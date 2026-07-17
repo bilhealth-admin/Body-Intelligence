@@ -1,17 +1,27 @@
 import 'package:flutter/material.dart';
-import 'theme/app_theme.dart';
-import 'pages/login_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main()=>runApp(const BILApp());
+import 'core/theme/app_theme.dart';
+import 'features/startup/startup_page.dart';
 
-class BILApp extends StatelessWidget{
- const BILApp({super.key});
- @override
- Widget build(BuildContext context){
-  return MaterialApp(
-   debugShowCheckedModeBanner:false,
-   theme: AppTheme.light,
-   home: const LoginPage(),
+void main() {
+  runApp(
+    const ProviderScope(
+      child: BILApp(),
+    ),
   );
- }
+}
+
+class BILApp extends StatelessWidget {
+  const BILApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'BIL – Body Intelligence Log',
+      theme: AppTheme.lightTheme,
+      home: const StartupPage(),
+    );
+  }
 }
