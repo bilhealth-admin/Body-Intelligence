@@ -27,6 +27,8 @@ class DashboardGrid extends ConsumerWidget {
     final waterAsync = ref.watch(todayWaterProvider);
     final allMealsAsync = ref.watch(allMealsProvider);
     final allWaterAsync = ref.watch(allWaterProvider);
+    final memoryEnabled =
+        ref.watch(decisionMemoryEnabledProvider).value ?? true;
     final system =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     if ([
@@ -167,6 +169,16 @@ class DashboardGrid extends ConsumerWidget {
               .clamp(0.0, 1.0);
     final goalDate = intelligence.goalDate;
     Future<void> respondToAction(String response) async {
+      if (!memoryEnabled) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Decision Memory is disabled. This response was not stored.',
+            ),
+          ),
+        );
+        return;
+      }
       final repository = ref.read(decisionMemoryRepositoryProvider);
       final id = await repository.rememberAction(bestAction);
       await repository.respond(id, response);
@@ -350,6 +362,10 @@ class DashboardGrid extends ConsumerWidget {
                     ),
                   ],
                 ),
+                if (!memoryEnabled)
+                  const Text(
+                    'Decision Memory is off. Actions remain visible, but responses and outcomes are not stored.',
+                  ),
               ],
             ),
           ),

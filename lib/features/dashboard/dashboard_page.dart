@@ -44,11 +44,6 @@ class DashboardPage extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        icon: const Icon(Icons.add),
-        label: Text(context.strings.text('Add Daily Entry')),
-        onPressed: () => context.go('/daily-log'),
-      ),
       body: const SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.all(16),

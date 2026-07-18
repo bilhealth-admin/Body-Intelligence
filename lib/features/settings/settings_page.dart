@@ -236,6 +236,14 @@ class SettingsPage extends ConsumerWidget {
             onTap: () => context.go('/analytics'),
           ),
           ListTile(
+            leading: const Icon(Icons.psychology_alt_outlined),
+            title: const Text('Decision Memory'),
+            subtitle: const Text(
+              'Review, rate, disable, or delete remembered actions.',
+            ),
+            onTap: () => context.go('/decision-memory'),
+          ),
+          ListTile(
             leading: const Icon(Icons.privacy_tip),
             title: Text(context.strings.text('Privacy')),
             subtitle: const Text('Your MVP data remains on this device.'),
