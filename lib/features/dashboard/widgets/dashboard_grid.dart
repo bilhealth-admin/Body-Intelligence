@@ -4,7 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../engine/bil_engine.dart';
 import '../../../core/units/measurement_units.dart';
 import '../../../engine/body_profile.dart';
+import '../../../engine/body_twin_engine.dart';
+import '../../../engine/data_honesty_engine.dart';
 import '../../../engine/intelligence_engine.dart';
+import '../../../engine/one_best_action_engine.dart';
+import '../../../engine/what_changed_engine.dart';
+import '../../../data/database/date_keys.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../../weight/providers/weight_provider.dart';
 import '../providers/dashboard_provider.dart';
@@ -19,6 +24,8 @@ class DashboardGrid extends ConsumerWidget {
     final weightsAsync = ref.watch(weightHistoryProvider);
     final mealsAsync = ref.watch(todayMealsProvider);
     final waterAsync = ref.watch(todayWaterProvider);
+    final allMealsAsync = ref.watch(allMealsProvider);
+    final allWaterAsync = ref.watch(allWaterProvider);
     final system =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     if ([
@@ -26,6 +33,8 @@ class DashboardGrid extends ConsumerWidget {
       weightsAsync,
       mealsAsync,
       waterAsync,
+      allMealsAsync,
+      allWaterAsync,
     ].any((value) => value.isLoading)) {
       return const Center(
         child: Padding(
@@ -37,7 +46,9 @@ class DashboardGrid extends ConsumerWidget {
     if (profileAsync.hasError ||
         weightsAsync.hasError ||
         mealsAsync.hasError ||
-        waterAsync.hasError) {
+        waterAsync.hasError ||
+        allMealsAsync.hasError ||
+        allWaterAsync.hasError) {
       return const Card(
         child: Padding(
           padding: EdgeInsets.all(20),
@@ -59,6 +70,8 @@ class DashboardGrid extends ConsumerWidget {
     final weights = weightsAsync.value ?? const [];
     final meals = mealsAsync.value ?? const [];
     final waterRows = waterAsync.value ?? const [];
+    final allMeals = allMealsAsync.value ?? const [];
+    final allWater = allWaterAsync.value ?? const [];
     final items = meals.expand((meal) => meal.items).toList();
     final calories = items.fold<double>(0, (sum, item) => sum + item.calories);
     final protein = items.fold<double>(0, (sum, item) => sum + item.protein);
@@ -87,6 +100,15 @@ class DashboardGrid extends ConsumerWidget {
       drankWater: water,
     );
     final chronological = weights.reversed.map((row) => row.weight).toList();
+    final mealDays = allMeals.map((row) => row.meal.dayKey).toSet();
+    final waterDays = allWater.map((row) => row.dayKey).toSet();
+    final weightDays = weights
+        .map((row) => row.dayKey ?? dayKeyFor(row.date))
+        .toSet();
+    final observedDays = {...mealDays, ...waterDays, ...weightDays};
+    final comparableWeightDays = weights
+        .where((row) => row.measurementContext != 'differentConditions')
+        .length;
     final intelligence = IntelligenceEngine.evaluate(
       calorieTarget: bil.targets.calories,
       proteinTarget: bil.targets.protein,
@@ -98,6 +120,36 @@ class DashboardGrid extends ConsumerWidget {
       goalWeight: profile.targetWeight,
       sodium: sodium,
       trackedDays: items.isEmpty && waterRows.isEmpty ? 0 : 1,
+    );
+    final honesty = DataHonestyEngine.evaluate(
+      observationDays: observedDays.length,
+      weightDays: weightDays.length,
+      nutritionDays: mealDays.length,
+      waterDays: waterDays.length,
+      consistentConditionDays: comparableWeightDays,
+    );
+    final bestAction = OneBestActionEngine.choose(
+      weighedToday: weightDays.contains(dayKeyFor(DateTime.now())),
+      loggingComplete: meals.isNotEmpty,
+      protein: protein,
+      proteinTarget: bil.targets.protein,
+      waterMl: water,
+      waterTarget: bil.targets.water,
+      trackedDays: observedDays.length,
+    );
+    final changed = WhatChangedEngine.compare(
+      chronologicalWeights: chronological,
+      comparableConditions:
+          weights.length >= 2 &&
+          weights[0].measurementContext == weights[1].measurementContext &&
+          weights[0].measurementContext != 'differentConditions',
+    );
+    final twin = BodyTwinEngine.simulate(
+      calorieTarget: bil.targets.calories,
+      tdee: bil.tdee.round(),
+      weightDays: weightDays.length,
+      nutritionDays: mealDays.length,
+      observationDays: observedDays.length,
     );
     final progressDenominator = (profile.currentWeight - profile.targetWeight)
         .abs();
@@ -181,6 +233,78 @@ class DashboardGrid extends ConsumerWidget {
               '${intelligence.insights.first.explanation}\n${intelligence.insights.first.suggestedAction}',
             ),
             isThreeLine: true,
+          ),
+        ),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'One best action',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  bestAction.title,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                Text(bestAction.reason),
+                const SizedBox(height: 8),
+                Text('Evidence: ${bestAction.evidence.join(' · ')}'),
+              ],
+            ),
+          ),
+        ),
+        Card(
+          child: ExpansionTile(
+            leading: CircleAvatar(child: Text('${honesty.score}')),
+            title: const Text('Data honesty'),
+            subtitle: Text(
+              '${honesty.reliability.name} reliability · tap to see what is missing',
+            ),
+            childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            children: [
+              if (honesty.strengths.isNotEmpty)
+                Text('Evidence: ${honesty.strengths.join(' · ')}'),
+              if (honesty.missing.isNotEmpty)
+                Text('Improve confidence: ${honesty.missing.join(' · ')}'),
+            ],
+          ),
+        ),
+        Card(
+          child: ExpansionTile(
+            title: const Text('What changed today?'),
+            subtitle: Text(changed.summary),
+            childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            children: [
+              if (changed.evidence.isNotEmpty)
+                Text('Evidence: ${changed.evidence.join(' · ')}'),
+              Text('Other explanations: ${changed.alternatives.join(' · ')}'),
+            ],
+          ),
+        ),
+        Card(
+          child: ExpansionTile(
+            title: const Text('Body Twin'),
+            subtitle: Text(
+              twin.sufficient
+                  ? 'Cautious scenario available from your local evidence'
+                  : 'Learning safely · ${twin.requiredData.join(' · ')}',
+            ),
+            childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            children: [
+              if (twin.scenario != null) ...[
+                Text(
+                  'Expected planning direction: ${twin.scenario!.expectedWeeklyKg.toStringAsFixed(2)} kg/week',
+                ),
+                Text(
+                  'Cautious range: ${twin.scenario!.cautiousLowKg.toStringAsFixed(2)} to ${twin.scenario!.cautiousHighKg.toStringAsFixed(2)} kg/week',
+                ),
+                Text('Assumptions: ${twin.scenario!.assumptions.join(' · ')}'),
+              ],
+            ],
           ),
         ),
       ],
