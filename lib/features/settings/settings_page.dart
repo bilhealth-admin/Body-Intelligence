@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/environment/app_environment.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/services/app_settings_provider.dart';
 import '../../app/services/data_export_service.dart';
+import '../../app/services/external_capabilities.dart';
 import '../../core/units/measurement_units.dart';
 import '../../data/database/database_provider.dart';
 import '../../data/database/seed_data.dart';
@@ -245,16 +245,49 @@ class SettingsPage extends ConsumerWidget {
             title: Text('App version'),
             subtitle: Text('1.0.0+1'),
           ),
-          ListTile(
-            enabled: AppEnvironment.useSupabase,
-            leading: const Icon(Icons.cloud_off),
-            title: Text(context.strings.text('Cloud sync')),
-            subtitle: Text(
-              AppEnvironment.useSupabase
-                  ? 'Configured'
-                  : 'Unavailable in Local Mode',
-            ),
+          const Divider(height: 32),
+          Text(
+            'Connected capabilities',
+            style: Theme.of(context).textTheme.titleMedium,
           ),
+          const SizedBox(height: 6),
+          for (final capability in ExternalCapability.values)
+            Builder(
+              builder: (context) {
+                final status = ExternalCapabilities.status(capability);
+                return ListTile(
+                  enabled: status.available,
+                  leading: Icon(switch (capability) {
+                    ExternalCapability.account => Icons.account_circle_outlined,
+                    ExternalCapability.sync => Icons.cloud_sync_outlined,
+                    ExternalCapability.ai => Icons.auto_awesome_outlined,
+                    ExternalCapability.commerce =>
+                      Icons.workspace_premium_outlined,
+                    ExternalCapability.community => Icons.groups_outlined,
+                    ExternalCapability.coach => Icons.support_agent_outlined,
+                    ExternalCapability.updates => Icons.system_update_outlined,
+                  }),
+                  title: Text(switch (capability) {
+                    ExternalCapability.account => 'Account',
+                    ExternalCapability.sync => context.strings.text(
+                      'Cloud sync',
+                    ),
+                    ExternalCapability.ai => 'Ask BIL',
+                    ExternalCapability.commerce =>
+                      'Subscriptions and purchases',
+                    ExternalCapability.community => 'Community',
+                    ExternalCapability.coach => 'Coach platform',
+                    ExternalCapability.updates => 'Remote update channel',
+                  }),
+                  subtitle: Text(status.reason),
+                  trailing: Icon(
+                    status.available
+                        ? Icons.check_circle_outline
+                        : Icons.lock_outline,
+                  ),
+                );
+              },
+            ),
           const Divider(height: 32),
           ListTile(
             textColor: Theme.of(context).colorScheme.error,
