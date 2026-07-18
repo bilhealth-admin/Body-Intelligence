@@ -43,10 +43,10 @@ class _FoodPageState extends ConsumerState<FoodPage> {
     );
   }
 
-  Future<void> _createFood() async {
+  Future<void> _createFood([String? initialBarcode]) async {
     final created = await showDialog<_FoodDraft>(
       context: context,
-      builder: (_) => const _CustomFoodDialog(),
+      builder: (_) => _CustomFoodDialog(initialBarcode: initialBarcode),
     );
     if (created == null) return;
     await ref
@@ -72,11 +72,79 @@ class _FoodPageState extends ConsumerState<FoodPage> {
     await _runSearch(search.text);
   }
 
+  Future<void> _barcodeLookup() async {
+    final controller = TextEditingController();
+    final barcode = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Manual barcode lookup'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            labelText: 'Barcode digits',
+            helperText:
+                'Camera scanning is unavailable until a verified scanner adapter and permissions are configured.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('Search'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (barcode == null || barcode.isEmpty) return;
+    final matches = await ref.read(foodRepositoryProvider).search(barcode);
+    if (!mounted) return;
+    if (matches.isNotEmpty) {
+      search.text = barcode;
+      setState(() => results = matches);
+      return;
+    }
+    final create = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Barcode not found locally'),
+        content: const Text(
+          'BIL will not invent nutrition values. You can create a food from the product label and this barcode will be prefilled.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Not now'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Create custom food'),
+          ),
+        ],
+      ),
+    );
+    if (create == true) await _createFood(barcode);
+  }
+
   @override
   Widget build(BuildContext context) {
     final allFoods = ref.watch(foodsProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(context.strings.text('Food catalog'))),
+      appBar: AppBar(
+        title: Text(context.strings.text('Food catalog')),
+        actions: [
+          IconButton(
+            tooltip: 'Manual barcode lookup',
+            onPressed: _barcodeLookup,
+            icon: const Icon(Icons.qr_code_scanner),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _createFood,
         icon: const Icon(Icons.add),
@@ -248,7 +316,9 @@ class _FoodDraft {
 }
 
 class _CustomFoodDialog extends StatefulWidget {
-  const _CustomFoodDialog();
+  const _CustomFoodDialog({this.initialBarcode});
+
+  final String? initialBarcode;
 
   @override
   State<_CustomFoodDialog> createState() => _CustomFoodDialogState();
@@ -257,6 +327,12 @@ class _CustomFoodDialog extends StatefulWidget {
 class _CustomFoodDialogState extends State<_CustomFoodDialog> {
   final formKey = GlobalKey<FormState>();
   final controllers = List.generate(15, (_) => TextEditingController());
+
+  @override
+  void initState() {
+    super.initState();
+    controllers[2].text = widget.initialBarcode ?? '';
+  }
 
   @override
   void dispose() {
