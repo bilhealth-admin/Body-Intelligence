@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,16 +17,30 @@ class FoodPage extends ConsumerStatefulWidget {
 class _FoodPageState extends ConsumerState<FoodPage> {
   final search = TextEditingController();
   List<Food>? results;
+  Timer? debounce;
+  int searchGeneration = 0;
 
   @override
   void dispose() {
     search.dispose();
+    debounce?.cancel();
     super.dispose();
   }
 
   Future<void> _runSearch(String value) async {
+    final generation = ++searchGeneration;
     final rows = await ref.read(foodRepositoryProvider).search(value);
-    if (mounted) setState(() => results = rows);
+    if (mounted && generation == searchGeneration) {
+      setState(() => results = rows);
+    }
+  }
+
+  void _scheduleSearch(String value) {
+    debounce?.cancel();
+    debounce = Timer(
+      const Duration(milliseconds: 180),
+      () => _runSearch(value),
+    );
   }
 
   Future<void> _createFood() async {
@@ -71,7 +87,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
               controller: search,
               hintText: 'English, Arabic, keyword, or barcode',
               leading: const Icon(Icons.search),
-              onChanged: _runSearch,
+              onChanged: _scheduleSearch,
             ),
           ),
           Expanded(
@@ -130,24 +146,64 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
   @override
   Widget build(BuildContext context) {
     final food = widget.food;
-    return ListTile(
-      title: Text(
-        food.arabicName == null
-            ? food.name
-            : '${food.arabicName} • ${food.name}',
-      ),
-      subtitle: Text(
-        '${food.calories.toStringAsFixed(0)} kcal · ${food.protein.toStringAsFixed(1)} g protein / '
-        '${food.servingSize.toStringAsFixed(0)} ${food.servingUnit}',
-      ),
-      trailing: IconButton(
-        tooltip: favorite ? 'Remove favorite' : 'Add favorite',
-        icon: Icon(favorite ? Icons.favorite : Icons.favorite_border),
-        onPressed: () async {
-          final next = !favorite;
-          await ref.read(foodRepositoryProvider).setFavorite(food.id, next);
-          if (mounted) setState(() => favorite = next);
-        },
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+      child: ListTile(
+        onTap: () => showModalBottomSheet<void>(
+          context: context,
+          showDragHandle: true,
+          builder: (context) => SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    food.name,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  if (food.arabicName != null) Text(food.arabicName!),
+                  const SizedBox(height: 12),
+                  Text('Source: ${food.source}'),
+                  Text(
+                    food.verified
+                        ? 'Verified catalog record'
+                        : 'Not independently verified',
+                  ),
+                  Text(
+                    'Normalized serving: ${food.servingSize.toStringAsFixed(0)} ${food.servingUnit}',
+                  ),
+                  Text('Updated locally: ${food.updatedAt.toLocal()}'),
+                  const SizedBox(height: 12),
+                  Text(
+                    '${food.calories.toStringAsFixed(0)} kcal · ${food.protein.toStringAsFixed(1)} g protein · '
+                    '${food.carbs.toStringAsFixed(1)} g carbs · ${food.fats.toStringAsFixed(1)} g fat',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        title: Text(
+          food.arabicName == null
+              ? food.name
+              : '${food.arabicName} • ${food.name}',
+        ),
+        subtitle: Text(
+          '${food.calories.toStringAsFixed(0)} kcal · ${food.protein.toStringAsFixed(1)} g protein / '
+          '${food.servingSize.toStringAsFixed(0)} ${food.servingUnit}\n${food.source} · ${food.verified ? 'verified' : 'unverified'}',
+        ),
+        isThreeLine: true,
+        trailing: IconButton(
+          tooltip: favorite ? 'Remove favorite' : 'Add favorite',
+          icon: Icon(favorite ? Icons.favorite : Icons.favorite_border),
+          onPressed: () async {
+            final next = !favorite;
+            await ref.read(foodRepositoryProvider).setFavorite(food.id, next);
+            if (mounted) setState(() => favorite = next);
+          },
+        ),
       ),
     );
   }

@@ -123,20 +123,36 @@ class FoodRepository {
 
   Future<List<Food>> search(String query, {int limit = 50}) {
     final normalized = query.trim().toLowerCase();
-    final selection = _database.select(_database.foods)
-      ..where((row) {
-        final active = row.deletedAt.isNull();
-        if (normalized.isEmpty) return active;
-        final pattern = '%$normalized%';
-        return active &
-            (row.name.lower().like(pattern) |
-                row.arabicName.lower().like(pattern) |
-                row.keywords.lower().like(pattern) |
-                row.barcode.equals(normalized));
-      })
-      ..orderBy([(row) => OrderingTerm.asc(row.name)])
-      ..limit(limit);
-    return selection.get();
+    final active = _database.foods.deletedAt.isNull();
+    final condition = normalized.isEmpty
+        ? active
+        : active &
+              (_database.foods.name.lower().like('%$normalized%') |
+                  _database.foods.arabicName.lower().like('%$normalized%') |
+                  _database.foods.keywords.lower().like('%$normalized%') |
+                  _database.foods.barcode.equals(normalized));
+    final selection =
+        _database.select(_database.foods).join([
+            leftOuterJoin(
+              _database.recentFoods,
+              _database.recentFoods.foodId.equalsExp(_database.foods.id),
+            ),
+            leftOuterJoin(
+              _database.favorites,
+              _database.favorites.foodId.equalsExp(_database.foods.id),
+            ),
+          ])
+          ..where(condition)
+          ..orderBy([
+            OrderingTerm.desc(_database.recentFoods.useCount),
+            OrderingTerm.desc(_database.favorites.id),
+            OrderingTerm.desc(_database.foods.verified),
+            OrderingTerm.asc(_database.foods.name),
+          ])
+          ..limit(limit);
+    return selection.get().then(
+      (rows) => rows.map((row) => row.readTable(_database.foods)).toList(),
+    );
   }
 
   Future<void> setFavorite(int foodId, bool favorite) async {
