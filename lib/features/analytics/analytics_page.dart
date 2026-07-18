@@ -11,12 +11,20 @@ import '../dashboard/providers/dashboard_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../life_context/providers/life_context_provider.dart';
 import '../weight/providers/weight_provider.dart';
+import 'widgets/analytics_range_selector.dart';
 
-class AnalyticsPage extends ConsumerWidget {
+class AnalyticsPage extends ConsumerStatefulWidget {
   const AnalyticsPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AnalyticsPage> createState() => _AnalyticsPageState();
+}
+
+class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
+  AnalyticsRange range = AnalyticsRange.thirtyDays;
+
+  @override
+  Widget build(BuildContext context) {
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
     String tr(String en, String ar) => arabic ? ar : en;
     final weightsAsync = ref.watch(weightHistoryProvider);
@@ -47,10 +55,21 @@ class AnalyticsPage extends ConsumerWidget {
         ),
       );
     }
-    final weights = (weightsAsync.value ?? const []).reversed.toList();
-    final meals = mealsAsync.value ?? const [];
-    final water = waterAsync.value ?? const [];
-    final contexts = contextsAsync.value ?? const [];
+    final allWeights = (weightsAsync.value ?? const []).reversed.toList();
+    final allMeals = mealsAsync.value ?? const [];
+    final allWater = waterAsync.value ?? const [];
+    final allContexts = contextsAsync.value ?? const [];
+    final start = range.days == null
+        ? null
+        : DateTime.now().subtract(Duration(days: range.days! - 1));
+    bool included(DateTime date) =>
+        start == null || dayKeyFor(date).compareTo(dayKeyFor(start)) >= 0;
+    final weights = allWeights.where((row) => included(row.date)).toList();
+    final meals = allMeals.where((row) => included(row.meal.date)).toList();
+    final water = allWater.where((row) => included(row.occurredAt)).toList();
+    final contexts = allContexts
+        .where((row) => included(row.occurredAt))
+        .toList();
     final caloriesByDay = <String, double>{};
     final proteinByDay = <String, double>{};
     for (final meal in meals) {
@@ -112,10 +131,10 @@ class AnalyticsPage extends ConsumerWidget {
       weeklyWeightChangeKg: rate,
     );
     final activityDates = <DateTime>[
-      ...weights.map((row) => row.date),
-      ...meals.map((row) => row.meal.date),
-      ...water.map((row) => row.occurredAt),
-      ...contexts.map((row) => row.occurredAt),
+      ...allWeights.map((row) => row.date),
+      ...allMeals.map((row) => row.meal.date),
+      ...allWater.map((row) => row.occurredAt),
+      ...allContexts.map((row) => row.occurredAt),
     ]..sort();
     final recovery = RecoveryEngine.evaluate(
       now: DateTime.now(),
@@ -127,6 +146,11 @@ class AnalyticsPage extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          AnalyticsRangeSelector(
+            value: range,
+            onChanged: (value) => setState(() => range = value),
+          ),
+          const SizedBox(height: 12),
           if (recovery.state != RecoveryState.current)
             _SummaryCard(
               title: arabic
@@ -184,7 +208,9 @@ class AnalyticsPage extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           _SummaryCard(
-            title: tr('7 / 30 day summary', 'ملخص 7 / 30 يومًا'),
+            title: range.days == null
+                ? tr('All-time summary', 'ملخص كل الوقت')
+                : tr('${range.days}-day summary', 'ملخص ${range.days} يومًا'),
             lines: [
               tr(
                 '$trackedDays nutrition or hydration days recorded',
