@@ -21,53 +21,136 @@ class HistoryPage extends ConsumerWidget {
     final system =
         ref.read(measurementSystemProvider).value ?? MeasurementSystem.metric;
     var displayed = UnitConverter.weightFromKg(entry?.weight ?? 60, system);
-    final value = await showDialog<double>(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text(
-            context.strings.text(entry == null ? 'Add weight' : 'Edit weight'),
-          ),
-          content: SizedBox(
-            width: 440,
-            child: WheelNumberField(
-              value: displayed,
-              minimum: UnitConverter.weightFromKg(20, system),
-              maximum: UnitConverter.weightFromKg(350, system),
-              step: UnitConverter.weightStep(system),
-              decimalPlaces: 1,
-              unit: UnitConverter.weightUnit(system),
-              label: context.strings.text('Weight'),
-              onChanged: (next) => setDialogState(() => displayed = next),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text(context.strings.text('Cancel')),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(
-                dialogContext,
-                UnitConverter.weightToKg(displayed, system),
+    var selectedDate = entry?.date ?? DateTime.now();
+    var measurementContext = entry?.measurementContext ?? 'differentConditions';
+    final value =
+        await showDialog<
+          ({double weight, DateTime date, String measurementContext})
+        >(
+          context: context,
+          builder: (dialogContext) => StatefulBuilder(
+            builder: (context, setDialogState) => AlertDialog(
+              title: Text(
+                context.strings.text(
+                  entry == null ? 'Add weight' : 'Edit weight',
+                ),
               ),
-              child: Text(context.strings.text('Save')),
+              content: SizedBox(
+                width: 440,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      WheelNumberField(
+                        value: displayed,
+                        minimum: UnitConverter.weightFromKg(20, system),
+                        maximum: UnitConverter.weightFromKg(350, system),
+                        step: UnitConverter.weightStep(system),
+                        decimalPlaces: 1,
+                        unit: UnitConverter.weightUnit(system),
+                        label: context.strings.text('Weight'),
+                        onChanged: (next) =>
+                            setDialogState(() => displayed = next),
+                      ),
+                      const SizedBox(height: 12),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.calendar_today_outlined),
+                        title: Text(context.strings.text('Measurement date')),
+                        subtitle: Text(
+                          MaterialLocalizations.of(
+                            context,
+                          ).formatMediumDate(selectedDate),
+                        ),
+                        onTap: () async {
+                          final picked = await showDatePicker(
+                            context: dialogContext,
+                            initialDate: selectedDate,
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime.now(),
+                          );
+                          if (picked != null) {
+                            setDialogState(() => selectedDate = picked);
+                          }
+                        },
+                      ),
+                      DropdownButtonFormField<String>(
+                        initialValue: measurementContext,
+                        decoration: InputDecoration(
+                          labelText: context.strings.text(
+                            'Measurement conditions',
+                          ),
+                        ),
+                        items:
+                            const [
+                                  'morning',
+                                  'afterBathroom',
+                                  'beforeFoodDrink',
+                                  'differentConditions',
+                                ]
+                                .map(
+                                  (contextValue) => DropdownMenuItem(
+                                    value: contextValue,
+                                    child: Text(
+                                      context.strings.text(contextValue),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                        onChanged: (next) => setDialogState(
+                          () => measurementContext =
+                              next ?? 'differentConditions',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: Text(context.strings.text('Cancel')),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(dialogContext, (
+                    weight: UnitConverter.weightToKg(displayed, system),
+                    date: selectedDate,
+                    measurementContext: measurementContext,
+                  )),
+                  child: Text(context.strings.text('Save')),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        );
     if (value == null) return;
     final repository = ref.read(weightRepositoryProvider);
-    if (entry == null) {
-      await repository.addWeight(value);
-    } else {
-      await repository.updateWeight(
-        id: entry.id,
-        weight: value,
-        date: entry.date,
-        note: entry.note,
-        measurementContext: entry.measurementContext,
+    try {
+      if (entry == null) {
+        await repository.addWeight(
+          value.weight,
+          date: value.date,
+          measurementContext: value.measurementContext,
+        );
+      } else {
+        await repository.updateWeight(
+          id: entry.id,
+          weight: value.weight,
+          date: value.date,
+          note: entry.note,
+          measurementContext: value.measurementContext,
+        );
+      }
+    } on StateError {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.strings.text(
+              'A weight entry already exists for this date.',
+            ),
+          ),
+        ),
       );
     }
   }

@@ -64,6 +64,10 @@ class WeightRepository {
   }) async {
     _validateWeight(weight);
     _validateContext(measurementContext);
+    final conflict = await getForDay(date);
+    if (conflict != null && conflict.id != id) {
+      throw StateError('A weight entry already exists for this day');
+    }
     final revision = await _nextRevision(id);
     await (_database.update(
       _database.weightEntries,

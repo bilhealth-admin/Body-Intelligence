@@ -396,6 +396,25 @@ void main() {
     },
   );
 
+  test('moving a weight cannot overwrite another active day', () async {
+    final weights = WeightRepository(database);
+    final firstId = await weights.addWeight(80, date: DateTime(2026, 7, 17));
+    await weights.addWeight(79.8, date: DateTime(2026, 7, 18));
+
+    await expectLater(
+      weights.updateWeight(
+        id: firstId,
+        weight: 79.9,
+        date: DateTime(2026, 7, 18),
+      ),
+      throwsA(isA<StateError>()),
+    );
+
+    final entries = await weights.getAll();
+    expect(entries, hasLength(2));
+    expect(entries.singleWhere((entry) => entry.id == firstId).weight, 80);
+  });
+
   test('water totals are calculated from individual entries', () async {
     final water = WaterRepository(database);
     final date = DateTime(2026, 7, 18);

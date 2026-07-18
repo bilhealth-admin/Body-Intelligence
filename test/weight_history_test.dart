@@ -59,6 +59,14 @@ void main() {
     );
     expect(tester.takeException(), isNull);
 
+    await tester.tap(find.text('79.4 kg'));
+    await tester.pumpAndSettle();
+    expect(find.text('Edit weight'), findsOneWidget);
+    expect(find.text('Measurement date'), findsOneWidget);
+    expect(find.text('Measurement conditions'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));

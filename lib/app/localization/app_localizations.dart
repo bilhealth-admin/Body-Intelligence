@@ -112,6 +112,14 @@ class AppLocalizations {
     'Existing meal history keeps its nutrition snapshot. This food will no longer appear in search.':
         'سيحتفظ سجل الوجبات الحالي بلقطة التغذية، ولن يظهر هذا الطعام في البحث بعد الآن.',
     'Weight trend': 'اتجاه الوزن',
+    'Measurement date': 'تاريخ القياس',
+    'Measurement conditions': 'ظروف القياس',
+    'morning': 'صباحًا',
+    'afterBathroom': 'بعد استخدام الحمام',
+    'beforeFoodDrink': 'قبل الطعام أو الشراب',
+    'differentConditions': 'ظروف مختلفة',
+    'A weight entry already exists for this date.':
+        'يوجد قياس وزن بالفعل لهذا التاريخ.',
     'Recorded weight trend over time': 'اتجاه الوزن المسجل عبر الزمن',
     'Seven-day change': 'تغير سبعة أيام',
     'Smoothed weekly direction': 'الاتجاه الأسبوعي الممهّد',
