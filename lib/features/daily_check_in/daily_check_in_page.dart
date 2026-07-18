@@ -144,7 +144,7 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
                           value: display,
                           minimum: UnitConverter.weightFromKg(20, system),
                           maximum: UnitConverter.weightFromKg(350, system),
-                          step: system == MeasurementSystem.metric ? 0.1 : 0.1,
+                          step: UnitConverter.weightStep(system),
                           decimalPlaces: 1,
                           unit: UnitConverter.weightUnit(system),
                           label: tr("Today's weight", 'وزن اليوم'),

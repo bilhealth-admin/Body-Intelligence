@@ -27,4 +27,12 @@ class UnitConverter {
 
   static String heightUnit(MeasurementSystem system) =>
       system == MeasurementSystem.metric ? 'cm' : 'in';
+
+  /// Display step approximating the canonical 0.1 kg step at one decimal.
+  static double weightStep(MeasurementSystem system) =>
+      system == MeasurementSystem.metric ? 0.1 : 0.2;
+
+  /// Display step approximating the canonical 1 cm step at one decimal.
+  static double heightStep(MeasurementSystem system) =>
+      system == MeasurementSystem.metric ? 1 : 0.4;
 }

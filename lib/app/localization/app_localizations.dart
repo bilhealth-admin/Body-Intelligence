@@ -111,6 +111,14 @@ class AppLocalizations {
     'Delete custom food?': 'حذف الطعام المخصص؟',
     'Existing meal history keeps its nutrition snapshot. This food will no longer appear in search.':
         'سيحتفظ سجل الوجبات الحالي بلقطة التغذية، ولن يظهر هذا الطعام في البحث بعد الآن.',
+    'Weight trend': 'اتجاه الوزن',
+    'Recorded weight trend over time': 'اتجاه الوزن المسجل عبر الزمن',
+    'Seven-day change': 'تغير سبعة أيام',
+    'Smoothed weekly direction': 'الاتجاه الأسبوعي الممهّد',
+    'At least four entries needed': 'نحتاج أربعة قياسات على الأقل',
+    'week': 'أسبوع',
+    'Scale trends include water, glycogen, digestive content, and measurement variation; they do not prove fat or muscle change.':
+        'تشمل اتجاهات الميزان الماء والجليكوجين ومحتوى الجهاز الهضمي واختلاف ظروف القياس؛ ولا تثبت تغير الدهون أو العضلات.',
     'Settings': 'الإعدادات',
     'Language': 'اللغة',
     'Appearance': 'المظهر',

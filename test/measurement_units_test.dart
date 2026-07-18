@@ -35,4 +35,23 @@ void main() {
       );
     },
   );
+
+  test('display wheel steps closely preserve canonical physical steps', () {
+    expect(UnitConverter.weightStep(MeasurementSystem.metric), 0.1);
+    expect(
+      UnitConverter.weightToKg(
+        UnitConverter.weightStep(MeasurementSystem.imperial),
+        MeasurementSystem.imperial,
+      ),
+      closeTo(0.1, 0.01),
+    );
+    expect(UnitConverter.heightStep(MeasurementSystem.metric), 1);
+    expect(
+      UnitConverter.heightToCm(
+        UnitConverter.heightStep(MeasurementSystem.imperial),
+        MeasurementSystem.imperial,
+      ),
+      closeTo(1, 0.02),
+    );
+  });
 }
