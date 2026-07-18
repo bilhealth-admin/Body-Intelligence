@@ -349,6 +349,20 @@ class AppLocalizations {
     'Protein': 'البروتين',
     'Required': 'مطلوب',
     'Enter a non-negative number': 'أدخل رقمًا غير سالب',
+    'Remember recommendation responses': 'تذكّر ردود التوصيات',
+    'When off, BIL does not store new action responses or outcomes. Existing memories remain available for deletion.':
+        'عند التعطيل، لا يحفظ BIL ردودًا أو نتائج جديدة. تظل الذكريات الحالية متاحة للحذف.',
+    'No recommendation responses have been stored. BIL will never invent outcomes.':
+        'لم تُحفظ ردود على التوصيات. لن يخترع BIL نتائج.',
+    'accepted': 'مقبول',
+    'done': 'تم',
+    'notSuitable': 'غير مناسب',
+    'dismissed': 'تم التجاهل',
+    'Outcome': 'النتيجة',
+    'Helpful?': 'هل كان مفيدًا؟',
+    'of 5': 'من 5',
+    'Helpfulness': 'درجة الفائدة',
+    'Delete memory': 'حذف الذاكرة',
   };
 
   String text(String english) =>

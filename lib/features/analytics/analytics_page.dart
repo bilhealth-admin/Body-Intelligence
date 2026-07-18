@@ -17,6 +17,8 @@ class AnalyticsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    String tr(String en, String ar) => arabic ? ar : en;
     final weightsAsync = ref.watch(weightHistoryProvider);
     final mealsAsync = ref.watch(allMealsProvider);
     final waterAsync = ref.watch(allWaterProvider);
@@ -34,8 +36,15 @@ class AnalyticsPage extends ConsumerWidget {
         mealsAsync.hasError ||
         waterAsync.hasError ||
         contextsAsync.hasError) {
-      return const Scaffold(
-        body: Center(child: Text('Analytics data could not be loaded.')),
+      return Scaffold(
+        body: Center(
+          child: Text(
+            tr(
+              'Analytics data could not be loaded.',
+              'تعذر تحميل بيانات التحليلات.',
+            ),
+          ),
+        ),
       );
     }
     final weights = (weightsAsync.value ?? const []).reversed.toList();
@@ -120,44 +129,93 @@ class AnalyticsPage extends ConsumerWidget {
         children: [
           if (recovery.state != RecoveryState.current)
             _SummaryCard(
-              title: recovery.title,
+              title: arabic
+                  ? recovery.daysAway == 0
+                        ? 'ابدأ اليوم من جديد'
+                        : 'مرحبًا بعودتك — لا حاجة لملء الأيام الناقصة'
+                  : recovery.title,
               lines: [
                 if (recovery.daysAway > 0)
-                  '${recovery.daysAway} days since the latest local record',
-                ...recovery.actions,
+                  tr(
+                    '${recovery.daysAway} days since the latest local record',
+                    '${recovery.daysAway} يومًا منذ أحدث سجل محلي',
+                  ),
+                ...(arabic
+                    ? const [
+                        'ابدأ اليوم من جديد',
+                        'سجّل الوزن',
+                        'سجّل أول وجبة',
+                      ]
+                    : recovery.actions),
               ],
             ),
           if (recovery.state != RecoveryState.current)
             const SizedBox(height: 12),
           _SummaryCard(
-            title: 'Weekly review',
+            title: tr('Weekly review', 'المراجعة الأسبوعية'),
             lines: [
-              '${weekly.trackedDays} of 7 days with at least one core record',
-              weekly.summary,
-              weekly.nextDecision,
-              ...weekly.missingData,
+              tr(
+                '${weekly.trackedDays} of 7 days with at least one core record',
+                '${weekly.trackedDays} من 7 أيام بها سجل أساسي واحد على الأقل',
+              ),
+              if (arabic)
+                rate == null
+                    ? 'لا توجد أدلة وزن متقاربة كافية لاتجاه أسبوعي.'
+                    : 'الاتجاه الأسبوعي الممهّد: ${rate >= 0 ? '+' : ''}${rate.toStringAsFixed(2)} كجم. لا يحدد هذا تغير الدهون أو العضلات.'
+              else
+                weekly.summary,
+              if (arabic)
+                weekly.missingData.isNotEmpty
+                    ? 'حسّن مصدر بيانات ناقصًا واحدًا قبل تغيير الخطة.'
+                    : 'حافظ على ثبات الخطة وقارن أسبوعًا كاملًا آخر.'
+              else
+                weekly.nextDecision,
+              ...(arabic
+                  ? [
+                      if (weekly.weightDays < 4)
+                        'تحسّن 4 أيام وزن على الأقل تفسير الاتجاه',
+                      if (weekly.nutritionDays < 5)
+                        'تحسّن أيام الوجبات المكتملة فهم المدخول',
+                      if (weekly.waterDays < 5)
+                        'تحسّن أيام الترطيب فهم الالتزام',
+                    ]
+                  : weekly.missingData),
             ],
           ),
           const SizedBox(height: 12),
           _SummaryCard(
-            title: '7 / 30 day summary',
+            title: tr('7 / 30 day summary', 'ملخص 7 / 30 يومًا'),
             lines: [
-              '$trackedDays nutrition or hydration days recorded',
+              tr(
+                '$trackedDays nutrition or hydration days recorded',
+                'تم تسجيل التغذية أو الترطيب في $trackedDays يومًا',
+              ),
               rate == null
-                  ? 'Weight trend needs at least four entries'
-                  : '${rate >= 0 ? '+' : ''}${UnitConverter.weightFromKg(rate, system).toStringAsFixed(2)} $weightUnit/week smoothed direction',
-              '${caloriesByDay.length} days with calculated meal totals',
+                  ? tr(
+                      'Weight trend needs at least four entries',
+                      'يحتاج اتجاه الوزن إلى أربعة قياسات على الأقل',
+                    )
+                  : '${rate >= 0 ? '+' : ''}${UnitConverter.weightFromKg(rate, system).toStringAsFixed(2)} $weightUnit/${tr('week', 'أسبوع')} ${tr('smoothed direction', 'اتجاه ممهّد')}',
+              tr(
+                '${caloriesByDay.length} days with calculated meal totals',
+                '${caloriesByDay.length} يومًا بإجماليات وجبات محسوبة',
+              ),
             ],
           ),
           const SizedBox(height: 12),
           Text(
-            'Weight over time',
+            tr('Weight over time', 'الوزن عبر الزمن'),
             style: Theme.of(context).textTheme.titleLarge,
           ),
           if (recentWeights.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(20),
-              child: Text('Add weight entries to see a trend.'),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                tr(
+                  'Add weight entries to see a trend.',
+                  'أضف قياسات وزن لرؤية الاتجاه.',
+                ),
+              ),
             )
           else
             ...recentWeights.map(
@@ -170,13 +228,18 @@ class AnalyticsPage extends ConsumerWidget {
             ),
           const SizedBox(height: 12),
           Text(
-            'Calories and protein by day',
+            tr('Calories and protein by day', 'السعرات والبروتين حسب اليوم'),
             style: Theme.of(context).textTheme.titleLarge,
           ),
           if (caloriesByDay.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(20),
-              child: Text('Add meals to see nutrition consistency.'),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                tr(
+                  'Add meals to see nutrition consistency.',
+                  'أضف وجبات لرؤية انتظام التغذية.',
+                ),
+              ),
             )
           else
             ...caloriesByDay.keys
@@ -187,13 +250,13 @@ class AnalyticsPage extends ConsumerWidget {
                   (day) => ListTile(
                     title: Text(day),
                     subtitle: Text(
-                      '${caloriesByDay[day]!.round()} kcal · ${proteinByDay[day]!.toStringAsFixed(1)} g protein',
+                      '${caloriesByDay[day]!.round()} ${tr('kcal', 'سعرة')} · ${proteinByDay[day]!.toStringAsFixed(1)} ${tr('g protein', 'غ بروتين')}',
                     ),
                   ),
                 ),
           const SizedBox(height: 12),
           Text(
-            'Water adherence records',
+            tr('Water adherence records', 'سجلات الالتزام بالماء'),
             style: Theme.of(context).textTheme.titleLarge,
           ),
           ...waterByDay.keys

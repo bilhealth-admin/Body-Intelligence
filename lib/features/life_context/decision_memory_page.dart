@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/localization/app_localizations.dart';
 import '../profile/providers/user_profile_provider.dart';
 import 'providers/life_context_provider.dart';
 
@@ -11,10 +12,12 @@ class DecisionMemoryPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = context.strings.text;
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
     final enabled = ref.watch(decisionMemoryEnabledProvider).value ?? true;
     final memories = ref.watch(decisionMemoriesProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Decision Memory')),
+      appBar: AppBar(title: Text(t('Decision Memory'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -23,9 +26,11 @@ class DecisionMemoryPage extends ConsumerWidget {
             onChanged: (value) => ref
                 .read(preferencesRepositoryProvider)
                 .set('decisionMemoryEnabled', value.toString()),
-            title: const Text('Remember recommendation responses'),
-            subtitle: const Text(
-              'When off, BIL does not store new action responses or outcomes. Existing memories remain available for deletion.',
+            title: Text(t('Remember recommendation responses')),
+            subtitle: Text(
+              t(
+                'When off, BIL does not store new action responses or outcomes. Existing memories remain available for deletion.',
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -34,11 +39,13 @@ class DecisionMemoryPage extends ConsumerWidget {
             error: (error, _) => Text(error.toString()),
             data: (rows) {
               if (rows.isEmpty) {
-                return const Card(
+                return Card(
                   child: Padding(
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     child: Text(
-                      'No recommendation responses have been stored. BIL will never invent outcomes.',
+                      t(
+                        'No recommendation responses have been stored. BIL will never invent outcomes.',
+                      ),
                     ),
                   ),
                 );
@@ -51,29 +58,31 @@ class DecisionMemoryPage extends ConsumerWidget {
                           .toList();
                   return Card(
                     child: ExpansionTile(
-                      title: Text(row.title),
-                      subtitle: Text('${row.dayKey} · ${row.response}'),
+                      title: Text(arabic ? _arabicTitle(row.title) : row.title),
+                      subtitle: Text('${row.dayKey} · ${t(row.response)}'),
                       childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                       children: [
                         Align(
                           alignment: AlignmentDirectional.centerStart,
                           child: Text(
-                            '${row.reason}\nEvidence: ${evidence.join(' · ')}',
+                            arabic
+                                ? '${_arabicReason(row.reason)}\nالدليل: ${evidence.map(_arabicEvidence).join(' · ')}'
+                                : '${row.reason}\nEvidence: ${evidence.join(' · ')}',
                           ),
                         ),
                         if (row.outcome != null)
                           Align(
                             alignment: AlignmentDirectional.centerStart,
-                            child: Text('Outcome: ${row.outcome}'),
+                            child: Text('${t('Outcome')}: ${row.outcome}'),
                           ),
                         if (row.helpfulness == null)
                           Wrap(
                             spacing: 4,
                             children: [
-                              const Text('Helpful?'),
+                              Text(t('Helpful?')),
                               for (var rating = 1; rating <= 5; rating++)
                                 IconButton(
-                                  tooltip: '$rating of 5',
+                                  tooltip: '$rating ${t('of 5')}',
                                   onPressed: () => ref
                                       .read(decisionMemoryRepositoryProvider)
                                       .evaluate(
@@ -85,7 +94,7 @@ class DecisionMemoryPage extends ConsumerWidget {
                             ],
                           )
                         else
-                          Text('Helpfulness: ${row.helpfulness}/5'),
+                          Text('${t('Helpfulness')}: ${row.helpfulness}/5'),
                         Align(
                           alignment: AlignmentDirectional.centerEnd,
                           child: TextButton.icon(
@@ -93,7 +102,7 @@ class DecisionMemoryPage extends ConsumerWidget {
                                 .read(decisionMemoryRepositoryProvider)
                                 .delete(row.id),
                             icon: const Icon(Icons.delete_outline),
-                            label: const Text('Delete memory'),
+                            label: Text(t('Delete memory')),
                           ),
                         ),
                       ],
@@ -106,5 +115,46 @@ class DecisionMemoryPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  static String _arabicTitle(String value) {
+    if (value.startsWith('Add about')) return 'أضف مصدر بروتين مناسبًا';
+    if (value.startsWith('Drink')) return 'اشرب الماء تدريجيًا';
+    return switch (value) {
+      'Log today’s weight' => 'سجّل وزن اليوم',
+      'Complete one missing meal' => 'أكمل وجبة ناقصة',
+      'Keep the plan unchanged today' => 'حافظ على الخطة دون تغيير اليوم',
+      'No plan change needed' => 'لا حاجة لتغيير الخطة',
+      _ => 'إجراء BIL محفوظ',
+    };
+  }
+
+  static String _arabicReason(String value) => switch (value) {
+    'A comparable daily check-in improves trend confidence.' =>
+      'القياس اليومي المتقارب يحسن ثقة الاتجاه.',
+    'An incomplete day can make intake-based explanations weaker.' =>
+      'اليوم غير المكتمل يضعف التفسيرات المعتمدة على المدخول.',
+    'Protein is the largest actionable gap in today’s logged plan.' =>
+      'البروتين هو أكبر فجوة قابلة للتنفيذ في خطة اليوم المسجلة.',
+    'Recorded hydration remains meaningfully below target.' =>
+      'الترطيب المسجل ما زال أقل بوضوح من الهدف.',
+    'More consistent observations are safer than reacting early.' =>
+      'الملاحظات الأكثر اتساقًا أكثر أمانًا من الاستجابة المبكرة.',
+    'Today’s recorded priorities are broadly covered.' =>
+      'الأولويات المسجلة اليوم مغطاة بصورة عامة.',
+    _ => 'تم حفظ سبب هذا الإجراء مع السجل المحلي.',
+  };
+
+  static String _arabicEvidence(String value) {
+    if (value.contains('weight check-in')) return 'لا يوجد قياس وزن اليوم';
+    if (value.contains('meal record')) return 'قد يكون سجل وجبات اليوم ناقصًا';
+    if (value.contains('target')) {
+      return 'الهدف المحفوظ: ${value.split(' ').first}';
+    }
+    if (value.contains('logged') || value.contains('recorded')) {
+      return 'القيمة المسجلة: ${value.split(' ').first}';
+    }
+    if (value.contains('14')) return 'أقل من 14 يومًا متقاربًا';
+    return 'سجل محلي متاح';
   }
 }

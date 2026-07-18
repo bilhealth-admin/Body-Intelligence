@@ -56,20 +56,28 @@ class DashboardGrid extends ConsumerWidget {
         waterAsync.hasError ||
         allMealsAsync.hasError ||
         allWaterAsync.hasError) {
-      return const Card(
+      return Card(
         child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Text('Some local dashboard data could not be loaded.'),
+          padding: const EdgeInsets.all(20),
+          child: Text(
+            tr(
+              'Some local dashboard data could not be loaded.',
+              'تعذر تحميل بعض بيانات لوحة اليوم المحلية.',
+            ),
+          ),
         ),
       );
     }
     final profile = profileAsync.value;
     if (profile == null) {
-      return const Card(
+      return Card(
         child: Padding(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Text(
-            'Complete your profile to calculate personalized targets.',
+            tr(
+              'Complete your profile to calculate personalized targets.',
+              'أكمل ملفك الشخصي لحساب أهدافك المخصصة.',
+            ),
           ),
         ),
       );
@@ -241,9 +249,12 @@ class DashboardGrid extends ConsumerWidget {
     Future<void> respondToAction(String response) async {
       if (!memoryEnabled) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'Decision Memory is disabled. This response was not stored.',
+              tr(
+                'Decision Memory is disabled. This response was not stored.',
+                'ذاكرة القرارات معطلة. لم يُحفظ هذا الرد.',
+              ),
             ),
           ),
         );
@@ -257,8 +268,14 @@ class DashboardGrid extends ConsumerWidget {
           SnackBar(
             content: Text(
               response == 'done'
-                  ? 'Marked done. BIL will not assume an outcome without your later feedback.'
-                  : 'Your response was saved locally and can be deleted from Decision Memory.',
+                  ? tr(
+                      'Marked done. BIL will not assume an outcome without your later feedback.',
+                      'تم وضع علامة «تم». لن يفترض BIL نتيجة دون ملاحظتك اللاحقة.',
+                    )
+                  : tr(
+                      'Your response was saved locally and can be deleted from Decision Memory.',
+                      'تم حفظ ردك محليًا ويمكن حذفه من ذاكرة القرارات.',
+                    ),
             ),
           ),
         );
@@ -449,8 +466,11 @@ class DashboardGrid extends ConsumerWidget {
                   ],
                 ),
                 if (!memoryEnabled)
-                  const Text(
-                    'Decision Memory is off. Actions remain visible, but responses and outcomes are not stored.',
+                  Text(
+                    tr(
+                      'Decision Memory is off. Actions remain visible, but responses and outcomes are not stored.',
+                      'ذاكرة القرارات متوقفة. تظل الإجراءات ظاهرة، لكن الردود والنتائج لا تُحفظ.',
+                    ),
                   ),
               ],
             ),
