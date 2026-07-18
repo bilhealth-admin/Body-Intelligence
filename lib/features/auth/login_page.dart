@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/environment/app_environment.dart';
+import '../../app/localization/app_localizations.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -24,9 +25,10 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.strings.text;
     final configured = AppEnvironment.cloudConfigured;
     return Scaffold(
-      appBar: AppBar(title: const Text('BIL account')),
+      appBar: AppBar(title: Text(t('BIL account'))),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -44,13 +46,15 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 18),
                     Text(
-                      'Your data, on your terms',
+                      t('Your data, on your terms'),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'Cloud accounts are optional. Local Mode remains fully usable and keeps data on this device.',
+                    Text(
+                      t(
+                        'Cloud accounts are optional. Local Mode remains fully usable and keeps data on this device.',
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
@@ -62,9 +66,9 @@ class _LoginPageState extends State<LoginPage> {
                         AutofillHints.username,
                         AutofillHints.email,
                       ],
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: Icon(Icons.email_outlined),
+                      decoration: InputDecoration(
+                        labelText: t('Email'),
+                        prefixIcon: const Icon(Icons.email_outlined),
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -74,10 +78,12 @@ class _LoginPageState extends State<LoginPage> {
                       obscureText: obscure,
                       autofillHints: const [AutofillHints.password],
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        labelText: t('Password'),
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
-                          tooltip: obscure ? 'Show password' : 'Hide password',
+                          tooltip: t(
+                            obscure ? 'Show password' : 'Hide password',
+                          ),
                           onPressed: configured
                               ? () => setState(() => obscure = !obscure)
                               : null,
@@ -91,13 +97,17 @@ class _LoginPageState extends State<LoginPage> {
                     FilledButton.icon(
                       onPressed: null,
                       icon: const Icon(Icons.login),
-                      label: const Text('Sign in'),
+                      label: Text(t('Sign in')),
                     ),
                     const SizedBox(height: 10),
                     Text(
                       configured
-                          ? 'Account sign-in remains disabled until the verified server auth boundary is initialized.'
-                          : 'Cloud accounts are not configured in this build. No credentials will be accepted or stored.',
+                          ? t(
+                              'Account sign-in remains disabled until the verified server auth boundary is initialized.',
+                            )
+                          : t(
+                              'Cloud accounts are not configured in this build. No credentials will be accepted or stored.',
+                            ),
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
@@ -105,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
                     OutlinedButton.icon(
                       onPressed: () => context.go('/onboarding'),
                       icon: const Icon(Icons.phone_android),
-                      label: const Text('Continue in Local Mode'),
+                      label: Text(t('Continue in Local Mode')),
                     ),
                   ],
                 ),

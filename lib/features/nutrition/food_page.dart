@@ -73,29 +73,31 @@ class _FoodPageState extends ConsumerState<FoodPage> {
   }
 
   Future<void> _barcodeLookup() async {
+    final t = context.strings.text;
     final controller = TextEditingController();
     final barcode = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Manual barcode lookup'),
+        title: Text(t('Manual barcode lookup')),
         content: TextField(
           controller: controller,
           autofocus: true,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: 'Barcode digits',
-            helperText:
-                'Camera scanning is unavailable until a verified scanner adapter and permissions are configured.',
+          decoration: InputDecoration(
+            labelText: t('Barcode digits'),
+            helperText: t(
+              'Camera scanning is unavailable until a verified scanner adapter and permissions are configured.',
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, controller.text.trim()),
-            child: const Text('Search'),
+            child: Text(t('Search')),
           ),
         ],
       ),
@@ -112,18 +114,20 @@ class _FoodPageState extends ConsumerState<FoodPage> {
     final create = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Barcode not found locally'),
-        content: const Text(
-          'BIL will not invent nutrition values. You can create a food from the product label and this barcode will be prefilled.',
+        title: Text(t('Barcode not found locally')),
+        content: Text(
+          t(
+            'BIL will not invent nutrition values. You can create a food from the product label and this barcode will be prefilled.',
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Not now'),
+            child: Text(t('Not now')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Create custom food'),
+            child: Text(t('Create custom food')),
           ),
         ],
       ),
@@ -133,13 +137,14 @@ class _FoodPageState extends ConsumerState<FoodPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.strings.text;
     final allFoods = ref.watch(foodsProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(context.strings.text('Food catalog')),
         actions: [
           IconButton(
-            tooltip: 'Manual barcode lookup',
+            tooltip: t('Manual barcode lookup'),
             onPressed: _barcodeLookup,
             icon: const Icon(Icons.qr_code_scanner),
           ),
@@ -156,7 +161,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
             padding: const EdgeInsets.all(16),
             child: SearchBar(
               controller: search,
-              hintText: 'English, Arabic, keyword, or barcode',
+              hintText: t('English, Arabic, keyword, or barcode'),
               leading: const Icon(Icons.search),
               onChanged: _scheduleSearch,
             ),
@@ -165,12 +170,12 @@ class _FoodPageState extends ConsumerState<FoodPage> {
             child: allFoods.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) =>
-                  Center(child: Text('Could not load foods: $error')),
+                  Center(child: Text('${t('Could not load foods')}: $error')),
               data: (foods) {
                 final visible = results ?? foods;
                 if (visible.isEmpty) {
-                  return const Center(
-                    child: Text('No matching foods. Create a custom food.'),
+                  return Center(
+                    child: Text(t('No matching foods. Create a custom food.')),
                   );
                 }
                 return ListView.builder(
@@ -216,6 +221,7 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.strings.text;
     final food = widget.food;
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
@@ -236,16 +242,16 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
                   ),
                   if (food.arabicName != null) Text(food.arabicName!),
                   const SizedBox(height: 12),
-                  Text('Source: ${food.source}'),
+                  Text('${t('Source')}: ${t(food.source)}'),
                   Text(
                     food.verified
-                        ? 'Verified catalog record'
-                        : 'Not independently verified',
+                        ? t('Verified catalog record')
+                        : t('Not independently verified'),
                   ),
                   Text(
-                    'Normalized serving: ${food.servingSize.toStringAsFixed(0)} ${food.servingUnit}',
+                    '${t('Normalized serving')}: ${food.servingSize.toStringAsFixed(0)} ${food.servingUnit}',
                   ),
-                  Text('Updated locally: ${food.updatedAt.toLocal()}'),
+                  Text('${t('Updated locally')}: ${food.updatedAt.toLocal()}'),
                   const SizedBox(height: 12),
                   Text(
                     '${food.calories.toStringAsFixed(0)} kcal · ${food.protein.toStringAsFixed(1)} g protein · '
@@ -263,11 +269,11 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
         ),
         subtitle: Text(
           '${food.calories.toStringAsFixed(0)} kcal · ${food.protein.toStringAsFixed(1)} g protein / '
-          '${food.servingSize.toStringAsFixed(0)} ${food.servingUnit}\n${food.source} · ${food.verified ? 'verified' : 'unverified'}',
+          '${food.servingSize.toStringAsFixed(0)} ${food.servingUnit}\n${t(food.source)} · ${t(food.verified ? 'verified' : 'unverified')}',
         ),
         isThreeLine: true,
         trailing: IconButton(
-          tooltip: favorite ? 'Remove favorite' : 'Add favorite',
+          tooltip: t(favorite ? 'Remove favorite' : 'Add favorite'),
           icon: Icon(favorite ? Icons.favorite : Icons.favorite_border),
           onPressed: () async {
             final next = !favorite;
@@ -344,6 +350,7 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.strings.text;
     const labels = <String>[
       'English name',
       'Arabic name',
@@ -362,7 +369,7 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
       'Sugar',
     ];
     return AlertDialog(
-      title: const Text('Create custom food'),
+      title: Text(t('Create custom food')),
       content: SizedBox(
         width: 420,
         child: Form(
@@ -373,18 +380,18 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
               children: List.generate(labels.length, (index) {
                 return TextFormField(
                   controller: controllers[index],
-                  decoration: InputDecoration(labelText: labels[index]),
+                  decoration: InputDecoration(labelText: t(labels[index])),
                   keyboardType: index >= 3 && index != 4
                       ? const TextInputType.numberWithOptions(decimal: true)
                       : TextInputType.text,
                   validator: (value) {
                     if (index == 0 && (value == null || value.trim().isEmpty)) {
-                      return 'Required';
+                      return t('Required');
                     }
                     if (index >= 3 &&
                         index != 4 &&
                         (double.tryParse(value ?? '') ?? -1) < 0) {
-                      return 'Enter a non-negative number';
+                      return t('Enter a non-negative number');
                     }
                     return null;
                   },
@@ -397,7 +404,7 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(t('Cancel')),
         ),
         FilledButton(
           onPressed: () {
@@ -430,7 +437,7 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
               ),
             );
           },
-          child: const Text('Save'),
+          child: Text(t('Save')),
         ),
       ],
     );

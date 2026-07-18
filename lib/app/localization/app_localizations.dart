@@ -298,6 +298,57 @@ class AppLocalizations {
     'from history?': 'من السجل؟',
     'Could not load weight history': 'تعذر تحميل سجل الوزن',
     'More data needed': 'نحتاج إلى مزيد من البيانات',
+    'BIL account': 'حساب BIL',
+    'Your data, on your terms': 'بياناتك بشروطك',
+    'Cloud accounts are optional. Local Mode remains fully usable and keeps data on this device.':
+        'الحساب السحابي اختياري. يظل الوضع المحلي كامل الاستخدام ويحفظ البيانات على هذا الجهاز.',
+    'Email': 'البريد الإلكتروني',
+    'Password': 'كلمة المرور',
+    'Show password': 'إظهار كلمة المرور',
+    'Hide password': 'إخفاء كلمة المرور',
+    'Sign in': 'تسجيل الدخول',
+    'Account sign-in remains disabled until the verified server auth boundary is initialized.':
+        'يظل تسجيل الدخول معطلًا حتى تفعيل حدود المصادقة الموثقة على الخادم.',
+    'Cloud accounts are not configured in this build. No credentials will be accepted or stored.':
+        'الحسابات السحابية غير مهيأة في هذا الإصدار. لن تُقبل أو تُحفظ أي بيانات دخول.',
+    'Continue in Local Mode': 'المتابعة في الوضع المحلي',
+    'Manual barcode lookup': 'البحث اليدوي بالباركود',
+    'Barcode digits': 'أرقام الباركود',
+    'Camera scanning is unavailable until a verified scanner adapter and permissions are configured.':
+        'المسح بالكاميرا غير متاح حتى إعداد محول مسح موثّق والأذونات اللازمة.',
+    'Search': 'بحث',
+    'Barcode not found locally': 'الباركود غير موجود محليًا',
+    'BIL will not invent nutrition values. You can create a food from the product label and this barcode will be prefilled.':
+        'لن يخترع BIL قيمًا غذائية. يمكنك إنشاء طعام من ملصق المنتج وسيُملأ هذا الباركود مسبقًا.',
+    'Not now': 'ليس الآن',
+    'English, Arabic, keyword, or barcode':
+        'الاسم العربي أو الإنجليزي أو كلمة مفتاحية أو باركود',
+    'Could not load foods': 'تعذر تحميل الأطعمة',
+    'No matching foods. Create a custom food.':
+        'لا توجد أطعمة مطابقة. أنشئ طعامًا مخصصًا.',
+    'Source': 'المصدر',
+    'Verified catalog record': 'سجل موثّق في الدليل',
+    'Not independently verified': 'غير موثّق بصورة مستقلة',
+    'Normalized serving': 'الحصة القياسية',
+    'Updated locally': 'آخر تحديث محلي',
+    'verified': 'موثّق',
+    'unverified': 'غير موثّق',
+    'starter': 'دليل البداية',
+    'custom': 'مخصص',
+    'user': 'أنشأه المستخدم',
+    'Remove favorite': 'إزالة من المفضلة',
+    'Add favorite': 'إضافة إلى المفضلة',
+    'English name': 'الاسم الإنجليزي',
+    'Arabic name': 'الاسم العربي',
+    'Barcode': 'الباركود',
+    'Serving size': 'حجم الحصة',
+    'Serving unit': 'وحدة الحصة',
+    'Carbohydrates': 'الكربوهيدرات',
+    'Fat': 'الدهون',
+    'Calories': 'السعرات',
+    'Protein': 'البروتين',
+    'Required': 'مطلوب',
+    'Enter a non-negative number': 'أدخل رقمًا غير سالب',
   };
 
   String text(String english) =>

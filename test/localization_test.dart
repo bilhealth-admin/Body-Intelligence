@@ -16,6 +16,10 @@ void main() {
         'Reset all local data?',
         'Could not load weight history',
         'More data needed',
+        'Cloud accounts are not configured in this build. No credentials will be accepted or stored.',
+        'Manual barcode lookup',
+        'No matching foods. Create a custom food.',
+        'Verified catalog record',
       ];
       for (final key in keys) {
         expect(
