@@ -49,6 +49,7 @@ configured. No unavailable action reports success.
 - [Database and migrations](docs/DATABASE.md)
 - [Scientific and health-safety rules](docs/SCIENTIFIC_RULES.md)
 - [Platform builds and deployment](docs/platform_support.md)
+- [Performance budgets and measurement](docs/PERFORMANCE.md)
 - [iOS readiness checklist](docs/IOS_READINESS.md)
 - [Commercial boundary](docs/COMMERCIAL_BOUNDARY.md)
 - [Current roadmap and external blockers](docs/ROADMAP.md)
