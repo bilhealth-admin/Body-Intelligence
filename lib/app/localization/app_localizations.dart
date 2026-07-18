@@ -239,6 +239,65 @@ class AppLocalizations {
     'This result is a personal observation, not medical proof.':
         'هذه النتيجة ملاحظة شخصية وليست إثباتًا طبيًا.',
     'Save observation': 'حفظ الملاحظة',
+    'Close': 'إغلاق',
+    'Local data export copied to the clipboard.':
+        'تم نسخ تصدير البيانات المحلية إلى الحافظة.',
+    'Reset all local data?': 'هل تريد حذف كل البيانات المحلية؟',
+    'This permanently removes your profile, goals, logs, meals, custom foods, and settings. Type RESET to continue.':
+        'سيؤدي هذا إلى حذف ملفك وأهدافك وسجلاتك ووجباتك وأطعمتك المخصصة وإعداداتك نهائيًا. اكتب RESET للمتابعة.',
+    'Reset': 'حذف البيانات',
+    'High contrast': 'تباين مرتفع',
+    'Increase separation between text, controls, and surfaces.':
+        'زيادة التمييز بين النصوص وعناصر التحكم والأسطح.',
+    'Reduce motion': 'تقليل الحركة',
+    'Minimize nonessential interface animation.':
+        'تقليل حركات الواجهة غير الضرورية.',
+    'Compare recommendations, assumptions, and your overrides.':
+        'قارن التوصيات والافتراضات وتعديلاتك.',
+    'Decision Memory': 'ذاكرة القرارات',
+    'Review, rate, disable, or delete remembered actions.':
+        'راجع الإجراءات المتذكّرة وقيّمها أو عطّلها أو احذفها.',
+    'Test a cautious hypothesis and record limitations.':
+        'اختبر فرضية حذرة وسجّل القيود.',
+    'Your data remains on this device.': 'تبقى بياناتك على هذا الجهاز.',
+    'BIL stores profile, weight, meals, foods, water, and preferences locally in SQLite. No data is uploaded while cloud services are disabled.':
+        'يحفظ BIL الملف الشخصي والوزن والوجبات والأطعمة والماء والتفضيلات محليًا في SQLite. لا تُرفع أي بيانات ما دامت الخدمات السحابية معطلة.',
+    'BIL provides general tracking information and cautious hypotheses. It does not diagnose, treat, or replace advice from a qualified healthcare professional.':
+        'يقدم BIL معلومات متابعة عامة وفرضيات حذرة. لا يشخّص أو يعالج ولا يحل محل نصيحة مختص صحي مؤهل.',
+    'Copy a JSON export to the clipboard.': 'انسخ تصدير JSON إلى الحافظة.',
+    'Connected capabilities': 'الخدمات المتصلة',
+    'Account': 'الحساب',
+    'Ask BIL': 'اسأل BIL',
+    'Subscriptions and purchases': 'الاشتراكات والمشتريات',
+    'Community': 'المجتمع',
+    'Coach platform': 'منصة المختص',
+    'Remote update channel': 'قناة التحديث البعيد',
+    'Configuration found, but verified registration/session activation is not enabled in this build.':
+        'تم العثور على إعدادات، لكن التسجيل والجلسات الموثقة غير مفعّلة في هذا الإصدار.',
+    'Requires Supabase client configuration and the BIL server boundary.':
+        'يتطلب إعداد عميل Supabase وحدود خادم BIL.',
+    'Configuration found, but verified outbox/inbox activation is not enabled in this build.':
+        'تم العثور على إعدادات، لكن مزامنة الصادر والوارد الموثقة غير مفعّلة في هذا الإصدار.',
+    'Local Mode is active. No data is uploaded.':
+        'الوضع المحلي نشط. لا تُرفع أي بيانات.',
+    'Server endpoint found, but the consent and rate-limit adapter is not activated.':
+        'تم العثور على عنوان الخادم، لكن طبقة الموافقة وتحديد المعدل غير مفعّلة.',
+    'Requires a server-side AI proxy. Model secrets are never accepted by the client.':
+        'يتطلب وسيط ذكاء اصطناعي على الخادم. لا يقبل التطبيق أسرار النموذج.',
+    'Payment configuration exists, but verified receipt/webhook activation is pending.':
+        'إعداد الدفع موجود، لكن تفعيل الإيصالات وإشعارات الخادم الموثقة ما زال معلقًا.',
+    'Purchases are not configured. No payment details are collected.':
+        'المشتريات غير معدّة. لا تُجمع أي بيانات دفع.',
+    'Requires authenticated identities, consent, moderation, and enforced server-side access policies.':
+        'يتطلب هويات موثقة وموافقة وإشرافًا وسياسات وصول مفروضة على الخادم.',
+    'Remote signed update configuration is not configured; platform stores remain authoritative.':
+        'إعداد التحديث البعيد الموقّع غير مهيأ؛ تظل متاجر المنصات هي المرجع.',
+    'Add weight': 'إضافة وزن',
+    'Edit weight': 'تعديل الوزن',
+    'Delete weight?': 'هل تريد حذف الوزن؟',
+    'from history?': 'من السجل؟',
+    'Could not load weight history': 'تعذر تحميل سجل الوزن',
+    'More data needed': 'نحتاج إلى مزيد من البيانات',
   };
 
   String text(String english) =>

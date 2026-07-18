@@ -24,7 +24,9 @@ class HistoryPage extends ConsumerWidget {
       context: context,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text(entry == null ? 'Add weight' : 'Edit weight'),
+          title: Text(
+            context.strings.text(entry == null ? 'Add weight' : 'Edit weight'),
+          ),
           content: SizedBox(
             width: 440,
             child: WheelNumberField(
@@ -41,14 +43,14 @@ class HistoryPage extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
+              child: Text(context.strings.text('Cancel')),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(
                 dialogContext,
                 UnitConverter.weightToKg(displayed, system),
               ),
-              child: const Text('Save'),
+              child: Text(context.strings.text('Save')),
             ),
           ],
         ),
@@ -80,18 +82,18 @@ class HistoryPage extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Delete weight?'),
+        title: Text(context.strings.text('Delete weight?')),
         content: Text(
-          'Delete ${displayed.toStringAsFixed(1)} ${UnitConverter.weightUnit(system)} from history?',
+          '${context.strings.text('Delete')} ${displayed.toStringAsFixed(1)} ${UnitConverter.weightUnit(system)} ${context.strings.text('from history?')}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(context.strings.text('Cancel')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: Text(context.strings.text('Delete')),
           ),
         ],
       ),
@@ -115,11 +117,16 @@ class HistoryPage extends ConsumerWidget {
       ),
       body: history.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) =>
-            Center(child: Text('Could not load weight history: $error')),
+        error: (error, _) => Center(
+          child: Text(
+            '${context.strings.text('Could not load weight history')}: $error',
+          ),
+        ),
         data: (rows) {
           if (rows.isEmpty) {
-            return const Center(child: Text('No weight entries yet.'));
+            return Center(
+              child: Text(context.strings.text('No weight entries yet.')),
+            );
           }
           final chronological = rows.reversed.toList();
           final trend = WeightAnalysis.calculateWeeklyTrend(
@@ -133,7 +140,7 @@ class HistoryPage extends ConsumerWidget {
                   title: Text(context.strings.text('Seven-day trend')),
                   subtitle: Text(
                     trend == null
-                        ? 'More data needed'
+                        ? context.strings.text('More data needed')
                         : '${UnitConverter.weightFromKg(trend, system).toStringAsFixed(2)} $unit',
                   ),
                 ),

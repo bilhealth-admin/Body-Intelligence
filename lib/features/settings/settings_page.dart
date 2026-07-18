@@ -26,7 +26,7 @@ class SettingsPage extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: Text(context.strings.text('Close')),
           ),
         ],
       ),
@@ -81,8 +81,10 @@ class SettingsPage extends ConsumerWidget {
     await const DataExportService().copyText(document);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Local data export copied to the clipboard.'),
+        SnackBar(
+          content: Text(
+            context.strings.text('Local data export copied to the clipboard.'),
+          ),
         ),
       );
     }
@@ -93,12 +95,14 @@ class SettingsPage extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Reset all local data?'),
+        title: Text(context.strings.text('Reset all local data?')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'This permanently removes your profile, goals, logs, meals, custom foods, and settings. Type RESET to continue.',
+            Text(
+              context.strings.text(
+                'This permanently removes your profile, goals, logs, meals, custom foods, and settings. Type RESET to continue.',
+              ),
             ),
             TextField(
               controller: controller,
@@ -109,11 +113,11 @@ class SettingsPage extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(context.strings.text('Cancel')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, controller.text == 'RESET'),
-            child: const Text('Reset'),
+            child: Text(context.strings.text('Reset')),
           ),
         ],
       ),
@@ -145,6 +149,7 @@ class SettingsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = context.strings.text;
     final settings = ref.watch(appSettingsProvider);
     final measurementSystem =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
@@ -197,9 +202,9 @@ class SettingsPage extends ConsumerWidget {
             value: settings.highContrast,
             onChanged: (value) =>
                 ref.read(appSettingsProvider.notifier).setHighContrast(value),
-            title: const Text('High contrast'),
-            subtitle: const Text(
-              'Increase separation between text, controls, and surfaces.',
+            title: Text(t('High contrast')),
+            subtitle: Text(
+              t('Increase separation between text, controls, and surfaces.'),
             ),
           ),
           SwitchListTile(
@@ -208,8 +213,8 @@ class SettingsPage extends ConsumerWidget {
             value: settings.reduceMotion,
             onChanged: (value) =>
                 ref.read(appSettingsProvider.notifier).setReduceMotion(value),
-            title: const Text('Reduce motion'),
-            subtitle: const Text('Minimize nonessential interface animation.'),
+            title: Text(t('Reduce motion')),
+            subtitle: Text(t('Minimize nonessential interface animation.')),
           ),
           const Divider(height: 32),
           DropdownButtonFormField<String>(
@@ -241,9 +246,9 @@ class SettingsPage extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.tune),
-            title: const Text('Targets and plan'),
-            subtitle: const Text(
-              'Compare recommendations, assumptions, and your overrides.',
+            title: Text(t('Targets and plan')),
+            subtitle: Text(
+              t('Compare recommendations, assumptions, and your overrides.'),
             ),
             onTap: () => context.go('/plan'),
           ),
@@ -254,17 +259,17 @@ class SettingsPage extends ConsumerWidget {
           ),
           ListTile(
             leading: const Icon(Icons.psychology_alt_outlined),
-            title: const Text('Decision Memory'),
-            subtitle: const Text(
-              'Review, rate, disable, or delete remembered actions.',
+            title: Text(t('Decision Memory')),
+            subtitle: Text(
+              t('Review, rate, disable, or delete remembered actions.'),
             ),
             onTap: () => context.go('/decision-memory'),
           ),
           ListTile(
             leading: const Icon(Icons.science_outlined),
-            title: const Text('Personal experiments'),
-            subtitle: const Text(
-              'Test a cautious hypothesis and record limitations.',
+            title: Text(t('Personal experiments')),
+            subtitle: Text(
+              t('Test a cautious hypothesis and record limitations.'),
             ),
             onTap: () => context.go('/experiments'),
           ),
@@ -291,11 +296,13 @@ class SettingsPage extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.privacy_tip),
             title: Text(context.strings.text('Privacy')),
-            subtitle: const Text('Your MVP data remains on this device.'),
+            subtitle: Text(t('Your data remains on this device.')),
             onTap: () => _showInfo(
               context,
-              'Privacy',
-              'BIL stores profile, weight, meals, foods, water, and preferences locally in SQLite. No data is uploaded while cloud services are disabled.',
+              t('Privacy'),
+              t(
+                'BIL stores profile, weight, meals, foods, water, and preferences locally in SQLite. No data is uploaded while cloud services are disabled.',
+              ),
             ),
           ),
           ListTile(
@@ -303,24 +310,26 @@ class SettingsPage extends ConsumerWidget {
             title: Text(context.strings.text('Health disclaimer')),
             onTap: () => _showInfo(
               context,
-              'Health disclaimer',
-              'BIL provides general tracking information and cautious hypotheses. It does not diagnose, treat, or replace advice from a qualified healthcare professional.',
+              t('Health disclaimer'),
+              t(
+                'BIL provides general tracking information and cautious hypotheses. It does not diagnose, treat, or replace advice from a qualified healthcare professional.',
+              ),
             ),
           ),
           ListTile(
             leading: const Icon(Icons.copy_all),
             title: Text(context.strings.text('Export local data')),
-            subtitle: const Text('Copy a JSON export to the clipboard.'),
+            subtitle: Text(t('Copy a JSON export to the clipboard.')),
             onTap: () => _export(context, ref),
           ),
-          const ListTile(
-            leading: Icon(Icons.info),
-            title: Text('App version'),
-            subtitle: Text('1.0.0+1'),
+          ListTile(
+            leading: const Icon(Icons.info),
+            title: Text(t('App version')),
+            subtitle: const Text('1.0.0+1'),
           ),
           const Divider(height: 32),
           Text(
-            'Connected capabilities',
+            t('Connected capabilities'),
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 6),
@@ -341,18 +350,19 @@ class SettingsPage extends ConsumerWidget {
                     ExternalCapability.updates => Icons.system_update_outlined,
                   }),
                   title: Text(switch (capability) {
-                    ExternalCapability.account => 'Account',
+                    ExternalCapability.account => t('Account'),
                     ExternalCapability.sync => context.strings.text(
                       'Cloud sync',
                     ),
-                    ExternalCapability.ai => 'Ask BIL',
-                    ExternalCapability.commerce =>
+                    ExternalCapability.ai => t('Ask BIL'),
+                    ExternalCapability.commerce => t(
                       'Subscriptions and purchases',
-                    ExternalCapability.community => 'Community',
-                    ExternalCapability.coach => 'Coach platform',
-                    ExternalCapability.updates => 'Remote update channel',
+                    ),
+                    ExternalCapability.community => t('Community'),
+                    ExternalCapability.coach => t('Coach platform'),
+                    ExternalCapability.updates => t('Remote update channel'),
                   }),
-                  subtitle: Text(status.reason),
+                  subtitle: Text(t(status.reason)),
                   trailing: Icon(
                     status.available
                         ? Icons.check_circle_outline
