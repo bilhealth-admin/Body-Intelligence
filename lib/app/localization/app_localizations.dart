@@ -107,6 +107,10 @@ class AppLocalizations {
     'from this meal?': 'من هذه الوجبة؟',
     'Verified': 'موثّق',
     'Unverified': 'غير موثّق',
+    'Edit custom food': 'تعديل الطعام المخصص',
+    'Delete custom food?': 'حذف الطعام المخصص؟',
+    'Existing meal history keeps its nutrition snapshot. This food will no longer appear in search.':
+        'سيحتفظ سجل الوجبات الحالي بلقطة التغذية، ولن يظهر هذا الطعام في البحث بعد الآن.',
     'Settings': 'الإعدادات',
     'Language': 'اللغة',
     'Appearance': 'المظهر',

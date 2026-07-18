@@ -29,33 +29,33 @@ class FoodRepository {
     double iron = 0,
     double vitaminC = 0,
   }) async {
-    if (name.trim().isEmpty) {
-      throw ArgumentError.value(name, 'name', 'A food name is required');
-    }
-    if (servingSize <= 0 ||
-        calories < 0 ||
-        protein < 0 ||
-        carbs < 0 ||
-        fats < 0 ||
-        fiber < 0 ||
-        sugar < 0 ||
-        sodium < 0 ||
-        potassium < 0 ||
-        calcium < 0 ||
-        magnesium < 0 ||
-        iron < 0 ||
-        vitaminC < 0) {
-      throw ArgumentError('Food quantities and nutrients must be non-negative');
-    }
+    _validateFood(
+      name: name,
+      servingSize: servingSize,
+      nutrients: [
+        calories,
+        protein,
+        carbs,
+        fats,
+        fiber,
+        sugar,
+        sodium,
+        potassium,
+        calcium,
+        magnesium,
+        iron,
+        vitaminC,
+      ],
+    );
     final rowId = await _database
         .into(_database.foods)
         .insert(
           FoodsCompanion.insert(
             name: name.trim(),
-            arabicName: Value(arabicName),
+            arabicName: Value(_optional(arabicName)),
             category: Value(category),
             keywords: Value(keywords.trim()),
-            barcode: Value(barcode),
+            barcode: Value(_optional(barcode)),
             servingSize: Value(servingSize),
             servingUnit: Value(servingUnit),
             calories: calories,
@@ -110,15 +110,97 @@ class FoodRepository {
   }
 
   Stream<List<Food>> watchFoods() {
-    return (_database.select(
-      _database.foods,
-    )..orderBy([(t) => OrderingTerm.asc(t.name)])).watch();
+    return (_database.select(_database.foods)
+          ..where((row) => row.deletedAt.isNull())
+          ..orderBy([(t) => OrderingTerm.asc(t.name)]))
+        .watch();
   }
 
   Future<List<Food>> getFoods() {
-    return (_database.select(
+    return (_database.select(_database.foods)
+          ..where((row) => row.deletedAt.isNull())
+          ..orderBy([(t) => OrderingTerm.asc(t.name)]))
+        .get();
+  }
+
+  Future<void> updateCustomFood({
+    required int id,
+    required String name,
+    required String category,
+    required double calories,
+    required double protein,
+    required double carbs,
+    required double fats,
+    String? arabicName,
+    String? barcode,
+    required double servingSize,
+    required String servingUnit,
+    double fiber = 0,
+    double sugar = 0,
+    double sodium = 0,
+    double potassium = 0,
+    double calcium = 0,
+    double magnesium = 0,
+  }) async {
+    _validateFood(
+      name: name,
+      servingSize: servingSize,
+      nutrients: [
+        calories,
+        protein,
+        carbs,
+        fats,
+        fiber,
+        sugar,
+        sodium,
+        potassium,
+        calcium,
+        magnesium,
+      ],
+    );
+    final existing = await _customFood(id);
+    await (_database.update(
       _database.foods,
-    )..orderBy([(t) => OrderingTerm.asc(t.name)])).get();
+    )..where((row) => row.id.equals(id))).write(
+      FoodsCompanion(
+        name: Value(name.trim()),
+        arabicName: Value(_optional(arabicName)),
+        category: Value(category),
+        barcode: Value(_optional(barcode)),
+        servingSize: Value(servingSize),
+        servingUnit: Value(
+          servingUnit.trim().isEmpty ? 'g' : servingUnit.trim(),
+        ),
+        calories: Value(calories),
+        protein: Value(protein),
+        carbs: Value(carbs),
+        fats: Value(fats),
+        fiber: Value(fiber),
+        sugar: Value(sugar),
+        sodium: Value(sodium),
+        potassium: Value(potassium),
+        calcium: Value(calcium),
+        magnesium: Value(magnesium),
+        updatedAt: Value(DateTime.now()),
+        revision: Value(existing.revision + 1),
+        syncStatus: const Value('pending'),
+      ),
+    );
+  }
+
+  Future<void> deleteCustomFood(int id) async {
+    final existing = await _customFood(id);
+    final now = DateTime.now();
+    await (_database.update(
+      _database.foods,
+    )..where((row) => row.id.equals(id))).write(
+      FoodsCompanion(
+        deletedAt: Value(now),
+        updatedAt: Value(now),
+        revision: Value(existing.revision + 1),
+        syncStatus: const Value('pendingDelete'),
+      ),
+    );
   }
 
   Future<List<Food>> search(String query, {int limit = 50}) {
@@ -187,5 +269,38 @@ class FoodRepository {
 
   Future<void> deleteAll() async {
     await _database.delete(_database.foods).go();
+  }
+
+  Future<Food> _customFood(int id) async {
+    final food =
+        await (_database.select(_database.foods)..where(
+              (row) =>
+                  row.id.equals(id) &
+                  row.isCustom.equals(true) &
+                  row.deletedAt.isNull(),
+            ))
+            .getSingleOrNull();
+    if (food == null) throw StateError('Custom food $id does not exist');
+    return food;
+  }
+
+  void _validateFood({
+    required String name,
+    required double servingSize,
+    required List<double> nutrients,
+  }) {
+    if (name.trim().isEmpty) {
+      throw ArgumentError.value(name, 'name', 'A food name is required');
+    }
+    if (!servingSize.isFinite ||
+        servingSize <= 0 ||
+        nutrients.any((value) => !value.isFinite || value < 0)) {
+      throw ArgumentError('Food quantities and nutrients must be valid');
+    }
+  }
+
+  String? _optional(String? value) {
+    final normalized = value?.trim();
+    return normalized == null || normalized.isEmpty ? null : normalized;
   }
 }

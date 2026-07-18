@@ -169,8 +169,20 @@ class _FoodPageState extends ConsumerState<FoodPage> {
           Expanded(
             child: allFoods.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) =>
-                  Center(child: Text('${t('Could not load foods')}: $error')),
+              error: (_, _) => Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(t('Could not load foods')),
+                    const SizedBox(height: 12),
+                    FilledButton.icon(
+                      onPressed: () => ref.invalidate(foodsProvider),
+                      icon: const Icon(Icons.refresh),
+                      label: Text(t('Try again')),
+                    ),
+                  ],
+                ),
+              ),
               data: (foods) {
                 final visible = results ?? foods;
                 if (visible.isEmpty) {
@@ -181,7 +193,10 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                 return ListView.builder(
                   padding: const EdgeInsets.only(bottom: 96),
                   itemCount: visible.length,
-                  itemBuilder: (_, index) => _FoodTile(food: visible[index]),
+                  itemBuilder: (_, index) => _FoodTile(
+                    food: visible[index],
+                    onChanged: () => _runSearch(search.text),
+                  ),
                 );
               },
             ),
@@ -193,8 +208,9 @@ class _FoodPageState extends ConsumerState<FoodPage> {
 }
 
 class _FoodTile extends ConsumerStatefulWidget {
-  const _FoodTile({required this.food});
+  const _FoodTile({required this.food, required this.onChanged});
   final Food food;
+  final Future<void> Function() onChanged;
 
   @override
   ConsumerState<_FoodTile> createState() => _FoodTileState();
@@ -217,6 +233,64 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
         );
       }
     });
+  }
+
+  Future<void> _edit() async {
+    final draft = await showDialog<_FoodDraft>(
+      context: context,
+      builder: (_) => _CustomFoodDialog(food: widget.food),
+    );
+    if (draft == null) return;
+    await ref
+        .read(foodRepositoryProvider)
+        .updateCustomFood(
+          id: widget.food.id,
+          name: draft.name,
+          arabicName: draft.arabicName,
+          barcode: draft.barcode,
+          category: 'custom',
+          servingSize: draft.servingSize,
+          servingUnit: draft.servingUnit,
+          calories: draft.calories,
+          protein: draft.protein,
+          carbs: draft.carbs,
+          fats: draft.fats,
+          fiber: draft.fiber,
+          sodium: draft.sodium,
+          potassium: draft.potassium,
+          calcium: draft.calcium,
+          magnesium: draft.magnesium,
+          sugar: draft.sugar,
+        );
+    await widget.onChanged();
+  }
+
+  Future<void> _delete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.strings.text('Delete custom food?')),
+        content: Text(
+          context.strings.text(
+            'Existing meal history keeps its nutrition snapshot. This food will no longer appear in search.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(context.strings.text('Cancel')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(context.strings.text('Delete')),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await ref.read(foodRepositoryProvider).deleteCustomFood(widget.food.id);
+      await widget.onChanged();
+    }
   }
 
   @override
@@ -257,6 +331,34 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
                     '${food.calories.toStringAsFixed(0)} kcal · ${food.protein.toStringAsFixed(1)} g protein · '
                     '${food.carbs.toStringAsFixed(1)} g carbs · ${food.fats.toStringAsFixed(1)} g fat',
                   ),
+                  if (food.isCustom) ...[
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _edit();
+                            },
+                            icon: const Icon(Icons.edit_outlined),
+                            label: Text(t('Edit custom food')),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _delete();
+                            },
+                            icon: const Icon(Icons.delete_outline),
+                            label: Text(t('Delete')),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -322,9 +424,10 @@ class _FoodDraft {
 }
 
 class _CustomFoodDialog extends StatefulWidget {
-  const _CustomFoodDialog({this.initialBarcode});
+  const _CustomFoodDialog({this.initialBarcode, this.food});
 
   final String? initialBarcode;
+  final Food? food;
 
   @override
   State<_CustomFoodDialog> createState() => _CustomFoodDialogState();
@@ -337,7 +440,36 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
   @override
   void initState() {
     super.initState();
-    controllers[2].text = widget.initialBarcode ?? '';
+    final food = widget.food;
+    if (food == null) {
+      controllers[2].text = widget.initialBarcode ?? '';
+      controllers[3].text = '100';
+      controllers[4].text = 'g';
+      for (var index = 5; index < controllers.length; index++) {
+        controllers[index].text = '0';
+      }
+      return;
+    }
+    final values = <String>[
+      food.name,
+      food.arabicName ?? '',
+      food.barcode ?? '',
+      food.servingSize.toString(),
+      food.servingUnit,
+      food.calories.toString(),
+      food.protein.toString(),
+      food.carbs.toString(),
+      food.fats.toString(),
+      food.fiber.toString(),
+      food.sodium.toString(),
+      food.potassium.toString(),
+      food.calcium.toString(),
+      food.magnesium.toString(),
+      food.sugar.toString(),
+    ];
+    for (var index = 0; index < values.length; index++) {
+      controllers[index].text = values[index];
+    }
   }
 
   @override
@@ -369,7 +501,9 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
       'Sugar',
     ];
     return AlertDialog(
-      title: Text(t('Create custom food')),
+      title: Text(
+        t(widget.food == null ? 'Create custom food' : 'Edit custom food'),
+      ),
       content: SizedBox(
         width: 420,
         child: Form(
@@ -388,10 +522,16 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
                     if (index == 0 && (value == null || value.trim().isEmpty)) {
                       return t('Required');
                     }
-                    if (index >= 3 &&
-                        index != 4 &&
-                        (double.tryParse(value ?? '') ?? -1) < 0) {
-                      return t('Enter a non-negative number');
+                    if (index >= 3 && index != 4) {
+                      final number = double.tryParse(
+                        (value ?? '').replaceAll(',', '.'),
+                      );
+                      if (number == null ||
+                          !number.isFinite ||
+                          number < 0 ||
+                          (index == 3 && number <= 0)) {
+                        return t('Enter a non-negative number');
+                      }
                     }
                     return null;
                   },
@@ -409,7 +549,8 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
         FilledButton(
           onPressed: () {
             if (!formKey.currentState!.validate()) return;
-            double number(int index) => double.parse(controllers[index].text);
+            double number(int index) =>
+                double.parse(controllers[index].text.replaceAll(',', '.'));
             Navigator.pop(
               context,
               _FoodDraft(

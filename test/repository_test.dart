@@ -211,6 +211,53 @@ void main() {
     );
   });
 
+  test('custom food edits and tombstones preserve meal history', () async {
+    final foods = FoodRepository(database);
+    final meals = MealRepository(database);
+    final foodId = await foods.addFood(
+      name: 'Personal yogurt',
+      category: 'custom',
+      calories: 120,
+      protein: 10,
+      carbs: 12,
+      fats: 3,
+    );
+    final mealId = await meals.createMeal(
+      date: DateTime(2026, 7, 18),
+      name: 'Snack',
+      type: 'snack',
+    );
+    await meals.addMealItem(mealId: mealId, foodId: foodId, quantity: 100);
+
+    await foods.updateCustomFood(
+      id: foodId,
+      name: 'Personal Greek yogurt',
+      category: 'custom',
+      servingSize: 100,
+      servingUnit: 'g',
+      calories: 130,
+      protein: 12,
+      carbs: 11,
+      fats: 3,
+    );
+    final edited = (await foods.search('Greek')).single;
+    expect(edited.revision, 2);
+    expect(edited.syncStatus, 'pending');
+
+    await foods.deleteCustomFood(foodId);
+    expect(await foods.getFoods(), isEmpty);
+    expect(await foods.search('Greek'), isEmpty);
+    final tombstone = await database.select(database.foods).getSingle();
+    expect(tombstone.revision, 3);
+    expect(tombstone.syncStatus, 'pendingDelete');
+    expect(tombstone.deletedAt, isNotNull);
+    final historicalItem = await database
+        .select(database.mealItems)
+        .getSingle();
+    expect(historicalItem.calories, 120);
+    expect(historicalItem.protein, 10);
+  });
+
   test(
     'food search ranks personal frequency and supports barcode fallback',
     () async {
