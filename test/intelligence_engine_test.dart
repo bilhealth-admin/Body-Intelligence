@@ -3,11 +3,39 @@ import 'package:body_intelligence_log/engine/body_profile.dart';
 import 'package:body_intelligence_log/engine/intelligence_engine.dart';
 import 'package:body_intelligence_log/engine/plan_engine.dart';
 import 'package:body_intelligence_log/engine/share_metrics_engine.dart';
+import 'package:body_intelligence_log/engine/challenge_engine.dart';
 import 'package:body_intelligence_log/engine/nutrition_engine.dart';
 import 'package:body_intelligence_log/engine/tdee_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('challenges reward recorded supportive behavior only', () {
+    final result = ChallengeEngine.calculate(
+      type: 'protein',
+      targetDays: 2,
+      days: const [
+        ChallengeDayEvidence(
+          hasMeal: true,
+          hasWeight: false,
+          protein: 85,
+          fiber: 20,
+          waterMl: 2000,
+        ),
+        ChallengeDayEvidence(
+          hasMeal: true,
+          hasWeight: true,
+          protein: 20,
+          fiber: 30,
+          waterMl: 2500,
+        ),
+      ],
+      proteinTarget: 100,
+      fiberTarget: 30,
+      waterTarget: 2500,
+    );
+    expect(result.qualifyingDays, 1);
+    expect(result.complete, isFalse);
+  });
   test(
     'share metrics use behavior evidence and never require weight values',
     () {

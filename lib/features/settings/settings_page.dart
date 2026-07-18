@@ -50,6 +50,7 @@ class SettingsPage extends ConsumerWidget {
     final experiments = await database
         .select(database.personalExperiments)
         .get();
+    final challenges = await database.select(database.challenges).get();
     final preferences = await database.select(database.preferences).get();
     final document = const JsonEncoder.withIndent('  ').convert({
       'format': 'BIL local export v2',
@@ -74,6 +75,7 @@ class SettingsPage extends ConsumerWidget {
       'lifeContext': contexts.map((row) => row.toJson()).toList(),
       'decisionMemory': memories.map((row) => row.toJson()).toList(),
       'personalExperiments': experiments.map((row) => row.toJson()).toList(),
+      'challenges': challenges.map((row) => row.toJson()).toList(),
       'preferences': preferences.map((row) => row.toJson()).toList(),
     });
     await const DataExportService().copyText(document);
@@ -123,6 +125,7 @@ class SettingsPage extends ConsumerWidget {
       await database.delete(database.decisionMemories).go();
       await database.delete(database.lifeContextEntries).go();
       await database.delete(database.personalExperiments).go();
+      await database.delete(database.challenges).go();
       await database.delete(database.mealItems).go();
       await database.delete(database.meals).go();
       await database.delete(database.favorites).go();
@@ -274,6 +277,16 @@ class SettingsPage extends ConsumerWidget {
               ),
             ),
             onTap: () => context.go('/share-studio'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.emoji_events_outlined),
+            title: Text(context.strings.text('Challenges')),
+            subtitle: Text(
+              context.strings.text(
+                'Behavior-first private challenges with evidence-based progress.',
+              ),
+            ),
+            onTap: () => context.go('/challenges'),
           ),
           ListTile(
             leading: const Icon(Icons.privacy_tip),

@@ -36,6 +36,7 @@ void main() {
           'decision_memories',
           'plan_settings',
           'personal_experiments',
+          'challenges',
         ]),
       );
     },

@@ -2,6 +2,7 @@ import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
 import 'package:body_intelligence_log/data/repositories/decision_memory_repository.dart';
 import 'package:body_intelligence_log/data/repositories/experiment_repository.dart';
+import 'package:body_intelligence_log/data/repositories/challenge_repository.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
 import 'package:body_intelligence_log/data/repositories/plan_repository.dart';
@@ -57,6 +58,31 @@ void main() {
     expect(row.limitations, isNotEmpty);
     expect(row.adherence, 75);
   });
+
+  test(
+    'private challenges persist and shared audiences fail honestly',
+    () async {
+      final repository = ChallengeRepository(database);
+      await repository.start(
+        type: 'water',
+        title: 'Hydration',
+        targetDays: 14,
+        startedAt: DateTime(2026, 7, 1),
+      );
+      final challenge = await database.select(database.challenges).getSingle();
+      expect(challenge.audience, 'private');
+      expect(challenge.endsAt, DateTime(2026, 7, 15));
+      expect(
+        () => repository.start(
+          type: 'water',
+          title: 'Friends hydration',
+          targetDays: 14,
+          audience: 'friends',
+        ),
+        throwsStateError,
+      );
+    },
+  );
 
   test('meal items enforce references and cascade with their meal', () async {
     final foods = FoodRepository(database);

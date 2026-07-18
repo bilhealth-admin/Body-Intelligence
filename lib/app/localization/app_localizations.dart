@@ -173,6 +173,9 @@ class AppLocalizations {
     'Share Studio': 'استوديو المشاركة',
     'Create a privacy-safe progress image. Weight stays hidden.':
         'أنشئ صورة تقدم تحمي خصوصيتك. يظل الوزن مخفيًا.',
+    'Challenges': 'التحديات',
+    'Behavior-first private challenges with evidence-based progress.':
+        'تحديات خاصة تركّز على السلوك ويُحسب تقدمها من الأدلة.',
   };
 
   String text(String english) =>

@@ -7,6 +7,7 @@ import '../../features/daily_check_in/daily_check_in_page.dart';
 import '../../features/dashboard/dashboard_page.dart';
 import '../../features/history/history_page.dart';
 import '../../features/experiments/experiments_page.dart';
+import '../../features/challenges/challenges_page.dart';
 import '../../features/life_context/life_context_page.dart';
 import '../../features/life_context/decision_memory_page.dart';
 import '../../features/nutrition/food_page.dart';
@@ -39,6 +40,7 @@ class AppRouter {
         path: '/share-studio',
         builder: (_, _) => const ShareStudioPage(),
       ),
+      GoRoute(path: '/challenges', builder: (_, _) => const ChallengesPage()),
       ShellRoute(
         builder: (_, _, child) => ResponsiveAppShell(child: child),
         routes: [
