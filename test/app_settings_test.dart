@@ -3,6 +3,14 @@ import 'package:body_intelligence_log/app/services/app_settings_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('an existing saved locale is preserved during startup', () async {
+    final service = _MemorySettingsService();
+    final controller = AppSettingsController(service);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(controller.state.localeCode, 'ar');
+  });
+
   test('locale and theme changes are persisted by the controller', () async {
     final service = _MemorySettingsService();
     final controller = AppSettingsController(service);
