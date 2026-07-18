@@ -2,11 +2,39 @@ import 'package:body_intelligence_log/engine/bmr_engine.dart';
 import 'package:body_intelligence_log/engine/body_profile.dart';
 import 'package:body_intelligence_log/engine/intelligence_engine.dart';
 import 'package:body_intelligence_log/engine/plan_engine.dart';
+import 'package:body_intelligence_log/engine/share_metrics_engine.dart';
 import 'package:body_intelligence_log/engine/nutrition_engine.dart';
 import 'package:body_intelligence_log/engine/tdee_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'share metrics use behavior evidence and never require weight values',
+    () {
+      final result = ShareMetricsEngine.calculate(
+        const [
+          ShareDayEvidence(
+            hasMeal: true,
+            hasWeight: false,
+            protein: 90,
+            waterMl: 2200,
+          ),
+          ShareDayEvidence(
+            hasMeal: false,
+            hasWeight: true,
+            protein: 0,
+            waterMl: 0,
+          ),
+        ],
+        proteinTarget: 100,
+        waterTarget: 2500,
+      );
+      expect(result.consistentDays, 2);
+      expect(result.proteinDays, 1);
+      expect(result.hydrationDays, 1);
+      expect(result.score, 67);
+    },
+  );
   test('plan recommendation is deterministic and overrides stay separate', () {
     const profile = BodyProfile(
       age: 35,

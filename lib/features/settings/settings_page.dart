@@ -266,6 +266,16 @@ class SettingsPage extends ConsumerWidget {
             onTap: () => context.go('/experiments'),
           ),
           ListTile(
+            leading: const Icon(Icons.ios_share_outlined),
+            title: Text(context.strings.text('Share Studio')),
+            subtitle: Text(
+              context.strings.text(
+                'Create a privacy-safe progress image. Weight stays hidden.',
+              ),
+            ),
+            onTap: () => context.go('/share-studio'),
+          ),
+          ListTile(
             leading: const Icon(Icons.privacy_tip),
             title: Text(context.strings.text('Privacy')),
             subtitle: const Text('Your MVP data remains on this device.'),

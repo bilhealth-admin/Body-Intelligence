@@ -12,6 +12,7 @@ import '../../features/life_context/decision_memory_page.dart';
 import '../../features/nutrition/food_page.dart';
 import '../../features/onboarding/onboarding_page.dart';
 import '../../features/settings/settings_page.dart';
+import '../../features/share_studio/share_studio_page.dart';
 import '../../features/profile/plan_page.dart';
 import '../../features/startup/startup_page.dart';
 import 'responsive_app_shell.dart';
@@ -34,6 +35,10 @@ class AppRouter {
       ),
       GoRoute(path: '/plan', builder: (_, _) => const PlanPage()),
       GoRoute(path: '/experiments', builder: (_, _) => const ExperimentsPage()),
+      GoRoute(
+        path: '/share-studio',
+        builder: (_, _) => const ShareStudioPage(),
+      ),
       ShellRoute(
         builder: (_, _, child) => ResponsiveAppShell(child: child),
         routes: [

@@ -170,6 +170,9 @@ class AppLocalizations {
     'What changed today?': 'ما الذي تغير اليوم؟',
     'Body Twin': 'توأم الجسم',
     'Weekly review': 'المراجعة الأسبوعية',
+    'Share Studio': 'استوديو المشاركة',
+    'Create a privacy-safe progress image. Weight stays hidden.':
+        'أنشئ صورة تقدم تحمي خصوصيتك. يظل الوزن مخفيًا.',
   };
 
   String text(String english) =>
