@@ -91,8 +91,18 @@ class ResponsiveAppShell extends StatelessWidget {
               _QuickAction(
                 icon: Icons.restaurant_menu,
                 label: Localizations.localeOf(context).languageCode == 'ar'
-                    ? 'وجبة أو ماء'
-                    : 'Meal or water',
+                    ? 'إضافة طعام'
+                    : 'Add food',
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  context.go('/daily-log');
+                },
+              ),
+              _QuickAction(
+                icon: Icons.water_drop_outlined,
+                label: Localizations.localeOf(context).languageCode == 'ar'
+                    ? 'إضافة ماء'
+                    : 'Add water',
                 onTap: () {
                   Navigator.pop(sheetContext);
                   context.go('/daily-log');
@@ -101,31 +111,28 @@ class ResponsiveAppShell extends StatelessWidget {
               _QuickAction(
                 icon: Icons.search,
                 label: Localizations.localeOf(context).languageCode == 'ar'
-                    ? 'بحث أو طعام مخصص'
+                    ? 'البحث في الأطعمة أو إنشاء طعام'
                     : 'Search or create food',
                 onTap: () {
                   Navigator.pop(sheetContext);
                   context.go('/nutrition');
                 },
               ),
-              _QuickAction(
-                icon: Icons.event_note_outlined,
-                label: context.strings.text('Life context'),
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  context.go('/context');
-                },
+              _UnavailableQuickAction(
+                icon: Icons.qr_code_scanner,
+                label: Localizations.localeOf(context).languageCode == 'ar'
+                    ? 'مسح الباركود'
+                    : 'Scan barcode',
+                reason: Localizations.localeOf(context).languageCode == 'ar'
+                    ? 'غير متاح حتى يتم إعداد مصدر موثوق لبيانات الباركود.'
+                    : 'Unavailable until a verified barcode data source is configured.',
               ),
-              ListTile(
-                enabled: false,
-                leading: const Icon(Icons.auto_awesome_outlined),
-                title: Text(context.strings.text('Ask BIL')),
-                subtitle: Text(
-                  context.strings.text(
-                    'Unavailable until the server-side AI consent and rate-limit boundary is configured.',
-                  ),
+              _UnavailableQuickAction(
+                icon: Icons.auto_awesome_outlined,
+                label: context.strings.text('Ask BIL'),
+                reason: context.strings.text(
+                  'Unavailable until the server-side AI consent and rate-limit boundary is configured.',
                 ),
-                trailing: const Icon(Icons.lock_outline),
               ),
             ],
           ),
@@ -181,6 +188,27 @@ class ResponsiveAppShell extends StatelessWidget {
       ),
     );
   }
+}
+
+class _UnavailableQuickAction extends StatelessWidget {
+  const _UnavailableQuickAction({
+    required this.icon,
+    required this.label,
+    required this.reason,
+  });
+
+  final IconData icon;
+  final String label;
+  final String reason;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    enabled: false,
+    leading: Icon(icon),
+    title: Text(label),
+    subtitle: Text(reason),
+    trailing: const Icon(Icons.lock_outline),
+  );
 }
 
 class _QuickAction extends StatelessWidget {

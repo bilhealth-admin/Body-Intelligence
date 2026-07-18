@@ -74,6 +74,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('إضافة سريعة'), findsOneWidget);
+    expect(find.text('إضافة طعام'), findsOneWidget);
+    expect(find.text('إضافة ماء'), findsOneWidget);
+    expect(find.text('مسح الباركود'), findsOneWidget);
+    expect(
+      find.text('غير متاح حتى يتم إعداد مصدر موثوق لبيانات الباركود.'),
+      findsOneWidget,
+    );
     expect(find.text('اسأل BIL'), findsOneWidget);
     expect(
       find.text(

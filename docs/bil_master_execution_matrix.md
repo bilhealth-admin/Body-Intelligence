@@ -15,9 +15,9 @@
 
 ## Status summary
 
-- complete: **68**
+- complete: **69**
 - partial: **143**
-- missing and locally implementable: **14**
+- missing and locally implementable: **13**
 - blocked by credentials/infrastructure: **213**
 - strategic/non-code: **112**
 
@@ -1996,19 +1996,19 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 171. Meals Timeline
 - **Requirement:** Instead of list. Use timeline. Breakfast ↓ Lunch Dinner Snack Each meal expandable.
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `089d523`
 
 ### BIL-TDY-172 — Meal Card
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 172. Meal Card
 - **Requirement:** Contains: Meal icon Calories Foods Time Protein Quick Edit
 - **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Partial audit disposition:** substantially complete; minor release polish remains for direct per-meal quick editing
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -2020,7 +2020,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 173. Quick Add Button
 - **Requirement:** Floating Action Button. Opens sheet. Options: Food Water Weight Barcode Ask BIL
 - **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Partial audit disposition:** substantially complete; offline food, water, weight and search actions are real, while barcode and Ask BIL remain visibly unavailable pending external infrastructure
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
