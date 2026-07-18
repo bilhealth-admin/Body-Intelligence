@@ -364,6 +364,9 @@ class AppLocalizations {
     'Helpfulness': 'درجة الفائدة',
     'Delete memory': 'حذف الذاكرة',
     'Edit': 'تعديل',
+    'Quick Add': 'إضافة سريعة',
+    'Unavailable until the server-side AI consent and rate-limit boundary is configured.':
+        'غير متاح حتى إعداد حدود موافقة الذكاء الاصطناعي وتحديد المعدل على الخادم.',
   };
 
   String text(String english) =>

@@ -119,9 +119,11 @@ class ResponsiveAppShell extends StatelessWidget {
               ListTile(
                 enabled: false,
                 leading: const Icon(Icons.auto_awesome_outlined),
-                title: const Text('Ask BIL'),
-                subtitle: const Text(
-                  'Unavailable until the server-side AI consent and rate-limit boundary is configured.',
+                title: Text(context.strings.text('Ask BIL')),
+                subtitle: Text(
+                  context.strings.text(
+                    'Unavailable until the server-side AI consent and rate-limit boundary is configured.',
+                  ),
                 ),
                 trailing: const Icon(Icons.lock_outline),
               ),
@@ -132,7 +134,7 @@ class ResponsiveAppShell extends StatelessWidget {
     );
     final quickButton = FloatingActionButton(
       onPressed: quickAdd,
-      tooltip: 'Quick Add',
+      tooltip: context.strings.text('Quick Add'),
       child: const Icon(Icons.add),
     );
     if (!wide) {

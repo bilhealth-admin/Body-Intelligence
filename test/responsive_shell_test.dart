@@ -5,7 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
-Widget shellApp() {
+Widget shellApp({Locale locale = const Locale('en')}) {
   final router = GoRouter(
     initialLocation: '/dashboard',
     routes: [
@@ -21,6 +21,7 @@ Widget shellApp() {
     ],
   );
   return MaterialApp.router(
+    locale: locale,
     routerConfig: router,
     supportedLocales: AppLocalizations.supportedLocales,
     localizationsDelegates: const [
@@ -57,5 +58,32 @@ void main() {
 
     expect(find.byType(NavigationRail), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
+  });
+
+  testWidgets('Arabic quick add localizes unavailable AI boundary', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(shellApp(locale: const Locale('ar')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('إضافة سريعة'), findsOneWidget);
+    expect(find.text('اسأل BIL'), findsOneWidget);
+    expect(
+      find.text(
+        'غير متاح حتى إعداد حدود موافقة الذكاء الاصطناعي وتحديد المعدل على الخادم.',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      Directionality.of(tester.element(find.text('إضافة سريعة'))),
+      TextDirection.rtl,
+    );
   });
 }
