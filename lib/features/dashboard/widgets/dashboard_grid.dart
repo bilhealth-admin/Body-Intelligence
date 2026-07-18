@@ -24,6 +24,7 @@ import 'dashboard_check_in_card.dart';
 import 'confidence_ring.dart';
 import 'dashboard_loading_skeleton.dart';
 import 'nutrition_progress_card.dart';
+import 'weekly_progress_card.dart';
 import 'dashboard_meals_timeline.dart';
 
 class DashboardGrid extends ConsumerWidget {
@@ -211,6 +212,18 @@ class DashboardGrid extends ConsumerWidget {
         : ((profile.currentWeight - currentWeight).abs() / progressDenominator)
               .clamp(0.0, 1.0);
     final goalDate = intelligence.goalDate;
+    final weekCutoff = dayKeyFor(
+      DateTime.now().subtract(const Duration(days: 6)),
+    );
+    final weeklyWeights = weights
+        .where(
+          (row) =>
+              (row.dayKey ?? dayKeyFor(row.date)).compareTo(weekCutoff) >= 0,
+        )
+        .toList();
+    final weekStartWeight = weeklyWeights.isEmpty
+        ? currentWeight
+        : weeklyWeights.last.weight;
     final localizedBestTitle = arabic
         ? switch (bestAction.type) {
             BestActionType.weighIn => 'سجّل وزن اليوم',
@@ -462,6 +475,12 @@ class DashboardGrid extends ConsumerWidget {
                 ),
             ],
           ),
+        ),
+        WeeklyProgressCard(
+          start: UnitConverter.weightFromKg(weekStartWeight, system),
+          today: UnitConverter.weightFromKg(currentWeight, system),
+          goal: UnitConverter.weightFromKg(profile.targetWeight, system),
+          unit: UnitConverter.weightUnit(system),
         ),
         Card(
           child: Padding(
