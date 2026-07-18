@@ -15,9 +15,9 @@
 
 ## Status summary
 
-- complete: **61**
+- complete: **63**
 - partial: **209**
-- missing and locally implementable: **16**
+- missing and locally implementable: **14**
 - blocked by credentials/infrastructure: **185**
 - strategic/non-code: **79**
 
@@ -2107,23 +2107,23 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 189. Loading Dashboard
 - **Requirement:** Skeleton UI. Never spinner only.
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
-- **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
+- **Acceptance criteria:** Dashboard and plan waits preserve the responsive card structure with a localized live-region skeleton and no spinner-only or blank state; safe error states remain separate and do not leak exceptions.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `13e6a71`
 
 ### BIL-TDY-190 — Refresh
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 190. Refresh
 - **Requirement:** Pull-to-refresh. Smooth. Shows: Updated successfully.
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
-- **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
+- **Acceptance criteria:** Pull-to-refresh is available even on short Today content, re-queries all local profile/weight/meal/water/reminder providers, and reports localized success or safe partial failure without exposing raw exceptions.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `13e6a71`
 
 ### BIL-TDY-191 — Search Everywhere
 
