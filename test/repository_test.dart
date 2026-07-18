@@ -76,6 +76,53 @@ void main() {
     expect(await database.select(database.mealItems).get(), isEmpty);
   });
 
+  test(
+    'usual meals require repetition and copy only after confirmation',
+    () async {
+      final foods = FoodRepository(database);
+      final meals = MealRepository(database);
+      final foodId = await foods.addFood(
+        name: 'Repeat oats',
+        category: 'grain',
+        calories: 380,
+        protein: 15,
+        carbs: 65,
+        fats: 7,
+      );
+      for (final day in [1, 3]) {
+        final mealId = await meals.createMeal(
+          date: DateTime(2026, 7, day),
+          name: 'Breakfast',
+          type: 'breakfast',
+        );
+        await meals.addMealItem(
+          mealId: mealId,
+          foodId: foodId,
+          quantity: 50,
+          calories: 190,
+          protein: 7.5,
+          carbs: 32.5,
+          fats: 3.5,
+        );
+      }
+
+      final suggestions = await meals.usualMeals(
+        type: 'breakfast',
+        before: DateTime(2026, 7, 10),
+      );
+      expect(suggestions, hasLength(1));
+      expect(suggestions.single.occurrences, 2);
+      expect(await database.select(database.meals).get(), hasLength(2));
+
+      await meals.repeatMeal(
+        candidate: suggestions.single,
+        date: DateTime(2026, 7, 10),
+      );
+      expect(await database.select(database.meals).get(), hasLength(3));
+      expect(await database.select(database.mealItems).get(), hasLength(3));
+    },
+  );
+
   test('food search matches Arabic names and favorites are unique', () async {
     final foods = FoodRepository(database);
     final id = await foods.addFood(

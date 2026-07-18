@@ -175,6 +175,90 @@ class MealRepository {
       return rows;
     });
   }
+
+  Future<List<UsualMealCandidate>> usualMeals({
+    required String type,
+    DateTime? before,
+    int lookbackDays = 60,
+  }) async {
+    final cutoff = (before ?? DateTime.now()).subtract(
+      Duration(days: lookbackDays),
+    );
+    final meals =
+        await (_database.select(_database.meals)
+              ..where(
+                (row) =>
+                    row.type.equals(type) &
+                    row.date.isBiggerOrEqualValue(cutoff) &
+                    row.deletedAt.isNull(),
+              )
+              ..orderBy([(row) => OrderingTerm.desc(row.date)]))
+            .get();
+    final grouped = <String, List<MealWithItems>>{};
+    for (final meal in meals) {
+      final items =
+          await (_database.select(_database.mealItems)
+                ..where(
+                  (row) => row.mealId.equals(meal.id) & row.deletedAt.isNull(),
+                )
+                ..orderBy([(row) => OrderingTerm.asc(row.foodId)]))
+              .get();
+      if (items.isEmpty) continue;
+      final signature = items
+          .map((item) => '${item.foodId}:${item.quantity.toStringAsFixed(1)}')
+          .join('|');
+      grouped
+          .putIfAbsent(signature, () => [])
+          .add(MealWithItems(meal: meal, items: items));
+    }
+    final candidates =
+        grouped.values
+            .where((matches) => matches.length >= 2)
+            .map(
+              (matches) => UsualMealCandidate(
+                source: matches.first,
+                occurrences: matches.length,
+              ),
+            )
+            .toList()
+          ..sort((a, b) {
+            final frequency = b.occurrences.compareTo(a.occurrences);
+            return frequency != 0
+                ? frequency
+                : b.source.meal.date.compareTo(a.source.meal.date);
+          });
+    return candidates.take(3).toList(growable: false);
+  }
+
+  Future<void> repeatMeal({
+    required UsualMealCandidate candidate,
+    required DateTime date,
+  }) async {
+    await _database.transaction(() async {
+      final mealId = await createMeal(
+        date: date,
+        name: candidate.source.meal.name,
+        type: candidate.source.meal.type,
+      );
+      for (final item in candidate.source.items) {
+        await addMealItem(
+          mealId: mealId,
+          foodId: item.foodId,
+          quantity: item.quantity,
+          calories: item.calories,
+          protein: item.protein,
+          carbs: item.carbs,
+          fats: item.fats,
+          fiber: item.fiber,
+          sodium: item.sodium,
+          potassium: item.potassium,
+          calcium: item.calcium,
+          magnesium: item.magnesium,
+          sugar: item.sugar,
+        );
+      }
+    });
+  }
 }
 
 class MealWithItems {
@@ -182,4 +266,11 @@ class MealWithItems {
   final List<MealItem> items;
 
   const MealWithItems({required this.meal, required this.items});
+}
+
+class UsualMealCandidate {
+  const UsualMealCandidate({required this.source, required this.occurrences});
+
+  final MealWithItems source;
+  final int occurrences;
 }

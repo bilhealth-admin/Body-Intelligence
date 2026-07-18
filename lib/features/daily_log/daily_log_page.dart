@@ -164,6 +164,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     final date = ref.watch(selectedLogDateProvider);
     final meals = ref.watch(dailyMealsProvider);
     final waterEntries = ref.watch(dailyWaterProvider);
+    final usualMeals = ref.watch(usualMealsProvider(mealType));
     ref.listen(selectedDailyLogProvider, (_, next) {
       next.whenData((log) {
         final value = log?.notes ?? '';
@@ -277,6 +278,91 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                   setState(() => mealType = type),
                             ),
                         ],
+                      ),
+                      usualMeals.when(
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, _) => const SizedBox.shrink(),
+                        data: (candidates) {
+                          if (candidates.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: 12),
+                              Text(
+                                Localizations.localeOf(context).languageCode ==
+                                        'ar'
+                                    ? 'وجباتك المعتادة — لن تتم الإضافة دون تأكيدك'
+                                    : 'Your usual meals — nothing is added without your confirmation',
+                                style: Theme.of(context).textTheme.labelLarge,
+                              ),
+                              const SizedBox(height: 6),
+                              for (final candidate in candidates)
+                                Card.outlined(
+                                  child: ListTile(
+                                    leading: const Icon(Icons.replay_outlined),
+                                    title: Text(
+                                      candidate.source.items
+                                          .map(
+                                            (item) => items
+                                                .where(
+                                                  (food) =>
+                                                      food.id == item.foodId,
+                                                )
+                                                .map((food) => food.name)
+                                                .firstOrNull,
+                                          )
+                                          .whereType<String>()
+                                          .join(' + '),
+                                    ),
+                                    subtitle: Text(
+                                      Localizations.localeOf(
+                                                context,
+                                              ).languageCode ==
+                                              'ar'
+                                          ? 'سجلتها ${candidate.occurrences} مرات'
+                                          : 'Logged ${candidate.occurrences} times',
+                                    ),
+                                    trailing: FilledButton.tonal(
+                                      onPressed: () async {
+                                        await ref
+                                            .read(mealRepositoryProvider)
+                                            .repeatMeal(
+                                              candidate: candidate,
+                                              date: date,
+                                            );
+                                        ref.invalidate(
+                                          usualMealsProvider(mealType),
+                                        );
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                context.strings.text(
+                                                  'Meal saved locally.',
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      child: Text(
+                                        Localizations.localeOf(
+                                                  context,
+                                                ).languageCode ==
+                                                'ar'
+                                            ? 'أضف'
+                                            : 'Add',
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
                       ),
                       const SizedBox(height: 12),
                       SearchAnchor(

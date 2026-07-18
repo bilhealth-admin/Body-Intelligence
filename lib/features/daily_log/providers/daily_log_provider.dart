@@ -32,6 +32,11 @@ final dailyMealsProvider = StreamProvider<List<MealWithItems>>((ref) {
   return ref.watch(mealRepositoryProvider).watchMealsForDate(date);
 });
 
+final usualMealsProvider =
+    FutureProvider.family<List<UsualMealCandidate>, String>(
+      (ref, type) => ref.watch(mealRepositoryProvider).usualMeals(type: type),
+    );
+
 final waterRepositoryProvider = Provider<WaterRepository>((ref) {
   return WaterRepository(ref.watch(databaseProvider));
 });
