@@ -15,11 +15,11 @@
 
 ## Status summary
 
-- complete: **63**
-- partial: **209**
+- complete: **65**
+- partial: **146**
 - missing and locally implementable: **14**
-- blocked by credentials/infrastructure: **185**
-- strategic/non-code: **79**
+- blocked by credentials/infrastructure: **213**
+- strategic/non-code: **112**
 
 ## Requirement ledger
 
@@ -183,22 +183,22 @@
 
 - **Source section:** Part 1 — Foundation / 15. Emotional Goals
 - **Requirement:** Never make users feel guilty. Never punish. Never shame. Never exaggerate. Never scare. Always educate. Always encourage. Always explain.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `README.md`; `docs/SCIENTIFIC_RULES.md`; `docs/ARCHITECTURE.md`; `lib/app`; `lib/engine`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Policy/document review plus engine, localization, privacy, and offline regression tests where executable.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-FND-016 — Design Philosophy
 
 - **Source section:** Part 1 — Foundation / 16. Design Philosophy
 - **Requirement:** Beauty attracts. Trust retains. Intelligence creates loyalty.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `README.md`; `docs/SCIENTIFIC_RULES.md`; `docs/ARCHITECTURE.md`; `lib/app`; `lib/engine`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Policy/document review plus engine, localization, privacy, and offline regression tests where executable.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-FND-017 — AI Philosophy
@@ -239,6 +239,7 @@
 - **Source section:** Part 1 — Foundation / 20. Cross Platform Philosophy
 - **Requirement:** The user owns one body. Therefore the user deserves one experience. Android. iPhone. iPad. Windows. Web. Future macOS. Everything should feel native. Everything should feel familiar. Everything should share one intelligent brain.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `README.md`; `docs/SCIENTIFIC_RULES.md`; `docs/ARCHITECTURE.md`; `lib/app`; `lib/engine`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Policy/document review plus engine, localization, privacy, and offline regression tests where executable.
@@ -249,11 +250,11 @@
 
 - **Source section:** Part 1 — Foundation / 21. Data Philosophy
 - **Requirement:** Collect only data that creates value. If data has no purpose... Do not ask for it.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `README.md`; `docs/SCIENTIFIC_RULES.md`; `docs/ARCHITECTURE.md`; `lib/app`; `lib/engine`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Policy/document review plus engine, localization, privacy, and offline regression tests where executable.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-FND-022 — Every Input Needs A Reason
@@ -261,6 +262,7 @@
 - **Source section:** Part 1 — Foundation / 22. Every Input Needs A Reason
 - **Requirement:** If BIL asks for: Weight It must explain why. Sleep Water Users should never wonder: "Why is the app asking me this?"
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `README.md`; `docs/SCIENTIFIC_RULES.md`; `docs/ARCHITECTURE.md`; `lib/app`; `lib/engine`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Policy/document review plus engine, localization, privacy, and offline regression tests where executable.
@@ -272,6 +274,7 @@
 - **Source section:** Part 1 — Foundation / 23. Intelligence Philosophy
 - **Requirement:** Raw Data ↓ Clean Data Reliable Data Understanding Explanation Recommendation Learning Better Recommendation
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `README.md`; `docs/SCIENTIFIC_RULES.md`; `docs/ARCHITECTURE.md`; `lib/app`; `lib/engine`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Policy/document review plus engine, localization, privacy, and offline regression tests where executable.
@@ -304,22 +307,22 @@
 
 - **Source section:** Part 1 — Foundation / 26. Product Voice
 - **Requirement:** Avoid: "You failed." "You cheated." "You ruined your diet." Use: "Today's data is incomplete." "This fluctuation is common." "Let's continue." "We need more information." "There is no reason to change the plan today."
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `README.md`; `docs/SCIENTIFIC_RULES.md`; `docs/ARCHITECTURE.md`; `lib/app`; `lib/engine`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Policy/document review plus engine, localization, privacy, and offline regression tests where executable.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-FND-027 — The User Must Feel Smarter
 
 - **Source section:** Part 1 — Foundation / 27. The User Must Feel Smarter
 - **Requirement:** Every session should leave the user understanding something new about their own body. Not merely seeing another chart.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `README.md`; `docs/SCIENTIFIC_RULES.md`; `docs/ARCHITECTURE.md`; `lib/app`; `lib/engine`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Policy/document review plus engine, localization, privacy, and offline regression tests where executable.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-FND-028 — Long-Term Goal
@@ -439,6 +442,7 @@
 - **Source section:** Part 2 — Product Identity & Competitive Strategy / 38. BIL Body Twin
 - **Requirement:** Every user gradually builds: One digital twin. Not one profile. The twin remembers: weight response water response sodium response carbohydrate response adherence consistency recovery normal fluctuation measurement habits No two twins are identical.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `docs/SCIENTIFIC_RULES.md`; `lib/engine`; `lib/features/dashboard`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Deterministic engine tests and Today/analytics widget tests; product-strategy review for non-code clauses.
@@ -461,6 +465,7 @@
 - **Source section:** Part 2 — Product Identity & Competitive Strategy / 40. Explain Everything
 - **Requirement:** Every major number inside BIL must answer: Why? Examples: Calories. Protein. Water. TDEE. Weight trend. Prediction. Goal date. Body Twin. Every screen should contain a way to answer: "Why do you think that?"
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `docs/SCIENTIFIC_RULES.md`; `lib/engine`; `lib/features/dashboard`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Deterministic engine tests and Today/analytics widget tests; product-strategy review for non-code clauses.
@@ -504,12 +509,12 @@
 
 - **Source section:** Part 2 — Product Identity & Competitive Strategy / 44. Confidence Is Visible
 - **Requirement:** Every important insight has: Confidence. Not hidden confidence. Visible confidence. Examples: ★★★★★ ★★★★☆ ★★★☆☆ or Very High High Moderate Low Insufficient Data
-- **Current repository status:** `partial`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `docs/SCIENTIFIC_RULES.md`; `lib/engine`; `lib/features/dashboard`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Deterministic engine tests and Today/analytics widget tests; product-strategy review for non-code clauses.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `da19565`
 
 ### BIL-IDN-045 — Data Honesty
 
@@ -537,11 +542,11 @@
 
 - **Source section:** Part 2 — Product Identity & Competitive Strategy / 47. Simplicity Is Intelligence
 - **Requirement:** A smart application reduces work. It never increases work. If users repeatedly enter: Same breakfast. Same lunch. Same coffee. Same water. Same meals. BIL learns.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `docs/SCIENTIFIC_RULES.md`; `lib/engine`; `lib/features/dashboard`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Deterministic engine tests and Today/analytics widget tests; product-strategy review for non-code clauses.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-IDN-048 — Adaptive Logging
@@ -549,6 +554,7 @@
 - **Source section:** Part 2 — Product Identity & Competitive Strategy / 48. Adaptive Logging
 - **Requirement:** Eventually BIL should ask: "Did you have your usual breakfast?" One tap. Done. Less effort. More consistency.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `docs/SCIENTIFIC_RULES.md`; `lib/engine`; `lib/features/dashboard`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Deterministic engine tests and Today/analytics widget tests; product-strategy review for non-code clauses.
@@ -604,6 +610,7 @@
 - **Source section:** Part 2 — Product Identity & Competitive Strategy / 53. Every Day Should Feel Different
 - **Requirement:** Users should never feel they are reopening yesterday. Each day answers: What changed? What matters today? What should I do?
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `docs/SCIENTIFIC_RULES.md`; `lib/engine`; `lib/features/dashboard`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Deterministic engine tests and Today/analytics widget tests; product-strategy review for non-code clauses.
@@ -615,6 +622,7 @@
 - **Source section:** Part 2 — Product Identity & Competitive Strategy / 54. Personal Baseline
 - **Requirement:** Never compare users to averages only. Compare users to themselves. Your sodium. Your water. Your sleep. Your trend. Your body.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `docs/SCIENTIFIC_RULES.md`; `lib/engine`; `lib/features/dashboard`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Deterministic engine tests and Today/analytics widget tests; product-strategy review for non-code clauses.
@@ -636,33 +644,33 @@
 
 - **Source section:** Part 2 — Product Identity & Competitive Strategy / 56. Less Noise
 - **Requirement:** Avoid flooding dashboards. If everything is important. Nothing is important.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `docs/SCIENTIFIC_RULES.md`; `lib/engine`; `lib/features/dashboard`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Deterministic engine tests and Today/analytics widget tests; product-strategy review for non-code clauses.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-IDN-057 — Beautiful Doesn't Mean Complex
 
 - **Source section:** Part 2 — Product Identity & Competitive Strategy / 57. Beautiful Doesn't Mean Complex
 - **Requirement:** Premium means: Readable. Calm. Fast. Organized. Purposeful. Not overloaded.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `docs/SCIENTIFIC_RULES.md`; `lib/engine`; `lib/features/dashboard`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Deterministic engine tests and Today/analytics widget tests; product-strategy review for non-code clauses.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-IDN-058 — Every Screen Has A Purpose
 
 - **Source section:** Part 2 — Product Identity & Competitive Strategy / 58. Every Screen Has A Purpose
 - **Requirement:** No decorative screens. Every screen answers a question. Every button solves a problem. Every chart tells a story.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `docs/SCIENTIFIC_RULES.md`; `lib/engine`; `lib/features/dashboard`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Deterministic engine tests and Today/analytics widget tests; product-strategy review for non-code clauses.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-IDN-059 — We Build Habits
@@ -694,6 +702,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 61. The First 10 Seconds
 - **Requirement:** The first launch determines whether the user will ever return. The first impression must communicate: This app is premium. This app is fast. This app respects me. This app understands me. This app is different. The user must feel excitement, not confusion.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -705,6 +714,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 62. The First Question
 - **Requirement:** Do not start by asking for twenty fields. Start by asking: "Let's understand your body together." Everything afterwards should feel like a conversation, not a government form.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -716,6 +726,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 63. Every Screen Must Answer One Question
 - **Requirement:** Users should never wonder: "What am I supposed to do here?" Every screen must have a single primary purpose. Examples: Today → What should I do today? Diary → What have I eaten today? Analytics → What is happening to my body? Body Twin → What may happen next? Settings → How do I personalize my experience?
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -727,6 +738,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 64. One Primary Action
 - **Requirement:** Every screen has ONE primary button. Never five competing buttons. Never ten floating actions. One clear action. Everything else is secondary.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -738,6 +750,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 65. Navigation Philosophy
 - **Requirement:** The user should reach any important feature in: Maximum: Three taps. If something needs five taps... Redesign it.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -749,6 +762,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 66. Zero Learning Curve
 - **Requirement:** The application should feel familiar immediately. A first-time user should understand: where to add food where to add water where to enter weight where to ask AI where today's progress is without reading documentation.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -760,6 +774,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 67. Remove Cognitive Load
 - **Requirement:** The application must think. The user should not. Examples: Instead of: Choose meal. Choose category. Choose favorites. Choose database. Choose serving. Choose units. Choose meal order. Instead: Search. Select. Done.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -771,6 +786,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 68. Intelligent Defaults
 - **Requirement:** Never ask users questions when BIL already knows the answer. Examples: Country. Language. Units. Recent breakfast. Favorite coffee. Typical lunch. The app remembers.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -782,6 +798,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 69. Daily Flow
 - **Requirement:** Every day should follow a natural rhythm. Morning ↓ Daily Check-in Weight Today's Insight Meals Water Progress One Best Action Done No unnecessary interruptions.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -793,6 +810,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 70. The Today Screen
 - **Requirement:** The Today screen is the heart of BIL. Everything else supports Today. If Today is weak... The product is weak.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -804,6 +822,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 71. The Today Screen Answers
 - **Requirement:** Did I weigh today? Where am I? How much remains? What changed? What should I do? How confident is BIL? Nothing more. Nothing less.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -815,6 +834,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 72. Empty States Matter
 - **Requirement:** Never show: "No Data." Instead show: "Let's build your understanding together." or "Log today's weight to unlock trend analysis." Empty states should motivate. Not disappoint.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -826,6 +846,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 73. Success Feels Quiet
 - **Requirement:** Do not celebrate everything. Celebrate meaningful moments. Examples: First week. First month. Goal reached. Perfect consistency. Body Twin unlocked. Recovery completed. Avoid childish fireworks. Aim for elegant satisfaction.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -848,6 +869,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 75. Confirmation Philosophy
 - **Requirement:** Never ask: "Are you sure?" without context. Instead: "Delete today's weight? This cannot be undone." Clear. Simple. Respectful.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -859,6 +881,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 76. Speed Is UX
 - **Requirement:** The user perceives waiting as poor quality. Target: Immediate response. Skeleton loading. Lazy loading. Background processing. Never blank screens.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -870,6 +893,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 77. Motion Philosophy
 - **Requirement:** Animation must explain. Not entertain. Animation guides attention. Animation confirms success. Animation softens transitions. Animation should never delay work.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -881,6 +905,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 78. Touch Targets
 - **Requirement:** Every tappable element should be comfortable. Never tiny. Never crowded. Never frustrating.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -892,6 +917,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 79. Accessibility Is Premium
 - **Requirement:** Accessibility is not optional. Support: Large text. Screen readers. High contrast. Reduced motion. Keyboard navigation. VoiceOver. TalkBack. Mouse. Touch. Stylus. Everyone deserves the same quality.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -903,6 +929,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 80. Colors Have Meaning
 - **Requirement:** Green does not always mean good. Red does not always mean bad. Context determines meaning. Example: For weight gain: Higher calories may be positive. For weight loss: Higher calories may require attention. Never hardcode emotions into colors.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -914,6 +941,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 81. Typography
 - **Requirement:** Users read more than they tap. Typography must be: Elegant. Readable. Consistent. Never decorative.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -958,6 +986,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 85. Forms
 - **Requirement:** Forms should never intimidate. Break long forms into steps. Provide progress. Auto-save. Auto-focus intelligently. Restore unfinished work.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -969,6 +998,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 86. Search
 - **Requirement:** Search should feel instant. Results should appear while typing. Recent searches. Favorites. Personal ranking. Country relevance. Meal relevance. The user should rarely need to finish typing.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -1013,6 +1043,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 90. Every Pixel Has A Job
 - **Requirement:** Nothing exists only for decoration. Every icon. Every card. Every color. Every animation. Every shadow. Every label. Every space. Must have a reason. If it has no purpose... Remove it. بعده
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -1026,6 +1057,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 91. The First Feeling
 - **Requirement:** Before the user reads a single word... He must feel: This application is expensive. Even if it is free. Premium is a feeling. Not a price.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1037,6 +1069,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 92. Visual Identity
 - **Requirement:** BIL should become recognizable from one screenshot. Just like: Apple. Spotify. Notion. Linear. Arc. People should immediately know: "This is BIL."
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1048,6 +1081,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 93. Simplicity Wins
 - **Requirement:** Every extra element must justify its existence. If removing something improves clarity... Remove it.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1059,6 +1093,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 94. Calm Over Excitement
 - **Requirement:** Health applications should reduce anxiety. Not create stimulation. Avoid: Neon colors. Aggressive animations. Flashing elements. Visual overload. Choose: Soft gradients. Natural spacing. Readable typography. Comfortable contrast.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1070,6 +1105,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 95. Luxury Through Restraint
 - **Requirement:** Luxury is not adding more. Luxury is removing everything unnecessary.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1081,6 +1117,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 96. White Space Is A Feature
 - **Requirement:** Do not fear empty space. Empty space guides attention. Crowded screens create stress.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1092,6 +1129,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 97. Card Philosophy
 - **Requirement:** Cards should feel like physical information panels. Every card answers one question. Never mix unrelated information.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1103,6 +1141,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 98. Visual Hierarchy
 - **Requirement:** Every screen has: Primary focus. Secondary information. Supporting details. Never equal importance everywhere.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1114,6 +1153,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 99. One Hero Element
 - **Requirement:** Every screen contains exactly one visual hero. Examples: Today's Weight. Today's Action. Body Twin Projection. Weekly Progress. Everything else supports it.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1125,6 +1165,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 100. Colors
 - **Requirement:** Primary Color Trust. Secondary Color Guidance. Success Progress. Warning Attention. Error Action required. Never use color only. Always combine with: Icons. Text. Shapes.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1136,6 +1177,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 101. Typography Hierarchy
 - **Requirement:** Large Story. Medium Decision. Small Details. Tiny Avoid whenever possible.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1147,6 +1189,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 102. Buttons
 - **Requirement:** Buttons must communicate priority. Primary One only. Secondary Supporting. Text Button Low priority. Danger Rare.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1158,6 +1201,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 103. Icons
 - **Requirement:** Icons explain. They never replace text completely. Every important action must remain understandable without guessing icons.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1169,6 +1213,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 104. Motion
 - **Requirement:** Every animation answers: "What changed?" Animations never exist for decoration.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1180,6 +1225,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 105. Duration
 - **Requirement:** Instant 100–150ms Small transition 200ms Navigation 250–350ms Celebration 500–800ms Never exceed user patience.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1202,6 +1248,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 107. Glassmorphism
 - **Requirement:** Use carefully. Only where hierarchy improves. Never reduce readability. Never imitate Apple blindly. Purpose first.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1213,6 +1260,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 108. Shadows
 - **Requirement:** Soft. Natural. Consistent. Not dramatic.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1224,6 +1272,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 109. Corners
 - **Requirement:** Rounded. Friendly. Professional. Never childish.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1235,6 +1284,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 110. Charts
 - **Requirement:** Charts must tell stories. Not show mathematics. Every chart should answer: "What does this mean?" Not only: "What happened?"
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1246,6 +1296,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 111. Empty Charts
 - **Requirement:** Don't show empty graphs. Instead: Explain what will appear. Motivate the user.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1257,6 +1308,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 112. Dashboard Philosophy
 - **Requirement:** Dashboard ≠ Statistics. Dashboard = Decisions.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1268,6 +1320,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 113. Analytics Philosophy
 - **Requirement:** Analytics should educate. Not overwhelm.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1290,6 +1343,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 115. Loading States
 - **Requirement:** Never show blank white pages. Always use: Skeletons. Progress placeholders. Cached content. Immediate shell.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1301,6 +1355,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 116. Error Screens
 - **Requirement:** Beautiful. Human. Helpful. Never technical. Example: "We couldn't load today's data." Retry. Offline mode. Explanation.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1312,6 +1367,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 117. Delight
 - **Requirement:** Tiny moments. Tiny smiles. Tiny rewards. Never casino psychology.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1323,6 +1379,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 118. Celebration
 - **Requirement:** Celebrate: Recovery. Consistency. Milestones. Personal records. Learning. Not: Lowest calories. Fastest weight loss. Extreme deficits.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1345,6 +1402,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 120. Every Screen Must Feel Alive
 - **Requirement:** Static screens feel abandoned. Use: Subtle transitions. Responsive feedback. Smooth scrolling. Micro animations. Gentle progress. Everything should communicate: "This application is carefully crafted."
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1356,6 +1414,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 121. Native Feeling
 - **Requirement:** Android users should feel: "This is an excellent Android app." iPhone users should feel: "This belongs on iOS." Windows users should feel: "This is a desktop application." Web users should feel: "This is a premium web experience." Not: "This is a Flutter app."
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1367,6 +1426,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 122. Premium Means Invisible Quality
 - **Requirement:** Users rarely notice: Spacing. Animation timing. Consistency. Alignment. Touch response. Typography. But they immediately notice when these are wrong. Perfection lives in invisible details.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1378,6 +1438,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 123. Visual Trust
 - **Requirement:** People trust beautiful products more. Beauty is not vanity. Beauty creates confidence. Confidence increases consistency. Consistency changes lives.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1389,6 +1450,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 124. The BIL Standard
 - **Requirement:** Before releasing any screen ask: Would Apple ship this? Would Google approve this? Would Linear be proud of this? Would Notion accept this quality? If not... Improve it.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1400,6 +1462,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 125. Final Design Principle
 - **Requirement:** The application should never look like: A student project. A Flutter template. A clone. A dashboard generator. It should look like: The future of personal health intelligence. تمام # BIL Vision 2.0
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -1413,6 +1476,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 126. Intelligence Before Artificial Intelligence
 - **Requirement:** BIL must never depend on AI to appear intelligent. If every AI service disappears tomorrow... BIL must still be the smartest body application. AI enhances. Deterministic science remains the foundation.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1424,6 +1488,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 127. Explain Everything
 - **Requirement:** Every important number must answer: Why? Not only: What?
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1468,6 +1533,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 131. Body Twin Philosophy
 - **Requirement:** The Body Twin is not a prediction engine. It is a learning engine. It improves continuously. It never claims certainty.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1479,6 +1545,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 132. Personal Baseline
 - **Requirement:** Never compare users with averages first. Compare them with themselves. The baseline becomes more valuable every month.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1490,6 +1557,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 133. Adaptive Intelligence
 - **Requirement:** The application should become: More accurate. More personal. More helpful. Every week.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1501,6 +1569,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 134. Context Changes Everything
 - **Requirement:** The same weight gain means different things if: User travelled. User slept badly. User trained heavily. User ate high sodium. User fasted. Context is intelligence.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1523,6 +1592,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 136. Recommendations Must Be Practical
 - **Requirement:** Advice should always be realistic. Bad: Exercise two hours. Good: Walk ten minutes after dinner.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1545,6 +1615,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 138. Intelligence Should Feel Invisible
 - **Requirement:** Users should think: "This application understands me." Not: "This application is using AI."
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1589,6 +1660,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 142. Memory Philosophy
 - **Requirement:** Remember only useful things. Forget unnecessary things. Memory exists to help. Not to profile.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1611,6 +1683,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 144. Food Intelligence
 - **Requirement:** Food search should improve automatically. Frequently used foods move upward. Rare foods move downward. The user notices the improvement. Without configuring anything.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1622,6 +1695,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 145. Speed Is Intelligence
 - **Requirement:** If finding breakfast takes: 12 seconds The application is not intelligent. Even if AI exists.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1633,6 +1707,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 146. Intelligence Must Save Time
 - **Requirement:** Every month the user should spend less effort. Never more.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1655,6 +1730,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 148. AI Never Judges
 - **Requirement:** No guilt. No shame. No manipulation. No fear. Only support.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1666,6 +1742,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 149. Recommendations Should Learn
 - **Requirement:** If advice repeatedly fails... Stop repeating it. Try another approach.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1677,6 +1754,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 150. Explain Before Predicting
 - **Requirement:** Never predict without explaining. Users trust explanations.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1699,6 +1777,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 152. Continuous Calibration
 - **Requirement:** Every prediction should improve over time. If it becomes worse... The application should recognize this.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1710,6 +1789,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 153. No Magic Numbers
 - **Requirement:** Never invent precision. Instead of: 68.231% Prefer: Likely. Moderately likely. Very likely. Unless statistically justified.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1721,6 +1801,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 154. Body Twin Is Personal
 - **Requirement:** Two identical people should still receive different guidance. Because history matters.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1732,6 +1813,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 155. Intelligence Must Remain Fast
 - **Requirement:** Thinking should not delay interaction. Background processing. Caching. Incremental updates.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1754,6 +1836,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 157. Intelligence Should Reduce Anxiety
 - **Requirement:** Every explanation should make users calmer. More informed. More confident.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1776,6 +1859,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 159. Personal Evolution
 - **Requirement:** The application evolves with the user. Beginner. Intermediate. Advanced. Professional. Without changing identity.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1787,6 +1871,7 @@
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 160. Final Intelligence Principle
 - **Requirement:** A truly intelligent application does not overwhelm users with information. It quietly gives them the right insight at the right moment, with the right level of confidence, helping them make one better decision every day. تمام ممتاز. أرسل اللي بعده. # Premium UI Bible
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
@@ -1800,6 +1885,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 161. The Home Screen Must Be Calm
 - **Requirement:** When users open BIL they should immediately understand: Where they are. What changed. What matters today. What action should be taken. Nothing else.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -1811,6 +1897,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 162. Information Hierarchy
 - **Requirement:** Order of importance: Daily Check-in What Changed Today One Best Action Today's Progress Meals Water Activity Insights Quick Actions
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -1866,6 +1953,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 167. Today's Calories
 - **Requirement:** Card contains: Consumed Target Remaining Large typography. Animated progress ring.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -1877,6 +1965,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 168. Macronutrients
 - **Requirement:** Three premium cards: Protein Carbs Fat Each shows: Consumed Target Remaining Color adapts to goal.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -1888,6 +1977,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 169. Micronutrients
 - **Requirement:** Expandable section. Shows: Sodium Potassium Magnesium Calcium Fiber Sugar Only if available.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -1921,6 +2011,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 172. Meal Card
 - **Requirement:** Contains: Meal icon Calories Foods Time Protein Quick Edit
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -1932,6 +2023,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 173. Quick Add Button
 - **Requirement:** Floating Action Button. Opens sheet. Options: Food Water Weight Barcode Ask BIL
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -1942,11 +2034,11 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 174. Ask BIL
 - **Requirement:** Beautiful entry point. Premium. Never oversized. Unavailable state clearly explained.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-TDY-175 — Progress Rings
@@ -1954,6 +2046,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 175. Progress Rings
 - **Requirement:** Never use thick childish circles. Elegant. Thin. Animated. Premium.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -1976,6 +2069,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 177. Trend Line
 - **Requirement:** Weight trend: Smoothed. Raw data optional. Confidence shading.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -2020,6 +2114,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 181. Empty Dashboard
 - **Requirement:** Never blank. Instead: Welcome. Let's start today.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -2031,6 +2126,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 182. Daily Motivation
 - **Requirement:** Not random quotes. Only contextual encouragement. Example: Three consecutive days logged. Great consistency.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -2041,11 +2137,11 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 183. Notifications
 - **Requirement:** Never intrusive. Quiet reminders. Context aware.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-TDY-184 — Scroll Experience
@@ -2053,6 +2149,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 184. Scroll Experience
 - **Requirement:** Natural. Momentum. No lag.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -2075,6 +2172,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 186. Cards
 - **Requirement:** Rounded. 16–24dp radius. Soft shadow. Consistent spacing.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -2086,6 +2184,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 187. Touch Feedback
 - **Requirement:** Ripple. Scale. Haptic. Fast.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -2097,6 +2196,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 188. Animation Duration
 - **Requirement:** Small interactions: 150–220ms Transitions: 250–350ms Screen transitions: 300–450ms
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -2141,6 +2241,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 192. Fast Entry
 - **Requirement:** User should log breakfast in under: 5 seconds.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -2185,6 +2286,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 196. Desktop Dashboard
 - **Requirement:** Centered content. Maximum width. Panels. Not stretched.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -2196,6 +2298,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 197. Tablet Layout
 - **Requirement:** Two columns. Natural spacing.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -2207,6 +2310,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 198. Landscape
 - **Requirement:** Never waste space. Use panels.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -2218,6 +2322,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 199. Accessibility
 - **Requirement:** Everything reachable. Keyboard. Mouse. Screen Reader. Large text.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -2229,6 +2334,7 @@
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 200. Final Dashboard Principle
 - **Requirement:** The Today screen should feel like opening the dashboard of your own body—not a spreadsheet, not a calorie calculator, but a calm control center that immediately tells you: What happened, where you stand, and what the single best next step is. # Premium UI Bible
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
@@ -2252,11 +2358,11 @@
 
 - **Source section:** Part 1 — Core AI Platform & Intelligence Layer / 2. Core Principle
 - **Requirement:** Deterministic Engine = Source of Truth AI = Natural Language Layer Meaning: Calories, TDEE, macros, Body Twin, Truth Engine and analytics always come from BIL itself. The AI only explains them.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/engine/ai_write_policy.dart`; `lib/app/environment`; `docs/ROADMAP.md`; future server/provider adapters
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Provider-contract, consent, redaction, prompt-injection, deterministic-tool, safe-write, deletion/export, cost, and outage integration tests.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-AI-003 — AI Responsibilities
@@ -2274,22 +2380,22 @@
 
 - **Source section:** Part 1 — Core AI Platform & Intelligence Layer / 4. AI Must Never
 - **Requirement:** Never: invent calories invent nutrients diagnose illness prescribe medication replace physicians change user goals automatically modify data without permission
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/engine/ai_write_policy.dart`; `lib/app/environment`; `docs/ROADMAP.md`; future server/provider adapters
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Provider-contract, consent, redaction, prompt-injection, deterministic-tool, safe-write, deletion/export, cost, and outage integration tests.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-AI-005 — AI Personality
 
 - **Source section:** Part 1 — Core AI Platform & Intelligence Layer / 5. AI Personality
 - **Requirement:** The assistant should feel: calm intelligent encouraging scientific honest humble Never robotic. Never manipulative. Never overly emotional.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/engine/ai_write_policy.dart`; `lib/app/environment`; `docs/ROADMAP.md`; future server/provider adapters
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Provider-contract, consent, redaction, prompt-injection, deterministic-tool, safe-write, deletion/export, cost, and outage integration tests.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-AI-006 — Brand Identity
@@ -2494,11 +2600,11 @@
 
 - **Source section:** Part 1 — Core AI Platform & Intelligence Layer / 24. Safe Writes
 - **Requirement:** Every database modification requires confirmation.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/engine/ai_write_policy.dart`; `lib/app/environment`; `docs/ROADMAP.md`; future server/provider adapters
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Provider-contract, consent, redaction, prompt-injection, deterministic-tool, safe-write, deletion/export, cost, and outage integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-AI-025 — Explain TDEE
@@ -2571,22 +2677,22 @@
 
 - **Source section:** Part 1 — Core AI Platform & Intelligence Layer / 31. Confidence
 - **Requirement:** Every recommendation should mention: High Medium Low
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/engine/ai_write_policy.dart`; `lib/app/environment`; `docs/ROADMAP.md`; future server/provider adapters
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Provider-contract, consent, redaction, prompt-injection, deterministic-tool, safe-write, deletion/export, cost, and outage integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-AI-032 — Missing Data
 
 - **Source section:** Part 1 — Core AI Platform & Intelligence Layer / 32. Missing Data
 - **Requirement:** AI should clearly state: More data needed.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/engine/ai_write_policy.dart`; `lib/app/environment`; `docs/ROADMAP.md`; future server/provider adapters
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Provider-contract, consent, redaction, prompt-injection, deterministic-tool, safe-write, deletion/export, cost, and outage integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-AI-033 — Sources
@@ -2604,55 +2710,55 @@
 
 - **Source section:** Part 1 — Core AI Platform & Intelligence Layer / 34. Hallucination Policy
 - **Requirement:** If unsure: Say so. Never guess.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/engine/ai_write_policy.dart`; `lib/app/environment`; `docs/ROADMAP.md`; future server/provider adapters
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Provider-contract, consent, redaction, prompt-injection, deterministic-tool, safe-write, deletion/export, cost, and outage integration tests.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-AI-035 — Medical Safety
 
 - **Source section:** Part 1 — Core AI Platform & Intelligence Layer / 35. Medical Safety
 - **Requirement:** For alarming symptoms: Advise professional medical evaluation. Never diagnose.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/engine/ai_write_policy.dart`; `lib/app/environment`; `docs/ROADMAP.md`; future server/provider adapters
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Provider-contract, consent, redaction, prompt-injection, deterministic-tool, safe-write, deletion/export, cost, and outage integration tests.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-AI-036 — Eating Disorders
 
 - **Source section:** Part 1 — Core AI Platform & Intelligence Layer / 36. Eating Disorders
 - **Requirement:** Respond safely. Avoid harmful coaching.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/engine/ai_write_policy.dart`; `lib/app/environment`; `docs/ROADMAP.md`; future server/provider adapters
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Provider-contract, consent, redaction, prompt-injection, deterministic-tool, safe-write, deletion/export, cost, and outage integration tests.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-AI-037 — Dangerous Weight Loss
 
 - **Source section:** Part 1 — Core AI Platform & Intelligence Layer / 37. Dangerous Weight Loss
 - **Requirement:** Warn appropriately.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/engine/ai_write_policy.dart`; `lib/app/environment`; `docs/ROADMAP.md`; future server/provider adapters
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Provider-contract, consent, redaction, prompt-injection, deterministic-tool, safe-write, deletion/export, cost, and outage integration tests.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-AI-038 — Harmful Requests
 
 - **Source section:** Part 1 — Core AI Platform & Intelligence Layer / 38. Harmful Requests
 - **Requirement:** Refuse politely.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/engine/ai_write_policy.dart`; `lib/app/environment`; `docs/ROADMAP.md`; future server/provider adapters
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Provider-contract, consent, redaction, prompt-injection, deterministic-tool, safe-write, deletion/export, cost, and outage integration tests.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-AI-039 — Cost Management
@@ -2714,12 +2820,12 @@
 
 - **Source section:** Part 1 — Core AI Platform & Intelligence Layer / 44. Offline Mode
 - **Requirement:** If offline: Explain AI unavailable. Offer deterministic features.
-- **Current repository status:** `partial`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/engine/ai_write_policy.dart`; `lib/app/environment`; `docs/ROADMAP.md`; future server/provider adapters
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Provider-contract, consent, redaction, prompt-injection, deterministic-tool, safe-write, deletion/export, cost, and outage integration tests.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `12187e1`
 
 ### BIL-AI-045 — Conversation Export
 
@@ -2747,11 +2853,11 @@
 
 - **Source section:** Part 1 — Core AI Platform & Intelligence Layer / 47. Privacy
 - **Requirement:** Never use conversations for training without explicit consent.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/engine/ai_write_policy.dart`; `lib/app/environment`; `docs/ROADMAP.md`; future server/provider adapters
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Provider-contract, consent, redaction, prompt-injection, deterministic-tool, safe-write, deletion/export, cost, and outage integration tests.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-AI-048 — Audit Logs
@@ -2780,11 +2886,11 @@
 
 - **Source section:** Part 1 — Core AI Platform & Intelligence Layer / 50. Final AI Principle
 - **Requirement:** The AI should never try to impress the user. Its purpose is to help the user understand their body, make informed decisions, and trust BIL because it is consistently accurate, transparent, and honest. Cloud Architecture
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/engine/ai_write_policy.dart`; `lib/app/environment`; `docs/ROADMAP.md`; future server/provider adapters
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Provider-contract, consent, redaction, prompt-injection, deterministic-tool, safe-write, deletion/export, cost, and outage integration tests.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ## Part 1 — Offline-First Cloud & Synchronization Platform
@@ -2914,44 +3020,44 @@
 
 - **Source section:** Part 1 — Offline-First Cloud & Synchronization Platform / 12. Conflict Detection
 - **Requirement:** Detect: Two devices editing the same object.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/data/database`; `lib/data/repositories`; `lib/engine/sync_conflict_engine.dart`; `docs/DATABASE.md`; future sync service
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Migration, tombstone, outbox/inbox, conflict, RLS, multi-device, retry, backup/restore, privacy, and offline integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-CLD-013 — Conflict Resolution
 
 - **Source section:** Part 1 — Offline-First Cloud & Synchronization Platform / 13. Conflict Resolution
 - **Requirement:** Priority: Newest revision Otherwise: Ask user.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/data/database`; `lib/data/repositories`; `lib/engine/sync_conflict_engine.dart`; `docs/DATABASE.md`; future sync service
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Migration, tombstone, outbox/inbox, conflict, RLS, multi-device, retry, backup/restore, privacy, and offline integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-CLD-014 — Merge Strategy
 
 - **Source section:** Part 1 — Offline-First Cloud & Synchronization Platform / 14. Merge Strategy
 - **Requirement:** Independent objects merge automatically. Conflicting edits require deterministic rules.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/data/database`; `lib/data/repositories`; `lib/engine/sync_conflict_engine.dart`; `docs/DATABASE.md`; future sync service
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Migration, tombstone, outbox/inbox, conflict, RLS, multi-device, retry, backup/restore, privacy, and offline integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-CLD-015 — Sync Queue
 
 - **Source section:** Part 1 — Offline-First Cloud & Synchronization Platform / 15. Sync Queue
 - **Requirement:** Every device contains: Outgoing queue Incoming queue Retry queue
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/data/database`; `lib/data/repositories`; `lib/engine/sync_conflict_engine.dart`; `docs/DATABASE.md`; future sync service
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Migration, tombstone, outbox/inbox, conflict, RLS, multi-device, retry, backup/restore, privacy, and offline integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-CLD-016 — Background Sync
@@ -2969,22 +3075,22 @@
 
 - **Source section:** Part 1 — Offline-First Cloud & Synchronization Platform / 17. Retry Logic
 - **Requirement:** Network unavailable? Retry later. No data loss.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/data/database`; `lib/data/repositories`; `lib/engine/sync_conflict_engine.dart`; `docs/DATABASE.md`; future sync service
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Migration, tombstone, outbox/inbox, conflict, RLS, multi-device, retry, backup/restore, privacy, and offline integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-CLD-018 — Sync Status
 
 - **Source section:** Part 1 — Offline-First Cloud & Synchronization Platform / 18. Sync Status
 - **Requirement:** Show: Synced Syncing Offline Conflict Error
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/data/database`; `lib/data/repositories`; `lib/engine/sync_conflict_engine.dart`; `docs/DATABASE.md`; future sync service
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Migration, tombstone, outbox/inbox, conflict, RLS, multi-device, retry, backup/restore, privacy, and offline integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-CLD-019 — Manual Sync
@@ -3013,11 +3119,11 @@
 
 - **Source section:** Part 1 — Offline-First Cloud & Synchronization Platform / 21. Encryption
 - **Requirement:** TLS during transport. Encrypted storage on backend.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/data/database`; `lib/data/repositories`; `lib/engine/sync_conflict_engine.dart`; `docs/DATABASE.md`; future sync service
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Migration, tombstone, outbox/inbox, conflict, RLS, multi-device, retry, backup/restore, privacy, and offline integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-CLD-022 — Device Registration
@@ -3057,22 +3163,22 @@
 
 - **Source section:** Part 1 — Offline-First Cloud & Synchronization Platform / 25. Backup
 - **Requirement:** Automatic cloud backup.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/data/database`; `lib/data/repositories`; `lib/engine/sync_conflict_engine.dart`; `docs/DATABASE.md`; future sync service
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Migration, tombstone, outbox/inbox, conflict, RLS, multi-device, retry, backup/restore, privacy, and offline integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-CLD-026 — Restore
 
 - **Source section:** Part 1 — Offline-First Cloud & Synchronization Platform / 26. Restore
 - **Requirement:** Restore any account to a new device.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/data/database`; `lib/data/repositories`; `lib/engine/sync_conflict_engine.dart`; `docs/DATABASE.md`; future sync service
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Migration, tombstone, outbox/inbox, conflict, RLS, multi-device, retry, backup/restore, privacy, and offline integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-CLD-027 — Export
@@ -3090,22 +3196,22 @@
 
 - **Source section:** Part 1 — Offline-First Cloud & Synchronization Platform / 28. Delete Account
 - **Requirement:** Delete: Authentication Cloud data Sessions Backups Community identity According to retention policy.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/data/database`; `lib/data/repositories`; `lib/engine/sync_conflict_engine.dart`; `docs/DATABASE.md`; future sync service
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Migration, tombstone, outbox/inbox, conflict, RLS, multi-device, retry, backup/restore, privacy, and offline integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-CLD-029 — Privacy Controls
 
 - **Source section:** Part 1 — Offline-First Cloud & Synchronization Platform / 29. Privacy Controls
 - **Requirement:** User chooses: What syncs.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/data/database`; `lib/data/repositories`; `lib/engine/sync_conflict_engine.dart`; `docs/DATABASE.md`; future sync service
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Migration, tombstone, outbox/inbox, conflict, RLS, multi-device, retry, backup/restore, privacy, and offline integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-CLD-030 — AI Data
@@ -3244,11 +3350,11 @@
 
 - **Source section:** Part 1 — Offline-First Cloud & Synchronization Platform / 42. Sync Performance
 - **Requirement:** Target: Small payloads. Compression. Pagination. Batch uploads.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/data/database`; `lib/data/repositories`; `lib/engine/sync_conflict_engine.dart`; `docs/DATABASE.md`; future sync service
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Migration, tombstone, outbox/inbox, conflict, RLS, multi-device, retry, backup/restore, privacy, and offline integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-CLD-043 — Scalability
@@ -3299,22 +3405,22 @@
 
 - **Source section:** Part 1 — Offline-First Cloud & Synchronization Platform / 47. GDPR & Privacy
 - **Requirement:** Support: Export Deletion Consent Data minimization
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/data/database`; `lib/data/repositories`; `lib/engine/sync_conflict_engine.dart`; `docs/DATABASE.md`; future sync service
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Migration, tombstone, outbox/inbox, conflict, RLS, multi-device, retry, backup/restore, privacy, and offline integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-CLD-048 — Health Data
 
 - **Source section:** Part 1 — Offline-First Cloud & Synchronization Platform / 48. Health Data
 - **Requirement:** Treat as sensitive. Higher protection.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/data/database`; `lib/data/repositories`; `lib/engine/sync_conflict_engine.dart`; `docs/DATABASE.md`; future sync service
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Migration, tombstone, outbox/inbox, conflict, RLS, multi-device, retry, backup/restore, privacy, and offline integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-CLD-049 — Future Expansion
@@ -3332,11 +3438,11 @@
 
 - **Source section:** Part 1 — Offline-First Cloud & Synchronization Platform / 50. Final Cloud Principle
 - **Requirement:** The user should never think: "I hope my data syncs." They should simply use BIL naturally, while synchronization happens quietly, securely, reliably, and invisibly in the background. Cloud Architecture
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/data/database`; `lib/data/repositories`; `lib/engine/sync_conflict_engine.dart`; `docs/DATABASE.md`; future sync service
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Migration, tombstone, outbox/inbox, conflict, RLS, multi-device, retry, backup/restore, privacy, and offline integration tests.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ## Part 1 — Professional Coach & Clinic Ecosystem
@@ -5001,11 +5107,11 @@
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 1. Mission
 - **Requirement:** The App Store Release Package ensures BIL can be published professionally on every supported platform with the highest possible quality, compliance, security, and presentation.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-REL-002 — Supported Platforms
@@ -5013,6 +5119,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 2. Supported Platforms
 - **Requirement:** Official launch targets: Android (Google Play) iPhone (App Store) iPad Windows Web (PWA) Future: macOS WearOS watchOS
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5023,11 +5130,11 @@
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 3. Release Philosophy
 - **Requirement:** Never publish because development is finished. Publish only when: Stable Fast Beautiful Trusted Fully tested
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-REL-004 — Versioning
@@ -5035,6 +5142,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 4. Versioning
 - **Requirement:** Semantic Versioning: Major.Minor.Patch Examples: 1.0.0 1.1.0 1.1.3 2.0.0
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5045,11 +5153,11 @@
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 5. Release Branch
 - **Requirement:** Every production release comes from: release/x.x.x Never from development branches.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-REL-006 — Git Tags
@@ -5057,6 +5165,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 6. Git Tags
 - **Requirement:** Every production release receives: Git Tag Release Notes Build Number Commit Hash
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5090,6 +5199,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 9. Windows Release
 - **Requirement:** Produce: Signed Installer Portable Version Release ZIP
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5101,6 +5211,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 10. Web Release
 - **Requirement:** Generate: Optimized Build PWA Compression Caching Version Detection
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5123,6 +5234,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 12. Splash Screens
 - **Requirement:** Native. Fast. Premium. Consistent branding.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5189,6 +5301,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 18. Localization
 - **Requirement:** Translate: Store descriptions Screenshots Release notes Privacy pages
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5200,6 +5313,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 19. Privacy Policy
 - **Requirement:** Hosted online. Always updated.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5211,6 +5325,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 20. Terms of Service
 - **Requirement:** Legally reviewed. Easy to read.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5233,6 +5348,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 22. App Permissions
 - **Requirement:** Request only when needed. Explain clearly.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5244,6 +5360,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 23. Sensitive Permissions
 - **Requirement:** Camera Notifications Storage Location Requested only when actually required.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5255,6 +5372,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 24. Crash-Free Target
 - **Requirement:** Production target: 99.9%
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5266,6 +5384,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 25. Startup Target
 - **Requirement:** Cold Start: As fast as technically possible. No blank white screens.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5277,6 +5396,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 26. Performance Target
 - **Requirement:** Food Search Body Twin Dashboard Weight Logging Should feel instant.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5288,6 +5408,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 27. Accessibility
 - **Requirement:** Screen Reader Large Text Keyboard Navigation High Contrast Reduced Motion
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5310,6 +5431,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 29. Security Review
 - **Requirement:** Before every release: Secrets API Keys Permissions Certificates Dependencies
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5321,6 +5443,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 30. Dependency Audit
 - **Requirement:** Remove: Unused packages Deprecated packages Unsafe packages
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5354,6 +5477,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 33. Manual QA
 - **Requirement:** Verify: Registration Login Weight Meals Water Dashboard AI Payments Coach Sync Community
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5365,6 +5489,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 34. Device Testing
 - **Requirement:** Phones Tablets Desktop Web Different screen sizes.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5376,6 +5501,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 35. Supported OS
 - **Requirement:** Android: Document supported API levels. iOS: Document minimum version. Windows: Document supported versions.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5464,6 +5590,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 43. Analytics Review
 - **Requirement:** Measure: Downloads Retention Engagement Conversion Churn
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5475,6 +5602,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 44. Security Updates
 - **Requirement:** Critical fixes released immediately.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5486,6 +5614,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 45. Long-Term Maintenance
 - **Requirement:** Monthly: Dependency updates Security patches Performance improvements
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5497,6 +5626,7 @@
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 46. Production Checklist
 - **Requirement:** Every release verifies: Analyze Tests Builds Signing Localization Accessibility Privacy Store assets Documentation
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
@@ -5518,33 +5648,33 @@
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 48. Success Criteria
 - **Requirement:** A successful release is one that users do not notice technically. Everything simply works.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-REL-049 — Continuous Improvement
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 49. Continuous Improvement
 - **Requirement:** Every release should improve: Speed Trust Intelligence Design Reliability
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-REL-050 — Final Release Principle
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 50. Final Release Principle
 - **Requirement:** Publishing BIL is not the finish line. It is the beginning of a long-term commitment to continuously improving the most trusted body intelligence platform in the world. Enterprise Architecture
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ## Part 1 — Long-Term Scalable Technical Architecture
@@ -5553,22 +5683,22 @@
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 1. Mission
 - **Requirement:** The architecture must support growth from: One user to Millions of users without requiring a complete rewrite.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-ARC-002 — Core Philosophy
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 2. Core Philosophy
 - **Requirement:** One Product One Codebase One Business Logic Multiple Platforms
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-ARC-003 — Technology Stack
@@ -5587,6 +5717,7 @@
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 4. Clean Architecture
 - **Requirement:** Layers: Presentation Application Domain Infrastructure Platform
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
@@ -5598,6 +5729,7 @@
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 5. Domain First
 - **Requirement:** Business rules never depend on: Flutter Supabase SQLite AI Provider Payment Provider Cloud Provider
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
@@ -5609,6 +5741,7 @@
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 6. Modular Structure
 - **Requirement:** Modules: Authentication Profile Diary Food Weight Analytics Body Twin Truth Engine Coach Community Commerce AI Settings Admin
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
@@ -5620,6 +5753,7 @@
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 7. Feature Independence
 - **Requirement:** Each module should compile independently. Dependencies only through interfaces.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
@@ -5631,6 +5765,7 @@
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 8. Shared Design System
 - **Requirement:** Single Design System. Shared Components. Never duplicate UI.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
@@ -5675,6 +5810,7 @@
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 12. Platform Adapters
 - **Requirement:** Separate: Android iOS Windows Web Future macOS
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
@@ -5686,6 +5822,7 @@
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 13. No Platform Checks Everywhere
 - **Requirement:** Avoid: Platform.isAndroid kIsWeb Inside business logic. Use adapters.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
@@ -5707,55 +5844,55 @@
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 15. Cloud Layer
 - **Requirement:** Cloud interface only. Provider replaceable.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-ARC-016 — AI Layer
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 16. AI Layer
 - **Requirement:** Provider abstraction. Support: OpenAI Gemini Anthropic Future local LLMs.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-ARC-017 — Commerce Layer
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 17. Commerce Layer
 - **Requirement:** Unified Entitlement Engine. Separate payment providers.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-ARC-018 — Authentication Layer
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 18. Authentication Layer
 - **Requirement:** Replaceable providers. Never tightly coupled.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-ARC-019 — Notification Layer
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 19. Notification Layer
 - **Requirement:** Abstract notifications. Platform implementations hidden.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-ARC-020 — Storage Layer
@@ -5763,6 +5900,7 @@
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 20. Storage Layer
 - **Requirement:** Abstract: Files Images Exports Cloud objects
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
@@ -5774,6 +5912,7 @@
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 21. Configuration
 - **Requirement:** Central configuration service. No hardcoded values.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
@@ -5884,6 +6023,7 @@
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 31. Localization
 - **Requirement:** Independent module. Scalable.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
@@ -5895,6 +6035,7 @@
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 32. Assets
 - **Requirement:** Centralized. Versioned. Optimized.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
@@ -5927,11 +6068,11 @@
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 35. Continuous Delivery
 - **Requirement:** Staged deployment. Rollback ready.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-ARC-036 — Security
@@ -5939,6 +6080,7 @@
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 36. Security
 - **Requirement:** Defense in depth. Least privilege. Encryption.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
@@ -5950,6 +6092,7 @@
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 37. Scalability
 - **Requirement:** Prepared for: 10 users 100 1,000 100,000 1,000,000+
 - **Current repository status:** `partial`
+- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
@@ -5960,11 +6103,11 @@
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 38. Observability
 - **Requirement:** Metrics. Tracing. Logging. Alerts.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-ARC-039 — Documentation
@@ -5983,6 +6126,7 @@
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 40. API Design
 - **Requirement:** Versioned. Backward compatible. Documented.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
@@ -6005,6 +6149,7 @@
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 42. Maintainability
 - **Requirement:** Readable code. Small modules. Low coupling. High cohesion.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
@@ -6016,6 +6161,7 @@
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 43. Extensibility
 - **Requirement:** Every future feature should plug into the architecture. Not modify its foundations.
 - **Current repository status:** `partial`
+- **Partial audit disposition:** genuinely incomplete locally implementable functionality
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
@@ -6026,75 +6172,75 @@
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 44. Upgrade Strategy
 - **Requirement:** Dependencies updated regularly. Breaking changes isolated.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-ARC-045 — Technical Debt
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 45. Technical Debt
 - **Requirement:** Tracked. Prioritized. Reduced continuously.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-ARC-046 — Code Reviews
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 46. Code Reviews
 - **Requirement:** Every major feature reviewed before merge.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-ARC-047 — Release Governance
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 47. Release Governance
 - **Requirement:** No production deployment without: Tests Security review Performance review
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-ARC-048 — Disaster Recovery
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 48. Disaster Recovery
 - **Requirement:** Backups. Rollback. Recovery plans.
-- **Current repository status:** `partial`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Requires production external infrastructure, owned credentials, authorization/consent controls, monitoring, and end-to-end verification; the local client must remain honest and disabled.
 - **Completion commit:** —
 
 ### BIL-ARC-049 — Long-Term Vision
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 49. Long-Term Vision
 - **Requirement:** The architecture should still feel modern five years after the first release.
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —
 
 ### BIL-ARC-050 — Final Architecture Principle
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 50. Final Architecture Principle
 - **Requirement:** The architecture of BIL should be almost invisible to users. They should only notice that the application is fast, reliable, secure, beautiful, and consistently works the same across every device they own. END
-- **Current repository status:** `partial`
+- **Current repository status:** `strategic/non-code`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Product/operations governance requirement; conformance is reviewed continuously rather than completed by one feature.
 - **Completion commit:** —

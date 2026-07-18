@@ -22,6 +22,7 @@ import 'dashboard_water_card.dart';
 import 'dashboard_check_in_card.dart';
 import 'confidence_ring.dart';
 import 'dashboard_loading_skeleton.dart';
+import 'nutrition_progress_card.dart';
 
 class DashboardGrid extends ConsumerWidget {
   const DashboardGrid({super.key});
@@ -335,14 +336,21 @@ class DashboardGrid extends ConsumerWidget {
                   key: ValueKey('dashboard-check-in-complete'),
                 ),
         ),
-        GridView.count(
+        GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: MediaQuery.sizeOf(context).width >= 700 ? 4 : 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 1.05,
-          children: [
+          itemCount: 5,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: MediaQuery.sizeOf(context).width >= 900
+                ? 5
+                : MediaQuery.sizeOf(context).width >= 600
+                ? 3
+                : 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            mainAxisExtent: 174,
+          ),
+          itemBuilder: (context, index) => [
             StatCard(
               title: context.strings.text('Weight'),
               value:
@@ -350,25 +358,39 @@ class DashboardGrid extends ConsumerWidget {
               icon: Icons.monitor_weight,
               color: Colors.blue,
             ),
-            StatCard(
-              title: context.strings.text('Calories'),
-              value: '${calories.round()} / ${effectiveTargets.calories}',
+            NutritionProgressCard(
+              label: context.strings.text('Calories'),
+              consumed: calories,
+              target: effectiveTargets.calories.toDouble(),
+              unit: 'kcal',
               icon: Icons.local_fire_department,
               color: Colors.orange,
             ),
-            StatCard(
-              title: context.strings.text('Protein'),
-              value: '${protein.round()} / ${effectiveTargets.protein} g',
+            NutritionProgressCard(
+              label: context.strings.text('Protein'),
+              consumed: protein,
+              target: effectiveTargets.protein.toDouble(),
+              unit: 'g',
               icon: Icons.fitness_center,
               color: Colors.green,
             ),
-            StatCard(
-              title: context.strings.text('Water'),
-              value: '$water / ${effectiveTargets.water} ml',
-              icon: Icons.water_drop,
-              color: Colors.cyan,
+            NutritionProgressCard(
+              label: tr('Carbohydrates', 'الكربوهيدرات'),
+              consumed: carbs,
+              target: effectiveTargets.carbs.toDouble(),
+              unit: 'g',
+              icon: Icons.grain,
+              color: Colors.amber.shade800,
             ),
-          ],
+            NutritionProgressCard(
+              label: tr('Fat', 'الدهون'),
+              consumed: fats,
+              target: effectiveTargets.fats.toDouble(),
+              unit: 'g',
+              icon: Icons.opacity,
+              color: Colors.purple,
+            ),
+          ][index],
         ),
         const SizedBox(height: 12),
         DashboardWaterCard(
@@ -377,56 +399,38 @@ class DashboardGrid extends ConsumerWidget {
           onAdd: addWater,
         ),
         Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  tr('Today’s nutrition evidence', 'أدلة تغذية اليوم'),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  tr(
-                    'Consumed, target, and remaining values come only from logged food portions.',
-                    'تأتي القيم المستهلكة والمستهدفة والمتبقية فقط من حصص الطعام المسجلة.',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _TargetRow(
-                  label: tr('Carbohydrates', 'الكربوهيدرات'),
-                  consumed: carbs,
-                  target: effectiveTargets.carbs.toDouble(),
-                  unit: 'g',
-                ),
-                _TargetRow(
-                  label: tr('Fat', 'الدهون'),
-                  consumed: fats,
-                  target: effectiveTargets.fats.toDouble(),
-                  unit: 'g',
-                ),
-                _TargetRow(
-                  label: tr('Fiber', 'الألياف'),
-                  consumed: fiber,
-                  target: effectiveTargets.fiber.toDouble(),
-                  unit: 'g',
-                ),
-                _TargetRow(
-                  label: tr('Sodium', 'الصوديوم'),
-                  consumed: sodium,
-                  target: effectiveTargets.sodium.toDouble(),
-                  unit: 'mg',
-                  upperLimit: true,
-                ),
-                _TargetRow(
-                  label: tr('Potassium', 'البوتاسيوم'),
-                  consumed: potassium,
-                  target: effectiveTargets.potassium.toDouble(),
-                  unit: 'mg',
-                ),
-              ],
+          child: ExpansionTile(
+            title: Text(
+              tr('Available nutrient evidence', 'أدلة العناصر المتاحة'),
             ),
+            subtitle: Text(
+              tr(
+                'Calculated only from logged food portions; unavailable nutrients are not shown as zero.',
+                'تُحسب فقط من حصص الطعام المسجلة؛ ولا تظهر العناصر غير المتاحة على أنها صفر.',
+              ),
+            ),
+            childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            children: [
+              _TargetRow(
+                label: tr('Fiber', 'الألياف'),
+                consumed: fiber,
+                target: effectiveTargets.fiber.toDouble(),
+                unit: 'g',
+              ),
+              _TargetRow(
+                label: tr('Sodium', 'الصوديوم'),
+                consumed: sodium,
+                target: effectiveTargets.sodium.toDouble(),
+                unit: 'mg',
+                upperLimit: true,
+              ),
+              _TargetRow(
+                label: tr('Potassium', 'البوتاسيوم'),
+                consumed: potassium,
+                target: effectiveTargets.potassium.toDouble(),
+                unit: 'mg',
+              ),
+            ],
           ),
         ),
         Card(

@@ -170,6 +170,9 @@ class AppLocalizations {
     'Today is up to date.': 'بيانات اليوم محدثة.',
     'Some local Today data could not be refreshed.':
         'تعذر تحديث بعض بيانات اليوم المحلية.',
+    'consumed': 'مستهلك',
+    'target': 'هدف',
+    'above target reference': 'أعلى من الهدف المرجعي',
     'Meal type': 'نوع الوجبة',
     'Breakfast': 'الإفطار',
     'Lunch': 'الغداء',
