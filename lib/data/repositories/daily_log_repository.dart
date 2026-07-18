@@ -53,6 +53,13 @@ class DailyLogRepository {
         .watchSingleOrNull();
   }
 
+  Stream<DailyLog?> watchForDay(DateTime date) {
+    return (_database.select(_database.dailyLogs)
+          ..where((row) => row.dayKey.equals(dayKeyFor(date)))
+          ..limit(1))
+        .watchSingleOrNull();
+  }
+
   Future<void> deleteAll() async {
     await _database.delete(_database.dailyLogs).go();
   }

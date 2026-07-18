@@ -1,0 +1,34 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../data/database/app_database.dart';
+import '../../../data/database/database_provider.dart';
+import '../../../data/database/seed_data.dart';
+import '../../../data/repositories/food_repository.dart';
+import '../../../data/repositories/meal_repository.dart';
+
+final foodRepositoryProvider = Provider<FoodRepository>((ref) {
+  final database = ref.watch(databaseProvider);
+  return FoodRepository(database);
+});
+
+final mealRepositoryProvider = Provider<MealRepository>((ref) {
+  final database = ref.watch(databaseProvider);
+  return MealRepository(database);
+});
+
+final foodsProvider = StreamProvider<List<Food>>((ref) {
+  final repository = ref.watch(foodRepositoryProvider);
+  return repository.watchFoods();
+});
+
+final favoriteFoodsProvider = StreamProvider<List<Food>>((ref) {
+  return ref.watch(foodRepositoryProvider).watchFavorites();
+});
+
+final recentFoodsProvider = StreamProvider<List<Food>>((ref) {
+  return ref.watch(foodRepositoryProvider).watchRecent();
+});
+
+final seedCatalogProvider = FutureProvider<void>((ref) {
+  return SeedData.seedStarterCatalog(ref.watch(foodRepositoryProvider));
+});

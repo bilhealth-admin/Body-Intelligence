@@ -19,6 +19,15 @@ class FoodRepository {
     double servingSize = 100,
     String servingUnit = 'g',
     bool isCustom = true,
+    String keywords = '',
+    double fiber = 0,
+    double sugar = 0,
+    double sodium = 0,
+    double potassium = 0,
+    double calcium = 0,
+    double magnesium = 0,
+    double iron = 0,
+    double vitaminC = 0,
   }) async {
     if (name.trim().isEmpty) {
       throw ArgumentError.value(name, 'name', 'A food name is required');
@@ -27,7 +36,15 @@ class FoodRepository {
         calories < 0 ||
         protein < 0 ||
         carbs < 0 ||
-        fats < 0) {
+        fats < 0 ||
+        fiber < 0 ||
+        sugar < 0 ||
+        sodium < 0 ||
+        potassium < 0 ||
+        calcium < 0 ||
+        magnesium < 0 ||
+        iron < 0 ||
+        vitaminC < 0) {
       throw ArgumentError('Food quantities and nutrients must be non-negative');
     }
     final rowId = await _database
@@ -37,6 +54,7 @@ class FoodRepository {
             name: name.trim(),
             arabicName: Value(arabicName),
             category: Value(category),
+            keywords: Value(keywords.trim()),
             barcode: Value(barcode),
             servingSize: Value(servingSize),
             servingUnit: Value(servingUnit),
@@ -44,20 +62,51 @@ class FoodRepository {
             protein: protein,
             carbs: carbs,
             fats: fats,
-            fiber: const Value(0),
-            sugar: const Value(0),
-            potassium: const Value(0),
-            sodium: const Value(0),
-            calcium: const Value(0),
-            iron: const Value(0),
-            magnesium: const Value(0),
-            vitaminC: const Value(0),
+            fiber: Value(fiber),
+            sugar: Value(sugar),
+            potassium: Value(potassium),
+            sodium: Value(sodium),
+            calcium: Value(calcium),
+            iron: Value(iron),
+            magnesium: Value(magnesium),
+            vitaminC: Value(vitaminC),
             verified: const Value(false),
             isCustom: Value(isCustom),
           ),
         );
 
     return rowId;
+  }
+
+  Stream<List<Food>> watchFavorites() {
+    final query =
+        _database.select(_database.foods).join([
+            innerJoin(
+              _database.favorites,
+              _database.favorites.foodId.equalsExp(_database.foods.id),
+            ),
+          ])
+          ..where(_database.foods.deletedAt.isNull())
+          ..orderBy([OrderingTerm.asc(_database.foods.name)]);
+    return query.watch().map(
+      (rows) => rows.map((row) => row.readTable(_database.foods)).toList(),
+    );
+  }
+
+  Stream<List<Food>> watchRecent({int limit = 20}) {
+    final query =
+        _database.select(_database.foods).join([
+            innerJoin(
+              _database.recentFoods,
+              _database.recentFoods.foodId.equalsExp(_database.foods.id),
+            ),
+          ])
+          ..where(_database.foods.deletedAt.isNull())
+          ..orderBy([OrderingTerm.desc(_database.recentFoods.lastUsedAt)])
+          ..limit(limit);
+    return query.watch().map(
+      (rows) => rows.map((row) => row.readTable(_database.foods)).toList(),
+    );
   }
 
   Stream<List<Food>> watchFoods() {

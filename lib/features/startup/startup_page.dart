@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
-import '../dashboard/dashboard_page.dart';
-import '../onboarding/onboarding_page.dart';
 import '../profile/providers/user_profile_provider.dart';
+import '../foods/providers/food_provider.dart';
 
 class StartupPage extends ConsumerWidget {
   const StartupPage({super.key});
@@ -11,24 +11,30 @@ class StartupPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(userProfileProvider);
+    final seed = ref.watch(seedCatalogProvider);
+
+    if (seed.hasError) {
+      return Scaffold(body: Center(child: Text(seed.error.toString())));
+    }
+    if (seed.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     return profile.when(
-      loading: () => const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      ),
-      error: (e, s) => Scaffold(
-        body: Center(
-          child: Text(e.toString()),
-        ),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (error, stack) =>
+          Scaffold(body: Center(child: Text(error.toString()))),
       data: (user) {
-        if (user == null) {
-          return const OnboardingPage();
-        }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (user == null) {
+            context.go('/onboarding');
+          } else {
+            context.go('/dashboard');
+          }
+        });
 
-        return const DashboardPage();
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
       },
     );
   }

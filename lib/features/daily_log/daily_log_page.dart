@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../data/database/app_database.dart';
 import '../../engine/nutrition_engine.dart';
 import '../foods/providers/food_provider.dart';
+import '../weight/providers/weight_provider.dart';
 import 'providers/daily_log_provider.dart';
 
 class DailyLogPage extends ConsumerStatefulWidget {
@@ -16,24 +17,34 @@ class DailyLogPage extends ConsumerStatefulWidget {
 
 class _DailyLogPageState extends ConsumerState<DailyLogPage> {
   final notes = TextEditingController();
-  final mealName = TextEditingController(text: 'Breakfast');
+  final weight = TextEditingController();
+  final water = TextEditingController(text: '250');
   final quantity = TextEditingController(text: '100');
   Food? selectedFood;
+  String mealType = 'breakfast';
 
   @override
   void dispose() {
     notes.dispose();
-    mealName.dispose();
+    weight.dispose();
+    water.dispose();
     quantity.dispose();
     super.dispose();
   }
 
   Future<void> _save() async {
+    final date = ref.read(selectedLogDateProvider);
     final repository = ref.read(dailyLogRepositoryProvider);
     await repository.save(
-      date: DateTime.now(),
+      date: date,
       notes: notes.text.trim().isEmpty ? null : notes.text.trim(),
     );
+    final weightValue = double.tryParse(weight.text);
+    if (weightValue != null) {
+      await ref
+          .read(weightRepositoryProvider)
+          .addWeight(weightValue, date: date);
+    }
 
     if (!mounted) return;
     context.go('/dashboard');
@@ -45,10 +56,11 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     }
 
     final mealRepository = ref.read(mealRepositoryProvider);
+    final date = ref.read(selectedLogDateProvider);
     final mealId = await mealRepository.createMeal(
-      date: DateTime.now(),
-      name: mealName.text.trim().isEmpty ? 'Meal' : mealName.text.trim(),
-      type: 'meal',
+      date: date,
+      name: mealType,
+      type: mealType,
     );
 
     final quantityValue = double.tryParse(quantity.text) ?? 100;
@@ -69,7 +81,12 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       protein: portion.protein,
       carbs: portion.carbs,
       fats: portion.fats,
+      fiber: selectedFood!.fiber * quantityValue / selectedFood!.servingSize,
+      sodium: selectedFood!.sodium * quantityValue / selectedFood!.servingSize,
+      potassium:
+          selectedFood!.potassium * quantityValue / selectedFood!.servingSize,
     );
+    await ref.read(foodRepositoryProvider).recordRecent(selectedFood!.id);
 
     if (!mounted) return;
     ScaffoldMessenger.of(
@@ -77,9 +94,81 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     ).showSnackBar(const SnackBar(content: Text('Meal saved locally.')));
   }
 
+  Future<void> _addWater() async {
+    final amount = int.tryParse(water.text);
+    if (amount == null) return;
+    final date = ref.read(selectedLogDateProvider);
+    final now = DateTime.now();
+    await ref
+        .read(waterRepositoryProvider)
+        .add(
+          occurredAt: DateTime(
+            date.year,
+            date.month,
+            date.day,
+            now.hour,
+            now.minute,
+          ),
+          amountMl: amount,
+        );
+  }
+
+  Future<void> _editMealItem(MealItem item, Food food) async {
+    final controller = TextEditingController(text: item.quantity.toString());
+    final updated = await showDialog<double>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Edit ${food.name}'),
+        content: TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            labelText: 'Quantity (${food.servingUnit})',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () =>
+                Navigator.pop(context, double.tryParse(controller.text)),
+            child: const Text('Update'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (updated == null || updated <= 0) return;
+    final factor = updated / food.servingSize;
+    await ref
+        .read(mealRepositoryProvider)
+        .updateMealItem(
+          id: item.id,
+          quantity: updated,
+          calories: food.calories * factor,
+          protein: food.protein * factor,
+          carbs: food.carbs * factor,
+          fats: food.fats * factor,
+          fiber: food.fiber * factor,
+          sodium: food.sodium * factor,
+          potassium: food.potassium * factor,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     final foods = ref.watch(foodsProvider);
+    final date = ref.watch(selectedLogDateProvider);
+    final meals = ref.watch(dailyMealsProvider);
+    final waterEntries = ref.watch(dailyWaterProvider);
+    ref.listen(selectedDailyLogProvider, (_, next) {
+      next.whenData((log) {
+        final value = log?.notes ?? '';
+        if (notes.text != value) notes.text = value;
+      });
+    });
 
     return Scaffold(
       appBar: AppBar(title: const Text('Daily Log')),
@@ -90,18 +179,75 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.calendar_today),
+                title: Text(
+                  '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
+                ),
+                trailing: const Icon(Icons.edit_calendar),
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: date,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now().add(const Duration(days: 1)),
+                  );
+                  if (picked != null) {
+                    ref.read(selectedLogDateProvider.notifier).state = picked;
+                  }
+                },
+              ),
+              _field(weight, 'Weight (kg)'),
               _field(notes, 'Notes', lines: 4),
+              Row(
+                children: [
+                  Expanded(child: _field(water, 'Water (ml)')),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    onPressed: _addWater,
+                    child: const Text('Add water'),
+                  ),
+                ],
+              ),
+              waterEntries.when(
+                data: (rows) => Text(
+                  'Water total: ${rows.fold<int>(0, (sum, row) => sum + row.amountMl)} ml',
+                ),
+                loading: () => const LinearProgressIndicator(),
+                error: (_, _) => const Text('Water data unavailable'),
+              ),
               const SizedBox(height: 20),
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      TextField(
-                        controller: mealName,
+                      DropdownButtonFormField<String>(
+                        initialValue: mealType,
                         decoration: const InputDecoration(
-                          labelText: 'Meal name',
+                          labelText: 'Meal type',
                         ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'breakfast',
+                            child: Text('Breakfast'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'lunch',
+                            child: Text('Lunch'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'dinner',
+                            child: Text('Dinner'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'snack',
+                            child: Text('Snack'),
+                          ),
+                        ],
+                        onChanged: (value) =>
+                            setState(() => mealType = value ?? 'breakfast'),
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<Food>(
@@ -134,6 +280,50 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                     ],
                   ),
                 ),
+              ),
+              const SizedBox(height: 12),
+              meals.when(
+                loading: () => const LinearProgressIndicator(),
+                error: (_, _) => const Text('Meals unavailable'),
+                data: (rows) {
+                  if (rows.isEmpty) return const Text('No meals for this day.');
+                  final allItems = rows.expand((meal) => meal.items).toList();
+                  return Column(
+                    children: [
+                      ListTile(
+                        title: const Text('Calculated nutrition'),
+                        subtitle: Text(
+                          '${allItems.fold<double>(0, (sum, item) => sum + item.calories).toStringAsFixed(0)} kcal · '
+                          '${allItems.fold<double>(0, (sum, item) => sum + item.protein).toStringAsFixed(1)} g protein · '
+                          '${allItems.fold<double>(0, (sum, item) => sum + item.carbs).toStringAsFixed(1)} g carbs · '
+                          '${allItems.fold<double>(0, (sum, item) => sum + item.fats).toStringAsFixed(1)} g fat',
+                        ),
+                      ),
+                      ...rows.expand(
+                        (meal) => meal.items.map((item) {
+                          final food = items
+                              .where((row) => row.id == item.foodId)
+                              .firstOrNull;
+                          return ListTile(
+                            title: Text(food?.name ?? 'Food'),
+                            subtitle: Text(
+                              '${meal.meal.type} · ${item.quantity.toStringAsFixed(0)} ${food?.servingUnit ?? 'g'}',
+                            ),
+                            onTap: food == null
+                                ? null
+                                : () => _editMealItem(item, food),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete_outline),
+                              onPressed: () => ref
+                                  .read(mealRepositoryProvider)
+                                  .deleteMealItem(item.id),
+                            ),
+                          );
+                        }),
+                      ),
+                    ],
+                  );
+                },
               ),
               const SizedBox(height: 20),
               FilledButton(onPressed: _save, child: const Text('Save log')),

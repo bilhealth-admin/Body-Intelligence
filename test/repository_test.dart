@@ -2,6 +2,9 @@ import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
+import 'package:body_intelligence_log/data/repositories/water_repository.dart';
+import 'package:body_intelligence_log/data/repositories/weight_repository.dart';
+import 'package:body_intelligence_log/data/repositories/user_profile_repository.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -55,5 +58,88 @@ void main() {
       database.meals,
     )..where((row) => row.id.equals(mealId))).go();
     expect(await database.select(database.mealItems).get(), isEmpty);
+  });
+
+  test('food search matches Arabic names and favorites are unique', () async {
+    final foods = FoodRepository(database);
+    final id = await foods.addFood(
+      name: 'Lentils',
+      arabicName: 'عدس',
+      category: 'legume',
+      calories: 116,
+      protein: 9,
+      carbs: 20,
+      fats: 0.4,
+    );
+    expect((await foods.search('عدس')).single.id, id);
+    await foods.setFavorite(id, true);
+    await foods.setFavorite(id, true);
+    expect(await database.select(database.favorites).get(), hasLength(1));
+    await foods.recordRecent(id);
+    await foods.recordRecent(id);
+    expect(
+      (await database.select(database.recentFoods).getSingle()).useCount,
+      2,
+    );
+  });
+
+  test('weight supports add update and soft delete', () async {
+    final weights = WeightRepository(database);
+    final id = await weights.addWeight(80, date: DateTime(2026, 7, 1));
+    await weights.updateWeight(
+      id: id,
+      weight: 79.5,
+      date: DateTime(2026, 7, 1),
+    );
+    expect((await weights.getAll()).single.weight, 79.5);
+    await weights.deleteWeight(id);
+    expect(await weights.getAll(), isEmpty);
+  });
+
+  test('water totals are calculated from individual entries', () async {
+    final water = WaterRepository(database);
+    final date = DateTime(2026, 7, 18);
+    await water.add(
+      occurredAt: date.add(const Duration(hours: 8)),
+      amountMl: 250,
+    );
+    await water.add(
+      occurredAt: date.add(const Duration(hours: 12)),
+      amountMl: 400,
+    );
+    expect(await water.totalForDay(date), 650);
+  });
+
+  test('profile edits update the singleton row', () async {
+    final profiles = UserProfileRepository(database);
+    Future<void> save(double weight) => profiles.save(
+      gender: 'female',
+      age: 32,
+      height: 168,
+      currentWeight: weight,
+      targetWeight: 65,
+      activityLevel: 'moderate',
+      exercises: true,
+    );
+    await save(72);
+    await save(71);
+    expect(await database.select(database.userProfile).get(), hasLength(1));
+    expect((await profiles.getProfile())!.currentWeight, 71);
+  });
+
+  test('meal type is reused for the same day', () async {
+    final meals = MealRepository(database);
+    final first = await meals.createMeal(
+      date: DateTime(2026, 7, 18, 8),
+      name: 'Breakfast',
+      type: 'breakfast',
+    );
+    final second = await meals.createMeal(
+      date: DateTime(2026, 7, 18, 10),
+      name: 'Breakfast',
+      type: 'breakfast',
+    );
+    expect(second, first);
+    expect(await database.select(database.meals).get(), hasLength(1));
   });
 }
