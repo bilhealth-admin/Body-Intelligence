@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
@@ -73,7 +75,26 @@ class _DashboardWaterCardState extends State<DashboardWaterCard> {
               label:
                   '${context.strings.text('Water progress')}: ${widget.consumedMl} / $target ml',
               value: '${(progress * 100).round()}%',
-              child: LinearProgressIndicator(value: progress),
+              child: SizedBox(
+                height: 72,
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: 1),
+                  duration: MediaQuery.disableAnimationsOf(context)
+                      ? Duration.zero
+                      : const Duration(milliseconds: 700),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, phase, _) => CustomPaint(
+                    painter: _WaterWavePainter(
+                      progress: progress,
+                      phase: phase,
+                      color: Theme.of(context).colorScheme.primary,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer,
+                    ),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 6),
             Text(
@@ -104,6 +125,52 @@ class _DashboardWaterCardState extends State<DashboardWaterCard> {
       ),
     );
   }
+}
+
+class _WaterWavePainter extends CustomPainter {
+  const _WaterWavePainter({
+    required this.progress,
+    required this.phase,
+    required this.color,
+    required this.backgroundColor,
+  });
+
+  final double progress;
+  final double phase;
+  final Color color;
+  final Color backgroundColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final radius = Radius.circular(size.height / 2);
+    final bounds = Offset.zero & size;
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(bounds, radius),
+      Paint()..color = backgroundColor.withValues(alpha: 0.45),
+    );
+    canvas.save();
+    canvas.clipRRect(RRect.fromRectAndRadius(bounds, radius));
+    final fillStart = size.width * (1 - progress * phase);
+    final path = Path()..moveTo(fillStart, 0);
+    const amplitude = 4.0;
+    for (double y = 0; y <= size.height; y += 2) {
+      final wave = math.sin((y / size.height * math.pi * 4) + phase * math.pi);
+      path.lineTo(fillStart + wave * amplitude, y);
+    }
+    path
+      ..lineTo(size.width, size.height)
+      ..lineTo(size.width, 0)
+      ..close();
+    canvas.drawPath(path, Paint()..color = color.withValues(alpha: 0.78));
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _WaterWavePainter oldDelegate) =>
+      oldDelegate.progress != progress ||
+      oldDelegate.phase != phase ||
+      oldDelegate.color != color ||
+      oldDelegate.backgroundColor != backgroundColor;
 }
 
 class _CustomWaterDialog extends StatefulWidget {
