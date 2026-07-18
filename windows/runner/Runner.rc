@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "body_intelligence_log" "\0"
+            VALUE "CompanyName", "BIL" "\0"
+            VALUE "FileDescription", "BIL - Body Intelligence Log" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "body_intelligence_log" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
+            VALUE "InternalName", "BIL" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 BIL. All rights reserved." "\0"
             VALUE "OriginalFilename", "body_intelligence_log.exe" "\0"
-            VALUE "ProductName", "body_intelligence_log" "\0"
+            VALUE "ProductName", "BIL - Body Intelligence Log" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

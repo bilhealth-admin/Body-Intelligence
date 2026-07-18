@@ -14,6 +14,9 @@ flutter build appbundle --release
 ```
 
 The artifact is `build/app/outputs/flutter-apk/app-debug.apk`.
+Automatic Android backup is disabled because the current local database can
+contain sensitive body and nutrition records. Users control copies through the
+explicit JSON export until an encrypted, consented backup service exists.
 Release artifacts must be signed with credentials supplied outside Git. Record
 the minimum/target Android versions from the generated Gradle configuration at
 release time and test install/upgrade on a physical supported device.
