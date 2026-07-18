@@ -15,9 +15,9 @@
 
 ## Status summary
 
-- complete: **58**
+- complete: **59**
 - partial: **209**
-- missing and locally implementable: **19**
+- missing and locally implementable: **18**
 - blocked by credentials/infrastructure: **185**
 - strategic/non-code: **79**
 
@@ -1898,12 +1898,12 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 170. Water Card
 - **Requirement:** Beautiful wave animation. Large progress. Quick buttons: +250 +500 +750 Custom
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
-- **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
+- **Acceptance criteria:** The Today card shows persisted consumed, target, and remaining water; provides +250/+500/+750 and validated custom additions; renders an accessible finite wave animation that respects reduced motion; and updates from the real local water stream in English and Arabic.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `0152f0b`
 
 ### BIL-TDY-171 — Meals Timeline
 
@@ -6098,4 +6098,3 @@
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
 - **Blocker:** None
 - **Completion commit:** —
-
