@@ -51,6 +51,9 @@ class MealRepository {
     double fiber = 0,
     double sodium = 0,
     double potassium = 0,
+    double calcium = 0,
+    double magnesium = 0,
+    double sugar = 0,
   }) async {
     if (quantity <= 0 ||
         calories < 0 ||
@@ -59,7 +62,10 @@ class MealRepository {
         fats < 0 ||
         fiber < 0 ||
         sodium < 0 ||
-        potassium < 0) {
+        potassium < 0 ||
+        calcium < 0 ||
+        magnesium < 0 ||
+        sugar < 0) {
       throw ArgumentError('Meal quantities and nutrients must be non-negative');
     }
     await _database
@@ -76,6 +82,9 @@ class MealRepository {
             fiber: Value(fiber),
             sodium: Value(sodium),
             potassium: Value(potassium),
+            calcium: Value(calcium),
+            magnesium: Value(magnesium),
+            sugar: Value(sugar),
           ),
         );
   }
@@ -90,6 +99,9 @@ class MealRepository {
     double fiber = 0,
     double sodium = 0,
     double potassium = 0,
+    double calcium = 0,
+    double magnesium = 0,
+    double sugar = 0,
   }) async {
     if (quantity <= 0) throw ArgumentError.value(quantity, 'quantity');
     await (_database.update(
@@ -104,6 +116,9 @@ class MealRepository {
         fiber: Value(fiber),
         sodium: Value(sodium),
         potassium: Value(potassium),
+        calcium: Value(calcium),
+        magnesium: Value(magnesium),
+        sugar: Value(sugar),
         updatedAt: Value(DateTime.now()),
       ),
     );

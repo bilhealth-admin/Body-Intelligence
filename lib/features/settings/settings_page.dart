@@ -42,14 +42,35 @@ class SettingsPage extends ConsumerWidget {
     final meals = await database.select(database.meals).get();
     final mealItems = await database.select(database.mealItems).get();
     final water = await database.select(database.waterEntries).get();
+    final foods = await database.select(database.foods).get();
+    final goals = await database.select(database.goals).get();
+    final dailyLogs = await database.select(database.dailyLogs).get();
+    final contexts = await database.select(database.lifeContextEntries).get();
+    final memories = await database.select(database.decisionMemories).get();
+    final preferences = await database.select(database.preferences).get();
     final document = const JsonEncoder.withIndent('  ').convert({
-      'format': 'BIL local export v1',
+      'format': 'BIL local export v2',
       'exportedAt': DateTime.now().toIso8601String(),
+      'canonicalUnits': {
+        'weight': 'kg',
+        'height': 'cm',
+        'water': 'ml',
+        'nutrientMass': 'g or mg as identified by field',
+      },
+      'selectedDisplayUnits':
+          await ref.read(preferencesRepositoryProvider).get('units') ??
+          'metric',
       'profile': profile?.toJson(),
+      'goals': goals.map((row) => row.toJson()).toList(),
       'weights': weights.map((row) => row.toJson()).toList(),
+      'dailyLogs': dailyLogs.map((row) => row.toJson()).toList(),
+      'foods': foods.map((row) => row.toJson()).toList(),
       'meals': meals.map((row) => row.toJson()).toList(),
       'mealItems': mealItems.map((row) => row.toJson()).toList(),
       'waterEntries': water.map((row) => row.toJson()).toList(),
+      'lifeContext': contexts.map((row) => row.toJson()).toList(),
+      'decisionMemory': memories.map((row) => row.toJson()).toList(),
+      'preferences': preferences.map((row) => row.toJson()).toList(),
     });
     await const DataExportService().copyText(document);
     if (context.mounted) {
@@ -95,6 +116,8 @@ class SettingsPage extends ConsumerWidget {
     if (confirmed != true) return;
     final database = ref.read(databaseProvider);
     await database.transaction(() async {
+      await database.delete(database.decisionMemories).go();
+      await database.delete(database.lifeContextEntries).go();
       await database.delete(database.mealItems).go();
       await database.delete(database.meals).go();
       await database.delete(database.favorites).go();

@@ -76,7 +76,14 @@ class DashboardGrid extends ConsumerWidget {
     final items = meals.expand((meal) => meal.items).toList();
     final calories = items.fold<double>(0, (sum, item) => sum + item.calories);
     final protein = items.fold<double>(0, (sum, item) => sum + item.protein);
+    final carbs = items.fold<double>(0, (sum, item) => sum + item.carbs);
+    final fats = items.fold<double>(0, (sum, item) => sum + item.fats);
+    final fiber = items.fold<double>(0, (sum, item) => sum + item.fiber);
     final sodium = items.fold<double>(0, (sum, item) => sum + item.sodium);
+    final potassium = items.fold<double>(
+      0,
+      (sum, item) => sum + item.potassium,
+    );
     final water = waterRows.fold<int>(0, (sum, item) => sum + item.amountMl);
     final currentWeight = weights.firstOrNull?.weight ?? profile.currentWeight;
     final goalType = profile.targetWeight < currentWeight
@@ -220,6 +227,56 @@ class DashboardGrid extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Text(
+                  'Today’s nutrition evidence',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'Consumed, target, and remaining values come only from logged food portions.',
+                ),
+                const SizedBox(height: 12),
+                _TargetRow(
+                  label: 'Carbohydrates',
+                  consumed: carbs,
+                  target: bil.targets.carbs.toDouble(),
+                  unit: 'g',
+                ),
+                _TargetRow(
+                  label: 'Fat',
+                  consumed: fats,
+                  target: bil.targets.fats.toDouble(),
+                  unit: 'g',
+                ),
+                _TargetRow(
+                  label: 'Fiber',
+                  consumed: fiber,
+                  target: bil.targets.fiber.toDouble(),
+                  unit: 'g',
+                ),
+                _TargetRow(
+                  label: 'Sodium',
+                  consumed: sodium,
+                  target: bil.targets.sodium.toDouble(),
+                  unit: 'mg',
+                  upperLimit: true,
+                ),
+                _TargetRow(
+                  label: 'Potassium',
+                  consumed: potassium,
+                  target: bil.targets.potassium.toDouble(),
+                  unit: 'mg',
+                ),
+              ],
+            ),
+          ),
+        ),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
                 Text('Goal progress ${(progress * 100).round()}%'),
                 const SizedBox(height: 8),
                 LinearProgressIndicator(value: progress),
@@ -348,6 +405,63 @@ class DashboardGrid extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _TargetRow extends StatelessWidget {
+  const _TargetRow({
+    required this.label,
+    required this.consumed,
+    required this.target,
+    required this.unit,
+    this.upperLimit = false,
+  });
+
+  final String label;
+  final double consumed;
+  final double target;
+  final String unit;
+  final bool upperLimit;
+
+  @override
+  Widget build(BuildContext context) {
+    final difference = target - consumed;
+    final exceeded = difference < 0;
+    final ratio = target <= 0 ? 0.0 : (consumed / target).clamp(0.0, 1.0);
+    final needsAttention = upperLimit ? exceeded : consumed < target * 0.75;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 7),
+      child: Row(
+        children: [
+          Icon(
+            needsAttention ? Icons.info_outline : Icons.check_circle_outline,
+            color: needsAttention
+                ? Theme.of(context).colorScheme.tertiary
+                : Theme.of(context).colorScheme.primary,
+            size: 20,
+          ),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  '$label · ${consumed.toStringAsFixed(0)} / ${target.toStringAsFixed(0)} $unit',
+                ),
+                const SizedBox(height: 4),
+                LinearProgressIndicator(value: ratio),
+                Text(
+                  exceeded
+                      ? '${difference.abs().toStringAsFixed(0)} $unit above the reference target'
+                      : '${difference.toStringAsFixed(0)} $unit remaining',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

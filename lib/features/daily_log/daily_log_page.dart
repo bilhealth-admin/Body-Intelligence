@@ -24,6 +24,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
   double weightKg = 60;
   final water = TextEditingController(text: '250');
   final quantity = TextEditingController(text: '100');
+  final foodSearch = SearchController();
   Food? selectedFood;
   String mealType = 'breakfast';
 
@@ -32,6 +33,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     notes.dispose();
     water.dispose();
     quantity.dispose();
+    foodSearch.dispose();
     super.dispose();
   }
 
@@ -83,17 +85,22 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       sodium: selectedFood!.sodium * quantityValue / selectedFood!.servingSize,
       potassium:
           selectedFood!.potassium * quantityValue / selectedFood!.servingSize,
+      calcium:
+          selectedFood!.calcium * quantityValue / selectedFood!.servingSize,
+      magnesium:
+          selectedFood!.magnesium * quantityValue / selectedFood!.servingSize,
+      sugar: selectedFood!.sugar * quantityValue / selectedFood!.servingSize,
     );
     await ref.read(foodRepositoryProvider).recordRecent(selectedFood!.id);
 
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Meal saved locally.')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.strings.text('Meal saved locally.'))),
+    );
   }
 
-  Future<void> _addWater() async {
-    final amount = int.tryParse(water.text);
+  Future<void> _addWater([int? quickAmount]) async {
+    final amount = quickAmount ?? int.tryParse(water.text);
     if (amount == null) return;
     final date = ref.read(selectedLogDateProvider);
     final now = DateTime.now();
@@ -152,6 +159,9 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
           fiber: food.fiber * factor,
           sodium: food.sodium * factor,
           potassium: food.potassium * factor,
+          calcium: food.calcium * factor,
+          magnesium: food.magnesium * factor,
+          sugar: food.sugar * factor,
         );
   }
 
@@ -171,7 +181,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     });
 
     return Scaffold(
-      appBar: AppBar(title: Text(context.strings.text('Daily Log'))),
+      appBar: AppBar(title: Text(context.strings.text('Diary'))),
       body: foods.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text(error.toString())),
@@ -231,12 +241,26 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                   ),
                 ],
               ),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final amount in const [250, 350, 500])
+                    ActionChip(
+                      avatar: const Icon(Icons.water_drop_outlined, size: 18),
+                      label: Text('+$amount ml'),
+                      onPressed: () => _addWater(amount),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
               waterEntries.when(
                 data: (rows) => Text(
-                  'Water total: ${rows.fold<int>(0, (sum, row) => sum + row.amountMl)} ml',
+                  '${context.strings.text('Water total')}: ${rows.fold<int>(0, (sum, row) => sum + row.amountMl)} ml',
                 ),
                 loading: () => const LinearProgressIndicator(),
-                error: (_, _) => const Text('Water data unavailable'),
+                error: (_, _) =>
+                    Text(context.strings.text('Water data unavailable')),
               ),
               const SizedBox(height: 20),
               Card(
@@ -244,49 +268,115 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      DropdownButtonFormField<String>(
-                        initialValue: mealType,
-                        decoration: InputDecoration(
-                          labelText: context.strings.text('Meal type'),
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          context.strings.text('Meal type'),
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        items: [
-                          DropdownMenuItem(
-                            value: 'breakfast',
-                            child: Text(context.strings.text('Breakfast')),
-                          ),
-                          DropdownMenuItem(
-                            value: 'lunch',
-                            child: Text(context.strings.text('Lunch')),
-                          ),
-                          DropdownMenuItem(
-                            value: 'dinner',
-                            child: Text(context.strings.text('Dinner')),
-                          ),
-                          DropdownMenuItem(
-                            value: 'snack',
-                            child: Text(context.strings.text('Snack')),
-                          ),
-                        ],
-                        onChanged: (value) =>
-                            setState(() => mealType = value ?? 'breakfast'),
                       ),
                       const SizedBox(height: 8),
-                      DropdownButtonFormField<Food>(
-                        initialValue: selectedFood,
-                        decoration: InputDecoration(
-                          labelText: context.strings.text('Food'),
-                        ),
-                        items: items
-                            .map(
-                              (food) => DropdownMenuItem<Food>(
-                                value: food,
-                                child: Text(food.name),
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          for (final type in const [
+                            'breakfast',
+                            'lunch',
+                            'dinner',
+                            'snack',
+                          ])
+                            ChoiceChip(
+                              avatar: Icon(switch (type) {
+                                'breakfast' => Icons.free_breakfast_outlined,
+                                'lunch' => Icons.lunch_dining_outlined,
+                                'dinner' => Icons.dinner_dining_outlined,
+                                _ => Icons.cookie_outlined,
+                              }, size: 18),
+                              label: Text(
+                                context.strings.text(
+                                  '${type[0].toUpperCase()}${type.substring(1)}',
+                                ),
                               ),
-                            )
-                            .toList(),
-                        onChanged: (food) =>
-                            setState(() => selectedFood = food),
+                              selected: mealType == type,
+                              onSelected: (_) =>
+                                  setState(() => mealType = type),
+                            ),
+                        ],
                       ),
+                      const SizedBox(height: 12),
+                      SearchAnchor(
+                        searchController: foodSearch,
+                        viewHintText:
+                            Localizations.localeOf(context).languageCode == 'ar'
+                            ? 'ابحث بالاسم العربي أو الإنجليزي أو الباركود'
+                            : 'Search English, Arabic, keyword, or barcode',
+                        builder: (context, controller) => SearchBar(
+                          controller: controller,
+                          leading: const Icon(Icons.search),
+                          hintText:
+                              Localizations.localeOf(context).languageCode ==
+                                  'ar'
+                              ? 'ابحث عن طعام'
+                              : 'Search foods',
+                          onTap: controller.openView,
+                          onChanged: (_) => controller.openView(),
+                        ),
+                        suggestionsBuilder: (context, controller) async {
+                          final arabic =
+                              Localizations.localeOf(context).languageCode ==
+                              'ar';
+                          final results = await ref
+                              .read(foodRepositoryProvider)
+                              .search(controller.text, limit: 20);
+                          if (results.isEmpty) {
+                            return [
+                              ListTile(
+                                leading: const Icon(Icons.search_off),
+                                title: Text(
+                                  arabic
+                                      ? 'لا توجد نتائج محلية. يمكنك إنشاء طعام مخصص من دليل الأطعمة.'
+                                      : 'No local result. Create a custom food from the food catalog.',
+                                ),
+                              ),
+                            ];
+                          }
+                          return results.map(
+                            (food) => ListTile(
+                              leading: Icon(
+                                food.isCustom
+                                    ? Icons.person_outline
+                                    : Icons.verified_outlined,
+                              ),
+                              title: Text(
+                                food.arabicName == null
+                                    ? food.name
+                                    : '${food.arabicName} • ${food.name}',
+                              ),
+                              subtitle: Text(
+                                '${food.calories.toStringAsFixed(0)} kcal / ${food.servingSize.toStringAsFixed(0)} ${food.servingUnit} · ${food.source}',
+                              ),
+                              onTap: () {
+                                setState(() => selectedFood = food);
+                                controller.closeView(food.name);
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                      if (selectedFood != null)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.check_circle),
+                          title: Text(selectedFood!.name),
+                          subtitle: Text(
+                            '${selectedFood!.source} · ${selectedFood!.verified ? 'verified' : 'unverified'}',
+                          ),
+                          trailing: IconButton(
+                            onPressed: () =>
+                                setState(() => selectedFood = null),
+                            icon: const Icon(Icons.close),
+                          ),
+                        ),
                       const SizedBox(height: 8),
                       TextField(
                         controller: quantity,
@@ -307,9 +397,12 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
               const SizedBox(height: 12),
               meals.when(
                 loading: () => const LinearProgressIndicator(),
-                error: (_, _) => const Text('Meals unavailable'),
+                error: (_, _) =>
+                    Text(context.strings.text('Meals unavailable')),
                 data: (rows) {
-                  if (rows.isEmpty) return const Text('No meals for this day.');
+                  if (rows.isEmpty) {
+                    return Text(context.strings.text('No meals for this day.'));
+                  }
                   final allItems = rows.expand((meal) => meal.items).toList();
                   return Column(
                     children: [
@@ -323,6 +416,60 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                           '${allItems.fold<double>(0, (sum, item) => sum + item.carbs).toStringAsFixed(1)} g carbs · '
                           '${allItems.fold<double>(0, (sum, item) => sum + item.fats).toStringAsFixed(1)} g fat',
                         ),
+                      ),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          _NutrientMetric(
+                            label: 'Fiber',
+                            value: allItems.fold<double>(
+                              0,
+                              (sum, item) => sum + item.fiber,
+                            ),
+                            unit: 'g',
+                          ),
+                          _NutrientMetric(
+                            label: 'Sodium',
+                            value: allItems.fold<double>(
+                              0,
+                              (sum, item) => sum + item.sodium,
+                            ),
+                            unit: 'mg',
+                          ),
+                          _NutrientMetric(
+                            label: 'Potassium',
+                            value: allItems.fold<double>(
+                              0,
+                              (sum, item) => sum + item.potassium,
+                            ),
+                            unit: 'mg',
+                          ),
+                          _NutrientMetric(
+                            label: 'Magnesium',
+                            value: allItems.fold<double>(
+                              0,
+                              (sum, item) => sum + item.magnesium,
+                            ),
+                            unit: 'mg',
+                          ),
+                          _NutrientMetric(
+                            label: 'Calcium',
+                            value: allItems.fold<double>(
+                              0,
+                              (sum, item) => sum + item.calcium,
+                            ),
+                            unit: 'mg',
+                          ),
+                          _NutrientMetric(
+                            label: 'Sugar',
+                            value: allItems.fold<double>(
+                              0,
+                              (sum, item) => sum + item.sugar,
+                            ),
+                            unit: 'g',
+                          ),
+                        ],
                       ),
                       ...rows.expand(
                         (meal) => meal.items.map((item) {
@@ -380,4 +527,23 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       ),
     );
   }
+}
+
+class _NutrientMetric extends StatelessWidget {
+  const _NutrientMetric({
+    required this.label,
+    required this.value,
+    required this.unit,
+  });
+  final String label;
+  final double value;
+  final String unit;
+
+  @override
+  Widget build(BuildContext context) => Chip(
+    avatar: const Icon(Icons.science_outlined, size: 17),
+    label: Text(
+      '${context.strings.text(label)} ${value.toStringAsFixed(1)} $unit',
+    ),
+  );
 }

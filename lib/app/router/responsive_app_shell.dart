@@ -31,27 +31,27 @@ class ResponsiveAppShell extends StatelessWidget {
       NavigationDestination(
         icon: const Icon(Icons.dashboard_outlined),
         selectedIcon: const Icon(Icons.dashboard),
-        label: context.strings.text('Dashboard'),
+        label: context.strings.text('Today'),
       ),
       NavigationDestination(
         icon: const Icon(Icons.edit_note),
-        label: context.strings.text('Daily Log'),
+        label: context.strings.text('Diary'),
       ),
       NavigationDestination(
         icon: const Icon(Icons.restaurant_menu),
-        label: context.strings.text('Food'),
+        label: context.strings.text('Discover'),
       ),
       NavigationDestination(
         icon: const Icon(Icons.monitor_weight_outlined),
-        label: context.strings.text('Weight history'),
+        label: context.strings.text('Progress'),
       ),
       NavigationDestination(
         icon: const Icon(Icons.analytics_outlined),
-        label: context.strings.text('Analytics'),
+        label: context.strings.text('Insights'),
       ),
       NavigationDestination(
         icon: const Icon(Icons.settings_outlined),
-        label: context.strings.text('Settings'),
+        label: context.strings.text('More'),
       ),
     ];
     void navigate(int next) => context.go(paths[next]);

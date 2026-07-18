@@ -31,6 +31,12 @@ class MealItems extends Table {
 
   RealColumn get potassium => real().withDefault(const Constant(0))();
 
+  RealColumn get calcium => real().withDefault(const Constant(0))();
+
+  RealColumn get magnesium => real().withDefault(const Constant(0))();
+
+  RealColumn get sugar => real().withDefault(const Constant(0))();
+
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();

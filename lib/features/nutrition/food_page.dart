@@ -65,6 +65,9 @@ class _FoodPageState extends ConsumerState<FoodPage> {
           fiber: created.fiber,
           sodium: created.sodium,
           potassium: created.potassium,
+          calcium: created.calcium,
+          magnesium: created.magnesium,
+          sugar: created.sugar,
         );
     await _runSearch(search.text);
   }
@@ -223,6 +226,9 @@ class _FoodDraft {
     required this.fiber,
     required this.sodium,
     required this.potassium,
+    required this.calcium,
+    required this.magnesium,
+    required this.sugar,
   });
   final String name;
   final String? arabicName;
@@ -236,6 +242,9 @@ class _FoodDraft {
   final double fiber;
   final double sodium;
   final double potassium;
+  final double calcium;
+  final double magnesium;
+  final double sugar;
 }
 
 class _CustomFoodDialog extends StatefulWidget {
@@ -247,7 +256,7 @@ class _CustomFoodDialog extends StatefulWidget {
 
 class _CustomFoodDialogState extends State<_CustomFoodDialog> {
   final formKey = GlobalKey<FormState>();
-  final controllers = List.generate(11, (_) => TextEditingController());
+  final controllers = List.generate(15, (_) => TextEditingController());
 
   @override
   void dispose() {
@@ -271,6 +280,10 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
       'Fat',
       'Fiber',
       'Sodium',
+      'Potassium',
+      'Calcium',
+      'Magnesium',
+      'Sugar',
     ];
     return AlertDialog(
       title: const Text('Create custom food'),
@@ -334,7 +347,10 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
                 fats: number(8),
                 fiber: number(9),
                 sodium: number(10),
-                potassium: 0,
+                potassium: number(11),
+                calcium: number(12),
+                magnesium: number(13),
+                sugar: number(14),
               ),
             );
           },

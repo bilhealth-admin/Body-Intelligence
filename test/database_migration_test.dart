@@ -109,5 +109,12 @@ void main() {
         .map((row) => row.read<String>('name'))
         .toSet();
     expect(columnNames, containsAll(['day_key', 'measurement_context']));
+    final mealItemColumns = await database
+        .customSelect('PRAGMA table_info(meal_items)')
+        .get();
+    expect(
+      mealItemColumns.map((row) => row.read<String>('name')),
+      containsAll(['calcium', 'magnesium', 'sugar']),
+    );
   });
 }

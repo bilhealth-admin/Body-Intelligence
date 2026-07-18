@@ -41,7 +41,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -80,6 +80,13 @@ class AppDatabase extends _$AppDatabase {
         await migrator.createTable(lifeContextEntries);
         await migrator.createTable(decisionMemories);
         await _createV7Indexes();
+      }
+      if (from < 8) {
+        await _addColumns('meal_items', <String>[
+          'calcium REAL NOT NULL DEFAULT 0',
+          'magnesium REAL NOT NULL DEFAULT 0',
+          'sugar REAL NOT NULL DEFAULT 0',
+        ]);
       }
     },
   );

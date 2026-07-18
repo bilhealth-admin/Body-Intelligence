@@ -4898,6 +4898,40 @@ class $MealItemsTable extends MealItems
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _calciumMeta = const VerificationMeta(
+    'calcium',
+  );
+  @override
+  late final GeneratedColumn<double> calcium = GeneratedColumn<double>(
+    'calcium',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _magnesiumMeta = const VerificationMeta(
+    'magnesium',
+  );
+  @override
+  late final GeneratedColumn<double> magnesium = GeneratedColumn<double>(
+    'magnesium',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _sugarMeta = const VerificationMeta('sugar');
+  @override
+  late final GeneratedColumn<double> sugar = GeneratedColumn<double>(
+    'sugar',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -4947,6 +4981,9 @@ class $MealItemsTable extends MealItems
     fiber,
     sodium,
     potassium,
+    calcium,
+    magnesium,
+    sugar,
     createdAt,
     updatedAt,
     deletedAt,
@@ -5036,6 +5073,24 @@ class $MealItemsTable extends MealItems
         potassium.isAcceptableOrUnknown(data['potassium']!, _potassiumMeta),
       );
     }
+    if (data.containsKey('calcium')) {
+      context.handle(
+        _calciumMeta,
+        calcium.isAcceptableOrUnknown(data['calcium']!, _calciumMeta),
+      );
+    }
+    if (data.containsKey('magnesium')) {
+      context.handle(
+        _magnesiumMeta,
+        magnesium.isAcceptableOrUnknown(data['magnesium']!, _magnesiumMeta),
+      );
+    }
+    if (data.containsKey('sugar')) {
+      context.handle(
+        _sugarMeta,
+        sugar.isAcceptableOrUnknown(data['sugar']!, _sugarMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -5111,6 +5166,18 @@ class $MealItemsTable extends MealItems
         DriftSqlType.double,
         data['${effectivePrefix}potassium'],
       )!,
+      calcium: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}calcium'],
+      )!,
+      magnesium: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}magnesium'],
+      )!,
+      sugar: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}sugar'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -5145,6 +5212,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
   final double fiber;
   final double sodium;
   final double potassium;
+  final double calcium;
+  final double magnesium;
+  final double sugar;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -5161,6 +5231,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     required this.fiber,
     required this.sodium,
     required this.potassium,
+    required this.calcium,
+    required this.magnesium,
+    required this.sugar,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -5180,6 +5253,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     map['fiber'] = Variable<double>(fiber);
     map['sodium'] = Variable<double>(sodium);
     map['potassium'] = Variable<double>(potassium);
+    map['calcium'] = Variable<double>(calcium);
+    map['magnesium'] = Variable<double>(magnesium);
+    map['sugar'] = Variable<double>(sugar);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -5202,6 +5278,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       fiber: Value(fiber),
       sodium: Value(sodium),
       potassium: Value(potassium),
+      calcium: Value(calcium),
+      magnesium: Value(magnesium),
+      sugar: Value(sugar),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -5228,6 +5307,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       fiber: serializer.fromJson<double>(json['fiber']),
       sodium: serializer.fromJson<double>(json['sodium']),
       potassium: serializer.fromJson<double>(json['potassium']),
+      calcium: serializer.fromJson<double>(json['calcium']),
+      magnesium: serializer.fromJson<double>(json['magnesium']),
+      sugar: serializer.fromJson<double>(json['sugar']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -5249,6 +5331,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       'fiber': serializer.toJson<double>(fiber),
       'sodium': serializer.toJson<double>(sodium),
       'potassium': serializer.toJson<double>(potassium),
+      'calcium': serializer.toJson<double>(calcium),
+      'magnesium': serializer.toJson<double>(magnesium),
+      'sugar': serializer.toJson<double>(sugar),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -5268,6 +5353,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     double? fiber,
     double? sodium,
     double? potassium,
+    double? calcium,
+    double? magnesium,
+    double? sugar,
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -5284,6 +5372,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     fiber: fiber ?? this.fiber,
     sodium: sodium ?? this.sodium,
     potassium: potassium ?? this.potassium,
+    calcium: calcium ?? this.calcium,
+    magnesium: magnesium ?? this.magnesium,
+    sugar: sugar ?? this.sugar,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -5302,6 +5393,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       fiber: data.fiber.present ? data.fiber.value : this.fiber,
       sodium: data.sodium.present ? data.sodium.value : this.sodium,
       potassium: data.potassium.present ? data.potassium.value : this.potassium,
+      calcium: data.calcium.present ? data.calcium.value : this.calcium,
+      magnesium: data.magnesium.present ? data.magnesium.value : this.magnesium,
+      sugar: data.sugar.present ? data.sugar.value : this.sugar,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -5323,6 +5417,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
           ..write('fiber: $fiber, ')
           ..write('sodium: $sodium, ')
           ..write('potassium: $potassium, ')
+          ..write('calcium: $calcium, ')
+          ..write('magnesium: $magnesium, ')
+          ..write('sugar: $sugar, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt')
@@ -5344,6 +5441,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     fiber,
     sodium,
     potassium,
+    calcium,
+    magnesium,
+    sugar,
     createdAt,
     updatedAt,
     deletedAt,
@@ -5364,6 +5464,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
           other.fiber == this.fiber &&
           other.sodium == this.sodium &&
           other.potassium == this.potassium &&
+          other.calcium == this.calcium &&
+          other.magnesium == this.magnesium &&
+          other.sugar == this.sugar &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt);
@@ -5382,6 +5485,9 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
   final Value<double> fiber;
   final Value<double> sodium;
   final Value<double> potassium;
+  final Value<double> calcium;
+  final Value<double> magnesium;
+  final Value<double> sugar;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -5398,6 +5504,9 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     this.fiber = const Value.absent(),
     this.sodium = const Value.absent(),
     this.potassium = const Value.absent(),
+    this.calcium = const Value.absent(),
+    this.magnesium = const Value.absent(),
+    this.sugar = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -5415,6 +5524,9 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     this.fiber = const Value.absent(),
     this.sodium = const Value.absent(),
     this.potassium = const Value.absent(),
+    this.calcium = const Value.absent(),
+    this.magnesium = const Value.absent(),
+    this.sugar = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -5433,6 +5545,9 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     Expression<double>? fiber,
     Expression<double>? sodium,
     Expression<double>? potassium,
+    Expression<double>? calcium,
+    Expression<double>? magnesium,
+    Expression<double>? sugar,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -5450,6 +5565,9 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
       if (fiber != null) 'fiber': fiber,
       if (sodium != null) 'sodium': sodium,
       if (potassium != null) 'potassium': potassium,
+      if (calcium != null) 'calcium': calcium,
+      if (magnesium != null) 'magnesium': magnesium,
+      if (sugar != null) 'sugar': sugar,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -5469,6 +5587,9 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     Value<double>? fiber,
     Value<double>? sodium,
     Value<double>? potassium,
+    Value<double>? calcium,
+    Value<double>? magnesium,
+    Value<double>? sugar,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
@@ -5486,6 +5607,9 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
       fiber: fiber ?? this.fiber,
       sodium: sodium ?? this.sodium,
       potassium: potassium ?? this.potassium,
+      calcium: calcium ?? this.calcium,
+      magnesium: magnesium ?? this.magnesium,
+      sugar: sugar ?? this.sugar,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -5531,6 +5655,15 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     if (potassium.present) {
       map['potassium'] = Variable<double>(potassium.value);
     }
+    if (calcium.present) {
+      map['calcium'] = Variable<double>(calcium.value);
+    }
+    if (magnesium.present) {
+      map['magnesium'] = Variable<double>(magnesium.value);
+    }
+    if (sugar.present) {
+      map['sugar'] = Variable<double>(sugar.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -5558,6 +5691,9 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
           ..write('fiber: $fiber, ')
           ..write('sodium: $sodium, ')
           ..write('potassium: $potassium, ')
+          ..write('calcium: $calcium, ')
+          ..write('magnesium: $magnesium, ')
+          ..write('sugar: $sugar, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt')
@@ -11967,6 +12103,9 @@ typedef $$MealItemsTableCreateCompanionBuilder =
       Value<double> fiber,
       Value<double> sodium,
       Value<double> potassium,
+      Value<double> calcium,
+      Value<double> magnesium,
+      Value<double> sugar,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -11985,6 +12124,9 @@ typedef $$MealItemsTableUpdateCompanionBuilder =
       Value<double> fiber,
       Value<double> sodium,
       Value<double> potassium,
+      Value<double> calcium,
+      Value<double> magnesium,
+      Value<double> sugar,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -12085,6 +12227,21 @@ class $$MealItemsTableFilterComposer
 
   ColumnFilters<double> get potassium => $composableBuilder(
     column: $table.potassium,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get calcium => $composableBuilder(
+    column: $table.calcium,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get magnesium => $composableBuilder(
+    column: $table.magnesium,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get sugar => $composableBuilder(
+    column: $table.sugar,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12209,6 +12366,21 @@ class $$MealItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get calcium => $composableBuilder(
+    column: $table.calcium,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get magnesium => $composableBuilder(
+    column: $table.magnesium,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get sugar => $composableBuilder(
+    column: $table.sugar,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -12310,6 +12482,15 @@ class $$MealItemsTableAnnotationComposer
   GeneratedColumn<double> get potassium =>
       $composableBuilder(column: $table.potassium, builder: (column) => column);
 
+  GeneratedColumn<double> get calcium =>
+      $composableBuilder(column: $table.calcium, builder: (column) => column);
+
+  GeneratedColumn<double> get magnesium =>
+      $composableBuilder(column: $table.magnesium, builder: (column) => column);
+
+  GeneratedColumn<double> get sugar =>
+      $composableBuilder(column: $table.sugar, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -12406,6 +12587,9 @@ class $$MealItemsTableTableManager
                 Value<double> fiber = const Value.absent(),
                 Value<double> sodium = const Value.absent(),
                 Value<double> potassium = const Value.absent(),
+                Value<double> calcium = const Value.absent(),
+                Value<double> magnesium = const Value.absent(),
+                Value<double> sugar = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -12422,6 +12606,9 @@ class $$MealItemsTableTableManager
                 fiber: fiber,
                 sodium: sodium,
                 potassium: potassium,
+                calcium: calcium,
+                magnesium: magnesium,
+                sugar: sugar,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
@@ -12440,6 +12627,9 @@ class $$MealItemsTableTableManager
                 Value<double> fiber = const Value.absent(),
                 Value<double> sodium = const Value.absent(),
                 Value<double> potassium = const Value.absent(),
+                Value<double> calcium = const Value.absent(),
+                Value<double> magnesium = const Value.absent(),
+                Value<double> sugar = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -12456,6 +12646,9 @@ class $$MealItemsTableTableManager
                 fiber: fiber,
                 sodium: sodium,
                 potassium: potassium,
+                calcium: calcium,
+                magnesium: magnesium,
+                sugar: sugar,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,

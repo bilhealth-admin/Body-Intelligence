@@ -55,7 +55,18 @@ void main() {
       protein: 8.45,
       carbs: 33.15,
       fats: 3.45,
+      fiber: 4.2,
+      sodium: 120,
+      potassium: 310,
+      calcium: 45,
+      magnesium: 80,
+      sugar: 1.5,
     );
+
+    final storedItem = await database.select(database.mealItems).getSingle();
+    expect(storedItem.calcium, 45);
+    expect(storedItem.magnesium, 80);
+    expect(storedItem.sugar, 1.5);
 
     await (database.delete(
       database.meals,
@@ -85,6 +96,35 @@ void main() {
       2,
     );
   });
+
+  test(
+    'food search ranks personal frequency and supports barcode fallback',
+    () async {
+      final foods = FoodRepository(database);
+      final frequent = await foods.addFood(
+        name: 'Frequent oats',
+        category: 'grain',
+        barcode: '123456789',
+        calories: 380,
+        protein: 15,
+        carbs: 65,
+        fats: 7,
+      );
+      await foods.addFood(
+        name: 'Alphabetical apple',
+        category: 'fruit',
+        calories: 52,
+        protein: 0.3,
+        carbs: 14,
+        fats: 0.2,
+      );
+      await foods.recordRecent(frequent);
+      await foods.recordRecent(frequent);
+
+      expect((await foods.search('')).first.id, frequent);
+      expect((await foods.search('123456789')).single.id, frequent);
+    },
+  );
 
   test('weight supports add update and soft delete', () async {
     final weights = WeightRepository(database);
