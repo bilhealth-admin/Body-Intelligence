@@ -47,6 +47,9 @@ class SettingsPage extends ConsumerWidget {
     final dailyLogs = await database.select(database.dailyLogs).get();
     final contexts = await database.select(database.lifeContextEntries).get();
     final memories = await database.select(database.decisionMemories).get();
+    final experiments = await database
+        .select(database.personalExperiments)
+        .get();
     final preferences = await database.select(database.preferences).get();
     final document = const JsonEncoder.withIndent('  ').convert({
       'format': 'BIL local export v2',
@@ -70,6 +73,7 @@ class SettingsPage extends ConsumerWidget {
       'waterEntries': water.map((row) => row.toJson()).toList(),
       'lifeContext': contexts.map((row) => row.toJson()).toList(),
       'decisionMemory': memories.map((row) => row.toJson()).toList(),
+      'personalExperiments': experiments.map((row) => row.toJson()).toList(),
       'preferences': preferences.map((row) => row.toJson()).toList(),
     });
     await const DataExportService().copyText(document);
@@ -118,6 +122,7 @@ class SettingsPage extends ConsumerWidget {
     await database.transaction(() async {
       await database.delete(database.decisionMemories).go();
       await database.delete(database.lifeContextEntries).go();
+      await database.delete(database.personalExperiments).go();
       await database.delete(database.mealItems).go();
       await database.delete(database.meals).go();
       await database.delete(database.favorites).go();
@@ -251,6 +256,14 @@ class SettingsPage extends ConsumerWidget {
               'Review, rate, disable, or delete remembered actions.',
             ),
             onTap: () => context.go('/decision-memory'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.science_outlined),
+            title: const Text('Personal experiments'),
+            subtitle: const Text(
+              'Test a cautious hypothesis and record limitations.',
+            ),
+            onTap: () => context.go('/experiments'),
           ),
           ListTile(
             leading: const Icon(Icons.privacy_tip),

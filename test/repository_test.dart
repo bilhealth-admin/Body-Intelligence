@@ -1,6 +1,7 @@
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
 import 'package:body_intelligence_log/data/repositories/decision_memory_repository.dart';
+import 'package:body_intelligence_log/data/repositories/experiment_repository.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
 import 'package:body_intelligence_log/data/repositories/plan_repository.dart';
@@ -31,6 +32,30 @@ void main() {
     expect(rows, hasLength(1));
     expect(rows.single.notes, 'evening');
     expect(rows.single.dayKey, '2026-07-18');
+  });
+
+  test('personal experiments preserve cautious evidence states', () async {
+    final repository = ExperimentRepository(database);
+    final id = await repository.create(
+      hypothesis: 'Protein breakfast may improve reported satiety',
+      changedVariable: 'Breakfast protein',
+      controlledFactors: 'Meal time',
+      requiredData: 'Meal log and satiety note',
+      startedAt: DateTime(2026, 7, 1),
+      durationDays: 14,
+    );
+    await repository.complete(
+      id: id,
+      adherence: 75,
+      result: 'Satiety notes were somewhat higher',
+      limitations: 'Four days were missing',
+      confidence: 'low',
+    );
+    final row = await database.select(database.personalExperiments).getSingle();
+    expect(row.status, 'completed');
+    expect(row.confidence, 'low');
+    expect(row.limitations, isNotEmpty);
+    expect(row.adherence, 75);
   });
 
   test('meal items enforce references and cascade with their meal', () async {

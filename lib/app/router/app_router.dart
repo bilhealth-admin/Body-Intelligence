@@ -6,6 +6,7 @@ import '../../features/daily_log/daily_log_page.dart';
 import '../../features/daily_check_in/daily_check_in_page.dart';
 import '../../features/dashboard/dashboard_page.dart';
 import '../../features/history/history_page.dart';
+import '../../features/experiments/experiments_page.dart';
 import '../../features/life_context/life_context_page.dart';
 import '../../features/life_context/decision_memory_page.dart';
 import '../../features/nutrition/food_page.dart';
@@ -32,6 +33,7 @@ class AppRouter {
         builder: (_, _) => const DecisionMemoryPage(),
       ),
       GoRoute(path: '/plan', builder: (_, _) => const PlanPage()),
+      GoRoute(path: '/experiments', builder: (_, _) => const ExperimentsPage()),
       ShellRoute(
         builder: (_, _, child) => ResponsiveAppShell(child: child),
         routes: [

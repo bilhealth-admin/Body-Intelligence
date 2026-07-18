@@ -35,6 +35,7 @@ void main() {
           'life_context_entries',
           'decision_memories',
           'plan_settings',
+          'personal_experiments',
         ]),
       );
     },

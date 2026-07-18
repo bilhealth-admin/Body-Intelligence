@@ -10512,6 +10512,992 @@ class PlanSettingsCompanion extends UpdateCompanion<PlanSetting> {
   }
 }
 
+class $PersonalExperimentsTable extends PersonalExperiments
+    with TableInfo<$PersonalExperimentsTable, PersonalExperiment> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PersonalExperimentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
+  @override
+  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
+    'uuid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+    clientDefault: newDatabaseId,
+  );
+  static const VerificationMeta _hypothesisMeta = const VerificationMeta(
+    'hypothesis',
+  );
+  @override
+  late final GeneratedColumn<String> hypothesis = GeneratedColumn<String>(
+    'hypothesis',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _changedVariableMeta = const VerificationMeta(
+    'changedVariable',
+  );
+  @override
+  late final GeneratedColumn<String> changedVariable = GeneratedColumn<String>(
+    'changed_variable',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _controlledFactorsMeta = const VerificationMeta(
+    'controlledFactors',
+  );
+  @override
+  late final GeneratedColumn<String> controlledFactors =
+      GeneratedColumn<String>(
+        'controlled_factors',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(''),
+      );
+  static const VerificationMeta _requiredDataMeta = const VerificationMeta(
+    'requiredData',
+  );
+  @override
+  late final GeneratedColumn<String> requiredData = GeneratedColumn<String>(
+    'required_data',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _startedAtMeta = const VerificationMeta(
+    'startedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> startedAt = GeneratedColumn<DateTime>(
+    'started_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endsAtMeta = const VerificationMeta('endsAt');
+  @override
+  late final GeneratedColumn<DateTime> endsAt = GeneratedColumn<DateTime>(
+    'ends_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _adherenceMeta = const VerificationMeta(
+    'adherence',
+  );
+  @override
+  late final GeneratedColumn<double> adherence = GeneratedColumn<double>(
+    'adherence',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _resultMeta = const VerificationMeta('result');
+  @override
+  late final GeneratedColumn<String> result = GeneratedColumn<String>(
+    'result',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _confidenceMeta = const VerificationMeta(
+    'confidence',
+  );
+  @override
+  late final GeneratedColumn<String> confidence = GeneratedColumn<String>(
+    'confidence',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('insufficient'),
+  );
+  static const VerificationMeta _limitationsMeta = const VerificationMeta(
+    'limitations',
+  );
+  @override
+  late final GeneratedColumn<String> limitations = GeneratedColumn<String>(
+    'limitations',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('active'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('local'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    uuid,
+    hypothesis,
+    changedVariable,
+    controlledFactors,
+    requiredData,
+    startedAt,
+    endsAt,
+    adherence,
+    result,
+    confidence,
+    limitations,
+    status,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    revision,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'personal_experiments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PersonalExperiment> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uuid')) {
+      context.handle(
+        _uuidMeta,
+        uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta),
+      );
+    }
+    if (data.containsKey('hypothesis')) {
+      context.handle(
+        _hypothesisMeta,
+        hypothesis.isAcceptableOrUnknown(data['hypothesis']!, _hypothesisMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hypothesisMeta);
+    }
+    if (data.containsKey('changed_variable')) {
+      context.handle(
+        _changedVariableMeta,
+        changedVariable.isAcceptableOrUnknown(
+          data['changed_variable']!,
+          _changedVariableMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_changedVariableMeta);
+    }
+    if (data.containsKey('controlled_factors')) {
+      context.handle(
+        _controlledFactorsMeta,
+        controlledFactors.isAcceptableOrUnknown(
+          data['controlled_factors']!,
+          _controlledFactorsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('required_data')) {
+      context.handle(
+        _requiredDataMeta,
+        requiredData.isAcceptableOrUnknown(
+          data['required_data']!,
+          _requiredDataMeta,
+        ),
+      );
+    }
+    if (data.containsKey('started_at')) {
+      context.handle(
+        _startedAtMeta,
+        startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startedAtMeta);
+    }
+    if (data.containsKey('ends_at')) {
+      context.handle(
+        _endsAtMeta,
+        endsAt.isAcceptableOrUnknown(data['ends_at']!, _endsAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_endsAtMeta);
+    }
+    if (data.containsKey('adherence')) {
+      context.handle(
+        _adherenceMeta,
+        adherence.isAcceptableOrUnknown(data['adherence']!, _adherenceMeta),
+      );
+    }
+    if (data.containsKey('result')) {
+      context.handle(
+        _resultMeta,
+        result.isAcceptableOrUnknown(data['result']!, _resultMeta),
+      );
+    }
+    if (data.containsKey('confidence')) {
+      context.handle(
+        _confidenceMeta,
+        confidence.isAcceptableOrUnknown(data['confidence']!, _confidenceMeta),
+      );
+    }
+    if (data.containsKey('limitations')) {
+      context.handle(
+        _limitationsMeta,
+        limitations.isAcceptableOrUnknown(
+          data['limitations']!,
+          _limitationsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PersonalExperiment map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PersonalExperiment(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      uuid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uuid'],
+      )!,
+      hypothesis: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hypothesis'],
+      )!,
+      changedVariable: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}changed_variable'],
+      )!,
+      controlledFactors: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}controlled_factors'],
+      )!,
+      requiredData: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}required_data'],
+      )!,
+      startedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}started_at'],
+      )!,
+      endsAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}ends_at'],
+      )!,
+      adherence: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}adherence'],
+      ),
+      result: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}result'],
+      ),
+      confidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}confidence'],
+      )!,
+      limitations: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}limitations'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $PersonalExperimentsTable createAlias(String alias) {
+    return $PersonalExperimentsTable(attachedDatabase, alias);
+  }
+}
+
+class PersonalExperiment extends DataClass
+    implements Insertable<PersonalExperiment> {
+  final int id;
+  final String uuid;
+  final String hypothesis;
+  final String changedVariable;
+  final String controlledFactors;
+  final String requiredData;
+  final DateTime startedAt;
+  final DateTime endsAt;
+  final double? adherence;
+  final String? result;
+  final String confidence;
+  final String limitations;
+  final String status;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int revision;
+  final String syncStatus;
+  const PersonalExperiment({
+    required this.id,
+    required this.uuid,
+    required this.hypothesis,
+    required this.changedVariable,
+    required this.controlledFactors,
+    required this.requiredData,
+    required this.startedAt,
+    required this.endsAt,
+    this.adherence,
+    this.result,
+    required this.confidence,
+    required this.limitations,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.revision,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['uuid'] = Variable<String>(uuid);
+    map['hypothesis'] = Variable<String>(hypothesis);
+    map['changed_variable'] = Variable<String>(changedVariable);
+    map['controlled_factors'] = Variable<String>(controlledFactors);
+    map['required_data'] = Variable<String>(requiredData);
+    map['started_at'] = Variable<DateTime>(startedAt);
+    map['ends_at'] = Variable<DateTime>(endsAt);
+    if (!nullToAbsent || adherence != null) {
+      map['adherence'] = Variable<double>(adherence);
+    }
+    if (!nullToAbsent || result != null) {
+      map['result'] = Variable<String>(result);
+    }
+    map['confidence'] = Variable<String>(confidence);
+    map['limitations'] = Variable<String>(limitations);
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['revision'] = Variable<int>(revision);
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  PersonalExperimentsCompanion toCompanion(bool nullToAbsent) {
+    return PersonalExperimentsCompanion(
+      id: Value(id),
+      uuid: Value(uuid),
+      hypothesis: Value(hypothesis),
+      changedVariable: Value(changedVariable),
+      controlledFactors: Value(controlledFactors),
+      requiredData: Value(requiredData),
+      startedAt: Value(startedAt),
+      endsAt: Value(endsAt),
+      adherence: adherence == null && nullToAbsent
+          ? const Value.absent()
+          : Value(adherence),
+      result: result == null && nullToAbsent
+          ? const Value.absent()
+          : Value(result),
+      confidence: Value(confidence),
+      limitations: Value(limitations),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      revision: Value(revision),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory PersonalExperiment.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PersonalExperiment(
+      id: serializer.fromJson<int>(json['id']),
+      uuid: serializer.fromJson<String>(json['uuid']),
+      hypothesis: serializer.fromJson<String>(json['hypothesis']),
+      changedVariable: serializer.fromJson<String>(json['changedVariable']),
+      controlledFactors: serializer.fromJson<String>(json['controlledFactors']),
+      requiredData: serializer.fromJson<String>(json['requiredData']),
+      startedAt: serializer.fromJson<DateTime>(json['startedAt']),
+      endsAt: serializer.fromJson<DateTime>(json['endsAt']),
+      adherence: serializer.fromJson<double?>(json['adherence']),
+      result: serializer.fromJson<String?>(json['result']),
+      confidence: serializer.fromJson<String>(json['confidence']),
+      limitations: serializer.fromJson<String>(json['limitations']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      revision: serializer.fromJson<int>(json['revision']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'uuid': serializer.toJson<String>(uuid),
+      'hypothesis': serializer.toJson<String>(hypothesis),
+      'changedVariable': serializer.toJson<String>(changedVariable),
+      'controlledFactors': serializer.toJson<String>(controlledFactors),
+      'requiredData': serializer.toJson<String>(requiredData),
+      'startedAt': serializer.toJson<DateTime>(startedAt),
+      'endsAt': serializer.toJson<DateTime>(endsAt),
+      'adherence': serializer.toJson<double?>(adherence),
+      'result': serializer.toJson<String?>(result),
+      'confidence': serializer.toJson<String>(confidence),
+      'limitations': serializer.toJson<String>(limitations),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'revision': serializer.toJson<int>(revision),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  PersonalExperiment copyWith({
+    int? id,
+    String? uuid,
+    String? hypothesis,
+    String? changedVariable,
+    String? controlledFactors,
+    String? requiredData,
+    DateTime? startedAt,
+    DateTime? endsAt,
+    Value<double?> adherence = const Value.absent(),
+    Value<String?> result = const Value.absent(),
+    String? confidence,
+    String? limitations,
+    String? status,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    int? revision,
+    String? syncStatus,
+  }) => PersonalExperiment(
+    id: id ?? this.id,
+    uuid: uuid ?? this.uuid,
+    hypothesis: hypothesis ?? this.hypothesis,
+    changedVariable: changedVariable ?? this.changedVariable,
+    controlledFactors: controlledFactors ?? this.controlledFactors,
+    requiredData: requiredData ?? this.requiredData,
+    startedAt: startedAt ?? this.startedAt,
+    endsAt: endsAt ?? this.endsAt,
+    adherence: adherence.present ? adherence.value : this.adherence,
+    result: result.present ? result.value : this.result,
+    confidence: confidence ?? this.confidence,
+    limitations: limitations ?? this.limitations,
+    status: status ?? this.status,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    revision: revision ?? this.revision,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  PersonalExperiment copyWithCompanion(PersonalExperimentsCompanion data) {
+    return PersonalExperiment(
+      id: data.id.present ? data.id.value : this.id,
+      uuid: data.uuid.present ? data.uuid.value : this.uuid,
+      hypothesis: data.hypothesis.present
+          ? data.hypothesis.value
+          : this.hypothesis,
+      changedVariable: data.changedVariable.present
+          ? data.changedVariable.value
+          : this.changedVariable,
+      controlledFactors: data.controlledFactors.present
+          ? data.controlledFactors.value
+          : this.controlledFactors,
+      requiredData: data.requiredData.present
+          ? data.requiredData.value
+          : this.requiredData,
+      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
+      endsAt: data.endsAt.present ? data.endsAt.value : this.endsAt,
+      adherence: data.adherence.present ? data.adherence.value : this.adherence,
+      result: data.result.present ? data.result.value : this.result,
+      confidence: data.confidence.present
+          ? data.confidence.value
+          : this.confidence,
+      limitations: data.limitations.present
+          ? data.limitations.value
+          : this.limitations,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      revision: data.revision.present ? data.revision.value : this.revision,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PersonalExperiment(')
+          ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
+          ..write('hypothesis: $hypothesis, ')
+          ..write('changedVariable: $changedVariable, ')
+          ..write('controlledFactors: $controlledFactors, ')
+          ..write('requiredData: $requiredData, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('endsAt: $endsAt, ')
+          ..write('adherence: $adherence, ')
+          ..write('result: $result, ')
+          ..write('confidence: $confidence, ')
+          ..write('limitations: $limitations, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('revision: $revision, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    uuid,
+    hypothesis,
+    changedVariable,
+    controlledFactors,
+    requiredData,
+    startedAt,
+    endsAt,
+    adherence,
+    result,
+    confidence,
+    limitations,
+    status,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    revision,
+    syncStatus,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PersonalExperiment &&
+          other.id == this.id &&
+          other.uuid == this.uuid &&
+          other.hypothesis == this.hypothesis &&
+          other.changedVariable == this.changedVariable &&
+          other.controlledFactors == this.controlledFactors &&
+          other.requiredData == this.requiredData &&
+          other.startedAt == this.startedAt &&
+          other.endsAt == this.endsAt &&
+          other.adherence == this.adherence &&
+          other.result == this.result &&
+          other.confidence == this.confidence &&
+          other.limitations == this.limitations &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.revision == this.revision &&
+          other.syncStatus == this.syncStatus);
+}
+
+class PersonalExperimentsCompanion extends UpdateCompanion<PersonalExperiment> {
+  final Value<int> id;
+  final Value<String> uuid;
+  final Value<String> hypothesis;
+  final Value<String> changedVariable;
+  final Value<String> controlledFactors;
+  final Value<String> requiredData;
+  final Value<DateTime> startedAt;
+  final Value<DateTime> endsAt;
+  final Value<double?> adherence;
+  final Value<String?> result;
+  final Value<String> confidence;
+  final Value<String> limitations;
+  final Value<String> status;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> revision;
+  final Value<String> syncStatus;
+  const PersonalExperimentsCompanion({
+    this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
+    this.hypothesis = const Value.absent(),
+    this.changedVariable = const Value.absent(),
+    this.controlledFactors = const Value.absent(),
+    this.requiredData = const Value.absent(),
+    this.startedAt = const Value.absent(),
+    this.endsAt = const Value.absent(),
+    this.adherence = const Value.absent(),
+    this.result = const Value.absent(),
+    this.confidence = const Value.absent(),
+    this.limitations = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+  });
+  PersonalExperimentsCompanion.insert({
+    this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
+    required String hypothesis,
+    required String changedVariable,
+    this.controlledFactors = const Value.absent(),
+    this.requiredData = const Value.absent(),
+    required DateTime startedAt,
+    required DateTime endsAt,
+    this.adherence = const Value.absent(),
+    this.result = const Value.absent(),
+    this.confidence = const Value.absent(),
+    this.limitations = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+  }) : hypothesis = Value(hypothesis),
+       changedVariable = Value(changedVariable),
+       startedAt = Value(startedAt),
+       endsAt = Value(endsAt);
+  static Insertable<PersonalExperiment> custom({
+    Expression<int>? id,
+    Expression<String>? uuid,
+    Expression<String>? hypothesis,
+    Expression<String>? changedVariable,
+    Expression<String>? controlledFactors,
+    Expression<String>? requiredData,
+    Expression<DateTime>? startedAt,
+    Expression<DateTime>? endsAt,
+    Expression<double>? adherence,
+    Expression<String>? result,
+    Expression<String>? confidence,
+    Expression<String>? limitations,
+    Expression<String>? status,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? revision,
+    Expression<String>? syncStatus,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (uuid != null) 'uuid': uuid,
+      if (hypothesis != null) 'hypothesis': hypothesis,
+      if (changedVariable != null) 'changed_variable': changedVariable,
+      if (controlledFactors != null) 'controlled_factors': controlledFactors,
+      if (requiredData != null) 'required_data': requiredData,
+      if (startedAt != null) 'started_at': startedAt,
+      if (endsAt != null) 'ends_at': endsAt,
+      if (adherence != null) 'adherence': adherence,
+      if (result != null) 'result': result,
+      if (confidence != null) 'confidence': confidence,
+      if (limitations != null) 'limitations': limitations,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (revision != null) 'revision': revision,
+      if (syncStatus != null) 'sync_status': syncStatus,
+    });
+  }
+
+  PersonalExperimentsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? uuid,
+    Value<String>? hypothesis,
+    Value<String>? changedVariable,
+    Value<String>? controlledFactors,
+    Value<String>? requiredData,
+    Value<DateTime>? startedAt,
+    Value<DateTime>? endsAt,
+    Value<double?>? adherence,
+    Value<String?>? result,
+    Value<String>? confidence,
+    Value<String>? limitations,
+    Value<String>? status,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<int>? revision,
+    Value<String>? syncStatus,
+  }) {
+    return PersonalExperimentsCompanion(
+      id: id ?? this.id,
+      uuid: uuid ?? this.uuid,
+      hypothesis: hypothesis ?? this.hypothesis,
+      changedVariable: changedVariable ?? this.changedVariable,
+      controlledFactors: controlledFactors ?? this.controlledFactors,
+      requiredData: requiredData ?? this.requiredData,
+      startedAt: startedAt ?? this.startedAt,
+      endsAt: endsAt ?? this.endsAt,
+      adherence: adherence ?? this.adherence,
+      result: result ?? this.result,
+      confidence: confidence ?? this.confidence,
+      limitations: limitations ?? this.limitations,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      revision: revision ?? this.revision,
+      syncStatus: syncStatus ?? this.syncStatus,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (uuid.present) {
+      map['uuid'] = Variable<String>(uuid.value);
+    }
+    if (hypothesis.present) {
+      map['hypothesis'] = Variable<String>(hypothesis.value);
+    }
+    if (changedVariable.present) {
+      map['changed_variable'] = Variable<String>(changedVariable.value);
+    }
+    if (controlledFactors.present) {
+      map['controlled_factors'] = Variable<String>(controlledFactors.value);
+    }
+    if (requiredData.present) {
+      map['required_data'] = Variable<String>(requiredData.value);
+    }
+    if (startedAt.present) {
+      map['started_at'] = Variable<DateTime>(startedAt.value);
+    }
+    if (endsAt.present) {
+      map['ends_at'] = Variable<DateTime>(endsAt.value);
+    }
+    if (adherence.present) {
+      map['adherence'] = Variable<double>(adherence.value);
+    }
+    if (result.present) {
+      map['result'] = Variable<String>(result.value);
+    }
+    if (confidence.present) {
+      map['confidence'] = Variable<String>(confidence.value);
+    }
+    if (limitations.present) {
+      map['limitations'] = Variable<String>(limitations.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PersonalExperimentsCompanion(')
+          ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
+          ..write('hypothesis: $hypothesis, ')
+          ..write('changedVariable: $changedVariable, ')
+          ..write('controlledFactors: $controlledFactors, ')
+          ..write('requiredData: $requiredData, ')
+          ..write('startedAt: $startedAt, ')
+          ..write('endsAt: $endsAt, ')
+          ..write('adherence: $adherence, ')
+          ..write('result: $result, ')
+          ..write('confidence: $confidence, ')
+          ..write('limitations: $limitations, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('revision: $revision, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -10532,6 +11518,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this,
   );
   late final $PlanSettingsTable planSettings = $PlanSettingsTable(this);
+  late final $PersonalExperimentsTable personalExperiments =
+      $PersonalExperimentsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -10551,6 +11539,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     lifeContextEntries,
     decisionMemories,
     planSettings,
+    personalExperiments,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -16843,6 +17832,477 @@ typedef $$PlanSettingsTableProcessedTableManager =
       PlanSetting,
       PrefetchHooks Function({bool profileUuid})
     >;
+typedef $$PersonalExperimentsTableCreateCompanionBuilder =
+    PersonalExperimentsCompanion Function({
+      Value<int> id,
+      Value<String> uuid,
+      required String hypothesis,
+      required String changedVariable,
+      Value<String> controlledFactors,
+      Value<String> requiredData,
+      required DateTime startedAt,
+      required DateTime endsAt,
+      Value<double?> adherence,
+      Value<String?> result,
+      Value<String> confidence,
+      Value<String> limitations,
+      Value<String> status,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> revision,
+      Value<String> syncStatus,
+    });
+typedef $$PersonalExperimentsTableUpdateCompanionBuilder =
+    PersonalExperimentsCompanion Function({
+      Value<int> id,
+      Value<String> uuid,
+      Value<String> hypothesis,
+      Value<String> changedVariable,
+      Value<String> controlledFactors,
+      Value<String> requiredData,
+      Value<DateTime> startedAt,
+      Value<DateTime> endsAt,
+      Value<double?> adherence,
+      Value<String?> result,
+      Value<String> confidence,
+      Value<String> limitations,
+      Value<String> status,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> revision,
+      Value<String> syncStatus,
+    });
+
+class $$PersonalExperimentsTableFilterComposer
+    extends Composer<_$AppDatabase, $PersonalExperimentsTable> {
+  $$PersonalExperimentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get hypothesis => $composableBuilder(
+    column: $table.hypothesis,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get changedVariable => $composableBuilder(
+    column: $table.changedVariable,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get controlledFactors => $composableBuilder(
+    column: $table.controlledFactors,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get requiredData => $composableBuilder(
+    column: $table.requiredData,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get endsAt => $composableBuilder(
+    column: $table.endsAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get adherence => $composableBuilder(
+    column: $table.adherence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get result => $composableBuilder(
+    column: $table.result,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get limitations => $composableBuilder(
+    column: $table.limitations,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PersonalExperimentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PersonalExperimentsTable> {
+  $$PersonalExperimentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get hypothesis => $composableBuilder(
+    column: $table.hypothesis,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get changedVariable => $composableBuilder(
+    column: $table.changedVariable,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get controlledFactors => $composableBuilder(
+    column: $table.controlledFactors,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get requiredData => $composableBuilder(
+    column: $table.requiredData,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get startedAt => $composableBuilder(
+    column: $table.startedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get endsAt => $composableBuilder(
+    column: $table.endsAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get adherence => $composableBuilder(
+    column: $table.adherence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get result => $composableBuilder(
+    column: $table.result,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get limitations => $composableBuilder(
+    column: $table.limitations,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PersonalExperimentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PersonalExperimentsTable> {
+  $$PersonalExperimentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uuid =>
+      $composableBuilder(column: $table.uuid, builder: (column) => column);
+
+  GeneratedColumn<String> get hypothesis => $composableBuilder(
+    column: $table.hypothesis,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get changedVariable => $composableBuilder(
+    column: $table.changedVariable,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get controlledFactors => $composableBuilder(
+    column: $table.controlledFactors,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get requiredData => $composableBuilder(
+    column: $table.requiredData,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get startedAt =>
+      $composableBuilder(column: $table.startedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get endsAt =>
+      $composableBuilder(column: $table.endsAt, builder: (column) => column);
+
+  GeneratedColumn<double> get adherence =>
+      $composableBuilder(column: $table.adherence, builder: (column) => column);
+
+  GeneratedColumn<String> get result =>
+      $composableBuilder(column: $table.result, builder: (column) => column);
+
+  GeneratedColumn<String> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get limitations => $composableBuilder(
+    column: $table.limitations,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+}
+
+class $$PersonalExperimentsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PersonalExperimentsTable,
+          PersonalExperiment,
+          $$PersonalExperimentsTableFilterComposer,
+          $$PersonalExperimentsTableOrderingComposer,
+          $$PersonalExperimentsTableAnnotationComposer,
+          $$PersonalExperimentsTableCreateCompanionBuilder,
+          $$PersonalExperimentsTableUpdateCompanionBuilder,
+          (
+            PersonalExperiment,
+            BaseReferences<
+              _$AppDatabase,
+              $PersonalExperimentsTable,
+              PersonalExperiment
+            >,
+          ),
+          PersonalExperiment,
+          PrefetchHooks Function()
+        > {
+  $$PersonalExperimentsTableTableManager(
+    _$AppDatabase db,
+    $PersonalExperimentsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PersonalExperimentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PersonalExperimentsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PersonalExperimentsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> uuid = const Value.absent(),
+                Value<String> hypothesis = const Value.absent(),
+                Value<String> changedVariable = const Value.absent(),
+                Value<String> controlledFactors = const Value.absent(),
+                Value<String> requiredData = const Value.absent(),
+                Value<DateTime> startedAt = const Value.absent(),
+                Value<DateTime> endsAt = const Value.absent(),
+                Value<double?> adherence = const Value.absent(),
+                Value<String?> result = const Value.absent(),
+                Value<String> confidence = const Value.absent(),
+                Value<String> limitations = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+              }) => PersonalExperimentsCompanion(
+                id: id,
+                uuid: uuid,
+                hypothesis: hypothesis,
+                changedVariable: changedVariable,
+                controlledFactors: controlledFactors,
+                requiredData: requiredData,
+                startedAt: startedAt,
+                endsAt: endsAt,
+                adherence: adherence,
+                result: result,
+                confidence: confidence,
+                limitations: limitations,
+                status: status,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                revision: revision,
+                syncStatus: syncStatus,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> uuid = const Value.absent(),
+                required String hypothesis,
+                required String changedVariable,
+                Value<String> controlledFactors = const Value.absent(),
+                Value<String> requiredData = const Value.absent(),
+                required DateTime startedAt,
+                required DateTime endsAt,
+                Value<double?> adherence = const Value.absent(),
+                Value<String?> result = const Value.absent(),
+                Value<String> confidence = const Value.absent(),
+                Value<String> limitations = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+              }) => PersonalExperimentsCompanion.insert(
+                id: id,
+                uuid: uuid,
+                hypothesis: hypothesis,
+                changedVariable: changedVariable,
+                controlledFactors: controlledFactors,
+                requiredData: requiredData,
+                startedAt: startedAt,
+                endsAt: endsAt,
+                adherence: adherence,
+                result: result,
+                confidence: confidence,
+                limitations: limitations,
+                status: status,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                revision: revision,
+                syncStatus: syncStatus,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PersonalExperimentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PersonalExperimentsTable,
+      PersonalExperiment,
+      $$PersonalExperimentsTableFilterComposer,
+      $$PersonalExperimentsTableOrderingComposer,
+      $$PersonalExperimentsTableAnnotationComposer,
+      $$PersonalExperimentsTableCreateCompanionBuilder,
+      $$PersonalExperimentsTableUpdateCompanionBuilder,
+      (
+        PersonalExperiment,
+        BaseReferences<
+          _$AppDatabase,
+          $PersonalExperimentsTable,
+          PersonalExperiment
+        >,
+      ),
+      PersonalExperiment,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -16875,4 +18335,6 @@ class $AppDatabaseManager {
       $$DecisionMemoriesTableTableManager(_db, _db.decisionMemories);
   $$PlanSettingsTableTableManager get planSettings =>
       $$PlanSettingsTableTableManager(_db, _db.planSettings);
+  $$PersonalExperimentsTableTableManager get personalExperiments =>
+      $$PersonalExperimentsTableTableManager(_db, _db.personalExperiments);
 }
