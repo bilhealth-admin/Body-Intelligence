@@ -20,6 +20,11 @@ class DashboardPage extends StatelessWidget {
             onPressed: () => context.go('/daily-check-in'),
           ),
           IconButton(
+            tooltip: 'Life context',
+            icon: const Icon(Icons.event_note_outlined),
+            onPressed: () => context.go('/context'),
+          ),
+          IconButton(
             tooltip: 'Food catalog',
             icon: const Icon(Icons.restaurant_menu),
             onPressed: () => context.go('/nutrition'),

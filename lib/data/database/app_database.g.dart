@@ -7571,6 +7571,1652 @@ class PreferencesCompanion extends UpdateCompanion<Preference> {
   }
 }
 
+class $LifeContextEntriesTable extends LifeContextEntries
+    with TableInfo<$LifeContextEntriesTable, LifeContextEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LifeContextEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
+  @override
+  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
+    'uuid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+    clientDefault: newDatabaseId,
+  );
+  static const VerificationMeta _occurredAtMeta = const VerificationMeta(
+    'occurredAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> occurredAt = GeneratedColumn<DateTime>(
+    'occurred_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dayKeyMeta = const VerificationMeta('dayKey');
+  @override
+  late final GeneratedColumn<String> dayKey = GeneratedColumn<String>(
+    'day_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _typeMeta = const VerificationMeta('type');
+  @override
+  late final GeneratedColumn<String> type = GeneratedColumn<String>(
+    'type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _detailsMeta = const VerificationMeta(
+    'details',
+  );
+  @override
+  late final GeneratedColumn<String> details = GeneratedColumn<String>(
+    'details',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _useInInsightsMeta = const VerificationMeta(
+    'useInInsights',
+  );
+  @override
+  late final GeneratedColumn<bool> useInInsights = GeneratedColumn<bool>(
+    'use_in_insights',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("use_in_insights" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('local'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    uuid,
+    occurredAt,
+    dayKey,
+    type,
+    details,
+    useInInsights,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    revision,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'life_context_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LifeContextEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uuid')) {
+      context.handle(
+        _uuidMeta,
+        uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta),
+      );
+    }
+    if (data.containsKey('occurred_at')) {
+      context.handle(
+        _occurredAtMeta,
+        occurredAt.isAcceptableOrUnknown(data['occurred_at']!, _occurredAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_occurredAtMeta);
+    }
+    if (data.containsKey('day_key')) {
+      context.handle(
+        _dayKeyMeta,
+        dayKey.isAcceptableOrUnknown(data['day_key']!, _dayKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dayKeyMeta);
+    }
+    if (data.containsKey('type')) {
+      context.handle(
+        _typeMeta,
+        type.isAcceptableOrUnknown(data['type']!, _typeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_typeMeta);
+    }
+    if (data.containsKey('details')) {
+      context.handle(
+        _detailsMeta,
+        details.isAcceptableOrUnknown(data['details']!, _detailsMeta),
+      );
+    }
+    if (data.containsKey('use_in_insights')) {
+      context.handle(
+        _useInInsightsMeta,
+        useInInsights.isAcceptableOrUnknown(
+          data['use_in_insights']!,
+          _useInInsightsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LifeContextEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LifeContextEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      uuid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uuid'],
+      )!,
+      occurredAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}occurred_at'],
+      )!,
+      dayKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}day_key'],
+      )!,
+      type: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}type'],
+      )!,
+      details: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}details'],
+      ),
+      useInInsights: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}use_in_insights'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $LifeContextEntriesTable createAlias(String alias) {
+    return $LifeContextEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class LifeContextEntry extends DataClass
+    implements Insertable<LifeContextEntry> {
+  final int id;
+  final String uuid;
+  final DateTime occurredAt;
+  final String dayKey;
+  final String type;
+  final String? details;
+  final bool useInInsights;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int revision;
+  final String syncStatus;
+  const LifeContextEntry({
+    required this.id,
+    required this.uuid,
+    required this.occurredAt,
+    required this.dayKey,
+    required this.type,
+    this.details,
+    required this.useInInsights,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.revision,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['uuid'] = Variable<String>(uuid);
+    map['occurred_at'] = Variable<DateTime>(occurredAt);
+    map['day_key'] = Variable<String>(dayKey);
+    map['type'] = Variable<String>(type);
+    if (!nullToAbsent || details != null) {
+      map['details'] = Variable<String>(details);
+    }
+    map['use_in_insights'] = Variable<bool>(useInInsights);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['revision'] = Variable<int>(revision);
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  LifeContextEntriesCompanion toCompanion(bool nullToAbsent) {
+    return LifeContextEntriesCompanion(
+      id: Value(id),
+      uuid: Value(uuid),
+      occurredAt: Value(occurredAt),
+      dayKey: Value(dayKey),
+      type: Value(type),
+      details: details == null && nullToAbsent
+          ? const Value.absent()
+          : Value(details),
+      useInInsights: Value(useInInsights),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      revision: Value(revision),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory LifeContextEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LifeContextEntry(
+      id: serializer.fromJson<int>(json['id']),
+      uuid: serializer.fromJson<String>(json['uuid']),
+      occurredAt: serializer.fromJson<DateTime>(json['occurredAt']),
+      dayKey: serializer.fromJson<String>(json['dayKey']),
+      type: serializer.fromJson<String>(json['type']),
+      details: serializer.fromJson<String?>(json['details']),
+      useInInsights: serializer.fromJson<bool>(json['useInInsights']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      revision: serializer.fromJson<int>(json['revision']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'uuid': serializer.toJson<String>(uuid),
+      'occurredAt': serializer.toJson<DateTime>(occurredAt),
+      'dayKey': serializer.toJson<String>(dayKey),
+      'type': serializer.toJson<String>(type),
+      'details': serializer.toJson<String?>(details),
+      'useInInsights': serializer.toJson<bool>(useInInsights),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'revision': serializer.toJson<int>(revision),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  LifeContextEntry copyWith({
+    int? id,
+    String? uuid,
+    DateTime? occurredAt,
+    String? dayKey,
+    String? type,
+    Value<String?> details = const Value.absent(),
+    bool? useInInsights,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    int? revision,
+    String? syncStatus,
+  }) => LifeContextEntry(
+    id: id ?? this.id,
+    uuid: uuid ?? this.uuid,
+    occurredAt: occurredAt ?? this.occurredAt,
+    dayKey: dayKey ?? this.dayKey,
+    type: type ?? this.type,
+    details: details.present ? details.value : this.details,
+    useInInsights: useInInsights ?? this.useInInsights,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    revision: revision ?? this.revision,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  LifeContextEntry copyWithCompanion(LifeContextEntriesCompanion data) {
+    return LifeContextEntry(
+      id: data.id.present ? data.id.value : this.id,
+      uuid: data.uuid.present ? data.uuid.value : this.uuid,
+      occurredAt: data.occurredAt.present
+          ? data.occurredAt.value
+          : this.occurredAt,
+      dayKey: data.dayKey.present ? data.dayKey.value : this.dayKey,
+      type: data.type.present ? data.type.value : this.type,
+      details: data.details.present ? data.details.value : this.details,
+      useInInsights: data.useInInsights.present
+          ? data.useInInsights.value
+          : this.useInInsights,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      revision: data.revision.present ? data.revision.value : this.revision,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LifeContextEntry(')
+          ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
+          ..write('occurredAt: $occurredAt, ')
+          ..write('dayKey: $dayKey, ')
+          ..write('type: $type, ')
+          ..write('details: $details, ')
+          ..write('useInInsights: $useInInsights, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('revision: $revision, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    uuid,
+    occurredAt,
+    dayKey,
+    type,
+    details,
+    useInInsights,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    revision,
+    syncStatus,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LifeContextEntry &&
+          other.id == this.id &&
+          other.uuid == this.uuid &&
+          other.occurredAt == this.occurredAt &&
+          other.dayKey == this.dayKey &&
+          other.type == this.type &&
+          other.details == this.details &&
+          other.useInInsights == this.useInInsights &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.revision == this.revision &&
+          other.syncStatus == this.syncStatus);
+}
+
+class LifeContextEntriesCompanion extends UpdateCompanion<LifeContextEntry> {
+  final Value<int> id;
+  final Value<String> uuid;
+  final Value<DateTime> occurredAt;
+  final Value<String> dayKey;
+  final Value<String> type;
+  final Value<String?> details;
+  final Value<bool> useInInsights;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> revision;
+  final Value<String> syncStatus;
+  const LifeContextEntriesCompanion({
+    this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
+    this.occurredAt = const Value.absent(),
+    this.dayKey = const Value.absent(),
+    this.type = const Value.absent(),
+    this.details = const Value.absent(),
+    this.useInInsights = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+  });
+  LifeContextEntriesCompanion.insert({
+    this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
+    required DateTime occurredAt,
+    required String dayKey,
+    required String type,
+    this.details = const Value.absent(),
+    this.useInInsights = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+  }) : occurredAt = Value(occurredAt),
+       dayKey = Value(dayKey),
+       type = Value(type);
+  static Insertable<LifeContextEntry> custom({
+    Expression<int>? id,
+    Expression<String>? uuid,
+    Expression<DateTime>? occurredAt,
+    Expression<String>? dayKey,
+    Expression<String>? type,
+    Expression<String>? details,
+    Expression<bool>? useInInsights,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? revision,
+    Expression<String>? syncStatus,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (uuid != null) 'uuid': uuid,
+      if (occurredAt != null) 'occurred_at': occurredAt,
+      if (dayKey != null) 'day_key': dayKey,
+      if (type != null) 'type': type,
+      if (details != null) 'details': details,
+      if (useInInsights != null) 'use_in_insights': useInInsights,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (revision != null) 'revision': revision,
+      if (syncStatus != null) 'sync_status': syncStatus,
+    });
+  }
+
+  LifeContextEntriesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? uuid,
+    Value<DateTime>? occurredAt,
+    Value<String>? dayKey,
+    Value<String>? type,
+    Value<String?>? details,
+    Value<bool>? useInInsights,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<int>? revision,
+    Value<String>? syncStatus,
+  }) {
+    return LifeContextEntriesCompanion(
+      id: id ?? this.id,
+      uuid: uuid ?? this.uuid,
+      occurredAt: occurredAt ?? this.occurredAt,
+      dayKey: dayKey ?? this.dayKey,
+      type: type ?? this.type,
+      details: details ?? this.details,
+      useInInsights: useInInsights ?? this.useInInsights,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      revision: revision ?? this.revision,
+      syncStatus: syncStatus ?? this.syncStatus,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (uuid.present) {
+      map['uuid'] = Variable<String>(uuid.value);
+    }
+    if (occurredAt.present) {
+      map['occurred_at'] = Variable<DateTime>(occurredAt.value);
+    }
+    if (dayKey.present) {
+      map['day_key'] = Variable<String>(dayKey.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(type.value);
+    }
+    if (details.present) {
+      map['details'] = Variable<String>(details.value);
+    }
+    if (useInInsights.present) {
+      map['use_in_insights'] = Variable<bool>(useInInsights.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LifeContextEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
+          ..write('occurredAt: $occurredAt, ')
+          ..write('dayKey: $dayKey, ')
+          ..write('type: $type, ')
+          ..write('details: $details, ')
+          ..write('useInInsights: $useInInsights, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('revision: $revision, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DecisionMemoriesTable extends DecisionMemories
+    with TableInfo<$DecisionMemoriesTable, DecisionMemory> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DecisionMemoriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
+  @override
+  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
+    'uuid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+    clientDefault: newDatabaseId,
+  );
+  static const VerificationMeta _dayKeyMeta = const VerificationMeta('dayKey');
+  @override
+  late final GeneratedColumn<String> dayKey = GeneratedColumn<String>(
+    'day_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recommendationKeyMeta = const VerificationMeta(
+    'recommendationKey',
+  );
+  @override
+  late final GeneratedColumn<String> recommendationKey =
+      GeneratedColumn<String>(
+        'recommendation_key',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _evidenceJsonMeta = const VerificationMeta(
+    'evidenceJson',
+  );
+  @override
+  late final GeneratedColumn<String> evidenceJson = GeneratedColumn<String>(
+    'evidence_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _confidenceMeta = const VerificationMeta(
+    'confidence',
+  );
+  @override
+  late final GeneratedColumn<String> confidence = GeneratedColumn<String>(
+    'confidence',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('low'),
+  );
+  static const VerificationMeta _responseMeta = const VerificationMeta(
+    'response',
+  );
+  @override
+  late final GeneratedColumn<String> response = GeneratedColumn<String>(
+    'response',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('pending'),
+  );
+  static const VerificationMeta _outcomeMeta = const VerificationMeta(
+    'outcome',
+  );
+  @override
+  late final GeneratedColumn<String> outcome = GeneratedColumn<String>(
+    'outcome',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _helpfulnessMeta = const VerificationMeta(
+    'helpfulness',
+  );
+  @override
+  late final GeneratedColumn<int> helpfulness = GeneratedColumn<int>(
+    'helpfulness',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _surfacedAtMeta = const VerificationMeta(
+    'surfacedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> surfacedAt = GeneratedColumn<DateTime>(
+    'surfaced_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _respondedAtMeta = const VerificationMeta(
+    'respondedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> respondedAt = GeneratedColumn<DateTime>(
+    'responded_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _evaluatedAtMeta = const VerificationMeta(
+    'evaluatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> evaluatedAt = GeneratedColumn<DateTime>(
+    'evaluated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('local'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    uuid,
+    dayKey,
+    recommendationKey,
+    title,
+    reason,
+    evidenceJson,
+    confidence,
+    response,
+    outcome,
+    helpfulness,
+    surfacedAt,
+    respondedAt,
+    evaluatedAt,
+    deletedAt,
+    revision,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'decision_memories';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DecisionMemory> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uuid')) {
+      context.handle(
+        _uuidMeta,
+        uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta),
+      );
+    }
+    if (data.containsKey('day_key')) {
+      context.handle(
+        _dayKeyMeta,
+        dayKey.isAcceptableOrUnknown(data['day_key']!, _dayKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dayKeyMeta);
+    }
+    if (data.containsKey('recommendation_key')) {
+      context.handle(
+        _recommendationKeyMeta,
+        recommendationKey.isAcceptableOrUnknown(
+          data['recommendation_key']!,
+          _recommendationKeyMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_recommendationKeyMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reasonMeta);
+    }
+    if (data.containsKey('evidence_json')) {
+      context.handle(
+        _evidenceJsonMeta,
+        evidenceJson.isAcceptableOrUnknown(
+          data['evidence_json']!,
+          _evidenceJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('confidence')) {
+      context.handle(
+        _confidenceMeta,
+        confidence.isAcceptableOrUnknown(data['confidence']!, _confidenceMeta),
+      );
+    }
+    if (data.containsKey('response')) {
+      context.handle(
+        _responseMeta,
+        response.isAcceptableOrUnknown(data['response']!, _responseMeta),
+      );
+    }
+    if (data.containsKey('outcome')) {
+      context.handle(
+        _outcomeMeta,
+        outcome.isAcceptableOrUnknown(data['outcome']!, _outcomeMeta),
+      );
+    }
+    if (data.containsKey('helpfulness')) {
+      context.handle(
+        _helpfulnessMeta,
+        helpfulness.isAcceptableOrUnknown(
+          data['helpfulness']!,
+          _helpfulnessMeta,
+        ),
+      );
+    }
+    if (data.containsKey('surfaced_at')) {
+      context.handle(
+        _surfacedAtMeta,
+        surfacedAt.isAcceptableOrUnknown(data['surfaced_at']!, _surfacedAtMeta),
+      );
+    }
+    if (data.containsKey('responded_at')) {
+      context.handle(
+        _respondedAtMeta,
+        respondedAt.isAcceptableOrUnknown(
+          data['responded_at']!,
+          _respondedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('evaluated_at')) {
+      context.handle(
+        _evaluatedAtMeta,
+        evaluatedAt.isAcceptableOrUnknown(
+          data['evaluated_at']!,
+          _evaluatedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {dayKey, recommendationKey},
+  ];
+  @override
+  DecisionMemory map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DecisionMemory(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      uuid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uuid'],
+      )!,
+      dayKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}day_key'],
+      )!,
+      recommendationKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recommendation_key'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      )!,
+      evidenceJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}evidence_json'],
+      )!,
+      confidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}confidence'],
+      )!,
+      response: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}response'],
+      )!,
+      outcome: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}outcome'],
+      ),
+      helpfulness: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}helpfulness'],
+      ),
+      surfacedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}surfaced_at'],
+      )!,
+      respondedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}responded_at'],
+      ),
+      evaluatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}evaluated_at'],
+      ),
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $DecisionMemoriesTable createAlias(String alias) {
+    return $DecisionMemoriesTable(attachedDatabase, alias);
+  }
+}
+
+class DecisionMemory extends DataClass implements Insertable<DecisionMemory> {
+  final int id;
+  final String uuid;
+  final String dayKey;
+  final String recommendationKey;
+  final String title;
+  final String reason;
+  final String evidenceJson;
+  final String confidence;
+  final String response;
+  final String? outcome;
+  final int? helpfulness;
+  final DateTime surfacedAt;
+  final DateTime? respondedAt;
+  final DateTime? evaluatedAt;
+  final DateTime? deletedAt;
+  final int revision;
+  final String syncStatus;
+  const DecisionMemory({
+    required this.id,
+    required this.uuid,
+    required this.dayKey,
+    required this.recommendationKey,
+    required this.title,
+    required this.reason,
+    required this.evidenceJson,
+    required this.confidence,
+    required this.response,
+    this.outcome,
+    this.helpfulness,
+    required this.surfacedAt,
+    this.respondedAt,
+    this.evaluatedAt,
+    this.deletedAt,
+    required this.revision,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['uuid'] = Variable<String>(uuid);
+    map['day_key'] = Variable<String>(dayKey);
+    map['recommendation_key'] = Variable<String>(recommendationKey);
+    map['title'] = Variable<String>(title);
+    map['reason'] = Variable<String>(reason);
+    map['evidence_json'] = Variable<String>(evidenceJson);
+    map['confidence'] = Variable<String>(confidence);
+    map['response'] = Variable<String>(response);
+    if (!nullToAbsent || outcome != null) {
+      map['outcome'] = Variable<String>(outcome);
+    }
+    if (!nullToAbsent || helpfulness != null) {
+      map['helpfulness'] = Variable<int>(helpfulness);
+    }
+    map['surfaced_at'] = Variable<DateTime>(surfacedAt);
+    if (!nullToAbsent || respondedAt != null) {
+      map['responded_at'] = Variable<DateTime>(respondedAt);
+    }
+    if (!nullToAbsent || evaluatedAt != null) {
+      map['evaluated_at'] = Variable<DateTime>(evaluatedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['revision'] = Variable<int>(revision);
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  DecisionMemoriesCompanion toCompanion(bool nullToAbsent) {
+    return DecisionMemoriesCompanion(
+      id: Value(id),
+      uuid: Value(uuid),
+      dayKey: Value(dayKey),
+      recommendationKey: Value(recommendationKey),
+      title: Value(title),
+      reason: Value(reason),
+      evidenceJson: Value(evidenceJson),
+      confidence: Value(confidence),
+      response: Value(response),
+      outcome: outcome == null && nullToAbsent
+          ? const Value.absent()
+          : Value(outcome),
+      helpfulness: helpfulness == null && nullToAbsent
+          ? const Value.absent()
+          : Value(helpfulness),
+      surfacedAt: Value(surfacedAt),
+      respondedAt: respondedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(respondedAt),
+      evaluatedAt: evaluatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(evaluatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      revision: Value(revision),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory DecisionMemory.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DecisionMemory(
+      id: serializer.fromJson<int>(json['id']),
+      uuid: serializer.fromJson<String>(json['uuid']),
+      dayKey: serializer.fromJson<String>(json['dayKey']),
+      recommendationKey: serializer.fromJson<String>(json['recommendationKey']),
+      title: serializer.fromJson<String>(json['title']),
+      reason: serializer.fromJson<String>(json['reason']),
+      evidenceJson: serializer.fromJson<String>(json['evidenceJson']),
+      confidence: serializer.fromJson<String>(json['confidence']),
+      response: serializer.fromJson<String>(json['response']),
+      outcome: serializer.fromJson<String?>(json['outcome']),
+      helpfulness: serializer.fromJson<int?>(json['helpfulness']),
+      surfacedAt: serializer.fromJson<DateTime>(json['surfacedAt']),
+      respondedAt: serializer.fromJson<DateTime?>(json['respondedAt']),
+      evaluatedAt: serializer.fromJson<DateTime?>(json['evaluatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      revision: serializer.fromJson<int>(json['revision']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'uuid': serializer.toJson<String>(uuid),
+      'dayKey': serializer.toJson<String>(dayKey),
+      'recommendationKey': serializer.toJson<String>(recommendationKey),
+      'title': serializer.toJson<String>(title),
+      'reason': serializer.toJson<String>(reason),
+      'evidenceJson': serializer.toJson<String>(evidenceJson),
+      'confidence': serializer.toJson<String>(confidence),
+      'response': serializer.toJson<String>(response),
+      'outcome': serializer.toJson<String?>(outcome),
+      'helpfulness': serializer.toJson<int?>(helpfulness),
+      'surfacedAt': serializer.toJson<DateTime>(surfacedAt),
+      'respondedAt': serializer.toJson<DateTime?>(respondedAt),
+      'evaluatedAt': serializer.toJson<DateTime?>(evaluatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'revision': serializer.toJson<int>(revision),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  DecisionMemory copyWith({
+    int? id,
+    String? uuid,
+    String? dayKey,
+    String? recommendationKey,
+    String? title,
+    String? reason,
+    String? evidenceJson,
+    String? confidence,
+    String? response,
+    Value<String?> outcome = const Value.absent(),
+    Value<int?> helpfulness = const Value.absent(),
+    DateTime? surfacedAt,
+    Value<DateTime?> respondedAt = const Value.absent(),
+    Value<DateTime?> evaluatedAt = const Value.absent(),
+    Value<DateTime?> deletedAt = const Value.absent(),
+    int? revision,
+    String? syncStatus,
+  }) => DecisionMemory(
+    id: id ?? this.id,
+    uuid: uuid ?? this.uuid,
+    dayKey: dayKey ?? this.dayKey,
+    recommendationKey: recommendationKey ?? this.recommendationKey,
+    title: title ?? this.title,
+    reason: reason ?? this.reason,
+    evidenceJson: evidenceJson ?? this.evidenceJson,
+    confidence: confidence ?? this.confidence,
+    response: response ?? this.response,
+    outcome: outcome.present ? outcome.value : this.outcome,
+    helpfulness: helpfulness.present ? helpfulness.value : this.helpfulness,
+    surfacedAt: surfacedAt ?? this.surfacedAt,
+    respondedAt: respondedAt.present ? respondedAt.value : this.respondedAt,
+    evaluatedAt: evaluatedAt.present ? evaluatedAt.value : this.evaluatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    revision: revision ?? this.revision,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  DecisionMemory copyWithCompanion(DecisionMemoriesCompanion data) {
+    return DecisionMemory(
+      id: data.id.present ? data.id.value : this.id,
+      uuid: data.uuid.present ? data.uuid.value : this.uuid,
+      dayKey: data.dayKey.present ? data.dayKey.value : this.dayKey,
+      recommendationKey: data.recommendationKey.present
+          ? data.recommendationKey.value
+          : this.recommendationKey,
+      title: data.title.present ? data.title.value : this.title,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      evidenceJson: data.evidenceJson.present
+          ? data.evidenceJson.value
+          : this.evidenceJson,
+      confidence: data.confidence.present
+          ? data.confidence.value
+          : this.confidence,
+      response: data.response.present ? data.response.value : this.response,
+      outcome: data.outcome.present ? data.outcome.value : this.outcome,
+      helpfulness: data.helpfulness.present
+          ? data.helpfulness.value
+          : this.helpfulness,
+      surfacedAt: data.surfacedAt.present
+          ? data.surfacedAt.value
+          : this.surfacedAt,
+      respondedAt: data.respondedAt.present
+          ? data.respondedAt.value
+          : this.respondedAt,
+      evaluatedAt: data.evaluatedAt.present
+          ? data.evaluatedAt.value
+          : this.evaluatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      revision: data.revision.present ? data.revision.value : this.revision,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DecisionMemory(')
+          ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
+          ..write('dayKey: $dayKey, ')
+          ..write('recommendationKey: $recommendationKey, ')
+          ..write('title: $title, ')
+          ..write('reason: $reason, ')
+          ..write('evidenceJson: $evidenceJson, ')
+          ..write('confidence: $confidence, ')
+          ..write('response: $response, ')
+          ..write('outcome: $outcome, ')
+          ..write('helpfulness: $helpfulness, ')
+          ..write('surfacedAt: $surfacedAt, ')
+          ..write('respondedAt: $respondedAt, ')
+          ..write('evaluatedAt: $evaluatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('revision: $revision, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    uuid,
+    dayKey,
+    recommendationKey,
+    title,
+    reason,
+    evidenceJson,
+    confidence,
+    response,
+    outcome,
+    helpfulness,
+    surfacedAt,
+    respondedAt,
+    evaluatedAt,
+    deletedAt,
+    revision,
+    syncStatus,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DecisionMemory &&
+          other.id == this.id &&
+          other.uuid == this.uuid &&
+          other.dayKey == this.dayKey &&
+          other.recommendationKey == this.recommendationKey &&
+          other.title == this.title &&
+          other.reason == this.reason &&
+          other.evidenceJson == this.evidenceJson &&
+          other.confidence == this.confidence &&
+          other.response == this.response &&
+          other.outcome == this.outcome &&
+          other.helpfulness == this.helpfulness &&
+          other.surfacedAt == this.surfacedAt &&
+          other.respondedAt == this.respondedAt &&
+          other.evaluatedAt == this.evaluatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.revision == this.revision &&
+          other.syncStatus == this.syncStatus);
+}
+
+class DecisionMemoriesCompanion extends UpdateCompanion<DecisionMemory> {
+  final Value<int> id;
+  final Value<String> uuid;
+  final Value<String> dayKey;
+  final Value<String> recommendationKey;
+  final Value<String> title;
+  final Value<String> reason;
+  final Value<String> evidenceJson;
+  final Value<String> confidence;
+  final Value<String> response;
+  final Value<String?> outcome;
+  final Value<int?> helpfulness;
+  final Value<DateTime> surfacedAt;
+  final Value<DateTime?> respondedAt;
+  final Value<DateTime?> evaluatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> revision;
+  final Value<String> syncStatus;
+  const DecisionMemoriesCompanion({
+    this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
+    this.dayKey = const Value.absent(),
+    this.recommendationKey = const Value.absent(),
+    this.title = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.evidenceJson = const Value.absent(),
+    this.confidence = const Value.absent(),
+    this.response = const Value.absent(),
+    this.outcome = const Value.absent(),
+    this.helpfulness = const Value.absent(),
+    this.surfacedAt = const Value.absent(),
+    this.respondedAt = const Value.absent(),
+    this.evaluatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+  });
+  DecisionMemoriesCompanion.insert({
+    this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
+    required String dayKey,
+    required String recommendationKey,
+    required String title,
+    required String reason,
+    this.evidenceJson = const Value.absent(),
+    this.confidence = const Value.absent(),
+    this.response = const Value.absent(),
+    this.outcome = const Value.absent(),
+    this.helpfulness = const Value.absent(),
+    this.surfacedAt = const Value.absent(),
+    this.respondedAt = const Value.absent(),
+    this.evaluatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+  }) : dayKey = Value(dayKey),
+       recommendationKey = Value(recommendationKey),
+       title = Value(title),
+       reason = Value(reason);
+  static Insertable<DecisionMemory> custom({
+    Expression<int>? id,
+    Expression<String>? uuid,
+    Expression<String>? dayKey,
+    Expression<String>? recommendationKey,
+    Expression<String>? title,
+    Expression<String>? reason,
+    Expression<String>? evidenceJson,
+    Expression<String>? confidence,
+    Expression<String>? response,
+    Expression<String>? outcome,
+    Expression<int>? helpfulness,
+    Expression<DateTime>? surfacedAt,
+    Expression<DateTime>? respondedAt,
+    Expression<DateTime>? evaluatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? revision,
+    Expression<String>? syncStatus,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (uuid != null) 'uuid': uuid,
+      if (dayKey != null) 'day_key': dayKey,
+      if (recommendationKey != null) 'recommendation_key': recommendationKey,
+      if (title != null) 'title': title,
+      if (reason != null) 'reason': reason,
+      if (evidenceJson != null) 'evidence_json': evidenceJson,
+      if (confidence != null) 'confidence': confidence,
+      if (response != null) 'response': response,
+      if (outcome != null) 'outcome': outcome,
+      if (helpfulness != null) 'helpfulness': helpfulness,
+      if (surfacedAt != null) 'surfaced_at': surfacedAt,
+      if (respondedAt != null) 'responded_at': respondedAt,
+      if (evaluatedAt != null) 'evaluated_at': evaluatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (revision != null) 'revision': revision,
+      if (syncStatus != null) 'sync_status': syncStatus,
+    });
+  }
+
+  DecisionMemoriesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? uuid,
+    Value<String>? dayKey,
+    Value<String>? recommendationKey,
+    Value<String>? title,
+    Value<String>? reason,
+    Value<String>? evidenceJson,
+    Value<String>? confidence,
+    Value<String>? response,
+    Value<String?>? outcome,
+    Value<int?>? helpfulness,
+    Value<DateTime>? surfacedAt,
+    Value<DateTime?>? respondedAt,
+    Value<DateTime?>? evaluatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<int>? revision,
+    Value<String>? syncStatus,
+  }) {
+    return DecisionMemoriesCompanion(
+      id: id ?? this.id,
+      uuid: uuid ?? this.uuid,
+      dayKey: dayKey ?? this.dayKey,
+      recommendationKey: recommendationKey ?? this.recommendationKey,
+      title: title ?? this.title,
+      reason: reason ?? this.reason,
+      evidenceJson: evidenceJson ?? this.evidenceJson,
+      confidence: confidence ?? this.confidence,
+      response: response ?? this.response,
+      outcome: outcome ?? this.outcome,
+      helpfulness: helpfulness ?? this.helpfulness,
+      surfacedAt: surfacedAt ?? this.surfacedAt,
+      respondedAt: respondedAt ?? this.respondedAt,
+      evaluatedAt: evaluatedAt ?? this.evaluatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      revision: revision ?? this.revision,
+      syncStatus: syncStatus ?? this.syncStatus,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (uuid.present) {
+      map['uuid'] = Variable<String>(uuid.value);
+    }
+    if (dayKey.present) {
+      map['day_key'] = Variable<String>(dayKey.value);
+    }
+    if (recommendationKey.present) {
+      map['recommendation_key'] = Variable<String>(recommendationKey.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (evidenceJson.present) {
+      map['evidence_json'] = Variable<String>(evidenceJson.value);
+    }
+    if (confidence.present) {
+      map['confidence'] = Variable<String>(confidence.value);
+    }
+    if (response.present) {
+      map['response'] = Variable<String>(response.value);
+    }
+    if (outcome.present) {
+      map['outcome'] = Variable<String>(outcome.value);
+    }
+    if (helpfulness.present) {
+      map['helpfulness'] = Variable<int>(helpfulness.value);
+    }
+    if (surfacedAt.present) {
+      map['surfaced_at'] = Variable<DateTime>(surfacedAt.value);
+    }
+    if (respondedAt.present) {
+      map['responded_at'] = Variable<DateTime>(respondedAt.value);
+    }
+    if (evaluatedAt.present) {
+      map['evaluated_at'] = Variable<DateTime>(evaluatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DecisionMemoriesCompanion(')
+          ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
+          ..write('dayKey: $dayKey, ')
+          ..write('recommendationKey: $recommendationKey, ')
+          ..write('title: $title, ')
+          ..write('reason: $reason, ')
+          ..write('evidenceJson: $evidenceJson, ')
+          ..write('confidence: $confidence, ')
+          ..write('response: $response, ')
+          ..write('outcome: $outcome, ')
+          ..write('helpfulness: $helpfulness, ')
+          ..write('surfacedAt: $surfacedAt, ')
+          ..write('respondedAt: $respondedAt, ')
+          ..write('evaluatedAt: $evaluatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('revision: $revision, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -7585,6 +9231,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $GoalsTable goals = $GoalsTable(this);
   late final $WaterEntriesTable waterEntries = $WaterEntriesTable(this);
   late final $PreferencesTable preferences = $PreferencesTable(this);
+  late final $LifeContextEntriesTable lifeContextEntries =
+      $LifeContextEntriesTable(this);
+  late final $DecisionMemoriesTable decisionMemories = $DecisionMemoriesTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7601,6 +9252,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     goals,
     waterEntries,
     preferences,
+    lifeContextEntries,
+    decisionMemories,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -12318,6 +13971,796 @@ typedef $$PreferencesTableProcessedTableManager =
       Preference,
       PrefetchHooks Function()
     >;
+typedef $$LifeContextEntriesTableCreateCompanionBuilder =
+    LifeContextEntriesCompanion Function({
+      Value<int> id,
+      Value<String> uuid,
+      required DateTime occurredAt,
+      required String dayKey,
+      required String type,
+      Value<String?> details,
+      Value<bool> useInInsights,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> revision,
+      Value<String> syncStatus,
+    });
+typedef $$LifeContextEntriesTableUpdateCompanionBuilder =
+    LifeContextEntriesCompanion Function({
+      Value<int> id,
+      Value<String> uuid,
+      Value<DateTime> occurredAt,
+      Value<String> dayKey,
+      Value<String> type,
+      Value<String?> details,
+      Value<bool> useInInsights,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> revision,
+      Value<String> syncStatus,
+    });
+
+class $$LifeContextEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $LifeContextEntriesTable> {
+  $$LifeContextEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dayKey => $composableBuilder(
+    column: $table.dayKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get details => $composableBuilder(
+    column: $table.details,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get useInInsights => $composableBuilder(
+    column: $table.useInInsights,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LifeContextEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $LifeContextEntriesTable> {
+  $$LifeContextEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dayKey => $composableBuilder(
+    column: $table.dayKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get details => $composableBuilder(
+    column: $table.details,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get useInInsights => $composableBuilder(
+    column: $table.useInInsights,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LifeContextEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LifeContextEntriesTable> {
+  $$LifeContextEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uuid =>
+      $composableBuilder(column: $table.uuid, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get dayKey =>
+      $composableBuilder(column: $table.dayKey, builder: (column) => column);
+
+  GeneratedColumn<String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get details =>
+      $composableBuilder(column: $table.details, builder: (column) => column);
+
+  GeneratedColumn<bool> get useInInsights => $composableBuilder(
+    column: $table.useInInsights,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+}
+
+class $$LifeContextEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LifeContextEntriesTable,
+          LifeContextEntry,
+          $$LifeContextEntriesTableFilterComposer,
+          $$LifeContextEntriesTableOrderingComposer,
+          $$LifeContextEntriesTableAnnotationComposer,
+          $$LifeContextEntriesTableCreateCompanionBuilder,
+          $$LifeContextEntriesTableUpdateCompanionBuilder,
+          (
+            LifeContextEntry,
+            BaseReferences<
+              _$AppDatabase,
+              $LifeContextEntriesTable,
+              LifeContextEntry
+            >,
+          ),
+          LifeContextEntry,
+          PrefetchHooks Function()
+        > {
+  $$LifeContextEntriesTableTableManager(
+    _$AppDatabase db,
+    $LifeContextEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LifeContextEntriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LifeContextEntriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LifeContextEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> uuid = const Value.absent(),
+                Value<DateTime> occurredAt = const Value.absent(),
+                Value<String> dayKey = const Value.absent(),
+                Value<String> type = const Value.absent(),
+                Value<String?> details = const Value.absent(),
+                Value<bool> useInInsights = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+              }) => LifeContextEntriesCompanion(
+                id: id,
+                uuid: uuid,
+                occurredAt: occurredAt,
+                dayKey: dayKey,
+                type: type,
+                details: details,
+                useInInsights: useInInsights,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                revision: revision,
+                syncStatus: syncStatus,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> uuid = const Value.absent(),
+                required DateTime occurredAt,
+                required String dayKey,
+                required String type,
+                Value<String?> details = const Value.absent(),
+                Value<bool> useInInsights = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+              }) => LifeContextEntriesCompanion.insert(
+                id: id,
+                uuid: uuid,
+                occurredAt: occurredAt,
+                dayKey: dayKey,
+                type: type,
+                details: details,
+                useInInsights: useInInsights,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                revision: revision,
+                syncStatus: syncStatus,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LifeContextEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LifeContextEntriesTable,
+      LifeContextEntry,
+      $$LifeContextEntriesTableFilterComposer,
+      $$LifeContextEntriesTableOrderingComposer,
+      $$LifeContextEntriesTableAnnotationComposer,
+      $$LifeContextEntriesTableCreateCompanionBuilder,
+      $$LifeContextEntriesTableUpdateCompanionBuilder,
+      (
+        LifeContextEntry,
+        BaseReferences<
+          _$AppDatabase,
+          $LifeContextEntriesTable,
+          LifeContextEntry
+        >,
+      ),
+      LifeContextEntry,
+      PrefetchHooks Function()
+    >;
+typedef $$DecisionMemoriesTableCreateCompanionBuilder =
+    DecisionMemoriesCompanion Function({
+      Value<int> id,
+      Value<String> uuid,
+      required String dayKey,
+      required String recommendationKey,
+      required String title,
+      required String reason,
+      Value<String> evidenceJson,
+      Value<String> confidence,
+      Value<String> response,
+      Value<String?> outcome,
+      Value<int?> helpfulness,
+      Value<DateTime> surfacedAt,
+      Value<DateTime?> respondedAt,
+      Value<DateTime?> evaluatedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> revision,
+      Value<String> syncStatus,
+    });
+typedef $$DecisionMemoriesTableUpdateCompanionBuilder =
+    DecisionMemoriesCompanion Function({
+      Value<int> id,
+      Value<String> uuid,
+      Value<String> dayKey,
+      Value<String> recommendationKey,
+      Value<String> title,
+      Value<String> reason,
+      Value<String> evidenceJson,
+      Value<String> confidence,
+      Value<String> response,
+      Value<String?> outcome,
+      Value<int?> helpfulness,
+      Value<DateTime> surfacedAt,
+      Value<DateTime?> respondedAt,
+      Value<DateTime?> evaluatedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> revision,
+      Value<String> syncStatus,
+    });
+
+class $$DecisionMemoriesTableFilterComposer
+    extends Composer<_$AppDatabase, $DecisionMemoriesTable> {
+  $$DecisionMemoriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dayKey => $composableBuilder(
+    column: $table.dayKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recommendationKey => $composableBuilder(
+    column: $table.recommendationKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get evidenceJson => $composableBuilder(
+    column: $table.evidenceJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get response => $composableBuilder(
+    column: $table.response,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get outcome => $composableBuilder(
+    column: $table.outcome,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get helpfulness => $composableBuilder(
+    column: $table.helpfulness,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get surfacedAt => $composableBuilder(
+    column: $table.surfacedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get respondedAt => $composableBuilder(
+    column: $table.respondedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get evaluatedAt => $composableBuilder(
+    column: $table.evaluatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$DecisionMemoriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $DecisionMemoriesTable> {
+  $$DecisionMemoriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dayKey => $composableBuilder(
+    column: $table.dayKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recommendationKey => $composableBuilder(
+    column: $table.recommendationKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get evidenceJson => $composableBuilder(
+    column: $table.evidenceJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get response => $composableBuilder(
+    column: $table.response,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get outcome => $composableBuilder(
+    column: $table.outcome,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get helpfulness => $composableBuilder(
+    column: $table.helpfulness,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get surfacedAt => $composableBuilder(
+    column: $table.surfacedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get respondedAt => $composableBuilder(
+    column: $table.respondedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get evaluatedAt => $composableBuilder(
+    column: $table.evaluatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$DecisionMemoriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DecisionMemoriesTable> {
+  $$DecisionMemoriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uuid =>
+      $composableBuilder(column: $table.uuid, builder: (column) => column);
+
+  GeneratedColumn<String> get dayKey =>
+      $composableBuilder(column: $table.dayKey, builder: (column) => column);
+
+  GeneratedColumn<String> get recommendationKey => $composableBuilder(
+    column: $table.recommendationKey,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get evidenceJson => $composableBuilder(
+    column: $table.evidenceJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get response =>
+      $composableBuilder(column: $table.response, builder: (column) => column);
+
+  GeneratedColumn<String> get outcome =>
+      $composableBuilder(column: $table.outcome, builder: (column) => column);
+
+  GeneratedColumn<int> get helpfulness => $composableBuilder(
+    column: $table.helpfulness,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get surfacedAt => $composableBuilder(
+    column: $table.surfacedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get respondedAt => $composableBuilder(
+    column: $table.respondedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get evaluatedAt => $composableBuilder(
+    column: $table.evaluatedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+}
+
+class $$DecisionMemoriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DecisionMemoriesTable,
+          DecisionMemory,
+          $$DecisionMemoriesTableFilterComposer,
+          $$DecisionMemoriesTableOrderingComposer,
+          $$DecisionMemoriesTableAnnotationComposer,
+          $$DecisionMemoriesTableCreateCompanionBuilder,
+          $$DecisionMemoriesTableUpdateCompanionBuilder,
+          (
+            DecisionMemory,
+            BaseReferences<
+              _$AppDatabase,
+              $DecisionMemoriesTable,
+              DecisionMemory
+            >,
+          ),
+          DecisionMemory,
+          PrefetchHooks Function()
+        > {
+  $$DecisionMemoriesTableTableManager(
+    _$AppDatabase db,
+    $DecisionMemoriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DecisionMemoriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DecisionMemoriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DecisionMemoriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> uuid = const Value.absent(),
+                Value<String> dayKey = const Value.absent(),
+                Value<String> recommendationKey = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String> reason = const Value.absent(),
+                Value<String> evidenceJson = const Value.absent(),
+                Value<String> confidence = const Value.absent(),
+                Value<String> response = const Value.absent(),
+                Value<String?> outcome = const Value.absent(),
+                Value<int?> helpfulness = const Value.absent(),
+                Value<DateTime> surfacedAt = const Value.absent(),
+                Value<DateTime?> respondedAt = const Value.absent(),
+                Value<DateTime?> evaluatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+              }) => DecisionMemoriesCompanion(
+                id: id,
+                uuid: uuid,
+                dayKey: dayKey,
+                recommendationKey: recommendationKey,
+                title: title,
+                reason: reason,
+                evidenceJson: evidenceJson,
+                confidence: confidence,
+                response: response,
+                outcome: outcome,
+                helpfulness: helpfulness,
+                surfacedAt: surfacedAt,
+                respondedAt: respondedAt,
+                evaluatedAt: evaluatedAt,
+                deletedAt: deletedAt,
+                revision: revision,
+                syncStatus: syncStatus,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> uuid = const Value.absent(),
+                required String dayKey,
+                required String recommendationKey,
+                required String title,
+                required String reason,
+                Value<String> evidenceJson = const Value.absent(),
+                Value<String> confidence = const Value.absent(),
+                Value<String> response = const Value.absent(),
+                Value<String?> outcome = const Value.absent(),
+                Value<int?> helpfulness = const Value.absent(),
+                Value<DateTime> surfacedAt = const Value.absent(),
+                Value<DateTime?> respondedAt = const Value.absent(),
+                Value<DateTime?> evaluatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+              }) => DecisionMemoriesCompanion.insert(
+                id: id,
+                uuid: uuid,
+                dayKey: dayKey,
+                recommendationKey: recommendationKey,
+                title: title,
+                reason: reason,
+                evidenceJson: evidenceJson,
+                confidence: confidence,
+                response: response,
+                outcome: outcome,
+                helpfulness: helpfulness,
+                surfacedAt: surfacedAt,
+                respondedAt: respondedAt,
+                evaluatedAt: evaluatedAt,
+                deletedAt: deletedAt,
+                revision: revision,
+                syncStatus: syncStatus,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$DecisionMemoriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DecisionMemoriesTable,
+      DecisionMemory,
+      $$DecisionMemoriesTableFilterComposer,
+      $$DecisionMemoriesTableOrderingComposer,
+      $$DecisionMemoriesTableAnnotationComposer,
+      $$DecisionMemoriesTableCreateCompanionBuilder,
+      $$DecisionMemoriesTableUpdateCompanionBuilder,
+      (
+        DecisionMemory,
+        BaseReferences<_$AppDatabase, $DecisionMemoriesTable, DecisionMemory>,
+      ),
+      DecisionMemory,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -12344,4 +14787,8 @@ class $AppDatabaseManager {
       $$WaterEntriesTableTableManager(_db, _db.waterEntries);
   $$PreferencesTableTableManager get preferences =>
       $$PreferencesTableTableManager(_db, _db.preferences);
+  $$LifeContextEntriesTableTableManager get lifeContextEntries =>
+      $$LifeContextEntriesTableTableManager(_db, _db.lifeContextEntries);
+  $$DecisionMemoriesTableTableManager get decisionMemories =>
+      $$DecisionMemoriesTableTableManager(_db, _db.decisionMemories);
 }

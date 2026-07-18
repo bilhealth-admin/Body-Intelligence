@@ -6,6 +6,7 @@ import '../../features/daily_log/daily_log_page.dart';
 import '../../features/daily_check_in/daily_check_in_page.dart';
 import '../../features/dashboard/dashboard_page.dart';
 import '../../features/history/history_page.dart';
+import '../../features/life_context/life_context_page.dart';
 import '../../features/nutrition/food_page.dart';
 import '../../features/onboarding/onboarding_page.dart';
 import '../../features/settings/settings_page.dart';
@@ -23,6 +24,7 @@ class AppRouter {
         path: '/daily-check-in',
         builder: (_, _) => const DailyCheckInPage(),
       ),
+      GoRoute(path: '/context', builder: (_, _) => const LifeContextPage()),
       ShellRoute(
         builder: (_, _, child) => ResponsiveAppShell(child: child),
         routes: [

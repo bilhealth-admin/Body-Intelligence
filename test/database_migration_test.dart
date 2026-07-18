@@ -32,6 +32,8 @@ void main() {
           'meal_items',
           'water_entries',
           'preferences',
+          'life_context_entries',
+          'decision_memories',
         ]),
       );
     },

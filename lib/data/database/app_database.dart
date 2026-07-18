@@ -1,12 +1,14 @@
 import 'package:drift/drift.dart';
 
 import 'daily_logs.dart';
+import 'decision_memories.dart';
 import 'database_ids.dart';
 import 'favorites.dart';
 import 'foods.dart';
 import 'goals.dart';
 import 'meal_items.dart';
 import 'meals.dart';
+import 'life_context_entries.dart';
 import 'preferences.dart';
 import 'recent_foods.dart';
 import 'user_profile.dart';
@@ -29,6 +31,8 @@ part 'app_database.g.dart';
     Goals,
     WaterEntries,
     Preferences,
+    LifeContextEntries,
+    DecisionMemories,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -37,7 +41,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -48,6 +52,7 @@ class AppDatabase extends _$AppDatabase {
       await migrator.createAll();
       await _createIndexes();
       await _createWeightDayIndex();
+      await _createV7Indexes();
     },
     onUpgrade: (migrator, from, to) async {
       if (from < 2) {
@@ -70,6 +75,11 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 6) {
         await _upgradeToV6();
+      }
+      if (from < 7) {
+        await migrator.createTable(lifeContextEntries);
+        await migrator.createTable(decisionMemories);
+        await _createV7Indexes();
       }
     },
   );
@@ -275,4 +285,15 @@ class AppDatabase extends _$AppDatabase {
     'ON weight_entries(day_key) '
     'WHERE deleted_at IS NULL AND day_key IS NOT NULL',
   );
+
+  Future<void> _createV7Indexes() async {
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS life_context_day_idx '
+      'ON life_context_entries(day_key)',
+    );
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS decision_memory_day_idx '
+      'ON decision_memories(day_key)',
+    );
+  }
 }

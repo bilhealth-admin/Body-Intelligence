@@ -11,6 +11,7 @@ import '../../../engine/one_best_action_engine.dart';
 import '../../../engine/what_changed_engine.dart';
 import '../../../data/database/date_keys.dart';
 import '../../profile/providers/user_profile_provider.dart';
+import '../../life_context/providers/life_context_provider.dart';
 import '../../weight/providers/weight_provider.dart';
 import '../providers/dashboard_provider.dart';
 import 'stat_card.dart';
@@ -158,6 +159,22 @@ class DashboardGrid extends ConsumerWidget {
         : ((profile.currentWeight - currentWeight).abs() / progressDenominator)
               .clamp(0.0, 1.0);
     final goalDate = intelligence.goalDate;
+    Future<void> respondToAction(String response) async {
+      final repository = ref.read(decisionMemoryRepositoryProvider);
+      final id = await repository.rememberAction(bestAction);
+      await repository.respond(id, response);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              response == 'done'
+                  ? 'Marked done. BIL will not assume an outcome without your later feedback.'
+                  : 'Your response was saved locally and can be deleted from Decision Memory.',
+            ),
+          ),
+        );
+      }
+    }
 
     return Column(
       children: [
@@ -253,6 +270,29 @@ class DashboardGrid extends ConsumerWidget {
                 Text(bestAction.reason),
                 const SizedBox(height: 8),
                 Text('Evidence: ${bestAction.evidence.join(' · ')}'),
+                const SizedBox(height: 10),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    FilledButton.tonal(
+                      onPressed: () => respondToAction('accepted'),
+                      child: const Text('Accept'),
+                    ),
+                    OutlinedButton(
+                      onPressed: () => respondToAction('done'),
+                      child: const Text('Done'),
+                    ),
+                    TextButton(
+                      onPressed: () => respondToAction('notSuitable'),
+                      child: const Text('Not suitable today'),
+                    ),
+                    TextButton(
+                      onPressed: () => respondToAction('dismissed'),
+                      child: const Text('Dismiss'),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),

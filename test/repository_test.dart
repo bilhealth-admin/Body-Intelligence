@@ -1,10 +1,13 @@
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
+import 'package:body_intelligence_log/data/repositories/decision_memory_repository.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
+import 'package:body_intelligence_log/data/repositories/life_context_repository.dart';
 import 'package:body_intelligence_log/data/repositories/water_repository.dart';
 import 'package:body_intelligence_log/data/repositories/weight_repository.dart';
 import 'package:body_intelligence_log/data/repositories/user_profile_repository.dart';
+import 'package:body_intelligence_log/engine/one_best_action_engine.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -185,4 +188,47 @@ void main() {
     expect(second, first);
     expect(await database.select(database.meals).get(), hasLength(1));
   });
+
+  test('life context consent controls intelligence visibility', () async {
+    final contexts = LifeContextRepository(database);
+    final id = await contexts.add(
+      occurredAt: DateTime(2026, 7, 18),
+      type: 'poorSleep',
+      details: 'Short night',
+      useInInsights: true,
+    );
+    expect(await contexts.watchAllForInsights().first, hasLength(1));
+
+    await contexts.setInsightConsent(id, false);
+
+    expect(await contexts.watchAllForInsights().first, isEmpty);
+    expect(
+      await contexts.watchForDay(DateTime(2026, 7, 18)).first,
+      hasLength(1),
+    );
+  });
+
+  test(
+    'decision memory records response and evaluation without duplicates',
+    () async {
+      final memories = DecisionMemoryRepository(database);
+      const action = BestAction(
+        type: BestActionType.hydration,
+        title: 'Drink 500 ml gradually',
+        reason: 'Hydration is below target.',
+        evidence: ['1000 ml recorded'],
+      );
+      final date = DateTime(2026, 7, 18);
+      final firstId = await memories.rememberAction(action, date: date);
+      final secondId = await memories.rememberAction(action, date: date);
+      await memories.respond(firstId, 'done');
+      await memories.evaluate(id: firstId, helpfulness: 4, outcome: 'Helpful');
+
+      final rows = await memories.watchAll().first;
+      expect(secondId, firstId);
+      expect(rows, hasLength(1));
+      expect(rows.single.response, 'done');
+      expect(rows.single.helpfulness, 4);
+    },
+  );
 }
