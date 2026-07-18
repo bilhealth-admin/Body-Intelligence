@@ -10,6 +10,7 @@ class DashboardHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
     final latestWeight = ref.watch(latestWeightProvider);
     final system =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
@@ -33,14 +34,14 @@ class DashboardHeader extends ConsumerWidget {
         data: (weight) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Welcome back',
-              style: TextStyle(color: Colors.white70, fontSize: 16),
+            Text(
+              arabic ? 'مرحبًا بعودتك' : 'Welcome back',
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),
             const SizedBox(height: 8),
             Text(
               weight == null
-                  ? 'Start your first log'
+                  ? (arabic ? 'ابدأ أول تسجيل لك' : 'Start your first log')
                   : '${UnitConverter.weightFromKg(weight.weight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}',
               style: const TextStyle(
                 color: Colors.white,
@@ -51,8 +52,12 @@ class DashboardHeader extends ConsumerWidget {
             const SizedBox(height: 12),
             Text(
               weight == null
-                  ? 'Record your weight and meals to build your local BIL intelligence.'
-                  : 'Your local data is ready for review.',
+                  ? (arabic
+                        ? 'سجّل وزنك ووجباتك لبناء ذكاء BIL المحلي.'
+                        : 'Record your weight and meals to build your local BIL intelligence.')
+                  : (arabic
+                        ? 'بياناتك المحلية جاهزة للمراجعة.'
+                        : 'Your local data is ready for review.'),
               style: const TextStyle(color: Colors.white),
             ),
           ],

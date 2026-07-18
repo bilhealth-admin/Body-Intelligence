@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/localization/app_localizations.dart';
 import '../../../engine/bil_engine.dart';
 import '../../../core/units/measurement_units.dart';
 import '../../../engine/body_profile.dart';
@@ -21,6 +22,8 @@ class DashboardGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    String tr(String en, String ar) => arabic ? ar : en;
     final profileAsync = ref.watch(userProfileProvider);
     final weightsAsync = ref.watch(weightHistoryProvider);
     final mealsAsync = ref.watch(todayMealsProvider);
@@ -168,6 +171,54 @@ class DashboardGrid extends ConsumerWidget {
         : ((profile.currentWeight - currentWeight).abs() / progressDenominator)
               .clamp(0.0, 1.0);
     final goalDate = intelligence.goalDate;
+    final localizedBestTitle = arabic
+        ? switch (bestAction.type) {
+            BestActionType.weighIn => 'سجّل وزن اليوم',
+            BestActionType.completeLogging => 'أكمل تسجيل وجبة واحدة',
+            BestActionType.protein => 'أضف مصدر بروتين مناسبًا اليوم',
+            BestActionType.hydration => 'اشرب الماء تدريجيًا',
+            BestActionType.holdPlan => 'حافظ على الخطة دون تغيير اليوم',
+            BestActionType.none => 'لا حاجة لتغيير الخطة',
+          }
+        : bestAction.title;
+    final localizedBestReason = arabic
+        ? switch (bestAction.type) {
+            BestActionType.weighIn =>
+              'القياس اليومي المتقارب يحسن ثقة الاتجاه.',
+            BestActionType.completeLogging =>
+              'نقص تسجيل الوجبات يضعف تفسير بيانات المدخول.',
+            BestActionType.protein =>
+              'البروتين هو أكبر فجوة قابلة للتنفيذ اليوم.',
+            BestActionType.hydration => 'الماء المسجل أقل بوضوح من هدف اليوم.',
+            BestActionType.holdPlan =>
+              'جمع ملاحظات أكثر اتساقًا أكثر أمانًا من التغيير المبكر.',
+            BestActionType.none => 'الأولويات المسجلة اليوم مغطاة بصورة عامة.',
+          }
+        : bestAction.reason;
+    final localizedChanged = arabic
+        ? switch (changed.interpretation) {
+            ChangeInterpretation.insufficient =>
+              'نحتاج قياس وزن آخر في ظروف متقاربة لوصف التغير.',
+            ChangeInterpretation.stable =>
+              'الوزن مستقر بصورة عامة مقارنة بالقياس السابق.',
+            ChangeInterpretation.likelyNoise =>
+              'تغير الميزان، لكن قراءة واحدة لا تكفي لتغيير الخطة.',
+            ChangeInterpretation.directional =>
+              'سُجّل تغير محدود، ويظل الاتجاه عبر عدة أيام أكثر فائدة.',
+          }
+        : changed.summary;
+    final primaryInsight = intelligence.insights.first;
+    final localizedInsightTitle = arabic
+        ? switch (primaryInsight.title) {
+            'Protein below target' => 'البروتين أقل من الهدف',
+            'Hydration opportunity' => 'فرصة لتحسين شرب الماء',
+            'Possible plateau' => 'ثبات محتمل في الاتجاه',
+            'Possible short-term water retention' =>
+              'احتباس ماء قصير المدى محتمل',
+            'Build your baseline' => 'ابنِ خطك الأساسي',
+            _ => 'الأهداف اليومية متقاربة بصورة عامة',
+          }
+        : primaryInsight.title;
     Future<void> respondToAction(String response) async {
       if (!memoryEnabled) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -206,26 +257,26 @@ class DashboardGrid extends ConsumerWidget {
           childAspectRatio: 1.05,
           children: [
             StatCard(
-              title: 'Weight',
+              title: context.strings.text('Weight'),
               value:
                   '${UnitConverter.weightFromKg(currentWeight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}',
               icon: Icons.monitor_weight,
               color: Colors.blue,
             ),
             StatCard(
-              title: 'Calories',
+              title: context.strings.text('Calories'),
               value: '${calories.round()} / ${bil.targets.calories}',
               icon: Icons.local_fire_department,
               color: Colors.orange,
             ),
             StatCard(
-              title: 'Protein',
+              title: context.strings.text('Protein'),
               value: '${protein.round()} / ${bil.targets.protein} g',
               icon: Icons.fitness_center,
               color: Colors.green,
             ),
             StatCard(
-              title: 'Water',
+              title: context.strings.text('Water'),
               value: '$water / ${bil.targets.water} ml',
               icon: Icons.water_drop,
               color: Colors.cyan,
@@ -240,41 +291,44 @@ class DashboardGrid extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Today’s nutrition evidence',
+                  tr('Today’s nutrition evidence', 'أدلة تغذية اليوم'),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 6),
-                const Text(
-                  'Consumed, target, and remaining values come only from logged food portions.',
+                Text(
+                  tr(
+                    'Consumed, target, and remaining values come only from logged food portions.',
+                    'تأتي القيم المستهلكة والمستهدفة والمتبقية فقط من حصص الطعام المسجلة.',
+                  ),
                 ),
                 const SizedBox(height: 12),
                 _TargetRow(
-                  label: 'Carbohydrates',
+                  label: tr('Carbohydrates', 'الكربوهيدرات'),
                   consumed: carbs,
                   target: bil.targets.carbs.toDouble(),
                   unit: 'g',
                 ),
                 _TargetRow(
-                  label: 'Fat',
+                  label: tr('Fat', 'الدهون'),
                   consumed: fats,
                   target: bil.targets.fats.toDouble(),
                   unit: 'g',
                 ),
                 _TargetRow(
-                  label: 'Fiber',
+                  label: tr('Fiber', 'الألياف'),
                   consumed: fiber,
                   target: bil.targets.fiber.toDouble(),
                   unit: 'g',
                 ),
                 _TargetRow(
-                  label: 'Sodium',
+                  label: tr('Sodium', 'الصوديوم'),
                   consumed: sodium,
                   target: bil.targets.sodium.toDouble(),
                   unit: 'mg',
                   upperLimit: true,
                 ),
                 _TargetRow(
-                  label: 'Potassium',
+                  label: tr('Potassium', 'البوتاسيوم'),
                   consumed: potassium,
                   target: bil.targets.potassium.toDouble(),
                   unit: 'mg',
@@ -289,21 +343,28 @@ class DashboardGrid extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Goal progress ${(progress * 100).round()}%'),
+                Text(
+                  '${tr('Goal progress', 'التقدم نحو الهدف')} ${(progress * 100).round()}%',
+                ),
                 const SizedBox(height: 8),
                 LinearProgressIndicator(value: progress),
                 const SizedBox(height: 12),
                 Text(
-                  'Estimated TDEE ${bil.tdee.round()} kcal · planned ${goalType == 'lose'
-                      ? 'deficit'
-                      : goalType == 'gain'
-                      ? 'surplus'
-                      : 'maintenance'} ${bil.targets.calories - bil.tdee.round()} kcal',
+                  arabic
+                      ? 'الاحتياج اليومي المقدر ${bil.tdee.round()} سعرة · هدف السعرات ${bil.targets.calories}'
+                      : 'Estimated TDEE ${bil.tdee.round()} kcal · planned ${goalType == 'lose'
+                            ? 'deficit'
+                            : goalType == 'gain'
+                            ? 'surplus'
+                            : 'maintenance'} ${bil.targets.calories - bil.tdee.round()} kcal',
                 ),
                 Text(
                   goalDate == null
-                      ? 'Goal date: more consistent weight data needed'
-                      : 'Estimated goal date: ${goalDate.year}-${goalDate.month.toString().padLeft(2, '0')}-${goalDate.day.toString().padLeft(2, '0')}',
+                      ? tr(
+                          'Goal date: more consistent weight data needed',
+                          'تاريخ الهدف: نحتاج بيانات وزن أكثر اتساقًا',
+                        )
+                      : '${tr('Estimated goal date', 'تاريخ الهدف المقدر')}: ${goalDate.year}-${goalDate.month.toString().padLeft(2, '0')}-${goalDate.day.toString().padLeft(2, '0')}',
                 ),
               ],
             ),
@@ -314,9 +375,11 @@ class DashboardGrid extends ConsumerWidget {
             leading: CircleAvatar(
               child: Text(intelligence.score?.toString() ?? '—'),
             ),
-            title: Text(intelligence.insights.first.title),
+            title: Text(localizedInsightTitle),
             subtitle: Text(
-              '${intelligence.insights.first.explanation}\n${intelligence.insights.first.suggestedAction}',
+              arabic
+                  ? 'يستند هذا الاستنتاج إلى بياناتك المحلية المسجلة فقط. راجع الدليل واجمع أيامًا إضافية قبل تغيير الخطة.'
+                  : '${primaryInsight.explanation}\n${primaryInsight.suggestedAction}',
             ),
             isThreeLine: true,
           ),
@@ -328,17 +391,21 @@ class DashboardGrid extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'One best action',
+                  context.strings.text('One best action'),
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  bestAction.title,
+                  localizedBestTitle,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
-                Text(bestAction.reason),
+                Text(localizedBestReason),
                 const SizedBox(height: 8),
-                Text('Evidence: ${bestAction.evidence.join(' · ')}'),
+                Text(
+                  arabic
+                      ? 'الدليل: بيانات اليوم المسجلة محليًا'
+                      : 'Evidence: ${bestAction.evidence.join(' · ')}',
+                ),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,
@@ -346,19 +413,19 @@ class DashboardGrid extends ConsumerWidget {
                   children: [
                     FilledButton.tonal(
                       onPressed: () => respondToAction('accepted'),
-                      child: const Text('Accept'),
+                      child: Text(tr('Accept', 'قبول')),
                     ),
                     OutlinedButton(
                       onPressed: () => respondToAction('done'),
-                      child: const Text('Done'),
+                      child: Text(tr('Done', 'تم')),
                     ),
                     TextButton(
                       onPressed: () => respondToAction('notSuitable'),
-                      child: const Text('Not suitable today'),
+                      child: Text(tr('Not suitable today', 'غير مناسب اليوم')),
                     ),
                     TextButton(
                       onPressed: () => respondToAction('dismissed'),
-                      child: const Text('Dismiss'),
+                      child: Text(tr('Dismiss', 'تجاهل')),
                     ),
                   ],
                 ),
@@ -373,36 +440,55 @@ class DashboardGrid extends ConsumerWidget {
         Card(
           child: ExpansionTile(
             leading: CircleAvatar(child: Text('${honesty.score}')),
-            title: const Text('Data honesty'),
+            title: Text(context.strings.text('Data honesty')),
             subtitle: Text(
-              '${honesty.reliability.name} reliability · tap to see what is missing',
+              arabic
+                  ? 'موثوقية ${switch (honesty.reliability) {
+                      DataReliability.insufficient => 'غير كافية',
+                      DataReliability.emerging => 'قيد التكوين',
+                      DataReliability.useful => 'مفيدة',
+                      DataReliability.strong => 'قوية',
+                    }} · اضغط لمعرفة البيانات الناقصة'
+                  : '${honesty.reliability.name} reliability · tap to see what is missing',
             ),
             childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             children: [
-              if (honesty.strengths.isNotEmpty)
+              if (honesty.strengths.isNotEmpty && !arabic)
                 Text('Evidence: ${honesty.strengths.join(' · ')}'),
-              if (honesty.missing.isNotEmpty)
+              if (honesty.missing.isNotEmpty && !arabic)
                 Text('Improve confidence: ${honesty.missing.join(' · ')}'),
+              if (arabic)
+                Text(
+                  'أيام الوزن: ${weightDays.length} · أيام التغذية: ${mealDays.length} · أيام الماء: ${waterDays.length}. تتحسن الثقة مع اكتمال البيانات وثبات ظروف القياس.',
+                ),
             ],
           ),
         ),
         Card(
           child: ExpansionTile(
-            title: const Text('What changed today?'),
-            subtitle: Text(changed.summary),
+            title: Text(context.strings.text('What changed today?')),
+            subtitle: Text(localizedChanged),
             childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             children: [
-              if (changed.evidence.isNotEmpty)
+              if (changed.evidence.isNotEmpty && !arabic)
                 Text('Evidence: ${changed.evidence.join(' · ')}'),
-              Text('Other explanations: ${changed.alternatives.join(' · ')}'),
+              Text(
+                arabic
+                    ? 'تفسيرات بديلة محتملة: الماء والجليكوجين ومحتوى الجهاز الهضمي وتوقيت القياس ونقص التسجيل. لا يُعد أي منها تشخيصًا.'
+                    : 'Other explanations: ${changed.alternatives.join(' · ')}',
+              ),
             ],
           ),
         ),
         Card(
           child: ExpansionTile(
-            title: const Text('Body Twin'),
+            title: Text(context.strings.text('Body Twin')),
             subtitle: Text(
-              twin.sufficient
+              arabic
+                  ? twin.sufficient
+                        ? 'سيناريو حذر متاح من أدلتك المحلية'
+                        : 'يتعلم بأمان · نحتاج أيام وزن وتغذية وملاحظة أكثر'
+                  : twin.sufficient
                   ? 'Cautious scenario available from your local evidence'
                   : 'Learning safely · ${twin.requiredData.join(' · ')}',
             ),
@@ -410,12 +496,16 @@ class DashboardGrid extends ConsumerWidget {
             children: [
               if (twin.scenario != null) ...[
                 Text(
-                  'Expected planning direction: ${twin.scenario!.expectedWeeklyKg.toStringAsFixed(2)} kg/week',
+                  '${tr('Expected planning direction', 'اتجاه التخطيط المتوقع')}: ${twin.scenario!.expectedWeeklyKg.toStringAsFixed(2)} ${tr('kg/week', 'كجم/أسبوع')}',
                 ),
                 Text(
-                  'Cautious range: ${twin.scenario!.cautiousLowKg.toStringAsFixed(2)} to ${twin.scenario!.cautiousHighKg.toStringAsFixed(2)} kg/week',
+                  '${tr('Cautious range', 'النطاق الحذر')}: ${twin.scenario!.cautiousLowKg.toStringAsFixed(2)} ${tr('to', 'إلى')} ${twin.scenario!.cautiousHighKg.toStringAsFixed(2)} ${tr('kg/week', 'كجم/أسبوع')}',
                 ),
-                Text('Assumptions: ${twin.scenario!.assumptions.join(' · ')}'),
+                Text(
+                  arabic
+                      ? 'الافتراضات: اكتمال التسجيل نسبيًا وثبات النشاط وظروف القياس. لا يمكن تحديد تغير الدهون أو العضلات من الميزان وحده.'
+                      : 'Assumptions: ${twin.scenario!.assumptions.join(' · ')}',
+                ),
               ],
             ],
           ),
@@ -442,6 +532,7 @@ class _TargetRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
     final difference = target - consumed;
     final exceeded = difference < 0;
     final ratio = target <= 0 ? 0.0 : (consumed / target).clamp(0.0, 1.0);
@@ -468,7 +559,11 @@ class _TargetRow extends StatelessWidget {
                 const SizedBox(height: 4),
                 LinearProgressIndicator(value: ratio),
                 Text(
-                  exceeded
+                  arabic
+                      ? exceeded
+                            ? '${difference.abs().toStringAsFixed(0)} $unit أعلى من الهدف المرجعي'
+                            : '${difference.toStringAsFixed(0)} $unit متبقٍ'
+                      : exceeded
                       ? '${difference.abs().toStringAsFixed(0)} $unit above the reference target'
                       : '${difference.toStringAsFixed(0)} $unit remaining',
                   style: Theme.of(context).textTheme.bodySmall,
