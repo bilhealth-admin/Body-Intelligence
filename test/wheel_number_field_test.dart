@@ -1,8 +1,46 @@
+import 'dart:ui' show SemanticsAction;
+
 import 'package:body_intelligence_log/shared/widgets/wheel_number_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('screen readers can adjust by exactly one configured step', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    var value = 60.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StatefulBuilder(
+            builder: (context, setState) => WheelNumberField(
+              value: value,
+              minimum: 20,
+              maximum: 100,
+              step: 0.1,
+              decimalPlaces: 1,
+              unit: 'kg',
+              label: 'Weight',
+              onChanged: (next) => setState(() => value = next),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final node = tester.getSemantics(find.byType(WheelNumberField));
+    expect(node.getSemanticsData().hasAction(SemanticsAction.increase), isTrue);
+    expect(node.getSemanticsData().hasAction(SemanticsAction.decrease), isTrue);
+    node.owner!.performAction(node.id, SemanticsAction.increase);
+    await tester.pumpAndSettle();
+    expect(value, closeTo(60.1, 0.0001));
+    node.owner!.performAction(node.id, SemanticsAction.decrease);
+    await tester.pumpAndSettle();
+    expect(value, closeTo(60.0, 0.0001));
+    semantics.dispose();
+  });
   testWidgets('typed values update the wheel field callback', (tester) async {
     double value = 70;
     await tester.pumpWidget(

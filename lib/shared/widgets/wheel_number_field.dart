@@ -84,6 +84,22 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
     }
   }
 
+  void adjustBy(int direction) {
+    final current = indexFor(widget.value);
+    final next = (current + direction).clamp(0, itemCount - 1);
+    if (next == current) return;
+    final value = valueFor(next);
+    text.text = value.toStringAsFixed(widget.decimalPlaces);
+    widget.onChanged(value);
+    if (wheel.hasClients) {
+      wheel.animateToItem(
+        next,
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Semantics(
@@ -96,6 +112,8 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
       decreasedValue: valueFor(
         (indexFor(widget.value) - 1).clamp(0, itemCount - 1),
       ).toStringAsFixed(widget.decimalPlaces),
+      onIncrease: () => adjustBy(1),
+      onDecrease: () => adjustBy(-1),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
