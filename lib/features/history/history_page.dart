@@ -64,6 +64,7 @@ class HistoryPage extends ConsumerWidget {
         weight: value,
         date: entry.date,
         note: entry.note,
+        measurementContext: entry.measurementContext,
       );
     }
   }

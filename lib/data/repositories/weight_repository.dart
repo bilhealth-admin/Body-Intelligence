@@ -1,23 +1,58 @@
 import 'package:drift/drift.dart';
 
 import '../database/app_database.dart';
+import '../database/date_keys.dart';
 
 class WeightRepository {
   final AppDatabase _database;
 
   WeightRepository(this._database);
 
-  Future<int> addWeight(double weight, {DateTime? date, String? note}) async {
+  Future<int> addWeight(
+    double weight, {
+    DateTime? date,
+    String? note,
+    String measurementContext = 'differentConditions',
+  }) async {
     _validateWeight(weight);
+    _validateContext(measurementContext);
+    final occurredAt = date ?? DateTime.now();
+    final existing = await getForDay(occurredAt);
+    if (existing != null) {
+      await updateWeight(
+        id: existing.id,
+        weight: weight,
+        date: occurredAt,
+        note: note,
+        measurementContext: measurementContext,
+      );
+      return existing.id;
+    }
     return _database
         .into(_database.weightEntries)
         .insert(
           WeightEntriesCompanion.insert(
             weight: weight,
-            date: Value(date ?? DateTime.now()),
+            date: Value(occurredAt),
+            dayKey: Value(dayKeyFor(occurredAt)),
             note: Value(note),
+            measurementContext: Value(measurementContext),
           ),
         );
+  }
+
+  Future<WeightEntry?> getForDay(DateTime date) {
+    return (_database.select(_database.weightEntries)..where(
+          (row) => row.dayKey.equals(dayKeyFor(date)) & row.deletedAt.isNull(),
+        ))
+        .getSingleOrNull();
+  }
+
+  Stream<WeightEntry?> watchForDay(DateTime date) {
+    return (_database.select(_database.weightEntries)..where(
+          (row) => row.dayKey.equals(dayKeyFor(date)) & row.deletedAt.isNull(),
+        ))
+        .watchSingleOrNull();
   }
 
   Future<void> updateWeight({
@@ -25,15 +60,19 @@ class WeightRepository {
     required double weight,
     required DateTime date,
     String? note,
+    String measurementContext = 'differentConditions',
   }) async {
     _validateWeight(weight);
+    _validateContext(measurementContext);
     await (_database.update(
       _database.weightEntries,
     )..where((row) => row.id.equals(id))).write(
       WeightEntriesCompanion(
         weight: Value(weight),
         date: Value(date),
+        dayKey: Value(dayKeyFor(date)),
         note: Value(note),
+        measurementContext: Value(measurementContext),
         updatedAt: Value(DateTime.now()),
         revision: const Value(2),
         syncStatus: const Value('pending'),
@@ -83,6 +122,17 @@ class WeightRepository {
   void _validateWeight(double weight) {
     if (!weight.isFinite || weight < 20 || weight > 500) {
       throw ArgumentError.value(weight, 'weight', 'Must be 20–500 kg');
+    }
+  }
+
+  void _validateContext(String value) {
+    if (!const {
+      'morning',
+      'afterBathroom',
+      'beforeFoodDrink',
+      'differentConditions',
+    }.contains(value)) {
+      throw ArgumentError.value(value, 'measurementContext');
     }
   }
 }

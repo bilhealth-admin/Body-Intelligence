@@ -1,7 +1,9 @@
 import 'package:go_router/go_router.dart';
 
 import '../../features/analytics/analytics_page.dart';
+import '../../features/auth/login_page.dart';
 import '../../features/daily_log/daily_log_page.dart';
+import '../../features/daily_check_in/daily_check_in_page.dart';
 import '../../features/dashboard/dashboard_page.dart';
 import '../../features/history/history_page.dart';
 import '../../features/nutrition/food_page.dart';
@@ -15,7 +17,12 @@ class AppRouter {
     initialLocation: '/startup',
     routes: [
       GoRoute(path: '/startup', builder: (_, _) => const StartupPage()),
+      GoRoute(path: '/login', builder: (_, _) => const LoginPage()),
       GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingPage()),
+      GoRoute(
+        path: '/daily-check-in',
+        builder: (_, _) => const DailyCheckInPage(),
+      ),
       ShellRoute(
         builder: (_, _, child) => ResponsiveAppShell(child: child),
         routes: [

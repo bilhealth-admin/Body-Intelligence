@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../profile/providers/user_profile_provider.dart';
 import '../foods/providers/food_provider.dart';
+import '../profile/providers/user_profile_provider.dart';
+import '../weight/providers/weight_provider.dart';
 
 class StartupPage extends ConsumerWidget {
   const StartupPage({super.key});
@@ -12,11 +13,12 @@ class StartupPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(userProfileProvider);
     final seed = ref.watch(seedCatalogProvider);
+    final checkInDue = ref.watch(dailyCheckInDueProvider);
 
     if (seed.hasError) {
       return Scaffold(body: Center(child: Text(seed.error.toString())));
     }
-    if (seed.isLoading) {
+    if (seed.isLoading || checkInDue.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
@@ -29,6 +31,8 @@ class StartupPage extends ConsumerWidget {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (user == null) {
             context.go('/onboarding');
+          } else if (checkInDue.value == true) {
+            context.go('/daily-check-in');
           } else {
             context.go('/dashboard');
           }

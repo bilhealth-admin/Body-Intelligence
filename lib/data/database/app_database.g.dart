@@ -2008,6 +2008,15 @@ class $WeightEntriesTable extends WeightEntries
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _dayKeyMeta = const VerificationMeta('dayKey');
+  @override
+  late final GeneratedColumn<String> dayKey = GeneratedColumn<String>(
+    'day_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _weightMeta = const VerificationMeta('weight');
   @override
   late final GeneratedColumn<double> weight = GeneratedColumn<double>(
@@ -2026,6 +2035,18 @@ class $WeightEntriesTable extends WeightEntries
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _measurementContextMeta =
+      const VerificationMeta('measurementContext');
+  @override
+  late final GeneratedColumn<String> measurementContext =
+      GeneratedColumn<String>(
+        'measurement_context',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('differentConditions'),
+      );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -2090,8 +2111,10 @@ class $WeightEntriesTable extends WeightEntries
     id,
     uuid,
     date,
+    dayKey,
     weight,
     note,
+    measurementContext,
     createdAt,
     updatedAt,
     deletedAt,
@@ -2125,6 +2148,12 @@ class $WeightEntriesTable extends WeightEntries
         date.isAcceptableOrUnknown(data['date']!, _dateMeta),
       );
     }
+    if (data.containsKey('day_key')) {
+      context.handle(
+        _dayKeyMeta,
+        dayKey.isAcceptableOrUnknown(data['day_key']!, _dayKeyMeta),
+      );
+    }
     if (data.containsKey('weight')) {
       context.handle(
         _weightMeta,
@@ -2137,6 +2166,15 @@ class $WeightEntriesTable extends WeightEntries
       context.handle(
         _noteMeta,
         note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('measurement_context')) {
+      context.handle(
+        _measurementContextMeta,
+        measurementContext.isAcceptableOrUnknown(
+          data['measurement_context']!,
+          _measurementContextMeta,
+        ),
       );
     }
     if (data.containsKey('created_at')) {
@@ -2190,6 +2228,10 @@ class $WeightEntriesTable extends WeightEntries
         DriftSqlType.dateTime,
         data['${effectivePrefix}date'],
       )!,
+      dayKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}day_key'],
+      ),
       weight: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}weight'],
@@ -2198,6 +2240,10 @@ class $WeightEntriesTable extends WeightEntries
         DriftSqlType.string,
         data['${effectivePrefix}note'],
       ),
+      measurementContext: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}measurement_context'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -2231,8 +2277,14 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
   final int id;
   final String uuid;
   final DateTime date;
+
+  /// Local calendar date used to enforce one logical check-in per day.
+  final String? dayKey;
   final double weight;
   final String? note;
+
+  /// Stable, non-localized measurement condition selected by the user.
+  final String measurementContext;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -2242,8 +2294,10 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     required this.id,
     required this.uuid,
     required this.date,
+    this.dayKey,
     required this.weight,
     this.note,
+    required this.measurementContext,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -2256,10 +2310,14 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     map['id'] = Variable<int>(id);
     map['uuid'] = Variable<String>(uuid);
     map['date'] = Variable<DateTime>(date);
+    if (!nullToAbsent || dayKey != null) {
+      map['day_key'] = Variable<String>(dayKey);
+    }
     map['weight'] = Variable<double>(weight);
     if (!nullToAbsent || note != null) {
       map['note'] = Variable<String>(note);
     }
+    map['measurement_context'] = Variable<String>(measurementContext);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -2275,8 +2333,12 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       id: Value(id),
       uuid: Value(uuid),
       date: Value(date),
+      dayKey: dayKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dayKey),
       weight: Value(weight),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      measurementContext: Value(measurementContext),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -2296,8 +2358,12 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       id: serializer.fromJson<int>(json['id']),
       uuid: serializer.fromJson<String>(json['uuid']),
       date: serializer.fromJson<DateTime>(json['date']),
+      dayKey: serializer.fromJson<String?>(json['dayKey']),
       weight: serializer.fromJson<double>(json['weight']),
       note: serializer.fromJson<String?>(json['note']),
+      measurementContext: serializer.fromJson<String>(
+        json['measurementContext'],
+      ),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -2312,8 +2378,10 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       'id': serializer.toJson<int>(id),
       'uuid': serializer.toJson<String>(uuid),
       'date': serializer.toJson<DateTime>(date),
+      'dayKey': serializer.toJson<String?>(dayKey),
       'weight': serializer.toJson<double>(weight),
       'note': serializer.toJson<String?>(note),
+      'measurementContext': serializer.toJson<String>(measurementContext),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -2326,8 +2394,10 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     int? id,
     String? uuid,
     DateTime? date,
+    Value<String?> dayKey = const Value.absent(),
     double? weight,
     Value<String?> note = const Value.absent(),
+    String? measurementContext,
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -2337,8 +2407,10 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     id: id ?? this.id,
     uuid: uuid ?? this.uuid,
     date: date ?? this.date,
+    dayKey: dayKey.present ? dayKey.value : this.dayKey,
     weight: weight ?? this.weight,
     note: note.present ? note.value : this.note,
+    measurementContext: measurementContext ?? this.measurementContext,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -2350,8 +2422,12 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       id: data.id.present ? data.id.value : this.id,
       uuid: data.uuid.present ? data.uuid.value : this.uuid,
       date: data.date.present ? data.date.value : this.date,
+      dayKey: data.dayKey.present ? data.dayKey.value : this.dayKey,
       weight: data.weight.present ? data.weight.value : this.weight,
       note: data.note.present ? data.note.value : this.note,
+      measurementContext: data.measurementContext.present
+          ? data.measurementContext.value
+          : this.measurementContext,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -2368,8 +2444,10 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
           ..write('id: $id, ')
           ..write('uuid: $uuid, ')
           ..write('date: $date, ')
+          ..write('dayKey: $dayKey, ')
           ..write('weight: $weight, ')
           ..write('note: $note, ')
+          ..write('measurementContext: $measurementContext, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -2384,8 +2462,10 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     id,
     uuid,
     date,
+    dayKey,
     weight,
     note,
+    measurementContext,
     createdAt,
     updatedAt,
     deletedAt,
@@ -2399,8 +2479,10 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
           other.id == this.id &&
           other.uuid == this.uuid &&
           other.date == this.date &&
+          other.dayKey == this.dayKey &&
           other.weight == this.weight &&
           other.note == this.note &&
+          other.measurementContext == this.measurementContext &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -2412,8 +2494,10 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
   final Value<int> id;
   final Value<String> uuid;
   final Value<DateTime> date;
+  final Value<String?> dayKey;
   final Value<double> weight;
   final Value<String?> note;
+  final Value<String> measurementContext;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -2423,8 +2507,10 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     this.id = const Value.absent(),
     this.uuid = const Value.absent(),
     this.date = const Value.absent(),
+    this.dayKey = const Value.absent(),
     this.weight = const Value.absent(),
     this.note = const Value.absent(),
+    this.measurementContext = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -2435,8 +2521,10 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     this.id = const Value.absent(),
     this.uuid = const Value.absent(),
     this.date = const Value.absent(),
+    this.dayKey = const Value.absent(),
     required double weight,
     this.note = const Value.absent(),
+    this.measurementContext = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -2447,8 +2535,10 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     Expression<int>? id,
     Expression<String>? uuid,
     Expression<DateTime>? date,
+    Expression<String>? dayKey,
     Expression<double>? weight,
     Expression<String>? note,
+    Expression<String>? measurementContext,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -2459,8 +2549,10 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
       if (id != null) 'id': id,
       if (uuid != null) 'uuid': uuid,
       if (date != null) 'date': date,
+      if (dayKey != null) 'day_key': dayKey,
       if (weight != null) 'weight': weight,
       if (note != null) 'note': note,
+      if (measurementContext != null) 'measurement_context': measurementContext,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -2473,8 +2565,10 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     Value<int>? id,
     Value<String>? uuid,
     Value<DateTime>? date,
+    Value<String?>? dayKey,
     Value<double>? weight,
     Value<String?>? note,
+    Value<String>? measurementContext,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
@@ -2485,8 +2579,10 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
       id: id ?? this.id,
       uuid: uuid ?? this.uuid,
       date: date ?? this.date,
+      dayKey: dayKey ?? this.dayKey,
       weight: weight ?? this.weight,
       note: note ?? this.note,
+      measurementContext: measurementContext ?? this.measurementContext,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -2507,11 +2603,17 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     if (date.present) {
       map['date'] = Variable<DateTime>(date.value);
     }
+    if (dayKey.present) {
+      map['day_key'] = Variable<String>(dayKey.value);
+    }
     if (weight.present) {
       map['weight'] = Variable<double>(weight.value);
     }
     if (note.present) {
       map['note'] = Variable<String>(note.value);
+    }
+    if (measurementContext.present) {
+      map['measurement_context'] = Variable<String>(measurementContext.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -2537,8 +2639,10 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
           ..write('id: $id, ')
           ..write('uuid: $uuid, ')
           ..write('date: $date, ')
+          ..write('dayKey: $dayKey, ')
           ..write('weight: $weight, ')
           ..write('note: $note, ')
+          ..write('measurementContext: $measurementContext, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -8525,8 +8629,10 @@ typedef $$WeightEntriesTableCreateCompanionBuilder =
       Value<int> id,
       Value<String> uuid,
       Value<DateTime> date,
+      Value<String?> dayKey,
       required double weight,
       Value<String?> note,
+      Value<String> measurementContext,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -8538,8 +8644,10 @@ typedef $$WeightEntriesTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> uuid,
       Value<DateTime> date,
+      Value<String?> dayKey,
       Value<double> weight,
       Value<String?> note,
+      Value<String> measurementContext,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -8571,6 +8679,11 @@ class $$WeightEntriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get dayKey => $composableBuilder(
+    column: $table.dayKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<double> get weight => $composableBuilder(
     column: $table.weight,
     builder: (column) => ColumnFilters(column),
@@ -8578,6 +8691,11 @@ class $$WeightEntriesTableFilterComposer
 
   ColumnFilters<String> get note => $composableBuilder(
     column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get measurementContext => $composableBuilder(
+    column: $table.measurementContext,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8631,6 +8749,11 @@ class $$WeightEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get dayKey => $composableBuilder(
+    column: $table.dayKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get weight => $composableBuilder(
     column: $table.weight,
     builder: (column) => ColumnOrderings(column),
@@ -8638,6 +8761,11 @@ class $$WeightEntriesTableOrderingComposer
 
   ColumnOrderings<String> get note => $composableBuilder(
     column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get measurementContext => $composableBuilder(
+    column: $table.measurementContext,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -8685,11 +8813,19 @@ class $$WeightEntriesTableAnnotationComposer
   GeneratedColumn<DateTime> get date =>
       $composableBuilder(column: $table.date, builder: (column) => column);
 
+  GeneratedColumn<String> get dayKey =>
+      $composableBuilder(column: $table.dayKey, builder: (column) => column);
+
   GeneratedColumn<double> get weight =>
       $composableBuilder(column: $table.weight, builder: (column) => column);
 
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get measurementContext => $composableBuilder(
+    column: $table.measurementContext,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -8743,8 +8879,10 @@ class $$WeightEntriesTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> uuid = const Value.absent(),
                 Value<DateTime> date = const Value.absent(),
+                Value<String?> dayKey = const Value.absent(),
                 Value<double> weight = const Value.absent(),
                 Value<String?> note = const Value.absent(),
+                Value<String> measurementContext = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -8754,8 +8892,10 @@ class $$WeightEntriesTableTableManager
                 id: id,
                 uuid: uuid,
                 date: date,
+                dayKey: dayKey,
                 weight: weight,
                 note: note,
+                measurementContext: measurementContext,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
@@ -8767,8 +8907,10 @@ class $$WeightEntriesTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> uuid = const Value.absent(),
                 Value<DateTime> date = const Value.absent(),
+                Value<String?> dayKey = const Value.absent(),
                 required double weight,
                 Value<String?> note = const Value.absent(),
+                Value<String> measurementContext = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -8778,8 +8920,10 @@ class $$WeightEntriesTableTableManager
                 id: id,
                 uuid: uuid,
                 date: date,
+                dayKey: dayKey,
                 weight: weight,
                 note: note,
+                measurementContext: measurementContext,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,

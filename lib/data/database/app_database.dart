@@ -37,7 +37,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -47,6 +47,7 @@ class AppDatabase extends _$AppDatabase {
     onCreate: (migrator) async {
       await migrator.createAll();
       await _createIndexes();
+      await _createWeightDayIndex();
     },
     onUpgrade: (migrator, from, to) async {
       if (from < 2) {
@@ -66,6 +67,9 @@ class AppDatabase extends _$AppDatabase {
 
       if (from < 5) {
         await _upgradeToV5(migrator);
+      }
+      if (from < 6) {
+        await _upgradeToV6();
       }
     },
   );
@@ -224,6 +228,28 @@ class AppDatabase extends _$AppDatabase {
     }
   }
 
+  Future<void> _upgradeToV6() async {
+    await _addColumns('weight_entries', <String>[
+      'day_key TEXT',
+      "measurement_context TEXT NOT NULL DEFAULT 'differentConditions'",
+    ]);
+    await customStatement('''
+      UPDATE weight_entries SET day_key = printf('%04d-%02d-%02d',
+        CAST(strftime('%Y', date, 'unixepoch', 'localtime') AS INTEGER),
+        CAST(strftime('%m', date, 'unixepoch', 'localtime') AS INTEGER),
+        CAST(strftime('%d', date, 'unixepoch', 'localtime') AS INTEGER))
+      WHERE day_key IS NULL
+    ''');
+    await customStatement('''
+      UPDATE weight_entries SET deleted_at = COALESCE(deleted_at, updated_at, created_at)
+      WHERE deleted_at IS NULL AND id NOT IN (
+        SELECT MAX(id) FROM weight_entries WHERE deleted_at IS NULL GROUP BY day_key
+      )
+    ''');
+    await _createIndexes();
+    await _createWeightDayIndex();
+  }
+
   Future<void> _createIndexes() async {
     const statements = <String>[
       'CREATE UNIQUE INDEX IF NOT EXISTS user_profile_uuid_uq ON user_profile(uuid)',
@@ -243,4 +269,10 @@ class AppDatabase extends _$AppDatabase {
       await customStatement(statement);
     }
   }
+
+  Future<void> _createWeightDayIndex() => customStatement(
+    'CREATE UNIQUE INDEX IF NOT EXISTS weight_entries_active_day_uq '
+    'ON weight_entries(day_key) '
+    'WHERE deleted_at IS NULL AND day_key IS NOT NULL',
+  );
 }

@@ -139,12 +139,24 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
                         },
                         childDelegate: ListWheelChildBuilderDelegate(
                           childCount: itemCount,
-                          builder: (_, index) => Center(
-                            child: Text(
-                              valueFor(
+                          builder: (_, index) => Semantics(
+                            button: true,
+                            label:
+                                '${valueFor(index).toStringAsFixed(widget.decimalPlaces)} ${widget.unit}',
+                            child: InkWell(
+                              onTap: () => wheel.animateToItem(
                                 index,
-                              ).toStringAsFixed(widget.decimalPlaces),
-                              style: Theme.of(context).textTheme.titleLarge,
+                                duration: const Duration(milliseconds: 180),
+                                curve: Curves.easeOut,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  valueFor(
+                                    index,
+                                  ).toStringAsFixed(widget.decimalPlaces),
+                                  style: Theme.of(context).textTheme.titleLarge,
+                                ),
+                              ),
                             ),
                           ),
                         ),

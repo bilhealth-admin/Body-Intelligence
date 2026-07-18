@@ -100,5 +100,12 @@ void main() {
     expect(log.notes, 'preserve me');
     expect(log.dayKey, '2024-01-01');
     expect(await database.select(database.preferences).get(), isEmpty);
+    final weightColumns = await database
+        .customSelect('PRAGMA table_info(weight_entries)')
+        .get();
+    final columnNames = weightColumns
+        .map((row) => row.read<String>('name'))
+        .toSet();
+    expect(columnNames, containsAll(['day_key', 'measurement_context']));
   });
 }

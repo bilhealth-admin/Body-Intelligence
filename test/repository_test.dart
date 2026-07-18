@@ -96,6 +96,49 @@ void main() {
     expect(await weights.getAll(), isEmpty);
   });
 
+  test(
+    'daily weight check-in preserves one active entry and durable id',
+    () async {
+      final weights = WeightRepository(database);
+      final morning = DateTime(2026, 7, 18, 7);
+      final firstId = await weights.addWeight(
+        80,
+        date: morning,
+        measurementContext: 'morning',
+      );
+      final firstUuid = (await weights.getForDay(morning))!.uuid;
+
+      final secondId = await weights.addWeight(
+        79.8,
+        date: morning.add(const Duration(hours: 8)),
+        measurementContext: 'afterBathroom',
+      );
+
+      final entry = await weights.getForDay(morning);
+      expect(secondId, firstId);
+      expect(entry!.uuid, firstUuid);
+      expect(entry.weight, 79.8);
+      expect(entry.measurementContext, 'afterBathroom');
+      expect(await weights.getAll(), hasLength(1));
+    },
+  );
+
+  test(
+    'deleted daily weight can be recorded again without resurrection',
+    () async {
+      final weights = WeightRepository(database);
+      final date = DateTime(2026, 7, 18);
+      final deletedId = await weights.addWeight(80, date: date);
+      await weights.deleteWeight(deletedId);
+
+      final replacementId = await weights.addWeight(79.9, date: date);
+
+      expect(replacementId, isNot(deletedId));
+      expect((await weights.getForDay(date))!.weight, 79.9);
+      expect(await weights.getAll(), hasLength(1));
+    },
+  );
+
   test('water totals are calculated from individual entries', () async {
     final water = WaterRepository(database);
     final date = DateTime(2026, 7, 18);

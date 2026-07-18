@@ -9,9 +9,16 @@ class WeightEntries extends Table {
 
   DateTimeColumn get date => dateTime().withDefault(currentDateAndTime)();
 
+  /// Local calendar date used to enforce one logical check-in per day.
+  TextColumn get dayKey => text().nullable()();
+
   RealColumn get weight => real()();
 
   TextColumn get note => text().nullable()();
+
+  /// Stable, non-localized measurement condition selected by the user.
+  TextColumn get measurementContext =>
+      text().withDefault(const Constant('differentConditions'))();
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
