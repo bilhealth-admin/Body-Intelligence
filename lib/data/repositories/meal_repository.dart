@@ -142,6 +142,24 @@ class MealRepository {
       return rows;
     });
   }
+
+  Stream<List<MealWithItems>> watchAll() {
+    final query = _database.select(_database.meals)
+      ..where((row) => row.deletedAt.isNull())
+      ..orderBy([(row) => OrderingTerm.asc(row.date)]);
+    return query.watch().asyncMap((meals) async {
+      final rows = <MealWithItems>[];
+      for (final meal in meals) {
+        final items =
+            await (_database.select(_database.mealItems)..where(
+                  (row) => row.mealId.equals(meal.id) & row.deletedAt.isNull(),
+                ))
+                .get();
+        rows.add(MealWithItems(meal: meal, items: items));
+      }
+      return rows;
+    });
+  }
 }
 
 class MealWithItems {

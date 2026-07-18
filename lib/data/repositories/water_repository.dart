@@ -48,6 +48,13 @@ class WaterRepository {
         .watch();
   }
 
+  Stream<List<WaterEntry>> watchAll() {
+    return (_database.select(_database.waterEntries)
+          ..where((row) => row.deletedAt.isNull())
+          ..orderBy([(row) => OrderingTerm.asc(row.occurredAt)]))
+        .watch();
+  }
+
   Future<void> delete(int id) async {
     await (_database.update(
       _database.waterEntries,

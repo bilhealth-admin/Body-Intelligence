@@ -13,6 +13,8 @@ class BodyProfile {
 
   final bool exercises;
 
+  final String goalType;
+
   const BodyProfile({
     required this.age,
     required this.gender,
@@ -21,5 +23,6 @@ class BodyProfile {
     required this.targetWeight,
     required this.activityLevel,
     required this.exercises,
+    this.goalType = 'maintain',
   });
 }
