@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/services/app_settings_provider.dart';
 import '../../app/services/data_export_service.dart';
+import '../../app/services/local_data_lifecycle_service.dart';
 import '../../app/services/external_capabilities.dart';
 import '../../core/units/measurement_units.dart';
 import '../../data/database/database_provider.dart';
@@ -35,49 +34,11 @@ class SettingsPage extends ConsumerWidget {
 
   Future<void> _export(BuildContext context, WidgetRef ref) async {
     final database = ref.read(databaseProvider);
-    final profile = await database
-        .select(database.userProfile)
-        .getSingleOrNull();
-    final weights = await database.select(database.weightEntries).get();
-    final meals = await database.select(database.meals).get();
-    final mealItems = await database.select(database.mealItems).get();
-    final water = await database.select(database.waterEntries).get();
-    final foods = await database.select(database.foods).get();
-    final goals = await database.select(database.goals).get();
-    final dailyLogs = await database.select(database.dailyLogs).get();
-    final contexts = await database.select(database.lifeContextEntries).get();
-    final memories = await database.select(database.decisionMemories).get();
-    final experiments = await database
-        .select(database.personalExperiments)
-        .get();
-    final challenges = await database.select(database.challenges).get();
-    final preferences = await database.select(database.preferences).get();
-    final document = const JsonEncoder.withIndent('  ').convert({
-      'format': 'BIL local export v2',
-      'exportedAt': DateTime.now().toIso8601String(),
-      'canonicalUnits': {
-        'weight': 'kg',
-        'height': 'cm',
-        'water': 'ml',
-        'nutrientMass': 'g or mg as identified by field',
-      },
-      'selectedDisplayUnits':
-          await ref.read(preferencesRepositoryProvider).get('units') ??
-          'metric',
-      'profile': profile?.toJson(),
-      'goals': goals.map((row) => row.toJson()).toList(),
-      'weights': weights.map((row) => row.toJson()).toList(),
-      'dailyLogs': dailyLogs.map((row) => row.toJson()).toList(),
-      'foods': foods.map((row) => row.toJson()).toList(),
-      'meals': meals.map((row) => row.toJson()).toList(),
-      'mealItems': mealItems.map((row) => row.toJson()).toList(),
-      'waterEntries': water.map((row) => row.toJson()).toList(),
-      'lifeContext': contexts.map((row) => row.toJson()).toList(),
-      'decisionMemory': memories.map((row) => row.toJson()).toList(),
-      'personalExperiments': experiments.map((row) => row.toJson()).toList(),
-      'challenges': challenges.map((row) => row.toJson()).toList(),
-      'preferences': preferences.map((row) => row.toJson()).toList(),
-    });
+    final displayUnits =
+        await ref.read(preferencesRepositoryProvider).get('units') ?? 'metric';
+    final document = await LocalDataLifecycleService(
+      database,
+    ).exportJson(displayUnits: displayUnits);
     await const DataExportService().copyText(document);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -125,24 +86,7 @@ class SettingsPage extends ConsumerWidget {
     controller.dispose();
     if (confirmed != true) return;
     final database = ref.read(databaseProvider);
-    await database.transaction(() async {
-      await database.delete(database.decisionMemories).go();
-      await database.delete(database.lifeContextEntries).go();
-      await database.delete(database.personalExperiments).go();
-      await database.delete(database.challenges).go();
-      await database.delete(database.mealItems).go();
-      await database.delete(database.meals).go();
-      await database.delete(database.favorites).go();
-      await database.delete(database.recentFoods).go();
-      await database.delete(database.waterEntries).go();
-      await database.delete(database.goals).go();
-      await database.delete(database.planSettings).go();
-      await database.delete(database.weightEntries).go();
-      await database.delete(database.dailyLogs).go();
-      await database.delete(database.userProfile).go();
-      await database.delete(database.foods).go();
-      await database.delete(database.preferences).go();
-    });
+    await LocalDataLifecycleService(database).clearAll();
     await SeedData.seedStarterCatalog(ref.read(foodRepositoryProvider));
     if (context.mounted) context.go('/onboarding');
   }
