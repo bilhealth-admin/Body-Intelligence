@@ -9,6 +9,7 @@ import '../../../engine/body_twin_engine.dart';
 import '../../../engine/data_honesty_engine.dart';
 import '../../../engine/intelligence_engine.dart';
 import '../../../engine/one_best_action_engine.dart';
+import '../../../engine/plan_engine.dart';
 import '../../../engine/what_changed_engine.dart';
 import '../../../data/database/date_keys.dart';
 import '../../profile/providers/user_profile_provider.dart';
@@ -73,6 +74,10 @@ class DashboardGrid extends ConsumerWidget {
         ),
       );
     }
+    final planAsync = ref.watch(planSettingProvider(profile.uuid));
+    if (planAsync.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
     final weights = weightsAsync.value ?? const [];
     final meals = mealsAsync.value ?? const [];
     final waterRows = waterAsync.value ?? const [];
@@ -112,6 +117,20 @@ class DashboardGrid extends ConsumerWidget {
       eatenProtein: protein.round(),
       drankWater: water,
     );
+    final plan = planAsync.value;
+    final effectiveTargets = PlanEngine.effective(
+      bil.targets,
+      plan == null
+          ? null
+          : PlanOverrides(
+              calories: plan.overrideCalories,
+              protein: plan.overrideProtein,
+              carbs: plan.overrideCarbs,
+              fats: plan.overrideFats,
+              fiber: plan.overrideFiber,
+              water: plan.overrideWater,
+            ),
+    );
     final chronological = weights.reversed.map((row) => row.weight).toList();
     final mealDays = allMeals.map((row) => row.meal.dayKey).toSet();
     final waterDays = allWater.map((row) => row.dayKey).toSet();
@@ -123,9 +142,9 @@ class DashboardGrid extends ConsumerWidget {
         .where((row) => row.measurementContext != 'differentConditions')
         .length;
     final intelligence = IntelligenceEngine.evaluate(
-      calorieTarget: bil.targets.calories,
-      proteinTarget: bil.targets.protein,
-      waterTarget: bil.targets.water,
+      calorieTarget: effectiveTargets.calories,
+      proteinTarget: effectiveTargets.protein,
+      waterTarget: effectiveTargets.water,
       calories: calories,
       protein: protein,
       waterMl: water,
@@ -145,9 +164,9 @@ class DashboardGrid extends ConsumerWidget {
       weighedToday: weightDays.contains(dayKeyFor(DateTime.now())),
       loggingComplete: meals.isNotEmpty,
       protein: protein,
-      proteinTarget: bil.targets.protein,
+      proteinTarget: effectiveTargets.protein,
       waterMl: water,
-      waterTarget: bil.targets.water,
+      waterTarget: effectiveTargets.water,
       trackedDays: observedDays.length,
     );
     final changed = WhatChangedEngine.compare(
@@ -158,7 +177,7 @@ class DashboardGrid extends ConsumerWidget {
           weights[0].measurementContext != 'differentConditions',
     );
     final twin = BodyTwinEngine.simulate(
-      calorieTarget: bil.targets.calories,
+      calorieTarget: effectiveTargets.calories,
       tdee: bil.tdee.round(),
       weightDays: weightDays.length,
       nutritionDays: mealDays.length,
@@ -265,19 +284,19 @@ class DashboardGrid extends ConsumerWidget {
             ),
             StatCard(
               title: context.strings.text('Calories'),
-              value: '${calories.round()} / ${bil.targets.calories}',
+              value: '${calories.round()} / ${effectiveTargets.calories}',
               icon: Icons.local_fire_department,
               color: Colors.orange,
             ),
             StatCard(
               title: context.strings.text('Protein'),
-              value: '${protein.round()} / ${bil.targets.protein} g',
+              value: '${protein.round()} / ${effectiveTargets.protein} g',
               icon: Icons.fitness_center,
               color: Colors.green,
             ),
             StatCard(
               title: context.strings.text('Water'),
-              value: '$water / ${bil.targets.water} ml',
+              value: '$water / ${effectiveTargets.water} ml',
               icon: Icons.water_drop,
               color: Colors.cyan,
             ),
@@ -305,32 +324,32 @@ class DashboardGrid extends ConsumerWidget {
                 _TargetRow(
                   label: tr('Carbohydrates', 'الكربوهيدرات'),
                   consumed: carbs,
-                  target: bil.targets.carbs.toDouble(),
+                  target: effectiveTargets.carbs.toDouble(),
                   unit: 'g',
                 ),
                 _TargetRow(
                   label: tr('Fat', 'الدهون'),
                   consumed: fats,
-                  target: bil.targets.fats.toDouble(),
+                  target: effectiveTargets.fats.toDouble(),
                   unit: 'g',
                 ),
                 _TargetRow(
                   label: tr('Fiber', 'الألياف'),
                   consumed: fiber,
-                  target: bil.targets.fiber.toDouble(),
+                  target: effectiveTargets.fiber.toDouble(),
                   unit: 'g',
                 ),
                 _TargetRow(
                   label: tr('Sodium', 'الصوديوم'),
                   consumed: sodium,
-                  target: bil.targets.sodium.toDouble(),
+                  target: effectiveTargets.sodium.toDouble(),
                   unit: 'mg',
                   upperLimit: true,
                 ),
                 _TargetRow(
                   label: tr('Potassium', 'البوتاسيوم'),
                   consumed: potassium,
-                  target: bil.targets.potassium.toDouble(),
+                  target: effectiveTargets.potassium.toDouble(),
                   unit: 'mg',
                 ),
               ],
@@ -351,12 +370,12 @@ class DashboardGrid extends ConsumerWidget {
                 const SizedBox(height: 12),
                 Text(
                   arabic
-                      ? 'الاحتياج اليومي المقدر ${bil.tdee.round()} سعرة · هدف السعرات ${bil.targets.calories}'
+                      ? 'الاحتياج اليومي المقدر ${bil.tdee.round()} سعرة · هدف السعرات ${effectiveTargets.calories}'
                       : 'Estimated TDEE ${bil.tdee.round()} kcal · planned ${goalType == 'lose'
                             ? 'deficit'
                             : goalType == 'gain'
                             ? 'surplus'
-                            : 'maintenance'} ${bil.targets.calories - bil.tdee.round()} kcal',
+                            : 'maintenance'} ${effectiveTargets.calories - bil.tdee.round()} kcal',
                 ),
                 Text(
                   goalDate == null

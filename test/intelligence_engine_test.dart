@@ -1,11 +1,34 @@
 import 'package:body_intelligence_log/engine/bmr_engine.dart';
 import 'package:body_intelligence_log/engine/body_profile.dart';
 import 'package:body_intelligence_log/engine/intelligence_engine.dart';
+import 'package:body_intelligence_log/engine/plan_engine.dart';
 import 'package:body_intelligence_log/engine/nutrition_engine.dart';
 import 'package:body_intelligence_log/engine/tdee_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('plan recommendation is deterministic and overrides stay separate', () {
+    const profile = BodyProfile(
+      age: 35,
+      gender: 'male',
+      height: 180,
+      weight: 85,
+      targetWeight: 78,
+      activityLevel: 'moderate',
+      exercises: true,
+      goalType: 'lose',
+    );
+    final recommendation = PlanEngine.recommend(profile);
+    final effective = PlanEngine.effective(
+      recommendation.targets,
+      const PlanOverrides(calories: 2400),
+    );
+    expect(effective.calories, 2400);
+    expect(recommendation.targets.calories, isNot(2400));
+    expect(effective.protein, recommendation.targets.protein);
+    expect(recommendation.assumptions, isNotEmpty);
+  });
+
   const maintain = BodyProfile(
     age: 30,
     gender: 'male',

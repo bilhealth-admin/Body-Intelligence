@@ -5,6 +5,7 @@ import '../../../data/database/app_database.dart';
 import '../../../data/database/database_provider.dart';
 import '../../../data/repositories/goal_repository.dart';
 import '../../../data/repositories/preferences_repository.dart';
+import '../../../data/repositories/plan_repository.dart';
 import '../../../data/repositories/user_profile_repository.dart';
 
 final userProfileRepositoryProvider = Provider<UserProfileRepository>((ref) {
@@ -18,6 +19,21 @@ final goalRepositoryProvider = Provider<GoalRepository>((ref) {
 
 final preferencesRepositoryProvider = Provider<PreferencesRepository>((ref) {
   return PreferencesRepository(ref.watch(databaseProvider));
+});
+
+final planRepositoryProvider = Provider<PlanRepository>((ref) {
+  return PlanRepository(ref.watch(databaseProvider));
+});
+
+final activeGoalProvider = StreamProvider<Goal?>((ref) {
+  return ref.watch(goalRepositoryProvider).watchActive();
+});
+
+final planSettingProvider = StreamProvider.family<PlanSetting?, String>((
+  ref,
+  uuid,
+) {
+  return ref.watch(planRepositoryProvider).watchForProfile(uuid);
 });
 
 final measurementSystemProvider = StreamProvider<MeasurementSystem>((ref) {

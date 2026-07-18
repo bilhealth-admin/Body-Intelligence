@@ -11,6 +11,7 @@ import '../../features/life_context/decision_memory_page.dart';
 import '../../features/nutrition/food_page.dart';
 import '../../features/onboarding/onboarding_page.dart';
 import '../../features/settings/settings_page.dart';
+import '../../features/profile/plan_page.dart';
 import '../../features/startup/startup_page.dart';
 import 'responsive_app_shell.dart';
 
@@ -30,6 +31,7 @@ class AppRouter {
         path: '/decision-memory',
         builder: (_, _) => const DecisionMemoryPage(),
       ),
+      GoRoute(path: '/plan', builder: (_, _) => const PlanPage()),
       ShellRoute(
         builder: (_, _, child) => ResponsiveAppShell(child: child),
         routes: [

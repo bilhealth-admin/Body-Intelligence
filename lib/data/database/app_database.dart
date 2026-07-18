@@ -10,6 +10,7 @@ import 'meal_items.dart';
 import 'meals.dart';
 import 'life_context_entries.dart';
 import 'preferences.dart';
+import 'plan_settings.dart';
 import 'recent_foods.dart';
 import 'user_profile.dart';
 import 'water_entries.dart';
@@ -33,6 +34,7 @@ part 'app_database.g.dart';
     Preferences,
     LifeContextEntries,
     DecisionMemories,
+    PlanSettings,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -41,7 +43,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -87,6 +89,9 @@ class AppDatabase extends _$AppDatabase {
           'magnesium REAL NOT NULL DEFAULT 0',
           'sugar REAL NOT NULL DEFAULT 0',
         ]);
+      }
+      if (from < 9) {
+        await migrator.createTable(planSettings);
       }
     },
   );

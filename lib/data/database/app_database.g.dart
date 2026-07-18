@@ -9353,6 +9353,1165 @@ class DecisionMemoriesCompanion extends UpdateCompanion<DecisionMemory> {
   }
 }
 
+class $PlanSettingsTable extends PlanSettings
+    with TableInfo<$PlanSettingsTable, PlanSetting> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PlanSettingsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
+  @override
+  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
+    'uuid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+    clientDefault: newDatabaseId,
+  );
+  static const VerificationMeta _profileUuidMeta = const VerificationMeta(
+    'profileUuid',
+  );
+  @override
+  late final GeneratedColumn<String> profileUuid = GeneratedColumn<String>(
+    'profile_uuid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'UNIQUE REFERENCES user_profile (uuid) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _recommendedCaloriesMeta =
+      const VerificationMeta('recommendedCalories');
+  @override
+  late final GeneratedColumn<int> recommendedCalories = GeneratedColumn<int>(
+    'recommended_calories',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recommendedProteinMeta =
+      const VerificationMeta('recommendedProtein');
+  @override
+  late final GeneratedColumn<int> recommendedProtein = GeneratedColumn<int>(
+    'recommended_protein',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recommendedCarbsMeta = const VerificationMeta(
+    'recommendedCarbs',
+  );
+  @override
+  late final GeneratedColumn<int> recommendedCarbs = GeneratedColumn<int>(
+    'recommended_carbs',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recommendedFatsMeta = const VerificationMeta(
+    'recommendedFats',
+  );
+  @override
+  late final GeneratedColumn<int> recommendedFats = GeneratedColumn<int>(
+    'recommended_fats',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recommendedFiberMeta = const VerificationMeta(
+    'recommendedFiber',
+  );
+  @override
+  late final GeneratedColumn<int> recommendedFiber = GeneratedColumn<int>(
+    'recommended_fiber',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recommendedWaterMeta = const VerificationMeta(
+    'recommendedWater',
+  );
+  @override
+  late final GeneratedColumn<int> recommendedWater = GeneratedColumn<int>(
+    'recommended_water',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _overrideCaloriesMeta = const VerificationMeta(
+    'overrideCalories',
+  );
+  @override
+  late final GeneratedColumn<int> overrideCalories = GeneratedColumn<int>(
+    'override_calories',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _overrideProteinMeta = const VerificationMeta(
+    'overrideProtein',
+  );
+  @override
+  late final GeneratedColumn<int> overrideProtein = GeneratedColumn<int>(
+    'override_protein',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _overrideCarbsMeta = const VerificationMeta(
+    'overrideCarbs',
+  );
+  @override
+  late final GeneratedColumn<int> overrideCarbs = GeneratedColumn<int>(
+    'override_carbs',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _overrideFatsMeta = const VerificationMeta(
+    'overrideFats',
+  );
+  @override
+  late final GeneratedColumn<int> overrideFats = GeneratedColumn<int>(
+    'override_fats',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _overrideFiberMeta = const VerificationMeta(
+    'overrideFiber',
+  );
+  @override
+  late final GeneratedColumn<int> overrideFiber = GeneratedColumn<int>(
+    'override_fiber',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _overrideWaterMeta = const VerificationMeta(
+    'overrideWater',
+  );
+  @override
+  late final GeneratedColumn<int> overrideWater = GeneratedColumn<int>(
+    'override_water',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _assumptionsVersionMeta =
+      const VerificationMeta('assumptionsVersion');
+  @override
+  late final GeneratedColumn<String> assumptionsVersion =
+      GeneratedColumn<String>(
+        'assumptions_version',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('deterministic-v1'),
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('local'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    uuid,
+    profileUuid,
+    recommendedCalories,
+    recommendedProtein,
+    recommendedCarbs,
+    recommendedFats,
+    recommendedFiber,
+    recommendedWater,
+    overrideCalories,
+    overrideProtein,
+    overrideCarbs,
+    overrideFats,
+    overrideFiber,
+    overrideWater,
+    assumptionsVersion,
+    createdAt,
+    updatedAt,
+    revision,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'plan_settings';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PlanSetting> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uuid')) {
+      context.handle(
+        _uuidMeta,
+        uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta),
+      );
+    }
+    if (data.containsKey('profile_uuid')) {
+      context.handle(
+        _profileUuidMeta,
+        profileUuid.isAcceptableOrUnknown(
+          data['profile_uuid']!,
+          _profileUuidMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_profileUuidMeta);
+    }
+    if (data.containsKey('recommended_calories')) {
+      context.handle(
+        _recommendedCaloriesMeta,
+        recommendedCalories.isAcceptableOrUnknown(
+          data['recommended_calories']!,
+          _recommendedCaloriesMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_recommendedCaloriesMeta);
+    }
+    if (data.containsKey('recommended_protein')) {
+      context.handle(
+        _recommendedProteinMeta,
+        recommendedProtein.isAcceptableOrUnknown(
+          data['recommended_protein']!,
+          _recommendedProteinMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_recommendedProteinMeta);
+    }
+    if (data.containsKey('recommended_carbs')) {
+      context.handle(
+        _recommendedCarbsMeta,
+        recommendedCarbs.isAcceptableOrUnknown(
+          data['recommended_carbs']!,
+          _recommendedCarbsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_recommendedCarbsMeta);
+    }
+    if (data.containsKey('recommended_fats')) {
+      context.handle(
+        _recommendedFatsMeta,
+        recommendedFats.isAcceptableOrUnknown(
+          data['recommended_fats']!,
+          _recommendedFatsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_recommendedFatsMeta);
+    }
+    if (data.containsKey('recommended_fiber')) {
+      context.handle(
+        _recommendedFiberMeta,
+        recommendedFiber.isAcceptableOrUnknown(
+          data['recommended_fiber']!,
+          _recommendedFiberMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_recommendedFiberMeta);
+    }
+    if (data.containsKey('recommended_water')) {
+      context.handle(
+        _recommendedWaterMeta,
+        recommendedWater.isAcceptableOrUnknown(
+          data['recommended_water']!,
+          _recommendedWaterMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_recommendedWaterMeta);
+    }
+    if (data.containsKey('override_calories')) {
+      context.handle(
+        _overrideCaloriesMeta,
+        overrideCalories.isAcceptableOrUnknown(
+          data['override_calories']!,
+          _overrideCaloriesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('override_protein')) {
+      context.handle(
+        _overrideProteinMeta,
+        overrideProtein.isAcceptableOrUnknown(
+          data['override_protein']!,
+          _overrideProteinMeta,
+        ),
+      );
+    }
+    if (data.containsKey('override_carbs')) {
+      context.handle(
+        _overrideCarbsMeta,
+        overrideCarbs.isAcceptableOrUnknown(
+          data['override_carbs']!,
+          _overrideCarbsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('override_fats')) {
+      context.handle(
+        _overrideFatsMeta,
+        overrideFats.isAcceptableOrUnknown(
+          data['override_fats']!,
+          _overrideFatsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('override_fiber')) {
+      context.handle(
+        _overrideFiberMeta,
+        overrideFiber.isAcceptableOrUnknown(
+          data['override_fiber']!,
+          _overrideFiberMeta,
+        ),
+      );
+    }
+    if (data.containsKey('override_water')) {
+      context.handle(
+        _overrideWaterMeta,
+        overrideWater.isAcceptableOrUnknown(
+          data['override_water']!,
+          _overrideWaterMeta,
+        ),
+      );
+    }
+    if (data.containsKey('assumptions_version')) {
+      context.handle(
+        _assumptionsVersionMeta,
+        assumptionsVersion.isAcceptableOrUnknown(
+          data['assumptions_version']!,
+          _assumptionsVersionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PlanSetting map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PlanSetting(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      uuid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uuid'],
+      )!,
+      profileUuid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}profile_uuid'],
+      )!,
+      recommendedCalories: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}recommended_calories'],
+      )!,
+      recommendedProtein: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}recommended_protein'],
+      )!,
+      recommendedCarbs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}recommended_carbs'],
+      )!,
+      recommendedFats: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}recommended_fats'],
+      )!,
+      recommendedFiber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}recommended_fiber'],
+      )!,
+      recommendedWater: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}recommended_water'],
+      )!,
+      overrideCalories: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}override_calories'],
+      ),
+      overrideProtein: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}override_protein'],
+      ),
+      overrideCarbs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}override_carbs'],
+      ),
+      overrideFats: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}override_fats'],
+      ),
+      overrideFiber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}override_fiber'],
+      ),
+      overrideWater: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}override_water'],
+      ),
+      assumptionsVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}assumptions_version'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $PlanSettingsTable createAlias(String alias) {
+    return $PlanSettingsTable(attachedDatabase, alias);
+  }
+}
+
+class PlanSetting extends DataClass implements Insertable<PlanSetting> {
+  final int id;
+  final String uuid;
+  final String profileUuid;
+  final int recommendedCalories;
+  final int recommendedProtein;
+  final int recommendedCarbs;
+  final int recommendedFats;
+  final int recommendedFiber;
+  final int recommendedWater;
+  final int? overrideCalories;
+  final int? overrideProtein;
+  final int? overrideCarbs;
+  final int? overrideFats;
+  final int? overrideFiber;
+  final int? overrideWater;
+  final String assumptionsVersion;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final int revision;
+  final String syncStatus;
+  const PlanSetting({
+    required this.id,
+    required this.uuid,
+    required this.profileUuid,
+    required this.recommendedCalories,
+    required this.recommendedProtein,
+    required this.recommendedCarbs,
+    required this.recommendedFats,
+    required this.recommendedFiber,
+    required this.recommendedWater,
+    this.overrideCalories,
+    this.overrideProtein,
+    this.overrideCarbs,
+    this.overrideFats,
+    this.overrideFiber,
+    this.overrideWater,
+    required this.assumptionsVersion,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.revision,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['uuid'] = Variable<String>(uuid);
+    map['profile_uuid'] = Variable<String>(profileUuid);
+    map['recommended_calories'] = Variable<int>(recommendedCalories);
+    map['recommended_protein'] = Variable<int>(recommendedProtein);
+    map['recommended_carbs'] = Variable<int>(recommendedCarbs);
+    map['recommended_fats'] = Variable<int>(recommendedFats);
+    map['recommended_fiber'] = Variable<int>(recommendedFiber);
+    map['recommended_water'] = Variable<int>(recommendedWater);
+    if (!nullToAbsent || overrideCalories != null) {
+      map['override_calories'] = Variable<int>(overrideCalories);
+    }
+    if (!nullToAbsent || overrideProtein != null) {
+      map['override_protein'] = Variable<int>(overrideProtein);
+    }
+    if (!nullToAbsent || overrideCarbs != null) {
+      map['override_carbs'] = Variable<int>(overrideCarbs);
+    }
+    if (!nullToAbsent || overrideFats != null) {
+      map['override_fats'] = Variable<int>(overrideFats);
+    }
+    if (!nullToAbsent || overrideFiber != null) {
+      map['override_fiber'] = Variable<int>(overrideFiber);
+    }
+    if (!nullToAbsent || overrideWater != null) {
+      map['override_water'] = Variable<int>(overrideWater);
+    }
+    map['assumptions_version'] = Variable<String>(assumptionsVersion);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['revision'] = Variable<int>(revision);
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  PlanSettingsCompanion toCompanion(bool nullToAbsent) {
+    return PlanSettingsCompanion(
+      id: Value(id),
+      uuid: Value(uuid),
+      profileUuid: Value(profileUuid),
+      recommendedCalories: Value(recommendedCalories),
+      recommendedProtein: Value(recommendedProtein),
+      recommendedCarbs: Value(recommendedCarbs),
+      recommendedFats: Value(recommendedFats),
+      recommendedFiber: Value(recommendedFiber),
+      recommendedWater: Value(recommendedWater),
+      overrideCalories: overrideCalories == null && nullToAbsent
+          ? const Value.absent()
+          : Value(overrideCalories),
+      overrideProtein: overrideProtein == null && nullToAbsent
+          ? const Value.absent()
+          : Value(overrideProtein),
+      overrideCarbs: overrideCarbs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(overrideCarbs),
+      overrideFats: overrideFats == null && nullToAbsent
+          ? const Value.absent()
+          : Value(overrideFats),
+      overrideFiber: overrideFiber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(overrideFiber),
+      overrideWater: overrideWater == null && nullToAbsent
+          ? const Value.absent()
+          : Value(overrideWater),
+      assumptionsVersion: Value(assumptionsVersion),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      revision: Value(revision),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory PlanSetting.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PlanSetting(
+      id: serializer.fromJson<int>(json['id']),
+      uuid: serializer.fromJson<String>(json['uuid']),
+      profileUuid: serializer.fromJson<String>(json['profileUuid']),
+      recommendedCalories: serializer.fromJson<int>(
+        json['recommendedCalories'],
+      ),
+      recommendedProtein: serializer.fromJson<int>(json['recommendedProtein']),
+      recommendedCarbs: serializer.fromJson<int>(json['recommendedCarbs']),
+      recommendedFats: serializer.fromJson<int>(json['recommendedFats']),
+      recommendedFiber: serializer.fromJson<int>(json['recommendedFiber']),
+      recommendedWater: serializer.fromJson<int>(json['recommendedWater']),
+      overrideCalories: serializer.fromJson<int?>(json['overrideCalories']),
+      overrideProtein: serializer.fromJson<int?>(json['overrideProtein']),
+      overrideCarbs: serializer.fromJson<int?>(json['overrideCarbs']),
+      overrideFats: serializer.fromJson<int?>(json['overrideFats']),
+      overrideFiber: serializer.fromJson<int?>(json['overrideFiber']),
+      overrideWater: serializer.fromJson<int?>(json['overrideWater']),
+      assumptionsVersion: serializer.fromJson<String>(
+        json['assumptionsVersion'],
+      ),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      revision: serializer.fromJson<int>(json['revision']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'uuid': serializer.toJson<String>(uuid),
+      'profileUuid': serializer.toJson<String>(profileUuid),
+      'recommendedCalories': serializer.toJson<int>(recommendedCalories),
+      'recommendedProtein': serializer.toJson<int>(recommendedProtein),
+      'recommendedCarbs': serializer.toJson<int>(recommendedCarbs),
+      'recommendedFats': serializer.toJson<int>(recommendedFats),
+      'recommendedFiber': serializer.toJson<int>(recommendedFiber),
+      'recommendedWater': serializer.toJson<int>(recommendedWater),
+      'overrideCalories': serializer.toJson<int?>(overrideCalories),
+      'overrideProtein': serializer.toJson<int?>(overrideProtein),
+      'overrideCarbs': serializer.toJson<int?>(overrideCarbs),
+      'overrideFats': serializer.toJson<int?>(overrideFats),
+      'overrideFiber': serializer.toJson<int?>(overrideFiber),
+      'overrideWater': serializer.toJson<int?>(overrideWater),
+      'assumptionsVersion': serializer.toJson<String>(assumptionsVersion),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'revision': serializer.toJson<int>(revision),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  PlanSetting copyWith({
+    int? id,
+    String? uuid,
+    String? profileUuid,
+    int? recommendedCalories,
+    int? recommendedProtein,
+    int? recommendedCarbs,
+    int? recommendedFats,
+    int? recommendedFiber,
+    int? recommendedWater,
+    Value<int?> overrideCalories = const Value.absent(),
+    Value<int?> overrideProtein = const Value.absent(),
+    Value<int?> overrideCarbs = const Value.absent(),
+    Value<int?> overrideFats = const Value.absent(),
+    Value<int?> overrideFiber = const Value.absent(),
+    Value<int?> overrideWater = const Value.absent(),
+    String? assumptionsVersion,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    int? revision,
+    String? syncStatus,
+  }) => PlanSetting(
+    id: id ?? this.id,
+    uuid: uuid ?? this.uuid,
+    profileUuid: profileUuid ?? this.profileUuid,
+    recommendedCalories: recommendedCalories ?? this.recommendedCalories,
+    recommendedProtein: recommendedProtein ?? this.recommendedProtein,
+    recommendedCarbs: recommendedCarbs ?? this.recommendedCarbs,
+    recommendedFats: recommendedFats ?? this.recommendedFats,
+    recommendedFiber: recommendedFiber ?? this.recommendedFiber,
+    recommendedWater: recommendedWater ?? this.recommendedWater,
+    overrideCalories: overrideCalories.present
+        ? overrideCalories.value
+        : this.overrideCalories,
+    overrideProtein: overrideProtein.present
+        ? overrideProtein.value
+        : this.overrideProtein,
+    overrideCarbs: overrideCarbs.present
+        ? overrideCarbs.value
+        : this.overrideCarbs,
+    overrideFats: overrideFats.present ? overrideFats.value : this.overrideFats,
+    overrideFiber: overrideFiber.present
+        ? overrideFiber.value
+        : this.overrideFiber,
+    overrideWater: overrideWater.present
+        ? overrideWater.value
+        : this.overrideWater,
+    assumptionsVersion: assumptionsVersion ?? this.assumptionsVersion,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    revision: revision ?? this.revision,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  PlanSetting copyWithCompanion(PlanSettingsCompanion data) {
+    return PlanSetting(
+      id: data.id.present ? data.id.value : this.id,
+      uuid: data.uuid.present ? data.uuid.value : this.uuid,
+      profileUuid: data.profileUuid.present
+          ? data.profileUuid.value
+          : this.profileUuid,
+      recommendedCalories: data.recommendedCalories.present
+          ? data.recommendedCalories.value
+          : this.recommendedCalories,
+      recommendedProtein: data.recommendedProtein.present
+          ? data.recommendedProtein.value
+          : this.recommendedProtein,
+      recommendedCarbs: data.recommendedCarbs.present
+          ? data.recommendedCarbs.value
+          : this.recommendedCarbs,
+      recommendedFats: data.recommendedFats.present
+          ? data.recommendedFats.value
+          : this.recommendedFats,
+      recommendedFiber: data.recommendedFiber.present
+          ? data.recommendedFiber.value
+          : this.recommendedFiber,
+      recommendedWater: data.recommendedWater.present
+          ? data.recommendedWater.value
+          : this.recommendedWater,
+      overrideCalories: data.overrideCalories.present
+          ? data.overrideCalories.value
+          : this.overrideCalories,
+      overrideProtein: data.overrideProtein.present
+          ? data.overrideProtein.value
+          : this.overrideProtein,
+      overrideCarbs: data.overrideCarbs.present
+          ? data.overrideCarbs.value
+          : this.overrideCarbs,
+      overrideFats: data.overrideFats.present
+          ? data.overrideFats.value
+          : this.overrideFats,
+      overrideFiber: data.overrideFiber.present
+          ? data.overrideFiber.value
+          : this.overrideFiber,
+      overrideWater: data.overrideWater.present
+          ? data.overrideWater.value
+          : this.overrideWater,
+      assumptionsVersion: data.assumptionsVersion.present
+          ? data.assumptionsVersion.value
+          : this.assumptionsVersion,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      revision: data.revision.present ? data.revision.value : this.revision,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlanSetting(')
+          ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
+          ..write('profileUuid: $profileUuid, ')
+          ..write('recommendedCalories: $recommendedCalories, ')
+          ..write('recommendedProtein: $recommendedProtein, ')
+          ..write('recommendedCarbs: $recommendedCarbs, ')
+          ..write('recommendedFats: $recommendedFats, ')
+          ..write('recommendedFiber: $recommendedFiber, ')
+          ..write('recommendedWater: $recommendedWater, ')
+          ..write('overrideCalories: $overrideCalories, ')
+          ..write('overrideProtein: $overrideProtein, ')
+          ..write('overrideCarbs: $overrideCarbs, ')
+          ..write('overrideFats: $overrideFats, ')
+          ..write('overrideFiber: $overrideFiber, ')
+          ..write('overrideWater: $overrideWater, ')
+          ..write('assumptionsVersion: $assumptionsVersion, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('revision: $revision, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    uuid,
+    profileUuid,
+    recommendedCalories,
+    recommendedProtein,
+    recommendedCarbs,
+    recommendedFats,
+    recommendedFiber,
+    recommendedWater,
+    overrideCalories,
+    overrideProtein,
+    overrideCarbs,
+    overrideFats,
+    overrideFiber,
+    overrideWater,
+    assumptionsVersion,
+    createdAt,
+    updatedAt,
+    revision,
+    syncStatus,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PlanSetting &&
+          other.id == this.id &&
+          other.uuid == this.uuid &&
+          other.profileUuid == this.profileUuid &&
+          other.recommendedCalories == this.recommendedCalories &&
+          other.recommendedProtein == this.recommendedProtein &&
+          other.recommendedCarbs == this.recommendedCarbs &&
+          other.recommendedFats == this.recommendedFats &&
+          other.recommendedFiber == this.recommendedFiber &&
+          other.recommendedWater == this.recommendedWater &&
+          other.overrideCalories == this.overrideCalories &&
+          other.overrideProtein == this.overrideProtein &&
+          other.overrideCarbs == this.overrideCarbs &&
+          other.overrideFats == this.overrideFats &&
+          other.overrideFiber == this.overrideFiber &&
+          other.overrideWater == this.overrideWater &&
+          other.assumptionsVersion == this.assumptionsVersion &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.revision == this.revision &&
+          other.syncStatus == this.syncStatus);
+}
+
+class PlanSettingsCompanion extends UpdateCompanion<PlanSetting> {
+  final Value<int> id;
+  final Value<String> uuid;
+  final Value<String> profileUuid;
+  final Value<int> recommendedCalories;
+  final Value<int> recommendedProtein;
+  final Value<int> recommendedCarbs;
+  final Value<int> recommendedFats;
+  final Value<int> recommendedFiber;
+  final Value<int> recommendedWater;
+  final Value<int?> overrideCalories;
+  final Value<int?> overrideProtein;
+  final Value<int?> overrideCarbs;
+  final Value<int?> overrideFats;
+  final Value<int?> overrideFiber;
+  final Value<int?> overrideWater;
+  final Value<String> assumptionsVersion;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> revision;
+  final Value<String> syncStatus;
+  const PlanSettingsCompanion({
+    this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
+    this.profileUuid = const Value.absent(),
+    this.recommendedCalories = const Value.absent(),
+    this.recommendedProtein = const Value.absent(),
+    this.recommendedCarbs = const Value.absent(),
+    this.recommendedFats = const Value.absent(),
+    this.recommendedFiber = const Value.absent(),
+    this.recommendedWater = const Value.absent(),
+    this.overrideCalories = const Value.absent(),
+    this.overrideProtein = const Value.absent(),
+    this.overrideCarbs = const Value.absent(),
+    this.overrideFats = const Value.absent(),
+    this.overrideFiber = const Value.absent(),
+    this.overrideWater = const Value.absent(),
+    this.assumptionsVersion = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+  });
+  PlanSettingsCompanion.insert({
+    this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
+    required String profileUuid,
+    required int recommendedCalories,
+    required int recommendedProtein,
+    required int recommendedCarbs,
+    required int recommendedFats,
+    required int recommendedFiber,
+    required int recommendedWater,
+    this.overrideCalories = const Value.absent(),
+    this.overrideProtein = const Value.absent(),
+    this.overrideCarbs = const Value.absent(),
+    this.overrideFats = const Value.absent(),
+    this.overrideFiber = const Value.absent(),
+    this.overrideWater = const Value.absent(),
+    this.assumptionsVersion = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+  }) : profileUuid = Value(profileUuid),
+       recommendedCalories = Value(recommendedCalories),
+       recommendedProtein = Value(recommendedProtein),
+       recommendedCarbs = Value(recommendedCarbs),
+       recommendedFats = Value(recommendedFats),
+       recommendedFiber = Value(recommendedFiber),
+       recommendedWater = Value(recommendedWater);
+  static Insertable<PlanSetting> custom({
+    Expression<int>? id,
+    Expression<String>? uuid,
+    Expression<String>? profileUuid,
+    Expression<int>? recommendedCalories,
+    Expression<int>? recommendedProtein,
+    Expression<int>? recommendedCarbs,
+    Expression<int>? recommendedFats,
+    Expression<int>? recommendedFiber,
+    Expression<int>? recommendedWater,
+    Expression<int>? overrideCalories,
+    Expression<int>? overrideProtein,
+    Expression<int>? overrideCarbs,
+    Expression<int>? overrideFats,
+    Expression<int>? overrideFiber,
+    Expression<int>? overrideWater,
+    Expression<String>? assumptionsVersion,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? revision,
+    Expression<String>? syncStatus,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (uuid != null) 'uuid': uuid,
+      if (profileUuid != null) 'profile_uuid': profileUuid,
+      if (recommendedCalories != null)
+        'recommended_calories': recommendedCalories,
+      if (recommendedProtein != null) 'recommended_protein': recommendedProtein,
+      if (recommendedCarbs != null) 'recommended_carbs': recommendedCarbs,
+      if (recommendedFats != null) 'recommended_fats': recommendedFats,
+      if (recommendedFiber != null) 'recommended_fiber': recommendedFiber,
+      if (recommendedWater != null) 'recommended_water': recommendedWater,
+      if (overrideCalories != null) 'override_calories': overrideCalories,
+      if (overrideProtein != null) 'override_protein': overrideProtein,
+      if (overrideCarbs != null) 'override_carbs': overrideCarbs,
+      if (overrideFats != null) 'override_fats': overrideFats,
+      if (overrideFiber != null) 'override_fiber': overrideFiber,
+      if (overrideWater != null) 'override_water': overrideWater,
+      if (assumptionsVersion != null) 'assumptions_version': assumptionsVersion,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (revision != null) 'revision': revision,
+      if (syncStatus != null) 'sync_status': syncStatus,
+    });
+  }
+
+  PlanSettingsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? uuid,
+    Value<String>? profileUuid,
+    Value<int>? recommendedCalories,
+    Value<int>? recommendedProtein,
+    Value<int>? recommendedCarbs,
+    Value<int>? recommendedFats,
+    Value<int>? recommendedFiber,
+    Value<int>? recommendedWater,
+    Value<int?>? overrideCalories,
+    Value<int?>? overrideProtein,
+    Value<int?>? overrideCarbs,
+    Value<int?>? overrideFats,
+    Value<int?>? overrideFiber,
+    Value<int?>? overrideWater,
+    Value<String>? assumptionsVersion,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? revision,
+    Value<String>? syncStatus,
+  }) {
+    return PlanSettingsCompanion(
+      id: id ?? this.id,
+      uuid: uuid ?? this.uuid,
+      profileUuid: profileUuid ?? this.profileUuid,
+      recommendedCalories: recommendedCalories ?? this.recommendedCalories,
+      recommendedProtein: recommendedProtein ?? this.recommendedProtein,
+      recommendedCarbs: recommendedCarbs ?? this.recommendedCarbs,
+      recommendedFats: recommendedFats ?? this.recommendedFats,
+      recommendedFiber: recommendedFiber ?? this.recommendedFiber,
+      recommendedWater: recommendedWater ?? this.recommendedWater,
+      overrideCalories: overrideCalories ?? this.overrideCalories,
+      overrideProtein: overrideProtein ?? this.overrideProtein,
+      overrideCarbs: overrideCarbs ?? this.overrideCarbs,
+      overrideFats: overrideFats ?? this.overrideFats,
+      overrideFiber: overrideFiber ?? this.overrideFiber,
+      overrideWater: overrideWater ?? this.overrideWater,
+      assumptionsVersion: assumptionsVersion ?? this.assumptionsVersion,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      revision: revision ?? this.revision,
+      syncStatus: syncStatus ?? this.syncStatus,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (uuid.present) {
+      map['uuid'] = Variable<String>(uuid.value);
+    }
+    if (profileUuid.present) {
+      map['profile_uuid'] = Variable<String>(profileUuid.value);
+    }
+    if (recommendedCalories.present) {
+      map['recommended_calories'] = Variable<int>(recommendedCalories.value);
+    }
+    if (recommendedProtein.present) {
+      map['recommended_protein'] = Variable<int>(recommendedProtein.value);
+    }
+    if (recommendedCarbs.present) {
+      map['recommended_carbs'] = Variable<int>(recommendedCarbs.value);
+    }
+    if (recommendedFats.present) {
+      map['recommended_fats'] = Variable<int>(recommendedFats.value);
+    }
+    if (recommendedFiber.present) {
+      map['recommended_fiber'] = Variable<int>(recommendedFiber.value);
+    }
+    if (recommendedWater.present) {
+      map['recommended_water'] = Variable<int>(recommendedWater.value);
+    }
+    if (overrideCalories.present) {
+      map['override_calories'] = Variable<int>(overrideCalories.value);
+    }
+    if (overrideProtein.present) {
+      map['override_protein'] = Variable<int>(overrideProtein.value);
+    }
+    if (overrideCarbs.present) {
+      map['override_carbs'] = Variable<int>(overrideCarbs.value);
+    }
+    if (overrideFats.present) {
+      map['override_fats'] = Variable<int>(overrideFats.value);
+    }
+    if (overrideFiber.present) {
+      map['override_fiber'] = Variable<int>(overrideFiber.value);
+    }
+    if (overrideWater.present) {
+      map['override_water'] = Variable<int>(overrideWater.value);
+    }
+    if (assumptionsVersion.present) {
+      map['assumptions_version'] = Variable<String>(assumptionsVersion.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PlanSettingsCompanion(')
+          ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
+          ..write('profileUuid: $profileUuid, ')
+          ..write('recommendedCalories: $recommendedCalories, ')
+          ..write('recommendedProtein: $recommendedProtein, ')
+          ..write('recommendedCarbs: $recommendedCarbs, ')
+          ..write('recommendedFats: $recommendedFats, ')
+          ..write('recommendedFiber: $recommendedFiber, ')
+          ..write('recommendedWater: $recommendedWater, ')
+          ..write('overrideCalories: $overrideCalories, ')
+          ..write('overrideProtein: $overrideProtein, ')
+          ..write('overrideCarbs: $overrideCarbs, ')
+          ..write('overrideFats: $overrideFats, ')
+          ..write('overrideFiber: $overrideFiber, ')
+          ..write('overrideWater: $overrideWater, ')
+          ..write('assumptionsVersion: $assumptionsVersion, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('revision: $revision, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -9372,6 +10531,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DecisionMemoriesTable decisionMemories = $DecisionMemoriesTable(
     this,
   );
+  late final $PlanSettingsTable planSettings = $PlanSettingsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -9390,6 +10550,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     preferences,
     lifeContextEntries,
     decisionMemories,
+    planSettings,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -9420,6 +10581,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('goals', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'user_profile',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('plan_settings', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -9893,6 +11061,24 @@ final class $$UserProfileTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$PlanSettingsTable, List<PlanSetting>>
+  _planSettingsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.planSettings,
+    aliasName: 'user_profile__uuid__plan_settings__profile_uuid',
+  );
+
+  $$PlanSettingsTableProcessedTableManager get planSettingsRefs {
+    final manager = $$PlanSettingsTableTableManager($_db, $_db.planSettings)
+        .filter(
+          (f) => f.profileUuid.uuid.sqlEquals($_itemColumn<String>('uuid')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_planSettingsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$UserProfileTableFilterComposer
@@ -10020,6 +11206,31 @@ class $$UserProfileTableFilterComposer
           }) => $$GoalsTableFilterComposer(
             $db: $db,
             $table: $db.goals,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> planSettingsRefs(
+    Expression<bool> Function($$PlanSettingsTableFilterComposer f) f,
+  ) {
+    final $$PlanSettingsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.uuid,
+      referencedTable: $db.planSettings,
+      getReferencedColumn: (t) => t.profileUuid,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlanSettingsTableFilterComposer(
+            $db: $db,
+            $table: $db.planSettings,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -10243,6 +11454,31 @@ class $$UserProfileTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> planSettingsRefs<T extends Object>(
+    Expression<T> Function($$PlanSettingsTableAnnotationComposer a) f,
+  ) {
+    final $$PlanSettingsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.uuid,
+      referencedTable: $db.planSettings,
+      getReferencedColumn: (t) => t.profileUuid,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PlanSettingsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.planSettings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$UserProfileTableTableManager
@@ -10258,7 +11494,7 @@ class $$UserProfileTableTableManager
           $$UserProfileTableUpdateCompanionBuilder,
           (UserProfileData, $$UserProfileTableReferences),
           UserProfileData,
-          PrefetchHooks Function({bool goalsRefs})
+          PrefetchHooks Function({bool goalsRefs, bool planSettingsRefs})
         > {
   $$UserProfileTableTableManager(_$AppDatabase db, $UserProfileTable table)
     : super(
@@ -10367,34 +11603,63 @@ class $$UserProfileTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({goalsRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (goalsRefs) db.goals],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (goalsRefs)
-                    await $_getPrefetchedData<
-                      UserProfileData,
-                      $UserProfileTable,
-                      Goal
-                    >(
-                      currentTable: table,
-                      referencedTable: $$UserProfileTableReferences
-                          ._goalsRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$UserProfileTableReferences(db, table, p0).goalsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where(
-                            (e) => e.profileUuid == item.uuid,
-                          ),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({goalsRefs = false, planSettingsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (goalsRefs) db.goals,
+                    if (planSettingsRefs) db.planSettings,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (goalsRefs)
+                        await $_getPrefetchedData<
+                          UserProfileData,
+                          $UserProfileTable,
+                          Goal
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UserProfileTableReferences
+                              ._goalsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UserProfileTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).goalsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.profileUuid == item.uuid,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (planSettingsRefs)
+                        await $_getPrefetchedData<
+                          UserProfileData,
+                          $UserProfileTable,
+                          PlanSetting
+                        >(
+                          currentTable: table,
+                          referencedTable: $$UserProfileTableReferences
+                              ._planSettingsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$UserProfileTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).planSettingsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.profileUuid == item.uuid,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -10411,7 +11676,7 @@ typedef $$UserProfileTableProcessedTableManager =
       $$UserProfileTableUpdateCompanionBuilder,
       (UserProfileData, $$UserProfileTableReferences),
       UserProfileData,
-      PrefetchHooks Function({bool goalsRefs})
+      PrefetchHooks Function({bool goalsRefs, bool planSettingsRefs})
     >;
 typedef $$WeightEntriesTableCreateCompanionBuilder =
     WeightEntriesCompanion Function({
@@ -14954,6 +16219,630 @@ typedef $$DecisionMemoriesTableProcessedTableManager =
       DecisionMemory,
       PrefetchHooks Function()
     >;
+typedef $$PlanSettingsTableCreateCompanionBuilder =
+    PlanSettingsCompanion Function({
+      Value<int> id,
+      Value<String> uuid,
+      required String profileUuid,
+      required int recommendedCalories,
+      required int recommendedProtein,
+      required int recommendedCarbs,
+      required int recommendedFats,
+      required int recommendedFiber,
+      required int recommendedWater,
+      Value<int?> overrideCalories,
+      Value<int?> overrideProtein,
+      Value<int?> overrideCarbs,
+      Value<int?> overrideFats,
+      Value<int?> overrideFiber,
+      Value<int?> overrideWater,
+      Value<String> assumptionsVersion,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> revision,
+      Value<String> syncStatus,
+    });
+typedef $$PlanSettingsTableUpdateCompanionBuilder =
+    PlanSettingsCompanion Function({
+      Value<int> id,
+      Value<String> uuid,
+      Value<String> profileUuid,
+      Value<int> recommendedCalories,
+      Value<int> recommendedProtein,
+      Value<int> recommendedCarbs,
+      Value<int> recommendedFats,
+      Value<int> recommendedFiber,
+      Value<int> recommendedWater,
+      Value<int?> overrideCalories,
+      Value<int?> overrideProtein,
+      Value<int?> overrideCarbs,
+      Value<int?> overrideFats,
+      Value<int?> overrideFiber,
+      Value<int?> overrideWater,
+      Value<String> assumptionsVersion,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> revision,
+      Value<String> syncStatus,
+    });
+
+final class $$PlanSettingsTableReferences
+    extends BaseReferences<_$AppDatabase, $PlanSettingsTable, PlanSetting> {
+  $$PlanSettingsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $UserProfileTable _profileUuidTable(_$AppDatabase db) => db.userProfile
+      .createAlias('plan_settings__profile_uuid__user_profile__uuid');
+
+  $$UserProfileTableProcessedTableManager get profileUuid {
+    final $_column = $_itemColumn<String>('profile_uuid')!;
+
+    final manager = $$UserProfileTableTableManager(
+      $_db,
+      $_db.userProfile,
+    ).filter((f) => f.uuid.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_profileUuidTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$PlanSettingsTableFilterComposer
+    extends Composer<_$AppDatabase, $PlanSettingsTable> {
+  $$PlanSettingsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get recommendedCalories => $composableBuilder(
+    column: $table.recommendedCalories,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get recommendedProtein => $composableBuilder(
+    column: $table.recommendedProtein,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get recommendedCarbs => $composableBuilder(
+    column: $table.recommendedCarbs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get recommendedFats => $composableBuilder(
+    column: $table.recommendedFats,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get recommendedFiber => $composableBuilder(
+    column: $table.recommendedFiber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get recommendedWater => $composableBuilder(
+    column: $table.recommendedWater,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get overrideCalories => $composableBuilder(
+    column: $table.overrideCalories,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get overrideProtein => $composableBuilder(
+    column: $table.overrideProtein,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get overrideCarbs => $composableBuilder(
+    column: $table.overrideCarbs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get overrideFats => $composableBuilder(
+    column: $table.overrideFats,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get overrideFiber => $composableBuilder(
+    column: $table.overrideFiber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get overrideWater => $composableBuilder(
+    column: $table.overrideWater,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get assumptionsVersion => $composableBuilder(
+    column: $table.assumptionsVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$UserProfileTableFilterComposer get profileUuid {
+    final $$UserProfileTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.profileUuid,
+      referencedTable: $db.userProfile,
+      getReferencedColumn: (t) => t.uuid,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UserProfileTableFilterComposer(
+            $db: $db,
+            $table: $db.userProfile,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlanSettingsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PlanSettingsTable> {
+  $$PlanSettingsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get recommendedCalories => $composableBuilder(
+    column: $table.recommendedCalories,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get recommendedProtein => $composableBuilder(
+    column: $table.recommendedProtein,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get recommendedCarbs => $composableBuilder(
+    column: $table.recommendedCarbs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get recommendedFats => $composableBuilder(
+    column: $table.recommendedFats,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get recommendedFiber => $composableBuilder(
+    column: $table.recommendedFiber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get recommendedWater => $composableBuilder(
+    column: $table.recommendedWater,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get overrideCalories => $composableBuilder(
+    column: $table.overrideCalories,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get overrideProtein => $composableBuilder(
+    column: $table.overrideProtein,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get overrideCarbs => $composableBuilder(
+    column: $table.overrideCarbs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get overrideFats => $composableBuilder(
+    column: $table.overrideFats,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get overrideFiber => $composableBuilder(
+    column: $table.overrideFiber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get overrideWater => $composableBuilder(
+    column: $table.overrideWater,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get assumptionsVersion => $composableBuilder(
+    column: $table.assumptionsVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$UserProfileTableOrderingComposer get profileUuid {
+    final $$UserProfileTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.profileUuid,
+      referencedTable: $db.userProfile,
+      getReferencedColumn: (t) => t.uuid,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UserProfileTableOrderingComposer(
+            $db: $db,
+            $table: $db.userProfile,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlanSettingsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PlanSettingsTable> {
+  $$PlanSettingsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uuid =>
+      $composableBuilder(column: $table.uuid, builder: (column) => column);
+
+  GeneratedColumn<int> get recommendedCalories => $composableBuilder(
+    column: $table.recommendedCalories,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get recommendedProtein => $composableBuilder(
+    column: $table.recommendedProtein,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get recommendedCarbs => $composableBuilder(
+    column: $table.recommendedCarbs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get recommendedFats => $composableBuilder(
+    column: $table.recommendedFats,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get recommendedFiber => $composableBuilder(
+    column: $table.recommendedFiber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get recommendedWater => $composableBuilder(
+    column: $table.recommendedWater,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get overrideCalories => $composableBuilder(
+    column: $table.overrideCalories,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get overrideProtein => $composableBuilder(
+    column: $table.overrideProtein,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get overrideCarbs => $composableBuilder(
+    column: $table.overrideCarbs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get overrideFats => $composableBuilder(
+    column: $table.overrideFats,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get overrideFiber => $composableBuilder(
+    column: $table.overrideFiber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get overrideWater => $composableBuilder(
+    column: $table.overrideWater,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get assumptionsVersion => $composableBuilder(
+    column: $table.assumptionsVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
+  $$UserProfileTableAnnotationComposer get profileUuid {
+    final $$UserProfileTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.profileUuid,
+      referencedTable: $db.userProfile,
+      getReferencedColumn: (t) => t.uuid,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$UserProfileTableAnnotationComposer(
+            $db: $db,
+            $table: $db.userProfile,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$PlanSettingsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PlanSettingsTable,
+          PlanSetting,
+          $$PlanSettingsTableFilterComposer,
+          $$PlanSettingsTableOrderingComposer,
+          $$PlanSettingsTableAnnotationComposer,
+          $$PlanSettingsTableCreateCompanionBuilder,
+          $$PlanSettingsTableUpdateCompanionBuilder,
+          (PlanSetting, $$PlanSettingsTableReferences),
+          PlanSetting,
+          PrefetchHooks Function({bool profileUuid})
+        > {
+  $$PlanSettingsTableTableManager(_$AppDatabase db, $PlanSettingsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PlanSettingsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PlanSettingsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PlanSettingsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> uuid = const Value.absent(),
+                Value<String> profileUuid = const Value.absent(),
+                Value<int> recommendedCalories = const Value.absent(),
+                Value<int> recommendedProtein = const Value.absent(),
+                Value<int> recommendedCarbs = const Value.absent(),
+                Value<int> recommendedFats = const Value.absent(),
+                Value<int> recommendedFiber = const Value.absent(),
+                Value<int> recommendedWater = const Value.absent(),
+                Value<int?> overrideCalories = const Value.absent(),
+                Value<int?> overrideProtein = const Value.absent(),
+                Value<int?> overrideCarbs = const Value.absent(),
+                Value<int?> overrideFats = const Value.absent(),
+                Value<int?> overrideFiber = const Value.absent(),
+                Value<int?> overrideWater = const Value.absent(),
+                Value<String> assumptionsVersion = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+              }) => PlanSettingsCompanion(
+                id: id,
+                uuid: uuid,
+                profileUuid: profileUuid,
+                recommendedCalories: recommendedCalories,
+                recommendedProtein: recommendedProtein,
+                recommendedCarbs: recommendedCarbs,
+                recommendedFats: recommendedFats,
+                recommendedFiber: recommendedFiber,
+                recommendedWater: recommendedWater,
+                overrideCalories: overrideCalories,
+                overrideProtein: overrideProtein,
+                overrideCarbs: overrideCarbs,
+                overrideFats: overrideFats,
+                overrideFiber: overrideFiber,
+                overrideWater: overrideWater,
+                assumptionsVersion: assumptionsVersion,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                revision: revision,
+                syncStatus: syncStatus,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> uuid = const Value.absent(),
+                required String profileUuid,
+                required int recommendedCalories,
+                required int recommendedProtein,
+                required int recommendedCarbs,
+                required int recommendedFats,
+                required int recommendedFiber,
+                required int recommendedWater,
+                Value<int?> overrideCalories = const Value.absent(),
+                Value<int?> overrideProtein = const Value.absent(),
+                Value<int?> overrideCarbs = const Value.absent(),
+                Value<int?> overrideFats = const Value.absent(),
+                Value<int?> overrideFiber = const Value.absent(),
+                Value<int?> overrideWater = const Value.absent(),
+                Value<String> assumptionsVersion = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+              }) => PlanSettingsCompanion.insert(
+                id: id,
+                uuid: uuid,
+                profileUuid: profileUuid,
+                recommendedCalories: recommendedCalories,
+                recommendedProtein: recommendedProtein,
+                recommendedCarbs: recommendedCarbs,
+                recommendedFats: recommendedFats,
+                recommendedFiber: recommendedFiber,
+                recommendedWater: recommendedWater,
+                overrideCalories: overrideCalories,
+                overrideProtein: overrideProtein,
+                overrideCarbs: overrideCarbs,
+                overrideFats: overrideFats,
+                overrideFiber: overrideFiber,
+                overrideWater: overrideWater,
+                assumptionsVersion: assumptionsVersion,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                revision: revision,
+                syncStatus: syncStatus,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$PlanSettingsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({profileUuid = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (profileUuid) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.profileUuid,
+                                referencedTable: $$PlanSettingsTableReferences
+                                    ._profileUuidTable(db),
+                                referencedColumn: $$PlanSettingsTableReferences
+                                    ._profileUuidTable(db)
+                                    .uuid,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$PlanSettingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PlanSettingsTable,
+      PlanSetting,
+      $$PlanSettingsTableFilterComposer,
+      $$PlanSettingsTableOrderingComposer,
+      $$PlanSettingsTableAnnotationComposer,
+      $$PlanSettingsTableCreateCompanionBuilder,
+      $$PlanSettingsTableUpdateCompanionBuilder,
+      (PlanSetting, $$PlanSettingsTableReferences),
+      PlanSetting,
+      PrefetchHooks Function({bool profileUuid})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -14984,4 +16873,6 @@ class $AppDatabaseManager {
       $$LifeContextEntriesTableTableManager(_db, _db.lifeContextEntries);
   $$DecisionMemoriesTableTableManager get decisionMemories =>
       $$DecisionMemoriesTableTableManager(_db, _db.decisionMemories);
+  $$PlanSettingsTableTableManager get planSettings =>
+      $$PlanSettingsTableTableManager(_db, _db.planSettings);
 }

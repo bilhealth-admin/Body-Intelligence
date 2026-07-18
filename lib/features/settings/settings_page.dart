@@ -124,6 +124,7 @@ class SettingsPage extends ConsumerWidget {
       await database.delete(database.recentFoods).go();
       await database.delete(database.waterEntries).go();
       await database.delete(database.goals).go();
+      await database.delete(database.planSettings).go();
       await database.delete(database.weightEntries).go();
       await database.delete(database.dailyLogs).go();
       await database.delete(database.userProfile).go();
@@ -229,6 +230,14 @@ class SettingsPage extends ConsumerWidget {
             leading: const Icon(Icons.person),
             title: Text(context.strings.text('Profile and goals')),
             onTap: () => context.go('/onboarding'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.tune),
+            title: const Text('Targets and plan'),
+            subtitle: const Text(
+              'Compare recommendations, assumptions, and your overrides.',
+            ),
+            onTap: () => context.go('/plan'),
           ),
           ListTile(
             leading: const Icon(Icons.analytics),

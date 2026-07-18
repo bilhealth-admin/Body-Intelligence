@@ -3,11 +3,13 @@ import 'package:body_intelligence_log/data/repositories/daily_log_repository.dar
 import 'package:body_intelligence_log/data/repositories/decision_memory_repository.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
+import 'package:body_intelligence_log/data/repositories/plan_repository.dart';
 import 'package:body_intelligence_log/data/repositories/life_context_repository.dart';
 import 'package:body_intelligence_log/data/repositories/water_repository.dart';
 import 'package:body_intelligence_log/data/repositories/weight_repository.dart';
 import 'package:body_intelligence_log/data/repositories/user_profile_repository.dart';
 import 'package:body_intelligence_log/engine/one_best_action_engine.dart';
+import 'package:body_intelligence_log/engine/daily_targets.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -123,6 +125,49 @@ void main() {
 
       expect((await foods.search('')).first.id, frequent);
       expect((await foods.search('123456789')).single.id, frequent);
+    },
+  );
+
+  test(
+    'plan overrides preserve recommendation snapshot and reset safely',
+    () async {
+      final profiles = UserProfileRepository(database);
+      await profiles.save(
+        gender: 'male',
+        age: 35,
+        height: 180,
+        currentWeight: 85,
+        targetWeight: 78,
+        activityLevel: 'moderate',
+        exercises: true,
+      );
+      final profile = (await profiles.getProfile())!;
+      final plans = PlanRepository(database);
+      const recommended = DailyTargets(
+        calories: 2300,
+        protein: 150,
+        carbs: 250,
+        fats: 75,
+        potassium: 4700,
+        sodium: 2300,
+        fiber: 35,
+        water: 3200,
+      );
+      await plans.save(
+        profileUuid: profile.uuid,
+        recommended: recommended,
+        calories: 2400,
+        protein: 160,
+      );
+      var plan = (await plans.getForProfile(profile.uuid))!;
+      expect(plan.recommendedCalories, 2300);
+      expect(plan.overrideCalories, 2400);
+
+      await plans.reset(profileUuid: profile.uuid, recommended: recommended);
+      plan = (await plans.getForProfile(profile.uuid))!;
+      expect(plan.uuid, isNotEmpty);
+      expect(plan.overrideCalories, isNull);
+      expect(plan.overrideProtein, isNull);
     },
   );
 
