@@ -17,6 +17,9 @@ final mealRepositoryProvider = Provider<MealRepository>((ref) {
 });
 
 final foodsProvider = StreamProvider<List<Food>>((ref) {
+  // Seeding is intentionally lazy: startup/profile restoration must never wait
+  // for catalog maintenance. Inserts automatically update this stream.
+  ref.watch(seedCatalogProvider);
   final repository = ref.watch(foodRepositoryProvider);
   return repository.watchFoods();
 });

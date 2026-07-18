@@ -29,4 +29,58 @@ void main() {
     expect(value, 81.5);
     expect(find.text('81.5'), findsWidgets);
   });
+
+  testWidgets('locale decimal separator is preserved as a precise value', (
+    tester,
+  ) async {
+    double value = 70;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: WheelNumberField(
+            value: value,
+            minimum: 20,
+            maximum: 350,
+            step: 0.1,
+            decimalPlaces: 1,
+            unit: 'kg',
+            label: 'Weight',
+            onChanged: (next) => value = next,
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), '77,2');
+    await tester.pumpAndSettle();
+
+    expect(value, closeTo(77.2, 0.000001));
+  });
+
+  testWidgets('tapping an adjacent visible wheel value selects one step', (
+    tester,
+  ) async {
+    double value = 70;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: WheelNumberField(
+            value: value,
+            minimum: 20,
+            maximum: 350,
+            step: 0.1,
+            decimalPlaces: 1,
+            unit: 'kg',
+            label: 'Weight',
+            onChanged: (next) => value = next,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('70.1'));
+    await tester.pumpAndSettle();
+
+    expect(value, closeTo(70.1, 0.000001));
+  });
 }

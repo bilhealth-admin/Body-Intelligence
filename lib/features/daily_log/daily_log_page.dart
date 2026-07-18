@@ -214,7 +214,13 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                 }),
               ),
               const SizedBox(height: 14),
-              _field(notes, 'Notes', lines: 4),
+              _field(
+                notes,
+                Localizations.localeOf(context).languageCode == 'ar'
+                    ? 'هل هناك ما قد يفسر تغيرات جسمك اليوم؟ مثل السفر أو قلة النوم أو وجبة عالية الصوديوم أو الصيام أو الضغط'
+                    : 'Anything that may explain today’s body changes? For example travel, poor sleep, a high-sodium meal, fasting, or stress',
+                lines: 4,
+              ),
               Row(
                 children: [
                   Expanded(child: _field(water, 'Water (ml)')),
