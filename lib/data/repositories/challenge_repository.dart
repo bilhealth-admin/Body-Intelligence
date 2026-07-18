@@ -45,27 +45,40 @@ class ChallengeRepository {
         );
   }
 
-  Future<void> markComplete(int id) =>
-      (database.update(
-        database.challenges,
-      )..where((row) => row.id.equals(id))).write(
-        ChallengesCompanion(
-          status: const Value('completed'),
-          completedAt: Value(DateTime.now()),
-          updatedAt: Value(DateTime.now()),
-          revision: const Value(2),
-          syncStatus: const Value('pending'),
-        ),
-      );
+  Future<void> markComplete(int id) async {
+    final revision = await _nextRevision(id);
+    await (database.update(
+      database.challenges,
+    )..where((row) => row.id.equals(id))).write(
+      ChallengesCompanion(
+        status: const Value('completed'),
+        completedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+        revision: Value(revision),
+        syncStatus: const Value('pending'),
+      ),
+    );
+  }
 
-  Future<void> delete(int id) =>
-      (database.update(
-        database.challenges,
-      )..where((row) => row.id.equals(id))).write(
-        ChallengesCompanion(
-          deletedAt: Value(DateTime.now()),
-          updatedAt: Value(DateTime.now()),
-          syncStatus: const Value('pending'),
-        ),
-      );
+  Future<void> delete(int id) async {
+    final revision = await _nextRevision(id);
+    await (database.update(
+      database.challenges,
+    )..where((row) => row.id.equals(id))).write(
+      ChallengesCompanion(
+        deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+        revision: Value(revision),
+        syncStatus: const Value('pendingDelete'),
+      ),
+    );
+  }
+
+  Future<int> _nextRevision(int id) async {
+    final row = await (database.select(
+      database.challenges,
+    )..where((entry) => entry.id.equals(id))).getSingleOrNull();
+    if (row == null) throw StateError('Challenge $id does not exist');
+    return row.revision + 1;
+  }
 }

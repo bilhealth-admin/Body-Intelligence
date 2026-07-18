@@ -56,13 +56,17 @@ class WaterRepository {
   }
 
   Future<void> delete(int id) async {
+    final existing = await (_database.select(
+      _database.waterEntries,
+    )..where((row) => row.id.equals(id))).getSingleOrNull();
+    if (existing == null) throw StateError('Water entry $id does not exist');
     await (_database.update(
       _database.waterEntries,
     )..where((row) => row.id.equals(id))).write(
       WaterEntriesCompanion(
         deletedAt: Value(DateTime.now()),
         updatedAt: Value(DateTime.now()),
-        revision: const Value(2),
+        revision: Value(existing.revision + 1),
         syncStatus: const Value('pendingDelete'),
       ),
     );

@@ -67,28 +67,38 @@ class LifeContextRepository {
   }
 
   Future<void> setInsightConsent(int id, bool enabled) async {
+    final revision = await _nextRevision(id);
     await (database.update(
       database.lifeContextEntries,
     )..where((row) => row.id.equals(id))).write(
       LifeContextEntriesCompanion(
         useInInsights: Value(enabled),
         updatedAt: Value(DateTime.now()),
-        revision: const Value(2),
+        revision: Value(revision),
         syncStatus: const Value('pending'),
       ),
     );
   }
 
   Future<void> delete(int id) async {
+    final revision = await _nextRevision(id);
     await (database.update(
       database.lifeContextEntries,
     )..where((row) => row.id.equals(id))).write(
       LifeContextEntriesCompanion(
         deletedAt: Value(DateTime.now()),
         updatedAt: Value(DateTime.now()),
-        revision: const Value(2),
+        revision: Value(revision),
         syncStatus: const Value('pendingDelete'),
       ),
     );
+  }
+
+  Future<int> _nextRevision(int id) async {
+    final row = await (database.select(
+      database.lifeContextEntries,
+    )..where((entry) => entry.id.equals(id))).getSingleOrNull();
+    if (row == null) throw StateError('Life context $id does not exist');
+    return row.revision + 1;
   }
 }

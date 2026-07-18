@@ -46,14 +46,15 @@ class ExperimentRepository {
     required String result,
     required String limitations,
     required String confidence,
-  }) {
+  }) async {
     if (adherence < 0 || adherence > 100) {
       throw ArgumentError.value(adherence, 'adherence');
     }
     if (!const {'insufficient', 'low', 'moderate'}.contains(confidence)) {
       throw ArgumentError.value(confidence, 'confidence');
     }
-    return (database.update(
+    final revision = await _nextRevision(id);
+    await (database.update(
       database.personalExperiments,
     )..where((row) => row.id.equals(id))).write(
       PersonalExperimentsCompanion(
@@ -63,20 +64,31 @@ class ExperimentRepository {
         confidence: Value(confidence),
         status: const Value('completed'),
         updatedAt: Value(DateTime.now()),
-        revision: const Value(2),
+        revision: Value(revision),
         syncStatus: const Value('pending'),
       ),
     );
   }
 
-  Future<void> delete(int id) =>
-      (database.update(
-        database.personalExperiments,
-      )..where((row) => row.id.equals(id))).write(
-        PersonalExperimentsCompanion(
-          deletedAt: Value(DateTime.now()),
-          updatedAt: Value(DateTime.now()),
-          syncStatus: const Value('pending'),
-        ),
-      );
+  Future<void> delete(int id) async {
+    final revision = await _nextRevision(id);
+    await (database.update(
+      database.personalExperiments,
+    )..where((row) => row.id.equals(id))).write(
+      PersonalExperimentsCompanion(
+        deletedAt: Value(DateTime.now()),
+        updatedAt: Value(DateTime.now()),
+        revision: Value(revision),
+        syncStatus: const Value('pendingDelete'),
+      ),
+    );
+  }
+
+  Future<int> _nextRevision(int id) async {
+    final row = await (database.select(
+      database.personalExperiments,
+    )..where((entry) => entry.id.equals(id))).getSingleOrNull();
+    if (row == null) throw StateError('Experiment $id does not exist');
+    return row.revision + 1;
+  }
 }

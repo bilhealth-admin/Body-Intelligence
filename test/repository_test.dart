@@ -57,13 +57,20 @@ void main() {
     expect(row.confidence, 'low');
     expect(row.limitations, isNotEmpty);
     expect(row.adherence, 75);
+    expect(row.revision, 2);
+    await repository.delete(id);
+    final deleted = await database
+        .select(database.personalExperiments)
+        .getSingle();
+    expect(deleted.revision, 3);
+    expect(deleted.syncStatus, 'pendingDelete');
   });
 
   test(
     'private challenges persist and shared audiences fail honestly',
     () async {
       final repository = ChallengeRepository(database);
-      await repository.start(
+      final id = await repository.start(
         type: 'water',
         title: 'Hydration',
         targetDays: 14,
@@ -72,6 +79,11 @@ void main() {
       final challenge = await database.select(database.challenges).getSingle();
       expect(challenge.audience, 'private');
       expect(challenge.endsAt, DateTime(2026, 7, 15));
+      await repository.markComplete(id);
+      await repository.delete(id);
+      final deleted = await database.select(database.challenges).getSingle();
+      expect(deleted.revision, 3);
+      expect(deleted.syncStatus, 'pendingDelete');
       expect(
         () => repository.start(
           type: 'water',
@@ -278,8 +290,18 @@ void main() {
       date: DateTime(2026, 7, 1),
     );
     expect((await weights.getAll()).single.weight, 79.5);
+    await weights.updateWeight(
+      id: id,
+      weight: 79.2,
+      date: DateTime(2026, 7, 1),
+    );
+    expect((await weights.getAll()).single.revision, 3);
     await weights.deleteWeight(id);
     expect(await weights.getAll(), isEmpty);
+    expect(
+      (await database.select(database.weightEntries).getSingle()).revision,
+      4,
+    );
   });
 
   test(
@@ -328,7 +350,7 @@ void main() {
   test('water totals are calculated from individual entries', () async {
     final water = WaterRepository(database);
     final date = DateTime(2026, 7, 18);
-    await water.add(
+    final firstId = await water.add(
       occurredAt: date.add(const Duration(hours: 8)),
       amountMl: 250,
     );
@@ -337,6 +359,13 @@ void main() {
       amountMl: 400,
     );
     expect(await water.totalForDay(date), 650);
+    await water.delete(firstId);
+    expect(await water.totalForDay(date), 400);
+    final deleted = await (database.select(
+      database.waterEntries,
+    )..where((row) => row.id.equals(firstId))).getSingle();
+    expect(deleted.revision, 2);
+    expect(deleted.syncStatus, 'pendingDelete');
   });
 
   test('profile edits update the singleton row', () async {
@@ -383,11 +412,17 @@ void main() {
     expect(await contexts.watchAllForInsights().first, hasLength(1));
 
     await contexts.setInsightConsent(id, false);
+    await contexts.setInsightConsent(id, true);
+    await contexts.setInsightConsent(id, false);
 
     expect(await contexts.watchAllForInsights().first, isEmpty);
     expect(
       await contexts.watchForDay(DateTime(2026, 7, 18)).first,
       hasLength(1),
+    );
+    expect(
+      (await database.select(database.lifeContextEntries).getSingle()).revision,
+      4,
     );
   });
 
@@ -412,6 +447,7 @@ void main() {
       expect(rows, hasLength(1));
       expect(rows.single.response, 'done');
       expect(rows.single.helpfulness, 4);
+      expect(rows.single.revision, 4);
     },
   );
 }

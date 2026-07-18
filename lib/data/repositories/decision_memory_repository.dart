@@ -30,6 +30,8 @@ class DecisionMemoryRepository {
           reason: Value(action.reason),
           evidenceJson: Value(jsonEncode(action.evidence)),
           surfacedAt: Value(occurredAt),
+          revision: Value(existing.revision + 1),
+          syncStatus: const Value('pending'),
         ),
       );
       return existing.id;
@@ -57,13 +59,14 @@ class DecisionMemoryRepository {
     }.contains(response)) {
       throw ArgumentError.value(response, 'response');
     }
+    final revision = await _nextRevision(id);
     await (database.update(
       database.decisionMemories,
     )..where((row) => row.id.equals(id))).write(
       DecisionMemoriesCompanion(
         response: Value(response),
         respondedAt: Value(DateTime.now()),
-        revision: const Value(2),
+        revision: Value(revision),
         syncStatus: const Value('pending'),
       ),
     );
@@ -77,6 +80,7 @@ class DecisionMemoryRepository {
     if (helpfulness < 1 || helpfulness > 5) {
       throw ArgumentError.value(helpfulness, 'helpfulness', 'Must be 1–5');
     }
+    final revision = await _nextRevision(id);
     await (database.update(
       database.decisionMemories,
     )..where((row) => row.id.equals(id))).write(
@@ -84,7 +88,7 @@ class DecisionMemoryRepository {
         helpfulness: Value(helpfulness),
         outcome: Value(outcome),
         evaluatedAt: Value(DateTime.now()),
-        revision: const Value(3),
+        revision: Value(revision),
         syncStatus: const Value('pending'),
       ),
     );
@@ -98,14 +102,23 @@ class DecisionMemoryRepository {
   }
 
   Future<void> delete(int id) async {
+    final revision = await _nextRevision(id);
     await (database.update(
       database.decisionMemories,
     )..where((row) => row.id.equals(id))).write(
       DecisionMemoriesCompanion(
         deletedAt: Value(DateTime.now()),
-        revision: const Value(2),
+        revision: Value(revision),
         syncStatus: const Value('pendingDelete'),
       ),
     );
+  }
+
+  Future<int> _nextRevision(int id) async {
+    final row = await (database.select(
+      database.decisionMemories,
+    )..where((entry) => entry.id.equals(id))).getSingleOrNull();
+    if (row == null) throw StateError('Decision memory $id does not exist');
+    return row.revision + 1;
   }
 }

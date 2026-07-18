@@ -64,6 +64,7 @@ class WeightRepository {
   }) async {
     _validateWeight(weight);
     _validateContext(measurementContext);
+    final revision = await _nextRevision(id);
     await (_database.update(
       _database.weightEntries,
     )..where((row) => row.id.equals(id))).write(
@@ -74,20 +75,21 @@ class WeightRepository {
         note: Value(note),
         measurementContext: Value(measurementContext),
         updatedAt: Value(DateTime.now()),
-        revision: const Value(2),
+        revision: Value(revision),
         syncStatus: const Value('pending'),
       ),
     );
   }
 
   Future<void> deleteWeight(int id) async {
+    final revision = await _nextRevision(id);
     await (_database.update(
       _database.weightEntries,
     )..where((row) => row.id.equals(id))).write(
       WeightEntriesCompanion(
         deletedAt: Value(DateTime.now()),
         updatedAt: Value(DateTime.now()),
-        revision: const Value(2),
+        revision: Value(revision),
         syncStatus: const Value('pendingDelete'),
       ),
     );
@@ -117,6 +119,14 @@ class WeightRepository {
 
   Future<void> deleteAll() async {
     await _database.delete(_database.weightEntries).go();
+  }
+
+  Future<int> _nextRevision(int id) async {
+    final row = await (_database.select(
+      _database.weightEntries,
+    )..where((entry) => entry.id.equals(id))).getSingleOrNull();
+    if (row == null) throw StateError('Weight entry $id does not exist');
+    return row.revision + 1;
   }
 
   void _validateWeight(double weight) {
