@@ -133,6 +133,19 @@ void main() {
     expect(storedItem.magnesium, 80);
     expect(storedItem.sugar, 1.5);
 
+    await meals.updateMealItem(
+      id: storedItem.id,
+      quantity: 60,
+      calories: 233.4,
+      protein: 10.14,
+      carbs: 39.78,
+      fats: 4.14,
+    );
+    await meals.deleteMealItem(storedItem.id);
+    final deletedItem = await database.select(database.mealItems).getSingle();
+    expect(deletedItem.revision, 3);
+    expect(deletedItem.syncStatus, 'pendingDelete');
+
     await (database.delete(
       database.meals,
     )..where((row) => row.id.equals(mealId))).go();

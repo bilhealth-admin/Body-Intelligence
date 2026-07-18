@@ -1,7 +1,7 @@
 # Database and migration policy
 
 BIL uses one Drift database as its local source of truth. The current schema
-version is 12. Every version increase has an explicit additive migration in
+version is 13. Every version increase has an explicit additive migration in
 `AppDatabase.migration`; no migration drops user tables or rewrites historical
 nutrition. Foreign keys are enabled on every connection.
 
@@ -29,6 +29,9 @@ only for compatible upgrades and are not written by current repositories.
 Schema v12 adds partial/composite indexes for active daily meals and items,
 water, context, recents, experiments, and challenges. Daily meal observation
 uses the canonical `day_key` rather than a timestamp-range scan.
+Schema v13 adds monotonic revision and sync-status metadata to existing meal
+items without changing their UUIDs, quantities, nutrient snapshots, or
+tombstones.
 
 ## Migration verification
 

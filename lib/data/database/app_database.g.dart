@@ -4967,6 +4967,30 @@ class $MealItemsTable extends MealItems
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('local'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -4987,6 +5011,8 @@ class $MealItemsTable extends MealItems
     createdAt,
     updatedAt,
     deletedAt,
+    revision,
+    syncStatus,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -5109,6 +5135,18 @@ class $MealItemsTable extends MealItems
         deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
       );
     }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
     return context;
   }
 
@@ -5190,6 +5228,14 @@ class $MealItemsTable extends MealItems
         DriftSqlType.dateTime,
         data['${effectivePrefix}deleted_at'],
       ),
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
     );
   }
 
@@ -5218,6 +5264,8 @@ class MealItem extends DataClass implements Insertable<MealItem> {
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
+  final int revision;
+  final String syncStatus;
   const MealItem({
     required this.id,
     required this.uuid,
@@ -5237,6 +5285,8 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
+    required this.revision,
+    required this.syncStatus,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -5261,6 +5311,8 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     if (!nullToAbsent || deletedAt != null) {
       map['deleted_at'] = Variable<DateTime>(deletedAt);
     }
+    map['revision'] = Variable<int>(revision);
+    map['sync_status'] = Variable<String>(syncStatus);
     return map;
   }
 
@@ -5286,6 +5338,8 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       deletedAt: deletedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(deletedAt),
+      revision: Value(revision),
+      syncStatus: Value(syncStatus),
     );
   }
 
@@ -5313,6 +5367,8 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      revision: serializer.fromJson<int>(json['revision']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
     );
   }
   @override
@@ -5337,6 +5393,8 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'revision': serializer.toJson<int>(revision),
+      'syncStatus': serializer.toJson<String>(syncStatus),
     };
   }
 
@@ -5359,6 +5417,8 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
+    int? revision,
+    String? syncStatus,
   }) => MealItem(
     id: id ?? this.id,
     uuid: uuid ?? this.uuid,
@@ -5378,6 +5438,8 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    revision: revision ?? this.revision,
+    syncStatus: syncStatus ?? this.syncStatus,
   );
   MealItem copyWithCompanion(MealItemsCompanion data) {
     return MealItem(
@@ -5399,6 +5461,10 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      revision: data.revision.present ? data.revision.value : this.revision,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
     );
   }
 
@@ -5422,7 +5488,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
           ..write('sugar: $sugar, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('deletedAt: $deletedAt')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('revision: $revision, ')
+          ..write('syncStatus: $syncStatus')
           ..write(')'))
         .toString();
   }
@@ -5447,6 +5515,8 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     createdAt,
     updatedAt,
     deletedAt,
+    revision,
+    syncStatus,
   );
   @override
   bool operator ==(Object other) =>
@@ -5469,7 +5539,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
           other.sugar == this.sugar &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
-          other.deletedAt == this.deletedAt);
+          other.deletedAt == this.deletedAt &&
+          other.revision == this.revision &&
+          other.syncStatus == this.syncStatus);
 }
 
 class MealItemsCompanion extends UpdateCompanion<MealItem> {
@@ -5491,6 +5563,8 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
+  final Value<int> revision;
+  final Value<String> syncStatus;
   const MealItemsCompanion({
     this.id = const Value.absent(),
     this.uuid = const Value.absent(),
@@ -5510,6 +5584,8 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.syncStatus = const Value.absent(),
   });
   MealItemsCompanion.insert({
     this.id = const Value.absent(),
@@ -5530,6 +5606,8 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.syncStatus = const Value.absent(),
   }) : mealId = Value(mealId),
        foodId = Value(foodId);
   static Insertable<MealItem> custom({
@@ -5551,6 +5629,8 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
+    Expression<int>? revision,
+    Expression<String>? syncStatus,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -5571,6 +5651,8 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
+      if (revision != null) 'revision': revision,
+      if (syncStatus != null) 'sync_status': syncStatus,
     });
   }
 
@@ -5593,6 +5675,8 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
+    Value<int>? revision,
+    Value<String>? syncStatus,
   }) {
     return MealItemsCompanion(
       id: id ?? this.id,
@@ -5613,6 +5697,8 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
+      revision: revision ?? this.revision,
+      syncStatus: syncStatus ?? this.syncStatus,
     );
   }
 
@@ -5673,6 +5759,12 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     if (deletedAt.present) {
       map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
     return map;
   }
 
@@ -5696,7 +5788,9 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
           ..write('sugar: $sugar, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
-          ..write('deletedAt: $deletedAt')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('revision: $revision, ')
+          ..write('syncStatus: $syncStatus')
           ..write(')'))
         .toString();
   }
@@ -15191,6 +15285,8 @@ typedef $$MealItemsTableCreateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
+      Value<int> revision,
+      Value<String> syncStatus,
     });
 typedef $$MealItemsTableUpdateCompanionBuilder =
     MealItemsCompanion Function({
@@ -15212,6 +15308,8 @@ typedef $$MealItemsTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
+      Value<int> revision,
+      Value<String> syncStatus,
     });
 
 final class $$MealItemsTableReferences
@@ -15339,6 +15437,16 @@ class $$MealItemsTableFilterComposer
 
   ColumnFilters<DateTime> get deletedAt => $composableBuilder(
     column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -15478,6 +15586,16 @@ class $$MealItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$MealsTableOrderingComposer get mealId {
     final $$MealsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -15582,6 +15700,14 @@ class $$MealItemsTableAnnotationComposer
   GeneratedColumn<DateTime> get deletedAt =>
       $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
   $$MealsTableAnnotationComposer get mealId {
     final $$MealsTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -15675,6 +15801,8 @@ class $$MealItemsTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
               }) => MealItemsCompanion(
                 id: id,
                 uuid: uuid,
@@ -15694,6 +15822,8 @@ class $$MealItemsTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
+                revision: revision,
+                syncStatus: syncStatus,
               ),
           createCompanionCallback:
               ({
@@ -15715,6 +15845,8 @@ class $$MealItemsTableTableManager
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
               }) => MealItemsCompanion.insert(
                 id: id,
                 uuid: uuid,
@@ -15734,6 +15866,8 @@ class $$MealItemsTableTableManager
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
+                revision: revision,
+                syncStatus: syncStatus,
               ),
           withReferenceMapper: (p0) => p0
               .map(

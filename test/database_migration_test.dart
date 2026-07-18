@@ -108,6 +108,13 @@ void main() {
           "INSERT INTO foods (name, calories, protein, carbs, fats) VALUES ('Oats',389,16.9,66.3,6.9)",
         );
         raw.execute(
+          "INSERT INTO meals (date, name, type) VALUES (1704067200,'Breakfast','breakfast')",
+        );
+        raw.execute(
+          'INSERT INTO meal_items (meal_id, food_id, quantity, calories) '
+          'VALUES (1,1,50,194.5)',
+        );
+        raw.execute(
           "INSERT INTO daily_logs (date, notes) VALUES (1704067200,'preserve me')",
         );
       },
@@ -134,7 +141,12 @@ void main() {
         .get();
     expect(
       mealItemColumns.map((row) => row.read<String>('name')),
-      containsAll(['calcium', 'magnesium', 'sugar']),
+      containsAll(['calcium', 'magnesium', 'sugar', 'revision', 'sync_status']),
     );
+    final preservedItem = await database.select(database.mealItems).getSingle();
+    expect(preservedItem.quantity, 50);
+    expect(preservedItem.calories, 194.5);
+    expect(preservedItem.revision, 1);
+    expect(preservedItem.syncStatus, 'local');
   });
 }

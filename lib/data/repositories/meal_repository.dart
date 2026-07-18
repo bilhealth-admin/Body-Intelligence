@@ -104,6 +104,7 @@ class MealRepository {
     double sugar = 0,
   }) async {
     if (quantity <= 0) throw ArgumentError.value(quantity, 'quantity');
+    final existing = await _mealItem(id);
     await (_database.update(
       _database.mealItems,
     )..where((row) => row.id.equals(id))).write(
@@ -120,19 +121,32 @@ class MealRepository {
         magnesium: Value(magnesium),
         sugar: Value(sugar),
         updatedAt: Value(DateTime.now()),
+        revision: Value(existing.revision + 1),
+        syncStatus: const Value('pending'),
       ),
     );
   }
 
   Future<void> deleteMealItem(int id) async {
+    final existing = await _mealItem(id);
     await (_database.update(
       _database.mealItems,
     )..where((row) => row.id.equals(id))).write(
       MealItemsCompanion(
         deletedAt: Value(DateTime.now()),
         updatedAt: Value(DateTime.now()),
+        revision: Value(existing.revision + 1),
+        syncStatus: const Value('pendingDelete'),
       ),
     );
+  }
+
+  Future<MealItem> _mealItem(int id) async {
+    final item = await (_database.select(
+      _database.mealItems,
+    )..where((row) => row.id.equals(id))).getSingleOrNull();
+    if (item == null) throw StateError('Meal item $id does not exist');
+    return item;
   }
 
   Stream<List<MealWithItems>> watchMealsForDate(DateTime date) {

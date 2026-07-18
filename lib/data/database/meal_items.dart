@@ -42,4 +42,8 @@ class MealItems extends Table {
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   DateTimeColumn get deletedAt => dateTime().nullable()();
+
+  IntColumn get revision => integer().withDefault(const Constant(1))();
+
+  TextColumn get syncStatus => text().withDefault(const Constant('local'))();
 }
