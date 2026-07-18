@@ -20,6 +20,7 @@ import '../providers/dashboard_provider.dart';
 import 'stat_card.dart';
 import 'dashboard_water_card.dart';
 import 'dashboard_check_in_card.dart';
+import 'confidence_ring.dart';
 
 class DashboardGrid extends ConsumerWidget {
   const DashboardGrid({super.key});
@@ -537,7 +538,10 @@ class DashboardGrid extends ConsumerWidget {
         ),
         Card(
           child: ExpansionTile(
-            leading: CircleAvatar(child: Text('${honesty.score}')),
+            leading: ConfidenceRing(
+              score: honesty.score,
+              reliability: honesty.reliability,
+            ),
             title: Text(context.strings.text('Data honesty')),
             subtitle: Text(
               arabic
