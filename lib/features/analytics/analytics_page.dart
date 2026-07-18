@@ -5,8 +5,11 @@ import '../../data/database/date_keys.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../core/units/measurement_units.dart';
 import '../../engine/intelligence_engine.dart';
+import '../../engine/recovery_engine.dart';
+import '../../engine/weekly_review_engine.dart';
 import '../dashboard/providers/dashboard_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
+import '../life_context/providers/life_context_provider.dart';
 import '../weight/providers/weight_provider.dart';
 
 class AnalyticsPage extends ConsumerWidget {
@@ -17,15 +20,20 @@ class AnalyticsPage extends ConsumerWidget {
     final weightsAsync = ref.watch(weightHistoryProvider);
     final mealsAsync = ref.watch(allMealsProvider);
     final waterAsync = ref.watch(allWaterProvider);
+    final contextsAsync = ref.watch(insightLifeContextProvider);
     final system =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     final weightUnit = UnitConverter.weightUnit(system);
     if (weightsAsync.isLoading ||
         mealsAsync.isLoading ||
-        waterAsync.isLoading) {
+        waterAsync.isLoading ||
+        contextsAsync.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    if (weightsAsync.hasError || mealsAsync.hasError || waterAsync.hasError) {
+    if (weightsAsync.hasError ||
+        mealsAsync.hasError ||
+        waterAsync.hasError ||
+        contextsAsync.hasError) {
       return const Scaffold(
         body: Center(child: Text('Analytics data could not be loaded.')),
       );
@@ -33,6 +41,7 @@ class AnalyticsPage extends ConsumerWidget {
     final weights = (weightsAsync.value ?? const []).reversed.toList();
     final meals = mealsAsync.value ?? const [];
     final water = waterAsync.value ?? const [];
+    final contexts = contextsAsync.value ?? const [];
     final caloriesByDay = <String, double>{};
     final proteinByDay = <String, double>{};
     for (final meal in meals) {
@@ -69,12 +78,67 @@ class AnalyticsPage extends ConsumerWidget {
         : recentWeights
               .map((row) => row.weight)
               .reduce((a, b) => a > b ? a : b);
+    final cutoffKey = dayKeyFor(
+      DateTime.now().subtract(const Duration(days: 6)),
+    );
+    final recentWeightDays = weights
+        .where((row) => dayKeyFor(row.date).compareTo(cutoffKey) >= 0)
+        .map((row) => dayKeyFor(row.date))
+        .toSet();
+    final recentMealDays = caloriesByDay.keys
+        .where((day) => day.compareTo(cutoffKey) >= 0)
+        .toSet();
+    final recentWaterDays = waterByDay.keys
+        .where((day) => day.compareTo(cutoffKey) >= 0)
+        .toSet();
+    final recentContextDays = contexts
+        .where((row) => row.dayKey.compareTo(cutoffKey) >= 0)
+        .map((row) => row.dayKey)
+        .toSet();
+    final weekly = WeeklyReviewEngine.evaluate(
+      weightDays: recentWeightDays.length,
+      nutritionDays: recentMealDays.length,
+      waterDays: recentWaterDays.length,
+      contextDays: recentContextDays.length,
+      weeklyWeightChangeKg: rate,
+    );
+    final activityDates = <DateTime>[
+      ...weights.map((row) => row.date),
+      ...meals.map((row) => row.meal.date),
+      ...water.map((row) => row.occurredAt),
+      ...contexts.map((row) => row.occurredAt),
+    ]..sort();
+    final recovery = RecoveryEngine.evaluate(
+      now: DateTime.now(),
+      lastTrackedAt: activityDates.lastOrNull,
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text(context.strings.text('Analytics'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (recovery.state != RecoveryState.current)
+            _SummaryCard(
+              title: recovery.title,
+              lines: [
+                if (recovery.daysAway > 0)
+                  '${recovery.daysAway} days since the latest local record',
+                ...recovery.actions,
+              ],
+            ),
+          if (recovery.state != RecoveryState.current)
+            const SizedBox(height: 12),
+          _SummaryCard(
+            title: 'Weekly review',
+            lines: [
+              '${weekly.trackedDays} of 7 days with at least one core record',
+              weekly.summary,
+              weekly.nextDecision,
+              ...weekly.missingData,
+            ],
+          ),
+          const SizedBox(height: 12),
           _SummaryCard(
             title: '7 / 30 day summary',
             lines: [

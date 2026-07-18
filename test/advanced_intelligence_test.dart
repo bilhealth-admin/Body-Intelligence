@@ -2,6 +2,8 @@ import 'package:body_intelligence_log/engine/body_twin_engine.dart';
 import 'package:body_intelligence_log/engine/data_honesty_engine.dart';
 import 'package:body_intelligence_log/engine/one_best_action_engine.dart';
 import 'package:body_intelligence_log/engine/what_changed_engine.dart';
+import 'package:body_intelligence_log/engine/recovery_engine.dart';
+import 'package:body_intelligence_log/engine/weekly_review_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -69,5 +71,28 @@ void main() {
     expect(report.interpretation, ChangeInterpretation.likelyNoise);
     expect(report.alternatives, contains('Water and glycogen'));
     expect(report.summary, isNot(contains('fat gain')));
+  });
+
+  test('recovery mode welcomes return without requiring backfill', () {
+    final report = RecoveryEngine.evaluate(
+      now: DateTime(2026, 7, 18),
+      lastTrackedAt: DateTime(2026, 7, 8),
+    );
+    expect(report.state, RecoveryState.gentleReturn);
+    expect(report.title, contains('no need to fill'));
+    expect(report.actions, contains('Start today fresh'));
+  });
+
+  test('weekly review discloses missing data and avoids tissue claims', () {
+    final review = WeeklyReviewEngine.evaluate(
+      weightDays: 3,
+      nutritionDays: 4,
+      waterDays: 2,
+      contextDays: 1,
+      weeklyWeightChangeKg: 0.8,
+    );
+    expect(review.missingData, isNotEmpty);
+    expect(review.summary, contains('does not identify fat or muscle'));
+    expect(review.nextDecision, contains('before changing the plan'));
   });
 }
