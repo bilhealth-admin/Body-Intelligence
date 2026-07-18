@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 
 class AppThemeData {
-  static ThemeData lightTheme(Brightness brightness) {
+  static ThemeData lightTheme(
+    Brightness brightness, {
+    bool highContrast = false,
+  }) {
     final dark = brightness == Brightness.dark;
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.primary,
       brightness: brightness,
+      contrastLevel: highContrast ? 1 : 0,
       surface: dark ? const Color(0xFF121A2A) : const Color(0xFFF8FAFC),
     );
 
@@ -16,6 +20,8 @@ class AppThemeData {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: dark
           ? const Color(0xFF09111F)
+          : highContrast
+          ? Colors.white
           : AppColors.background,
       visualDensity: VisualDensity.standard,
       pageTransitionsTheme: const PageTransitionsTheme(

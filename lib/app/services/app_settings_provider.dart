@@ -35,4 +35,14 @@ class AppSettingsController extends StateNotifier<AppSettings> {
     state = state.copyWith(themeMode: mode);
     await _service.save(state);
   }
+
+  Future<void> setHighContrast(bool enabled) async {
+    state = state.copyWith(highContrast: enabled);
+    await _service.save(state);
+  }
+
+  Future<void> setReduceMotion(bool enabled) async {
+    state = state.copyWith(reduceMotion: enabled);
+    await _service.save(state);
+  }
 }

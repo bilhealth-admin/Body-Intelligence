@@ -182,6 +182,26 @@ class SettingsPage extends ConsumerWidget {
                 .read(appSettingsProvider.notifier)
                 .setThemeMode(value ?? 'system'),
           ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            secondary: const Icon(Icons.contrast),
+            value: settings.highContrast,
+            onChanged: (value) =>
+                ref.read(appSettingsProvider.notifier).setHighContrast(value),
+            title: const Text('High contrast'),
+            subtitle: const Text(
+              'Increase separation between text, controls, and surfaces.',
+            ),
+          ),
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            secondary: const Icon(Icons.motion_photos_off_outlined),
+            value: settings.reduceMotion,
+            onChanged: (value) =>
+                ref.read(appSettingsProvider.notifier).setReduceMotion(value),
+            title: const Text('Reduce motion'),
+            subtitle: const Text('Minimize nonessential interface animation.'),
+          ),
           const Divider(height: 32),
           DropdownButtonFormField<String>(
             key: ValueKey(measurementSystem),

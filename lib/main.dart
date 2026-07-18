@@ -40,8 +40,21 @@ class BILApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       themeMode: selectedThemeMode,
-      theme: AppThemeData.lightTheme(Brightness.light),
-      darkTheme: AppThemeData.lightTheme(Brightness.dark),
+      theme: AppThemeData.lightTheme(
+        Brightness.light,
+        highContrast: settings.highContrast,
+      ),
+      darkTheme: AppThemeData.lightTheme(
+        Brightness.dark,
+        highContrast: settings.highContrast,
+      ),
+      builder: (context, child) {
+        if (!settings.reduceMotion) return child ?? const SizedBox.shrink();
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(disableAnimations: true),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       routerConfig: AppRouter.router,
     );
   }

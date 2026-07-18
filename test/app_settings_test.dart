@@ -18,10 +18,14 @@ void main() {
 
     await controller.setLocale('en');
     await controller.setThemeMode('dark');
+    await controller.setHighContrast(true);
+    await controller.setReduceMotion(true);
 
     expect(controller.state.localeCode, 'en');
     expect(controller.state.themeMode, 'dark');
     expect((await service.load()).themeMode, 'dark');
+    expect((await service.load()).highContrast, isTrue);
+    expect((await service.load()).reduceMotion, isTrue);
   });
 }
 
