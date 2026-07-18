@@ -112,6 +112,9 @@ class AppLocalizations {
     'Existing meal history keeps its nutrition snapshot. This food will no longer appear in search.':
         'سيحتفظ سجل الوجبات الحالي بلقطة التغذية، ولن يظهر هذا الطعام في البحث بعد الآن.',
     'Weight trend': 'اتجاه الوزن',
+    'Loading your latest body data': 'جارٍ تحميل أحدث بيانات جسمك',
+    'Your latest body data could not be loaded.':
+        'تعذر تحميل أحدث بيانات جسمك.',
     'Measurement date': 'تاريخ القياس',
     'Measurement conditions': 'ظروف القياس',
     'morning': 'صباحًا',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/localization/app_localizations.dart';
 import '../../../core/units/measurement_units.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../../weight/providers/weight_provider.dart';
@@ -25,12 +26,31 @@ class DashboardHeader extends ConsumerWidget {
         ),
       ),
       child: latestWeight.when(
-        loading: () => const Text(
-          'Loading your latest data…',
-          style: TextStyle(color: Colors.white),
+        loading: () => Semantics(
+          label: context.strings.text('Loading your latest body data'),
+          child: const LinearProgressIndicator(
+            color: Colors.white,
+            backgroundColor: Colors.white24,
+          ),
         ),
-        error: (error, _) =>
-            Text(error.toString(), style: const TextStyle(color: Colors.white)),
+        error: (_, _) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              context.strings.text(
+                'Your latest body data could not be loaded.',
+              ),
+              style: const TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(foregroundColor: Colors.white),
+              onPressed: () => ref.invalidate(latestWeightProvider),
+              icon: const Icon(Icons.refresh),
+              label: Text(context.strings.text('Try again')),
+            ),
+          ],
+        ),
         data: (weight) => Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
