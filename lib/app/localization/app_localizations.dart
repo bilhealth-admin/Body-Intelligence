@@ -155,6 +155,12 @@ class AppLocalizations {
     'remaining': 'متبقٍ',
     'Hydration target reached': 'تم الوصول إلى هدف شرب الماء',
     'Custom amount': 'كمية مخصصة',
+    'Did you weigh yourself today?': 'هل قست وزنك اليوم؟',
+    'A comparable daily check-in improves trend confidence. Normal fluctuations are expected, and skipping is always allowed.':
+        'يحسن القياس اليومي في ظروف متقاربة ثقة الاتجاه. التقلبات الطبيعية متوقعة، ويمكنك التخطي دائمًا.',
+    "Today's weight": 'وزن اليوم',
+    'Skip today': 'تخطي اليوم',
+    'Save check-in': 'حفظ القياس',
     'Meal type': 'نوع الوجبة',
     'Breakfast': 'الإفطار',
     'Lunch': 'الغداء',

@@ -25,6 +25,14 @@ final todayWeightProvider = StreamProvider<WeightEntry?>((ref) {
   return ref.watch(weightRepositoryProvider).watchForDay(DateTime.now());
 });
 
+final weightReminderSkippedTodayProvider = StreamProvider<bool>((ref) {
+  final todayKey = dayKeyFor(DateTime.now());
+  return ref
+      .watch(preferencesRepositoryProvider)
+      .watch('weightReminderSkippedDay')
+      .map((value) => value == todayKey);
+});
+
 final dailyCheckInDueProvider = FutureProvider<bool>((ref) async {
   final today = DateTime.now();
   final entry = await ref.watch(weightRepositoryProvider).getForDay(today);

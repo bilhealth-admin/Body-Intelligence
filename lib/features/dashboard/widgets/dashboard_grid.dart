@@ -19,6 +19,7 @@ import '../../weight/providers/weight_provider.dart';
 import '../providers/dashboard_provider.dart';
 import 'stat_card.dart';
 import 'dashboard_water_card.dart';
+import 'dashboard_check_in_card.dart';
 
 class DashboardGrid extends ConsumerWidget {
   const DashboardGrid({super.key});
@@ -33,6 +34,7 @@ class DashboardGrid extends ConsumerWidget {
     final waterAsync = ref.watch(todayWaterProvider);
     final allMealsAsync = ref.watch(allMealsProvider);
     final allWaterAsync = ref.watch(allWaterProvider);
+    final skippedWeightAsync = ref.watch(weightReminderSkippedTodayProvider);
     final memoryEnabled =
         ref.watch(decisionMemoryEnabledProvider).value ?? true;
     final system =
@@ -44,6 +46,7 @@ class DashboardGrid extends ConsumerWidget {
       waterAsync,
       allMealsAsync,
       allWaterAsync,
+      skippedWeightAsync,
     ].any((value) => value.isLoading)) {
       return const Center(
         child: Padding(
@@ -57,7 +60,8 @@ class DashboardGrid extends ConsumerWidget {
         mealsAsync.hasError ||
         waterAsync.hasError ||
         allMealsAsync.hasError ||
-        allWaterAsync.hasError) {
+        allWaterAsync.hasError ||
+        skippedWeightAsync.hasError) {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -93,6 +97,7 @@ class DashboardGrid extends ConsumerWidget {
     final waterRows = waterAsync.value ?? const [];
     final allMeals = allMealsAsync.value ?? const [];
     final allWater = allWaterAsync.value ?? const [];
+    final skippedWeightToday = skippedWeightAsync.value ?? false;
     final items = meals.expand((meal) => meal.items).toList();
     final calories = items.fold<double>(0, (sum, item) => sum + item.calories);
     final protein = items.fold<double>(0, (sum, item) => sum + item.protein);
@@ -302,8 +307,37 @@ class DashboardGrid extends ConsumerWidget {
       }
     }
 
+    Future<void> saveWeight(double weightKg) async {
+      await ref
+          .read(weightRepositoryProvider)
+          .addWeight(weightKg, measurementContext: 'morning');
+    }
+
+    Future<void> skipWeight() async {
+      await ref
+          .read(preferencesRepositoryProvider)
+          .set('weightReminderSkippedDay', dayKeyFor(DateTime.now()));
+    }
+
     return Column(
       children: [
+        AnimatedSwitcher(
+          duration: MediaQuery.disableAnimationsOf(context)
+              ? Duration.zero
+              : const Duration(milliseconds: 250),
+          child:
+              !weightDays.contains(dayKeyFor(DateTime.now())) &&
+                  !skippedWeightToday
+              ? DashboardCheckInCard(
+                  initialWeightKg: currentWeight,
+                  system: system,
+                  onSave: saveWeight,
+                  onSkip: skipWeight,
+                )
+              : const SizedBox.shrink(
+                  key: ValueKey('dashboard-check-in-complete'),
+                ),
+        ),
         GridView.count(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
