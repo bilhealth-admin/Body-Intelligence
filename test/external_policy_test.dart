@@ -1,9 +1,26 @@
 import 'package:body_intelligence_log/engine/ai_write_policy.dart';
 import 'package:body_intelligence_log/engine/sync_conflict_engine.dart';
 import 'package:body_intelligence_log/engine/update_policy_engine.dart';
+import 'package:body_intelligence_log/app/services/external_capabilities.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('unverified external capabilities never advertise availability', () {
+    for (final capability in ExternalCapability.values) {
+      final status = ExternalCapabilities.status(capability);
+      expect(status.capability, capability);
+      expect(status.available, isFalse);
+      expect(status.reason.trim(), isNotEmpty);
+    }
+    expect(
+      ExternalCapabilities.status(ExternalCapability.sync).reason,
+      contains('No data is uploaded'),
+    );
+    expect(
+      ExternalCapabilities.status(ExternalCapability.commerce).reason,
+      contains('No payment details are collected'),
+    );
+  });
   test('required update is distinguished from optional update', () {
     const policy = UpdatePolicy(
       latestVersion: '2.1.0',
