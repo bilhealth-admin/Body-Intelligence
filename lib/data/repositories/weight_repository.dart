@@ -8,36 +8,28 @@ class WeightRepository {
   WeightRepository(this._database);
 
   Future<void> addWeight(double weight) async {
-    await _database.into(_database.weightEntries).insert(
-      WeightEntriesCompanion.insert(
-        weight: weight,
-      ),
-    );
+    await _database
+        .into(_database.weightEntries)
+        .insert(WeightEntriesCompanion.insert(weight: weight));
   }
 
   Stream<List<WeightEntry>> watchWeights() {
-    return (_database.select(_database.weightEntries)
-      ..orderBy([
-            (t) => OrderingTerm.desc(t.date),
-      ]))
-        .watch();
+    return (_database.select(
+      _database.weightEntries,
+    )..orderBy([(t) => OrderingTerm.desc(t.date)])).watch();
   }
 
   Stream<WeightEntry?> watchLatestWeight() {
     return (_database.select(_database.weightEntries)
-      ..orderBy([
-            (t) => OrderingTerm.desc(t.date),
-      ])
-      ..limit(1))
+          ..orderBy([(t) => OrderingTerm.desc(t.date)])
+          ..limit(1))
         .watchSingleOrNull();
   }
 
   Future<List<WeightEntry>> getAll() {
-    return (_database.select(_database.weightEntries)
-      ..orderBy([
-            (t) => OrderingTerm.desc(t.date),
-      ]))
-        .get();
+    return (_database.select(
+      _database.weightEntries,
+    )..orderBy([(t) => OrderingTerm.desc(t.date)])).get();
   }
 
   Future<void> deleteAll() async {

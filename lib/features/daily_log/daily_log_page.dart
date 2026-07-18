@@ -1,100 +1,165 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../data/database/app_database.dart';
+import '../../engine/nutrition_engine.dart';
+import '../foods/providers/food_provider.dart';
 import 'providers/daily_log_provider.dart';
 
 class DailyLogPage extends ConsumerStatefulWidget {
- const DailyLogPage({super.key});
+  const DailyLogPage({super.key});
 
- @override
- ConsumerState<DailyLogPage> createState() => _DailyLogPageState();
+  @override
+  ConsumerState<DailyLogPage> createState() => _DailyLogPageState();
 }
 
 class _DailyLogPageState extends ConsumerState<DailyLogPage> {
- final weight = TextEditingController();
- final calories = TextEditingController();
- final protein = TextEditingController();
- final carbs = TextEditingController();
- final fats = TextEditingController();
- final water = TextEditingController();
- final notes = TextEditingController();
+  final notes = TextEditingController();
+  final mealName = TextEditingController(text: 'Breakfast');
+  final quantity = TextEditingController(text: '100');
+  Food? selectedFood;
 
- @override
- void dispose() {
-  weight.dispose();
-  calories.dispose();
-  protein.dispose();
-  carbs.dispose();
-  fats.dispose();
-  water.dispose();
-  notes.dispose();
-  super.dispose();
- }
+  @override
+  void dispose() {
+    notes.dispose();
+    mealName.dispose();
+    quantity.dispose();
+    super.dispose();
+  }
 
- Future<void> _save() async {
-  final repository = ref.read(dailyLogRepositoryProvider);
+  Future<void> _save() async {
+    final repository = ref.read(dailyLogRepositoryProvider);
+    await repository.save(
+      date: DateTime.now(),
+      notes: notes.text.trim().isEmpty ? null : notes.text.trim(),
+    );
 
-  await repository.save(
-   date: DateTime.now(),
-   weight: double.tryParse(weight.text),
-   calories: int.tryParse(calories.text),
-   protein: int.tryParse(protein.text),
-   carbs: int.tryParse(carbs.text),
-   fats: int.tryParse(fats.text),
-   water: int.tryParse(water.text),
-   notes: notes.text.trim().isEmpty ? null : notes.text.trim(),
-  );
+    if (!mounted) return;
+    context.go('/dashboard');
+  }
 
-  final logs = await repository.getAll();
-  debugPrint('Saved logs count: ${logs.length}');
-  debugPrint(logs.toString());
+  Future<void> _saveMeal() async {
+    if (selectedFood == null) {
+      return;
+    }
 
-  if (!mounted) return;
+    final mealRepository = ref.read(mealRepositoryProvider);
+    final mealId = await mealRepository.createMeal(
+      date: DateTime.now(),
+      name: mealName.text.trim().isEmpty ? 'Meal' : mealName.text.trim(),
+      type: 'meal',
+    );
 
-  Navigator.of(context).pop();
- }
+    final quantityValue = double.tryParse(quantity.text) ?? 100;
+    final portion = NutritionEngine.calculateFoodPortion(
+      quantity: quantityValue,
+      servingSize: selectedFood!.servingSize,
+      calories: selectedFood!.calories,
+      protein: selectedFood!.protein,
+      carbs: selectedFood!.carbs,
+      fats: selectedFood!.fats,
+    );
 
- @override
- Widget build(BuildContext context) {
-  return Scaffold(
-   appBar: AppBar(title: const Text('Daily Log')),
-   body: ListView(
-    padding: const EdgeInsets.all(16),
-    children: [
-     _field(weight, 'Weight (kg)'),
-     _field(calories, 'Calories'),
-     _field(protein, 'Protein'),
-     _field(carbs, 'Carbs'),
-     _field(fats, 'Fats'),
-     _field(water, 'Water (ml)'),
-     _field(notes, 'Notes', lines: 4),
-     const SizedBox(height: 20),
-     FilledButton(
-      onPressed: _save,
-      child: const Text('Save'),
-     ),
-    ],
-   ),
-  );
- }
+    await mealRepository.addMealItem(
+      mealId: mealId,
+      foodId: selectedFood!.id,
+      quantity: quantityValue,
+      calories: portion.calories,
+      protein: portion.protein,
+      carbs: portion.carbs,
+      fats: portion.fats,
+    );
 
- Widget _field(
-     TextEditingController controller,
-     String label, {
-      int lines = 1,
-     }) {
-  return Padding(
-   padding: const EdgeInsets.only(bottom: 14),
-   child: TextField(
-    controller: controller,
-    maxLines: lines,
-    keyboardType:
-    lines == 1 ? TextInputType.number : TextInputType.text,
-    decoration: InputDecoration(
-     labelText: label,
-     border: const OutlineInputBorder(),
-    ),
-   ),
-  );
- }
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Meal saved locally.')));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final foods = ref.watch(foodsProvider);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Daily Log')),
+      body: foods.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text(error.toString())),
+        data: (items) {
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              _field(notes, 'Notes', lines: 4),
+              const SizedBox(height: 20),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: mealName,
+                        decoration: const InputDecoration(
+                          labelText: 'Meal name',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<Food>(
+                        initialValue: selectedFood,
+                        decoration: const InputDecoration(labelText: 'Food'),
+                        items: items
+                            .map(
+                              (food) => DropdownMenuItem<Food>(
+                                value: food,
+                                child: Text(food.name),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (food) =>
+                            setState(() => selectedFood = food),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: quantity,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Quantity (g)',
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      FilledButton(
+                        onPressed: _saveMeal,
+                        child: const Text('Save meal'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              FilledButton(onPressed: _save, child: const Text('Save log')),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _field(
+    TextEditingController controller,
+    String label, {
+    int lines = 1,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: TextField(
+        controller: controller,
+        maxLines: lines,
+        keyboardType: lines == 1 ? TextInputType.number : TextInputType.text,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+      ),
+    );
+  }
 }

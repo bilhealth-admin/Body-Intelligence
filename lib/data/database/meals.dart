@@ -2,16 +2,18 @@ import 'package:drift/drift.dart';
 
 import 'database_ids.dart';
 
-class WeightEntries extends Table {
+class Meals extends Table {
   IntColumn get id => integer().autoIncrement()();
 
   TextColumn get uuid => text().clientDefault(newDatabaseId).unique()();
 
-  DateTimeColumn get date => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get date => dateTime()();
 
-  RealColumn get weight => real()();
+  TextColumn get dayKey => text()();
 
-  TextColumn get note => text().nullable()();
+  TextColumn get name => text().withDefault(const Constant('Meal'))();
+
+  TextColumn get type => text().withDefault(const Constant('other'))();
 
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
