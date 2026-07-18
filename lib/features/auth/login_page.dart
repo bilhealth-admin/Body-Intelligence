@@ -1,67 +1,111 @@
 import 'package:flutter/material.dart';
-import '../dashboard/dashboard_page.dart';
-import '../../shared/widgets/app_card.dart';
-import '../../shared/widgets/primary_button.dart';
+import 'package:go_router/go_router.dart';
 
-class LoginPage extends StatelessWidget {
+import '../../app/environment/app_environment.dart';
+
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final email = TextEditingController();
+  final password = TextEditingController();
+  bool obscure = true;
+
+  @override
+  void dispose() {
+    email.dispose();
+    password.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final configured = AppEnvironment.cloudConfigured;
     return Scaffold(
+      appBar: AppBar(title: const Text('BIL account')),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: SizedBox(
-              width: 420,
-              child: AppCard(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: AutofillGroup(
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Icon(Icons.monitor_weight, size: 70),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Body Intelligence',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Icon(
+                      Icons.shield_outlined,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      'Your data, on your terms',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Welcome back',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                      'Cloud accounts are optional. Local Mode remains fully usable and keeps data on this device.',
+                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 30),
-                    const TextField(
-                      decoration: InputDecoration(
+                    const SizedBox(height: 24),
+                    TextField(
+                      controller: email,
+                      enabled: configured,
+                      keyboardType: TextInputType.emailAddress,
+                      autofillHints: const [
+                        AutofillHints.username,
+                        AutofillHints.email,
+                      ],
+                      decoration: const InputDecoration(
                         labelText: 'Email',
-                        border: OutlineInputBorder(),
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    const TextField(
-                      obscureText: true,
+                    const SizedBox(height: 14),
+                    TextField(
+                      controller: password,
+                      enabled: configured,
+                      obscureText: obscure,
+                      autofillHints: const [AutofillHints.password],
                       decoration: InputDecoration(
                         labelText: 'Password',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.lock_outline),
+                        prefixIcon: const Icon(Icons.lock_outline),
+                        suffixIcon: IconButton(
+                          tooltip: obscure ? 'Show password' : 'Hide password',
+                          onPressed: configured
+                              ? () => setState(() => obscure = !obscure)
+                              : null,
+                          icon: Icon(
+                            obscure ? Icons.visibility : Icons.visibility_off,
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    PrimaryButton(
-                      text: 'Login',
-                      icon: Icons.login,
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const DashboardPage(),
-                          ),
-                        );
-                      },
+                    const SizedBox(height: 18),
+                    FilledButton.icon(
+                      onPressed: null,
+                      icon: const Icon(Icons.login),
+                      label: const Text('Sign in'),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      configured
+                          ? 'Account sign-in remains disabled until the verified server auth boundary is initialized.'
+                          : 'Cloud accounts are not configured in this build. No credentials will be accepted or stored.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 18),
+                    OutlinedButton.icon(
+                      onPressed: () => context.go('/onboarding'),
+                      icon: const Icon(Icons.phone_android),
+                      label: const Text('Continue in Local Mode'),
                     ),
                   ],
                 ),
