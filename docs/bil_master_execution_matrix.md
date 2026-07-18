@@ -15,9 +15,9 @@
 
 ## Status summary
 
-- complete: **59**
+- complete: **60**
 - partial: **209**
-- missing and locally implementable: **18**
+- missing and locally implementable: **17**
 - blocked by credentials/infrastructure: **185**
 - strategic/non-code: **79**
 
@@ -1821,12 +1821,12 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 163. Daily Check-in Card
 - **Requirement:** Always appears at the top when today's weight is missing. Contains: Wheel Picker Text Field Save Skip Today After saving: Card disappears. Smooth animation.
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
-- **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
+- **Acceptance criteria:** When today has no active weight and was not skipped, Today displays a bilingual wheel-plus-text check-in initialized from the latest canonical value; Save upserts one logical local entry, Skip persists for the local day, and either action removes the card through a reduced-motion-aware transition.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `a5ce4dd`
 
 ### BIL-TDY-164 — What Changed Today Card
 
