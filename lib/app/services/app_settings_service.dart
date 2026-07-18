@@ -1,7 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:path_provider/path_provider.dart';
+import 'settings_store.dart';
 
 class AppSettings {
   AppSettings({required this.localeCode, required this.themeMode});
@@ -21,34 +20,32 @@ class AppSettings {
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
     return AppSettings(
-      localeCode: json['localeCode']?.toString() ?? 'ar',
+      localeCode: json['localeCode']?.toString() ?? 'en',
       themeMode: json['themeMode']?.toString() ?? 'system',
     );
   }
 }
 
 class AppSettingsService {
-  Future<File> _localFile() async {
-    final dir = await getApplicationSupportDirectory();
-    return File('${dir.path}/app_settings.json');
-  }
+  AppSettingsService({SettingsStore? store})
+    : _store = store ?? createSettingsStore();
+
+  final SettingsStore _store;
 
   Future<AppSettings> load() async {
     try {
-      final file = await _localFile();
-      if (!await file.exists()) {
-        return AppSettings(localeCode: 'ar', themeMode: 'system');
+      final contents = await _store.read();
+      if (contents == null) {
+        return AppSettings(localeCode: 'en', themeMode: 'system');
       }
-      final contents = await file.readAsString();
       final decoded = jsonDecode(contents) as Map<String, dynamic>;
       return AppSettings.fromJson(decoded);
     } catch (_) {
-      return AppSettings(localeCode: 'ar', themeMode: 'system');
+      return AppSettings(localeCode: 'en', themeMode: 'system');
     }
   }
 
   Future<void> save(AppSettings settings) async {
-    final file = await _localFile();
-    await file.writeAsString(jsonEncode(settings.toJson()));
+    await _store.write(jsonEncode(settings.toJson()));
   }
 }

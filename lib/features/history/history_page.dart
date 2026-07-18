@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/database/app_database.dart';
 import '../../app/localization/app_localizations.dart';
+import '../../core/units/measurement_units.dart';
 import '../../engine/weight_analysis.dart';
+import '../../shared/widgets/wheel_number_field.dart';
+import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
 
 class HistoryPage extends ConsumerWidget {
@@ -14,33 +17,43 @@ class HistoryPage extends ConsumerWidget {
     WidgetRef ref, [
     WeightEntry? entry,
   ]) async {
-    final controller = TextEditingController(
-      text: entry?.weight.toStringAsFixed(1),
-    );
+    final system =
+        ref.read(measurementSystemProvider).value ?? MeasurementSystem.metric;
+    var displayed = UnitConverter.weightFromKg(entry?.weight ?? 60, system);
     final value = await showDialog<double>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text(entry == null ? 'Add weight' : 'Edit weight'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: const InputDecoration(labelText: 'Weight (kg)'),
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(entry == null ? 'Add weight' : 'Edit weight'),
+          content: SizedBox(
+            width: 440,
+            child: WheelNumberField(
+              value: displayed,
+              minimum: UnitConverter.weightFromKg(20, system),
+              maximum: UnitConverter.weightFromKg(350, system),
+              step: system == MeasurementSystem.metric ? 0.1 : 0.2,
+              decimalPlaces: 1,
+              unit: UnitConverter.weightUnit(system),
+              label: context.strings.text('Weight'),
+              onChanged: (next) => setDialogState(() => displayed = next),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(
+                dialogContext,
+                UnitConverter.weightToKg(displayed, system),
+              ),
+              child: const Text('Save'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () =>
-                Navigator.pop(context, double.tryParse(controller.text)),
-            child: const Text('Save'),
-          ),
-        ],
       ),
     );
-    controller.dispose();
     if (value == null) return;
     final repository = ref.read(weightRepositoryProvider);
     if (entry == null) {
@@ -60,12 +73,15 @@ class HistoryPage extends ConsumerWidget {
     WidgetRef ref,
     WeightEntry entry,
   ) async {
+    final system =
+        ref.read(measurementSystemProvider).value ?? MeasurementSystem.metric;
+    final displayed = UnitConverter.weightFromKg(entry.weight, system);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Delete weight?'),
         content: Text(
-          'Delete ${entry.weight.toStringAsFixed(1)} kg from history?',
+          'Delete ${displayed.toStringAsFixed(1)} ${UnitConverter.weightUnit(system)} from history?',
         ),
         actions: [
           TextButton(
@@ -87,6 +103,9 @@ class HistoryPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final history = ref.watch(weightHistoryProvider);
+    final system =
+        ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
+    final unit = UnitConverter.weightUnit(system);
     return Scaffold(
       appBar: AppBar(title: Text(context.strings.text('Weight history'))),
       floatingActionButton: FloatingActionButton(
@@ -114,14 +133,16 @@ class HistoryPage extends ConsumerWidget {
                   subtitle: Text(
                     trend == null
                         ? 'More data needed'
-                        : '${trend.toStringAsFixed(2)} kg',
+                        : '${UnitConverter.weightFromKg(trend, system).toStringAsFixed(2)} $unit',
                   ),
                 ),
               ),
               ...rows.map(
                 (entry) => Card(
                   child: ListTile(
-                    title: Text('${entry.weight.toStringAsFixed(1)} kg'),
+                    title: Text(
+                      '${UnitConverter.weightFromKg(entry.weight, system).toStringAsFixed(1)} $unit',
+                    ),
                     subtitle: Text(
                       '${entry.date.year}-${entry.date.month.toString().padLeft(2, '0')}-${entry.date.day.toString().padLeft(2, '0')}',
                     ),

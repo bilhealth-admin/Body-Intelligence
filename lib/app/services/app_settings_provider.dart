@@ -14,7 +14,7 @@ final appSettingsProvider =
 
 class AppSettingsController extends StateNotifier<AppSettings> {
   AppSettingsController(this._service)
-    : super(AppSettings(localeCode: 'ar', themeMode: 'system')) {
+    : super(AppSettings(localeCode: 'en', themeMode: 'system')) {
     _load();
   }
 

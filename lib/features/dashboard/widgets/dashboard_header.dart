@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/units/measurement_units.dart';
+import '../../profile/providers/user_profile_provider.dart';
 import '../../weight/providers/weight_provider.dart';
 
 class DashboardHeader extends ConsumerWidget {
@@ -9,6 +11,8 @@ class DashboardHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final latestWeight = ref.watch(latestWeightProvider);
+    final system =
+        ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
 
     return Container(
       width: double.infinity,
@@ -37,7 +41,7 @@ class DashboardHeader extends ConsumerWidget {
             Text(
               weight == null
                   ? 'Start your first log'
-                  : '${weight.weight.toStringAsFixed(1)} kg',
+                  : '${UnitConverter.weightFromKg(weight.weight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 28,

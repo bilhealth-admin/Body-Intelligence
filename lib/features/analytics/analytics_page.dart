@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/database/date_keys.dart';
 import '../../app/localization/app_localizations.dart';
+import '../../core/units/measurement_units.dart';
 import '../../engine/intelligence_engine.dart';
 import '../dashboard/providers/dashboard_provider.dart';
+import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
 
 class AnalyticsPage extends ConsumerWidget {
@@ -15,6 +17,9 @@ class AnalyticsPage extends ConsumerWidget {
     final weightsAsync = ref.watch(weightHistoryProvider);
     final mealsAsync = ref.watch(allMealsProvider);
     final waterAsync = ref.watch(allWaterProvider);
+    final system =
+        ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
+    final weightUnit = UnitConverter.weightUnit(system);
     if (weightsAsync.isLoading ||
         mealsAsync.isLoading ||
         waterAsync.isLoading) {
@@ -76,7 +81,7 @@ class AnalyticsPage extends ConsumerWidget {
               '$trackedDays nutrition or hydration days recorded',
               rate == null
                   ? 'Weight trend needs at least four entries'
-                  : '${rate >= 0 ? '+' : ''}${rate.toStringAsFixed(2)} kg/week smoothed direction',
+                  : '${rate >= 0 ? '+' : ''}${UnitConverter.weightFromKg(rate, system).toStringAsFixed(2)} $weightUnit/week smoothed direction',
               '${caloriesByDay.length} days with calculated meal totals',
             ],
           ),
@@ -94,9 +99,9 @@ class AnalyticsPage extends ConsumerWidget {
             ...recentWeights.map(
               (row) => _MetricBar(
                 label: dayKeyFor(row.date),
-                value: row.weight,
-                maximum: maxWeight,
-                suffix: 'kg',
+                value: UnitConverter.weightFromKg(row.weight, system),
+                maximum: UnitConverter.weightFromKg(maxWeight, system),
+                suffix: weightUnit,
               ),
             ),
           const SizedBox(height: 12),

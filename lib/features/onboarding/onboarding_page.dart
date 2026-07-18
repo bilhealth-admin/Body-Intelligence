@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/units/measurement_units.dart';
 import '../profile/providers/user_profile_provider.dart';
-import 'models/onboarding_data.dart';
 import 'widgets/profile_step.dart';
 import 'widgets/welcome_step.dart';
 
@@ -16,18 +16,21 @@ class OnboardingPage extends ConsumerStatefulWidget {
 
 class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   int step = 0;
-  final data = OnboardingData();
-
   final ageController = TextEditingController();
-  final heightController = TextEditingController();
-  final currentWeightController = TextEditingController();
-  final targetWeightController = TextEditingController();
-  final genderController = TextEditingController();
-  final activityController = TextEditingController();
+  final profileScrollController = ScrollController();
+  double heightCm = 155;
+  double currentWeightKg = 60;
+  double targetWeightKg = 60;
+  String? gender;
+  String? activity;
   String goalType = 'maintain';
-  String units = 'metric';
+  MeasurementSystem system = MeasurementSystem.metric;
   bool disclaimerAccepted = false;
   bool existingProfileLoaded = false;
+  Map<String, String> errors = const {};
+
+  bool get isArabic => Localizations.localeOf(context).languageCode == 'ar';
+  String message(String en, String ar) => isArabic ? ar : en;
 
   @override
   void didChangeDependencies() {
@@ -35,86 +38,128 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     if (existingProfileLoaded) return;
     existingProfileLoaded = true;
     Future<void>(() async {
+      final preferences = ref.read(preferencesRepositoryProvider);
+      final savedUnits = await preferences.get('units');
       final profile = await ref
           .read(userProfileRepositoryProvider)
           .getProfile();
-      if (profile == null || !mounted) return;
-      ageController.text = profile.age.toString();
-      heightController.text = profile.height.toString();
-      currentWeightController.text = profile.currentWeight.toString();
-      targetWeightController.text = profile.targetWeight.toString();
-      genderController.text = profile.gender;
-      activityController.text = profile.activityLevel;
-      setState(() => disclaimerAccepted = true);
+      if (!mounted) return;
+      setState(() {
+        system = savedUnits == 'imperial'
+            ? MeasurementSystem.imperial
+            : MeasurementSystem.metric;
+        if (profile != null) {
+          step = 1;
+          ageController.text = profile.age.toString();
+          heightCm = profile.height;
+          currentWeightKg = profile.currentWeight;
+          targetWeightKg = profile.targetWeight;
+          gender = profile.gender;
+          activity = profile.activityLevel;
+          goalType = profile.targetWeight < profile.currentWeight
+              ? 'lose'
+              : profile.targetWeight > profile.currentWeight
+              ? 'gain'
+              : 'maintain';
+          disclaimerAccepted = true;
+        }
+      });
     });
   }
 
   @override
   void dispose() {
     ageController.dispose();
-    heightController.dispose();
-    currentWeightController.dispose();
-    targetWeightController.dispose();
-    genderController.dispose();
-    activityController.dispose();
+    profileScrollController.dispose();
     super.dispose();
   }
 
-  void _next() {
-    setState(() {
-      step = 1;
-    });
+  Map<String, String> validate() {
+    final next = <String, String>{};
+    final age = int.tryParse(ageController.text);
+    if (age == null || age < 18 || age > 120) {
+      next['age'] = message(
+        'Enter an age from 18 to 120.',
+        'أدخل عمرًا من ١٨ إلى ١٢٠.',
+      );
+    }
+    if (gender == null) {
+      next['gender'] = message(
+        'Select biological sex.',
+        'اختر الجنس البيولوجي.',
+      );
+    }
+    if (activity == null) {
+      next['activity'] = message(
+        'Select an activity level.',
+        'اختر مستوى النشاط.',
+      );
+    }
+    if (heightCm < 100 || heightCm > 250) {
+      next['height'] = message(
+        'Height must be between 100 and 250 cm.',
+        'يجب أن يكون الطول بين ١٠٠ و٢٥٠ سم.',
+      );
+    }
+    if (currentWeightKg < 20 || currentWeightKg > 350) {
+      next['currentWeight'] = message(
+        'Weight must be between 20 and 350 kg.',
+        'يجب أن يكون الوزن بين ٢٠ و٣٥٠ كجم.',
+      );
+    }
+    if (targetWeightKg < 20 || targetWeightKg > 350) {
+      next['targetWeight'] = message(
+        'Goal weight must be between 20 and 350 kg.',
+        'يجب أن يكون الوزن المستهدف بين ٢٠ و٣٥٠ كجم.',
+      );
+    } else if (goalType == 'lose' && targetWeightKg >= currentWeightKg) {
+      next['targetWeight'] = message(
+        'For weight loss, choose a goal below your current weight.',
+        'لخسارة الوزن، اختر هدفًا أقل من وزنك الحالي.',
+      );
+    } else if (goalType == 'gain' && targetWeightKg <= currentWeightKg) {
+      next['targetWeight'] = message(
+        'For weight gain, choose a goal above your current weight.',
+        'لزيادة الوزن، اختر هدفًا أعلى من وزنك الحالي.',
+      );
+    } else if (goalType == 'maintain' &&
+        (targetWeightKg - currentWeightKg).abs() > 2) {
+      next['targetWeight'] = message(
+        'A maintenance goal should remain within 2 kg of current weight.',
+        'هدف الحفاظ يجب أن يكون ضمن ٢ كجم من الوزن الحالي.',
+      );
+    }
+    if (!disclaimerAccepted) {
+      next['disclaimer'] = message(
+        'Accept the health disclaimer to continue.',
+        'وافق على إخلاء المسؤولية الصحية للمتابعة.',
+      );
+    }
+    return next;
   }
 
-  Future<void> _complete() async {
-    final age = int.tryParse(ageController.text);
-    final height = double.tryParse(heightController.text);
-    final currentWeight = double.tryParse(currentWeightController.text);
-    final targetWeight = double.tryParse(targetWeightController.text);
-    final gender = genderController.text.trim().toLowerCase();
-    final activity = activityController.text.trim().toLowerCase();
-    final valid =
-        age != null &&
-        age >= 18 &&
-        age <= 120 &&
-        height != null &&
-        height >= 100 &&
-        height <= 250 &&
-        currentWeight != null &&
-        currentWeight >= 20 &&
-        currentWeight <= 500 &&
-        targetWeight != null &&
-        targetWeight >= 20 &&
-        targetWeight <= 500 &&
-        const {'male', 'female'}.contains(gender) &&
-        const {
-          'sedentary',
-          'light',
-          'moderate',
-          'active',
-          'very_active',
-        }.contains(activity) &&
-        disclaimerAccepted;
-    if (!valid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Complete every field with valid values and accept the health disclaimer.',
-          ),
-        ),
-      );
+  Future<void> complete() async {
+    final nextErrors = validate();
+    setState(() => errors = nextErrors);
+    if (nextErrors.isNotEmpty) {
+      if (profileScrollController.hasClients) {
+        await profileScrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      }
       return;
     }
     final repository = ref.read(userProfileRepositoryProvider);
-
     await repository.save(
-      gender: gender,
-      age: age,
-      height: height,
-      currentWeight: currentWeight,
-      targetWeight: targetWeight,
-      activityLevel: activity,
-      exercises: true,
+      gender: gender!,
+      age: int.parse(ageController.text),
+      height: heightCm,
+      currentWeight: currentWeightKg,
+      targetWeight: targetWeightKg,
+      activityLevel: activity!,
+      exercises: activity != 'sedentary',
     );
     final profile = await repository.getProfile();
     if (profile != null) {
@@ -123,16 +168,24 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           .save(
             profileUuid: profile.uuid,
             type: goalType,
-            targetWeight: targetWeight,
+            targetWeight: targetWeightKg,
           );
     }
-    await ref.read(preferencesRepositoryProvider).set('units', units);
-    await ref
-        .read(preferencesRepositoryProvider)
-        .set('healthDisclaimerAccepted', 'true');
+    final preferences = ref.read(preferencesRepositoryProvider);
+    await preferences.set('units', system.name);
+    await preferences.set('healthDisclaimerAccepted', 'true');
+    if (mounted) context.go('/dashboard');
+  }
 
-    if (!mounted) return;
-    context.go('/dashboard');
+  void updateSystem(MeasurementSystem value) {
+    setState(() {
+      system = value;
+      errors = {...errors}
+        ..remove('height')
+        ..remove('currentWeight')
+        ..remove('targetWeight');
+    });
+    ref.read(preferencesRepositoryProvider).set('units', value.name);
   }
 
   @override
@@ -144,23 +197,38 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
             child: step == 0
-                ? WelcomeStep(onContinue: _next)
+                ? WelcomeStep(
+                    key: const ValueKey('welcome'),
+                    onContinue: () => setState(() => step = 1),
+                  )
                 : ProfileStep(
+                    key: const ValueKey('profile'),
                     ageController: ageController,
-                    heightController: heightController,
-                    currentWeightController: currentWeightController,
-                    targetWeightController: targetWeightController,
-                    genderController: genderController,
-                    activityController: activityController,
+                    heightCm: heightCm,
+                    currentWeightKg: currentWeightKg,
+                    targetWeightKg: targetWeightKg,
+                    gender: gender,
+                    activity: activity,
                     goalType: goalType,
-                    units: units,
+                    system: system,
                     disclaimerAccepted: disclaimerAccepted,
+                    errors: errors,
+                    onHeightChanged: (value) =>
+                        setState(() => heightCm = value),
+                    onCurrentWeightChanged: (value) =>
+                        setState(() => currentWeightKg = value),
+                    onTargetWeightChanged: (value) =>
+                        setState(() => targetWeightKg = value),
+                    onGenderChanged: (value) => setState(() => gender = value),
+                    onActivityChanged: (value) =>
+                        setState(() => activity = value),
                     onGoalTypeChanged: (value) =>
                         setState(() => goalType = value),
-                    onUnitsChanged: (value) => setState(() => units = value),
+                    onSystemChanged: updateSystem,
                     onDisclaimerChanged: (value) =>
                         setState(() => disclaimerAccepted = value),
-                    onContinue: _complete,
+                    onContinue: complete,
+                    scrollController: profileScrollController,
                   ),
           ),
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../engine/bil_engine.dart';
+import '../../../core/units/measurement_units.dart';
 import '../../../engine/body_profile.dart';
 import '../../../engine/intelligence_engine.dart';
 import '../../profile/providers/user_profile_provider.dart';
@@ -18,6 +19,8 @@ class DashboardGrid extends ConsumerWidget {
     final weightsAsync = ref.watch(weightHistoryProvider);
     final mealsAsync = ref.watch(todayMealsProvider);
     final waterAsync = ref.watch(todayWaterProvider);
+    final system =
+        ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     if ([
       profileAsync,
       weightsAsync,
@@ -116,7 +119,8 @@ class DashboardGrid extends ConsumerWidget {
           children: [
             StatCard(
               title: 'Weight',
-              value: '${currentWeight.toStringAsFixed(1)} kg',
+              value:
+                  '${UnitConverter.weightFromKg(currentWeight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}',
               icon: Icons.monitor_weight,
               color: Colors.blue,
             ),

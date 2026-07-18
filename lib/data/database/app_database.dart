@@ -1,9 +1,4 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 import 'daily_logs.dart';
 import 'database_ids.dart';
@@ -17,6 +12,7 @@ import 'recent_foods.dart';
 import 'user_profile.dart';
 import 'water_entries.dart';
 import 'weight_entries.dart';
+import 'connection/database_connection.dart';
 
 part 'app_database.g.dart';
 
@@ -36,7 +32,7 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase() : super(openDatabaseConnection());
 
   AppDatabase.forTesting(super.executor);
 
@@ -247,18 +243,4 @@ class AppDatabase extends _$AppDatabase {
       await customStatement(statement);
     }
   }
-}
-
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final directory = await getApplicationSupportDirectory();
-
-    if (!directory.existsSync()) {
-      directory.createSync(recursive: true);
-    }
-
-    final file = File(p.join(directory.path, 'body_intelligence.sqlite'));
-
-    return NativeDatabase.createInBackground(file);
-  });
 }

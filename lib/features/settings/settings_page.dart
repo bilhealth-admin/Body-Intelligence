@@ -1,13 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/environment/app_environment.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/services/app_settings_provider.dart';
+import '../../app/services/data_export_service.dart';
+import '../../core/units/measurement_units.dart';
 import '../../data/database/database_provider.dart';
 import '../../data/database/seed_data.dart';
 import '../foods/providers/food_provider.dart';
@@ -50,7 +51,7 @@ class SettingsPage extends ConsumerWidget {
       'mealItems': mealItems.map((row) => row.toJson()).toList(),
       'waterEntries': water.map((row) => row.toJson()).toList(),
     });
-    await Clipboard.setData(ClipboardData(text: document));
+    await const DataExportService().copyText(document);
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -113,6 +114,8 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(appSettingsProvider);
+    final measurementSystem =
+        ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     return Scaffold(
       appBar: AppBar(title: Text(context.strings.text('Settings'))),
       body: ListView(
@@ -129,7 +132,7 @@ class SettingsPage extends ConsumerWidget {
               DropdownMenuItem(value: 'en', child: Text('English')),
             ],
             onChanged: (value) =>
-                ref.read(appSettingsProvider.notifier).setLocale(value ?? 'ar'),
+                ref.read(appSettingsProvider.notifier).setLocale(value ?? 'en'),
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
@@ -157,28 +160,26 @@ class SettingsPage extends ConsumerWidget {
                 .setThemeMode(value ?? 'system'),
           ),
           const Divider(height: 32),
-          FutureBuilder<String?>(
-            future: ref.read(preferencesRepositoryProvider).get('units'),
-            builder: (context, snapshot) => DropdownButtonFormField<String>(
-              initialValue: snapshot.data ?? 'metric',
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.straighten),
-                labelText: context.strings.text('Units'),
-              ),
-              items: [
-                DropdownMenuItem(
-                  value: 'metric',
-                  child: Text(context.strings.text('Metric (kg, cm)')),
-                ),
-                DropdownMenuItem(
-                  value: 'imperial',
-                  child: Text(context.strings.text('Imperial (lb, in)')),
-                ),
-              ],
-              onChanged: (value) => ref
-                  .read(preferencesRepositoryProvider)
-                  .set('units', value ?? 'metric'),
+          DropdownButtonFormField<String>(
+            key: ValueKey(measurementSystem),
+            initialValue: measurementSystem.name,
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.straighten),
+              labelText: context.strings.text('Units'),
             ),
+            items: [
+              DropdownMenuItem(
+                value: 'metric',
+                child: Text(context.strings.text('Metric (kg, cm)')),
+              ),
+              DropdownMenuItem(
+                value: 'imperial',
+                child: Text(context.strings.text('Imperial (lb, in)')),
+              ),
+            ],
+            onChanged: (value) => ref
+                .read(preferencesRepositoryProvider)
+                .set('units', value ?? 'metric'),
           ),
           const Divider(height: 32),
           ListTile(

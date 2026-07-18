@@ -4,8 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/database/app_database.dart';
 import '../../app/localization/app_localizations.dart';
+import '../../core/units/measurement_units.dart';
 import '../../engine/nutrition_engine.dart';
+import '../../shared/widgets/wheel_number_field.dart';
 import '../foods/providers/food_provider.dart';
+import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
 import 'providers/daily_log_provider.dart';
 
@@ -18,7 +21,7 @@ class DailyLogPage extends ConsumerStatefulWidget {
 
 class _DailyLogPageState extends ConsumerState<DailyLogPage> {
   final notes = TextEditingController();
-  final weight = TextEditingController();
+  double weightKg = 60;
   final water = TextEditingController(text: '250');
   final quantity = TextEditingController(text: '100');
   Food? selectedFood;
@@ -27,7 +30,6 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
   @override
   void dispose() {
     notes.dispose();
-    weight.dispose();
     water.dispose();
     quantity.dispose();
     super.dispose();
@@ -40,12 +42,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       date: date,
       notes: notes.text.trim().isEmpty ? null : notes.text.trim(),
     );
-    final weightValue = double.tryParse(weight.text);
-    if (weightValue != null) {
-      await ref
-          .read(weightRepositoryProvider)
-          .addWeight(weightValue, date: date);
-    }
+    await ref.read(weightRepositoryProvider).addWeight(weightKg, date: date);
 
     if (!mounted) return;
     context.go('/dashboard');
@@ -164,6 +161,8 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     final date = ref.watch(selectedLogDateProvider);
     final meals = ref.watch(dailyMealsProvider);
     final waterEntries = ref.watch(dailyWaterProvider);
+    final system =
+        ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     ref.listen(selectedDailyLogProvider, (_, next) {
       next.whenData((log) {
         final value = log?.notes ?? '';
@@ -199,7 +198,22 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                   }
                 },
               ),
-              _field(weight, 'Weight (kg)'),
+              WheelNumberField(
+                key: ValueKey(system),
+                label: context.strings.text('Weight'),
+                unit: UnitConverter.weightUnit(system),
+                value: system == MeasurementSystem.metric
+                    ? weightKg
+                    : UnitConverter.weightFromKg(weightKg, system),
+                minimum: UnitConverter.weightFromKg(20, system),
+                maximum: UnitConverter.weightFromKg(350, system),
+                step: system == MeasurementSystem.metric ? 0.1 : 0.2,
+                decimalPlaces: 1,
+                onChanged: (value) => setState(() {
+                  weightKg = UnitConverter.weightToKg(value, system);
+                }),
+              ),
+              const SizedBox(height: 14),
               _field(notes, 'Notes', lines: 4),
               Row(
                 children: [
