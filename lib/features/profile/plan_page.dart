@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/localization/app_localizations.dart';
 import '../../engine/body_profile.dart';
 import '../../engine/plan_engine.dart';
 import 'providers/user_profile_provider.dart';
@@ -27,16 +28,17 @@ class _PlanPageState extends ConsumerState<PlanPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.strings.text;
     final profileAsync = ref.watch(userProfileProvider);
     final goal = ref.watch(activeGoalProvider).value;
     return Scaffold(
-      appBar: AppBar(title: const Text('Targets and plan')),
+      appBar: AppBar(title: Text(t('Targets and plan'))),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text(error.toString())),
         data: (profile) {
           if (profile == null) {
-            return const Center(child: Text('Complete your profile first.'));
+            return Center(child: Text(t('Complete your profile first.')));
           }
           final body = BodyProfile(
             age: profile.age,
@@ -90,8 +92,10 @@ class _PlanPageState extends ConsumerState<PlanPage> {
                 .toList();
             if (values.any((value) => value == null)) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Enter whole-number targets in every field.'),
+                SnackBar(
+                  content: Text(
+                    t('Enter whole-number targets in every field.'),
+                  ),
                 ),
               );
               return;
@@ -114,9 +118,9 @@ class _PlanPageState extends ConsumerState<PlanPage> {
                   );
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     content: Text(
-                      'Plan saved. Historical records were not changed.',
+                      t('Plan saved. Historical records were not changed.'),
                     ),
                   ),
                 );
@@ -146,21 +150,25 @@ class _PlanPageState extends ConsumerState<PlanPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        'We recommend…',
+                        t('We recommend…'),
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'BMR ${recommendation.bmr.round()} kcal · TDEE ${recommendation.tdee.round()} kcal · '
-                        '${goal?.type ?? 'maintain'} plan ${recommendation.targets.calories} kcal',
+                        '${t('BMR')} ${recommendation.bmr.round()} ${t('kcal')} · ${t('TDEE')} ${recommendation.tdee.round()} ${t('kcal')} · '
+                        '${t(goal?.type ?? 'maintain')} ${t('plan')} ${recommendation.targets.calories} ${t('kcal')}',
                       ),
                       const SizedBox(height: 8),
                       ...recommendation.assumptions.map(
-                        (assumption) => Text('• $assumption'),
+                        (assumption) => Text(
+                          '• ${Localizations.localeOf(context).languageCode == 'ar' ? _arabicAssumption(assumption) : assumption}',
+                        ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Confidence starts formula-based. Consistent weight and complete meal records are required before observed estimates become useful.',
+                      Text(
+                        t(
+                          'Confidence starts formula-based. Consistent weight and complete meal records are required before observed estimates become useful.',
+                        ),
                       ),
                     ],
                   ),
@@ -178,17 +186,17 @@ class _PlanPageState extends ConsumerState<PlanPage> {
                     keyboardType: TextInputType.number,
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
-                      labelText: labels[index],
+                      labelText: t(labels[index]),
                       helperText: delta == 0
-                          ? 'Using recommendation: ${recommended[index]}'
-                          : '${delta > 0 ? '+' : ''}$delta versus recommendation. Changing this may alter adherence and scenario interpretations.',
+                          ? '${t('Using recommendation')}: ${recommended[index]}'
+                          : '${delta > 0 ? '+' : ''}$delta ${t('versus recommendation. Changing this may alter adherence and scenario interpretations.')}',
                     ),
                   ),
                 );
               }),
               FilledButton(
                 onPressed: saving ? null : save,
-                child: Text(saving ? 'Saving…' : 'Save plan'),
+                child: Text(saving ? t('Saving…') : t('Save plan')),
               ),
               TextButton(
                 onPressed: () async {
@@ -203,15 +211,33 @@ class _PlanPageState extends ConsumerState<PlanPage> {
                   }
                   if (mounted) setState(() {});
                 },
-                child: const Text('Reset to recommended'),
+                child: Text(t('Reset to recommended')),
               ),
-              const Text(
-                'BIL does not recommend faster change as inherently better. If you have medical needs, pregnancy, an eating-disorder history, or clinician-directed targets, consult a qualified professional.',
+              Text(
+                t(
+                  'BIL does not recommend faster change as inherently better. If you have medical needs, pregnancy, an eating-disorder history, or clinician-directed targets, consult a qualified professional.',
+                ),
               ),
             ],
           );
         },
       ),
     );
+  }
+
+  String _arabicAssumption(String value) {
+    if (value.startsWith('Activity factor:')) {
+      return 'معامل النشاط: ${value.split(':').last.trim()}';
+    }
+    if (value.startsWith('Goal direction:')) {
+      return 'اتجاه الهدف: ${value.split(':').last.trim()}';
+    }
+    return switch (value) {
+      'Mifflin–St Jeor BMR using the saved age, sex, height, and current weight' =>
+        'معادلة ميفلين–سانت جيور باستخدام العمر والجنس والطول والوزن الحالي المحفوظ',
+      'Logged scale weight cannot distinguish fat from muscle' =>
+        'وزن الميزان المسجل لا يميز بين الدهون والعضلات',
+      _ => value,
+    };
   }
 }

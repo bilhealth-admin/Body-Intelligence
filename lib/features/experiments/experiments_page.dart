@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../app/localization/app_localizations.dart';
 import '../../data/database/database_provider.dart';
 import '../../data/repositories/experiment_repository.dart';
 
@@ -16,13 +17,14 @@ class ExperimentsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final t = context.strings.text;
     final experiments = ref.watch(experimentsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Personal experiments')),
+      appBar: AppBar(title: Text(t('Personal experiments'))),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _create(context, ref),
         icon: const Icon(Icons.add),
-        label: const Text('New experiment'),
+        label: Text(t('New experiment')),
       ),
       body: experiments.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -30,19 +32,23 @@ class ExperimentsPage extends ConsumerWidget {
         data: (rows) => ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const Card(
+            Card(
               child: Padding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 child: Text(
-                  'Experiments are structured personal observations, not medical proof. Change one variable when practical and record missing data and limitations.',
+                  t(
+                    'Experiments are structured personal observations, not medical proof. Change one variable when practical and record missing data and limitations.',
+                  ),
                 ),
               ),
             ),
             if (rows.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(24),
+              Padding(
+                padding: const EdgeInsets.all(24),
                 child: Text(
-                  'No experiment yet. Start with a cautious, measurable question such as whether a consistent protein breakfast affects your reported satiety.',
+                  t(
+                    'No experiment yet. Start with a cautious, measurable question such as whether a consistent protein breakfast affects your reported satiety.',
+                  ),
                 ),
               ),
             for (final row in rows)
@@ -56,14 +62,14 @@ class ExperimentsPage extends ConsumerWidget {
                   title: Text(row.hypothesis),
                   subtitle: Text(
                     '${row.changedVariable} · ${row.startedAt.toLocal().toString().split(' ').first} → ${row.endsAt.toLocal().toString().split(' ').first}\n'
-                    '${row.status == 'completed' ? '${row.result ?? 'No result recorded'} · ${row.confidence} confidence · ${row.adherence?.toStringAsFixed(0)}% adherence' : 'Active · required: ${row.requiredData.isEmpty ? 'not specified' : row.requiredData}'}',
+                    '${row.status == 'completed' ? '${row.result ?? t('No result recorded')} · ${t(row.confidence)} ${t('confidence')} · ${row.adherence?.toStringAsFixed(0)}% ${t('adherence')}' : '${t('Active')} · ${t('required')}: ${row.requiredData.isEmpty ? t('not specified') : row.requiredData}'}',
                   ),
                   isThreeLine: true,
                   onTap: row.status == 'completed'
                       ? null
                       : () => _complete(context, ref, row.id),
                   trailing: IconButton(
-                    tooltip: 'Delete experiment',
+                    tooltip: t('Delete experiment'),
                     icon: const Icon(Icons.delete_outline),
                     onPressed: () =>
                         ref.read(experimentRepositoryProvider).delete(row.id),
@@ -78,6 +84,7 @@ class ExperimentsPage extends ConsumerWidget {
   }
 
   Future<void> _create(BuildContext context, WidgetRef ref) async {
+    final t = context.strings.text;
     final hypothesis = TextEditingController();
     final variable = TextEditingController();
     final controls = TextEditingController();
@@ -86,36 +93,36 @@ class ExperimentsPage extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Design an observation'),
+        title: Text(t('Design an observation')),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: hypothesis,
-                decoration: const InputDecoration(labelText: 'Hypothesis'),
+                decoration: InputDecoration(labelText: t('Hypothesis')),
               ),
               TextField(
                 controller: variable,
-                decoration: const InputDecoration(
-                  labelText: 'One changed variable',
+                decoration: InputDecoration(
+                  labelText: t('One changed variable'),
                 ),
               ),
               TextField(
                 controller: controls,
-                decoration: const InputDecoration(
-                  labelText: 'Factors to keep consistent',
+                decoration: InputDecoration(
+                  labelText: t('Factors to keep consistent'),
                 ),
               ),
               TextField(
                 controller: data,
-                decoration: const InputDecoration(labelText: 'Required data'),
+                decoration: InputDecoration(labelText: t('Required data')),
               ),
               TextField(
                 controller: duration,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Duration (3–90 days)',
+                decoration: InputDecoration(
+                  labelText: t('Duration (3–90 days)'),
                 ),
               ),
             ],
@@ -124,11 +131,11 @@ class ExperimentsPage extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Start'),
+            child: Text(t('Start')),
           ),
         ],
       ),
@@ -163,6 +170,7 @@ class ExperimentsPage extends ConsumerWidget {
   }
 
   Future<void> _complete(BuildContext context, WidgetRef ref, int id) async {
+    final t = context.strings.text;
     final result = TextEditingController();
     final limitations = TextEditingController();
     final adherence = TextEditingController(text: '80');
@@ -171,52 +179,54 @@ class ExperimentsPage extends ConsumerWidget {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text('Record observation'),
+          title: Text(t('Record observation')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: result,
-                  decoration: const InputDecoration(
-                    labelText: 'What did you observe?',
+                  decoration: InputDecoration(
+                    labelText: t('What did you observe?'),
                   ),
                 ),
                 TextField(
                   controller: adherence,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Adherence (0–100%)',
+                  decoration: InputDecoration(
+                    labelText: t('Adherence (0–100%)'),
                   ),
                 ),
                 TextField(
                   controller: limitations,
-                  decoration: const InputDecoration(
-                    labelText: 'Missing data and limitations',
+                  decoration: InputDecoration(
+                    labelText: t('Missing data and limitations'),
                   ),
                 ),
                 DropdownButtonFormField<String>(
                   initialValue: confidence,
-                  items: const [
+                  items: [
                     DropdownMenuItem(
                       value: 'insufficient',
-                      child: Text('Insufficient evidence'),
+                      child: Text(t('Insufficient evidence')),
                     ),
                     DropdownMenuItem(
                       value: 'low',
-                      child: Text('Low confidence'),
+                      child: Text(t('Low confidence')),
                     ),
                     DropdownMenuItem(
                       value: 'moderate',
-                      child: Text('Moderate confidence'),
+                      child: Text(t('Moderate confidence')),
                     ),
                   ],
                   onChanged: (value) =>
                       setState(() => confidence = value ?? confidence),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'This result is a personal observation, not medical proof.',
+                Text(
+                  t(
+                    'This result is a personal observation, not medical proof.',
+                  ),
                 ),
               ],
             ),
@@ -224,11 +234,11 @@ class ExperimentsPage extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: Text(t('Cancel')),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Save observation'),
+              child: Text(t('Save observation')),
             ),
           ],
         ),
