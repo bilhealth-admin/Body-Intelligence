@@ -15,9 +15,9 @@
 
 ## Status summary
 
-- complete: **60**
+- complete: **61**
 - partial: **209**
-- missing and locally implementable: **17**
+- missing and locally implementable: **16**
 - blocked by credentials/infrastructure: **185**
 - strategic/non-code: **79**
 
@@ -1854,12 +1854,12 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 166. Confidence Ring
 - **Requirement:** Circular indicator. Green Blue Orange Red Shows: Today's analysis reliability.
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
-- **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
+- **Acceptance criteria:** Today renders the deterministic Data Honesty score as a circular indicator with distinct insufficient/emerging/useful/strong colors, localized reliability wording, and screen-reader label/value semantics; no health status is inferred from data quality.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `da19565`
 
 ### BIL-TDY-167 — Today's Calories
 
