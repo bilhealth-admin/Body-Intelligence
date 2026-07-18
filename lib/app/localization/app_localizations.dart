@@ -363,6 +363,7 @@ class AppLocalizations {
     'of 5': 'من 5',
     'Helpfulness': 'درجة الفائدة',
     'Delete memory': 'حذف الذاكرة',
+    'Edit': 'تعديل',
   };
 
   String text(String english) =>

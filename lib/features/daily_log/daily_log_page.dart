@@ -116,23 +116,24 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     final updated = await showDialog<double>(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('Edit ${food.name}'),
+        title: Text('${context.strings.text('Edit')} ${food.name}'),
         content: TextField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: InputDecoration(
-            labelText: 'Quantity (${food.servingUnit})',
+            labelText:
+                '${context.strings.text('Quantity')} (${food.servingUnit})',
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(context.strings.text('Cancel')),
           ),
           FilledButton(
             onPressed: () =>
                 Navigator.pop(context, double.tryParse(controller.text)),
-            child: const Text('Update'),
+            child: Text(context.strings.text('Update')),
           ),
         ],
       ),
@@ -442,8 +443,8 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                       TextField(
                         controller: quantity,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Quantity (g)',
+                        decoration: InputDecoration(
+                          labelText: '${context.strings.text('Quantity')} (g)',
                         ),
                       ),
                       const SizedBox(height: 12),
