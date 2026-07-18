@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/localization/app_localizations.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
 
@@ -13,14 +14,26 @@ class StartupPage extends ConsumerWidget {
     final profile = ref.watch(userProfileProvider);
     final checkInDue = ref.watch(dailyCheckInDueProvider);
 
+    if (profile.hasError || checkInDue.hasError) {
+      return _StartupError(
+        onRetry: () {
+          ref.invalidate(userProfileProvider);
+          ref.invalidate(dailyCheckInDueProvider);
+        },
+      );
+    }
     if (checkInDue.isLoading) {
       return const _StartupSurface();
     }
 
     return profile.when(
       loading: () => const _StartupSurface(),
-      error: (error, stack) =>
-          Scaffold(body: Center(child: Text(error.toString()))),
+      error: (_, _) => _StartupError(
+        onRetry: () {
+          ref.invalidate(userProfileProvider);
+          ref.invalidate(dailyCheckInDueProvider);
+        },
+      ),
       data: (user) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (user == null) {
@@ -57,7 +70,7 @@ class _StartupSurface extends StatelessWidget {
       child: SafeArea(
         child: Center(
           child: Semantics(
-            label: 'BIL is preparing your local data',
+            label: context.strings.text('BIL is preparing your local data'),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -80,6 +93,55 @@ class _StartupSurface extends StatelessWidget {
                 const SizedBox(
                   width: 180,
                   child: LinearProgressIndicator(minHeight: 3),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class _StartupError extends StatelessWidget {
+  const _StartupError({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: SafeArea(
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.storage_outlined,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  context.strings.text('Could not open your local data'),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  context.strings.text(
+                    'Your data was not reset or uploaded. Try opening it again.',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                FilledButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh),
+                  label: Text(context.strings.text('Try again')),
                 ),
               ],
             ),

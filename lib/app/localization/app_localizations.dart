@@ -91,6 +91,11 @@ class AppLocalizations {
   }
 
   static const Map<String, String> _arabicText = {
+    'BIL is preparing your local data': 'يُجهّز BIL بياناتك المحلية',
+    'Could not open your local data': 'تعذر فتح بياناتك المحلية',
+    'Your data was not reset or uploaded. Try opening it again.':
+        'لم يتم حذف بياناتك أو رفعها. حاول فتحها مرة أخرى.',
+    'Try again': 'حاول مرة أخرى',
     'Settings': 'الإعدادات',
     'Language': 'اللغة',
     'Appearance': 'المظهر',
