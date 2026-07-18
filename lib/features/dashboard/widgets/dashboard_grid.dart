@@ -13,10 +13,12 @@ import '../../../engine/plan_engine.dart';
 import '../../../engine/what_changed_engine.dart';
 import '../../../data/database/date_keys.dart';
 import '../../profile/providers/user_profile_provider.dart';
+import '../../daily_log/providers/daily_log_provider.dart';
 import '../../life_context/providers/life_context_provider.dart';
 import '../../weight/providers/weight_provider.dart';
 import '../providers/dashboard_provider.dart';
 import 'stat_card.dart';
+import 'dashboard_water_card.dart';
 
 class DashboardGrid extends ConsumerWidget {
   const DashboardGrid({super.key});
@@ -282,6 +284,24 @@ class DashboardGrid extends ConsumerWidget {
       }
     }
 
+    Future<void> addWater(int amountMl) async {
+      await ref
+          .read(waterRepositoryProvider)
+          .add(occurredAt: DateTime.now(), amountMl: amountMl);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              tr(
+                '$amountMl ml added to today.',
+                'تمت إضافة $amountMl مل إلى اليوم.',
+              ),
+            ),
+          ),
+        );
+      }
+    }
+
     return Column(
       children: [
         GridView.count(
@@ -320,6 +340,11 @@ class DashboardGrid extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: 12),
+        DashboardWaterCard(
+          consumedMl: water,
+          targetMl: effectiveTargets.water,
+          onAdd: addWater,
+        ),
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
