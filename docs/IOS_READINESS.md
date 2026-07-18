@@ -4,7 +4,10 @@ iOS has been audited for source compatibility but cannot be compiled or run on
 this Windows host. The shared application no longer imports Android-only APIs.
 Drift uses its native executor on iOS and stores the SQLite file in the
 application-support directory. Shared preferences stores locale/theme settings.
-Clipboard export uses Flutter's cross-platform services API.
+Clipboard export uses Flutter's cross-platform services API. Share Studio uses
+the platform share sheet and an in-memory PNG; it does not request photo-library
+access merely to open the sheet. Recheck plugin minimums and privacy manifests
+on the release Mac.
 
 The current Xcode project still uses the development identifier
 `com.example.bodyIntelligenceLog`. Replace it with an identifier owned by the

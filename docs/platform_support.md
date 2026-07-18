@@ -9,9 +9,22 @@ only at input and display boundaries.
 ```sh
 flutter pub get
 flutter build apk --debug
+flutter build apk --release
+flutter build appbundle --release
 ```
 
 The artifact is `build/app/outputs/flutter-apk/app-debug.apk`.
+Release artifacts must be signed with credentials supplied outside Git. Record
+the minimum/target Android versions from the generated Gradle configuration at
+release time and test install/upgrade on a physical supported device.
+
+The current development Gradle file deliberately signs release-mode artifacts
+with the debug key and still uses `com.example.body_intelligence_log`. The
+successfully generated APK/AAB prove release compilation only; they are not
+store-upload candidates. Before distribution, choose an owned application ID,
+configure an upload key through ignored/environment-provided properties,
+remove debug signing from the release build type, and repeat release and
+physical-device verification.
 
 ## Windows
 
@@ -20,11 +33,15 @@ Install Visual Studio with the Desktop development with C++ workload, then:
 ```sh
 flutter config --enable-windows-desktop
 flutter build windows --debug
+flutter build windows --release
 flutter run -d windows
 ```
 
 The database is in the application-support directory. Resizing switches the
 main shell between bottom navigation and a navigation rail.
+Distribute the complete release folder or a signed installer; the executable
+alone is insufficient. Support targets Windows 10/11 x64. Windows 7 is not
+claimed; offer the Web build on unsupported desktop systems.
 
 ## Web
 
@@ -41,6 +58,12 @@ flutter run -d chrome
 Drift chooses OPFS when supported and otherwise falls back to IndexedDB.
 Browser storage can be cleared by the user or browser policy, so export local
 JSON before clearing site data.
+
+Deploy the complete `build/web` directory to an HTTPS static host with SPA
+fallback to `index.html`. Serve `.wasm` as `application/wasm`, do not cache
+`index.html` indefinitely, and use versioned immutable caching for hashed
+assets. Test a fresh load, refresh on a nested route, offline/local persistence,
+an upgrade, export, and storage clearing in current Chrome plus another browser.
 
 ## iOS readiness
 

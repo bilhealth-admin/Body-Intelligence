@@ -25,3 +25,15 @@ gated by data sufficiency and are never diagnoses.
 
 Supabase is disabled by default. Missing credentials leave the complete local
 experience available and cloud controls visibly disabled.
+
+Adaptive logging is derived from repeated local meal-item combinations and
+requires an explicit user action before copying. Personal experiments store
+hypothesis, controlled factors, required evidence, adherence, result,
+confidence, and limitations. Challenges award only recorded supportive
+behavior. Share Studio renders a local PNG and hides actual weight by default
+and by implementation.
+
+External services are represented by policies and capability states rather
+than simulated implementations. Client builds contain no service-role keys,
+payment secrets, AI provider secrets, administrator credentials, or signing
+credentials.

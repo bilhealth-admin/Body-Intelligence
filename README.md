@@ -1,10 +1,11 @@
 # BIL — Body Intelligence Log
 
-BIL is an offline-first Flutter application for recording body weight,
-meals, hydration, and daily context. It calculates nutrition totals and
-deterministic, explainable insights locally. Fresh installs start in English;
-Arabic is available from the first onboarding screen and both directions are
-fully supported.
+BIL is an offline-first Flutter body-intelligence application. It records body
+weight, meals, hydration, and life context, then produces deterministic,
+explainable insights locally. It also supports personal experiments,
+behavior-first private challenges, adaptive meal suggestions, and privacy-safe
+progress cards. Fresh installs start in English; Arabic is available from the
+first onboarding screen with immediate RTL/LTR switching.
 
 ## Run and verify
 
@@ -27,14 +28,30 @@ assets, Windows prerequisites, Android output, and the iOS signing checklist.
 
 ## Local data
 
-Drift/SQLite is the source of truth. Profile, goals, weights, daily notes,
-foods, favorites, recents, meals, meal items, water, and preferences persist in
+Drift/SQLite schema v11 is the source of truth. Profile, goals, plan overrides,
+weights, daily notes, foods, favorites, recents, meals, meal items, water,
+context, decision memory, experiments, challenges, and preferences persist in
 the application-support directory. Nutrition is derived from meal items; old
 daily nutrition columns remain read-only solely for migration compatibility.
 
 Cloud authentication and synchronization are deliberately disabled when no
 Supabase URL and anonymous key are configured. The app remains fully usable in
 Local Mode. Never place a Supabase service-role key in this client.
+
+Other external capabilities—including AI, commerce, community, coach access,
+remote updates, and shared challenges—remain visibly unavailable until their
+authenticated server-side adapters, consent rules, and verification paths are
+configured. No unavailable action reports success.
+
+## Release documentation
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Database and migrations](docs/DATABASE.md)
+- [Scientific and health-safety rules](docs/SCIENTIFIC_RULES.md)
+- [Platform builds and deployment](docs/platform_support.md)
+- [iOS readiness checklist](docs/IOS_READINESS.md)
+- [Commercial boundary](docs/COMMERCIAL_BOUNDARY.md)
+- [Current roadmap and external blockers](docs/ROADMAP.md)
 
 ## Health scope
 
