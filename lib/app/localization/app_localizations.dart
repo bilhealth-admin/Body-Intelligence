@@ -96,6 +96,17 @@ class AppLocalizations {
     'Your data was not reset or uploaded. Try opening it again.':
         'لم يتم حذف بياناتك أو رفعها. حاول فتحها مرة أخرى.',
     'Try again': 'حاول مرة أخرى',
+    'Enter a quantity from 0.1 to 100000.': 'أدخل كمية من 0.1 إلى 100000.',
+    'Enter a water amount from 1 to 5000 ml.':
+        'أدخل كمية ماء من 1 إلى 5000 مل.',
+    'Could not load the food catalog.': 'تعذر تحميل دليل الأطعمة.',
+    'Remove water entry': 'إزالة سجل الماء',
+    'Remove meal item': 'إزالة عنصر الوجبة',
+    'Remove meal item?': 'إزالة عنصر الوجبة؟',
+    'Remove': 'إزالة',
+    'from this meal?': 'من هذه الوجبة؟',
+    'Verified': 'موثّق',
+    'Unverified': 'غير موثّق',
     'Settings': 'الإعدادات',
     'Language': 'اللغة',
     'Appearance': 'المظهر',

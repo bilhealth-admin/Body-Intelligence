@@ -97,61 +97,57 @@ void main() {
     },
   );
 
-  test('meal items enforce references and cascade with their meal', () async {
-    final foods = FoodRepository(database);
-    final meals = MealRepository(database);
-    final foodId = await foods.addFood(
-      name: 'Oats',
-      category: 'grain',
-      calories: 389,
-      protein: 16.9,
-      carbs: 66.3,
-      fats: 6.9,
-    );
-    final mealId = await meals.createMeal(
-      date: DateTime(2026, 7, 18),
-      name: 'Breakfast',
-      type: 'breakfast',
-    );
-    await meals.addMealItem(
-      mealId: mealId,
-      foodId: foodId,
-      quantity: 50,
-      calories: 194.5,
-      protein: 8.45,
-      carbs: 33.15,
-      fats: 3.45,
-      fiber: 4.2,
-      sodium: 120,
-      potassium: 310,
-      calcium: 45,
-      magnesium: 80,
-      sugar: 1.5,
-    );
+  test(
+    'meal items derive nutrition from foods and cascade with their meal',
+    () async {
+      final foods = FoodRepository(database);
+      final meals = MealRepository(database);
+      final foodId = await foods.addFood(
+        name: 'Oats',
+        category: 'grain',
+        calories: 389,
+        protein: 16.9,
+        carbs: 66.3,
+        fats: 6.9,
+        fiber: 8.4,
+        sodium: 240,
+        potassium: 620,
+        calcium: 90,
+        magnesium: 160,
+        sugar: 3,
+      );
+      final mealId = await meals.createMeal(
+        date: DateTime(2026, 7, 18),
+        name: 'Breakfast',
+        type: 'breakfast',
+      );
+      await expectLater(
+        meals.addMealItem(mealId: mealId, foodId: foodId, quantity: double.nan),
+        throwsArgumentError,
+      );
+      await meals.addMealItem(mealId: mealId, foodId: foodId, quantity: 50);
 
-    final storedItem = await database.select(database.mealItems).getSingle();
-    expect(storedItem.calcium, 45);
-    expect(storedItem.magnesium, 80);
-    expect(storedItem.sugar, 1.5);
+      final storedItem = await database.select(database.mealItems).getSingle();
+      expect(storedItem.calcium, 45);
+      expect(storedItem.magnesium, 80);
+      expect(storedItem.sugar, 1.5);
 
-    await meals.updateMealItem(
-      id: storedItem.id,
-      quantity: 60,
-      calories: 233.4,
-      protein: 10.14,
-      carbs: 39.78,
-      fats: 4.14,
-    );
-    await meals.deleteMealItem(storedItem.id);
-    final deletedItem = await database.select(database.mealItems).getSingle();
-    expect(deletedItem.revision, 3);
-    expect(deletedItem.syncStatus, 'pendingDelete');
+      expect(storedItem.calories, closeTo(194.5, 0.001));
+      await meals.updateMealItem(id: storedItem.id, quantity: 60);
+      final updatedItem = await database.select(database.mealItems).getSingle();
+      expect(updatedItem.calories, closeTo(233.4, 0.001));
+      expect(updatedItem.protein, closeTo(10.14, 0.001));
+      await meals.deleteMealItem(storedItem.id);
+      final deletedItem = await database.select(database.mealItems).getSingle();
+      expect(deletedItem.revision, 3);
+      expect(deletedItem.syncStatus, 'pendingDelete');
 
-    await (database.delete(
-      database.meals,
-    )..where((row) => row.id.equals(mealId))).go();
-    expect(await database.select(database.mealItems).get(), isEmpty);
-  });
+      await (database.delete(
+        database.meals,
+      )..where((row) => row.id.equals(mealId))).go();
+      expect(await database.select(database.mealItems).get(), isEmpty);
+    },
+  );
 
   test(
     'usual meals require repetition and copy only after confirmation',
@@ -172,15 +168,7 @@ void main() {
           name: 'Breakfast',
           type: 'breakfast',
         );
-        await meals.addMealItem(
-          mealId: mealId,
-          foodId: foodId,
-          quantity: 50,
-          calories: 190,
-          protein: 7.5,
-          carbs: 32.5,
-          fats: 3.5,
-        );
+        await meals.addMealItem(mealId: mealId, foodId: foodId, quantity: 50);
       }
 
       final suggestions = await meals.usualMeals(

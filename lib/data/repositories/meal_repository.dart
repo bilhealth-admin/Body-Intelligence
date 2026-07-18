@@ -44,87 +44,63 @@ class MealRepository {
     required int mealId,
     required int foodId,
     required double quantity,
-    required double calories,
-    required double protein,
-    required double carbs,
-    required double fats,
-    double fiber = 0,
-    double sodium = 0,
-    double potassium = 0,
-    double calcium = 0,
-    double magnesium = 0,
-    double sugar = 0,
   }) async {
-    if (quantity <= 0 ||
-        calories < 0 ||
-        protein < 0 ||
-        carbs < 0 ||
-        fats < 0 ||
-        fiber < 0 ||
-        sodium < 0 ||
-        potassium < 0 ||
-        calcium < 0 ||
-        magnesium < 0 ||
-        sugar < 0) {
-      throw ArgumentError('Meal quantities and nutrients must be non-negative');
-    }
-    await _database
-        .into(_database.mealItems)
-        .insert(
-          MealItemsCompanion.insert(
-            mealId: mealId,
-            foodId: foodId,
-            quantity: Value(quantity),
-            calories: Value(calories),
-            protein: Value(protein),
-            carbs: Value(carbs),
-            fats: Value(fats),
-            fiber: Value(fiber),
-            sodium: Value(sodium),
-            potassium: Value(potassium),
-            calcium: Value(calcium),
-            magnesium: Value(magnesium),
-            sugar: Value(sugar),
-          ),
-        );
+    _validateQuantity(quantity);
+    await _database.transaction(() async {
+      final food = await _activeFood(foodId);
+      final factor = quantity / food.servingSize;
+      await _database
+          .into(_database.mealItems)
+          .insert(
+            MealItemsCompanion.insert(
+              mealId: mealId,
+              foodId: foodId,
+              quantity: Value(quantity),
+              calories: Value(food.calories * factor),
+              protein: Value(food.protein * factor),
+              carbs: Value(food.carbs * factor),
+              fats: Value(food.fats * factor),
+              fiber: Value(food.fiber * factor),
+              sodium: Value(food.sodium * factor),
+              potassium: Value(food.potassium * factor),
+              calcium: Value(food.calcium * factor),
+              magnesium: Value(food.magnesium * factor),
+              sugar: Value(food.sugar * factor),
+            ),
+          );
+    });
   }
 
   Future<void> updateMealItem({
     required int id,
     required double quantity,
-    required double calories,
-    required double protein,
-    required double carbs,
-    required double fats,
-    double fiber = 0,
-    double sodium = 0,
-    double potassium = 0,
-    double calcium = 0,
-    double magnesium = 0,
-    double sugar = 0,
   }) async {
-    if (quantity <= 0) throw ArgumentError.value(quantity, 'quantity');
-    final existing = await _mealItem(id);
-    await (_database.update(
-      _database.mealItems,
-    )..where((row) => row.id.equals(id))).write(
-      MealItemsCompanion(
-        quantity: Value(quantity),
-        calories: Value(calories),
-        protein: Value(protein),
-        carbs: Value(carbs),
-        fats: Value(fats),
-        fiber: Value(fiber),
-        sodium: Value(sodium),
-        potassium: Value(potassium),
-        calcium: Value(calcium),
-        magnesium: Value(magnesium),
-        sugar: Value(sugar),
-        updatedAt: Value(DateTime.now()),
-        revision: Value(existing.revision + 1),
-        syncStatus: const Value('pending'),
-      ),
-    );
+    _validateQuantity(quantity);
+    await _database.transaction(() async {
+      final existing = await _mealItem(id);
+      final food = await _activeFood(existing.foodId);
+      final factor = quantity / food.servingSize;
+      await (_database.update(
+        _database.mealItems,
+      )..where((row) => row.id.equals(id))).write(
+        MealItemsCompanion(
+          quantity: Value(quantity),
+          calories: Value(food.calories * factor),
+          protein: Value(food.protein * factor),
+          carbs: Value(food.carbs * factor),
+          fats: Value(food.fats * factor),
+          fiber: Value(food.fiber * factor),
+          sodium: Value(food.sodium * factor),
+          potassium: Value(food.potassium * factor),
+          calcium: Value(food.calcium * factor),
+          magnesium: Value(food.magnesium * factor),
+          sugar: Value(food.sugar * factor),
+          updatedAt: Value(DateTime.now()),
+          revision: Value(existing.revision + 1),
+          syncStatus: const Value('pending'),
+        ),
+      );
+    });
   }
 
   Future<void> deleteMealItem(int id) async {
@@ -147,6 +123,24 @@ class MealRepository {
     )..where((row) => row.id.equals(id))).getSingleOrNull();
     if (item == null) throw StateError('Meal item $id does not exist');
     return item;
+  }
+
+  Future<Food> _activeFood(int id) async {
+    final food =
+        await (_database.select(_database.foods)
+              ..where((row) => row.id.equals(id) & row.deletedAt.isNull()))
+            .getSingleOrNull();
+    if (food == null) throw StateError('Food $id does not exist');
+    if (food.servingSize <= 0) {
+      throw StateError('Food $id has an invalid serving size');
+    }
+    return food;
+  }
+
+  void _validateQuantity(double quantity) {
+    if (!quantity.isFinite || quantity <= 0 || quantity > 100000) {
+      throw ArgumentError.value(quantity, 'quantity', 'Must be 0–100000');
+    }
   }
 
   Stream<List<MealWithItems>> watchMealsForDate(DateTime date) {
@@ -256,16 +250,6 @@ class MealRepository {
           mealId: mealId,
           foodId: item.foodId,
           quantity: item.quantity,
-          calories: item.calories,
-          protein: item.protein,
-          carbs: item.carbs,
-          fats: item.fats,
-          fiber: item.fiber,
-          sodium: item.sodium,
-          potassium: item.potassium,
-          calcium: item.calcium,
-          magnesium: item.magnesium,
-          sugar: item.sugar,
         );
       }
     });

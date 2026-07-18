@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/database/app_database.dart';
 import '../../app/localization/app_localizations.dart';
-import '../../engine/nutrition_engine.dart';
 import '../foods/providers/food_provider.dart';
 import 'providers/daily_log_provider.dart';
 
@@ -56,33 +55,16 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       type: mealType,
     );
 
-    final quantityValue = double.tryParse(quantity.text) ?? 100;
-    final portion = NutritionEngine.calculateFoodPortion(
-      quantity: quantityValue,
-      servingSize: selectedFood!.servingSize,
-      calories: selectedFood!.calories,
-      protein: selectedFood!.protein,
-      carbs: selectedFood!.carbs,
-      fats: selectedFood!.fats,
-    );
+    final quantityValue = double.tryParse(quantity.text.replaceAll(',', '.'));
+    if (quantityValue == null || quantityValue <= 0 || quantityValue > 100000) {
+      _message('Enter a quantity from 0.1 to 100000.');
+      return;
+    }
 
     await mealRepository.addMealItem(
       mealId: mealId,
       foodId: selectedFood!.id,
       quantity: quantityValue,
-      calories: portion.calories,
-      protein: portion.protein,
-      carbs: portion.carbs,
-      fats: portion.fats,
-      fiber: selectedFood!.fiber * quantityValue / selectedFood!.servingSize,
-      sodium: selectedFood!.sodium * quantityValue / selectedFood!.servingSize,
-      potassium:
-          selectedFood!.potassium * quantityValue / selectedFood!.servingSize,
-      calcium:
-          selectedFood!.calcium * quantityValue / selectedFood!.servingSize,
-      magnesium:
-          selectedFood!.magnesium * quantityValue / selectedFood!.servingSize,
-      sugar: selectedFood!.sugar * quantityValue / selectedFood!.servingSize,
     );
     await ref.read(foodRepositoryProvider).recordRecent(selectedFood!.id);
 
@@ -94,7 +76,10 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
 
   Future<void> _addWater([int? quickAmount]) async {
     final amount = quickAmount ?? int.tryParse(water.text);
-    if (amount == null) return;
+    if (amount == null || amount <= 0 || amount > 5000) {
+      _message('Enter a water amount from 1 to 5000 ml.');
+      return;
+    }
     final date = ref.read(selectedLogDateProvider);
     final now = DateTime.now();
     await ref
@@ -109,6 +94,38 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
           ),
           amountMl: amount,
         );
+  }
+
+  void _message(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(context.strings.text(message))));
+  }
+
+  Future<void> _deleteMealItem(MealItem item, String foodName) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.strings.text('Remove meal item?')),
+        content: Text(
+          '${context.strings.text('Remove')} $foodName ${context.strings.text('from this meal?')}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(context.strings.text('Cancel')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(context.strings.text('Remove')),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await ref.read(mealRepositoryProvider).deleteMealItem(item.id);
+    }
   }
 
   Future<void> _editMealItem(MealItem item, Food food) async {
@@ -131,8 +148,10 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
             child: Text(context.strings.text('Cancel')),
           ),
           FilledButton(
-            onPressed: () =>
-                Navigator.pop(context, double.tryParse(controller.text)),
+            onPressed: () => Navigator.pop(
+              context,
+              double.tryParse(controller.text.replaceAll(',', '.')),
+            ),
             child: Text(context.strings.text('Update')),
           ),
         ],
@@ -140,23 +159,9 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     );
     controller.dispose();
     if (updated == null || updated <= 0) return;
-    final factor = updated / food.servingSize;
     await ref
         .read(mealRepositoryProvider)
-        .updateMealItem(
-          id: item.id,
-          quantity: updated,
-          calories: food.calories * factor,
-          protein: food.protein * factor,
-          carbs: food.carbs * factor,
-          fats: food.fats * factor,
-          fiber: food.fiber * factor,
-          sodium: food.sodium * factor,
-          potassium: food.potassium * factor,
-          calcium: food.calcium * factor,
-          magnesium: food.magnesium * factor,
-          sugar: food.sugar * factor,
-        );
+        .updateMealItem(id: item.id, quantity: updated);
   }
 
   @override
@@ -177,7 +182,23 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       appBar: AppBar(title: Text(context.strings.text('Diary'))),
       body: foods.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text(error.toString())),
+        error: (_, _) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(context.strings.text('Could not load the food catalog.')),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: () => ref.invalidate(foodsProvider),
+                  icon: const Icon(Icons.refresh),
+                  label: Text(context.strings.text('Try again')),
+                ),
+              ],
+            ),
+          ),
+        ),
         data: (items) {
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -232,8 +253,30 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
               ),
               const SizedBox(height: 8),
               waterEntries.when(
-                data: (rows) => Text(
-                  '${context.strings.text('Water total')}: ${rows.fold<int>(0, (sum, row) => sum + row.amountMl)} ml',
+                data: (rows) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      '${context.strings.text('Water total')}: ${rows.fold<int>(0, (sum, row) => sum + row.amountMl)} ml',
+                    ),
+                    for (final entry in rows)
+                      ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.water_drop_outlined),
+                        title: Text('${entry.amountMl} ml'),
+                        subtitle: Text(
+                          '${entry.occurredAt.hour.toString().padLeft(2, '0')}:${entry.occurredAt.minute.toString().padLeft(2, '0')}',
+                        ),
+                        trailing: IconButton(
+                          tooltip: context.strings.text('Remove water entry'),
+                          onPressed: () => ref
+                              .read(waterRepositoryProvider)
+                              .delete(entry.id),
+                          icon: const Icon(Icons.close),
+                        ),
+                      ),
+                  ],
                 ),
                 loading: () => const LinearProgressIndicator(),
                 error: (_, _) =>
@@ -431,7 +474,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                           leading: const Icon(Icons.check_circle),
                           title: Text(selectedFood!.name),
                           subtitle: Text(
-                            '${selectedFood!.source} · ${selectedFood!.verified ? 'verified' : 'unverified'}',
+                            '${selectedFood!.source} · ${context.strings.text(selectedFood!.verified ? 'Verified' : 'Unverified')}',
                           ),
                           trailing: IconButton(
                             onPressed: () =>
@@ -442,14 +485,17 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                       const SizedBox(height: 8),
                       TextField(
                         controller: quantity,
-                        keyboardType: TextInputType.number,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
                         decoration: InputDecoration(
-                          labelText: '${context.strings.text('Quantity')} (g)',
+                          labelText:
+                              '${context.strings.text('Quantity')} (${selectedFood?.servingUnit ?? 'g'})',
                         ),
                       ),
                       const SizedBox(height: 12),
                       FilledButton(
-                        onPressed: _saveMeal,
+                        onPressed: selectedFood == null ? null : _saveMeal,
                         child: Text(context.strings.text('Save meal')),
                       ),
                     ],
@@ -539,18 +585,22 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                               .where((row) => row.id == item.foodId)
                               .firstOrNull;
                           return ListTile(
-                            title: Text(food?.name ?? 'Food'),
+                            title: Text(
+                              food?.name ?? context.strings.text('Food'),
+                            ),
                             subtitle: Text(
-                              '${meal.meal.type} · ${item.quantity.toStringAsFixed(0)} ${food?.servingUnit ?? 'g'}',
+                              '${context.strings.text('${meal.meal.type[0].toUpperCase()}${meal.meal.type.substring(1)}')} · ${item.quantity.toStringAsFixed(0)} ${food?.servingUnit ?? 'g'}',
                             ),
                             onTap: food == null
                                 ? null
                                 : () => _editMealItem(item, food),
                             trailing: IconButton(
+                              tooltip: context.strings.text('Remove meal item'),
                               icon: const Icon(Icons.delete_outline),
-                              onPressed: () => ref
-                                  .read(mealRepositoryProvider)
-                                  .deleteMealItem(item.id),
+                              onPressed: () => _deleteMealItem(
+                                item,
+                                food?.name ?? context.strings.text('Food'),
+                              ),
                             ),
                           );
                         }),
