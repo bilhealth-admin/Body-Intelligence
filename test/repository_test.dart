@@ -127,6 +127,10 @@ void main() {
       );
       await meals.addMealItem(mealId: mealId, foodId: foodId, quantity: 50);
 
+      final timelineMeal =
+          (await meals.watchMealsForDate(DateTime(2026, 7, 18)).first).single;
+      expect(timelineMeal.foodsById[foodId]?.name, 'Oats');
+
       final storedItem = await database.select(database.mealItems).getSingle();
       expect(storedItem.calcium, 45);
       expect(storedItem.magnesium, 80);

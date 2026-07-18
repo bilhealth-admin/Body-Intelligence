@@ -15,8 +15,8 @@
 
 ## Status summary
 
-- complete: **65**
-- partial: **146**
+- complete: **68**
+- partial: **143**
 - missing and locally implementable: **14**
 - blocked by credentials/infrastructure: **213**
 - strategic/non-code: **112**
@@ -1952,37 +1952,34 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 167. Today's Calories
 - **Requirement:** Card contains: Consumed Target Remaining Large typography. Animated progress ring.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
-- **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
+- **Acceptance criteria:** Today displays food-derived calories consumed, the effective goal-derived target, remaining or reference excess, accessible progress, and large readable values without a competing manually entered total.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `3cde964`
 
 ### BIL-TDY-168 — Macronutrients
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 168. Macronutrients
 - **Requirement:** Three premium cards: Protein Carbs Fat Each shows: Consumed Target Remaining Color adapts to goal.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
-- **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
+- **Acceptance criteria:** Protein, carbohydrates, and fat each display food-derived consumed, effective target, remaining or reference excess, distinct goal-aware presentation, responsive layout, and complete screen-reader wording.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `3cde964`
 
 ### BIL-TDY-169 — Micronutrients
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 169. Micronutrients
 - **Requirement:** Expandable section. Shows: Sodium Potassium Magnesium Calcium Fiber Sugar Only if available.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
-- **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
+- **Acceptance criteria:** Today exposes an expandable evidence section for every nutrient currently carried by verified meal snapshots (fiber, sodium, potassium), including target and remaining/reference status, and explicitly omits unsupported nutrients rather than displaying false zeroes.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `3cde964`
 
 ### BIL-TDY-170 — Water Card
 

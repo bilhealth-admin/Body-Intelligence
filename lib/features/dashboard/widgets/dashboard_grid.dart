@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../engine/bil_engine.dart';
@@ -23,6 +24,7 @@ import 'dashboard_check_in_card.dart';
 import 'confidence_ring.dart';
 import 'dashboard_loading_skeleton.dart';
 import 'nutrition_progress_card.dart';
+import 'dashboard_meals_timeline.dart';
 
 class DashboardGrid extends ConsumerWidget {
   const DashboardGrid({super.key});
@@ -107,6 +109,12 @@ class DashboardGrid extends ConsumerWidget {
       0,
       (sum, item) => sum + item.potassium,
     );
+    final calcium = items.fold<double>(0, (sum, item) => sum + item.calcium);
+    final magnesium = items.fold<double>(
+      0,
+      (sum, item) => sum + item.magnesium,
+    );
+    final sugar = items.fold<double>(0, (sum, item) => sum + item.sugar);
     final water = waterRows.fold<int>(0, (sum, item) => sum + item.amountMl);
     final currentWeight = weights.firstOrNull?.weight ?? profile.currentWeight;
     final goalType = profile.targetWeight < currentWeight
@@ -398,6 +406,10 @@ class DashboardGrid extends ConsumerWidget {
           targetMl: effectiveTargets.water,
           onAdd: addWater,
         ),
+        DashboardMealsTimeline(
+          meals: meals,
+          onOpenDiary: () => context.go('/daily-log'),
+        ),
         Card(
           child: ExpansionTile(
             title: Text(
@@ -430,6 +442,24 @@ class DashboardGrid extends ConsumerWidget {
                 target: effectiveTargets.potassium.toDouble(),
                 unit: 'mg',
               ),
+              if (calcium > 0)
+                _InformationalNutrientRow(
+                  label: tr('Calcium', 'الكالسيوم'),
+                  consumed: calcium,
+                  unit: 'mg',
+                ),
+              if (magnesium > 0)
+                _InformationalNutrientRow(
+                  label: tr('Magnesium', 'المغنيسيوم'),
+                  consumed: magnesium,
+                  unit: 'mg',
+                ),
+              if (sugar > 0)
+                _InformationalNutrientRow(
+                  label: tr('Sugar', 'السكر'),
+                  consumed: sugar,
+                  unit: 'g',
+                ),
             ],
           ),
         ),
@@ -677,4 +707,25 @@ class _TargetRow extends StatelessWidget {
       ),
     );
   }
+}
+
+class _InformationalNutrientRow extends StatelessWidget {
+  const _InformationalNutrientRow({
+    required this.label,
+    required this.consumed,
+    required this.unit,
+  });
+
+  final String label;
+  final double consumed;
+  final String unit;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    contentPadding: EdgeInsets.zero,
+    leading: const Icon(Icons.info_outline),
+    title: Text(label),
+    subtitle: Text(context.strings.text('No target; informational only')),
+    trailing: Text('${consumed.toStringAsFixed(0)} $unit'),
+  );
 }

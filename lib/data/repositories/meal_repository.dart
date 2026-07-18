@@ -157,7 +157,13 @@ class MealRepository {
                   (tbl) => tbl.mealId.equals(meal.id) & tbl.deletedAt.isNull(),
                 ))
                 .get();
-        rows.add(MealWithItems(meal: meal, items: items));
+        rows.add(
+          MealWithItems(
+            meal: meal,
+            items: items,
+            foodsById: await _foodsForItems(items),
+          ),
+        );
       }
       return rows;
     });
@@ -175,7 +181,13 @@ class MealRepository {
                   (row) => row.mealId.equals(meal.id) & row.deletedAt.isNull(),
                 ))
                 .get();
-        rows.add(MealWithItems(meal: meal, items: items));
+        rows.add(
+          MealWithItems(
+            meal: meal,
+            items: items,
+            foodsById: await _foodsForItems(items),
+          ),
+        );
       }
       return rows;
     });
@@ -214,7 +226,13 @@ class MealRepository {
           .join('|');
       grouped
           .putIfAbsent(signature, () => [])
-          .add(MealWithItems(meal: meal, items: items));
+          .add(
+            MealWithItems(
+              meal: meal,
+              items: items,
+              foodsById: await _foodsForItems(items),
+            ),
+          );
     }
     final candidates =
         grouped.values
@@ -254,13 +272,27 @@ class MealRepository {
       }
     });
   }
+
+  Future<Map<int, Food>> _foodsForItems(List<MealItem> items) async {
+    final ids = items.map((item) => item.foodId).toSet();
+    if (ids.isEmpty) return const {};
+    final foods = await (_database.select(
+      _database.foods,
+    )..where((food) => food.id.isIn(ids))).get();
+    return {for (final food in foods) food.id: food};
+  }
 }
 
 class MealWithItems {
   final Meal meal;
   final List<MealItem> items;
+  final Map<int, Food> foodsById;
 
-  const MealWithItems({required this.meal, required this.items});
+  const MealWithItems({
+    required this.meal,
+    required this.items,
+    this.foodsById = const {},
+  });
 }
 
 class UsualMealCandidate {
