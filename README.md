@@ -28,7 +28,7 @@ assets, Windows prerequisites, Android output, and the iOS signing checklist.
 
 ## Local data
 
-Drift/SQLite schema v11 is the source of truth. Profile, goals, plan overrides,
+Drift/SQLite schema v12 is the source of truth. Profile, goals, plan overrides,
 weights, daily notes, foods, favorites, recents, meals, meal items, water,
 context, decision memory, experiments, challenges, and preferences persist in
 the application-support directory. Nutrition is derived from meal items; old

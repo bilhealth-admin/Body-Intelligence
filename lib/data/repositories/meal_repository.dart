@@ -136,13 +136,10 @@ class MealRepository {
   }
 
   Stream<List<MealWithItems>> watchMealsForDate(DateTime date) {
-    final start = DateTime(date.year, date.month, date.day);
-    final end = DateTime(date.year, date.month, date.day, 23, 59, 59);
+    final key = dayKeyFor(date);
 
     final query = _database.select(_database.meals)
-      ..where(
-        (tbl) => tbl.date.isBetweenValues(start, end) & tbl.deletedAt.isNull(),
-      );
+      ..where((tbl) => tbl.dayKey.equals(key) & tbl.deletedAt.isNull());
 
     return query.watch().asyncMap((meals) async {
       final rows = <MealWithItems>[];

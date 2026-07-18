@@ -39,6 +39,23 @@ void main() {
           'challenges',
         ]),
       );
+
+      final indexes = await database
+          .customSelect("SELECT name FROM sqlite_master WHERE type = 'index'")
+          .get();
+      final indexNames = indexes.map((row) => row.read<String>('name')).toSet();
+      expect(
+        indexNames,
+        containsAll(<String>[
+          'meals_active_day_type_idx',
+          'meal_items_active_meal_idx',
+          'water_entries_active_day_idx',
+          'life_context_active_day_idx',
+          'recent_foods_last_used_idx',
+          'challenges_active_started_idx',
+          'experiments_active_started_idx',
+        ]),
+      );
     },
   );
 

@@ -47,7 +47,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -59,6 +59,7 @@ class AppDatabase extends _$AppDatabase {
       await _createIndexes();
       await _createWeightDayIndex();
       await _createV7Indexes();
+      await _createV12Indexes();
     },
     onUpgrade: (migrator, from, to) async {
       if (from < 2) {
@@ -102,6 +103,9 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 11) {
         await migrator.createTable(challenges);
+      }
+      if (from < 12) {
+        await _createV12Indexes();
       }
     },
   );
@@ -317,5 +321,27 @@ class AppDatabase extends _$AppDatabase {
       'CREATE INDEX IF NOT EXISTS decision_memory_day_idx '
       'ON decision_memories(day_key)',
     );
+  }
+
+  Future<void> _createV12Indexes() async {
+    const statements = <String>[
+      'CREATE INDEX IF NOT EXISTS meals_active_day_type_idx '
+          'ON meals(day_key, type) WHERE deleted_at IS NULL',
+      'CREATE INDEX IF NOT EXISTS meal_items_active_meal_idx '
+          'ON meal_items(meal_id) WHERE deleted_at IS NULL',
+      'CREATE INDEX IF NOT EXISTS water_entries_active_day_idx '
+          'ON water_entries(day_key) WHERE deleted_at IS NULL',
+      'CREATE INDEX IF NOT EXISTS life_context_active_day_idx '
+          'ON life_context_entries(day_key) WHERE deleted_at IS NULL',
+      'CREATE INDEX IF NOT EXISTS recent_foods_last_used_idx '
+          'ON recent_foods(last_used_at DESC)',
+      'CREATE INDEX IF NOT EXISTS challenges_active_started_idx '
+          'ON challenges(started_at DESC) WHERE deleted_at IS NULL',
+      'CREATE INDEX IF NOT EXISTS experiments_active_started_idx '
+          'ON personal_experiments(started_at DESC) WHERE deleted_at IS NULL',
+    ];
+    for (final statement in statements) {
+      await customStatement(statement);
+    }
   }
 }
