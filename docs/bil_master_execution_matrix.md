@@ -15,9 +15,9 @@
 
 ## Status summary
 
-- complete: **69**
+- complete: **70**
 - partial: **143**
-- missing and locally implementable: **13**
+- missing and locally implementable: **12**
 - blocked by credentials/infrastructure: **213**
 - strategic/non-code: **112**
 
@@ -1320,7 +1320,7 @@
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 113. Analytics Philosophy
 - **Requirement:** Analytics should educate. Not overwhelm.
 - **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Partial audit disposition:** substantially complete; real-data summaries, cautious explanations, empty/error states, and selectable evidence ranges are implemented, with minor visual release polish remaining
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
@@ -2077,12 +2077,12 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 178. Weekly Progress
 - **Requirement:** Horizontal card. Shows: Start Today Goal Difference
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `268c3c4`
 
 ### BIL-TDY-179 — Goal Progress
 
