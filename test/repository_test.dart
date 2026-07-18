@@ -7,6 +7,7 @@ import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
 import 'package:body_intelligence_log/data/repositories/plan_repository.dart';
 import 'package:body_intelligence_log/data/repositories/life_context_repository.dart';
+import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/data/repositories/water_repository.dart';
 import 'package:body_intelligence_log/data/repositories/weight_repository.dart';
 import 'package:body_intelligence_log/data/repositories/user_profile_repository.dart';
@@ -397,6 +398,35 @@ void main() {
     expect(await database.select(database.userProfile).get(), hasLength(1));
     expect((await profiles.getProfile())!.currentWeight, 71);
   });
+
+  test(
+    'optional body context and regional preferences persist locally',
+    () async {
+      final profiles = UserProfileRepository(database);
+      await profiles.save(
+        gender: 'female',
+        age: 32,
+        height: 168,
+        currentWeight: 71,
+        targetWeight: 65,
+        activityLevel: 'moderate',
+        exercises: true,
+        waist: 81.4,
+        neck: 34.2,
+      );
+      final profile = (await profiles.getProfile())!;
+      expect(profile.waist, 81.4);
+      expect(profile.neck, 34.2);
+
+      final preferences = PreferencesRepository(database);
+      await preferences.set('countryRegion', 'Egypt');
+      await preferences.set('timezoneName', 'EEST');
+      expect(await preferences.get('countryRegion'), 'Egypt');
+      expect(await preferences.get('timezoneName'), 'EEST');
+      await preferences.remove('countryRegion');
+      expect(await preferences.get('countryRegion'), isNull);
+    },
+  );
 
   test('meal type is reused for the same day', () async {
     final meals = MealRepository(database);

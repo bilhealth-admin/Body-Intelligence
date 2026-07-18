@@ -17,10 +17,13 @@ class OnboardingPage extends ConsumerStatefulWidget {
 class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   int step = 0;
   final ageController = TextEditingController();
+  final regionController = TextEditingController();
   final profileScrollController = ScrollController();
   double heightCm = 155;
   double currentWeightKg = 60;
   double targetWeightKg = 60;
+  double? waistCm;
+  double? neckCm;
   String? gender;
   String? activity;
   String goalType = 'maintain';
@@ -40,6 +43,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     Future<void>(() async {
       final preferences = ref.read(preferencesRepositoryProvider);
       final savedUnits = await preferences.get('units');
+      final savedRegion = await preferences.get('countryRegion');
       final profile = await ref
           .read(userProfileRepositoryProvider)
           .getProfile();
@@ -48,12 +52,15 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         system = savedUnits == 'imperial'
             ? MeasurementSystem.imperial
             : MeasurementSystem.metric;
+        regionController.text = savedRegion ?? '';
         if (profile != null) {
           step = 1;
           ageController.text = profile.age.toString();
           heightCm = profile.height;
           currentWeightKg = profile.currentWeight;
           targetWeightKg = profile.targetWeight;
+          waistCm = profile.waist;
+          neckCm = profile.neck;
           gender = profile.gender;
           activity = profile.activityLevel;
           goalType = profile.targetWeight < profile.currentWeight
@@ -70,6 +77,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   @override
   void dispose() {
     ageController.dispose();
+    regionController.dispose();
     profileScrollController.dispose();
     super.dispose();
   }
@@ -160,6 +168,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       targetWeight: targetWeightKg,
       activityLevel: activity!,
       exercises: activity != 'sedentary',
+      waist: waistCm,
+      neck: neckCm,
     );
     final profile = await repository.getProfile();
     if (profile != null) {
@@ -174,6 +184,18 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     final preferences = ref.read(preferencesRepositoryProvider);
     await preferences.set('units', system.name);
     await preferences.set('healthDisclaimerAccepted', 'true');
+    final region = regionController.text.trim();
+    if (region.isEmpty) {
+      await preferences.remove('countryRegion');
+    } else {
+      await preferences.set('countryRegion', region);
+    }
+    final now = DateTime.now();
+    await preferences.set('timezoneName', now.timeZoneName);
+    await preferences.set(
+      'timezoneOffsetMinutes',
+      now.timeZoneOffset.inMinutes.toString(),
+    );
     if (mounted) context.go('/dashboard');
   }
 
@@ -207,6 +229,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     heightCm: heightCm,
                     currentWeightKg: currentWeightKg,
                     targetWeightKg: targetWeightKg,
+                    waistCm: waistCm,
+                    neckCm: neckCm,
+                    regionController: regionController,
                     gender: gender,
                     activity: activity,
                     goalType: goalType,
@@ -219,6 +244,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                         setState(() => currentWeightKg = value),
                     onTargetWeightChanged: (value) =>
                         setState(() => targetWeightKg = value),
+                    onWaistChanged: (value) => setState(() => waistCm = value),
+                    onNeckChanged: (value) => setState(() => neckCm = value),
                     onGenderChanged: (value) => setState(() => gender = value),
                     onActivityChanged: (value) =>
                         setState(() => activity = value),

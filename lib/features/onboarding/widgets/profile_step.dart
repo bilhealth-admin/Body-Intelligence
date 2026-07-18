@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../core/units/measurement_units.dart';
@@ -11,6 +12,9 @@ class ProfileStep extends StatelessWidget {
     required this.heightCm,
     required this.currentWeightKg,
     required this.targetWeightKg,
+    required this.waistCm,
+    required this.neckCm,
+    required this.regionController,
     required this.gender,
     required this.activity,
     required this.goalType,
@@ -20,6 +24,8 @@ class ProfileStep extends StatelessWidget {
     required this.onHeightChanged,
     required this.onCurrentWeightChanged,
     required this.onTargetWeightChanged,
+    required this.onWaistChanged,
+    required this.onNeckChanged,
     required this.onGenderChanged,
     required this.onActivityChanged,
     required this.onGoalTypeChanged,
@@ -33,6 +39,9 @@ class ProfileStep extends StatelessWidget {
   final double heightCm;
   final double currentWeightKg;
   final double targetWeightKg;
+  final double? waistCm;
+  final double? neckCm;
+  final TextEditingController regionController;
   final String? gender;
   final String? activity;
   final String goalType;
@@ -42,6 +51,8 @@ class ProfileStep extends StatelessWidget {
   final ValueChanged<double> onHeightChanged;
   final ValueChanged<double> onCurrentWeightChanged;
   final ValueChanged<double> onTargetWeightChanged;
+  final ValueChanged<double?> onWaistChanged;
+  final ValueChanged<double?> onNeckChanged;
   final ValueChanged<String> onGenderChanged;
   final ValueChanged<String> onActivityChanged;
   final ValueChanged<String> onGoalTypeChanged;
@@ -98,6 +109,9 @@ class ProfileStep extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               SegmentedButton<MeasurementSystem>(
+                direction: MediaQuery.sizeOf(context).width < 480
+                    ? Axis.vertical
+                    : Axis.horizontal,
                 segments: [
                   ButtonSegment(
                     value: MeasurementSystem.metric,
@@ -165,6 +179,9 @@ class ProfileStep extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               SegmentedButton<String>(
+                direction: MediaQuery.sizeOf(context).width < 480
+                    ? Axis.vertical
+                    : Axis.horizontal,
                 segments: [
                   ButtonSegment(
                     value: 'male',
@@ -183,6 +200,7 @@ class ProfileStep extends StatelessWidget {
               if (errors['gender'] != null) _ErrorText(errors['gender']!),
               const SizedBox(height: 24),
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 initialValue: activity,
                 decoration: InputDecoration(
                   labelText: context.strings.text('Activity level'),
@@ -247,6 +265,7 @@ class ProfileStep extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               DropdownButtonFormField<String>(
+                isExpanded: true,
                 initialValue: goalType,
                 decoration: InputDecoration(
                   labelText: context.strings.text('Goal'),
@@ -315,6 +334,85 @@ class ProfileStep extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: const EdgeInsets.only(bottom: 8),
+                title: Text(
+                  tr(context, 'Optional body context', 'سياق الجسم الاختياري'),
+                ),
+                subtitle: Text(
+                  tr(
+                    context,
+                    'Region and measurements improve relevant context and remain on this device.',
+                    'تساعد المنطقة والقياسات في تحسين السياق المناسب وتبقى على هذا الجهاز.',
+                  ),
+                ),
+                children: [
+                  TextField(
+                    controller: regionController,
+                    textCapitalization: TextCapitalization.words,
+                    autofillHints: const [AutofillHints.countryName],
+                    decoration: InputDecoration(
+                      labelText: tr(
+                        context,
+                        'Country or region',
+                        'الدولة أو المنطقة',
+                      ),
+                      helperText: tr(
+                        context,
+                        'Optional; used only for locally relevant food context.',
+                        'اختياري؛ يُستخدم فقط لسياق الطعام المحلي المناسب.',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _OptionalMeasurementField(
+                          key: ValueKey('waist-$heightUnit-$waistCm'),
+                          label: tr(context, 'Waist', 'محيط الخصر'),
+                          unit: heightUnit,
+                          value: waistCm == null
+                              ? null
+                              : UnitConverter.heightFromCm(waistCm!, system),
+                          onChanged: (value) => onWaistChanged(
+                            value == null
+                                ? null
+                                : UnitConverter.heightToCm(value, system),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _OptionalMeasurementField(
+                          key: ValueKey('neck-$heightUnit-$neckCm'),
+                          label: tr(context, 'Neck', 'محيط الرقبة'),
+                          unit: heightUnit,
+                          value: neckCm == null
+                              ? null
+                              : UnitConverter.heightFromCm(neckCm!, system),
+                          onChanged: (value) => onNeckChanged(
+                            value == null
+                                ? null
+                                : UnitConverter.heightToCm(value, system),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    tr(
+                      context,
+                      'Timezone is detected from this device when you save.',
+                      'يتم اكتشاف المنطقة الزمنية من هذا الجهاز عند الحفظ.',
+                    ),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
               CheckboxListTile(
                 contentPadding: EdgeInsets.zero,
                 value: disclaimerAccepted,
@@ -342,6 +440,38 @@ class ProfileStep extends StatelessWidget {
       ),
     );
   }
+}
+
+class _OptionalMeasurementField extends StatelessWidget {
+  const _OptionalMeasurementField({
+    super.key,
+    required this.label,
+    required this.unit,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final String unit;
+  final double? value;
+  final ValueChanged<double?> onChanged;
+
+  @override
+  Widget build(BuildContext context) => TextFormField(
+    initialValue: value?.toStringAsFixed(1),
+    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
+    decoration: InputDecoration(labelText: label, suffixText: unit),
+    onChanged: (raw) {
+      final normalized = raw.trim().replaceAll(',', '.');
+      if (normalized.isEmpty) {
+        onChanged(null);
+        return;
+      }
+      final parsed = double.tryParse(normalized);
+      if (parsed != null && parsed > 0) onChanged(parsed);
+    },
+  );
 }
 
 class _UnitChoice extends StatelessWidget {

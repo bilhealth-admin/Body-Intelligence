@@ -26,6 +26,12 @@ class PreferencesRepository {
         );
   }
 
+  Future<void> remove(String key) async {
+    await (_database.delete(
+      _database.preferences,
+    )..where((item) => item.key.equals(key))).go();
+  }
+
   Stream<String?> watch(String key) {
     return (_database.select(_database.preferences)
           ..where((item) => item.key.equals(key)))
