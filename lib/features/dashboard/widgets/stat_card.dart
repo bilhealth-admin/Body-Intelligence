@@ -18,9 +18,7 @@ class StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
@@ -34,18 +32,10 @@ class StatCard extends StatelessWidget {
             const Spacer(),
             Text(
               value,
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 6),
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.grey,
-              ),
-            ),
+            Text(title, style: const TextStyle(color: Colors.grey)),
           ],
         ),
       ),

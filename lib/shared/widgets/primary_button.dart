@@ -25,13 +25,13 @@ class PrimaryButton extends StatelessWidget {
         onPressed: loading ? null : onPressed,
         icon: loading
             ? const SizedBox(
-          width: 22,
-          height: 22,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            color: Colors.white,
-          ),
-        )
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
             : Icon(icon ?? Icons.check),
         label: Text(text),
         style: FilledButton.styleFrom(

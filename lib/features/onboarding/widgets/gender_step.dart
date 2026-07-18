@@ -19,10 +19,7 @@ class GenderStep extends StatelessWidget {
       children: [
         const Text(
           'What is your gender?',
-          style: TextStyle(
-            fontSize: 34,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
         ),
 
         const SizedBox(height: 12),
@@ -67,10 +64,7 @@ class GenderStep extends StatelessWidget {
           height: 58,
           child: FilledButton(
             onPressed: gender == null ? null : onContinue,
-            child: const Text(
-              'Continue',
-              style: TextStyle(fontSize: 18),
-            ),
+            child: const Text('Continue', style: TextStyle(fontSize: 18)),
           ),
         ),
       ],

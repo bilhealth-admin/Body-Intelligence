@@ -5,12 +5,7 @@ class AppCard extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final VoidCallback? onTap;
 
-  const AppCard({
-    super.key,
-    required this.child,
-    this.padding,
-    this.onTap,
-  });
+  const AppCard({super.key, required this.child, this.padding, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +22,6 @@ class AppCard extends StatelessWidget {
       );
     }
 
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: content,
-    );
+    return Card(clipBehavior: Clip.antiAlias, child: content);
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/localization/app_localizations.dart';
+
 class ProfileStep extends StatelessWidget {
   const ProfileStep({
     super.key,
@@ -38,39 +40,52 @@ class ProfileStep extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Complete your profile',
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          Text(
+            context.strings.text('Complete your profile'),
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: ageController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Age'),
+            decoration: InputDecoration(labelText: context.strings.text('Age')),
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             initialValue: goalType,
-            decoration: const InputDecoration(labelText: 'Goal'),
-            items: const [
-              DropdownMenuItem(value: 'lose', child: Text('Lose weight')),
+            decoration: InputDecoration(
+              labelText: context.strings.text('Goal'),
+            ),
+            items: [
+              DropdownMenuItem(
+                value: 'lose',
+                child: Text(context.strings.text('Lose weight')),
+              ),
               DropdownMenuItem(
                 value: 'maintain',
-                child: Text('Maintain weight'),
+                child: Text(context.strings.text('Maintain weight')),
               ),
-              DropdownMenuItem(value: 'gain', child: Text('Gain weight')),
+              DropdownMenuItem(
+                value: 'gain',
+                child: Text(context.strings.text('Gain weight')),
+              ),
             ],
             onChanged: (value) => onGoalTypeChanged(value ?? 'maintain'),
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             initialValue: units,
-            decoration: const InputDecoration(labelText: 'Units'),
-            items: const [
-              DropdownMenuItem(value: 'metric', child: Text('Metric (kg, cm)')),
+            decoration: InputDecoration(
+              labelText: context.strings.text('Units'),
+            ),
+            items: [
+              DropdownMenuItem(
+                value: 'metric',
+                child: Text(context.strings.text('Metric (kg, cm)')),
+              ),
               DropdownMenuItem(
                 value: 'imperial',
-                child: Text('Imperial (lb, in)'),
+                child: Text(context.strings.text('Imperial (lb, in)')),
               ),
             ],
             onChanged: (value) => onUnitsChanged(value ?? 'metric'),
@@ -79,46 +94,56 @@ class ProfileStep extends StatelessWidget {
             contentPadding: EdgeInsets.zero,
             value: disclaimerAccepted,
             onChanged: (value) => onDisclaimerChanged(value ?? false),
-            title: const Text(
-              'I understand BIL provides general information, not medical advice.',
+            title: Text(
+              context.strings.text(
+                'I understand BIL provides general information, not medical advice.',
+              ),
             ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: genderController,
-            decoration: const InputDecoration(
-              labelText: 'Gender (male/female)',
+            decoration: InputDecoration(
+              labelText: context.strings.text('Gender (male/female)'),
             ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: heightController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Height (cm)'),
+            decoration: InputDecoration(
+              labelText: context.strings.text('Height (cm)'),
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: currentWeightController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Current weight (kg)'),
+            decoration: InputDecoration(
+              labelText: context.strings.text('Current weight (kg)'),
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: targetWeightController,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Goal weight (kg)'),
+            decoration: InputDecoration(
+              labelText: context.strings.text('Goal weight (kg)'),
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: activityController,
-            decoration: const InputDecoration(labelText: 'Activity level'),
+            decoration: InputDecoration(
+              labelText: context.strings.text('Activity level'),
+            ),
           ),
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             child: FilledButton(
               onPressed: onContinue,
-              child: const Text('Continue'),
+              child: Text(context.strings.text('Continue')),
             ),
           ),
         ],

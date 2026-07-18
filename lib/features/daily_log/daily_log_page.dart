@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../data/database/app_database.dart';
+import '../../app/localization/app_localizations.dart';
 import '../../engine/nutrition_engine.dart';
 import '../foods/providers/food_provider.dart';
 import '../weight/providers/weight_provider.dart';
@@ -171,7 +172,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Daily Log')),
+      appBar: AppBar(title: Text(context.strings.text('Daily Log'))),
       body: foods.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text(error.toString())),
@@ -206,7 +207,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                   const SizedBox(width: 8),
                   FilledButton(
                     onPressed: _addWater,
-                    child: const Text('Add water'),
+                    child: Text(context.strings.text('Add water')),
                   ),
                 ],
               ),
@@ -225,25 +226,25 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                     children: [
                       DropdownButtonFormField<String>(
                         initialValue: mealType,
-                        decoration: const InputDecoration(
-                          labelText: 'Meal type',
+                        decoration: InputDecoration(
+                          labelText: context.strings.text('Meal type'),
                         ),
-                        items: const [
+                        items: [
                           DropdownMenuItem(
                             value: 'breakfast',
-                            child: Text('Breakfast'),
+                            child: Text(context.strings.text('Breakfast')),
                           ),
                           DropdownMenuItem(
                             value: 'lunch',
-                            child: Text('Lunch'),
+                            child: Text(context.strings.text('Lunch')),
                           ),
                           DropdownMenuItem(
                             value: 'dinner',
-                            child: Text('Dinner'),
+                            child: Text(context.strings.text('Dinner')),
                           ),
                           DropdownMenuItem(
                             value: 'snack',
-                            child: Text('Snack'),
+                            child: Text(context.strings.text('Snack')),
                           ),
                         ],
                         onChanged: (value) =>
@@ -252,7 +253,9 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                       const SizedBox(height: 8),
                       DropdownButtonFormField<Food>(
                         initialValue: selectedFood,
-                        decoration: const InputDecoration(labelText: 'Food'),
+                        decoration: InputDecoration(
+                          labelText: context.strings.text('Food'),
+                        ),
                         items: items
                             .map(
                               (food) => DropdownMenuItem<Food>(
@@ -275,7 +278,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                       const SizedBox(height: 12),
                       FilledButton(
                         onPressed: _saveMeal,
-                        child: const Text('Save meal'),
+                        child: Text(context.strings.text('Save meal')),
                       ),
                     ],
                   ),
@@ -291,7 +294,9 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                   return Column(
                     children: [
                       ListTile(
-                        title: const Text('Calculated nutrition'),
+                        title: Text(
+                          context.strings.text('Calculated nutrition'),
+                        ),
                         subtitle: Text(
                           '${allItems.fold<double>(0, (sum, item) => sum + item.calories).toStringAsFixed(0)} kcal · '
                           '${allItems.fold<double>(0, (sum, item) => sum + item.protein).toStringAsFixed(1)} g protein · '
@@ -326,7 +331,10 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                 },
               ),
               const SizedBox(height: 20),
-              FilledButton(onPressed: _save, child: const Text('Save log')),
+              FilledButton(
+                onPressed: _save,
+                child: Text(context.strings.text('Save log')),
+              ),
             ],
           );
         },

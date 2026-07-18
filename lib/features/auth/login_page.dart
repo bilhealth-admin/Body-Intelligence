@@ -19,10 +19,7 @@ class LoginPage extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.monitor_weight,
-                      size: 70,
-                    ),
+                    const Icon(Icons.monitor_weight, size: 70),
                     const SizedBox(height: 20),
                     const Text(
                       'Body Intelligence',
@@ -34,10 +31,7 @@ class LoginPage extends StatelessWidget {
                     const SizedBox(height: 8),
                     const Text(
                       'Welcome back',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
                     ),
                     const SizedBox(height: 30),
                     const TextField(
@@ -67,7 +61,8 @@ class LoginPage extends StatelessWidget {
                             builder: (_) => const DashboardPage(),
                           ),
                         );
-                      },                    ),
+                      },
+                    ),
                   ],
                 ),
               ),

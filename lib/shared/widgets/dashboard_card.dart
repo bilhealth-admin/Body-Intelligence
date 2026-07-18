@@ -20,9 +20,7 @@ class DashboardCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
         onTap: onTap,
@@ -34,10 +32,7 @@ class DashboardCard extends StatelessWidget {
               CircleAvatar(
                 radius: 22,
                 backgroundColor: color.withValues(alpha: 0.15),
-                child: Icon(
-                  icon,
-                  color: color,
-                ),
+                child: Icon(icon, color: color),
               ),
               const Spacer(),
               Text(
@@ -50,10 +45,7 @@ class DashboardCard extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 title,
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 15,
-                ),
+                style: const TextStyle(color: Colors.grey, fontSize: 15),
               ),
             ],
           ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/database/app_database.dart';
+import '../../app/localization/app_localizations.dart';
 import '../foods/providers/food_provider.dart';
 
 class FoodPage extends ConsumerStatefulWidget {
@@ -56,11 +57,11 @@ class _FoodPageState extends ConsumerState<FoodPage> {
   Widget build(BuildContext context) {
     final allFoods = ref.watch(foodsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Food catalog')),
+      appBar: AppBar(title: Text(context.strings.text('Food catalog'))),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _createFood,
         icon: const Icon(Icons.add),
-        label: const Text('Custom food'),
+        label: Text(context.strings.text('Custom food')),
       ),
       body: Column(
         children: [

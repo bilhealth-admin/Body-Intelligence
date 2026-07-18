@@ -33,9 +33,6 @@ class ScoreEngine {
       message = "Needs Improvement";
     }
 
-    return DailyScore(
-      score: score,
-      message: message,
-    );
+    return DailyScore(score: score, message: message);
   }
 }

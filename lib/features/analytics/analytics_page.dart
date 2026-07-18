@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/database/date_keys.dart';
+import '../../app/localization/app_localizations.dart';
 import '../../engine/intelligence_engine.dart';
 import '../dashboard/providers/dashboard_provider.dart';
 import '../weight/providers/weight_provider.dart';
@@ -65,7 +66,7 @@ class AnalyticsPage extends ConsumerWidget {
               .reduce((a, b) => a > b ? a : b);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Analytics')),
+      appBar: AppBar(title: Text(context.strings.text('Analytics'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

@@ -18,10 +18,7 @@ class AgeStep extends StatelessWidget {
       children: [
         const Text(
           'How old are you?',
-          style: TextStyle(
-            fontSize: 34,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
         ),
 
         const SizedBox(height: 12),
@@ -49,10 +46,7 @@ class AgeStep extends StatelessWidget {
           height: 58,
           child: FilledButton(
             onPressed: onContinue,
-            child: const Text(
-              'Continue',
-              style: TextStyle(fontSize: 18),
-            ),
+            child: const Text('Continue', style: TextStyle(fontSize: 18)),
           ),
         ),
       ],

@@ -20,9 +20,7 @@ class AppTheme {
     cardTheme: CardThemeData(
       elevation: 0,
       color: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
     ),
     navigationBarTheme: NavigationBarThemeData(
       indicatorColor: AppColors.primary.withValues(alpha: 0.15),

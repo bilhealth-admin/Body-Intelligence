@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/database/app_database.dart';
+import '../../app/localization/app_localizations.dart';
 import '../../engine/weight_analysis.dart';
 import '../weight/providers/weight_provider.dart';
 
@@ -87,7 +88,7 @@ class HistoryPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final history = ref.watch(weightHistoryProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Weight history')),
+      appBar: AppBar(title: Text(context.strings.text('Weight history'))),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _edit(context, ref),
         child: const Icon(Icons.add),
@@ -109,7 +110,7 @@ class HistoryPage extends ConsumerWidget {
             children: [
               Card(
                 child: ListTile(
-                  title: const Text('Seven-day trend'),
+                  title: Text(context.strings.text('Seven-day trend')),
                   subtitle: Text(
                     trend == null
                         ? 'More data needed'
