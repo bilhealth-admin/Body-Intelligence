@@ -21,6 +21,7 @@ import 'stat_card.dart';
 import 'dashboard_water_card.dart';
 import 'dashboard_check_in_card.dart';
 import 'confidence_ring.dart';
+import 'dashboard_loading_skeleton.dart';
 
 class DashboardGrid extends ConsumerWidget {
   const DashboardGrid({super.key});
@@ -49,12 +50,7 @@ class DashboardGrid extends ConsumerWidget {
       allWaterAsync,
       skippedWeightAsync,
     ].any((value) => value.isLoading)) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(32),
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const DashboardLoadingSkeleton();
     }
     if (profileAsync.hasError ||
         weightsAsync.hasError ||
@@ -91,7 +87,7 @@ class DashboardGrid extends ConsumerWidget {
     }
     final planAsync = ref.watch(planSettingProvider(profile.uuid));
     if (planAsync.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const DashboardLoadingSkeleton();
     }
     final weights = weightsAsync.value ?? const [];
     final meals = mealsAsync.value ?? const [];

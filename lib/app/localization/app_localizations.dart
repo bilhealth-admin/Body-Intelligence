@@ -166,6 +166,10 @@ class AppLocalizations {
     'Emerging confidence': 'ثقة قيد التكوين',
     'Useful confidence': 'ثقة مفيدة',
     'Strong confidence': 'ثقة قوية',
+    'Loading Today dashboard': 'جارٍ تحميل لوحة اليوم',
+    'Today is up to date.': 'بيانات اليوم محدثة.',
+    'Some local Today data could not be refreshed.':
+        'تعذر تحديث بعض بيانات اليوم المحلية.',
     'Meal type': 'نوع الوجبة',
     'Breakfast': 'الإفطار',
     'Lunch': 'الغداء',

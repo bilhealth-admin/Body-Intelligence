@@ -1,15 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'widgets/dashboard_grid.dart';
 import 'widgets/dashboard_header.dart';
 import '../../app/localization/app_localizations.dart';
+import '../profile/providers/user_profile_provider.dart';
+import '../weight/providers/weight_provider.dart';
+import 'providers/dashboard_provider.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
 
+  Future<void> refresh(BuildContext context, WidgetRef ref) async {
+    try {
+      await Future.wait([
+        ref.refresh(latestWeightProvider.future),
+        ref.refresh(weightHistoryProvider.future),
+        ref.refresh(userProfileProvider.future),
+        ref.refresh(todayMealsProvider.future),
+        ref.refresh(todayWaterProvider.future),
+        ref.refresh(allMealsProvider.future),
+        ref.refresh(allWaterProvider.future),
+        ref.refresh(weightReminderSkippedTodayProvider.future),
+      ]);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.strings.text('Today is up to date.'))),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.strings.text(
+                'Some local Today data could not be refreshed.',
+              ),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('BIL'),
@@ -46,16 +82,20 @@ class DashboardPage extends StatelessWidget {
           ),
         ],
       ),
-      body: const SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              DashboardHeader(),
-              SizedBox(height: 20),
-              DashboardGrid(),
-            ],
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () => refresh(context, ref),
+          child: const SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                DashboardHeader(),
+                SizedBox(height: 20),
+                DashboardGrid(),
+              ],
+            ),
           ),
         ),
       ),
