@@ -1,9 +1,10 @@
 # BIL — Body Intelligence Log
 
-BIL is an offline-first Flutter Android application for recording body weight,
+BIL is an offline-first Flutter application for recording body weight,
 meals, hydration, and daily context. It calculates nutrition totals and
-deterministic, explainable insights locally. Arabic is the default language and
-English is supported.
+deterministic, explainable insights locally. Fresh installs start in English;
+Arabic is available from the first onboarding screen and both directions are
+fully supported.
 
 ## Run and verify
 
@@ -13,11 +14,16 @@ dart run build_runner build
 flutter analyze
 flutter test
 flutter build apk --debug
+flutter build windows --debug
+flutter build web
 ```
 
 From WSL in this workspace, use the Windows SDK at
 `C:\develop\flutter\bin\flutter.bat`. The debug APK is produced at
 `build/app/outputs/flutter-apk/app-debug.apk`.
+
+See [`docs/platform_support.md`](docs/platform_support.md) for Web persistence
+assets, Windows prerequisites, Android output, and the iOS signing checklist.
 
 ## Local data
 
