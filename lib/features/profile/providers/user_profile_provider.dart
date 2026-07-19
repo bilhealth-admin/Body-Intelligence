@@ -7,6 +7,7 @@ import '../../../data/repositories/goal_repository.dart';
 import '../../../data/repositories/preferences_repository.dart';
 import '../../../data/repositories/plan_repository.dart';
 import '../../../data/repositories/user_profile_repository.dart';
+import '../../onboarding/models/onboarding_draft.dart';
 
 final userProfileRepositoryProvider = Provider<UserProfileRepository>((ref) {
   final database = ref.watch(databaseProvider);
@@ -19,6 +20,12 @@ final goalRepositoryProvider = Provider<GoalRepository>((ref) {
 
 final preferencesRepositoryProvider = Provider<PreferencesRepository>((ref) {
   return PreferencesRepository(ref.watch(databaseProvider));
+});
+
+final onboardingDraftRepositoryProvider = Provider<OnboardingDraftRepository>((
+  ref,
+) {
+  return OnboardingDraftRepository(ref.watch(preferencesRepositoryProvider));
 });
 
 final planRepositoryProvider = Provider<PlanRepository>((ref) {

@@ -1,0 +1,37 @@
+# BIL Phase 3 Product Excellence Execution Ledger
+
+This ledger tracks Phase 3 production work without changing the immutable Foundation V2 acceptance ledger. The Phase 3 baseline is Foundation V2 closure commit `7a91c21`, and implementation occurs only on `phase-3-product-excellence`.
+
+Status values are `planned`, `in progress`, `complete`, `blocked`, or `physical-device validation remaining`. A row is complete only when its acceptance criteria and automated verification are satisfied; unsupported real-device claims remain explicit.
+
+## Epic 1 — World-Class Product Experience
+
+Epic differentiator: BIL preserves unfinished setup privately and locally, explains why it asks for evidence, and never requires an account to recover progress.
+
+| ID | Foundation references | Journey and requirement | Existing implementation reused | Status | Acceptance criteria | Accessibility, localization, responsive, performance, and science safeguards | Tests / evidence | Commit / remaining validation |
+|---|---|---|---|---|---|---|---|---|
+| P3-E1-001 | BIL-UX-061, BIL-UX-062, BIL-UX-068 | First launch: safely resume an interrupted onboarding draft at the exact step with all entered fields. | Drift preferences, profile repository, startup profile routing, measurement units. | complete | Draft persists locally after each input; restart restores step and values; invalid draft is ignored; successful profile save clears draft; existing profiles remain authoritative. | Restore progress has a localized live-region announcement; loading semantics are bilingual; compact form remains scrollable; no cloud/account dependency; values are not used as completed evidence before profile save. | `onboarding_draft_test.dart`, `onboarding_profile_context_test.dart`, `widget_test.dart`; repository round-trip, corrupt-draft recovery, compact Arabic and RTL/LTR coverage. Full suite: 103 tests; analyzer and Android debug build green. | This row's implementation commit (`feat(onboarding): preserve interrupted local setup`); physical screen-reader and process-kill validation remain. |
+| P3-E1-002 | BIL-UX-061, BIL-UX-062 | First five minutes: conversational essential-data setup that explains why each required input matters and skips nonessential context. | Existing optional-context expansion and deterministic target inputs. | in progress | Required inputs are divided into low-cognitive-load stages; every stage states its purpose; optional fields are visibly skippable; back/forward navigation preserves input. | English/Arabic, logical focus order, large text, phone/tablet/desktop widths, no unsupported health claim. | Bilingual widget journey and semantics tests required. | Next Epic 1 milestone. |
+| P3-E1-003 | BIL-UX-063, BIL-UX-064 | First-value handoff: setup completion lands on a focused Today state with one clear next action. | Dashboard repositories and startup routing. | planned | New user sees what is known, what is missing, and one useful next action without fake statistics. | Bilingual semantics, sparse-data honesty, responsive composition. | End-to-end onboarding-to-Today widget test. | — |
+| P3-E1-004 | BIL-UX-069, BIL-UX-071 | Daily return: answer what changed, what matters, what to do, why, and what is unknown. | Today providers and deterministic intelligence engine. | planned | Returning-user state presents a single priority and evidence/confidence without competing totals. | Accessible reading order, RTL, large text, honest insufficient-data state. | Today journey regression tests. | — |
+| P3-E1-005 | BIL-UX-072 | Empty states explain what is absent, what remains safe, and the next meaningful action. | Existing feature-level empty states and local repositories. | planned | Primary journeys contain no generic “No data” dead ends and never invent values. | Localized action semantics and responsive layouts. | Sparse-data widget tests. | — |
+| P3-E1-006 | BIL-UX-061 | Loading and startup states preserve context and explain local work without blocking longer than necessary. | Startup state and dashboard skeletons. | planned | Loading is nontechnical, stable, retry-safe, and does not flash the wrong destination. | Localized progress semantics and reduced-motion-safe behavior. | Startup and async-state tests. | — |
+| P3-E1-007 | BIL-UX-072 | Error and offline recovery explains what happened, what stayed safe, and whether retry is meaningful. | Existing safe startup and repository error states. | planned | No private exception details or false success; retry is offered only when useful. | Focus moves to actionable recovery; bilingual and responsive. | Error-boundary/offline widget tests. | — |
+| P3-E1-008 | BIL-UX-065, BIL-UX-066 | Navigation keeps primary journeys within three interactions and preserves journey context across adaptive shells. | GoRouter and responsive app shell. | planned | No duplicate destinations; phone/tablet/desktop/web navigation retains route context and supports keyboard, mouse, touch, and semantics. | RTL order, visible focus, 48dp touch targets, keyboard traversal. | Navigation and breakpoint tests. | — |
+| P3-E1-009 | BIL-UX-067, BIL-UX-068 | Quick logging measurably reduces safe steps for weight, water, food, and usual meals. | Existing repositories, recents/favorites, Today quick actions. | planned | Before/after interaction counts documented; actions stay explicit, reversible, and snapshot-safe. | Bilingual labels, focus/semantics confirmation, responsive sheets. | End-to-end interaction-step tests and query timing proxy. | — |
+| P3-E1-010 | BIL-UX-063, BIL-UX-064 | Information hierarchy gives each primary screen one purpose and one primary action. | Existing screens and shared cards. | planned | Primary purpose/action is unambiguous; repeated information and competing calls to action are removed. | Heading semantics, reading order, contrast, RTL, large text. | Screen-level widget and semantics tests. | — |
+| P3-E1-011 | BIL-UX-061 through BIL-UX-072 | Epic 1 end-to-end quality gate and measurable “Why BIL?” evidence. | Existing 101-test Foundation baseline and platform build workflow. | planned | All Epic 1 journeys pass focused/full tests, analyzer, Android debug and supported Epic builds; ledger reconciled and worktree clean. | Arabic/English, RTL/LTR, accessibility, responsive, reduced-motion and performance evidence consolidated without unsupported physical-device claims. | Full gate plus supported platform builds. | — |
+
+## Later Epics
+
+Detailed requirement rows are added before implementation of each sequential Epic, after inspecting the corresponding existing systems. This prevents speculative acceptance criteria from replacing repository evidence while preserving the mandated execution order.
+
+| Epic | Scope | Status |
+|---|---|---|
+| Epic 2 | Premium Design System | planned |
+| Epic 3 | World-Class Today Experience | planned |
+| Epic 4 | World-Class Food Experience | planned |
+| Epic 5 | World-Class Charts & Insights | planned |
+| Epic 6 | Explainable Body Intelligence | planned |
+| Epic 7 | Premium Motion | planned |
+| Epic 8 | Product Quality | planned |

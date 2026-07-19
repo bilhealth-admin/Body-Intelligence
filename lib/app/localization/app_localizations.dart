@@ -199,6 +199,14 @@ class AppLocalizations {
     'Delete': 'حذف',
     'Continue': 'متابعة',
     'Complete your profile': 'أكمل ملفك الشخصي',
+    'These essentials calculate your starting targets. Your draft stays on this device if you leave.':
+        'تُستخدم هذه الأساسيات لحساب أهدافك الأولية. تبقى مسودتك على هذا الجهاز إذا غادرت.',
+    'Age and biological sex are used only for established energy equations.':
+        'يُستخدم العمر والجنس البيولوجي فقط في معادلات الطاقة المعتمدة.',
+    'Restoring your private setup on this device':
+        'جارٍ استعادة إعدادك الخاص من هذا الجهاز',
+    'Your unfinished setup was restored from this device.':
+        'تمت استعادة إعدادك غير المكتمل من هذا الجهاز.',
     'Gender (male/female)': 'الجنس البيولوجي (ذكر/أنثى)',
     'I understand BIL provides general information, not medical advice.':
         'أفهم أن BIL يقدم معلومات عامة وليس نصيحة طبية.',

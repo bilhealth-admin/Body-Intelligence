@@ -20,7 +20,10 @@ class ProfileStep extends StatelessWidget {
     required this.goalType,
     required this.system,
     required this.disclaimerAccepted,
+    required this.draftRestored,
     required this.errors,
+    required this.onAgeChanged,
+    required this.onRegionChanged,
     required this.onHeightChanged,
     required this.onCurrentWeightChanged,
     required this.onTargetWeightChanged,
@@ -47,7 +50,10 @@ class ProfileStep extends StatelessWidget {
   final String goalType;
   final MeasurementSystem system;
   final bool disclaimerAccepted;
+  final bool draftRestored;
   final Map<String, String> errors;
+  final ValueChanged<String> onAgeChanged;
+  final ValueChanged<String> onRegionChanged;
   final ValueChanged<double> onHeightChanged;
   final ValueChanged<double> onCurrentWeightChanged;
   final ValueChanged<double> onTargetWeightChanged;
@@ -92,15 +98,56 @@ class ProfileStep extends StatelessWidget {
                 context.strings.text('Complete your profile'),
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
+              const SizedBox(height: 8),
+              Text(
+                context.strings.text(
+                  'These essentials calculate your starting targets. Your draft stays on this device if you leave.',
+                ),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              if (draftRestored) ...[
+                const SizedBox(height: 12),
+                Semantics(
+                  liveRegion: true,
+                  child: Material(
+                    color: Theme.of(context).colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.restore),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              context.strings.text(
+                                'Your unfinished setup was restored from this device.',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 20),
               TextField(
                 controller: ageController,
+                onChanged: onAgeChanged,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: context.strings.text('Age'),
                   errorText: errors['age'],
                   border: const OutlineInputBorder(),
                 ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                context.strings.text(
+                  'Age and biological sex are used only for established energy equations.',
+                ),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
               const SizedBox(height: 20),
               Text(
@@ -350,6 +397,7 @@ class ProfileStep extends StatelessWidget {
                 children: [
                   TextField(
                     controller: regionController,
+                    onChanged: onRegionChanged,
                     textCapitalization: TextCapitalization.words,
                     autofillHints: const [AutofillHints.countryName],
                     decoration: InputDecoration(

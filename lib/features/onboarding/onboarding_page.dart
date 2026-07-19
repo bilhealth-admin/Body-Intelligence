@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/localization/app_localizations.dart';
 import '../../core/units/measurement_units.dart';
 import '../profile/providers/user_profile_provider.dart';
+import 'models/onboarding_draft.dart';
 import 'widgets/profile_step.dart';
 import 'widgets/welcome_step.dart';
 
@@ -30,6 +32,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   MeasurementSystem system = MeasurementSystem.metric;
   bool disclaimerAccepted = false;
   bool existingProfileLoaded = false;
+  bool draftLoaded = false;
+  bool draftRestored = false;
   Map<String, String> errors = const {};
 
   bool get isArabic => Localizations.localeOf(context).languageCode == 'ar';
@@ -44,15 +48,12 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       final preferences = ref.read(preferencesRepositoryProvider);
       final savedUnits = await preferences.get('units');
       final savedRegion = await preferences.get('countryRegion');
+      final draft = await ref.read(onboardingDraftRepositoryProvider).load();
       final profile = await ref
           .read(userProfileRepositoryProvider)
           .getProfile();
       if (!mounted) return;
       setState(() {
-        system = savedUnits == 'imperial'
-            ? MeasurementSystem.imperial
-            : MeasurementSystem.metric;
-        regionController.text = savedRegion ?? '';
         if (profile != null) {
           step = 1;
           ageController.text = profile.age.toString();
@@ -69,7 +70,28 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               ? 'gain'
               : 'maintain';
           disclaimerAccepted = true;
+        } else if (draft != null) {
+          draftRestored = true;
+          step = draft.step;
+          ageController.text = draft.age;
+          heightCm = draft.heightCm;
+          currentWeightKg = draft.currentWeightKg;
+          targetWeightKg = draft.targetWeightKg;
+          waistCm = draft.waistCm;
+          neckCm = draft.neckCm;
+          regionController.text = draft.region;
+          gender = draft.gender;
+          activity = draft.activity;
+          goalType = draft.goalType;
+          system = draft.system;
+          disclaimerAccepted = draft.disclaimerAccepted;
+        } else {
+          system = savedUnits == 'imperial'
+              ? MeasurementSystem.imperial
+              : MeasurementSystem.metric;
+          regionController.text = savedRegion ?? '';
         }
+        draftLoaded = true;
       });
     });
   }
@@ -196,11 +218,38 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       'timezoneOffsetMinutes',
       now.timeZoneOffset.inMinutes.toString(),
     );
+    await ref.read(onboardingDraftRepositoryProvider).clear();
     if (mounted) context.go('/dashboard');
   }
 
+  OnboardingDraft get draft => OnboardingDraft(
+    step: step,
+    age: ageController.text,
+    heightCm: heightCm,
+    currentWeightKg: currentWeightKg,
+    targetWeightKg: targetWeightKg,
+    waistCm: waistCm,
+    neckCm: neckCm,
+    region: regionController.text,
+    gender: gender,
+    activity: activity,
+    goalType: goalType,
+    system: system,
+    disclaimerAccepted: disclaimerAccepted,
+  );
+
+  void persistDraft() {
+    if (!draftLoaded) return;
+    ref.read(onboardingDraftRepositoryProvider).save(draft);
+  }
+
+  void update(VoidCallback change) {
+    setState(change);
+    persistDraft();
+  }
+
   void updateSystem(MeasurementSystem value) {
-    setState(() {
+    update(() {
       system = value;
       errors = {...errors}
         ..remove('height')
@@ -216,48 +265,63 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 250),
-            child: step == 0
-                ? WelcomeStep(
-                    key: const ValueKey('welcome'),
-                    onContinue: () => setState(() => step = 1),
-                  )
-                : ProfileStep(
-                    key: const ValueKey('profile'),
-                    ageController: ageController,
-                    heightCm: heightCm,
-                    currentWeightKg: currentWeightKg,
-                    targetWeightKg: targetWeightKg,
-                    waistCm: waistCm,
-                    neckCm: neckCm,
-                    regionController: regionController,
-                    gender: gender,
-                    activity: activity,
-                    goalType: goalType,
-                    system: system,
-                    disclaimerAccepted: disclaimerAccepted,
-                    errors: errors,
-                    onHeightChanged: (value) =>
-                        setState(() => heightCm = value),
-                    onCurrentWeightChanged: (value) =>
-                        setState(() => currentWeightKg = value),
-                    onTargetWeightChanged: (value) =>
-                        setState(() => targetWeightKg = value),
-                    onWaistChanged: (value) => setState(() => waistCm = value),
-                    onNeckChanged: (value) => setState(() => neckCm = value),
-                    onGenderChanged: (value) => setState(() => gender = value),
-                    onActivityChanged: (value) =>
-                        setState(() => activity = value),
-                    onGoalTypeChanged: (value) =>
-                        setState(() => goalType = value),
-                    onSystemChanged: updateSystem,
-                    onDisclaimerChanged: (value) =>
-                        setState(() => disclaimerAccepted = value),
-                    onContinue: complete,
-                    scrollController: profileScrollController,
+          child: !draftLoaded
+              ? Center(
+                  child: Semantics(
+                    label: context.strings.text(
+                      'Restoring your private setup on this device',
+                    ),
+                    child: const CircularProgressIndicator(),
                   ),
-          ),
+                )
+              : AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: step == 0
+                      ? WelcomeStep(
+                          key: const ValueKey('welcome'),
+                          onContinue: () => update(() => step = 1),
+                        )
+                      : ProfileStep(
+                          key: const ValueKey('profile'),
+                          ageController: ageController,
+                          heightCm: heightCm,
+                          currentWeightKg: currentWeightKg,
+                          targetWeightKg: targetWeightKg,
+                          waistCm: waistCm,
+                          neckCm: neckCm,
+                          regionController: regionController,
+                          gender: gender,
+                          activity: activity,
+                          goalType: goalType,
+                          system: system,
+                          disclaimerAccepted: disclaimerAccepted,
+                          draftRestored: draftRestored,
+                          errors: errors,
+                          onAgeChanged: (_) => persistDraft(),
+                          onRegionChanged: (_) => persistDraft(),
+                          onHeightChanged: (value) =>
+                              update(() => heightCm = value),
+                          onCurrentWeightChanged: (value) =>
+                              update(() => currentWeightKg = value),
+                          onTargetWeightChanged: (value) =>
+                              update(() => targetWeightKg = value),
+                          onWaistChanged: (value) =>
+                              update(() => waistCm = value),
+                          onNeckChanged: (value) =>
+                              update(() => neckCm = value),
+                          onGenderChanged: (value) =>
+                              update(() => gender = value),
+                          onActivityChanged: (value) =>
+                              update(() => activity = value),
+                          onGoalTypeChanged: (value) =>
+                              update(() => goalType = value),
+                          onSystemChanged: updateSystem,
+                          onDisclaimerChanged: (value) =>
+                              update(() => disclaimerAccepted = value),
+                          onContinue: complete,
+                          scrollController: profileScrollController,
+                        ),
+                ),
         ),
       ),
     );
