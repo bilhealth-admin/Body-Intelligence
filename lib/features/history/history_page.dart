@@ -9,6 +9,7 @@ import '../../core/units/measurement_units.dart';
 import '../../engine/weight_analysis.dart';
 import '../../engine/progress_analysis.dart';
 import '../../shared/widgets/wheel_number_field.dart';
+import '../../shared/widgets/actionable_empty_state.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
 
@@ -198,11 +199,13 @@ class HistoryPage extends ConsumerWidget {
     final profile = ref.watch(userProfileProvider).value;
     return Scaffold(
       appBar: AppBar(title: Text(context.strings.text('Weight history'))),
-      floatingActionButton: FloatingActionButton(
-        tooltip: context.strings.text('Add weight'),
-        onPressed: () => _edit(context, ref),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: history.value?.isNotEmpty == true
+          ? FloatingActionButton(
+              tooltip: context.strings.text('Add weight'),
+              onPressed: () => _edit(context, ref),
+              child: const Icon(Icons.add),
+            )
+          : null,
       body: history.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
@@ -221,8 +224,14 @@ class HistoryPage extends ConsumerWidget {
         ),
         data: (rows) {
           if (rows.isEmpty) {
-            return Center(
-              child: Text(context.strings.text('No weight entries yet.')),
+            return ActionableEmptyState(
+              icon: Icons.monitor_weight_outlined,
+              title: context.strings.text('Build your first comparable trend'),
+              body: context.strings.text(
+                'One measurement establishes a starting point. BIL waits for more comparable days before describing a trend.',
+              ),
+              actionLabel: context.strings.text('Record first weight'),
+              onAction: () => _edit(context, ref),
             );
           }
           final chronological = rows.reversed.toList();

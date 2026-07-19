@@ -268,6 +268,22 @@ class AppLocalizations {
         'تعذر على صفحة اليوم قراءة كل البيانات المحلية',
     'No current insight is shown because it may be stale. Existing records remain in local storage; retry when storage is available.':
         'لا تظهر رؤية حالية لأنها قد تكون قديمة. تظل السجلات الموجودة في التخزين المحلي؛ حاول مجددًا عندما يصبح التخزين متاحًا.',
+    'Build your first comparable trend': 'ابنِ أول اتجاه قابل للمقارنة',
+    'One measurement establishes a starting point. BIL waits for more comparable days before describing a trend.':
+        'يحدد قياس واحد نقطة البداية. ينتظر BIL أيامًا أكثر قابلية للمقارنة قبل وصف أي اتجاه.',
+    'Record first weight': 'سجّل أول وزن',
+    'Your favorites will stay one tap away': 'ستبقى مفضلاتك على بُعد نقرة',
+    'Favorite any food you trust to make future logging faster.':
+        'أضف أي طعام تثق به إلى المفضلة لتسريع التسجيل لاحقًا.',
+    'Recent foods appear after your first log':
+        'تظهر الأطعمة الأخيرة بعد أول تسجيل',
+    'BIL ranks foods you actually use without uploading your history.':
+        'يرتب BIL الأطعمة التي تستخدمها فعليًا دون رفع سجلك.',
+    'No local food matches this search': 'لا يطابق البحث أي طعام محلي',
+    'BIL will not invent a match. Create a custom food from verified label evidence.':
+        'لن يختلق BIL نتيجة. أنشئ طعامًا مخصصًا من بيانات الملصق الموثوقة.',
+    'Browse all foods': 'تصفح كل الأطعمة',
+    'Add food from label': 'أضف طعامًا من الملصق',
     'Gender (male/female)': 'الجنس البيولوجي (ذكر/أنثى)',
     'I understand BIL provides general information, not medical advice.':
         'أفهم أن BIL يقدم معلومات عامة وليس نصيحة طبية.',

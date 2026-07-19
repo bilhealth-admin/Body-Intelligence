@@ -7,6 +7,7 @@ import '../../data/database/app_database.dart';
 import '../../data/database/nutrient_evidence.dart';
 import '../../app/localization/app_localizations.dart';
 import '../foods/providers/food_provider.dart';
+import '../../shared/widgets/actionable_empty_state.dart';
 
 enum _CatalogView { all, favorites, recent }
 
@@ -245,18 +246,36 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                     ? (results ?? const <Food>[])
                     : selectedRows;
                 if (visible.isEmpty) {
-                  return Center(
-                    child: Text(
-                      catalogView == _CatalogView.favorites
-                          ? (arabic
-                                ? 'لا توجد أطعمة مفضلة بعد.'
-                                : 'No favorite foods yet.')
-                          : catalogView == _CatalogView.recent
-                          ? (arabic
-                                ? 'ستظهر الأطعمة المستخدمة مؤخرًا هنا.'
-                                : 'Recently used foods will appear here.')
-                          : t('No matching foods. Create a custom food.'),
+                  final favoritesEmpty = catalogView == _CatalogView.favorites;
+                  final recentEmpty = catalogView == _CatalogView.recent;
+                  return ActionableEmptyState(
+                    icon: favoritesEmpty
+                        ? Icons.favorite_outline
+                        : recentEmpty
+                        ? Icons.history
+                        : Icons.search_off,
+                    title: t(
+                      favoritesEmpty
+                          ? 'Your favorites will stay one tap away'
+                          : recentEmpty
+                          ? 'Recent foods appear after your first log'
+                          : 'No local food matches this search',
                     ),
+                    body: t(
+                      favoritesEmpty
+                          ? 'Favorite any food you trust to make future logging faster.'
+                          : recentEmpty
+                          ? 'BIL ranks foods you actually use without uploading your history.'
+                          : 'BIL will not invent a match. Create a custom food from verified label evidence.',
+                    ),
+                    actionLabel: t(
+                      favoritesEmpty || recentEmpty
+                          ? 'Browse all foods'
+                          : 'Add food from label',
+                    ),
+                    onAction: favoritesEmpty || recentEmpty
+                        ? () => setState(() => catalogView = _CatalogView.all)
+                        : _createFood,
                   );
                 }
                 return ListView.builder(
