@@ -33,18 +33,32 @@ class SettingsPage extends ConsumerWidget {
   }
 
   Future<void> _export(BuildContext context, WidgetRef ref) async {
-    final database = ref.read(databaseProvider);
-    final displayUnits =
-        await ref.read(preferencesRepositoryProvider).get('units') ?? 'metric';
-    final document = await LocalDataLifecycleService(
-      database,
-    ).exportJson(displayUnits: displayUnits);
-    await const DataExportService().copyText(document);
-    if (context.mounted) {
+    try {
+      final database = ref.read(databaseProvider);
+      final displayUnits =
+          await ref.read(preferencesRepositoryProvider).get('units') ??
+          'metric';
+      final document = await LocalDataLifecycleService(
+        database,
+      ).exportJson(displayUnits: displayUnits);
+      await const DataExportService().copyText(document);
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             context.strings.text('Local data export copied to the clipboard.'),
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      final arabic = Localizations.localeOf(context).languageCode == 'ar';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            arabic
+                ? 'تعذر إنشاء التصدير المحلي. لم يتم حذف أو رفع أي بيانات.'
+                : 'The local export could not be created. No data was deleted or uploaded.',
           ),
         ),
       );
@@ -85,10 +99,23 @@ class SettingsPage extends ConsumerWidget {
     );
     controller.dispose();
     if (confirmed != true) return;
-    final database = ref.read(databaseProvider);
-    await LocalDataLifecycleService(database).clearAll();
-    await SeedData.seedStarterCatalog(ref.read(foodRepositoryProvider));
-    if (context.mounted) context.go('/onboarding');
+    try {
+      final database = ref.read(databaseProvider);
+      await LocalDataLifecycleService(database).clearAll();
+      await SeedData.seedStarterCatalog(ref.read(foodRepositoryProvider));
+      if (context.mounted) context.go('/onboarding');
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.strings.text(
+              'Your data was not reset or uploaded. Try opening it again.',
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   @override
@@ -161,6 +188,8 @@ class SettingsPage extends ConsumerWidget {
             subtitle: Text(t('Minimize nonessential interface animation.')),
           ),
           const Divider(height: 32),
+          const _RegionTimezoneTile(),
+          const SizedBox(height: 8),
           DropdownButtonFormField<String>(
             key: ValueKey(measurementSystem),
             initialValue: measurementSystem.name,
@@ -208,6 +237,16 @@ class SettingsPage extends ConsumerWidget {
               t('Review, rate, disable, or delete remembered actions.'),
             ),
             onTap: () => context.go('/decision-memory'),
+          ),
+          ListTile(
+            leading: const Icon(Icons.event_note_outlined),
+            title: Text(t('Life context')),
+            subtitle: Text(
+              Localizations.localeOf(context).languageCode == 'ar'
+                  ? 'اختر لكل سجل ما إذا كان يمكن استخدامه في الاستنتاجات المحلية، أو احذفه.'
+                  : 'Choose per record whether it may inform local insights, or delete it.',
+            ),
+            onTap: () => context.go('/context'),
           ),
           ListTile(
             leading: const Icon(Icons.science_outlined),
@@ -325,6 +364,130 @@ class SettingsPage extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _RegionTimezoneTile extends ConsumerStatefulWidget {
+  const _RegionTimezoneTile();
+
+  @override
+  ConsumerState<_RegionTimezoneTile> createState() =>
+      _RegionTimezoneTileState();
+}
+
+class _RegionTimezoneTileState extends ConsumerState<_RegionTimezoneTile> {
+  String? region;
+  String? timezone;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final repository = ref.read(preferencesRepositoryProvider);
+    final values = await Future.wait([
+      repository.get('countryRegion'),
+      repository.get('timezoneName'),
+    ]);
+    if (mounted) {
+      setState(() {
+        region = values[0];
+        timezone = values[1];
+      });
+    }
+  }
+
+  Future<void> _edit() async {
+    final regionController = TextEditingController(text: region ?? '');
+    final timezoneController = TextEditingController(
+      text: timezone ?? DateTime.now().timeZoneName,
+    );
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    final result = await showDialog<(String, String)>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          arabic ? 'المنطقة والمنطقة الزمنية' : 'Region and timezone',
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: regionController,
+              autofillHints: const [AutofillHints.countryName],
+              decoration: InputDecoration(
+                labelText: arabic ? 'الدولة أو المنطقة' : 'Country or region',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: timezoneController,
+              decoration: InputDecoration(
+                labelText: arabic ? 'المنطقة الزمنية' : 'Timezone',
+                helperText: arabic
+                    ? 'تُستخدم للعرض المحلي فقط ولا تغيّر السجلات السابقة.'
+                    : 'Used for local display only; existing records are unchanged.',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(arabic ? 'إلغاء' : 'Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, (
+              regionController.text.trim(),
+              timezoneController.text.trim(),
+            )),
+            child: Text(arabic ? 'حفظ' : 'Save'),
+          ),
+        ],
+      ),
+    );
+    regionController.dispose();
+    timezoneController.dispose();
+    if (result == null) return;
+    final repository = ref.read(preferencesRepositoryProvider);
+    if (result.$1.isEmpty) {
+      await repository.remove('countryRegion');
+    } else {
+      await repository.set('countryRegion', result.$1);
+    }
+    if (result.$2.isEmpty) {
+      await repository.remove('timezoneName');
+    } else {
+      await repository.set('timezoneName', result.$2);
+    }
+    await _load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: const Icon(Icons.public),
+      title: Text(arabic ? 'المنطقة والمنطقة الزمنية' : 'Region and timezone'),
+      subtitle: Text(
+        [
+              if (region?.isNotEmpty == true) region!,
+              if (timezone?.isNotEmpty == true) timezone!,
+            ].isEmpty
+            ? (arabic
+                  ? 'غير محدد — يُستخدم إعداد الجهاز'
+                  : 'Not set — device defaults are used')
+            : [
+                if (region?.isNotEmpty == true) region!,
+                if (timezone?.isNotEmpty == true) timezone!,
+              ].join(' · '),
+      ),
+      trailing: const Icon(Icons.edit_outlined),
+      onTap: _edit,
     );
   }
 }
