@@ -160,6 +160,7 @@ class DashboardGrid extends ConsumerWidget {
         .map((row) => row.dayKey ?? dayKeyFor(row.date))
         .toSet();
     final observedDays = {...mealDays, ...waterDays, ...weightDays};
+    final loggingStreak = consecutiveLoggingDays(observedDays, DateTime.now());
     final comparableWeightDays = weights
         .where((row) => row.measurementContext != 'differentConditions')
         .length;
@@ -357,6 +358,25 @@ class DashboardGrid extends ConsumerWidget {
                   key: ValueKey('dashboard-check-in-complete'),
                 ),
         ),
+        if (loggingStreak >= 2)
+          Semantics(
+            liveRegion: true,
+            child: Card(
+              child: ListTile(
+                leading: const Icon(Icons.auto_graph_outlined),
+                title: Text(
+                  arabic
+                      ? 'استمرارية حقيقية: $loggingStreak أيام متتالية'
+                      : 'Real consistency: $loggingStreak days in a row',
+                ),
+                subtitle: Text(
+                  arabic
+                      ? 'هذا التشجيع مبني فقط على سجلاتك المحلية المتتالية، وليس رسالة عشوائية.'
+                      : 'This encouragement comes only from your consecutive local records, not a random quote.',
+                ),
+              ),
+            ),
+          ),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -664,6 +684,16 @@ class DashboardGrid extends ConsumerWidget {
       ],
     );
   }
+}
+
+int consecutiveLoggingDays(Set<String> observedDays, DateTime today) {
+  var streak = 0;
+  var day = today;
+  while (observedDays.contains(dayKeyFor(day))) {
+    streak++;
+    day = day.subtract(const Duration(days: 1));
+  }
+  return streak;
 }
 
 class _TargetRow extends StatelessWidget {

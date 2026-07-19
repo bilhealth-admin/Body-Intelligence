@@ -48,8 +48,13 @@ class DashboardPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('BIL'),
+        title: const _TodayAppBarTitle(),
         actions: [
+          IconButton(
+            tooltip: context.strings.text('Food catalog'),
+            icon: const Icon(Icons.search),
+            onPressed: () => context.go('/nutrition'),
+          ),
           IconButton(
             tooltip: context.strings.text('Daily check-in'),
             icon: const Icon(Icons.monitor_weight_outlined),
@@ -61,23 +66,8 @@ class DashboardPage extends ConsumerWidget {
             onPressed: () => context.go('/context'),
           ),
           IconButton(
-            tooltip: context.strings.text('Food catalog'),
-            icon: const Icon(Icons.restaurant_menu),
-            onPressed: () => context.go('/nutrition'),
-          ),
-          IconButton(
-            tooltip: context.strings.text('Analytics'),
-            icon: const Icon(Icons.analytics),
-            onPressed: () => context.go('/analytics'),
-          ),
-          IconButton(
-            tooltip: context.strings.text('Weight history'),
-            icon: const Icon(Icons.history),
-            onPressed: () => context.go('/history'),
-          ),
-          IconButton(
-            tooltip: context.strings.text('Settings'),
-            icon: const Icon(Icons.settings),
+            tooltip: context.strings.text('Profile'),
+            icon: const Icon(Icons.account_circle_outlined),
             onPressed: () => context.go('/settings'),
           ),
         ],
@@ -99,6 +89,32 @@ class DashboardPage extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _TodayAppBarTitle extends ConsumerWidget {
+  const _TodayAppBarTitle();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final meals = ref.watch(todayMealsProvider).value ?? const [];
+    final water = ref.watch(todayWaterProvider).value ?? const [];
+    final weight = ref.watch(todayWeightProvider).value;
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    final now = DateTime.now();
+    final hasRecord = weight != null || meals.isNotEmpty || water.isNotEmpty;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(MaterialLocalizations.of(context).formatMediumDate(now)),
+        Text(
+          hasRecord
+              ? (arabic ? 'تسجيل اليوم قيد التقدم' : 'Today in progress')
+              : (arabic ? 'ابدأ تسجيل اليوم' : 'Start today'),
+          style: Theme.of(context).textTheme.labelSmall,
+        ),
+      ],
     );
   }
 }
