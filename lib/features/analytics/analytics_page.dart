@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/database/date_keys.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../core/units/measurement_units.dart';
-import '../../engine/intelligence_engine.dart';
+import '../../engine/progress_analysis.dart';
 import '../../engine/recovery_engine.dart';
 import '../../engine/weekly_review_engine.dart';
 import '../dashboard/providers/dashboard_provider.dart';
@@ -95,9 +95,12 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
       );
     }
     final trackedDays = {...caloriesByDay.keys, ...waterByDay.keys}.length;
-    final rate = IntelligenceEngine.weeklyRate(
-      weights.map((row) => row.weight).toList(),
+    final progress = ProgressAnalysis.evaluate(
+      samples: weights
+          .map((row) => ProgressSample(date: row.date, weightKg: row.weight))
+          .toList(),
     );
+    final rate = progress.weeklyDirectionKg;
     final recentWeights = weights.length > 30
         ? weights.sublist(weights.length - 30)
         : weights;
@@ -226,6 +229,25 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                 '${caloriesByDay.length} days with calculated meal totals',
                 '${caloriesByDay.length} يومًا بإجماليات وجبات محسوبة',
               ),
+              tr(
+                'Weight evidence: ${progress.sampleCount} measurements across ${progress.spanDays} days · ${progress.confidence.name} confidence',
+                'دليل الوزن: ${progress.sampleCount} قياسًا خلال ${progress.spanDays} يومًا · ثقة ${switch (progress.confidence) {
+                  ProgressConfidence.insufficient => 'غير كافية',
+                  ProgressConfidence.low => 'منخفضة',
+                  ProgressConfidence.medium => 'متوسطة',
+                  ProgressConfidence.high => 'مرتفعة',
+                }}',
+              ),
+              if (progress.monthlyDirectionKg != null)
+                tr(
+                  'Approximate monthly direction: ${progress.monthlyDirectionKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(progress.monthlyDirectionKg!, system).toStringAsFixed(1)} $weightUnit',
+                  'الاتجاه الشهري التقريبي: ${progress.monthlyDirectionKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(progress.monthlyDirectionKg!, system).toStringAsFixed(1)} $weightUnit',
+                ),
+              if (progress.variabilityKg != null)
+                tr(
+                  'Variation around the direction: about ${UnitConverter.weightFromKg(progress.variabilityKg!, system).toStringAsFixed(2)} $weightUnit',
+                  'التذبذب حول الاتجاه: نحو ${UnitConverter.weightFromKg(progress.variabilityKg!, system).toStringAsFixed(2)} $weightUnit',
+                ),
             ],
           ),
           const SizedBox(height: 12),

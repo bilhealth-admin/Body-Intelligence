@@ -48,17 +48,22 @@ void main() {
       find.byWidgetPredicate(
         (widget) =>
             widget is Semantics &&
-            widget.properties.label == 'Recorded weight trend over time' &&
+            (widget.properties.label ?? '').startsWith(
+              'Recorded weight trend over time',
+            ) &&
             widget.properties.image == true,
       ),
       findsOneWidget,
     );
+    expect(find.text('Show raw measurements'), findsOneWidget);
+    expect(find.textContaining('Confidence:'), findsOneWidget);
     expect(
       find.textContaining('do not prove fat or muscle change'),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
 
+    await tester.scrollUntilVisible(find.text('79.4 kg'), 250);
     await tester.tap(find.text('79.4 kg'));
     await tester.pumpAndSettle();
     expect(find.text('Edit weight'), findsOneWidget);
