@@ -1738,7 +1738,7 @@
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
 - **Blocker:** None
-- **Completion commit:** `PENDING_ADAPTIVE_COMMIT`
+- **Completion commit:** `edf42ce`
 
 ### BIL-INT-150 — Explain Before Predicting
 
