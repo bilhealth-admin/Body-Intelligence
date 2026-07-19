@@ -1024,7 +1024,7 @@
 - **Acceptance criteria:** All source clauses are represented by the cited repository implementation/evidence, remain localized where user-facing, use real local data, and pass the listed regression coverage.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
 - **Blocker:** None
-- **Completion commit:** `PENDING_CLOSURE_COMMIT`
+- **Completion commit:** `e7ca432`
 
 ### BIL-UX-084 — English Is Also Native
 
@@ -2141,7 +2141,7 @@
 - **Acceptance criteria:** Do not represent missing evidence as zero; preserve known zero values and historical snapshots; label unavailable and partially supported totals in Arabic and English; retain calories and macros as existing authoritative snapshots.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** `PENDING_CLOSURE_COMMIT`
+- **Completion commit:** `e7ca432`
 
 ### BIL-TDY-170 — Water Card
 
