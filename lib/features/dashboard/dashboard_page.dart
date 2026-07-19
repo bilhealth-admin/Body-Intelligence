@@ -54,21 +54,6 @@ class DashboardPage extends ConsumerWidget {
         title: const _TodayAppBarTitle(),
         actions: [
           IconButton(
-            tooltip: context.strings.text('Food catalog'),
-            icon: const Icon(Icons.search),
-            onPressed: () => context.go('/nutrition'),
-          ),
-          IconButton(
-            tooltip: context.strings.text('Daily check-in'),
-            icon: const Icon(Icons.monitor_weight_outlined),
-            onPressed: () => context.go('/daily-check-in'),
-          ),
-          IconButton(
-            tooltip: context.strings.text('Life context'),
-            icon: const Icon(Icons.event_note_outlined),
-            onPressed: () => context.go('/context'),
-          ),
-          IconButton(
             tooltip: context.strings.text('Profile'),
             icon: const Icon(Icons.account_circle_outlined),
             onPressed: () => context.go('/settings'),
@@ -95,6 +80,15 @@ class DashboardPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                 ],
+                Semantics(
+                  container: true,
+                  header: true,
+                  child: Text(
+                    context.strings.text('Today'),
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                ),
+                const SizedBox(height: 12),
                 const DashboardHeader(),
                 const SizedBox(height: 20),
                 const DashboardGrid(),

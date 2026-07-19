@@ -260,483 +260,507 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
 
     return Scaffold(
       appBar: AppBar(title: Text(context.strings.text('Diary'))),
-      body: foods.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => ActionableErrorState(
-          title: context.strings.text('Could not load the food catalog.'),
-          onRetry: () => ref.invalidate(foodsProvider),
-        ),
-        data: (items) {
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.calendar_today),
-                title: Text(
-                  '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
-                ),
-                trailing: const Icon(Icons.edit_calendar),
-                onTap: () async {
-                  final picked = await showDatePicker(
-                    context: context,
-                    initialDate: date,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime.now().add(const Duration(days: 1)),
-                  );
-                  if (picked != null) {
-                    ref.read(selectedLogDateProvider.notifier).state = picked;
-                  }
-                },
-              ),
-              _field(
-                notes,
-                Localizations.localeOf(context).languageCode == 'ar'
-                    ? 'هل هناك ما قد يفسر تغيرات جسمك اليوم؟ مثل السفر أو قلة النوم أو وجبة عالية الصوديوم أو الصيام أو الضغط'
-                    : 'Anything that may explain today’s body changes? For example travel, poor sleep, a high-sodium meal, fasting, or stress',
-                lines: 4,
-              ),
-              Row(
-                children: [
-                  Expanded(child: _field(water, 'Water (ml)')),
-                  const SizedBox(width: 8),
-                  FilledButton(
-                    onPressed: _addWater,
-                    child: Text(context.strings.text('Add water')),
+      body: Semantics(
+        container: true,
+        child: foods.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, _) => ActionableErrorState(
+            title: context.strings.text('Could not load the food catalog.'),
+            onRetry: () => ref.invalidate(foodsProvider),
+          ),
+          data: (items) {
+            return ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Semantics(
+                  header: true,
+                  child: Text(
+                    context.strings.text('Record your day'),
+                    style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                ],
-              ),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final amount in const [250, 350, 500])
-                    ActionChip(
-                      avatar: const Icon(Icons.water_drop_outlined, size: 18),
-                      label: Text('+$amount ml'),
-                      onPressed: () => _addWater(amount),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              waterEntries.when(
-                data: (rows) => Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                ),
+                const SizedBox(height: 12),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.calendar_today),
+                  title: Text(
+                    '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
+                  ),
+                  trailing: const Icon(Icons.edit_calendar),
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: date,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime.now().add(const Duration(days: 1)),
+                    );
+                    if (picked != null) {
+                      ref.read(selectedLogDateProvider.notifier).state = picked;
+                    }
+                  },
+                ),
+                _field(
+                  notes,
+                  Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'هل هناك ما قد يفسر تغيرات جسمك اليوم؟ مثل السفر أو قلة النوم أو وجبة عالية الصوديوم أو الصيام أو الضغط'
+                      : 'Anything that may explain today’s body changes? For example travel, poor sleep, a high-sodium meal, fasting, or stress',
+                  lines: 4,
+                ),
+                Row(
                   children: [
-                    Text(
-                      '${context.strings.text('Water total')}: ${rows.fold<int>(0, (sum, row) => sum + row.amountMl)} ml',
+                    Expanded(child: _field(water, 'Water (ml)')),
+                    const SizedBox(width: 8),
+                    OutlinedButton(
+                      onPressed: _addWater,
+                      child: Text(context.strings.text('Add water')),
                     ),
-                    for (final entry in rows)
-                      ListTile(
-                        dense: true,
-                        contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.water_drop_outlined),
-                        title: Text('${entry.amountMl} ml'),
-                        subtitle: Text(
-                          '${entry.occurredAt.hour.toString().padLeft(2, '0')}:${entry.occurredAt.minute.toString().padLeft(2, '0')}',
-                        ),
-                        trailing: IconButton(
-                          tooltip: context.strings.text('Remove water entry'),
-                          onPressed: () => ref
-                              .read(waterRepositoryProvider)
-                              .delete(entry.id),
-                          icon: const Icon(Icons.close),
-                        ),
+                  ],
+                ),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final amount in const [250, 350, 500])
+                      ActionChip(
+                        avatar: const Icon(Icons.water_drop_outlined, size: 18),
+                        label: Text('+$amount ml'),
+                        onPressed: () => _addWater(amount),
                       ),
                   ],
                 ),
-                loading: () => const LinearProgressIndicator(),
-                error: (_, __) => ActionableErrorState(
-                  title: context.strings.text('Water data unavailable'),
-                  onRetry: () => ref.invalidate(dailyWaterProvider),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
+                const SizedBox(height: 8),
+                waterEntries.when(
+                  data: (rows) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: Text(
-                          context.strings.text('Meal type'),
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
+                      Text(
+                        '${context.strings.text('Water total')}: ${rows.fold<int>(0, (sum, row) => sum + row.amountMl)} ml',
                       ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        children: [
-                          for (final type in const [
-                            'breakfast',
-                            'lunch',
-                            'dinner',
-                            'snack',
-                          ])
-                            ChoiceChip(
-                              avatar: Icon(switch (type) {
-                                'breakfast' => Icons.free_breakfast_outlined,
-                                'lunch' => Icons.lunch_dining_outlined,
-                                'dinner' => Icons.dinner_dining_outlined,
-                                _ => Icons.cookie_outlined,
-                              }, size: 18),
-                              label: Text(
-                                context.strings.text(
-                                  '${type[0].toUpperCase()}${type.substring(1)}',
-                                ),
-                              ),
-                              selected: mealType == type,
-                              onSelected: (_) =>
-                                  setState(() => mealType = type),
-                            ),
-                        ],
-                      ),
-                      usualMeals.when(
-                        loading: () => const SizedBox.shrink(),
-                        error: (_, __) => ActionableErrorState(
-                          title: context.strings.text(
-                            'Your usual meals could not be loaded.',
+                      for (final entry in rows)
+                        ListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.water_drop_outlined),
+                          title: Text('${entry.amountMl} ml'),
+                          subtitle: Text(
+                            '${entry.occurredAt.hour.toString().padLeft(2, '0')}:${entry.occurredAt.minute.toString().padLeft(2, '0')}',
                           ),
-                          onRetry: () =>
-                              ref.invalidate(usualMealsProvider(mealType)),
+                          trailing: IconButton(
+                            tooltip: context.strings.text('Remove water entry'),
+                            onPressed: () => ref
+                                .read(waterRepositoryProvider)
+                                .delete(entry.id),
+                            icon: const Icon(Icons.close),
+                          ),
                         ),
-                        data: (candidates) {
-                          if (candidates.isEmpty) {
-                            return const SizedBox.shrink();
-                          }
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const SizedBox(height: 12),
-                              Text(
-                                Localizations.localeOf(context).languageCode ==
-                                        'ar'
-                                    ? 'وجباتك المعتادة — لن تتم الإضافة دون تأكيدك'
-                                    : 'Your usual meals — nothing is added without your confirmation',
-                                style: Theme.of(context).textTheme.labelLarge,
+                    ],
+                  ),
+                  loading: () => const LinearProgressIndicator(),
+                  error: (_, __) => ActionableErrorState(
+                    title: context.strings.text('Water data unavailable'),
+                    onRetry: () => ref.invalidate(dailyWaterProvider),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: Text(
+                            context.strings.text('Meal type'),
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          children: [
+                            for (final type in const [
+                              'breakfast',
+                              'lunch',
+                              'dinner',
+                              'snack',
+                            ])
+                              ChoiceChip(
+                                avatar: Icon(switch (type) {
+                                  'breakfast' => Icons.free_breakfast_outlined,
+                                  'lunch' => Icons.lunch_dining_outlined,
+                                  'dinner' => Icons.dinner_dining_outlined,
+                                  _ => Icons.cookie_outlined,
+                                }, size: 18),
+                                label: Text(
+                                  context.strings.text(
+                                    '${type[0].toUpperCase()}${type.substring(1)}',
+                                  ),
+                                ),
+                                selected: mealType == type,
+                                onSelected: (_) =>
+                                    setState(() => mealType = type),
                               ),
-                              const SizedBox(height: 6),
-                              for (final candidate in candidates)
-                                Card.outlined(
-                                  child: ListTile(
-                                    leading: const Icon(Icons.replay_outlined),
-                                    title: Text(
-                                      candidate.source.items
-                                          .map(
-                                            (item) => candidate
-                                                .source
-                                                .foodsById[item.foodId]
-                                                ?.name,
-                                          )
-                                          .whereType<String>()
-                                          .join(' + '),
-                                    ),
-                                    subtitle: Text(
-                                      Localizations.localeOf(
-                                                context,
-                                              ).languageCode ==
-                                              'ar'
-                                          ? 'سجلتها ${candidate.occurrences} مرات'
-                                          : 'Logged ${candidate.occurrences} times',
-                                    ),
-                                    trailing: FilledButton.tonal(
-                                      onPressed: () async {
-                                        await ref
-                                            .read(mealRepositoryProvider)
-                                            .repeatMeal(
-                                              candidate: candidate,
-                                              date: date,
-                                            );
-                                        ref.invalidate(
-                                          usualMealsProvider(mealType),
-                                        );
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(
+                          ],
+                        ),
+                        usualMeals.when(
+                          loading: () => const SizedBox.shrink(),
+                          error: (_, __) => ActionableErrorState(
+                            title: context.strings.text(
+                              'Your usual meals could not be loaded.',
+                            ),
+                            onRetry: () =>
+                                ref.invalidate(usualMealsProvider(mealType)),
+                          ),
+                          data: (candidates) {
+                            if (candidates.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                const SizedBox(height: 12),
+                                Text(
+                                  Localizations.localeOf(
                                             context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                context.strings.text(
-                                                  'Meal saved locally.',
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      },
-                                      child: Text(
+                                          ).languageCode ==
+                                          'ar'
+                                      ? 'وجباتك المعتادة — لن تتم الإضافة دون تأكيدك'
+                                      : 'Your usual meals — nothing is added without your confirmation',
+                                  style: Theme.of(context).textTheme.labelLarge,
+                                ),
+                                const SizedBox(height: 6),
+                                for (final candidate in candidates)
+                                  Card.outlined(
+                                    child: ListTile(
+                                      leading: const Icon(
+                                        Icons.replay_outlined,
+                                      ),
+                                      title: Text(
+                                        candidate.source.items
+                                            .map(
+                                              (item) => candidate
+                                                  .source
+                                                  .foodsById[item.foodId]
+                                                  ?.name,
+                                            )
+                                            .whereType<String>()
+                                            .join(' + '),
+                                      ),
+                                      subtitle: Text(
                                         Localizations.localeOf(
                                                   context,
                                                 ).languageCode ==
                                                 'ar'
-                                            ? 'أضف'
-                                            : 'Add',
+                                            ? 'سجلتها ${candidate.occurrences} مرات'
+                                            : 'Logged ${candidate.occurrences} times',
+                                      ),
+                                      trailing: FilledButton.tonal(
+                                        onPressed: () async {
+                                          await ref
+                                              .read(mealRepositoryProvider)
+                                              .repeatMeal(
+                                                candidate: candidate,
+                                                date: date,
+                                              );
+                                          ref.invalidate(
+                                            usualMealsProvider(mealType),
+                                          );
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  context.strings.text(
+                                                    'Meal saved locally.',
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        child: Text(
+                                          Localizations.localeOf(
+                                                    context,
+                                                  ).languageCode ==
+                                                  'ar'
+                                              ? 'أضف'
+                                              : 'Add',
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                            ],
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      SearchAnchor(
-                        searchController: foodSearch,
-                        viewHintText:
-                            Localizations.localeOf(context).languageCode == 'ar'
-                            ? 'ابحث بالاسم العربي أو الإنجليزي أو الباركود'
-                            : 'Search English, Arabic, keyword, or barcode',
-                        builder: (context, controller) => SearchBar(
-                          controller: controller,
-                          leading: const Icon(Icons.search),
-                          hintText:
+                              ],
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        SearchAnchor(
+                          searchController: foodSearch,
+                          viewHintText:
                               Localizations.localeOf(context).languageCode ==
                                   'ar'
-                              ? 'ابحث عن طعام'
-                              : 'Search foods',
-                          onTap: controller.openView,
-                          onChanged: (_) => controller.openView(),
-                        ),
-                        suggestionsBuilder: (context, controller) async {
-                          final arabic =
-                              Localizations.localeOf(context).languageCode ==
-                              'ar';
-                          final results = await ref
-                              .read(foodRepositoryProvider)
-                              .search(controller.text, limit: 20);
-                          if (results.isEmpty) {
-                            return [
-                              ListTile(
-                                leading: const Icon(Icons.search_off),
-                                title: Text(
-                                  arabic
-                                      ? 'لا توجد نتائج محلية. يمكنك إنشاء طعام مخصص من دليل الأطعمة.'
-                                      : 'No local result. Create a custom food from the food catalog.',
+                              ? 'ابحث بالاسم العربي أو الإنجليزي أو الباركود'
+                              : 'Search English, Arabic, keyword, or barcode',
+                          builder: (context, controller) => SearchBar(
+                            controller: controller,
+                            leading: const Icon(Icons.search),
+                            hintText:
+                                Localizations.localeOf(context).languageCode ==
+                                    'ar'
+                                ? 'ابحث عن طعام'
+                                : 'Search foods',
+                            onTap: controller.openView,
+                            onChanged: (_) => controller.openView(),
+                          ),
+                          suggestionsBuilder: (context, controller) async {
+                            final arabic =
+                                Localizations.localeOf(context).languageCode ==
+                                'ar';
+                            final results = await ref
+                                .read(foodRepositoryProvider)
+                                .search(controller.text, limit: 20);
+                            if (results.isEmpty) {
+                              return [
+                                ListTile(
+                                  leading: const Icon(Icons.search_off),
+                                  title: Text(
+                                    arabic
+                                        ? 'لا توجد نتائج محلية. يمكنك إنشاء طعام مخصص من دليل الأطعمة.'
+                                        : 'No local result. Create a custom food from the food catalog.',
+                                  ),
                                 ),
+                              ];
+                            }
+                            return results.map(
+                              (food) => ListTile(
+                                leading: Icon(
+                                  food.isCustom
+                                      ? Icons.person_outline
+                                      : Icons.verified_outlined,
+                                ),
+                                title: Text(
+                                  food.arabicName == null
+                                      ? food.name
+                                      : '${food.arabicName} • ${food.name}',
+                                ),
+                                subtitle: Text(
+                                  '${food.calories.toStringAsFixed(0)} kcal / ${food.servingSize.toStringAsFixed(0)} ${food.servingUnit} · ${food.source}',
+                                ),
+                                onTap: () {
+                                  setState(() => selectedFood = food);
+                                  controller.closeView(food.name);
+                                },
                               ),
-                            ];
-                          }
-                          return results.map(
-                            (food) => ListTile(
-                              leading: Icon(
-                                food.isCustom
-                                    ? Icons.person_outline
-                                    : Icons.verified_outlined,
-                              ),
-                              title: Text(
-                                food.arabicName == null
-                                    ? food.name
-                                    : '${food.arabicName} • ${food.name}',
-                              ),
-                              subtitle: Text(
-                                '${food.calories.toStringAsFixed(0)} kcal / ${food.servingSize.toStringAsFixed(0)} ${food.servingUnit} · ${food.source}',
-                              ),
-                              onTap: () {
-                                setState(() => selectedFood = food);
-                                controller.closeView(food.name);
-                              },
+                            );
+                          },
+                        ),
+                        if (selectedFood != null)
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(Icons.check_circle),
+                            title: Text(selectedFood!.name),
+                            subtitle: Text(
+                              '${selectedFood!.source} · ${context.strings.text(selectedFood!.verified ? 'Verified' : 'Unverified')}',
                             ),
-                          );
-                        },
-                      ),
-                      if (selectedFood != null)
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(Icons.check_circle),
-                          title: Text(selectedFood!.name),
-                          subtitle: Text(
-                            '${selectedFood!.source} · ${context.strings.text(selectedFood!.verified ? 'Verified' : 'Unverified')}',
+                            trailing: IconButton(
+                              onPressed: () =>
+                                  setState(() => selectedFood = null),
+                              icon: const Icon(Icons.close),
+                            ),
                           ),
-                          trailing: IconButton(
-                            onPressed: () =>
-                                setState(() => selectedFood = null),
-                            icon: const Icon(Icons.close),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: quantity,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: InputDecoration(
+                            labelText:
+                                '${context.strings.text('Quantity')} (${selectedFood?.servingUnit ?? 'g'})',
                           ),
                         ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: quantity,
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
+                        const SizedBox(height: 12),
+                        OutlinedButton(
+                          onPressed: selectedFood == null ? null : _saveMeal,
+                          child: Text(context.strings.text('Save meal')),
                         ),
-                        decoration: InputDecoration(
-                          labelText:
-                              '${context.strings.text('Quantity')} (${selectedFood?.servingUnit ?? 'g'})',
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      FilledButton(
-                        onPressed: selectedFood == null ? null : _saveMeal,
-                        child: Text(context.strings.text('Save meal')),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              meals.when(
-                loading: () => const LinearProgressIndicator(),
-                error: (_, __) => ActionableErrorState(
-                  title: context.strings.text('Meals unavailable'),
-                  onRetry: () => ref.invalidate(dailyMealsProvider),
+                const SizedBox(height: 12),
+                meals.when(
+                  loading: () => const LinearProgressIndicator(),
+                  error: (_, __) => ActionableErrorState(
+                    title: context.strings.text('Meals unavailable'),
+                    onRetry: () => ref.invalidate(dailyMealsProvider),
+                  ),
+                  data: (rows) {
+                    if (rows.isEmpty) {
+                      return Text(
+                        context.strings.text('No meals for this day.'),
+                      );
+                    }
+                    final allItems = rows.expand((meal) => meal.items).toList();
+                    return Column(
+                      children: [
+                        ListTile(
+                          title: Text(
+                            context.strings.text('Calculated nutrition'),
+                          ),
+                          subtitle: Text(
+                            '${allItems.fold<double>(0, (sum, item) => sum + item.calories).toStringAsFixed(0)} kcal · '
+                            '${allItems.fold<double>(0, (sum, item) => sum + item.protein).toStringAsFixed(1)} g protein · '
+                            '${allItems.fold<double>(0, (sum, item) => sum + item.carbs).toStringAsFixed(1)} g carbs · '
+                            '${allItems.fold<double>(0, (sum, item) => sum + item.fats).toStringAsFixed(1)} g fat',
+                          ),
+                        ),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _NutrientMetric(
+                              label: 'Fiber',
+                              value: allItems.fold<double>(
+                                0,
+                                (sum, item) => sum + item.fiber,
+                              ),
+                              unit: 'g',
+                            ),
+                            _NutrientMetric(
+                              label: 'Sodium',
+                              value: allItems.fold<double>(
+                                0,
+                                (sum, item) => sum + item.sodium,
+                              ),
+                              unit: 'mg',
+                            ),
+                            _NutrientMetric(
+                              label: 'Potassium',
+                              value: allItems.fold<double>(
+                                0,
+                                (sum, item) => sum + item.potassium,
+                              ),
+                              unit: 'mg',
+                            ),
+                            _NutrientMetric(
+                              label: 'Magnesium',
+                              value: allItems.fold<double>(
+                                0,
+                                (sum, item) => sum + item.magnesium,
+                              ),
+                              unit: 'mg',
+                            ),
+                            _NutrientMetric(
+                              label: 'Calcium',
+                              value: allItems.fold<double>(
+                                0,
+                                (sum, item) => sum + item.calcium,
+                              ),
+                              unit: 'mg',
+                            ),
+                            _NutrientMetric(
+                              label: 'Sugar',
+                              value: allItems.fold<double>(
+                                0,
+                                (sum, item) => sum + item.sugar,
+                              ),
+                              unit: 'g',
+                            ),
+                          ],
+                        ),
+                        ...rows.expand(
+                          (meal) => meal.items.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final item = entry.value;
+                            final food = meal.foodsById[item.foodId];
+                            return ListTile(
+                              title: Text(
+                                food?.name ??
+                                    context.strings.text('Historical food'),
+                              ),
+                              subtitle: Text(
+                                '${context.strings.text('${meal.meal.type[0].toUpperCase()}${meal.meal.type.substring(1)}')} · ${item.quantity.toStringAsFixed(0)} ${food?.servingUnit ?? 'g'}',
+                              ),
+                              onTap: food == null || food.deletedAt != null
+                                  ? null
+                                  : () => _editMealItem(item, food),
+                              onLongPress: () => _showItemActions(item, food),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    tooltip:
+                                        Localizations.localeOf(
+                                              context,
+                                            ).languageCode ==
+                                            'ar'
+                                        ? 'حرّك لأعلى'
+                                        : 'Move up',
+                                    onPressed: index == 0
+                                        ? null
+                                        : () => ref
+                                              .read(mealRepositoryProvider)
+                                              .moveMealItem(
+                                                id: item.id,
+                                                offset: -1,
+                                              ),
+                                    icon: const Icon(Icons.arrow_upward),
+                                  ),
+                                  IconButton(
+                                    tooltip:
+                                        Localizations.localeOf(
+                                              context,
+                                            ).languageCode ==
+                                            'ar'
+                                        ? 'حرّك لأسفل'
+                                        : 'Move down',
+                                    onPressed: index == meal.items.length - 1
+                                        ? null
+                                        : () => ref
+                                              .read(mealRepositoryProvider)
+                                              .moveMealItem(
+                                                id: item.id,
+                                                offset: 1,
+                                              ),
+                                    icon: const Icon(Icons.arrow_downward),
+                                  ),
+                                  IconButton(
+                                    tooltip:
+                                        Localizations.localeOf(
+                                              context,
+                                            ).languageCode ==
+                                            'ar'
+                                        ? 'إجراءات العنصر'
+                                        : 'Item actions',
+                                    icon: const Icon(Icons.more_vert),
+                                    onPressed: () =>
+                                        _showItemActions(item, food),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                        ),
+                      ],
+                    );
+                  },
                 ),
-                data: (rows) {
-                  if (rows.isEmpty) {
-                    return Text(context.strings.text('No meals for this day.'));
-                  }
-                  final allItems = rows.expand((meal) => meal.items).toList();
-                  return Column(
-                    children: [
-                      ListTile(
-                        title: Text(
-                          context.strings.text('Calculated nutrition'),
-                        ),
-                        subtitle: Text(
-                          '${allItems.fold<double>(0, (sum, item) => sum + item.calories).toStringAsFixed(0)} kcal · '
-                          '${allItems.fold<double>(0, (sum, item) => sum + item.protein).toStringAsFixed(1)} g protein · '
-                          '${allItems.fold<double>(0, (sum, item) => sum + item.carbs).toStringAsFixed(1)} g carbs · '
-                          '${allItems.fold<double>(0, (sum, item) => sum + item.fats).toStringAsFixed(1)} g fat',
-                        ),
-                      ),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _NutrientMetric(
-                            label: 'Fiber',
-                            value: allItems.fold<double>(
-                              0,
-                              (sum, item) => sum + item.fiber,
-                            ),
-                            unit: 'g',
-                          ),
-                          _NutrientMetric(
-                            label: 'Sodium',
-                            value: allItems.fold<double>(
-                              0,
-                              (sum, item) => sum + item.sodium,
-                            ),
-                            unit: 'mg',
-                          ),
-                          _NutrientMetric(
-                            label: 'Potassium',
-                            value: allItems.fold<double>(
-                              0,
-                              (sum, item) => sum + item.potassium,
-                            ),
-                            unit: 'mg',
-                          ),
-                          _NutrientMetric(
-                            label: 'Magnesium',
-                            value: allItems.fold<double>(
-                              0,
-                              (sum, item) => sum + item.magnesium,
-                            ),
-                            unit: 'mg',
-                          ),
-                          _NutrientMetric(
-                            label: 'Calcium',
-                            value: allItems.fold<double>(
-                              0,
-                              (sum, item) => sum + item.calcium,
-                            ),
-                            unit: 'mg',
-                          ),
-                          _NutrientMetric(
-                            label: 'Sugar',
-                            value: allItems.fold<double>(
-                              0,
-                              (sum, item) => sum + item.sugar,
-                            ),
-                            unit: 'g',
-                          ),
-                        ],
-                      ),
-                      ...rows.expand(
-                        (meal) => meal.items.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final item = entry.value;
-                          final food = meal.foodsById[item.foodId];
-                          return ListTile(
-                            title: Text(
-                              food?.name ??
-                                  context.strings.text('Historical food'),
-                            ),
-                            subtitle: Text(
-                              '${context.strings.text('${meal.meal.type[0].toUpperCase()}${meal.meal.type.substring(1)}')} · ${item.quantity.toStringAsFixed(0)} ${food?.servingUnit ?? 'g'}',
-                            ),
-                            onTap: food == null || food.deletedAt != null
-                                ? null
-                                : () => _editMealItem(item, food),
-                            onLongPress: () => _showItemActions(item, food),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  tooltip:
-                                      Localizations.localeOf(
-                                            context,
-                                          ).languageCode ==
-                                          'ar'
-                                      ? 'حرّك لأعلى'
-                                      : 'Move up',
-                                  onPressed: index == 0
-                                      ? null
-                                      : () => ref
-                                            .read(mealRepositoryProvider)
-                                            .moveMealItem(
-                                              id: item.id,
-                                              offset: -1,
-                                            ),
-                                  icon: const Icon(Icons.arrow_upward),
-                                ),
-                                IconButton(
-                                  tooltip:
-                                      Localizations.localeOf(
-                                            context,
-                                          ).languageCode ==
-                                          'ar'
-                                      ? 'حرّك لأسفل'
-                                      : 'Move down',
-                                  onPressed: index == meal.items.length - 1
-                                      ? null
-                                      : () => ref
-                                            .read(mealRepositoryProvider)
-                                            .moveMealItem(
-                                              id: item.id,
-                                              offset: 1,
-                                            ),
-                                  icon: const Icon(Icons.arrow_downward),
-                                ),
-                                IconButton(
-                                  tooltip:
-                                      Localizations.localeOf(
-                                            context,
-                                          ).languageCode ==
-                                          'ar'
-                                      ? 'إجراءات العنصر'
-                                      : 'Item actions',
-                                  icon: const Icon(Icons.more_vert),
-                                  onPressed: () => _showItemActions(item, food),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                      ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
-              FilledButton(
-                onPressed: _save,
-                child: Text(context.strings.text('Save log')),
-              ),
-            ],
-          );
-        },
+                const SizedBox(height: 20),
+                Semantics(
+                  button: true,
+                  label: context.strings.text('Save log'),
+                  child: FilledButton(
+                    key: const Key('daily_log_save_primary_action'),
+                    onPressed: _save,
+                    child: Text(context.strings.text('Save log')),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

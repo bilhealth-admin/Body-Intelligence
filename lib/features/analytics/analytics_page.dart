@@ -175,6 +175,14 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Semantics(
+            header: true,
+            child: Text(
+              context.strings.text('Analytics overview'),
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ),
+          const SizedBox(height: 12),
           AnalyticsRangeSelector(
             value: range,
             onChanged: (value) => setState(() => range = value),
