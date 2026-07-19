@@ -349,13 +349,10 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                     title: Text(
                                       candidate.source.items
                                           .map(
-                                            (item) => items
-                                                .where(
-                                                  (food) =>
-                                                      food.id == item.foodId,
-                                                )
-                                                .map((food) => food.name)
-                                                .firstOrNull,
+                                            (item) => candidate
+                                                .source
+                                                .foodsById[item.foodId]
+                                                ?.name,
                                           )
                                           .whereType<String>()
                                           .join(' + '),
@@ -580,27 +577,72 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                         ],
                       ),
                       ...rows.expand(
-                        (meal) => meal.items.map((item) {
-                          final food = items
-                              .where((row) => row.id == item.foodId)
-                              .firstOrNull;
+                        (meal) => meal.items.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final item = entry.value;
+                          final food = meal.foodsById[item.foodId];
                           return ListTile(
                             title: Text(
-                              food?.name ?? context.strings.text('Food'),
+                              food?.name ??
+                                  context.strings.text('Historical food'),
                             ),
                             subtitle: Text(
                               '${context.strings.text('${meal.meal.type[0].toUpperCase()}${meal.meal.type.substring(1)}')} · ${item.quantity.toStringAsFixed(0)} ${food?.servingUnit ?? 'g'}',
                             ),
-                            onTap: food == null
+                            onTap: food == null || food.deletedAt != null
                                 ? null
                                 : () => _editMealItem(item, food),
-                            trailing: IconButton(
-                              tooltip: context.strings.text('Remove meal item'),
-                              icon: const Icon(Icons.delete_outline),
-                              onPressed: () => _deleteMealItem(
-                                item,
-                                food?.name ?? context.strings.text('Food'),
-                              ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  tooltip:
+                                      Localizations.localeOf(
+                                            context,
+                                          ).languageCode ==
+                                          'ar'
+                                      ? 'حرّك لأعلى'
+                                      : 'Move up',
+                                  onPressed: index == 0
+                                      ? null
+                                      : () => ref
+                                            .read(mealRepositoryProvider)
+                                            .moveMealItem(
+                                              id: item.id,
+                                              offset: -1,
+                                            ),
+                                  icon: const Icon(Icons.arrow_upward),
+                                ),
+                                IconButton(
+                                  tooltip:
+                                      Localizations.localeOf(
+                                            context,
+                                          ).languageCode ==
+                                          'ar'
+                                      ? 'حرّك لأسفل'
+                                      : 'Move down',
+                                  onPressed: index == meal.items.length - 1
+                                      ? null
+                                      : () => ref
+                                            .read(mealRepositoryProvider)
+                                            .moveMealItem(
+                                              id: item.id,
+                                              offset: 1,
+                                            ),
+                                  icon: const Icon(Icons.arrow_downward),
+                                ),
+                                IconButton(
+                                  tooltip: context.strings.text(
+                                    'Remove meal item',
+                                  ),
+                                  icon: const Icon(Icons.delete_outline),
+                                  onPressed: () => _deleteMealItem(
+                                    item,
+                                    food?.name ??
+                                        context.strings.text('Historical food'),
+                                  ),
+                                ),
+                              ],
                             ),
                           );
                         }),

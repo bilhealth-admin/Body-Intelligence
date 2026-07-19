@@ -141,12 +141,20 @@ void main() {
         .get();
     expect(
       mealItemColumns.map((row) => row.read<String>('name')),
-      containsAll(['calcium', 'magnesium', 'sugar', 'revision', 'sync_status']),
+      containsAll([
+        'calcium',
+        'magnesium',
+        'sugar',
+        'revision',
+        'sync_status',
+        'position',
+      ]),
     );
     final preservedItem = await database.select(database.mealItems).getSingle();
     expect(preservedItem.quantity, 50);
     expect(preservedItem.calories, 194.5);
     expect(preservedItem.revision, 1);
     expect(preservedItem.syncStatus, 'local');
+    expect(preservedItem.position, 1);
   });
 }

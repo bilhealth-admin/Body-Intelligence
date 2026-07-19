@@ -7,6 +7,8 @@ import '../../data/database/app_database.dart';
 import '../../app/localization/app_localizations.dart';
 import '../foods/providers/food_provider.dart';
 
+enum _CatalogView { all, favorites, recent }
+
 class FoodPage extends ConsumerStatefulWidget {
   const FoodPage({super.key});
 
@@ -19,6 +21,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
   List<Food>? results;
   Timer? debounce;
   int searchGeneration = 0;
+  _CatalogView catalogView = _CatalogView.all;
 
   @override
   void dispose() {
@@ -139,6 +142,9 @@ class _FoodPageState extends ConsumerState<FoodPage> {
   Widget build(BuildContext context) {
     final t = context.strings.text;
     final allFoods = ref.watch(foodsProvider);
+    final favorites = ref.watch(favoriteFoodsProvider);
+    final recent = ref.watch(recentFoodsProvider);
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
     return Scaffold(
       appBar: AppBar(
         title: Text(context.strings.text('Food catalog')),
@@ -158,12 +164,40 @@ class _FoodPageState extends ConsumerState<FoodPage> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
-            child: SearchBar(
-              controller: search,
-              hintText: t('English, Arabic, keyword, or barcode'),
-              leading: const Icon(Icons.search),
-              onChanged: _scheduleSearch,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SearchBar(
+                  controller: search,
+                  hintText: t('English, Arabic, keyword, or barcode'),
+                  leading: const Icon(Icons.search),
+                  onChanged: _scheduleSearch,
+                ),
+                const SizedBox(height: 12),
+                SegmentedButton<_CatalogView>(
+                  showSelectedIcon: false,
+                  segments: [
+                    ButtonSegment(
+                      value: _CatalogView.all,
+                      label: Text(arabic ? 'الكل' : 'All'),
+                    ),
+                    ButtonSegment(
+                      value: _CatalogView.favorites,
+                      label: Text(arabic ? 'المفضلة' : 'Favorites'),
+                      icon: const Icon(Icons.favorite_outline),
+                    ),
+                    ButtonSegment(
+                      value: _CatalogView.recent,
+                      label: Text(arabic ? 'الأخيرة' : 'Recent'),
+                      icon: const Icon(Icons.history),
+                    ),
+                  ],
+                  selected: {catalogView},
+                  onSelectionChanged: (selection) =>
+                      setState(() => catalogView = selection.first),
+                ),
+              ],
             ),
           ),
           Expanded(
@@ -184,10 +218,44 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                 ),
               ),
               data: (foods) {
-                final visible = results ?? foods;
+                final selectedAsync = switch (catalogView) {
+                  _CatalogView.all => allFoods,
+                  _CatalogView.favorites => favorites,
+                  _CatalogView.recent => recent,
+                };
+                if (search.text.trim().isEmpty && selectedAsync.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (search.text.trim().isEmpty && selectedAsync.hasError) {
+                  return Center(
+                    child: Text(
+                      arabic
+                          ? 'تعذر تحميل هذه القائمة المحلية.'
+                          : 'This local food list could not be loaded.',
+                    ),
+                  );
+                }
+                final selectedRows = switch (catalogView) {
+                  _CatalogView.all => foods,
+                  _CatalogView.favorites => favorites.value ?? const <Food>[],
+                  _CatalogView.recent => recent.value ?? const <Food>[],
+                };
+                final visible = search.text.trim().isNotEmpty
+                    ? (results ?? const <Food>[])
+                    : selectedRows;
                 if (visible.isEmpty) {
                   return Center(
-                    child: Text(t('No matching foods. Create a custom food.')),
+                    child: Text(
+                      catalogView == _CatalogView.favorites
+                          ? (arabic
+                                ? 'لا توجد أطعمة مفضلة بعد.'
+                                : 'No favorite foods yet.')
+                          : catalogView == _CatalogView.recent
+                          ? (arabic
+                                ? 'ستظهر الأطعمة المستخدمة مؤخرًا هنا.'
+                                : 'Recently used foods will appear here.')
+                          : t('No matching foods. Create a custom food.'),
+                    ),
                   );
                 }
                 return ListView.builder(

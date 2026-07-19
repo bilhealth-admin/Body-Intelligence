@@ -183,14 +183,59 @@ void main() {
       expect(suggestions.single.occurrences, 2);
       expect(await database.select(database.meals).get(), hasLength(2));
 
+      await foods.deleteCustomFood(foodId);
+      expect(await foods.search('Repeat oats'), isEmpty);
+
       await meals.repeatMeal(
         candidate: suggestions.single,
         date: DateTime(2026, 7, 10),
       );
       expect(await database.select(database.meals).get(), hasLength(3));
       expect(await database.select(database.mealItems).get(), hasLength(3));
+      final repeated =
+          (await meals.watchMealsForDate(DateTime(2026, 7, 10)).first).single;
+      expect(repeated.foodsById[foodId]?.name, 'Repeat oats');
+      expect(repeated.items.single.calories, 190);
     },
   );
+
+  test('meal item order is durable and revisioned', () async {
+    final foods = FoodRepository(database);
+    final meals = MealRepository(database);
+    final firstFood = await foods.addFood(
+      name: 'First',
+      category: 'custom',
+      calories: 100,
+      protein: 1,
+      carbs: 1,
+      fats: 1,
+    );
+    final secondFood = await foods.addFood(
+      name: 'Second',
+      category: 'custom',
+      calories: 200,
+      protein: 2,
+      carbs: 2,
+      fats: 2,
+    );
+    final mealId = await meals.createMeal(
+      date: DateTime(2026, 7, 19),
+      name: 'Lunch',
+      type: 'lunch',
+    );
+    await meals.addMealItem(mealId: mealId, foodId: firstFood, quantity: 100);
+    await meals.addMealItem(mealId: mealId, foodId: secondFood, quantity: 100);
+    var watched =
+        (await meals.watchMealsForDate(DateTime(2026, 7, 19)).first).single;
+    expect(watched.items.map((item) => item.foodId), [firstFood, secondFood]);
+
+    await meals.moveMealItem(id: watched.items.last.id, offset: -1);
+    watched =
+        (await meals.watchMealsForDate(DateTime(2026, 7, 19)).first).single;
+    expect(watched.items.map((item) => item.foodId), [secondFood, firstFood]);
+    expect(watched.items.first.revision, 2);
+    expect(watched.items.first.syncStatus, 'pending');
+  });
 
   test('food search matches Arabic names and favorites are unique', () async {
     final foods = FoodRepository(database);

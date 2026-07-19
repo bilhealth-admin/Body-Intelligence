@@ -4822,6 +4822,18 @@ class $MealItemsTable extends MealItems
     requiredDuringInsert: false,
     defaultValue: const Constant(100),
   );
+  static const VerificationMeta _positionMeta = const VerificationMeta(
+    'position',
+  );
+  @override
+  late final GeneratedColumn<int> position = GeneratedColumn<int>(
+    'position',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _caloriesMeta = const VerificationMeta(
     'calories',
   );
@@ -4998,6 +5010,7 @@ class $MealItemsTable extends MealItems
     mealId,
     foodId,
     quantity,
+    position,
     calories,
     protein,
     carbs,
@@ -5055,6 +5068,12 @@ class $MealItemsTable extends MealItems
       context.handle(
         _quantityMeta,
         quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    }
+    if (data.containsKey('position')) {
+      context.handle(
+        _positionMeta,
+        position.isAcceptableOrUnknown(data['position']!, _positionMeta),
       );
     }
     if (data.containsKey('calories')) {
@@ -5176,6 +5195,10 @@ class $MealItemsTable extends MealItems
         DriftSqlType.double,
         data['${effectivePrefix}quantity'],
       )!,
+      position: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}position'],
+      )!,
       calories: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}calories'],
@@ -5251,6 +5274,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
   final int mealId;
   final int foodId;
   final double quantity;
+  final int position;
   final double calories;
   final double protein;
   final double carbs;
@@ -5272,6 +5296,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     required this.mealId,
     required this.foodId,
     required this.quantity,
+    required this.position,
     required this.calories,
     required this.protein,
     required this.carbs,
@@ -5296,6 +5321,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     map['meal_id'] = Variable<int>(mealId);
     map['food_id'] = Variable<int>(foodId);
     map['quantity'] = Variable<double>(quantity);
+    map['position'] = Variable<int>(position);
     map['calories'] = Variable<double>(calories);
     map['protein'] = Variable<double>(protein);
     map['carbs'] = Variable<double>(carbs);
@@ -5323,6 +5349,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       mealId: Value(mealId),
       foodId: Value(foodId),
       quantity: Value(quantity),
+      position: Value(position),
       calories: Value(calories),
       protein: Value(protein),
       carbs: Value(carbs),
@@ -5354,6 +5381,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       mealId: serializer.fromJson<int>(json['mealId']),
       foodId: serializer.fromJson<int>(json['foodId']),
       quantity: serializer.fromJson<double>(json['quantity']),
+      position: serializer.fromJson<int>(json['position']),
       calories: serializer.fromJson<double>(json['calories']),
       protein: serializer.fromJson<double>(json['protein']),
       carbs: serializer.fromJson<double>(json['carbs']),
@@ -5380,6 +5408,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       'mealId': serializer.toJson<int>(mealId),
       'foodId': serializer.toJson<int>(foodId),
       'quantity': serializer.toJson<double>(quantity),
+      'position': serializer.toJson<int>(position),
       'calories': serializer.toJson<double>(calories),
       'protein': serializer.toJson<double>(protein),
       'carbs': serializer.toJson<double>(carbs),
@@ -5404,6 +5433,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     int? mealId,
     int? foodId,
     double? quantity,
+    int? position,
     double? calories,
     double? protein,
     double? carbs,
@@ -5425,6 +5455,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     mealId: mealId ?? this.mealId,
     foodId: foodId ?? this.foodId,
     quantity: quantity ?? this.quantity,
+    position: position ?? this.position,
     calories: calories ?? this.calories,
     protein: protein ?? this.protein,
     carbs: carbs ?? this.carbs,
@@ -5448,6 +5479,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       mealId: data.mealId.present ? data.mealId.value : this.mealId,
       foodId: data.foodId.present ? data.foodId.value : this.foodId,
       quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      position: data.position.present ? data.position.value : this.position,
       calories: data.calories.present ? data.calories.value : this.calories,
       protein: data.protein.present ? data.protein.value : this.protein,
       carbs: data.carbs.present ? data.carbs.value : this.carbs,
@@ -5476,6 +5508,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
           ..write('mealId: $mealId, ')
           ..write('foodId: $foodId, ')
           ..write('quantity: $quantity, ')
+          ..write('position: $position, ')
           ..write('calories: $calories, ')
           ..write('protein: $protein, ')
           ..write('carbs: $carbs, ')
@@ -5496,12 +5529,13 @@ class MealItem extends DataClass implements Insertable<MealItem> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     uuid,
     mealId,
     foodId,
     quantity,
+    position,
     calories,
     protein,
     carbs,
@@ -5517,7 +5551,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     deletedAt,
     revision,
     syncStatus,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5527,6 +5561,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
           other.mealId == this.mealId &&
           other.foodId == this.foodId &&
           other.quantity == this.quantity &&
+          other.position == this.position &&
           other.calories == this.calories &&
           other.protein == this.protein &&
           other.carbs == this.carbs &&
@@ -5550,6 +5585,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
   final Value<int> mealId;
   final Value<int> foodId;
   final Value<double> quantity;
+  final Value<int> position;
   final Value<double> calories;
   final Value<double> protein;
   final Value<double> carbs;
@@ -5571,6 +5607,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     this.mealId = const Value.absent(),
     this.foodId = const Value.absent(),
     this.quantity = const Value.absent(),
+    this.position = const Value.absent(),
     this.calories = const Value.absent(),
     this.protein = const Value.absent(),
     this.carbs = const Value.absent(),
@@ -5593,6 +5630,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     required int mealId,
     required int foodId,
     this.quantity = const Value.absent(),
+    this.position = const Value.absent(),
     this.calories = const Value.absent(),
     this.protein = const Value.absent(),
     this.carbs = const Value.absent(),
@@ -5616,6 +5654,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     Expression<int>? mealId,
     Expression<int>? foodId,
     Expression<double>? quantity,
+    Expression<int>? position,
     Expression<double>? calories,
     Expression<double>? protein,
     Expression<double>? carbs,
@@ -5638,6 +5677,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
       if (mealId != null) 'meal_id': mealId,
       if (foodId != null) 'food_id': foodId,
       if (quantity != null) 'quantity': quantity,
+      if (position != null) 'position': position,
       if (calories != null) 'calories': calories,
       if (protein != null) 'protein': protein,
       if (carbs != null) 'carbs': carbs,
@@ -5662,6 +5702,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     Value<int>? mealId,
     Value<int>? foodId,
     Value<double>? quantity,
+    Value<int>? position,
     Value<double>? calories,
     Value<double>? protein,
     Value<double>? carbs,
@@ -5684,6 +5725,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
       mealId: mealId ?? this.mealId,
       foodId: foodId ?? this.foodId,
       quantity: quantity ?? this.quantity,
+      position: position ?? this.position,
       calories: calories ?? this.calories,
       protein: protein ?? this.protein,
       carbs: carbs ?? this.carbs,
@@ -5719,6 +5761,9 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     }
     if (quantity.present) {
       map['quantity'] = Variable<double>(quantity.value);
+    }
+    if (position.present) {
+      map['position'] = Variable<int>(position.value);
     }
     if (calories.present) {
       map['calories'] = Variable<double>(calories.value);
@@ -5776,6 +5821,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
           ..write('mealId: $mealId, ')
           ..write('foodId: $foodId, ')
           ..write('quantity: $quantity, ')
+          ..write('position: $position, ')
           ..write('calories: $calories, ')
           ..write('protein: $protein, ')
           ..write('carbs: $carbs, ')
@@ -15272,6 +15318,7 @@ typedef $$MealItemsTableCreateCompanionBuilder =
       required int mealId,
       required int foodId,
       Value<double> quantity,
+      Value<int> position,
       Value<double> calories,
       Value<double> protein,
       Value<double> carbs,
@@ -15295,6 +15342,7 @@ typedef $$MealItemsTableUpdateCompanionBuilder =
       Value<int> mealId,
       Value<int> foodId,
       Value<double> quantity,
+      Value<int> position,
       Value<double> calories,
       Value<double> protein,
       Value<double> carbs,
@@ -15372,6 +15420,11 @@ class $$MealItemsTableFilterComposer
 
   ColumnFilters<double> get quantity => $composableBuilder(
     column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get position => $composableBuilder(
+    column: $table.position,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -15521,6 +15574,11 @@ class $$MealItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get position => $composableBuilder(
+    column: $table.position,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get calories => $composableBuilder(
     column: $table.calories,
     builder: (column) => ColumnOrderings(column),
@@ -15661,6 +15719,9 @@ class $$MealItemsTableAnnotationComposer
   GeneratedColumn<double> get quantity =>
       $composableBuilder(column: $table.quantity, builder: (column) => column);
 
+  GeneratedColumn<int> get position =>
+      $composableBuilder(column: $table.position, builder: (column) => column);
+
   GeneratedColumn<double> get calories =>
       $composableBuilder(column: $table.calories, builder: (column) => column);
 
@@ -15788,6 +15849,7 @@ class $$MealItemsTableTableManager
                 Value<int> mealId = const Value.absent(),
                 Value<int> foodId = const Value.absent(),
                 Value<double> quantity = const Value.absent(),
+                Value<int> position = const Value.absent(),
                 Value<double> calories = const Value.absent(),
                 Value<double> protein = const Value.absent(),
                 Value<double> carbs = const Value.absent(),
@@ -15809,6 +15871,7 @@ class $$MealItemsTableTableManager
                 mealId: mealId,
                 foodId: foodId,
                 quantity: quantity,
+                position: position,
                 calories: calories,
                 protein: protein,
                 carbs: carbs,
@@ -15832,6 +15895,7 @@ class $$MealItemsTableTableManager
                 required int mealId,
                 required int foodId,
                 Value<double> quantity = const Value.absent(),
+                Value<int> position = const Value.absent(),
                 Value<double> calories = const Value.absent(),
                 Value<double> protein = const Value.absent(),
                 Value<double> carbs = const Value.absent(),
@@ -15853,6 +15917,7 @@ class $$MealItemsTableTableManager
                 mealId: mealId,
                 foodId: foodId,
                 quantity: quantity,
+                position: position,
                 calories: calories,
                 protein: protein,
                 carbs: carbs,

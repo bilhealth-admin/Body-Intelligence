@@ -47,7 +47,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -112,6 +112,12 @@ class AppDatabase extends _$AppDatabase {
           'revision INTEGER NOT NULL DEFAULT 1',
           "sync_status TEXT NOT NULL DEFAULT 'local'",
         ]);
+      }
+      if (from < 14) {
+        await _addColumns('meal_items', <String>[
+          'position INTEGER NOT NULL DEFAULT 0',
+        ]);
+        await customStatement('UPDATE meal_items SET position = id');
       }
     },
   );

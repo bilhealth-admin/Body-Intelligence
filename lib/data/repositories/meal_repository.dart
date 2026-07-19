@@ -49,6 +49,18 @@ class MealRepository {
     await _database.transaction(() async {
       final food = await _activeFood(foodId);
       final factor = quantity / food.servingSize;
+      final siblings =
+          await (_database.select(_database.mealItems)..where(
+                (item) => item.mealId.equals(mealId) & item.deletedAt.isNull(),
+              ))
+              .get();
+      final nextPosition =
+          siblings.fold<int>(
+            0,
+            (maximum, item) =>
+                item.position > maximum ? item.position : maximum,
+          ) +
+          1;
       await _database
           .into(_database.mealItems)
           .insert(
@@ -56,6 +68,7 @@ class MealRepository {
               mealId: mealId,
               foodId: foodId,
               quantity: Value(quantity),
+              position: Value(nextPosition),
               calories: Value(food.calories * factor),
               protein: Value(food.protein * factor),
               carbs: Value(food.carbs * factor),
@@ -117,6 +130,54 @@ class MealRepository {
     );
   }
 
+  Future<void> moveMealItem({required int id, required int offset}) async {
+    if (offset != -1 && offset != 1) {
+      throw ArgumentError.value(offset, 'offset', 'Must be -1 or 1');
+    }
+    await _database.transaction(() async {
+      final current = await _mealItem(id);
+      final siblings =
+          await (_database.select(_database.mealItems)
+                ..where(
+                  (item) =>
+                      item.mealId.equals(current.mealId) &
+                      item.deletedAt.isNull(),
+                )
+                ..orderBy([
+                  (item) => OrderingTerm.asc(item.position),
+                  (item) => OrderingTerm.asc(item.id),
+                ]))
+              .get();
+      final index = siblings.indexWhere((item) => item.id == id);
+      final targetIndex = index + offset;
+      if (index < 0 || targetIndex < 0 || targetIndex >= siblings.length) {
+        return;
+      }
+      final target = siblings[targetIndex];
+      final now = DateTime.now();
+      await (_database.update(
+        _database.mealItems,
+      )..where((item) => item.id.equals(current.id))).write(
+        MealItemsCompanion(
+          position: Value(target.position),
+          updatedAt: Value(now),
+          revision: Value(current.revision + 1),
+          syncStatus: const Value('pending'),
+        ),
+      );
+      await (_database.update(
+        _database.mealItems,
+      )..where((item) => item.id.equals(target.id))).write(
+        MealItemsCompanion(
+          position: Value(current.position),
+          updatedAt: Value(now),
+          revision: Value(target.revision + 1),
+          syncStatus: const Value('pending'),
+        ),
+      );
+    });
+  }
+
   Future<MealItem> _mealItem(int id) async {
     final item = await (_database.select(
       _database.mealItems,
@@ -153,9 +214,15 @@ class MealRepository {
       final rows = <MealWithItems>[];
       for (final meal in meals) {
         final items =
-            await (_database.select(_database.mealItems)..where(
-                  (tbl) => tbl.mealId.equals(meal.id) & tbl.deletedAt.isNull(),
-                ))
+            await (_database.select(_database.mealItems)
+                  ..where(
+                    (tbl) =>
+                        tbl.mealId.equals(meal.id) & tbl.deletedAt.isNull(),
+                  )
+                  ..orderBy([
+                    (item) => OrderingTerm.asc(item.position),
+                    (item) => OrderingTerm.asc(item.id),
+                  ]))
                 .get();
         rows.add(
           MealWithItems(
@@ -177,9 +244,15 @@ class MealRepository {
       final rows = <MealWithItems>[];
       for (final meal in meals) {
         final items =
-            await (_database.select(_database.mealItems)..where(
-                  (row) => row.mealId.equals(meal.id) & row.deletedAt.isNull(),
-                ))
+            await (_database.select(_database.mealItems)
+                  ..where(
+                    (row) =>
+                        row.mealId.equals(meal.id) & row.deletedAt.isNull(),
+                  )
+                  ..orderBy([
+                    (item) => OrderingTerm.asc(item.position),
+                    (item) => OrderingTerm.asc(item.id),
+                  ]))
                 .get();
         rows.add(
           MealWithItems(
@@ -263,12 +336,28 @@ class MealRepository {
         name: candidate.source.meal.name,
         type: candidate.source.meal.type,
       );
-      for (final item in candidate.source.items) {
-        await addMealItem(
-          mealId: mealId,
-          foodId: item.foodId,
-          quantity: item.quantity,
-        );
+      for (var index = 0; index < candidate.source.items.length; index++) {
+        final item = candidate.source.items[index];
+        await _database
+            .into(_database.mealItems)
+            .insert(
+              MealItemsCompanion.insert(
+                mealId: mealId,
+                foodId: item.foodId,
+                quantity: Value(item.quantity),
+                position: Value(index + 1),
+                calories: Value(item.calories),
+                protein: Value(item.protein),
+                carbs: Value(item.carbs),
+                fats: Value(item.fats),
+                fiber: Value(item.fiber),
+                sodium: Value(item.sodium),
+                potassium: Value(item.potassium),
+                calcium: Value(item.calcium),
+                magnesium: Value(item.magnesium),
+                sugar: Value(item.sugar),
+              ),
+            );
       }
     });
   }

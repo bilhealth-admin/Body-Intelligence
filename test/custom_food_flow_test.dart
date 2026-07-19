@@ -1,6 +1,7 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
+import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/features/foods/providers/food_provider.dart';
 import 'package:body_intelligence_log/features/nutrition/food_page.dart';
 import 'package:drift/native.dart';
@@ -62,6 +63,16 @@ void main() {
     expect(find.text('Personal yogurt'), findsOneWidget);
     var food = await database.select(database.foods).getSingle();
     expect(food.calories, 120.5);
+
+    await tester.tap(find.byTooltip('Add favorite'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Favorites'));
+    await tester.pumpAndSettle();
+    expect(find.text('Personal yogurt'), findsOneWidget);
+    await FoodRepository(database).recordRecent(food.id);
+    await tester.tap(find.text('Recent'));
+    await tester.pumpAndSettle();
+    expect(find.text('Personal yogurt'), findsOneWidget);
 
     await tester.tap(find.text('Personal yogurt'));
     await tester.pumpAndSettle();

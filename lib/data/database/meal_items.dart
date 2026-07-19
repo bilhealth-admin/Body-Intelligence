@@ -17,6 +17,8 @@ class MealItems extends Table {
 
   RealColumn get quantity => real().withDefault(const Constant(100))();
 
+  IntColumn get position => integer().withDefault(const Constant(0))();
+
   RealColumn get calories => real().withDefault(const Constant(0))();
 
   RealColumn get protein => real().withDefault(const Constant(0))();
