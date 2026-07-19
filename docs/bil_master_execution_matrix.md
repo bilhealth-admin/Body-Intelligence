@@ -15,8 +15,8 @@
 
 ## Status summary
 
-- complete: **70**
-- partial: **143**
+- complete: **73**
+- partial: **140**
 - missing and locally implementable: **12**
 - blocked by credentials/infrastructure: **213**
 - strategic/non-code: **112**
@@ -998,7 +998,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 86. Search
 - **Requirement:** Search should feel instant. Results should appear while typing. Recent searches. Favorites. Personal ranking. Country relevance. Meal relevance. The user should rarely need to finish typing.
 - **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Partial audit disposition:** substantially complete; live bilingual search, favorites, recents, usage ranking, barcode matching, and meal-context entry are implemented, while broader country-specific catalog relevance remains release-content work
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -1682,37 +1682,34 @@
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 144. Food Intelligence
 - **Requirement:** Food search should improve automatically. Frequently used foods move upward. Rare foods move downward. The user notices the improvement. Without configuring anything.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `fe7789e`
 
 ### BIL-INT-145 — Speed Is Intelligence
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 145. Speed Is Intelligence
 - **Requirement:** If finding breakfast takes: 12 seconds The application is not intelligent. Even if AI exists.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `fe7789e`
 
 ### BIL-INT-146 — Intelligence Must Save Time
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 146. Intelligence Must Save Time
 - **Requirement:** Every month the user should spend less effort. Never more.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `fe7789e`
 
 ### BIL-INT-147 — Recovery Is Part Of Intelligence
 
