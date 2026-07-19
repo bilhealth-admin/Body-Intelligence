@@ -15,8 +15,8 @@
 
 ## Status summary
 
-- complete: **73**
-- partial: **140**
+- complete: **74**
+- partial: **139**
 - missing and locally implementable: **12**
 - blocked by credentials/infrastructure: **213**
 - strategic/non-code: **112**
@@ -2062,13 +2062,12 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 177. Trend Line
 - **Requirement:** Weight trend: Smoothed. Raw data optional. Confidence shading.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `a4422ba`
 
 ### BIL-TDY-178 — Weekly Progress
 
