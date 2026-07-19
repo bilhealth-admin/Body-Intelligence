@@ -15,8 +15,8 @@
 
 ## Status summary
 
-- complete: **90**
-- partial: **131**
+- complete: **92**
+- partial: **129**
 - missing and locally implementable: **0**
 - blocked by credentials/infrastructure: **215**
 - strategic/non-code: **112**
@@ -554,13 +554,12 @@
 
 - **Source section:** Part 2 — Product Identity & Competitive Strategy / 48. Adaptive Logging
 - **Requirement:** Eventually BIL should ask: "Did you have your usual breakfast?" One tap. Done. Less effort. More consistency.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
 - **Files/modules involved:** `docs/SCIENTIFIC_RULES.md`; `lib/engine`; `lib/features/dashboard`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Deterministic engine tests and Today/analytics widget tests; product-strategy review for non-code clauses.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `d27e661`
 
 ### BIL-IDN-049 — Invisible Intelligence
 
@@ -1555,13 +1554,12 @@
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 133. Adaptive Intelligence
 - **Requirement:** The application should become: More accurate. More personal. More helpful. Every week.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `61c087d`
 
 ### BIL-INT-134 — Context Changes Everything
 
@@ -1662,7 +1660,7 @@
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
 - **Blocker:** None
-- **Completion commit:** `PENDING_MEMORY_COMMIT`
+- **Completion commit:** `4f98d33`
 
 ### BIL-INT-143 — Decision Memory
 
