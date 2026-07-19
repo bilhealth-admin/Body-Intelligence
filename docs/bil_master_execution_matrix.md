@@ -15,8 +15,8 @@
 
 ## Status summary
 
-- complete: **82**
-- partial: **134**
+- complete: **84**
+- partial: **132**
 - missing and locally implementable: **9**
 - blocked by credentials/infrastructure: **213**
 - strategic/non-code: **112**
@@ -621,13 +621,12 @@
 
 - **Source section:** Part 2 — Product Identity & Competitive Strategy / 54. Personal Baseline
 - **Requirement:** Never compare users to averages only. Compare users to themselves. Your sodium. Your water. Your sleep. Your trend. Your body.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
 - **Files/modules involved:** `docs/SCIENTIFIC_RULES.md`; `lib/engine`; `lib/features/dashboard`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Deterministic engine tests and Today/analytics widget tests; product-strategy review for non-code clauses.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `61c087d`
 
 ### BIL-IDN-055 — Explanation Before Prediction
 
@@ -1544,13 +1543,12 @@
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 132. Personal Baseline
 - **Requirement:** Never compare users with averages first. Compare them with themselves. The baseline becomes more valuable every month.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `61c087d`
 
 ### BIL-INT-133 — Adaptive Intelligence
 
