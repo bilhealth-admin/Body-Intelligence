@@ -15,9 +15,9 @@
 
 ## Status summary
 
-- complete: **74**
-- partial: **139**
-- missing and locally implementable: **12**
+- complete: **78**
+- partial: **137**
+- missing and locally implementable: **10**
 - blocked by credentials/infrastructure: **213**
 - strategic/non-code: **112**
 
@@ -2106,25 +2106,23 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 181. Empty Dashboard
 - **Requirement:** Never blank. Instead: Welcome. Let's start today.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `217f09b`
 
 ### BIL-TDY-182 — Daily Motivation
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 182. Daily Motivation
 - **Requirement:** Not random quotes. Only contextual encouragement. Example: Three consecutive days logged. Great consistency.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `217f09b`
 
 ### BIL-TDY-183 — Notifications
 
@@ -2153,12 +2151,12 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 185. Sticky Header
 - **Requirement:** Small. Elegant. Contains: Date Today's status Profile
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `217f09b`
 
 ### BIL-TDY-186 — Cards
 
@@ -2222,12 +2220,12 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 191. Search Everywhere
 - **Requirement:** Search always accessible. Never hidden deeply.
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `217f09b`
 
 ### BIL-TDY-192 — Fast Entry
 
