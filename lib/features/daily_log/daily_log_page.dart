@@ -346,8 +346,10 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                   ],
                 ),
                 loading: () => const LinearProgressIndicator(),
-                error: (_, _) =>
-                    Text(context.strings.text('Water data unavailable')),
+                error: (_, __) => ActionableErrorState(
+                  title: context.strings.text('Water data unavailable'),
+                  onRetry: () => ref.invalidate(dailyWaterProvider),
+                ),
               ),
               const SizedBox(height: 20),
               Card(
@@ -392,7 +394,13 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                       ),
                       usualMeals.when(
                         loading: () => const SizedBox.shrink(),
-                        error: (_, _) => const SizedBox.shrink(),
+                        error: (_, __) => ActionableErrorState(
+                          title: context.strings.text(
+                            'Your usual meals could not be loaded.',
+                          ),
+                          onRetry: () =>
+                              ref.invalidate(usualMealsProvider(mealType)),
+                        ),
                         data: (candidates) {
                           if (candidates.isEmpty) {
                             return const SizedBox.shrink();
@@ -569,8 +577,10 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
               const SizedBox(height: 12),
               meals.when(
                 loading: () => const LinearProgressIndicator(),
-                error: (_, _) =>
-                    Text(context.strings.text('Meals unavailable')),
+                error: (_, __) => ActionableErrorState(
+                  title: context.strings.text('Meals unavailable'),
+                  onRetry: () => ref.invalidate(dailyMealsProvider),
+                ),
                 data: (rows) {
                   if (rows.isEmpty) {
                     return Text(context.strings.text('No meals for this day.'));

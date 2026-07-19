@@ -8,6 +8,8 @@ import '../../engine/progress_analysis.dart';
 import '../../engine/personal_baseline_engine.dart';
 import '../../engine/recovery_engine.dart';
 import '../../engine/weekly_review_engine.dart';
+import '../../shared/widgets/actionable_error_state.dart';
+
 import '../dashboard/providers/dashboard_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../life_context/providers/life_context_provider.dart';
@@ -47,13 +49,17 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         waterAsync.hasError ||
         contextsAsync.hasError) {
       return Scaffold(
-        body: Center(
-          child: Text(
-            tr(
-              'Analytics data could not be loaded.',
-              'تعذر تحميل بيانات التحليلات.',
-            ),
+        body: ActionableErrorState(
+          title: tr(
+            'Analytics data could not be loaded.',
+            'تعذر تحميل بيانات التحليلات.',
           ),
+          onRetry: () {
+            ref.invalidate(weightHistoryProvider);
+            ref.invalidate(allMealsProvider);
+            ref.invalidate(allWaterProvider);
+            ref.invalidate(insightLifeContextProvider);
+          },
         ),
       );
     }

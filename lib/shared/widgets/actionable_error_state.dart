@@ -28,11 +28,7 @@ class ActionableErrorState extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                size: 48,
-                color: Theme.of(context).colorScheme.error,
-              ),
+              Icon(icon, size: 48, color: Theme.of(context).colorScheme.error),
               const SizedBox(height: 16),
               Semantics(
                 header: true,
@@ -43,10 +39,7 @@ class ActionableErrorState extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                body ?? defaultBody,
-                textAlign: TextAlign.center,
-              ),
+              Text(body ?? defaultBody, textAlign: TextAlign.center),
               const SizedBox(height: 20),
               FilledButton.icon(
                 onPressed: onRetry,
