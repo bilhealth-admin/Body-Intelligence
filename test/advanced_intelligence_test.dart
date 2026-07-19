@@ -35,6 +35,39 @@ void main() {
     expect(action.evidence, hasLength(1));
   });
 
+  test('one best action stops repeating advice rated unhelpful twice', () {
+    final action = OneBestActionEngine.choose(
+      weighedToday: true,
+      loggingComplete: true,
+      protein: 20,
+      proteinTarget: 120,
+      waterMl: 800,
+      waterTarget: 2500,
+      trackedDays: 20,
+      suppressedTypes: const {BestActionType.protein},
+    );
+    expect(action.type, BestActionType.hydration);
+  });
+
+  test('suppressed advice yields an explicit memory explanation', () {
+    final action = OneBestActionEngine.choose(
+      weighedToday: true,
+      loggingComplete: true,
+      protein: 120,
+      proteinTarget: 120,
+      waterMl: 2500,
+      waterTarget: 2500,
+      trackedDays: 20,
+      suppressedTypes: const {BestActionType.hydration},
+    );
+    expect(action.type, BestActionType.none);
+    expect(action.reason, contains('not repeated'));
+    expect(
+      action.evidence,
+      contains('Two or more explicit low helpfulness ratings'),
+    );
+  });
+
   test('body twin refuses a scenario until data is sufficient', () {
     final report = BodyTwinEngine.simulate(
       calorieTarget: 2000,

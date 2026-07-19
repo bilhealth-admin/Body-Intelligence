@@ -32,8 +32,9 @@ class OneBestActionEngine {
     required int waterMl,
     required int waterTarget,
     required int trackedDays,
+    Set<BestActionType> suppressedTypes = const {},
   }) {
-    if (!weighedToday) {
+    if (!weighedToday && !suppressedTypes.contains(BestActionType.weighIn)) {
       return const BestAction(
         type: BestActionType.weighIn,
         title: 'Log today’s weight',
@@ -41,7 +42,8 @@ class OneBestActionEngine {
         evidence: ['No weight check-in recorded today'],
       );
     }
-    if (!loggingComplete) {
+    if (!loggingComplete &&
+        !suppressedTypes.contains(BestActionType.completeLogging)) {
       return const BestAction(
         type: BestActionType.completeLogging,
         title: 'Complete one missing meal',
@@ -50,7 +52,7 @@ class OneBestActionEngine {
       );
     }
     final proteinGap = (proteinTarget - protein).round();
-    if (proteinGap >= 20) {
+    if (proteinGap >= 20 && !suppressedTypes.contains(BestActionType.protein)) {
       return BestAction(
         type: BestActionType.protein,
         title: 'Add about $proteinGap g protein',
@@ -59,7 +61,8 @@ class OneBestActionEngine {
       );
     }
     final waterGap = waterTarget - waterMl;
-    if (waterGap >= 400) {
+    if (waterGap >= 400 &&
+        !suppressedTypes.contains(BestActionType.hydration)) {
       return BestAction(
         type: BestActionType.hydration,
         title: 'Drink ${waterGap.clamp(400, 1000)} ml gradually',
@@ -67,7 +70,8 @@ class OneBestActionEngine {
         evidence: ['$waterMl ml recorded', '$waterTarget ml target'],
       );
     }
-    if (trackedDays < 14) {
+    if (trackedDays < 14 &&
+        !suppressedTypes.contains(BestActionType.holdPlan)) {
       return const BestAction(
         type: BestActionType.holdPlan,
         title: 'Keep the plan unchanged today',
@@ -75,11 +79,15 @@ class OneBestActionEngine {
         evidence: ['Fewer than 14 comparable tracked days'],
       );
     }
-    return const BestAction(
+    return BestAction(
       type: BestActionType.none,
       title: 'No plan change needed',
-      reason: 'Today’s recorded priorities are broadly covered.',
-      evidence: ['Weight, meal, protein, and hydration records are present'],
+      reason: suppressedTypes.isEmpty
+          ? 'Today’s recorded priorities are broadly covered.'
+          : 'A repeatedly unhelpful recommendation was not repeated.',
+      evidence: suppressedTypes.isEmpty
+          ? const ['Weight, meal, protein, and hydration records are present']
+          : const ['Two or more explicit low helpfulness ratings'],
     );
   }
 }

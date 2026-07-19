@@ -15,8 +15,8 @@
 
 ## Status summary
 
-- complete: **92**
-- partial: **129**
+- complete: **93**
+- partial: **128**
 - missing and locally implementable: **0**
 - blocked by credentials/infrastructure: **215**
 - strategic/non-code: **112**
@@ -1733,13 +1733,12 @@
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 149. Recommendations Should Learn
 - **Requirement:** If advice repeatedly fails... Stop repeating it. Try another approach.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `PENDING_ADAPTIVE_COMMIT`
 
 ### BIL-INT-150 — Explain Before Predicting
 

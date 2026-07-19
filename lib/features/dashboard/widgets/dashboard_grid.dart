@@ -43,6 +43,7 @@ class DashboardGrid extends ConsumerWidget {
     final allWaterAsync = ref.watch(allWaterProvider);
     final skippedWeightAsync = ref.watch(weightReminderSkippedTodayProvider);
     final contextAsync = ref.watch(todayLifeContextProvider);
+    final memoriesAsync = ref.watch(decisionMemoriesProvider);
     final memoryEnabled =
         ref.watch(decisionMemoryEnabledProvider).value ?? true;
     final usualBreakfast = ref
@@ -60,6 +61,7 @@ class DashboardGrid extends ConsumerWidget {
       allWaterAsync,
       skippedWeightAsync,
       contextAsync,
+      memoriesAsync,
     ].any((value) => value.isLoading)) {
       return const DashboardLoadingSkeleton();
     }
@@ -70,7 +72,8 @@ class DashboardGrid extends ConsumerWidget {
         allMealsAsync.hasError ||
         allWaterAsync.hasError ||
         skippedWeightAsync.hasError ||
-        contextAsync.hasError) {
+        contextAsync.hasError ||
+        memoriesAsync.hasError) {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -109,6 +112,19 @@ class DashboardGrid extends ConsumerWidget {
     final insightContexts = (contextAsync.value ?? const [])
         .where((entry) => entry.useInInsights)
         .toList();
+    final lowRatings = <String, int>{};
+    for (final memory in memoriesAsync.value ?? const []) {
+      if ((memory.helpfulness ?? 5) <= 2) {
+        lowRatings.update(
+          memory.recommendationKey,
+          (count) => count + 1,
+          ifAbsent: () => 1,
+        );
+      }
+    }
+    final suppressedActions = BestActionType.values
+        .where((type) => (lowRatings[type.name] ?? 0) >= 2)
+        .toSet();
     final skippedWeightToday = skippedWeightAsync.value ?? false;
     final items = meals.expand((meal) => meal.items).toList();
     final calories = items.fold<double>(0, (sum, item) => sum + item.calories);
@@ -202,6 +218,7 @@ class DashboardGrid extends ConsumerWidget {
       waterMl: water,
       waterTarget: effectiveTargets.water,
       trackedDays: observedDays.length,
+      suppressedTypes: suppressedActions,
     );
     final changed = WhatChangedEngine.compare(
       chronologicalWeights: chronological,
