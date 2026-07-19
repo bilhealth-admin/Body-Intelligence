@@ -13,6 +13,7 @@ import '../profile/providers/user_profile_provider.dart';
 import '../life_context/providers/life_context_provider.dart';
 import '../weight/providers/weight_provider.dart';
 import 'widgets/analytics_range_selector.dart';
+import 'localized_confidence.dart';
 
 class AnalyticsPage extends ConsumerStatefulWidget {
   const AnalyticsPage({super.key});
@@ -202,8 +203,8 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
             lines: baseline.sufficient
                 ? [
                     tr(
-                      'Compared with your own earlier records · ${baseline.confidence.name} confidence',
-                      'مقارنة بسجلاتك السابقة أنت · ثقة ${baseline.confidence.name}',
+                      'Compared with your own earlier records · ${localizedBaselineConfidence(baseline.confidence, arabic: false)} confidence',
+                      'مقارنة بسجلاتك السابقة أنت · ثقة ${localizedBaselineConfidence(baseline.confidence, arabic: true)}',
                     ),
                     ...baseline.comparisons.map((item) {
                       final sign = item.change >= 0 ? '+' : '';

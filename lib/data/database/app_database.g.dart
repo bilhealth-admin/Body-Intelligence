@@ -2888,6 +2888,17 @@ class $FoodsTable extends Foods with TableInfo<$FoodsTable, Food> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _nutrientEvidenceMaskMeta =
+      const VerificationMeta('nutrientEvidenceMask');
+  @override
+  late final GeneratedColumn<int> nutrientEvidenceMask = GeneratedColumn<int>(
+    'nutrient_evidence_mask',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _verifiedMeta = const VerificationMeta(
     'verified',
   );
@@ -3010,6 +3021,7 @@ class $FoodsTable extends Foods with TableInfo<$FoodsTable, Food> {
     iron,
     magnesium,
     vitaminC,
+    nutrientEvidenceMask,
     verified,
     isCustom,
     source,
@@ -3170,6 +3182,15 @@ class $FoodsTable extends Foods with TableInfo<$FoodsTable, Food> {
         vitaminC.isAcceptableOrUnknown(data['vitamin_c']!, _vitaminCMeta),
       );
     }
+    if (data.containsKey('nutrient_evidence_mask')) {
+      context.handle(
+        _nutrientEvidenceMaskMeta,
+        nutrientEvidenceMask.isAcceptableOrUnknown(
+          data['nutrient_evidence_mask']!,
+          _nutrientEvidenceMaskMeta,
+        ),
+      );
+    }
     if (data.containsKey('verified')) {
       context.handle(
         _verifiedMeta,
@@ -3311,6 +3332,10 @@ class $FoodsTable extends Foods with TableInfo<$FoodsTable, Food> {
         DriftSqlType.double,
         data['${effectivePrefix}vitamin_c'],
       )!,
+      nutrientEvidenceMask: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}nutrient_evidence_mask'],
+      )!,
       verified: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}verified'],
@@ -3374,6 +3399,7 @@ class Food extends DataClass implements Insertable<Food> {
   final double iron;
   final double magnesium;
   final double vitaminC;
+  final int nutrientEvidenceMask;
   final bool verified;
   final bool isCustom;
   final String source;
@@ -3404,6 +3430,7 @@ class Food extends DataClass implements Insertable<Food> {
     required this.iron,
     required this.magnesium,
     required this.vitaminC,
+    required this.nutrientEvidenceMask,
     required this.verified,
     required this.isCustom,
     required this.source,
@@ -3443,6 +3470,7 @@ class Food extends DataClass implements Insertable<Food> {
     map['iron'] = Variable<double>(iron);
     map['magnesium'] = Variable<double>(magnesium);
     map['vitamin_c'] = Variable<double>(vitaminC);
+    map['nutrient_evidence_mask'] = Variable<int>(nutrientEvidenceMask);
     map['verified'] = Variable<bool>(verified);
     map['is_custom'] = Variable<bool>(isCustom);
     map['source'] = Variable<String>(source);
@@ -3485,6 +3513,7 @@ class Food extends DataClass implements Insertable<Food> {
       iron: Value(iron),
       magnesium: Value(magnesium),
       vitaminC: Value(vitaminC),
+      nutrientEvidenceMask: Value(nutrientEvidenceMask),
       verified: Value(verified),
       isCustom: Value(isCustom),
       source: Value(source),
@@ -3525,6 +3554,9 @@ class Food extends DataClass implements Insertable<Food> {
       iron: serializer.fromJson<double>(json['iron']),
       magnesium: serializer.fromJson<double>(json['magnesium']),
       vitaminC: serializer.fromJson<double>(json['vitaminC']),
+      nutrientEvidenceMask: serializer.fromJson<int>(
+        json['nutrientEvidenceMask'],
+      ),
       verified: serializer.fromJson<bool>(json['verified']),
       isCustom: serializer.fromJson<bool>(json['isCustom']),
       source: serializer.fromJson<String>(json['source']),
@@ -3560,6 +3592,7 @@ class Food extends DataClass implements Insertable<Food> {
       'iron': serializer.toJson<double>(iron),
       'magnesium': serializer.toJson<double>(magnesium),
       'vitaminC': serializer.toJson<double>(vitaminC),
+      'nutrientEvidenceMask': serializer.toJson<int>(nutrientEvidenceMask),
       'verified': serializer.toJson<bool>(verified),
       'isCustom': serializer.toJson<bool>(isCustom),
       'source': serializer.toJson<String>(source),
@@ -3593,6 +3626,7 @@ class Food extends DataClass implements Insertable<Food> {
     double? iron,
     double? magnesium,
     double? vitaminC,
+    int? nutrientEvidenceMask,
     bool? verified,
     bool? isCustom,
     String? source,
@@ -3623,6 +3657,7 @@ class Food extends DataClass implements Insertable<Food> {
     iron: iron ?? this.iron,
     magnesium: magnesium ?? this.magnesium,
     vitaminC: vitaminC ?? this.vitaminC,
+    nutrientEvidenceMask: nutrientEvidenceMask ?? this.nutrientEvidenceMask,
     verified: verified ?? this.verified,
     isCustom: isCustom ?? this.isCustom,
     source: source ?? this.source,
@@ -3661,6 +3696,9 @@ class Food extends DataClass implements Insertable<Food> {
       iron: data.iron.present ? data.iron.value : this.iron,
       magnesium: data.magnesium.present ? data.magnesium.value : this.magnesium,
       vitaminC: data.vitaminC.present ? data.vitaminC.value : this.vitaminC,
+      nutrientEvidenceMask: data.nutrientEvidenceMask.present
+          ? data.nutrientEvidenceMask.value
+          : this.nutrientEvidenceMask,
       verified: data.verified.present ? data.verified.value : this.verified,
       isCustom: data.isCustom.present ? data.isCustom.value : this.isCustom,
       source: data.source.present ? data.source.value : this.source,
@@ -3698,6 +3736,7 @@ class Food extends DataClass implements Insertable<Food> {
           ..write('iron: $iron, ')
           ..write('magnesium: $magnesium, ')
           ..write('vitaminC: $vitaminC, ')
+          ..write('nutrientEvidenceMask: $nutrientEvidenceMask, ')
           ..write('verified: $verified, ')
           ..write('isCustom: $isCustom, ')
           ..write('source: $source, ')
@@ -3733,6 +3772,7 @@ class Food extends DataClass implements Insertable<Food> {
     iron,
     magnesium,
     vitaminC,
+    nutrientEvidenceMask,
     verified,
     isCustom,
     source,
@@ -3767,6 +3807,7 @@ class Food extends DataClass implements Insertable<Food> {
           other.iron == this.iron &&
           other.magnesium == this.magnesium &&
           other.vitaminC == this.vitaminC &&
+          other.nutrientEvidenceMask == this.nutrientEvidenceMask &&
           other.verified == this.verified &&
           other.isCustom == this.isCustom &&
           other.source == this.source &&
@@ -3799,6 +3840,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
   final Value<double> iron;
   final Value<double> magnesium;
   final Value<double> vitaminC;
+  final Value<int> nutrientEvidenceMask;
   final Value<bool> verified;
   final Value<bool> isCustom;
   final Value<String> source;
@@ -3829,6 +3871,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     this.iron = const Value.absent(),
     this.magnesium = const Value.absent(),
     this.vitaminC = const Value.absent(),
+    this.nutrientEvidenceMask = const Value.absent(),
     this.verified = const Value.absent(),
     this.isCustom = const Value.absent(),
     this.source = const Value.absent(),
@@ -3860,6 +3903,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     this.iron = const Value.absent(),
     this.magnesium = const Value.absent(),
     this.vitaminC = const Value.absent(),
+    this.nutrientEvidenceMask = const Value.absent(),
     this.verified = const Value.absent(),
     this.isCustom = const Value.absent(),
     this.source = const Value.absent(),
@@ -3895,6 +3939,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     Expression<double>? iron,
     Expression<double>? magnesium,
     Expression<double>? vitaminC,
+    Expression<int>? nutrientEvidenceMask,
     Expression<bool>? verified,
     Expression<bool>? isCustom,
     Expression<String>? source,
@@ -3926,6 +3971,8 @@ class FoodsCompanion extends UpdateCompanion<Food> {
       if (iron != null) 'iron': iron,
       if (magnesium != null) 'magnesium': magnesium,
       if (vitaminC != null) 'vitamin_c': vitaminC,
+      if (nutrientEvidenceMask != null)
+        'nutrient_evidence_mask': nutrientEvidenceMask,
       if (verified != null) 'verified': verified,
       if (isCustom != null) 'is_custom': isCustom,
       if (source != null) 'source': source,
@@ -3959,6 +4006,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     Value<double>? iron,
     Value<double>? magnesium,
     Value<double>? vitaminC,
+    Value<int>? nutrientEvidenceMask,
     Value<bool>? verified,
     Value<bool>? isCustom,
     Value<String>? source,
@@ -3990,6 +4038,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
       iron: iron ?? this.iron,
       magnesium: magnesium ?? this.magnesium,
       vitaminC: vitaminC ?? this.vitaminC,
+      nutrientEvidenceMask: nutrientEvidenceMask ?? this.nutrientEvidenceMask,
       verified: verified ?? this.verified,
       isCustom: isCustom ?? this.isCustom,
       source: source ?? this.source,
@@ -4067,6 +4116,9 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     if (vitaminC.present) {
       map['vitamin_c'] = Variable<double>(vitaminC.value);
     }
+    if (nutrientEvidenceMask.present) {
+      map['nutrient_evidence_mask'] = Variable<int>(nutrientEvidenceMask.value);
+    }
     if (verified.present) {
       map['verified'] = Variable<bool>(verified.value);
     }
@@ -4118,6 +4170,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
           ..write('iron: $iron, ')
           ..write('magnesium: $magnesium, ')
           ..write('vitaminC: $vitaminC, ')
+          ..write('nutrientEvidenceMask: $nutrientEvidenceMask, ')
           ..write('verified: $verified, ')
           ..write('isCustom: $isCustom, ')
           ..write('source: $source, ')
@@ -4944,6 +4997,17 @@ class $MealItemsTable extends MealItems
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _nutrientEvidenceMaskMeta =
+      const VerificationMeta('nutrientEvidenceMask');
+  @override
+  late final GeneratedColumn<int> nutrientEvidenceMask = GeneratedColumn<int>(
+    'nutrient_evidence_mask',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -5021,6 +5085,7 @@ class $MealItemsTable extends MealItems
     calcium,
     magnesium,
     sugar,
+    nutrientEvidenceMask,
     createdAt,
     updatedAt,
     deletedAt,
@@ -5136,6 +5201,15 @@ class $MealItemsTable extends MealItems
         sugar.isAcceptableOrUnknown(data['sugar']!, _sugarMeta),
       );
     }
+    if (data.containsKey('nutrient_evidence_mask')) {
+      context.handle(
+        _nutrientEvidenceMaskMeta,
+        nutrientEvidenceMask.isAcceptableOrUnknown(
+          data['nutrient_evidence_mask']!,
+          _nutrientEvidenceMaskMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -5239,6 +5313,10 @@ class $MealItemsTable extends MealItems
         DriftSqlType.double,
         data['${effectivePrefix}sugar'],
       )!,
+      nutrientEvidenceMask: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}nutrient_evidence_mask'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -5285,6 +5363,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
   final double calcium;
   final double magnesium;
   final double sugar;
+  final int nutrientEvidenceMask;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -5307,6 +5386,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     required this.calcium,
     required this.magnesium,
     required this.sugar,
+    required this.nutrientEvidenceMask,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -5332,6 +5412,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     map['calcium'] = Variable<double>(calcium);
     map['magnesium'] = Variable<double>(magnesium);
     map['sugar'] = Variable<double>(sugar);
+    map['nutrient_evidence_mask'] = Variable<int>(nutrientEvidenceMask);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -5360,6 +5441,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       calcium: Value(calcium),
       magnesium: Value(magnesium),
       sugar: Value(sugar),
+      nutrientEvidenceMask: Value(nutrientEvidenceMask),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -5392,6 +5474,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       calcium: serializer.fromJson<double>(json['calcium']),
       magnesium: serializer.fromJson<double>(json['magnesium']),
       sugar: serializer.fromJson<double>(json['sugar']),
+      nutrientEvidenceMask: serializer.fromJson<int>(
+        json['nutrientEvidenceMask'],
+      ),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -5419,6 +5504,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       'calcium': serializer.toJson<double>(calcium),
       'magnesium': serializer.toJson<double>(magnesium),
       'sugar': serializer.toJson<double>(sugar),
+      'nutrientEvidenceMask': serializer.toJson<int>(nutrientEvidenceMask),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -5444,6 +5530,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     double? calcium,
     double? magnesium,
     double? sugar,
+    int? nutrientEvidenceMask,
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -5466,6 +5553,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     calcium: calcium ?? this.calcium,
     magnesium: magnesium ?? this.magnesium,
     sugar: sugar ?? this.sugar,
+    nutrientEvidenceMask: nutrientEvidenceMask ?? this.nutrientEvidenceMask,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -5490,6 +5578,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       calcium: data.calcium.present ? data.calcium.value : this.calcium,
       magnesium: data.magnesium.present ? data.magnesium.value : this.magnesium,
       sugar: data.sugar.present ? data.sugar.value : this.sugar,
+      nutrientEvidenceMask: data.nutrientEvidenceMask.present
+          ? data.nutrientEvidenceMask.value
+          : this.nutrientEvidenceMask,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -5519,6 +5610,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
           ..write('calcium: $calcium, ')
           ..write('magnesium: $magnesium, ')
           ..write('sugar: $sugar, ')
+          ..write('nutrientEvidenceMask: $nutrientEvidenceMask, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -5546,6 +5638,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     calcium,
     magnesium,
     sugar,
+    nutrientEvidenceMask,
     createdAt,
     updatedAt,
     deletedAt,
@@ -5572,6 +5665,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
           other.calcium == this.calcium &&
           other.magnesium == this.magnesium &&
           other.sugar == this.sugar &&
+          other.nutrientEvidenceMask == this.nutrientEvidenceMask &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -5596,6 +5690,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
   final Value<double> calcium;
   final Value<double> magnesium;
   final Value<double> sugar;
+  final Value<int> nutrientEvidenceMask;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -5618,6 +5713,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     this.calcium = const Value.absent(),
     this.magnesium = const Value.absent(),
     this.sugar = const Value.absent(),
+    this.nutrientEvidenceMask = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -5641,6 +5737,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     this.calcium = const Value.absent(),
     this.magnesium = const Value.absent(),
     this.sugar = const Value.absent(),
+    this.nutrientEvidenceMask = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -5665,6 +5762,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     Expression<double>? calcium,
     Expression<double>? magnesium,
     Expression<double>? sugar,
+    Expression<int>? nutrientEvidenceMask,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -5688,6 +5786,8 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
       if (calcium != null) 'calcium': calcium,
       if (magnesium != null) 'magnesium': magnesium,
       if (sugar != null) 'sugar': sugar,
+      if (nutrientEvidenceMask != null)
+        'nutrient_evidence_mask': nutrientEvidenceMask,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -5713,6 +5813,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     Value<double>? calcium,
     Value<double>? magnesium,
     Value<double>? sugar,
+    Value<int>? nutrientEvidenceMask,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
@@ -5736,6 +5837,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
       calcium: calcium ?? this.calcium,
       magnesium: magnesium ?? this.magnesium,
       sugar: sugar ?? this.sugar,
+      nutrientEvidenceMask: nutrientEvidenceMask ?? this.nutrientEvidenceMask,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -5795,6 +5897,9 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     if (sugar.present) {
       map['sugar'] = Variable<double>(sugar.value);
     }
+    if (nutrientEvidenceMask.present) {
+      map['nutrient_evidence_mask'] = Variable<int>(nutrientEvidenceMask.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -5832,6 +5937,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
           ..write('calcium: $calcium, ')
           ..write('magnesium: $magnesium, ')
           ..write('sugar: $sugar, ')
+          ..write('nutrientEvidenceMask: $nutrientEvidenceMask, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -13989,6 +14095,7 @@ typedef $$FoodsTableCreateCompanionBuilder =
       Value<double> iron,
       Value<double> magnesium,
       Value<double> vitaminC,
+      Value<int> nutrientEvidenceMask,
       Value<bool> verified,
       Value<bool> isCustom,
       Value<String> source,
@@ -14021,6 +14128,7 @@ typedef $$FoodsTableUpdateCompanionBuilder =
       Value<double> iron,
       Value<double> magnesium,
       Value<double> vitaminC,
+      Value<int> nutrientEvidenceMask,
       Value<bool> verified,
       Value<bool> isCustom,
       Value<String> source,
@@ -14200,6 +14308,11 @@ class $$FoodsTableFilterComposer extends Composer<_$AppDatabase, $FoodsTable> {
 
   ColumnFilters<double> get vitaminC => $composableBuilder(
     column: $table.vitaminC,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get nutrientEvidenceMask => $composableBuilder(
+    column: $table.nutrientEvidenceMask,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -14433,6 +14546,11 @@ class $$FoodsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get nutrientEvidenceMask => $composableBuilder(
+    column: $table.nutrientEvidenceMask,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get verified => $composableBuilder(
     column: $table.verified,
     builder: (column) => ColumnOrderings(column),
@@ -14551,6 +14669,11 @@ class $$FoodsTableAnnotationComposer
 
   GeneratedColumn<double> get vitaminC =>
       $composableBuilder(column: $table.vitaminC, builder: (column) => column);
+
+  GeneratedColumn<int> get nutrientEvidenceMask => $composableBuilder(
+    column: $table.nutrientEvidenceMask,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<bool> get verified =>
       $composableBuilder(column: $table.verified, builder: (column) => column);
@@ -14707,6 +14830,7 @@ class $$FoodsTableTableManager
                 Value<double> iron = const Value.absent(),
                 Value<double> magnesium = const Value.absent(),
                 Value<double> vitaminC = const Value.absent(),
+                Value<int> nutrientEvidenceMask = const Value.absent(),
                 Value<bool> verified = const Value.absent(),
                 Value<bool> isCustom = const Value.absent(),
                 Value<String> source = const Value.absent(),
@@ -14737,6 +14861,7 @@ class $$FoodsTableTableManager
                 iron: iron,
                 magnesium: magnesium,
                 vitaminC: vitaminC,
+                nutrientEvidenceMask: nutrientEvidenceMask,
                 verified: verified,
                 isCustom: isCustom,
                 source: source,
@@ -14769,6 +14894,7 @@ class $$FoodsTableTableManager
                 Value<double> iron = const Value.absent(),
                 Value<double> magnesium = const Value.absent(),
                 Value<double> vitaminC = const Value.absent(),
+                Value<int> nutrientEvidenceMask = const Value.absent(),
                 Value<bool> verified = const Value.absent(),
                 Value<bool> isCustom = const Value.absent(),
                 Value<String> source = const Value.absent(),
@@ -14799,6 +14925,7 @@ class $$FoodsTableTableManager
                 iron: iron,
                 magnesium: magnesium,
                 vitaminC: vitaminC,
+                nutrientEvidenceMask: nutrientEvidenceMask,
                 verified: verified,
                 isCustom: isCustom,
                 source: source,
@@ -15329,6 +15456,7 @@ typedef $$MealItemsTableCreateCompanionBuilder =
       Value<double> calcium,
       Value<double> magnesium,
       Value<double> sugar,
+      Value<int> nutrientEvidenceMask,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -15353,6 +15481,7 @@ typedef $$MealItemsTableUpdateCompanionBuilder =
       Value<double> calcium,
       Value<double> magnesium,
       Value<double> sugar,
+      Value<int> nutrientEvidenceMask,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -15475,6 +15604,11 @@ class $$MealItemsTableFilterComposer
 
   ColumnFilters<double> get sugar => $composableBuilder(
     column: $table.sugar,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get nutrientEvidenceMask => $composableBuilder(
+    column: $table.nutrientEvidenceMask,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -15629,6 +15763,11 @@ class $$MealItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get nutrientEvidenceMask => $composableBuilder(
+    column: $table.nutrientEvidenceMask,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -15752,6 +15891,11 @@ class $$MealItemsTableAnnotationComposer
   GeneratedColumn<double> get sugar =>
       $composableBuilder(column: $table.sugar, builder: (column) => column);
 
+  GeneratedColumn<int> get nutrientEvidenceMask => $composableBuilder(
+    column: $table.nutrientEvidenceMask,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -15860,6 +16004,7 @@ class $$MealItemsTableTableManager
                 Value<double> calcium = const Value.absent(),
                 Value<double> magnesium = const Value.absent(),
                 Value<double> sugar = const Value.absent(),
+                Value<int> nutrientEvidenceMask = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -15882,6 +16027,7 @@ class $$MealItemsTableTableManager
                 calcium: calcium,
                 magnesium: magnesium,
                 sugar: sugar,
+                nutrientEvidenceMask: nutrientEvidenceMask,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
@@ -15906,6 +16052,7 @@ class $$MealItemsTableTableManager
                 Value<double> calcium = const Value.absent(),
                 Value<double> magnesium = const Value.absent(),
                 Value<double> sugar = const Value.absent(),
+                Value<int> nutrientEvidenceMask = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -15928,6 +16075,7 @@ class $$MealItemsTableTableManager
                 calcium: calcium,
                 magnesium: magnesium,
                 sugar: sugar,
+                nutrientEvidenceMask: nutrientEvidenceMask,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,

@@ -15,12 +15,12 @@
 
 ## Status summary
 
-- complete: **119**
+- complete: **108**
 - partial: **0**
 - missing and locally implementable: **0**
 - blocked by credentials/infrastructure: **215**
 - strategic/non-code: **115**
-- deferred — Premium UI phase: **66**
+- deferred — Premium UI phase: **77**
 - deferred — Global Launch/App Store phase: **27**
 - deferred — Intelligence Platform 2.0 phase: **5**
 - deferred — Cloud Architecture phase: **3**
@@ -1018,11 +1018,13 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 83. Arabic Is First-Class
 - **Requirement:** Arabic is not a translated interface. Arabic is a native experience. RTL must feel intentional. Typography must be optimized. Spacing must be mirrored correctly. Icons should respect RTL where appropriate.
 - **Current repository status:** `complete`
+- **Foundation V2 portion:** Complete and verified: persisted Arabic selection, RTL direction, localized Personal Baseline confidence, directional layout primitives, semantics, locale-aware input, and bilingual widget/golden coverage.
+- **Premium UI child scope:** Deferred — Premium UI phase: physical-device typography tuning plus comprehensive keyboard, screen-reader, large-text, and directional-icon certification.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** All source clauses are represented by the cited repository implementation/evidence, remain localized where user-facing, use real local data, and pass the listed regression coverage.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
 - **Blocker:** None
-- **Completion commit:** `c58c437`
+- **Completion commit:** `PENDING_CLOSURE_COMMIT`
 
 ### BIL-UX-084 — English Is Also Native
 
@@ -2028,62 +2030,68 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 161. The Home Screen Must Be Calm
 - **Requirement:** When users open BIL they should immediately understand: Where they are. What changed. What matters today. What action should be taken. Nothing else.
-- **Current repository status:** `complete`
-- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
-- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
-- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** Foundation V2 exposes real status, What Changed, and One Best Action without fake data; the literal “nothing else” hierarchy remains premium information architecture.
+- **Foundation V2 evidence:** `dashboard_grid.dart`, dashboard trust tests, and deterministic intelligence tests.
+- **Future-phase remainder:** Premium UI hierarchy and usability validation.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None for Foundation V2.
-- **Completion commit:** `217f09b`
+- **Blocker:** Premium UI phase hierarchy validation.
+- **Completion commit:** —
 
 ### BIL-TDY-162 — Information Hierarchy
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 162. Information Hierarchy
 - **Requirement:** Order of importance: Daily Check-in What Changed Today One Best Action Today's Progress Meals Water Activity Insights Quick Actions
-- **Current repository status:** `complete`
-- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
-- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
-- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** All named information exists, but current card order does not match the literal prescribed order.
+- **Foundation V2 evidence:** Today widget and repository suites verify every functional data path independently.
+- **Future-phase remainder:** Premium UI hierarchy and usability validation.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None for Foundation V2.
-- **Completion commit:** `217f09b`
+- **Blocker:** Premium UI phase hierarchy validation.
+- **Completion commit:** —
 
 ### BIL-TDY-163 — Daily Check-in Card
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 163. Daily Check-in Card
 - **Requirement:** Always appears at the top when today's weight is missing. Contains: Wheel Picker Text Field Save Skip Today After saving: Card disappears. Smooth animation.
-- **Current repository status:** `complete`
+- **Current repository status:** `deferred — Premium UI phase`
+- **Foundation V2 portion:** Wheel/text entry, save, skip, persistence, and post-save disappearance are implemented and tested.
+- **Premium UI child scope:** The literal smooth animation still needs reduced-motion and physical-device validation.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** When today has no active weight and was not skipped, Today displays a bilingual wheel-plus-text check-in initialized from the latest canonical value; Save upserts one logical local entry, Skip persists for the local day, and either action removes the card through a reduced-motion-aware transition.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
-- **Completion commit:** `a5ce4dd`
+- **Blocker:** Premium UI motion phase.
+- **Completion commit:** —
 
 ### BIL-TDY-164 — What Changed Today Card
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 164. What Changed Today Card
 - **Requirement:** Large premium card. Contains: Title Summary Confidence Expand Button Never overwhelming.
-- **Current repository status:** `complete`
+- **Current repository status:** `deferred — Premium UI phase`
+- **Foundation V2 portion:** Deterministic summary, evidence, alternatives, localization, and expansion are implemented and engine-tested.
+- **Premium UI child scope:** Confidence is composed in the adjacent Data Honesty card rather than inside this literal card.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** All source clauses are represented by the cited repository implementation/evidence, remain localized where user-facing, use real local data, and pass the listed regression coverage.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
-- **Completion commit:** `1e34961`
+- **Blocker:** Premium UI card-composition validation.
+- **Completion commit:** —
 
 ### BIL-TDY-165 — One Best Action Card
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 165. One Best Action Card
 - **Requirement:** Large colorful card. Contains: One recommendation only. Examples: Drink 700 ml more. Log lunch. Eat 30 g protein. Keep today's plan.
-- **Current repository status:** `complete`
+- **Current repository status:** `deferred — Premium UI phase`
+- **Foundation V2 portion:** Exactly one evidence-based, feedback-adaptive recommendation is implemented and tested.
+- **Premium UI child scope:** The literal large/colorful premium treatment remains visual-system work.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** All source clauses are represented by the cited repository implementation/evidence, remain localized where user-facing, use real local data, and pass the listed regression coverage.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
-- **Completion commit:** `1e34961`
+- **Blocker:** Premium UI visual and accessibility validation.
+- **Completion commit:** —
 
 ### BIL-TDY-166 — Confidence Ring
 
@@ -2100,34 +2108,40 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 167. Today's Calories
 - **Requirement:** Card contains: Consumed Target Remaining Large typography. Animated progress ring.
-- **Current repository status:** `complete`
+- **Current repository status:** `deferred — Premium UI phase`
+- **Foundation V2 portion:** Food-derived consumed, target, remaining, overflow, semantics, and localization are implemented and widget-tested.
+- **Premium UI child scope:** The current linear indicator does not satisfy the literal animated-ring clause.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Today displays food-derived calories consumed, the effective goal-derived target, remaining or reference excess, accessible progress, and large readable values without a competing manually entered total.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
-- **Completion commit:** `3cde964`
+- **Blocker:** Premium UI animated-ring and reduced-motion acceptance.
+- **Completion commit:** —
 
 ### BIL-TDY-168 — Macronutrients
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 168. Macronutrients
 - **Requirement:** Three premium cards: Protein Carbs Fat Each shows: Consumed Target Remaining Color adapts to goal.
-- **Current repository status:** `complete`
+- **Current repository status:** `deferred — Premium UI phase`
+- **Foundation V2 portion:** Protein, carbohydrate, and fat cards derive consumed, target, and remaining from meal snapshots.
+- **Premium UI child scope:** Nutrient colors are fixed rather than adapting to the user goal.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Protein, carbohydrates, and fat each display food-derived consumed, effective target, remaining or reference excess, distinct goal-aware presentation, responsive layout, and complete screen-reader wording.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
-- **Completion commit:** `3cde964`
+- **Blocker:** Premium UI semantic-color and contrast design.
+- **Completion commit:** —
 
 ### BIL-TDY-169 — Micronutrients
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 169. Micronutrients
 - **Requirement:** Expandable section. Shows: Sodium Potassium Magnesium Calcium Fiber Sugar Only if available.
 - **Current repository status:** `complete`
-- **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
-- **Acceptance criteria:** Today exposes an expandable evidence section for every nutrient currently carried by verified meal snapshots (fiber, sodium, potassium), including target and remaining/reference status, and explicitly omits unsupported nutrients rather than displaying false zeroes.
+- **Foundation V2 portion:** Complete and verified: per-nutrient availability metadata survives food edits, portions, meal repetition, duplication, deletion, and historical snapshots; UI distinguishes measured zero, unavailable evidence, and partial totals in Arabic and English.
+- **Premium UI child scope:** Deferred — Premium UI phase: visual refinement of the expandable nutrient presentation only.
+- **Files/modules involved:** `lib/data/database`; `lib/data/repositories`; `lib/engine/nutrient_evidence_engine.dart`; `lib/features/dashboard`; `lib/features/nutrition`
+- **Acceptance criteria:** Do not represent missing evidence as zero; preserve known zero values and historical snapshots; label unavailable and partially supported totals in Arabic and English; retain calories and macros as existing authoritative snapshots.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** `3cde964`
+- **Completion commit:** `PENDING_CLOSURE_COMMIT`
 
 ### BIL-TDY-170 — Water Card
 
@@ -2191,15 +2205,15 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 175. Progress Rings
 - **Requirement:** Never use thick childish circles. Elegant. Thin. Animated. Premium.
-- **Current repository status:** `complete`
-- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
-- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
-- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** Accessible real-data progress exists, but most Today indicators are linear rather than the specified thin animated rings.
+- **Foundation V2 evidence:** Nutrition and weekly progress widget tests verify values and semantics.
+- **Future-phase remainder:** Premium UI motion, visual, and reduced-motion acceptance.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None for Foundation V2.
-- **Completion commit:** `217f09b`
+- **Blocker:** Premium UI phase.
+- **Completion commit:** —
 
 ### BIL-TDY-176 — Dashboard Charts
 
@@ -2216,12 +2230,14 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 177. Trend Line
 - **Requirement:** Weight trend: Smoothed. Raw data optional. Confidence shading.
-- **Current repository status:** `complete`
+- **Current repository status:** `deferred — Premium UI phase`
+- **Foundation V2 portion:** Smoothed explainable trends, raw records, confidence, sparse states, and accessible detail exist in History and Analytics.
+- **Premium UI child scope:** Those screens are not credited as the literal Today trend with raw-data toggle and confidence shading.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
-- **Completion commit:** `a4422ba`
+- **Blocker:** Premium UI Today-chart interaction design.
+- **Completion commit:** —
 
 ### BIL-TDY-178 — Weekly Progress
 
@@ -2238,23 +2254,27 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 179. Goal Progress
 - **Requirement:** Beautiful circular visualization. Percentage. Days remaining. Expected date.
-- **Current repository status:** `complete`
+- **Current repository status:** `deferred — Premium UI phase`
+- **Foundation V2 portion:** Real percentage and cautiously gated expected date are implemented from local evidence.
+- **Premium UI child scope:** The current linear presentation lacks the specified circular visualization and explicit days remaining.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** All source clauses are represented by the cited repository implementation/evidence, remain localized where user-facing, use real local data, and pass the listed regression coverage.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
-- **Completion commit:** `98515db`
+- **Blocker:** Premium UI visualization and cautious duration presentation.
+- **Completion commit:** —
 
 ### BIL-TDY-180 — Weight Trend
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 180. Weight Trend
 - **Requirement:** Primary color. Current point highlighted. Tap for details.
-- **Current repository status:** `complete`
+- **Current repository status:** `deferred — Premium UI phase`
+- **Foundation V2 portion:** Weight History provides the verified accessible smoothed trend and details.
+- **Premium UI child scope:** History/Analytics do not satisfy a primary-colored Today trend with highlighted current point and tap-through interaction.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** All source clauses are represented by the cited repository implementation/evidence, remain localized where user-facing, use real local data, and pass the listed regression coverage.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
-- **Completion commit:** `b6ef7da`
+- **Blocker:** Premium UI Today trend component and interaction validation.
+- **Completion commit:** —
 
 ### BIL-TDY-181 — Empty Dashboard
 

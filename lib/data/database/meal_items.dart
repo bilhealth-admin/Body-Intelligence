@@ -39,6 +39,9 @@ class MealItems extends Table {
 
   RealColumn get sugar => real().withDefault(const Constant(0))();
 
+  IntColumn get nutrientEvidenceMask =>
+      integer().withDefault(const Constant(0))();
+
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();

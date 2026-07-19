@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/database/app_database.dart';
+import '../../data/database/nutrient_evidence.dart';
 import '../../app/localization/app_localizations.dart';
 import '../foods/providers/food_provider.dart';
 
@@ -483,12 +484,12 @@ class _FoodDraft {
   final double protein;
   final double carbs;
   final double fats;
-  final double fiber;
-  final double sodium;
-  final double potassium;
-  final double calcium;
-  final double magnesium;
-  final double sugar;
+  final double? fiber;
+  final double? sodium;
+  final double? potassium;
+  final double? calcium;
+  final double? magnesium;
+  final double? sugar;
 }
 
 class _CustomFoodDialog extends StatefulWidget {
@@ -513,7 +514,7 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
       controllers[2].text = widget.initialBarcode ?? '';
       controllers[3].text = '100';
       controllers[4].text = 'g';
-      for (var index = 5; index < controllers.length; index++) {
+      for (var index = 5; index <= 8; index++) {
         controllers[index].text = '0';
       }
       return;
@@ -528,12 +529,42 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
       food.protein.toString(),
       food.carbs.toString(),
       food.fats.toString(),
-      food.fiber.toString(),
-      food.sodium.toString(),
-      food.potassium.toString(),
-      food.calcium.toString(),
-      food.magnesium.toString(),
-      food.sugar.toString(),
+      NutrientEvidenceMask.contains(
+            food.nutrientEvidenceMask,
+            TrackedNutrient.fiber,
+          )
+          ? food.fiber.toString()
+          : '',
+      NutrientEvidenceMask.contains(
+            food.nutrientEvidenceMask,
+            TrackedNutrient.sodium,
+          )
+          ? food.sodium.toString()
+          : '',
+      NutrientEvidenceMask.contains(
+            food.nutrientEvidenceMask,
+            TrackedNutrient.potassium,
+          )
+          ? food.potassium.toString()
+          : '',
+      NutrientEvidenceMask.contains(
+            food.nutrientEvidenceMask,
+            TrackedNutrient.calcium,
+          )
+          ? food.calcium.toString()
+          : '',
+      NutrientEvidenceMask.contains(
+            food.nutrientEvidenceMask,
+            TrackedNutrient.magnesium,
+          )
+          ? food.magnesium.toString()
+          : '',
+      NutrientEvidenceMask.contains(
+            food.nutrientEvidenceMask,
+            TrackedNutrient.sugar,
+          )
+          ? food.sugar.toString()
+          : '',
     ];
     for (var index = 0; index < values.length; index++) {
       controllers[index].text = values[index];
@@ -591,6 +622,9 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
                       return t('Required');
                     }
                     if (index >= 3 && index != 4) {
+                      if (index >= 9 && (value == null || value.isEmpty)) {
+                        return null;
+                      }
                       final number = double.tryParse(
                         (value ?? '').replaceAll(',', '.'),
                       );
@@ -619,6 +653,8 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
             if (!formKey.currentState!.validate()) return;
             double number(int index) =>
                 double.parse(controllers[index].text.replaceAll(',', '.'));
+            double? optionalNumber(int index) =>
+                controllers[index].text.trim().isEmpty ? null : number(index);
             Navigator.pop(
               context,
               _FoodDraft(
@@ -637,12 +673,12 @@ class _CustomFoodDialogState extends State<_CustomFoodDialog> {
                 protein: number(6),
                 carbs: number(7),
                 fats: number(8),
-                fiber: number(9),
-                sodium: number(10),
-                potassium: number(11),
-                calcium: number(12),
-                magnesium: number(13),
-                sugar: number(14),
+                fiber: optionalNumber(9),
+                sodium: optionalNumber(10),
+                potassium: optionalNumber(11),
+                calcium: optionalNumber(12),
+                magnesium: optionalNumber(13),
+                sugar: optionalNumber(14),
               ),
             );
           },

@@ -1,4 +1,5 @@
 import 'package:body_intelligence_log/data/database/app_database.dart';
+import 'package:body_intelligence_log/data/database/nutrient_evidence.dart';
 import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
 import 'package:body_intelligence_log/data/repositories/decision_memory_repository.dart';
 import 'package:body_intelligence_log/data/repositories/experiment_repository.dart';
@@ -642,4 +643,60 @@ void main() {
     expect(tombstone.deletedAt, isNotNull);
     expect(tombstone.syncStatus, 'pendingDelete');
   });
+
+  test(
+    'known zero and unavailable nutrient evidence remain distinct',
+    () async {
+      final foods = FoodRepository(database);
+      final meals = MealRepository(database);
+      final foodId = await foods.addFood(
+        name: 'Known sodium-free food',
+        category: 'custom',
+        calories: 10,
+        protein: 1,
+        carbs: 1,
+        fats: 0,
+        sodium: 0,
+      );
+      final food = await database.select(database.foods).getSingle();
+      expect(
+        NutrientEvidenceMask.contains(
+          food.nutrientEvidenceMask,
+          TrackedNutrient.sodium,
+        ),
+        isTrue,
+      );
+      expect(
+        NutrientEvidenceMask.contains(
+          food.nutrientEvidenceMask,
+          TrackedNutrient.fiber,
+        ),
+        isFalse,
+      );
+
+      final mealId = await meals.createMeal(
+        date: DateTime(2026, 7, 19),
+        name: 'Evidence meal',
+        type: 'lunch',
+      );
+      await meals.addMealItem(mealId: mealId, foodId: foodId, quantity: 100);
+      await foods.deleteCustomFood(foodId);
+      final snapshot = await database.select(database.mealItems).getSingle();
+      expect(snapshot.sodium, 0);
+      expect(
+        NutrientEvidenceMask.contains(
+          snapshot.nutrientEvidenceMask,
+          TrackedNutrient.sodium,
+        ),
+        isTrue,
+      );
+      expect(
+        NutrientEvidenceMask.contains(
+          snapshot.nutrientEvidenceMask,
+          TrackedNutrient.fiber,
+        ),
+        isFalse,
+      );
+    },
+  );
 }

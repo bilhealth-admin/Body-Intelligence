@@ -79,6 +79,7 @@ class MealRepository {
               calcium: Value(food.calcium * factor),
               magnesium: Value(food.magnesium * factor),
               sugar: Value(food.sugar * factor),
+              nutrientEvidenceMask: Value(food.nutrientEvidenceMask),
             ),
           );
     });
@@ -108,6 +109,7 @@ class MealRepository {
           calcium: Value(food.calcium * factor),
           magnesium: Value(food.magnesium * factor),
           sugar: Value(food.sugar * factor),
+          nutrientEvidenceMask: Value(food.nutrientEvidenceMask),
           updatedAt: Value(DateTime.now()),
           revision: Value(existing.revision + 1),
           syncStatus: const Value('pending'),
@@ -212,6 +214,7 @@ class MealRepository {
               calcium: Value(source.calcium),
               magnesium: Value(source.magnesium),
               sugar: Value(source.sugar),
+              nutrientEvidenceMask: Value(source.nutrientEvidenceMask),
             ),
           );
     });
@@ -395,6 +398,7 @@ class MealRepository {
                 calcium: Value(item.calcium),
                 magnesium: Value(item.magnesium),
                 sugar: Value(item.sugar),
+                nutrientEvidenceMask: Value(item.nutrientEvidenceMask),
               ),
             );
       }

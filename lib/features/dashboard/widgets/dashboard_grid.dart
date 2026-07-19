@@ -13,6 +13,8 @@ import '../../../engine/one_best_action_engine.dart';
 import '../../../engine/plan_engine.dart';
 import '../../../engine/what_changed_engine.dart';
 import '../../../data/database/date_keys.dart';
+import '../../../data/database/nutrient_evidence.dart';
+import '../../../engine/nutrient_evidence_engine.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
 import '../../foods/providers/food_provider.dart';
@@ -27,6 +29,7 @@ import 'dashboard_loading_skeleton.dart';
 import 'nutrition_progress_card.dart';
 import 'weekly_progress_card.dart';
 import 'dashboard_meals_timeline.dart';
+import 'nutrient_evidence_status_text.dart';
 
 class DashboardGrid extends ConsumerWidget {
   const DashboardGrid({super.key});
@@ -131,18 +134,44 @@ class DashboardGrid extends ConsumerWidget {
     final protein = items.fold<double>(0, (sum, item) => sum + item.protein);
     final carbs = items.fold<double>(0, (sum, item) => sum + item.carbs);
     final fats = items.fold<double>(0, (sum, item) => sum + item.fats);
-    final fiber = items.fold<double>(0, (sum, item) => sum + item.fiber);
     final sodium = items.fold<double>(0, (sum, item) => sum + item.sodium);
-    final potassium = items.fold<double>(
-      0,
-      (sum, item) => sum + item.potassium,
+    NutrientEvidenceReport nutrientReport(
+      TrackedNutrient nutrient,
+      double Function(dynamic item) value,
+    ) => NutrientEvidenceEngine.total([
+      for (final item in items)
+        NutrientObservation(
+          value: value(item),
+          available: NutrientEvidenceMask.contains(
+            item.nutrientEvidenceMask,
+            nutrient,
+          ),
+        ),
+    ]);
+    final fiberEvidence = nutrientReport(
+      TrackedNutrient.fiber,
+      (item) => item.fiber as double,
     );
-    final calcium = items.fold<double>(0, (sum, item) => sum + item.calcium);
-    final magnesium = items.fold<double>(
-      0,
-      (sum, item) => sum + item.magnesium,
+    final sodiumEvidence = nutrientReport(
+      TrackedNutrient.sodium,
+      (item) => item.sodium as double,
     );
-    final sugar = items.fold<double>(0, (sum, item) => sum + item.sugar);
+    final potassiumEvidence = nutrientReport(
+      TrackedNutrient.potassium,
+      (item) => item.potassium as double,
+    );
+    final calciumEvidence = nutrientReport(
+      TrackedNutrient.calcium,
+      (item) => item.calcium as double,
+    );
+    final magnesiumEvidence = nutrientReport(
+      TrackedNutrient.magnesium,
+      (item) => item.magnesium as double,
+    );
+    final sugarEvidence = nutrientReport(
+      TrackedNutrient.sugar,
+      (item) => item.sugar as double,
+    );
     final water = waterRows.fold<int>(0, (sum, item) => sum + item.amountMl);
     final currentWeight = weights.firstOrNull?.weight ?? profile.currentWeight;
     final goalType = profile.targetWeight < currentWeight
@@ -521,41 +550,38 @@ class DashboardGrid extends ConsumerWidget {
             children: [
               _TargetRow(
                 label: tr('Fiber', 'الألياف'),
-                consumed: fiber,
+                evidence: fiberEvidence,
                 target: effectiveTargets.fiber.toDouble(),
                 unit: 'g',
               ),
               _TargetRow(
                 label: tr('Sodium', 'الصوديوم'),
-                consumed: sodium,
+                evidence: sodiumEvidence,
                 target: effectiveTargets.sodium.toDouble(),
                 unit: 'mg',
                 upperLimit: true,
               ),
               _TargetRow(
                 label: tr('Potassium', 'البوتاسيوم'),
-                consumed: potassium,
+                evidence: potassiumEvidence,
                 target: effectiveTargets.potassium.toDouble(),
                 unit: 'mg',
               ),
-              if (calcium > 0)
-                _InformationalNutrientRow(
-                  label: tr('Calcium', 'الكالسيوم'),
-                  consumed: calcium,
-                  unit: 'mg',
-                ),
-              if (magnesium > 0)
-                _InformationalNutrientRow(
-                  label: tr('Magnesium', 'المغنيسيوم'),
-                  consumed: magnesium,
-                  unit: 'mg',
-                ),
-              if (sugar > 0)
-                _InformationalNutrientRow(
-                  label: tr('Sugar', 'السكر'),
-                  consumed: sugar,
-                  unit: 'g',
-                ),
+              _InformationalNutrientRow(
+                label: tr('Calcium', 'الكالسيوم'),
+                evidence: calciumEvidence,
+                unit: 'mg',
+              ),
+              _InformationalNutrientRow(
+                label: tr('Magnesium', 'المغنيسيوم'),
+                evidence: magnesiumEvidence,
+                unit: 'mg',
+              ),
+              _InformationalNutrientRow(
+                label: tr('Sugar', 'السكر'),
+                evidence: sugarEvidence,
+                unit: 'g',
+              ),
             ],
           ),
         ),
@@ -762,14 +788,14 @@ int consecutiveLoggingDays(Set<String> observedDays, DateTime today) {
 class _TargetRow extends StatelessWidget {
   const _TargetRow({
     required this.label,
-    required this.consumed,
+    required this.evidence,
     required this.target,
     required this.unit,
     this.upperLimit = false,
   });
 
   final String label;
-  final double consumed;
+  final NutrientEvidenceReport evidence;
   final double target;
   final String unit;
   final bool upperLimit;
@@ -777,6 +803,10 @@ class _TargetRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    final consumed = evidence.total;
+    if (consumed == null) {
+      return _UnavailableNutrientRow(label: label);
+    }
     final difference = target - consumed;
     final exceeded = difference < 0;
     final ratio = target <= 0 ? 0.0 : (consumed / target).clamp(0.0, 1.0);
@@ -800,6 +830,8 @@ class _TargetRow extends StatelessWidget {
                 Text(
                   '$label · ${consumed.toStringAsFixed(0)} / ${target.toStringAsFixed(0)} $unit',
                 ),
+                if (evidence.state == NutrientEvidenceState.partial)
+                  NutrientEvidenceStatusText(state: evidence.state),
                 const SizedBox(height: 4),
                 LinearProgressIndicator(value: ratio),
                 Text(
@@ -824,20 +856,46 @@ class _TargetRow extends StatelessWidget {
 class _InformationalNutrientRow extends StatelessWidget {
   const _InformationalNutrientRow({
     required this.label,
-    required this.consumed,
+    required this.evidence,
     required this.unit,
   });
 
   final String label;
-  final double consumed;
+  final NutrientEvidenceReport evidence;
   final String unit;
 
   @override
-  Widget build(BuildContext context) => ListTile(
-    contentPadding: EdgeInsets.zero,
-    leading: const Icon(Icons.info_outline),
-    title: Text(label),
-    subtitle: Text(context.strings.text('No target; informational only')),
-    trailing: Text('${consumed.toStringAsFixed(0)} $unit'),
-  );
+  Widget build(BuildContext context) {
+    if (evidence.total == null) return _UnavailableNutrientRow(label: label);
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: const Icon(Icons.info_outline),
+      title: Text(label),
+      subtitle: evidence.state == NutrientEvidenceState.partial
+          ? NutrientEvidenceStatusText(
+              state: evidence.state,
+              informational: true,
+            )
+          : Text(context.strings.text('No target; informational only')),
+      trailing: Text('${evidence.total!.toStringAsFixed(0)} $unit'),
+    );
+  }
+}
+
+class _UnavailableNutrientRow extends StatelessWidget {
+  const _UnavailableNutrientRow({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: const Icon(Icons.help_outline),
+      title: Text(label),
+      subtitle: const NutrientEvidenceStatusText(
+        state: NutrientEvidenceState.unavailable,
+      ),
+      trailing: const Text('—'),
+    );
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:body_intelligence_log/data/database/app_database.dart';
+import 'package:body_intelligence_log/data/database/nutrient_evidence.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -105,7 +106,7 @@ void main() {
         created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
       )''');
         raw.execute(
-          "INSERT INTO foods (name, calories, protein, carbs, fats) VALUES ('Oats',389,16.9,66.3,6.9)",
+          "INSERT INTO foods (name, calories, protein, carbs, fats, fiber) VALUES ('Oats',389,16.9,66.3,6.9,8.4)",
         );
         raw.execute(
           "INSERT INTO meals (date, name, type) VALUES (1704067200,'Breakfast','breakfast')",
@@ -148,6 +149,7 @@ void main() {
         'revision',
         'sync_status',
         'position',
+        'nutrient_evidence_mask',
       ]),
     );
     final preservedItem = await database.select(database.mealItems).getSingle();
@@ -156,5 +158,13 @@ void main() {
     expect(preservedItem.revision, 1);
     expect(preservedItem.syncStatus, 'local');
     expect(preservedItem.position, 1);
+    expect(
+      NutrientEvidenceMask.contains(
+        food.nutrientEvidenceMask,
+        TrackedNutrient.fiber,
+      ),
+      isTrue,
+    );
+    expect(preservedItem.nutrientEvidenceMask, 0);
   });
 }

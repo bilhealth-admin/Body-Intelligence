@@ -47,7 +47,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -118,6 +118,32 @@ class AppDatabase extends _$AppDatabase {
           'position INTEGER NOT NULL DEFAULT 0',
         ]);
         await customStatement('UPDATE meal_items SET position = id');
+      }
+      if (from < 15) {
+        await _addColumns('foods', <String>[
+          'nutrient_evidence_mask INTEGER NOT NULL DEFAULT 0',
+        ]);
+        await _addColumns('meal_items', <String>[
+          'nutrient_evidence_mask INTEGER NOT NULL DEFAULT 0',
+        ]);
+        await customStatement('''
+          UPDATE foods SET nutrient_evidence_mask =
+            (CASE WHEN fiber != 0 THEN 1 ELSE 0 END) |
+            (CASE WHEN sodium != 0 THEN 2 ELSE 0 END) |
+            (CASE WHEN potassium != 0 THEN 4 ELSE 0 END) |
+            (CASE WHEN calcium != 0 THEN 8 ELSE 0 END) |
+            (CASE WHEN magnesium != 0 THEN 16 ELSE 0 END) |
+            (CASE WHEN sugar != 0 THEN 32 ELSE 0 END)
+        ''');
+        await customStatement('''
+          UPDATE meal_items SET nutrient_evidence_mask =
+            (CASE WHEN fiber != 0 THEN 1 ELSE 0 END) |
+            (CASE WHEN sodium != 0 THEN 2 ELSE 0 END) |
+            (CASE WHEN potassium != 0 THEN 4 ELSE 0 END) |
+            (CASE WHEN calcium != 0 THEN 8 ELSE 0 END) |
+            (CASE WHEN magnesium != 0 THEN 16 ELSE 0 END) |
+            (CASE WHEN sugar != 0 THEN 32 ELSE 0 END)
+        ''');
       }
     },
   );

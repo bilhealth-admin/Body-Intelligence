@@ -45,6 +45,9 @@ class Foods extends Table {
 
   RealColumn get vitaminC => real().withDefault(const Constant(0))();
 
+  IntColumn get nutrientEvidenceMask =>
+      integer().withDefault(const Constant(0))();
+
   BoolColumn get verified => boolean().withDefault(const Constant(false))();
 
   BoolColumn get isCustom => boolean().withDefault(const Constant(false))();
