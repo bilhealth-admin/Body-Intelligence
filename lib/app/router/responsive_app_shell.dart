@@ -19,8 +19,13 @@ class ResponsiveAppShell extends StatelessWidget {
 
   int selectedIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
-    final index = paths.indexWhere(location.startsWith);
-    return index < 0 ? 0 : index;
+    for (var i = 0; i < paths.length; i++) {
+      final path = paths[i];
+      if (location == path || location.startsWith('$path/')) {
+        return i;
+      }
+    }
+    return 0;
   }
 
   @override
@@ -139,20 +144,31 @@ class ResponsiveAppShell extends StatelessWidget {
         ),
       ),
     );
-    final quickButton = FloatingActionButton(
-      onPressed: quickAdd,
-      tooltip: context.strings.text('Quick Add'),
-      child: const Icon(Icons.add),
+    final quickButton = Semantics(
+      button: true,
+      label: context.strings.text('Quick Add'),
+      hint: context.strings.text(
+        'Open quick actions for weight, food, and water logging',
+      ),
+      child: FloatingActionButton(
+        onPressed: quickAdd,
+        tooltip: context.strings.text('Quick Add'),
+        child: const Icon(Icons.add),
+      ),
     );
     if (!wide) {
       return Scaffold(
         body: child,
         floatingActionButton: quickButton,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: index,
-          onDestinationSelected: navigate,
-          destinations: destinations,
+        bottomNavigationBar: Semantics(
+          container: true,
+          label: context.strings.text('Primary navigation'),
+          child: NavigationBar(
+            selectedIndex: index,
+            onDestinationSelected: navigate,
+            destinations: destinations,
+          ),
         ),
       );
     }
@@ -160,19 +176,23 @@ class ResponsiveAppShell extends StatelessWidget {
       floatingActionButton: quickButton,
       body: Row(
         children: [
-          NavigationRail(
-            selectedIndex: index,
-            onDestinationSelected: navigate,
-            labelType: NavigationRailLabelType.all,
-            destinations: destinations
-                .map(
-                  (item) => NavigationRailDestination(
-                    icon: item.icon,
-                    selectedIcon: item.selectedIcon,
-                    label: Text(item.label),
-                  ),
-                )
-                .toList(),
+          Semantics(
+            container: true,
+            label: context.strings.text('Primary navigation'),
+            child: NavigationRail(
+              selectedIndex: index,
+              onDestinationSelected: navigate,
+              labelType: NavigationRailLabelType.all,
+              destinations: destinations
+                  .map(
+                    (item) => NavigationRailDestination(
+                      icon: item.icon,
+                      selectedIcon: item.selectedIcon,
+                      label: Text(item.label),
+                    ),
+                  )
+                  .toList(),
+            ),
           ),
           const VerticalDivider(width: 1),
           Expanded(

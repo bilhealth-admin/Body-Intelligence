@@ -5,16 +5,45 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
-Widget shellApp({Locale locale = const Locale('en')}) {
+Widget shellApp({
+  Locale locale = const Locale('en'),
+  String initialLocation = '/dashboard',
+}) {
   final router = GoRouter(
-    initialLocation: '/dashboard',
+    initialLocation: initialLocation,
     routes: [
       ShellRoute(
         builder: (_, _, child) => ResponsiveAppShell(child: child),
         routes: [
           GoRoute(
             path: '/dashboard',
-            builder: (_, _) => const SizedBox(key: Key('content')),
+            builder: (_, _) =>
+                const Scaffold(body: Center(child: Text('dashboard'))),
+          ),
+          GoRoute(
+            path: '/daily-log',
+            builder: (_, _) =>
+                const Scaffold(body: Center(child: Text('daily-log'))),
+          ),
+          GoRoute(
+            path: '/nutrition',
+            builder: (_, _) =>
+                const Scaffold(body: Center(child: Text('nutrition'))),
+          ),
+          GoRoute(
+            path: '/history',
+            builder: (_, _) =>
+                const Scaffold(body: Center(child: Text('history'))),
+          ),
+          GoRoute(
+            path: '/analytics',
+            builder: (_, _) =>
+                const Scaffold(body: Center(child: Text('analytics'))),
+          ),
+          GoRoute(
+            path: '/settings',
+            builder: (_, _) =>
+                const Scaffold(body: Center(child: Text('settings'))),
           ),
         ],
       ),
@@ -58,6 +87,66 @@ void main() {
 
     expect(find.byType(NavigationRail), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
+  });
+
+  testWidgets('compact shell destination tap navigates to analytics', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(shellApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Insights'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('analytics'), findsOneWidget);
+  });
+
+  testWidgets('selected index uses exact path matching boundaries', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(shellApp(initialLocation: '/daily-log'));
+    await tester.pumpAndSettle();
+
+    final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
+    expect(bar.selectedIndex, 1);
+  });
+
+  testWidgets('unknown shell route defaults selected index to dashboard', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(shellApp(initialLocation: '/dashboard'));
+    await tester.pumpAndSettle();
+
+    final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
+    expect(bar.selectedIndex, 0);
+  });
+
+  testWidgets('navigation and quick add semantics are present', (tester) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(shellApp());
+    await tester.pumpAndSettle();
+
+    expect(find.bySemanticsLabel('Primary navigation'), findsOneWidget);
+    expect(find.bySemanticsLabel('Quick Add'), findsWidgets);
   });
 
   testWidgets('Arabic quick add localizes unavailable AI boundary', (
