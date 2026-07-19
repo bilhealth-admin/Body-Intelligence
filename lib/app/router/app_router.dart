@@ -45,7 +45,12 @@ class AppRouter {
         builder: (_, _, child) => ResponsiveAppShell(child: child),
         routes: [
           GoRoute(path: '/dashboard', builder: (_, _) => const DashboardPage()),
-          GoRoute(path: '/daily-log', builder: (_, _) => const DailyLogPage()),
+          GoRoute(
+            path: '/daily-log',
+            builder: (_, state) => DailyLogPage(
+              initialMealType: state.uri.queryParameters['meal'],
+            ),
+          ),
           GoRoute(path: '/nutrition', builder: (_, _) => const FoodPage()),
           GoRoute(path: '/history', builder: (_, _) => const HistoryPage()),
           GoRoute(path: '/analytics', builder: (_, _) => const AnalyticsPage()),

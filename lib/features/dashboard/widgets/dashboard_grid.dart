@@ -15,6 +15,7 @@ import '../../../engine/what_changed_engine.dart';
 import '../../../data/database/date_keys.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
+import '../../foods/providers/food_provider.dart';
 import '../../life_context/providers/life_context_provider.dart';
 import '../../weight/providers/weight_provider.dart';
 import '../providers/dashboard_provider.dart';
@@ -43,6 +44,10 @@ class DashboardGrid extends ConsumerWidget {
     final skippedWeightAsync = ref.watch(weightReminderSkippedTodayProvider);
     final memoryEnabled =
         ref.watch(decisionMemoryEnabledProvider).value ?? true;
+    final usualBreakfast = ref
+        .watch(usualMealsProvider('breakfast'))
+        .value
+        ?.firstOrNull;
     final system =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     if ([
@@ -339,6 +344,38 @@ class DashboardGrid extends ConsumerWidget {
           .set('weightReminderSkippedDay', dayKeyFor(DateTime.now()));
     }
 
+    Future<void> repeatBreakfast() async {
+      final candidate = usualBreakfast;
+      if (candidate == null) return;
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(tr('Repeat usual breakfast?', 'تكرار الفطور المعتاد؟')),
+          content: Text(
+            tr(
+              'The same saved portions and nutrition snapshots will be added to today only after confirmation.',
+              'ستُضاف نفس الحصص ولقطات التغذية المحفوظة إلى اليوم بعد التأكيد فقط.',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(tr('Cancel', 'إلغاء')),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(tr('Add breakfast', 'إضافة الفطور')),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+      await ref
+          .read(mealRepositoryProvider)
+          .repeatMeal(candidate: candidate, date: DateTime.now());
+      ref.invalidate(usualMealsProvider('breakfast'));
+    }
+
     return Column(
       children: [
         AnimatedSwitcher(
@@ -441,7 +478,9 @@ class DashboardGrid extends ConsumerWidget {
         ),
         DashboardMealsTimeline(
           meals: meals,
-          onOpenDiary: () => context.go('/daily-log'),
+          onOpenMeal: (type) => context.go('/daily-log?meal=$type'),
+          usualBreakfastAvailable: usualBreakfast != null,
+          onRepeatBreakfast: repeatBreakfast,
         ),
         Card(
           child: ExpansionTile(

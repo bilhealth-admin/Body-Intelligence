@@ -178,6 +178,45 @@ class MealRepository {
     });
   }
 
+  Future<int> duplicateMealItem(int id) async {
+    return _database.transaction(() async {
+      final source = await _mealItem(id);
+      final siblings =
+          await (_database.select(_database.mealItems)..where(
+                (item) =>
+                    item.mealId.equals(source.mealId) & item.deletedAt.isNull(),
+              ))
+              .get();
+      final nextPosition =
+          siblings.fold<int>(
+            0,
+            (maximum, item) =>
+                item.position > maximum ? item.position : maximum,
+          ) +
+          1;
+      return _database
+          .into(_database.mealItems)
+          .insert(
+            MealItemsCompanion.insert(
+              mealId: source.mealId,
+              foodId: source.foodId,
+              quantity: Value(source.quantity),
+              position: Value(nextPosition),
+              calories: Value(source.calories),
+              protein: Value(source.protein),
+              carbs: Value(source.carbs),
+              fats: Value(source.fats),
+              fiber: Value(source.fiber),
+              sodium: Value(source.sodium),
+              potassium: Value(source.potassium),
+              calcium: Value(source.calcium),
+              magnesium: Value(source.magnesium),
+              sugar: Value(source.sugar),
+            ),
+          );
+    });
+  }
+
   Future<MealItem> _mealItem(int id) async {
     final item = await (_database.select(
       _database.mealItems,

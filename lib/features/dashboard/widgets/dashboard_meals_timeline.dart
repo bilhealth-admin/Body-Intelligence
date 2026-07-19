@@ -7,11 +7,15 @@ class DashboardMealsTimeline extends StatelessWidget {
   const DashboardMealsTimeline({
     super.key,
     required this.meals,
-    required this.onOpenDiary,
+    required this.onOpenMeal,
+    this.usualBreakfastAvailable = false,
+    this.onRepeatBreakfast,
   });
 
   final List<MealWithItems> meals;
-  final VoidCallback onOpenDiary;
+  final ValueChanged<String> onOpenMeal;
+  final bool usualBreakfastAvailable;
+  final VoidCallback? onRepeatBreakfast;
 
   static const types = ['breakfast', 'lunch', 'dinner', 'snack'];
 
@@ -47,13 +51,26 @@ class DashboardMealsTimeline extends StatelessWidget {
                   ),
                 ),
                 TextButton.icon(
-                  onPressed: onOpenDiary,
+                  onPressed: () => onOpenMeal('breakfast'),
                   icon: const Icon(Icons.edit_outlined),
                   label: Text(context.strings.text('Open Diary')),
                 ),
               ],
             ),
           ),
+          if (usualBreakfastAvailable)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              child: FilledButton.tonalIcon(
+                onPressed: onRepeatBreakfast,
+                icon: const Icon(Icons.replay_outlined),
+                label: Text(
+                  Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'كرر فطورك المعتاد'
+                      : 'Repeat usual breakfast',
+                ),
+              ),
+            ),
           for (var index = 0; index < types.length; index++)
             _MealTimelineEntry(
               type: types[index],
@@ -63,7 +80,7 @@ class DashboardMealsTimeline extends StatelessWidget {
                   .where((entry) => entry.meal.type == types[index])
                   .firstOrNull,
               last: index == types.length - 1,
-              onOpenDiary: onOpenDiary,
+              onOpenMeal: onOpenMeal,
             ),
         ],
       ),
@@ -78,7 +95,7 @@ class _MealTimelineEntry extends StatelessWidget {
     required this.icon,
     required this.meal,
     required this.last,
-    required this.onOpenDiary,
+    required this.onOpenMeal,
   });
 
   final String type;
@@ -86,7 +103,7 @@ class _MealTimelineEntry extends StatelessWidget {
   final IconData icon;
   final MealWithItems? meal;
   final bool last;
-  final VoidCallback onOpenDiary;
+  final ValueChanged<String> onOpenMeal;
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +166,7 @@ class _MealTimelineEntry extends StatelessWidget {
                   Align(
                     alignment: AlignmentDirectional.centerStart,
                     child: TextButton.icon(
-                      onPressed: onOpenDiary,
+                      onPressed: () => onOpenMeal(type),
                       icon: const Icon(Icons.add),
                       label: Text(context.strings.text('Add food')),
                     ),
@@ -157,7 +174,11 @@ class _MealTimelineEntry extends StatelessWidget {
                 else
                   Align(
                     alignment: AlignmentDirectional.centerStart,
-                    child: Text(foodNames.join(' · ')),
+                    child: TextButton.icon(
+                      onPressed: () => onOpenMeal(type),
+                      icon: const Icon(Icons.edit_outlined),
+                      label: Text(foodNames.join(' · ')),
+                    ),
                   ),
               ],
             ),

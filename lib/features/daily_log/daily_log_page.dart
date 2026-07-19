@@ -8,7 +8,9 @@ import '../foods/providers/food_provider.dart';
 import 'providers/daily_log_provider.dart';
 
 class DailyLogPage extends ConsumerStatefulWidget {
-  const DailyLogPage({super.key});
+  const DailyLogPage({super.key, this.initialMealType});
+
+  final String? initialMealType;
 
   @override
   ConsumerState<DailyLogPage> createState() => _DailyLogPageState();
@@ -21,6 +23,19 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
   final foodSearch = SearchController();
   Food? selectedFood;
   String mealType = 'breakfast';
+
+  @override
+  void initState() {
+    super.initState();
+    if (const {
+      'breakfast',
+      'lunch',
+      'dinner',
+      'snack',
+    }.contains(widget.initialMealType)) {
+      mealType = widget.initialMealType!;
+    }
+  }
 
   @override
   void dispose() {
@@ -162,6 +177,70 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     await ref
         .read(mealRepositoryProvider)
         .updateMealItem(id: item.id, quantity: updated);
+  }
+
+  Future<void> _showItemActions(MealItem item, Food? food) async {
+    final foodName = food?.name ?? context.strings.text('Historical food');
+    final activeFood = food != null && food.deletedAt == null;
+    final favorite = activeFood
+        ? await ref.read(foodRepositoryProvider).isFavorite(food.id)
+        : false;
+    if (!mounted) return;
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit_outlined),
+              enabled: activeFood,
+              title: Text(arabic ? 'تعديل الكمية' : 'Edit quantity'),
+              onTap: () => Navigator.pop(sheetContext, 'edit'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.copy_outlined),
+              title: Text(arabic ? 'تكرار العنصر' : 'Duplicate item'),
+              subtitle: Text(
+                arabic
+                    ? 'يُنسخ نفس المقدار ولقطة التغذية المحفوظة.'
+                    : 'Copies the same quantity and saved nutrition snapshot.',
+              ),
+              onTap: () => Navigator.pop(sheetContext, 'duplicate'),
+            ),
+            ListTile(
+              leading: Icon(favorite ? Icons.favorite : Icons.favorite_border),
+              enabled: activeFood,
+              title: Text(
+                favorite
+                    ? (arabic ? 'إزالة من المفضلة' : 'Remove favorite')
+                    : (arabic ? 'إضافة إلى المفضلة' : 'Add favorite'),
+              ),
+              onTap: () => Navigator.pop(sheetContext, 'favorite'),
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.delete_outline,
+                color: Theme.of(context).colorScheme.error,
+              ),
+              title: Text(arabic ? 'حذف من الوجبة' : 'Delete from meal'),
+              onTap: () => Navigator.pop(sheetContext, 'delete'),
+            ),
+          ],
+        ),
+      ),
+    );
+    switch (action) {
+      case 'edit':
+        await _editMealItem(item, food!);
+      case 'duplicate':
+        await ref.read(mealRepositoryProvider).duplicateMealItem(item.id);
+      case 'favorite':
+        await ref.read(foodRepositoryProvider).setFavorite(food!.id, !favorite);
+      case 'delete':
+        await _deleteMealItem(item, foodName);
+    }
   }
 
   @override
@@ -592,6 +671,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                             onTap: food == null || food.deletedAt != null
                                 ? null
                                 : () => _editMealItem(item, food),
+                            onLongPress: () => _showItemActions(item, food),
                             trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
@@ -632,15 +712,15 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                   icon: const Icon(Icons.arrow_downward),
                                 ),
                                 IconButton(
-                                  tooltip: context.strings.text(
-                                    'Remove meal item',
-                                  ),
-                                  icon: const Icon(Icons.delete_outline),
-                                  onPressed: () => _deleteMealItem(
-                                    item,
-                                    food?.name ??
-                                        context.strings.text('Historical food'),
-                                  ),
+                                  tooltip:
+                                      Localizations.localeOf(
+                                            context,
+                                          ).languageCode ==
+                                          'ar'
+                                      ? 'إجراءات العنصر'
+                                      : 'Item actions',
+                                  icon: const Icon(Icons.more_vert),
+                                  onPressed: () => _showItemActions(item, food),
                                 ),
                               ],
                             ),

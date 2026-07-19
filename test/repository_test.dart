@@ -235,6 +235,17 @@ void main() {
     expect(watched.items.map((item) => item.foodId), [secondFood, firstFood]);
     expect(watched.items.first.revision, 2);
     expect(watched.items.first.syncStatus, 'pending');
+
+    final duplicateId = await meals.duplicateMealItem(watched.items.first.id);
+    watched =
+        (await meals.watchMealsForDate(DateTime(2026, 7, 19)).first).single;
+    expect(watched.items, hasLength(3));
+    final duplicate = watched.items.singleWhere(
+      (item) => item.id == duplicateId,
+    );
+    expect(duplicate.foodId, secondFood);
+    expect(duplicate.calories, 200);
+    expect(duplicate.position, greaterThan(watched.items[1].position));
   });
 
   test('food search matches Arabic names and favorites are unique', () async {

@@ -9,6 +9,7 @@ void main() {
     tester,
   ) async {
     var opened = 0;
+    String? openedType;
     await tester.pumpWidget(
       MaterialApp(
         supportedLocales: AppLocalizations.supportedLocales,
@@ -22,7 +23,10 @@ void main() {
           body: SingleChildScrollView(
             child: DashboardMealsTimeline(
               meals: const [],
-              onOpenDiary: () => opened++,
+              onOpenMeal: (type) {
+                opened++;
+                openedType = type;
+              },
             ),
           ),
         ),
@@ -38,6 +42,34 @@ void main() {
     expect(find.text('Add food'), findsOneWidget);
     await tester.tap(find.text('Add food'));
     expect(opened, 1);
+    expect(openedType, 'breakfast');
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'usual breakfast requires one action plus explicit confirmation',
+    (tester) async {
+      var requested = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: DashboardMealsTimeline(
+            meals: const [],
+            onOpenMeal: (_) {},
+            usualBreakfastAvailable: true,
+            onRepeatBreakfast: () => requested++,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Repeat usual breakfast'));
+      expect(requested, 1);
+    },
+  );
 }

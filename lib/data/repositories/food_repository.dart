@@ -252,6 +252,13 @@ class FoodRepository {
     }
   }
 
+  Future<bool> isFavorite(int foodId) async {
+    final row = await (_database.select(
+      _database.favorites,
+    )..where((favorite) => favorite.foodId.equals(foodId))).getSingleOrNull();
+    return row != null;
+  }
+
   Future<void> recordRecent(int foodId) async {
     final existing = await (_database.select(
       _database.recentFoods,
