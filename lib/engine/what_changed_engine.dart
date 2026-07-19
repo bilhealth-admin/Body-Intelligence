@@ -20,13 +20,28 @@ class WhatChangedEngine {
   static WhatChangedReport compare({
     required List<double> chronologicalWeights,
     required bool comparableConditions,
+    List<String> contextTypes = const [],
   }) {
+    final contextEvidence = contextTypes
+        .toSet()
+        .map((type) => 'Context recorded: $type')
+        .toList();
+    final contextAlternatives = contextTypes
+        .toSet()
+        .map(
+          (type) =>
+              '$type may be relevant, but this record does not prove cause',
+        )
+        .toList();
     if (chronologicalWeights.length < 2) {
-      return const WhatChangedReport(
+      return WhatChangedReport(
         interpretation: ChangeInterpretation.insufficient,
         summary: 'Another comparable weight is needed to describe change.',
-        evidence: [],
-        alternatives: ['Normal measurement variation remains unknown'],
+        evidence: contextEvidence,
+        alternatives: [
+          'Normal measurement variation remains unknown',
+          ...contextAlternatives,
+        ],
       );
     }
     final change =
@@ -36,9 +51,13 @@ class WhatChangedEngine {
       return WhatChangedReport(
         interpretation: ChangeInterpretation.stable,
         summary: 'Weight is broadly stable since the previous check-in.',
-        evidence: ['${change >= 0 ? '+' : ''}${change.toStringAsFixed(1)} kg'],
-        alternatives: const [
+        evidence: [
+          '${change >= 0 ? '+' : ''}${change.toStringAsFixed(1)} kg',
+          ...contextEvidence,
+        ],
+        alternatives: [
           'Small daily variation can mask the underlying trend',
+          ...contextAlternatives,
         ],
       );
     }
@@ -50,12 +69,14 @@ class WhatChangedEngine {
         evidence: [
           '${change >= 0 ? '+' : ''}${change.toStringAsFixed(1)} kg since the previous check-in',
           if (!comparableConditions) 'Measurement conditions differed',
+          ...contextEvidence,
         ],
-        alternatives: const [
+        alternatives: [
           'Water and glycogen',
           'Digestive content',
           'Measurement timing or conditions',
           'Incomplete food logging',
+          ...contextAlternatives,
         ],
       );
     }
@@ -63,8 +84,14 @@ class WhatChangedEngine {
       interpretation: ChangeInterpretation.directional,
       summary:
           'A modest change was recorded; the multi-day trend is more informative.',
-      evidence: ['${change >= 0 ? '+' : ''}${change.toStringAsFixed(1)} kg'],
-      alternatives: const ['Normal day-to-day scale variation'],
+      evidence: [
+        '${change >= 0 ? '+' : ''}${change.toStringAsFixed(1)} kg',
+        ...contextEvidence,
+      ],
+      alternatives: [
+        'Normal day-to-day scale variation',
+        ...contextAlternatives,
+      ],
     );
   }
 }

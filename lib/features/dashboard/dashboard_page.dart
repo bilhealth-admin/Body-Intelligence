@@ -6,6 +6,7 @@ import 'widgets/dashboard_grid.dart';
 import 'widgets/dashboard_header.dart';
 import '../../app/localization/app_localizations.dart';
 import '../profile/providers/user_profile_provider.dart';
+import '../life_context/providers/life_context_provider.dart';
 import '../weight/providers/weight_provider.dart';
 import 'providers/dashboard_provider.dart';
 
@@ -23,6 +24,7 @@ class DashboardPage extends ConsumerWidget {
         ref.refresh(allMealsProvider.future),
         ref.refresh(allWaterProvider.future),
         ref.refresh(weightReminderSkippedTodayProvider.future),
+        ref.refresh(todayLifeContextProvider.future),
       ]);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -42,6 +42,7 @@ class DashboardGrid extends ConsumerWidget {
     final allMealsAsync = ref.watch(allMealsProvider);
     final allWaterAsync = ref.watch(allWaterProvider);
     final skippedWeightAsync = ref.watch(weightReminderSkippedTodayProvider);
+    final contextAsync = ref.watch(todayLifeContextProvider);
     final memoryEnabled =
         ref.watch(decisionMemoryEnabledProvider).value ?? true;
     final usualBreakfast = ref
@@ -58,6 +59,7 @@ class DashboardGrid extends ConsumerWidget {
       allMealsAsync,
       allWaterAsync,
       skippedWeightAsync,
+      contextAsync,
     ].any((value) => value.isLoading)) {
       return const DashboardLoadingSkeleton();
     }
@@ -67,7 +69,8 @@ class DashboardGrid extends ConsumerWidget {
         waterAsync.hasError ||
         allMealsAsync.hasError ||
         allWaterAsync.hasError ||
-        skippedWeightAsync.hasError) {
+        skippedWeightAsync.hasError ||
+        contextAsync.hasError) {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -103,6 +106,9 @@ class DashboardGrid extends ConsumerWidget {
     final waterRows = waterAsync.value ?? const [];
     final allMeals = allMealsAsync.value ?? const [];
     final allWater = allWaterAsync.value ?? const [];
+    final insightContexts = (contextAsync.value ?? const [])
+        .where((entry) => entry.useInInsights)
+        .toList();
     final skippedWeightToday = skippedWeightAsync.value ?? false;
     final items = meals.expand((meal) => meal.items).toList();
     final calories = items.fold<double>(0, (sum, item) => sum + item.calories);
@@ -203,6 +209,7 @@ class DashboardGrid extends ConsumerWidget {
           weights.length >= 2 &&
           weights[0].measurementContext == weights[1].measurementContext &&
           weights[0].measurementContext != 'differentConditions',
+      contextTypes: insightContexts.map((entry) => entry.type).toList(),
     );
     final twin = BodyTwinEngine.simulate(
       calorieTarget: effectiveTargets.calories,

@@ -67,10 +67,16 @@ void main() {
     final report = WhatChangedEngine.compare(
       chronologicalWeights: const [80, 81.2],
       comparableConditions: false,
+      contextTypes: const ['travel', 'poorSleep'],
     );
     expect(report.interpretation, ChangeInterpretation.likelyNoise);
     expect(report.alternatives, contains('Water and glycogen'));
     expect(report.summary, isNot(contains('fat gain')));
+    expect(report.evidence, contains('Context recorded: travel'));
+    expect(
+      report.alternatives,
+      contains('travel may be relevant, but this record does not prove cause'),
+    );
   });
 
   test('recovery mode welcomes return without requiring backfill', () {
