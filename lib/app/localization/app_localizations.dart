@@ -224,6 +224,26 @@ class AppLocalizations {
         'لا يختلق BIL أدلة مفقودة ولا يقدم التخمين على أنه حقيقة.',
     'No account required. Nothing is uploaded.':
         'لا يلزم حساب. لا يتم رفع أي شيء.',
+    'Let’s start with you': 'لنبدأ بك',
+    'Your starting point': 'نقطة بدايتك',
+    'Where do you want to go?': 'إلى أين تريد أن تصل؟',
+    'Your choice and safety': 'اختيارك وسلامتك',
+    'Age and biological sex are used only in established energy equations. Choose the units that feel natural to you.':
+        'يُستخدم العمر والجنس البيولوجي فقط في معادلات الطاقة المعتمدة. اختر الوحدات الأنسب لك.',
+    'Height, current weight, and usual activity establish your starting energy estimate.':
+        'يحدد الطول والوزن الحالي والنشاط المعتاد تقدير طاقة البداية.',
+    'Your direction shapes targets. BIL keeps the estimate cautious and you can change it later.':
+        'يحدد اتجاهك الأهداف. يحافظ BIL على تقدير حذر ويمكنك تغييره لاحقًا.',
+    'Extra context is optional and stays on this device. Review the safety boundary before finishing.':
+        'السياق الإضافي اختياري ويبقى على هذا الجهاز. راجع حدود السلامة قبل الإنهاء.',
+    'Setup progress': 'تقدم الإعداد',
+    'Step 1 of 4': 'الخطوة ١ من ٤',
+    'Step 2 of 4': 'الخطوة ٢ من ٤',
+    'Step 3 of 4': 'الخطوة ٣ من ٤',
+    'Step 4 of 4': 'الخطوة ٤ من ٤',
+    'Usual activity': 'النشاط المعتاد',
+    'Back': 'رجوع',
+    'Finish setup': 'إنهاء الإعداد',
     'Gender (male/female)': 'الجنس البيولوجي (ذكر/أنثى)',
     'I understand BIL provides general information, not medical advice.':
         'أفهم أن BIL يقدم معلومات عامة وليس نصيحة طبية.',

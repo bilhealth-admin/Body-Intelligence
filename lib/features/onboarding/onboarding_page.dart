@@ -62,7 +62,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       if (!mounted) return;
       setState(() {
         if (profile != null) {
-          step = 1;
+          step = 4;
           ageController.text = profile.age.toString();
           heightCm = profile.height;
           currentWeightKg = profile.currentWeight;
@@ -180,6 +180,39 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       );
     }
     return next;
+  }
+
+  void advanceProfile() {
+    final stageKeys = switch (step) {
+      1 => {'age', 'gender'},
+      2 => {'height', 'currentWeight', 'activity'},
+      3 => {'targetWeight'},
+      _ => <String>{},
+    };
+    final stageErrors = Map<String, String>.from(validate())
+      ..removeWhere((key, _) => !stageKeys.contains(key));
+    if (stageErrors.isNotEmpty) {
+      setState(() => errors = stageErrors);
+      return;
+    }
+    update(() {
+      errors = const {};
+      step += 1;
+    });
+    if (profileScrollController.hasClients) {
+      profileScrollController.jumpTo(0);
+    }
+  }
+
+  void goBackProfile() {
+    if (step <= 1) return;
+    update(() {
+      errors = const {};
+      step -= 1;
+    });
+    if (profileScrollController.hasClients) {
+      profileScrollController.jumpTo(0);
+    }
   }
 
   Future<void> complete() async {
@@ -345,14 +378,17 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   ),
                 )
               : AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 250),
+                  duration: MediaQuery.disableAnimationsOf(context)
+                      ? Duration.zero
+                      : const Duration(milliseconds: 250),
                   child: step == 0
                       ? WelcomeStep(
                           key: const ValueKey('welcome'),
                           onContinue: () => update(() => step = 1),
                         )
                       : ProfileStep(
-                          key: const ValueKey('profile'),
+                          key: ValueKey('profile-$step'),
+                          stage: step - 1,
                           ageController: ageController,
                           heightCm: heightCm,
                           currentWeightKg: currentWeightKg,
@@ -390,7 +426,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                           onSystemChanged: updateSystem,
                           onDisclaimerChanged: (value) =>
                               update(() => disclaimerAccepted = value),
-                          onContinue: complete,
+                          onBack: goBackProfile,
+                          onContinue: step == 4 ? complete : advanceProfile,
                           scrollController: profileScrollController,
                         ),
                 ),

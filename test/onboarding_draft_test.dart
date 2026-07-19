@@ -57,4 +57,13 @@ void main() {
     await repository.clear();
     expect(await repository.load(), isNull);
   });
+
+  test('draft preserves every conversational stage', () {
+    for (var step = 0; step <= 4; step++) {
+      expect(
+        OnboardingDraft.decode(OnboardingDraft(step: step).encode())?.step,
+        step,
+      );
+    }
+  });
 }

@@ -62,7 +62,10 @@ class OnboardingDraft {
           (value[key] as num?)?.toDouble() ?? fallback;
       double? optionalNumber(String key) => (value[key] as num?)?.toDouble();
       return OnboardingDraft(
-        step: value['step'] == 1 ? 1 : 0,
+        step: switch (value['step']) {
+          final int step when step >= 0 && step <= 4 => step,
+          _ => 0,
+        },
         age: value['age'] is String ? value['age'] as String : '',
         heightCm: number('heightCm', 155),
         currentWeightKg: number('currentWeightKg', 60),

@@ -32,6 +32,7 @@ void main() {
         ],
         home: Scaffold(
           body: ProfileStep(
+            stage: 3,
             ageController: age,
             regionController: region,
             scrollController: scroll,
@@ -61,6 +62,7 @@ void main() {
             onGoalTypeChanged: (_) {},
             onSystemChanged: (_) {},
             onDisclaimerChanged: (_) {},
+            onBack: () {},
             onContinue: () {},
           ),
         ),
@@ -69,21 +71,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull, reason: 'initial profile layout');
 
-    final optional = find.text('سياق الجسم الاختياري');
-    await tester.ensureVisible(optional);
-    await tester.tap(optional);
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull, reason: 'expanded optional layout');
-    expect(find.text('الدولة أو المنطقة'), findsOneWidget);
-    expect(find.text('محيط الخصر'), findsOneWidget);
-    expect(find.text('محيط الرقبة'), findsOneWidget);
+    expect(find.text('الدولة أو المنطقة (اختياري)'), findsOneWidget);
+    expect(find.text('محيط الخصر (اختياري)'), findsOneWidget);
+    expect(find.text('محيط الرقبة (اختياري)'), findsOneWidget);
 
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'محيط الخصر'),
+      find.widgetWithText(TextFormField, 'محيط الخصر (اختياري)'),
       '81,4',
     );
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'محيط الرقبة'),
+      find.widgetWithText(TextFormField, 'محيط الرقبة (اختياري)'),
       '34.2',
     );
     expect(waist, 81.4);
