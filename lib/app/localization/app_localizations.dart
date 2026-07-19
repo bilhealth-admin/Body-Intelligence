@@ -250,6 +250,24 @@ class AppLocalizations {
     'BIL does not have a comparable daily measurement yet, so it will not claim a trend.':
         'لا يملك BIL قياسًا يوميًا قابلًا للمقارنة بعد، لذلك لن يدّعي وجود اتجاه.',
     'Record first check-in': 'سجّل أول قياس يومي',
+    'Daily return summary': 'ملخص العودة اليومية',
+    'Start today calmly': 'ابدأ اليوم بهدوء',
+    'Continue today': 'تابع يومك',
+    'Today is covered': 'اكتمل ما يلزم اليوم',
+    'Welcome back — start with today': 'مرحبًا بعودتك — ابدأ من اليوم',
+    'No backfill is required. Your earlier local records remain usable; today can be a fresh observation.':
+        'لا يلزم ملء الأيام الماضية. تظل سجلاتك المحلية السابقة مفيدة، ويمكن أن يكون اليوم ملاحظة جديدة.',
+    'Meals': 'الوجبات',
+    'recorded': 'مسجّل',
+    'missing': 'غير مسجّل',
+    'What changed': 'ما الذي تغير',
+    'Important missing evidence': 'الأدلة المهمة الناقصة',
+    'No corrective action is needed from the evidence recorded today.':
+        'لا يلزم إجراء تصحيحي وفق الأدلة المسجلة اليوم.',
+    'Today could not read all local data':
+        'تعذر على صفحة اليوم قراءة كل البيانات المحلية',
+    'No current insight is shown because it may be stale. Existing records remain in local storage; retry when storage is available.':
+        'لا تظهر رؤية حالية لأنها قد تكون قديمة. تظل السجلات الموجودة في التخزين المحلي؛ حاول مجددًا عندما يصبح التخزين متاحًا.',
     'Gender (male/female)': 'الجنس البيولوجي (ذكر/أنثى)',
     'I understand BIL provides general information, not medical advice.':
         'أفهم أن BIL يقدم معلومات عامة وليس نصيحة طبية.',

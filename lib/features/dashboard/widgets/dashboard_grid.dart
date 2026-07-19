@@ -8,10 +8,12 @@ import '../../../core/units/measurement_units.dart';
 import '../../../engine/body_profile.dart';
 import '../../../engine/body_twin_engine.dart';
 import '../../../engine/data_honesty_engine.dart';
+import '../../../engine/daily_return_engine.dart';
 import '../../../engine/intelligence_engine.dart';
 import '../../../engine/one_best_action_engine.dart';
 import '../../../engine/plan_engine.dart';
 import '../../../engine/what_changed_engine.dart';
+import '../../../engine/recovery_engine.dart';
 import '../../../data/database/date_keys.dart';
 import '../../../data/database/nutrient_evidence.dart';
 import '../../../engine/nutrient_evidence_engine.dart';
@@ -23,13 +25,13 @@ import '../../weight/providers/weight_provider.dart';
 import '../providers/dashboard_provider.dart';
 import 'stat_card.dart';
 import 'dashboard_water_card.dart';
-import 'dashboard_check_in_card.dart';
 import 'confidence_ring.dart';
 import 'dashboard_loading_skeleton.dart';
 import 'nutrition_progress_card.dart';
 import 'weekly_progress_card.dart';
 import 'dashboard_meals_timeline.dart';
 import 'nutrient_evidence_status_text.dart';
+import 'daily_return_card.dart';
 
 class DashboardGrid extends ConsumerWidget {
   const DashboardGrid({super.key});
@@ -80,11 +82,36 @@ class DashboardGrid extends ConsumerWidget {
       return Card(
         child: Padding(
           padding: const EdgeInsets.all(20),
-          child: Text(
-            tr(
-              'Some local dashboard data could not be loaded.',
-              'تعذر تحميل بعض بيانات لوحة اليوم المحلية.',
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                context.strings.text('Today could not read all local data'),
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                context.strings.text(
+                  'No current insight is shown because it may be stale. Existing records remain in local storage; retry when storage is available.',
+                ),
+              ),
+              const SizedBox(height: 16),
+              FilledButton.icon(
+                onPressed: () {
+                  ref.invalidate(userProfileProvider);
+                  ref.invalidate(weightHistoryProvider);
+                  ref.invalidate(todayMealsProvider);
+                  ref.invalidate(todayWaterProvider);
+                  ref.invalidate(allMealsProvider);
+                  ref.invalidate(allWaterProvider);
+                  ref.invalidate(weightReminderSkippedTodayProvider);
+                  ref.invalidate(todayLifeContextProvider);
+                  ref.invalidate(decisionMemoriesProvider);
+                },
+                icon: const Icon(Icons.refresh),
+                label: Text(context.strings.text('Try again')),
+              ),
+            ],
           ),
         ),
       );
@@ -240,7 +267,8 @@ class DashboardGrid extends ConsumerWidget {
       consistentConditionDays: comparableWeightDays,
     );
     final bestAction = OneBestActionEngine.choose(
-      weighedToday: weightDays.contains(dayKeyFor(DateTime.now())),
+      weighedToday:
+          weightDays.contains(dayKeyFor(DateTime.now())) || skippedWeightToday,
       loggingComplete: meals.isNotEmpty,
       protein: protein,
       proteinTarget: effectiveTargets.protein,
@@ -256,6 +284,35 @@ class DashboardGrid extends ConsumerWidget {
           weights[0].measurementContext == weights[1].measurementContext &&
           weights[0].measurementContext != 'differentConditions',
       contextTypes: insightContexts.map((entry) => entry.type).toList(),
+    );
+    DateTime? latestTrackedAt;
+    void consider(DateTime value) {
+      if (latestTrackedAt == null || value.isAfter(latestTrackedAt!)) {
+        latestTrackedAt = value;
+      }
+    }
+
+    for (final row in weights) {
+      consider(row.date);
+    }
+    for (final row in allMeals) {
+      consider(row.meal.date);
+    }
+    for (final row in allWater) {
+      consider(row.occurredAt);
+    }
+    final recovery = RecoveryEngine.evaluate(
+      now: DateTime.now(),
+      lastTrackedAt: latestTrackedAt,
+    );
+    final dailyReturn = DailyReturnEngine.compose(
+      hasWeight: weightDays.contains(dayKeyFor(DateTime.now())),
+      hasMeals: meals.isNotEmpty,
+      hasWater: waterRows.isNotEmpty,
+      bestAction: bestAction,
+      changed: changed,
+      honesty: honesty,
+      recovery: recovery,
     );
     final twin = BodyTwinEngine.simulate(
       calorieTarget: effectiveTargets.calories,
@@ -385,18 +442,6 @@ class DashboardGrid extends ConsumerWidget {
       }
     }
 
-    Future<void> saveWeight(double weightKg) async {
-      await ref
-          .read(weightRepositoryProvider)
-          .addWeight(weightKg, measurementContext: 'morning');
-    }
-
-    Future<void> skipWeight() async {
-      await ref
-          .read(preferencesRepositoryProvider)
-          .set('weightReminderSkippedDay', dayKeyFor(DateTime.now()));
-    }
-
     Future<void> repeatBreakfast() async {
       final candidate = usualBreakfast;
       if (candidate == null) return;
@@ -431,22 +476,34 @@ class DashboardGrid extends ConsumerWidget {
 
     return Column(
       children: [
-        AnimatedSwitcher(
-          duration: MediaQuery.disableAnimationsOf(context)
-              ? Duration.zero
-              : const Duration(milliseconds: 250),
-          child:
-              !weightDays.contains(dayKeyFor(DateTime.now())) &&
-                  !skippedWeightToday
-              ? DashboardCheckInCard(
-                  initialWeightKg: currentWeight,
-                  system: system,
-                  onSave: saveWeight,
-                  onSkip: skipWeight,
+        DailyReturnCard(
+          report: dailyReturn,
+          changedSummary: localizedChanged,
+          actionTitle: localizedBestTitle,
+          actionReason: localizedBestReason,
+          missingEvidence: honesty.missing.isEmpty
+              ? tr(
+                  'No important evidence gap for today’s next decision.',
+                  'لا توجد فجوة أدلة مهمة لقرار اليوم التالي.',
                 )
-              : const SizedBox.shrink(
-                  key: ValueKey('dashboard-check-in-complete'),
+              : tr(
+                  honesty.missing.first,
+                  'تتحسن الثقة مع أيام محلية أكثر اكتمالًا واتساقًا.',
                 ),
+          onPrimaryAction: () {
+            switch (bestAction.type) {
+              case BestActionType.weighIn:
+                context.go('/daily-check-in');
+              case BestActionType.completeLogging:
+              case BestActionType.protein:
+                context.go('/daily-log');
+              case BestActionType.hydration:
+                addWater(250);
+              case BestActionType.holdPlan:
+              case BestActionType.none:
+                break;
+            }
+          },
         ),
         if (loggingStreak >= 2)
           Semantics(
