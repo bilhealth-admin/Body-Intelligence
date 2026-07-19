@@ -10,6 +10,7 @@ import '../../engine/weight_analysis.dart';
 import '../../engine/progress_analysis.dart';
 import '../../shared/widgets/wheel_number_field.dart';
 import '../../shared/widgets/actionable_empty_state.dart';
+import '../../shared/widgets/actionable_error_state.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
 
@@ -208,19 +209,9 @@ class HistoryPage extends ConsumerWidget {
           : null,
       body: history.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(context.strings.text('Could not load weight history')),
-              const SizedBox(height: 12),
-              FilledButton.icon(
-                onPressed: () => ref.invalidate(weightHistoryProvider),
-                icon: const Icon(Icons.refresh),
-                label: Text(context.strings.text('Try again')),
-              ),
-            ],
-          ),
+        error: (_, _) => ActionableErrorState(
+          title: context.strings.text('Could not load weight history'),
+          onRetry: () => ref.invalidate(weightHistoryProvider),
         ),
         data: (rows) {
           if (rows.isEmpty) {

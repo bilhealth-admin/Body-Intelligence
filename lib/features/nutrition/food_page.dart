@@ -8,6 +8,7 @@ import '../../data/database/nutrient_evidence.dart';
 import '../../app/localization/app_localizations.dart';
 import '../foods/providers/food_provider.dart';
 import '../../shared/widgets/actionable_empty_state.dart';
+import '../../shared/widgets/actionable_error_state.dart';
 
 enum _CatalogView { all, favorites, recent }
 
@@ -205,19 +206,9 @@ class _FoodPageState extends ConsumerState<FoodPage> {
           Expanded(
             child: allFoods.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) => Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(t('Could not load foods')),
-                    const SizedBox(height: 12),
-                    FilledButton.icon(
-                      onPressed: () => ref.invalidate(foodsProvider),
-                      icon: const Icon(Icons.refresh),
-                      label: Text(t('Try again')),
-                    ),
-                  ],
-                ),
+              error: (_, _) => ActionableErrorState(
+                title: t('Could not load foods'),
+                onRetry: () => ref.invalidate(foodsProvider),
               ),
               data: (foods) {
                 final selectedAsync = switch (catalogView) {
@@ -229,12 +220,15 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (search.text.trim().isEmpty && selectedAsync.hasError) {
-                  return Center(
-                    child: Text(
-                      arabic
-                          ? 'تعذر تحميل هذه القائمة المحلية.'
-                          : 'This local food list could not be loaded.',
-                    ),
+                  return ActionableErrorState(
+                    title: arabic
+                        ? 'تعذر تحميل هذه القائمة المحلية.'
+                        : 'This local food list could not be loaded.',
+                    onRetry: () {
+                      ref.invalidate(foodsProvider);
+                      ref.invalidate(favoriteFoodsProvider);
+                      ref.invalidate(recentFoodsProvider);
+                    },
                   );
                 }
                 final selectedRows = switch (catalogView) {

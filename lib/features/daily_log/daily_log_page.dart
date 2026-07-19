@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/database/app_database.dart';
 import '../../app/localization/app_localizations.dart';
+import '../../shared/widgets/actionable_error_state.dart';
 import '../foods/providers/food_provider.dart';
 import 'providers/daily_log_provider.dart';
 
@@ -261,22 +262,9 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       appBar: AppBar(title: Text(context.strings.text('Diary'))),
       body: foods.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(context.strings.text('Could not load the food catalog.')),
-                const SizedBox(height: 12),
-                FilledButton.icon(
-                  onPressed: () => ref.invalidate(foodsProvider),
-                  icon: const Icon(Icons.refresh),
-                  label: Text(context.strings.text('Try again')),
-                ),
-              ],
-            ),
-          ),
+        error: (_, _) => ActionableErrorState(
+          title: context.strings.text('Could not load the food catalog.'),
+          onRetry: () => ref.invalidate(foodsProvider),
         ),
         data: (items) {
           return ListView(
