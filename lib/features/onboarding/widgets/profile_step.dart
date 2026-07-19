@@ -21,6 +21,8 @@ class ProfileStep extends StatelessWidget {
     required this.system,
     required this.disclaimerAccepted,
     required this.draftRestored,
+    required this.saving,
+    required this.saveFailed,
     required this.errors,
     required this.onAgeChanged,
     required this.onRegionChanged,
@@ -51,6 +53,8 @@ class ProfileStep extends StatelessWidget {
   final MeasurementSystem system;
   final bool disclaimerAccepted;
   final bool draftRestored;
+  final bool saving;
+  final bool saveFailed;
   final Map<String, String> errors;
   final ValueChanged<String> onAgeChanged;
   final ValueChanged<String> onRegionChanged;
@@ -475,11 +479,35 @@ class ProfileStep extends StatelessWidget {
                     : _ErrorText(errors['disclaimer']!),
               ),
               const SizedBox(height: 16),
+              if (saveFailed) ...[
+                Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    context.strings.text(
+                      'Your setup could not be saved. Your draft remains on this device; try again.',
+                    ),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
               SizedBox(
                 height: 52,
                 child: FilledButton(
-                  onPressed: onContinue,
-                  child: Text(context.strings.text('Continue')),
+                  onPressed: saving ? null : onContinue,
+                  child: saving
+                      ? Semantics(
+                          label: context.strings.text(
+                            'Saving your setup locally',
+                          ),
+                          child: const SizedBox.square(
+                            dimension: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        )
+                      : Text(context.strings.text('Continue')),
                 ),
               ),
             ],

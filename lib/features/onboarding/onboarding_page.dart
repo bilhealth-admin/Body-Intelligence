@@ -34,6 +34,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   bool existingProfileLoaded = false;
   bool draftLoaded = false;
   bool draftRestored = false;
+  bool loadFailed = false;
+  bool saving = false;
+  bool saveFailed = false;
   Map<String, String> errors = const {};
 
   bool get isArabic => Localizations.localeOf(context).languageCode == 'ar';
@@ -44,7 +47,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     super.didChangeDependencies();
     if (existingProfileLoaded) return;
     existingProfileLoaded = true;
-    Future<void>(() async {
+    loadInitialState();
+  }
+
+  Future<void> loadInitialState() async {
+    try {
       final preferences = ref.read(preferencesRepositoryProvider);
       final savedUnits = await preferences.get('units');
       final savedRegion = await preferences.get('countryRegion');
@@ -92,8 +99,15 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           regionController.text = savedRegion ?? '';
         }
         draftLoaded = true;
+        loadFailed = false;
       });
-    });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        draftLoaded = true;
+        loadFailed = true;
+      });
+    }
   }
 
   @override
@@ -169,8 +183,12 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 
   Future<void> complete() async {
+    if (saving) return;
     final nextErrors = validate();
-    setState(() => errors = nextErrors);
+    setState(() {
+      errors = nextErrors;
+      saveFailed = false;
+    });
     if (nextErrors.isNotEmpty) {
       if (profileScrollController.hasClients) {
         await profileScrollController.animateTo(
@@ -181,45 +199,54 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       }
       return;
     }
-    final repository = ref.read(userProfileRepositoryProvider);
-    await repository.save(
-      gender: gender!,
-      age: int.parse(ageController.text),
-      height: heightCm,
-      currentWeight: currentWeightKg,
-      targetWeight: targetWeightKg,
-      activityLevel: activity!,
-      exercises: activity != 'sedentary',
-      waist: waistCm,
-      neck: neckCm,
-    );
-    final profile = await repository.getProfile();
-    if (profile != null) {
-      await ref
-          .read(goalRepositoryProvider)
-          .save(
-            profileUuid: profile.uuid,
-            type: goalType,
-            targetWeight: targetWeightKg,
-          );
+    setState(() => saving = true);
+    try {
+      final repository = ref.read(userProfileRepositoryProvider);
+      await repository.save(
+        gender: gender!,
+        age: int.parse(ageController.text),
+        height: heightCm,
+        currentWeight: currentWeightKg,
+        targetWeight: targetWeightKg,
+        activityLevel: activity!,
+        exercises: activity != 'sedentary',
+        waist: waistCm,
+        neck: neckCm,
+      );
+      final profile = await repository.getProfile();
+      if (profile != null) {
+        await ref
+            .read(goalRepositoryProvider)
+            .save(
+              profileUuid: profile.uuid,
+              type: goalType,
+              targetWeight: targetWeightKg,
+            );
+      }
+      final preferences = ref.read(preferencesRepositoryProvider);
+      await preferences.set('units', system.name);
+      await preferences.set('healthDisclaimerAccepted', 'true');
+      final region = regionController.text.trim();
+      if (region.isEmpty) {
+        await preferences.remove('countryRegion');
+      } else {
+        await preferences.set('countryRegion', region);
+      }
+      final now = DateTime.now();
+      await preferences.set('timezoneName', now.timeZoneName);
+      await preferences.set(
+        'timezoneOffsetMinutes',
+        now.timeZoneOffset.inMinutes.toString(),
+      );
+      await ref.read(onboardingDraftRepositoryProvider).clear();
+      if (mounted) context.go('/dashboard');
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        saving = false;
+        saveFailed = true;
+      });
     }
-    final preferences = ref.read(preferencesRepositoryProvider);
-    await preferences.set('units', system.name);
-    await preferences.set('healthDisclaimerAccepted', 'true');
-    final region = regionController.text.trim();
-    if (region.isEmpty) {
-      await preferences.remove('countryRegion');
-    } else {
-      await preferences.set('countryRegion', region);
-    }
-    final now = DateTime.now();
-    await preferences.set('timezoneName', now.timeZoneName);
-    await preferences.set(
-      'timezoneOffsetMinutes',
-      now.timeZoneOffset.inMinutes.toString(),
-    );
-    await ref.read(onboardingDraftRepositoryProvider).clear();
-    if (mounted) context.go('/dashboard');
   }
 
   OnboardingDraft get draft => OnboardingDraft(
@@ -274,6 +301,49 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     child: const CircularProgressIndicator(),
                   ),
                 )
+              : loadFailed
+              ? Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 480),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.storage_outlined,
+                          size: 48,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          context.strings.text(
+                            'Could not restore your local setup',
+                          ),
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          context.strings.text(
+                            'Nothing was deleted or uploaded. Reopen the local setup when your device storage is available.',
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 20),
+                        FilledButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              draftLoaded = false;
+                              loadFailed = false;
+                            });
+                            loadInitialState();
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: Text(context.strings.text('Try again')),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
               : AnimatedSwitcher(
                   duration: const Duration(milliseconds: 250),
                   child: step == 0
@@ -296,6 +366,8 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                           system: system,
                           disclaimerAccepted: disclaimerAccepted,
                           draftRestored: draftRestored,
+                          saving: saving,
+                          saveFailed: saveFailed,
                           errors: errors,
                           onAgeChanged: (_) => persistDraft(),
                           onRegionChanged: (_) => persistDraft(),

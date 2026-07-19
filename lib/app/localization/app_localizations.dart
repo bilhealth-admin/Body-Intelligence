@@ -207,6 +207,12 @@ class AppLocalizations {
         'جارٍ استعادة إعدادك الخاص من هذا الجهاز',
     'Your unfinished setup was restored from this device.':
         'تمت استعادة إعدادك غير المكتمل من هذا الجهاز.',
+    'Could not restore your local setup': 'تعذرت استعادة إعدادك المحلي',
+    'Nothing was deleted or uploaded. Reopen the local setup when your device storage is available.':
+        'لم يتم حذف أي شيء أو رفعه. أعد فتح الإعداد المحلي عندما تصبح مساحة تخزين الجهاز متاحة.',
+    'Your setup could not be saved. Your draft remains on this device; try again.':
+        'تعذر حفظ إعدادك. تظل مسودتك على هذا الجهاز؛ حاول مرة أخرى.',
+    'Saving your setup locally': 'جارٍ حفظ إعدادك محليًا',
     'Gender (male/female)': 'الجنس البيولوجي (ذكر/أنثى)',
     'I understand BIL provides general information, not medical advice.':
         'أفهم أن BIL يقدم معلومات عامة وليس نصيحة طبية.',

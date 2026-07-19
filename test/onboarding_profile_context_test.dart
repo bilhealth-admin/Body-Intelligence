@@ -46,6 +46,8 @@ void main() {
             system: MeasurementSystem.metric,
             disclaimerAccepted: true,
             draftRestored: false,
+            saving: false,
+            saveFailed: false,
             errors: const {},
             onAgeChanged: (_) {},
             onRegionChanged: (_) {},
