@@ -1,3 +1,5 @@
+enum EnvironmentProfile { development, testing, staging, production }
+
 class AppEnvironment {
   const AppEnvironment._();
 
@@ -14,6 +16,19 @@ class AppEnvironment {
     'BIL_PAYMENTS_ENABLED',
     defaultValue: false,
   );
+  static const String _profileName = String.fromEnvironment(
+    'BIL_ENVIRONMENT',
+    defaultValue: 'production',
+  );
+
+  static EnvironmentProfile get profile => switch (_profileName) {
+    'development' => EnvironmentProfile.development,
+    'testing' => EnvironmentProfile.testing,
+    'staging' => EnvironmentProfile.staging,
+    _ => EnvironmentProfile.production,
+  };
+
+  static bool get isProduction => profile == EnvironmentProfile.production;
 
   static bool get cloudConfigured =>
       useSupabase && supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;

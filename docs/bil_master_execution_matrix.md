@@ -9,17 +9,18 @@
 - Deduplicated actionable sections: **550**
 - Deduplication key: source part title + section number + section title; the longest repeated body is retained and normalized.
 - Each entry preserves the complete source-section clause text in the Requirement field. A section may contain several clauses and is complete only when every clause passes.
-- Status vocabulary: `complete`, `partial`, `missing and locally implementable`, `blocked by credentials/infrastructure`, `strategic/non-code`.
+- Status vocabulary: `complete`, `partial`, `missing and locally implementable`, `blocked by credentials/infrastructure`, `strategic/non-code`, and an explicitly named `deferred — … phase` closure outcome.
 - A `complete` status requires repository evidence and a verified commit. Partial entries remain open even if some clauses already exist.
 - External capabilities must remain disabled and must never report success until their blocker and acceptance criteria are fully satisfied.
 
 ## Status summary
 
-- complete: **84**
+- complete: **89**
 - partial: **132**
-- missing and locally implementable: **9**
-- blocked by credentials/infrastructure: **213**
+- missing and locally implementable: **0**
+- blocked by credentials/infrastructure: **215**
 - strategic/non-code: **112**
+- deferred — Premium UI phase: **2**
 
 ## Requirement ledger
 
@@ -1235,11 +1236,11 @@
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 106. Haptics
 - **Requirement:** Subtle. Meaningful. Never constant. Examples: Goal reached. Weight saved. Meal logged. Milestone achieved. Never vibrate for every tap.
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `deferred — Premium UI phase`
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Foundation V2 already limits selection haptics to the number wheel. A product-wide success-event haptic language requires physical-device tuning and reduced-sensation review; adding unverified vibration calls would not satisfy “subtle” or “meaningful.”
 - **Completion commit:** —
 
 ### BIL-DSN-107 — Glassmorphism
@@ -2047,11 +2048,11 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 176. Dashboard Charts
 - **Requirement:** Rounded. Interactive. Zoomable. Smooth. No sharp edges.
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `deferred — Premium UI phase`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
+- **Blocker:** Interactive and zoomable chart interaction is deferred to the Premium UI phase. Foundation V2 keeps the Today screen calm and routes the accessible real-data trend to Progress/Analytics rather than duplicating an unverified sharp-edged chart implementation.
 - **Completion commit:** —
 
 ### BIL-TDY-177 — Trend Line
@@ -5909,23 +5910,23 @@
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 22. Feature Flags
 - **Requirement:** All major features controllable remotely.
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Local compile-time gates exist in `lib/app/environment/feature_flags.dart`; the literal remote-control requirement needs a signed authenticated configuration service and rollout infrastructure.
 - **Completion commit:** —
 
 ### BIL-ARC-023 — Environment Profiles
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 23. Environment Profiles
 - **Requirement:** Development Testing Staging Production
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `PENDING_ARCHITECTURE_COMMIT`
 
 ### BIL-ARC-024 — Secrets
 
@@ -5942,44 +5943,44 @@
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 25. Logging
 - **Requirement:** Structured logging. Sensitive data removed.
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `PENDING_ARCHITECTURE_COMMIT`
 
 ### BIL-ARC-026 — Error Handling
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 26. Error Handling
 - **Requirement:** Unified. Meaningful. Recoverable.
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `PENDING_ARCHITECTURE_COMMIT`
 
 ### BIL-ARC-027 — Analytics
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 27. Analytics
 - **Requirement:** Independent service. Replaceable.
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `PENDING_ARCHITECTURE_COMMIT`
 
 ### BIL-ARC-028 — Crash Reporting
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 28. Crash Reporting
 - **Requirement:** Independent. Privacy aware.
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `blocked by credentials/infrastructure`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** A privacy-safe local crash boundary exists, but external crash ingestion needs a selected processor, credentials, consent/legal review, retention controls, and network infrastructure.
 - **Completion commit:** —
 
 ### BIL-ARC-029 — State Management
@@ -6043,12 +6044,12 @@
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 34. Continuous Integration
 - **Requirement:** Automatic: Analyze Test Build Artifacts
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `PENDING_ARCHITECTURE_COMMIT`
 
 ### BIL-ARC-035 — Continuous Delivery
 

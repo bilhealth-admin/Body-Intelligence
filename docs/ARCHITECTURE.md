@@ -37,3 +37,15 @@ External services are represented by policies and capability states rather
 than simulated implementations. Client builds contain no service-role keys,
 payment secrets, AI provider secrets, administrator credentials, or signing
 credentials.
+
+Build-time environment profiles use `BIL_ENVIRONMENT` and default to
+production-safe behavior. External feature flags are compile-time gates; remote
+overrides remain disabled until a signed configuration service exists. Logging
+is structured and redacts identity and health fields. Analytics is a replaceable
+no-op boundary and crash reporting is local-only: neither uploads data or
+pretends that an external service is configured. Framework, platform, and zoned
+errors converge on the same privacy-safe boundary.
+
+Repository CI formats, analyzes, tests, builds an Android debug artifact, and
+uploads that artifact. Release signing and distribution remain separate
+credentialed gates.

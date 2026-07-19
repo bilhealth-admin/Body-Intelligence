@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -6,9 +9,24 @@ import 'app/localization/app_localizations.dart';
 import 'app/router/app_router.dart';
 import 'app/theme/app_theme_data.dart';
 import 'app/services/app_settings_provider.dart';
+import 'app/services/app_observability.dart';
 
 void main() {
-  runApp(const ProviderScope(child: BILApp()));
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    AppObservability.crashes.record(
+      details.exception,
+      details.stack ?? StackTrace.current,
+    );
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    AppObservability.crashes.record(error, stack);
+    return true;
+  };
+  runZonedGuarded(
+    () => runApp(const ProviderScope(child: BILApp())),
+    AppObservability.crashes.record,
+  );
 }
 
 class BILApp extends ConsumerWidget {
