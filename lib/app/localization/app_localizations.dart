@@ -244,6 +244,12 @@ class AppLocalizations {
     'Usual activity': 'النشاط المعتاد',
     'Back': 'رجوع',
     'Finish setup': 'إنهاء الإعداد',
+    'Your private starting point is ready': 'نقطة بدايتك الخاصة جاهزة',
+    'BIL saved your profile and starting targets on this device.':
+        'حفظ BIL ملفك وأهداف البداية على هذا الجهاز.',
+    'BIL does not have a comparable daily measurement yet, so it will not claim a trend.':
+        'لا يملك BIL قياسًا يوميًا قابلًا للمقارنة بعد، لذلك لن يدّعي وجود اتجاه.',
+    'Record first check-in': 'سجّل أول قياس يومي',
     'Gender (male/female)': 'الجنس البيولوجي (ذكر/أنثى)',
     'I understand BIL provides general information, not medical advice.':
         'أفهم أن BIL يقدم معلومات عامة وليس نصيحة طبية.',

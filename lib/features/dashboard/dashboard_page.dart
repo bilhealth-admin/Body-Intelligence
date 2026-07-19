@@ -48,6 +48,7 @@ class DashboardPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final showFirstValue = ref.watch(firstValueHandoffProvider).value ?? false;
     return Scaffold(
       appBar: AppBar(
         title: const _TodayAppBarTitle(),
@@ -77,15 +78,26 @@ class DashboardPage extends ConsumerWidget {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () => refresh(context, ref),
-          child: const SingleChildScrollView(
+          child: SingleChildScrollView(
             physics: AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                DashboardHeader(),
-                SizedBox(height: 20),
-                DashboardGrid(),
+                if (showFirstValue) ...[
+                  FirstValueHandoffCard(
+                    onContinue: () async {
+                      await ref
+                          .read(preferencesRepositoryProvider)
+                          .remove('firstValueHandoffPending');
+                      if (context.mounted) context.go('/daily-check-in');
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                ],
+                const DashboardHeader(),
+                const SizedBox(height: 20),
+                const DashboardGrid(),
               ],
             ),
           ),
@@ -93,6 +105,61 @@ class DashboardPage extends ConsumerWidget {
       ),
     );
   }
+}
+
+class FirstValueHandoffCard extends StatelessWidget {
+  const FirstValueHandoffCard({super.key, required this.onContinue});
+
+  final VoidCallback onContinue;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    container: true,
+    child: Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Semantics(
+              header: true,
+              child: Text(
+                context.strings.text('Your private starting point is ready'),
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              context.strings.text(
+                'BIL saved your profile and starting targets on this device.',
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.info_outline, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    context.strings.text(
+                      'BIL does not have a comparable daily measurement yet, so it will not claim a trend.',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: onContinue,
+              icon: const Icon(Icons.monitor_weight_outlined),
+              label: Text(context.strings.text('Record first check-in')),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _TodayAppBarTitle extends ConsumerWidget {

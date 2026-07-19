@@ -54,6 +54,13 @@ final measurementSystemProvider = StreamProvider<MeasurementSystem>((ref) {
       );
 });
 
+final firstValueHandoffProvider = StreamProvider<bool>((ref) {
+  return ref
+      .watch(preferencesRepositoryProvider)
+      .watch('firstValueHandoffPending')
+      .map((value) => value == 'true');
+});
+
 final userProfileProvider = StreamProvider<UserProfileData?>((ref) {
   final repository = ref.watch(userProfileRepositoryProvider);
   return repository.watchProfile();

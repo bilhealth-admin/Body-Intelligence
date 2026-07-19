@@ -271,6 +271,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         'timezoneOffsetMinutes',
         now.timeZoneOffset.inMinutes.toString(),
       );
+      await preferences.set('firstValueHandoffPending', 'true');
       await ref.read(onboardingDraftRepositoryProvider).clear();
       if (mounted) context.go('/dashboard');
     } catch (_) {
