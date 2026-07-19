@@ -91,6 +91,11 @@ void main() {
 
     expect(find.text('Welcome to BIL'), findsOneWidget);
     expect(find.text('Start'), findsOneWidget);
+    expect(find.text('Understand every insight'), findsOneWidget);
+    expect(find.text('Private and useful offline'), findsOneWidget);
+    expect(find.text('Honest about uncertainty'), findsOneWidget);
+    expect(find.text('Optional account and sync'), findsNothing);
+    expect(find.widgetWithText(FilledButton, 'Start'), findsOneWidget);
     final direction = Directionality.of(
       tester.element(find.text('Welcome to BIL')),
     );

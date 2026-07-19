@@ -213,6 +213,17 @@ class AppLocalizations {
     'Your setup could not be saved. Your draft remains on this device; try again.':
         'تعذر حفظ إعدادك. تظل مسودتك على هذا الجهاز؛ حاول مرة أخرى.',
     'Saving your setup locally': 'جارٍ حفظ إعدادك محليًا',
+    'Understand every insight': 'افهم كل رؤية',
+    'See the evidence, confidence, and what BIL still does not know.':
+        'اطّلع على الأدلة والثقة وما لا يزال BIL لا يعرفه.',
+    'Private and useful offline': 'خاص ومفيد دون اتصال',
+    'Start without an account. Your health data stays on this device.':
+        'ابدأ دون حساب. تبقى بياناتك الصحية على هذا الجهاز.',
+    'Honest about uncertainty': 'صريح بشأن عدم اليقين',
+    'BIL never invents missing evidence or pretends a guess is a fact.':
+        'لا يختلق BIL أدلة مفقودة ولا يقدم التخمين على أنه حقيقة.',
+    'No account required. Nothing is uploaded.':
+        'لا يلزم حساب. لا يتم رفع أي شيء.',
     'Gender (male/female)': 'الجنس البيولوجي (ذكر/أنثى)',
     'I understand BIL provides general information, not medical advice.':
         'أفهم أن BIL يقدم معلومات عامة وليس نصيحة طبية.',
