@@ -15,9 +15,9 @@
 
 ## Status summary
 
-- complete: **78**
-- partial: **137**
-- missing and locally implementable: **10**
+- complete: **81**
+- partial: **135**
+- missing and locally implementable: **9**
 - blocked by credentials/infrastructure: **213**
 - strategic/non-code: **112**
 
@@ -998,7 +998,7 @@
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 86. Search
 - **Requirement:** Search should feel instant. Results should appear while typing. Recent searches. Favorites. Personal ranking. Country relevance. Meal relevance. The user should rarely need to finish typing.
 - **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; live bilingual search, favorites, recents, usage ranking, barcode matching, and meal-context entry are implemented, while broader country-specific catalog relevance remains release-content work
+- **Partial audit disposition:** substantially complete; live bilingual search, favorites, recents, usage ranking, barcode matching, and meal-context entry are implemented; country ranking cannot be activated until the trusted catalog contains explicit region metadata, and personal usage/favorites remain the deterministic fallback
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
@@ -2004,13 +2004,12 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 172. Meal Card
 - **Requirement:** Contains: Meal icon Calories Foods Time Protein Quick Edit
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish remains for direct per-meal quick editing
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `d27e661`
 
 ### BIL-TDY-173 — Quick Add Button
 
@@ -2231,24 +2230,23 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 192. Fast Entry
 - **Requirement:** User should log breakfast in under: 5 seconds.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `d27e661`
 
 ### BIL-TDY-193 — Context Menu
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 193. Context Menu
 - **Requirement:** Long press: Edit Duplicate Favorite Delete
-- **Current repository status:** `missing and locally implementable`
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `d27e661`
 
 ### BIL-TDY-194 — Bottom Navigation
 
