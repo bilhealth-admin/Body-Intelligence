@@ -51,70 +51,127 @@ class DecisionMemoryPage extends ConsumerWidget {
                 );
               }
               return Column(
-                children: rows.map((row) {
-                  final evidence =
-                      (jsonDecode(row.evidenceJson) as List<dynamic>)
-                          .map((item) => item.toString())
-                          .toList();
-                  return Card(
-                    child: ExpansionTile(
-                      title: Text(arabic ? _arabicTitle(row.title) : row.title),
-                      subtitle: Text('${row.dayKey} · ${t(row.response)}'),
-                      childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                      children: [
-                        Align(
-                          alignment: AlignmentDirectional.centerStart,
-                          child: Text(
-                            arabic
-                                ? '${_arabicReason(row.reason)}\nالدليل: ${evidence.map(_arabicEvidence).join(' · ')}'
-                                : '${row.reason}\nEvidence: ${evidence.join(' · ')}',
-                          ),
+                children: [
+                  if (rows.any((row) => (row.helpfulness ?? 5) <= 2))
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: TextButton.icon(
+                        onPressed: () => _confirmForgetUnhelpful(
+                          context,
+                          ref,
+                          arabic: arabic,
                         ),
-                        if (row.outcome != null)
+                        icon: const Icon(Icons.auto_delete_outlined),
+                        label: Text(
+                          arabic
+                              ? 'نسيان الذكريات غير المفيدة'
+                              : 'Forget unhelpful memories',
+                        ),
+                      ),
+                    ),
+                  ...rows.map((row) {
+                    final evidence =
+                        (jsonDecode(row.evidenceJson) as List<dynamic>)
+                            .map((item) => item.toString())
+                            .toList();
+                    return Card(
+                      child: ExpansionTile(
+                        title: Text(
+                          arabic ? _arabicTitle(row.title) : row.title,
+                        ),
+                        subtitle: Text('${row.dayKey} · ${t(row.response)}'),
+                        childrenPadding: const EdgeInsets.fromLTRB(
+                          16,
+                          0,
+                          16,
+                          16,
+                        ),
+                        children: [
                           Align(
                             alignment: AlignmentDirectional.centerStart,
-                            child: Text('${t('Outcome')}: ${row.outcome}'),
+                            child: Text(
+                              arabic
+                                  ? '${_arabicReason(row.reason)}\nالدليل: ${evidence.map(_arabicEvidence).join(' · ')}'
+                                  : '${row.reason}\nEvidence: ${evidence.join(' · ')}',
+                            ),
                           ),
-                        if (row.helpfulness == null)
-                          Wrap(
-                            spacing: 4,
-                            children: [
-                              Text(t('Helpful?')),
-                              for (var rating = 1; rating <= 5; rating++)
-                                IconButton(
-                                  tooltip: '$rating ${t('of 5')}',
-                                  onPressed: () => ref
-                                      .read(decisionMemoryRepositoryProvider)
-                                      .evaluate(
-                                        id: row.id,
-                                        helpfulness: rating,
-                                      ),
-                                  icon: const Icon(Icons.star_border),
-                                ),
-                            ],
-                          )
-                        else
-                          Text('${t('Helpfulness')}: ${row.helpfulness}/5'),
-                        Align(
-                          alignment: AlignmentDirectional.centerEnd,
-                          child: TextButton.icon(
-                            onPressed: () => ref
-                                .read(decisionMemoryRepositoryProvider)
-                                .delete(row.id),
-                            icon: const Icon(Icons.delete_outline),
-                            label: Text(t('Delete memory')),
+                          if (row.outcome != null)
+                            Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: Text('${t('Outcome')}: ${row.outcome}'),
+                            ),
+                          if (row.helpfulness == null)
+                            Wrap(
+                              spacing: 4,
+                              children: [
+                                Text(t('Helpful?')),
+                                for (var rating = 1; rating <= 5; rating++)
+                                  IconButton(
+                                    tooltip: '$rating ${t('of 5')}',
+                                    onPressed: () => ref
+                                        .read(decisionMemoryRepositoryProvider)
+                                        .evaluate(
+                                          id: row.id,
+                                          helpfulness: rating,
+                                        ),
+                                    icon: const Icon(Icons.star_border),
+                                  ),
+                              ],
+                            )
+                          else
+                            Text('${t('Helpfulness')}: ${row.helpfulness}/5'),
+                          Align(
+                            alignment: AlignmentDirectional.centerEnd,
+                            child: TextButton.icon(
+                              onPressed: () => ref
+                                  .read(decisionMemoryRepositoryProvider)
+                                  .delete(row.id),
+                              icon: const Icon(Icons.delete_outline),
+                              label: Text(t('Delete memory')),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
               );
             },
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _confirmForgetUnhelpful(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool arabic,
+  }) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(arabic ? 'نسيان الذكريات؟' : 'Forget memories?'),
+        content: Text(
+          arabic
+              ? 'سيتم حذف الذكريات التي قيّمتها بنجمتين أو أقل فقط. لا يتم حذف أي شيء تلقائيًا.'
+              : 'Only memories you rated two stars or less will be deleted. Nothing is deleted automatically.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(arabic ? 'إلغاء' : 'Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(arabic ? 'نسيان' : 'Forget'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await ref.read(decisionMemoryRepositoryProvider).forgetUnhelpful();
+    }
   }
 
   static String _arabicTitle(String value) {

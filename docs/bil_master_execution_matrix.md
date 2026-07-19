@@ -15,8 +15,8 @@
 
 ## Status summary
 
-- complete: **89**
-- partial: **132**
+- complete: **90**
+- partial: **131**
 - missing and locally implementable: **0**
 - blocked by credentials/infrastructure: **215**
 - strategic/non-code: **112**
@@ -1657,13 +1657,12 @@
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 142. Memory Philosophy
 - **Requirement:** Remember only useful things. Forget unnecessary things. Memory exists to help. Not to profile.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
 - **Blocker:** None
-- **Completion commit:** —
+- **Completion commit:** `PENDING_MEMORY_COMMIT`
 
 ### BIL-INT-143 — Decision Memory
 
@@ -5926,7 +5925,7 @@
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
 - **Blocker:** None
-- **Completion commit:** `PENDING_ARCHITECTURE_COMMIT`
+- **Completion commit:** `3035419`
 
 ### BIL-ARC-024 — Secrets
 
@@ -5948,7 +5947,7 @@
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
 - **Blocker:** None
-- **Completion commit:** `PENDING_ARCHITECTURE_COMMIT`
+- **Completion commit:** `3035419`
 
 ### BIL-ARC-026 — Error Handling
 
@@ -5959,7 +5958,7 @@
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
 - **Blocker:** None
-- **Completion commit:** `PENDING_ARCHITECTURE_COMMIT`
+- **Completion commit:** `3035419`
 
 ### BIL-ARC-027 — Analytics
 
@@ -5970,7 +5969,7 @@
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
 - **Blocker:** None
-- **Completion commit:** `PENDING_ARCHITECTURE_COMMIT`
+- **Completion commit:** `3035419`
 
 ### BIL-ARC-028 — Crash Reporting
 
@@ -6049,7 +6048,7 @@
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
 - **Blocker:** None
-- **Completion commit:** `PENDING_ARCHITECTURE_COMMIT`
+- **Completion commit:** `3035419`
 
 ### BIL-ARC-035 — Continuous Delivery
 

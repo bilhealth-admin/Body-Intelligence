@@ -114,6 +114,22 @@ class DecisionMemoryRepository {
     );
   }
 
+  /// Forgets only memories the user explicitly rated as unhelpful. Nothing is
+  /// removed automatically, and sync metadata retains a deletion tombstone.
+  Future<int> forgetUnhelpful() async {
+    final rows =
+        await (database.select(database.decisionMemories)..where(
+              (row) =>
+                  row.deletedAt.isNull() &
+                  row.helpfulness.isSmallerOrEqualValue(2),
+            ))
+            .get();
+    for (final row in rows) {
+      await delete(row.id);
+    }
+    return rows.length;
+  }
+
   Future<int> _nextRevision(int id) async {
     final row = await (database.select(
       database.decisionMemories,

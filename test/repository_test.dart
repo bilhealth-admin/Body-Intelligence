@@ -607,4 +607,39 @@ void main() {
       expect(rows.single.revision, 4);
     },
   );
+
+  test('decision memory forgets only explicitly unhelpful records', () async {
+    final memories = DecisionMemoryRepository(database);
+    const hydration = BestAction(
+      type: BestActionType.hydration,
+      title: 'Drink water',
+      reason: 'Below target',
+      evidence: ['1000 ml recorded'],
+    );
+    const protein = BestAction(
+      type: BestActionType.protein,
+      title: 'Add protein',
+      reason: 'Below target',
+      evidence: ['40 g recorded'],
+    );
+    final unhelpful = await memories.rememberAction(
+      hydration,
+      date: DateTime(2026, 7, 17),
+    );
+    final helpful = await memories.rememberAction(
+      protein,
+      date: DateTime(2026, 7, 18),
+    );
+    await memories.evaluate(id: unhelpful, helpfulness: 2);
+    await memories.evaluate(id: helpful, helpfulness: 4);
+
+    expect(await memories.forgetUnhelpful(), 1);
+    final visible = await memories.watchAll().first;
+    expect(visible.map((row) => row.id), [helpful]);
+    final tombstone = await (database.select(
+      database.decisionMemories,
+    )..where((row) => row.id.equals(unhelpful))).getSingle();
+    expect(tombstone.deletedAt, isNotNull);
+    expect(tombstone.syncStatus, 'pendingDelete');
+  });
 }
