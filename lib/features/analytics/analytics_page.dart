@@ -5,6 +5,7 @@ import '../../data/database/date_keys.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../core/units/measurement_units.dart';
 import '../../engine/progress_analysis.dart';
+import '../../engine/personal_baseline_engine.dart';
 import '../../engine/recovery_engine.dart';
 import '../../engine/weekly_review_engine.dart';
 import '../dashboard/providers/dashboard_provider.dart';
@@ -72,6 +73,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         .toList();
     final caloriesByDay = <String, double>{};
     final proteinByDay = <String, double>{};
+    final sodiumByDay = <String, double>{};
     for (final meal in meals) {
       caloriesByDay.update(
         meal.meal.dayKey,
@@ -84,6 +86,11 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         (value) =>
             value + meal.items.fold(0, (sum, item) => sum + item.protein),
         ifAbsent: () => meal.items.fold(0, (sum, item) => sum + item.protein),
+      );
+      sodiumByDay.update(
+        meal.meal.dayKey,
+        (value) => value + meal.items.fold(0, (sum, item) => sum + item.sodium),
+        ifAbsent: () => meal.items.fold(0, (sum, item) => sum + item.sodium),
       );
     }
     final waterByDay = <String, int>{};
@@ -143,6 +150,18 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
       now: DateTime.now(),
       lastTrackedAt: activityDates.lastOrNull,
     );
+    final baseline = PersonalBaselineEngine.evaluate(
+      caloriesByDay: caloriesByDay,
+      proteinByDay: proteinByDay,
+      sodiumByDay: sodiumByDay,
+      waterByDay: waterByDay.map(
+        (key, value) => MapEntry(key, value.toDouble()),
+      ),
+      weightByDay: {
+        for (final row in allWeights) dayKeyFor(row.date): row.weight,
+      },
+      currentStartDay: cutoffKey,
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text(context.strings.text('Analytics'))),
@@ -178,6 +197,41 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
             ),
           if (recovery.state != RecoveryState.current)
             const SizedBox(height: 12),
+          _SummaryCard(
+            title: tr('Your personal baseline', 'خطك الأساسي الشخصي'),
+            lines: baseline.sufficient
+                ? [
+                    tr(
+                      'Compared with your own earlier records · ${baseline.confidence.name} confidence',
+                      'مقارنة بسجلاتك السابقة أنت · ثقة ${baseline.confidence.name}',
+                    ),
+                    ...baseline.comparisons.map((item) {
+                      final sign = item.change >= 0 ? '+' : '';
+                      return '${tr(item.metric, switch (item.metric) {
+                        'Calories' => 'السعرات',
+                        'Protein' => 'البروتين',
+                        'Sodium' => 'الصوديوم',
+                        'Water' => 'الماء',
+                        _ => 'الوزن',
+                      })}: ${item.current.toStringAsFixed(1)} ${item.unit} ($sign${item.change.toStringAsFixed(1)} ${tr('vs your baseline', 'مقابل خطك الأساسي')})';
+                    }),
+                    tr(
+                      'Associations describe your records; they do not prove a cause.',
+                      'العلاقات تصف سجلاتك ولا تثبت سببًا.',
+                    ),
+                  ]
+                : [
+                    tr(
+                      'A personal comparison needs at least 7 earlier and 3 recent days for one metric.',
+                      'تحتاج المقارنة الشخصية إلى 7 أيام سابقة و3 أيام حديثة على الأقل لمؤشر واحد.',
+                    ),
+                    tr(
+                      'No population average is substituted for your missing data.',
+                      'لن نستخدم متوسطات السكان بدلًا من بياناتك الناقصة.',
+                    ),
+                  ],
+          ),
+          const SizedBox(height: 12),
           _SummaryCard(
             title: tr('Weekly review', 'المراجعة الأسبوعية'),
             lines: [

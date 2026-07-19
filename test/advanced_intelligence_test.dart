@@ -1,6 +1,7 @@
 import 'package:body_intelligence_log/engine/body_twin_engine.dart';
 import 'package:body_intelligence_log/engine/data_honesty_engine.dart';
 import 'package:body_intelligence_log/engine/one_best_action_engine.dart';
+import 'package:body_intelligence_log/engine/personal_baseline_engine.dart';
 import 'package:body_intelligence_log/engine/what_changed_engine.dart';
 import 'package:body_intelligence_log/engine/recovery_engine.dart';
 import 'package:body_intelligence_log/engine/weekly_review_engine.dart';
@@ -100,5 +101,37 @@ void main() {
     expect(review.missingData, isNotEmpty);
     expect(review.summary, contains('does not identify fat or muscle'));
     expect(review.nextDecision, contains('before changing the plan'));
+  });
+
+  test('personal baseline compares the user only with their own records', () {
+    final calories = <String, double>{
+      for (var day = 1; day <= 14; day++)
+        '2026-07-${day.toString().padLeft(2, '0')}': day < 8 ? 2000 : 1800,
+    };
+    final report = PersonalBaselineEngine.evaluate(
+      caloriesByDay: calories,
+      proteinByDay: const {},
+      sodiumByDay: const {},
+      waterByDay: const {},
+      weightByDay: const {},
+      currentStartDay: '2026-07-08',
+    );
+    expect(report.sufficient, isTrue);
+    expect(report.comparisons.single.baseline, 2000);
+    expect(report.comparisons.single.current, 1800);
+    expect(report.missingEvidence, isNotEmpty);
+  });
+
+  test('personal baseline refuses population substitutes when sparse', () {
+    final report = PersonalBaselineEngine.evaluate(
+      caloriesByDay: const {'2026-07-18': 1800},
+      proteinByDay: const {},
+      sodiumByDay: const {},
+      waterByDay: const {},
+      weightByDay: const {},
+      currentStartDay: '2026-07-13',
+    );
+    expect(report.confidence, BaselineConfidence.insufficient);
+    expect(report.comparisons, isEmpty);
   });
 }
