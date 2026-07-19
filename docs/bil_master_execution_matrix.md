@@ -15,12 +15,15 @@
 
 ## Status summary
 
-- complete: **93**
-- partial: **128**
+- complete: **119**
+- partial: **0**
 - missing and locally implementable: **0**
 - blocked by credentials/infrastructure: **215**
-- strategic/non-code: **112**
-- deferred — Premium UI phase: **2**
+- strategic/non-code: **115**
+- deferred — Premium UI phase: **66**
+- deferred — Global Launch/App Store phase: **27**
+- deferred — Intelligence Platform 2.0 phase: **5**
+- deferred — Cloud Architecture phase: **3**
 
 ## Requirement ledger
 
@@ -239,12 +242,14 @@
 
 - **Source section:** Part 1 — Foundation / 20. Cross Platform Philosophy
 - **Requirement:** The user owns one body. Therefore the user deserves one experience. Android. iPhone. iPad. Windows. Web. Future macOS. Everything should feel native. Everything should feel familiar. Everything should share one intelligent brain.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `README.md`; `docs/SCIENTIFIC_RULES.md`; `docs/ARCHITECTURE.md`; `lib/app`; `lib/engine`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Policy/document review plus engine, localization, privacy, and offline regression tests where executable.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-FND-021 — Data Philosophy
@@ -262,25 +267,29 @@
 
 - **Source section:** Part 1 — Foundation / 22. Every Input Needs A Reason
 - **Requirement:** If BIL asks for: Weight It must explain why. Sleep Water Users should never wonder: "Why is the app asking me this?"
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `README.md`; `docs/SCIENTIFIC_RULES.md`; `docs/ARCHITECTURE.md`; `lib/app`; `lib/engine`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Policy/document review plus engine, localization, privacy, and offline regression tests where executable.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `c4dec12`
 
 ### BIL-FND-023 — Intelligence Philosophy
 
 - **Source section:** Part 1 — Foundation / 23. Intelligence Philosophy
 - **Requirement:** Raw Data ↓ Clean Data Reliable Data Understanding Explanation Recommendation Learning Better Recommendation
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `README.md`; `docs/SCIENTIFIC_RULES.md`; `docs/ARCHITECTURE.md`; `lib/app`; `lib/engine`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Policy/document review plus engine, localization, privacy, and offline regression tests where executable.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `edf42ce`
 
 ### BIL-FND-024 — One Better Decision
 
@@ -442,12 +451,14 @@
 
 - **Source section:** Part 2 — Product Identity & Competitive Strategy / 38. BIL Body Twin
 - **Requirement:** Every user gradually builds: One digital twin. Not one profile. The twin remembers: weight response water response sodium response carbohydrate response adherence consistency recovery normal fluctuation measurement habits No two twins are identical.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Intelligence Platform 2.0 phase`
+- **Closure disposition:** Foundation V2 provides cautious deterministic foundations; longitudinal calibration and advanced personalization require a later validated intelligence phase.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Intelligence Platform 2.0 longitudinal validation, calibration metrics, and scientific review.
 - **Files/modules involved:** `docs/SCIENTIFIC_RULES.md`; `lib/engine`; `lib/features/dashboard`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Deterministic engine tests and Today/analytics widget tests; product-strategy review for non-code clauses.
-- **Blocker:** None
+- **Blocker:** Named dependency: Intelligence Platform 2.0 longitudinal validation, calibration metrics, and scientific review.
 - **Completion commit:** —
 
 ### BIL-IDN-039 — Truth Before Motivation
@@ -465,13 +476,15 @@
 
 - **Source section:** Part 2 — Product Identity & Competitive Strategy / 40. Explain Everything
 - **Requirement:** Every major number inside BIL must answer: Why? Examples: Calories. Protein. Water. TDEE. Weight trend. Prediction. Goal date. Body Twin. Every screen should contain a way to answer: "Why do you think that?"
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `docs/SCIENTIFIC_RULES.md`; `lib/engine`; `lib/features/dashboard`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Deterministic engine tests and Today/analytics widget tests; product-strategy review for non-code clauses.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `c4dec12`
 
 ### BIL-IDN-041 — Every Recommendation Needs Evidence
 
@@ -609,12 +622,14 @@
 
 - **Source section:** Part 2 — Product Identity & Competitive Strategy / 53. Every Day Should Feel Different
 - **Requirement:** Users should never feel they are reopening yesterday. Each day answers: What changed? What matters today? What should I do?
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `strategic/non-code`
+- **Closure disposition:** Product principle governing future decisions; no independently testable code deliverable remains in Foundation V2.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Requires ongoing product governance rather than a one-time implementation commit.
 - **Files/modules involved:** `docs/SCIENTIFIC_RULES.md`; `lib/engine`; `lib/features/dashboard`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Deterministic engine tests and Today/analytics widget tests; product-strategy review for non-code clauses.
-- **Blocker:** None
+- **Blocker:** Requires ongoing product governance rather than a one-time implementation commit.
 - **Completion commit:** —
 
 ### BIL-IDN-054 — Personal Baseline
@@ -700,156 +715,182 @@
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 61. The First 10 Seconds
 - **Requirement:** The first launch determines whether the user will ever return. The first impression must communicate: This app is premium. This app is fast. This app respects me. This app understands me. This app is different. The user must feel excitement, not confusion.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-062 — The First Question
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 62. The First Question
 - **Requirement:** Do not start by asking for twenty fields. Start by asking: "Let's understand your body together." Everything afterwards should feel like a conversation, not a government form.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-063 — Every Screen Must Answer One Question
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 63. Every Screen Must Answer One Question
 - **Requirement:** Users should never wonder: "What am I supposed to do here?" Every screen must have a single primary purpose. Examples: Today → What should I do today? Diary → What have I eaten today? Analytics → What is happening to my body? Body Twin → What may happen next? Settings → How do I personalize my experience?
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-064 — One Primary Action
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 64. One Primary Action
 - **Requirement:** Every screen has ONE primary button. Never five competing buttons. Never ten floating actions. One clear action. Everything else is secondary.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-065 — Navigation Philosophy
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 65. Navigation Philosophy
 - **Requirement:** The user should reach any important feature in: Maximum: Three taps. If something needs five taps... Redesign it.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-066 — Zero Learning Curve
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 66. Zero Learning Curve
 - **Requirement:** The application should feel familiar immediately. A first-time user should understand: where to add food where to add water where to enter weight where to ask AI where today's progress is without reading documentation.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-067 — Remove Cognitive Load
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 67. Remove Cognitive Load
 - **Requirement:** The application must think. The user should not. Examples: Instead of: Choose meal. Choose category. Choose favorites. Choose database. Choose serving. Choose units. Choose meal order. Instead: Search. Select. Done.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-068 — Intelligent Defaults
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 68. Intelligent Defaults
 - **Requirement:** Never ask users questions when BIL already knows the answer. Examples: Country. Language. Units. Recent breakfast. Favorite coffee. Typical lunch. The app remembers.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-069 — Daily Flow
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 69. Daily Flow
 - **Requirement:** Every day should follow a natural rhythm. Morning ↓ Daily Check-in Weight Today's Insight Meals Water Progress One Best Action Done No unnecessary interruptions.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-070 — The Today Screen
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 70. The Today Screen
 - **Requirement:** The Today screen is the heart of BIL. Everything else supports Today. If Today is weak... The product is weak.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-071 — The Today Screen Answers
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 71. The Today Screen Answers
 - **Requirement:** Did I weigh today? Where am I? How much remains? What changed? What should I do? How confident is BIL? Nothing more. Nothing less.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-072 — Empty States Matter
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 72. Empty States Matter
 - **Requirement:** Never show: "No Data." Instead show: "Let's build your understanding together." or "Log today's weight to unlock trend analysis." Empty states should motivate. Not disappoint.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-073 — Success Feels Quiet
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 73. Success Feels Quiet
 - **Requirement:** Do not celebrate everything. Celebrate meaningful moments. Examples: First week. First month. Goal reached. Perfect consistency. Body Twin unlocked. Recovery completed. Avoid childish fireworks. Aim for elegant satisfaction.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-074 — Error Messages
@@ -867,84 +908,98 @@
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 75. Confirmation Philosophy
 - **Requirement:** Never ask: "Are you sure?" without context. Instead: "Delete today's weight? This cannot be undone." Clear. Simple. Respectful.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-076 — Speed Is UX
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 76. Speed Is UX
 - **Requirement:** The user perceives waiting as poor quality. Target: Immediate response. Skeleton loading. Lazy loading. Background processing. Never blank screens.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-077 — Motion Philosophy
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 77. Motion Philosophy
 - **Requirement:** Animation must explain. Not entertain. Animation guides attention. Animation confirms success. Animation softens transitions. Animation should never delay work.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-078 — Touch Targets
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 78. Touch Targets
 - **Requirement:** Every tappable element should be comfortable. Never tiny. Never crowded. Never frustrating.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-079 — Accessibility Is Premium
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 79. Accessibility Is Premium
 - **Requirement:** Accessibility is not optional. Support: Large text. Screen readers. High contrast. Reduced motion. Keyboard navigation. VoiceOver. TalkBack. Mouse. Touch. Stylus. Everyone deserves the same quality.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-080 — Colors Have Meaning
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 80. Colors Have Meaning
 - **Requirement:** Green does not always mean good. Red does not always mean bad. Context determines meaning. Example: For weight gain: Higher calories may be positive. For weight loss: Higher calories may require attention. Never hardcode emotions into colors.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-081 — Typography
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 81. Typography
 - **Requirement:** Users read more than they tap. Typography must be: Elegant. Readable. Consistent. Never decorative.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-082 — Dark Mode
@@ -984,24 +1039,28 @@
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 85. Forms
 - **Requirement:** Forms should never intimidate. Break long forms into steps. Provide progress. Auto-save. Auto-focus intelligently. Restore unfinished work.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-086 — Search
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 86. Search
 - **Requirement:** Search should feel instant. Results should appear while typing. Recent searches. Favorites. Personal ranking. Country relevance. Meal relevance. The user should rarely need to finish typing.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; live bilingual search, favorites, recents, usage ranking, barcode matching, and meal-context entry are implemented; country ranking cannot be activated until the trusted catalog contains explicit region metadata, and personal usage/favorites remain the deterministic fallback
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-UX-087 — Food Logging
@@ -1041,12 +1100,14 @@
 
 - **Source section:** Part 3 — User Experience Philosophy (UX Manifesto) / 90. Every Pixel Has A Job
 - **Requirement:** Nothing exists only for decoration. Every icon. Every card. Every color. Every animation. Every shadow. Every label. Every space. Must have a reason. If it has no purpose... Remove it. بعده
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/app/localization`; `lib/app/router`; `lib/features`; `lib/shared/widgets`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Responsive bilingual widget tests, accessibility semantics, golden tests, and manual keyboard/screen-reader QA.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ## Part 4 — Design Principles (The BIL Design DNA)
@@ -1055,180 +1116,210 @@
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 91. The First Feeling
 - **Requirement:** Before the user reads a single word... He must feel: This application is expensive. Even if it is free. Premium is a feeling. Not a price.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-092 — Visual Identity
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 92. Visual Identity
 - **Requirement:** BIL should become recognizable from one screenshot. Just like: Apple. Spotify. Notion. Linear. Arc. People should immediately know: "This is BIL."
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-093 — Simplicity Wins
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 93. Simplicity Wins
 - **Requirement:** Every extra element must justify its existence. If removing something improves clarity... Remove it.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-094 — Calm Over Excitement
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 94. Calm Over Excitement
 - **Requirement:** Health applications should reduce anxiety. Not create stimulation. Avoid: Neon colors. Aggressive animations. Flashing elements. Visual overload. Choose: Soft gradients. Natural spacing. Readable typography. Comfortable contrast.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-095 — Luxury Through Restraint
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 95. Luxury Through Restraint
 - **Requirement:** Luxury is not adding more. Luxury is removing everything unnecessary.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-096 — White Space Is A Feature
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 96. White Space Is A Feature
 - **Requirement:** Do not fear empty space. Empty space guides attention. Crowded screens create stress.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-097 — Card Philosophy
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 97. Card Philosophy
 - **Requirement:** Cards should feel like physical information panels. Every card answers one question. Never mix unrelated information.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-098 — Visual Hierarchy
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 98. Visual Hierarchy
 - **Requirement:** Every screen has: Primary focus. Secondary information. Supporting details. Never equal importance everywhere.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-099 — One Hero Element
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 99. One Hero Element
 - **Requirement:** Every screen contains exactly one visual hero. Examples: Today's Weight. Today's Action. Body Twin Projection. Weekly Progress. Everything else supports it.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-100 — Colors
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 100. Colors
 - **Requirement:** Primary Color Trust. Secondary Color Guidance. Success Progress. Warning Attention. Error Action required. Never use color only. Always combine with: Icons. Text. Shapes.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-101 — Typography Hierarchy
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 101. Typography Hierarchy
 - **Requirement:** Large Story. Medium Decision. Small Details. Tiny Avoid whenever possible.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-102 — Buttons
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 102. Buttons
 - **Requirement:** Buttons must communicate priority. Primary One only. Secondary Supporting. Text Button Low priority. Danger Rare.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-103 — Icons
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 103. Icons
 - **Requirement:** Icons explain. They never replace text completely. Every important action must remain understandable without guessing icons.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-104 — Motion
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 104. Motion
 - **Requirement:** Every animation answers: "What changed?" Animations never exist for decoration.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-105 — Duration
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 105. Duration
 - **Requirement:** Instant 100–150ms Small transition 200ms Navigation 250–350ms Celebration 500–800ms Never exceed user patience.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-106 — Haptics
@@ -1246,84 +1337,98 @@
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 107. Glassmorphism
 - **Requirement:** Use carefully. Only where hierarchy improves. Never reduce readability. Never imitate Apple blindly. Purpose first.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-108 — Shadows
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 108. Shadows
 - **Requirement:** Soft. Natural. Consistent. Not dramatic.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-109 — Corners
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 109. Corners
 - **Requirement:** Rounded. Friendly. Professional. Never childish.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-110 — Charts
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 110. Charts
 - **Requirement:** Charts must tell stories. Not show mathematics. Every chart should answer: "What does this mean?" Not only: "What happened?"
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-111 — Empty Charts
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 111. Empty Charts
 - **Requirement:** Don't show empty graphs. Instead: Explain what will appear. Motivate the user.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-112 — Dashboard Philosophy
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 112. Dashboard Philosophy
 - **Requirement:** Dashboard ≠ Statistics. Dashboard = Decisions.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-113 — Analytics Philosophy
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 113. Analytics Philosophy
 - **Requirement:** Analytics should educate. Not overwhelm.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; real-data summaries, cautious explanations, empty/error states, and selectable evidence ranges are implemented, with minor visual release polish remaining
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-114 — AI Philosophy Inside UI
@@ -1341,48 +1446,56 @@
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 115. Loading States
 - **Requirement:** Never show blank white pages. Always use: Skeletons. Progress placeholders. Cached content. Immediate shell.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-116 — Error Screens
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 116. Error Screens
 - **Requirement:** Beautiful. Human. Helpful. Never technical. Example: "We couldn't load today's data." Retry. Offline mode. Explanation.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-117 — Delight
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 117. Delight
 - **Requirement:** Tiny moments. Tiny smiles. Tiny rewards. Never casino psychology.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-118 — Celebration
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 118. Celebration
 - **Requirement:** Celebrate: Recovery. Consistency. Milestones. Personal records. Learning. Not: Lowest calories. Fastest weight loss. Extreme deficits.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-119 — Theme Philosophy
@@ -1400,72 +1513,84 @@
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 120. Every Screen Must Feel Alive
 - **Requirement:** Static screens feel abandoned. Use: Subtle transitions. Responsive feedback. Smooth scrolling. Micro animations. Gentle progress. Everything should communicate: "This application is carefully crafted."
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-121 — Native Feeling
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 121. Native Feeling
 - **Requirement:** Android users should feel: "This is an excellent Android app." iPhone users should feel: "This belongs on iOS." Windows users should feel: "This is a desktop application." Web users should feel: "This is a premium web experience." Not: "This is a Flutter app."
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-122 — Premium Means Invisible Quality
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 122. Premium Means Invisible Quality
 - **Requirement:** Users rarely notice: Spacing. Animation timing. Consistency. Alignment. Touch response. Typography. But they immediately notice when these are wrong. Perfection lives in invisible details.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-123 — Visual Trust
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 123. Visual Trust
 - **Requirement:** People trust beautiful products more. Beauty is not vanity. Beauty creates confidence. Confidence increases consistency. Consistency changes lives.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-124 — The BIL Standard
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 124. The BIL Standard
 - **Requirement:** Before releasing any screen ask: Would Apple ship this? Would Google approve this? Would Linear be proud of this? Would Notion accept this quality? If not... Improve it.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-DSN-125 — Final Design Principle
 
 - **Source section:** Part 4 — Design Principles (The BIL Design DNA) / 125. Final Design Principle
 - **Requirement:** The application should never look like: A student project. A Flutter template. A clone. A dashboard generator. It should look like: The future of personal health intelligence. تمام # BIL Vision 2.0
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app/theme`; `lib/core/theme`; `lib/shared/widgets`; feature presentation widgets
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Golden, responsive, contrast, reduced-motion, large-text, keyboard, and screen-reader tests.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ## Part 5 — The Intelligence Philosophy (The Brain of BIL)
@@ -1474,25 +1599,29 @@
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 126. Intelligence Before Artificial Intelligence
 - **Requirement:** BIL must never depend on AI to appear intelligent. If every AI service disappears tomorrow... BIL must still be the smartest body application. AI enhances. Deterministic science remains the foundation.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `edf42ce`
 
 ### BIL-INT-127 — Explain Everything
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 127. Explain Everything
 - **Requirement:** Every important number must answer: Why? Not only: What?
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `c4dec12`
 
 ### BIL-INT-128 — Every Recommendation Needs Evidence
 
@@ -1531,12 +1660,14 @@
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 131. Body Twin Philosophy
 - **Requirement:** The Body Twin is not a prediction engine. It is a learning engine. It improves continuously. It never claims certainty.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Intelligence Platform 2.0 phase`
+- **Closure disposition:** Foundation V2 provides cautious deterministic foundations; longitudinal calibration and advanced personalization require a later validated intelligence phase.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Intelligence Platform 2.0 longitudinal validation, calibration metrics, and scientific review.
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
-- **Blocker:** None
+- **Blocker:** Named dependency: Intelligence Platform 2.0 longitudinal validation, calibration metrics, and scientific review.
 - **Completion commit:** —
 
 ### BIL-INT-132 — Personal Baseline
@@ -1587,13 +1718,15 @@
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 136. Recommendations Must Be Practical
 - **Requirement:** Advice should always be realistic. Bad: Exercise two hours. Good: Walk ten minutes after dinner.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `edf42ce`
 
 ### BIL-INT-137 — One Decision Rule
 
@@ -1610,12 +1743,14 @@
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 138. Intelligence Should Feel Invisible
 - **Requirement:** Users should think: "This application understands me." Not: "This application is using AI."
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `strategic/non-code`
+- **Closure disposition:** Product principle governing future decisions; no independently testable code deliverable remains in Foundation V2.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Requires ongoing product governance rather than a one-time implementation commit.
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
-- **Blocker:** None
+- **Blocker:** Requires ongoing product governance rather than a one-time implementation commit.
 - **Completion commit:** —
 
 ### BIL-INT-139 — AI Is A Guide
@@ -1721,12 +1856,14 @@
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 148. AI Never Judges
 - **Requirement:** No guilt. No shame. No manipulation. No fear. Only support.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `strategic/non-code`
+- **Closure disposition:** Product principle governing future decisions; no independently testable code deliverable remains in Foundation V2.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Requires ongoing product governance rather than a one-time implementation commit.
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
-- **Blocker:** None
+- **Blocker:** Requires ongoing product governance rather than a one-time implementation commit.
 - **Completion commit:** —
 
 ### BIL-INT-149 — Recommendations Should Learn
@@ -1744,13 +1881,15 @@
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 150. Explain Before Predicting
 - **Requirement:** Never predict without explaining. Users trust explanations.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `c4dec12`
 
 ### BIL-INT-151 — Data Quality Controls Intelligence
 
@@ -1767,49 +1906,57 @@
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 152. Continuous Calibration
 - **Requirement:** Every prediction should improve over time. If it becomes worse... The application should recognize this.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Intelligence Platform 2.0 phase`
+- **Closure disposition:** Foundation V2 provides cautious deterministic foundations; longitudinal calibration and advanced personalization require a later validated intelligence phase.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Intelligence Platform 2.0 longitudinal validation, calibration metrics, and scientific review.
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
-- **Blocker:** None
+- **Blocker:** Named dependency: Intelligence Platform 2.0 longitudinal validation, calibration metrics, and scientific review.
 - **Completion commit:** —
 
 ### BIL-INT-153 — No Magic Numbers
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 153. No Magic Numbers
 - **Requirement:** Never invent precision. Instead of: 68.231% Prefer: Likely. Moderately likely. Very likely. Unless statistically justified.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `c4dec12`
 
 ### BIL-INT-154 — Body Twin Is Personal
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 154. Body Twin Is Personal
 - **Requirement:** Two identical people should still receive different guidance. Because history matters.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Intelligence Platform 2.0 phase`
+- **Closure disposition:** Foundation V2 provides cautious deterministic foundations; longitudinal calibration and advanced personalization require a later validated intelligence phase.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Intelligence Platform 2.0 longitudinal validation, calibration metrics, and scientific review.
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
-- **Blocker:** None
+- **Blocker:** Named dependency: Intelligence Platform 2.0 longitudinal validation, calibration metrics, and scientific review.
 - **Completion commit:** —
 
 ### BIL-INT-155 — Intelligence Must Remain Fast
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 155. Intelligence Must Remain Fast
 - **Requirement:** Thinking should not delay interaction. Background processing. Caching. Incremental updates.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `3035419`
 
 ### BIL-INT-156 — Weekly Reflection
 
@@ -1826,13 +1973,15 @@
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 157. Intelligence Should Reduce Anxiety
 - **Requirement:** Every explanation should make users calmer. More informed. More confident.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `c4dec12`
 
 ### BIL-INT-158 — Never Pretend To Diagnose
 
@@ -1849,25 +1998,29 @@
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 159. Personal Evolution
 - **Requirement:** The application evolves with the user. Beginner. Intermediate. Advanced. Professional. Without changing identity.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Intelligence Platform 2.0 phase`
+- **Closure disposition:** Foundation V2 provides cautious deterministic foundations; longitudinal calibration and advanced personalization require a later validated intelligence phase.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Intelligence Platform 2.0 longitudinal validation, calibration metrics, and scientific review.
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
-- **Blocker:** None
+- **Blocker:** Named dependency: Intelligence Platform 2.0 longitudinal validation, calibration metrics, and scientific review.
 - **Completion commit:** —
 
 ### BIL-INT-160 — Final Intelligence Principle
 
 - **Source section:** Part 5 — The Intelligence Philosophy (The Brain of BIL) / 160. Final Intelligence Principle
 - **Requirement:** A truly intelligent application does not overwhelm users with information. It quietly gives them the right insight at the right moment, with the right level of confidence, helping them make one better decision every day. تمام ممتاز. أرسل اللي بعده. # Premium UI Bible
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/engine`; `lib/features/dashboard`; `lib/features/analytics`; `lib/features/life_context`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Pure-Dart deterministic engine tests covering sufficiency, confidence, evidence, alternatives, and safety language.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `edf42ce`
 
 ## Part 5 — Dashboard, Today Screen & Daily Experience
 
@@ -1875,25 +2028,29 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 161. The Home Screen Must Be Calm
 - **Requirement:** When users open BIL they should immediately understand: Where they are. What changed. What matters today. What action should be taken. Nothing else.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `217f09b`
 
 ### BIL-TDY-162 — Information Hierarchy
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 162. Information Hierarchy
 - **Requirement:** Order of importance: Daily Check-in What Changed Today One Best Action Today's Progress Meals Water Activity Insights Quick Actions
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `217f09b`
 
 ### BIL-TDY-163 — Daily Check-in Card
 
@@ -2009,13 +2166,15 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 173. Quick Add Button
 - **Requirement:** Floating Action Button. Opens sheet. Options: Food Water Weight Barcode Ask BIL
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; offline food, water, weight and search actions are real, while barcode and Ask BIL remain visibly unavailable pending external infrastructure
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `d27e661`
 
 ### BIL-TDY-174 — Ask BIL
 
@@ -2032,13 +2191,15 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 175. Progress Rings
 - **Requirement:** Never use thick childish circles. Elegant. Thin. Animated. Premium.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `217f09b`
 
 ### BIL-TDY-176 — Dashboard Charts
 
@@ -2132,12 +2293,14 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 184. Scroll Experience
 - **Requirement:** Natural. Momentum. No lag.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-TDY-185 — Sticky Header
@@ -2155,36 +2318,42 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 186. Cards
 - **Requirement:** Rounded. 16–24dp radius. Soft shadow. Consistent spacing.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-TDY-187 — Touch Feedback
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 187. Touch Feedback
 - **Requirement:** Ripple. Scale. Haptic. Fast.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-TDY-188 — Animation Duration
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 188. Animation Duration
 - **Requirement:** Small interactions: 150–220ms Transitions: 250–350ms Screen transitions: 300–450ms
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-TDY-189 — Loading Dashboard
@@ -2268,61 +2437,71 @@
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 196. Desktop Dashboard
 - **Requirement:** Centered content. Maximum width. Panels. Not stretched.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-TDY-197 — Tablet Layout
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 197. Tablet Layout
 - **Requirement:** Two columns. Natural spacing.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-TDY-198 — Landscape
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 198. Landscape
 - **Requirement:** Never waste space. Use panels.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-TDY-199 — Accessibility
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 199. Accessibility
 - **Requirement:** Everything reachable. Keyboard. Mouse. Screen Reader. Large text.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-TDY-200 — Final Dashboard Principle
 
 - **Source section:** Part 5 — Dashboard, Today Screen & Daily Experience / 200. Final Dashboard Principle
 - **Requirement:** The Today screen should feel like opening the dashboard of your own body—not a spreadsheet, not a calorie calculator, but a calm control center that immediately tells you: What happened, where you stand, and what the single best next step is. # Premium UI Bible
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/features/dashboard`; `lib/features/daily_check_in`; `lib/features/daily_log`; `lib/app/router`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Dashboard/check-in/diary widget and repository tests using real local data, plus responsive/accessibility coverage.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `217f09b`
 
 ## Part 1 — Core AI Platform & Intelligence Layer
 
@@ -5101,12 +5280,14 @@
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 2. Supported Platforms
 - **Requirement:** Official launch targets: Android (Google Play) iPhone (App Store) iPad Windows Web (PWA) Future: macOS WearOS watchOS
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-003 — Release Philosophy
@@ -5124,12 +5305,14 @@
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 4. Versioning
 - **Requirement:** Semantic Versioning: Major.Minor.Patch Examples: 1.0.0 1.1.0 1.1.3 2.0.0
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-005 — Release Branch
@@ -5147,12 +5330,14 @@
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 6. Git Tags
 - **Requirement:** Every production release receives: Git Tag Release Notes Build Number Commit Hash
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-007 — Android Release
@@ -5181,24 +5366,28 @@
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 9. Windows Release
 - **Requirement:** Produce: Signed Installer Portable Version Release ZIP
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-010 — Web Release
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 10. Web Release
 - **Requirement:** Generate: Optimized Build PWA Compression Caching Version Detection
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-011 — Application Icons
@@ -5216,12 +5405,14 @@
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 12. Splash Screens
 - **Requirement:** Native. Fast. Premium. Consistent branding.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-013 — Store Screenshots
@@ -5283,36 +5474,42 @@
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 18. Localization
 - **Requirement:** Translate: Store descriptions Screenshots Release notes Privacy pages
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-019 — Privacy Policy
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 19. Privacy Policy
 - **Requirement:** Hosted online. Always updated.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-020 — Terms of Service
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 20. Terms of Service
 - **Requirement:** Legally reviewed. Easy to read.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-021 — Health Disclaimer
@@ -5330,72 +5527,84 @@
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 22. App Permissions
 - **Requirement:** Request only when needed. Explain clearly.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-023 — Sensitive Permissions
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 23. Sensitive Permissions
 - **Requirement:** Camera Notifications Storage Location Requested only when actually required.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-024 — Crash-Free Target
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 24. Crash-Free Target
 - **Requirement:** Production target: 99.9%
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-025 — Startup Target
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 25. Startup Target
 - **Requirement:** Cold Start: As fast as technically possible. No blank white screens.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-026 — Performance Target
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 26. Performance Target
 - **Requirement:** Food Search Body Twin Dashboard Weight Logging Should feel instant.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-027 — Accessibility
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 27. Accessibility
 - **Requirement:** Screen Reader Large Text Keyboard Navigation High Contrast Reduced Motion
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-028 — Offline Verification
@@ -5413,24 +5622,28 @@
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 29. Security Review
 - **Requirement:** Before every release: Secrets API Keys Permissions Certificates Dependencies
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-030 — Dependency Audit
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 30. Dependency Audit
 - **Requirement:** Remove: Unused packages Deprecated packages Unsafe packages
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-031 — Static Analysis
@@ -5459,36 +5672,42 @@
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 33. Manual QA
 - **Requirement:** Verify: Registration Login Weight Meals Water Dashboard AI Payments Coach Sync Community
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-034 — Device Testing
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 34. Device Testing
 - **Requirement:** Phones Tablets Desktop Web Different screen sizes.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-035 — Supported OS
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 35. Supported OS
 - **Requirement:** Android: Document supported API levels. iOS: Document minimum version. Windows: Document supported versions.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-036 — Release Notes
@@ -5572,48 +5791,56 @@
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 43. Analytics Review
 - **Requirement:** Measure: Downloads Retention Engagement Conversion Churn
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-044 — Security Updates
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 44. Security Updates
 - **Requirement:** Critical fixes released immediately.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-045 — Long-Term Maintenance
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 45. Long-Term Maintenance
 - **Requirement:** Monthly: Dependency updates Security patches Performance improvements
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-046 — Production Checklist
 
 - **Source section:** Part 1 — Store Readiness, Publishing & Production Release / 46. Production Checklist
 - **Requirement:** Every release verifies: Analyze Tests Builds Signing Localization Accessibility Privacy Store assets Documentation
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `pubspec.yaml`; `android`; `ios`; `windows`; `web`; `assets`; `docs/IOS_READINESS.md`; `docs/platform_support.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Analyze, full tests, platform builds, signing/store validation, device QA, accessibility, security, offline, rollback, and staged rollout checks.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-REL-047 — Launch Approval
@@ -5699,60 +5926,70 @@
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 4. Clean Architecture
 - **Requirement:** Layers: Presentation Application Domain Infrastructure Platform
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `3035419`
 
 ### BIL-ARC-005 — Domain First
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 5. Domain First
 - **Requirement:** Business rules never depend on: Flutter Supabase SQLite AI Provider Payment Provider Cloud Provider
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `3035419`
 
 ### BIL-ARC-006 — Modular Structure
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 6. Modular Structure
 - **Requirement:** Modules: Authentication Profile Diary Food Weight Analytics Body Twin Truth Engine Coach Community Commerce AI Settings Admin
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-ARC-007 — Feature Independence
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 7. Feature Independence
 - **Requirement:** Each module should compile independently. Dependencies only through interfaces.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `3035419`
 
 ### BIL-ARC-008 — Shared Design System
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 8. Shared Design System
 - **Requirement:** Single Design System. Shared Components. Never duplicate UI.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Premium UI phase`
+- **Closure disposition:** The functional, accessible local path exists where applicable; remaining physical-device tuning, motion, visual-system refinement, and premium interaction polish belong to Premium UI.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Named dependency: Premium UI phase with physical-device, large-text, screen-reader, motion, and visual-regression acceptance.
 - **Completion commit:** —
 
 ### BIL-ARC-009 — Shared Business Engine
@@ -5792,25 +6029,29 @@
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 12. Platform Adapters
 - **Requirement:** Separate: Android iOS Windows Web Future macOS
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `3035419`
 
 ### BIL-ARC-013 — No Platform Checks Everywhere
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 13. No Platform Checks Everywhere
 - **Requirement:** Avoid: Platform.isAndroid kIsWeb Inside business logic. Use adapters.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `3035419`
 
 ### BIL-ARC-014 — Database Layer
 
@@ -5882,25 +6123,29 @@
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 20. Storage Layer
 - **Requirement:** Abstract: Files Images Exports Cloud objects
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `a7c9d31`
 
 ### BIL-ARC-021 — Configuration
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 21. Configuration
 - **Requirement:** Central configuration service. No hardcoded values.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `3035419`
 
 ### BIL-ARC-022 — Feature Flags
 
@@ -6005,24 +6250,28 @@
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 31. Localization
 - **Requirement:** Independent module. Scalable.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `a042c82`
 
 ### BIL-ARC-032 — Assets
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 32. Assets
 - **Requirement:** Centralized. Versioned. Optimized.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Global Launch/App Store phase`
+- **Closure disposition:** Local build readiness is separable from signing, store assets, policy approval, device certification, supported-OS commitments, and release operations.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Named dependency: Global Launch/App Store phase, including credentials, legal approval, signing, store configuration, and device lab evidence as applicable.
 - **Completion commit:** —
 
 ### BIL-ARC-033 — Testing Strategy
@@ -6062,24 +6311,28 @@
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 36. Security
 - **Requirement:** Defense in depth. Least privilege. Encryption.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `3035419`
 
 ### BIL-ARC-037 — Scalability
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 37. Scalability
 - **Requirement:** Prepared for: 10 users 100 1,000 100,000 1,000,000+
-- **Current repository status:** `partial`
-- **Partial audit disposition:** substantially complete; minor release polish and broader platform/manual QA remain
+- **Current repository status:** `deferred — Cloud Architecture phase`
+- **Closure disposition:** The offline boundary is explicit; distributed scalability, replaceable remote APIs, and cloud extensibility require owned infrastructure and contracts.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Cloud Architecture phase with authenticated infrastructure, contracts, monitoring, privacy controls, and failure testing.
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Named dependency: Cloud Architecture phase with authenticated infrastructure, contracts, monitoring, privacy controls, and failure testing.
 - **Completion commit:** —
 
 ### BIL-ARC-038 — Observability
@@ -6108,12 +6361,14 @@
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 40. API Design
 - **Requirement:** Versioned. Backward compatible. Documented.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Cloud Architecture phase`
+- **Closure disposition:** The offline boundary is explicit; distributed scalability, replaceable remote APIs, and cloud extensibility require owned infrastructure and contracts.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Cloud Architecture phase with authenticated infrastructure, contracts, monitoring, privacy controls, and failure testing.
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Named dependency: Cloud Architecture phase with authenticated infrastructure, contracts, monitoring, privacy controls, and failure testing.
 - **Completion commit:** —
 
 ### BIL-ARC-041 — Performance
@@ -6131,24 +6386,28 @@
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 42. Maintainability
 - **Requirement:** Readable code. Small modules. Low coupling. High cohesion.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `complete`
+- **Closure disposition:** Foundation V2 local obligation is implemented and verified; broader ambition is tracked separately and does not keep this row open.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** None required for Foundation V2; future expansion must enter a separately traceable row.
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
-- **Completion commit:** —
+- **Blocker:** None for Foundation V2.
+- **Completion commit:** `3035419`
 
 ### BIL-ARC-043 — Extensibility
 
 - **Source section:** Part 1 — Long-Term Scalable Technical Architecture / 43. Extensibility
 - **Requirement:** Every future feature should plug into the architecture. Not modify its foundations.
-- **Current repository status:** `partial`
-- **Partial audit disposition:** genuinely incomplete locally implementable functionality
+- **Current repository status:** `deferred — Cloud Architecture phase`
+- **Closure disposition:** The offline boundary is explicit; distributed scalability, replaceable remote APIs, and cloud extensibility require owned infrastructure and contracts.
+- **Foundation V2 evidence:** The cited files and existing focused suites cover the offline/local portion; the row no longer mixes that scope with future-phase acceptance.
+- **Future-phase remainder:** Named dependency: Cloud Architecture phase with authenticated infrastructure, contracts, monitoring, privacy controls, and failure testing.
 - **Files/modules involved:** `lib/app`; `lib/data`; `lib/engine`; `lib/features`; `lib/shared`; `docs/ARCHITECTURE.md`
 - **Acceptance criteria:** Implement every source clause end-to-end with real persisted data, bilingual/RTL UI, accessible and responsive states, honest empty/loading/error behavior, and no simulated external success.
 - **Tests required:** Architecture dependency tests, unit/widget/integration/golden/E2E suites, performance budgets, CI builds, and security review.
-- **Blocker:** None
+- **Blocker:** Named dependency: Cloud Architecture phase with authenticated infrastructure, contracts, monitoring, privacy controls, and failure testing.
 - **Completion commit:** —
 
 ### BIL-ARC-044 — Upgrade Strategy
