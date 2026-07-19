@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/localization/app_localizations.dart';
+import '../../app/services/app_settings_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
 
@@ -14,6 +15,10 @@ class StartupPage extends ConsumerWidget {
     final profile = ref.watch(userProfileProvider);
     final checkInDue = ref.watch(dailyCheckInDueProvider);
 
+    if (profile.isLoading || checkInDue.isLoading) {
+      return const _StartupSurface();
+    }
+
     if (profile.hasError || checkInDue.hasError) {
       return _StartupError(
         onRetry: () {
@@ -22,85 +27,86 @@ class StartupPage extends ConsumerWidget {
         },
       );
     }
-    if (checkInDue.isLoading) {
-      return const _StartupSurface();
-    }
 
-    return profile.when(
-      loading: () => const _StartupSurface(),
-      error: (_, _) => _StartupError(
-        onRetry: () {
-          ref.invalidate(userProfileProvider);
-          ref.invalidate(dailyCheckInDueProvider);
-        },
-      ),
-      data: (user) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (user == null) {
-            context.go('/onboarding');
-          } else if (checkInDue.value == true) {
-            context.go('/daily-check-in');
-          } else {
-            context.go('/dashboard');
-          }
-        });
+    final user = profile.value;
+    final isCheckInDue = checkInDue.value;
 
-        return const _StartupSurface();
-      },
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (user == null) {
+        context.go('/onboarding');
+      } else if (isCheckInDue == true) {
+        context.go('/daily-check-in');
+      } else {
+        context.go('/dashboard');
+      }
+    });
+
+    return const _StartupSurface();
   }
 }
 
-class _StartupSurface extends StatelessWidget {
+class _StartupSurface extends ConsumerWidget {
   const _StartupSurface();
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Theme.of(context).colorScheme.primaryContainer,
-            Theme.of(context).colorScheme.surface,
-          ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(appSettingsProvider);
+    final disableAnimations =
+        settings.reduceMotion || MediaQuery.of(context).disableAnimations;
+
+    return Scaffold(
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(context).colorScheme.primaryContainer,
+              Theme.of(context).colorScheme.surface,
+            ],
+          ),
         ),
-      ),
-      child: SafeArea(
-        child: Center(
-          child: Semantics(
-            label: context.strings.text('BIL is preparing your local data'),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(22),
+        child: SafeArea(
+          child: Center(
+            child: Semantics(
+              label: context.strings.text('BIL is preparing your local data'),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                    child: Icon(
+                      Icons.insights_rounded,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      size: 38,
+                    ),
                   ),
-                  child: Icon(
-                    Icons.insights_rounded,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    size: 38,
+                  const SizedBox(height: 18),
+                  Text(
+                    'BIL',
+                    style: Theme.of(context).textTheme.headlineMedium,
                   ),
-                ),
-                const SizedBox(height: 18),
-                Text('BIL', style: Theme.of(context).textTheme.headlineMedium),
-                const SizedBox(height: 16),
-                const SizedBox(
-                  width: 180,
-                  child: LinearProgressIndicator(minHeight: 3),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: 180,
+                    child: LinearProgressIndicator(
+                      minHeight: 3,
+                      value: disableAnimations ? 0.5 : null,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _StartupError extends StatelessWidget {
