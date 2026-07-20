@@ -31,6 +31,30 @@ class AnalyticsPage extends ConsumerStatefulWidget {
 class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
   AnalyticsRange range = AnalyticsRange.thirtyDays;
 
+  String _localizedProgressConfidence(
+    BuildContext context,
+    ProgressConfidence confidence,
+  ) {
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    if (!arabic) return confidence.name;
+    return switch (confidence) {
+      ProgressConfidence.insufficient => 'غير كافية',
+      ProgressConfidence.low => 'منخفضة',
+      ProgressConfidence.medium => 'متوسطة',
+      ProgressConfidence.high => 'مرتفعة',
+    };
+  }
+
+  String _rangeLabel(BuildContext context, AnalyticsRange selected) {
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    return switch (selected) {
+      AnalyticsRange.sevenDays => arabic ? 'آخر 7 أيام' : 'Last 7 days',
+      AnalyticsRange.thirtyDays => arabic ? 'آخر 30 يومًا' : 'Last 30 days',
+      AnalyticsRange.ninetyDays => arabic ? 'آخر 90 يومًا' : 'Last 90 days',
+      AnalyticsRange.allTime => arabic ? 'كل الوقت' : 'All time',
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
@@ -283,45 +307,125 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
             ],
           ),
           const SizedBox(height: PremiumDesignTokens.spaceSm),
-          _SummaryCard(
-            title: range.days == null
-                ? tr('All-time summary', 'ملخص كل الوقت')
-                : tr('${range.days}-day summary', 'ملخص ${range.days} يومًا'),
-            lines: [
-              tr(
-                '$trackedDays nutrition or hydration days recorded',
-                'تم تسجيل التغذية أو الترطيب في $trackedDays يومًا',
-              ),
-              rate == null
-                  ? tr(
-                      'Weight trend needs at least four entries',
-                      'يحتاج اتجاه الوزن إلى أربعة قياسات على الأقل',
-                    )
-                  : '${rate >= 0 ? '+' : ''}${UnitConverter.weightFromKg(rate, system).toStringAsFixed(2)} $weightUnit/${tr('week', 'أسبوع')} ${tr('smoothed direction', 'اتجاه ممهّد')}',
-              tr(
-                '${caloriesByDay.length} days with calculated meal totals',
-                '${caloriesByDay.length} يومًا بإجماليات وجبات محسوبة',
-              ),
-              tr(
-                'Weight evidence: ${progress.sampleCount} measurements across ${progress.spanDays} days · ${progress.confidence.name} confidence',
-                'دليل الوزن: ${progress.sampleCount} قياسًا خلال ${progress.spanDays} يومًا · ثقة ${switch (progress.confidence) {
-                  ProgressConfidence.insufficient => 'غير كافية',
-                  ProgressConfidence.low => 'منخفضة',
-                  ProgressConfidence.medium => 'متوسطة',
-                  ProgressConfidence.high => 'مرتفعة',
-                }}',
-              ),
-              if (progress.monthlyDirectionKg != null)
-                tr(
-                  'Approximate monthly direction: ${progress.monthlyDirectionKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(progress.monthlyDirectionKg!, system).toStringAsFixed(1)} $weightUnit',
-                  'الاتجاه الشهري التقريبي: ${progress.monthlyDirectionKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(progress.monthlyDirectionKg!, system).toStringAsFixed(1)} $weightUnit',
+          PremiumSurface(
+            padding: PremiumDesignTokens.cardPaddingLarge,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Semantics(
+                  header: true,
+                  child: Text(
+                    tr(
+                      'Evidence story for ${_rangeLabel(context, range)}',
+                      'قصة الأدلة في ${_rangeLabel(context, range)}',
+                    ),
+                    style: PremiumDesignTokens.cardHeading(context),
+                  ),
                 ),
-              if (progress.variabilityKg != null)
-                tr(
-                  'Variation around the direction: about ${UnitConverter.weightFromKg(progress.variabilityKg!, system).toStringAsFixed(2)} $weightUnit',
-                  'التذبذب حول الاتجاه: نحو ${UnitConverter.weightFromKg(progress.variabilityKg!, system).toStringAsFixed(2)} $weightUnit',
+                const SizedBox(height: PremiumDesignTokens.spaceXs),
+                Text(
+                  tr(
+                    'What changed, what supports it, and what remains uncertain.',
+                    'ما الذي تغير، وما الذي يدعمه، وما الذي لا يزال غير محسوم.',
+                  ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
-            ],
+                const SizedBox(height: PremiumDesignTokens.spaceMd),
+                Wrap(
+                  spacing: PremiumDesignTokens.spaceXs,
+                  runSpacing: PremiumDesignTokens.spaceXs,
+                  children: [
+                    _EvidencePill(
+                      label: tr('Tracked days', 'الأيام المسجلة'),
+                      value: '$trackedDays',
+                    ),
+                    _EvidencePill(
+                      label: tr('Weight points', 'نقاط الوزن'),
+                      value: '${progress.sampleCount}',
+                    ),
+                    _EvidencePill(
+                      label: tr('Evidence confidence', 'ثقة الأدلة'),
+                      value: _localizedProgressConfidence(
+                        context,
+                        progress.confidence,
+                      ),
+                    ),
+                    _EvidencePill(
+                      label: tr('Selected range', 'النطاق المحدد'),
+                      value: _rangeLabel(context, range),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: PremiumDesignTokens.spaceMd),
+                Text(
+                  tr('What changed', 'ما الذي تغير'),
+                  style: PremiumDesignTokens.sectionHeading(context),
+                ),
+                const SizedBox(height: PremiumDesignTokens.spaceXs),
+                Text(
+                  rate == null
+                      ? tr(
+                          'Weight direction is not shown yet because this range does not have enough measured points.',
+                          'لا يظهر اتجاه الوزن بعد لأن هذا النطاق لا يحتوي على نقاط قياس كافية.',
+                        )
+                      : tr(
+                          'Smoothed weekly direction: ${rate >= 0 ? '+' : ''}${UnitConverter.weightFromKg(rate, system).toStringAsFixed(2)} $weightUnit/week.',
+                          'الاتجاه الأسبوعي الممهّد: ${rate >= 0 ? '+' : ''}${UnitConverter.weightFromKg(rate, system).toStringAsFixed(2)} $weightUnit/أسبوع.',
+                        ),
+                ),
+                if (progress.monthlyDirectionKg != null) ...[
+                  const SizedBox(height: PremiumDesignTokens.spaceXs),
+                  Text(
+                    tr(
+                      'Approximate monthly direction: ${progress.monthlyDirectionKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(progress.monthlyDirectionKg!, system).toStringAsFixed(1)} $weightUnit.',
+                      'الاتجاه الشهري التقريبي: ${progress.monthlyDirectionKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(progress.monthlyDirectionKg!, system).toStringAsFixed(1)} $weightUnit.',
+                    ),
+                  ),
+                ],
+                const SizedBox(height: PremiumDesignTokens.spaceSm),
+                Text(
+                  tr('What evidence supports this', 'ما الأدلة التي تدعم ذلك'),
+                  style: PremiumDesignTokens.sectionHeading(context),
+                ),
+                const SizedBox(height: PremiumDesignTokens.spaceXs),
+                Text(
+                  tr(
+                    '${progress.sampleCount} weight measurements across ${progress.spanDays} days and ${caloriesByDay.length} days with calculated meal totals.',
+                    '${progress.sampleCount} قياس وزن خلال ${progress.spanDays} يومًا و${caloriesByDay.length} يومًا بإجماليات وجبات محسوبة.',
+                  ),
+                ),
+                if (progress.variabilityKg != null) ...[
+                  const SizedBox(height: PremiumDesignTokens.spaceXs),
+                  Text(
+                    tr(
+                      'Observed variability around direction: about ${UnitConverter.weightFromKg(progress.variabilityKg!, system).toStringAsFixed(2)} $weightUnit.',
+                      'التذبذب الملحوظ حول الاتجاه: نحو ${UnitConverter.weightFromKg(progress.variabilityKg!, system).toStringAsFixed(2)} $weightUnit.',
+                    ),
+                  ),
+                ],
+                const SizedBox(height: PremiumDesignTokens.spaceSm),
+                Text(
+                  tr('What cannot be concluded yet', 'ما الذي لا يمكن استنتاجه بعد'),
+                  style: PremiumDesignTokens.sectionHeading(context),
+                ),
+                const SizedBox(height: PremiumDesignTokens.spaceXs),
+                Text(
+                  tr(
+                    'These records cannot on their own determine fat-versus-muscle change or prove cause and effect.',
+                    'لا يمكن لهذه السجلات وحدها تحديد تغير الدهون مقابل العضلات أو إثبات علاقة سبب ونتيجة.',
+                  ),
+                ),
+                const SizedBox(height: PremiumDesignTokens.spaceXs),
+                Text(
+                  tr(
+                    'If evidence is sparse, hold interpretation and add more consistent measurements first.',
+                    'إذا كانت الأدلة متفرقة فالأفضل إيقاف التفسير وإضافة قياسات أكثر اتساقًا أولًا.',
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: PremiumDesignTokens.spaceSm),
           PremiumChartCard(
@@ -350,8 +454,8 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                 'اتجاه المسار: ${rate == null ? 'أدلة غير كافية' : '${rate >= 0 ? '+' : ''}${UnitConverter.weightFromKg(rate, system).toStringAsFixed(2)} $weightUnit/أسبوع (ممهّد)'}',
               ),
               tr(
-                'Evidence sufficiency: ${progress.sampleCount} measurements across ${progress.spanDays} days (${progress.confidence.name}).',
-                'كفاية الأدلة: ${progress.sampleCount} قياسًا خلال ${progress.spanDays} يومًا (ثقة ${progress.confidence.name}).',
+                'Evidence sufficiency: ${progress.sampleCount} measurements across ${progress.spanDays} days (${_localizedProgressConfidence(context, progress.confidence)}).',
+                'كفاية الأدلة: ${progress.sampleCount} قياسًا خلال ${progress.spanDays} يومًا (ثقة ${_localizedProgressConfidence(context, progress.confidence)}).',
               ),
               tr(
                 'This chart reflects measured weight only and cannot safely conclude fat or muscle change on its own.',
@@ -590,6 +694,44 @@ class _WeightLinePainter extends CustomPainter {
         oldDelegate.span != span ||
         oldDelegate.lineColor != lineColor ||
         oldDelegate.pointColor != pointColor;
+  }
+}
+
+class _EvidencePill extends StatelessWidget {
+  const _EvidencePill({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Semantics(
+      label: '$label: $value',
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: PremiumDesignTokens.spaceSm,
+          vertical: PremiumDesignTokens.spaceXs,
+        ),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(value, style: theme.textTheme.labelLarge),
+          ],
+        ),
+      ),
+    );
   }
 }
 
