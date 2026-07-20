@@ -1,3 +1,4 @@
+import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -250,7 +251,11 @@ class ProfileStep extends StatelessWidget {
         ],
         emptySelectionAllowed: true,
         selected: gender == null ? {} : {gender!},
-        onSelectionChanged: (value) => onGenderChanged(value.single),
+        onSelectionChanged: (value) {
+          if (value.isNotEmpty) {
+            onGenderChanged(value.first);
+          }
+        },
       ),
       if (errors['gender'] != null) _ErrorText(errors['gender']!),
       const SizedBox(height: 20),
@@ -276,7 +281,11 @@ class ProfileStep extends StatelessWidget {
           ),
         ],
         selected: {system},
-        onSelectionChanged: (value) => onSystemChanged(value.single),
+        onSelectionChanged: (value) {
+          if (value.isNotEmpty) {
+            onSystemChanged(value.first);
+          }
+        },
       ),
     ],
   );
@@ -417,23 +426,18 @@ class ProfileStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TextField(
+        _CountryPickerField(
           controller: regionController,
           onChanged: onRegionChanged,
-          textCapitalization: TextCapitalization.words,
-          autofillHints: const [AutofillHints.countryName],
-          decoration: InputDecoration(
-            labelText: tr(
-              context,
-              'Country or region (optional)',
-              'الدولة أو المنطقة (اختياري)',
-            ),
-            helperText: tr(
-              context,
-              'Used only for locally relevant food context.',
-              'تُستخدم فقط لسياق الطعام المحلي المناسب.',
-            ),
-            border: const OutlineInputBorder(),
+          label: tr(
+            context,
+            'Country or region (optional)',
+            'الدولة أو المنطقة (اختياري)',
+          ),
+          helper: tr(
+            context,
+            'Used only for locally relevant food context.',
+            'تُستخدم فقط لسياق الطعام المحلي المناسب.',
           ),
         ),
         const SizedBox(height: 16),
@@ -557,6 +561,57 @@ class _OptionalMeasurementField extends StatelessWidget {
       if (parsed != null && parsed > 0) onChanged(parsed);
     },
   );
+}
+
+class _CountryPickerField extends StatelessWidget {
+  const _CountryPickerField({
+    required this.controller,
+    required this.onChanged,
+    required this.label,
+    required this.helper,
+  });
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  final String label;
+  final String helper;
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context);
+    final isArabic = locale.languageCode == 'ar';
+    return TextFormField(
+      controller: controller,
+      readOnly: true,
+      autofillHints: const [AutofillHints.countryName],
+      decoration: InputDecoration(
+        labelText: label,
+        helperText: helper,
+        border: const OutlineInputBorder(),
+        suffixIcon: const Icon(Icons.public),
+      ),
+      onTap: () {
+        showCountryPicker(
+          context: context,
+          useSafeArea: true,
+          showPhoneCode: false,
+          countryListTheme: CountryListThemeData(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            inputDecoration: InputDecoration(
+              labelText: isArabic ? 'ابحث عن الدولة' : 'Search country',
+              prefixIcon: const Icon(Icons.search),
+              border: const OutlineInputBorder(),
+            ),
+          ),
+          onSelect: (country) {
+            final name = isArabic ? country.nameLocalized ?? country.name : country.name;
+            controller.text = name;
+            onChanged(name);
+          },
+        );
+      },
+    );
+  }
 }
 
 class _ErrorText extends StatelessWidget {

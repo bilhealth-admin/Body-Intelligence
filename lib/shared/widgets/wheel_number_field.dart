@@ -34,6 +34,7 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
   late FixedExtentScrollController wheel;
   late TextEditingController text;
   late FocusNode focus;
+  bool _editingText = false;
 
   int get itemCount =>
       ((widget.maximum - widget.minimum) / widget.step).round() + 1;
@@ -54,8 +55,11 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
   @override
   void didUpdateWidget(covariant WheelNumberField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value || oldWidget.unit != widget.unit) {
-      text.text = widget.value.toStringAsFixed(widget.decimalPlaces);
+    if (!_editingText &&
+        (oldWidget.value != widget.value || oldWidget.unit != widget.unit)) {
+      text.value = TextEditingValue(
+        text: widget.value.toStringAsFixed(widget.decimalPlaces),
+      );
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (wheel.hasClients) wheel.jumpToItem(indexFor(widget.value));
       });
@@ -70,11 +74,19 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
     super.dispose();
   }
 
-  void updateFromText(String raw) {
-    final parsed = double.tryParse(raw.replaceAll(',', '.'));
-    if (parsed == null || parsed < widget.minimum || parsed > widget.maximum) {
+  void updateFromText(String raw, {bool commit = false}) {
+    final normalized = raw.replaceAll(',', '.').trim();
+    if (normalized.isEmpty) {
       return;
     }
+    final parsed = double.tryParse(normalized);
+    if (parsed == null || parsed < widget.minimum || parsed > widget.maximum) {
+      if (commit) {
+        _syncTextFromValue();
+      }
+      return;
+    }
+
     widget.onChanged(parsed);
     if (wheel.hasClients) {
       wheel.animateToItem(
@@ -83,6 +95,19 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
         curve: Curves.easeOut,
       );
     }
+    if (commit) {
+      _syncTextFromValue(parsed);
+    }
+  }
+
+  void _syncTextFromValue([double? value]) {
+    final effective = value ?? widget.value;
+    text.value = TextEditingValue(
+      text: effective.toStringAsFixed(widget.decimalPlaces),
+      selection: TextSelection.collapsed(
+        offset: effective.toStringAsFixed(widget.decimalPlaces).length,
+      ),
+    );
   }
 
   void adjustBy(int direction) {
@@ -90,7 +115,7 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
     final next = (current + direction).clamp(0, itemCount - 1);
     if (next == current) return;
     final value = valueFor(next);
-    text.text = value.toStringAsFixed(widget.decimalPlaces);
+    _syncTextFromValue(value);
     widget.onChanged(value);
     if (wheel.hasClients) {
       wheel.animateToItem(
@@ -206,10 +231,23 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                       ],
-                      onChanged: updateFromText,
-                      onSubmitted: (_) => updateFromText(text.text),
-                      onEditingComplete: () => updateFromText(text.text),
-                      onTapOutside: (_) => focus.unfocus(),
+                      onTap: () {
+                        _editingText = true;
+                      },
+                      onChanged: (value) => updateFromText(value),
+                      onSubmitted: (_) {
+                        _editingText = false;
+                        updateFromText(text.text, commit: true);
+                      },
+                      onEditingComplete: () {
+                        _editingText = false;
+                        updateFromText(text.text, commit: true);
+                      },
+                      onTapOutside: (_) {
+                        _editingText = false;
+                        updateFromText(text.text, commit: true);
+                        focus.unfocus();
+                      },
                       decoration: InputDecoration(
                         suffixText: widget.unit,
                         errorText: widget.errorText,

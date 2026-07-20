@@ -45,6 +45,7 @@ dependencies:
   share_plus: ^13.2.1
   flutter_localizations:
     sdk: flutter
+  country_picker: ^2.0.28
 
 dev_dependencies:
   flutter_test:
