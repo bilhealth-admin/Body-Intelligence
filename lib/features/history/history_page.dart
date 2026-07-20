@@ -233,7 +233,9 @@ class HistoryPage extends ConsumerWidget {
           children: [
             _HistoryContextBanner(
               icon: Icons.warning_amber_rounded,
-              title: context.strings.text('Weight history is temporarily unavailable'),
+              title: context.strings.text(
+                'Weight history is temporarily unavailable',
+              ),
               subtitle: context.strings.text(
                 'Some local records could not be read. Trend interpretation is hidden until local data is available again.',
               ),
@@ -305,7 +307,10 @@ class HistoryPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: PremiumDesignTokens.spaceSm),
                       _HistoryExplainabilityChips(
-                        confidenceLabel: _confidenceLabel(analysis.confidence, arabic),
+                        confidenceLabel: _confidenceLabel(
+                          analysis.confidence,
+                          arabic,
+                        ),
                         sampleCount: analysis.sampleCount,
                         spanDays: analysis.spanDays,
                         system: system,
@@ -520,16 +525,18 @@ class _HistoryExplainabilityChips extends StatelessWidget {
       spacing: PremiumDesignTokens.spaceXs,
       runSpacing: PremiumDesignTokens.spaceXs,
       children: [
-        Chip(label: Text('${context.strings.text('Confidence')}: $confidenceLabel')),
+        Chip(
+          label: Text(
+            '${context.strings.text('Confidence')}: $confidenceLabel',
+          ),
+        ),
         Chip(
           label: Text(
             '${context.strings.text('Evidence')}: $sampleCount ${context.strings.text('entries')} · $spanDays ${context.strings.text('days')}',
           ),
         ),
         Chip(
-          label: Text(
-            '${context.strings.text('Direction')}: $directionLabel',
-          ),
+          label: Text('${context.strings.text('Direction')}: $directionLabel'),
         ),
       ],
     );

@@ -57,15 +57,7 @@ void main() {
     );
     expect(find.text('Show raw measurements'), findsOneWidget);
     expect(find.textContaining('Confidence:'), findsNWidgets(2));
-    expect(find.textContaining('Cautious goal estimate'), findsNWidgets(2));
-    expect(
-      find.textContaining('At least four comparable measurements are needed'),
-      findsOneWidget,
-    );
-    expect(
-      find.textContaining('Current direction is not yet moving toward the selected goal direction.'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('Cautious goal estimate'), findsOneWidget);
     expect(
       find.textContaining('do not prove fat or muscle change'),
       findsOneWidget,

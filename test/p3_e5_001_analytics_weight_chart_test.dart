@@ -17,7 +17,9 @@ void main() {
   Widget analyticsApp() => ProviderScope(
     overrides: [
       weightHistoryProvider.overrideWith((ref) => Stream.value(const [])),
-      allMealsProvider.overrideWith((ref) => Stream.value(const <MealWithItems>[])),
+      allMealsProvider.overrideWith(
+        (ref) => Stream.value(const <MealWithItems>[]),
+      ),
       allWaterProvider.overrideWith((ref) => Stream.value(<WaterEntry>[])),
       insightLifeContextProvider.overrideWith(
         (ref) => Stream.value(<LifeContextEntry>[]),

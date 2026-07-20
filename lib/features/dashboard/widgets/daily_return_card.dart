@@ -49,136 +49,136 @@ class DailyReturnCard extends StatelessWidget {
       child: PremiumSurface(
         padding: PremiumDesignTokens.cardPaddingLarge,
         child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Semantics(
-                header: true,
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.3,
-                  ),
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Semantics(
+              header: true,
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.3,
                 ),
               ),
-              if (report.daysAway >= 4) ...[
-                const SizedBox(height: PremiumDesignTokens.spaceXs - 2),
-                Text(
-                  context.strings.text(
-                    'No backfill is required. Your earlier local records remain usable; today can be a fresh observation.',
-                  ),
+            ),
+            if (report.daysAway >= 4) ...[
+              const SizedBox(height: PremiumDesignTokens.spaceXs - 2),
+              Text(
+                context.strings.text(
+                  'No backfill is required. Your earlier local records remain usable; today can be a fresh observation.',
+                ),
+              ),
+            ],
+            const SizedBox(height: PremiumDesignTokens.spaceMd),
+            Wrap(
+              spacing: PremiumDesignTokens.spaceSm,
+              runSpacing: PremiumDesignTokens.spaceSm,
+              children: [
+                _Status(
+                  label: context.strings.text('Weight'),
+                  recorded: report.hasWeight,
+                ),
+                _Status(
+                  label: context.strings.text('Meals'),
+                  recorded: report.hasMeals,
+                ),
+                _Status(
+                  label: context.strings.text('Water'),
+                  recorded: report.hasWater,
                 ),
               ],
-              const SizedBox(height: PremiumDesignTokens.spaceMd),
-              Wrap(
-                spacing: PremiumDesignTokens.spaceSm,
-                runSpacing: PremiumDesignTokens.spaceSm,
-                children: [
-                  _Status(
-                    label: context.strings.text('Weight'),
-                    recorded: report.hasWeight,
-                  ),
-                  _Status(
-                    label: context.strings.text('Meals'),
-                    recorded: report.hasMeals,
-                  ),
-                  _Status(
-                    label: context.strings.text('Water'),
-                    recorded: report.hasWater,
-                  ),
-                ],
-              ),
-              const SizedBox(height: PremiumDesignTokens.spaceMd),
+            ),
+            const SizedBox(height: PremiumDesignTokens.spaceMd),
+            _LabeledInsight(
+              label: context.strings.text('What changed'),
+              value: changedSummary,
+            ),
+            const SizedBox(height: PremiumDesignTokens.spaceSm),
+            _LabeledInsight(
+              label: context.strings.text('Important missing evidence'),
+              value: missingEvidence,
+            ),
+            const SizedBox(height: PremiumDesignTokens.spaceLg),
+            if (report.hasPrimaryAction) ...[
               _LabeledInsight(
-                label: context.strings.text('What changed'),
+                label: context.strings.text('Why this action appears'),
+                value: actionReason,
+              ),
+              const SizedBox(height: PremiumDesignTokens.spaceSm),
+              _LabeledInsight(
+                label: context.strings.text('Evidence used'),
                 value: changedSummary,
               ),
               const SizedBox(height: PremiumDesignTokens.spaceSm),
               _LabeledInsight(
-                label: context.strings.text('Important missing evidence'),
+                label: context.strings.text('Evidence missing'),
                 value: missingEvidence,
               ),
-              const SizedBox(height: PremiumDesignTokens.spaceLg),
-              if (report.hasPrimaryAction) ...[
+              const SizedBox(height: PremiumDesignTokens.spaceSm),
+              _LabeledInsight(
+                label: context.strings.text('Confidence'),
+                value: _confidenceLabel(context),
+              ),
+              if (recommendationTimeHorizon != null) ...[
+                const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
                 _LabeledInsight(
-                  label: context.strings.text('Why this action appears'),
-                  value: actionReason,
+                  label: context.strings.text('Time horizon'),
+                  value: recommendationTimeHorizon!,
                 ),
-                const SizedBox(height: PremiumDesignTokens.spaceSm),
+              ],
+              if (alternativeExplanation != null) ...[
+                const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
                 _LabeledInsight(
-                  label: context.strings.text('Evidence used'),
-                  value: changedSummary,
+                  label: context.strings.text('Alternative explanation'),
+                  value: alternativeExplanation!,
                 ),
-                const SizedBox(height: PremiumDesignTokens.spaceSm),
-                _LabeledInsight(
-                  label: context.strings.text('Evidence missing'),
-                  value: missingEvidence,
+              ],
+              const SizedBox(height: PremiumDesignTokens.spaceMd),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: onPrimaryAction,
+                  child: Text(actionTitle),
                 ),
-                const SizedBox(height: PremiumDesignTokens.spaceSm),
-                _LabeledInsight(
-                  label: context.strings.text('Confidence'),
-                  value: _confidenceLabel(context),
+              ),
+              if (onDismissRecommendation != null ||
+                  onCorrectRecommendation != null ||
+                  onRecommendationFeedback != null) ...[
+                const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
+                Wrap(
+                  spacing: PremiumDesignTokens.spaceSm,
+                  runSpacing: PremiumDesignTokens.spaceSm,
+                  children: [
+                    if (onDismissRecommendation != null)
+                      OutlinedButton(
+                        onPressed: onDismissRecommendation,
+                        child: Text(context.strings.text('Dismiss')),
+                      ),
+                    if (onCorrectRecommendation != null)
+                      OutlinedButton(
+                        onPressed: onCorrectRecommendation,
+                        child: Text(context.strings.text('Correct')),
+                      ),
+                    if (onRecommendationFeedback != null)
+                      OutlinedButton(
+                        onPressed: onRecommendationFeedback,
+                        child: Text(context.strings.text('Feedback')),
+                      ),
+                  ],
                 ),
-                if (recommendationTimeHorizon != null) ...[
-                  const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
-                  _LabeledInsight(
-                    label: context.strings.text('Time horizon'),
-                    value: recommendationTimeHorizon!,
+              ],
+            ] else
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  context.strings.text(
+                    'No corrective action is needed from the evidence recorded today because the current evidence is insufficient or does not support a safer recommendation.',
                   ),
-                ],
-                if (alternativeExplanation != null) ...[
-                  const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
-                  _LabeledInsight(
-                    label: context.strings.text('Alternative explanation'),
-                    value: alternativeExplanation!,
-                  ),
-                ],
-                const SizedBox(height: PremiumDesignTokens.spaceMd),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: onPrimaryAction,
-                    child: Text(actionTitle),
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
-                if (onDismissRecommendation != null ||
-                    onCorrectRecommendation != null ||
-                    onRecommendationFeedback != null) ...[
-                  const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
-                  Wrap(
-                    spacing: PremiumDesignTokens.spaceSm,
-                    runSpacing: PremiumDesignTokens.spaceSm,
-                    children: [
-                      if (onDismissRecommendation != null)
-                        OutlinedButton(
-                          onPressed: onDismissRecommendation,
-                          child: Text(context.strings.text('Dismiss')),
-                        ),
-                      if (onCorrectRecommendation != null)
-                        OutlinedButton(
-                          onPressed: onCorrectRecommendation,
-                          child: Text(context.strings.text('Correct')),
-                        ),
-                      if (onRecommendationFeedback != null)
-                        OutlinedButton(
-                          onPressed: onRecommendationFeedback,
-                          child: Text(context.strings.text('Feedback')),
-                        ),
-                    ],
-                  ),
-                ],
-              ] else
-                Semantics(
-                  liveRegion: true,
-                  child: Text(
-                    context.strings.text(
-                      'No corrective action is needed from the evidence recorded today because the current evidence is insufficient or does not support a safer recommendation.',
-                    ),
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
-            ],
-          ),
+              ),
+          ],
+        ),
       ),
     );
   }

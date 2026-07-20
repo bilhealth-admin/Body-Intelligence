@@ -57,50 +57,47 @@ void main() {
     },
   );
 
-  testWidgets(
-    'P3-E5-006 analytics recovery keeps privacy-safe retry context',
-    (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            weightHistoryProvider.overrideWith(
-              (ref) => Stream.error(StateError('private analytics detail')),
-            ),
-            allMealsProvider.overrideWith(
-              (ref) => Stream.value(const <MealWithItems>[]),
-            ),
-            allWaterProvider.overrideWith(
-              (ref) => Stream.value(<WaterEntry>[]),
-            ),
-            insightLifeContextProvider.overrideWith(
-              (ref) => Stream.value(<LifeContextEntry>[]),
-            ),
-            measurementSystemProvider.overrideWith(
-              (ref) => Stream.value(MeasurementSystem.metric),
-            ),
-            userProfileProvider.overrideWith((ref) => Stream.value(null)),
-          ],
-          child: const MaterialApp(
-            locale: Locale('ar'),
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            home: AnalyticsPage(),
+  testWidgets('P3-E5-006 analytics recovery keeps privacy-safe retry context', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          weightHistoryProvider.overrideWith(
+            (ref) => Stream.error(StateError('private analytics detail')),
           ),
+          allMealsProvider.overrideWith(
+            (ref) => Stream.value(const <MealWithItems>[]),
+          ),
+          allWaterProvider.overrideWith((ref) => Stream.value(<WaterEntry>[])),
+          insightLifeContextProvider.overrideWith(
+            (ref) => Stream.value(<LifeContextEntry>[]),
+          ),
+          measurementSystemProvider.overrideWith(
+            (ref) => Stream.value(MeasurementSystem.metric),
+          ),
+          userProfileProvider.overrideWith((ref) => Stream.value(null)),
+        ],
+        child: const MaterialApp(
+          locale: Locale('ar'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: AnalyticsPage(),
         ),
-      );
-      await tester.pumpAndSettle();
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(find.textContaining('private analytics detail'), findsNothing);
-      expect(find.text('تعذر تحميل بيانات التحليلات.'), findsOneWidget);
-      expect(find.text('حاول مرة أخرى'), findsOneWidget);
-      await tester.tap(find.text('حاول مرة أخرى'));
-      await tester.pump();
-      expect(tester.takeException(), isNull);
-    },
-  );
+    expect(find.textContaining('private analytics detail'), findsNothing);
+    expect(find.text('تعذر تحميل بيانات التحليلات.'), findsOneWidget);
+    expect(find.text('حاول مرة أخرى'), findsOneWidget);
+    await tester.tap(find.text('حاول مرة أخرى'));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
 }

@@ -67,7 +67,9 @@ void main() {
       expect(action.reason, contains('Hydration advice was paused'));
       expect(
         action.evidence,
-        contains('Hydration recommendation was intentionally not repeated today'),
+        contains(
+          'Hydration recommendation was intentionally not repeated today',
+        ),
       );
     },
   );

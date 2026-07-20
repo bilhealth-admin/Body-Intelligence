@@ -60,52 +60,54 @@ void main() {
     expect(find.byType(FilledButton), findsNothing);
   });
 
-  testWidgets('primary recommendation shows transparency fields and feedback controls', (
-    tester,
-  ) async {
-    var dismissed = 0;
-    var corrected = 0;
-    var feedback = 0;
+  testWidgets(
+    'primary recommendation shows transparency fields and feedback controls',
+    (tester) async {
+      var dismissed = 0;
+      var corrected = 0;
+      var feedback = 0;
 
-    await tester.pumpWidget(
-      _app(
-        DailyReturnCard(
-          report: _report(DailyReturnState.partial, primary: true),
-          changedSummary: 'Weight rose while meal timing shifted.',
-          actionTitle: 'Log today\'s weight',
-          actionReason: 'A comparable morning measurement improves direction confidence.',
-          missingEvidence: 'Two additional comparable days are missing.',
-          recommendationTimeHorizon: 'Reassess over the next 3 days.',
-          alternativeExplanation:
-              'Temporary fluid retention remains plausible from recent sodium intake.',
-          onPrimaryAction: () {},
-          onDismissRecommendation: () => dismissed++,
-          onCorrectRecommendation: () => corrected++,
-          onRecommendationFeedback: () => feedback++,
+      await tester.pumpWidget(
+        _app(
+          DailyReturnCard(
+            report: _report(DailyReturnState.partial, primary: true),
+            changedSummary: 'Weight rose while meal timing shifted.',
+            actionTitle: 'Log today\'s weight',
+            actionReason:
+                'A comparable morning measurement improves direction confidence.',
+            missingEvidence: 'Two additional comparable days are missing.',
+            recommendationTimeHorizon: 'Reassess over the next 3 days.',
+            alternativeExplanation:
+                'Temporary fluid retention remains plausible from recent sodium intake.',
+            onPrimaryAction: () {},
+            onDismissRecommendation: () => dismissed++,
+            onCorrectRecommendation: () => corrected++,
+            onRecommendationFeedback: () => feedback++,
+          ),
+          locale: const Locale('en'),
         ),
-        locale: const Locale('en'),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Why this action appears'), findsOneWidget);
-    expect(find.text('Evidence used'), findsOneWidget);
-    expect(find.text('Evidence missing'), findsOneWidget);
-    expect(find.text('Confidence'), findsOneWidget);
-    expect(find.text('Time horizon'), findsOneWidget);
-    expect(find.text('Alternative explanation'), findsOneWidget);
-    expect(find.text('Log today\'s weight'), findsOneWidget);
+      expect(find.text('Why this action appears'), findsOneWidget);
+      expect(find.text('Evidence used'), findsOneWidget);
+      expect(find.text('Evidence missing'), findsOneWidget);
+      expect(find.text('Confidence'), findsOneWidget);
+      expect(find.text('Time horizon'), findsOneWidget);
+      expect(find.text('Alternative explanation'), findsOneWidget);
+      expect(find.text('Log today\'s weight'), findsOneWidget);
 
-    await tester.ensureVisible(find.text('Dismiss'));
-    await tester.tap(find.text('Dismiss'));
-    await tester.ensureVisible(find.text('Correct'));
-    await tester.tap(find.text('Correct'));
-    await tester.ensureVisible(find.text('Feedback'));
-    await tester.tap(find.text('Feedback'));
-    expect(dismissed, 1);
-    expect(corrected, 1);
-    expect(feedback, 1);
-  });
+      await tester.ensureVisible(find.text('Dismiss'));
+      await tester.tap(find.text('Dismiss'));
+      await tester.ensureVisible(find.text('Correct'));
+      await tester.tap(find.text('Correct'));
+      await tester.ensureVisible(find.text('Feedback'));
+      await tester.tap(find.text('Feedback'));
+      expect(dismissed, 1);
+      expect(corrected, 1);
+      expect(feedback, 1);
+    },
+  );
 }
 
 DailyReturnReport _report(DailyReturnState state, {required bool primary}) =>
