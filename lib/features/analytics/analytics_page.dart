@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/database/app_database.dart';
 import '../../data/database/date_keys.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/theme/premium_design_tokens.dart';
@@ -10,6 +11,7 @@ import '../../engine/personal_baseline_engine.dart';
 import '../../engine/recovery_engine.dart';
 import '../../engine/weekly_review_engine.dart';
 import '../../shared/widgets/actionable_error_state.dart';
+import '../../shared/widgets/premium_chart_card.dart';
 import '../../shared/widgets/premium_surface.dart';
 
 import '../dashboard/providers/dashboard_provider.dart';
@@ -322,29 +324,49 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
             ],
           ),
           const SizedBox(height: PremiumDesignTokens.spaceSm),
-          Text(
-            tr('Weight over time', 'الوزن عبر الزمن'),
-            style: PremiumDesignTokens.sectionHeading(context),
-          ),
-          if (recentWeights.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Text(
-                tr(
-                  'Add weight entries to see a trend.',
-                  'أضف قياسات وزن لرؤية الاتجاه.',
-                ),
-              ),
-            )
-          else
-            ...recentWeights.map(
-              (row) => _MetricBar(
-                label: dayKeyFor(row.date),
-                value: UnitConverter.weightFromKg(row.weight, system),
-                maximum: UnitConverter.weightFromKg(maxWeight, system),
-                suffix: weightUnit,
-              ),
+          PremiumChartCard(
+            semanticLabel: tr(
+              'Weight chart with evidence explanation',
+              'مخطط الوزن مع شرح الأدلة',
             ),
+            title: tr('Weight over time', 'الوزن عبر الزمن'),
+            subtitle: range.days == null
+                ? tr(
+                    'Measured local check-ins across all recorded time.',
+                    'قياسات تسجيل محلية عبر كامل الفترة المسجلة.',
+                  )
+                : tr(
+                    'Measured local check-ins across the selected ${range.days}-day range.',
+                    'قياسات تسجيل محلية عبر نطاق ${range.days} يومًا المحدد.',
+                  ),
+            chart: _WeightTrendChart(
+              weights: recentWeights,
+              system: system,
+              maximum: maxWeight,
+            ),
+            explanation: [
+              tr(
+                'Trend direction: ${rate == null ? 'insufficient evidence' : '${rate >= 0 ? '+' : ''}${UnitConverter.weightFromKg(rate, system).toStringAsFixed(2)} $weightUnit/week (smoothed)'}',
+                'اتجاه المسار: ${rate == null ? 'أدلة غير كافية' : '${rate >= 0 ? '+' : ''}${UnitConverter.weightFromKg(rate, system).toStringAsFixed(2)} $weightUnit/أسبوع (ممهّد)'}',
+              ),
+              tr(
+                'Evidence sufficiency: ${progress.sampleCount} measurements across ${progress.spanDays} days (${progress.confidence.name}).',
+                'كفاية الأدلة: ${progress.sampleCount} قياسًا خلال ${progress.spanDays} يومًا (ثقة ${progress.confidence.name}).',
+              ),
+              tr(
+                'This chart reflects measured weight only and cannot safely conclude fat or muscle change on its own.',
+                'يعرض هذا المخطط الوزن المقاس فقط ولا يمكنه وحده استنتاج تغير الدهون أو العضلات بشكل آمن.',
+              ),
+            ],
+            footer: recentWeights.isEmpty
+                ? Text(
+                    tr(
+                      'Add weight entries to unlock trend interpretation.',
+                      'أضف قياسات وزن لبدء تفسير الاتجاه.',
+                    ),
+                  )
+                : null,
+          ),
           const SizedBox(height: PremiumDesignTokens.spaceSm),
           Text(
             tr('Calories and protein by day', 'السعرات والبروتين حسب اليوم'),
@@ -412,6 +434,163 @@ class _SummaryCard extends StatelessWidget {
       ],
     ),
   );
+}
+
+class _WeightTrendChart extends StatelessWidget {
+  const _WeightTrendChart({
+    required this.weights,
+    required this.system,
+    required this.maximum,
+  });
+
+  final List<WeightEntry> weights;
+  final MeasurementSystem system;
+  final double maximum;
+
+  @override
+  Widget build(BuildContext context) {
+    if (weights.isEmpty) {
+      return SizedBox(
+        height: 180,
+        child: Center(
+          child: Text(
+            context.strings.text('No local weight measurements in this range.'),
+          ),
+        ),
+      );
+    }
+
+    final converted = weights
+        .map((entry) => UnitConverter.weightFromKg(entry.weight, system))
+        .toList();
+    final minValue = converted.reduce((a, b) => a < b ? a : b);
+    final maxValue = converted.reduce((a, b) => a > b ? a : b);
+    final span = (maxValue - minValue).abs() < 0.01
+        ? 1.0
+        : (maxValue - minValue);
+
+    return SizedBox(
+      height: 200,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
+          color: Theme.of(context).colorScheme.surfaceContainerLow,
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            PremiumDesignTokens.spaceMd,
+            PremiumDesignTokens.spaceSm,
+            PremiumDesignTokens.spaceMd,
+            PremiumDesignTokens.spaceSm,
+          ),
+          child: CustomPaint(
+            painter: _WeightLinePainter(
+              values: converted,
+              minValue: minValue,
+              span: span,
+              lineColor: Theme.of(context).colorScheme.primary,
+              pointColor: Theme.of(context).colorScheme.tertiary,
+            ),
+            child: Align(
+              alignment: AlignmentDirectional.bottomEnd,
+              child: Semantics(
+                label: context.strings.text('Current measured point'),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: PremiumDesignTokens.spaceXs,
+                    vertical: PremiumDesignTokens.spaceXs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(
+                      PremiumDesignTokens.radiusMd,
+                    ),
+                  ),
+                  child: Text(
+                    '${converted.last.toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WeightLinePainter extends CustomPainter {
+  _WeightLinePainter({
+    required this.values,
+    required this.minValue,
+    required this.span,
+    required this.lineColor,
+    required this.pointColor,
+  });
+
+  final List<double> values;
+  final double minValue;
+  final double span;
+  final Color lineColor;
+  final Color pointColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (values.isEmpty) return;
+
+    final line = Paint()
+      ..color = lineColor
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    final path = Path();
+    for (var index = 0; index < values.length; index++) {
+      final x = values.length == 1
+          ? size.width / 2
+          : (index / (values.length - 1)) * size.width;
+      final normalized = (values[index] - minValue) / span;
+      final y = size.height - (normalized * (size.height - 8)) - 4;
+      if (index == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    canvas.drawPath(path, line);
+
+    final latestX = values.length == 1 ? size.width / 2 : size.width;
+    final latestNormalized = (values.last - minValue) / span;
+    final latestY = size.height - (latestNormalized * (size.height - 8)) - 4;
+
+    canvas.drawCircle(
+      Offset(latestX, latestY),
+      6,
+      Paint()
+        ..color = pointColor
+        ..style = PaintingStyle.fill,
+    );
+    canvas.drawCircle(
+      Offset(latestX, latestY),
+      11,
+      Paint()
+        ..color = pointColor.withValues(alpha: 0.20)
+        ..style = PaintingStyle.fill,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _WeightLinePainter oldDelegate) {
+    return oldDelegate.values != values ||
+        oldDelegate.minValue != minValue ||
+        oldDelegate.span != span ||
+        oldDelegate.lineColor != lineColor ||
+        oldDelegate.pointColor != pointColor;
+  }
 }
 
 class _MetricBar extends StatelessWidget {
