@@ -80,27 +80,42 @@ class DashboardPage extends ConsumerWidget {
                         if (context.mounted) context.go('/daily-check-in');
                       },
                     ),
-                    const SizedBox(height: PremiumDesignTokens.spaceMd),
+                    const SizedBox(height: PremiumDesignTokens.spaceLg),
                   ],
-                  Semantics(
-                    container: true,
-                    header: true,
-                    child: Text(
-                      context.strings.text('Today'),
-                      style: PremiumDesignTokens.screenHeading(context),
+                  PremiumSurface(
+                    padding: PremiumDesignTokens.cardPaddingLarge,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Semantics(
+                          container: true,
+                          header: true,
+                          child: Text(
+                            context.strings.text('Today'),
+                            style: PremiumDesignTokens.screenHeading(context),
+                          ),
+                        ),
+                        const SizedBox(height: PremiumDesignTokens.spaceXs),
+                        Text(
+                          context.strings.text(
+                            'A calm summary of your current signals and the most useful next action.',
+                          ),
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        const SizedBox(height: PremiumDesignTokens.spaceMd),
+                        const DashboardHeader(),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: PremiumDesignTokens.spaceSm),
-                  const DashboardHeader(),
                 ],
               );
               final content = wideToday
                   ? Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(flex: 4, child: leadingColumn),
+                        Expanded(flex: 5, child: leadingColumn),
                         const SizedBox(width: PremiumDesignTokens.spaceXl),
-                        const Expanded(flex: 8, child: DashboardGrid()),
+                        const Expanded(flex: 7, child: DashboardGrid()),
                       ],
                     )
                   : Column(

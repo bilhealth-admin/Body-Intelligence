@@ -4,6 +4,7 @@ import '../../../app/localization/app_localizations.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../engine/daily_return_engine.dart';
 import '../../../engine/data_honesty_engine.dart';
+import '../../../shared/widgets/premium_surface.dart';
 
 class DailyReturnCard extends StatelessWidget {
   const DailyReturnCard({
@@ -45,17 +46,19 @@ class DailyReturnCard extends StatelessWidget {
     return Semantics(
       container: true,
       label: context.strings.text('Daily return summary'),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(PremiumDesignTokens.spaceLg),
-          child: Column(
+      child: PremiumSurface(
+        padding: PremiumDesignTokens.cardPaddingLarge,
+        child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Semantics(
                 header: true,
                 child: Text(
                   title,
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.3,
+                  ),
                 ),
               ),
               if (report.daysAway >= 4) ...[
@@ -66,10 +69,10 @@ class DailyReturnCard extends StatelessWidget {
                   ),
                 ),
               ],
-              const SizedBox(height: PremiumDesignTokens.spaceSm),
+              const SizedBox(height: PremiumDesignTokens.spaceMd),
               Wrap(
-                spacing: PremiumDesignTokens.spaceXs,
-                runSpacing: PremiumDesignTokens.spaceXs,
+                spacing: PremiumDesignTokens.spaceSm,
+                runSpacing: PremiumDesignTokens.spaceSm,
                 children: [
                   _Status(
                     label: context.strings.text('Weight'),
@@ -85,71 +88,66 @@ class DailyReturnCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: PremiumDesignTokens.spaceSm + 2),
-              Text(
-                context.strings.text('What changed'),
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-              Text(changedSummary),
-              const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
-              Text(
-                context.strings.text('Important missing evidence'),
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-              Text(missingEvidence),
               const SizedBox(height: PremiumDesignTokens.spaceMd),
+              _LabeledInsight(
+                label: context.strings.text('What changed'),
+                value: changedSummary,
+              ),
+              const SizedBox(height: PremiumDesignTokens.spaceSm),
+              _LabeledInsight(
+                label: context.strings.text('Important missing evidence'),
+                value: missingEvidence,
+              ),
+              const SizedBox(height: PremiumDesignTokens.spaceLg),
               if (report.hasPrimaryAction) ...[
-                Text(
-                  context.strings.text('Why this action appears'),
-                  style: Theme.of(context).textTheme.labelLarge,
+                _LabeledInsight(
+                  label: context.strings.text('Why this action appears'),
+                  value: actionReason,
                 ),
-                Text(actionReason),
-                const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
-                Text(
-                  context.strings.text('Evidence used'),
-                  style: Theme.of(context).textTheme.labelLarge,
+                const SizedBox(height: PremiumDesignTokens.spaceSm),
+                _LabeledInsight(
+                  label: context.strings.text('Evidence used'),
+                  value: changedSummary,
                 ),
-                Text(changedSummary),
-                const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
-                Text(
-                  context.strings.text('Evidence missing'),
-                  style: Theme.of(context).textTheme.labelLarge,
+                const SizedBox(height: PremiumDesignTokens.spaceSm),
+                _LabeledInsight(
+                  label: context.strings.text('Evidence missing'),
+                  value: missingEvidence,
                 ),
-                Text(missingEvidence),
-                const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
-                Text(
-                  context.strings.text('Confidence'),
-                  style: Theme.of(context).textTheme.labelLarge,
+                const SizedBox(height: PremiumDesignTokens.spaceSm),
+                _LabeledInsight(
+                  label: context.strings.text('Confidence'),
+                  value: _confidenceLabel(context),
                 ),
-                Text(_confidenceLabel(context)),
                 if (recommendationTimeHorizon != null) ...[
                   const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
-                  Text(
-                    context.strings.text('Time horizon'),
-                    style: Theme.of(context).textTheme.labelLarge,
+                  _LabeledInsight(
+                    label: context.strings.text('Time horizon'),
+                    value: recommendationTimeHorizon!,
                   ),
-                  Text(recommendationTimeHorizon!),
                 ],
                 if (alternativeExplanation != null) ...[
                   const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
-                  Text(
-                    context.strings.text('Alternative explanation'),
-                    style: Theme.of(context).textTheme.labelLarge,
+                  _LabeledInsight(
+                    label: context.strings.text('Alternative explanation'),
+                    value: alternativeExplanation!,
                   ),
-                  Text(alternativeExplanation!),
                 ],
                 const SizedBox(height: PremiumDesignTokens.spaceMd),
-                FilledButton(
-                  onPressed: onPrimaryAction,
-                  child: Text(actionTitle),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: onPrimaryAction,
+                    child: Text(actionTitle),
+                  ),
                 ),
                 if (onDismissRecommendation != null ||
                     onCorrectRecommendation != null ||
                     onRecommendationFeedback != null) ...[
                   const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
                   Wrap(
-                    spacing: PremiumDesignTokens.spaceXs,
-                    runSpacing: PremiumDesignTokens.spaceXs,
+                    spacing: PremiumDesignTokens.spaceSm,
+                    runSpacing: PremiumDesignTokens.spaceSm,
                     children: [
                       if (onDismissRecommendation != null)
                         OutlinedButton(
@@ -181,7 +179,6 @@ class DailyReturnCard extends StatelessWidget {
                 ),
             ],
           ),
-        ),
       ),
     );
   }
@@ -199,6 +196,29 @@ class DailyReturnCard extends StatelessWidget {
     }
     return context.strings.text('Insufficient data');
   }
+}
+
+class _LabeledInsight extends StatelessWidget {
+  const _LabeledInsight({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Text(
+        label,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.15,
+        ),
+      ),
+      const SizedBox(height: PremiumDesignTokens.spaceXs),
+      Text(value, style: Theme.of(context).textTheme.bodyMedium),
+    ],
+  );
 }
 
 class _Status extends StatelessWidget {

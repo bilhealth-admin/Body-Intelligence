@@ -33,6 +33,7 @@ void main() {
     expect(find.textContaining('لا يلزم ملء الأيام الماضية'), findsOneWidget);
     expect(find.byType(FilledButton), findsOneWidget);
     expect(find.bySemanticsLabel('ملخص العودة اليومية'), findsOneWidget);
+    await tester.ensureVisible(find.text('سجّل وزن اليوم'));
     await tester.tap(find.text('سجّل وزن اليوم'));
     expect(actions, 1);
   });
