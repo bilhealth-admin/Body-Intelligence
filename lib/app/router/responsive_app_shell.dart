@@ -67,10 +67,22 @@ class ResponsiveAppShell extends StatelessWidget {
       builder: (sheetContext) => SafeArea(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 620),
-          child: ListView(
-            shrinkWrap: true,
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-            children: [
+          child: Card(
+            margin: const EdgeInsets.fromLTRB(
+              PremiumDesignTokens.spaceMd,
+              0,
+              PremiumDesignTokens.spaceMd,
+              PremiumDesignTokens.spaceLg,
+            ),
+            child: ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.fromLTRB(
+                PremiumDesignTokens.spaceMd,
+                0,
+                PremiumDesignTokens.spaceMd,
+                PremiumDesignTokens.spaceMd,
+              ),
+              children: [
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(
@@ -142,6 +154,7 @@ class ResponsiveAppShell extends StatelessWidget {
                 ),
               ),
             ],
+            ),
           ),
         ),
       ),
