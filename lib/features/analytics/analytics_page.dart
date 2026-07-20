@@ -5,6 +5,7 @@ import '../../data/database/app_database.dart';
 import '../../data/database/date_keys.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/theme/premium_design_tokens.dart';
+import '../../app/theme/premium_motion_tokens.dart';
 import '../../core/units/measurement_units.dart';
 import '../../engine/progress_analysis.dart';
 import '../../engine/personal_baseline_engine.dart';
@@ -98,39 +99,21 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         waterAsync.hasError ||
         contextsAsync.hasError) {
       return Scaffold(
-        body: SafeArea(
-          child: ListView(
-            padding: PremiumDesignTokens.screenPadding,
-            children: [
-              _StateContextBanner(
-                icon: Icons.warning_amber_rounded,
-                title: tr(
-                  'Analytics is temporarily unavailable',
-                  'التحليلات غير متاحة مؤقتًا',
-                ),
-                subtitle: tr(
-                  'Some local records could not be read. Existing insights are hidden until local data is available again.',
-                  'تعذرت قراءة بعض السجلات المحلية. تم إخفاء الرؤى الحالية حتى تتوفر البيانات المحلية من جديد.',
-                ),
-              ),
-              const SizedBox(height: PremiumDesignTokens.spaceSm),
-              ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 280),
-                child: ActionableErrorState(
-                  title: tr(
-                    'Analytics data could not be loaded.',
-                    'تعذر تحميل بيانات التحليلات.',
-                  ),
-                  onRetry: () {
-                    ref.invalidate(weightHistoryProvider);
-                    ref.invalidate(allMealsProvider);
-                    ref.invalidate(allWaterProvider);
-                    ref.invalidate(insightLifeContextProvider);
-                  },
-                ),
-              ),
-            ],
+        body: ActionableErrorState(
+          title: tr(
+            'Analytics data could not be loaded.',
+            'تعذر تحميل بيانات التحليلات.',
           ),
+          body: tr(
+            'Some local records could not be read. Existing insights are hidden until local data is available again.',
+            'تعذرت قراءة بعض السجلات المحلية. تم إخفاء الرؤى الحالية حتى تتوفر البيانات المحلية من جديد.',
+          ),
+          onRetry: () {
+            ref.invalidate(weightHistoryProvider);
+            ref.invalidate(allMealsProvider);
+            ref.invalidate(allWaterProvider);
+            ref.invalidate(insightLifeContextProvider);
+          },
         ),
       );
     }
@@ -238,22 +221,30 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
 
     return Scaffold(
       appBar: AppBar(title: Text(context.strings.text('Analytics'))),
-      body: ListView(
-        padding: PremiumDesignTokens.screenPadding,
-        children: [
-          Semantics(
-            header: true,
-            child: Text(
-              context.strings.text('Analytics overview'),
-              style: PremiumDesignTokens.screenHeading(context),
+      body: AnimatedSwitcher(
+        duration: PremiumMotionTokens.durationFor(
+          context,
+          PremiumMotionTokens.stateChangeDuration,
+        ),
+        switchInCurve: PremiumMotionTokens.stateChangeCurve,
+        switchOutCurve: PremiumMotionTokens.stateChangeCurve,
+        child: ListView(
+          key: ValueKey<String>('analytics-range-${range.name}'),
+          padding: PremiumDesignTokens.screenPadding,
+          children: [
+            Semantics(
+              header: true,
+              child: Text(
+                context.strings.text('Analytics overview'),
+                style: PremiumDesignTokens.screenHeading(context),
+              ),
             ),
-          ),
-          const SizedBox(height: PremiumDesignTokens.spaceSm),
-          AnalyticsRangeSelector(
-            value: range,
-            onChanged: (value) => setState(() => range = value),
-          ),
-          const SizedBox(height: 12),
+            const SizedBox(height: PremiumDesignTokens.spaceSm),
+            AnalyticsRangeSelector(
+              value: range,
+              onChanged: (value) => setState(() => range = value),
+            ),
+            const SizedBox(height: 12),
           if (recovery.state != RecoveryState.current)
             _SummaryCard(
               title: arabic
@@ -568,19 +559,20 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
             tr('Water adherence records', 'سجلات الالتزام بالماء'),
             style: PremiumDesignTokens.sectionHeading(context),
           ),
-          ...waterByDay.keys
-              .toList()
-              .reversed
-              .take(30)
-              .map(
-                (day) => _MetricBar(
-                  label: day,
-                  value: waterByDay[day]!.toDouble(),
-                  maximum: 3000,
-                  suffix: 'ml',
+            ...waterByDay.keys
+                .toList()
+                .reversed
+                .take(30)
+                .map(
+                  (day) => _MetricBar(
+                    label: day,
+                    value: waterByDay[day]!.toDouble(),
+                    maximum: 3000,
+                    suffix: 'ml',
+                  ),
                 ),
-              ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -950,47 +942,6 @@ class _EvidencePill extends StatelessWidget {
   }
 }
 
-class _StateContextBanner extends StatelessWidget {
-  const _StateContextBanner({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return PremiumSurface(
-      padding: PremiumDesignTokens.cardPaddingLarge,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: theme.colorScheme.tertiary),
-          const SizedBox(width: PremiumDesignTokens.spaceSm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: PremiumDesignTokens.cardHeading(context)),
-                const SizedBox(height: PremiumDesignTokens.spaceXs),
-                Text(
-                  subtitle,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 class _AnalyticsStateSkeletonBlock extends StatelessWidget {
   const _AnalyticsStateSkeletonBlock({required this.height});
