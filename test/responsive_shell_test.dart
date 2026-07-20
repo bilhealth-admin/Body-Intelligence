@@ -182,4 +182,35 @@ void main() {
       TextDirection.rtl,
     );
   });
+
+  testWidgets(
+    'English quick add shows explicit unavailable capability boundaries',
+    (tester) async {
+      tester.view.physicalSize = const Size(600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(shellApp(locale: const Locale('en')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(FloatingActionButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Quick Add'), findsOneWidget);
+      expect(find.text('Scan barcode'), findsOneWidget);
+      expect(
+        find.text(
+          'Unavailable until a verified barcode data source is configured.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Ask BIL'), findsOneWidget);
+      expect(
+        find.text(
+          'Unavailable until the server-side AI consent and rate-limit boundary is configured.',
+        ),
+        findsOneWidget,
+      );
+    },
+  );
 }
