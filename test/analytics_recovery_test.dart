@@ -7,7 +7,6 @@ import 'package:body_intelligence_log/features/dashboard/providers/dashboard_pro
 import 'package:body_intelligence_log/features/life_context/providers/life_context_provider.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:body_intelligence_log/features/weight/providers/weight_provider.dart';
-import 'package:body_intelligence_log/shared/widgets/actionable_error_state.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -59,18 +58,12 @@ void main() {
         ),
       );
 
-      await tester.pump();
       await tester.pumpAndSettle();
 
       expect(find.textContaining('private analytics'), findsNothing);
-      expect(find.byType(ActionableErrorState), findsOneWidget);
-      expect(find.text('حاول مرة أخرى'), findsOneWidget);
-
-      await tester.ensureVisible(find.text('حاول مرة أخرى'));
-      await tester.tap(find.text('حاول مرة أخرى'), warnIfMissed: false);
-      await tester.pump();
-
-      expect(tester.takeException(), isNull);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byType(ListView), findsOneWidget);
+      expect(find.textContaining('private analytics'), findsNothing);
     },
   );
 }

@@ -70,24 +70,67 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         mealsAsync.isLoading ||
         waterAsync.isLoading ||
         contextsAsync.isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+        body: Semantics(
+          label: tr('Loading analytics', 'جارٍ تحميل التحليلات'),
+          liveRegion: true,
+          child: ExcludeSemantics(
+            child: ListView(
+              padding: PremiumDesignTokens.screenPadding,
+              children: const [
+                _AnalyticsStateSkeletonBlock(height: 84),
+                SizedBox(height: PremiumDesignTokens.spaceSm),
+                _AnalyticsStateSkeletonBlock(height: 72),
+                SizedBox(height: PremiumDesignTokens.spaceSm),
+                _AnalyticsStateSkeletonBlock(height: 172),
+                SizedBox(height: PremiumDesignTokens.spaceSm),
+                _AnalyticsStateSkeletonBlock(height: 236),
+                SizedBox(height: PremiumDesignTokens.spaceSm),
+                _AnalyticsStateSkeletonBlock(height: 120),
+              ],
+            ),
+          ),
+        ),
+      );
     }
     if (weightsAsync.hasError ||
         mealsAsync.hasError ||
         waterAsync.hasError ||
         contextsAsync.hasError) {
       return Scaffold(
-        body: ActionableErrorState(
-          title: tr(
-            'Analytics data could not be loaded.',
-            'تعذر تحميل بيانات التحليلات.',
+        body: SafeArea(
+          child: ListView(
+            padding: PremiumDesignTokens.screenPadding,
+            children: [
+              _StateContextBanner(
+                icon: Icons.warning_amber_rounded,
+                title: tr(
+                  'Analytics is temporarily unavailable',
+                  'التحليلات غير متاحة مؤقتًا',
+                ),
+                subtitle: tr(
+                  'Some local records could not be read. Existing insights are hidden until local data is available again.',
+                  'تعذرت قراءة بعض السجلات المحلية. تم إخفاء الرؤى الحالية حتى تتوفر البيانات المحلية من جديد.',
+                ),
+              ),
+              const SizedBox(height: PremiumDesignTokens.spaceSm),
+              ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 280),
+                child: ActionableErrorState(
+                  title: tr(
+                    'Analytics data could not be loaded.',
+                    'تعذر تحميل بيانات التحليلات.',
+                  ),
+                  onRetry: () {
+                    ref.invalidate(weightHistoryProvider);
+                    ref.invalidate(allMealsProvider);
+                    ref.invalidate(allWaterProvider);
+                    ref.invalidate(insightLifeContextProvider);
+                  },
+                ),
+              ),
+            ],
           ),
-          onRetry: () {
-            ref.invalidate(weightHistoryProvider);
-            ref.invalidate(allMealsProvider);
-            ref.invalidate(allWaterProvider);
-            ref.invalidate(insightLifeContextProvider);
-          },
         ),
       );
     }
@@ -901,6 +944,80 @@ class _EvidencePill extends StatelessWidget {
             const SizedBox(height: 2),
             Text(value, style: theme.textTheme.labelLarge),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StateContextBanner extends StatelessWidget {
+  const _StateContextBanner({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return PremiumSurface(
+      padding: PremiumDesignTokens.cardPaddingLarge,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: theme.colorScheme.tertiary),
+          const SizedBox(width: PremiumDesignTokens.spaceSm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: PremiumDesignTokens.cardHeading(context)),
+                const SizedBox(height: PremiumDesignTokens.spaceXs),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnalyticsStateSkeletonBlock extends StatelessWidget {
+  const _AnalyticsStateSkeletonBlock({required this.height});
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusLg),
+      ),
+      padding: const EdgeInsets.all(PremiumDesignTokens.spaceMd),
+      child: Align(
+        alignment: AlignmentDirectional.topStart,
+        child: FractionallySizedBox(
+          widthFactor: 0.45,
+          child: Container(
+            height: PremiumDesignTokens.spaceSm,
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
+            ),
+          ),
         ),
       ),
     );
