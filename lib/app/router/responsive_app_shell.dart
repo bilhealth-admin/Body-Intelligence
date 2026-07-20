@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../localization/app_localizations.dart';
 import '../theme/premium_design_tokens.dart';
+import '../theme/premium_motion_tokens.dart';
 
 class ResponsiveAppShell extends StatelessWidget {
   const ResponsiveAppShell({super.key, required this.child});
@@ -64,6 +65,16 @@ class ResponsiveAppShell extends StatelessWidget {
     void quickAdd() => showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      sheetAnimationStyle: AnimationStyle(
+        duration: PremiumMotionTokens.durationFor(
+          context,
+          PremiumMotionTokens.navigationDuration,
+        ),
+        reverseDuration: PremiumMotionTokens.durationFor(
+          context,
+          PremiumMotionTokens.stateChangeDuration,
+        ),
+      ),
       builder: (sheetContext) => SafeArea(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 620),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/theme/premium_design_tokens.dart';
+import '../../app/theme/premium_motion_tokens.dart';
 
 class PremiumSurface extends StatelessWidget {
   const PremiumSurface({
@@ -28,7 +29,15 @@ class PremiumSurface extends StatelessWidget {
         : InkWell(
             borderRadius: PremiumDesignTokens.cardRadius,
             onTap: onTap,
-            child: content,
+            child: AnimatedScale(
+              duration: PremiumMotionTokens.durationFor(
+                context,
+                PremiumMotionTokens.feedbackDuration,
+              ),
+              curve: PremiumMotionTokens.feedbackCurve,
+              scale: 1,
+              child: content,
+            ),
           );
 
     return Semantics(

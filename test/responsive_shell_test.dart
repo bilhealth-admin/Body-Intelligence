@@ -1,5 +1,6 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/router/responsive_app_shell.dart';
+import 'package:body_intelligence_log/app/theme/premium_motion_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -147,6 +148,27 @@ void main() {
 
     expect(find.bySemanticsLabel('Primary navigation'), findsOneWidget);
     expect(find.bySemanticsLabel('Quick Add'), findsWidgets);
+  });
+
+  testWidgets('quick add sheet uses canonical motion timing', (tester) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(shellApp(locale: const Locale('en')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pump();
+
+    expect(find.text('Quick Add'), findsOneWidget);
+
+    await tester.tapAt(const Offset(16, 16));
+    await tester.pump(PremiumMotionTokens.navigationDuration);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Quick Add'), findsNothing);
   });
 
   testWidgets('Arabic quick add localizes unavailable AI boundary', (
