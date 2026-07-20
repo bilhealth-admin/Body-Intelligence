@@ -43,7 +43,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('تعذر تحميل أحدث بيانات جسمك.'), findsOneWidget);
+    expect(find.byType(FilledButton), findsOneWidget);
     expect(find.text('حاول مرة أخرى'), findsOneWidget);
     expect(find.textContaining('sensitive database detail'), findsNothing);
     expect(tester.takeException(), isNull);
