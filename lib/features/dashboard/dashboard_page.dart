@@ -6,6 +6,7 @@ import 'widgets/dashboard_grid.dart';
 import 'widgets/dashboard_header.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/theme/premium_design_tokens.dart';
+import '../../shared/widgets/premium_surface.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../life_context/providers/life_context_provider.dart';
 import '../weight/providers/weight_provider.dart';
@@ -108,51 +109,46 @@ class FirstValueHandoffCard extends StatelessWidget {
   final VoidCallback onContinue;
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    container: true,
-    child: Card(
-      child: Padding(
-        padding: PremiumDesignTokens.cardPaddingLarge,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+  Widget build(BuildContext context) => PremiumSurface(
+    padding: PremiumDesignTokens.cardPaddingLarge,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(
+            context.strings.text('Your private starting point is ready'),
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+        ),
+        const SizedBox(height: PremiumDesignTokens.spaceXs),
+        Text(
+          context.strings.text(
+            'BIL saved your profile and starting targets on this device.',
+          ),
+        ),
+        const SizedBox(height: PremiumDesignTokens.spaceSm),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Semantics(
-              header: true,
+            const Icon(Icons.info_outline, size: 20),
+            const SizedBox(width: PremiumDesignTokens.spaceXs),
+            Expanded(
               child: Text(
-                context.strings.text('Your private starting point is ready'),
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            const SizedBox(height: PremiumDesignTokens.spaceXs),
-            Text(
-              context.strings.text(
-                'BIL saved your profile and starting targets on this device.',
-              ),
-            ),
-            const SizedBox(height: PremiumDesignTokens.spaceSm),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.info_outline, size: 20),
-                const SizedBox(width: PremiumDesignTokens.spaceXs),
-                Expanded(
-                  child: Text(
-                    context.strings.text(
-                      'BIL does not have a comparable daily measurement yet, so it will not claim a trend.',
-                    ),
-                  ),
+                context.strings.text(
+                  'BIL does not have a comparable daily measurement yet, so it will not claim a trend.',
                 ),
-              ],
-            ),
-            const SizedBox(height: PremiumDesignTokens.spaceMd),
-            FilledButton.icon(
-              onPressed: onContinue,
-              icon: const Icon(Icons.monitor_weight_outlined),
-              label: Text(context.strings.text('Record first check-in')),
+              ),
             ),
           ],
         ),
-      ),
+        const SizedBox(height: PremiumDesignTokens.spaceMd),
+        FilledButton.icon(
+          onPressed: onContinue,
+          icon: const Icon(Icons.monitor_weight_outlined),
+          label: Text(context.strings.text('Record first check-in')),
+        ),
+      ],
     ),
   );
 }

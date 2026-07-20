@@ -10,6 +10,7 @@ import '../../engine/personal_baseline_engine.dart';
 import '../../engine/recovery_engine.dart';
 import '../../engine/weekly_review_engine.dart';
 import '../../shared/widgets/actionable_error_state.dart';
+import '../../shared/widgets/premium_surface.dart';
 
 import '../dashboard/providers/dashboard_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
@@ -401,17 +402,14 @@ class _SummaryCard extends StatelessWidget {
   final List<String> lines;
 
   @override
-  Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: PremiumDesignTokens.cardPadding,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: PremiumDesignTokens.cardHeading(context)),
-          const SizedBox(height: PremiumDesignTokens.spaceXs),
-          ...lines.map(Text.new),
-        ],
-      ),
+  Widget build(BuildContext context) => PremiumSurface(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: PremiumDesignTokens.cardHeading(context)),
+        const SizedBox(height: PremiumDesignTokens.spaceXs),
+        ...lines.map(Text.new),
+      ],
     ),
   );
 }

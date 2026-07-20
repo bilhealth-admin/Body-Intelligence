@@ -40,47 +40,51 @@ void main() {
   });
 
   group('P3-E2-001 AppThemeData token consumption', () {
-    test('light theme consumes canonical tokenized shape/elevation/color roles', () {
-      final theme = AppThemeData.lightTheme(Brightness.light);
+    test(
+      'light theme consumes canonical tokenized shape/elevation/color roles',
+      () {
+        final theme = AppThemeData.lightTheme(Brightness.light);
 
-      expect(
-        (theme.cardTheme.shape as RoundedRectangleBorder).borderRadius,
-        PremiumDesignTokens.cardRadius,
-      );
-      expect(theme.cardTheme.elevation, PremiumDesignTokens.elevationNone);
-      expect(
-        ((theme.cardTheme.shape as RoundedRectangleBorder).side).color,
-        PremiumDesignTokens.cardBorderColor(Brightness.light),
-      );
+        expect(
+          (theme.cardTheme.shape as RoundedRectangleBorder).borderRadius,
+          PremiumDesignTokens.cardRadius,
+        );
+        expect(theme.cardTheme.elevation, PremiumDesignTokens.elevationNone);
+        expect(
+          ((theme.cardTheme.shape as RoundedRectangleBorder).side).color,
+          PremiumDesignTokens.cardBorderColor(Brightness.light),
+        );
 
-      expect(
-        (theme.filledButtonTheme.style?.shape
-                    ?.resolve(<WidgetState>{}) as RoundedRectangleBorder)
-                .borderRadius,
-        PremiumDesignTokens.inputRadius,
-      );
+        expect(
+          (theme.filledButtonTheme.style?.shape?.resolve(<WidgetState>{})
+                  as RoundedRectangleBorder)
+              .borderRadius,
+          PremiumDesignTokens.inputRadius,
+        );
 
-      expect(
-        (theme.inputDecorationTheme.border as OutlineInputBorder).borderRadius,
-        PremiumDesignTokens.inputRadius,
-      );
-      expect(
-        (theme.inputDecorationTheme.enabledBorder as OutlineInputBorder)
-            .borderRadius,
-        PremiumDesignTokens.inputRadius,
-      );
-      expect(
-        (theme.inputDecorationTheme.enabledBorder as OutlineInputBorder)
-            .borderSide
-            .color,
-        PremiumDesignTokens.inputBorderColor(Brightness.light),
-      );
+        expect(
+          (theme.inputDecorationTheme.border as OutlineInputBorder)
+              .borderRadius,
+          PremiumDesignTokens.inputRadius,
+        );
+        expect(
+          (theme.inputDecorationTheme.enabledBorder as OutlineInputBorder)
+              .borderRadius,
+          PremiumDesignTokens.inputRadius,
+        );
+        expect(
+          (theme.inputDecorationTheme.enabledBorder as OutlineInputBorder)
+              .borderSide
+              .color,
+          PremiumDesignTokens.inputBorderColor(Brightness.light),
+        );
 
-      expect(
-        (theme.dialogTheme.shape as RoundedRectangleBorder).borderRadius,
-        PremiumDesignTokens.dialogRadius,
-      );
-    });
+        expect(
+          (theme.dialogTheme.shape as RoundedRectangleBorder).borderRadius,
+          PremiumDesignTokens.dialogRadius,
+        );
+      },
+    );
 
     test('dark theme consumes canonical semantic border colors', () {
       final theme = AppThemeData.lightTheme(Brightness.dark);
@@ -103,10 +107,10 @@ void main() {
       tester,
     ) async {
       final textTheme = ThemeData().textTheme.copyWith(
-            headlineSmall: const TextStyle(fontSize: 21),
-            titleLarge: const TextStyle(fontSize: 19),
-            titleMedium: const TextStyle(fontSize: 17),
-          );
+        headlineSmall: const TextStyle(fontSize: 21),
+        titleLarge: const TextStyle(fontSize: 19),
+        titleMedium: const TextStyle(fontSize: 17),
+      );
 
       await tester.pumpWidget(
         MaterialApp(

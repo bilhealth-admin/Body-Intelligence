@@ -6,6 +6,7 @@ import '../../data/database/app_database.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/theme/premium_design_tokens.dart';
 import '../../shared/widgets/actionable_error_state.dart';
+import '../../shared/widgets/premium_surface.dart';
 import '../foods/providers/food_provider.dart';
 import 'providers/daily_log_provider.dart';
 
@@ -363,235 +364,227 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                   ),
                 ),
                 const SizedBox(height: PremiumDesignTokens.spaceLg),
-                Card(
-                  child: Padding(
-                    padding: PremiumDesignTokens.cardPadding,
-                    child: Column(
-                      children: [
-                        Align(
-                          alignment: AlignmentDirectional.centerStart,
-                          child: Text(
-                            context.strings.text('Meal type'),
-                            style: PremiumDesignTokens.cardHeading(context),
-                          ),
+                PremiumSurface(
+                  child: Column(
+                    children: [
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          context.strings.text('Meal type'),
+                          style: PremiumDesignTokens.cardHeading(context),
                         ),
-                        const SizedBox(height: PremiumDesignTokens.spaceXs),
-                        Wrap(
-                          spacing: 8,
-                          children: [
-                            for (final type in const [
-                              'breakfast',
-                              'lunch',
-                              'dinner',
-                              'snack',
-                            ])
-                              ChoiceChip(
-                                avatar: Icon(switch (type) {
-                                  'breakfast' => Icons.free_breakfast_outlined,
-                                  'lunch' => Icons.lunch_dining_outlined,
-                                  'dinner' => Icons.dinner_dining_outlined,
-                                  _ => Icons.cookie_outlined,
-                                }, size: 18),
-                                label: Text(
-                                  context.strings.text(
-                                    '${type[0].toUpperCase()}${type.substring(1)}',
-                                  ),
+                      ),
+                      const SizedBox(height: PremiumDesignTokens.spaceXs),
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          for (final type in const [
+                            'breakfast',
+                            'lunch',
+                            'dinner',
+                            'snack',
+                          ])
+                            ChoiceChip(
+                              avatar: Icon(switch (type) {
+                                'breakfast' => Icons.free_breakfast_outlined,
+                                'lunch' => Icons.lunch_dining_outlined,
+                                'dinner' => Icons.dinner_dining_outlined,
+                                _ => Icons.cookie_outlined,
+                              }, size: 18),
+                              label: Text(
+                                context.strings.text(
+                                  '${type[0].toUpperCase()}${type.substring(1)}',
                                 ),
-                                selected: mealType == type,
-                                onSelected: (_) =>
-                                    setState(() => mealType = type),
                               ),
-                          ],
-                        ),
-                        usualMeals.when(
-                          loading: () => const SizedBox.shrink(),
-                          error: (_, __) => ActionableErrorState(
-                            title: context.strings.text(
-                              'Your usual meals could not be loaded.',
+                              selected: mealType == type,
+                              onSelected: (_) =>
+                                  setState(() => mealType = type),
                             ),
-                            onRetry: () =>
-                                ref.invalidate(usualMealsProvider(mealType)),
+                        ],
+                      ),
+                      usualMeals.when(
+                        loading: () => const SizedBox.shrink(),
+                        error: (_, __) => ActionableErrorState(
+                          title: context.strings.text(
+                            'Your usual meals could not be loaded.',
                           ),
-                          data: (candidates) {
-                            if (candidates.isEmpty) {
-                              return const SizedBox.shrink();
-                            }
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                const SizedBox(
-                                  height: PremiumDesignTokens.spaceSm,
-                                ),
-                                Text(
-                                  Localizations.localeOf(
+                          onRetry: () =>
+                              ref.invalidate(usualMealsProvider(mealType)),
+                        ),
+                        data: (candidates) {
+                          if (candidates.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(
+                                height: PremiumDesignTokens.spaceSm,
+                              ),
+                              Text(
+                                Localizations.localeOf(context).languageCode ==
+                                        'ar'
+                                    ? 'وجباتك المعتادة — لن تتم الإضافة دون تأكيدك'
+                                    : 'Your usual meals — nothing is added without your confirmation',
+                                style: Theme.of(context).textTheme.labelLarge,
+                              ),
+                              const SizedBox(
+                                height: PremiumDesignTokens.spaceXs,
+                              ),
+                              for (final candidate in candidates)
+                                Card.outlined(
+                                  child: ListTile(
+                                    leading: const Icon(Icons.replay_outlined),
+                                    title: Text(
+                                      candidate.source.items
+                                          .map(
+                                            (item) => candidate
+                                                .source
+                                                .foodsById[item.foodId]
+                                                ?.name,
+                                          )
+                                          .whereType<String>()
+                                          .join(' + '),
+                                    ),
+                                    subtitle: Text(
+                                      Localizations.localeOf(
+                                                context,
+                                              ).languageCode ==
+                                              'ar'
+                                          ? 'سجلتها ${candidate.occurrences} مرات'
+                                          : 'Logged ${candidate.occurrences} times',
+                                    ),
+                                    trailing: FilledButton.tonal(
+                                      onPressed: () async {
+                                        await ref
+                                            .read(mealRepositoryProvider)
+                                            .repeatMeal(
+                                              candidate: candidate,
+                                              date: date,
+                                            );
+                                        ref.invalidate(
+                                          usualMealsProvider(mealType),
+                                        );
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
                                             context,
-                                          ).languageCode ==
-                                          'ar'
-                                      ? 'وجباتك المعتادة — لن تتم الإضافة دون تأكيدك'
-                                      : 'Your usual meals — nothing is added without your confirmation',
-                                  style: Theme.of(context).textTheme.labelLarge,
-                                ),
-                                const SizedBox(
-                                  height: PremiumDesignTokens.spaceXs,
-                                ),
-                                for (final candidate in candidates)
-                                  Card.outlined(
-                                    child: ListTile(
-                                      leading: const Icon(
-                                        Icons.replay_outlined,
-                                      ),
-                                      title: Text(
-                                        candidate.source.items
-                                            .map(
-                                              (item) => candidate
-                                                  .source
-                                                  .foodsById[item.foodId]
-                                                  ?.name,
-                                            )
-                                            .whereType<String>()
-                                            .join(' + '),
-                                      ),
-                                      subtitle: Text(
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                context.strings.text(
+                                                  'Meal saved locally.',
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      child: Text(
                                         Localizations.localeOf(
                                                   context,
                                                 ).languageCode ==
                                                 'ar'
-                                            ? 'سجلتها ${candidate.occurrences} مرات'
-                                            : 'Logged ${candidate.occurrences} times',
-                                      ),
-                                      trailing: FilledButton.tonal(
-                                        onPressed: () async {
-                                          await ref
-                                              .read(mealRepositoryProvider)
-                                              .repeatMeal(
-                                                candidate: candidate,
-                                                date: date,
-                                              );
-                                          ref.invalidate(
-                                            usualMealsProvider(mealType),
-                                          );
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  context.strings.text(
-                                                    'Meal saved locally.',
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                          }
-                                        },
-                                        child: Text(
-                                          Localizations.localeOf(
-                                                    context,
-                                                  ).languageCode ==
-                                                  'ar'
-                                              ? 'أضف'
-                                              : 'Add',
-                                        ),
+                                            ? 'أضف'
+                                            : 'Add',
                                       ),
                                     ),
                                   ),
-                              ],
-                            );
-                          },
-                        ),
-                        const SizedBox(height: PremiumDesignTokens.spaceSm),
-                        SearchAnchor(
-                          searchController: foodSearch,
-                          viewHintText:
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: PremiumDesignTokens.spaceSm),
+                      SearchAnchor(
+                        searchController: foodSearch,
+                        viewHintText:
+                            Localizations.localeOf(context).languageCode == 'ar'
+                            ? 'ابحث بالاسم العربي أو الإنجليزي أو الباركود'
+                            : 'Search English, Arabic, keyword, or barcode',
+                        builder: (context, controller) => SearchBar(
+                          controller: controller,
+                          leading: const Icon(Icons.search),
+                          hintText:
                               Localizations.localeOf(context).languageCode ==
                                   'ar'
-                              ? 'ابحث بالاسم العربي أو الإنجليزي أو الباركود'
-                              : 'Search English, Arabic, keyword, or barcode',
-                          builder: (context, controller) => SearchBar(
-                            controller: controller,
-                            leading: const Icon(Icons.search),
-                            hintText:
-                                Localizations.localeOf(context).languageCode ==
-                                    'ar'
-                                ? 'ابحث عن طعام'
-                                : 'Search foods',
-                            onTap: controller.openView,
-                            onChanged: (_) => controller.openView(),
-                          ),
-                          suggestionsBuilder: (context, controller) async {
-                            final arabic =
-                                Localizations.localeOf(context).languageCode ==
-                                'ar';
-                            final results = await ref
-                                .read(foodRepositoryProvider)
-                                .search(controller.text, limit: 20);
-                            if (results.isEmpty) {
-                              return [
-                                ListTile(
-                                  leading: const Icon(Icons.search_off),
-                                  title: Text(
-                                    arabic
-                                        ? 'لا توجد نتائج محلية. يمكنك إنشاء طعام مخصص من دليل الأطعمة.'
-                                        : 'No local result. Create a custom food from the food catalog.',
-                                  ),
-                                ),
-                              ];
-                            }
-                            return results.map(
-                              (food) => ListTile(
-                                leading: Icon(
-                                  food.isCustom
-                                      ? Icons.person_outline
-                                      : Icons.verified_outlined,
-                                ),
+                              ? 'ابحث عن طعام'
+                              : 'Search foods',
+                          onTap: controller.openView,
+                          onChanged: (_) => controller.openView(),
+                        ),
+                        suggestionsBuilder: (context, controller) async {
+                          final arabic =
+                              Localizations.localeOf(context).languageCode ==
+                              'ar';
+                          final results = await ref
+                              .read(foodRepositoryProvider)
+                              .search(controller.text, limit: 20);
+                          if (results.isEmpty) {
+                            return [
+                              ListTile(
+                                leading: const Icon(Icons.search_off),
                                 title: Text(
-                                  food.arabicName == null
-                                      ? food.name
-                                      : '${food.arabicName} • ${food.name}',
+                                  arabic
+                                      ? 'لا توجد نتائج محلية. يمكنك إنشاء طعام مخصص من دليل الأطعمة.'
+                                      : 'No local result. Create a custom food from the food catalog.',
                                 ),
-                                subtitle: Text(
-                                  '${food.calories.toStringAsFixed(0)} kcal / ${food.servingSize.toStringAsFixed(0)} ${food.servingUnit} · ${food.source}',
-                                ),
-                                onTap: () {
-                                  setState(() => selectedFood = food);
-                                  controller.closeView(food.name);
-                                },
                               ),
-                            );
-                          },
-                        ),
-                        if (selectedFood != null)
-                          ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: const Icon(Icons.check_circle),
-                            title: Text(selectedFood!.name),
-                            subtitle: Text(
-                              '${selectedFood!.source} · ${context.strings.text(selectedFood!.verified ? 'Verified' : 'Unverified')}',
+                            ];
+                          }
+                          return results.map(
+                            (food) => ListTile(
+                              leading: Icon(
+                                food.isCustom
+                                    ? Icons.person_outline
+                                    : Icons.verified_outlined,
+                              ),
+                              title: Text(
+                                food.arabicName == null
+                                    ? food.name
+                                    : '${food.arabicName} • ${food.name}',
+                              ),
+                              subtitle: Text(
+                                '${food.calories.toStringAsFixed(0)} kcal / ${food.servingSize.toStringAsFixed(0)} ${food.servingUnit} · ${food.source}',
+                              ),
+                              onTap: () {
+                                setState(() => selectedFood = food);
+                                controller.closeView(food.name);
+                              },
                             ),
-                            trailing: IconButton(
-                              onPressed: () =>
-                                  setState(() => selectedFood = null),
-                              icon: const Icon(Icons.close),
-                            ),
+                          );
+                        },
+                      ),
+                      if (selectedFood != null)
+                        ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: const Icon(Icons.check_circle),
+                          title: Text(selectedFood!.name),
+                          subtitle: Text(
+                            '${selectedFood!.source} · ${context.strings.text(selectedFood!.verified ? 'Verified' : 'Unverified')}',
                           ),
-                        const SizedBox(height: PremiumDesignTokens.spaceXs),
-                        TextField(
-                          controller: quantity,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          decoration: InputDecoration(
-                            labelText:
-                                '${context.strings.text('Quantity')} (${selectedFood?.servingUnit ?? 'g'})',
+                          trailing: IconButton(
+                            onPressed: () =>
+                                setState(() => selectedFood = null),
+                            icon: const Icon(Icons.close),
                           ),
                         ),
-                        const SizedBox(height: PremiumDesignTokens.spaceSm),
-                        OutlinedButton(
-                          onPressed: selectedFood == null ? null : _saveMeal,
-                          child: Text(context.strings.text('Save meal')),
+                      const SizedBox(height: PremiumDesignTokens.spaceXs),
+                      TextField(
+                        controller: quantity,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
                         ),
-                      ],
-                    ),
+                        decoration: InputDecoration(
+                          labelText:
+                              '${context.strings.text('Quantity')} (${selectedFood?.servingUnit ?? 'g'})',
+                        ),
+                      ),
+                      const SizedBox(height: PremiumDesignTokens.spaceSm),
+                      OutlinedButton(
+                        onPressed: selectedFood == null ? null : _saveMeal,
+                        child: Text(context.strings.text('Save meal')),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: PremiumDesignTokens.spaceSm),
