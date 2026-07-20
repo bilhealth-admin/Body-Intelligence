@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../localization/app_localizations.dart';
+import '../theme/premium_design_tokens.dart';
 
 class ResponsiveAppShell extends StatelessWidget {
   const ResponsiveAppShell({super.key, required this.child});
@@ -71,11 +72,12 @@ class ResponsiveAppShell extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
             children: [
               ListTile(
+                contentPadding: EdgeInsets.zero,
                 title: Text(
                   Localizations.localeOf(context).languageCode == 'ar'
                       ? 'إضافة سريعة'
                       : 'Quick Add',
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: PremiumDesignTokens.sectionHeading(context),
                 ),
                 subtitle: Text(
                   Localizations.localeOf(context).languageCode == 'ar'
