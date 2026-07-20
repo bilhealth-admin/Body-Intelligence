@@ -65,37 +65,58 @@ class DashboardPage extends ConsumerWidget {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () => refresh(context, ref),
-          child: SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
-            padding: PremiumDesignTokens.screenPadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (showFirstValue) ...[
-                  FirstValueHandoffCard(
-                    onContinue: () async {
-                      await ref
-                          .read(preferencesRepositoryProvider)
-                          .remove('firstValueHandoffPending');
-                      if (context.mounted) context.go('/daily-check-in');
-                    },
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final wideToday = constraints.maxWidth >= 1200;
+              final leadingColumn = Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (showFirstValue) ...[
+                    FirstValueHandoffCard(
+                      onContinue: () async {
+                        await ref
+                            .read(preferencesRepositoryProvider)
+                            .remove('firstValueHandoffPending');
+                        if (context.mounted) context.go('/daily-check-in');
+                      },
+                    ),
+                    const SizedBox(height: PremiumDesignTokens.spaceMd),
+                  ],
+                  Semantics(
+                    container: true,
+                    header: true,
+                    child: Text(
+                      context.strings.text('Today'),
+                      style: PremiumDesignTokens.screenHeading(context),
+                    ),
                   ),
-                  const SizedBox(height: PremiumDesignTokens.spaceMd),
+                  const SizedBox(height: PremiumDesignTokens.spaceSm),
+                  const DashboardHeader(),
                 ],
-                Semantics(
-                  container: true,
-                  header: true,
-                  child: Text(
-                    context.strings.text('Today'),
-                    style: PremiumDesignTokens.screenHeading(context),
-                  ),
-                ),
-                const SizedBox(height: PremiumDesignTokens.spaceSm),
-                const DashboardHeader(),
-                const SizedBox(height: PremiumDesignTokens.spaceLg),
-                const DashboardGrid(),
-              ],
-            ),
+              );
+              final content = wideToday
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 4, child: leadingColumn),
+                        const SizedBox(width: PremiumDesignTokens.spaceLg),
+                        const Expanded(flex: 8, child: DashboardGrid()),
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        leadingColumn,
+                        const SizedBox(height: PremiumDesignTokens.spaceLg),
+                        const DashboardGrid(),
+                      ],
+                    );
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: PremiumDesignTokens.screenPadding,
+                child: content,
+              );
+            },
           ),
         ),
       ),
