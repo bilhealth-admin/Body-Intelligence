@@ -39,4 +39,25 @@ void main() {
       TextDirection.rtl,
     );
   });
+
+  testWidgets(
+    'informational partial evidence excludes unavailable foods without overclaiming',
+    (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: NutrientEvidenceStatusText(
+            state: NutrientEvidenceState.partial,
+            informational: true,
+          ),
+        ),
+      );
+      expect(
+        find.text(
+          'Partial evidence; foods with unavailable values are excluded.',
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('0'), findsNothing);
+    },
+  );
 }
