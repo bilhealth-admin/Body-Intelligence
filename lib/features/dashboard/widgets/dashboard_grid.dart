@@ -51,10 +51,13 @@ class DashboardGrid extends ConsumerWidget {
     final memoriesAsync = ref.watch(decisionMemoriesProvider);
     final memoryEnabled =
         ref.watch(decisionMemoryEnabledProvider).value ?? true;
-    final usualBreakfast = ref
-        .watch(usualMealsProvider('breakfast'))
-        .value
-        ?.firstOrNull;
+    final usualBreakfastCandidates =
+        ref.watch(usualMealsProvider('breakfast')).value ?? const [];
+    final usualBreakfast = usualBreakfastCandidates.firstOrNull;
+    final recentBreakfast = (mealsAsync.value ?? const [])
+        .where((entry) => entry.meal.type == 'breakfast')
+        .toList()
+      ..sort((a, b) => b.meal.date.compareTo(a.meal.date));
     final system =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     if ([
@@ -442,19 +445,18 @@ class DashboardGrid extends ConsumerWidget {
       }
     }
 
-    Future<void> repeatBreakfast() async {
-      final candidate = usualBreakfast;
-      if (candidate == null) return;
+    Future<void> confirmAndRepeatBreakfast({
+      required String titleEn,
+      required String titleAr,
+      required String contentEn,
+      required String contentAr,
+      required Future<void> Function() onConfirm,
+    }) async {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog(
-          title: Text(tr('Repeat usual breakfast?', 'تكرار الفطور المعتاد؟')),
-          content: Text(
-            tr(
-              'The same saved portions and nutrition snapshots will be added to today only after confirmation.',
-              'ستُضاف نفس الحصص ولقطات التغذية المحفوظة إلى اليوم بعد التأكيد فقط.',
-            ),
-          ),
+          title: Text(tr(titleEn, titleAr)),
+          content: Text(tr(contentEn, contentAr)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
@@ -468,10 +470,40 @@ class DashboardGrid extends ConsumerWidget {
         ),
       );
       if (confirmed != true) return;
-      await ref
-          .read(mealRepositoryProvider)
-          .repeatMeal(candidate: candidate, date: DateTime.now());
+      await onConfirm();
       ref.invalidate(usualMealsProvider('breakfast'));
+    }
+
+    Future<void> repeatUsualBreakfast() async {
+      final candidate = usualBreakfast;
+      if (candidate == null) return;
+      await confirmAndRepeatBreakfast(
+        titleEn: 'Repeat usual breakfast?',
+        titleAr: 'تكرار الفطور المعتاد؟',
+        contentEn:
+            'The same saved portions and nutrition snapshots will be added to today only after confirmation.',
+        contentAr:
+            'ستُضاف نفس الحصص ولقطات التغذية المحفوظة إلى اليوم بعد التأكيد فقط.',
+        onConfirm: () => ref
+            .read(mealRepositoryProvider)
+            .repeatMeal(candidate: candidate, date: DateTime.now()),
+      );
+    }
+
+    Future<void> repeatRecentBreakfast() async {
+      final latestBreakfast = recentBreakfast.firstOrNull;
+      if (latestBreakfast == null) return;
+      await confirmAndRepeatBreakfast(
+        titleEn: 'Repeat last breakfast?',
+        titleAr: 'تكرار آخر فطور؟',
+        contentEn:
+            'Items and saved nutrition snapshots from your latest breakfast will be copied to today only after confirmation.',
+        contentAr:
+            'ستُنسخ العناصر ولقطات التغذية المحفوظة من آخر فطور إلى اليوم بعد التأكيد فقط.',
+        onConfirm: () => ref
+            .read(mealRepositoryProvider)
+            .repeatHistoricalMeal(meal: latestBreakfast, date: DateTime.now()),
+      );
     }
 
     return Column(
@@ -590,7 +622,10 @@ class DashboardGrid extends ConsumerWidget {
           meals: meals,
           onOpenMeal: (type) => context.go('/daily-log?meal=$type'),
           usualBreakfastAvailable: usualBreakfast != null,
-          onRepeatBreakfast: repeatBreakfast,
+          onRepeatBreakfast: repeatUsualBreakfast,
+          recentBreakfastAvailable:
+              usualBreakfast == null && recentBreakfast.isNotEmpty,
+          onRepeatRecentBreakfast: repeatRecentBreakfast,
         ),
         Card(
           child: ExpansionTile(

@@ -371,15 +371,20 @@ class MealRepository {
   Future<void> repeatMeal({
     required UsualMealCandidate candidate,
     required DateTime date,
+  }) => repeatHistoricalMeal(meal: candidate.source, date: date);
+
+  Future<void> repeatHistoricalMeal({
+    required MealWithItems meal,
+    required DateTime date,
   }) async {
     await _database.transaction(() async {
       final mealId = await createMeal(
         date: date,
-        name: candidate.source.meal.name,
-        type: candidate.source.meal.type,
+        name: meal.meal.name,
+        type: meal.meal.type,
       );
-      for (var index = 0; index < candidate.source.items.length; index++) {
-        final item = candidate.source.items[index];
+      for (var index = 0; index < meal.items.length; index++) {
+        final item = meal.items[index];
         await _database
             .into(_database.mealItems)
             .insert(

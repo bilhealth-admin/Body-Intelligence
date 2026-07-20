@@ -11,12 +11,16 @@ class DashboardMealsTimeline extends StatelessWidget {
     required this.onOpenMeal,
     this.usualBreakfastAvailable = false,
     this.onRepeatBreakfast,
+    this.recentBreakfastAvailable = false,
+    this.onRepeatRecentBreakfast,
   });
 
   final List<MealWithItems> meals;
   final ValueChanged<String> onOpenMeal;
   final bool usualBreakfastAvailable;
   final VoidCallback? onRepeatBreakfast;
+  final bool recentBreakfastAvailable;
+  final VoidCallback? onRepeatRecentBreakfast;
 
   static const types = ['breakfast', 'lunch', 'dinner', 'snack'];
 
@@ -64,7 +68,7 @@ class DashboardMealsTimeline extends StatelessWidget {
               ],
             ),
           ),
-          if (usualBreakfastAvailable)
+          if (usualBreakfastAvailable || recentBreakfastAvailable)
             Padding(
               padding: EdgeInsets.fromLTRB(
                 PremiumDesignTokens.spaceMd,
@@ -72,14 +76,31 @@ class DashboardMealsTimeline extends StatelessWidget {
                 PremiumDesignTokens.spaceMd,
                 PremiumDesignTokens.spaceXs,
               ),
-              child: FilledButton.tonalIcon(
-                onPressed: onRepeatBreakfast,
-                icon: const Icon(Icons.replay_outlined),
-                label: Text(
-                  Localizations.localeOf(context).languageCode == 'ar'
-                      ? 'كرر فطورك المعتاد'
-                      : 'Repeat usual breakfast',
-                ),
+              child: Wrap(
+                spacing: PremiumDesignTokens.spaceXs,
+                runSpacing: PremiumDesignTokens.spaceXs,
+                children: [
+                  if (usualBreakfastAvailable)
+                    FilledButton.tonalIcon(
+                      onPressed: onRepeatBreakfast,
+                      icon: const Icon(Icons.replay_outlined),
+                      label: Text(
+                        Localizations.localeOf(context).languageCode == 'ar'
+                            ? 'كرر فطورك المعتاد'
+                            : 'Repeat usual breakfast',
+                      ),
+                    ),
+                  if (recentBreakfastAvailable)
+                    OutlinedButton.icon(
+                      onPressed: onRepeatRecentBreakfast,
+                      icon: const Icon(Icons.history_outlined),
+                      label: Text(
+                        Localizations.localeOf(context).languageCode == 'ar'
+                            ? 'كرر آخر فطور'
+                            : 'Repeat last breakfast',
+                      ),
+                    ),
+                ],
               ),
             ),
           for (var index = 0; index < types.length; index++)

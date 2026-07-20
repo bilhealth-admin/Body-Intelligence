@@ -72,4 +72,32 @@ void main() {
       expect(requested, 1);
     },
   );
+
+  testWidgets('recent breakfast action is shown when usual is unavailable', (
+    tester,
+  ) async {
+    var recentRequested = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: DashboardMealsTimeline(
+          meals: const [],
+          onOpenMeal: (_) {},
+          recentBreakfastAvailable: true,
+          onRepeatRecentBreakfast: () => recentRequested++,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Repeat last breakfast'), findsOneWidget);
+    await tester.tap(find.text('Repeat last breakfast'));
+    expect(recentRequested, 1);
+  });
 }
