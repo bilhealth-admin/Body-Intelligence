@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/database/app_database.dart';
 import '../../app/localization/app_localizations.dart';
+import '../../app/theme/premium_design_tokens.dart';
 import '../../shared/widgets/actionable_error_state.dart';
 import '../foods/providers/food_provider.dart';
 import 'providers/daily_log_provider.dart';
@@ -270,16 +271,16 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
           ),
           data: (items) {
             return ListView(
-              padding: const EdgeInsets.all(16),
+              padding: PremiumDesignTokens.screenPadding,
               children: [
                 Semantics(
                   header: true,
                   child: Text(
                     context.strings.text('Record your day'),
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: PremiumDesignTokens.screenHeading(context),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: PremiumDesignTokens.spaceSm),
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: const Icon(Icons.calendar_today),
@@ -361,20 +362,20 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                     onRetry: () => ref.invalidate(dailyWaterProvider),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: PremiumDesignTokens.spaceLg),
                 Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: PremiumDesignTokens.cardPadding,
                     child: Column(
                       children: [
                         Align(
                           alignment: AlignmentDirectional.centerStart,
                           child: Text(
                             context.strings.text('Meal type'),
-                            style: Theme.of(context).textTheme.titleMedium,
+                            style: PremiumDesignTokens.cardHeading(context),
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: PremiumDesignTokens.spaceXs),
                         Wrap(
                           spacing: 8,
                           children: [
@@ -418,7 +419,9 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                const SizedBox(height: 12),
+                                const SizedBox(
+                                  height: PremiumDesignTokens.spaceSm,
+                                ),
                                 Text(
                                   Localizations.localeOf(
                                             context,
@@ -428,7 +431,9 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                       : 'Your usual meals — nothing is added without your confirmation',
                                   style: Theme.of(context).textTheme.labelLarge,
                                 ),
-                                const SizedBox(height: 6),
+                                const SizedBox(
+                                  height: PremiumDesignTokens.spaceXs,
+                                ),
                                 for (final candidate in candidates)
                                   Card.outlined(
                                     child: ListTile(
@@ -494,7 +499,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                             );
                           },
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: PremiumDesignTokens.spaceSm),
                         SearchAnchor(
                           searchController: foodSearch,
                           viewHintText:
@@ -569,7 +574,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                               icon: const Icon(Icons.close),
                             ),
                           ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: PremiumDesignTokens.spaceXs),
                         TextField(
                           controller: quantity,
                           keyboardType: const TextInputType.numberWithOptions(
@@ -580,7 +585,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                 '${context.strings.text('Quantity')} (${selectedFood?.servingUnit ?? 'g'})',
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: PremiumDesignTokens.spaceSm),
                         OutlinedButton(
                           onPressed: selectedFood == null ? null : _saveMeal,
                           child: Text(context.strings.text('Save meal')),
@@ -589,7 +594,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: PremiumDesignTokens.spaceSm),
                 meals.when(
                   loading: () => const LinearProgressIndicator(),
                   error: (_, __) => ActionableErrorState(
@@ -747,7 +752,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                     );
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: PremiumDesignTokens.spaceLg),
                 Semantics(
                   button: true,
                   label: context.strings.text('Save log'),

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'widgets/dashboard_grid.dart';
 import 'widgets/dashboard_header.dart';
 import '../../app/localization/app_localizations.dart';
+import '../../app/theme/premium_design_tokens.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../life_context/providers/life_context_provider.dart';
 import '../weight/providers/weight_provider.dart';
@@ -65,7 +66,7 @@ class DashboardPage extends ConsumerWidget {
           onRefresh: () => refresh(context, ref),
           child: SingleChildScrollView(
             physics: AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.all(16),
+            padding: PremiumDesignTokens.screenPadding,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -78,19 +79,19 @@ class DashboardPage extends ConsumerWidget {
                       if (context.mounted) context.go('/daily-check-in');
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: PremiumDesignTokens.spaceMd),
                 ],
                 Semantics(
                   container: true,
                   header: true,
                   child: Text(
                     context.strings.text('Today'),
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    style: PremiumDesignTokens.screenHeading(context),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: PremiumDesignTokens.spaceSm),
                 const DashboardHeader(),
-                const SizedBox(height: 20),
+                const SizedBox(height: PremiumDesignTokens.spaceLg),
                 const DashboardGrid(),
               ],
             ),
@@ -111,7 +112,7 @@ class FirstValueHandoffCard extends StatelessWidget {
     container: true,
     child: Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: PremiumDesignTokens.cardPaddingLarge,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -122,18 +123,18 @@ class FirstValueHandoffCard extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: PremiumDesignTokens.spaceXs),
             Text(
               context.strings.text(
                 'BIL saved your profile and starting targets on this device.',
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: PremiumDesignTokens.spaceSm),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(Icons.info_outline, size: 20),
-                const SizedBox(width: 8),
+                const SizedBox(width: PremiumDesignTokens.spaceXs),
                 Expanded(
                   child: Text(
                     context.strings.text(
@@ -143,7 +144,7 @@ class FirstValueHandoffCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: PremiumDesignTokens.spaceMd),
             FilledButton.icon(
               onPressed: onContinue,
               icon: const Icon(Icons.monitor_weight_outlined),

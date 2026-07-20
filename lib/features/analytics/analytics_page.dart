@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/database/date_keys.dart';
 import '../../app/localization/app_localizations.dart';
+import '../../app/theme/premium_design_tokens.dart';
 import '../../core/units/measurement_units.dart';
 import '../../engine/progress_analysis.dart';
 import '../../engine/personal_baseline_engine.dart';
@@ -173,16 +174,16 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     return Scaffold(
       appBar: AppBar(title: Text(context.strings.text('Analytics'))),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: PremiumDesignTokens.screenPadding,
         children: [
           Semantics(
             header: true,
             child: Text(
               context.strings.text('Analytics overview'),
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: PremiumDesignTokens.screenHeading(context),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: PremiumDesignTokens.spaceSm),
           AnalyticsRangeSelector(
             value: range,
             onChanged: (value) => setState(() => range = value),
@@ -211,7 +212,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
               ],
             ),
           if (recovery.state != RecoveryState.current)
-            const SizedBox(height: 12),
+            const SizedBox(height: PremiumDesignTokens.spaceSm),
           _SummaryCard(
             title: tr('Your personal baseline', 'خطك الأساسي الشخصي'),
             lines: baseline.sufficient
@@ -246,7 +247,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                     ),
                   ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: PremiumDesignTokens.spaceSm),
           _SummaryCard(
             title: tr('Weekly review', 'المراجعة الأسبوعية'),
             lines: [
@@ -278,7 +279,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                   : weekly.missingData),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: PremiumDesignTokens.spaceSm),
           _SummaryCard(
             title: range.days == null
                 ? tr('All-time summary', 'ملخص كل الوقت')
@@ -319,10 +320,10 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                 ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: PremiumDesignTokens.spaceSm),
           Text(
             tr('Weight over time', 'الوزن عبر الزمن'),
-            style: Theme.of(context).textTheme.titleLarge,
+            style: PremiumDesignTokens.sectionHeading(context),
           ),
           if (recentWeights.isEmpty)
             Padding(
@@ -343,10 +344,10 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                 suffix: weightUnit,
               ),
             ),
-          const SizedBox(height: 12),
+          const SizedBox(height: PremiumDesignTokens.spaceSm),
           Text(
             tr('Calories and protein by day', 'السعرات والبروتين حسب اليوم'),
-            style: Theme.of(context).textTheme.titleLarge,
+            style: PremiumDesignTokens.sectionHeading(context),
           ),
           if (caloriesByDay.isEmpty)
             Padding(
@@ -371,10 +372,10 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                     ),
                   ),
                 ),
-          const SizedBox(height: 12),
+          const SizedBox(height: PremiumDesignTokens.spaceSm),
           Text(
             tr('Water adherence records', 'سجلات الالتزام بالماء'),
-            style: Theme.of(context).textTheme.titleLarge,
+            style: PremiumDesignTokens.sectionHeading(context),
           ),
           ...waterByDay.keys
               .toList()
@@ -402,12 +403,12 @@ class _SummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Card(
     child: Padding(
-      padding: const EdgeInsets.all(16),
+      padding: PremiumDesignTokens.cardPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 8),
+          Text(title, style: PremiumDesignTokens.cardHeading(context)),
+          const SizedBox(height: PremiumDesignTokens.spaceXs),
           ...lines.map(Text.new),
         ],
       ),

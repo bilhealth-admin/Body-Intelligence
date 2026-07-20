@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import 'premium_design_tokens.dart';
 
 class AppThemeData {
   static ThemeData lightTheme(
@@ -41,13 +42,13 @@ class AppThemeData {
         foregroundColor: dark ? Colors.white : AppColors.textPrimary,
       ),
       cardTheme: CardThemeData(
-        elevation: 0,
+        elevation: PremiumDesignTokens.elevationNone,
         margin: const EdgeInsets.symmetric(vertical: 6),
         color: dark ? const Color(0xFF121E31) : AppColors.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: PremiumDesignTokens.cardRadius,
           side: BorderSide(
-            color: dark ? const Color(0xFF26364E) : const Color(0xFFE3EAF3),
+            color: PremiumDesignTokens.cardBorderColor(brightness),
           ),
         ),
       ),
@@ -55,7 +56,7 @@ class AppThemeData {
         style: FilledButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: PremiumDesignTokens.inputRadius,
           ),
         ),
       ),
@@ -67,13 +68,13 @@ class AppThemeData {
           vertical: 15,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: PremiumDesignTokens.inputRadius,
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: PremiumDesignTokens.inputRadius,
           borderSide: BorderSide(
-            color: dark ? const Color(0xFF31415A) : const Color(0xFFD8E1ED),
+            color: PremiumDesignTokens.inputBorderColor(brightness),
           ),
         ),
       ),
@@ -90,7 +91,9 @@ class AppThemeData {
       ),
       dialogTheme: DialogThemeData(
         backgroundColor: dark ? const Color(0xFF121E31) : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: RoundedRectangleBorder(
+          borderRadius: PremiumDesignTokens.dialogRadius,
+        ),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
