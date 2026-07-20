@@ -148,8 +148,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Record your day'), findsOneWidget);
-      expect(find.widgetWithText(OutlinedButton, 'Add water'), findsOneWidget);
-      expect(find.widgetWithText(OutlinedButton, 'Save meal'), findsOneWidget);
+      expect(
+        find.widgetWithText(FilledButton, 'Add water'),
+        findsOneWidget,
+      );
+      expect(
+        find.widgetWithText(FilledButton, 'Save meal'),
+        findsOneWidget,
+      );
 
       await tester.drag(find.byType(ListView).first, const Offset(0, -2000));
       await tester.pumpAndSettle();
