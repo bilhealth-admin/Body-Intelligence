@@ -73,8 +73,8 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       type: mealType,
     );
 
-    final quantityValue = double.tryParse(quantity.text.replaceAll(',', '.'));
-    if (quantityValue == null || quantityValue <= 0 || quantityValue > 100000) {
+    final quantityValue = _parsePositiveQuantity(quantity.text);
+    if (quantityValue == null) {
       _message('Enter a quantity from 0.1 to 100000.');
       return;
     }
@@ -85,6 +85,9 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       quantity: quantityValue,
     );
     await ref.read(foodRepositoryProvider).recordRecent(selectedFood!.id);
+    quantity.text = quantityValue.toStringAsFixed(
+      quantityValue.truncateToDouble() == quantityValue ? 0 : 1,
+    );
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -176,10 +179,12 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       ),
     );
     controller.dispose();
-    if (updated == null || updated <= 0) return;
+    if (updated == null) return;
+    final normalizedUpdated = _parsePositiveQuantity(updated.toString());
+    if (normalizedUpdated == null) return;
     await ref
         .read(mealRepositoryProvider)
-        .updateMealItem(id: item.id, quantity: updated);
+        .updateMealItem(id: item.id, quantity: normalizedUpdated);
   }
 
   Future<void> _showItemActions(MealItem item, Food? food) async {
@@ -579,6 +584,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                           labelText:
                               '${context.strings.text('Quantity')} (${selectedFood?.servingUnit ?? 'g'})',
                         ),
+                        onSubmitted: (_) => _saveMeal(),
                       ),
                       const SizedBox(height: PremiumDesignTokens.spaceSm),
                       FilledButton.tonalIcon(
@@ -763,6 +769,12 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
         ),
       ),
     );
+  }
+
+  double? _parsePositiveQuantity(String raw) {
+    final value = double.tryParse(raw.replaceAll(',', '.'));
+    if (value == null || value <= 0 || value > 100000) return null;
+    return value;
   }
 
   Widget _field(
