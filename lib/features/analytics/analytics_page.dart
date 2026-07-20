@@ -402,8 +402,34 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                 ],
                 const SizedBox(height: PremiumDesignTokens.spaceSm),
                 Text(
-                  tr('What cannot be concluded yet', 'ما الذي لا يمكن استنتاجه بعد'),
+                  tr('Uncertainty and confidence', 'عدم اليقين والثقة'),
                   style: PremiumDesignTokens.sectionHeading(context),
+                ),
+                const SizedBox(height: PremiumDesignTokens.spaceXs),
+                Text(
+                  tr(
+                    'Current confidence: ${_localizedProgressConfidence(context, progress.confidence)}.',
+                    'الثقة الحالية: ${_localizedProgressConfidence(context, progress.confidence)}.',
+                  ),
+                ),
+                const SizedBox(height: PremiumDesignTokens.spaceXs),
+                Text(
+                  tr(
+                    progress.confidence == ProgressConfidence.insufficient
+                        ? 'The current evidence is not yet sufficient for a reliable trend claim.'
+                        : progress.confidence == ProgressConfidence.low
+                        ? 'The trend signal exists, but uncertainty remains high; avoid aggressive plan changes.'
+                        : progress.confidence == ProgressConfidence.medium
+                        ? 'Evidence supports a directional signal, but alternative explanations are still plausible.'
+                        : 'Evidence is relatively consistent for this range, but confidence is not certainty.',
+                    progress.confidence == ProgressConfidence.insufficient
+                        ? 'الأدلة الحالية غير كافية بعد لادعاء اتجاه موثوق.'
+                        : progress.confidence == ProgressConfidence.low
+                        ? 'إشارة الاتجاه موجودة، لكن عدم اليقين ما يزال مرتفعًا؛ تجنّب تغييرات حادة في الخطة.'
+                        : progress.confidence == ProgressConfidence.medium
+                        ? 'الأدلة تدعم إشارة اتجاه، لكن تفسيرات بديلة ما تزال ممكنة.'
+                        : 'الأدلة متسقة نسبيًا في هذا النطاق، لكن الثقة ليست يقينًا.',
+                  ),
                 ),
                 const SizedBox(height: PremiumDesignTokens.spaceXs),
                 Text(
