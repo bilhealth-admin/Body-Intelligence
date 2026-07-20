@@ -320,7 +320,7 @@ void main() {
   });
 
   test(
-    'food search ranks personal frequency and supports barcode fallback',
+    'food search ranks favorites first then personal recency/frequency and barcode fallback',
     () async {
       final foods = FoodRepository(database);
       final frequent = await foods.addFood(
@@ -332,6 +332,14 @@ void main() {
         carbs: 65,
         fats: 7,
       );
+      final favorite = await foods.addFood(
+        name: 'Favorite yogurt',
+        category: 'dairy',
+        calories: 95,
+        protein: 8,
+        carbs: 10,
+        fats: 3,
+      );
       await foods.addFood(
         name: 'Alphabetical apple',
         category: 'fruit',
@@ -342,8 +350,11 @@ void main() {
       );
       await foods.recordRecent(frequent);
       await foods.recordRecent(frequent);
+      await foods.setFavorite(favorite, true);
 
-      expect((await foods.search('')).first.id, frequent);
+      final ranked = await foods.search('');
+      expect(ranked.first.id, favorite);
+      expect(ranked[1].id, frequent);
       expect((await foods.search('123456789')).single.id, frequent);
     },
   );

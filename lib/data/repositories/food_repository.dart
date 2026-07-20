@@ -247,8 +247,9 @@ class FoodRepository {
           ])
           ..where(condition)
           ..orderBy([
-            OrderingTerm.desc(_database.recentFoods.useCount),
             OrderingTerm.desc(_database.favorites.id),
+            OrderingTerm.desc(_database.recentFoods.useCount),
+            OrderingTerm.desc(_database.recentFoods.lastUsedAt),
             OrderingTerm.desc(_database.foods.verified),
             OrderingTerm.asc(_database.foods.name),
           ])

@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -185,20 +186,35 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
                 const SizedBox(width: 12),
                 SizedBox(
                   width: 132,
-                  child: TextField(
-                    controller: text,
-                    focusNode: focus,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-                    ],
-                    onChanged: updateFromText,
-                    decoration: InputDecoration(
-                      suffixText: widget.unit,
-                      errorText: widget.errorText,
-                      border: const OutlineInputBorder(),
+                  child: Listener(
+                    onPointerSignal: (event) {
+                      if (event is PointerScrollEvent) {
+                        if (event.scrollDelta.dy < 0) {
+                          adjustBy(1);
+                        } else if (event.scrollDelta.dy > 0) {
+                          adjustBy(-1);
+                        }
+                      }
+                    },
+                    child: TextField(
+                      controller: text,
+                      focusNode: focus,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      textInputAction: TextInputAction.done,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                      ],
+                      onChanged: updateFromText,
+                      onSubmitted: (_) => updateFromText(text.text),
+                      onEditingComplete: () => updateFromText(text.text),
+                      onTapOutside: (_) => focus.unfocus(),
+                      decoration: InputDecoration(
+                        suffixText: widget.unit,
+                        errorText: widget.errorText,
+                        border: const OutlineInputBorder(),
+                      ),
                     ),
                   ),
                 ),
