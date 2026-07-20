@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../app/theme/premium_design_tokens.dart';
 import '../../../engine/daily_return_engine.dart';
 
 class DailyReturnCard extends StatelessWidget {
@@ -35,7 +36,7 @@ class DailyReturnCard extends StatelessWidget {
       label: context.strings.text('Daily return summary'),
       child: Card(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(PremiumDesignTokens.spaceLg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -47,17 +48,17 @@ class DailyReturnCard extends StatelessWidget {
                 ),
               ),
               if (report.daysAway >= 4) ...[
-                const SizedBox(height: 6),
+                const SizedBox(height: PremiumDesignTokens.spaceXs - 2),
                 Text(
                   context.strings.text(
                     'No backfill is required. Your earlier local records remain usable; today can be a fresh observation.',
                   ),
                 ),
               ],
-              const SizedBox(height: 12),
+              const SizedBox(height: PremiumDesignTokens.spaceSm),
               Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: PremiumDesignTokens.spaceXs,
+                runSpacing: PremiumDesignTokens.spaceXs,
                 children: [
                   _Status(
                     label: context.strings.text('Weight'),
@@ -73,22 +74,22 @@ class DailyReturnCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: PremiumDesignTokens.spaceSm + 2),
               Text(
                 context.strings.text('What changed'),
                 style: Theme.of(context).textTheme.labelLarge,
               ),
               Text(changedSummary),
-              const SizedBox(height: 10),
+              const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
               Text(
                 context.strings.text('Important missing evidence'),
                 style: Theme.of(context).textTheme.labelLarge,
               ),
               Text(missingEvidence),
-              const SizedBox(height: 16),
+              const SizedBox(height: PremiumDesignTokens.spaceMd),
               if (report.hasPrimaryAction) ...[
                 Text(actionReason),
-                const SizedBox(height: 10),
+                const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
                 FilledButton(
                   onPressed: onPrimaryAction,
                   child: Text(actionTitle),
