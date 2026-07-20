@@ -334,12 +334,10 @@ class HistoryPage extends ConsumerWidget {
                               ? 'التذبذب حول الاتجاه: نحو ${UnitConverter.weightFromKg(analysis.variabilityKg!, system).toStringAsFixed(2)} $unit'
                               : 'Variation around the direction: about ${UnitConverter.weightFromKg(analysis.variabilityKg!, system).toStringAsFixed(2)} $unit',
                         ),
-                      Text(
-                        analysis.projectedGoalDate == null
-                            ? (arabic
-                                  ? 'لن نعرض تاريخ هدف حتى تتوفر بيانات كافية واتجاه متوافق.'
-                                  : 'No goal date is shown until evidence is sufficient and the direction aligns with the goal.')
-                            : '${arabic ? 'نطاق تقديري حذر للهدف' : 'Cautious goal estimate'}: ${analysis.projectedGoalDate!.year}-${analysis.projectedGoalDate!.month.toString().padLeft(2, '0')}-${analysis.projectedGoalDate!.day.toString().padLeft(2, '0')}',
+                      _HistoryGoalProjectionCard(
+                        analysis: analysis,
+                        system: system,
+                        arabic: arabic,
                       ),
                       Text(
                         context.strings.text(
@@ -534,6 +532,87 @@ class _HistoryExplainabilityChips extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _HistoryGoalProjectionCard extends StatelessWidget {
+  const _HistoryGoalProjectionCard({
+    required this.analysis,
+    required this.system,
+    required this.arabic,
+  });
+
+  final ProgressAnalysis analysis;
+  final MeasurementSystem system;
+  final bool arabic;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = arabic ? 'توقع حذر للهدف' : 'Cautious goal estimate';
+    final noEstimateMessage = arabic
+        ? 'لا يظهر تاريخ هدف حتى تصبح الأدلة كافية ويتوافق الاتجاه مع الهدف.'
+        : 'No goal date is shown until evidence is sufficient and the direction aligns with the goal.';
+    final direction = analysis.weeklyDirectionKg;
+    final unit = UnitConverter.weightUnit(system);
+
+    final reasons = <String>[
+      if (analysis.projectedGoalDate == null && analysis.sampleCount < 4)
+        arabic
+            ? 'نحتاج أربعة قياسات على الأقل قبل حساب أي تقدير.'
+            : 'At least four comparable measurements are needed before estimating a goal date.',
+      if (analysis.projectedGoalDate == null &&
+          analysis.confidence == ProgressConfidence.insufficient)
+        arabic
+            ? 'الثقة غير كافية الآن، لذا نؤجل التاريخ التقديري.'
+            : 'Confidence is insufficient right now, so the estimated date is withheld.',
+      if (analysis.projectedGoalDate == null &&
+          direction != null &&
+          direction.abs() < 0.01)
+        arabic
+            ? 'الاتجاه قريب من الثبات؛ نحتاج تغيرًا أوضح قبل التقدير.'
+            : 'The direction is near flat; a clearer change is needed before estimating.',
+    ];
+
+    String directionLine() {
+      if (direction == null) {
+        return arabic
+            ? 'الاتجاه الأسبوعي غير متاح بعد.'
+            : 'Weekly direction is not available yet.';
+      }
+      final formatted =
+          '${direction >= 0 ? '+' : ''}${UnitConverter.weightFromKg(direction, system).toStringAsFixed(2)} $unit/${context.strings.text('week')}';
+      return arabic
+          ? 'الاتجاه الحالي: $formatted'
+          : 'Current direction: $formatted';
+    }
+
+    final projectionLine = analysis.projectedGoalDate == null
+        ? noEstimateMessage
+        : '${analysis.projectedGoalDate!.year}-${analysis.projectedGoalDate!.month.toString().padLeft(2, '0')}-${analysis.projectedGoalDate!.day.toString().padLeft(2, '0')}';
+
+    return PremiumSurface(
+      child: Padding(
+        padding: PremiumDesignTokens.cardPadding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: PremiumDesignTokens.cardHeading(context)),
+            const SizedBox(height: PremiumDesignTokens.spaceXs),
+            Text(
+              analysis.projectedGoalDate == null
+                  ? noEstimateMessage
+                  : '${arabic ? 'نطاق تقديري حذر للهدف' : 'Cautious goal estimate'}: $projectionLine',
+            ),
+            const SizedBox(height: PremiumDesignTokens.spaceXs),
+            Text(directionLine()),
+            if (reasons.isNotEmpty) ...[
+              const SizedBox(height: PremiumDesignTokens.spaceXs),
+              for (final reason in reasons) Text('• $reason'),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
