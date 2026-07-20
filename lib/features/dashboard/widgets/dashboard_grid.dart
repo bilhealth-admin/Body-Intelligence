@@ -17,6 +17,8 @@ import '../../../engine/recovery_engine.dart';
 import '../../../data/database/date_keys.dart';
 import '../../../data/database/nutrient_evidence.dart';
 import '../../../engine/nutrient_evidence_engine.dart';
+import '../../../app/theme/premium_design_tokens.dart';
+import '../../../shared/widgets/premium_surface.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
 import '../../foods/providers/food_provider.dart';
@@ -508,6 +510,7 @@ class DashboardGrid extends ConsumerWidget {
     }
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DailyReturnCard(
           report: dailyReturn,
@@ -538,11 +541,13 @@ class DashboardGrid extends ConsumerWidget {
             }
           },
         ),
-        if (loggingStreak >= 2)
+        if (loggingStreak >= 2) ...[
+          const SizedBox(height: PremiumDesignTokens.spaceMd),
           Semantics(
             liveRegion: true,
-            child: Card(
+            child: PremiumSurface(
               child: ListTile(
+                contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.auto_graph_outlined),
                 title: Text(
                   arabic
@@ -557,6 +562,8 @@ class DashboardGrid extends ConsumerWidget {
               ),
             ),
           ),
+        ],
+        const SizedBox(height: PremiumDesignTokens.spaceMd),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -567,8 +574,8 @@ class DashboardGrid extends ConsumerWidget {
                 : MediaQuery.sizeOf(context).width >= 600
                 ? 3
                 : 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
+            crossAxisSpacing: PremiumDesignTokens.spaceMd,
+            mainAxisSpacing: PremiumDesignTokens.spaceMd,
             mainAxisExtent: 174,
           ),
           itemBuilder: (context, index) => [
@@ -613,7 +620,7 @@ class DashboardGrid extends ConsumerWidget {
             ),
           ][index],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: PremiumDesignTokens.spaceMd),
         DashboardWaterCard(
           consumedMl: water,
           targetMl: effectiveTargets.water,
