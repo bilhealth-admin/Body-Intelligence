@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../app/theme/premium_design_tokens.dart';
 
 class DashboardLoadingSkeleton extends StatelessWidget {
   const DashboardLoadingSkeleton({super.key});
@@ -16,8 +17,8 @@ class DashboardLoadingSkeleton extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             crossAxisCount: MediaQuery.sizeOf(context).width >= 700 ? 4 : 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
+            crossAxisSpacing: PremiumDesignTokens.spaceSm + 2,
+            mainAxisSpacing: PremiumDesignTokens.spaceSm + 2,
             childAspectRatio: 1.05,
             children: const [
               _SkeletonBlock(),
@@ -26,10 +27,10 @@ class DashboardLoadingSkeleton extends StatelessWidget {
               _SkeletonBlock(),
             ],
           ),
-          const SizedBox(height: 12),
-          const _SkeletonBlock(height: 150),
-          const SizedBox(height: 12),
-          const _SkeletonBlock(height: 110),
+          const SizedBox(height: PremiumDesignTokens.spaceSm + 2),
+          const _SkeletonBlock(height: PremiumDesignTokens.spaceXl * 5 + 10),
+          const SizedBox(height: PremiumDesignTokens.spaceSm + 2),
+          const _SkeletonBlock(height: PremiumDesignTokens.spaceXl * 3 + 14),
         ],
       ),
     ),
@@ -46,9 +47,12 @@ class _SkeletonBlock extends StatelessWidget {
     height: height,
     decoration: BoxDecoration(
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusLg),
     ),
-    padding: const EdgeInsets.all(18),
+    padding: const EdgeInsets.symmetric(
+      horizontal: PremiumDesignTokens.spaceMd,
+      vertical: PremiumDesignTokens.spaceSm,
+    ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -64,10 +68,12 @@ class _SkeletonBlock extends StatelessWidget {
         FractionallySizedBox(
           widthFactor: 0.7,
           child: Container(
-            height: 14,
+            height: PremiumDesignTokens.spaceSm,
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(
+                PremiumDesignTokens.radiusMd - 4,
+              ),
             ),
           ),
         ),
