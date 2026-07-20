@@ -146,11 +146,6 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     final recentWeights = weights.length > 30
         ? weights.sublist(weights.length - 30)
         : weights;
-    final maxWeight = recentWeights.isEmpty
-        ? 1.0
-        : recentWeights
-              .map((row) => row.weight)
-              .reduce((a, b) => a > b ? a : b);
     final cutoffKey = dayKeyFor(
       DateTime.now().subtract(const Duration(days: 6)),
     );
@@ -446,7 +441,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
             chart: _WeightTrendChart(
               weights: recentWeights,
               system: system,
-              maximum: maxWeight,
+              rangeLabel: _rangeLabel(context, range),
             ),
             explanation: [
               tr(
@@ -544,12 +539,12 @@ class _WeightTrendChart extends StatelessWidget {
   const _WeightTrendChart({
     required this.weights,
     required this.system,
-    required this.maximum,
+    required this.rangeLabel,
   });
 
   final List<WeightEntry> weights;
   final MeasurementSystem system;
-  final double maximum;
+  final String rangeLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -572,13 +567,26 @@ class _WeightTrendChart extends StatelessWidget {
     final span = (maxValue - minValue).abs() < 0.01
         ? 1.0
         : (maxValue - minValue);
+    final unit = UnitConverter.weightUnit(system);
+    final firstValue = converted.first;
+    final lastValue = converted.last;
+    final delta = lastValue - firstValue;
 
     return SizedBox(
-      height: 200,
+      height: 236,
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
-          color: Theme.of(context).colorScheme.surfaceContainerLow,
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).colorScheme.primaryContainer.withValues(
+                alpha: 0.35,
+              ),
+              Theme.of(context).colorScheme.surfaceContainerLow,
+            ],
+          ),
           border: Border.all(
             color: Theme.of(context).colorScheme.outlineVariant,
           ),
@@ -590,36 +598,97 @@ class _WeightTrendChart extends StatelessWidget {
             PremiumDesignTokens.spaceMd,
             PremiumDesignTokens.spaceSm,
           ),
-          child: CustomPaint(
-            painter: _WeightLinePainter(
-              values: converted,
-              minValue: minValue,
-              span: span,
-              lineColor: Theme.of(context).colorScheme.primary,
-              pointColor: Theme.of(context).colorScheme.tertiary,
-            ),
-            child: Align(
-              alignment: AlignmentDirectional.bottomEnd,
-              child: Semantics(
-                label: context.strings.text('Current measured point'),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: PremiumDesignTokens.spaceXs,
-                    vertical: PremiumDesignTokens.spaceXs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(
-                      PremiumDesignTokens.radiusMd,
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _ChartMetricChip(
+                      label: context.strings.text('Start'),
+                      value: '${firstValue.toStringAsFixed(1)} $unit',
                     ),
                   ),
-                  child: Text(
-                    '${converted.last.toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}',
-                    style: Theme.of(context).textTheme.labelSmall,
+                  const SizedBox(width: PremiumDesignTokens.spaceXs),
+                  Expanded(
+                    child: _ChartMetricChip(
+                      label: context.strings.text('Current'),
+                      value: '${lastValue.toStringAsFixed(1)} $unit',
+                      emphasize: true,
+                    ),
+                  ),
+                  const SizedBox(width: PremiumDesignTokens.spaceXs),
+                  Expanded(
+                    child: _ChartMetricChip(
+                      label: context.strings.text('Range change'),
+                      value:
+                          '${delta >= 0 ? '+' : ''}${delta.toStringAsFixed(1)} $unit',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: PremiumDesignTokens.spaceSm),
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _ChartAxisLabels(
+                      top: maxValue,
+                      middle: minValue + (span / 2),
+                      bottom: minValue,
+                      unit: unit,
+                    ),
+                    const SizedBox(width: PremiumDesignTokens.spaceXs),
+                    Expanded(
+                      child: CustomPaint(
+                        painter: _WeightLinePainter(
+                          values: converted,
+                          minValue: minValue,
+                          span: span,
+                          lineColor: Theme.of(context).colorScheme.primary,
+                          pointColor: Theme.of(context).colorScheme.tertiary,
+                        ),
+                        child: Align(
+                          alignment: AlignmentDirectional.bottomEnd,
+                          child: Semantics(
+                            label: context.strings.text(
+                              'Current measured point',
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: PremiumDesignTokens.spaceXs,
+                                vertical: PremiumDesignTokens.spaceXs,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(
+                                  PremiumDesignTokens.radiusMd,
+                                ),
+                              ),
+                              child: Text(
+                                '${lastValue.toStringAsFixed(1)} $unit',
+                                style: Theme.of(context).textTheme.labelSmall,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: PremiumDesignTokens.spaceXs),
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Text(
+                  rangeLabel,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -694,6 +763,83 @@ class _WeightLinePainter extends CustomPainter {
         oldDelegate.span != span ||
         oldDelegate.lineColor != lineColor ||
         oldDelegate.pointColor != pointColor;
+  }
+}
+
+class _ChartMetricChip extends StatelessWidget {
+  const _ChartMetricChip({
+    required this.label,
+    required this.value,
+    this.emphasize = false,
+  });
+
+  final String label;
+  final String value;
+  final bool emphasize;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: PremiumDesignTokens.spaceXs,
+        vertical: PremiumDesignTokens.spaceXs,
+      ),
+      decoration: BoxDecoration(
+        color: emphasize
+            ? theme.colorScheme.primaryContainer
+            : theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(value, style: theme.textTheme.labelMedium),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChartAxisLabels extends StatelessWidget {
+  const _ChartAxisLabels({
+    required this.top,
+    required this.middle,
+    required this.bottom,
+    required this.unit,
+  });
+
+  final double top;
+  final double middle;
+  final double bottom;
+  final String unit;
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+    );
+    return SizedBox(
+      width: 54,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('${top.toStringAsFixed(1)} $unit', style: textStyle),
+          Text('${middle.toStringAsFixed(1)} $unit', style: textStyle),
+          Text('${bottom.toStringAsFixed(1)} $unit', style: textStyle),
+        ],
+      ),
+    );
   }
 }
 
