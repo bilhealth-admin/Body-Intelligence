@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../app/theme/premium_design_tokens.dart';
 
 class DashboardWaterCard extends StatefulWidget {
   const DashboardWaterCard({
@@ -50,7 +51,7 @@ class _DashboardWaterCardState extends State<DashboardWaterCard> {
         : (widget.consumedMl / target).clamp(0.0, 1.0);
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(PremiumDesignTokens.spaceMd),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -60,7 +61,7 @@ class _DashboardWaterCardState extends State<DashboardWaterCard> {
                   Icons.water_drop_outlined,
                   color: Theme.of(context).colorScheme.primary,
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: PremiumDesignTokens.spaceXs),
                 Expanded(
                   child: Text(
                     context.strings.text('Water'),
@@ -70,7 +71,7 @@ class _DashboardWaterCardState extends State<DashboardWaterCard> {
                 Text('${widget.consumedMl} / $target ml'),
               ],
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: PremiumDesignTokens.spaceSm),
             Semantics(
               label:
                   '${context.strings.text('Water progress')}: ${widget.consumedMl} / $target ml',
@@ -96,17 +97,17 @@ class _DashboardWaterCardState extends State<DashboardWaterCard> {
                 ),
               ),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: PremiumDesignTokens.spaceXs - 2),
             Text(
               remaining > 0
                   ? '$remaining ml ${context.strings.text('remaining')}'
                   : context.strings.text('Hydration target reached'),
               style: Theme.of(context).textTheme.bodySmall,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: PremiumDesignTokens.spaceMd - 4),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: PremiumDesignTokens.spaceXs,
+              runSpacing: PremiumDesignTokens.spaceXs,
               children: [
                 for (final amount in const [250, 500, 750])
                   FilledButton.tonal(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../app/theme/premium_design_tokens.dart';
 import '../../../data/repositories/meal_repository.dart';
 
 class DashboardMealsTimeline extends StatelessWidget {
@@ -36,12 +37,17 @@ class DashboardMealsTimeline extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Card(
     child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: PremiumDesignTokens.spaceXs),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            padding: EdgeInsets.fromLTRB(
+              PremiumDesignTokens.spaceMd,
+              PremiumDesignTokens.spaceXs,
+              PremiumDesignTokens.spaceMd,
+              PremiumDesignTokens.spaceXs / 2,
+            ),
             child: Row(
               children: [
                 Expanded(
@@ -60,7 +66,12 @@ class DashboardMealsTimeline extends StatelessWidget {
           ),
           if (usualBreakfastAvailable)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+              padding: EdgeInsets.fromLTRB(
+                PremiumDesignTokens.spaceMd,
+                PremiumDesignTokens.spaceXs / 2,
+                PremiumDesignTokens.spaceMd,
+                PremiumDesignTokens.spaceXs,
+              ),
               child: FilledButton.tonalIcon(
                 onPressed: onRepeatBreakfast,
                 icon: const Icon(Icons.replay_outlined),
