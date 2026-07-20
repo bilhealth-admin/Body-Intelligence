@@ -99,7 +99,7 @@ class DashboardPage extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(flex: 4, child: leadingColumn),
-                        const SizedBox(width: PremiumDesignTokens.spaceLg),
+                        const SizedBox(width: PremiumDesignTokens.spaceXl),
                         const Expanded(flex: 8, child: DashboardGrid()),
                       ],
                     )
@@ -107,7 +107,7 @@ class DashboardPage extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         leadingColumn,
-                        const SizedBox(height: PremiumDesignTokens.spaceLg),
+                        const SizedBox(height: PremiumDesignTokens.spaceXl),
                         const DashboardGrid(),
                       ],
                     );
