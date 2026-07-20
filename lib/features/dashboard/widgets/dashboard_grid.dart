@@ -54,10 +54,11 @@ class DashboardGrid extends ConsumerWidget {
     final usualBreakfastCandidates =
         ref.watch(usualMealsProvider('breakfast')).value ?? const [];
     final usualBreakfast = usualBreakfastCandidates.firstOrNull;
-    final recentBreakfast = (mealsAsync.value ?? const [])
-        .where((entry) => entry.meal.type == 'breakfast')
-        .toList()
-      ..sort((a, b) => b.meal.date.compareTo(a.meal.date));
+    final recentBreakfast =
+        (mealsAsync.value ?? const [])
+            .where((entry) => entry.meal.type == 'breakfast')
+            .toList()
+          ..sort((a, b) => b.meal.date.compareTo(a.meal.date));
     final system =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     if ([

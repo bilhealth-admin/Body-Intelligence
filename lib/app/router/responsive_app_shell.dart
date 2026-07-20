@@ -83,77 +83,77 @@ class ResponsiveAppShell extends StatelessWidget {
                 PremiumDesignTokens.spaceMd,
               ),
               children: [
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  Localizations.localeOf(context).languageCode == 'ar'
-                      ? 'إضافة سريعة'
-                      : 'Quick Add',
-                  style: PremiumDesignTokens.sectionHeading(context),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'إضافة سريعة'
+                        : 'Quick Add',
+                    style: PremiumDesignTokens.sectionHeading(context),
+                  ),
+                  subtitle: Text(
+                    Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'اختر إجراءً واحدًا. لن يتم حفظ شيء دون تأكيدك.'
+                        : 'Choose one action. Nothing is saved without your confirmation.',
+                  ),
                 ),
-                subtitle: Text(
-                  Localizations.localeOf(context).languageCode == 'ar'
-                      ? 'اختر إجراءً واحدًا. لن يتم حفظ شيء دون تأكيدك.'
-                      : 'Choose one action. Nothing is saved without your confirmation.',
+                _QuickAction(
+                  icon: Icons.monitor_weight_outlined,
+                  label: Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'قياس الوزن اليومي'
+                      : 'Daily weight check-in',
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    context.go('/daily-check-in');
+                  },
                 ),
-              ),
-              _QuickAction(
-                icon: Icons.monitor_weight_outlined,
-                label: Localizations.localeOf(context).languageCode == 'ar'
-                    ? 'قياس الوزن اليومي'
-                    : 'Daily weight check-in',
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  context.go('/daily-check-in');
-                },
-              ),
-              _QuickAction(
-                icon: Icons.restaurant_menu,
-                label: Localizations.localeOf(context).languageCode == 'ar'
-                    ? 'إضافة طعام'
-                    : 'Add food',
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  context.go('/daily-log');
-                },
-              ),
-              _QuickAction(
-                icon: Icons.water_drop_outlined,
-                label: Localizations.localeOf(context).languageCode == 'ar'
-                    ? 'إضافة ماء'
-                    : 'Add water',
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  context.go('/daily-log');
-                },
-              ),
-              _QuickAction(
-                icon: Icons.search,
-                label: Localizations.localeOf(context).languageCode == 'ar'
-                    ? 'البحث في الأطعمة أو إنشاء طعام'
-                    : 'Search or create food',
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  context.go('/nutrition');
-                },
-              ),
-              _UnavailableQuickAction(
-                icon: Icons.qr_code_scanner,
-                label: Localizations.localeOf(context).languageCode == 'ar'
-                    ? 'مسح الباركود'
-                    : 'Scan barcode',
-                reason: Localizations.localeOf(context).languageCode == 'ar'
-                    ? 'غير متاح حتى يتم إعداد مصدر موثوق لبيانات الباركود.'
-                    : 'Unavailable until a verified barcode data source is configured.',
-              ),
-              _UnavailableQuickAction(
-                icon: Icons.auto_awesome_outlined,
-                label: context.strings.text('Ask BIL'),
-                reason: context.strings.text(
-                  'Unavailable until the server-side AI consent and rate-limit boundary is configured.',
+                _QuickAction(
+                  icon: Icons.restaurant_menu,
+                  label: Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'إضافة طعام'
+                      : 'Add food',
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    context.go('/daily-log');
+                  },
                 ),
-              ),
-            ],
+                _QuickAction(
+                  icon: Icons.water_drop_outlined,
+                  label: Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'إضافة ماء'
+                      : 'Add water',
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    context.go('/daily-log');
+                  },
+                ),
+                _QuickAction(
+                  icon: Icons.search,
+                  label: Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'البحث في الأطعمة أو إنشاء طعام'
+                      : 'Search or create food',
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    context.go('/nutrition');
+                  },
+                ),
+                _UnavailableQuickAction(
+                  icon: Icons.qr_code_scanner,
+                  label: Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'مسح الباركود'
+                      : 'Scan barcode',
+                  reason: Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'غير متاح حتى يتم إعداد مصدر موثوق لبيانات الباركود.'
+                      : 'Unavailable until a verified barcode data source is configured.',
+                ),
+                _UnavailableQuickAction(
+                  icon: Icons.auto_awesome_outlined,
+                  label: context.strings.text('Ask BIL'),
+                  reason: context.strings.text(
+                    'Unavailable until the server-side AI consent and rate-limit boundary is configured.',
+                  ),
+                ),
+              ],
             ),
           ),
         ),

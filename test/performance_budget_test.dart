@@ -59,37 +59,43 @@ void main() {
     },
   );
 
-  test('empty-query ranking remains deterministic for large local catalogs', () async {
-    final database = AppDatabase.forTesting(NativeDatabase.memory());
-    addTearDown(database.close);
+  test(
+    'empty-query ranking remains deterministic for large local catalogs',
+    () async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
 
-    await database.batch((batch) {
-      for (var index = 0; index < 1000; index++) {
-        batch.insert(
-          database.foods,
-          FoodsCompanion.insert(
-            name: index == 812 ? 'Preferred target food' : 'Catalog food $index',
-            arabicName: Value('طعام $index'),
-            category: const Value('benchmark'),
-            keywords: const Value('catalog'),
-            calories: 100,
-            protein: 5,
-            carbs: 15,
-            fats: 2,
-          ),
-        );
-      }
-    });
+      await database.batch((batch) {
+        for (var index = 0; index < 1000; index++) {
+          batch.insert(
+            database.foods,
+            FoodsCompanion.insert(
+              name: index == 812
+                  ? 'Preferred target food'
+                  : 'Catalog food $index',
+              arabicName: Value('طعام $index'),
+              category: const Value('benchmark'),
+              keywords: const Value('catalog'),
+              calories: 100,
+              protein: 5,
+              carbs: 15,
+              fats: 2,
+            ),
+          );
+        }
+      });
 
-    final repository = FoodRepository(database);
-    final preferredId =
-        (await repository.search('Preferred target food')).single.id;
-    await repository.recordRecent(preferredId);
-    await repository.recordRecent(preferredId);
-    await repository.setFavorite(preferredId, true);
+      final repository = FoodRepository(database);
+      final preferredId = (await repository.search(
+        'Preferred target food',
+      )).single.id;
+      await repository.recordRecent(preferredId);
+      await repository.recordRecent(preferredId);
+      await repository.setFavorite(preferredId, true);
 
-    final ranked = await repository.search('');
-    expect(ranked, isNotEmpty);
-    expect(ranked.first.id, preferredId);
-  });
+      final ranked = await repository.search('');
+      expect(ranked, isNotEmpty);
+      expect(ranked.first.id, preferredId);
+    },
+  );
 }
