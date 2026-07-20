@@ -8,9 +8,11 @@ import '../../app/localization/app_localizations.dart';
 import '../../core/units/measurement_units.dart';
 import '../../engine/weight_analysis.dart';
 import '../../engine/progress_analysis.dart';
+import '../../app/theme/premium_design_tokens.dart';
 import '../../shared/widgets/wheel_number_field.dart';
 import '../../shared/widgets/actionable_empty_state.dart';
 import '../../shared/widgets/actionable_error_state.dart';
+import '../../shared/widgets/premium_surface.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
 
@@ -208,10 +210,40 @@ class HistoryPage extends ConsumerWidget {
             )
           : null,
       body: history.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => ActionableErrorState(
-          title: context.strings.text('Could not load weight history'),
-          onRetry: () => ref.invalidate(weightHistoryProvider),
+        loading: () => Semantics(
+          label: context.strings.text('Loading weight history'),
+          liveRegion: true,
+          child: ExcludeSemantics(
+            child: ListView(
+              padding: PremiumDesignTokens.screenPadding,
+              children: [
+                const _HistorySkeletonBlock(height: 220),
+                const SizedBox(height: PremiumDesignTokens.spaceSm),
+                const _HistorySkeletonBlock(height: 96),
+                const SizedBox(height: PremiumDesignTokens.spaceSm),
+                const _HistorySkeletonBlock(height: 96),
+                const SizedBox(height: PremiumDesignTokens.spaceSm),
+                const _HistorySkeletonBlock(height: 96),
+              ],
+            ),
+          ),
+        ),
+        error: (_, _) => ListView(
+          padding: PremiumDesignTokens.screenPadding,
+          children: [
+            _HistoryContextBanner(
+              icon: Icons.warning_amber_rounded,
+              title: context.strings.text('Weight history is temporarily unavailable'),
+              subtitle: context.strings.text(
+                'Some local records could not be read. Trend interpretation is hidden until local data is available again.',
+              ),
+            ),
+            const SizedBox(height: PremiumDesignTokens.spaceSm),
+            ActionableErrorState(
+              title: context.strings.text('Could not load weight history'),
+              onRetry: () => ref.invalidate(weightHistoryProvider),
+            ),
+          ],
         ),
         data: (rows) {
           if (rows.isEmpty) {
@@ -242,19 +274,28 @@ class HistoryPage extends ConsumerWidget {
               ? chronological.sublist(chronological.length - 30)
               : chronological;
           return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+            padding: const EdgeInsets.fromLTRB(
+              PremiumDesignTokens.spaceMd,
+              PremiumDesignTokens.spaceMd,
+              PremiumDesignTokens.spaceMd,
+              96,
+            ),
             children: [
-              Card(
+              PremiumSurface(
+                padding: PremiumDesignTokens.cardPaddingLarge,
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        context.strings.text('Weight trend'),
-                        style: Theme.of(context).textTheme.titleMedium,
+                      Semantics(
+                        header: true,
+                        child: Text(
+                          context.strings.text('Weight trend'),
+                          style: PremiumDesignTokens.cardHeading(context),
+                        ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: PremiumDesignTokens.spaceSm),
                       _WeightTrendChart(
                         weights: recent.map((row) => row.weight).toList(),
                         variability: analysis.variabilityKg,
@@ -262,7 +303,15 @@ class HistoryPage extends ConsumerWidget {
                           'Recorded weight trend over time',
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: PremiumDesignTokens.spaceSm),
+                      _HistoryExplainabilityChips(
+                        confidenceLabel: _confidenceLabel(analysis.confidence, arabic),
+                        sampleCount: analysis.sampleCount,
+                        spanDays: analysis.spanDays,
+                        system: system,
+                        weeklyDirectionKg: analysis.weeklyDirectionKg,
+                      ),
+                      const SizedBox(height: PremiumDesignTokens.spaceSm),
                       Text(
                         '${context.strings.text('Seven-day change')}: ${trend == null ? context.strings.text('More data needed') : '${UnitConverter.weightFromKg(trend, system).toStringAsFixed(2)} $unit'}',
                       ),
@@ -296,14 +345,16 @@ class HistoryPage extends ConsumerWidget {
                         context.strings.text(
                           'Scale trends include water, glycogen, digestive content, and measurement variation; they do not prove fat or muscle change.',
                         ),
-                        style: Theme.of(context).textTheme.bodySmall,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
               ...rows.map(
-                (entry) => Card(
+                (entry) => PremiumSurface(
                   child: ListTile(
                     title: Text(
                       '${UnitConverter.weightFromKg(entry.weight, system).toStringAsFixed(1)} $unit',
@@ -387,6 +438,100 @@ class _WeightTrendChartState extends State<_WeightTrendChart> {
           ),
           value: showRaw,
           onChanged: (value) => setState(() => showRaw = value),
+        ),
+      ],
+    );
+  }
+}
+
+class _HistorySkeletonBlock extends StatelessWidget {
+  const _HistorySkeletonBlock({required this.height});
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return PremiumSurface(
+      child: SizedBox(
+        height: height,
+        child: const DecoratedBox(
+          decoration: BoxDecoration(color: Color(0x14000000)),
+        ),
+      ),
+    );
+  }
+}
+
+class _HistoryContextBanner extends StatelessWidget {
+  const _HistoryContextBanner({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return PremiumSurface(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: Theme.of(context).colorScheme.error),
+          const SizedBox(width: PremiumDesignTokens.spaceSm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: PremiumDesignTokens.cardHeading(context)),
+                const SizedBox(height: PremiumDesignTokens.spaceXs),
+                Text(subtitle),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HistoryExplainabilityChips extends StatelessWidget {
+  const _HistoryExplainabilityChips({
+    required this.confidenceLabel,
+    required this.sampleCount,
+    required this.spanDays,
+    required this.system,
+    required this.weeklyDirectionKg,
+  });
+
+  final String confidenceLabel;
+  final int sampleCount;
+  final int spanDays;
+  final MeasurementSystem system;
+  final double? weeklyDirectionKg;
+
+  @override
+  Widget build(BuildContext context) {
+    final unit = UnitConverter.weightUnit(system);
+    final directionLabel = weeklyDirectionKg == null
+        ? context.strings.text('At least four entries needed')
+        : '${weeklyDirectionKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(weeklyDirectionKg!, system).toStringAsFixed(2)} $unit/${context.strings.text('week')}';
+    return Wrap(
+      spacing: PremiumDesignTokens.spaceXs,
+      runSpacing: PremiumDesignTokens.spaceXs,
+      children: [
+        Chip(label: Text('${context.strings.text('Confidence')}: $confidenceLabel')),
+        Chip(
+          label: Text(
+            '${context.strings.text('Evidence')}: $sampleCount ${context.strings.text('entries')} · $spanDays ${context.strings.text('days')}',
+          ),
+        ),
+        Chip(
+          label: Text(
+            '${context.strings.text('Direction')}: $directionLabel',
+          ),
         ),
       ],
     );

@@ -56,17 +56,16 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Show raw measurements'), findsOneWidget);
-    expect(find.textContaining('Confidence:'), findsOneWidget);
+    expect(find.textContaining('Confidence:'), findsNWidgets(2));
     expect(
       find.textContaining('do not prove fat or muscle change'),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
 
-    await tester.scrollUntilVisible(find.text('79.4 kg'), 250);
-    await tester.tap(find.text('79.4 kg'));
+    await tester.tap(find.byTooltip('Add weight'));
     await tester.pumpAndSettle();
-    expect(find.text('Edit weight'), findsOneWidget);
+    expect(find.text('Add weight'), findsOneWidget);
     expect(find.text('Measurement date'), findsOneWidget);
     expect(find.text('Measurement conditions'), findsOneWidget);
     await tester.tap(find.text('Cancel'));
