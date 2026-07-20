@@ -79,6 +79,54 @@ class OneBestActionEngine {
         evidence: ['Fewer than 14 comparable tracked days'],
       );
     }
+    if (suppressedTypes.contains(BestActionType.hydration)) {
+      return const BestAction(
+        type: BestActionType.none,
+        title: 'No repeated hydration prompt today',
+        reason:
+            'Hydration advice was paused after repeated low-helpfulness feedback.',
+        evidence: [
+          'Two or more explicit low helpfulness ratings for hydration',
+          'Hydration recommendation was intentionally not repeated today',
+        ],
+      );
+    }
+    if (suppressedTypes.contains(BestActionType.protein)) {
+      return const BestAction(
+        type: BestActionType.none,
+        title: 'No repeated protein prompt today',
+        reason:
+            'Protein advice was paused after repeated low-helpfulness feedback.',
+        evidence: [
+          'Two or more explicit low helpfulness ratings for protein',
+          'Protein recommendation was intentionally not repeated today',
+        ],
+      );
+    }
+    if (suppressedTypes.contains(BestActionType.completeLogging)) {
+      return const BestAction(
+        type: BestActionType.none,
+        title: 'No repeated logging prompt today',
+        reason:
+            'Logging advice was paused after repeated low-helpfulness feedback.',
+        evidence: [
+          'Two or more explicit low helpfulness ratings for logging completion',
+          'Logging recommendation was intentionally not repeated today',
+        ],
+      );
+    }
+    if (suppressedTypes.contains(BestActionType.weighIn)) {
+      return const BestAction(
+        type: BestActionType.none,
+        title: 'No repeated weigh-in prompt today',
+        reason:
+            'Weigh-in advice was paused after repeated low-helpfulness feedback.',
+        evidence: [
+          'Two or more explicit low helpfulness ratings for weigh-in reminders',
+          'Weigh-in recommendation was intentionally not repeated today',
+        ],
+      );
+    }
     return BestAction(
       type: BestActionType.none,
       title: 'No plan change needed',

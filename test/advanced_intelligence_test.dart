@@ -49,24 +49,51 @@ void main() {
     expect(action.type, BestActionType.hydration);
   });
 
-  test('suppressed advice yields an explicit memory explanation', () {
-    final action = OneBestActionEngine.choose(
-      weighedToday: true,
-      loggingComplete: true,
-      protein: 120,
-      proteinTarget: 120,
-      waterMl: 2500,
-      waterTarget: 2500,
-      trackedDays: 20,
-      suppressedTypes: const {BestActionType.hydration},
-    );
-    expect(action.type, BestActionType.none);
-    expect(action.reason, contains('not repeated'));
-    expect(
-      action.evidence,
-      contains('Two or more explicit low helpfulness ratings'),
-    );
-  });
+  test(
+    'suppressed hydration advice yields explicit type-specific memory explanation',
+    () {
+      final action = OneBestActionEngine.choose(
+        weighedToday: true,
+        loggingComplete: true,
+        protein: 120,
+        proteinTarget: 120,
+        waterMl: 2500,
+        waterTarget: 2500,
+        trackedDays: 20,
+        suppressedTypes: const {BestActionType.hydration},
+      );
+      expect(action.type, BestActionType.none);
+      expect(action.title, contains('hydration'));
+      expect(action.reason, contains('Hydration advice was paused'));
+      expect(
+        action.evidence,
+        contains('Hydration recommendation was intentionally not repeated today'),
+      );
+    },
+  );
+
+  test(
+    'suppressed protein advice yields explicit type-specific memory explanation',
+    () {
+      final action = OneBestActionEngine.choose(
+        weighedToday: true,
+        loggingComplete: true,
+        protein: 120,
+        proteinTarget: 120,
+        waterMl: 2500,
+        waterTarget: 2500,
+        trackedDays: 20,
+        suppressedTypes: const {BestActionType.protein},
+      );
+      expect(action.type, BestActionType.none);
+      expect(action.title, contains('protein'));
+      expect(action.reason, contains('Protein advice was paused'));
+      expect(
+        action.evidence,
+        contains('Protein recommendation was intentionally not repeated today'),
+      );
+    },
+  );
 
   test('body twin refuses a scenario until data is sufficient', () {
     final report = BodyTwinEngine.simulate(
