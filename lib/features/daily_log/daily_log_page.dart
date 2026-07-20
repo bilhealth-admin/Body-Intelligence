@@ -312,9 +312,10 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                   children: [
                     Expanded(child: _field(water, 'Water (ml)')),
                     const SizedBox(width: 8),
-                    OutlinedButton(
+                    FilledButton.tonalIcon(
                       onPressed: _addWater,
-                      child: Text(context.strings.text('Add water')),
+                      icon: const Icon(Icons.water_drop_outlined),
+                      label: Text(context.strings.text('Add water')),
                     ),
                   ],
                 ),
@@ -580,9 +581,10 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                         ),
                       ),
                       const SizedBox(height: PremiumDesignTokens.spaceSm),
-                      OutlinedButton(
+                      FilledButton.tonalIcon(
                         onPressed: selectedFood == null ? null : _saveMeal,
-                        child: Text(context.strings.text('Save meal')),
+                        icon: const Icon(Icons.restaurant_menu),
+                        label: Text(context.strings.text('Save meal')),
                       ),
                     ],
                   ),
