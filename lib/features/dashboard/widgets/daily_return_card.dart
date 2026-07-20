@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../engine/daily_return_engine.dart';
+import '../../../engine/data_honesty_engine.dart';
 
 class DailyReturnCard extends StatelessWidget {
   const DailyReturnCard({
@@ -13,6 +14,11 @@ class DailyReturnCard extends StatelessWidget {
     required this.actionReason,
     required this.missingEvidence,
     required this.onPrimaryAction,
+    this.onDismissRecommendation,
+    this.onCorrectRecommendation,
+    this.onRecommendationFeedback,
+    this.recommendationTimeHorizon,
+    this.alternativeExplanation,
   });
 
   final DailyReturnReport report;
@@ -21,6 +27,11 @@ class DailyReturnCard extends StatelessWidget {
   final String actionReason;
   final String missingEvidence;
   final VoidCallback onPrimaryAction;
+  final VoidCallback? onDismissRecommendation;
+  final VoidCallback? onCorrectRecommendation;
+  final VoidCallback? onRecommendationFeedback;
+  final String? recommendationTimeHorizon;
+  final String? alternativeExplanation;
 
   @override
   Widget build(BuildContext context) {
@@ -88,18 +99,82 @@ class DailyReturnCard extends StatelessWidget {
               Text(missingEvidence),
               const SizedBox(height: PremiumDesignTokens.spaceMd),
               if (report.hasPrimaryAction) ...[
+                Text(
+                  context.strings.text('Why this action appears'),
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
                 Text(actionReason),
                 const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
+                Text(
+                  context.strings.text('Evidence used'),
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                Text(changedSummary),
+                const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
+                Text(
+                  context.strings.text('Evidence missing'),
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                Text(missingEvidence),
+                const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
+                Text(
+                  context.strings.text('Confidence'),
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                Text(_confidenceLabel(context)),
+                if (recommendationTimeHorizon != null) ...[
+                  const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
+                  Text(
+                    context.strings.text('Time horizon'),
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  Text(recommendationTimeHorizon!),
+                ],
+                if (alternativeExplanation != null) ...[
+                  const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
+                  Text(
+                    context.strings.text('Alternative explanation'),
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  Text(alternativeExplanation!),
+                ],
+                const SizedBox(height: PremiumDesignTokens.spaceMd),
                 FilledButton(
                   onPressed: onPrimaryAction,
                   child: Text(actionTitle),
                 ),
+                if (onDismissRecommendation != null ||
+                    onCorrectRecommendation != null ||
+                    onRecommendationFeedback != null) ...[
+                  const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
+                  Wrap(
+                    spacing: PremiumDesignTokens.spaceXs,
+                    runSpacing: PremiumDesignTokens.spaceXs,
+                    children: [
+                      if (onDismissRecommendation != null)
+                        OutlinedButton(
+                          onPressed: onDismissRecommendation,
+                          child: Text(context.strings.text('Dismiss')),
+                        ),
+                      if (onCorrectRecommendation != null)
+                        OutlinedButton(
+                          onPressed: onCorrectRecommendation,
+                          child: Text(context.strings.text('Correct')),
+                        ),
+                      if (onRecommendationFeedback != null)
+                        OutlinedButton(
+                          onPressed: onRecommendationFeedback,
+                          child: Text(context.strings.text('Feedback')),
+                        ),
+                    ],
+                  ),
+                ],
               ] else
                 Semantics(
                   liveRegion: true,
                   child: Text(
                     context.strings.text(
-                      'No corrective action is needed from the evidence recorded today.',
+                      'No corrective action is needed from the evidence recorded today because the current evidence is insufficient or does not support a safer recommendation.',
                     ),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
@@ -109,6 +184,20 @@ class DailyReturnCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _confidenceLabel(BuildContext context) {
+    final reliability = report.honesty.reliability;
+    if (reliability == DataReliability.strong) {
+      return context.strings.text('High');
+    }
+    if (reliability == DataReliability.useful) {
+      return context.strings.text('Moderate');
+    }
+    if (reliability == DataReliability.emerging) {
+      return context.strings.text('Low');
+    }
+    return context.strings.text('Insufficient data');
   }
 }
 
