@@ -1,4 +1,4 @@
-name: body_intelligence_log
+﻿name: body_intelligence_log
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -28,6 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  google_fonts: ^8.2.0
   flutter:
     sdk: flutter
 
@@ -67,7 +68,21 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
+  assets:
+    - assets/images/v10_master/bil_hologram_master.png
+    - assets/images/v10_master/bil_hdr_starfield_master.png
+    - assets/images/backgrounds/bil_hdr_space_v10.webp
+    - assets/images/onboarding/bil_body_hologram_v10.webp
+    - assets/images/branding/bil_logo_silver_v10.webp
+    - assets/images/v9/v9_hologram.webp
+    - assets/images/v9/v9_logo_registered.webp
+    - assets/images/v9/v9_glow_rings.webp
+    - assets/images/v9/v9_hdr_background.webp
+    - assets/images/branding/bil_logo_registered_v8.webp
+    - assets/images/v10_final/bil_logo_metallic_transparent.png
+    - assets/images/v10_final/bil_hologram_transparent.png
+    - assets/images/onboarding/bil_body_hologram_v8.webp
+    - assets/images/onboarding/bil_body_hologram.webp
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -124,3 +139,11 @@ flutter_launcher_icons:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+
+
+
+
+
+
+

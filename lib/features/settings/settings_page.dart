@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -19,12 +21,12 @@ class SettingsPage extends ConsumerWidget {
   Future<void> _showInfo(BuildContext context, String title, String body) {
     return showDialog<void>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(title),
         content: SingleChildScrollView(child: Text(body)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text(context.strings.text('Close')),
           ),
         ],
@@ -66,46 +68,104 @@ class SettingsPage extends ConsumerWidget {
   }
 
   Future<void> _reset(BuildContext context, WidgetRef ref) async {
-    final controller = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      barrierDismissible: false,
+      useRootNavigator: true,
+      builder: (dialogContext) => AlertDialog(
         title: Text(context.strings.text('Reset all local data?')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              context.strings.text(
-                'This permanently removes your profile, goals, logs, meals, custom foods, and settings. Type RESET to continue.',
-              ),
-            ),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(labelText: 'RESET'),
-            ),
-          ],
+        content: Text(
+          context.strings.text(
+            'This permanently removes your profile, goals, logs, meals, custom foods, and settings.',
+          ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
             child: Text(context.strings.text('Cancel')),
           ),
           FilledButton(
-            onPressed: () => Navigator.pop(context, controller.text == 'RESET'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(context.strings.text('Reset')),
           ),
         ],
       ),
     );
-    controller.dispose();
-    if (confirmed != true) return;
+
+    if (confirmed != true || !context.mounted) return;
+
+    BuildContext? progressDialogContext;
+    final progressDialogReady = Completer<void>();
+
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        useRootNavigator: true,
+        builder: (dialogContext) {
+          progressDialogContext = dialogContext;
+          if (!progressDialogReady.isCompleted) {
+            progressDialogReady.complete();
+          }
+
+          return PopScope(
+            canPop: false,
+            child: AlertDialog(
+              content: Row(
+                children: [
+                  const SizedBox.square(
+                    dimension: 28,
+                    child: CircularProgressIndicator(strokeWidth: 3),
+                  ),
+                  const SizedBox(width: 18),
+                  Expanded(
+                    child: Text(
+                      context.strings.text(
+                        'Deleting local data. Please wait...',
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+
+    await progressDialogReady.future;
+
     try {
       final database = ref.read(databaseProvider);
       await LocalDataLifecycleService(database).clearAll();
       await SeedData.seedStarterCatalog(ref.read(foodRepositoryProvider));
-      if (context.mounted) context.go('/onboarding');
-    } catch (_) {
+
+      ref.invalidate(userProfileProvider);
+      ref.invalidate(measurementSystemProvider);
+      ref.invalidate(appSettingsProvider);
+      ref.invalidate(foodRepositoryProvider);
+
+      final dialogContext = progressDialogContext;
+      if (dialogContext != null && dialogContext.mounted) {
+        Navigator.of(dialogContext).pop();
+      }
+
       if (!context.mounted) return;
+
+      await Future<void>.delayed(Duration.zero);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          context.go('/onboarding');
+        }
+      });
+    } catch (_) {
+      final dialogContext = progressDialogContext;
+      if (dialogContext != null && dialogContext.mounted) {
+        Navigator.of(dialogContext).pop();
+      }
+
+      if (!context.mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

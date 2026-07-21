@@ -5,8 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../core/units/measurement_units.dart';
 import '../profile/providers/user_profile_provider.dart';
-import 'models/onboarding_draft.dart';
-import 'widgets/profile_step.dart';
+import 'bil_flagship_onboarding.dart';
 import 'widgets/welcome_step.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
@@ -20,7 +19,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   int step = 0;
   final ageController = TextEditingController();
   final regionController = TextEditingController();
-  final profileScrollController = ScrollController();
+
   double heightCm = 155;
   double currentWeightKg = 60;
   double targetWeightKg = 60;
@@ -30,17 +29,16 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   String? activity;
   String goalType = 'maintain';
   MeasurementSystem system = MeasurementSystem.metric;
-  bool disclaimerAccepted = false;
+
   bool existingProfileLoaded = false;
   bool draftLoaded = false;
   bool draftRestored = false;
+  bool profileRestored = false;
   bool loadFailed = false;
   bool saving = false;
-  bool saveFailed = false;
-  Map<String, String> errors = const {};
 
-  bool get isArabic => Localizations.localeOf(context).languageCode == 'ar';
-  String message(String en, String ar) => isArabic ? ar : en;
+  bool get isArabic =>
+      Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
 
   @override
   void didChangeDependencies() {
@@ -55,14 +53,18 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       final preferences = ref.read(preferencesRepositoryProvider);
       final savedUnits = await preferences.get('units');
       final savedRegion = await preferences.get('countryRegion');
-      final draft = await ref.read(onboardingDraftRepositoryProvider).load();
+      final savedDraft = await ref
+          .read(onboardingDraftRepositoryProvider)
+          .load();
       final profile = await ref
           .read(userProfileRepositoryProvider)
           .getProfile();
+
       if (!mounted) return;
       setState(() {
         if (profile != null) {
-          step = 4;
+          profileRestored = true;
+          step = 0;
           ageController.text = profile.age.toString();
           heightCm = profile.height;
           currentWeightKg = profile.currentWeight;
@@ -76,22 +78,20 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
               : profile.targetWeight > profile.currentWeight
               ? 'gain'
               : 'maintain';
-          disclaimerAccepted = true;
-        } else if (draft != null) {
+        } else if (savedDraft != null) {
           draftRestored = true;
-          step = draft.step;
-          ageController.text = draft.age;
-          heightCm = draft.heightCm;
-          currentWeightKg = draft.currentWeightKg;
-          targetWeightKg = draft.targetWeightKg;
-          waistCm = draft.waistCm;
-          neckCm = draft.neckCm;
-          regionController.text = draft.region;
-          gender = draft.gender;
-          activity = draft.activity;
-          goalType = draft.goalType;
-          system = draft.system;
-          disclaimerAccepted = draft.disclaimerAccepted;
+          step = 0;
+          ageController.text = savedDraft.age;
+          heightCm = savedDraft.heightCm;
+          currentWeightKg = savedDraft.currentWeightKg;
+          targetWeightKg = savedDraft.targetWeightKg;
+          waistCm = savedDraft.waistCm;
+          neckCm = savedDraft.neckCm;
+          regionController.text = savedDraft.region;
+          gender = savedDraft.gender;
+          activity = savedDraft.activity;
+          goalType = savedDraft.goalType;
+          system = savedDraft.system;
         } else {
           system = savedUnits == 'imperial'
               ? MeasurementSystem.imperial
@@ -114,326 +114,331 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   void dispose() {
     ageController.dispose();
     regionController.dispose();
-    profileScrollController.dispose();
     super.dispose();
   }
 
-  Map<String, String> validate() {
-    final next = <String, String>{};
+  int _ageFromBirthDate(DateTime birthDate) {
+    final today = DateTime.now();
+    var age = today.year - birthDate.year;
+    final birthdayPassed =
+        today.month > birthDate.month ||
+        (today.month == birthDate.month && today.day >= birthDate.day);
+    if (!birthdayPassed) age--;
+    return age;
+  }
+
+  BilOnboardingDraft _initialFlagshipDraft() {
     final age = int.tryParse(ageController.text);
-    if (age == null || age < 18 || age > 120) {
-      next['age'] = message(
-        'Enter an age from 18 to 120.',
-        'أدخل عمرًا من ١٨ إلى ١٢٠.',
-      );
-    }
-    if (gender == null) {
-      next['gender'] = message(
-        'Select biological sex.',
-        'اختر الجنس البيولوجي.',
-      );
-    }
-    if (activity == null) {
-      next['activity'] = message(
-        'Select an activity level.',
-        'اختر مستوى النشاط.',
-      );
-    }
-    if (heightCm < 100 || heightCm > 250) {
-      next['height'] = message(
-        'Height must be between 100 and 250 cm.',
-        'يجب أن يكون الطول بين ١٠٠ و٢٥٠ سم.',
-      );
-    }
-    if (currentWeightKg < 20 || currentWeightKg > 350) {
-      next['currentWeight'] = message(
-        'Weight must be between 20 and 350 kg.',
-        'يجب أن يكون الوزن بين ٢٠ و٣٥٠ كجم.',
-      );
-    }
-    if (targetWeightKg < 20 || targetWeightKg > 350) {
-      next['targetWeight'] = message(
-        'Goal weight must be between 20 and 350 kg.',
-        'يجب أن يكون الوزن المستهدف بين ٢٠ و٣٥٠ كجم.',
-      );
-    } else if (goalType == 'lose' && targetWeightKg >= currentWeightKg) {
-      next['targetWeight'] = message(
-        'For weight loss, choose a goal below your current weight.',
-        'لخسارة الوزن، اختر هدفًا أقل من وزنك الحالي.',
-      );
-    } else if (goalType == 'gain' && targetWeightKg <= currentWeightKg) {
-      next['targetWeight'] = message(
-        'For weight gain, choose a goal above your current weight.',
-        'لزيادة الوزن، اختر هدفًا أعلى من وزنك الحالي.',
-      );
-    } else if (goalType == 'maintain' &&
-        (targetWeightKg - currentWeightKg).abs() > 2) {
-      next['targetWeight'] = message(
-        'A maintenance goal should remain within 2 kg of current weight.',
-        'هدف الحفاظ يجب أن يكون ضمن ٢ كجم من الوزن الحالي.',
-      );
-    }
-    if (!disclaimerAccepted) {
-      next['disclaimer'] = message(
-        'Accept the health disclaimer to continue.',
-        'وافق على إخلاء المسؤولية الصحية للمتابعة.',
-      );
-    }
-    return next;
-  }
+    final now = DateTime.now();
 
-  void advanceProfile() {
-    final stageKeys = switch (step) {
-      1 => {'age', 'gender'},
-      2 => {'height', 'currentWeight', 'activity'},
-      3 => {'targetWeight'},
-      _ => <String>{},
-    };
-    final stageErrors = Map<String, String>.from(validate())
-      ..removeWhere((key, _) => !stageKeys.contains(key));
-    if (stageErrors.isNotEmpty) {
-      setState(() => errors = stageErrors);
-      return;
-    }
-    update(() {
-      errors = const {};
-      step += 1;
-    });
-    if (profileScrollController.hasClients) {
-      profileScrollController.jumpTo(0);
-    }
-  }
-
-  void goBackProfile() {
-    if (step <= 1) return;
-    update(() {
-      errors = const {};
-      step -= 1;
-    });
-    if (profileScrollController.hasClients) {
-      profileScrollController.jumpTo(0);
-    }
-  }
-
-  Future<void> complete() async {
-    if (saving) return;
-    final nextErrors = validate();
-    setState(() {
-      errors = nextErrors;
-      saveFailed = false;
-    });
-    if (nextErrors.isNotEmpty) {
-      if (profileScrollController.hasClients) {
-        await profileScrollController.animateTo(
-          0,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
-        );
+    return BilOnboardingDraft()
+      ..birthDate = age == null ? null : DateTime(now.year - age, 1, 1)
+      ..sex = gender == 'female' ? BilSex.female : BilSex.male
+      ..units = system == MeasurementSystem.imperial
+          ? BilUnits.imperial
+          : BilUnits.metric
+      ..goal = switch (goalType) {
+        'gain' => BilGoal.buildMuscle,
+        'maintain' => BilGoal.maintain,
+        _ => BilGoal.loseFat,
       }
-      return;
+      ..activity = switch (activity) {
+        'sedentary' => BilActivity.low,
+        'light' => BilActivity.light,
+        'active' => BilActivity.high,
+        'veryActive' => BilActivity.veryHigh,
+        _ => BilActivity.moderate,
+      }
+      ..sexConfirmed = draftRestored || profileRestored
+      ..goalConfirmed = draftRestored || profileRestored
+      ..activityConfirmed = draftRestored || profileRestored
+      ..weight = (draftRestored || profileRestored) ? currentWeightKg : null
+      ..height = (draftRestored || profileRestored) ? heightCm : null
+      ..waist = (draftRestored || profileRestored) ? waistCm : null
+      ..neck = (draftRestored || profileRestored) ? neckCm : null;
+  }
+
+  double _activityFactor(BilActivity value) {
+    return switch (value) {
+      BilActivity.low => 1.2,
+      BilActivity.light => 1.375,
+      BilActivity.moderate => 1.55,
+      BilActivity.high => 1.725,
+      BilActivity.veryHigh => 1.9,
+    };
+  }
+
+  Future<BilInitialPlan> _calculatePlan(BilOnboardingDraft draft) async {
+    final birthDate = draft.birthDate;
+    final weight = draft.weight;
+    final height = draft.height;
+
+    if (birthDate == null || weight == null || height == null) {
+      throw StateError('Missing required body calibration values.');
     }
+
+    final age = _ageFromBirthDate(birthDate);
+    final sexOffset = draft.sex == BilSex.male ? 5.0 : -161.0;
+    final bmr = (10 * weight) + (6.25 * height) - (5 * age) + sexOffset;
+    final maintenance = bmr * _activityFactor(draft.activity);
+
+    final calories = switch (draft.goal) {
+      BilGoal.loseFat => (maintenance - 400).round(),
+      BilGoal.maintain => maintenance.round(),
+      BilGoal.buildMuscle => (maintenance + 250).round(),
+    }.clamp(1200, 6000);
+
+    final proteinPerKg = switch (draft.goal) {
+      BilGoal.loseFat => 1.8,
+      BilGoal.maintain => 1.6,
+      BilGoal.buildMuscle => 1.8,
+    };
+    final protein = (weight * proteinPerKg).round();
+    final fat = (weight * .8).round().clamp(40, 180);
+    final remainingCalories = calories - (protein * 4) - (fat * 9);
+    final carbs = (remainingCalories / 4).round().clamp(50, 800);
+
+    final weeklyPace = switch (draft.goal) {
+      BilGoal.loseFat => -0.4,
+      BilGoal.maintain => 0.0,
+      BilGoal.buildMuscle => 0.2,
+    };
+
+    return BilInitialPlan(
+      calories: calories,
+      protein: protein,
+      carbs: carbs,
+      fat: fat,
+      weeklyPace: weeklyPace,
+    );
+  }
+
+  String _activityValue(BilActivity value) {
+    return switch (value) {
+      BilActivity.low => 'sedentary',
+      BilActivity.light => 'light',
+      BilActivity.moderate => 'moderate',
+      BilActivity.high => 'active',
+      BilActivity.veryHigh => 'veryActive',
+    };
+  }
+
+  String _goalValue(BilGoal value) {
+    return switch (value) {
+      BilGoal.loseFat => 'lose',
+      BilGoal.maintain => 'maintain',
+      BilGoal.buildMuscle => 'gain',
+    };
+  }
+
+  double _suggestedTargetWeight(BilOnboardingDraft draft) {
+    final weight = draft.weight!;
+    return switch (draft.goal) {
+      BilGoal.loseFat => weight * .90,
+      BilGoal.maintain => weight,
+      BilGoal.buildMuscle => weight * 1.05,
+    };
+  }
+
+  Future<bool> _confirmHealthDisclaimer() async {
+    final accepted = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          isArabic ? 'معلومة صحية مهمة' : 'Important health information',
+        ),
+        content: Text(
+          isArabic
+              ? 'BIL يقدم تقديرات تعليمية وشخصية ولا يستبدل التشخيص أو الرعاية الطبية. بالمتابعة فإنك تقر بأن القرار الطبي النهائي يعود لك ولطبيبك.'
+              : 'BIL provides educational, personalized estimates and does not replace diagnosis or medical care. By continuing, you acknowledge that final medical decisions remain with you and your clinician.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(isArabic ? 'رجوع' : 'Back'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(isArabic ? 'أوافق وأتابع' : 'Accept & continue'),
+          ),
+        ],
+      ),
+    );
+    return accepted ?? false;
+  }
+
+  Future<void> _saveAndComplete(
+    BilOnboardingDraft draft,
+    BilInitialPlan plan,
+  ) async {
+    if (saving) return;
+    final accepted = await _confirmHealthDisclaimer();
+    if (!accepted || !mounted) return;
+
     setState(() => saving = true);
     try {
+      final birthDate = draft.birthDate!;
+      final age = _ageFromBirthDate(birthDate);
+      final currentWeight = draft.weight!;
+      final targetWeight = _suggestedTargetWeight(draft);
+      final activityValue = _activityValue(draft.activity);
+      final goalValue = _goalValue(draft.goal);
+
       final repository = ref.read(userProfileRepositoryProvider);
       await repository.save(
-        gender: gender!,
-        age: int.parse(ageController.text),
-        height: heightCm,
-        currentWeight: currentWeightKg,
-        targetWeight: targetWeightKg,
-        activityLevel: activity!,
-        exercises: activity != 'sedentary',
-        waist: waistCm,
-        neck: neckCm,
+        gender: draft.sex == BilSex.male ? 'male' : 'female',
+        age: age,
+        height: draft.height!,
+        currentWeight: currentWeight,
+        targetWeight: targetWeight,
+        activityLevel: activityValue,
+        exercises: activityValue != 'sedentary',
+        waist: draft.waist,
+        neck: draft.neck,
       );
+
       final profile = await repository.getProfile();
       if (profile != null) {
         await ref
             .read(goalRepositoryProvider)
             .save(
               profileUuid: profile.uuid,
-              type: goalType,
-              targetWeight: targetWeightKg,
+              type: goalValue,
+              targetWeight: targetWeight,
             );
       }
+
       final preferences = ref.read(preferencesRepositoryProvider);
-      await preferences.set('units', system.name);
+      await preferences.set(
+        'units',
+        draft.units == BilUnits.imperial ? 'imperial' : 'metric',
+      );
       await preferences.set('healthDisclaimerAccepted', 'true');
+
       final region = regionController.text.trim();
       if (region.isEmpty) {
         await preferences.remove('countryRegion');
       } else {
         await preferences.set('countryRegion', region);
       }
+
       final now = DateTime.now();
       await preferences.set('timezoneName', now.timeZoneName);
       await preferences.set(
         'timezoneOffsetMinutes',
         now.timeZoneOffset.inMinutes.toString(),
       );
-      await preferences.set('firstValueHandoffPending', 'true');
+      await preferences.set('firstValueHandoffPending', 'false');
+
       await ref.read(onboardingDraftRepositoryProvider).clear();
+
       if (mounted) context.go('/dashboard');
-    } catch (_) {
+    } catch (error, stack) {
+      debugPrint('Failed to save flagship onboarding: $error\n$stack');
       if (!mounted) return;
-      setState(() {
-        saving = false;
-        saveFailed = true;
-      });
+      setState(() => saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isArabic
+                ? 'تعذر حفظ الملف على هذا الجهاز. لم يتم رفع أي بيانات.'
+                : 'Could not save the profile on this device. No data was uploaded.',
+          ),
+        ),
+      );
     }
   }
 
-  OnboardingDraft get draft => OnboardingDraft(
-    step: step,
-    age: ageController.text,
-    heightCm: heightCm,
-    currentWeightKg: currentWeightKg,
-    targetWeightKg: targetWeightKg,
-    waistCm: waistCm,
-    neckCm: neckCm,
-    region: regionController.text,
-    gender: gender,
-    activity: activity,
-    goalType: goalType,
-    system: system,
-    disclaimerAccepted: disclaimerAccepted,
-  );
-
-  void persistDraft() {
-    if (!draftLoaded) return;
-    ref.read(onboardingDraftRepositoryProvider).save(draft);
+  Widget _loadingView() {
+    return Center(
+      child: Semantics(
+        label: context.strings.text(
+          'Restoring your private setup on this device',
+        ),
+        child: const CircularProgressIndicator(),
+      ),
+    );
   }
 
-  void update(VoidCallback change) {
-    setState(change);
-    persistDraft();
-  }
-
-  void updateSystem(MeasurementSystem value) {
-    update(() {
-      system = value;
-      errors = {...errors}
-        ..remove('height')
-        ..remove('currentWeight')
-        ..remove('targetWeight');
-    });
-    ref.read(preferencesRepositoryProvider).set('units', value.name);
+  Widget _loadFailureView() {
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.storage_outlined,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              context.strings.text('Could not restore your local setup'),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              onPressed: () {
+                setState(() {
+                  draftLoaded = false;
+                  loadFailed = false;
+                });
+                loadInitialState();
+              },
+              icon: const Icon(Icons.refresh),
+              label: Text(context.strings.text('Try again')),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: !draftLoaded
-              ? Center(
-                  child: Semantics(
-                    label: context.strings.text(
-                      'Restoring your private setup on this device',
-                    ),
-                    child: const CircularProgressIndicator(),
-                  ),
-                )
-              : loadFailed
-              ? Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 480),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.storage_outlined,
-                          size: 48,
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          context.strings.text(
-                            'Could not restore your local setup',
-                          ),
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          context.strings.text(
-                            'Nothing was deleted or uploaded. Reopen the local setup when your device storage is available.',
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 20),
-                        FilledButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              draftLoaded = false;
-                              loadFailed = false;
-                            });
-                            loadInitialState();
-                          },
-                          icon: const Icon(Icons.refresh),
-                          label: Text(context.strings.text('Try again')),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              : AnimatedSwitcher(
-                  duration: MediaQuery.disableAnimationsOf(context)
-                      ? Duration.zero
-                      : const Duration(milliseconds: 250),
-                  child: step == 0
-                      ? WelcomeStep(
-                          key: const ValueKey('welcome'),
-                          onContinue: () => update(() => step = 1),
-                        )
-                      : ProfileStep(
-                          key: ValueKey('profile-$step'),
-                          stage: step - 1,
-                          ageController: ageController,
-                          heightCm: heightCm,
-                          currentWeightKg: currentWeightKg,
-                          targetWeightKg: targetWeightKg,
-                          waistCm: waistCm,
-                          neckCm: neckCm,
-                          regionController: regionController,
-                          gender: gender,
-                          activity: activity,
-                          goalType: goalType,
-                          system: system,
-                          disclaimerAccepted: disclaimerAccepted,
-                          draftRestored: draftRestored,
-                          saving: saving,
-                          saveFailed: saveFailed,
-                          errors: errors,
-                          onAgeChanged: (_) => persistDraft(),
-                          onRegionChanged: (_) => persistDraft(),
-                          onHeightChanged: (value) =>
-                              update(() => heightCm = value),
-                          onCurrentWeightChanged: (value) =>
-                              update(() => currentWeightKg = value),
-                          onTargetWeightChanged: (value) =>
-                              update(() => targetWeightKg = value),
-                          onWaistChanged: (value) =>
-                              update(() => waistCm = value),
-                          onNeckChanged: (value) =>
-                              update(() => neckCm = value),
-                          onGenderChanged: (value) =>
-                              update(() => gender = value),
-                          onActivityChanged: (value) =>
-                              update(() => activity = value),
-                          onGoalTypeChanged: (value) =>
-                              update(() => goalType = value),
-                          onSystemChanged: updateSystem,
-                          onDisclaimerChanged: (value) =>
-                              update(() => disclaimerAccepted = value),
-                          onBack: goBackProfile,
-                          onContinue: step == 4 ? complete : advanceProfile,
-                          scrollController: profileScrollController,
-                        ),
-                ),
-        ),
-      ),
+    if (!draftLoaded) {
+      return Scaffold(body: SafeArea(child: _loadingView()));
+    }
+
+    if (loadFailed) {
+      return Scaffold(body: SafeArea(child: _loadFailureView()));
+    }
+
+    final content = step == 0
+        ? Scaffold(
+            key: const ValueKey('welcome'),
+            body: SafeArea(
+              child: WelcomeStep(onContinue: () => setState(() => step = 1)),
+            ),
+          )
+        : BilFlagshipOnboarding(
+            key: ValueKey('flagship-${draftRestored ? 'restored' : 'new'}'),
+            showWelcome: false,
+            initialDraft: _initialFlagshipDraft(),
+            onExitToWelcome: () => setState(() => step = 0),
+            calculatePlan: _calculatePlan,
+            onComplete: _saveAndComplete,
+          );
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 600),
+      reverseDuration: const Duration(milliseconds: 520),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) {
+        final slide = Tween<Offset>(
+          begin: const Offset(.035, 0),
+          end: Offset.zero,
+        ).animate(animation);
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(position: slide, child: child),
+        );
+      },
+      child: content,
     );
   }
 }

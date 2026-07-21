@@ -1,8 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../localization/app_localizations.dart';
-import '../theme/premium_design_tokens.dart';
 import '../theme/premium_motion_tokens.dart';
 
 class ResponsiveAppShell extends StatelessWidget {
@@ -23,9 +24,7 @@ class ResponsiveAppShell extends StatelessWidget {
     final location = GoRouterState.of(context).uri.path;
     for (var i = 0; i < paths.length; i++) {
       final path = paths[i];
-      if (location == path || location.startsWith('$path/')) {
-        return i;
-      }
+      if (location == path || location.startsWith('$path/')) return i;
     }
     return 0;
   }
@@ -34,37 +33,49 @@ class ResponsiveAppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final index = selectedIndex(context);
     final wide = MediaQuery.sizeOf(context).width >= 900;
-    final destinations = <NavigationDestination>[
-      NavigationDestination(
-        icon: const Icon(Icons.dashboard_outlined),
-        selectedIcon: const Icon(Icons.dashboard),
+    final arabic =
+        Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
+
+    final items = <({IconData icon, IconData selected, String label})>[
+      (
+        icon: Icons.dashboard_outlined,
+        selected: Icons.dashboard_rounded,
         label: context.strings.text('Today'),
       ),
-      NavigationDestination(
-        icon: const Icon(Icons.edit_note),
+      (
+        icon: Icons.edit_note_outlined,
+        selected: Icons.edit_note_rounded,
         label: context.strings.text('Diary'),
       ),
-      NavigationDestination(
-        icon: const Icon(Icons.restaurant_menu),
+      (
+        icon: Icons.restaurant_menu_outlined,
+        selected: Icons.restaurant_menu_rounded,
         label: context.strings.text('Discover'),
       ),
-      NavigationDestination(
-        icon: const Icon(Icons.monitor_weight_outlined),
+      (
+        icon: Icons.monitor_weight_outlined,
+        selected: Icons.monitor_weight_rounded,
         label: context.strings.text('Progress'),
       ),
-      NavigationDestination(
-        icon: const Icon(Icons.analytics_outlined),
+      (
+        icon: Icons.analytics_outlined,
+        selected: Icons.analytics_rounded,
         label: context.strings.text('Insights'),
       ),
-      NavigationDestination(
-        icon: const Icon(Icons.settings_outlined),
+      (
+        icon: Icons.settings_outlined,
+        selected: Icons.settings_rounded,
         label: context.strings.text('More'),
       ),
     ];
+
     void navigate(int next) => context.go(paths[next]);
+
     void quickAdd() => showModalBottomSheet<void>(
       context: context,
-      showDragHandle: true,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
       sheetAnimationStyle: AnimationStyle(
         duration: PremiumMotionTokens.durationFor(
           context,
@@ -75,186 +86,347 @@ class ResponsiveAppShell extends StatelessWidget {
           PremiumMotionTokens.stateChangeDuration,
         ),
       ),
-      builder: (sheetContext) => SafeArea(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 620),
-          child: Card(
-            margin: const EdgeInsets.fromLTRB(
-              PremiumDesignTokens.spaceMd,
-              0,
-              PremiumDesignTokens.spaceMd,
-              PremiumDesignTokens.spaceLg,
-            ),
-            child: ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.fromLTRB(
-                PremiumDesignTokens.spaceMd,
-                0,
-                PremiumDesignTokens.spaceMd,
-                PremiumDesignTokens.spaceMd,
-              ),
-              children: [
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    Localizations.localeOf(context).languageCode == 'ar'
-                        ? 'إضافة سريعة'
-                        : 'Quick Add',
-                    style: PremiumDesignTokens.sectionHeading(context),
-                  ),
-                  subtitle: Text(
-                    Localizations.localeOf(context).languageCode == 'ar'
-                        ? 'اختر إجراءً واحدًا. لن يتم حفظ شيء دون تأكيدك.'
-                        : 'Choose one action. Nothing is saved without your confirmation.',
-                  ),
-                ),
-                _QuickAction(
-                  icon: Icons.monitor_weight_outlined,
-                  label: Localizations.localeOf(context).languageCode == 'ar'
-                      ? 'قياس الوزن اليومي'
-                      : 'Daily weight check-in',
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    context.go('/daily-check-in');
-                  },
-                ),
-                _QuickAction(
-                  icon: Icons.restaurant_menu,
-                  label: Localizations.localeOf(context).languageCode == 'ar'
-                      ? 'إضافة طعام'
-                      : 'Add food',
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    context.go('/daily-log');
-                  },
-                ),
-                _QuickAction(
-                  icon: Icons.water_drop_outlined,
-                  label: Localizations.localeOf(context).languageCode == 'ar'
-                      ? 'إضافة ماء'
-                      : 'Add water',
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    context.go('/daily-log');
-                  },
-                ),
-                _QuickAction(
-                  icon: Icons.search,
-                  label: Localizations.localeOf(context).languageCode == 'ar'
-                      ? 'البحث في الأطعمة أو إنشاء طعام'
-                      : 'Search or create food',
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    context.go('/nutrition');
-                  },
-                ),
-                _UnavailableQuickAction(
-                  icon: Icons.qr_code_scanner,
-                  label: Localizations.localeOf(context).languageCode == 'ar'
-                      ? 'مسح الباركود'
-                      : 'Scan barcode',
-                  reason: Localizations.localeOf(context).languageCode == 'ar'
-                      ? 'غير متاح حتى يتم إعداد مصدر موثوق لبيانات الباركود.'
-                      : 'Unavailable until a verified barcode data source is configured.',
-                ),
-                _UnavailableQuickAction(
-                  icon: Icons.auto_awesome_outlined,
-                  label: context.strings.text('Ask BIL'),
-                  reason: context.strings.text(
-                    'Unavailable until the server-side AI consent and rate-limit boundary is configured.',
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+      builder: (sheetContext) => _QuickAddSheet(
+        arabic: arabic,
+        onWeight: () {
+          Navigator.pop(sheetContext);
+          context.go('/daily-check-in');
+        },
+        onFood: () {
+          Navigator.pop(sheetContext);
+          context.go('/daily-log');
+        },
+        onWater: () {
+          Navigator.pop(sheetContext);
+          context.go('/daily-log');
+        },
+        onSearch: () {
+          Navigator.pop(sheetContext);
+          context.go('/nutrition');
+        },
       ),
     );
-    final quickButton = Semantics(
-      button: true,
-      label: context.strings.text('Quick Add'),
-      hint: context.strings.text(
-        'Open quick actions for weight, food, and water logging',
-      ),
-      child: FloatingActionButton(
-        onPressed: quickAdd,
-        tooltip: context.strings.text('Quick Add'),
-        child: const Icon(Icons.add),
-      ),
-    );
+
+    final quickButton = _GlassQuickAdd(onTap: quickAdd);
+
     if (!wide) {
       return Scaffold(
+        backgroundColor: const Color(0xFF01050D),
         body: child,
         floatingActionButton: quickButton,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        bottomNavigationBar: Semantics(
-          container: true,
-          label: context.strings.text('Primary navigation'),
-          child: NavigationBar(
-            selectedIndex: index,
-            onDestinationSelected: navigate,
-            destinations: destinations,
-          ),
+        bottomNavigationBar: _GlassBottomNavigation(
+          selectedIndex: index,
+          items: items,
+          onSelected: navigate,
         ),
       );
     }
+
     return Scaffold(
+      backgroundColor: const Color(0xFF01050D),
       floatingActionButton: quickButton,
       body: Row(
         children: [
-          Semantics(
-            container: true,
-            label: context.strings.text('Primary navigation'),
-            child: NavigationRail(
-              selectedIndex: index,
-              onDestinationSelected: navigate,
-              labelType: NavigationRailLabelType.all,
-              destinations: destinations
-                  .map(
-                    (item) => NavigationRailDestination(
-                      icon: item.icon,
-                      selectedIcon: item.selectedIcon,
-                      label: Text(item.label),
-                    ),
-                  )
-                  .toList(),
-            ),
+          _GlassNavigationRail(
+            selectedIndex: index,
+            items: items,
+            onSelected: navigate,
           ),
-          const VerticalDivider(width: 1),
-          Expanded(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1200),
-                child: child,
-              ),
-            ),
-          ),
+          Expanded(child: child),
         ],
       ),
     );
   }
 }
 
-class _UnavailableQuickAction extends StatelessWidget {
-  const _UnavailableQuickAction({
-    required this.icon,
-    required this.label,
-    required this.reason,
+class _GlassNavigationRail extends StatelessWidget {
+  const _GlassNavigationRail({
+    required this.selectedIndex,
+    required this.items,
+    required this.onSelected,
   });
 
-  final IconData icon;
-  final String label;
-  final String reason;
+  final int selectedIndex;
+  final List<({IconData icon, IconData selected, String label})> items;
+  final ValueChanged<int> onSelected;
 
   @override
-  Widget build(BuildContext context) => ListTile(
-    enabled: false,
-    leading: Icon(icon),
-    title: Text(label),
-    subtitle: Text(reason),
-    trailing: const Icon(Icons.lock_outline),
-  );
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        topRight: Radius.circular(28),
+        bottomRight: Radius.circular(28),
+      ),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+        child: Container(
+          width: 104,
+          padding: const EdgeInsets.fromLTRB(10, 24, 10, 90),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withValues(alpha: .075),
+                const Color(0xFF52D9FF).withValues(alpha: .025),
+                const Color(0xFF775FFF).withValues(alpha: .022),
+                Colors.white.withValues(alpha: .012),
+              ],
+            ),
+          ),
+          child: Column(
+            children: [
+              const Text(
+                'BIL®',
+                style: TextStyle(
+                  color: Color(0xFFE8EEF3),
+                  fontSize: 25,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 30),
+              for (var i = 0; i < items.length; i++) ...[
+                _RailItem(
+                  item: items[i],
+                  selected: i == selectedIndex,
+                  onTap: () => onSelected(i),
+                ),
+                const SizedBox(height: 9),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RailItem extends StatelessWidget {
+  const _RailItem({
+    required this.item,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final ({IconData icon, IconData selected, String label}) item;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: item.label,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          width: 74,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: selected
+                ? LinearGradient(
+                    colors: [
+                      Colors.white.withValues(alpha: .14),
+                      const Color(0xFF54D9FF).withValues(alpha: .07),
+                      const Color(0xFF765FFF).withValues(alpha: .06),
+                    ],
+                  )
+                : null,
+            boxShadow: selected
+                ? const [
+                    BoxShadow(
+                      color: Color(0x354CD9FF),
+                      blurRadius: 22,
+                      spreadRadius: -8,
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            children: [
+              Icon(
+                selected ? item.selected : item.icon,
+                color: selected
+                    ? const Color(0xFFF0F4F7)
+                    : const Color(0xFF91A1B1),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                item.label,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: selected
+                      ? const Color(0xFFE2E9EF)
+                      : const Color(0xFF91A1B1),
+                  fontSize: 10,
+                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassBottomNavigation extends StatelessWidget {
+  const _GlassBottomNavigation({
+    required this.selectedIndex,
+    required this.items,
+    required this.onSelected,
+  });
+
+  final int selectedIndex;
+  final List<({IconData icon, IconData selected, String label})> items;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+        child: NavigationBar(
+          height: 76,
+          backgroundColor: const Color(0xC407111D),
+          indicatorColor: Colors.white.withValues(alpha: .12),
+          selectedIndex: selectedIndex,
+          onDestinationSelected: onSelected,
+          destinations: [
+            for (final item in items)
+              NavigationDestination(
+                icon: Icon(item.icon),
+                selectedIcon: Icon(item.selected),
+                label: item.label,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GlassQuickAdd extends StatelessWidget {
+  const _GlassQuickAdd({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 62,
+      height: 62,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: .22),
+            const Color(0xFF54D9FF).withValues(alpha: .13),
+            const Color(0xFF765FFF).withValues(alpha: .12),
+          ],
+        ),
+        boxShadow: const [
+          BoxShadow(color: Color(0x704BD8FF), blurRadius: 28, spreadRadius: -7),
+        ],
+      ),
+      child: IconButton(
+        tooltip: context.strings.text('Quick Add'),
+        onPressed: onTap,
+        icon: const Icon(Icons.add_rounded, color: Color(0xFFF1F5F8), size: 30),
+      ),
+    );
+  }
+}
+
+class _QuickAddSheet extends StatelessWidget {
+  const _QuickAddSheet({
+    required this.arabic,
+    required this.onWeight,
+    required this.onFood,
+    required this.onWater,
+    required this.onSearch,
+  });
+
+  final bool arabic;
+  final VoidCallback onWeight;
+  final VoidCallback onFood;
+  final VoidCallback onWater;
+  final VoidCallback onSearch;
+
+  String tr(String en, String ar) => arabic ? ar : en;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 640),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    const Color(0xF20A1522),
+                    const Color(0xE9131B2D),
+                    const Color(0xEC0A111C),
+                  ],
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 52,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.white38,
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    tr('Quick Add', 'إضافة سريعة'),
+                    style: const TextStyle(
+                      color: Color(0xFFE8EEF3),
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  _QuickAction(
+                    icon: Icons.monitor_weight_outlined,
+                    label: tr('Daily weight check-in', 'قياس الوزن اليومي'),
+                    onTap: onWeight,
+                  ),
+                  _QuickAction(
+                    icon: Icons.restaurant_menu_rounded,
+                    label: tr('Add food', 'إضافة طعام'),
+                    onTap: onFood,
+                  ),
+                  _QuickAction(
+                    icon: Icons.water_drop_outlined,
+                    label: tr('Add water', 'إضافة ماء'),
+                    onTap: onWater,
+                  ),
+                  _QuickAction(
+                    icon: Icons.search_rounded,
+                    label: tr('Search or create food', 'البحث أو إنشاء طعام'),
+                    onTap: onSearch,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _QuickAction extends StatelessWidget {
@@ -263,15 +435,47 @@ class _QuickAction extends StatelessWidget {
     required this.label,
     required this.onTap,
   });
+
   final IconData icon;
   final String label;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => ListTile(
-    leading: Icon(icon),
-    title: Text(label),
-    trailing: const Icon(Icons.chevron_right),
-    onTap: onTap,
-  );
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 9),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withValues(alpha: .075),
+                const Color(0xFF54D9FF).withValues(alpha: .025),
+              ],
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: const Color(0xFFDCE5EC)),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    color: Color(0xFFDCE5EC),
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: Color(0xFF9BAAB9)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

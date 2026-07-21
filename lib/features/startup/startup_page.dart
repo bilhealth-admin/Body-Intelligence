@@ -1,159 +1,148 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../app/localization/app_localizations.dart';
-import '../../app/services/app_settings_provider.dart';
-import '../profile/providers/user_profile_provider.dart';
-import '../weight/providers/weight_provider.dart';
-
-class StartupPage extends ConsumerWidget {
+class StartupPage extends StatefulWidget {
   const StartupPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final profile = ref.watch(userProfileProvider);
-    final checkInDue = ref.watch(dailyCheckInDueProvider);
-
-    if (profile.isLoading || checkInDue.isLoading) {
-      return const _StartupSurface();
-    }
-
-    if (profile.hasError || checkInDue.hasError) {
-      return _StartupError(
-        onRetry: () {
-          ref.invalidate(userProfileProvider);
-          ref.invalidate(dailyCheckInDueProvider);
-        },
-      );
-    }
-
-    final user = profile.value;
-    final isCheckInDue = checkInDue.value;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (user == null) {
-        context.go('/onboarding');
-      } else if (isCheckInDue == true) {
-        context.go('/daily-check-in');
-      } else {
-        context.go('/dashboard');
-      }
-    });
-
-    return const _StartupSurface();
-  }
+  State<StartupPage> createState() => _StartupPageState();
 }
 
-class _StartupSurface extends ConsumerWidget {
-  const _StartupSurface();
+class _StartupPageState extends State<StartupPage>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController controller;
+  Timer? timer;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(appSettingsProvider);
-    final disableAnimations =
-        settings.reduceMotion || MediaQuery.of(context).disableAnimations;
+  void initState() {
+    super.initState();
+    controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5),
+    )..forward();
 
+    timer = Timer(const Duration(seconds: 5), () {
+      if (mounted) {
+        context.go('/onboarding');
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    controller.dispose();
+    super.dispose();
+  }
+
+  double _unitInterval(double value) => value.clamp(0.0, 1.0).toDouble();
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).colorScheme.primaryContainer,
-              Theme.of(context).colorScheme.surface,
-            ],
+      backgroundColor: const Color(0xFF01050D),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/images/v10_master/bil_hdr_starfield_master.png',
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.high,
           ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: Semantics(
-              label: context.strings.text('BIL is preparing your local data'),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 72,
-                    height: 72,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(22),
-                    ),
-                    child: Icon(
-                      Icons.insights_rounded,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                      size: 38,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    'BIL',
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    width: 180,
-                    child: LinearProgressIndicator(
-                      minHeight: 3,
-                      value: disableAnimations ? 0.5 : null,
-                    ),
-                  ),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                radius: .78,
+                colors: [
+                  Color(0x382A8CFF),
+                  Color(0x1817CDE4),
+                  Color(0x0001050D),
                 ],
               ),
             ),
           ),
-        ),
+          Center(
+            child: AnimatedBuilder(
+              animation: controller,
+              builder: (context, child) {
+                final v = _unitInterval(controller.value);
+
+                final fadeInProgress = _unitInterval(v / .18);
+                final fadeOutProgress = _unitInterval((v - .82) / .18);
+                final scaleProgress = _unitInterval(v / .28);
+
+                final opacity = v < .18
+                    ? Curves.easeOutCubic.transform(fadeInProgress)
+                    : v > .82
+                    ? 1.0 - Curves.easeInCubic.transform(fadeOutProgress)
+                    : 1.0;
+
+                final scale =
+                    .90 + .10 * Curves.easeOutCubic.transform(scaleProgress);
+
+                return Opacity(
+                  opacity: _unitInterval(opacity),
+                  child: Transform.scale(scale: scale, child: child),
+                );
+              },
+              child: const _SplashBrand(),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _StartupError extends StatelessWidget {
-  const _StartupError({required this.onRetry});
-
-  final VoidCallback onRetry;
+class _SplashBrand extends StatelessWidget {
+  const _SplashBrand();
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: SafeArea(
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.storage_outlined,
-                  size: 48,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  context.strings.text('Could not open your local data'),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  context.strings.text(
-                    'Your data was not reset or uploaded. Try opening it again.',
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-                FilledButton.icon(
-                  onPressed: onRetry,
-                  icon: const Icon(Icons.refresh),
-                  label: Text(context.strings.text('Try again')),
-                ),
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ShaderMask(
+          blendMode: BlendMode.srcIn,
+          shaderCallback: (rect) => const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFFFFFFF),
+              Color(0xFFE4EAF0),
+              Color(0xFF91A0AE),
+              Color(0xFFFFFFFF),
+            ],
+          ).createShader(rect),
+          child: const Text(
+            'BIL®',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 132,
+              height: .86,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -6,
+              shadows: [
+                Shadow(color: Color(0x805BD8FF), blurRadius: 40),
+                Shadow(color: Color(0x60795EFF), blurRadius: 62),
               ],
             ),
           ),
         ),
-      ),
-    ),
-  );
+        const SizedBox(height: 18),
+        const Text(
+          'BODY INTELLIGENCE LOG',
+          style: TextStyle(
+            color: Color(0xFFD9E3EC),
+            fontSize: 15,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 6,
+            shadows: [Shadow(color: Color(0x505ACBFF), blurRadius: 14)],
+          ),
+        ),
+      ],
+    );
+  }
 }

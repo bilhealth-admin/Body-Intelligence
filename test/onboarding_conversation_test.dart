@@ -47,13 +47,44 @@ void main() {
     expect(find.text('Let’s start with you'), findsOneWidget);
     expect(find.text('Current weight'), findsNothing);
     expect(find.text('Goal'), findsNothing);
-    await tester.enterText(find.widgetWithText(TextField, 'Age'), '34');
+
+    // حقن القيمة داخل الحقل الـ readOnly مباشرة لتجاوز فتح الـ Picker
+    final dobFinder = find.widgetWithText(TextFormField, 'Date of Birth');
+    final TextFormField dobWidget = tester.widget(dobFinder);
+    dobWidget.controller?.text = '1992-07-20'; 
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Female'));
-    await tester.tap(find.widgetWithText(FilledButton, 'Continue'));
+    await tester.pumpAndSettle();
+    
+    // عمل سكرول للأسفل للوصول لاتفاقية السلامة الطبية (Disclaimer) لتجنب خطأ خارج الشاشة
+    final disclaimerFinder = find.byType(CheckboxListTile);
+    await tester.scrollUntilVisible(
+      disclaimerFinder,
+      500.0,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    // تفعيل الاتفاقية لتفعيل زر المتابعة
+    await tester.tap(disclaimerFinder);
+    await tester.pumpAndSettle();
+
+    // البحث عن زر Continue وعمل سكرول إضافي لضمان ظهوره كاملاً
+    final continueButtonFinder = find.widgetWithText(FilledButton, 'Continue');
+    await tester.scrollUntilVisible(
+      continueButtonFinder,
+      200.0,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(continueButtonFinder);
     await tester.pumpAndSettle();
 
     expect(find.text('Your starting point'), findsOneWidget);
-    expect(find.text('Age'), findsNothing);
+    expect(find.text('Date of Birth'), findsNothing);
+    
     final draft = await OnboardingDraftRepository(
       PreferencesRepository(database),
     ).load();
@@ -63,14 +94,13 @@ void main() {
 
     await tester.tap(find.widgetWithText(TextButton, 'Back'));
     await tester.pumpAndSettle();
+    
     expect(find.text('Let’s start with you'), findsOneWidget);
-    expect(
-      tester
-          .widget<TextField>(find.widgetWithText(TextField, 'Age'))
-          .controller
-          ?.text,
-      '34',
-    );
+    
+    final dobFinderBack = find.widgetWithText(TextFormField, 'Date of Birth');
+    final TextFormField dobWidgetBack = tester.widget(dobFinderBack);
+    expect(dobWidgetBack.controller?.text, '1992-07-20');
+    
     expect(tester.takeException(), isNull);
   });
 }

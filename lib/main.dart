@@ -2,14 +2,14 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app/localization/app_localizations.dart';
 import 'app/router/app_router.dart';
-import 'app/theme/app_theme_data.dart';
-import 'app/services/app_settings_provider.dart';
 import 'app/services/app_observability.dart';
+import 'app/services/app_settings_provider.dart';
+import 'app/theme/bil_flagship_theme.dart';
 
 void main() {
   FlutterError.onError = (details) {
@@ -19,10 +19,12 @@ void main() {
       details.stack ?? StackTrace.current,
     );
   };
+
   PlatformDispatcher.instance.onError = (error, stack) {
     AppObservability.crashes.record(error, stack);
     return true;
   };
+
   runZonedGuarded(
     () => runApp(const ProviderScope(child: BILApp())),
     AppObservability.crashes.record,
@@ -46,6 +48,7 @@ class BILApp extends ConsumerWidget {
           'light' => ThemeMode.light,
           _ => ThemeMode.system,
         };
+
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'BIL – Body Intelligence Log',
@@ -58,16 +61,19 @@ class BILApp extends ConsumerWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       themeMode: selectedThemeMode,
-      theme: AppThemeData.lightTheme(
-        Brightness.light,
+      theme: BilFlagshipTheme.light(
         highContrast: settings.highContrast,
+        isArabic: selectedLocale.languageCode.toLowerCase() == 'ar',
       ),
-      darkTheme: AppThemeData.lightTheme(
-        Brightness.dark,
+      darkTheme: BilFlagshipTheme.dark(
         highContrast: settings.highContrast,
+        isArabic: selectedLocale.languageCode.toLowerCase() == 'ar',
       ),
       builder: (context, child) {
-        if (!settings.reduceMotion) return child ?? const SizedBox.shrink();
+        if (!settings.reduceMotion) {
+          return child ?? const SizedBox.shrink();
+        }
+
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(disableAnimations: true),
           child: child ?? const SizedBox.shrink(),

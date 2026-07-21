@@ -1,8 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/localization/app_localizations.dart';
-import '../../../app/theme/premium_design_tokens.dart';
 import '../../../core/units/measurement_units.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../../weight/providers/weight_provider.dart';
@@ -12,116 +12,509 @@ class DashboardHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    final arabic =
+        Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
     final latestWeight = ref.watch(latestWeightProvider);
-    final system =
+    final measurementSystem =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
-    final topRadius = BorderRadius.circular(PremiumDesignTokens.radiusXl);
 
-    return Semantics(
-      container: true,
-      header: true,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(PremiumDesignTokens.spaceXl),
-        decoration: BoxDecoration(
-          borderRadius: topRadius,
-          gradient: const LinearGradient(
-            colors: [Color(0xFF2563EB), Color(0xFF06B6D4)],
-          ),
-        ),
-        child: latestWeight.when(
-          loading: () => Semantics(
-            label: context.strings.text(
-              'Loading your latest body data and next best action context',
-            ),
-            child: const LinearProgressIndicator(
-              color: Colors.white,
-              backgroundColor: Colors.white24,
-            ),
-          ),
-          error: (_, _) => Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                context.strings.text(
-                  'Today could not load your latest local body data.',
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 680;
+
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(34),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+            child: Container(
+              padding: EdgeInsets.all(compact ? 20 : 28),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(34),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.white.withValues(alpha: .11),
+                    const Color(0xFF54DAFF).withValues(alpha: .055),
+                    const Color(0xFF765DFF).withValues(alpha: .050),
+                    Colors.white.withValues(alpha: .018),
+                  ],
                 ),
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: PremiumDesignTokens.spaceSm),
-              Text(
-                context.strings.text(
-                  'Your local records remain safe on this device. Retry to refresh the hero context.',
-                ),
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.white),
-              ),
-              const SizedBox(height: PremiumDesignTokens.spaceMd),
-              Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: FilledButton.tonalIcon(
-                  style: FilledButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.white24,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF46D4FF).withValues(alpha: .16),
+                    blurRadius: 46,
+                    spreadRadius: -14,
                   ),
-                  onPressed: () => ref.invalidate(latestWeightProvider),
-                  icon: const Icon(Icons.refresh),
-                  label: Text(context.strings.text('Try again')),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: .28),
+                    blurRadius: 28,
+                    offset: const Offset(0, 16),
+                  ),
+                ],
+              ),
+              child: latestWeight.when(
+                loading: () => _Loading(arabic: arabic),
+                error: (_, _) => _Error(
+                  arabic: arabic,
+                  onRetry: () => ref.invalidate(latestWeightProvider),
                 ),
+                data: (weight) {
+                  final hasWeight = weight != null;
+                  final value = hasWeight
+                      ? UnitConverter.weightFromKg(
+                          weight.weight,
+                          measurementSystem,
+                        ).toStringAsFixed(1)
+                      : '—';
+                  final unit = UnitConverter.weightUnit(measurementSystem);
+
+                  return compact
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _BodyCopy(
+                              arabic: arabic,
+                              hasWeight: hasWeight,
+                              value: value,
+                              unit: unit,
+                            ),
+                            const SizedBox(height: 22),
+                            _SignalOrb(arabic: arabic, hasWeight: hasWeight),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            Expanded(
+                              flex: 7,
+                              child: _BodyCopy(
+                                arabic: arabic,
+                                hasWeight: hasWeight,
+                                value: value,
+                                unit: unit,
+                              ),
+                            ),
+                            const SizedBox(width: 24),
+                            Expanded(
+                              flex: 4,
+                              child: _SignalOrb(
+                                arabic: arabic,
+                                hasWeight: hasWeight,
+                              ),
+                            ),
+                          ],
+                        );
+                },
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _BodyCopy extends StatelessWidget {
+  const _BodyCopy({
+    required this.arabic,
+    required this.hasWeight,
+    required this.value,
+    required this.unit,
+  });
+
+  final bool arabic;
+  final bool hasWeight;
+  final String value;
+  final String unit;
+
+  String tr(String en, String ar) => arabic ? ar : en;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: arabic ? TextDirection.rtl : TextDirection.ltr,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              const _GlassBadge(
+                icon: Icons.lock_outline_rounded,
+                labelEn: 'Local only',
+                labelAr: 'محفوظ محليًا',
+              ),
+              _GlassBadge(
+                icon: hasWeight
+                    ? Icons.verified_outlined
+                    : Icons.add_circle_outline_rounded,
+                labelEn: hasWeight ? 'Latest trusted signal' : 'Starting point',
+                labelAr: hasWeight ? 'أحدث إشارة موثوقة' : 'نقطة البداية',
               ),
             ],
           ),
-          data: (weight) {
-            final heroTitle = weight == null
-                ? context.strings.text('Start today with one trusted check-in')
-                : context.strings.text(
-                    'Today starts from your latest evidence',
-                  );
-            final heroValue = weight == null
-                ? (arabic ? 'أول تسجيل' : 'First check-in')
-                : '${UnitConverter.weightFromKg(weight.weight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}';
-            final heroContext = weight == null
-                ? context.strings.text(
-                    'BIL will explain change only after comparable local measurements exist.',
-                  )
-                : context.strings.text(
-                    'This value is from your local record and is shown without claiming trend certainty.',
-                  );
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  heroTitle,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w600,
+          const SizedBox(height: 22),
+          _MetalText(
+            tr(
+              'Your body intelligence, distilled for today',
+              'ذكاء جسمك، مُلخّص لليوم',
+            ),
+            size: 30,
+            weight: FontWeight.w900,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            tr(
+              'A calm view of what matters now, why it matters, and the next useful action.',
+              'نظرة هادئة لما يهم الآن، ولماذا يهم، والخطوة التالية الأكثر فائدة.',
+            ),
+            style: const TextStyle(
+              color: Color(0xFFB8C5D1),
+              fontSize: 15,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 22),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _MetalText(
+                hasWeight ? value : tr('First check-in', 'أول تسجيل'),
+                size: hasWeight ? 58 : 32,
+                weight: FontWeight.w900,
+              ),
+              if (hasWeight) ...[
+                const SizedBox(width: 10),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 7),
+                  child: Text(
+                    unit,
+                    style: const TextStyle(
+                      color: Color(0xFFC8D4DE),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
-                ),
-                const SizedBox(height: PremiumDesignTokens.spaceSm),
-                Text(
-                  heroValue,
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: PremiumDesignTokens.spaceMd),
-                Text(
-                  heroContext,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Colors.white),
                 ),
               ],
-            );
-          },
+            ],
+          ),
+          const SizedBox(height: 18),
+          _InsightGlass(
+            icon: hasWeight
+                ? Icons.psychology_alt_outlined
+                : Icons.monitor_weight_outlined,
+            title: hasWeight
+                ? tr('What this signal means', 'ماذا تعني هذه الإشارة؟')
+                : tr('The best next step', 'أفضل خطوة تالية'),
+            body: hasWeight
+                ? tr(
+                    'BIL will not claim a trend until comparable measurements provide enough evidence.',
+                    'لن يدّعي BIL وجود اتجاه قبل توفر قياسات قابلة للمقارنة وأدلة كافية.',
+                  )
+                : tr(
+                    'Record one trusted daily measurement to begin your private baseline.',
+                    'سجّل قياسًا يوميًا موثوقًا لبدء خط أساسك الخاص.',
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SignalOrb extends StatelessWidget {
+  const _SignalOrb({required this.arabic, required this.hasWeight});
+
+  final bool arabic;
+  final bool hasWeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 1,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  const Color(0xFF51DCFF).withValues(alpha: .20),
+                  const Color(0xFF765DFF).withValues(alpha: .09),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+          Container(
+            width: 176,
+            height: 176,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const SweepGradient(
+                colors: [
+                  Color(0xFF90A2B3),
+                  Color(0xFFF5F8FA),
+                  Color(0xFF59D9FF),
+                  Color(0xFF846CFF),
+                  Color(0xFF90A2B3),
+                ],
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x704AD9FF),
+                  blurRadius: 36,
+                  spreadRadius: -8,
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(2),
+            child: Container(
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xDB07111D),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'BIL®',
+                    style: TextStyle(
+                      color: Color(0xFFE9EFF4),
+                      fontSize: 30,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    hasWeight
+                        ? (arabic ? 'إشارة اليوم' : 'Today signal')
+                        : (arabic ? 'جاهز للبدء' : 'Ready to begin'),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Color(0xFFB7C5D1),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GlassBadge extends StatelessWidget {
+  const _GlassBadge({
+    required this.icon,
+    required this.labelEn,
+    required this.labelAr,
+  });
+
+  final IconData icon;
+  final String labelEn;
+  final String labelAr;
+
+  @override
+  Widget build(BuildContext context) {
+    final arabic =
+        Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(99),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: .095),
+            const Color(0xFF51D8FF).withValues(alpha: .034),
+          ],
         ),
       ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: const Color(0xFFD7E2EA)),
+          const SizedBox(width: 7),
+          Text(
+            arabic ? labelAr : labelEn,
+            style: const TextStyle(
+              color: Color(0xFFD0DAE3),
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InsightGlass extends StatelessWidget {
+  const _InsightGlass({
+    required this.icon,
+    required this.title,
+    required this.body,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: .075),
+            const Color(0xFF58D9FF).withValues(alpha: .032),
+            Colors.white.withValues(alpha: .018),
+          ],
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              gradient: LinearGradient(
+                colors: [
+                  Colors.white.withValues(alpha: .12),
+                  const Color(0xFF58D9FF).withValues(alpha: .06),
+                ],
+              ),
+            ),
+            child: Icon(icon, color: const Color(0xFFDDE6ED)),
+          ),
+          const SizedBox(width: 13),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _MetalText(title, size: 15, weight: FontWeight.w900),
+                const SizedBox(height: 5),
+                Text(
+                  body,
+                  style: const TextStyle(
+                    color: Color(0xFFB4C1CD),
+                    height: 1.45,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MetalText extends StatelessWidget {
+  const _MetalText(this.text, {required this.size, required this.weight});
+
+  final String text;
+  final double size;
+  final FontWeight weight;
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.srcIn,
+      shaderCallback: (rect) => const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Color(0xFFFFFFFF),
+          Color(0xFFDCE5EC),
+          Color(0xFF91A0AE),
+          Color(0xFFF5F8FA),
+        ],
+      ).createShader(rect),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: size,
+          height: 1.14,
+          fontWeight: weight,
+        ),
+      ),
+    );
+  }
+}
+
+class _Loading extends StatelessWidget {
+  const _Loading({required this.arabic});
+
+  final bool arabic;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _MetalText(
+          arabic ? 'نجهّز ملخصك اليومي' : 'Preparing your daily brief',
+          size: 25,
+          weight: FontWeight.w900,
+        ),
+        const SizedBox(height: 18),
+        const LinearProgressIndicator(
+          minHeight: 7,
+          color: Color(0xFFE5ECF2),
+          backgroundColor: Color(0x35495E72),
+        ),
+      ],
+    );
+  }
+}
+
+class _Error extends StatelessWidget {
+  const _Error({required this.arabic, required this.onRetry});
+
+  final bool arabic;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _MetalText(
+          arabic
+              ? 'تعذر تحميل أحدث بيانات الجسم'
+              : 'Could not load the latest body signal',
+          size: 24,
+          weight: FontWeight.w900,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          arabic
+              ? 'بقيت بياناتك المحلية آمنة. حاول إعادة القراءة.'
+              : 'Your local data remains safe. Try reading it again.',
+          style: const TextStyle(color: Color(0xFFB7C4D0)),
+        ),
+        const SizedBox(height: 16),
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: TextButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh_rounded),
+            label: Text(arabic ? 'إعادة المحاولة' : 'Retry'),
+          ),
+        ),
+      ],
     );
   }
 }

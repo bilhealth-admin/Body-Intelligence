@@ -14,6 +14,9 @@ class WheelNumberField extends StatefulWidget {
     required this.label,
     required this.onChanged,
     this.errorText,
+    this.focusNode,
+    this.textInputAction = TextInputAction.next,
+    this.onSubmitted,
   });
 
   final double value;
@@ -25,6 +28,9 @@ class WheelNumberField extends StatefulWidget {
   final String label;
   final ValueChanged<double> onChanged;
   final String? errorText;
+  final FocusNode? focusNode;
+  final TextInputAction textInputAction;
+  final VoidCallback? onSubmitted;
 
   @override
   State<WheelNumberField> createState() => _WheelNumberFieldState();
@@ -34,12 +40,15 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
   late FixedExtentScrollController wheel;
   late TextEditingController text;
   late FocusNode focus;
+  late bool _ownsFocusNode;
   bool _editingText = false;
 
   int get itemCount =>
       ((widget.maximum - widget.minimum) / widget.step).round() + 1;
+
   int indexFor(double value) =>
       ((value - widget.minimum) / widget.step).round().clamp(0, itemCount - 1);
+
   double valueFor(int index) => widget.minimum + index * widget.step;
 
   @override
@@ -49,7 +58,8 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
     text = TextEditingController(
       text: widget.value.toStringAsFixed(widget.decimalPlaces),
     );
-    focus = FocusNode();
+    _ownsFocusNode = widget.focusNode == null;
+    focus = widget.focusNode ?? FocusNode();
   }
 
   @override
@@ -61,7 +71,9 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
         text: widget.value.toStringAsFixed(widget.decimalPlaces),
       );
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (wheel.hasClients) wheel.jumpToItem(indexFor(widget.value));
+        if (wheel.hasClients) {
+          wheel.jumpToItem(indexFor(widget.value));
+        }
       });
     }
   }
@@ -70,7 +82,9 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
   void dispose() {
     wheel.dispose();
     text.dispose();
-    focus.dispose();
+    if (_ownsFocusNode) {
+      focus.dispose();
+    }
     super.dispose();
   }
 
@@ -79,6 +93,7 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
     if (normalized.isEmpty) {
       return;
     }
+
     final parsed = double.tryParse(normalized);
     if (parsed == null || parsed < widget.minimum || parsed > widget.maximum) {
       if (commit) {
@@ -87,26 +102,31 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
       return;
     }
 
-    widget.onChanged(parsed);
+    // تأمين هندسي: تقريب الرقم المدخل يدوياً إلى أقرب خطوة (Step) مدعومة في الـ Wheel
+    final targetIndex = indexFor(parsed);
+    final steppedValue = valueFor(targetIndex);
+
+    widget.onChanged(steppedValue);
+
     if (wheel.hasClients) {
       wheel.animateToItem(
-        indexFor(parsed),
+        targetIndex,
         duration: const Duration(milliseconds: 180),
         curve: Curves.easeOut,
       );
     }
+
     if (commit) {
-      _syncTextFromValue(parsed);
+      _syncTextFromValue(steppedValue);
     }
   }
 
   void _syncTextFromValue([double? value]) {
     final effective = value ?? widget.value;
+    final formattedText = effective.toStringAsFixed(widget.decimalPlaces);
     text.value = TextEditingValue(
-      text: effective.toStringAsFixed(widget.decimalPlaces),
-      selection: TextSelection.collapsed(
-        offset: effective.toStringAsFixed(widget.decimalPlaces).length,
-      ),
+      text: formattedText,
+      selection: TextSelection.collapsed(offset: formattedText.length),
     );
   }
 
@@ -114,9 +134,11 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
     final current = indexFor(widget.value);
     final next = (current + direction).clamp(0, itemCount - 1);
     if (next == current) return;
+
     final value = valueFor(next);
     _syncTextFromValue(value);
     widget.onChanged(value);
+
     if (wheel.hasClients) {
       wheel.animateToItem(
         next,
@@ -174,6 +196,8 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
                         physics: const FixedExtentScrollPhysics(),
                         diameterRatio: 1.35,
                         onSelectedItemChanged: (index) {
+                          if (_editingText)
+                            return; // منع تداخل الأحداث أثناء الكتابة باليد
                           final value = valueFor(index);
                           text.text = value.toStringAsFixed(
                             widget.decimalPlaces,
@@ -188,11 +212,15 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
                             label:
                                 '${valueFor(index).toStringAsFixed(widget.decimalPlaces)} ${widget.unit}',
                             child: InkWell(
-                              onTap: () => wheel.animateToItem(
-                                index,
-                                duration: const Duration(milliseconds: 180),
-                                curve: Curves.easeOut,
-                              ),
+                              onTap: () {
+                                if (wheel.hasClients) {
+                                  wheel.animateToItem(
+                                    index,
+                                    duration: const Duration(milliseconds: 180),
+                                    curve: Curves.easeOut,
+                                  );
+                                }
+                              },
                               child: Center(
                                 child: Text(
                                   valueFor(
@@ -211,47 +239,64 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
                 const SizedBox(width: 12),
                 SizedBox(
                   width: 132,
-                  child: Listener(
-                    onPointerSignal: (event) {
-                      if (event is PointerScrollEvent) {
-                        if (event.scrollDelta.dy < 0) {
-                          adjustBy(1);
-                        } else if (event.scrollDelta.dy > 0) {
-                          adjustBy(-1);
-                        }
+                  child: Focus(
+                    onKeyEvent: (_, event) {
+                      if (event is! KeyDownEvent) return KeyEventResult.ignored;
+                      // تعديل الاتجاه هندسياً ليتوافق مع حركة الأسهم الطبيعية للمستخدم
+                      if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+                        adjustBy(1);
+                        return KeyEventResult.handled;
                       }
+                      if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                        adjustBy(-1);
+                        return KeyEventResult.handled;
+                      }
+                      return KeyEventResult.ignored;
                     },
-                    child: TextField(
-                      controller: text,
-                      focusNode: focus,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      textInputAction: TextInputAction.done,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-                      ],
-                      onTap: () {
-                        _editingText = true;
+                    child: Listener(
+                      onPointerSignal: (event) {
+                        if (event is PointerScrollEvent) {
+                          // تصحيح اتجاه سكرول الماوس ليكون طبيعياً (Up يزيد، Down ينقص)
+                          if (event.scrollDelta.dy < 0) {
+                            adjustBy(1);
+                          } else if (event.scrollDelta.dy > 0) {
+                            adjustBy(-1);
+                          }
+                        }
                       },
-                      onChanged: (value) => updateFromText(value),
-                      onSubmitted: (_) {
-                        _editingText = false;
-                        updateFromText(text.text, commit: true);
-                      },
-                      onEditingComplete: () {
-                        _editingText = false;
-                        updateFromText(text.text, commit: true);
-                      },
-                      onTapOutside: (_) {
-                        _editingText = false;
-                        updateFromText(text.text, commit: true);
-                        focus.unfocus();
-                      },
-                      decoration: InputDecoration(
-                        suffixText: widget.unit,
-                        errorText: widget.errorText,
-                        border: const OutlineInputBorder(),
+                      child: TextField(
+                        controller: text,
+                        focusNode: focus,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        textInputAction: widget.textInputAction,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                        ],
+                        onTap: () {
+                          _editingText = true;
+                        },
+                        onChanged: (value) => updateFromText(value),
+                        onSubmitted: (_) {
+                          _editingText = false;
+                          updateFromText(text.text, commit: true);
+                          widget.onSubmitted?.call();
+                        },
+                        onEditingComplete: () {
+                          _editingText = false;
+                          updateFromText(text.text, commit: true);
+                        },
+                        onTapOutside: (_) {
+                          _editingText = false;
+                          updateFromText(text.text, commit: true);
+                          focus.unfocus();
+                        },
+                        decoration: InputDecoration(
+                          suffixText: widget.unit,
+                          errorText: widget.errorText,
+                          border: const OutlineInputBorder(),
+                        ),
                       ),
                     ),
                   ),
