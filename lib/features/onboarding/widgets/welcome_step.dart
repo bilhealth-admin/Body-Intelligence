@@ -59,20 +59,39 @@ class WelcomeStep extends ConsumerWidget {
                     ),
                     child: Column(
                       children: [
-                        Row(
-                          children: [
-                            _LanguageSwitch(
+                        LayoutBuilder(
+                          builder: (context, headerConstraints) {
+                            final stackHeader =
+                                headerConstraints.maxWidth < 560;
+                            final languageSwitch = _LanguageSwitch(
                               locale: locale,
                               onChanged: (value) => ref
                                   .read(appSettingsProvider.notifier)
                                   .setLocale(value),
-                            ),
-                            const Spacer(),
-                            _MasterBrand(
+                            );
+                            final brand = _MasterBrand(
                               logoSize: wide ? 82 : 62,
                               compact: !wide,
-                            ),
-                          ],
+                            );
+
+                            if (stackHeader) {
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  brand,
+                                  const SizedBox(height: 16),
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: languageSwitch,
+                                  ),
+                                ],
+                              );
+                            }
+
+                            return Row(
+                              children: [languageSwitch, const Spacer(), brand],
+                            );
+                          },
                         ),
                         SizedBox(height: compactHeight ? 12 : 28),
                         if (wide)
@@ -539,7 +558,14 @@ class _WelcomeChip extends StatelessWidget {
         children: [
           Icon(icon, color: const Color(0xFFCFD9E3), size: 18),
           const SizedBox(width: 8),
-          _MasterMetalText(label, size: 14, weight: FontWeight.w800),
+          Flexible(
+            child: _MasterMetalText(
+              label,
+              size: 14,
+              weight: FontWeight.w800,
+              maxLines: 2,
+            ),
+          ),
         ],
       ),
     );
@@ -659,20 +685,34 @@ class _MasterGlassButtonState extends State<_MasterGlassButton> {
                       ),
                     ),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _MasterMetalText(
-                        widget.label,
-                        size: 18,
-                        weight: FontWeight.w900,
-                      ),
-                      const SizedBox(width: 14),
-                      const Icon(
-                        Icons.arrow_forward_rounded,
-                        color: Color(0xFFE7EEF5),
-                      ),
-                    ],
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final compact = constraints.maxWidth < 360;
+                      return Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: compact ? 14 : 22,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Flexible(
+                              child: _MasterMetalText(
+                                widget.label,
+                                size: compact ? 16 : 18,
+                                weight: FontWeight.w900,
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                              ),
+                            ),
+                            SizedBox(width: compact ? 8 : 14),
+                            const Icon(
+                              Icons.arrow_forward_rounded,
+                              color: Color(0xFFE7EEF5),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
