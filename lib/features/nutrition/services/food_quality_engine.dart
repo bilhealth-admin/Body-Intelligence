@@ -94,3 +94,118 @@ class FoodQualityEngine {
     );
   }
 }
+
+class FoodQualityRecord {
+  final UnifiedFood food;
+  final FoodQualityAssessment assessment;
+
+  const FoodQualityRecord({required this.food, required this.assessment});
+}
+
+class FoodQualityAudit {
+  final int totalFoods;
+  final int highConfidenceCount;
+  final int mediumConfidenceCount;
+  final int lowConfidenceCount;
+  final List<FoodQualityRecord> records;
+
+  const FoodQualityAudit({
+    required this.totalFoods,
+    required this.highConfidenceCount,
+    required this.mediumConfidenceCount,
+    required this.lowConfidenceCount,
+    required this.records,
+  });
+
+  int countFor(FoodConfidenceLevel level) => switch (level) {
+    FoodConfidenceLevel.high => highConfidenceCount,
+    FoodConfidenceLevel.medium => mediumConfidenceCount,
+    FoodConfidenceLevel.low => lowConfidenceCount,
+  };
+}
+
+class FoodQualityAuditEngine {
+  const FoodQualityAuditEngine._();
+
+  static FoodQualityAudit audit(
+    Iterable<UnifiedFood> foods, {
+    FoodConfidenceLevel? maximumConfidence,
+    FoodQualityIssue? issue,
+    int limit = 1000,
+  }) {
+    if (limit <= 0) {
+      return const FoodQualityAudit(
+        totalFoods: 0,
+        highConfidenceCount: 0,
+        mediumConfidenceCount: 0,
+        lowConfidenceCount: 0,
+        records: <FoodQualityRecord>[],
+      );
+    }
+
+    final all = foods
+        .map(
+          (food) => FoodQualityRecord(
+            food: food,
+            assessment: FoodQualityEngine.assess(food),
+          ),
+        )
+        .toList(growable: false);
+
+    final high = all
+        .where(
+          (record) => record.assessment.confidence == FoodConfidenceLevel.high,
+        )
+        .length;
+    final medium = all
+        .where(
+          (record) =>
+              record.assessment.confidence == FoodConfidenceLevel.medium,
+        )
+        .length;
+    final low = all
+        .where(
+          (record) => record.assessment.confidence == FoodConfidenceLevel.low,
+        )
+        .length;
+
+    var filtered = all.where((record) {
+      if (maximumConfidence != null &&
+          _rank(record.assessment.confidence) > _rank(maximumConfidence)) {
+        return false;
+      }
+      if (issue != null && !record.assessment.issues.contains(issue)) {
+        return false;
+      }
+      return true;
+    }).toList();
+
+    filtered.sort((left, right) {
+      final scoreOrder = left.assessment.score.compareTo(
+        right.assessment.score,
+      );
+      if (scoreOrder != 0) return scoreOrder;
+      final issueOrder = right.assessment.issues.length.compareTo(
+        left.assessment.issues.length,
+      );
+      if (issueOrder != 0) return issueOrder;
+      return left.food.name.toLowerCase().compareTo(
+        right.food.name.toLowerCase(),
+      );
+    });
+
+    return FoodQualityAudit(
+      totalFoods: all.length,
+      highConfidenceCount: high,
+      mediumConfidenceCount: medium,
+      lowConfidenceCount: low,
+      records: List<FoodQualityRecord>.unmodifiable(filtered.take(limit)),
+    );
+  }
+
+  static int _rank(FoodConfidenceLevel level) => switch (level) {
+    FoodConfidenceLevel.low => 0,
+    FoodConfidenceLevel.medium => 1,
+    FoodConfidenceLevel.high => 2,
+  };
+}
