@@ -5,6 +5,7 @@ import 'food_unit_engine.dart';
 enum FoodMigrationIssueKind {
   blankStableId,
   blankPrimaryName,
+  nonCanonicalPrimaryName,
   unknownSource,
   nonCanonicalSourceLabel,
   invalidServingBasis,
@@ -86,6 +87,13 @@ class FoodMigrationEngine {
         const FoodMigrationIssue(
           kind: FoodMigrationIssueKind.blankPrimaryName,
           message: 'A primary food name is required.',
+        ),
+      );
+    } else if (food.name != name) {
+      issues.add(
+        const FoodMigrationIssue(
+          kind: FoodMigrationIssueKind.nonCanonicalPrimaryName,
+          message: 'Primary food name contains non-canonical whitespace.',
         ),
       );
     }

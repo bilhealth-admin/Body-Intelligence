@@ -1,5 +1,6 @@
 import '../domain/unified_food.dart';
 import '../services/food_deduplication_engine.dart';
+import '../services/food_foundation_integrity_engine.dart';
 import '../services/food_migration_engine.dart';
 import '../services/food_quality_engine.dart';
 import '../services/offline_food_search_pipeline.dart';
@@ -20,5 +21,9 @@ abstract interface class UnifiedFoodRepository {
     FoodConfidenceLevel? maximumConfidence,
     FoodQualityIssue? issue,
     int limit = 1000,
+  });
+  Future<FoodFoundationIntegrityReport> auditFoundationIntegrity({
+    int migrationLimit = 1000,
+    int duplicatePairLimit = 10000,
   });
 }
