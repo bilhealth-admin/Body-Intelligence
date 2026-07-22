@@ -5,6 +5,7 @@ import '../database/nutrient_evidence.dart';
 import '../../features/nutrition/adapters/unified_food_adapter.dart';
 import '../../features/nutrition/domain/unified_food.dart';
 import '../../features/nutrition/repositories/unified_food_repository.dart';
+import '../../features/nutrition/services/food_deduplication_engine.dart';
 import '../../features/nutrition/services/food_search_normalizer.dart';
 import '../../features/nutrition/services/offline_food_search_pipeline.dart';
 
@@ -315,6 +316,21 @@ class FoodRepository implements UnifiedFoodRepository {
       }
     }
     return null;
+  }
+
+  @override
+  Future<List<FoodDuplicateCandidate>> findDuplicateCandidates(
+    UnifiedFood incoming, {
+    FoodDuplicateKind minimumKind = FoodDuplicateKind.possible,
+    int limit = 20,
+  }) async {
+    final existing = _adapter.adaptAll(await getFoods());
+    return FoodDeduplicationEngine.findCandidates(
+      incoming: incoming,
+      existing: existing,
+      minimumKind: minimumKind,
+      limit: limit,
+    );
   }
 
   Future<List<Food>> _rankPersonalizedFoods(

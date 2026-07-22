@@ -17,8 +17,57 @@ class FoodDuplicateAssessment {
   bool get shouldAutoMerge => false;
 }
 
+class FoodDuplicateCandidate {
+  final UnifiedFood food;
+  final FoodDuplicateAssessment assessment;
+
+  const FoodDuplicateCandidate({required this.food, required this.assessment});
+}
+
 class FoodDeduplicationEngine {
   const FoodDeduplicationEngine._();
+
+  static List<FoodDuplicateCandidate> findCandidates({
+    required UnifiedFood incoming,
+    required Iterable<UnifiedFood> existing,
+    FoodDuplicateKind minimumKind = FoodDuplicateKind.possible,
+    int limit = 20,
+  }) {
+    if (limit <= 0) return const <FoodDuplicateCandidate>[];
+
+    final candidates = <FoodDuplicateCandidate>[];
+    for (final food in existing) {
+      if (food.id == incoming.id) continue;
+      final assessment = compare(incoming, food);
+      if (_rank(assessment.kind) < _rank(minimumKind)) continue;
+      candidates.add(
+        FoodDuplicateCandidate(food: food, assessment: assessment),
+      );
+    }
+
+    candidates.sort((left, right) {
+      final scoreOrder = right.assessment.score.compareTo(
+        left.assessment.score,
+      );
+      if (scoreOrder != 0) return scoreOrder;
+      final kindOrder = _rank(
+        right.assessment.kind,
+      ).compareTo(_rank(left.assessment.kind));
+      if (kindOrder != 0) return kindOrder;
+      return left.food.name.toLowerCase().compareTo(
+        right.food.name.toLowerCase(),
+      );
+    });
+
+    return List<FoodDuplicateCandidate>.unmodifiable(candidates.take(limit));
+  }
+
+  static int _rank(FoodDuplicateKind kind) => switch (kind) {
+    FoodDuplicateKind.none => 0,
+    FoodDuplicateKind.possible => 1,
+    FoodDuplicateKind.highConfidence => 2,
+    FoodDuplicateKind.identicalIdentity => 3,
+  };
 
   static FoodDuplicateAssessment compare(UnifiedFood left, UnifiedFood right) {
     final reasons = <String>[];
@@ -49,10 +98,16 @@ class FoodDeduplicationEngine {
     final rightArabic = FoodSearchNormalizer.normalize(right.arabicName ?? '');
     if (leftName.isNotEmpty && leftName == rightName) {
       reasons.add('same-primary-name');
-      score += 0.35;
+      score += 0.5;
     } else if (leftArabic.isNotEmpty && leftArabic == rightArabic) {
       reasons.add('same-arabic-name');
-      score += 0.35;
+      score += 0.5;
+    } else if (_isRelatedName(leftName, rightName)) {
+      reasons.add('related-primary-name');
+      score += 0.2;
+    } else if (_isRelatedName(leftArabic, rightArabic)) {
+      reasons.add('related-arabic-name');
+      score += 0.2;
     }
 
     final servingDifference = (left.serving.grams - right.serving.grams).abs();
@@ -84,6 +139,21 @@ class FoodDeduplicationEngine {
       score: bounded,
       reasons: List.unmodifiable(reasons),
     );
+  }
+
+  static bool _isRelatedName(String left, String right) {
+    if (left.isEmpty || right.isEmpty || left == right) return false;
+    final shorter = left.length <= right.length ? left : right;
+    final longer = left.length <= right.length ? right : left;
+    if (longer.startsWith('$shorter ')) return true;
+
+    final shorterTokens = shorter.split(' ').where((token) => token.isNotEmpty);
+    final longerTokens = longer
+        .split(' ')
+        .where((token) => token.isNotEmpty)
+        .toSet();
+    return shorterTokens.isNotEmpty &&
+        shorterTokens.every(longerTokens.contains);
   }
 
   static double _coreNutrientSimilarity(UnifiedFood left, UnifiedFood right) {
