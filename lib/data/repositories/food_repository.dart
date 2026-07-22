@@ -6,6 +6,7 @@ import '../../features/nutrition/adapters/unified_food_adapter.dart';
 import '../../features/nutrition/domain/unified_food.dart';
 import '../../features/nutrition/repositories/unified_food_repository.dart';
 import '../../features/nutrition/services/food_deduplication_engine.dart';
+import '../../features/nutrition/services/food_migration_engine.dart';
 import '../../features/nutrition/services/food_search_normalizer.dart';
 import '../../features/nutrition/services/offline_food_search_pipeline.dart';
 
@@ -329,6 +330,14 @@ class FoodRepository implements UnifiedFoodRepository {
       incoming: incoming,
       existing: existing,
       minimumKind: minimumKind,
+      limit: limit,
+    );
+  }
+
+  @override
+  Future<List<FoodMigrationPlan>> auditMigration({int limit = 1000}) async {
+    return FoodMigrationEngine.auditAll(
+      _adapter.adaptAll(await getFoods()),
       limit: limit,
     );
   }
