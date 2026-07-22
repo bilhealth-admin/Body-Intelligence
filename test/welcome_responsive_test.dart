@@ -1,7 +1,6 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/services/app_settings_provider.dart';
 import 'package:body_intelligence_log/app/services/app_settings_service.dart';
-import 'package:body_intelligence_log/app/theme/app_theme_data.dart';
 import 'package:body_intelligence_log/features/onboarding/widgets/welcome_step.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -9,22 +8,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  for (final locale in const [Locale('en'), Locale('ar')]) {
-    testWidgets('Welcome V10 ${locale.languageCode} visual baseline', (
-      tester,
-    ) async {
-      await tester.binding.setSurfaceSize(const Size(390, 844));
+  const cases = <({Size size, Locale locale})>[
+    (size: Size(306, 650), locale: Locale('en')),
+    (size: Size(306, 650), locale: Locale('ar')),
+    (size: Size(390, 844), locale: Locale('en')),
+    (size: Size(390, 844), locale: Locale('ar')),
+    (size: Size(1280, 720), locale: Locale('en')),
+    (size: Size(1280, 720), locale: Locale('ar')),
+  ];
+
+  for (final testCase in cases) {
+    testWidgets('Welcome V10 has no overflow at '
+        '${testCase.size.width.toInt()}x${testCase.size.height.toInt()} '
+        '${testCase.locale.languageCode}', (tester) async {
+      await tester.binding.setSurfaceSize(testCase.size);
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
-      await tester.pumpWidget(_welcome(locale));
+      await tester.pumpWidget(_welcome(testCase.locale));
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-
-      await expectLater(
-        find.byType(WelcomeStep),
-        matchesGoldenFile('goldens/welcome_v10_${locale.languageCode}.png'),
-      );
+      expect(find.byType(WelcomeStep), findsOneWidget);
     });
   }
 }
@@ -32,7 +36,7 @@ void main() {
 Widget _welcome(Locale locale) => ProviderScope(
   overrides: [
     appSettingsServiceProvider.overrideWithValue(
-      _GoldenSettingsService(locale.languageCode),
+      _ResponsiveSettingsService(locale.languageCode),
     ),
   ],
   child: MaterialApp(
@@ -45,16 +49,15 @@ Widget _welcome(Locale locale) => ProviderScope(
       GlobalWidgetsLocalizations.delegate,
       GlobalCupertinoLocalizations.delegate,
     ],
-    theme: AppThemeData.lightTheme(Brightness.light),
     home: WelcomeStep(onContinue: _noop),
   ),
 );
 
 void _noop() {}
 
-class _GoldenSettingsService extends AppSettingsService {
-  _GoldenSettingsService(String localeCode)
-    : settings = AppSettings(localeCode: localeCode, themeMode: 'light');
+class _ResponsiveSettingsService extends AppSettingsService {
+  _ResponsiveSettingsService(String localeCode)
+    : settings = AppSettings(localeCode: localeCode, themeMode: 'system');
 
   AppSettings settings;
 

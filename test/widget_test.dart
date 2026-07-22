@@ -1,10 +1,10 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
-import 'package:body_intelligence_log/features/onboarding/widgets/welcome_step.dart';
 import 'package:body_intelligence_log/app/services/app_settings_provider.dart';
 import 'package:body_intelligence_log/app/services/app_settings_service.dart';
+import 'package:body_intelligence_log/features/onboarding/widgets/welcome_step.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget buildWelcomeApp(Locale locale) {
@@ -23,7 +23,7 @@ Widget buildWelcomeApp(Locale locale) {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: Scaffold(body: WelcomeStep(onContinue: () {})),
+      home: WelcomeStep(onContinue: _noop),
     ),
   );
 }
@@ -50,11 +50,9 @@ class _ReactiveWelcomeHarness extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: Scaffold(body: WelcomeStep(onContinue: _noop)),
+      home: WelcomeStep(onContinue: _noop),
     );
   }
-
-  static void _noop() {}
 }
 
 class _WidgetSettingsService extends AppSettingsService {
@@ -70,35 +68,49 @@ class _WidgetSettingsService extends AppSettingsService {
   Future<void> save(AppSettings settings) async => value = settings;
 }
 
+void _noop() {}
+
 void main() {
-  testWidgets('Arabic default locale shows RTL onboarding text', (
+  testWidgets('Arabic V10 welcome uses RTL and approved content', (
     tester,
   ) async {
     await tester.pumpWidget(buildWelcomeApp(const Locale('ar')));
     await tester.pumpAndSettle();
 
-    expect(find.text('مرحبًا بك في BIL'), findsOneWidget);
-    expect(find.text('ابدأ'), findsOneWidget);
-    final direction = Directionality.of(
-      tester.element(find.text('مرحبًا بك في BIL')),
+    expect(find.text('مرحبًا بك'), findsOneWidget);
+    expect(find.text('ابدأ رحلتك'), findsOneWidget);
+    expect(find.text('خصوصية تامة'), findsOneWidget);
+    expect(find.text('يعمل دون إنترنت'), findsOneWidget);
+    expect(find.text('نتائج قابلة للتفسير'), findsOneWidget);
+    expect(
+      find.text('لا يلزم إنشاء حساب، ولا يتم رفع أي بيانات.'),
+      findsOneWidget,
     );
+
+    final direction = Directionality.of(tester.element(find.text('مرحبًا بك')));
     expect(direction, TextDirection.rtl);
   });
 
-  testWidgets('English locale shows LTR onboarding text', (tester) async {
+  testWidgets('English V10 welcome uses LTR and approved content', (
+    tester,
+  ) async {
     await tester.pumpWidget(buildWelcomeApp(const Locale('en')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome to BIL'), findsOneWidget);
-    expect(find.text('Start'), findsOneWidget);
+    expect(find.text('Welcome'), findsOneWidget);
+    expect(find.text('Start your journey'), findsOneWidget);
+    expect(find.text('Private'), findsOneWidget);
+    expect(find.text('Offline'), findsOneWidget);
+    expect(find.text('Explainable'), findsOneWidget);
     expect(find.text('Understand every insight'), findsOneWidget);
-    expect(find.text('Private and useful offline'), findsOneWidget);
-    expect(find.text('Honest about uncertainty'), findsOneWidget);
-    expect(find.text('Optional account and sync'), findsNothing);
-    expect(find.widgetWithText(FilledButton, 'Start'), findsOneWidget);
-    final direction = Directionality.of(
-      tester.element(find.text('Welcome to BIL')),
+    expect(find.text('Science first'), findsOneWidget);
+    expect(
+      find.text('No account required. Nothing is uploaded.'),
+      findsOneWidget,
     );
+    expect(find.text('Optional account and sync'), findsNothing);
+
+    final direction = Directionality.of(tester.element(find.text('Welcome')));
     expect(direction, TextDirection.ltr);
   });
 
@@ -109,15 +121,17 @@ void main() {
     await tester.pumpWidget(_buildReactiveWelcomeApp(service));
     await tester.pumpAndSettle();
 
+    expect(find.text('Welcome'), findsOneWidget);
+
     await tester.tap(find.text('العربية'));
     await tester.pumpAndSettle();
 
-    expect(find.text('مرحبًا بك في BIL'), findsOneWidget);
+    expect(find.text('مرحبًا بك'), findsOneWidget);
     expect(
-      Directionality.of(tester.element(find.text('مرحبًا بك في BIL'))),
+      Directionality.of(tester.element(find.text('مرحبًا بك'))),
       TextDirection.rtl,
     );
     expect(service.value.localeCode, 'ar');
-    expect(find.text('Welcome to BIL'), findsNothing);
+    expect(find.text('Welcome'), findsNothing);
   });
 }
