@@ -1,19 +1,23 @@
 # Package Manifest
 
-Package ID: `BDAR-002R5`
-Type: Critical production navigation fix
+Package ID: `BDAR-003A-R1`
+Type: Test-only compatibility correction
 
-## Production
-- `lib/features/daily_log/daily_log_page.dart`
+## Changed files
 
-## Test
-- `test/daily_log_edit_quantity_route_contract_test.dart`
-
-## Package documentation
+- `test/first_value_handoff_test.dart`
 - `PACKAGE_CONSTITUTION.md`
-- `PACKAGE_MANIFEST.md`
-- `IMPLEMENTATION_NOTES.md`
+
+## Production changes
+
+None.
+
+## Root cause
+
+BDAR-003A moved `FirstValueHandoffCard` from `dashboard_page.dart` into
+`widgets/first_value_handoff_card.dart`. The pre-existing test still imported
+the old file, so analyzer could not resolve the widget.
 
 ## Rollback
-Restore only the production and test files listed above, or revert the focused
-R5 commit after approval. Never reset the repository.
+
+Restore only the two files listed above. Never reset the repository.

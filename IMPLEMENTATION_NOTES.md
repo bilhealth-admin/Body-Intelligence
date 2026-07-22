@@ -1,23 +1,14 @@
-# BDAR-002R5 Implementation Notes
+# BDAR-003A-R1 Implementation Notes
 
-## Failure
+The production widget exists and the new composition tests pass. The remaining
+analyzer error came from a stale import in `first_value_handoff_test.dart`.
 
-Pressing Update Quantity caused:
+R1 updates the import to the new widget file and preserves the original
+behavioral assertions:
 
-- `You have popped the last page off of the stack`
-- `currentConfiguration.isNotEmpty`
-- a subsequent Navigator `!_debugLocked` assertion
-- a fully black application window
+- approved Arabic title;
+- honest no-trend explanation;
+- exactly one primary action;
+- action callback execution.
 
-## Correction
-
-The dialog builder now exposes `dialogContext`.
-
-Both Cancel and Update close that dialog with:
-
-- `Navigator.pop(dialogContext)`
-- `Navigator.pop(dialogContext, parsedQuantity)`
-
-The Daily Log page route is no longer popped.
-
-No quantity calculation, storage, or visual behavior is otherwise changed.
+No production source is changed.

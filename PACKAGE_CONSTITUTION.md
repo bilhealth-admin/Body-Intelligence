@@ -1,30 +1,24 @@
 # BIL Package Constitution
 
-Package: `BDAR-002R5 — Edit Quantity Route Safety`
+Package: `BDAR-003A-R1 — First Value Test Compatibility`
+Baseline commit: `9270697`
+Branch: `phase-3-product-excellence`
 
-This critical revision is subordinate to BDAR-002 and all higher BIL governance.
-
-## Root cause
-
-The Edit Quantity dialog was opened with `showDialog`, but both dialog buttons
-called `Navigator.pop(context)` using the Daily Log page context rather than the
-dialog builder context.
-
-With GoRouter this popped the last routed page from the application stack,
-leaving no page to render and producing the black screen.
+This revision is subordinate to BDAR-003A and all higher BIL governance
+documents.
 
 ## Frozen scope
 
-- Correct only the Edit Quantity dialog route ownership.
-- Cancel and Update must close the dialog route through `dialogContext`.
-- Preserve quantity parsing, repository updates, UI, and navigation elsewhere.
-- Add a route-safety regression contract.
-- No BDAR-003A files or architectural changes.
+- Update only `test/first_value_handoff_test.dart`.
+- Import `FirstValueHandoffCard` from its new presentation file.
+- Preserve the existing Arabic honesty and single-action assertions.
+- Remove trailing whitespace from the package constitution.
+- Change no production code, behavior, calculations, navigation, persistence,
+  localization, or dashboard layout.
 
 ## Completion gate
 
-- Analyzer introduces no new errors.
-- Route-safety test passes.
-- Existing BDAR-002 tests remain passing.
-- Manual Windows test confirms Cancel and Update return to Daily Log without a
-  black screen or GoRouter assertion.
+- `git diff --check` reports no whitespace errors from this package.
+- `flutter analyze --no-pub` has no BDAR-003A errors.
+- `flutter test test\first_value_handoff_test.dart` passes.
+- Existing BDAR-003A and BDAR-002 regression tests remain passing.
