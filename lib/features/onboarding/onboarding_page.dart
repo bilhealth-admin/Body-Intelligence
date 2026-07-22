@@ -330,6 +330,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         now.timeZoneOffset.inMinutes.toString(),
       );
       await preferences.set('firstValueHandoffPending', 'false');
+      await preferences.set('forceOnboarding', 'false');
 
       await ref.read(onboardingDraftRepositoryProvider).clear();
 

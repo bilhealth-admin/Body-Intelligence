@@ -13,6 +13,7 @@ import '../../features/life_context/decision_memory_page.dart';
 import '../../features/nutrition/food_page.dart';
 import '../../features/onboarding/onboarding_page.dart';
 import '../../features/settings/settings_page.dart';
+import '../../features/settings/location_settings_page.dart';
 import '../../features/share_studio/share_studio_page.dart';
 import '../../features/profile/plan_page.dart';
 import '../../features/profile/profile_settings_page.dart';
@@ -45,6 +46,10 @@ class AppRouter {
       GoRoute(
         path: '/profile-settings',
         builder: (_, _) => const ProfileSettingsPage(),
+      ),
+      GoRoute(
+        path: '/location-settings',
+        builder: (_, _) => const LocationSettingsPage(),
       ),
       GoRoute(
         path: '/settings/analytics',

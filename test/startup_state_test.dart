@@ -30,6 +30,7 @@ void main() {
         overrides: [
           userProfileOverride,
           dailyCheckInDueProvider.overrideWith((ref) async => false),
+          forceOnboardingProvider.overrideWith((ref) async => false),
         ],
       ),
     );
@@ -63,6 +64,7 @@ void main() {
         overrides: [
           userProfileProvider.overrideWith((ref) => const Stream.empty()),
           dailyCheckInDueProvider.overrideWith((ref) => pending.future),
+          forceOnboardingProvider.overrideWith((ref) async => false),
         ],
       ),
     );
@@ -78,6 +80,7 @@ void main() {
         overrides: [
           userProfileProvider.overrideWith((ref) => const Stream.empty()),
           dailyCheckInDueProvider.overrideWith((ref) => pending.future),
+          forceOnboardingProvider.overrideWith((ref) async => false),
         ],
         disableAnimations: true,
       ),
@@ -114,6 +117,7 @@ void main() {
             ),
           ),
           dailyCheckInDueProvider.overrideWith((ref) async => false),
+          forceOnboardingProvider.overrideWith((ref) async => false),
         ],
       ),
     );

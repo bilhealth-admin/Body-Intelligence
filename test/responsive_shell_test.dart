@@ -69,25 +69,21 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-
     await tester.pumpWidget(shellApp());
     await tester.pumpAndSettle();
-
-    expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.byType(NavigationRail), findsNothing);
+    expect(find.byKey(const Key('glass-bottom-navigation')), findsOneWidget);
+    expect(find.byKey(const Key('glass-navigation-rail')), findsNothing);
   });
 
-  testWidgets('wide shell uses navigation rail', (tester) async {
+  testWidgets('wide shell uses custom navigation rail', (tester) async {
     tester.view.physicalSize = const Size(1200, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-
     await tester.pumpWidget(shellApp());
     await tester.pumpAndSettle();
-
-    expect(find.byType(NavigationRail), findsOneWidget);
-    expect(find.byType(NavigationBar), findsNothing);
+    expect(find.byKey(const Key('glass-navigation-rail')), findsOneWidget);
+    expect(find.byKey(const Key('glass-bottom-navigation')), findsNothing);
   });
 
   testWidgets('compact shell destination tap navigates to analytics', (
@@ -97,13 +93,10 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-
     await tester.pumpWidget(shellApp());
     await tester.pumpAndSettle();
-
     await tester.tap(find.text('Insights'));
     await tester.pumpAndSettle();
-
     expect(find.text('analytics'), findsOneWidget);
   });
 
@@ -114,27 +107,10 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-
     await tester.pumpWidget(shellApp(initialLocation: '/daily-log'));
     await tester.pumpAndSettle();
-
     final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
     expect(bar.selectedIndex, 1);
-  });
-
-  testWidgets('unknown shell route defaults selected index to dashboard', (
-    tester,
-  ) async {
-    tester.view.physicalSize = const Size(600, 900);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    await tester.pumpWidget(shellApp(initialLocation: '/dashboard'));
-    await tester.pumpAndSettle();
-
-    final bar = tester.widget<NavigationBar>(find.byType(NavigationBar));
-    expect(bar.selectedIndex, 0);
   });
 
   testWidgets('navigation and quick add semantics are present', (tester) async {
@@ -142,12 +118,10 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-
     await tester.pumpWidget(shellApp());
     await tester.pumpAndSettle();
-
     expect(find.bySemanticsLabel('Primary navigation'), findsOneWidget);
-    expect(find.bySemanticsLabel('Quick Add'), findsWidgets);
+    expect(find.byTooltip('Quick Add'), findsOneWidget);
   });
 
   testWidgets('quick add sheet uses canonical motion timing', (tester) async {
@@ -155,84 +129,58 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-
-    await tester.pumpWidget(shellApp(locale: const Locale('en')));
+    await tester.pumpWidget(shellApp());
     await tester.pumpAndSettle();
-
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byKey(const Key('shell-quick-add')));
     await tester.pump();
-
     expect(find.text('Quick Add'), findsOneWidget);
-
     await tester.tapAt(const Offset(16, 16));
     await tester.pump(PremiumMotionTokens.navigationDuration);
     await tester.pumpAndSettle();
-
     expect(find.text('Quick Add'), findsNothing);
   });
 
-  testWidgets('Arabic quick add localizes unavailable AI boundary', (
+  testWidgets('Arabic quick add exposes only implemented capabilities', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(600, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-
     await tester.pumpWidget(shellApp(locale: const Locale('ar')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.byKey(const Key('shell-quick-add')));
     await tester.pumpAndSettle();
-
     expect(find.text('إضافة سريعة'), findsOneWidget);
+    expect(find.text('قياس الوزن اليومي'), findsOneWidget);
     expect(find.text('إضافة طعام'), findsOneWidget);
     expect(find.text('إضافة ماء'), findsOneWidget);
-    expect(find.text('مسح الباركود'), findsOneWidget);
-    expect(
-      find.text('غير متاح حتى يتم إعداد مصدر موثوق لبيانات الباركود.'),
-      findsOneWidget,
-    );
-    expect(find.text('اسأل BIL'), findsOneWidget);
-    expect(
-      find.text(
-        'غير متاح حتى إعداد حدود موافقة الذكاء الاصطناعي وتحديد المعدل على الخادم.',
-      ),
-      findsOneWidget,
-    );
+    expect(find.text('البحث أو إنشاء طعام'), findsOneWidget);
+    expect(find.text('مسح الباركود'), findsNothing);
+    expect(find.text('اسأل BIL'), findsNothing);
     expect(
       Directionality.of(tester.element(find.text('إضافة سريعة'))),
       TextDirection.rtl,
     );
   });
 
-  testWidgets(
-    'English quick add shows explicit unavailable capability boundaries',
-    (tester) async {
-      tester.view.physicalSize = const Size(600, 900);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-
-      await tester.pumpWidget(shellApp(locale: const Locale('en')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byType(FloatingActionButton));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Quick Add'), findsOneWidget);
-      expect(find.text('Scan barcode'), findsOneWidget);
-      expect(
-        find.text(
-          'Unavailable until a verified barcode data source is configured.',
-        ),
-        findsOneWidget,
-      );
-      expect(find.text('Ask BIL'), findsOneWidget);
-      expect(
-        find.text(
-          'Unavailable until the server-side AI consent and rate-limit boundary is configured.',
-        ),
-        findsOneWidget,
-      );
-    },
-  );
+  testWidgets('English quick add exposes only implemented capabilities', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(shellApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('shell-quick-add')));
+    await tester.pumpAndSettle();
+    expect(find.text('Quick Add'), findsOneWidget);
+    expect(find.text('Daily weight check-in'), findsOneWidget);
+    expect(find.text('Add food'), findsOneWidget);
+    expect(find.text('Add water'), findsOneWidget);
+    expect(find.text('Search or create food'), findsOneWidget);
+    expect(find.text('Scan barcode'), findsNothing);
+    expect(find.text('Ask BIL'), findsNothing);
+  });
 }

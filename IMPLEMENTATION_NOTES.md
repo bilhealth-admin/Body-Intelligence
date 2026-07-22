@@ -1,10 +1,12 @@
-# BDAR-003B-R1 Implementation Notes
+# Implementation Notes
 
-R1 corrects three test defects without touching production code:
+The log proved that the forced-onboarding `StreamProvider` opened a real Drift
+query during startup tests. Drift schedules stream-query cleanup on disposal,
+leaving a zero-duration timer visible to Flutter's test invariant.
 
-1. Dart does not allow a constant map with `double` keys in this context, so the
-   viewport cases now use records in a normal list.
-2. The responsive source contract now uses a whitespace-tolerant regular
-   expression and no longer fails when `dart format` wraps the resolver call.
-3. The legacy composition test now reflects the approved product contract:
-   1280px remains stacked; 1600px and 1920px use two regions.
+The preference is a startup decision, not a continuously changing UI signal.
+It is therefore read once through `FutureProvider.autoDispose`. The startup
+tests also override the dependency explicitly, preventing accidental use of the
+production database.
+
+This removes the pending timer without weakening the startup tests.

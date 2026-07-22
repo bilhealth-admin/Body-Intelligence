@@ -19,7 +19,7 @@ void main() {
 
         expect(find.byType(PremiumSurface), findsOneWidget);
         expect(find.byType(Semantics), findsWidgets);
-        expect(find.byType(Card), findsOneWidget);
+        expect(find.byType(AnimatedContainer), findsOneWidget);
 
         final padding = tester.widget<Padding>(
           find.descendant(
@@ -50,7 +50,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(PremiumSurface),
-          matching: find.byType(InkWell),
+          matching: find.byType(GestureDetector),
         ),
         findsOneWidget,
       );
@@ -72,10 +72,6 @@ void main() {
           of: find.byType(AppCard),
           matching: find.byType(PremiumSurface),
         ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(of: find.byType(AppCard), matching: find.byType(Card)),
         findsOneWidget,
       );
     });

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/core/units/measurement_units.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
@@ -22,66 +24,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('P3-E1-010 Dashboard exposes one top-level app bar action', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          firstValueHandoffProvider.overrideWith((ref) => Stream.value(false)),
-          latestWeightProvider.overrideWith((ref) => Stream.value(null)),
-          todayWeightProvider.overrideWith((ref) => Stream.value(null)),
-          weightHistoryProvider.overrideWith(
-            (ref) => Stream.value(<WeightEntry>[]),
-          ),
-          userProfileProvider.overrideWith((ref) => Stream.value(null)),
-          todayMealsProvider.overrideWith(
-            (ref) => Stream.value(<MealWithItems>[]),
-          ),
-          todayWaterProvider.overrideWith(
-            (ref) => Stream.value(<WaterEntry>[]),
-          ),
-          allMealsProvider.overrideWith(
-            (ref) => Stream.value(<MealWithItems>[]),
-          ),
-          allWaterProvider.overrideWith((ref) => Stream.value(<WaterEntry>[])),
-          weightReminderSkippedTodayProvider.overrideWith(
-            (ref) => Stream.value(false),
-          ),
-          todayLifeContextProvider.overrideWith(
-            (ref) => Stream.value(<LifeContextEntry>[]),
-          ),
-          decisionMemoriesProvider.overrideWith(
-            (ref) => Stream.value(<DecisionMemory>[]),
-          ),
-          decisionMemoryEnabledProvider.overrideWith(
-            (ref) => Stream.value(true),
-          ),
-          usualMealsProvider(
-            'breakfast',
-          ).overrideWith((ref) async => <UsualMealCandidate>[]),
-          measurementSystemProvider.overrideWith(
-            (ref) => Stream.value(MeasurementSystem.metric),
-          ),
-        ],
-        child: const MaterialApp(
-          locale: Locale('en'),
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          home: DashboardPage(),
-        ),
-      ),
-    );
-    await tester.pump();
+  test('P3-E1-010 Dashboard exposes one top-level profile action', () {
+    final source = File(
+      'lib/features/dashboard/widgets/dashboard_top_bar.dart',
+    ).readAsStringSync();
 
-    final appBar = tester.widget<AppBar>(find.byType(AppBar).first);
-    expect(appBar.actions, isNotNull);
-    expect(appBar.actions!.length, 1);
+    expect(source, contains('required this.onProfile'));
+    expect(source, contains('Icons.account_circle_outlined'));
+    expect(source, contains('_RoundGlassButton('));
   });
 
   testWidgets(

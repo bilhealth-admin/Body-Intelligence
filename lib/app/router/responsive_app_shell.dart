@@ -107,7 +107,10 @@ class ResponsiveAppShell extends StatelessWidget {
       ),
     );
 
-    final quickButton = _GlassQuickAdd(onTap: quickAdd);
+    final quickButton = _GlassQuickAdd(
+      key: const Key('shell-quick-add'),
+      onTap: quickAdd,
+    );
 
     if (!wide) {
       return Scaffold(
@@ -115,10 +118,14 @@ class ResponsiveAppShell extends StatelessWidget {
         body: child,
         floatingActionButton: quickButton,
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        bottomNavigationBar: _GlassBottomNavigation(
-          selectedIndex: index,
-          items: items,
-          onSelected: navigate,
+        bottomNavigationBar: Semantics(
+          label: arabic ? 'التنقل الرئيسي' : 'Primary navigation',
+          child: _GlassBottomNavigation(
+            key: const Key('glass-bottom-navigation'),
+            selectedIndex: index,
+            items: items,
+            onSelected: navigate,
+          ),
         ),
       );
     }
@@ -128,10 +135,14 @@ class ResponsiveAppShell extends StatelessWidget {
       floatingActionButton: quickButton,
       body: Row(
         children: [
-          _GlassNavigationRail(
-            selectedIndex: index,
-            items: items,
-            onSelected: navigate,
+          Semantics(
+            label: arabic ? 'التنقل الرئيسي' : 'Primary navigation',
+            child: _GlassNavigationRail(
+              key: const Key('glass-navigation-rail'),
+              selectedIndex: index,
+              items: items,
+              onSelected: navigate,
+            ),
           ),
           Expanded(child: child),
         ],
@@ -142,6 +153,7 @@ class ResponsiveAppShell extends StatelessWidget {
 
 class _GlassNavigationRail extends StatelessWidget {
   const _GlassNavigationRail({
+    super.key,
     required this.selectedIndex,
     required this.items,
     required this.onSelected,
@@ -273,6 +285,7 @@ class _RailItem extends StatelessWidget {
 
 class _GlassBottomNavigation extends StatelessWidget {
   const _GlassBottomNavigation({
+    super.key,
     required this.selectedIndex,
     required this.items,
     required this.onSelected,
@@ -309,7 +322,7 @@ class _GlassBottomNavigation extends StatelessWidget {
 }
 
 class _GlassQuickAdd extends StatelessWidget {
-  const _GlassQuickAdd({required this.onTap});
+  const _GlassQuickAdd({super.key, required this.onTap});
 
   final VoidCallback onTap;
 

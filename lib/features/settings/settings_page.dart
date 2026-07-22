@@ -67,6 +67,45 @@ class SettingsPage extends ConsumerWidget {
     }
   }
 
+  Future<void> _reviewSetupAgain(BuildContext context, WidgetRef ref) async {
+    final arabic =
+        Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          arabic ? 'مراجعة الإعداد الأولي؟' : 'Review your initial setup?',
+        ),
+        content: Text(
+          arabic
+              ? 'سيُفتح الإعداد الأولي مع الاحتفاظ بملفك وسجلات الوزن والطعام وجميع بياناتك. لن يتم حذف أو رفع أي شيء.'
+              : 'Onboarding will open while keeping your profile, weight records, meals, and all local data. Nothing will be deleted or uploaded.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(arabic ? 'إلغاء' : 'Cancel'),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            icon: const Icon(Icons.tune_rounded),
+            label: Text(arabic ? 'فتح الإعداد' : 'Open setup'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    await ref
+        .read(preferencesRepositoryProvider)
+        .set('forceOnboarding', 'true');
+
+    if (!context.mounted) return;
+    context.go('/onboarding');
+  }
+
   Future<void> _reset(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -438,6 +477,23 @@ class SettingsPage extends ConsumerWidget {
             ),
           const Divider(height: 32),
           ListTile(
+            key: const Key('settings-review-onboarding'),
+            leading: const Icon(Icons.tune_rounded),
+            title: Text(
+              Localizations.localeOf(context).languageCode == 'ar'
+                  ? 'مراجعة الإعداد الأولي'
+                  : 'Review initial setup',
+            ),
+            subtitle: Text(
+              Localizations.localeOf(context).languageCode == 'ar'
+                  ? 'أعد فتح خطوات الإعداد دون حذف السجلات أو الملف الشخصي.'
+                  : 'Reopen onboarding without deleting your profile or records.',
+            ),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => _reviewSetupAgain(context, ref),
+          ),
+          const SizedBox(height: 8),
+          ListTile(
             textColor: Theme.of(context).colorScheme.error,
             iconColor: Theme.of(context).colorScheme.error,
             leading: const Icon(Icons.delete_forever),
@@ -459,7 +515,8 @@ class _RegionTimezoneTile extends ConsumerStatefulWidget {
 }
 
 class _RegionTimezoneTileState extends ConsumerState<_RegionTimezoneTile> {
-  String? region;
+  String? country;
+  String? city;
   String? timezone;
 
   @override
@@ -472,104 +529,43 @@ class _RegionTimezoneTileState extends ConsumerState<_RegionTimezoneTile> {
     final repository = ref.read(preferencesRepositoryProvider);
     final values = await Future.wait([
       repository.get('countryRegion'),
+      repository.get('cityName'),
       repository.get('timezoneName'),
     ]);
-    if (mounted) {
-      setState(() {
-        region = values[0];
-        timezone = values[1];
-      });
-    }
-  }
-
-  Future<void> _edit() async {
-    final regionController = TextEditingController(text: region ?? '');
-    final timezoneController = TextEditingController(
-      text: timezone ?? DateTime.now().timeZoneName,
-    );
-    final arabic = Localizations.localeOf(context).languageCode == 'ar';
-    final result = await showDialog<(String, String)>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(
-          arabic ? 'المنطقة والمنطقة الزمنية' : 'Region and timezone',
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: regionController,
-              autofillHints: const [AutofillHints.countryName],
-              decoration: InputDecoration(
-                labelText: arabic ? 'الدولة أو المنطقة' : 'Country or region',
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: timezoneController,
-              decoration: InputDecoration(
-                labelText: arabic ? 'المنطقة الزمنية' : 'Timezone',
-                helperText: arabic
-                    ? 'تُستخدم للعرض المحلي فقط ولا تغيّر السجلات السابقة.'
-                    : 'Used for local display only; existing records are unchanged.',
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(arabic ? 'إلغاء' : 'Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, (
-              regionController.text.trim(),
-              timezoneController.text.trim(),
-            )),
-            child: Text(arabic ? 'حفظ' : 'Save'),
-          ),
-        ],
-      ),
-    );
-    regionController.dispose();
-    timezoneController.dispose();
-    if (result == null) return;
-    final repository = ref.read(preferencesRepositoryProvider);
-    if (result.$1.isEmpty) {
-      await repository.remove('countryRegion');
-    } else {
-      await repository.set('countryRegion', result.$1);
-    }
-    if (result.$2.isEmpty) {
-      await repository.remove('timezoneName');
-    } else {
-      await repository.set('timezoneName', result.$2);
-    }
-    await _load();
+    if (!mounted) return;
+    setState(() {
+      country = values[0];
+      city = values[1];
+      timezone = values[2];
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    final parts = [
+      if (country?.isNotEmpty == true) country!,
+      if (city?.isNotEmpty == true) city!,
+      if (timezone?.isNotEmpty == true) timezone!,
+    ];
+
     return ListTile(
+      key: const Key('settings-location-tile'),
       contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.public),
-      title: Text(arabic ? 'المنطقة والمنطقة الزمنية' : 'Region and timezone'),
+      leading: const Icon(Icons.public_rounded),
+      title: Text(arabic ? 'الموقع والوقت المحلي' : 'Location & local time'),
       subtitle: Text(
-        [
-              if (region?.isNotEmpty == true) region!,
-              if (timezone?.isNotEmpty == true) timezone!,
-            ].isEmpty
+        parts.isEmpty
             ? (arabic
-                  ? 'غير محدد — يُستخدم إعداد الجهاز'
-                  : 'Not set — device defaults are used')
-            : [
-                if (region?.isNotEmpty == true) region!,
-                if (timezone?.isNotEmpty == true) timezone!,
-              ].join(' · '),
+                  ? 'اختر الدولة والمدينة أو استخدم إعداد الجهاز.'
+                  : 'Choose country and city or detect from this device.')
+            : parts.join(' · '),
       ),
-      trailing: const Icon(Icons.edit_outlined),
-      onTap: _edit,
+      trailing: const Icon(Icons.chevron_right_rounded),
+      onTap: () async {
+        await context.push('/location-settings');
+        await _load();
+      },
     );
   }
 }

@@ -43,8 +43,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(FilledButton), findsOneWidget);
-    expect(find.text('حاول مرة أخرى'), findsOneWidget);
+    expect(find.byType(TextButton), findsOneWidget);
+    expect(find.text('إعادة المحاولة'), findsOneWidget);
     expect(find.textContaining('sensitive database detail'), findsNothing);
     expect(tester.takeException(), isNull);
   });

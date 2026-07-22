@@ -61,6 +61,13 @@ final firstValueHandoffProvider = StreamProvider<bool>((ref) {
       .map((value) => value == 'true');
 });
 
+final forceOnboardingProvider = FutureProvider.autoDispose<bool>((ref) async {
+  final value = await ref
+      .watch(preferencesRepositoryProvider)
+      .get('forceOnboarding');
+  return value == 'true';
+});
+
 final userProfileProvider = StreamProvider<UserProfileData?>((ref) {
   final repository = ref.watch(userProfileRepositoryProvider);
   return repository.watchProfile();

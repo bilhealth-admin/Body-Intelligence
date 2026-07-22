@@ -45,6 +45,8 @@ void main() {
   testWidgets('pull to refresh re-queries local Today providers', (
     tester,
   ) async {
+    await tester.binding.setSurfaceSize(const Size(1280, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
     final database = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(database.close);
     await tester.pumpWidget(

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,6 +25,10 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
   String gender = 'male';
   String activity = 'moderate';
   bool exercises = true;
+  int weeklyExerciseSessions = 3;
+  String exerciseType = 'mixed';
+  String dietApproach = 'balanced';
+  bool experiencePreferencesLoaded = false;
   bool initialized = false;
   bool saving = false;
   bool dirty = false;
@@ -46,6 +52,24 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
     height.text = profile.height.toStringAsFixed(1);
     weight.text = profile.currentWeight.toStringAsFixed(1);
     target.text = profile.targetWeight.toStringAsFixed(1);
+    unawaited(_loadExperiencePreferences());
+  }
+
+  Future<void> _loadExperiencePreferences() async {
+    if (experiencePreferencesLoaded) return;
+    experiencePreferencesLoaded = true;
+    final repository = ref.read(preferencesRepositoryProvider);
+    final values = await Future.wait([
+      repository.get('weeklyExerciseSessions'),
+      repository.get('exerciseType'),
+      repository.get('dietApproach'),
+    ]);
+    if (!mounted) return;
+    setState(() {
+      weeklyExerciseSessions = int.tryParse(values[0] ?? '') ?? 3;
+      exerciseType = values[1] ?? 'mixed';
+      dietApproach = values[2] ?? 'balanced';
+    });
   }
 
   String? validate(String? value, double min, double max) {
@@ -123,6 +147,13 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
             targetWeight: targetWeight,
             targetDate: activeGoal?.targetDate,
           );
+      final preferences = ref.read(preferencesRepositoryProvider);
+      await preferences.set(
+        'weeklyExerciseSessions',
+        exercises ? weeklyExerciseSessions.toString() : '0',
+      );
+      await preferences.set('exerciseType', exerciseType);
+      await preferences.set('dietApproach', dietApproach);
       ref.invalidate(userProfileProvider);
       ref.invalidate(activeGoalProvider);
       if (!mounted) return;
@@ -136,6 +167,7 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
           ),
         ),
       );
+      context.go('/settings');
     } finally {
       if (mounted) setState(() => saving = false);
     }
@@ -296,8 +328,127 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
                     contentPadding: EdgeInsets.zero,
                     value: exercises,
                     title: Text(ar ? 'أمارس التمارين' : 'I exercise'),
+                    subtitle: Text(
+                      ar
+                          ? 'سنستخدم التكرار والنوع لتفسير نشاطك، لا لادعاء حرق دقيق.'
+                          : 'Frequency and type improve context without claiming exact calorie burn.',
+                    ),
                     onChanged: (value) => setState(() {
                       exercises = value;
+                      dirty = true;
+                    }),
+                  ),
+                  if (exercises) ...[
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<int>(
+                      key: ValueKey(weeklyExerciseSessions),
+                      initialValue: weeklyExerciseSessions,
+                      decoration: InputDecoration(
+                        labelText: ar
+                            ? 'مرات التمرين أسبوعيًا'
+                            : 'Exercise sessions per week',
+                      ),
+                      items: [
+                        for (var sessions = 1; sessions <= 7; sessions++)
+                          DropdownMenuItem(
+                            value: sessions,
+                            child: Text(
+                              ar
+                                  ? '$sessions مرات أسبوعيًا'
+                                  : '$sessions per week',
+                            ),
+                          ),
+                      ],
+                      onChanged: (value) => setState(() {
+                        weeklyExerciseSessions =
+                            value ?? weeklyExerciseSessions;
+                        dirty = true;
+                      }),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: exerciseType,
+                      decoration: InputDecoration(
+                        labelText: ar
+                            ? 'نوع التمرين الأساسي'
+                            : 'Primary exercise type',
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: 'walking',
+                          child: Text(ar ? 'المشي' : 'Walking'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'strength',
+                          child: Text(
+                            ar ? 'تمارين المقاومة والجيم' : 'Strength & gym',
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'cardio',
+                          child: Text(ar ? 'كارديو' : 'Cardio'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'swimming',
+                          child: Text(ar ? 'السباحة' : 'Swimming'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'cycling',
+                          child: Text(ar ? 'ركوب الدراجة' : 'Cycling'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'mixed',
+                          child: Text(ar ? 'برنامج مختلط' : 'Mixed training'),
+                        ),
+                      ],
+                      onChanged: (value) => setState(() {
+                        exerciseType = value ?? exerciseType;
+                        dirty = true;
+                      }),
+                    ),
+                  ],
+                  const SizedBox(height: 20),
+                  Text(
+                    ar ? 'أسلوب التغذية' : 'Nutrition approach',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: dietApproach,
+                    decoration: InputDecoration(
+                      labelText: ar ? 'اسم خطتي' : 'My plan style',
+                      helperText: ar
+                          ? 'هذا يغيّر طريقة العرض والتفضيلات، وليس الحقائق العلمية الأساسية.'
+                          : 'This guides presentation and preferences, not core scientific facts.',
+                    ),
+                    items: [
+                      DropdownMenuItem(
+                        value: 'balanced',
+                        child: Text(ar ? 'توازن ذكي' : 'Smart Balance'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'high_protein',
+                        child: Text(ar ? 'بروتين أعلى' : 'Protein Forward'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'low_carb',
+                        child: Text(ar ? 'كربوهيدرات أقل' : 'Lower Carb'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'keto',
+                        child: Text(ar ? 'كيتو' : 'Keto'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'mediterranean',
+                        child: Text(ar ? 'متوسطي' : 'Mediterranean'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'plant_forward',
+                        child: Text(ar ? 'نباتي مرن' : 'Plant Forward'),
+                      ),
+                    ],
+                    onChanged: (value) => setState(() {
+                      dietApproach = value ?? dietApproach;
                       dirty = true;
                     }),
                   ),
@@ -306,7 +457,11 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
                     key: const Key('profile-settings-save'),
                     onPressed: saving ? null : () => save(profile),
                     icon: const Icon(Icons.save_rounded),
-                    label: Text(ar ? 'حفظ التغييرات' : 'Save changes'),
+                    label: Text(
+                      ar
+                          ? 'حفظ والعودة إلى الإعدادات'
+                          : 'Save and return to settings',
+                    ),
                   ),
                   const SizedBox(height: 10),
                   OutlinedButton.icon(
