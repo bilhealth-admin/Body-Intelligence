@@ -1,23 +1,21 @@
 # Package Manifest
 
-Package ID: `BDAR-003A-R1`
+Package ID: `BDAR-003B-R1`
 Type: Test-only compatibility correction
 
 ## Changed files
 
-- `test/first_value_handoff_test.dart`
+- `test/dashboard_layout_metrics_test.dart`
+- `test/dashboard_responsive_contract_test.dart`
+- `test/dashboard_composition_test.dart`
 - `PACKAGE_CONSTITUTION.md`
+- `PACKAGE_MANIFEST.md`
+- `IMPLEMENTATION_NOTES.md`
 
 ## Production changes
 
 None.
 
-## Root cause
-
-BDAR-003A moved `FirstValueHandoffCard` from `dashboard_page.dart` into
-`widgets/first_value_handoff_card.dart`. The pre-existing test still imported
-the old file, so analyzer could not resolve the widget.
-
 ## Rollback
 
-Restore only the two files listed above. Never reset the repository.
+Restore only the files listed above. Never reset the repository.

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'dashboard_layout_metrics.dart';
+
 /// Owns dashboard-level environment concerns only: background, safe area,
 /// scrolling, refresh, viewport padding, and maximum content width.
 ///
@@ -45,19 +47,24 @@ class DashboardShell extends StatelessWidget {
               onRefresh: onRefresh,
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final horizontal = constraints.maxWidth < 700 ? 16.0 : 28.0;
+                  final metrics = DashboardLayoutMetrics.resolve(
+                    constraints.maxWidth,
+                  );
+
                   return SingleChildScrollView(
                     key: const Key('dashboard-scroll-view'),
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: EdgeInsets.fromLTRB(
-                      horizontal,
+                      metrics.horizontalPadding,
                       16,
-                      horizontal,
+                      metrics.horizontalPadding,
                       120,
                     ),
                     child: Center(
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 1380),
+                        constraints: BoxConstraints(
+                          maxWidth: metrics.maxContentWidth,
+                        ),
                         child: child,
                       ),
                     ),

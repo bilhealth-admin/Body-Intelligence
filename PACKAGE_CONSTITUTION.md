@@ -1,24 +1,23 @@
 # BIL Package Constitution
 
-Package: `BDAR-003A-R1 — First Value Test Compatibility`
-Baseline commit: `9270697`
+Package: `BDAR-003B-R1 — Test Compatibility`
+Baseline: BDAR-003B working tree over commit `cf4aa3e`
 Branch: `phase-3-product-excellence`
 
-This revision is subordinate to BDAR-003A and all higher BIL governance
-documents.
+This revision is subordinate to BDAR-003B and all higher BIL governance.
 
 ## Frozen scope
 
-- Update only `test/first_value_handoff_test.dart`.
-- Import `FirstValueHandoffCard` from its new presentation file.
-- Preserve the existing Arabic honesty and single-action assertions.
-- Remove trailing whitespace from the package constitution.
-- Change no production code, behavior, calculations, navigation, persistence,
-  localization, or dashboard layout.
+- Fix only the three stale or invalid tests created by BDAR-003B.
+- Replace the invalid constant double-key map with record-based test cases.
+- Make the source contract resilient to formatter line wrapping.
+- Align the legacy composition test with the approved 1500px two-region rule.
+- Change no production Dart code, layout metrics, routing, data, engines,
+  calculations, persistence, localization, or scientific behavior.
 
 ## Completion gate
 
-- `git diff --check` reports no whitespace errors from this package.
-- `flutter analyze --no-pub` has no BDAR-003A errors.
-- `flutter test test\first_value_handoff_test.dart` passes.
-- Existing BDAR-003A and BDAR-002 regression tests remain passing.
+- `flutter analyze --no-pub` has no BDAR-003B errors.
+- All three corrected tests pass.
+- All BDAR-003A and critical BDAR-002 regression tests remain passing.
+- Manual Windows review passes before commit.
