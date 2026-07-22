@@ -3,7 +3,7 @@
 Project: Body Intelligence Log  
 Branch: `phase-3-product-excellence`  
 Current Program: `BIL-STAB-002 — Product Stabilization`  
-Current Focus: `STAB-202 — Secondary Page Navigation`
+Current Focus: `BDAR-002 — Emergency Dashboard Integrity`
 
 ---
 
@@ -38,6 +38,11 @@ Current Focus: `STAB-202 — Secondary Page Navigation`
 
 | ID | Issue | Classification | Status | Evidence / Commit |
 |---|---|---|---|---|
+| BDAR-001 | Current Repository and Dashboard Forensic Audit | Audit/governance | Complete | Latest archive reviewed; static findings and execution program recorded |
+| BDAR-002 | Emergency Dashboard Integrity | Product regression | In Progress | Mojibake plus suspected paint/clip/transparency leak in deep-insights surface |
+| BDAR-003 | Deterministic Dashboard Refresh | Product regression | Planned | Replace all-or-nothing refresh orchestration with bounded partial results |
+| BDAR-004 | Dashboard Architecture Foundation | Architecture debt | Planned | Immutable view model, orchestration boundary, and section decomposition |
+| BDAR-005 | Responsive Information Architecture | Product/UX architecture | Planned | Compact/medium/wide hierarchy, RTL/LTR, accessibility, approved goldens |
 | STAB-205 | Startup Accessibility and Recovery Contracts | Lost contract / regression | Open | Retry, localized semantics, reduced motion, and redirect behavior require classification |
 | STAB-206 | Responsive Shell and Quick Add Contracts | Mixed: regression / outdated tests | Open | NavigationRail, semantics, FAB, and adaptive quick-add behavior require product-contract review |
 | STAB-207 | Dashboard Architecture Split | Architecture debt | Open | Introduce immutable DashboardViewModel and decompose monolithic dashboard composition |
@@ -62,6 +67,7 @@ Current Focus: `STAB-202 — Secondary Page Navigation`
 
 | ID | Deliverable | Status | Evidence / Commit |
 |---|---|---|---|
+| BDAR-001 | Latest baseline forensic audit and master execution program | Complete | `BIL_Review_Latest.zip` SHA-256 recorded in package constitution |
 | STAB-201 | Welcome Responsive Overflow | Complete | Approved visually on Windows; no overflow in compact/mobile/wide Welcome tests; commit message recorded above |
 | STAB-211 | Welcome V10 Test Modernization | Complete | `529f663` |
 | GOV-001 | Repository baseline and stabilization governance | Complete | Baseline, execution ledger, Quality Board, and Product Excellence packs established |

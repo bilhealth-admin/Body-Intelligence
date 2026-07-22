@@ -23,3 +23,13 @@
 | BIL-STAB-008 | Dashboard architecture decomposition | Planned |
 | BIL-STAB-009 | Flagship design-system consolidation | Planned |
 | BIL-STAB-010 | Full cross-platform regression gate | Planned |
+
+## Dashboard Architecture Review Program
+
+| ID | Scope | Status |
+|---|---|---|
+| BDAR-001 | Latest baseline forensic audit and package governance | Complete |
+| BDAR-002 | Emergency dashboard integrity: Arabic encoding and visual layer leak | In Progress |
+| BDAR-003 | Deterministic refresh and partial-success states | Planned |
+| BDAR-004 | Dashboard view model and architecture decomposition | Planned |
+| BDAR-005 | Responsive information architecture and approved visual baselines | Planned |
