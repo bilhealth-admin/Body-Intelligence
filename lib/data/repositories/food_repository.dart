@@ -2,11 +2,24 @@ import 'package:drift/drift.dart';
 
 import '../database/app_database.dart';
 import '../database/nutrient_evidence.dart';
+import '../../features/nutrition/adapters/unified_food_adapter.dart';
+import '../../features/nutrition/domain/unified_food.dart';
+import '../../features/nutrition/repositories/unified_food_repository.dart';
+import '../../features/nutrition/services/food_search_normalizer.dart';
+import '../../features/nutrition/services/offline_food_search_pipeline.dart';
 
-class FoodRepository {
+class FoodRepository implements UnifiedFoodRepository {
   final AppDatabase _database;
+  final UnifiedFoodAdapter _adapter;
+  final OfflineFoodSearchPipeline _searchPipeline;
 
-  FoodRepository(this._database);
+  FoodRepository(
+    this._database, {
+    UnifiedFoodAdapter adapter = const UnifiedFoodAdapter(),
+    OfflineFoodSearchPipeline searchPipeline =
+        const OfflineFoodSearchPipeline(),
+  }) : _adapter = adapter,
+       _searchPipeline = searchPipeline;
 
   Future<int> addFood({
     required String name,
@@ -20,6 +33,8 @@ class FoodRepository {
     double servingSize = 100,
     String servingUnit = 'g',
     bool isCustom = true,
+    String source = 'local',
+    bool verified = false,
     String keywords = '',
     double? fiber,
     double? sugar,
@@ -81,8 +96,9 @@ class FoodRepository {
               ),
             ),
             vitaminC: Value(vitaminC),
-            verified: const Value(false),
+            verified: Value(verified),
             isCustom: Value(isCustom),
+            source: Value(source.trim().isEmpty ? 'local' : source.trim()),
           ),
         );
 
@@ -224,39 +240,120 @@ class FoodRepository {
     );
   }
 
-  Future<List<Food>> search(String query, {int limit = 50}) {
-    final normalized = query.trim().toLowerCase();
-    final active = _database.foods.deletedAt.isNull();
-    final condition = normalized.isEmpty
-        ? active
-        : active &
-              (_database.foods.name.lower().like('%$normalized%') |
-                  _database.foods.arabicName.lower().like('%$normalized%') |
-                  _database.foods.keywords.lower().like('%$normalized%') |
-                  _database.foods.barcode.equals(normalized));
-    final selection =
-        _database.select(_database.foods).join([
-            leftOuterJoin(
-              _database.recentFoods,
-              _database.recentFoods.foodId.equalsExp(_database.foods.id),
-            ),
-            leftOuterJoin(
-              _database.favorites,
-              _database.favorites.foodId.equalsExp(_database.foods.id),
-            ),
-          ])
-          ..where(condition)
-          ..orderBy([
-            OrderingTerm.desc(_database.favorites.id),
-            OrderingTerm.desc(_database.recentFoods.useCount),
-            OrderingTerm.desc(_database.recentFoods.lastUsedAt),
-            OrderingTerm.desc(_database.foods.verified),
-            OrderingTerm.asc(_database.foods.name),
-          ])
-          ..limit(limit);
-    return selection.get().then(
-      (rows) => rows.map((row) => row.readTable(_database.foods)).toList(),
+  Future<List<Food>> search(String query, {int limit = 50}) async {
+    final foods = await getFoods();
+    if (FoodSearchNormalizer.normalize(query).isEmpty) {
+      return _rankPersonalizedFoods(foods, limit: limit);
+    }
+
+    final hits = _searchPipeline.search(
+      foods: _adapter.adaptAll(foods),
+      query: query,
+      limit: limit,
     );
+    final byId = <int, Food>{for (final food in foods) food.id: food};
+    return hits
+        .map((hit) => hit.food.localId == null ? null : byId[hit.food.localId!])
+        .whereType<Food>()
+        .toList(growable: false);
+  }
+
+  @override
+  Future<List<FoodSearchHit>> searchUnified(
+    String query, {
+    int limit = 50,
+  }) async {
+    final foods = await getFoods();
+    if (FoodSearchNormalizer.normalize(query).isEmpty) {
+      final ranked = await _rankPersonalizedFoods(foods, limit: limit);
+      return List<FoodSearchHit>.unmodifiable(
+        ranked.map(
+          (food) => FoodSearchHit(
+            food: _adapter.adapt(food),
+            score: 1,
+            reasons: const <String>['personalized-empty-query'],
+          ),
+        ),
+      );
+    }
+
+    return _searchPipeline.search(
+      foods: _adapter.adaptAll(foods),
+      query: query,
+      limit: limit,
+    );
+  }
+
+  @override
+  Stream<List<UnifiedFood>> watchAll() => watchFoods().map(_adapter.adaptAll);
+
+  @override
+  Future<List<UnifiedFood>> getAll() async =>
+      _adapter.adaptAll(await getFoods());
+
+  @override
+  Future<UnifiedFood?> findById(String id) async {
+    final normalized = id.trim();
+    if (normalized.isEmpty) return null;
+    final food =
+        await (_database.select(_database.foods)..where(
+              (row) => row.uuid.equals(normalized) & row.deletedAt.isNull(),
+            ))
+            .getSingleOrNull();
+    return food == null ? null : _adapter.adapt(food);
+  }
+
+  @override
+  Future<UnifiedFood?> findByBarcode(String barcode) async {
+    final normalized = FoodSearchNormalizer.normalizeBarcode(barcode);
+    if (normalized.isEmpty) return null;
+    final foods = await getFoods();
+    for (final food in foods) {
+      if (FoodSearchNormalizer.normalizeBarcode(food.barcode ?? '') ==
+          normalized) {
+        return _adapter.adapt(food);
+      }
+    }
+    return null;
+  }
+
+  Future<List<Food>> _rankPersonalizedFoods(
+    List<Food> foods, {
+    required int limit,
+  }) async {
+    if (limit <= 0 || foods.isEmpty) return const <Food>[];
+
+    final favoriteRows = await _database.select(_database.favorites).get();
+    final recentRows = await _database.select(_database.recentFoods).get();
+    final favoriteIds = favoriteRows.map((row) => row.foodId).toSet();
+    final recentsByFoodId = {for (final row in recentRows) row.foodId: row};
+
+    final ranked = List<Food>.of(foods);
+    ranked.sort((left, right) {
+      final favoriteOrder = (favoriteIds.contains(right.id) ? 1 : 0).compareTo(
+        favoriteIds.contains(left.id) ? 1 : 0,
+      );
+      if (favoriteOrder != 0) return favoriteOrder;
+
+      final leftRecent = recentsByFoodId[left.id];
+      final rightRecent = recentsByFoodId[right.id];
+      final useCountOrder = (rightRecent?.useCount ?? 0).compareTo(
+        leftRecent?.useCount ?? 0,
+      );
+      if (useCountOrder != 0) return useCountOrder;
+
+      final lastUsedOrder =
+          (rightRecent?.lastUsedAt ?? DateTime.fromMillisecondsSinceEpoch(0))
+              .compareTo(
+                leftRecent?.lastUsedAt ??
+                    DateTime.fromMillisecondsSinceEpoch(0),
+              );
+      if (lastUsedOrder != 0) return lastUsedOrder;
+
+      return left.name.toLowerCase().compareTo(right.name.toLowerCase());
+    });
+
+    return List<Food>.unmodifiable(ranked.take(limit));
   }
 
   Future<void> setFavorite(int foodId, bool favorite) async {

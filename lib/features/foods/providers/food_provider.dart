@@ -5,10 +5,15 @@ import '../../../data/database/database_provider.dart';
 import '../../../data/database/seed_data.dart';
 import '../../../data/repositories/food_repository.dart';
 import '../../../data/repositories/meal_repository.dart';
+import '../../nutrition/repositories/unified_food_repository.dart';
 
 final foodRepositoryProvider = Provider<FoodRepository>((ref) {
   final database = ref.watch(databaseProvider);
   return FoodRepository(database);
+});
+
+final unifiedFoodRepositoryProvider = Provider<UnifiedFoodRepository>((ref) {
+  return ref.watch(foodRepositoryProvider);
 });
 
 final mealRepositoryProvider = Provider<MealRepository>((ref) {
