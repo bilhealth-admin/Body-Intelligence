@@ -11,19 +11,23 @@ import '../../features/nutrition/services/food_migration_engine.dart';
 import '../../features/nutrition/services/food_quality_engine.dart';
 import '../../features/nutrition/services/food_search_normalizer.dart';
 import '../../features/nutrition/services/offline_food_search_pipeline.dart';
+import '../../features/nutrition/services/offline_barcode_resolver.dart';
 
 class FoodRepository implements UnifiedFoodRepository {
   final AppDatabase _database;
   final UnifiedFoodAdapter _adapter;
   final OfflineFoodSearchPipeline _searchPipeline;
+  final OfflineBarcodeResolver _barcodeResolver;
 
   FoodRepository(
     this._database, {
     UnifiedFoodAdapter adapter = const UnifiedFoodAdapter(),
     OfflineFoodSearchPipeline searchPipeline =
         const OfflineFoodSearchPipeline(),
+    OfflineBarcodeResolver barcodeResolver = const OfflineBarcodeResolver(),
   }) : _adapter = adapter,
-       _searchPipeline = searchPipeline;
+       _searchPipeline = searchPipeline,
+       _barcodeResolver = barcodeResolver;
 
   Future<int> addFood({
     required String name,
@@ -319,6 +323,14 @@ class FoodRepository implements UnifiedFoodRepository {
       }
     }
     return null;
+  }
+
+  @override
+  Future<BarcodeResolution> resolveBarcode(String barcode) async {
+    return _barcodeResolver.resolve(
+      barcode: barcode,
+      foods: _adapter.adaptAll(await getFoods()),
+    );
   }
 
   @override
