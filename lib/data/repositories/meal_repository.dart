@@ -2,11 +2,22 @@ import 'package:drift/drift.dart';
 
 import '../database/app_database.dart';
 import '../database/date_keys.dart';
+import '../../features/nutrition/adapters/unified_food_adapter.dart';
+import '../../features/nutrition/domain/unified_food.dart';
+import '../../features/nutrition/services/nutrition_calculation_engine.dart';
 
 class MealRepository {
   final AppDatabase _database;
+  final UnifiedFoodAdapter _foodAdapter;
+  final NutritionCalculationEngine _nutritionEngine;
 
-  MealRepository(this._database);
+  MealRepository(
+    this._database, {
+    UnifiedFoodAdapter foodAdapter = const UnifiedFoodAdapter(),
+    NutritionCalculationEngine nutritionEngine =
+        const NutritionCalculationEngine(),
+  }) : _foodAdapter = foodAdapter,
+       _nutritionEngine = nutritionEngine;
 
   Future<int> createMeal({
     required DateTime date,
@@ -48,7 +59,7 @@ class MealRepository {
     _validateQuantity(quantity);
     await _database.transaction(() async {
       final food = await _activeFood(foodId);
-      final factor = quantity / food.servingSize;
+      final portion = _calculatePortion(food, quantity);
       final siblings =
           await (_database.select(_database.mealItems)..where(
                 (item) => item.mealId.equals(mealId) & item.deletedAt.isNull(),
@@ -69,17 +80,17 @@ class MealRepository {
               foodId: foodId,
               quantity: Value(quantity),
               position: Value(nextPosition),
-              calories: Value(food.calories * factor),
-              protein: Value(food.protein * factor),
-              carbs: Value(food.carbs * factor),
-              fats: Value(food.fats * factor),
-              fiber: Value(food.fiber * factor),
-              sodium: Value(food.sodium * factor),
-              potassium: Value(food.potassium * factor),
-              calcium: Value(food.calcium * factor),
-              magnesium: Value(food.magnesium * factor),
-              sugar: Value(food.sugar * factor),
-              nutrientEvidenceMask: Value(food.nutrientEvidenceMask),
+              calories: Value(portion.valueOrZero(FoodNutrient.calories)),
+              protein: Value(portion.valueOrZero(FoodNutrient.protein)),
+              carbs: Value(portion.valueOrZero(FoodNutrient.carbohydrates)),
+              fats: Value(portion.valueOrZero(FoodNutrient.fat)),
+              fiber: Value(portion.valueOrZero(FoodNutrient.fiber)),
+              sodium: Value(portion.valueOrZero(FoodNutrient.sodium)),
+              potassium: Value(portion.valueOrZero(FoodNutrient.potassium)),
+              calcium: Value(portion.valueOrZero(FoodNutrient.calcium)),
+              magnesium: Value(portion.valueOrZero(FoodNutrient.magnesium)),
+              sugar: Value(portion.valueOrZero(FoodNutrient.sugar)),
+              nutrientEvidenceMask: Value(portion.nutrientEvidenceMask),
             ),
           );
     });
@@ -93,23 +104,23 @@ class MealRepository {
     await _database.transaction(() async {
       final existing = await _mealItem(id);
       final food = await _activeFood(existing.foodId);
-      final factor = quantity / food.servingSize;
+      final portion = _calculatePortion(food, quantity);
       await (_database.update(
         _database.mealItems,
       )..where((row) => row.id.equals(id))).write(
         MealItemsCompanion(
           quantity: Value(quantity),
-          calories: Value(food.calories * factor),
-          protein: Value(food.protein * factor),
-          carbs: Value(food.carbs * factor),
-          fats: Value(food.fats * factor),
-          fiber: Value(food.fiber * factor),
-          sodium: Value(food.sodium * factor),
-          potassium: Value(food.potassium * factor),
-          calcium: Value(food.calcium * factor),
-          magnesium: Value(food.magnesium * factor),
-          sugar: Value(food.sugar * factor),
-          nutrientEvidenceMask: Value(food.nutrientEvidenceMask),
+          calories: Value(portion.valueOrZero(FoodNutrient.calories)),
+          protein: Value(portion.valueOrZero(FoodNutrient.protein)),
+          carbs: Value(portion.valueOrZero(FoodNutrient.carbohydrates)),
+          fats: Value(portion.valueOrZero(FoodNutrient.fat)),
+          fiber: Value(portion.valueOrZero(FoodNutrient.fiber)),
+          sodium: Value(portion.valueOrZero(FoodNutrient.sodium)),
+          potassium: Value(portion.valueOrZero(FoodNutrient.potassium)),
+          calcium: Value(portion.valueOrZero(FoodNutrient.calcium)),
+          magnesium: Value(portion.valueOrZero(FoodNutrient.magnesium)),
+          sugar: Value(portion.valueOrZero(FoodNutrient.sugar)),
+          nutrientEvidenceMask: Value(portion.nutrientEvidenceMask),
           updatedAt: Value(DateTime.now()),
           revision: Value(existing.revision + 1),
           syncStatus: const Value('pending'),
@@ -218,6 +229,13 @@ class MealRepository {
             ),
           );
     });
+  }
+
+  NutritionPortion _calculatePortion(Food food, double quantityGrams) {
+    return _nutritionEngine.calculate(
+      food: _foodAdapter.adapt(food),
+      grams: quantityGrams,
+    );
   }
 
   Future<MealItem> _mealItem(int id) async {
