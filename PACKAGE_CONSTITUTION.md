@@ -1,49 +1,30 @@
 # BIL Package Constitution
 
-Package: `BDAR-001 — Current Baseline Forensic Audit`  
-Baseline archive: `BIL_Review_Latest.zip`  
-Baseline SHA-256: `a84fa176baa5ebfc1b9087aac2bc8cc0734a25468bef315a1888fd57119d999d`  
-Branch: `phase-3-product-excellence`
+Package: `BDAR-002R5 — Edit Quantity Route Safety`
 
-## Governing authority
+This critical revision is subordinate to BDAR-002 and all higher BIL governance.
 
-This package is subordinate to:
+## Root cause
 
-1. `docs/PHASE_3_CONSTITUTION.md`
-2. `docs/governance/BIL_REPOSITORY_BASELINE_V1.md`
-3. `docs/governance/BIL_STABILIZATION_EXECUTION_LEDGER.md`
-4. `docs/governance/BIL_QUALITY_BOARD.md`
-5. Product Excellence governance documents
+The Edit Quantity dialog was opened with `showDialog`, but both dialog buttons
+called `Navigator.pop(context)` using the Daily Log page context rather than the
+dialog builder context.
 
-If any package instruction conflicts with a higher governing document, the higher governing document wins.
+With GoRouter this popped the last routed page from the application stack,
+leaving no page to render and producing the black screen.
 
-## Non-negotiable rules
+## Frozen scope
 
-- Preserve Foundation V2 and all verified Phase 3 work.
-- Do not reset, clean, discard, rewrite, force-push, merge, or push.
-- Do not replace the repository with an archive.
-- Do not duplicate repositories, engines, calculations, persistence paths, localization logic, or provider logic.
-- No feature may be declared complete from UI alone.
-- Every implementation package must include scoped tests, acceptance evidence, rollback guidance, and governance updates.
-- No package may hide failing tests by deleting or weakening valid contracts.
-- Golden files may be updated only after the product surface is visually approved and regression-free.
-- Missing evidence is not zero.
-- Estimates must be labeled as estimates.
-- No medical diagnosis, fabricated precision, fabricated confidence, or unsupported scientific claim.
-- Privacy-first, offline-first, accessibility, RTL/LTR, responsive behavior, and cross-platform support are mandatory.
-- No manual source editing is required from the Product Owner when a complete replacement file or package can be supplied.
-- Each package must be independently reviewable, testable, and revertible.
-- Major engines—nutrition strategies, exercise, adaptive TDEE, prediction, explainability, and recommendations—must have explicit scientific and architectural contracts before production activation.
+- Correct only the Edit Quantity dialog route ownership.
+- Cancel and Update must close the dialog route through `dialogContext`.
+- Preserve quantity parsing, repository updates, UI, and navigation elsewhere.
+- Add a route-safety regression contract.
+- No BDAR-003A files or architectural changes.
 
-## Package completion rule
+## Completion gate
 
-A package is complete only when:
-
-- preflight passes;
-- relevant analyzer/build/test gates pass;
-- manual acceptance evidence is recorded where needed;
-- the Quality Board and execution ledger are updated;
-- one focused commit is created;
-- the commit hash is recorded.
-
-Documentation alone cannot close a production milestone.
+- Analyzer introduces no new errors.
+- Route-safety test passes.
+- Existing BDAR-002 tests remain passing.
+- Manual Windows test confirms Cancel and Update return to Daily Log without a
+  black screen or GoRouter assertion.

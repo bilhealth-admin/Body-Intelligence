@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../shared/widgets/secondary_page_app_bar.dart';
+
 import '../../app/localization/app_localizations.dart';
 import '../../data/database/database_provider.dart';
 import '../../data/repositories/experiment_repository.dart';
@@ -20,7 +22,7 @@ class ExperimentsPage extends ConsumerWidget {
     final t = context.strings.text;
     final experiments = ref.watch(experimentsProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(t('Personal experiments'))),
+      appBar: SecondaryPageAppBar(title: Text(t('Personal experiments'))),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _create(context, ref),
         icon: const Icon(Icons.add),

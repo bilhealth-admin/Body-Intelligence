@@ -6,6 +6,7 @@ import '../../data/database/database_provider.dart';
 import '../../data/repositories/challenge_repository.dart';
 import '../../data/repositories/meal_repository.dart';
 import '../../engine/challenge_engine.dart';
+import '../../shared/widgets/secondary_page_app_bar.dart';
 
 final challengeRepositoryProvider = Provider(
   (ref) => ChallengeRepository(ref.watch(databaseProvider)),
@@ -79,7 +80,7 @@ class ChallengesPage extends ConsumerWidget {
     final rows = ref.watch(challengesProvider);
     final ar = Localizations.localeOf(context).languageCode == 'ar';
     return Scaffold(
-      appBar: AppBar(title: Text(ar ? 'التحديات' : 'Challenges')),
+      appBar: SecondaryPageAppBar(title: Text(ar ? 'التحديات' : 'Challenges')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _choose(context, ref, ar),
         icon: const Icon(Icons.add),

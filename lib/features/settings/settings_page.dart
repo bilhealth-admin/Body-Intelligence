@@ -212,15 +212,27 @@ class SettingsPage extends ConsumerWidget {
             items: [
               DropdownMenuItem(
                 value: 'system',
-                child: Text(context.strings.text('System')),
+                child: Text(
+                  Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'حسب الجهاز'
+                      : 'Follow device',
+                ),
               ),
               DropdownMenuItem(
                 value: 'light',
-                child: Text(context.strings.text('Light')),
+                child: Text(
+                  Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'ضوء النهار'
+                      : 'Daylight',
+                ),
               ),
               DropdownMenuItem(
                 value: 'dark',
-                child: Text(context.strings.text('Dark')),
+                child: Text(
+                  Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'الوضع الليلي'
+                      : 'Night mode',
+                ),
               ),
             ],
             onChanged: (value) => ref
@@ -273,9 +285,19 @@ class SettingsPage extends ConsumerWidget {
           ),
           const Divider(height: 32),
           ListTile(
-            leading: const Icon(Icons.person),
-            title: Text(context.strings.text('Profile and goals')),
-            onTap: () => context.go('/onboarding'),
+            leading: const Icon(Icons.person_outline_rounded),
+            title: Text(
+              Localizations.localeOf(context).languageCode == 'ar'
+                  ? 'ملفي وخطتي'
+                  : 'My profile & plan',
+            ),
+            subtitle: Text(
+              Localizations.localeOf(context).languageCode == 'ar'
+                  ? 'عدّل بيانات الجسم والهدف والنشاط دون إعادة شاشة الترحيب.'
+                  : 'Edit body data, goal, and activity without restarting onboarding.',
+            ),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push('/profile-settings'),
           ),
           ListTile(
             leading: const Icon(Icons.tune),
@@ -283,12 +305,12 @@ class SettingsPage extends ConsumerWidget {
             subtitle: Text(
               t('Compare recommendations, assumptions, and your overrides.'),
             ),
-            onTap: () => context.go('/plan'),
+            onTap: () => context.push('/plan'),
           ),
           ListTile(
             leading: const Icon(Icons.analytics),
             title: Text(context.strings.text('Analytics')),
-            onTap: () => context.go('/analytics'),
+            onTap: () => context.push('/settings/analytics'),
           ),
           ListTile(
             leading: const Icon(Icons.psychology_alt_outlined),
@@ -296,7 +318,7 @@ class SettingsPage extends ConsumerWidget {
             subtitle: Text(
               t('Review, rate, disable, or delete remembered actions.'),
             ),
-            onTap: () => context.go('/decision-memory'),
+            onTap: () => context.push('/decision-memory'),
           ),
           ListTile(
             leading: const Icon(Icons.event_note_outlined),
@@ -306,7 +328,7 @@ class SettingsPage extends ConsumerWidget {
                   ? 'اختر لكل سجل ما إذا كان يمكن استخدامه في الاستنتاجات المحلية، أو احذفه.'
                   : 'Choose per record whether it may inform local insights, or delete it.',
             ),
-            onTap: () => context.go('/context'),
+            onTap: () => context.push('/context'),
           ),
           ListTile(
             leading: const Icon(Icons.science_outlined),
@@ -314,7 +336,7 @@ class SettingsPage extends ConsumerWidget {
             subtitle: Text(
               t('Test a cautious hypothesis and record limitations.'),
             ),
-            onTap: () => context.go('/experiments'),
+            onTap: () => context.push('/experiments'),
           ),
           ListTile(
             leading: const Icon(Icons.ios_share_outlined),
@@ -324,7 +346,7 @@ class SettingsPage extends ConsumerWidget {
                 'Create a privacy-safe progress image. Weight stays hidden.',
               ),
             ),
-            onTap: () => context.go('/share-studio'),
+            onTap: () => context.push('/share-studio'),
           ),
           ListTile(
             leading: const Icon(Icons.emoji_events_outlined),
@@ -334,7 +356,7 @@ class SettingsPage extends ConsumerWidget {
                 'Behavior-first private challenges with evidence-based progress.',
               ),
             ),
-            onTap: () => context.go('/challenges'),
+            onTap: () => context.push('/challenges'),
           ),
           ListTile(
             leading: const Icon(Icons.privacy_tip),

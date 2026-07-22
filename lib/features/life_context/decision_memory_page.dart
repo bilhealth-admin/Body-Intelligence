@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../shared/widgets/secondary_page_app_bar.dart';
+
 import '../../app/localization/app_localizations.dart';
 import '../profile/providers/user_profile_provider.dart';
 import 'providers/life_context_provider.dart';
@@ -17,7 +19,7 @@ class DecisionMemoryPage extends ConsumerWidget {
     final enabled = ref.watch(decisionMemoryEnabledProvider).value ?? true;
     final memories = ref.watch(decisionMemoriesProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(t('Decision Memory'))),
+      appBar: SecondaryPageAppBar(title: Text(t('Decision Memory'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

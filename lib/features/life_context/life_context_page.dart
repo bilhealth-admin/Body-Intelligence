@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/life_context_repository.dart';
+import '../../shared/widgets/secondary_page_app_bar.dart';
 import 'providers/life_context_provider.dart';
 
 class LifeContextPage extends ConsumerWidget {
@@ -105,7 +106,9 @@ class LifeContextPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final entries = ref.watch(todayLifeContextProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(tr(context, 'Life context', 'سياق الحياة'))),
+      appBar: SecondaryPageAppBar(
+        title: Text(tr(context, 'Life context', 'سياق الحياة')),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => addContext(context, ref),
         icon: const Icon(Icons.add),

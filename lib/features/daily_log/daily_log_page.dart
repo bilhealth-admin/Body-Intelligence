@@ -153,7 +153,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     final controller = TextEditingController(text: item.quantity.toString());
     final updated = await showDialog<double>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text('${context.strings.text('Edit')} ${food.name}'),
         content: TextField(
           controller: controller,
@@ -165,12 +165,12 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text(context.strings.text('Cancel')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(
-              context,
+              dialogContext,
               double.tryParse(controller.text.replaceAll(',', '.')),
             ),
             child: Text(context.strings.text('Update')),

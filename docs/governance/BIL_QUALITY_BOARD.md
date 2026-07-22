@@ -3,7 +3,7 @@
 Project: Body Intelligence Log  
 Branch: `phase-3-product-excellence`  
 Current Program: `BIL-STAB-002 — Product Stabilization`  
-Current Focus: `BDAR-002 — Emergency Dashboard Integrity`
+Current Focus: `BDAR-002 — Emergency Dashboard Integrity (Verification)`
 
 ---
 
@@ -39,7 +39,7 @@ Current Focus: `BDAR-002 — Emergency Dashboard Integrity`
 | ID | Issue | Classification | Status | Evidence / Commit |
 |---|---|---|---|---|
 | BDAR-001 | Current Repository and Dashboard Forensic Audit | Audit/governance | Complete | Latest archive reviewed; static findings and execution program recorded |
-| BDAR-002 | Emergency Dashboard Integrity | Product regression | In Progress | Mojibake plus suspected paint/clip/transparency leak in deep-insights surface |
+| BDAR-002 | Emergency Dashboard Integrity | Product regression | Verification | Arabic repaired; deterministic collapsed-content containment and integrity tests delivered |
 | BDAR-003 | Deterministic Dashboard Refresh | Product regression | Planned | Replace all-or-nothing refresh orchestration with bounded partial results |
 | BDAR-004 | Dashboard Architecture Foundation | Architecture debt | Planned | Immutable view model, orchestration boundary, and section decomposition |
 | BDAR-005 | Responsive Information Architecture | Product/UX architecture | Planned | Compact/medium/wide hierarchy, RTL/LTR, accessibility, approved goldens |

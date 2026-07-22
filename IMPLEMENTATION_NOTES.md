@@ -1,28 +1,23 @@
-# Implementation Notes
+# BDAR-002R5 Implementation Notes
 
-This is the first package in the new sequential delivery program.
+## Failure
 
-It intentionally changes no production code. Its purpose is to lock the latest uploaded baseline, preserve every agreed product commitment, record verified findings, and govern all following implementation packages.
+Pressing Update Quantity caused:
 
-## Apply
+- `You have popped the last page off of the stack`
+- `currentConfiguration.isNotEmpty`
+- a subsequent Navigator `!_debugLocked` assertion
+- a fully black application window
 
-Extract into the repository root.
+## Correction
 
-## Verify
+The dialog builder now exposes `dialogContext`.
 
-Run:
+Both Cancel and Update close that dialog with:
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\bdar_preflight.ps1
-git diff -- docs scripts PACKAGE_CONSTITUTION.md PACKAGE_MANIFEST.md IMPLEMENTATION_NOTES.md
-```
+- `Navigator.pop(dialogContext)`
+- `Navigator.pop(dialogContext, parsedQuantity)`
 
-## Commit
+The Daily Log page route is no longer popped.
 
-Suggested commit:
-
-```text
-docs(governance): establish BDAR baseline and execution program
-```
-
-Do not include unrelated working-tree files in the commit.
+No quantity calculation, storage, or visual behavior is otherwise changed.

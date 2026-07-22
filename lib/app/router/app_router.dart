@@ -15,6 +15,7 @@ import '../../features/onboarding/onboarding_page.dart';
 import '../../features/settings/settings_page.dart';
 import '../../features/share_studio/share_studio_page.dart';
 import '../../features/profile/plan_page.dart';
+import '../../features/profile/profile_settings_page.dart';
 import '../../features/startup/startup_page.dart';
 import 'responsive_app_shell.dart';
 
@@ -41,6 +42,14 @@ class AppRouter {
         builder: (_, _) => const ShareStudioPage(),
       ),
       GoRoute(path: '/challenges', builder: (_, _) => const ChallengesPage()),
+      GoRoute(
+        path: '/profile-settings',
+        builder: (_, _) => const ProfileSettingsPage(),
+      ),
+      GoRoute(
+        path: '/settings/analytics',
+        builder: (_, _) => const AnalyticsPage(showSettingsBack: true),
+      ),
       ShellRoute(
         builder: (_, _, child) => ResponsiveAppShell(child: child),
         routes: [

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../data/database/app_database.dart';
 import '../../data/database/date_keys.dart';
@@ -23,7 +24,9 @@ import 'widgets/analytics_range_selector.dart';
 import 'localized_confidence.dart';
 
 class AnalyticsPage extends ConsumerStatefulWidget {
-  const AnalyticsPage({super.key});
+  const AnalyticsPage({super.key, this.showSettingsBack = false});
+
+  final bool showSettingsBack;
 
   @override
   ConsumerState<AnalyticsPage> createState() => _AnalyticsPageState();
@@ -56,6 +59,26 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     };
   }
 
+  PreferredSizeWidget? _settingsAppBar(BuildContext context) {
+    if (!widget.showSettingsBack) return null;
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    return AppBar(
+      title: Text(arabic ? 'التحليلات' : 'Analytics'),
+      leading: IconButton(
+        key: const Key('analytics-back-to-settings'),
+        tooltip: arabic ? 'العودة إلى الإعدادات' : 'Back to settings',
+        onPressed: () {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.go('/settings');
+          }
+        },
+        icon: const Icon(Icons.arrow_back_rounded),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
@@ -72,6 +95,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         waterAsync.isLoading ||
         contextsAsync.isLoading) {
       return Scaffold(
+        appBar: _settingsAppBar(context),
         body: Semantics(
           label: tr('Loading analytics', 'جارٍ تحميل التحليلات'),
           liveRegion: true,
@@ -99,6 +123,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         waterAsync.hasError ||
         contextsAsync.hasError) {
       return Scaffold(
+        appBar: _settingsAppBar(context),
         body: ActionableErrorState(
           title: tr(
             'Analytics data could not be loaded.',

@@ -3,6 +3,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../shared/widgets/secondary_page_app_bar.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:drift/drift.dart' show OrderingTerm;
 
@@ -115,7 +117,9 @@ class _ShareStudioPageState extends ConsumerState<ShareStudioPage> {
     final data = ref.watch(shareStudioDataProvider);
     final ar = Localizations.localeOf(context).languageCode == 'ar';
     return Scaffold(
-      appBar: AppBar(title: Text(ar ? 'استوديو المشاركة' : 'Share Studio')),
+      appBar: SecondaryPageAppBar(
+        title: Text(ar ? 'استوديو المشاركة' : 'Share Studio'),
+      ),
       body: data.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text(error.toString())),

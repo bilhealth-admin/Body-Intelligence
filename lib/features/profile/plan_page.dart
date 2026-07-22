@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../shared/widgets/secondary_page_app_bar.dart';
+
 import '../../app/localization/app_localizations.dart';
 import '../../engine/body_profile.dart';
 import '../../engine/plan_engine.dart';
@@ -32,7 +34,7 @@ class _PlanPageState extends ConsumerState<PlanPage> {
     final profileAsync = ref.watch(userProfileProvider);
     final goal = ref.watch(activeGoalProvider).value;
     return Scaffold(
-      appBar: AppBar(title: Text(t('Targets and plan'))),
+      appBar: SecondaryPageAppBar(title: Text(t('Targets and plan'))),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text(error.toString())),

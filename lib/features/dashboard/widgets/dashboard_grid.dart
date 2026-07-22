@@ -31,6 +31,7 @@ import 'dashboard_loading_skeleton.dart';
 import 'weekly_progress_card.dart';
 import 'dashboard_meals_timeline.dart';
 import 'nutrient_evidence_status_text.dart';
+import 'dashboard_insights_surface.dart';
 import 'daily_return_card.dart';
 
 class DashboardGrid extends ConsumerWidget {
@@ -128,7 +129,7 @@ class DashboardGrid extends ConsumerWidget {
           child: Text(
             tr(
               'Complete your profile to calculate personalized targets.',
-              'Ø£ÙƒÙ…Ù„ Ù…Ù„ÙÙƒ Ø§Ù„Ø´Ø®ØµÙŠ Ù„Ø­Ø³Ø§Ø¨ Ø£Ù‡Ø¯Ø§ÙÙƒ Ø§Ù„Ù…Ø®ØµØµØ©.',
+              'أكمل ملفك الشخصي لحساب أهدافك المخصصة.',
             ),
           ),
         ),
@@ -346,57 +347,50 @@ class DashboardGrid extends ConsumerWidget {
         : weeklyWeights.last.weight;
     final localizedBestTitle = arabic
         ? switch (bestAction.type) {
-            BestActionType.weighIn => 'Ø³Ø¬Ù‘Ù„ ÙˆØ²Ù† Ø§Ù„ÙŠÙˆÙ…',
-            BestActionType.completeLogging =>
-              'Ø£ÙƒÙ…Ù„ ØªØ³Ø¬ÙŠÙ„ ÙˆØ¬Ø¨Ø© ÙˆØ§Ø­Ø¯Ø©',
-            BestActionType.protein =>
-              'Ø£Ø¶Ù Ù…ØµØ¯Ø± Ø¨Ø±ÙˆØªÙŠÙ† Ù…Ù†Ø§Ø³Ø¨Ù‹Ø§ Ø§Ù„ÙŠÙˆÙ…',
-            BestActionType.hydration => 'Ø§Ø´Ø±Ø¨ Ø§Ù„Ù…Ø§Ø¡ ØªØ¯Ø±ÙŠØ¬ÙŠÙ‹Ø§',
-            BestActionType.holdPlan =>
-              'Ø­Ø§ÙØ¸ Ø¹Ù„Ù‰ Ø§Ù„Ø®Ø·Ø© Ø¯ÙˆÙ† ØªØºÙŠÙŠØ± Ø§Ù„ÙŠÙˆÙ…',
-            BestActionType.none => 'Ù„Ø§ Ø­Ø§Ø¬Ø© Ù„ØªØºÙŠÙŠØ± Ø§Ù„Ø®Ø·Ø©',
+            BestActionType.weighIn => 'سجّل وزن اليوم',
+            BestActionType.completeLogging => 'أكمل تسجيل وجبة واحدة',
+            BestActionType.protein => 'أضف مصدر بروتين مناسبًا اليوم',
+            BestActionType.hydration => 'اشرب الماء تدريجيًا',
+            BestActionType.holdPlan => 'حافظ على الخطة دون تغيير اليوم',
+            BestActionType.none => 'لا حاجة لتغيير الخطة',
           }
         : bestAction.title;
     final localizedBestReason = arabic
         ? switch (bestAction.type) {
             BestActionType.weighIn =>
-              'Ø§Ù„Ù‚ÙŠØ§Ø³ Ø§Ù„ÙŠÙˆÙ…ÙŠ Ø§Ù„Ù…ØªÙ‚Ø§Ø±Ø¨ ÙŠØ­Ø³Ù† Ø«Ù‚Ø© Ø§Ù„Ø§ØªØ¬Ø§Ù‡.',
+              'القياس اليومي المتقارب يحسن ثقة الاتجاه.',
             BestActionType.completeLogging =>
-              'Ù†Ù‚Øµ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„ÙˆØ¬Ø¨Ø§Øª ÙŠØ¶Ø¹Ù ØªÙØ³ÙŠØ± Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ù…Ø¯Ø®ÙˆÙ„.',
+              'نقص تسجيل الوجبات يضعف تفسير بيانات المدخول.',
             BestActionType.protein =>
-              'Ø§Ù„Ø¨Ø±ÙˆØªÙŠÙ† Ù‡Ùˆ Ø£ÙƒØ¨Ø± ÙØ¬ÙˆØ© Ù‚Ø§Ø¨Ù„Ø© Ù„Ù„ØªÙ†ÙÙŠØ° Ø§Ù„ÙŠÙˆÙ….',
-            BestActionType.hydration =>
-              'Ø§Ù„Ù…Ø§Ø¡ Ø§Ù„Ù…Ø³Ø¬Ù„ Ø£Ù‚Ù„ Ø¨ÙˆØ¶ÙˆØ­ Ù…Ù† Ù‡Ø¯Ù Ø§Ù„ÙŠÙˆÙ….',
+              'البروتين هو أكبر فجوة قابلة للتنفيذ اليوم.',
+            BestActionType.hydration => 'الماء المسجل أقل بوضوح من هدف اليوم.',
             BestActionType.holdPlan =>
-              'Ø¬Ù…Ø¹ Ù…Ù„Ø§Ø­Ø¸Ø§Øª Ø£ÙƒØ«Ø± Ø§ØªØ³Ø§Ù‚Ù‹Ø§ Ø£ÙƒØ«Ø± Ø£Ù…Ø§Ù†Ù‹Ø§ Ù…Ù† Ø§Ù„ØªØºÙŠÙŠØ± Ø§Ù„Ù…Ø¨ÙƒØ±.',
-            BestActionType.none =>
-              'Ø§Ù„Ø£ÙˆÙ„ÙˆÙŠØ§Øª Ø§Ù„Ù…Ø³Ø¬Ù„Ø© Ø§Ù„ÙŠÙˆÙ… Ù…ØºØ·Ø§Ø© Ø¨ØµÙˆØ±Ø© Ø¹Ø§Ù…Ø©.',
+              'جمع ملاحظات أكثر اتساقًا أكثر أمانًا من التغيير المبكر.',
+            BestActionType.none => 'الأولويات المسجلة اليوم مغطاة بصورة عامة.',
           }
         : bestAction.reason;
     final localizedChanged = arabic
         ? switch (changed.interpretation) {
             ChangeInterpretation.insufficient =>
-              'Ù†Ø­ØªØ§Ø¬ Ù‚ÙŠØ§Ø³ ÙˆØ²Ù† Ø¢Ø®Ø± ÙÙŠ Ø¸Ø±ÙˆÙ Ù…ØªÙ‚Ø§Ø±Ø¨Ø© Ù„ÙˆØµÙ Ø§Ù„ØªØºÙŠØ±.',
+              'نحتاج قياس وزن آخر في ظروف متقاربة لوصف التغير.',
             ChangeInterpretation.stable =>
-              'Ø§Ù„ÙˆØ²Ù† Ù…Ø³ØªÙ‚Ø± Ø¨ØµÙˆØ±Ø© Ø¹Ø§Ù…Ø© Ù…Ù‚Ø§Ø±Ù†Ø© Ø¨Ø§Ù„Ù‚ÙŠØ§Ø³ Ø§Ù„Ø³Ø§Ø¨Ù‚.',
+              'الوزن مستقر بصورة عامة مقارنة بالقياس السابق.',
             ChangeInterpretation.likelyNoise =>
-              'ØªØºÙŠØ± Ø§Ù„Ù…ÙŠØ²Ø§Ù†ØŒ Ù„ÙƒÙ† Ù‚Ø±Ø§Ø¡Ø© ÙˆØ§Ø­Ø¯Ø© Ù„Ø§ ØªÙƒÙÙŠ Ù„ØªØºÙŠÙŠØ± Ø§Ù„Ø®Ø·Ø©.',
+              'تغير الميزان، لكن قراءة واحدة لا تكفي لتغيير الخطة.',
             ChangeInterpretation.directional =>
-              'Ø³ÙØ¬Ù‘Ù„ ØªØºÙŠØ± Ù…Ø­Ø¯ÙˆØ¯ØŒ ÙˆÙŠØ¸Ù„ Ø§Ù„Ø§ØªØ¬Ø§Ù‡ Ø¹Ø¨Ø± Ø¹Ø¯Ø© Ø£ÙŠØ§Ù… Ø£ÙƒØ«Ø± ÙØ§Ø¦Ø¯Ø©.',
+              'سُجّل تغير محدود، ويظل الاتجاه عبر عدة أيام أكثر فائدة.',
           }
         : changed.summary;
     final primaryInsight = intelligence.insights.first;
     final localizedInsightTitle = arabic
         ? switch (primaryInsight.title) {
-            'Protein below target' => 'Ø§Ù„Ø¨Ø±ÙˆØªÙŠÙ† Ø£Ù‚Ù„ Ù…Ù† Ø§Ù„Ù‡Ø¯Ù',
-            'Hydration opportunity' =>
-              'ÙØ±ØµØ© Ù„ØªØ­Ø³ÙŠÙ† Ø´Ø±Ø¨ Ø§Ù„Ù…Ø§Ø¡',
-            'Possible plateau' => 'Ø«Ø¨Ø§Øª Ù…Ø­ØªÙ…Ù„ ÙÙŠ Ø§Ù„Ø§ØªØ¬Ø§Ù‡',
+            'Protein below target' => 'البروتين أقل من الهدف',
+            'Hydration opportunity' => 'فرصة لتحسين شرب الماء',
+            'Possible plateau' => 'ثبات محتمل في الاتجاه',
             'Possible short-term water retention' =>
-              'Ø§Ø­ØªØ¨Ø§Ø³ Ù…Ø§Ø¡ Ù‚ØµÙŠØ± Ø§Ù„Ù…Ø¯Ù‰ Ù…Ø­ØªÙ…Ù„',
-            'Build your baseline' => 'Ø§Ø¨Ù†Ù Ø®Ø·Ùƒ Ø§Ù„Ø£Ø³Ø§Ø³ÙŠ',
-            _ =>
-              'Ø§Ù„Ø£Ù‡Ø¯Ø§Ù Ø§Ù„ÙŠÙˆÙ…ÙŠØ© Ù…ØªÙ‚Ø§Ø±Ø¨Ø© Ø¨ØµÙˆØ±Ø© Ø¹Ø§Ù…Ø©',
+              'احتباس ماء قصير المدى محتمل',
+            'Build your baseline' => 'ابنِ خطك الأساسي',
+            _ => 'الأهداف اليومية متقاربة بصورة عامة',
           }
         : primaryInsight.title;
     Future<void> respondToAction(String response) async {
@@ -406,7 +400,7 @@ class DashboardGrid extends ConsumerWidget {
             content: Text(
               tr(
                 'Decision Memory is disabled. This response was not stored.',
-                'Ø°Ø§ÙƒØ±Ø© Ø§Ù„Ù‚Ø±Ø§Ø±Ø§Øª Ù…Ø¹Ø·Ù„Ø©. Ù„Ù… ÙŠÙØ­ÙØ¸ Ù‡Ø°Ø§ Ø§Ù„Ø±Ø¯.',
+                'ذاكرة القرارات معطلة. لم يُحفظ هذا الرد.',
               ),
             ),
           ),
@@ -423,11 +417,11 @@ class DashboardGrid extends ConsumerWidget {
               response == 'done'
                   ? tr(
                       'Marked done. BIL will not assume an outcome without your later feedback.',
-                      'ØªÙ… ÙˆØ¶Ø¹ Ø¹Ù„Ø§Ù…Ø© Â«ØªÙ…Â». Ù„Ù† ÙŠÙØªØ±Ø¶ BIL Ù†ØªÙŠØ¬Ø© Ø¯ÙˆÙ† Ù…Ù„Ø§Ø­Ø¸ØªÙƒ Ø§Ù„Ù„Ø§Ø­Ù‚Ø©.',
+                      'تم وضع علامة «تم». لن يفترض BIL نتيجة دون ملاحظتك اللاحقة.',
                     )
                   : tr(
                       'Your response was saved locally and can be deleted from Decision Memory.',
-                      'ØªÙ… Ø­ÙØ¸ Ø±Ø¯Ùƒ Ù…Ø­Ù„ÙŠÙ‹Ø§ ÙˆÙŠÙ…ÙƒÙ† Ø­Ø°ÙÙ‡ Ù…Ù† Ø°Ø§ÙƒØ±Ø© Ø§Ù„Ù‚Ø±Ø§Ø±Ø§Øª.',
+                      'تم حفظ ردك محليًا ويمكن حذفه من ذاكرة القرارات.',
                     ),
             ),
           ),
@@ -445,7 +439,7 @@ class DashboardGrid extends ConsumerWidget {
             content: Text(
               tr(
                 '$amountMl ml added to today.',
-                'ØªÙ…Øª Ø¥Ø¶Ø§ÙØ© $amountMl Ù…Ù„ Ø¥Ù„Ù‰ Ø§Ù„ÙŠÙˆÙ….',
+                'تمت إضافة $amountMl مل إلى اليوم.',
               ),
             ),
           ),
@@ -468,11 +462,11 @@ class DashboardGrid extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(tr('Cancel', 'Ø¥Ù„ØºØ§Ø¡')),
+              child: Text(tr('Cancel', 'إلغاء')),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(tr('Add breakfast', 'Ø¥Ø¶Ø§ÙØ© Ø§Ù„ÙØ·ÙˆØ±')),
+              child: Text(tr('Add breakfast', 'إضافة الفطور')),
             ),
           ],
         ),
@@ -487,11 +481,11 @@ class DashboardGrid extends ConsumerWidget {
       if (candidate == null) return;
       await confirmAndRepeatBreakfast(
         titleEn: 'Repeat usual breakfast?',
-        titleAr: 'ØªÙƒØ±Ø§Ø± Ø§Ù„ÙØ·ÙˆØ± Ø§Ù„Ù…Ø¹ØªØ§Ø¯ØŸ',
+        titleAr: 'تكرار الفطور المعتاد؟',
         contentEn:
             'The same saved portions and nutrition snapshots will be added to today only after confirmation.',
         contentAr:
-            'Ø³ØªÙØ¶Ø§Ù Ù†ÙØ³ Ø§Ù„Ø­ØµØµ ÙˆÙ„Ù‚Ø·Ø§Øª Ø§Ù„ØªØºØ°ÙŠØ© Ø§Ù„Ù…Ø­ÙÙˆØ¸Ø© Ø¥Ù„Ù‰ Ø§Ù„ÙŠÙˆÙ… Ø¨Ø¹Ø¯ Ø§Ù„ØªØ£ÙƒÙŠØ¯ ÙÙ‚Ø·.',
+            'ستُضاف نفس الحصص ولقطات التغذية المحفوظة إلى اليوم بعد التأكيد فقط.',
         onConfirm: () => ref
             .read(mealRepositoryProvider)
             .repeatMeal(candidate: candidate, date: DateTime.now()),
@@ -503,11 +497,11 @@ class DashboardGrid extends ConsumerWidget {
       if (latestBreakfast == null) return;
       await confirmAndRepeatBreakfast(
         titleEn: 'Repeat last breakfast?',
-        titleAr: 'ØªÙƒØ±Ø§Ø± Ø¢Ø®Ø± ÙØ·ÙˆØ±ØŸ',
+        titleAr: 'تكرار آخر فطور؟',
         contentEn:
             'Items and saved nutrition snapshots from your latest breakfast will be copied to today only after confirmation.',
         contentAr:
-            'Ø³ØªÙÙ†Ø³Ø® Ø§Ù„Ø¹Ù†Ø§ØµØ± ÙˆÙ„Ù‚Ø·Ø§Øª Ø§Ù„ØªØºØ°ÙŠØ© Ø§Ù„Ù…Ø­ÙÙˆØ¸Ø© Ù…Ù† Ø¢Ø®Ø± ÙØ·ÙˆØ± Ø¥Ù„Ù‰ Ø§Ù„ÙŠÙˆÙ… Ø¨Ø¹Ø¯ Ø§Ù„ØªØ£ÙƒÙŠØ¯ ÙÙ‚Ø·.',
+            'ستُنسخ العناصر ولقطات التغذية المحفوظة من آخر فطور إلى اليوم بعد التأكيد فقط.',
         onConfirm: () => ref
             .read(mealRepositoryProvider)
             .repeatHistoricalMeal(meal: latestBreakfast, date: DateTime.now()),
@@ -524,12 +518,12 @@ class DashboardGrid extends ConsumerWidget {
           actionReason: localizedBestReason,
           missingEvidence: honesty.missing.isEmpty
               ? tr(
-                  'No important evidence gap for todayâ€™s next decision.',
-                  'Ù„Ø§ ØªÙˆØ¬Ø¯ ÙØ¬ÙˆØ© Ø£Ø¯Ù„Ø© Ù…Ù‡Ù…Ø© Ù„Ù‚Ø±Ø§Ø± Ø§Ù„ÙŠÙˆÙ… Ø§Ù„ØªØ§Ù„ÙŠ.',
+                  'No important evidence gap for today’s next decision.',
+                  'لا توجد فجوة أدلة مهمة لقرار اليوم التالي.',
                 )
               : tr(
                   honesty.missing.first,
-                  'ØªØªØ­Ø³Ù† Ø§Ù„Ø«Ù‚Ø© Ù…Ø¹ Ø£ÙŠØ§Ù… Ù…Ø­Ù„ÙŠØ© Ø£ÙƒØ«Ø± Ø§ÙƒØªÙ…Ø§Ù„Ù‹Ø§ ÙˆØ§ØªØ³Ø§Ù‚Ù‹Ø§.',
+                  'تتحسن الثقة مع أيام محلية أكثر اكتمالًا واتساقًا.',
                 ),
           onPrimaryAction: () {
             switch (bestAction.type) {
@@ -568,18 +562,12 @@ class DashboardGrid extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              tr('Today at a glance', 'Ù…Ù„Ø®Øµ Ø§Ù„ÙŠÙˆÙ…'),
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(fontWeight: FontWeight.w800),
-                            ),
-                            const SizedBox(height: PremiumDesignTokens.spaceXs),
-                            Text(
-                              tr(
+                            _DashboardSectionHeading(
+                              title: tr('Today at a glance', 'ملخص اليوم'),
+                              subtitle: tr(
                                 'The few numbers that matter right now.',
-                                'Ø£Ù‡Ù… Ø§Ù„Ø£Ø±Ù‚Ø§Ù… Ø§Ù„ØªÙŠ ØªØ­ØªØ§Ø¬Ù‡Ø§ Ø§Ù„Ø¢Ù† ÙÙ‚Ø·.',
+                                'أهم الأرقام التي تحتاجها الآن فقط.',
                               ),
-                              style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ],
                         ),
@@ -597,7 +585,7 @@ class DashboardGrid extends ConsumerWidget {
                         width: tileWidth,
                         child: _CompactMetricTile(
                           icon: Icons.monitor_weight_outlined,
-                          label: tr('Weight', 'Ø§Ù„ÙˆØ²Ù†'),
+                          label: tr('Weight', 'الوزن'),
                           value: UnitConverter.weightFromKg(
                             currentWeight,
                             system,
@@ -610,7 +598,7 @@ class DashboardGrid extends ConsumerWidget {
                         width: tileWidth,
                         child: _CompactMetricTile(
                           icon: Icons.local_fire_department_outlined,
-                          label: tr('Calories', 'Ø§Ù„Ø³Ø¹Ø±Ø§Øª'),
+                          label: tr('Calories', 'السعرات'),
                           value: calories.round().toString(),
                           unit: '/ ${effectiveTargets.calories}',
                           progress: effectiveTargets.calories <= 0
@@ -626,7 +614,7 @@ class DashboardGrid extends ConsumerWidget {
                         width: tileWidth,
                         child: _CompactMetricTile(
                           icon: Icons.fitness_center_outlined,
-                          label: tr('Protein', 'Ø§Ù„Ø¨Ø±ÙˆØªÙŠÙ†'),
+                          label: tr('Protein', 'البروتين'),
                           value: protein.round().toString(),
                           unit: '/ ${effectiveTargets.protein} g',
                           progress: effectiveTargets.protein <= 0
@@ -642,7 +630,7 @@ class DashboardGrid extends ConsumerWidget {
                         width: tileWidth,
                         child: _CompactMetricTile(
                           icon: Icons.grain_outlined,
-                          label: tr('Carbs', 'Ø§Ù„ÙƒØ±Ø¨ÙˆÙ‡ÙŠØ¯Ø±Ø§Øª'),
+                          label: tr('Carbs', 'الكربوهيدرات'),
                           value: carbs.round().toString(),
                           unit: '/ ${effectiveTargets.carbs} g',
                           progress: effectiveTargets.carbs <= 0
@@ -658,7 +646,7 @@ class DashboardGrid extends ConsumerWidget {
                         width: tileWidth,
                         child: _CompactMetricTile(
                           icon: Icons.opacity_outlined,
-                          label: tr('Fat', 'Ø§Ù„Ø¯Ù‡ÙˆÙ†'),
+                          label: tr('Fat', 'الدهون'),
                           value: fats.round().toString(),
                           unit: '/ ${effectiveTargets.fats} g',
                           progress: effectiveTargets.fats <= 0
@@ -693,13 +681,12 @@ class DashboardGrid extends ConsumerWidget {
         const SizedBox(height: PremiumDesignTokens.spaceMd),
         PremiumSurface(
           padding: EdgeInsets.zero,
-          child: ExpansionTile(
-            initiallyExpanded: false,
+          child: DashboardInsightsSurface(
             leading: const Icon(Icons.insights_outlined),
             title: Text(
               tr(
                 'Insights, progress and evidence',
-                'Ø§Ù„ØªØ­Ù„ÙŠÙ„Ø§Øª ÙˆØ§Ù„ØªÙ‚Ø¯Ù… ÙˆØ§Ù„Ø£Ø¯Ù„Ø©',
+                'التحليلات والتقدم والأدلة',
               ),
               style: Theme.of(
                 context,
@@ -708,7 +695,7 @@ class DashboardGrid extends ConsumerWidget {
             subtitle: Text(
               tr(
                 'Open only when you want the deeper explanation.',
-                'Ø§ÙØªØ­ Ù‡Ø°Ø§ Ø§Ù„Ù‚Ø³Ù… ÙÙ‚Ø· Ø¹Ù†Ø¯Ù…Ø§ ØªØ±ÙŠØ¯ Ø§Ù„ØªÙØ§ØµÙŠÙ„ ÙˆØ§Ù„ØªÙØ³ÙŠØ±.',
+                'افتح هذا القسم فقط عندما تريد التفاصيل والتفسير.',
               ),
             ),
             childrenPadding: const EdgeInsets.fromLTRB(
@@ -729,14 +716,14 @@ class DashboardGrid extends ConsumerWidget {
               _DetailPanel(
                 icon: Icons.flag_outlined,
                 title:
-                    '${tr('Goal progress', 'Ø§Ù„ØªÙ‚Ø¯Ù… Ù†Ø­Ùˆ Ø§Ù„Ù‡Ø¯Ù')} ${(progress * 100).round()}%',
+                    '${tr('Goal progress', 'التقدم نحو الهدف')} ${(progress * 100).round()}%',
                 children: [
                   LinearProgressIndicator(value: progress),
                   const SizedBox(height: PremiumDesignTokens.spaceSm),
                   Text(
                     arabic
-                        ? 'Ø§Ù„Ø§Ø­ØªÙŠØ§Ø¬ Ø§Ù„ÙŠÙˆÙ…ÙŠ Ø§Ù„Ù…Ù‚Ø¯Ø± ${bil.tdee.round()} Ø³Ø¹Ø±Ø© Â· Ù‡Ø¯Ù Ø§Ù„Ø³Ø¹Ø±Ø§Øª ${effectiveTargets.calories}'
-                        : 'Estimated TDEE ${bil.tdee.round()} kcal Â· planned ${goalType == 'lose'
+                        ? 'الاحتياج اليومي المقدر ${bil.tdee.round()} سعرة · هدف السعرات ${effectiveTargets.calories}'
+                        : 'Estimated TDEE ${bil.tdee.round()} kcal · planned ${goalType == 'lose'
                               ? 'deficit'
                               : goalType == 'gain'
                               ? 'surplus'
@@ -747,9 +734,9 @@ class DashboardGrid extends ConsumerWidget {
                     goalDate == null
                         ? tr(
                             'Goal date: more consistent weight data needed',
-                            'ØªØ§Ø±ÙŠØ® Ø§Ù„Ù‡Ø¯Ù: Ù†Ø­ØªØ§Ø¬ Ø¨ÙŠØ§Ù†Ø§Øª ÙˆØ²Ù† Ø£ÙƒØ«Ø± Ø§ØªØ³Ø§Ù‚Ù‹Ø§',
+                            'تاريخ الهدف: نحتاج بيانات وزن أكثر اتساقًا',
                           )
-                        : '${tr('Estimated goal date', 'ØªØ§Ø±ÙŠØ® Ø§Ù„Ù‡Ø¯Ù Ø§Ù„Ù…Ù‚Ø¯Ø±')}: ${goalDate.year}-${goalDate.month.toString().padLeft(2, '0')}-${goalDate.day.toString().padLeft(2, '0')}',
+                        : '${tr('Estimated goal date', 'تاريخ الهدف المقدر')}: ${goalDate.year}-${goalDate.month.toString().padLeft(2, '0')}-${goalDate.day.toString().padLeft(2, '0')}',
                   ),
                 ],
               ),
@@ -760,7 +747,7 @@ class DashboardGrid extends ConsumerWidget {
                 children: [
                   Text(
                     arabic
-                        ? 'ÙŠØ³ØªÙ†Ø¯ Ù‡Ø°Ø§ Ø§Ù„Ø§Ø³ØªÙ†ØªØ§Ø¬ Ø¥Ù„Ù‰ Ø¨ÙŠØ§Ù†Ø§ØªÙƒ Ø§Ù„Ù…Ø­Ù„ÙŠØ© Ø§Ù„Ù…Ø³Ø¬Ù„Ø© ÙÙ‚Ø·. Ø§Ø¬Ù…Ø¹ Ø£ÙŠØ§Ù…Ù‹Ø§ Ø¥Ø¶Ø§ÙÙŠØ© Ù‚Ø¨Ù„ ØªØºÙŠÙŠØ± Ø§Ù„Ø®Ø·Ø©.'
+                        ? 'يستند هذا الاستنتاج إلى بياناتك المحلية المسجلة فقط. اجمع أيامًا إضافية قبل تغيير الخطة.'
                         : '${primaryInsight.explanation}\n${primaryInsight.suggestedAction}',
                   ),
                 ],
@@ -783,19 +770,16 @@ class DashboardGrid extends ConsumerWidget {
                     children: [
                       FilledButton.tonal(
                         onPressed: () => respondToAction('accepted'),
-                        child: Text(tr('Accept', 'Ù‚Ø¨ÙˆÙ„')),
+                        child: Text(tr('Accept', 'قبول')),
                       ),
                       OutlinedButton(
                         onPressed: () => respondToAction('done'),
-                        child: Text(tr('Done', 'ØªÙ…')),
+                        child: Text(tr('Done', 'تم')),
                       ),
                       TextButton(
                         onPressed: () => respondToAction('notSuitable'),
                         child: Text(
-                          tr(
-                            'Not suitable today',
-                            'ØºÙŠØ± Ù…Ù†Ø§Ø³Ø¨ Ø§Ù„ÙŠÙˆÙ…',
-                          ),
+                          tr('Not suitable today', 'غير مناسب اليوم'),
                         ),
                       ),
                     ],
@@ -812,25 +796,25 @@ class DashboardGrid extends ConsumerWidget {
                 title: Text(context.strings.text('Data honesty')),
                 subtitle: Text(
                   arabic
-                      ? 'Ù…ÙˆØ«ÙˆÙ‚ÙŠØ© ${switch (honesty.reliability) {
-                          DataReliability.insufficient => 'ØºÙŠØ± ÙƒØ§ÙÙŠØ©',
-                          DataReliability.emerging => 'Ù‚ÙŠØ¯ Ø§Ù„ØªÙƒÙˆÙŠÙ†',
-                          DataReliability.useful => 'Ù…ÙÙŠØ¯Ø©',
-                          DataReliability.strong => 'Ù‚ÙˆÙŠØ©',
+                      ? 'موثوقية ${switch (honesty.reliability) {
+                          DataReliability.insufficient => 'غير كافية',
+                          DataReliability.emerging => 'قيد التكوين',
+                          DataReliability.useful => 'مفيدة',
+                          DataReliability.strong => 'قوية',
                         }}'
                       : '${honesty.reliability.name} reliability',
                 ),
                 children: [
                   if (arabic)
                     Text(
-                      'Ø£ÙŠØ§Ù… Ø§Ù„ÙˆØ²Ù†: ${weightDays.length} Â· Ø£ÙŠØ§Ù… Ø§Ù„ØªØºØ°ÙŠØ©: ${mealDays.length} Â· Ø£ÙŠØ§Ù… Ø§Ù„Ù…Ø§Ø¡: ${waterDays.length}.',
+                      'أيام الوزن: ${weightDays.length} · أيام التغذية: ${mealDays.length} · أيام الماء: ${waterDays.length}.',
                     )
                   else ...[
                     if (honesty.strengths.isNotEmpty)
-                      Text('Evidence: ${honesty.strengths.join(' Â· ')}'),
+                      Text('Evidence: ${honesty.strengths.join(' · ')}'),
                     if (honesty.missing.isNotEmpty)
                       Text(
-                        'Improve confidence: ${honesty.missing.join(' Â· ')}',
+                        'Improve confidence: ${honesty.missing.join(' · ')}',
                       ),
                   ],
                 ],
@@ -841,11 +825,11 @@ class DashboardGrid extends ConsumerWidget {
                 subtitle: Text(localizedChanged),
                 children: [
                   if (changed.evidence.isNotEmpty && !arabic)
-                    Text('Evidence: ${changed.evidence.join(' Â· ')}'),
+                    Text('Evidence: ${changed.evidence.join(' · ')}'),
                   Text(
                     arabic
-                        ? 'ØªÙØ³ÙŠØ±Ø§Øª Ø¨Ø¯ÙŠÙ„Ø© Ù…Ø­ØªÙ…Ù„Ø©: Ø§Ù„Ù…Ø§Ø¡ ÙˆØ§Ù„Ø¬Ù„ÙŠÙƒÙˆØ¬ÙŠÙ† ÙˆÙ…Ø­ØªÙˆÙ‰ Ø§Ù„Ø¬Ù‡Ø§Ø² Ø§Ù„Ù‡Ø¶Ù…ÙŠ ÙˆØªÙˆÙ‚ÙŠØª Ø§Ù„Ù‚ÙŠØ§Ø³ ÙˆÙ†Ù‚Øµ Ø§Ù„ØªØ³Ø¬ÙŠÙ„. Ù„Ø§ ÙŠÙØ¹Ø¯ Ø£ÙŠ Ù…Ù†Ù‡Ø§ ØªØ´Ø®ÙŠØµÙ‹Ø§.'
-                        : 'Other explanations: ${changed.alternatives.join(' Â· ')}',
+                        ? 'تفسيرات بديلة محتملة: الماء والجليكوجين ومحتوى الجهاز الهضمي وتوقيت القياس ونقص التسجيل. لا يُعد أي منها تشخيصًا.'
+                        : 'Other explanations: ${changed.alternatives.join(' · ')}',
                   ),
                 ],
               ),
@@ -855,19 +839,19 @@ class DashboardGrid extends ConsumerWidget {
                 subtitle: Text(
                   arabic
                       ? twin.sufficient
-                            ? 'Ø³ÙŠÙ†Ø§Ø±ÙŠÙˆ Ø­Ø°Ø± Ù…ØªØ§Ø­ Ù…Ù† Ø£Ø¯Ù„ØªÙƒ Ø§Ù„Ù…Ø­Ù„ÙŠØ©'
-                            : 'ÙŠØªØ¹Ù„Ù… Ø¨Ø£Ù…Ø§Ù† Â· Ù†Ø­ØªØ§Ø¬ Ø¨ÙŠØ§Ù†Ø§Øª Ø£ÙƒØ«Ø±'
+                            ? 'سيناريو حذر متاح من أدلتك المحلية'
+                            : 'يتعلم بأمان · نحتاج بيانات أكثر'
                       : twin.sufficient
                       ? 'Cautious scenario available from your local evidence'
-                      : 'Learning safely Â· ${twin.requiredData.join(' Â· ')}',
+                      : 'Learning safely · ${twin.requiredData.join(' · ')}',
                 ),
                 children: [
                   if (twin.scenario != null) ...[
                     Text(
-                      '${tr('Expected planning direction', 'Ø§ØªØ¬Ø§Ù‡ Ø§Ù„ØªØ®Ø·ÙŠØ· Ø§Ù„Ù…ØªÙˆÙ‚Ø¹')}: ${twin.scenario!.expectedWeeklyKg.toStringAsFixed(2)} ${tr('kg/week', 'ÙƒØ¬Ù…/Ø£Ø³Ø¨ÙˆØ¹')}',
+                      '${tr('Expected planning direction', 'اتجاه التخطيط المتوقع')}: ${twin.scenario!.expectedWeeklyKg.toStringAsFixed(2)} ${tr('kg/week', 'كجم/أسبوع')}',
                     ),
                     Text(
-                      '${tr('Cautious range', 'Ø§Ù„Ù†Ø·Ø§Ù‚ Ø§Ù„Ø­Ø°Ø±')}: ${twin.scenario!.cautiousLowKg.toStringAsFixed(2)} ${tr('to', 'Ø¥Ù„Ù‰')} ${twin.scenario!.cautiousHighKg.toStringAsFixed(2)} ${tr('kg/week', 'ÙƒØ¬Ù…/Ø£Ø³Ø¨ÙˆØ¹')}',
+                      '${tr('Cautious range', 'النطاق الحذر')}: ${twin.scenario!.cautiousLowKg.toStringAsFixed(2)} ${tr('to', 'إلى')} ${twin.scenario!.cautiousHighKg.toStringAsFixed(2)} ${tr('kg/week', 'كجم/أسبوع')}',
                     ),
                   ],
                 ],
@@ -875,49 +859,46 @@ class DashboardGrid extends ConsumerWidget {
               ExpansionTile(
                 tilePadding: EdgeInsets.zero,
                 title: Text(
-                  tr(
-                    'Available nutrient evidence',
-                    'Ø£Ø¯Ù„Ø© Ø§Ù„Ø¹Ù†Ø§ØµØ± Ø§Ù„Ù…ØªØ§Ø­Ø©',
-                  ),
+                  tr('Available nutrient evidence', 'أدلة العناصر المتاحة'),
                 ),
                 subtitle: Text(
                   tr(
                     'Unavailable nutrients are never shown as zero.',
-                    'Ù„Ø§ ØªØ¸Ù‡Ø± Ø§Ù„Ø¹Ù†Ø§ØµØ± ØºÙŠØ± Ø§Ù„Ù…ØªØ§Ø­Ø© Ø¹Ù„Ù‰ Ø£Ù†Ù‡Ø§ ØµÙØ±.',
+                    'لا تظهر العناصر غير المتاحة على أنها صفر.',
                   ),
                 ),
                 children: [
                   _TargetRow(
-                    label: tr('Fiber', 'Ø§Ù„Ø£Ù„ÙŠØ§Ù'),
+                    label: tr('Fiber', 'الألياف'),
                     evidence: fiberEvidence,
                     target: effectiveTargets.fiber.toDouble(),
                     unit: 'g',
                   ),
                   _TargetRow(
-                    label: tr('Sodium', 'Ø§Ù„ØµÙˆØ¯ÙŠÙˆÙ…'),
+                    label: tr('Sodium', 'الصوديوم'),
                     evidence: sodiumEvidence,
                     target: effectiveTargets.sodium.toDouble(),
                     unit: 'mg',
                     upperLimit: true,
                   ),
                   _TargetRow(
-                    label: tr('Potassium', 'Ø§Ù„Ø¨ÙˆØªØ§Ø³ÙŠÙˆÙ…'),
+                    label: tr('Potassium', 'البوتاسيوم'),
                     evidence: potassiumEvidence,
                     target: effectiveTargets.potassium.toDouble(),
                     unit: 'mg',
                   ),
                   _InformationalNutrientRow(
-                    label: tr('Calcium', 'Ø§Ù„ÙƒØ§Ù„Ø³ÙŠÙˆÙ…'),
+                    label: tr('Calcium', 'الكالسيوم'),
                     evidence: calciumEvidence,
                     unit: 'mg',
                   ),
                   _InformationalNutrientRow(
-                    label: tr('Magnesium', 'Ø§Ù„Ù…ØºÙ†ÙŠØ³ÙŠÙˆÙ…'),
+                    label: tr('Magnesium', 'المغنيسيوم'),
                     evidence: magnesiumEvidence,
                     unit: 'mg',
                   ),
                   _InformationalNutrientRow(
-                    label: tr('Sugar', 'Ø§Ù„Ø³ÙƒØ±'),
+                    label: tr('Sugar', 'السكر'),
                     evidence: sugarEvidence,
                     unit: 'g',
                   ),
@@ -927,6 +908,59 @@ class DashboardGrid extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _DashboardSectionHeading extends StatelessWidget {
+  const _DashboardSectionHeading({required this.title, required this.subtitle});
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      header: true,
+      container: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            key: const Key('dashboard-today-summary-title'),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: const Color(0xFFF4F8FB),
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.2,
+              shadows: const [
+                Shadow(
+                  color: Color(0x80000000),
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceXs),
+          Text(
+            subtitle,
+            key: const Key('dashboard-today-summary-subtitle'),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: const Color(0xFFCAE0E8),
+              fontWeight: FontWeight.w600,
+              height: 1.4,
+              shadows: const [
+                Shadow(
+                  color: Color(0x66000000),
+                  blurRadius: 6,
+                  offset: Offset(0, 1),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1038,7 +1072,7 @@ class _StreakBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(99),
       ),
       child: Text(
-        arabic ? '$days Ø£ÙŠØ§Ù… Ù…ØªØªØ§Ù„ÙŠØ©' : '$days day streak',
+        arabic ? '$days أيام متتالية' : '$days day streak',
         style: Theme.of(
           context,
         ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w800),
@@ -1148,7 +1182,7 @@ class _TargetRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  '$label Â· ${consumed.toStringAsFixed(0)} / ${target.toStringAsFixed(0)} $unit',
+                  '$label · ${consumed.toStringAsFixed(0)} / ${target.toStringAsFixed(0)} $unit',
                 ),
                 if (evidence.state == NutrientEvidenceState.partial)
                   NutrientEvidenceStatusText(state: evidence.state),
@@ -1157,8 +1191,8 @@ class _TargetRow extends StatelessWidget {
                 Text(
                   arabic
                       ? exceeded
-                            ? '${difference.abs().toStringAsFixed(0)} $unit Ø£Ø¹Ù„Ù‰ Ù…Ù† Ø§Ù„Ù‡Ø¯Ù Ø§Ù„Ù…Ø±Ø¬Ø¹ÙŠ'
-                            : '${difference.toStringAsFixed(0)} $unit Ù…ØªØ¨Ù‚Ù'
+                            ? '${difference.abs().toStringAsFixed(0)} $unit أعلى من الهدف المرجعي'
+                            : '${difference.toStringAsFixed(0)} $unit متبقٍ'
                       : exceeded
                       ? '${difference.abs().toStringAsFixed(0)} $unit above the reference target'
                       : '${difference.toStringAsFixed(0)} $unit remaining',
@@ -1215,7 +1249,7 @@ class _UnavailableNutrientRow extends StatelessWidget {
       subtitle: const NutrientEvidenceStatusText(
         state: NutrientEvidenceState.unavailable,
       ),
-      trailing: const Text('â€”'),
+      trailing: const Text('—'),
     );
   }
 }
