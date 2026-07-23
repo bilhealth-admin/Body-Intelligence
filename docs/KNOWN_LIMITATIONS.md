@@ -35,4 +35,12 @@ Real store restoration remains intentionally unimplemented. The domain only expo
 - Product policy must supply `maximumOfflineAge`; the commerce domain does not choose a business duration.
 - Cached authority is device-local and is not synchronized across devices in this package.
 
-- `SubscriptionRecoveryPolicy` is intentionally runtime-constructed because Dart const evaluation cannot invoke `Duration.isNegative`; invalid negative windows are rejected by an assertion.
+
+## BIL-COM-005 limitations
+
+- Coupon definitions and redemption history are local contracts; no authoritative server synchronization exists yet.
+- Evaluation does not reserve or consume a coupon. Usage is recorded only by an explicit repository call after a future successful checkout.
+- Fixed-amount benefits are modeled in minor units but currency-specific catalog validation is deferred to Regional Pricing.
+- Commission basis points are metadata only; no balance, invoice, payout, tax, or settlement processing exists.
+- No creator/blogger dashboard or campaign administration UI exists.
+- Promotions never grant subscription entitlements or bypass receipt verification.

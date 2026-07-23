@@ -20,8 +20,7 @@ This living roadmap reflects repository reality after applying `BIL-COM-003` to 
 
 ### Remaining
 
-- `BIL-COM-004`: trials, grace periods, recovery orchestration, and persistence boundary.
-- `BIL-COM-005`: coupon and promotion engine.
+- `BIL-COM-006`: referral and affiliate attribution.
 - `BIL-COM-006`: referral and affiliate attribution.
 - `BIL-COM-007`: regional pricing and country eligibility.
 - `BIL-COM-008`: store adapter and receipt-validation contracts.
@@ -39,3 +38,14 @@ The subscription lifecycle package remains in verification. R2 corrects local fa
 - [x] Explicit stale-cache policy and fail-closed refresh/restore actions.
 - [x] Corrupt or unverified cached authority cannot grant paid access.
 - [ ] Live provider refresh and restore adapters remain deferred.
+
+
+## Commerce — BIL-COM-005
+
+- [x] Coupon definitions with percentage, fixed-amount, and free-duration benefits.
+- [x] Eligibility by UTC window, plan, and 1/3/6/12-month subscription term.
+- [x] Deterministic total and per-user usage limits.
+- [x] Non-stackable coupon enforcement.
+- [x] Celebrity/blogger attribution and commission metadata.
+- [x] Local repository and future sync contract without payment or networking.
+- [ ] Referral payout, affiliate settlement, and creator dashboards remain deferred.

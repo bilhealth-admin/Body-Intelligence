@@ -80,3 +80,22 @@ The maximum age of offline subscription authority is supplied through `Subscript
 **Status:** Accepted in `BIL-COM-004`.
 
 `EntitlementResolver` remains the single access decision path. `SubscriptionRecoveryEngine` only validates cache freshness, invokes that resolver, and returns explicit refresh/restore/discard actions.
+
+
+## ADR-COM-011 — Promotions influence offers, never entitlement authority
+
+**Status:** Accepted in `BIL-COM-005`.
+
+Coupon evaluation returns discount/free-duration metadata and a candidate redemption. It cannot create a subscription, perform payment, or grant runtime entitlements. Subscription authority remains exclusively behind verified subscription records and `EntitlementResolver`.
+
+## ADR-COM-012 — Use integer commercial units
+
+**Status:** Accepted in `BIL-COM-005`.
+
+Percentage discounts and commissions use basis points, fixed discounts use minor currency units, and free duration uses whole days. This avoids floating-point drift and keeps local/server reconciliation deterministic.
+
+## ADR-COM-013 — Separate evaluation from redemption recording
+
+**Status:** Accepted in `BIL-COM-005`.
+
+The engine is side-effect free. A successful decision contains a candidate `CouponRedemption`; the caller records it only after a future authoritative purchase flow succeeds. This prevents failed or abandoned checkouts from consuming usage limits.
