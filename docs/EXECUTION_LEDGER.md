@@ -1,53 +1,13 @@
-# BIL Execution Ledger
+# BIL Execution Ledger — Commerce Reconciliation Entry
 
 | Package | Parent HEAD | Team | Frozen scope | Status | Verification |
 |---|---|---|---|---|---|
-| BIL-COM-001-R1 | `1867640` | Commerce Team | Commerce boundary and canonical offline Free plan. | Closed | Product Owner verified and committed as `fa43ba8ca14c119fb4e316db74a99de648137a8d`. |
-| BIL-COM-002 | `fa43ba8ca14c119fb4e316db74a99de648137a8d` | Commerce Team | Paid-plan catalog and entitlement composition. | Closed | Product Owner verified and committed as `4f4f541fa66307fdcabc7ad7e38047130d795371`. |
-| BIL-COM-003 | `4f4f541fa66307fdcabc7ad7e38047130d795371` | Commerce Team | Subscription lifecycle, deterministic entitlement resolution, and provider-neutral contracts. | Ready for application | Product Owner must run package verification before commit. |
+| BIL-COM-010-R1 | `cddc1d476165796c79af78def163f1362a0315d3` | Commerce Platform Team | Commerce Epic quality gate, repository-first consistency audit, and living-document reconciliation. | Ready for Product Owner verification | Must pass focused reconciliation tests, all Commerce tests, analyzer, full tests, Android debug build, and `git diff --check`. |
 
-## BIL-COM-003 closure conditions
+## Repository-first audit result
 
-- Production files, tests, package governance, and all six living knowledge documents are applied together.
-- `scripts/verify.ps1` passes without weakening gates.
-- Only package-manifest files are staged and committed.
+No proven Commerce production defect justified a runtime rewrite. The package therefore adds epic-level regression evidence and reconciles stale planning text rather than inventing new behavior.
 
+## R1 baseline reconciliation
 
-## BIL-COM-003-R3
-- Corrected entitlement resolution for unverified provider records.
-- Local fallback now disables purchase restoration.
-- Added regression assertions for restore and purchase flags.
-
-| BIL-COM-006 | Referral and Affiliate Attribution | Ready for Product Owner verification | Adds deterministic local attribution, commission state, audit, tests, and sync boundary. |
-
-- BIL-COM-007: Regional Pricing and Country Eligibility — packaged for verification; production models, repository boundary, local resolver, focused tests, regression tests, and living documentation included.
-
-### BIL-COM-008
-- Added Apple, Google, Web, and unknown store-provider identities.
-- Added purchase and restore boundaries without provider SDK coupling.
-- Added receipt-validation contracts and deterministic local validation cache.
-- Added focused and regression tests.
-- No live billing, receipt networking, secrets, tax engine, or Paywall UI.
-
-| BIL-COM-009 | `a4f602e` | Commerce Team | Commerce-owned responsive paywall foundation and explicit transactional handoff boundaries. | Ready for Product Owner application | Product Owner must run package verification before commit. |
-
-
-## BIL-QUALITY-001 — Global analyzer cleanup
-- Classified and corrected the 40 analyzer findings blocking BIL-COM-009 verification.
-- No lint was disabled; no analyzer ignore comments were introduced.
-- Changes are behavior-preserving mechanical cleanup, deprecated API migration, constructor/formal cleanup, dead-code removal after reference inspection, and test cleanup.
-- Acceptance requires `flutter analyze` to report `No issues found`.
-
-## BIL-QUALITY-001-R1
-- Corrected three analyzer errors introduced by incomplete dead-code cleanup.
-- Removed the remaining `widget.unit` rendering branch.
-- Replaced the dangling `busy` conditional with the existing normal button content.
-- Added a focused source regression test preventing dangling references from returning.
-
-
-## BIL-QUALITY-001-R2 — Commerce Paywall UTF-8 Repair
-
-- Classification: Safe Mechanical Cleanup / encoding repair.
-- Finding: the full-project mojibake regression test detected a forbidden `â€` sequence in `lib/features/commerce/presentation/commerce_paywall.dart`.
-- Resolution: convert malformed Windows-1252/UTF-8 punctuation sequences to intended Unicode punctuation without behavioral changes.
-- Required gates: focused mojibake regression, Commerce tests, global analyzer, full project tests, and diff hygiene.
+`BIL-COM-010-R1` supersedes the unapplied `BIL-COM-010` archive only because the authoritative parent HEAD advanced to include the tracked and referenced `paywall_state.dart` model. No COM-009 work is replayed.
