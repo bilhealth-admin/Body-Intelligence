@@ -46,3 +46,8 @@ Regression fixtures must encode the existing Truth Engine arithmetic and thresho
 
 ## BIL-AI-007-R1
 Corrected AI-007 test fixtures to provide the required local evidence `source`; production contracts and behavior are unchanged.
+
+
+## ADR — Truth reports are validated without changing evaluation policy
+
+`TruthEvaluationValidator` observes an existing `TruthEvaluationReport` and emits ordered integrity issues. It does not recompute Truth Engine thresholds, rewrite assessments, rank actions, access external providers, or persist data. This keeps validation explainable and prevents a second truth policy from emerging.

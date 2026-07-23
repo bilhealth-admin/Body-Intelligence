@@ -58,3 +58,8 @@ Status: implementation package issued. Adds one immutable report that joins the 
 
 ## BIL-AI-007-R1
 Corrected AI-007 test fixtures to provide the required local evidence `source`; production contracts and behavior are unchanged.
+
+
+## BIL-AI-008 — Truth Evaluation Integrity Foundation
+
+Status: implementation package issued. Adds deterministic validation of provenance coverage, conflict arithmetic/status, assessment direction, and evidence cardinality for `TruthEvaluationReport`. It introduces no inference policy, provider, prompt, cloud, persistence, UI, ranking, or medical conclusion.

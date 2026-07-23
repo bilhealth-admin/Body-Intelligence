@@ -54,3 +54,10 @@ The original AI-006 regression fixture incorrectly expected `supported` for scor
 
 ## BIL-AI-007-R1
 Corrected AI-007 test fixtures to provide the required local evidence `source`; production contracts and behavior are unchanged.
+
+
+## BIL-AI-008 limitations
+
+- Validation checks internal report consistency only; it does not certify scientific correctness of rule definitions.
+- Balanced conflict tolerance remains owned by `TruthConflictAnalyzer`; AI-008 validates structural consistency rather than introducing a duplicate tolerance policy.
+- No persistence, telemetry, provider integration, recommendation ranking, UI, or medical inference is included.

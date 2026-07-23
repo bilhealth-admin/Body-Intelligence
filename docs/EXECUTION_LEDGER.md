@@ -75,3 +75,11 @@ Corrective package over the applied BIL-AI-003 state. Replaced constructor field
 
 ## BIL-AI-007-R1
 Corrected AI-007 test fixtures to provide the required local evidence `source`; production contracts and behavior are unchanged.
+
+
+## BIL-AI-008
+
+- Parent HEAD: `396c3c1d091e60551e3e64ab16a945af4a6efcf6`
+- Scope: deterministic truth report integrity validation.
+- Production: immutable issue/result contracts and pure validator.
+- Verification: focused tests, complete AI tests, Commerce regressions, analyze, full tests, and diff integrity.

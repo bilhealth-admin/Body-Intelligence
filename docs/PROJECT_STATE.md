@@ -57,3 +57,8 @@ Parent HEAD: `0afa164fce065c07ac3d85d89a6350a2271f1bcc`. AI-007 adds `TruthEvalu
 
 ## BIL-AI-007-R1
 Corrected AI-007 test fixtures to provide the required local evidence `source`; production contracts and behavior are unchanged.
+
+
+## BIL-AI-008 State
+
+Parent HEAD: `396c3c1d091e60551e3e64ab16a945af4a6efcf6`. AI-008 adds a pure integrity validator for the existing truth evaluation report. The validator reports explainable issues and does not mutate or replace Truth Engine outputs.
