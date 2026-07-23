@@ -2,19 +2,25 @@
 
 ## First next package
 
-### BIL-COM-003 — Subscription lifecycle state model
+### BIL-COM-004 — Trials, Grace Periods and Subscription Recovery
 
-**Goal:** Define immutable lifecycle vocabulary and transition rules for inactive, trial, active, grace, paused, expired, revoked, and refunded states without enabling purchases or claiming remote verification.
+**Goal:** Add persistence and deterministic recovery orchestration around verified subscription records, including trial/grace restoration and stale-record handling.
 
-**Expected boundaries:**
+**Boundaries:**
 
-- Domain-only lifecycle models and transition validation.
-- No store SDK, price, receipt, network, persistence, account UI, or entitlement activation.
-- Focused lifecycle tests and Free/catalog regression tests.
+- No live Apple/Google/Stripe integration.
+- No coupon, referral, affiliate, pricing, or paywall UI.
+- Preserve `EntitlementResolver` as the single runtime authorization path.
 
-## Later packages
+## Planned sequence
 
-- BIL-COM-004: verified entitlement persistence boundary.
-- BIL-COM-005: store-product and regional-pricing abstractions.
-- BIL-COM-006: restore, grace, expiration, refund, and revocation orchestration.
-- BIL-COM-007+: promotions, coupons, referrals, affiliates, paywalls, and revenue operations.
+- `BIL-COM-005` — Coupon and Promotion Engine.
+- `BIL-COM-006` — Referral and Affiliate Attribution.
+- `BIL-COM-007` — Regional Pricing and Country Eligibility.
+- `BIL-COM-008` — Store Provider Boundaries and Receipt Validation Contracts.
+- `BIL-COM-009` — Commerce UI and Paywall Foundation.
+- `BIL-COM-010` — Commerce Epic Quality Gate and Reconciliation.
+
+
+## Gate before BIL-COM-004
+BIL-COM-003-R3 must pass focused tests, commerce regression, analyzer, full regression, and debug build before trials and recovery work begins.

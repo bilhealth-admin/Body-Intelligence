@@ -1,5 +1,6 @@
 import 'commerce_entitlement.dart';
 import 'commerce_plan.dart';
+import 'subscription_lifecycle.dart';
 import 'subscription_state.dart';
 
 /// Canonical offline-first Free plan shipped with every BIL installation.
@@ -18,6 +19,7 @@ final class FreePlan {
     plan: CommercePlan.free,
     entitlements: entitlements,
     authority: EntitlementAuthority.localDefault,
+    lifecycle: SubscriptionLifecycle.inactive,
     isPurchasable: false,
     canRestorePurchases: false,
   );

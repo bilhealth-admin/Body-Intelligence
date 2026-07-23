@@ -1,22 +1,29 @@
 # BIL Known Limitations
 
-## Commerce limitations after BIL-COM-002
+## Commerce limitations after BIL-COM-003
 
-- Paid-plan catalog entries are descriptive metadata only and do not grant access.
-- No product identifiers, prices, currencies, regions, billing periods, trials, discounts, or tax models exist.
-- No subscription lifecycle state or transition model exists yet.
-- No store SDK, purchase flow, receipt validation, restore flow, server verification, entitlement synchronization, or persistence exists.
-- No paywall, account subscription screen, or revenue dashboard exists.
-- Commerce remains unavailable through the external-capability policy.
+- No Apple Billing, Google Play Billing, Stripe, or Web checkout integration exists.
+- No receipt validation, server verification, purchase execution, restore orchestration, or subscription persistence exists.
+- Provider contracts expose future boundaries only and have no concrete implementation.
+- `authorityVerified` is an input contract; this package does not produce or validate verification evidence.
+- No coupon, promotion, referral, affiliate, regional pricing, country eligibility, paywall, or revenue dashboard exists.
+- Commerce activation remains unavailable through the external-capability policy.
+
+## Lifecycle limitations
+
+- Missing required date boundaries produce Free fallback rather than optimistic access.
+- Cancelled subscriptions retain paid access only through a valid current-period end.
+- Paused subscriptions do not retain paid access in this package.
+- Date normalization is UTC-based; future adapters own conversion from provider timestamps.
 
 ## Product-definition limitation
 
-Elite currently inherits the Pro catalog capabilities without an Elite-only entitlement. Introducing one requires an explicit product decision and coordination with the owning product team; this package does not invent capability semantics.
-
-## Safety limitation
-
-`PaidPlanCatalog.composedEntitlementsFor` is not an authorization API. Runtime access must continue to come from a trusted `SubscriptionState` supplied through `EntitlementRepository`.
+Elite still inherits Pro without an Elite-only entitlement. No capability semantics were invented.
 
 ## Operational limitation
 
-Verification commands are provided but results are not claimed in advance. The Product Owner must run all supplied gates after application.
+Verification results are not claimed in advance. The Product Owner must run the supplied gates after applying the package.
+
+
+## BIL-COM-003-R3
+Real store restoration remains intentionally unimplemented. The domain only exposes restore eligibility for verified provider-backed records.

@@ -2,30 +2,32 @@
 
 ## Authority
 
-This living roadmap records implementation state after baseline `fa43ba8ca14c119fb4e316db74a99de648137a8d` and package `BIL-COM-002`. Repository code remains authoritative when implementation and older planning documents disagree.
+This living roadmap reflects repository reality after applying `BIL-COM-003` to baseline `4f4f541fa66307fdcabc7ad7e38047130d795371`. Repository code is authoritative when older planning text conflicts with implementation.
 
-## Completed foundations protected from regression
+## Completed and protected foundations
 
-- Application architecture, local database, repositories, offline-first behavior, responsive shell, dashboard foundation, navigation, startup, profile, and settings.
-- Unified food architecture, search, gram and unit engines, explainable nutrition, food quality, deduplication, barcode foundation, meal builder, meal templates, and offline barcode resolution.
-- Existing deterministic intelligence foundations already present in `lib/engine`.
-- Phase 3 ledger reconciliation and regression protection.
+- Application architecture, local database, repositories, offline-first behavior, responsive framework, dashboard foundation, navigation, startup, profile, and settings.
+- Unified food architecture, search, gram and unit engines, explainable nutrition, quality, deduplication, barcode foundation, meal builder/templates, and offline barcode resolver.
+- Explainable intelligence foundation, regression protection, and ledger reconciliation.
 
-## Commerce platform progress
+## Commerce platform
 
 ### Completed
 
-- `BIL-COM-001-R1`: plan identities, entitlement vocabulary, immutable subscription state, canonical offline Free plan, repository boundary, and Riverpod providers.
-- `BIL-COM-002`: immutable paid-plan catalog metadata for Plus, Pro, Elite, Coach, Clinic, and Enterprise; explicit inheritance; deterministic entitlement composition; catalog/runtime-authority separation.
+- `BIL-COM-001-R1`: plan and entitlement vocabulary, immutable subscription snapshot, canonical offline Free plan, local entitlement repository, and Riverpod boundaries.
+- `BIL-COM-002`: immutable paid-plan catalog for Plus, Pro, Elite, Coach, Clinic, and Enterprise with deterministic inheritance and non-authoritative catalog composition.
+- `BIL-COM-003`: subscription lifecycle vocabulary, date-aware deterministic entitlement resolution, provider-neutral Apple/Google/Web contracts, and regression protection for all prior commerce foundations.
 
-### Remaining commerce roadmap
+### Remaining
 
-- Subscription lifecycle state model.
-- Verified entitlement persistence boundary.
-- Store product discovery and regional pricing.
-- Server-verified purchase, restore, grace, refund, revocation, and expiration flows.
-- Coupon, promotion, referral, affiliate, paywall, and revenue operations.
+- `BIL-COM-004`: trials, grace periods, recovery orchestration, and persistence boundary.
+- `BIL-COM-005`: coupon and promotion engine.
+- `BIL-COM-006`: referral and affiliate attribution.
+- `BIL-COM-007`: regional pricing and country eligibility.
+- `BIL-COM-008`: store adapter and receipt-validation contracts.
+- `BIL-COM-009`: commerce UI and paywall foundation.
+- `BIL-COM-010`: commerce epic quality gate and reconciliation.
 
-## Next package
 
-`BIL-COM-003` should define the subscription lifecycle state model without adding store SDKs, remote verification, persistence, or UI.
+## BIL-COM-003-R3 verification correction
+The subscription lifecycle package remains in verification. R2 corrects local fallback restoration capability so unverified records cannot advertise restore operations.

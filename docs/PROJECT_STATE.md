@@ -1,43 +1,43 @@
 # BIL Project State
 
-## Baseline
+## Baseline and package
 
 - Branch: `phase-3-product-excellence`
-- Parent HEAD: `fa43ba8ca14c119fb4e316db74a99de648137a8d`
-- Package: `BIL-COM-002`
-- Package state: ready for Product Owner application and verification.
+- Parent HEAD: `4f4f541fa66307fdcabc7ad7e38047130d795371`
+- Package: `BIL-COM-003`
+- Frozen scope: subscription lifecycle and entitlement resolution.
 
-## Current implemented reality
+## Current implemented reality after application
 
-The repository contains the established offline-first Free-plan access boundary from `BIL-COM-001-R1`. Commerce activation remains unavailable through external-capability policy.
+Commerce Foundation remains intact. The project now additionally contains a provider-neutral lifecycle model for inactive, trial, active, grace period, paused, expired, cancelled, refunded, and revoked subscriptions.
 
-This package adds a non-authoritative paid-plan catalog. It defines product structure only and cannot create a paid `SubscriptionState`, verify a purchase, expose pricing, or activate runtime access.
+`EntitlementResolver` deterministically resolves runtime access from plan, lifecycle, verified authority, provider identity, and UTC date boundaries. A paid plan label alone never grants access. Unverified, terminal, paused, missing-boundary, or out-of-window records fall back to the canonical Free plan.
 
-## Added production capabilities
-
-- `PlanCatalogEntry`: immutable plan metadata with rank, parent plans, and direct entitlement additions.
-- `PaidPlanCatalog`: complete paid-plan registry and deterministic composition across Free, individual, professional, and enterprise plans.
-- Explicit inheritance without copying Free or parent entitlements into every tier.
-- Immutable ordered catalog output and composed entitlement sets.
+Apple, Google, and Web are represented only as future provider contracts. No store SDK, network purchase, receipt validation, secret, or cloud dependency is introduced.
 
 ## Verification assets
 
-- Focused catalog completeness, ordering, composition, and immutability tests.
-- Regression tests proving catalog metadata cannot activate paid runtime access and every paid plan retains Free capabilities.
+- Focused lifecycle and boundary tests.
+- Regression tests for Free Plan, Paid Plan Catalog, Local Entitlement Repository, Commerce Providers, and entitlement-based consumer authorization.
+- Package verification covers formatting, focused tests, all commerce tests, analyzer, full tests, Android debug build, and changed-file integrity.
 
 ## Technical debt
 
-No intentional technical debt is introduced. Elite currently inherits Pro without introducing a distinct capability because the existing entitlement vocabulary does not yet define an Elite-only capability. This is recorded as an intentional product-definition limitation, not duplicate logic.
+No intentional technical debt is introduced. Provider verification and persistence are deliberately deferred to later packages rather than simulated locally.
 
 ## Known risks
 
-- Consumers may confuse catalog composition with runtime authorization. Only `SubscriptionState` from the entitlement repository may authorize access.
-- Future entitlement vocabulary changes are cross-team API changes.
-- Product teams must not infer store availability, price, or verification from catalog presence.
+- Provider adapters must never mark records verified before trusted validation.
+- Date values must be normalized to UTC at adapter boundaries.
+- UI consumers must call `grants` and must not branch on plan names or lifecycle labels.
 
 ## Cross-team dependencies
 
-- AI Team owns the actual advanced-intelligence capability implementation.
-- Cloud Team owns cloud synchronization and verified remote authority.
-- Coach, Clinic, and Enterprise teams own their workspace implementations.
-- Premium and Global Launch teams own paywalls, localization, and store adapters.
+- Cloud Team: future authoritative synchronization and verification transport.
+- Global Launch Team: Apple/Google store SDK adapters.
+- Premium Team: paywall and subscription-management UI.
+- AI, Coach, Clinic, and Enterprise teams: capability implementations consumed through entitlements.
+
+
+## Current verification correction
+BIL-COM-003-R3 fixes the entitlement fallback invariant discovered by focused tests: unverified records resolve to Free with restore disabled.
