@@ -9,3 +9,12 @@ This boundary is deliberately provider-neutral, offline-first, clock-free, rando
 
 ## ADR — Validated immutable constructor inputs
 Immutable AI domain models that normalize constructor text must accept a plain parameter and assign the normalized value exactly once in the initializer list. Initializing formals must not be combined with a second initializer for the same field.
+
+
+## ADR — Typed rules compose signals; Truth Engine owns truth arithmetic
+
+Domain-specific deterministic rules may decide whether an evidence-backed signal applies to a typed context. They must not calculate final truth status or confidence. All final arithmetic remains centralized in `TruthEngine`, preserving one source of truth, stable ordering, explainability, offline operation, and provider neutrality.
+
+## ADR — Validating factories for immutable AI domain contracts
+
+When an immutable AI domain object requires input normalization before field initialization, use a public validating factory delegating to a private initializing constructor. This preserves the public API, keeps validation centralized, and satisfies analyzer constructor-formal rules without ignores.

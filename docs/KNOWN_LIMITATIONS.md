@@ -11,3 +11,14 @@
 
 ## BIL-AI-002-R1
 No new functional limitation. This package is a compilation repair only. Truth assessments remain deterministic, offline, provider-neutral, and non-medical.
+
+
+## BIL-AI-003 limitations
+
+- Rules are in-memory pure contracts; no persistence or registry is introduced.
+- Proposition contexts remain feature-owned and are not connected to Body Twin or Daily Log.
+- Rule calibration values are explicit inputs and are not learned or remotely configured.
+
+### BIL-AI-003-R1
+
+No new functional limitation. This package is a constructor-structure correction only; it adds no provider, cloud, UI, medical inference, or persistence behavior.

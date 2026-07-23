@@ -22,3 +22,10 @@ Truth Engine composition must continue before Explain Engine, Body Twin, Decisio
 
 ## BIL-AI-002-R1
 Corrected the TruthAssessment constructor contract after focused verification detected duplicate initialization of `rationale`. Scope remains the deterministic Truth Engine foundation; no new capability was added.
+
+
+## BIL-AI-003 — Typed Truth Proposition & Rule Composition Foundation
+
+Status: implementation package issued. Adds typed propositions, pure deterministic rules, and stable rule-to-signal composition through the existing Truth Engine.
+
+- `BIL-AI-003-R1`: corrective analyzer cleanup for the typed Truth Rule composition foundation; required before AI-003 closure.
