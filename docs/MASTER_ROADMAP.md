@@ -92,3 +92,7 @@ Status: implementation package issued. Adds a pure validator that verifies the i
 ## BIL-AI-012 — Truth Decision Validation Gate Foundation
 
 Adds the explicit post-decision integrity gate for the deterministic Truth/Explain pipeline. A decision is exposable only when the existing AI-011 fidelity validator reports no issues. Safe upstream rejection remains preserved and no ranking, provider, prompt, persistence, cloud, or UI scope is introduced.
+
+## BIL-AI-013 — Trusted Truth Decision Pipeline Foundation
+
+Status: implementation package issued. Adds one pure local orchestration boundary over the established rule composer, report integrity gate, decision bridge, and decision-fidelity validation gate. It introduces no candidate ranking, Body Twin, Decision Memory, provider, prompt, cloud, persistence, UI, or medical inference.

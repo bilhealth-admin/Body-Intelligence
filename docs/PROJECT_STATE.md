@@ -92,3 +92,7 @@ The AI-011 production implementation remains unchanged. R1 aligns one focused te
 ## BIL-AI-012 State
 
 Parent HEAD: `686799297af64ddc77f78f1e0ec5d668a0983238`. AI-012 converts the existing observational truth-decision fidelity validation into an explicit immutable consumption gate. It preserves the original decision result and all integrity issues, exposes valid action or abstention decisions, and preserves safe upstream rejection without leaking a decision.
+
+## BIL-AI-013 State
+
+Parent HEAD: `bbd0f86512658f21b68ccae77d78d4c87dd5d1f0`. AI-013 adds a thin deterministic pipeline that evaluates typed rules once and preserves the complete validated Truth/Explain result. Existing component APIs remain independently usable and unchanged.

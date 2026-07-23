@@ -133,3 +133,10 @@ Corrected the AI-009 regression fixture to use the repository-owned `TruthSignal
 - Production: `TruthDecisionValidationGateResult`, `TruthDecisionValidationGate`.
 - Verification: focused AI-012 tests, complete AI Platform tests, Commerce regression, analyzer, full project tests, diff integrity.
 - Non-scope: Body Twin, Decision Memory, One Best Action ranking, AI Coach, prompts, providers, cloud, persistence, and UI.
+
+## BIL-AI-013
+
+- Parent: `bbd0f86512658f21b68ccae77d78d4c87dd5d1f0`
+- Scope: trusted Truth decision pipeline orchestration.
+- Production: immutable pipeline result plus pure local pipeline service.
+- Gates: focused tests, complete AI tests, Commerce regression, analyze, full project tests, diff integrity.

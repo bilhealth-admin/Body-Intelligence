@@ -98,3 +98,7 @@ No new product limitation. This revision only repairs a compile-time test-fixtur
 ## BIL-AI-012 limitations
 
 The validation gate does not rank actions, determine One Best Action, persist decisions, invoke providers, access cloud services, or present UI. It only exposes whether the existing truth-decision result passed fidelity validation. Calibration and medical inference remain explicitly out of scope.
+
+## BIL-AI-013 limitations
+
+The pipeline accepts caller-owned supported and contradicted candidates but does not rank alternatives or implement One Best Action policy. It has no persistence, clock, randomness, provider, prompt, network, UI, or user-state mutation.
