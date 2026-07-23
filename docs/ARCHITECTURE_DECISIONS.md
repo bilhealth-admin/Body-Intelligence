@@ -1,17 +1,21 @@
-# BIL Architecture Decisions — BIL-COM-010-R1
+# BIL Architecture Decisions — BIL-AI-001
 
-## ADR-COM-010-01 — Repository First governs reconciliation
+## ADR-AI-001-01 — Deterministic engines remain authoritative
 
-The current repository graph, imports, tests, and runtime contracts are authoritative. Package manifests are delivery aids and never sufficient evidence for deleting or replacing a source file.
+AI contracts cite evidence produced by BIL-owned deterministic engines. No AI provider output becomes a source of health truth.
 
-## ADR-COM-010-02 — No speculative production rewrite at Epic closure
+## ADR-AI-001-02 — Explainability is structural
 
-The audit found no proven runtime defect requiring new Commerce production behavior. Epic closure is implemented through regression evidence, quality gates, and living-knowledge reconciliation.
+Rationale, evidence, confidence, alternatives, and missing evidence are first-class fields rather than optional presentation text.
 
-## ADR-COM-010-03 — Paywall remains non-authoritative
+## ADR-AI-001-03 — Safe abstention is mandatory
 
-Presentation may select offers and invoke explicit purchase/restore callbacks. It must not construct authoritative subscription state, validate receipts, or grant entitlements.
+When evidence is insufficient, the contract carries no action and must identify the missing evidence. Invented recommendations are invalid.
 
-## ADR-COM-010-04 — Referenced paywall state is part of the repository contract
+## ADR-AI-001-04 — Provider neutrality and offline-first foundation
 
-`paywall_state.dart` is retained because repository imports and tests prove it is an active production contract. Manifest omission is not deletion evidence.
+The first AI package is pure Dart and contains no network, provider SDK, cloud, storage, or Commerce dependency.
+
+## ADR-AI-001-05 — One action per decision envelope
+
+An action decision contains exactly one typed value. Alternatives are explanatory records and cannot become simultaneous recommendations.

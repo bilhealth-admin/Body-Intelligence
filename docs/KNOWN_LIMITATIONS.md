@@ -1,14 +1,17 @@
-# BIL Known Limitations — Commerce Epic Closure
+# BIL Known Limitations — AI Platform Foundation
 
-The following remain explicit boundaries, not hidden defects:
+`BIL-AI-001` intentionally does not provide:
 
-- No live Apple StoreKit integration.
-- No live Google Play Billing integration.
-- No Stripe or Web checkout execution.
-- No remote receipt/signature verification service.
-- No tax calculation, settlement, payout, or financial reconciliation.
-- No cloud synchronization or server-authoritative subscription transport.
-- No creator, clinic, or enterprise operational dashboards.
-- Physical-device purchase and restore validation requires future provider adapters and store credentials.
+- model-provider integration;
+- prompt execution or prompt storage;
+- natural-language generation;
+- Truth Engine rules;
+- Body Twin calculations;
+- One Best Action ranking;
+- Decision Memory persistence;
+- AI Coach UI;
+- cloud transport;
+- medical diagnosis or treatment advice;
+- calibrated numeric confidence.
 
-The local paywall remains non-authoritative and cannot grant entitlements.
+Confidence remains a coarse explanatory level until a deterministic calibration policy is implemented and verified.

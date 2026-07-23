@@ -1,19 +1,15 @@
-# BIL Project State — Commerce Epic Closure
+# BIL Project State — AI Platform
 
 - Branch: `phase-3-product-excellence`
-- Parent HEAD: `cddc1d476165796c79af78def163f1362a0315d3`
-- Package: `BIL-COM-010-R1`
-- Team: Commerce Platform Team
-- Scope: Epic-wide quality gate and repository-first reconciliation.
+- Parent HEAD: `c3676c28c88c8bbaa46e1b1d4d9038ef368aad03`
+- Package: `BIL-AI-001`
+- Team: AI Platform Team
+- Active scope: Explainable decision contract foundation.
 
 ## Current state
 
-The Commerce platform is complete for its declared local/provider-neutral scope. The final package adds no speculative production behavior. It verifies isolation, protects the non-authoritative paywall boundary, reconciles living knowledge, and reruns focused Commerce, complete Commerce, analyzer, full-project tests, Android debug build, and Git diff integrity.
+Commerce is complete and frozen as Non-Regression. AI Platform execution has started with pure Dart domain contracts only. BIL deterministic engines remain the source of truth; later AI layers may explain or present their outputs but may not replace them.
 
-## Closure condition
+## Package state
 
-The Commerce Epic is closed only after `scripts/verify.ps1` passes without weakening any gate and the Product Owner commits the package against the recorded parent HEAD.
-
-## Repository-first baseline reconciliation
-
-The parent HEAD includes commit `fix(commerce): add missing paywall state model`. `paywall_state.dart` is tracked, imported by Commerce production, and protected by the reconciliation test.
+`BIL-AI-001` is ready for Product Owner application and verification. Completion requires focused AI tests, AI regression tests, all Commerce tests, `flutter analyze`, the complete test suite, and `git diff --check`.

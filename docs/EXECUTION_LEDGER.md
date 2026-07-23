@@ -1,13 +1,9 @@
-# BIL Execution Ledger — Commerce Reconciliation Entry
+# BIL Execution Ledger — AI Platform
 
-| Package | Parent HEAD | Team | Frozen scope | Status | Verification |
+| Package | Parent HEAD | Team | Scope | Status | Verification |
 |---|---|---|---|---|---|
-| BIL-COM-010-R1 | `cddc1d476165796c79af78def163f1362a0315d3` | Commerce Platform Team | Commerce Epic quality gate, repository-first consistency audit, and living-document reconciliation. | Ready for Product Owner verification | Must pass focused reconciliation tests, all Commerce tests, analyzer, full tests, Android debug build, and `git diff --check`. |
+| BIL-AI-001 | `c3676c28c88c8bbaa46e1b1d4d9038ef368aad03` | AI Platform Team | Explainable, immutable, offline-first decision and evidence contracts. | Ready for Product Owner verification | Focused AI tests, AI regression tests, Commerce regression, analyzer, full tests, and `git diff --check`. |
 
-## Repository-first audit result
+## Non-Regression boundary
 
-No proven Commerce production defect justified a runtime rewrite. The package therefore adds epic-level regression evidence and reconciles stale planning text rather than inventing new behavior.
-
-## R1 baseline reconciliation
-
-`BIL-COM-010-R1` supersedes the unapplied `BIL-COM-010` archive only because the authoritative parent HEAD advanced to include the tracked and referenced `paywall_state.dart` model. No COM-009 work is replayed.
+The package does not modify Nutrition, Daily Log, Dashboard, Commerce, repositories, databases, navigation, startup, or platform integrations.

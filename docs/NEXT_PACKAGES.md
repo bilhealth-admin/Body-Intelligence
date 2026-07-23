@@ -1,7 +1,7 @@
 # BIL Next Packages
 
-## Commerce Platform
+## Active Epic — AI Platform
 
-No further Commerce package is authorized after `BIL-COM-010-R1` passes and is committed. The Commerce Epic is closed.
+After `BIL-AI-001` passes and is committed, the next package must be extracted from the updated baseline while preserving this foundation.
 
-A new baseline from the Product Owner is required before another team or Epic begins. Commerce must not transition autonomously into AI, Cloud, Premium Experience, Clinic, Enterprise, or live store integration.
+The next logical capability is a deterministic Truth Engine signal/result contract that can produce evidence-backed interpretations without provider or UI coupling. Its exact package scope must be reconciled against the new HEAD before delivery.

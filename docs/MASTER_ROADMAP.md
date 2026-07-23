@@ -1,21 +1,25 @@
-# BIL Master Roadmap — BIL-COM-010-R1 Reconciliation Update
+# BIL Master Roadmap — AI Platform Activation
 
-## Commerce Platform
+## Completed Epics
 
-### Epic status
+### Commerce Platform
 
-Commerce Packages `BIL-COM-001` through `BIL-COM-009` are implemented and protected as Non-Regression. `BIL-COM-010-R1` closes the Commerce Epic through repository-first reconciliation, epic-level regression coverage, and full project quality gates.
+Commerce Packages through `BIL-COM-010-R1` are complete and protected as Non-Regression.
 
-### Completed capabilities
+## Active Epic — AI Platform
 
-- Canonical Free plan and immutable paid-plan catalog.
-- Subscription lifecycle, deterministic entitlement resolution, trials, grace periods, and recovery.
-- Coupon and promotion policies.
-- Referral and affiliate attribution with local audit/commission boundaries.
-- Regional pricing and country eligibility.
-- Store-provider and receipt-validation contracts without store SDK coupling.
-- Non-authoritative responsive Commerce paywall foundation.
+The AI Platform begins with deterministic, provider-neutral contracts. The execution order starts with the explainable decision foundation before any provider, prompt, coach, memory, or cloud integration.
 
-### Boundary after closure
+### BIL-AI-001 — Explainable Decision Contract Foundation
 
-Live Apple, Google, and Web billing adapters; remote receipt validation; tax calculation; settlement; cloud synchronization; and institutional dashboards remain separate future-platform work. Commerce does not enter those platforms in this Epic.
+Establish the immutable contract every later AI component must satisfy:
+
+- one selected action or explicit abstention;
+- deterministic BIL-owned evidence;
+- rationale;
+- confidence;
+- alternatives;
+- missing-evidence disclosure;
+- offline-first and provider-neutral boundaries.
+
+No model provider, network transport, prompt execution, medical inference, or mutation is introduced in this package.
