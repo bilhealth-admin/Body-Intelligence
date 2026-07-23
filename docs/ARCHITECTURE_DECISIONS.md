@@ -65,3 +65,6 @@ A provider identifier alone is not sufficient to expose restore behavior. `canRe
 
 ## ADR-COM-006 — Attribution before networking
 Referral attribution and commission calculation are pure deterministic domain operations behind repositories. Cloud verification is represented only by an interface so offline behavior remains testable and payment/network concerns cannot leak into the domain.
+
+## ADR-COM-007 — Billing-country authority
+Store country is authoritative when present, account country is the offline fallback, and device country never grants pricing eligibility by itself. Country mismatches produce a review signal rather than silently changing eligibility. Monetary values use integer minor units and explicit fraction digits.

@@ -27,3 +27,6 @@ BIL-COM-003-R3 must pass focused tests, commerce regression, analyzer, full regr
 
 ## Next commerce package
 BIL-COM-007 — Regional Pricing and Country Eligibility.
+
+## Next commerce package
+BIL-COM-008 — Store Provider Boundaries and Receipt Validation Contracts.

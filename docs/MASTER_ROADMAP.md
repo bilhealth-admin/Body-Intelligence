@@ -34,3 +34,6 @@ The subscription lifecycle package remains in verification. R2 corrects local fa
 
 ## Commerce update — BIL-COM-006
 Referral and Affiliate Attribution is implemented as a deterministic offline-first domain and repository boundary. Financial transfers, creator dashboards, payment networking, and server verification remain future work.
+
+## BIL-COM-007 — Regional Pricing and Country Eligibility
+Implemented deterministic regional pricing models, country eligibility, billing-country precedence, local currency amounts, provider boundaries, and anti-arbitrage review signals. Next: BIL-COM-008 store provider boundaries and receipt validation contracts.

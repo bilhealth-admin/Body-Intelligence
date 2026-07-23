@@ -19,3 +19,5 @@
 - Added regression assertions for restore and purchase flags.
 
 | BIL-COM-006 | Referral and Affiliate Attribution | Ready for Product Owner verification | Adds deterministic local attribution, commission state, audit, tests, and sync boundary. |
+
+- BIL-COM-007: Regional Pricing and Country Eligibility — packaged for verification; production models, repository boundary, local resolver, focused tests, regression tests, and living documentation included.

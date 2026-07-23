@@ -30,3 +30,6 @@ Real store restoration remains intentionally unimplemented. The domain only expo
 
 ## BIL-COM-006 limitations
 No financial payout, creator dashboard, payment processing, network verification, fraud scoring, tax handling, or cloud persistence is implemented. Paid commissions are intentionally immutable locally; payout correction requires future server reconciliation.
+
+## BIL-COM-007 limitations
+No live Apple, Google, or Web pricing; no taxes; no server country verification; no final paywall. The local repository contains deterministic policy data only.

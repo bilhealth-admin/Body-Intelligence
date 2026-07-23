@@ -44,3 +44,6 @@ BIL-COM-003-R3 fixes the entitlement fallback invariant discovered by focused te
 
 ## BIL-COM-006 state
 Completed: referral programs, unique normalized codes, attribution, duplicate/self-attribution prevention, expiry windows, dual-sided rewards, affiliate commission ledger/statuses, refund/cancellation revocation support, audit records, local repository, and future sync contract.
+
+## Commerce state after BIL-COM-007
+Regional pricing and country eligibility are implemented locally. Billing country resolves from store country first, then account country; device country is contextual only. No network pricing, tax, payment, or receipt validation is implemented.
