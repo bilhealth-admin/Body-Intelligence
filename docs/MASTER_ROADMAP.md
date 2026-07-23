@@ -41,3 +41,12 @@ Status: implementation package issued. Adds immutable proposition and rule prove
 - Replaces the scheduler-sensitive single observation in the local 1000-food search benchmark with a five-sample median.
 - Preserves the existing `<500 ms` product budget and adds a `1500 ms` catastrophic outlier ceiling.
 - Does not change Food Repository production behavior or any AI Platform contract.
+
+
+## BIL-AI-006 — Deterministic Truth Conflict Analysis Foundation
+
+Status: implementation package issued. Adds immutable, provider-neutral analysis of disagreement between supporting and opposing Truth Engine signals. The analyzer explains direction, aggregate weights, margin, and balanced conflict without changing Truth Engine thresholds or assessment semantics.
+
+## BIL-AI-006-R1 — Verification correction
+- Corrected the AI-006 regression fixture to match the existing Truth Engine threshold semantics.
+- No production behavior, threshold, or public contract changed.

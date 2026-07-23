@@ -41,3 +41,11 @@ Parent HEAD: `d08db3ca4d375c10d249ac1fa49a4562476040b1`. AI-005 adds an immutabl
 
 ## Global quality unblock for BIL-AI-005
 `BIL-QUALITY-002-R1` stabilizes the performance gate that intermittently reported 358–615 ms for identical code and data. The 500 ms budget remains unchanged; the gate now evaluates a five-sample median and retains full per-sample evidence.
+
+
+## BIL-AI-006 State
+
+Parent HEAD: `12250f2f2ac6d7e18993bc32614aee45b25b4be6`. AI-006 adds deterministic conflict analysis over existing `TruthSignal` contracts. It is offline-only, clock-free, random-free, provider-neutral, mutation-free, and does not alter Truth Engine assessment behavior.
+
+## AI-006 verification state
+BIL-AI-006-R1 corrects a test-only expectation: a normalized score of `0.300` remains `uncertain` under the established `0.350` support threshold. Production is unchanged.

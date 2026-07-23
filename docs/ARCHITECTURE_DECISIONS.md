@@ -30,3 +30,11 @@ Deterministic truth composition may expose which typed rules were considered and
 
 ## ADR — Robust host-timed performance gates
 Host-timed microbenchmarks must retain product budgets while resisting isolated scheduler noise. For repeated deterministic operations, BIL gates use an odd-sized sample median, print every observation, and retain a separate catastrophic-outlier ceiling. This decision does not authorize raising product budgets or hiding measurements.
+
+
+## ADR — Truth conflict analysis is separate from truth resolution
+
+Conflict analysis consumes existing `TruthSignal` values and explains disagreement, but it does not replace `TruthEngine`, change thresholds, or select user actions. This separation preserves deterministic assessment semantics while making opposing evidence auditable.
+
+## AI-006-R1 — Test follows engine contract
+Regression fixtures must encode the existing Truth Engine arithmetic and thresholds; verification failures must not be resolved by changing production semantics when the fixture is incorrect.

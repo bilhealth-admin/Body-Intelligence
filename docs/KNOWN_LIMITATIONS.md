@@ -35,3 +35,12 @@ The trace records rule identity and match provenance only. It does not persist h
 
 ## Host timing variability
 Wall-clock tests can still reflect sustained machine contention. `BIL-QUALITY-002-R1` removes isolated single-sample noise but intentionally fails when the median reaches 500 ms or any sample reaches 1500 ms. It does not replace device profiling or release-mode benchmarking.
+
+
+## BIL-AI-006 limitations
+
+- Conflict analysis explains signal disagreement but does not decide clinical truth, recommend an action, or replace Truth Engine thresholds.
+- No persistence, provider, prompt, cloud, UI, Body Twin, Decision Memory, or One Best Action integration is included.
+
+## Resolved by BIL-AI-006-R1
+The original AI-006 regression fixture incorrectly expected `supported` for score `0.300`. R1 aligns the test with the established threshold without altering production.

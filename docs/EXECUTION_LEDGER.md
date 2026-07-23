@@ -49,3 +49,18 @@ Corrective package over the applied BIL-AI-003 state. Replaced constructor field
 - Scope: `test/performance_budget_test.dart`, reusable test sampling helper, focused regression test, living documents.
 - Production behavior: unchanged.
 - Budget: unchanged at `<500 ms`; added `1500 ms` catastrophic single-sample ceiling.
+
+
+## BIL-AI-006
+
+- Parent HEAD: `12250f2f2ac6d7e18993bc32614aee45b25b4be6`
+- Scope: deterministic Truth Signal conflict analysis and explanation.
+- Production: immutable conflict result plus pure analyzer service.
+- Gates: focused tests, complete AI tests, Commerce regression, analyzer, full project tests, diff integrity.
+- Status: package issued; pending Product Owner verification and commit.
+
+### BIL-AI-006-R1
+- Parent HEAD: `12250f2f2ac6d7e18993bc32614aee45b25b4be6` with BIL-AI-006 applied and uncommitted.
+- Corrected the conflict-analysis non-regression test expectation from `supported` to `uncertain`.
+- Reason: Truth Engine computes `(0.8 - 0.2) / 2.0 = 0.3`, below the existing `0.35` support threshold.
+- Production changes: none.
