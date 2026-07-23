@@ -30,3 +30,8 @@ BIL-COM-007 — Regional Pricing and Country Eligibility.
 
 ## Next commerce package
 BIL-COM-008 — Store Provider Boundaries and Receipt Validation Contracts.
+
+## Next commerce package
+BIL-COM-009 — Commerce UI and Paywall Foundation.
+
+Then: BIL-COM-010 — Commerce Epic Quality Gate and Reconciliation.

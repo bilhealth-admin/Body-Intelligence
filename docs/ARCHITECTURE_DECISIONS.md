@@ -68,3 +68,6 @@ Referral attribution and commission calculation are pure deterministic domain op
 
 ## ADR-COM-007 — Billing-country authority
 Store country is authoritative when present, account country is the offline fallback, and device country never grants pricing eligibility by itself. Country mismatches produce a review signal rather than silently changing eligibility. Monetary values use integer minor units and explicit fraction digits.
+
+### ADR-COM-008 — Server authority with bounded offline continuity
+Store receipts are opaque provider evidence and never directly grant entitlements. A server validation contract is the future authority. Offline access may rely only on a previously accepted validation result within a bounded freshness window. Store SDKs remain behind provider contracts so Apple, Google, and Web integrations cannot leak into domain or UI logic.

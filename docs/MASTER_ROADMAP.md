@@ -37,3 +37,8 @@ Referral and Affiliate Attribution is implemented as a deterministic offline-fir
 
 ## BIL-COM-007 — Regional Pricing and Country Eligibility
 Implemented deterministic regional pricing models, country eligibility, billing-country precedence, local currency amounts, provider boundaries, and anti-arbitrage review signals. Next: BIL-COM-008 store provider boundaries and receipt validation contracts.
+
+## BIL-COM-008 — Store Provider Boundaries and Receipt Validation Contracts
+Status: Ready for Product Owner application.
+
+Delivered deterministic Apple, Google, and Web provider boundaries; receipt identity models; offline validation-cache policy; server-validation contracts; and regression protection. Real billing, network verification, taxes, and payment execution remain outside this package.

@@ -21,3 +21,10 @@
 | BIL-COM-006 | Referral and Affiliate Attribution | Ready for Product Owner verification | Adds deterministic local attribution, commission state, audit, tests, and sync boundary. |
 
 - BIL-COM-007: Regional Pricing and Country Eligibility — packaged for verification; production models, repository boundary, local resolver, focused tests, regression tests, and living documentation included.
+
+### BIL-COM-008
+- Added Apple, Google, Web, and unknown store-provider identities.
+- Added purchase and restore boundaries without provider SDK coupling.
+- Added receipt-validation contracts and deterministic local validation cache.
+- Added focused and regression tests.
+- No live billing, receipt networking, secrets, tax engine, or Paywall UI.

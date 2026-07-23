@@ -47,3 +47,6 @@ Completed: referral programs, unique normalized codes, attribution, duplicate/se
 
 ## Commerce state after BIL-COM-007
 Regional pricing and country eligibility are implemented locally. Billing country resolves from store country first, then account country; device country is contextual only. No network pricing, tax, payment, or receipt validation is implemented.
+
+## Commerce state after BIL-COM-008
+Store purchase orchestration and receipt verification now have provider-neutral contracts. Locally cached validation may grant access only when it represents a fresh, valid server result. Unknown, malformed, stale, expired, refunded, or revoked receipts cannot silently grant paid access.

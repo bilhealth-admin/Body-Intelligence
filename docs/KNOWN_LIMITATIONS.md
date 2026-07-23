@@ -33,3 +33,11 @@ No financial payout, creator dashboard, payment processing, network verification
 
 ## BIL-COM-007 limitations
 No live Apple, Google, or Web pricing; no taxes; no server country verification; no final paywall. The local repository contains deterministic policy data only.
+
+## BIL-COM-008 limitations
+- No Apple StoreKit integration.
+- No Google Play Billing integration.
+- No Web/Stripe integration.
+- No remote receipt validation or server signature verification.
+- No tax calculation or payment settlement.
+- Cached validation storage is an in-memory boundary until the persistence/cloud teams provide an approved durable implementation.
