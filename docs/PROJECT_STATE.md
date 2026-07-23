@@ -31,3 +31,6 @@ BIL-AI-002 required a focused R1 because `TruthAssessment.rationale` was declare
 ### BIL-AI-003 corrective status
 
 `BIL-AI-003-R1` resolves the three analyzer findings in `TruthRule` while preserving the typed rule-composition contract and all existing tests. AI-003 remains the active package until R1 verification and commit succeed.
+## BIL-AI-004 State
+
+`BIL-AI-004` extends the explainability boundary without widening the AI platform into recommendation policy. `TruthDecisionExplainer` selects only between caller-supplied candidates when Truth Engine output is supported or contradicted, and safely abstains when the assessment is uncertain or evidence is insufficient. The bridge remains deterministic, offline-only, provider-neutral, clock-free, random-free, and mutation-free.

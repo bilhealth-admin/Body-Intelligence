@@ -2,12 +2,10 @@
 
 ## Active Epic — AI Platform Foundation
 
-`BIL-AI-003` is the current package. It establishes typed propositions and deterministic rule composition over the existing Truth Engine.
+`BIL-AI-004` is the current package. It establishes a deterministic explainability bridge from `TruthAssessment` to `ExplainableAiDecision` using caller-supplied typed candidates and mandatory abstention for unresolved truth.
 
-After `BIL-AI-003` passes and is committed, the next package must extend the explainability boundary using the established Truth Assessment and Explainable AI Decision contracts. It must remain deterministic, offline-first, provider-neutral, and isolated from Body Twin, Decision Memory, AI Coach, prompts, cloud transport, and UI.
+After `BIL-AI-004` passes and is committed, the next package must continue the Truth/Explain foundation from the committed repository state. It must not begin Body Twin, Decision Memory, One Best Action ranking, AI Coach, prompts, provider integration, cloud transport, persistence, or UI unless the living repository documents explicitly authorize that transition.
 
 ## Current Gate
 
-`BIL-AI-003` must pass and be committed before the next AI Platform package is issued.
-
-Current gate: complete and commit `BIL-AI-003-R1`. Do not advance to the next AI Platform package until all R1 verification gates pass.
+`BIL-AI-004` must pass and be committed before the next AI Platform package is issued.

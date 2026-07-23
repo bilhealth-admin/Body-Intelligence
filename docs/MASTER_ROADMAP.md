@@ -29,3 +29,6 @@ Corrected the TruthAssessment constructor contract after focused verification de
 Status: implementation package issued. Adds typed propositions, pure deterministic rules, and stable rule-to-signal composition through the existing Truth Engine.
 
 - `BIL-AI-003-R1`: corrective analyzer cleanup for the typed Truth Rule composition foundation; required before AI-003 closure.
+## BIL-AI-004 — Deterministic Truth-to-Decision Explainability Bridge
+
+Status: implementation package issued. Bridges resolved `TruthAssessment` results into the existing `ExplainableAiDecision` contract using caller-supplied typed candidates. Uncertain and insufficient assessments abstain. No One Best Action policy, provider, prompt, cloud, persistence, UI, or medical inference is introduced.

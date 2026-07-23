@@ -22,3 +22,9 @@ No new functional limitation. This package is a compilation repair only. Truth a
 ### BIL-AI-003-R1
 
 No new functional limitation. This package is a constructor-structure correction only; it adds no provider, cloud, UI, medical inference, or persistence behavior.
+## BIL-AI-004 limitations
+
+- The bridge does not generate candidates; domain packages must provide them explicitly.
+- No One Best Action ranking, Body Twin integration, Decision Memory, AI Coach, prompts, providers, cloud transport, or UI is included.
+- Confidence mapping is a deterministic coarse presentation policy and is not medical or probabilistic calibration.
+- Uncertain and insufficient assessments always abstain.

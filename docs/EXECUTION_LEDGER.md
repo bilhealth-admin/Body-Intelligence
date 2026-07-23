@@ -28,3 +28,10 @@
 ## BIL-AI-003-R1 — Analyzer-conformant TruthRule construction
 
 Corrective package over the applied BIL-AI-003 state. Replaced constructor field assignments with a public validating factory and a private positional initializing constructor. Public call sites and deterministic behavior remain unchanged; the three `prefer_initializing_formals` findings are eliminated without lint suppression.
+## BIL-AI-004 — Deterministic Truth-to-Decision Explainability Bridge
+
+- Parent HEAD: `3660eceea4e981a2c0e5303724cad61dd05525c4`.
+- Team: AI Platform Team.
+- Scope: typed truth decision candidates and deterministic TruthAssessment-to-ExplainableAiDecision bridge.
+- Production mutation outside AI Platform: none.
+- Verification: focused AI-004 tests, complete AI Platform tests, Commerce regression, analyzer, complete project tests, and diff integrity.

@@ -18,3 +18,8 @@ Domain-specific deterministic rules may decide whether an evidence-backed signal
 ## ADR — Validating factories for immutable AI domain contracts
 
 When an immutable AI domain object requires input normalization before field initialization, use a public validating factory delegating to a private initializing constructor. This preserves the public API, keeps validation centralized, and satisfies analyzer constructor-formal rules without ignores.
+## ADR — Truth resolution may feed explainability but not One Best Action policy
+
+A deterministic bridge may translate a resolved `TruthAssessment` into the provider-neutral `ExplainableAiDecision` contract only when the caller supplies the candidate values. Supported and contradicted assessments may select their corresponding candidate; uncertain and insufficient assessments must abstain. The bridge may not invent actions, call providers, access time or randomness, mutate state, or absorb One Best Action policy.
+
+Numeric Truth Engine confidence is mapped to the existing coarse AI confidence levels using explicit local thresholds: high at 0.75 or above, medium at 0.50 or above, otherwise low. This is a presentation boundary, not medical certainty or statistical calibration.
