@@ -3,8 +3,10 @@ import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../database/nutrient_evidence.dart';
 import '../../features/nutrition/adapters/unified_food_adapter.dart';
+import '../../features/nutrition/domain/food_access.dart';
 import '../../features/nutrition/domain/unified_food.dart';
 import '../../features/nutrition/repositories/unified_food_repository.dart';
+import '../../features/nutrition/services/food_access_engine.dart';
 import '../../features/nutrition/services/food_deduplication_engine.dart';
 import '../../features/nutrition/services/food_foundation_integrity_engine.dart';
 import '../../features/nutrition/services/food_migration_engine.dart';
@@ -18,6 +20,7 @@ class FoodRepository implements UnifiedFoodRepository {
   final UnifiedFoodAdapter _adapter;
   final OfflineFoodSearchPipeline _searchPipeline;
   final OfflineBarcodeResolver _barcodeResolver;
+  final FoodAccessEngine _foodAccessEngine;
 
   FoodRepository(
     this._database, {
@@ -25,9 +28,11 @@ class FoodRepository implements UnifiedFoodRepository {
     OfflineFoodSearchPipeline searchPipeline =
         const OfflineFoodSearchPipeline(),
     OfflineBarcodeResolver barcodeResolver = const OfflineBarcodeResolver(),
+    FoodAccessEngine foodAccessEngine = const FoodAccessEngine(),
   }) : _adapter = adapter,
        _searchPipeline = searchPipeline,
-       _barcodeResolver = barcodeResolver;
+       _barcodeResolver = barcodeResolver,
+       _foodAccessEngine = foodAccessEngine;
 
   Future<int> addFood({
     required String name,
@@ -419,6 +424,31 @@ class FoodRepository implements UnifiedFoodRepository {
     });
 
     return List<Food>.unmodifiable(ranked.take(limit));
+  }
+
+  Future<List<FoodAccessCandidate>> foodAccessCandidates({
+    String query = '',
+    int limit = 20,
+  }) async {
+    if (limit <= 0) return const <FoodAccessCandidate>[];
+    final foods = await getFoods();
+    final favoriteRows = await _database.select(_database.favorites).get();
+    final recentRows = await _database.select(_database.recentFoods).get();
+    final favoriteIds = favoriteRows.map((row) => row.foodId).toSet();
+    final recentsByFoodId = {for (final row in recentRows) row.foodId: row};
+    return _foodAccessEngine.rank(
+      foods.map((food) {
+        final recent = recentsByFoodId[food.id];
+        return FoodAccessRecord(
+          food: _adapter.adapt(food),
+          favorite: favoriteIds.contains(food.id),
+          useCount: recent?.useCount ?? 0,
+          lastUsedAt: recent?.lastUsedAt,
+        );
+      }),
+      query: query,
+      limit: limit,
+    );
   }
 
   Future<void> setFavorite(int foodId, bool favorite) async {

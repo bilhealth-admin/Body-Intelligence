@@ -2,10 +2,13 @@ import 'package:drift/drift.dart';
 
 import '../database/app_database.dart';
 import '../database/date_keys.dart';
+import '../database/nutrient_evidence.dart';
 import '../../features/nutrition/adapters/unified_food_adapter.dart';
+import '../../features/nutrition/domain/daily_nutrition_intelligence.dart';
 import '../../features/nutrition/domain/meal_builder.dart';
 import '../../features/nutrition/domain/meal_template.dart';
 import '../../features/nutrition/domain/unified_food.dart';
+import '../../features/nutrition/services/daily_nutrition_intelligence_engine.dart';
 import '../../features/nutrition/services/meal_builder_engine.dart';
 import '../../features/nutrition/services/meal_template_engine.dart';
 import '../../features/nutrition/services/nutrition_calculation_engine.dart';
@@ -16,6 +19,7 @@ class MealRepository {
   final NutritionCalculationEngine _nutritionEngine;
   final MealTemplateEngine _mealTemplateEngine;
   final MealBuilderEngine _mealBuilderEngine;
+  final DailyNutritionIntelligenceEngine _dailyNutritionEngine;
 
   MealRepository(
     this._database, {
@@ -24,10 +28,13 @@ class MealRepository {
         const NutritionCalculationEngine(),
     MealTemplateEngine mealTemplateEngine = const MealTemplateEngine(),
     MealBuilderEngine mealBuilderEngine = const MealBuilderEngine(),
+    DailyNutritionIntelligenceEngine dailyNutritionEngine =
+        const DailyNutritionIntelligenceEngine(),
   }) : _foodAdapter = foodAdapter,
        _nutritionEngine = nutritionEngine,
        _mealTemplateEngine = mealTemplateEngine,
-       _mealBuilderEngine = mealBuilderEngine;
+       _mealBuilderEngine = mealBuilderEngine,
+       _dailyNutritionEngine = dailyNutritionEngine;
 
   Future<int> createMeal({
     required DateTime date,
@@ -554,6 +561,142 @@ class MealRepository {
             );
       }
     });
+  }
+
+  Future<int> copyDay({
+    required DateTime sourceDate,
+    required DateTime destinationDate,
+  }) async {
+    final sourceKey = dayKeyFor(sourceDate);
+    final destinationKey = dayKeyFor(destinationDate);
+    if (sourceKey == destinationKey) {
+      throw ArgumentError('Source and destination days must be different.');
+    }
+
+    return _database.transaction(() async {
+      final existingDestination =
+          await (_database.select(_database.meals)..where(
+                (row) =>
+                    row.dayKey.equals(destinationKey) & row.deletedAt.isNull(),
+              ))
+              .get();
+      if (existingDestination.isNotEmpty) {
+        throw StateError('Destination day already contains meals.');
+      }
+
+      final sourceMeals =
+          await (_database.select(_database.meals)
+                ..where(
+                  (row) =>
+                      row.dayKey.equals(sourceKey) & row.deletedAt.isNull(),
+                )
+                ..orderBy([
+                  (row) => OrderingTerm.asc(row.date),
+                  (row) => OrderingTerm.asc(row.id),
+                ]))
+              .get();
+      var copied = 0;
+      for (final sourceMeal in sourceMeals) {
+        final destinationMealId = await _database
+            .into(_database.meals)
+            .insert(
+              MealsCompanion.insert(
+                date: destinationDate,
+                dayKey: destinationKey,
+                name: Value(sourceMeal.name),
+                type: Value(sourceMeal.type),
+              ),
+            );
+        final sourceItems =
+            await (_database.select(_database.mealItems)
+                  ..where(
+                    (item) =>
+                        item.mealId.equals(sourceMeal.id) &
+                        item.deletedAt.isNull(),
+                  )
+                  ..orderBy([
+                    (item) => OrderingTerm.asc(item.position),
+                    (item) => OrderingTerm.asc(item.id),
+                  ]))
+                .get();
+        for (final item in sourceItems) {
+          await _activeFood(item.foodId);
+          await _database
+              .into(_database.mealItems)
+              .insert(
+                MealItemsCompanion.insert(
+                  mealId: destinationMealId,
+                  foodId: item.foodId,
+                  quantity: Value(item.quantity),
+                  position: Value(item.position),
+                  calories: Value(item.calories),
+                  protein: Value(item.protein),
+                  carbs: Value(item.carbs),
+                  fats: Value(item.fats),
+                  fiber: Value(item.fiber),
+                  sodium: Value(item.sodium),
+                  potassium: Value(item.potassium),
+                  calcium: Value(item.calcium),
+                  magnesium: Value(item.magnesium),
+                  sugar: Value(item.sugar),
+                  nutrientEvidenceMask: Value(item.nutrientEvidenceMask),
+                ),
+              );
+        }
+        copied++;
+      }
+      return copied;
+    });
+  }
+
+  Future<DailyNutritionReport> analyzeDay({
+    required DateTime date,
+    required int waterMl,
+    required DailyNutritionTargets targets,
+  }) async {
+    final key = dayKeyFor(date);
+    final meals = await (_database.select(
+      _database.meals,
+    )..where((row) => row.dayKey.equals(key) & row.deletedAt.isNull())).get();
+    final snapshots = <DailyNutritionItemSnapshot>[];
+    for (final meal in meals) {
+      final items =
+          await (_database.select(_database.mealItems)..where(
+                (item) => item.mealId.equals(meal.id) & item.deletedAt.isNull(),
+              ))
+              .get();
+      for (final item in items) {
+        snapshots.add(
+          DailyNutritionItemSnapshot(
+            calories: item.calories,
+            protein: item.protein,
+            carbohydrates: item.carbs,
+            fat: item.fats,
+            fiber: item.fiber,
+            sodium: item.sodium,
+            potassium: item.potassium,
+            fiberKnown: NutrientEvidenceMask.contains(
+              item.nutrientEvidenceMask,
+              TrackedNutrient.fiber,
+            ),
+            sodiumKnown: NutrientEvidenceMask.contains(
+              item.nutrientEvidenceMask,
+              TrackedNutrient.sodium,
+            ),
+            potassiumKnown: NutrientEvidenceMask.contains(
+              item.nutrientEvidenceMask,
+              TrackedNutrient.potassium,
+            ),
+          ),
+        );
+      }
+    }
+    return _dailyNutritionEngine.analyze(
+      items: snapshots,
+      mealCount: meals.length,
+      waterMl: waterMl,
+      targets: targets,
+    );
   }
 
   Future<Map<int, Food>> _foodsForItems(List<MealItem> items) async {
