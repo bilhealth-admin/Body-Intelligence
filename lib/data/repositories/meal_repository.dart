@@ -3,21 +3,26 @@ import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../database/date_keys.dart';
 import '../../features/nutrition/adapters/unified_food_adapter.dart';
+import '../../features/nutrition/domain/meal_template.dart';
 import '../../features/nutrition/domain/unified_food.dart';
+import '../../features/nutrition/services/meal_template_engine.dart';
 import '../../features/nutrition/services/nutrition_calculation_engine.dart';
 
 class MealRepository {
   final AppDatabase _database;
   final UnifiedFoodAdapter _foodAdapter;
   final NutritionCalculationEngine _nutritionEngine;
+  final MealTemplateEngine _mealTemplateEngine;
 
   MealRepository(
     this._database, {
     UnifiedFoodAdapter foodAdapter = const UnifiedFoodAdapter(),
     NutritionCalculationEngine nutritionEngine =
         const NutritionCalculationEngine(),
+    MealTemplateEngine mealTemplateEngine = const MealTemplateEngine(),
   }) : _foodAdapter = foodAdapter,
-       _nutritionEngine = nutritionEngine;
+       _nutritionEngine = nutritionEngine,
+       _mealTemplateEngine = mealTemplateEngine;
 
   Future<int> createMeal({
     required DateTime date,
@@ -384,6 +389,73 @@ class MealRepository {
                 : b.source.meal.date.compareTo(a.source.meal.date);
           });
     return candidates.take(3).toList(growable: false);
+  }
+
+  MealTemplate createTemplateFromHistoricalMeal({
+    required MealWithItems meal,
+    required String templateId,
+    required String templateName,
+    DateTime? createdAt,
+  }) {
+    return _mealTemplateEngine.fromHistoricalMeal(
+      meal: meal.meal,
+      items: meal.items,
+      templateId: templateId,
+      templateName: templateName,
+      createdAt: createdAt,
+    );
+  }
+
+  Future<int> instantiateTemplate({
+    required MealTemplate template,
+    required DateTime date,
+  }) async {
+    _mealTemplateEngine.validateForInstantiation(template);
+    return _database.transaction(() async {
+      final mealId = await createMeal(
+        date: date,
+        name: template.name,
+        type: template.mealType,
+      );
+      final existingItems =
+          await (_database.select(_database.mealItems)..where(
+                (item) => item.mealId.equals(mealId) & item.deletedAt.isNull(),
+              ))
+              .get();
+      if (existingItems.isNotEmpty) {
+        throw StateError(
+          'Cannot instantiate a template into a meal that already has items',
+        );
+      }
+
+      final ordered = List<MealTemplateItem>.from(template.items)
+        ..sort((left, right) => left.position.compareTo(right.position));
+      for (final item in ordered) {
+        await _activeFood(item.foodId);
+        await _database
+            .into(_database.mealItems)
+            .insert(
+              MealItemsCompanion.insert(
+                mealId: mealId,
+                foodId: item.foodId,
+                quantity: Value(item.quantityGrams),
+                position: Value(item.position),
+                calories: Value(item.calories),
+                protein: Value(item.protein),
+                carbs: Value(item.carbohydrates),
+                fats: Value(item.fat),
+                fiber: Value(item.fiber),
+                sodium: Value(item.sodium),
+                potassium: Value(item.potassium),
+                calcium: Value(item.calcium),
+                magnesium: Value(item.magnesium),
+                sugar: Value(item.sugar),
+                nutrientEvidenceMask: Value(item.nutrientEvidenceMask),
+              ),
+            );
+      }
+      return mealId;
+    });
   }
 
   Future<void> repeatMeal({
