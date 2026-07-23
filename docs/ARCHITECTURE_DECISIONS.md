@@ -40,3 +40,31 @@
 
 - No store SDK dependency enters the domain layer.
 - Future persistence or streaming behavior can be introduced behind the repository contract in a later package.
+
+## ADR-COM-004 — Keep paid catalog metadata non-authoritative
+
+**Status:** Accepted in `BIL-COM-002`.
+
+**Decision:** Paid-plan catalog entries describe hierarchy and capability composition but cannot produce or mutate `SubscriptionState`.
+
+**Why:** Catalog presence, labels, and planned benefits are not proof of purchase or server verification.
+
+**Consequences:**
+
+- Runtime consumers continue to authorize exclusively through `SubscriptionState.grants`.
+- The catalog may be used by future paywalls and product-policy surfaces only as descriptive metadata.
+- Store availability, price, purchase state, and verification remain separate concerns.
+
+## ADR-COM-005 — Compose entitlements through explicit plan inheritance
+
+**Status:** Accepted in `BIL-COM-002`.
+
+**Decision:** Each paid plan records only parent plans and newly added entitlements. Effective catalog capabilities are resolved recursively from the canonical Free foundation.
+
+**Why:** This prevents copied entitlement lists, drift between tiers, and accidental regression of lower-tier capabilities.
+
+**Consequences:**
+
+- Plus inherits Free; Pro inherits Plus; Elite inherits Pro.
+- Coach and Clinic inherit Pro; Enterprise composes Coach and Clinic and adds enterprise administration.
+- Cycles are rejected during composition.

@@ -1,19 +1,22 @@
 # BIL Known Limitations
 
-## Commerce limitations after BIL-COM-001-R1
+## Commerce limitations after BIL-COM-002
 
-- Only the Free plan has an active entitlement definition.
-- Paid plan enum values are identifiers only; they do not grant capabilities.
-- No product catalog, price, currency, region, trial, discount, or billing-period model exists.
-- No store SDK, purchase flow, receipt validation, restore flow, server verification, or entitlement synchronization exists.
-- No subscription persistence or lifecycle events exist.
+- Paid-plan catalog entries are descriptive metadata only and do not grant access.
+- No product identifiers, prices, currencies, regions, billing periods, trials, discounts, or tax models exist.
+- No subscription lifecycle state or transition model exists yet.
+- No store SDK, purchase flow, receipt validation, restore flow, server verification, entitlement synchronization, or persistence exists.
 - No paywall, account subscription screen, or revenue dashboard exists.
-- Commerce remains unavailable through the baseline external-capability policy.
+- Commerce remains unavailable through the external-capability policy.
+
+## Product-definition limitation
+
+Elite currently inherits the Pro catalog capabilities without an Elite-only entitlement. Introducing one requires an explicit product decision and coordination with the owning product team; this package does not invent capability semantics.
 
 ## Safety limitation
 
-`EntitlementAuthority.verifiedServer` is reserved vocabulary only in this package. No implementation may claim verified authority until a later package provides an authenticated and tested verification path.
+`PaidPlanCatalog.composedEntitlementsFor` is not an authorization API. Runtime access must continue to come from a trusted `SubscriptionState` supplied through `EntitlementRepository`.
 
 ## Operational limitation
 
-The package includes executable verification commands, but their results are not claimed in advance. The Product Owner must run the supplied gates after applying the package.
+Verification commands are provided but results are not claimed in advance. The Product Owner must run all supplied gates after application.
