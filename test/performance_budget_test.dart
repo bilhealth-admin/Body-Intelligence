@@ -86,9 +86,10 @@ void main() {
       });
 
       final repository = FoodRepository(database);
-      final preferredId = (await repository.search(
-        'Preferred target food',
-      )).single.id;
+      final preferredMatches = await repository.search('Preferred target food');
+      final preferredId = preferredMatches
+          .firstWhere((food) => food.name == 'Preferred target food')
+          .id;
       await repository.recordRecent(preferredId);
       await repository.recordRecent(preferredId);
       await repository.setFavorite(preferredId, true);

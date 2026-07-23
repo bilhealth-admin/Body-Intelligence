@@ -1,5 +1,14 @@
 # Roadmap and activation blockers
 
+## Product Excellence program status
+
+- Branch: `phase-3-product-excellence`
+- Reconciled baseline: `7071621`
+- Phase 3 Product Excellence: **complete**, subject to the Phase 3 Ledger Reconciliation package full verification and Product Owner commit.
+- Epics 1–8: **complete** in `docs/phase_3_execution_ledger.md`.
+- No stale ledger item authorizes reimplementation of accepted production behavior.
+- The remaining items below are activation/release blockers, not unfinished Phase 3 production Epics.
+
 The offline/local product is the active implementation. The following
 capabilities require external infrastructure and must remain disabled until the
 whole activation checklist is satisfied:
