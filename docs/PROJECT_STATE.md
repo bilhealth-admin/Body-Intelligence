@@ -1,15 +1,21 @@
-# BIL Project State — AI Platform
+# BIL Project State
+
+## Baseline for this package
 
 - Branch: `phase-3-product-excellence`
-- Parent HEAD: `c3676c28c88c8bbaa46e1b1d4d9038ef368aad03`
-- Package: `BIL-AI-001`
-- Team: AI Platform Team
-- Active scope: Explainable decision contract foundation.
+- Parent HEAD: `54cf1fb27907b438e4ca16122a41c2bf923114b0`
 
-## Current state
+## AI Platform
 
-Commerce is complete and frozen as Non-Regression. AI Platform execution has started with pure Dart domain contracts only. BIL deterministic engines remain the source of truth; later AI layers may explain or present their outputs but may not replace them.
+- `BIL-AI-001`: complete and Non-Regression.
+- `BIL-AI-002`: implemented pending Product Owner verification and commit.
 
-## Package state
+The AI layer now has immutable explainable-decision contracts plus a deterministic, offline-only Truth Engine assessment foundation. No cloud/provider integration or medical inference has been introduced.
 
-`BIL-AI-001` is ready for Product Owner application and verification. Completion requires focused AI tests, AI regression tests, all Commerce tests, `flutter analyze`, the complete test suite, and `git diff --check`.
+## Protected systems
+
+Nutrition, Explainable Nutrition, Daily Log, Dashboard, Commerce, Offline First, and Privacy First remain protected by full-project and targeted regression gates.
+
+
+## BIL-AI-002-R1 State
+BIL-AI-002 required a focused R1 because `TruthAssessment.rationale` was declared as an initializing formal and also normalized in the initializer list. R1 preserves normalization by accepting a constructor parameter and assigning the validated value once.

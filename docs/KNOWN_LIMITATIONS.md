@@ -1,17 +1,13 @@
-# BIL Known Limitations — AI Platform Foundation
+# BIL Known Limitations
 
-`BIL-AI-001` intentionally does not provide:
+## AI Platform after BIL-AI-002
 
-- model-provider integration;
-- prompt execution or prompt storage;
-- natural-language generation;
-- Truth Engine rules;
-- Body Twin calculations;
-- One Best Action ranking;
-- Decision Memory persistence;
-- AI Coach UI;
-- cloud transport;
-- medical diagnosis or treatment advice;
-- calibrated numeric confidence.
+- Truth signals are contracts; no production domain engine emits them yet.
+- Thresholds are deterministic defaults and are not a medical calibration policy.
+- Confidence represents evidence reliability coverage, not medical certainty or statistical probability.
+- No Body Twin, Decision Memory, One Best Action, provider, prompt, cloud, UI, or persistence integration exists.
+- The engine does not diagnose, prescribe, or mutate health state.
 
-Confidence remains a coarse explanatory level until a deterministic calibration policy is implemented and verified.
+
+## BIL-AI-002-R1
+No new functional limitation. This package is a compilation repair only. Truth assessments remain deterministic, offline, provider-neutral, and non-medical.

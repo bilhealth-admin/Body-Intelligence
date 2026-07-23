@@ -1,4 +1,4 @@
-# BIL Master Roadmap — AI Platform Activation
+# BIL Master Roadmap — AI Platform
 
 ## Completed Epics
 
@@ -6,20 +6,19 @@
 
 Commerce Packages through `BIL-COM-010-R1` are complete and protected as Non-Regression.
 
-## Active Epic — AI Platform
+## Active Epic — AI Platform Foundation
 
-The AI Platform begins with deterministic, provider-neutral contracts. The execution order starts with the explainable decision foundation before any provider, prompt, coach, memory, or cloud integration.
+### Completed
 
-### BIL-AI-001 — Explainable Decision Contract Foundation
+- `BIL-AI-001` — Explainable Decision Contract Foundation.
+- `BIL-AI-002` — Deterministic Truth Assessment Foundation.
 
-Establish the immutable contract every later AI component must satisfy:
+`BIL-AI-002` introduces provider-neutral truth signals, immutable assessment results, and a transparent deterministic evaluator. It adds no provider, prompt, UI, network, persistence, medical diagnosis, or user-state mutation.
 
-- one selected action or explicit abstention;
-- deterministic BIL-owned evidence;
-- rationale;
-- confidence;
-- alternatives;
-- missing-evidence disclosure;
-- offline-first and provider-neutral boundaries.
+### Remaining AI Platform sequence
 
-No model provider, network transport, prompt execution, medical inference, or mutation is introduced in this package.
+Truth Engine composition must continue before Explain Engine, Body Twin, Decision Memory, One Best Action, AI Coach, context, safety, cost optimization, or prompt/provider integration.
+
+
+## BIL-AI-002-R1
+Corrected the TruthAssessment constructor contract after focused verification detected duplicate initialization of `rationale`. Scope remains the deterministic Truth Engine foundation; no new capability was added.

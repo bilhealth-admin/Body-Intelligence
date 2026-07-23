@@ -1,21 +1,11 @@
-# BIL Architecture Decisions — BIL-AI-001
+# BIL Architecture Decisions
 
-## ADR-AI-001-01 — Deterministic engines remain authoritative
+## ADR — Truth Engine starts as deterministic arithmetic
 
-AI contracts cite evidence produced by BIL-owned deterministic engines. No AI provider output becomes a source of health truth.
+The initial Truth Engine evaluates BIL-owned signals using explicit strength and reliability values. Inputs are sorted by stable keys, duplicate keys are rejected, and outputs expose normalized score, confidence, rationale, evidence, and missing evidence.
 
-## ADR-AI-001-02 — Explainability is structural
+This boundary is deliberately provider-neutral, offline-first, clock-free, random-free, and mutation-free. Later packages may compose domain-specific signals, but must not replace deterministic BIL truth with opaque model output.
 
-Rationale, evidence, confidence, alternatives, and missing evidence are first-class fields rather than optional presentation text.
 
-## ADR-AI-001-03 — Safe abstention is mandatory
-
-When evidence is insufficient, the contract carries no action and must identify the missing evidence. Invented recommendations are invalid.
-
-## ADR-AI-001-04 — Provider neutrality and offline-first foundation
-
-The first AI package is pure Dart and contains no network, provider SDK, cloud, storage, or Commerce dependency.
-
-## ADR-AI-001-05 — One action per decision envelope
-
-An action decision contains exactly one typed value. Alternatives are explanatory records and cannot become simultaneous recommendations.
+## ADR — Validated immutable constructor inputs
+Immutable AI domain models that normalize constructor text must accept a plain parameter and assign the normalized value exactly once in the initializer list. Initializing formals must not be combined with a second initializer for the same field.

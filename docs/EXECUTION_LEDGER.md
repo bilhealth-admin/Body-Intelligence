@@ -1,9 +1,18 @@
-# BIL Execution Ledger — AI Platform
+# BIL Execution Ledger
 
-| Package | Parent HEAD | Team | Scope | Status | Verification |
-|---|---|---|---|---|---|
-| BIL-AI-001 | `c3676c28c88c8bbaa46e1b1d4d9038ef368aad03` | AI Platform Team | Explainable, immutable, offline-first decision and evidence contracts. | Ready for Product Owner verification | Focused AI tests, AI regression tests, Commerce regression, analyzer, full tests, and `git diff --check`. |
+## BIL-AI-002 — Deterministic Truth Assessment Foundation
 
-## Non-Regression boundary
+- Parent HEAD: `54cf1fb27907b438e4ca16122a41c2bf923114b0`
+- Team: AI Platform Team
+- Scope: deterministic truth signal, assessment, and evaluator contracts.
+- Production mutation outside AI Platform: none.
+- Provider/network/prompt integration: none.
+- Verification: focused Truth Engine tests, AI regression tests, Commerce regression, analyzer, complete project tests, and diff integrity.
+- Status: delivered; awaiting Product Owner verification and commit.
 
-The package does not modify Nutrition, Daily Log, Dashboard, Commerce, repositories, databases, navigation, startup, or platform integrations.
+
+## BIL-AI-002-R1
+- Parent HEAD: `54cf1fb27907b438e4ca16122a41c2bf923114b0`
+- Trigger: focused Truth Engine compilation failure.
+- Fix: replace duplicate `this.rationale` initialization with a validated `String rationale` parameter.
+- Verification: focused AI tests, AI regression, Commerce regression, analyze, full tests, and diff integrity.
