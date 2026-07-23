@@ -38,3 +38,11 @@ Conflict analysis consumes existing `TruthSignal` values and explains disagreeme
 
 ## AI-006-R1 — Test follows engine contract
 Regression fixtures must encode the existing Truth Engine arithmetic and thresholds; verification failures must not be resolved by changing production semantics when the fixture is incorrect.
+
+
+## ADR — Truth evaluation report is the composition explainability boundary
+
+`TruthEvaluationReport` is the provider-neutral bundle for one proposition evaluation. It joins existing outputs rather than duplicating policy. `TruthRuleComposer.report` is the canonical full-output path; legacy `assess` and `trace` remain compatibility projections. The report performs no action ranking, storage, networking, clock access, randomness, or mutation.
+
+## BIL-AI-007-R1
+Corrected AI-007 test fixtures to provide the required local evidence `source`; production contracts and behavior are unchanged.

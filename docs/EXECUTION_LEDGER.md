@@ -64,3 +64,14 @@ Corrective package over the applied BIL-AI-003 state. Replaced constructor field
 - Corrected the conflict-analysis non-regression test expectation from `supported` to `uncertain`.
 - Reason: Truth Engine computes `(0.8 - 0.2) / 2.0 = 0.3`, below the existing `0.35` support threshold.
 - Production changes: none.
+
+
+## BIL-AI-007 — issued
+
+- Parent HEAD: `0afa164fce065c07ac3d85d89a6350a2271f1bcc`.
+- Added an immutable explainability report combining trace, assessment, and conflict analysis.
+- Refactored rule composition to evaluate rules once per requested output.
+- Added focused and regression coverage for determinism and API preservation.
+
+## BIL-AI-007-R1
+Corrected AI-007 test fixtures to provide the required local evidence `source`; production contracts and behavior are unchanged.

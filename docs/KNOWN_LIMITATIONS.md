@@ -44,3 +44,13 @@ Wall-clock tests can still reflect sustained machine contention. `BIL-QUALITY-00
 
 ## Resolved by BIL-AI-006-R1
 The original AI-006 regression fixture incorrectly expected `supported` for score `0.300`. R1 aligns the test with the established threshold without altering production.
+
+
+## BIL-AI-007 limitations
+
+- The report explains one deterministic proposition evaluation only.
+- It does not rank actions or create recommendations.
+- It has no persistence, provider, prompt, network, cloud, clock, randomness, UI, or medical inference integration.
+
+## BIL-AI-007-R1
+Corrected AI-007 test fixtures to provide the required local evidence `source`; production contracts and behavior are unchanged.

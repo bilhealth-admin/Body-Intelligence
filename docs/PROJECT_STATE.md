@@ -49,3 +49,11 @@ Parent HEAD: `12250f2f2ac6d7e18993bc32614aee45b25b4be6`. AI-006 adds determinist
 
 ## AI-006 verification state
 BIL-AI-006-R1 corrects a test-only expectation: a normalized score of `0.300` remains `uncertain` under the established `0.350` support threshold. Production is unchanged.
+
+
+## BIL-AI-007 State
+
+Parent HEAD: `0afa164fce065c07ac3d85d89a6350a2271f1bcc`. AI-007 adds `TruthEvaluationReport` and a backwards-compatible `TruthRuleComposer.report` API. Existing `assess` and `trace` contracts remain available and derive from the same deterministic evaluation pipeline.
+
+## BIL-AI-007-R1
+Corrected AI-007 test fixtures to provide the required local evidence `source`; production contracts and behavior are unchanged.

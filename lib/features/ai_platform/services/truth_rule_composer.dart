@@ -1,8 +1,10 @@
 import '../domain/truth_assessment.dart';
+import '../domain/truth_evaluation_report.dart';
 import '../domain/truth_evaluation_trace.dart';
 import '../domain/truth_proposition.dart';
 import '../domain/truth_rule.dart';
 import '../domain/truth_signal.dart';
+import 'truth_conflict_analyzer.dart';
 import 'truth_engine.dart';
 
 /// Composes typed deterministic rules into the existing Truth Engine boundary.
@@ -10,16 +12,20 @@ import 'truth_engine.dart';
 /// Composition is stable by rule key, rejects duplicate rules, and reports
 /// proposition evidence requirements that were not satisfied by matched rules.
 final class TruthRuleComposer {
-  const TruthRuleComposer({this.truthEngine = const TruthEngine()});
+  const TruthRuleComposer({
+    this.truthEngine = const TruthEngine(),
+    this.conflictAnalyzer = const TruthConflictAnalyzer(),
+  });
 
   final TruthEngine truthEngine;
+  final TruthConflictAnalyzer conflictAnalyzer;
 
   TruthAssessment assess<T>({
     required TruthProposition<T> proposition,
     required T context,
     required Iterable<TruthRule<T>> rules,
   }) {
-    return trace(
+    return report(
       proposition: proposition,
       context: context,
       rules: rules,
@@ -27,6 +33,18 @@ final class TruthRuleComposer {
   }
 
   TruthEvaluationTrace trace<T>({
+    required TruthProposition<T> proposition,
+    required T context,
+    required Iterable<TruthRule<T>> rules,
+  }) {
+    return report(
+      proposition: proposition,
+      context: context,
+      rules: rules,
+    ).trace;
+  }
+
+  TruthEvaluationReport report<T>({
     required TruthProposition<T> proposition,
     required T context,
     required Iterable<TruthRule<T>> rules,
@@ -60,12 +78,16 @@ final class TruthRuleComposer {
       signals: signals,
       missingEvidence: missingEvidence,
     );
-
-    return TruthEvaluationTrace(
+    final trace = TruthEvaluationTrace(
       propositionKey: proposition.key,
       consideredRuleKeys: orderedRules.map((rule) => rule.key),
       matchedRuleKeys: matchedRuleKeys,
       assessment: assessment,
+    );
+
+    return TruthEvaluationReport(
+      trace: trace,
+      conflict: conflictAnalyzer.analyze(signals: signals),
     );
   }
 

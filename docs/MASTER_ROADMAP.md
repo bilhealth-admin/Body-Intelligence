@@ -50,3 +50,11 @@ Status: implementation package issued. Adds immutable, provider-neutral analysis
 ## BIL-AI-006-R1 — Verification correction
 - Corrected the AI-006 regression fixture to match the existing Truth Engine threshold semantics.
 - No production behavior, threshold, or public contract changed.
+
+
+## BIL-AI-007 — Deterministic Truth Evaluation Report Foundation
+
+Status: implementation package issued. Adds one immutable report that joins the existing evaluation trace, Truth Engine assessment, and conflict analysis from a single deterministic rule pass. No recommendation ranking, provider, prompt, cloud, persistence, UI, or medical inference is introduced.
+
+## BIL-AI-007-R1
+Corrected AI-007 test fixtures to provide the required local evidence `source`; production contracts and behavior are unchanged.
