@@ -1,3 +1,4 @@
+import 'food_image.dart';
 import '../../../data/database/nutrient_evidence.dart';
 
 enum FoodDataSource { foundation, legacy, branded, custom, unknown }
@@ -54,6 +55,7 @@ class UnifiedFood {
   final bool verified;
   final bool isCustom;
   final DateTime? updatedAt;
+  final List<FoodImageReference> images;
 
   const UnifiedFood({
     required this.id,
@@ -70,6 +72,7 @@ class UnifiedFood {
     required this.verified,
     required this.isCustom,
     this.updatedAt,
+    this.images = const <FoodImageReference>[],
   });
 
   NutrientAmount nutrient(FoodNutrient nutrient) =>

@@ -1,3 +1,4 @@
+import '../../domain/food_image.dart';
 import '../../domain/unified_food.dart';
 
 class OpenFoodFactsMapper {
@@ -60,7 +61,38 @@ class OpenFoodFactsMapper {
       sourceLabel: 'openfoodfacts',
       verified: false,
       isCustom: false,
+      images: _images(barcode, product),
     );
+  }
+
+  List<FoodImageReference> _images(
+    String barcode,
+    Map<String, Object?> product,
+  ) {
+    final specs = <(String, FoodImageRole, bool)>[
+      ('image_front_url', FoodImageRole.front, true),
+      ('image_url', FoodImageRole.front, false),
+      ('image_nutrition_url', FoodImageRole.nutrition, false),
+      ('image_ingredients_url', FoodImageRole.ingredients, false),
+    ];
+    final images = <FoodImageReference>[];
+    final seen = <String>{};
+    for (final spec in specs) {
+      final raw = _string(product[spec.$1]);
+      final uri = raw == null ? null : Uri.tryParse(raw);
+      if (uri == null || !uri.hasScheme || !seen.add(uri.toString())) continue;
+      images.add(
+        FoodImageReference(
+          id: 'openfoodfacts:$barcode:${spec.$1}',
+          uri: uri,
+          role: spec.$2,
+          source: FoodImageSource.openFoodFacts,
+          attribution: 'OpenFoodFacts',
+          isPrimary: spec.$3,
+        ),
+      );
+    }
+    return List<FoodImageReference>.unmodifiable(images);
   }
 
   NutrientAmount _amount(
