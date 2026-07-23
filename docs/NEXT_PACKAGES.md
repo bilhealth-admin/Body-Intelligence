@@ -2,15 +2,6 @@
 
 ## Active Epic — AI Platform Foundation
 
-`BIL-AI-013` is the current package. It composes the established deterministic Truth/Explain boundaries into one validated local pipeline without adding policy.
+`BIL-AI-015` is the active package. It must pass and be committed before another AI package is issued. It completes the single trusted local orchestration boundary over the established Truth/Explain foundation.
 
-After AI-013 passes and is committed, the next package must continue the Truth/Explain foundation from the committed repository state. Body Twin, Decision Memory, One Best Action ranking, AI Coach, prompts, providers, cloud, persistence, and UI remain unauthorized unless living documents explicitly authorize transition.
-
-## Current Gate
-
-`BIL-AI-013` must pass and be committed before the next AI package is issued.
-
-
-## After BIL-AI-014
-
-`BIL-AI-014` is the active package. It must pass and be committed before another AI package is issued. The next package must continue the repository-authorized Truth/Explain foundation; Body Twin, Decision Memory, One Best Action ranking, AI Coach, prompts, providers, cloud, persistence, and UI remain unauthorized unless living documents explicitly authorize transition.
+After AI-015, living documents must be reconciled against the committed repository before authorizing transition to Body Twin, Decision Memory, One Best Action, AI Coach, prompts/providers, cloud, persistence, or UI. No transition is authorized by this package itself.

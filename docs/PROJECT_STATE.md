@@ -101,3 +101,7 @@ Parent HEAD: `bbd0f86512658f21b68ccae77d78d4c87dd5d1f0`. AI-013 adds a thin dete
 ## BIL-AI-014 State
 
 Parent HEAD: `3419142b5be77f1e7a7ed24516461c13e8886817`. AI-014 adds a pure validator and immutable gate over the trusted AI-013 pipeline result. The original pipeline result remains inspectable, while downstream consumption is allowed only when report provenance and exposure invariants remain valid.
+
+## BIL-AI-015 State
+
+Parent HEAD: `022911ef3524eda159203be6c1294bb5ff7c009d`. AI-015 adds `TrustedTruthDecisionPipeline` and `TrustedTruthDecisionResult` as a thin final consumption boundary over AI-013 and AI-014. Existing engines and gates remain independently usable and unchanged.

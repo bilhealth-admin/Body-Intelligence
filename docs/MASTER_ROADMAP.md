@@ -101,3 +101,7 @@ Status: implementation package issued. Adds one pure local orchestration boundar
 ## BIL-AI-014 — Trusted Truth Pipeline Integrity Gate Foundation
 
 Status: implementation package issued. Adds deterministic validation and an explicit consumption gate over the AI-013 pipeline envelope. It verifies exact report provenance and safe exposure invariants without adding ranking, Body Twin, Decision Memory, provider, prompt, cloud, persistence, UI, or medical inference.
+
+## BIL-AI-015 — Trusted Truth Decision Orchestrator Foundation
+
+Status: implementation package issued. Adds one final local orchestration boundary over the established AI-013 pipeline and AI-014 integrity gate. It exposes a decision only after every existing Truth/Explain validation boundary accepts the same immutable pipeline result. No ranking, Body Twin, Decision Memory, provider, prompt, cloud, persistence, UI, or medical inference is introduced.

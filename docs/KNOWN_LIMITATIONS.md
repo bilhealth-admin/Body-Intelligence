@@ -109,3 +109,9 @@ The pipeline accepts caller-owned supported and contradicted candidates but does
 - Validates pipeline-envelope provenance and exposure invariants only.
 - Does not rank candidates, model a user, persist decisions, call providers, or introduce recommendation policy.
 - Uses object identity for report provenance because AI-013 intentionally preserves one immutable report instance through all gates.
+
+## BIL-AI-015 limitations
+
+- The trusted orchestrator composes existing local contracts only; it does not rank actions or introduce product policy.
+- No production feature currently supplies real user-domain Truth rules to this boundary.
+- Body Twin, Decision Memory, One Best Action, AI Coach, providers, prompts, cloud, persistence, and UI remain outside scope.

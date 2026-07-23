@@ -90,3 +90,7 @@ AI-013 introduces a thin orchestration service rather than merging existing engi
 ## ADR — AI-014 trusted pipeline envelope is integrity-gated
 
 The AI-013 pipeline result is not treated as an implicitly trusted transport object. AI-014 validates that the top-level report is the exact report instance used by the established decision gates and exposes an explicit accept/reject consumption boundary. The validator is observational only and never repairs or replaces output.
+
+## ADR — AI-015 final trusted orchestration remains policy-free
+
+AI-015 composes the existing AI-013 pipeline and AI-014 integrity gate rather than duplicating any evaluator, validator, or decision policy. The final result exposes a value only when the complete established chain permits it; safe abstention remains explicit and inspectable.
