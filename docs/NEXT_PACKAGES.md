@@ -2,25 +2,24 @@
 
 ## First next package
 
-### BIL-COM-004 — Trials, Grace Periods and Subscription Recovery
+### BIL-COM-005 — Coupon and Promotion Engine
 
-**Goal:** Add persistence and deterministic recovery orchestration around verified subscription records, including trial/grace restoration and stale-record handling.
+**Goal:** Add deterministic, non-authoritative coupon and promotion eligibility, validation, stacking, and expiration rules without store or payment integration.
 
 **Boundaries:**
 
-- No live Apple/Google/Stripe integration.
-- No coupon, referral, affiliate, pricing, or paywall UI.
-- Preserve `EntitlementResolver` as the single runtime authorization path.
+- No live Apple, Google, Web, or Stripe purchase integration.
+- No referral, affiliate, regional pricing, or paywall UI.
+- Promotions may influence offer metadata but never directly grant runtime entitlements.
 
 ## Planned sequence
 
-- `BIL-COM-005` — Coupon and Promotion Engine.
 - `BIL-COM-006` — Referral and Affiliate Attribution.
 - `BIL-COM-007` — Regional Pricing and Country Eligibility.
 - `BIL-COM-008` — Store Provider Boundaries and Receipt Validation Contracts.
 - `BIL-COM-009` — Commerce UI and Paywall Foundation.
 - `BIL-COM-010` — Commerce Epic Quality Gate and Reconciliation.
 
+## Gate before BIL-COM-005
 
-## Gate before BIL-COM-004
-BIL-COM-003-R3 must pass focused tests, commerce regression, analyzer, full regression, and debug build before trials and recovery work begins.
+BIL-COM-004 must pass package formatting, focused recovery tests, all commerce tests, package-scoped analyzer, full regression, Android debug build, and diff integrity.

@@ -41,3 +41,9 @@ No intentional technical debt is introduced. Provider verification and persisten
 
 ## Current verification correction
 BIL-COM-003-R3 fixes the entitlement fallback invariant discovered by focused tests: unverified records resolve to Free with restore disabled.
+
+## BIL-COM-004 — Trials, Grace Periods and Subscription Recovery
+
+The commerce domain now persists only previously verified subscription facts through a platform-neutral key/value boundary. `SubscriptionRecoveryEngine` restores valid cached active, trial, grace-period, and cancelled access deterministically while offline. Missing, stale, terminal, corrupt, invalid, or expired cache fails closed to the canonical Free plan and emits an explicit provider follow-up action.
+
+The maximum offline authority age is an injected policy rather than a hidden product constant. No Apple, Google, Web, cloud, network, credential, or store SDK implementation is included.

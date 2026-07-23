@@ -62,3 +62,21 @@ Paid plans inherit lower-tier capabilities without copied entitlement lists.
 
 ## ADR: Restore capability requires verified commerce authority
 A provider identifier alone is not sufficient to expose restore behavior. `canRestorePurchases` is true only when commerce authority is verified and a provider is present. This preserves the local-default invariant and prevents unverified records from advertising transactional capability.
+
+## ADR-COM-008 — Cache verified facts, never inferred authority
+
+**Status:** Accepted in `BIL-COM-004`.
+
+Only provider-verified `SubscriptionRecord` values may be wrapped in a persisted `SubscriptionSnapshot`. Corrupt and unverified cache is discarded. Persistence does not create or upgrade authority.
+
+## ADR-COM-009 — Make offline freshness an injected policy
+
+**Status:** Accepted in `BIL-COM-004`.
+
+The maximum age of offline subscription authority is supplied through `SubscriptionRecoveryPolicy`. The recovery engine contains no hidden commercial duration. Stale data fails closed to Free and requests provider refresh.
+
+## ADR-COM-010 — Separate access resolution from recovery orchestration
+
+**Status:** Accepted in `BIL-COM-004`.
+
+`EntitlementResolver` remains the single access decision path. `SubscriptionRecoveryEngine` only validates cache freshness, invokes that resolver, and returns explicit refresh/restore/discard actions.

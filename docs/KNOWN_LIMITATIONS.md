@@ -27,3 +27,12 @@ Verification results are not claimed in advance. The Product Owner must run the 
 
 ## BIL-COM-003-R3
 Real store restoration remains intentionally unimplemented. The domain only exposes restore eligibility for verified provider-backed records.
+
+## BIL-COM-004 limitations
+
+- `CommerceKeyValueStore` requires a later platform adapter; this package intentionally avoids binding the domain to SharedPreferences, Drift, cloud storage, or store SDKs.
+- Recovery emits refresh/restore actions but does not execute network or store operations.
+- Product policy must supply `maximumOfflineAge`; the commerce domain does not choose a business duration.
+- Cached authority is device-local and is not synchronized across devices in this package.
+
+- `SubscriptionRecoveryPolicy` is intentionally runtime-constructed because Dart const evaluation cannot invoke `Duration.isNegative`; invalid negative windows are rejected by an assertion.

@@ -17,3 +17,14 @@
 - Corrected entitlement resolution for unverified provider records.
 - Local fallback now disables purchase restoration.
 - Added regression assertions for restore and purchase flags.
+
+## BIL-COM-004 — Closed by package application pending Product Owner verification
+
+- Added `SubscriptionSnapshot` for verified cache metadata.
+- Added configurable `SubscriptionRecoveryPolicy`.
+- Added deterministic `SubscriptionRecoveryEngine` and explicit recovery actions.
+- Added serialized `LocalSubscriptionRecordRepository` behind `CommerceKeyValueStore`.
+- Added focused persistence/recovery tests and commerce regression coverage.
+- Preserved `EntitlementResolver` as the only access-authority resolver.
+
+- BIL-COM-004-R1: corrected `SubscriptionRecoveryPolicy` construction so negative-window validation remains enforced without an invalid const expression; added focused regression coverage.

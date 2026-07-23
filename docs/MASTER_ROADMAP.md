@@ -31,3 +31,11 @@ This living roadmap reflects repository reality after applying `BIL-COM-003` to 
 
 ## BIL-COM-003-R3 verification correction
 The subscription lifecycle package remains in verification. R2 corrects local fallback restoration capability so unverified records cannot advertise restore operations.
+
+## Commerce — BIL-COM-004
+
+- [x] Verified subscription snapshot persistence boundary.
+- [x] Deterministic offline recovery for active, trial, grace, and cancelled access windows.
+- [x] Explicit stale-cache policy and fail-closed refresh/restore actions.
+- [x] Corrupt or unverified cached authority cannot grant paid access.
+- [ ] Live provider refresh and restore adapters remain deferred.
