@@ -73,3 +73,13 @@ Corrected AI-007 test fixtures to provide the required local evidence `source`; 
 ## BIL-AI-009-R1
 
 Corrected the AI-009 regression fixture to use the repository-owned `TruthSignalDirection.supports` enum member. Production contracts and behavior are unchanged.
+
+
+## BIL-AI-010 limitations
+
+- The gate establishes structural integrity, not medical truth.
+- Candidate actions remain caller-owned; no One Best Action ranking is introduced.
+- The pipeline is local, in-memory, deterministic, provider-neutral, clock-free, random-free, and persistence-free.
+
+## AI-010 R1
+No new production limitation. The original AI-010 focused tests contained stale constructor arguments and could not compile; R1 corrects those fixtures without changing runtime behavior.

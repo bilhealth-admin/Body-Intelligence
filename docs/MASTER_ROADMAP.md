@@ -73,3 +73,11 @@ Status: implementation package issued. Adds an explicit immutable accept/reject 
 ## BIL-AI-009-R1
 
 Corrected the AI-009 regression fixture to use the repository-owned `TruthSignalDirection.supports` enum member. Production contracts and behavior are unchanged.
+
+
+## BIL-AI-010 — Integrity-Gated Truth Decision Foundation
+
+Status: implementation package issued. Adds a pure local pipeline that validates a unified truth report before forwarding its accepted assessment to the existing deterministic decision explainer. Rejected reports produce no decision.
+
+## BIL-AI-010-R1 Verification Correction
+AI-010 remains the active package. R1 aligns focused-test fixtures with the repository contracts for `TruthAssessment`, `TruthConflictAnalysis`, `TruthProposition`, and `TruthRule`; production scope is unchanged.

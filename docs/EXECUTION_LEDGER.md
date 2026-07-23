@@ -97,3 +97,18 @@ Corrected AI-007 test fixtures to provide the required local evidence `source`; 
 ## BIL-AI-009-R1
 
 Corrected the AI-009 regression fixture to use the repository-owned `TruthSignalDirection.supports` enum member. Production contracts and behavior are unchanged.
+
+
+## BIL-AI-010
+
+- Parent HEAD: `8deff82d1eb41fa5d9d9959a5d2a5ebf274a4283`
+- Scope: immutable decision-gate result and pure integrity-gated decision service.
+- Production mutation outside AI Platform: none.
+- Status: package issued; pending Product Owner verification and commit.
+
+## BIL-AI-010-R1
+- Parent HEAD: `8deff82d1eb41fa5d9d9959a5d2a5ebf274a4283`
+- Trigger: focused tests exposed stale constructor fixtures.
+- Change: tests only; add required `rationale`, `missingEvidence`, proposition `description`, and rule `strength`.
+- Production behavior: unchanged.
+- Status: pending Product Owner verification.

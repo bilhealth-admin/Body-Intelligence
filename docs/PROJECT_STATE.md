@@ -72,3 +72,11 @@ Parent HEAD: `0bd4cb3c38be919ae6d139bba6700a1dd8ed394a`. AI-009 adds a pure loca
 ## BIL-AI-009-R1
 
 Corrected the AI-009 regression fixture to use the repository-owned `TruthSignalDirection.supports` enum member. Production contracts and behavior are unchanged.
+
+
+## BIL-AI-010 State
+
+Parent HEAD: `8deff82d1eb41fa5d9d9959a5d2a5ebf274a4283`. AI-010 adds an explicit integrity-gated boundary between validated truth reports and the existing explainable decision bridge. It introduces no ranking, provider, prompt, cloud, persistence, UI, or medical inference.
+
+## AI-010 R1 State
+AI-010 production files are applied and unchanged. R1 corrects compile-invalid focused-test fixtures discovered by verification. AI-010 is not complete until every original verification gate passes.

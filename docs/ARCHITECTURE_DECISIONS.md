@@ -61,3 +61,11 @@ Truth report validation remains a pure diagnostic operation. AI-009 adds a separ
 ## BIL-AI-009-R1
 
 Corrected the AI-009 regression fixture to use the repository-owned `TruthSignalDirection.supports` enum member. Production contracts and behavior are unchanged.
+
+
+## ADR — Truth decisions must consume only integrity-accepted reports
+
+AI-010 composes the existing truth evaluation gate and decision explainer without changing either contract. Invalid reports are preserved for diagnostics and never forwarded to decision selection. Accepted reports retain the established deterministic action-or-abstain semantics.
+
+## ADR — Test fixtures must instantiate current domain contracts
+AI Platform verification fixtures must use the exact repository-owned constructor contracts. A fixture mismatch is corrected in tests; production models are never weakened to accommodate stale tests.
