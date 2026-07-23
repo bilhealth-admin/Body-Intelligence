@@ -28,19 +28,5 @@ Verification results are not claimed in advance. The Product Owner must run the 
 ## BIL-COM-003-R3
 Real store restoration remains intentionally unimplemented. The domain only exposes restore eligibility for verified provider-backed records.
 
-## BIL-COM-004 limitations
-
-- `CommerceKeyValueStore` requires a later platform adapter; this package intentionally avoids binding the domain to SharedPreferences, Drift, cloud storage, or store SDKs.
-- Recovery emits refresh/restore actions but does not execute network or store operations.
-- Product policy must supply `maximumOfflineAge`; the commerce domain does not choose a business duration.
-- Cached authority is device-local and is not synchronized across devices in this package.
-
-
-## BIL-COM-005 limitations
-
-- Coupon definitions and redemption history are local contracts; no authoritative server synchronization exists yet.
-- Evaluation does not reserve or consume a coupon. Usage is recorded only by an explicit repository call after a future successful checkout.
-- Fixed-amount benefits are modeled in minor units but currency-specific catalog validation is deferred to Regional Pricing.
-- Commission basis points are metadata only; no balance, invoice, payout, tax, or settlement processing exists.
-- No creator/blogger dashboard or campaign administration UI exists.
-- Promotions never grant subscription entitlements or bypass receipt verification.
+## BIL-COM-006 limitations
+No financial payout, creator dashboard, payment processing, network verification, fraud scoring, tax handling, or cloud persistence is implemented. Paid commissions are intentionally immutable locally; payout correction requires future server reconciliation.

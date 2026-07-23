@@ -42,25 +42,5 @@ No intentional technical debt is introduced. Provider verification and persisten
 ## Current verification correction
 BIL-COM-003-R3 fixes the entitlement fallback invariant discovered by focused tests: unverified records resolve to Free with restore disabled.
 
-## BIL-COM-004 — Trials, Grace Periods and Subscription Recovery
-
-The commerce domain now persists only previously verified subscription facts through a platform-neutral key/value boundary. `SubscriptionRecoveryEngine` restores valid cached active, trial, grace-period, and cancelled access deterministically while offline. Missing, stale, terminal, corrupt, invalid, or expired cache fails closed to the canonical Free plan and emits an explicit provider follow-up action.
-
-The maximum offline authority age is an injected policy rather than a hidden product constant. No Apple, Google, Web, cloud, network, credential, or store SDK implementation is included.
-
-
-## BIL-COM-005 — Coupon and Promotion Engine
-
-The commerce domain now contains deterministic coupon definitions, integer-safe benefit models, subscription-term eligibility, local usage ledgers, stacking rules, and promotion evaluation. Coupon evaluation produces offer metadata and a candidate redemption only; it never performs payment, records usage automatically, or grants runtime entitlements.
-
-Celebrity, blogger, affiliate, partner, and campaign attribution are represented as neutral metadata. Commission basis points are recorded for future settlement, but no transfer, payout, dashboard, server, cloud, or store integration is introduced.
-
-### Verification assets
-
-- Focused percentage, fixed-amount, free-duration, eligibility, stacking, and usage-limit tests.
-- Regression tests proving promotions cannot alter Free Plan or entitlement authority.
-- Package-scoped analyzer, all commerce tests, full regression, Android debug build, and diff integrity gates.
-
-### Next stage
-
-`BIL-COM-006 — Referral and Affiliate Attribution`.
+## BIL-COM-006 state
+Completed: referral programs, unique normalized codes, attribution, duplicate/self-attribution prevention, expiry windows, dual-sided rewards, affiliate commission ledger/statuses, refund/cancellation revocation support, audit records, local repository, and future sync contract.
