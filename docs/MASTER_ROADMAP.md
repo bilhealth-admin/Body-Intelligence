@@ -32,3 +32,12 @@ Status: implementation package issued. Adds typed propositions, pure determinist
 ## BIL-AI-004 — Deterministic Truth-to-Decision Explainability Bridge
 
 Status: implementation package issued. Bridges resolved `TruthAssessment` results into the existing `ExplainableAiDecision` contract using caller-supplied typed candidates. Uncertain and insufficient assessments abstain. No One Best Action policy, provider, prompt, cloud, persistence, UI, or medical inference is introduced.
+
+## BIL-AI-005 — Deterministic Truth Evaluation Trace Foundation
+
+Status: implementation package issued. Adds immutable proposition and rule provenance to deterministic Truth Engine composition while preserving the existing `TruthRuleComposer.assess` API. No Body Twin, Decision Memory, One Best Action policy, provider, prompt, cloud, persistence, UI, or medical inference is introduced.
+
+## BIL-QUALITY-002-R1 — Stable Performance Budget Sampling
+- Replaces the scheduler-sensitive single observation in the local 1000-food search benchmark with a five-sample median.
+- Preserves the existing `<500 ms` product budget and adds a `1500 ms` catastrophic outlier ceiling.
+- Does not change Food Repository production behavior or any AI Platform contract.

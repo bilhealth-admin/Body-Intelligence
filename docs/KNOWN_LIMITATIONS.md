@@ -28,3 +28,10 @@ No new functional limitation. This package is a constructor-structure correction
 - No One Best Action ranking, Body Twin integration, Decision Memory, AI Coach, prompts, providers, cloud transport, or UI is included.
 - Confidence mapping is a deterministic coarse presentation policy and is not medical or probabilistic calibration.
 - Uncertain and insufficient assessments always abstain.
+
+## BIL-AI-005 limitations
+
+The trace records rule identity and match provenance only. It does not persist history, rank actions, infer user intent, calibrate medical certainty, call providers, or expose UI. Those capabilities require later explicitly authorized packages.
+
+## Host timing variability
+Wall-clock tests can still reflect sustained machine contention. `BIL-QUALITY-002-R1` removes isolated single-sample noise but intentionally fails when the median reaches 500 ms or any sample reaches 1500 ms. It does not replace device profiling or release-mode benchmarking.

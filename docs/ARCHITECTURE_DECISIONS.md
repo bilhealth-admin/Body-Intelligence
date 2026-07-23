@@ -23,3 +23,10 @@ When an immutable AI domain object requires input normalization before field ini
 A deterministic bridge may translate a resolved `TruthAssessment` into the provider-neutral `ExplainableAiDecision` contract only when the caller supplies the candidate values. Supported and contradicted assessments may select their corresponding candidate; uncertain and insufficient assessments must abstain. The bridge may not invent actions, call providers, access time or randomness, mutate state, or absorb One Best Action policy.
 
 Numeric Truth Engine confidence is mapped to the existing coarse AI confidence levels using explicit local thresholds: high at 0.75 or above, medium at 0.50 or above, otherwise low. This is a presentation boundary, not medical certainty or statistical calibration.
+
+## ADR — Truth composition must expose immutable provenance
+
+Deterministic truth composition may expose which typed rules were considered and which matched, but must not duplicate Truth Engine arithmetic. `TruthEvaluationTrace` therefore wraps the existing `TruthAssessment` and stable rule identities; `TruthRuleComposer.assess` remains backward compatible.
+
+## ADR — Robust host-timed performance gates
+Host-timed microbenchmarks must retain product budgets while resisting isolated scheduler noise. For repeated deterministic operations, BIL gates use an odd-sized sample median, print every observation, and retain a separate catastrophic-outlier ceiling. This decision does not authorize raising product budgets or hiding measurements.

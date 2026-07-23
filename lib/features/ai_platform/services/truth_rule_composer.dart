@@ -1,4 +1,5 @@
 import '../domain/truth_assessment.dart';
+import '../domain/truth_evaluation_trace.dart';
 import '../domain/truth_proposition.dart';
 import '../domain/truth_rule.dart';
 import '../domain/truth_signal.dart';
@@ -18,16 +19,30 @@ final class TruthRuleComposer {
     required T context,
     required Iterable<TruthRule<T>> rules,
   }) {
+    return trace(
+      proposition: proposition,
+      context: context,
+      rules: rules,
+    ).assessment;
+  }
+
+  TruthEvaluationTrace trace<T>({
+    required TruthProposition<T> proposition,
+    required T context,
+    required Iterable<TruthRule<T>> rules,
+  }) {
     final orderedRules = List<TruthRule<T>>.of(rules)
       ..sort((left, right) => left.key.compareTo(right.key));
     _requireUniqueRuleKeys(orderedRules);
     _requireMatchingProposition(proposition, orderedRules);
 
     final signals = <TruthSignal>[];
+    final matchedRuleKeys = <String>[];
     for (final rule in orderedRules) {
       final signal = rule.evaluate(context);
       if (signal != null) {
         signals.add(signal);
+        matchedRuleKeys.add(rule.key);
       }
     }
 
@@ -41,9 +56,16 @@ final class TruthRuleComposer {
             .toList(growable: false)
           ..sort();
 
-    return truthEngine.assess(
+    final assessment = truthEngine.assess(
       signals: signals,
       missingEvidence: missingEvidence,
+    );
+
+    return TruthEvaluationTrace(
+      propositionKey: proposition.key,
+      consideredRuleKeys: orderedRules.map((rule) => rule.key),
+      matchedRuleKeys: matchedRuleKeys,
+      assessment: assessment,
     );
   }
 
