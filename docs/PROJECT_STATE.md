@@ -96,3 +96,8 @@ Parent HEAD: `686799297af64ddc77f78f1e0ec5d668a0983238`. AI-012 converts the exi
 ## BIL-AI-013 State
 
 Parent HEAD: `bbd0f86512658f21b68ccae77d78d4c87dd5d1f0`. AI-013 adds a thin deterministic pipeline that evaluates typed rules once and preserves the complete validated Truth/Explain result. Existing component APIs remain independently usable and unchanged.
+
+
+## BIL-AI-014 State
+
+Parent HEAD: `3419142b5be77f1e7a7ed24516461c13e8886817`. AI-014 adds a pure validator and immutable gate over the trusted AI-013 pipeline result. The original pipeline result remains inspectable, while downstream consumption is allowed only when report provenance and exposure invariants remain valid.

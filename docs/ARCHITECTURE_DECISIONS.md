@@ -85,3 +85,8 @@ AI-011 remains the single observational fidelity validator. AI-012 adds a separa
 ## ADR — Compose established Truth/Explain gates without duplicating policy
 
 AI-013 introduces a thin orchestration service rather than merging existing engines. The composer remains the only rule evaluation path; evaluation integrity, decision production, and decision fidelity remain delegated to their existing gates. This prevents policy duplication and keeps every stage independently testable.
+
+
+## ADR — AI-014 trusted pipeline envelope is integrity-gated
+
+The AI-013 pipeline result is not treated as an implicitly trusted transport object. AI-014 validates that the top-level report is the exact report instance used by the established decision gates and exposes an explicit accept/reject consumption boundary. The validator is observational only and never repairs or replaces output.
