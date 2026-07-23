@@ -77,3 +77,7 @@ The Truth pipeline now has two independent safety boundaries: report integrity b
 
 ### AI-011-R1 — Preserve integrity issue subject identity
 Tests constructing `TruthIntegrityIssue` must provide the same explicit `subjectKey` required by production. The production contract is not weakened for fixture convenience.
+
+## ADR — Decision fidelity validation must become an explicit exposure gate
+
+AI-011 remains the single observational fidelity validator. AI-012 adds a separate immutable gate whose integrity status derives only from that validator. Downstream code may expose a decision only when fidelity is accepted and the upstream decision gate produced an explainable output. A valid upstream rejection remains a safe rejection. The gate never repairs, replaces, ranks, persists, or forwards inconsistent decisions.

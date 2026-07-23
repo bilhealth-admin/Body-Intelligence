@@ -88,3 +88,7 @@ Status: implementation package issued. Adds a pure validator that verifies the i
 
 
 - BIL-AI-011-R1: focused verification correction for the required integrity-issue subject identity; production scope unchanged.
+
+## BIL-AI-012 — Truth Decision Validation Gate Foundation
+
+Adds the explicit post-decision integrity gate for the deterministic Truth/Explain pipeline. A decision is exposable only when the existing AI-011 fidelity validator reports no issues. Safe upstream rejection remains preserved and no ranking, provider, prompt, persistence, cloud, or UI scope is introduced.

@@ -88,3 +88,7 @@ Parent HEAD: `14346ea4ea98033f6eab07dade96234cc6e9d7cd`. AI-011 adds determinist
 
 ### BIL-AI-011-R1 verification correction
 The AI-011 production implementation remains unchanged. R1 aligns one focused test fixture with the current `TruthIntegrityIssue` constructor contract by supplying `subjectKey`.
+
+## BIL-AI-012 State
+
+Parent HEAD: `686799297af64ddc77f78f1e0ec5d668a0983238`. AI-012 converts the existing observational truth-decision fidelity validation into an explicit immutable consumption gate. It preserves the original decision result and all integrity issues, exposes valid action or abstention decisions, and preserves safe upstream rejection without leaking a decision.

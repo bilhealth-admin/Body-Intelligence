@@ -94,3 +94,7 @@ No new production limitation. The original AI-010 focused tests contained stale 
 
 ### BIL-AI-011-R1
 No new product limitation. This revision only repairs a compile-time test-fixture mismatch.
+
+## BIL-AI-012 limitations
+
+The validation gate does not rank actions, determine One Best Action, persist decisions, invoke providers, access cloud services, or present UI. It only exposes whether the existing truth-decision result passed fidelity validation. Calibration and medical inference remain explicitly out of scope.

@@ -125,3 +125,11 @@ Corrected the AI-009 regression fixture to use the repository-owned `TruthSignal
 ## BIL-AI-011-R1
 - Corrected the focused validator test fixture to provide the repository-required `TruthIntegrityIssue.subjectKey`.
 - No production behavior or architecture changed.
+
+## BIL-AI-012
+
+- Parent HEAD: `686799297af64ddc77f78f1e0ec5d668a0983238`
+- Scope: post-decision integrity consumption gate.
+- Production: `TruthDecisionValidationGateResult`, `TruthDecisionValidationGate`.
+- Verification: focused AI-012 tests, complete AI Platform tests, Commerce regression, analyzer, full project tests, diff integrity.
+- Non-scope: Body Twin, Decision Memory, One Best Action ranking, AI Coach, prompts, providers, cloud, persistence, and UI.
