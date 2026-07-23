@@ -3,8 +3,10 @@ import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../database/date_keys.dart';
 import '../../features/nutrition/adapters/unified_food_adapter.dart';
+import '../../features/nutrition/domain/meal_builder.dart';
 import '../../features/nutrition/domain/meal_template.dart';
 import '../../features/nutrition/domain/unified_food.dart';
+import '../../features/nutrition/services/meal_builder_engine.dart';
 import '../../features/nutrition/services/meal_template_engine.dart';
 import '../../features/nutrition/services/nutrition_calculation_engine.dart';
 
@@ -13,6 +15,7 @@ class MealRepository {
   final UnifiedFoodAdapter _foodAdapter;
   final NutritionCalculationEngine _nutritionEngine;
   final MealTemplateEngine _mealTemplateEngine;
+  final MealBuilderEngine _mealBuilderEngine;
 
   MealRepository(
     this._database, {
@@ -20,9 +23,11 @@ class MealRepository {
     NutritionCalculationEngine nutritionEngine =
         const NutritionCalculationEngine(),
     MealTemplateEngine mealTemplateEngine = const MealTemplateEngine(),
+    MealBuilderEngine mealBuilderEngine = const MealBuilderEngine(),
   }) : _foodAdapter = foodAdapter,
        _nutritionEngine = nutritionEngine,
-       _mealTemplateEngine = mealTemplateEngine;
+       _mealTemplateEngine = mealTemplateEngine,
+       _mealBuilderEngine = mealBuilderEngine;
 
   Future<int> createMeal({
     required DateTime date,
@@ -389,6 +394,57 @@ class MealRepository {
                 : b.source.meal.date.compareTo(a.source.meal.date);
           });
     return candidates.take(3).toList(growable: false);
+  }
+
+  Future<int> createMealFromDraft({
+    required MealBuilderDraft draft,
+    required DateTime date,
+  }) async {
+    final canonical = _mealBuilderEngine.canonicalize(draft);
+    return _database.transaction(() async {
+      final mealId = await createMeal(
+        date: date,
+        name: canonical.name,
+        type: canonical.mealType,
+      );
+      final existingItems =
+          await (_database.select(_database.mealItems)..where(
+                (item) => item.mealId.equals(mealId) & item.deletedAt.isNull(),
+              ))
+              .get();
+      if (existingItems.isNotEmpty) {
+        throw StateError(
+          'Cannot build a meal over an existing meal that already has items',
+        );
+      }
+
+      for (final item in canonical.items) {
+        final food = await _activeFood(item.foodId);
+        final portion = _calculatePortion(food, item.quantityGrams);
+        await _database
+            .into(_database.mealItems)
+            .insert(
+              MealItemsCompanion.insert(
+                mealId: mealId,
+                foodId: item.foodId,
+                quantity: Value(item.quantityGrams),
+                position: Value(item.position),
+                calories: Value(portion.valueOrZero(FoodNutrient.calories)),
+                protein: Value(portion.valueOrZero(FoodNutrient.protein)),
+                carbs: Value(portion.valueOrZero(FoodNutrient.carbohydrates)),
+                fats: Value(portion.valueOrZero(FoodNutrient.fat)),
+                fiber: Value(portion.valueOrZero(FoodNutrient.fiber)),
+                sodium: Value(portion.valueOrZero(FoodNutrient.sodium)),
+                potassium: Value(portion.valueOrZero(FoodNutrient.potassium)),
+                calcium: Value(portion.valueOrZero(FoodNutrient.calcium)),
+                magnesium: Value(portion.valueOrZero(FoodNutrient.magnesium)),
+                sugar: Value(portion.valueOrZero(FoodNutrient.sugar)),
+                nutrientEvidenceMask: Value(portion.nutrientEvidenceMask),
+              ),
+            );
+      }
+      return mealId;
+    });
   }
 
   MealTemplate createTemplateFromHistoricalMeal({
