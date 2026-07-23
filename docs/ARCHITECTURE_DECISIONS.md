@@ -71,3 +71,26 @@ Store country is authoritative when present, account country is the offline fall
 
 ### ADR-COM-008 — Server authority with bounded offline continuity
 Store receipts are opaque provider evidence and never directly grant entitlements. A server validation contract is the future authority. Offline access may rely only on a previously accepted validation result within a bounded freshness window. Store SDKs remain behind provider contracts so Apple, Google, and Web integrations cannot leak into domain or UI logic.
+
+### ADR-COM-009 — Paywall presentation is non-authoritative
+**Status:** Accepted in `BIL-COM-009`.
+
+The paywall renders immutable offer metadata supplied by a trusted commerce coordinator and emits purchase/restore intent only through explicit callbacks. It never changes subscription state or grants entitlements. Transaction buttons are disabled unless corresponding provider capability is explicitly available. Localized copy remains inside the Commerce feature until Global Product owns an approved shared localization integration.
+
+
+## BIL-QUALITY-001 — Global analyzer cleanup
+- Classified and corrected the 40 analyzer findings blocking BIL-COM-009 verification.
+- No lint was disabled; no analyzer ignore comments were introduced.
+- Changes are behavior-preserving mechanical cleanup, deprecated API migration, constructor/formal cleanup, dead-code removal after reference inspection, and test cleanup.
+- Acceptance requires `flutter analyze` to report `No issues found`.
+
+## ADR — Complete removal of unused private optional widget state
+Because `_SetupTile.unit` and `_PrimaryButton.busy` were private implementation details with no baseline call sites, R1 completes their removal rather than restoring unused fields solely to compile. This preserves observed behavior and avoids retaining dead API surface.
+
+
+## BIL-QUALITY-001-R2 — Commerce Paywall UTF-8 Repair
+
+- Classification: Safe Mechanical Cleanup / encoding repair.
+- Finding: the full-project mojibake regression test detected a forbidden `â€` sequence in `lib/features/commerce/presentation/commerce_paywall.dart`.
+- Resolution: convert malformed Windows-1252/UTF-8 punctuation sequences to intended Unicode punctuation without behavioral changes.
+- Required gates: focused mojibake regression, Commerce tests, global analyzer, full project tests, and diff hygiene.

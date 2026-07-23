@@ -76,9 +76,8 @@ class ExplainableNutritionEngine {
   final NutritionCalculationEngine _nutritionEngine;
 
   const ExplainableNutritionEngine({
-    NutritionCalculationEngine nutritionEngine =
-        const NutritionCalculationEngine(),
-  }) : _nutritionEngine = nutritionEngine;
+    this._nutritionEngine = const NutritionCalculationEngine(),
+  });
 
   ExplainableNutritionReport explain({
     required UnifiedFood food,

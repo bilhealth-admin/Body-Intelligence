@@ -22,8 +22,9 @@ final class MoneyAmount {
   };
 
   MoneyAmount discountedByPercent(int percent) {
-    if (percent < 0 || percent > 100)
+    if (percent < 0 || percent > 100) {
       throw ArgumentError.value(percent, 'percent');
+    }
     final discounted = (minorUnits * (100 - percent) / 100).round();
     return MoneyAmount(
       minorUnits: discounted,

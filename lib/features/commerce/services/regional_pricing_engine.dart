@@ -12,31 +12,35 @@ final class RegionalPricingEngine {
     required CountryPricingContext context,
   }) {
     final billingCountry = context.billingCountryCode;
-    if (billingCountry == null)
+    if (billingCountry == null) {
       return const RegionalPricingDecision(
         allowed: false,
         reason: 'billing_country_unavailable',
       );
+    }
     final eligibility = repository.eligibilityFor(billingCountry);
-    if (eligibility == null)
+    if (eligibility == null) {
       return RegionalPricingDecision(
         allowed: false,
         reason: 'country_not_supported',
         requiresCountryReview: context.hasMismatch,
       );
-    if (!eligibility.eligiblePlans.contains(plan))
+    }
+    if (!eligibility.eligiblePlans.contains(plan)) {
       return RegionalPricingDecision(
         allowed: false,
         reason: 'plan_not_eligible',
         requiresCountryReview: context.hasMismatch,
       );
+    }
     final price = repository.priceFor(plan, billingCountry);
-    if (price == null)
+    if (price == null) {
       return RegionalPricingDecision(
         allowed: false,
         reason: 'price_not_available',
         requiresCountryReview: context.hasMismatch,
       );
+    }
     return RegionalPricingDecision(
       allowed: true,
       reason: 'eligible',

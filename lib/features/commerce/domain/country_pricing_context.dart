@@ -14,9 +14,9 @@ final class CountryPricingContext {
 
   bool get hasMismatch {
     final values = <String>{
-      if (_normalize(deviceCountryCode) case final value?) value,
-      if (_normalize(accountCountryCode) case final value?) value,
-      if (_normalize(storeCountryCode) case final value?) value,
+      ?_normalize(deviceCountryCode),
+      ?_normalize(accountCountryCode),
+      ?_normalize(storeCountryCode),
     };
     return values.length > 1;
   }

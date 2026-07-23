@@ -28,3 +28,26 @@
 - Added receipt-validation contracts and deterministic local validation cache.
 - Added focused and regression tests.
 - No live billing, receipt networking, secrets, tax engine, or Paywall UI.
+
+| BIL-COM-009 | `a4f602e` | Commerce Team | Commerce-owned responsive paywall foundation and explicit transactional handoff boundaries. | Ready for Product Owner application | Product Owner must run package verification before commit. |
+
+
+## BIL-QUALITY-001 — Global analyzer cleanup
+- Classified and corrected the 40 analyzer findings blocking BIL-COM-009 verification.
+- No lint was disabled; no analyzer ignore comments were introduced.
+- Changes are behavior-preserving mechanical cleanup, deprecated API migration, constructor/formal cleanup, dead-code removal after reference inspection, and test cleanup.
+- Acceptance requires `flutter analyze` to report `No issues found`.
+
+## BIL-QUALITY-001-R1
+- Corrected three analyzer errors introduced by incomplete dead-code cleanup.
+- Removed the remaining `widget.unit` rendering branch.
+- Replaced the dangling `busy` conditional with the existing normal button content.
+- Added a focused source regression test preventing dangling references from returning.
+
+
+## BIL-QUALITY-001-R2 — Commerce Paywall UTF-8 Repair
+
+- Classification: Safe Mechanical Cleanup / encoding repair.
+- Finding: the full-project mojibake regression test detected a forbidden `â€` sequence in `lib/features/commerce/presentation/commerce_paywall.dart`.
+- Resolution: convert malformed Windows-1252/UTF-8 punctuation sequences to intended Unicode punctuation without behavioral changes.
+- Required gates: focused mojibake regression, Commerce tests, global analyzer, full project tests, and diff hygiene.

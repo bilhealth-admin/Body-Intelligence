@@ -9,11 +9,12 @@ final class CountryEligibility {
     this.developingMarketDiscountPercent = 0,
   }) : eligiblePlans = Set.unmodifiable(eligiblePlans) {
     if (developingMarketDiscountPercent < 0 ||
-        developingMarketDiscountPercent > 100)
+        developingMarketDiscountPercent > 100) {
       throw ArgumentError.value(
         developingMarketDiscountPercent,
         'developingMarketDiscountPercent',
       );
+    }
   }
   final String countryCode;
   final PricingRegion region;

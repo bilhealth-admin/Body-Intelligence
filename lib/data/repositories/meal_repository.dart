@@ -23,18 +23,12 @@ class MealRepository {
 
   MealRepository(
     this._database, {
-    UnifiedFoodAdapter foodAdapter = const UnifiedFoodAdapter(),
-    NutritionCalculationEngine nutritionEngine =
-        const NutritionCalculationEngine(),
-    MealTemplateEngine mealTemplateEngine = const MealTemplateEngine(),
-    MealBuilderEngine mealBuilderEngine = const MealBuilderEngine(),
-    DailyNutritionIntelligenceEngine dailyNutritionEngine =
-        const DailyNutritionIntelligenceEngine(),
-  }) : _foodAdapter = foodAdapter,
-       _nutritionEngine = nutritionEngine,
-       _mealTemplateEngine = mealTemplateEngine,
-       _mealBuilderEngine = mealBuilderEngine,
-       _dailyNutritionEngine = dailyNutritionEngine;
+    this._foodAdapter = const UnifiedFoodAdapter(),
+    this._nutritionEngine = const NutritionCalculationEngine(),
+    this._mealTemplateEngine = const MealTemplateEngine(),
+    this._mealBuilderEngine = const MealBuilderEngine(),
+    this._dailyNutritionEngine = const DailyNutritionIntelligenceEngine(),
+  });
 
   Future<int> createMeal({
     required DateTime date,

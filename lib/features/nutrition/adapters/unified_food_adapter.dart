@@ -11,14 +11,13 @@ class UnifiedFoodAdapter {
   final BaseDatabaseFoodAdapter _fallback;
 
   const UnifiedFoodAdapter({
-    List<DatabaseFoodAdapter> adapters = const <DatabaseFoodAdapter>[
+    this._adapters = const <DatabaseFoodAdapter>[
       CustomFoodAdapter(),
       BrandedFoodAdapter(),
       LegacyFoodAdapter(),
       FoundationFoodAdapter(),
     ],
-  }) : _adapters = adapters,
-       _fallback = const _UnknownFoodAdapter();
+  }) : _fallback = const _UnknownFoodAdapter();
 
   UnifiedFood adapt(Food food) {
     for (final adapter in _adapters) {

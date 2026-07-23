@@ -41,3 +41,37 @@ No live Apple, Google, or Web pricing; no taxes; no server country verification;
 - No remote receipt validation or server signature verification.
 - No tax calculation or payment settlement.
 - Cached validation storage is an in-memory boundary until the persistence/cloud teams provide an approved durable implementation.
+
+## BIL-COM-009 limitations
+- The paywall is not routed from Dashboard, Navigation, Startup, Profile, or Premium surfaces because those files are outside Commerce Team ownership.
+- No live StoreKit, Google Play Billing, or Web checkout adapter is connected.
+- Offer construction, tax-inclusive display, legal copy, provider product identifiers, and remote experimentation remain integration responsibilities.
+- Commerce-local English and Arabic copy is intentionally isolated; shared localization integration requires the Global Product team.
+- Purchase and restore callbacks express intent only and cannot grant access.
+
+
+## BIL-COM-009-R1B global analyzer blocker
+
+- The global analyzer reported 49 findings: 39 Info, 10 Warning, and 0 Error.
+- Nine Commerce-local Info findings are corrected by BIL-COM-009-R1B.
+- Forty findings remain outside Commerce ownership: 30 Info and 10 Warning.
+- The unchanged global quality gate therefore remains externally blocked until the responsible teams resolve the inventory recorded in `docs/GLOBAL_ANALYZE_FINDINGS.md`.
+- Commerce focused tests and the complete Commerce test suite passed before this documentation correction; no waiver or analyzer suppression is introduced.
+
+
+## BIL-QUALITY-001 — Global analyzer cleanup
+- Classified and corrected the 40 analyzer findings blocking BIL-COM-009 verification.
+- No lint was disabled; no analyzer ignore comments were introduced.
+- Changes are behavior-preserving mechanical cleanup, deprecated API migration, constructor/formal cleanup, dead-code removal after reference inspection, and test cleanup.
+- Acceptance requires `flutter analyze` to report `No issues found`.
+
+## BIL-QUALITY-001-R1
+No known functional limitation is introduced. The removed `_SetupTile.unit` and `_PrimaryButton.busy` paths were private and had no call sites in the authoritative baseline. Full verification must still be run in the Product Owner Flutter environment.
+
+
+## BIL-QUALITY-001-R2 — Commerce Paywall UTF-8 Repair
+
+- Classification: Safe Mechanical Cleanup / encoding repair.
+- Finding: the full-project mojibake regression test detected a forbidden `â€` sequence in `lib/features/commerce/presentation/commerce_paywall.dart`.
+- Resolution: convert malformed Windows-1252/UTF-8 punctuation sequences to intended Unicode punctuation without behavioral changes.
+- Required gates: focused mojibake regression, Commerce tests, global analyzer, full project tests, and diff hygiene.

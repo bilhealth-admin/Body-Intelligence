@@ -696,7 +696,7 @@ class _PrivateFieldCardState extends State<_PrivateFieldCard> {
                   child: Text(
                     widget.title,
                     style: const TextStyle(
-                      color: const Color(0xFFD9E2EA),
+                      color: Color(0xFFD9E2EA),
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                     ),
@@ -1049,7 +1049,7 @@ class _CanvasHeader extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: progress,
                   minHeight: 6,
-                  color: const Color(0xFFB9C8D6),
+                  color: Color(0xFFB9C8D6),
                   backgroundColor: _BilColors.stroke,
                 ),
               ),
@@ -1060,7 +1060,7 @@ class _CanvasHeader extends StatelessWidget {
         Text(
           isArabic ? '$completed/6' : '$completed/6',
           style: const TextStyle(
-            color: const Color(0xFFB9C8D6),
+            color: Color(0xFFB9C8D6),
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -1076,12 +1076,10 @@ class _SetupTile extends StatefulWidget {
     required this.icon,
     required this.completed,
     required this.onTap,
-    this.unit,
   });
 
   final String title;
   final String value;
-  final String? unit;
   final IconData icon;
   final bool completed;
   final VoidCallback onTap;
@@ -1185,19 +1183,6 @@ class _SetupTileState extends State<_SetupTile> {
                                     ),
                                   ),
                                 ),
-                                if (widget.unit != null) ...[
-                                  const SizedBox(width: 5),
-                                  Padding(
-                                    padding: const EdgeInsets.only(bottom: 1),
-                                    child: Text(
-                                      widget.unit!,
-                                      style: const TextStyle(
-                                        color: _BilColors.textDim,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ),
-                                ],
                               ],
                             ),
                           ],
@@ -1238,7 +1223,7 @@ class _ModelAccuracyBar extends StatelessWidget {
         children: [
           const Icon(
             Icons.verified_user_outlined,
-            color: const Color(0xFFB9C8D6),
+            color: Color(0xFFB9C8D6),
             size: 20,
           ),
           const SizedBox(width: 10),
@@ -1254,7 +1239,7 @@ class _ModelAccuracyBar extends StatelessWidget {
           Text(
             '${(progress * 100).round()}%',
             style: const TextStyle(
-              color: const Color(0xFFB9C8D6),
+              color: Color(0xFFB9C8D6),
               fontSize: 22,
               fontWeight: FontWeight.w900,
             ),

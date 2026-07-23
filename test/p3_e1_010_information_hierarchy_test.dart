@@ -11,7 +11,6 @@ import 'package:body_intelligence_log/data/repositories/water_repository.dart';
 import 'package:body_intelligence_log/features/analytics/analytics_page.dart';
 import 'package:body_intelligence_log/features/daily_log/daily_log_page.dart';
 import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
-import 'package:body_intelligence_log/features/dashboard/dashboard_page.dart';
 import 'package:body_intelligence_log/features/dashboard/providers/dashboard_provider.dart';
 import 'package:body_intelligence_log/features/foods/providers/food_provider.dart';
 import 'package:body_intelligence_log/features/life_context/providers/life_context_provider.dart';

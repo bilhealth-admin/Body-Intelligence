@@ -2,7 +2,6 @@ import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../app/localization/app_localizations.dart';
 import '../../../core/units/measurement_units.dart';
 import '../../../shared/widgets/wheel_number_field.dart';
 
@@ -89,7 +88,6 @@ class _ProfileStepState extends State<ProfileStep> {
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
-  DateTime? _selectedDateOfBirth;
 
   String tr(BuildContext context, String en, String ar) =>
       Localizations.localeOf(context).languageCode == 'ar' ? ar : en;
@@ -131,7 +129,6 @@ class _ProfileStepState extends State<ProfileStep> {
 
   void _onDateOfBirthSelected(DateTime picked) {
     setState(() {
-      _selectedDateOfBirth = picked;
       _dobController.text =
           "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
 
@@ -146,15 +143,6 @@ class _ProfileStepState extends State<ProfileStep> {
       widget.ageController.text = ageStr;
       widget.onAgeChanged(ageStr);
     });
-  }
-
-  // Pure Arabic Hamza-Insensitive Search Implementation
-  String _normalizeArabic(String input) {
-    return input
-        .replaceAll(RegExp(r'[أإآا]'), 'ا')
-        .replaceAll(RegExp(r'ة'), 'ه')
-        .replaceAll(RegExp(r'ى'), 'ي')
-        .trim();
   }
 
   @override
@@ -365,7 +353,7 @@ class _ProfileStepState extends State<ProfileStep> {
               // Activity Dropdown
               DropdownButtonFormField<String>(
                 isExpanded: true,
-                value: widget.activity,
+                initialValue: widget.activity,
                 decoration: InputDecoration(
                   labelText: tr(context, 'Usual Activity', 'النشاط المعتاد'),
                   errorText: widget.errors['activity'],
@@ -694,11 +682,13 @@ class _ProfileStepState extends State<ProfileStep> {
           borderRadius: BorderRadius.circular(12),
           color: isSelected
               ? theme.colorScheme.primaryContainer
-              : theme.colorScheme.surfaceContainerHighest.withOpacity(0.4),
+              : theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.4,
+                ),
           border: Border.all(
             color: isSelected
                 ? theme.colorScheme.primary
-                : theme.colorScheme.outline.withOpacity(0.3),
+                : theme.colorScheme.outline.withValues(alpha: 0.3),
             width: 2,
           ),
         ),
@@ -740,18 +730,18 @@ class _ProfileStepState extends State<ProfileStep> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: isSelected
-              ? theme.colorScheme.primaryContainer.withOpacity(0.7)
+              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.7)
               : theme.cardColor,
           border: Border.all(
             color: isSelected
                 ? theme.colorScheme.primary
-                : theme.colorScheme.outline.withOpacity(0.2),
+                : theme.colorScheme.outline.withValues(alpha: 0.2),
             width: 2,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: theme.colorScheme.primary.withOpacity(0.1),
+                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
                     blurRadius: 8,
                   ),
                 ]

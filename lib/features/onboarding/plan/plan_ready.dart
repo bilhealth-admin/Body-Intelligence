@@ -448,7 +448,7 @@ class _V8ScoreRing extends StatelessWidget {
               Text(
                 isArabic ? 'ممتاز' : 'Excellent',
                 style: const TextStyle(
-                  color: const Color(0xFFBBC9D5),
+                  color: Color(0xFFBBC9D5),
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -627,7 +627,7 @@ class _V8MacroCard extends StatelessWidget {
           _V8MacroLine(
             label: isArabic ? 'البروتين' : 'Protein',
             grams: plan.protein,
-            color: const Color(0xFFBBC9D5),
+            color: Color(0xFFBBC9D5),
           ),
           const SizedBox(height: 9),
           _V8MacroLine(
@@ -1003,7 +1003,7 @@ class _SuggestedTargetsSheetState extends State<_SuggestedTargetsSheet> {
                     min: 40,
                     max: 350,
                     unit: 'g',
-                    color: const Color(0xFFBBC9D5),
+                    color: Color(0xFFBBC9D5),
                     onChanged: (value) =>
                         changeMacro(newProtein: value.round()),
                   ),

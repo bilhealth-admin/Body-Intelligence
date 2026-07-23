@@ -196,8 +196,9 @@ class _WheelNumberFieldState extends State<WheelNumberField> {
                         physics: const FixedExtentScrollPhysics(),
                         diameterRatio: 1.35,
                         onSelectedItemChanged: (index) {
-                          if (_editingText)
+                          if (_editingText) {
                             return; // منع تداخل الأحداث أثناء الكتابة باليد
+                          }
                           final value = valueFor(index);
                           text.text = value.toStringAsFixed(
                             widget.decimalPlaces,

@@ -42,3 +42,27 @@ Implemented deterministic regional pricing models, country eligibility, billing-
 Status: Ready for Product Owner application.
 
 Delivered deterministic Apple, Google, and Web provider boundaries; receipt identity models; offline validation-cache policy; server-validation contracts; and regression protection. Real billing, network verification, taxes, and payment execution remain outside this package.
+
+## BIL-COM-009 — Commerce UI and Paywall Foundation
+Status: Ready for Product Owner application.
+
+Delivered a commerce-owned, responsive and RTL-safe paywall foundation with immutable localized copy, presentation-safe offer models, deterministic available-offer selection, explicit purchase/restore capability gates, and callback-only transactional handoff. The surface does not grant entitlements, import store SDKs, or modify subscription authority.
+
+Next: `BIL-COM-010` Commerce Epic Quality Gate and Reconciliation.
+
+
+## BIL-QUALITY-001 — Global analyzer cleanup
+- Classified and corrected the 40 analyzer findings blocking BIL-COM-009 verification.
+- No lint was disabled; no analyzer ignore comments were introduced.
+- Changes are behavior-preserving mechanical cleanup, deprecated API migration, constructor/formal cleanup, dead-code removal after reference inspection, and test cleanup.
+- Acceptance requires `flutter analyze` to report `No issues found`.
+
+- BIL-QUALITY-001-R1: analyzer compile-error correction for incomplete private dead-code cleanup — delivered, verification pending.
+
+
+## BIL-QUALITY-001-R2 — Commerce Paywall UTF-8 Repair
+
+- Classification: Safe Mechanical Cleanup / encoding repair.
+- Finding: the full-project mojibake regression test detected a forbidden `â€` sequence in `lib/features/commerce/presentation/commerce_paywall.dart`.
+- Resolution: convert malformed Windows-1252/UTF-8 punctuation sequences to intended Unicode punctuation without behavioral changes.
+- Required gates: focused mojibake regression, Commerce tests, global analyzer, full project tests, and diff hygiene.

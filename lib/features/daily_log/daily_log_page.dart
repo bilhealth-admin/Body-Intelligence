@@ -364,7 +364,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                     ],
                   ),
                   loading: () => const LinearProgressIndicator(),
-                  error: (_, __) => ActionableErrorState(
+                  error: (_, _) => ActionableErrorState(
                     title: context.strings.text('Water data unavailable'),
                     onRetry: () => ref.invalidate(dailyWaterProvider),
                   ),
@@ -410,7 +410,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                       ),
                       usualMeals.when(
                         loading: () => const SizedBox.shrink(),
-                        error: (_, __) => ActionableErrorState(
+                        error: (_, _) => ActionableErrorState(
                           title: context.strings.text(
                             'Your usual meals could not be loaded.',
                           ),
@@ -598,7 +598,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                 const SizedBox(height: PremiumDesignTokens.spaceSm),
                 meals.when(
                   loading: () => const LinearProgressIndicator(),
-                  error: (_, __) => ActionableErrorState(
+                  error: (_, _) => ActionableErrorState(
                     title: context.strings.text('Meals unavailable'),
                     onRetry: () => ref.invalidate(dailyMealsProvider),
                   ),

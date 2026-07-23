@@ -21,9 +21,8 @@ class ServingIntelligenceEngine {
   final NutritionCalculationEngine _nutritionEngine;
 
   const ServingIntelligenceEngine({
-    NutritionCalculationEngine nutritionEngine =
-        const NutritionCalculationEngine(),
-  }) : _nutritionEngine = nutritionEngine;
+    this._nutritionEngine = const NutritionCalculationEngine(),
+  });
 
   ServingNutritionResult calculateMass({
     required UnifiedFood food,

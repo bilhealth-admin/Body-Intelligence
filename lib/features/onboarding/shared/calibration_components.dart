@@ -100,104 +100,6 @@ class _ChoiceTile<T> extends StatelessWidget {
   }
 }
 
-class _PrecisionBar extends StatelessWidget {
-  const _PrecisionBar({required this.decimals, required this.onNudge});
-
-  final int decimals;
-  final ValueChanged<double> onNudge;
-
-  @override
-  Widget build(BuildContext context) {
-    final values = decimals == 0
-        ? const [-10.0, -1.0, 1.0, 10.0]
-        : const [-10.0, -1.0, -.1, .1, 1.0, 10.0];
-
-    return _GlassPanel(
-      padding: const EdgeInsets.all(4),
-      child: Row(
-        children: [
-          for (final value in values)
-            Expanded(
-              child: TextButton(
-                onPressed: () => onNudge(value),
-                child: Text(
-                  value > 0
-                      ? '+${value.abs().toStringAsFixed(value.abs() < 1 ? 1 : 0)}'
-                      : '−${value.abs().toStringAsFixed(value.abs() < 1 ? 1 : 0)}',
-                  style: const TextStyle(
-                    color: _BilColors.textMuted,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NumberPad extends StatelessWidget {
-  const _NumberPad({required this.decimals, required this.onKey});
-
-  final int decimals;
-  final ValueChanged<String> onKey;
-
-  @override
-  Widget build(BuildContext context) {
-    final keys = [
-      '1',
-      '2',
-      '3',
-      '4',
-      '5',
-      '6',
-      '7',
-      '8',
-      '9',
-      decimals > 0 ? '.' : '',
-      '0',
-      'back',
-    ];
-
-    return _GlassPanel(
-      padding: const EdgeInsets.all(4),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: keys.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          childAspectRatio: 2.25,
-          crossAxisSpacing: 3,
-          mainAxisSpacing: 3,
-        ),
-        itemBuilder: (context, index) {
-          final key = keys[index];
-          if (key.isEmpty) return const SizedBox.shrink();
-
-          return InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: () => onKey(key),
-            child: Center(
-              child: key == 'back'
-                  ? const Icon(Icons.backspace_outlined, color: Colors.white)
-                  : Text(
-                      key,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
 class _TopBar extends StatelessWidget {
   const _TopBar({this.trailing});
 
@@ -228,7 +130,7 @@ class _TopBar extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        if (trailing != null) trailing!,
+        ?trailing,
       ],
     );
   }
@@ -300,14 +202,12 @@ class _FloatingTag extends StatelessWidget {
 }
 
 class _BodyHologram extends StatelessWidget {
-  const _BodyHologram({this.compact = false});
-
-  final bool compact;
+  const _BodyHologram();
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      size: compact ? const Size(260, 320) : const Size(360, 500),
+      size: const Size(360, 500),
       painter: _BodyHologramPainter(),
     );
   }
@@ -540,15 +440,10 @@ class _IconOrb extends StatelessWidget {
 }
 
 class _PrimaryButton extends StatelessWidget {
-  const _PrimaryButton({
-    required this.label,
-    required this.onPressed,
-    this.busy = false,
-  });
+  const _PrimaryButton({required this.label, required this.onPressed});
 
   final String label;
   final VoidCallback? onPressed;
-  final bool busy;
 
   @override
   Widget build(BuildContext context) {
@@ -583,29 +478,17 @@ class _PrimaryButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(17),
           ),
         ),
-        child: busy
-            ? const SizedBox(
-                width: 23,
-                height: 23,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: Colors.white,
-                ),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Icon(Icons.arrow_forward_rounded),
-                ],
-              ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(width: 10),
+            const Icon(Icons.arrow_forward_rounded),
+          ],
+        ),
       ),
     );
   }
@@ -636,7 +519,6 @@ abstract final class _BilColors {
   static const emerald = Color(0xFF14DFA6);
   static const cyan = Color(0xFF11CDE4);
   static const blue = Color(0xFF1877E8);
-  static const orange = Color(0xFFFFA24A);
   static const textMuted = Color(0xFF9EB0BE);
   static const textDim = Color(0xFF617687);
 }

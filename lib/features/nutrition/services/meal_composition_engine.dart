@@ -21,10 +21,9 @@ class MealCompositionEngine {
   final MealCompositionPolicy policy;
 
   const MealCompositionEngine({
-    NutritionCalculationEngine nutritionEngine =
-        const NutritionCalculationEngine(),
+    this._nutritionEngine = const NutritionCalculationEngine(),
     this.policy = const MealCompositionPolicy(),
-  }) : _nutritionEngine = nutritionEngine;
+  });
 
   MealCompositionReport analyze(Iterable<MealCompositionItem> items) {
     final materialized = List<MealCompositionItem>.unmodifiable(items);

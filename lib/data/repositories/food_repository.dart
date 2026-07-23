@@ -24,15 +24,11 @@ class FoodRepository implements UnifiedFoodRepository {
 
   FoodRepository(
     this._database, {
-    UnifiedFoodAdapter adapter = const UnifiedFoodAdapter(),
-    OfflineFoodSearchPipeline searchPipeline =
-        const OfflineFoodSearchPipeline(),
-    OfflineBarcodeResolver barcodeResolver = const OfflineBarcodeResolver(),
-    FoodAccessEngine foodAccessEngine = const FoodAccessEngine(),
-  }) : _adapter = adapter,
-       _searchPipeline = searchPipeline,
-       _barcodeResolver = barcodeResolver,
-       _foodAccessEngine = foodAccessEngine;
+    this._adapter = const UnifiedFoodAdapter(),
+    this._searchPipeline = const OfflineFoodSearchPipeline(),
+    this._barcodeResolver = const OfflineBarcodeResolver(),
+    this._foodAccessEngine = const FoodAccessEngine(),
+  });
 
   Future<int> addFood({
     required String name,
