@@ -83,3 +83,17 @@ Corrected AI-007 test fixtures to provide the required local evidence `source`; 
 - Scope: deterministic truth report integrity validation.
 - Production: immutable issue/result contracts and pure validator.
 - Verification: focused tests, complete AI tests, Commerce regressions, analyze, full tests, and diff integrity.
+
+
+## BIL-AI-009
+
+- Parent HEAD: `0bd4cb3c38be919ae6d139bba6700a1dd8ed394a`
+- Scope: immutable truth evaluation gate result and pure gate service.
+- Production mutation outside AI Platform: none.
+- Verification: focused gate tests, complete AI tests, Commerce regression, analyzer, full project tests, and diff integrity.
+- Status: package issued; pending Product Owner verification and commit.
+
+
+## BIL-AI-009-R1
+
+Corrected the AI-009 regression fixture to use the repository-owned `TruthSignalDirection.supports` enum member. Production contracts and behavior are unchanged.

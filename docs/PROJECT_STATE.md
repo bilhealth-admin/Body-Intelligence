@@ -62,3 +62,13 @@ Corrected AI-007 test fixtures to provide the required local evidence `source`; 
 ## BIL-AI-008 State
 
 Parent HEAD: `396c3c1d091e60551e3e64ab16a945af4a6efcf6`. AI-008 adds a pure integrity validator for the existing truth evaluation report. The validator reports explainable issues and does not mutate or replace Truth Engine outputs.
+
+
+## BIL-AI-009 State
+
+Parent HEAD: `0bd4cb3c38be919ae6d139bba6700a1dd8ed394a`. AI-009 adds a pure local gate that converts report-integrity validation into an explicit proceed/reject contract. Rejected reports remain inspectable for diagnostics, while downstream code receives a stable `canProceed` boundary.
+
+
+## BIL-AI-009-R1
+
+Corrected the AI-009 regression fixture to use the repository-owned `TruthSignalDirection.supports` enum member. Production contracts and behavior are unchanged.

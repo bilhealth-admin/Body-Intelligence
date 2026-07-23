@@ -51,3 +51,13 @@ Corrected AI-007 test fixtures to provide the required local evidence `source`; 
 ## ADR — Truth reports are validated without changing evaluation policy
 
 `TruthEvaluationValidator` observes an existing `TruthEvaluationReport` and emits ordered integrity issues. It does not recompute Truth Engine thresholds, rewrite assessments, rank actions, access external providers, or persist data. This keeps validation explainable and prevents a second truth policy from emerging.
+
+
+## ADR — Integrity validation must become an explicit consumption gate
+
+Truth report validation remains a pure diagnostic operation. AI-009 adds a separate gate result whose status is derived only from the validator output. The original report and all integrity issues are preserved; the gate does not repair, reinterpret, rank, or mutate truth output. This keeps validation explainable and prevents silent consumption of inconsistent reports.
+
+
+## BIL-AI-009-R1
+
+Corrected the AI-009 regression fixture to use the repository-owned `TruthSignalDirection.supports` enum member. Production contracts and behavior are unchanged.

@@ -61,3 +61,15 @@ Corrected AI-007 test fixtures to provide the required local evidence `source`; 
 - Validation checks internal report consistency only; it does not certify scientific correctness of rule definitions.
 - Balanced conflict tolerance remains owned by `TruthConflictAnalyzer`; AI-008 validates structural consistency rather than introducing a duplicate tolerance policy.
 - No persistence, telemetry, provider integration, recommendation ranking, UI, or medical inference is included.
+
+
+## BIL-AI-009 limitations
+
+- The gate validates internal report consistency only; it does not establish medical truth.
+- It does not repair rejected reports or choose fallback recommendations.
+- It is local, in-memory, provider-neutral, clock-free, random-free, and persistence-free.
+
+
+## BIL-AI-009-R1
+
+Corrected the AI-009 regression fixture to use the repository-owned `TruthSignalDirection.supports` enum member. Production contracts and behavior are unchanged.

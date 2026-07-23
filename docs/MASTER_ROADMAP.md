@@ -63,3 +63,13 @@ Corrected AI-007 test fixtures to provide the required local evidence `source`; 
 ## BIL-AI-008 — Truth Evaluation Integrity Foundation
 
 Status: implementation package issued. Adds deterministic validation of provenance coverage, conflict arithmetic/status, assessment direction, and evidence cardinality for `TruthEvaluationReport`. It introduces no inference policy, provider, prompt, cloud, persistence, UI, ranking, or medical conclusion.
+
+
+## BIL-AI-009 — Validated Truth Evaluation Gate Foundation
+
+Status: implementation package issued. Adds an explicit immutable accept/reject boundary over `TruthEvaluationValidator`, preserving the original report and explainable integrity issues. It introduces no new inference, recommendation policy, provider, prompt, cloud, persistence, UI, or medical conclusion.
+
+
+## BIL-AI-009-R1
+
+Corrected the AI-009 regression fixture to use the repository-owned `TruthSignalDirection.supports` enum member. Production contracts and behavior are unchanged.
