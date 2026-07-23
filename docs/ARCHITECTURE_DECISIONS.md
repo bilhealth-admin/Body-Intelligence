@@ -69,3 +69,11 @@ AI-010 composes the existing truth evaluation gate and decision explainer withou
 
 ## ADR — Test fixtures must instantiate current domain contracts
 AI Platform verification fixtures must use the exact repository-owned constructor contracts. A fixture mismatch is corrected in tests; production models are never weakened to accommodate stale tests.
+
+## ADR — Validate decision fidelity after the integrity gate
+
+The Truth pipeline now has two independent safety boundaries: report integrity before decision production, and decision fidelity after production. The second validator is observational only: it never repairs, replaces, ranks, persists, or forwards a decision. This preserves deterministic explainability and allows later consumers to reject inconsistent output explicitly.
+
+
+### AI-011-R1 — Preserve integrity issue subject identity
+Tests constructing `TruthIntegrityIssue` must provide the same explicit `subjectKey` required by production. The production contract is not weakened for fixture convenience.

@@ -80,3 +80,11 @@ Parent HEAD: `8deff82d1eb41fa5d9d9959a5d2a5ebf274a4283`. AI-010 adds an explicit
 
 ## AI-010 R1 State
 AI-010 production files are applied and unchanged. R1 corrects compile-invalid focused-test fixtures discovered by verification. AI-010 is not complete until every original verification gate passes.
+
+## BIL-AI-011 State
+
+Parent HEAD: `14346ea4ea98033f6eab07dade96234cc6e9d7cd`. AI-011 adds deterministic validation of the existing truth-decision output. Rejected integrity gates remain safe because no decision escaped; accepted outcomes are checked for exact explainability fidelity. Existing AI contracts and protected systems remain unchanged.
+
+
+### BIL-AI-011-R1 verification correction
+The AI-011 production implementation remains unchanged. R1 aligns one focused test fixture with the current `TruthIntegrityIssue` constructor contract by supplying `subjectKey`.

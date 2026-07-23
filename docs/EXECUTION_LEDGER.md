@@ -112,3 +112,16 @@ Corrected the AI-009 regression fixture to use the repository-owned `TruthSignal
 - Change: tests only; add required `rationale`, `missingEvidence`, proposition `description`, and rule `strength`.
 - Production behavior: unchanged.
 - Status: pending Product Owner verification.
+
+## BIL-AI-011 — Issued
+
+- Parent HEAD: `14346ea4ea98033f6eab07dade96234cc6e9d7cd`
+- Scope: truth-decision integrity result and pure validator.
+- Production changes are isolated to `lib/features/ai_platform/`.
+- Focused tests cover valid action, valid abstention, rejected gates, and forged mismatches.
+- Full AI, Commerce, analyzer, full-project, and diff gates remain mandatory.
+
+
+## BIL-AI-011-R1
+- Corrected the focused validator test fixture to provide the repository-required `TruthIntegrityIssue.subjectKey`.
+- No production behavior or architecture changed.

@@ -81,3 +81,10 @@ Status: implementation package issued. Adds a pure local pipeline that validates
 
 ## BIL-AI-010-R1 Verification Correction
 AI-010 remains the active package. R1 aligns focused-test fixtures with the repository contracts for `TruthAssessment`, `TruthConflictAnalysis`, `TruthProposition`, and `TruthRule`; production scope is unchanged.
+
+## BIL-AI-011 — Truth Decision Integrity Foundation
+
+Status: implementation package issued. Adds a pure validator that verifies the integrity-gated decision preserves the accepted Truth assessment's disposition, rationale, evidence, confidence mapping, and missing-evidence disclosure. It introduces no ranking, provider, prompt, cloud, persistence, UI, medical inference, or state mutation.
+
+
+- BIL-AI-011-R1: focused verification correction for the required integrity-issue subject identity; production scope unchanged.

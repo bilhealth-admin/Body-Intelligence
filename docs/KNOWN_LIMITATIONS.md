@@ -83,3 +83,14 @@ Corrected the AI-009 regression fixture to use the repository-owned `TruthSignal
 
 ## AI-010 R1
 No new production limitation. The original AI-010 focused tests contained stale constructor arguments and could not compile; R1 corrects those fixtures without changing runtime behavior.
+
+## BIL-AI-011 limitations
+
+- Validation is structural and deterministic; it is not clinical validation.
+- Candidate identity and ranking are intentionally outside scope.
+- No persistence, audit store, provider integration, prompt execution, UI, or user-state mutation is included.
+- Evidence values are compared with their existing Dart equality semantics.
+
+
+### BIL-AI-011-R1
+No new product limitation. This revision only repairs a compile-time test-fixture mismatch.
