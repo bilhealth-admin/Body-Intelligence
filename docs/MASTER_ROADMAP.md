@@ -105,3 +105,7 @@ Status: implementation package issued. Adds deterministic validation and an expl
 ## BIL-AI-015 — Trusted Truth Decision Orchestrator Foundation
 
 Status: implementation package issued. Adds one final local orchestration boundary over the established AI-013 pipeline and AI-014 integrity gate. It exposes a decision only after every existing Truth/Explain validation boundary accepts the same immutable pipeline result. No ranking, Body Twin, Decision Memory, provider, prompt, cloud, persistence, UI, or medical inference is introduced.
+
+## BIL-AI-016 — Truth/Explain Foundation Public Boundary and Reconciliation
+
+Status: implementation package issued. Adds the stable public consumer facade over the fully trusted AI-015 pipeline and reconciles the completed deterministic Truth/Explain foundation. It introduces no Body Twin state, Decision Memory, One Best Action ranking, providers, prompts, cloud, persistence, UI, or medical inference. After verification and commit, the next authorized AI work is the first repository-defined Body Twin foundation package.

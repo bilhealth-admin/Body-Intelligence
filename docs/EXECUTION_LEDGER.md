@@ -156,3 +156,12 @@ Corrected the AI-009 regression fixture to use the repository-owned `TruthSignal
 - Scope: AI Platform domain/service orchestration plus focused and regression tests.
 - Production mutation outside AI Platform: none.
 - Verification: package format, focused AI-015 tests, complete AI Platform tests, Commerce regression, analyzer, complete project tests, and diff integrity.
+
+## BIL-AI-016 — Truth/Explain Foundation Public Boundary and Reconciliation
+
+- Parent HEAD: `50f450ee4b01ee0bfef3d21cf4222becfe85493c`.
+- Adds a stable public facade over the trusted AI-015 orchestration boundary.
+- Adds immutable public outcome classification: action, abstention, rejected.
+- Preserves the complete underlying trusted result for explainability and diagnostics.
+- Non-scope: Body Twin state, Decision Memory, One Best Action ranking, AI Coach, prompts, providers, cloud, persistence, UI, and medical inference.
+- Next after successful verification and commit: first repository-defined Body Twin foundation package.

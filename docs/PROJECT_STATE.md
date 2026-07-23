@@ -105,3 +105,7 @@ Parent HEAD: `3419142b5be77f1e7a7ed24516461c13e8886817`. AI-014 adds a pure vali
 ## BIL-AI-015 State
 
 Parent HEAD: `022911ef3524eda159203be6c1294bb5ff7c009d`. AI-015 adds `TrustedTruthDecisionPipeline` and `TrustedTruthDecisionResult` as a thin final consumption boundary over AI-013 and AI-014. Existing engines and gates remain independently usable and unchanged.
+
+## BIL-AI-016 State
+
+Parent HEAD: `50f450ee4b01ee0bfef3d21cf4222becfe85493c`. AI-016 adds a stable public `TruthExplainFoundation` facade over AI-015 and an immutable public outcome classification for action, safe abstention, or rejection. The package closes and reconciles the local deterministic Truth/Explain foundation without adding policy or cross-feature integration.

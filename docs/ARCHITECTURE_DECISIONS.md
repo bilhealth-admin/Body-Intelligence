@@ -94,3 +94,7 @@ The AI-013 pipeline result is not treated as an implicitly trusted transport obj
 ## ADR — AI-015 final trusted orchestration remains policy-free
 
 AI-015 composes the existing AI-013 pipeline and AI-014 integrity gate rather than duplicating any evaluator, validator, or decision policy. The final result exposes a value only when the complete established chain permits it; safe abstention remains explicit and inspectable.
+
+## ADR — Close Truth/Explain behind one stable public foundation boundary
+
+Downstream AI components must depend on `TruthExplainFoundation` rather than reconstructing the internal AI-001 through AI-015 pipeline. The facade remains a thin delegate and may classify only the already validated trusted outcome as action, abstention, or rejection. It may not rank candidates, infer new facts, mutate state, use providers, persist data, or bypass any integrity gate.

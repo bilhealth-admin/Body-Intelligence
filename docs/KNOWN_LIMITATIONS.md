@@ -115,3 +115,7 @@ The pipeline accepts caller-owned supported and contradicted candidates but does
 - The trusted orchestrator composes existing local contracts only; it does not rank actions or introduce product policy.
 - No production feature currently supplies real user-domain Truth rules to this boundary.
 - Body Twin, Decision Memory, One Best Action, AI Coach, providers, prompts, cloud, persistence, and UI remain outside scope.
+
+## BIL-AI-016 limitations
+
+The stable Truth/Explain facade classifies only outcomes already validated by AI-001 through AI-015. It does not create or persist a Body Twin, remember decisions, rank alternatives, select One Best Action, coach the user, invoke prompts/providers, access cloud services, or present UI. Candidate actions remain caller-owned.
