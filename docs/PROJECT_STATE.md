@@ -169,3 +169,7 @@ Delivery candidate closes Body Twin at the deterministic local engine boundary. 
 ## BIL-AI-033 — AI Context Engine Closure
 
 Issued against parent HEAD `a980f73b8ec695e494d9a7c19e14584c67278670`. AI Context Engine is complete at the local deterministic boundary with immutable bounded context, explicit provenance, missing-context evidence, future-memory exclusion, integrity validation, and a trusted consumption gate. Next engine: Tissue and Water Noise Isolation.
+
+## BIL-AI-034-R2 delivery candidate
+
+Tissue and Water Noise Isolation is implemented at a deterministic local boundary. It consumes accepted AI Context trends, requires caller-supported tissue evidence, preserves uncertainty and alternative explanations, and blocks incomplete or rejected context. Next engine after Product Owner acceptance: Adaptive Metabolic Forecasting.

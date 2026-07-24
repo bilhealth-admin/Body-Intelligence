@@ -279,3 +279,10 @@ Adds immutable outcome transitions and deterministic append-only reconciliation 
 - Production: immutable context/provenance/result contracts, integrity validator, deterministic bounded engine.
 - Gates: focused tests, regression tests, complete AI Platform suite, analyze, full test, exact diff scope.
 - Status: delivery candidate; Product Owner verification required.
+
+### BIL-AI-034-R2 — Tissue and Water Noise Isolation
+
+- Parent HEAD: `f089a5f53d76d8b09e78fbf3dff90fb60ebbd935`
+- Scope: immutable analysis and policy contracts, deterministic residual isolation engine, integrity validator, focused tests, regression tests, living-document reconciliation.
+- Exit: accepted context plus supported tissue evidence yields reproducible classification; missing evidence or rejected context abstains/rejects; uncertainty and alternatives remain explicit.
+- Non-scope: metabolic forecasting, recommendations, diagnosis, persistence, providers, prompts, cloud, and UI.

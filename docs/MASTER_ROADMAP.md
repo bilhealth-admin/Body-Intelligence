@@ -171,3 +171,7 @@ Status: implementation package issued against parent HEAD `dd658deb90262ed2cb0e9
 ## BIL-AI-033 — AI Context Engine Closure
 
 AI Context Engine is closed at the deterministic local boundary. It admits only accepted Truth/Explain, Body Twin, and Decision Memory outputs; preserves provenance and missing-context evidence; bounds historical context; and exposes downstream context only after integrity validation. No prompt, provider, persistence, cloud, UI, recommendation, forecast, or diagnosis behavior is introduced.
+
+## BIL-AI-034-R2 — Tissue and Water Noise Isolation
+
+Status: implementation package issued against parent HEAD `f089a5f53d76d8b09e78fbf3dff90fb60ebbd935`. Closes the deterministic local isolation boundary by separating observed scale change into caller-supported tissue change and residual water/noise, while exposing uncertainty, alternative explanations, evidence, and abstention. No forecasting, diagnosis, persistence, provider, prompt, cloud, recommendation, or UI behavior is introduced.

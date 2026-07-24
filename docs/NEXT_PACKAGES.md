@@ -2,12 +2,12 @@
 
 ## Current delivery candidate
 
-`BIL-AI-033` closes AI Context Engine in one integrated package.
+`BIL-AI-034-R2` closes Tissue and Water Noise Isolation in one integrated package.
 
 ## Next authorized package
 
-`BIL-AI-034` — complete and close Tissue and Water Noise Isolation in one integrated package, using accepted Body Twin and AI Context outputs without forecasting or medical diagnosis.
+`BIL-AI-035` — complete and close Adaptive Metabolic Forecasting in one integrated package using accepted AI Context and Tissue/Water Noise outputs with explicit assumptions, horizons, confidence, and abstention.
 
 ## Remaining engine order
 
-Tissue and Water Noise Isolation → Adaptive Metabolic Forecasting → One Best Action → AI Safety Layer → Automated Health Insight Summaries → AI Coach → Prompt Engine → AI Cost Optimizer → Proprietary BIL Intelligence → Scientific Validation & Explainability → Final Integration and AI Platform Closure.
+Adaptive Metabolic Forecasting → One Best Action → AI Safety Layer → Automated Health Insight Summaries → AI Coach → Prompt Engine → AI Cost Optimizer → Proprietary BIL Intelligence → Scientific Validation & Explainability → Final Integration and AI Platform Closure.

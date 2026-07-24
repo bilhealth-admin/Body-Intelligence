@@ -186,3 +186,7 @@ Body Twin is closed only at the deterministic local evidence engine boundary. It
 ## AI Context Engine boundary after BIL-AI-033
 
 AI Context is local, deterministic, immutable, and provider-neutral. It does not persist data, call an LLM, generate prompts, forecast physiology, isolate tissue/water noise, recommend actions, diagnose conditions, or mutate product state. Context completeness depends on accepted upstream engine outputs and caller-declared required keys.
+
+## BIL-AI-034-R2 limitations
+
+The engine isolates a residual water/noise component only from accepted factual weight observations and a caller-supported tissue-change estimate. It does not diagnose fluid disorders, infer sodium/glycogen physiology, create a tissue estimate, interpolate missing values, forecast metabolism, persist results, call providers, or recommend actions.

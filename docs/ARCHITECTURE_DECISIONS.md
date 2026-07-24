@@ -158,3 +158,7 @@ BIL-AI-032 closes the local Body Twin Engine by composing, not replacing, the ac
 ## ADR — AI Context remains a local deterministic projection
 
 AI Context may consume only accepted local engine outputs. Missing inputs are evidence, not values to infer. Decision history is caller-bounded and future records are excluded. LLMs, prompts, providers, persistence, cloud services, recommendations, forecasts, diagnosis, and UI mutation remain outside this engine boundary.
+
+## ADR — Caller-supported tissue estimate and residual water/noise isolation
+
+BIL-AI-034-R2 does not invent physiological tissue change. It accepts a caller-supported tissue-change estimate with evidence identifiers, computes the residual against observed accepted weight change, and classifies dominance using caller-owned policy. Missing or stale evidence produces insufficiency rather than false precision.
