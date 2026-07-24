@@ -150,3 +150,7 @@ Decision Memory exports a schema-versioned primitive map and reconstructs throug
 ## ADR — Decision Memory retention is lossless movement, never deletion
 
 Decision Memory compaction separates active records from immutable audit records while preserving every record and transition exactly once. Retention policy is caller-owned and deterministic. The domain exposes no silent deletion operation; database, filesystem, encryption, synchronization, and cloud adapters remain outside the engine boundary.
+
+## ADR — Body Twin closes through snapshot/history reconciliation
+
+BIL-AI-032 closes the local Body Twin Engine by composing, not replacing, the accepted snapshot trust pipeline and trend-ready factual history. The closure validator requires the latest observation for every accepted snapshot metric to match the trend state exactly and rejects unexpected or missing trend projections. This boundary remains deterministic and offline-only and deliberately excludes interpolation, forecasting, tissue/water interpretation, recommendation, persistence, providers, and medical inference.

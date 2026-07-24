@@ -262,3 +262,12 @@ Adds immutable outcome transitions and deterministic append-only reconciliation 
 - Adds an integrity gate for exact record, transition, rationale, confidence, and evidence preservation.
 - Decision Memory exit criteria are complete at the persistence-neutral local engine boundary.
 - Next after Product Owner verification and commit: `BIL-AI-032` Body Twin Engine closure.
+
+## BIL-AI-032 — Body Twin Engine Closure
+
+- Parent HEAD: `dd658deb90262ed2cb0e99d7012d1d87578541d2`
+- Scope: close the existing local deterministic Body Twin Engine without reimplementing accepted foundations.
+- Production: engine result, closure-integrity validator, and complete composition root.
+- Verification: focused closure tests, Body Twin regression suite, complete AI Platform suite, analyze, full test suite, and exact diff scope.
+- Non-scope: tissue/water isolation, forecasting, context, recommendations, providers, prompts, persistence, cloud, UI, and medical inference.
+- Next after Product Owner verification and commit: `BIL-AI-033` AI Context Engine.

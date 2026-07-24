@@ -178,3 +178,7 @@ The public facade is local and in-memory. It does not provide durable persistenc
 ## BIL-AI-031 limitations
 
 Decision Memory is complete as a deterministic local domain engine, but this package intentionally does not choose a database, filesystem, encryption mechanism, synchronization protocol, cloud adapter, UI, or causal outcome inference. Retention compaction never deletes audit evidence; external lifecycle deletion requires a separate user-data governance boundary.
+
+## BIL-AI-032 Body Twin closure boundary
+
+Body Twin is closed only at the deterministic local evidence engine boundary. It assembles and validates caller-provided observations, applies caller-owned freshness and consistency policy, preserves trend-ready factual history, and verifies snapshot/history reconciliation. It does not isolate tissue or water noise, interpolate missing values, forecast metabolism, infer medical meaning, rank actions, persist data, invoke providers/prompts, use cloud transport, or present UI.

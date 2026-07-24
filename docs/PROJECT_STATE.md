@@ -161,3 +161,7 @@ Issued against parent HEAD `74dbaf8f0b59797a4949981325581e0b353df82f`. Decision 
 ## BIL-AI-031 delivery candidate
 
 Decision Memory is complete at the local engine boundary: immutable records, append-only outcomes, deterministic retrieval, public history projection, schema-versioned export/import, explainable retention decisions, lossless compaction, and compaction integrity validation. Next engine: Body Twin closure in BIL-AI-032.
+
+## BIL-AI-032 — Body Twin Engine Closure
+
+Delivery candidate closes Body Twin at the deterministic local engine boundary. `BodyTwinEngine` exposes one immutable result that preserves the trusted snapshot outcome and trend-ready history, with downstream use permitted only when closure invariants confirm that the accepted latest snapshot exactly matches the latest factual trend observations. The next authorized engine is AI Context Engine.

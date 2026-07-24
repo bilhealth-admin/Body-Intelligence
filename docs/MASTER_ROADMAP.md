@@ -163,3 +163,7 @@ Adds a deterministic, persistence-neutral archive contract for immutable decisio
 ## BIL-AI-031 — Decision Memory Engine Closure
 
 Closes the local deterministic Decision Memory Engine with caller-owned retention policy, explainable per-record retention decisions, lossless active/audit compaction, and an integrity gate that rejects missing, duplicate, unknown, or mutated audit evidence. Durable storage adapters, encryption, synchronization, and cross-feature outcome ingestion remain platform integration concerns rather than Decision Memory domain gaps.
+
+## BIL-AI-032 — Body Twin Engine Closure
+
+Status: implementation package issued against parent HEAD `dd658deb90262ed2cb0e99d7012d1d87578541d2`. Completes the repository-supported local Body Twin Engine by composing the accepted snapshot trust chain with immutable trend-ready factual history and an explicit closure-integrity validator. Existing snapshot construction, provenance, integrity, freshness, consistency, trusted composition, public facade, and trend-state foundations are reused without reimplementation. No forecasting, tissue/water inference, persistence, provider, prompt, cloud, recommendation, diagnosis, or UI behavior is introduced.
