@@ -154,3 +154,7 @@ Status: delivery candidate. Exit criteria: immutable transition contract; determ
 ### BIL-AI-029-R2 — Decision Memory public facade and history projection
 
 Status: delivery candidate. Adds one stable local boundary that exposes immutable decision records together with their validated append-only outcome history and deterministic current-state projection. No persistence, recommendation, forecasting, provider, prompt, cloud, UI, or medical inference is introduced.
+
+## BIL-AI-030-R1 — Decision Memory Export/Import Contract
+
+Adds a deterministic, persistence-neutral archive contract for immutable decision records and append-only outcome histories. Exact current-state reconstruction, duplicate rejection, transition ordering, and schema validation are test-gated. Storage technology, retention, encryption, cloud sync, and cross-feature ingestion remain outside this package.

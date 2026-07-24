@@ -167,3 +167,9 @@ Outcome reconciliation is in-memory and persistence-neutral. It does not ingest 
 ## BIL-AI-029-R2 limitations
 
 The public facade is local and in-memory. It does not provide durable persistence, serialization, migrations, retention policy, cross-device synchronization, outcome ingestion, causal inference, recommendation selection, forecasting, provider access, prompts, cloud transport, UI, or medical interpretation.
+
+## BIL-AI-030-R1 limitations
+
+- The archive contract does not persist data by itself.
+- No database, filesystem, encryption, retention, migration beyond schema version 1, sync, or cloud adapter is selected.
+- Import is intentionally fail-fast and atomic only with respect to the newly constructed in-memory facade.

@@ -141,3 +141,7 @@ BIL-AI-028-R1 preserves every `DecisionMemoryRecord` as immutable history. Outco
 ## ADR — Decision Memory consumers use one stable local facade
 
 BIL-AI-029-R2 composes the existing immutable record store and append-only outcome reconciler behind a stable public boundary. The facade projects each record with its validated transition history and current state, but does not duplicate transition policy or introduce persistence, ranking, forecasting, provider, prompt, cloud, or medical behavior.
+
+## ADR — Decision Memory persistence-neutral archive boundary
+
+Decision Memory exports a schema-versioned primitive map and reconstructs through the existing `DecisionMemory` facade. Import deliberately reuses established record duplicate rejection and outcome-transition policy instead of bypassing domain rules. No storage adapter is selected in AI Platform.

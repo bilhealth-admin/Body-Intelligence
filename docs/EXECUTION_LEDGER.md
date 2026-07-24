@@ -244,3 +244,11 @@ Adds immutable outcome transitions and deterministic append-only reconciliation 
 - Adds stable `DecisionMemory` facade over the existing store and reconciler.
 - Preserves deterministic ordering, append-only transitions, and explicit unknown-record rejection.
 - Does not add persistence, providers, recommendations, forecasts, prompts, cloud, UI, or medical inference.
+
+## BIL-AI-030-R1
+
+- Parent HEAD: `74dbaf8f0b59797a4949981325581e0b353df82f`
+- Capability: Decision Memory deterministic export/import contract.
+- Production: immutable archive envelope and persistence-neutral codec.
+- Gates: focused round-trip and ordering tests; regression duplicate, schema, and transition-policy tests; AI Platform suite; analyze; full tests; exact diff scope.
+- Status: ready for Product Owner application and verification.

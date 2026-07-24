@@ -152,3 +152,7 @@ Issued against parent HEAD `3898b7dde9a47f0ff2a94e18335fde9e6cafd6b9`. Decision 
 ## BIL-AI-029-R2 State
 
 Parent HEAD: `ac12875d1432c8d441fcd57d6d1998dbd4b3dcb0`. Decision Memory now has a stable local facade over the existing immutable record store and append-only outcome reconciler. The package preserves deterministic retrieval and complete transition evidence. Durable persistence and retention remain outside this package.
+
+## BIL-AI-030-R1 State
+
+Issued against parent HEAD `74dbaf8f0b59797a4949981325581e0b353df82f`. Decision Memory now exposes a deterministic schema-versioned export/import boundary suitable for future local persistence adapters. The package does not select a database, filesystem, cloud provider, retention policy, or encryption mechanism.
