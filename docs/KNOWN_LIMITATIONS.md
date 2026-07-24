@@ -151,3 +151,6 @@ The freshness gate evaluates only caller-supplied maximum ages against the accep
 - Consistency rules are caller supplied and are not universal physiological or diagnostic ranges.
 - Units are compared exactly; no conversion or normalization is performed.
 - The engine evaluates one snapshot only and does not infer trends, tissue state, water noise, or forecasts.
+
+## BIL-AI-023 limitations
+The trusted snapshot pipeline performs no unit conversion, trend inference, tissue/water isolation, forecasting, persistence, provider access, recommendation, or medical inference. Policies remain caller-owned.

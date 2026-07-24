@@ -137,3 +137,6 @@ Status: implementation package issued against parent `5967bb068c4a3d8f009edfb8e6
 ## BIL-AI-022 — Body Twin Consistency Engine Foundation
 
 Status: implementation package issued against parent `e8405282c17b7ad7a0e2c9a96cb62e4aba610e25`. Adds explicit caller-owned unit and optional bounded-value consistency rules over the accepted fresh Body Twin snapshot. Inconsistent or unconfigured metrics remain explainable and block downstream consumption. No unit conversion, diagnosis, repair, trend inference, forecasting, persistence, provider, prompt, UI, recommendation, or medical interpretation is introduced.
+
+## BIL-AI-023 — Trusted Body Twin Snapshot Pipeline
+Completed: deterministic offline composition of the existing Body Twin foundation, freshness, and consistency gates into one evidence-preserving result.

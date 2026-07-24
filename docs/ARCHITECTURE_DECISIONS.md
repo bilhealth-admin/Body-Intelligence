@@ -124,3 +124,6 @@ BIL-AI-021 does not embed universal freshness assumptions inside the AI Platform
 ## ADR — Body Twin consistency remains caller-owned deterministic policy
 
 BIL-AI-022 layers a pure local consistency gate over the already integrity- and freshness-accepted Body Twin snapshot. Metric units and optional minimum/maximum bounds are supplied by the caller; the AI Platform does not invent physiological ranges, convert units, repair values, diagnose conditions, or infer trends. Missing policy, unit mismatch, and out-of-bound values remain explicit and block downstream consumption.
+
+## ADR — Compose Body Twin trust gates without duplicating policy
+BIL-AI-023 introduces a pure composition root that delegates to the existing foundation, freshness, and consistency engines. The pipeline preserves their evidence objects and does not recreate or weaken policy.
