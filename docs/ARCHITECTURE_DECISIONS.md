@@ -191,3 +191,6 @@ AI Cost Optimizer closed with deterministic local-first routing, explicit budget
 
 ## ADR — Proprietary intelligence is synthesis, not a new truth source
 BIL proprietary intelligence may combine only trusted caller-supplied local engine signals. It preserves signal and evidence provenance, applies deterministic confidence and size policies, and abstains when required inputs are absent. It does not call providers, invent facts, override upstream safety, or become an opaque source of truth.
+
+## ADR — Scientific claims require explicit evidence and uncertainty
+Scientific Validation & Explainability never promotes an unsupported claim. Every validated record preserves claim strength, evidence identifiers, assumptions, confidence, and uncertainty disclosures. Missing evidence, low confidence, oversized input, or integrity failure results in abstention or rejection rather than invented support.

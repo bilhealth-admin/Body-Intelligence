@@ -219,3 +219,8 @@ AI Cost Optimizer closed with deterministic local-first routing, explicit budget
 
 ## BIL-AI-042 limitations
 The engine does not discover signals, infer clinical policy, call an LLM/provider, persist results, create recommendations, or override upstream engines. Required signal identifiers, confidence thresholds, and output bounds remain caller-owned.
+
+## BIL-AI-043 limitations
+- Evidence identifiers remain caller-supplied; this package does not retrieve or rank external literature.
+- The engine validates traceability and reproducibility contracts, not clinical truth beyond trusted upstream evidence.
+- No provider, network, diagnostic, persistence, or Cloud behavior is introduced.

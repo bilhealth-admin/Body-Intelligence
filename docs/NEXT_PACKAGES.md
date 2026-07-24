@@ -2,12 +2,12 @@
 
 ## Current delivery candidate
 
-`BIL-AI-042` closes Proprietary BIL Intelligence with deterministic synthesis over trusted local engines, explicit provenance, confidence gating, bounded output, and abstention.
+`BIL-AI-043` closes Scientific Validation & Explainability with deterministic validation records, evidence traceability, reproducible claims, uncertainty disclosure, and explicit abstention.
 
 ## Next authorized package
 
-`BIL-AI-043` — complete and close Scientific Validation & Explainability with deterministic validation records, evidence traceability, reproducible claims, uncertainty disclosure, and explicit abstention.
+`BIL-AI-044` — Final Integration and AI Platform Closure. It must reconcile all completed local engines behind an explicit integration boundary, verify closure criteria, preserve engine independence, and formally close AI Platform without entering Cloud Platform.
 
 ## Remaining engine order
 
-Scientific Validation & Explainability → Final Integration and AI Platform Closure.
+Final Integration and AI Platform Closure.
