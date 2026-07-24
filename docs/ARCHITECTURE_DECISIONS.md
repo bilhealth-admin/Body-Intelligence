@@ -211,3 +211,6 @@ Adds the offline local repository projection, physiological tissue/water attribu
 ## BIL-IRC-002-R1 — Complete Local Intelligence Engine Wiring and Reality Gate
 
 Status: Ready for Product Owner verification on parent HEAD 4ddf5582616bdee7101e5e5e941d5012c210137d. The local runtime now wires actual closed AI Platform engines, loads local Decision Memory, applies asOf upper bounds, and routes actions through AI Safety before integration.
+
+## ADR — Product Intelligence Behavioral Reality Boundary
+Product output must be translated from accepted engine results rather than fixed signals. Plateau risk is a deterministic fusion of observed slowdown, recent flatness, supported energy balance, forecast acceptance, and physiology confidence. Sodium and potassium are opposing explicit water-noise drivers. Decision Memory outcomes modify candidate benefit/confidence before deterministic ranking, while AI Safety remains the final acceptance gate.

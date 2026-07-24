@@ -246,3 +246,6 @@ The local physiology runtime estimates transient mass from explicit local intake
 ## BIL-IRC-002-R1 — Complete Local Intelligence Engine Wiring and Reality Gate
 
 Status: Ready for Product Owner verification on parent HEAD 4ddf5582616bdee7101e5e5e941d5012c210137d. The local runtime now wires actual closed AI Platform engines, loads local Decision Memory, applies asOf upper bounds, and routes actions through AI Safety before integration.
+
+## BIL-IRC-003 boundaries
+The local behavioral model is deterministic and offline. It does not diagnose, prescribe medication, infer unlogged data, contact providers, or use cloud/LLM services. Forecast and action output abstain when accepted upstream evidence is unavailable.

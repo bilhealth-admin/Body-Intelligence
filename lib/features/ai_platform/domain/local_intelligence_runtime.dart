@@ -76,6 +76,7 @@ final class PhysiologicalNoiseEstimate {
     required this.waterAndGlycogenNoiseKg,
     required this.digestiveMassNoiseKg,
     required this.sodiumDriverKg,
+    required this.potassiumDriverKg,
     required this.carbohydrateDriverKg,
     required this.hydrationDriverKg,
     required this.confidence,
@@ -87,6 +88,7 @@ final class PhysiologicalNoiseEstimate {
   final double waterAndGlycogenNoiseKg;
   final double digestiveMassNoiseKg;
   final double sodiumDriverKg;
+  final double potassiumDriverKg;
   final double carbohydrateDriverKg;
   final double hydrationDriverKg;
   final double confidence;

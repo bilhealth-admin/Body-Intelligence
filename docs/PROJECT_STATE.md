@@ -223,3 +223,6 @@ Adds the offline local repository projection, physiological tissue/water attribu
 ## BIL-IRC-002-R1 — Complete Local Intelligence Engine Wiring and Reality Gate
 
 Status: Ready for Product Owner verification on parent HEAD 4ddf5582616bdee7101e5e5e941d5012c210137d. The local runtime now wires actual closed AI Platform engines, loads local Decision Memory, applies asOf upper bounds, and routes actions through AI Safety before integration.
+
+## BIL-IRC-003 delivery candidate
+Parent HEAD: `fc1a2270bde13431576ad6aaccbb15627ccc1109`. Product-facing local intelligence now receives real accepted forecast points, deterministic plateau risk, electrolyte-balanced water-noise attribution, adaptive candidate generation, and Decision Memory ranking effects. Product Owner verification is required before Cloud Platform authorization.

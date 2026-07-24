@@ -56,6 +56,7 @@ final class PhysiologicalRealityModel {
         waterAndGlycogenNoiseKg: 0,
         digestiveMassNoiseKg: 0,
         sodiumDriverKg: 0,
+        potassiumDriverKg: 0,
         carbohydrateDriverKg: 0,
         hydrationDriverKg: 0,
         confidence: 0,
@@ -82,8 +83,11 @@ final class PhysiologicalRealityModel {
 
     final early = _window(relevant, true);
     final late = _window(relevant, false);
-    final sodium =
-        ((late.sodiumMg - early.sodiumMg) / 2300).clamp(-2.0, 2.0) * 0.22;
+    final sodiumDelta = (late.sodiumMg - early.sodiumMg) / 2300;
+    final potassiumDelta = (late.potassiumMg - early.potassiumMg) / 3500;
+    final sodium = sodiumDelta.clamp(-2.0, 2.0) * 0.24;
+    final potassium = (-potassiumDelta).clamp(-2.0, 2.0) * 0.16;
+    final electrolyteBalance = (sodium + potassium).clamp(-0.6, 0.6);
     final carbohydrate = ((late.carbsG - early.carbsG) * 0.003).clamp(
       -1.2,
       1.2,
@@ -94,7 +98,8 @@ final class PhysiologicalRealityModel {
       -0.45,
       0.45,
     );
-    final mechanistic = sodium + carbohydrate + hydration + digestive;
+    final mechanistic =
+        electrolyteBalance + carbohydrate + hydration + digestive;
     final residual = observed - tissue;
     final noise = (mechanistic * 0.6) + (residual * 0.4);
     final coverage = logged.length / math.max(1, relevant.length);
@@ -109,12 +114,13 @@ final class PhysiologicalRealityModel {
       waterAndGlycogenNoiseKg: noise,
       digestiveMassNoiseKg: digestive,
       sodiumDriverKg: sodium,
+      potassiumDriverKg: potassium,
       carbohydrateDriverKg: carbohydrate,
       hydrationDriverKg: hydration,
       confidence: confidence,
       explanations: [
         'Tissue change uses logged energy balance at 7700 kcal per kilogram.',
-        'Sodium driver compares recent and early intake against 2300 mg/day.',
+        'Sodium and potassium are modeled as opposing electrolyte water drivers.',
         'Carbohydrate driver models glycogen-bound water from intake change.',
         'Hydration and digestive-mass drivers remain explicit and independently inspectable.',
       ],
@@ -132,6 +138,7 @@ final class PhysiologicalRealityModel {
       caloriesKcal: _average(values.map((day) => day.caloriesKcal)),
       carbsG: _average(values.map((day) => day.carbsG)),
       sodiumMg: _average(values.map((day) => day.sodiumMg)),
+      potassiumMg: _average(values.map((day) => day.potassiumMg)),
       waterMl: _average(values.map((day) => day.waterMl.toDouble())),
     );
   }
@@ -147,10 +154,12 @@ final class _Window {
     this.caloriesKcal = 0,
     this.carbsG = 0,
     this.sodiumMg = 0,
+    this.potassiumMg = 0,
     this.waterMl = 0,
   });
   final double caloriesKcal;
   final double carbsG;
   final double sodiumMg;
+  final double potassiumMg;
   final double waterMl;
 }

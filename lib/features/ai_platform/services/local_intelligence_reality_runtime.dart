@@ -8,7 +8,6 @@ import '../domain/body_twin_consistency_result.dart';
 import '../domain/body_twin_freshness_result.dart';
 import '../domain/body_twin_observation.dart';
 import '../domain/local_intelligence_runtime.dart';
-import '../domain/one_best_action.dart';
 import '../domain/one_best_action_policy.dart';
 import '../domain/proprietary_bil_intelligence.dart';
 import '../domain/scientific_validation.dart';
@@ -26,6 +25,7 @@ import 'bil_intelligence_integration_engine.dart';
 import 'body_twin_engine.dart';
 import 'one_best_action_engine.dart';
 import 'physiological_reality_model.dart';
+import 'product_intelligence_behavior_model.dart';
 import 'proprietary_bil_intelligence_engine.dart';
 import 'scientific_validation_engine.dart';
 import 'tissue_water_noise_engine.dart';
@@ -39,7 +39,8 @@ final class BilLocalIntelligenceRealityRuntime {
 
   Future<ProductIntelligenceOutput> run({required DateTime asOf}) async {
     final timeline = await adapter.load(asOf: asOf);
-    final physiology = const PhysiologicalRealityModel();
+    const physiology = PhysiologicalRealityModel();
+    const behavior = ProductIntelligenceBehaviorModel();
     final tdee = physiology.adaptiveTdee(timeline);
     final estimate = physiology.analyze(timeline, tdeeKcal: tdee);
     final observations = <BodyTwinObservation>[
@@ -181,7 +182,20 @@ final class BilLocalIntelligenceRealityRuntime {
           : const ['local-energy-balance'],
       assumptionIds: const ['kcal-per-kg-7700', 'local-intake-completeness'],
     );
-    final candidates = _candidates(timeline, estimate);
+    final plateauRisk = behavior.plateauRisk(
+      timeline: timeline,
+      adaptiveTdeeKcal: tdee,
+      averageIntakeKcal: averageIntake,
+      forecastResult: forecast,
+      physiologyConfidence: estimate.confidence,
+    );
+    final candidates = behavior.candidates(
+      timeline: timeline,
+      estimate: estimate,
+      adaptiveTdeeKcal: tdee,
+      averageIntakeKcal: averageIntake,
+      plateauRisk: plateauRisk,
+    );
     final action = const OneBestActionEngine().select<String>(
       contextResult: context,
       forecastResult: forecast,
@@ -201,6 +215,12 @@ final class BilLocalIntelligenceRealityRuntime {
             description: 'Block aggressive deficit escalation.',
             severity: AiSafetySeverity.blocking,
             matches: (c) => c.id == 'deepen-deficit',
+          ),
+          AiSafetyRule(
+            id: 'unsafe-eligibility',
+            description: 'Block candidates that failed evidence eligibility.',
+            severity: AiSafetySeverity.blocking,
+            matches: (c) => !c.safetyEligible,
           ),
           AiSafetyRule(
             id: 'evidence-required',
@@ -285,9 +305,12 @@ final class BilLocalIntelligenceRealityRuntime {
     return ProductIntelligenceOutput(
       brainResult: brain,
       noiseEstimate: estimate,
-      forecast: const [],
+      forecast: behavior.productForecast(
+        result: forecast,
+        latestWeightKg: timeline.weightedDays.last.weightKg!,
+      ),
       adaptiveTdeeKcal: tdee,
-      plateauRisk: forecast.canProceed ? 0.35 : 1,
+      plateauRisk: plateauRisk,
       primaryMessage: coach.message,
       explanation: [...estimate.explanations, ...brain.explanation],
     );
@@ -298,46 +321,6 @@ final class BilLocalIntelligenceRealityRuntime {
     if (t.days.any((d) => d.potassiumMg > 0)) 'local-potassium',
     if (t.days.any((d) => d.carbsG > 0)) 'local-carbohydrates',
     if (t.days.any((d) => d.waterMl > 0)) 'local-water',
-  ];
-  static List<OneBestActionCandidate> _candidates(
-    LocalIntelligenceTimeline t,
-    PhysiologicalNoiseEstimate e,
-  ) => [
-    OneBestActionCandidate(
-      id: 'continue-plan',
-      title: 'Continue the current plan',
-      rationale:
-          'The local physiological trend does not justify an aggressive change.',
-      expectedBenefit: 0.7,
-      confidence: e.confidence,
-      burden: 0.05,
-      safetyEligible: true,
-      evidenceIds: const ['local-physiology'],
-    ),
-    if (t.days.where((d) => d.sleepHours != null).isNotEmpty)
-      OneBestActionCandidate(
-        id: 'protect-sleep',
-        title: 'Protect sleep consistency',
-        rationale:
-            'Recent sleep context is available and can improve recovery confidence.',
-        expectedBenefit: 0.75,
-        confidence: 0.7,
-        burden: 0.15,
-        safetyEligible: true,
-        evidenceIds: const ['local-sleep'],
-      ),
-    if (t.days.where((d) => d.steps != null).isNotEmpty)
-      OneBestActionCandidate(
-        id: 'maintain-activity',
-        title: 'Maintain activity consistency',
-        rationale:
-            'Recent activity evidence supports preserving the current movement baseline.',
-        expectedBenefit: 0.65,
-        confidence: 0.7,
-        burden: 0.1,
-        safetyEligible: true,
-        evidenceIds: const ['local-activity'],
-      ),
   ];
   static List<HealthInsightEvidence> _insights(
     LocalIntelligenceTimeline t,
@@ -359,5 +342,32 @@ final class BilLocalIntelligenceRealityRuntime {
         observedAt: t.decisionHistory.first.record.createdAt,
         confidence: t.decisionHistory.first.record.confidence,
       ),
+    if (t.days.any((day) => day.sleepHours != null))
+      HealthInsightEvidence(
+        key: 'sleep',
+        statement: 'Recent sleep evidence participates in action ranking.',
+        provenance: 'local-sleep',
+        observedAt: t.days.lastWhere((day) => day.sleepHours != null).day,
+        confidence: _contextCoverageConfidence(
+          t.days.where((day) => day.sleepHours != null).length,
+          t.days.length,
+        ),
+      ),
+    if (t.days.any((day) => day.steps != null))
+      HealthInsightEvidence(
+        key: 'activity',
+        statement: 'Recent activity evidence participates in action ranking.',
+        provenance: 'local-activity',
+        observedAt: t.days.lastWhere((day) => day.steps != null).day,
+        confidence: _contextCoverageConfidence(
+          t.days.where((day) => day.steps != null).length,
+          t.days.length,
+        ),
+      ),
   ];
+
+  static double _contextCoverageConfidence(int available, int total) =>
+      (0.35 + (available / (total == 0 ? 1 : total)) * 0.6)
+          .clamp(0.0, 0.95)
+          .toDouble();
 }
