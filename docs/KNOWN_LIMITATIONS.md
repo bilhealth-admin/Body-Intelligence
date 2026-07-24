@@ -231,3 +231,7 @@ The engine does not discover signals, infer clinical policy, call an LLM/provide
 - Engine checkpoints are caller-supplied and must be created from verified engine-specific evidence.
 - Cloud execution, remote providers, durable synchronization, billing integration, and cross-device state remain outside AI Platform closure.
 - Product-feature wiring belongs to the later BIL Intelligence Integration phase.
+
+## BIL-INT-001-R1 explicit boundaries
+
+The Unified Health Brain is deterministic and local. It does not call an LLM, generate clinical policy, persist data, contact providers, or replace upstream engine truth. Caller-owned policies and upstream engine outputs remain authoritative inputs. Integration rejects or abstains when critical evidence, safety, proprietary synthesis, or scientific validation is unavailable.

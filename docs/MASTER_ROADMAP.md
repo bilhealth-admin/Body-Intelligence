@@ -215,3 +215,7 @@ Scientific Validation & Explainability is delivered as a deterministic local bou
 ## BIL-AI-044 — Final AI Platform Integration and Closure
 
 The local AI Platform closes only through an explicit engine-checkpoint boundary. Every required engine must present a unique closed checkpoint, a non-empty contract version, and inspectable evidence. The closure boundary does not merge engine internals, call providers, select Cloud infrastructure, or weaken any engine-specific gate.
+
+## BIL Intelligence Integration — BIL-INT-001-R1
+
+`BIL-INT-001-R1` is the single complete integration and closure package above the closed AI Platform engines. It adds Cross-Engine Truth Fusion, weighted harmonic Confidence Aggregation, hard-gate Truth Reconciliation, One Best Action and Safety identity reconciliation, Explainability Fusion, End-to-End Decision Trace, Cross-Engine Validation, System-Level Regression Protection, and the Unified Health Brain boundary. No closed AI Platform engine is reimplemented.

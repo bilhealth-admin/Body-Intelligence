@@ -210,3 +210,7 @@ Issued against parent HEAD `768525fd55aecfc655702ce17757d0895f0354c9`. Scientifi
 ## BIL-AI-044 delivery candidate
 
 Issued against parent HEAD `eddf00abf8db2d3139c4b7a06f007cd3b21c4d8c`. Final AI Platform closure is represented by a deterministic certificate over all required independent engine checkpoints. Closure is rejected for duplicate or evidence-free checkpoints and remains incomplete when any required engine is absent or non-closed. Product Owner verification and commit are still required.
+
+## BIL-INT-001-R1 delivery candidate
+
+Issued against parent HEAD `7f0d42685bd064f98223af4e3e67360a07188a69`. The package introduces the final deterministic BIL Intelligence Integration layer over accepted AI Platform outputs. Product Owner verification is required before the integration phase is considered closed.

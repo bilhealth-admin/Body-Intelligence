@@ -198,3 +198,7 @@ Scientific Validation & Explainability never promotes an unsupported claim. Ever
 ## ADR — AI Platform closes through independent engine checkpoints
 
 Formal platform closure is evaluated from immutable checkpoints rather than a monolithic orchestrator. Each engine remains independently testable and owns its internal contracts. The closure engine verifies required membership, uniqueness, contract version, evidence presence, and closed status; it does not reinterpret engine outputs or create new health decisions.
+
+## ADR — BIL weighted harmonic confidence fusion
+
+The Unified Health Brain aggregates independent engine confidence using a weighted harmonic mean rather than a simple average. This prevents a weak critical engine from being hidden by several strong auxiliary engines. Explicit hard contradictions are never averaged away: they force rejection. The integration layer consumes immutable outputs from closed engines and does not own or recreate their internal logic.
