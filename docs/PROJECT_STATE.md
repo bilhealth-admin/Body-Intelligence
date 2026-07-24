@@ -109,3 +109,7 @@ Parent HEAD: `022911ef3524eda159203be6c1294bb5ff7c009d`. AI-015 adds `TrustedTru
 ## BIL-AI-016 State
 
 Parent HEAD: `50f450ee4b01ee0bfef3d21cf4222becfe85493c`. AI-016 adds a stable public `TruthExplainFoundation` facade over AI-015 and an immutable public outcome classification for action, safe abstention, or rejection. The package closes and reconciles the local deterministic Truth/Explain foundation without adding policy or cross-feature integration.
+
+## BIL-AI-017 State
+
+Parent HEAD: `83dff08434af4e99504976c1b7cd5a715223e995`. AI-017 begins the authorized Body Twin foundation with generic immutable local observations, immutable snapshots, explicit completeness, future-observation exclusion, and deterministic latest-per-metric selection. Equal-time conflicts are rejected. No value inference, persistence, provider, prompt, UI, medical interpretation, or feature mutation is introduced.

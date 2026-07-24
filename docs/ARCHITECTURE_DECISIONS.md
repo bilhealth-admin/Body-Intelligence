@@ -98,3 +98,7 @@ AI-015 composes the existing AI-013 pipeline and AI-014 integrity gate rather th
 ## ADR — Close Truth/Explain behind one stable public foundation boundary
 
 Downstream AI components must depend on `TruthExplainFoundation` rather than reconstructing the internal AI-001 through AI-015 pipeline. The facade remains a thin delegate and may classify only the already validated trusted outcome as action, abstention, or rejection. It may not rank candidates, infer new facts, mutate state, use providers, persist data, or bypass any integrity gate.
+
+## ADR — Body Twin starts as an immutable evidence snapshot, not an inferred model
+
+BIL-AI-017 represents the Body Twin as caller-supplied local observations assembled into a deterministic latest-known snapshot at an explicit `asOf` time. Feature engines retain ownership of measurement production and scientific interpretation. The AI Platform must not fill missing values, average conflicting measurements, consult a provider, or silently resolve equal-time conflicts. This keeps the first Body Twin boundary testable, offline-only, explainable, and safe for later composition with Truth Engine.

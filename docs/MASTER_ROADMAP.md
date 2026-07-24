@@ -109,3 +109,9 @@ Status: implementation package issued. Adds one final local orchestration bounda
 ## BIL-AI-016 — Truth/Explain Foundation Public Boundary and Reconciliation
 
 Status: implementation package issued. Adds the stable public consumer facade over the fully trusted AI-015 pipeline and reconciles the completed deterministic Truth/Explain foundation. It introduces no Body Twin state, Decision Memory, One Best Action ranking, providers, prompts, cloud, persistence, UI, or medical inference. After verification and commit, the next authorized AI work is the first repository-defined Body Twin foundation package.
+
+## BIL-AI-017 — Body Twin Observation & Snapshot Foundation
+
+Status: delivered for Product Owner verification against parent `83dff08434af4e99504976c1b7cd5a715223e995`.
+
+This package starts the Body Twin track with immutable local observation and snapshot contracts plus deterministic latest-known-state assembly. It adds no estimation, trend analysis, persistence, provider, prompt, network, UI, diagnosis, recommendation, or cross-feature mutation. Truth/Explain remains complete and Non-Regression.

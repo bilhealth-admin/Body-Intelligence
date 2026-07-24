@@ -165,3 +165,14 @@ Corrected the AI-009 regression fixture to use the repository-owned `TruthSignal
 - Preserves the complete underlying trusted result for explainability and diagnostics.
 - Non-scope: Body Twin state, Decision Memory, One Best Action ranking, AI Coach, prompts, providers, cloud, persistence, UI, and medical inference.
 - Next after successful verification and commit: first repository-defined Body Twin foundation package.
+
+## BIL-AI-017 — Body Twin Observation & Snapshot Foundation
+
+- Parent HEAD: `83dff08434af4e99504976c1b7cd5a715223e995`.
+- Team: AI Platform Team.
+- Scope: immutable Body Twin observation/snapshot contracts and deterministic local latest-known-state assembly.
+- Production mutation outside AI Platform: none.
+- Provider/network/prompt/persistence integration: none.
+- Safety: future observations are excluded; equal-time conflicting values are rejected; missing required metrics remain explicit.
+- Verification: focused AI-017 tests, complete AI Platform tests, Commerce regression, analyzer, full project tests, and exact diff integrity.
+- Status: delivered; awaiting Product Owner verification and commit.

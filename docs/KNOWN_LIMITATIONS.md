@@ -119,3 +119,11 @@ The pipeline accepts caller-owned supported and contradicted candidates but does
 ## BIL-AI-016 limitations
 
 The stable Truth/Explain facade classifies only outcomes already validated by AI-001 through AI-015. It does not create or persist a Body Twin, remember decisions, rank alternatives, select One Best Action, coach the user, invoke prompts/providers, access cloud services, or present UI. Candidate actions remain caller-owned.
+
+## BIL-AI-017 limitations
+
+- The snapshot contains only caller-supplied observations and does not estimate missing metrics.
+- It selects the latest observation per metric but does not compute trends, deltas, tissue state, water-noise isolation, metabolic forecasts, or recommendations.
+- Metric keys and units are feature-owned strings in this first foundation; cross-metric unit normalization is not included.
+- No repository adapter, persistence, UI, provider, prompt, network, telemetry, diagnosis, or medical interpretation is included.
+- Equal-time observations with different payloads are rejected rather than resolved automatically.

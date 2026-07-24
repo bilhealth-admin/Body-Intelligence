@@ -1,13 +1,13 @@
 # BIL Next Packages
 
-## Active Epic — AI Platform Foundation
+## Active Epic — AI Platform / Body Twin
 
-`BIL-AI-016` is the active package. It closes and reconciles the deterministic local Truth/Explain foundation behind one stable public consumer boundary.
+`BIL-AI-017` is delivered for Product Owner verification. It establishes the immutable local observation and snapshot foundation for Body Twin.
 
 ## Current Gate
 
-`BIL-AI-016` must pass and be committed before transition beyond Truth/Explain.
+`BIL-AI-017` must pass and be committed before any further Body Twin behavior is authorized.
 
-## After BIL-AI-016
+## After BIL-AI-017
 
-After successful verification and commit, the next authorized package is the first small, offline-only, privacy-first Body Twin foundation package derived from the committed repository state. Decision Memory, One Best Action ranking, AI Coach, prompts/providers, cloud, persistence, and UI remain unauthorized until living documents explicitly advance them.
+After successful verification and commit, derive `BIL-AI-018` from the new committed baseline as the next smallest offline-only Body Twin package. The next package may add typed snapshot validation/provenance integrity only if supported by the committed code and living documents. Decision Memory, One Best Action, AI Coach, prompts/providers, cloud, persistence, and UI remain unauthorized until living documents explicitly advance them.
