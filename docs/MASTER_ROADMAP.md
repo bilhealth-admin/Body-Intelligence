@@ -192,5 +192,8 @@ Delivery candidate closes One Best Action at the deterministic local boundary wi
 - Explainable, stable safety issues and integrity validation.
 - No diagnosis, emergency-service substitution, provider calls, or mutation.
 
-## BIL-AI-038-R1 — Automated Health Insight Summaries
+## BIL-AI-038 — Automated Health Insight Summaries
 Deterministic bounded health summaries with provenance, uncertainty preservation, explicit safety gating, abstention, immutable evidence, and no diagnostic claims. Product Owner verification remains required.
+
+## BIL-AI-039 — AI Coach Engine
+AI Coach closes at the deterministic local boundary with safety-approved action consumption, bounded insight composition, abstention, rejection, evidence preservation, and integrity validation. Next engine: Prompt Engine.

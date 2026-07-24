@@ -175,5 +175,8 @@ One Best Action does not invent actions or safety policy. It ranks caller-suppli
 
 AI Safety evaluates explicit caller-supplied rules over accepted One Best Action output. The platform does not invent clinical thresholds, emergency advice, diagnosis, or user-specific policy. Blocking rules reject; advisory rules remain explainable and may trigger caller-configured abstention.
 
-## BIL-AI-038-R1 — Automated Health Insight Summaries
+## BIL-AI-038 — Automated Health Insight Summaries
 Deterministic bounded health summaries with provenance, uncertainty preservation, explicit safety gating, abstention, immutable evidence, and no diagnostic claims. Product Owner verification remains required.
+
+## ADR — AI Coach remains a deterministic composition boundary
+AI Coach may only compose trusted local outputs already approved by the AI Safety Layer. It does not generate candidate actions, invent evidence, diagnose, call an LLM/provider, or mutate user state. Prompt-driven language generation remains the responsibility of the later Prompt Engine.
