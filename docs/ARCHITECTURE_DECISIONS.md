@@ -188,3 +188,6 @@ Prompt Engine is delivered as a provider-neutral deterministic boundary that pro
 
 ## BIL-AI-041
 AI Cost Optimizer closed with deterministic local-first routing, explicit budgets, provider-neutral remote eligibility, and abstention on invalid or over-budget requests. No billing provider integration is included. Next: BIL-AI-042 Proprietary BIL Intelligence.
+
+## ADR — Proprietary intelligence is synthesis, not a new truth source
+BIL proprietary intelligence may combine only trusted caller-supplied local engine signals. It preserves signal and evidence provenance, applies deterministic confidence and size policies, and abstains when required inputs are absent. It does not call providers, invent facts, override upstream safety, or become an opaque source of truth.

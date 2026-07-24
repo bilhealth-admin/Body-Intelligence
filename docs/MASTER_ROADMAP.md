@@ -205,3 +205,6 @@ Prompt Engine is delivered as a provider-neutral deterministic boundary that pro
 
 ## BIL-AI-041
 AI Cost Optimizer closed with deterministic local-first routing, explicit budgets, provider-neutral remote eligibility, and abstention on invalid or over-budget requests. No billing provider integration is included. Next: BIL-AI-042 Proprietary BIL Intelligence.
+
+## BIL-AI-042 — Proprietary BIL Intelligence
+Closed as a deterministic local synthesis engine over trusted upstream signals, with explicit provenance, confidence gates, bounded output, abstention, and no provider-owned decision logic. Next: Scientific Validation & Explainability.

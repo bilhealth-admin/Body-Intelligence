@@ -2,12 +2,12 @@
 
 ## Current delivery candidate
 
-`BIL-AI-041` closes AI Cost Optimizer in one integrated provider-neutral deterministic package.
+`BIL-AI-042` closes Proprietary BIL Intelligence with deterministic synthesis over trusted local engines, explicit provenance, confidence gating, bounded output, and abstention.
 
 ## Next authorized package
 
-`BIL-AI-042` — complete and close Proprietary BIL Intelligence with deterministic synthesis over trusted local engines, explicit provenance, abstention, and no opaque provider-owned decision logic.
+`BIL-AI-043` — complete and close Scientific Validation & Explainability with deterministic validation records, evidence traceability, reproducible claims, uncertainty disclosure, and explicit abstention.
 
 ## Remaining engine order
 
-Proprietary BIL Intelligence → Scientific Validation & Explainability → Final Integration and AI Platform Closure.
+Scientific Validation & Explainability → Final Integration and AI Platform Closure.
