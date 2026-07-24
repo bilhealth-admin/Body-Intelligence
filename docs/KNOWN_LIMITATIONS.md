@@ -198,3 +198,7 @@ The engine does not estimate energy expenditure, infer adherence, diagnose metab
 ## One Best Action boundaries
 
 The engine does not generate candidate actions, diagnose conditions, replace AI Safety Layer, call providers, persist decisions, or mutate user state. Safety eligibility and thresholds are caller-owned until the dedicated AI Safety Layer is closed.
+
+## AI Safety Layer
+
+The engine does not author medical policy, diagnose conditions, contact emergency services, replace professional judgment, generate action candidates, persist results, or call remote providers. Rules and their clinical governance remain caller-owned.

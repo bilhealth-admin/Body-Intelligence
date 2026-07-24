@@ -170,3 +170,7 @@ Adaptive forecasts may project only an explicitly supplied supported energy bala
 ## ADR — One Best Action remains a deterministic selector
 
 One Best Action does not invent actions or safety policy. It ranks caller-supplied candidates only after accepted AI Context and forecasting boundaries, excludes candidates not marked safety-eligible, preserves evidence, and abstains when no candidate crosses caller-owned thresholds.
+
+## ADR — AI Safety policy remains caller-owned
+
+AI Safety evaluates explicit caller-supplied rules over accepted One Best Action output. The platform does not invent clinical thresholds, emergency advice, diagnosis, or user-specific policy. Blocking rules reject; advisory rules remain explainable and may trigger caller-configured abstention.

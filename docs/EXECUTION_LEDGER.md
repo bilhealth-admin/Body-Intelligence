@@ -295,3 +295,9 @@ Adds immutable outcome transitions and deterministic append-only reconciliation 
 - Status: delivery candidate pending Product Owner verification.
 
 | BIL-AI-036 | One Best Action Engine closure | Delivery candidate | `37333a7e1d5fb25fcff4758b60cbb0b831340e6c` | Deterministic ranking, confidence/evidence gates, abstention, integrity validation |
+
+## BIL-AI-037 — Delivery Candidate
+
+Parent HEAD: `fc208f05a2e7f68f9bb78ff33803212ca188c2ea`
+
+Closes AI Safety Layer at the deterministic local engine boundary. Awaiting Product Owner verification and commit.

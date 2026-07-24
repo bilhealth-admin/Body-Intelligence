@@ -183,3 +183,11 @@ Adaptive Metabolic Forecasting is implemented as a deterministic local engine wi
 ## BIL-AI-036 — One Best Action
 
 Delivery candidate closes One Best Action at the deterministic local boundary with accepted-upstream requirements, caller-owned candidates and thresholds, evidence-preserving ranking, bounded output, explicit abstention, and safety-compatible eligibility boundaries.
+
+## BIL-AI-037 — AI Safety Layer Closure
+
+- Deterministic caller-owned advisory/blocking policy.
+- Explicit accepted, abstained, and rejected outcomes.
+- Hard rejection boundaries and no upstream action leakage.
+- Explainable, stable safety issues and integrity validation.
+- No diagnosis, emergency-service substitution, provider calls, or mutation.
