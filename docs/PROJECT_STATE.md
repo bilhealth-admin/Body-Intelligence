@@ -156,3 +156,8 @@ Parent HEAD: `ac12875d1432c8d441fcd57d6d1998dbd4b3dcb0`. Decision Memory now has
 ## BIL-AI-030-R1 State
 
 Issued against parent HEAD `74dbaf8f0b59797a4949981325581e0b353df82f`. Decision Memory now exposes a deterministic schema-versioned export/import boundary suitable for future local persistence adapters. The package does not select a database, filesystem, cloud provider, retention policy, or encryption mechanism.
+
+
+## BIL-AI-031 delivery candidate
+
+Decision Memory is complete at the local engine boundary: immutable records, append-only outcomes, deterministic retrieval, public history projection, schema-versioned export/import, explainable retention decisions, lossless compaction, and compaction integrity validation. Next engine: Body Twin closure in BIL-AI-032.

@@ -173,3 +173,8 @@ The public facade is local and in-memory. It does not provide durable persistenc
 - The archive contract does not persist data by itself.
 - No database, filesystem, encryption, retention, migration beyond schema version 1, sync, or cloud adapter is selected.
 - Import is intentionally fail-fast and atomic only with respect to the newly constructed in-memory facade.
+
+
+## BIL-AI-031 limitations
+
+Decision Memory is complete as a deterministic local domain engine, but this package intentionally does not choose a database, filesystem, encryption mechanism, synchronization protocol, cloud adapter, UI, or causal outcome inference. Retention compaction never deletes audit evidence; external lifecycle deletion requires a separate user-data governance boundary.

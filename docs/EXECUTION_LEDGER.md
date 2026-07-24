@@ -252,3 +252,13 @@ Adds immutable outcome transitions and deterministic append-only reconciliation 
 - Production: immutable archive envelope and persistence-neutral codec.
 - Gates: focused round-trip and ordering tests; regression duplicate, schema, and transition-policy tests; AI Platform suite; analyze; full tests; exact diff scope.
 - Status: ready for Product Owner application and verification.
+
+
+## BIL-AI-031 — Decision Memory Engine Closure
+
+- Parent HEAD: `1cc23bf5be7ffd41dca26199fe486298c5d6f5b8`.
+- Adds deterministic retention policy and explainable retention decisions.
+- Adds lossless active/audit compaction with no deletion path.
+- Adds an integrity gate for exact record, transition, rationale, confidence, and evidence preservation.
+- Decision Memory exit criteria are complete at the persistence-neutral local engine boundary.
+- Next after Product Owner verification and commit: `BIL-AI-032` Body Twin Engine closure.

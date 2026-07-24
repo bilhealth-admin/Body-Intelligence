@@ -158,3 +158,8 @@ Status: delivery candidate. Adds one stable local boundary that exposes immutabl
 ## BIL-AI-030-R1 — Decision Memory Export/Import Contract
 
 Adds a deterministic, persistence-neutral archive contract for immutable decision records and append-only outcome histories. Exact current-state reconstruction, duplicate rejection, transition ordering, and schema validation are test-gated. Storage technology, retention, encryption, cloud sync, and cross-feature ingestion remain outside this package.
+
+
+## BIL-AI-031 — Decision Memory Engine Closure
+
+Closes the local deterministic Decision Memory Engine with caller-owned retention policy, explainable per-record retention decisions, lossless active/audit compaction, and an integrity gate that rejects missing, duplicate, unknown, or mutated audit evidence. Durable storage adapters, encryption, synchronization, and cross-feature outcome ingestion remain platform integration concerns rather than Decision Memory domain gaps.

@@ -1,15 +1,13 @@
-# BIL Next Packages
+# AI Platform Next Packages
 
-## Active capability
-Decision Memory.
+## Current delivery candidate
 
-## Current package
-`BIL-AI-030-R1` adds deterministic schema-versioned Decision Memory export/import suitable for local persistence adapters while preserving immutable records, append-only outcomes, duplicate rejection, and exact current-state reconstruction.
+`BIL-AI-031` closes Decision Memory at the local deterministic engine boundary with retention, lossless compaction, and audit-integrity validation.
 
-## Next production package
-`BIL-AI-031` — Decision Memory retention and compaction policy contract. It must preserve immutable audit evidence, prohibit silent deletion, expose deterministic retention decisions, and remain independent of database, cloud, and synchronization technology.
+## Next authorized package
 
-## Ordered continuation
-Decision Memory completion → AI Context Engine → Tissue and Water Noise Isolation → Adaptive Metabolic Forecasting → One Best Action → AI Safety Layer → Automated Health Insight Summaries → AI Coach → Prompt Engine → AI Cost Optimizer → Proprietary BIL Intelligence → Scientific Validation & Explainability → Final Integration and AI Platform Closure.
+`BIL-AI-032` — complete and close the existing Body Twin Engine without reimplementing accepted foundations. Exit criteria must reconcile snapshot construction, provenance, integrity, freshness, consistency, trusted composition, public facade, and trend-ready state, then close only the remaining repository-supported gaps.
 
-Cloud Platform remains unauthorized until formal AI Platform closure.
+## Remaining engine order
+
+Body Twin completion → AI Context Engine → Tissue and Water Noise Isolation → Adaptive Metabolic Forecasting → One Best Action → AI Safety Layer → Automated Health Insight Summaries → AI Coach → Prompt Engine → AI Cost Optimizer → Proprietary BIL Intelligence → Scientific Validation & Explainability → Final Integration and AI Platform Closure.

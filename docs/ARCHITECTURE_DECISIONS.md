@@ -145,3 +145,8 @@ BIL-AI-029-R2 composes the existing immutable record store and append-only outco
 ## ADR — Decision Memory persistence-neutral archive boundary
 
 Decision Memory exports a schema-versioned primitive map and reconstructs through the existing `DecisionMemory` facade. Import deliberately reuses established record duplicate rejection and outcome-transition policy instead of bypassing domain rules. No storage adapter is selected in AI Platform.
+
+
+## ADR — Decision Memory retention is lossless movement, never deletion
+
+Decision Memory compaction separates active records from immutable audit records while preserving every record and transition exactly once. Retention policy is caller-owned and deterministic. The domain exposes no silent deletion operation; database, filesystem, encryption, synchronization, and cloud adapters remain outside the engine boundary.
