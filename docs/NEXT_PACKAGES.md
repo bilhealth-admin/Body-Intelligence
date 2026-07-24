@@ -1,19 +1,15 @@
 # BIL Next Packages
 
-## Active Epic — AI Platform Closure Execution
+## Active capability
+Decision Memory.
 
-`BIL-AI-026` advances Body Twin with deterministic trend-ready observed history.
+## Current package
+`BIL-AI-027` establishes immutable local decision records and deterministic retrieval.
 
-## Current Gate
-
-`BIL-AI-026` must pass Product Owner verification and be committed before production work continues.
-
-## First production package
-
-`BIL-AI-027` — smallest Body Twin completion package that composes the trusted snapshot outcome with trend-ready state through one stable local contract while preserving all existing gates and abstention behavior.
+## Next production package
+`BIL-AI-028` — Decision Memory outcome reconciliation and append-only transition rules. It must preserve immutable historical decisions, reject illegal outcome transitions, and remain local-first and provider-independent.
 
 ## Ordered continuation
+Decision Memory completion → AI Context Engine → Tissue and Water Noise Isolation → Adaptive Metabolic Forecasting → One Best Action → AI Safety Layer → Automated Health Insight Summaries → AI Coach → Prompt Engine → AI Cost Optimizer → Proprietary BIL Intelligence → Scientific Validation & Explainability → Final Integration and AI Platform Closure.
 
-After Body Twin completion: Decision Memory → AI Context Engine → Tissue and Water Noise Isolation → Adaptive Metabolic Forecasting → One Best Action → AI Safety Layer → Automated Health Insight Summaries → AI Coach → Prompt Engine → AI Cost Optimizer → Proprietary BIL Intelligence → Scientific Validation & Explainability → Final Integration and AI Platform Closure.
-
-Cloud Platform remains unauthorized until formal closure.
+Cloud Platform remains unauthorized until formal AI Platform closure.
