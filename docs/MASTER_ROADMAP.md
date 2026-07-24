@@ -219,3 +219,7 @@ The local AI Platform closes only through an explicit engine-checkpoint boundary
 ## BIL Intelligence Integration — BIL-INT-001-R1
 
 `BIL-INT-001-R1` is the single complete integration and closure package above the closed AI Platform engines. It adds Cross-Engine Truth Fusion, weighted harmonic Confidence Aggregation, hard-gate Truth Reconciliation, One Best Action and Safety identity reconciliation, Explainability Fusion, End-to-End Decision Trace, Cross-Engine Validation, System-Level Regression Protection, and the Unified Health Brain boundary. No closed AI Platform engine is reimplemented.
+
+## BIL-IRC-001 — Local Intelligence Reality Closure
+
+Adds the offline local repository projection, physiological tissue/water attribution, adaptive observed TDEE, seven- and fourteen-day runtime forecast, plateau-risk estimation, automatic One Best Action candidate generation, product-facing output contract, and a single local runtime entry point that emits UnifiedHealthBrainResult from persisted user data. No Cloud, provider, network, prompt, or LLM dependency is introduced. Parent HEAD: c87dce6d63c39183813d9c910a6ee4cadb7d30b2.

@@ -214,3 +214,7 @@ Issued against parent HEAD `eddf00abf8db2d3139c4b7a06f007cd3b21c4d8c`. Final AI 
 ## BIL-INT-001-R1 delivery candidate
 
 Issued against parent HEAD `7f0d42685bd064f98223af4e3e67360a07188a69`. The package introduces the final deterministic BIL Intelligence Integration layer over accepted AI Platform outputs. Product Owner verification is required before the integration phase is considered closed.
+
+## BIL-IRC-001 — Local Intelligence Reality Closure
+
+Adds the offline local repository projection, physiological tissue/water attribution, adaptive observed TDEE, seven- and fourteen-day runtime forecast, plateau-risk estimation, automatic One Best Action candidate generation, product-facing output contract, and a single local runtime entry point that emits UnifiedHealthBrainResult from persisted user data. No Cloud, provider, network, prompt, or LLM dependency is introduced. Parent HEAD: c87dce6d63c39183813d9c910a6ee4cadb7d30b2.

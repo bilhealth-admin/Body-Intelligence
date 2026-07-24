@@ -202,3 +202,7 @@ Formal platform closure is evaluated from immutable checkpoints rather than a mo
 ## ADR — BIL weighted harmonic confidence fusion
 
 The Unified Health Brain aggregates independent engine confidence using a weighted harmonic mean rather than a simple average. This prevents a weak critical engine from being hidden by several strong auxiliary engines. Explicit hard contradictions are never averaged away: they force rejection. The integration layer consumes immutable outputs from closed engines and does not own or recreate their internal logic.
+
+## BIL-IRC-001 — Local Intelligence Reality Closure
+
+Adds the offline local repository projection, physiological tissue/water attribution, adaptive observed TDEE, seven- and fourteen-day runtime forecast, plateau-risk estimation, automatic One Best Action candidate generation, product-facing output contract, and a single local runtime entry point that emits UnifiedHealthBrainResult from persisted user data. No Cloud, provider, network, prompt, or LLM dependency is introduced. Parent HEAD: c87dce6d63c39183813d9c910a6ee4cadb7d30b2.
