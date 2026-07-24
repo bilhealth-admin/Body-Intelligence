@@ -27,3 +27,7 @@
 ## Authorized execution order
 
 The sequence above is binding. The first production package after this governance reconciliation is `BIL-AI-026`, the smallest remaining Body Twin completion package supported by the committed baseline. No Cloud Platform package is authorized before formal AI Platform closure.
+
+## BIL-AI-026 — Body Twin Trend-Ready State
+
+Adds immutable, deterministic per-metric observation history. No interpolation, forecasting, tissue/water classification, recommendation, persistence, provider, or cloud behavior is introduced.

@@ -13,3 +13,7 @@ Parent HEAD: `316b20b284a9229af5d49ea9fbe42e288d292981`.
 - Cloud Platform: blocked until AI Platform final closure.
 
 The package adds no physiological inference, recommendation, persistence, provider, cloud, prompt execution, or UI behavior.
+
+## BIL-AI-026
+
+Body Twin now exposes deterministic trend-ready observed history while retaining explicit caller time and observed-fact-only boundaries. Body Twin remains partial pending final composition with its existing trust facade.

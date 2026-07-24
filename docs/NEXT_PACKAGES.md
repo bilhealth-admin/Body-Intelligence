@@ -2,15 +2,15 @@
 
 ## Active Epic — AI Platform Closure Execution
 
-`BIL-AI-025-R1` reconciles the binding closure sequence and introduces no inference behavior.
+`BIL-AI-026` advances Body Twin with deterministic trend-ready observed history.
 
 ## Current Gate
 
-`BIL-AI-025-R1` must pass Product Owner verification and be committed before production work continues.
+`BIL-AI-026` must pass Product Owner verification and be committed before production work continues.
 
 ## First production package
 
-`BIL-AI-026` — smallest Body Twin completion package supported by the new committed baseline. It must advance deterministic trend-ready Body Twin state while preserving the existing completeness, provenance, integrity, freshness, consistency, and public outcome gates. It must not implement tissue/water isolation or forecasting prematurely.
+`BIL-AI-027` — smallest Body Twin completion package that composes the trusted snapshot outcome with trend-ready state through one stable local contract while preserving all existing gates and abstention behavior.
 
 ## Ordered continuation
 

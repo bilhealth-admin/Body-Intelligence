@@ -7,3 +7,7 @@
 The sequence is: complete Body Twin, Decision Memory, AI Context Engine, tissue/water noise isolation, adaptive metabolic forecasting, One Best Action, AI Safety, automated health insight summaries, AI Coach, Prompt Engine, AI Cost Optimizer, Proprietary BIL Intelligence, Scientific Validation & Explainability, then final integration and closure.
 
 Cloud Platform is architecturally blocked until the final AI Platform closure gates pass.
+
+## ADR — Trend-ready state preserves observations only
+
+Body Twin history is an ordered projection of validated caller-provided observations. It does not interpolate missing dates, infer trends, classify noise, forecast, or access a clock implicitly.
