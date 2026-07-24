@@ -196,3 +196,7 @@ Issued against parent HEAD `3b3c88539a8400eb2073d4809cc30d0a7359a8db`. AI Coach 
 ## BIL-AI-040 — Prompt Engine closure
 
 Prompt Engine is delivered as a provider-neutral deterministic boundary that projects only approved AI Coach output into bounded context, preserves evidence, uncertainty, and safety requirements, refuses non-approved coaching output, performs no provider call, and does not treat an LLM as a source of truth. Final acceptance remains subject to Product Owner verification on parent HEAD 5ae4c8840e183bcf72461d7b1cdcbfce9961a81c.
+
+
+## BIL-AI-041
+AI Cost Optimizer closed with deterministic local-first routing, explicit budgets, provider-neutral remote eligibility, and abstention on invalid or over-budget requests. No billing provider integration is included. Next: BIL-AI-042 Proprietary BIL Intelligence.
