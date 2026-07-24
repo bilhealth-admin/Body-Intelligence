@@ -102,3 +102,7 @@ Downstream AI components must depend on `TruthExplainFoundation` rather than rec
 ## ADR — Body Twin starts as an immutable evidence snapshot, not an inferred model
 
 BIL-AI-017 represents the Body Twin as caller-supplied local observations assembled into a deterministic latest-known snapshot at an explicit `asOf` time. Feature engines retain ownership of measurement production and scientific interpretation. The AI Platform must not fill missing values, average conflicting measurements, consult a provider, or silently resolve equal-time conflicts. This keeps the first Body Twin boundary testable, offline-only, explainable, and safe for later composition with Truth Engine.
+
+## ADR — BIL-AI-018 Body Twin provenance is derived and validated locally
+
+Body Twin provenance is projected directly from accepted immutable observations and validated against the snapshot before downstream consumption. Mismatches are surfaced as stable typed issues; the validator never repairs data or consults a provider.

@@ -127,3 +127,7 @@ The stable Truth/Explain facade classifies only outcomes already validated by AI
 - Metric keys and units are feature-owned strings in this first foundation; cross-metric unit normalization is not included.
 - No repository adapter, persistence, UI, provider, prompt, network, telemetry, diagnosis, or medical interpretation is included.
 - Equal-time observations with different payloads are rejected rather than resolved automatically.
+
+## BIL-AI-018 limitations
+
+The validator checks structural and provenance consistency only. It does not judge physiological plausibility, freshness policy, unit conversion, trends, predictions, medical meaning, persistence, UI, or provider output.

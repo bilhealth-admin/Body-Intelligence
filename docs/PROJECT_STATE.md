@@ -113,3 +113,7 @@ Parent HEAD: `50f450ee4b01ee0bfef3d21cf4222becfe85493c`. AI-016 adds a stable pu
 ## BIL-AI-017 State
 
 Parent HEAD: `83dff08434af4e99504976c1b7cd5a715223e995`. AI-017 begins the authorized Body Twin foundation with generic immutable local observations, immutable snapshots, explicit completeness, future-observation exclusion, and deterministic latest-per-metric selection. Equal-time conflicts are rejected. No value inference, persistence, provider, prompt, UI, medical interpretation, or feature mutation is introduced.
+
+## BIL-AI-018 State
+
+Issued against parent HEAD `30008d1f5558375b02aad9f05a98272725d8ad34`. Scope is deterministic Body Twin snapshot integrity validation and typed provenance projection only.

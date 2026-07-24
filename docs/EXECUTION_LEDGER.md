@@ -176,3 +176,10 @@ Corrected the AI-009 regression fixture to use the repository-owned `TruthSignal
 - Safety: future observations are excluded; equal-time conflicting values are rejected; missing required metrics remain explicit.
 - Verification: focused AI-017 tests, complete AI Platform tests, Commerce regression, analyzer, full project tests, and exact diff integrity.
 - Status: delivered; awaiting Product Owner verification and commit.
+
+## BIL-AI-018 — Body Twin Snapshot Integrity and Provenance Foundation
+
+- Parent HEAD: `30008d1f5558375b02aad9f05a98272725d8ad34`
+- Adds immutable metric provenance, explainable integrity issue/result types, and a pure snapshot validator.
+- Non-scope: prediction, scientific inference, Decision Memory, One Best Action, AI Coach, prompts/providers, cloud, persistence, and UI.
+- Next after successful verification and commit: next smallest repository-defined Body Twin package.

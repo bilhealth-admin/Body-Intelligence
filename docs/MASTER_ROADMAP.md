@@ -115,3 +115,7 @@ Status: implementation package issued. Adds the stable public consumer facade ov
 Status: delivered for Product Owner verification against parent `83dff08434af4e99504976c1b7cd5a715223e995`.
 
 This package starts the Body Twin track with immutable local observation and snapshot contracts plus deterministic latest-known-state assembly. It adds no estimation, trend analysis, persistence, provider, prompt, network, UI, diagnosis, recommendation, or cross-feature mutation. Truth/Explain remains complete and Non-Regression.
+
+## BIL-AI-018 — Body Twin Snapshot Integrity and Provenance Foundation
+
+Status: implementation package issued. Adds a pure local validator and immutable typed provenance projection for Body Twin snapshots. It detects future observations, map identity mismatches, orphan provenance, and source/time/reliability drift without estimating, repairing, persisting, ranking, or invoking providers.
