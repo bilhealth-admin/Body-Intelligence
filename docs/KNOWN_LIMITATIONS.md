@@ -159,3 +159,7 @@ The trusted snapshot pipeline performs no unit conversion, trend inference, tiss
 The public facade does not infer trends, normalize units, repair observations, persist state, access providers, recommend actions, or perform medical interpretation. Caller-owned freshness and consistency policy remains mandatory.
 
 - BIL-AI-027 Decision Memory is in-memory only; durable persistence, outcome transitions, retention policy, and cross-session retrieval are not yet implemented.
+
+## BIL-AI-028-R1 limitations
+
+Outcome reconciliation is in-memory and persistence-neutral. It does not ingest real user outcomes, infer causality, grade clinical benefit, reopen terminal outcomes, synchronize across devices, or drive One Best Action. The initial state is parsed from the existing record string and unsupported values are rejected explicitly.

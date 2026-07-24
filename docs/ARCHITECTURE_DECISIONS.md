@@ -133,3 +133,7 @@ The AI Platform exposes the composed Body Twin trust chain through a thin facade
 
 ## ADR — Decision Memory starts as a local immutable contract
 Decision records preserve evidence identifiers, selected action, rationale, confidence, timestamp, and outcome state. The first repository is deterministic and in-memory; persistence remains a later adapter concern.
+
+## ADR — Decision outcomes are append-only transitions
+
+BIL-AI-028-R1 preserves every `DecisionMemoryRecord` as immutable history. Outcome reconciliation is represented by separate immutable transitions with explicit from/to states, local evidence, and caller-supplied timestamps. Only `pending` may transition, and only to a terminal state (`succeeded`, `failed`, or `abandoned`). Terminal outcomes cannot be rewritten. The reconciler is local-only, provider-independent, persistence-neutral, and does not evaluate medical truth or select actions.

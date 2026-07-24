@@ -146,3 +146,7 @@ Adds the stable public local Body Twin outcome and facade over the complete trus
 
 ## BIL-AI-027 — Decision Memory Foundation
 Introduces immutable local decision records and deterministic retrieval. Exit remains partial until persistence and outcome reconciliation are implemented in later Decision Memory packages.
+
+### BIL-AI-028-R1 — Decision Memory outcome reconciliation
+
+Status: delivery candidate. Exit criteria: immutable transition contract; deterministic current-state projection; duplicate, mismatched, retroactive, no-op, and terminal rewrites rejected; focused and regression tests; full AI Platform regression and analyzer gates.

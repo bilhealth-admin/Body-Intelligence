@@ -231,3 +231,8 @@ Corrected the AI-009 regression fixture to use the repository-owned `TruthSignal
 - Adds the public Body Twin facade and explicit outcome classification over the trusted snapshot pipeline.
 
 - BIL-AI-027: Decision Memory immutable record and deterministic local store foundation. Parent HEAD: a19feb336cd0165a75f31fb468eae225efba31d0.
+
+## BIL-AI-028-R1 — Decision Memory outcome reconciliation
+
+Parent HEAD: `3898b7dde9a47f0ff2a94e18335fde9e6cafd6b9`.
+Adds immutable outcome transitions and deterministic append-only reconciliation rules. Existing decision records remain unchanged and terminal outcomes cannot be rewritten.

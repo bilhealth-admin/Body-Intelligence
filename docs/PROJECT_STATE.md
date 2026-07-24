@@ -144,3 +144,7 @@ Issued against parent HEAD `efcdd7c46ab0a6bdc25ce219a36718837b41bc27`. Scope is 
 
 ## BIL-AI-027
 Decision Memory is now active with an immutable local record contract and deterministic in-memory repository boundary. No cloud or provider dependency is introduced.
+
+## BIL-AI-028-R1 State
+
+Issued against parent HEAD `3898b7dde9a47f0ff2a94e18335fde9e6cafd6b9`. Decision Memory now supports local append-only outcome reconciliation while preserving immutable decision history. Persistence adapters, cross-feature ingestion, AI Context, forecasting, and recommendations remain outside this package.
