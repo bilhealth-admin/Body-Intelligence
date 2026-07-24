@@ -179,3 +179,7 @@ Status: implementation package issued against parent HEAD `f089a5f53d76d8b09e78f
 ## BIL-AI-035-R2 — Adaptive Metabolic Forecasting Closure
 
 Adaptive Metabolic Forecasting is implemented as a deterministic local engine with explicit caller-owned energy assumptions, bounded horizons, confidence, evidence, abstention, integrity validation, and no hidden expenditure inference. Next: One Best Action.
+
+## BIL-AI-036 — One Best Action
+
+Delivery candidate closes One Best Action at the deterministic local boundary with accepted-upstream requirements, caller-owned candidates and thresholds, evidence-preserving ranking, bounded output, explicit abstention, and safety-compatible eligibility boundaries.

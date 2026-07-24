@@ -177,3 +177,7 @@ Tissue and Water Noise Isolation is implemented at a deterministic local boundar
 ## BIL-AI-035-R2 delivery candidate
 
 Issued against parent HEAD `48d2969f6fec0d180afdb199222265ed656f7b61`. Adaptive Metabolic Forecasting consumes only accepted AI Context and Tissue/Water Noise output, requires explicit supported energy balance and assumptions, and exposes accepted, abstained, or rejected outcomes. Next engine: One Best Action.
+
+## BIL-AI-036 delivery candidate
+
+Issued against parent HEAD `37333a7e1d5fb25fcff4758b60cbb0b831340e6c`. One Best Action ranks only caller-supplied, evidence-backed, safety-eligible candidates over accepted AI Context and Adaptive Metabolic Forecasting outputs. Ranking, confidence gates, abstention, evidence preservation, deterministic tie-breaking, and bounded output are explicit. Candidate generation, clinical safety policy, provider calls, and user-state mutation remain outside this engine.

@@ -166,3 +166,7 @@ BIL-AI-034-R2 does not invent physiological tissue change. It accepts a caller-s
 ## ADR — Forecasting remains evidence-bound and caller-policy-owned
 
 Adaptive forecasts may project only an explicitly supplied supported energy balance through caller-owned conversion and horizon policies. Missing evidence, low confidence, or rejected upstream context must abstain or reject rather than infer metabolism.
+
+## ADR — One Best Action remains a deterministic selector
+
+One Best Action does not invent actions or safety policy. It ranks caller-supplied candidates only after accepted AI Context and forecasting boundaries, excludes candidates not marked safety-eligible, preserves evidence, and abstains when no candidate crosses caller-owned thresholds.

@@ -194,3 +194,7 @@ The engine isolates a residual water/noise component only from accepted factual 
 ## Adaptive Metabolic Forecasting boundary
 
 The engine does not estimate energy expenditure, infer adherence, diagnose metabolic adaptation, select clinical targets, or model nonlinear physiology. Energy balance, conversion factors, horizons, and confidence thresholds remain caller-owned and evidence-backed.
+
+## One Best Action boundaries
+
+The engine does not generate candidate actions, diagnose conditions, replace AI Safety Layer, call providers, persist decisions, or mutate user state. Safety eligibility and thresholds are caller-owned until the dedicated AI Safety Layer is closed.

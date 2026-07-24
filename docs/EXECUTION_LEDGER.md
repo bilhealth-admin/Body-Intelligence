@@ -293,3 +293,5 @@ Adds immutable outcome transitions and deterministic append-only reconciliation 
 - Scope: close Adaptive Metabolic Forecasting.
 - Gates: focused tests, regression tests, AI Platform suite, analyze, full test, exact diff scope.
 - Status: delivery candidate pending Product Owner verification.
+
+| BIL-AI-036 | One Best Action Engine closure | Delivery candidate | `37333a7e1d5fb25fcff4758b60cbb0b831340e6c` | Deterministic ranking, confidence/evidence gates, abstention, integrity validation |
