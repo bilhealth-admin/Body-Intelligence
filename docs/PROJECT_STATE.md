@@ -173,3 +173,7 @@ Issued against parent HEAD `a980f73b8ec695e494d9a7c19e14584c67278670`. AI Contex
 ## BIL-AI-034-R2 delivery candidate
 
 Tissue and Water Noise Isolation is implemented at a deterministic local boundary. It consumes accepted AI Context trends, requires caller-supported tissue evidence, preserves uncertainty and alternative explanations, and blocks incomplete or rejected context. Next engine after Product Owner acceptance: Adaptive Metabolic Forecasting.
+
+## BIL-AI-035-R2 delivery candidate
+
+Issued against parent HEAD `48d2969f6fec0d180afdb199222265ed656f7b61`. Adaptive Metabolic Forecasting consumes only accepted AI Context and Tissue/Water Noise output, requires explicit supported energy balance and assumptions, and exposes accepted, abstained, or rejected outcomes. Next engine: One Best Action.

@@ -175,3 +175,7 @@ AI Context Engine is closed at the deterministic local boundary. It admits only 
 ## BIL-AI-034-R2 — Tissue and Water Noise Isolation
 
 Status: implementation package issued against parent HEAD `f089a5f53d76d8b09e78fbf3dff90fb60ebbd935`. Closes the deterministic local isolation boundary by separating observed scale change into caller-supported tissue change and residual water/noise, while exposing uncertainty, alternative explanations, evidence, and abstention. No forecasting, diagnosis, persistence, provider, prompt, cloud, recommendation, or UI behavior is introduced.
+
+## BIL-AI-035-R2 — Adaptive Metabolic Forecasting Closure
+
+Adaptive Metabolic Forecasting is implemented as a deterministic local engine with explicit caller-owned energy assumptions, bounded horizons, confidence, evidence, abstention, integrity validation, and no hidden expenditure inference. Next: One Best Action.

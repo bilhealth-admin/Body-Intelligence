@@ -190,3 +190,7 @@ AI Context is local, deterministic, immutable, and provider-neutral. It does not
 ## BIL-AI-034-R2 limitations
 
 The engine isolates a residual water/noise component only from accepted factual weight observations and a caller-supported tissue-change estimate. It does not diagnose fluid disorders, infer sodium/glycogen physiology, create a tissue estimate, interpolate missing values, forecast metabolism, persist results, call providers, or recommend actions.
+
+## Adaptive Metabolic Forecasting boundary
+
+The engine does not estimate energy expenditure, infer adherence, diagnose metabolic adaptation, select clinical targets, or model nonlinear physiology. Energy balance, conversion factors, horizons, and confidence thresholds remain caller-owned and evidence-backed.

@@ -162,3 +162,7 @@ AI Context may consume only accepted local engine outputs. Missing inputs are ev
 ## ADR — Caller-supported tissue estimate and residual water/noise isolation
 
 BIL-AI-034-R2 does not invent physiological tissue change. It accepts a caller-supported tissue-change estimate with evidence identifiers, computes the residual against observed accepted weight change, and classifies dominance using caller-owned policy. Missing or stale evidence produces insufficiency rather than false precision.
+
+## ADR — Forecasting remains evidence-bound and caller-policy-owned
+
+Adaptive forecasts may project only an explicitly supplied supported energy balance through caller-owned conversion and horizon policies. Missing evidence, low confidence, or rejected upstream context must abstain or reject rather than infer metabolism.

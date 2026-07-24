@@ -286,3 +286,10 @@ Adds immutable outcome transitions and deterministic append-only reconciliation 
 - Scope: immutable analysis and policy contracts, deterministic residual isolation engine, integrity validator, focused tests, regression tests, living-document reconciliation.
 - Exit: accepted context plus supported tissue evidence yields reproducible classification; missing evidence or rejected context abstains/rejects; uncertainty and alternatives remain explicit.
 - Non-scope: metabolic forecasting, recommendations, diagnosis, persistence, providers, prompts, cloud, and UI.
+
+## BIL-AI-035-R2
+
+- Parent HEAD: `48d2969f6fec0d180afdb199222265ed656f7b61`
+- Scope: close Adaptive Metabolic Forecasting.
+- Gates: focused tests, regression tests, AI Platform suite, analyze, full test, exact diff scope.
+- Status: delivery candidate pending Product Owner verification.
