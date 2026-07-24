@@ -111,3 +111,7 @@ Body Twin provenance is projected directly from accepted immutable observations 
 ## ADR — Body Twin snapshot validation becomes an explicit consumption gate
 
 AI-019 keeps AI-018 as the single structural and provenance validator. The new gate derives acceptance exclusively from that validator, preserves the original snapshot and validation evidence for diagnostics, and exposes accepted snapshot/provenance values only when integrity succeeds. It never repairs data, estimates missing metrics, changes freshness policy, invokes providers, or introduces recommendation behavior.
+
+## ADR — Body Twin snapshot consumers use one stable gated facade
+
+BIL-AI-020 exposes deterministic snapshot construction and the existing integrity gate through one public local facade. The facade does not duplicate validation or create scientific policy. It returns the complete gate envelope for explainability and exposes a snapshot only after acceptance, keeping later AI capabilities dependent on one testable offline boundary.

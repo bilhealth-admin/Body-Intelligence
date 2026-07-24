@@ -122,3 +122,7 @@ Issued against parent HEAD `30008d1f5558375b02aad9f05a98272725d8ad34`. Scope is 
 ## BIL-AI-019 State
 
 Issued against parent HEAD `d142847a2a5c6505710bb41dd3b59e85c09bb4ce`. Scope is an explicit immutable Body Twin snapshot integrity gate over the existing AI-018 validator. Accepted snapshots and provenance are exposed only when validation succeeds; rejected envelopes remain inspectable and expose no accepted value.
+
+## BIL-AI-020 State
+
+Issued against parent HEAD `7e4c7fb2aab097f3f30a285c11217432268fd039`. Scope is the stable public Body Twin snapshot facade over AI-017 through AI-019. Snapshot construction and integrity enforcement remain deterministic, offline-only, provider-neutral, clock-injected, and mutation-free.

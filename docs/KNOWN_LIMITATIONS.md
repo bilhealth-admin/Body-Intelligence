@@ -136,3 +136,7 @@ The validator checks structural and provenance consistency only. It does not jud
 ## BIL-AI-019 limitations
 
 The gate establishes structural and provenance acceptance only. It does not certify physiological plausibility or scientific correctness, normalize units, assess freshness, calculate trends, isolate tissue or water noise, forecast metabolism, persist state, call providers, rank actions, or present UI.
+
+## BIL-AI-020 limitations
+
+The public Body Twin snapshot facade assembles and integrity-gates caller-supplied observations only. It does not determine physiological plausibility, data freshness, trends, tissue or water effects, forecasts, health insights, recommendations, medical meaning, persistence, provider use, prompts, cloud transport, or UI behavior.

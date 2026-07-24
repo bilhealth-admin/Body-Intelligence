@@ -192,3 +192,12 @@ Corrected the AI-009 regression fixture to use the repository-owned `TruthSignal
 - Production scope: immutable gate result and pure gate service over AI-018 validation.
 - Tests: focused acceptance/rejection behavior plus deterministic immutability regression.
 - Status: delivered for Product Owner verification.
+
+## BIL-AI-020 — Body Twin Snapshot Public Foundation
+
+- Parent HEAD: `7e4c7fb2aab097f3f30a285c11217432268fd039`.
+- Package: stable public facade over Body Twin snapshot construction and integrity gating.
+- Production: immutable public outcome plus one orchestration service.
+- Tests: focused acceptance/completeness and regression coverage for latest-state, future exclusion, and equal-time conflict rejection.
+- Non-scope: physiological plausibility, freshness policy, trends, tissue/water isolation, forecasting, Decision Memory, One Best Action, AI Coach, providers, prompts, persistence, cloud, and UI.
+- Next after successful verification and commit: derive the next smallest repository-defined AI package from the new committed baseline.

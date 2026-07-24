@@ -124,3 +124,7 @@ Status: implementation package issued. Adds a pure local validator and immutable
 ## BIL-AI-019 — Body Twin Snapshot Integrity Gate Foundation
 
 Status: implementation package issued against parent `d142847a2a5c6505710bb41dd3b59e85c09bb4ce`. Adds a pure local accept/reject consumption boundary over the established Body Twin snapshot validator. It preserves the original snapshot, provenance, and integrity evidence without adding estimation, repair, freshness policy, persistence, provider, prompt, UI, recommendation, or medical inference.
+
+## BIL-AI-020 — Body Twin Snapshot Public Foundation
+
+Status: implementation package issued against parent `7e4c7fb2aab097f3f30a285c11217432268fd039`. Adds a stable public facade over deterministic snapshot assembly and the established integrity gate. It exposes only accepted snapshots and preserves the complete gate evidence without adding inference, repair, freshness policy, persistence, provider, prompt, UI, recommendation, forecasting, or medical interpretation.
