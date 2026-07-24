@@ -180,3 +180,7 @@ Deterministic bounded health summaries with provenance, uncertainty preservation
 
 ## ADR — AI Coach remains a deterministic composition boundary
 AI Coach may only compose trusted local outputs already approved by the AI Safety Layer. It does not generate candidate actions, invent evidence, diagnose, call an LLM/provider, or mutate user state. Prompt-driven language generation remains the responsibility of the later Prompt Engine.
+
+## BIL-AI-040 — Prompt Engine closure
+
+Prompt Engine is delivered as a provider-neutral deterministic boundary that projects only approved AI Coach output into bounded context, preserves evidence, uncertainty, and safety requirements, refuses non-approved coaching output, performs no provider call, and does not treat an LLM as a source of truth. Final acceptance remains subject to Product Owner verification on parent HEAD 5ae4c8840e183bcf72461d7b1cdcbfce9961a81c.

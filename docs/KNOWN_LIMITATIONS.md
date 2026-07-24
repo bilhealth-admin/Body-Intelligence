@@ -208,3 +208,7 @@ Deterministic bounded health summaries with provenance, uncertainty preservation
 
 ## AI Coach limitations after BIL-AI-039
 The engine produces deterministic bounded coaching copy from trusted local outputs only. Personal conversational adaptation, prompt execution, provider integration, long-form dialogue, notifications, and UI delivery remain outside this package.
+
+## BIL-AI-040 — Prompt Engine closure
+
+Prompt Engine is delivered as a provider-neutral deterministic boundary that projects only approved AI Coach output into bounded context, preserves evidence, uncertainty, and safety requirements, refuses non-approved coaching output, performs no provider call, and does not treat an LLM as a source of truth. Final acceptance remains subject to Product Owner verification on parent HEAD 5ae4c8840e183bcf72461d7b1cdcbfce9961a81c.

@@ -309,3 +309,7 @@ Deterministic bounded health summaries with provenance, uncertainty preservation
 - Parent HEAD: `3b3c88539a8400eb2073d4809cc30d0a7359a8db`
 - Status: delivery candidate pending Product Owner verification.
 - Scope: deterministic local AI Coach response composition, integrity validation, safety rejection, abstention, evidence preservation, and bounded output.
+
+## BIL-AI-040 — Prompt Engine closure
+
+Prompt Engine is delivered as a provider-neutral deterministic boundary that projects only approved AI Coach output into bounded context, preserves evidence, uncertainty, and safety requirements, refuses non-approved coaching output, performs no provider call, and does not treat an LLM as a source of truth. Final acceptance remains subject to Product Owner verification on parent HEAD 5ae4c8840e183bcf72461d7b1cdcbfce9961a81c.

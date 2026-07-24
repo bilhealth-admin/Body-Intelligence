@@ -192,3 +192,7 @@ Deterministic bounded health summaries with provenance, uncertainty preservation
 ## BIL-AI-039 delivery candidate
 
 Issued against parent HEAD `3b3c88539a8400eb2073d4809cc30d0a7359a8db`. AI Coach composes only safety-approved One Best Action output and bounded automated health insight summaries. It preserves evidence and uncertainty, rejects unsafe upstream output, abstains when trusted context is unavailable, and introduces no provider call, prompt execution, diagnosis, or user-state mutation.
+
+## BIL-AI-040 — Prompt Engine closure
+
+Prompt Engine is delivered as a provider-neutral deterministic boundary that projects only approved AI Coach output into bounded context, preserves evidence, uncertainty, and safety requirements, refuses non-approved coaching output, performs no provider call, and does not treat an LLM as a source of truth. Final acceptance remains subject to Product Owner verification on parent HEAD 5ae4c8840e183bcf72461d7b1cdcbfce9961a81c.

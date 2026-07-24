@@ -2,12 +2,12 @@
 
 ## Current delivery candidate
 
-`BIL-AI-039` closes AI Coach in one integrated deterministic package.
+`BIL-AI-040` closes Prompt Engine in one integrated provider-neutral deterministic package.
 
 ## Next authorized package
 
-`BIL-AI-040` — complete and close Prompt Engine in one integrated package with provider-neutral prompt contracts, bounded context projection, safety-preserving output requirements, and no provider-specific integration.
+`BIL-AI-041` — complete and close AI Cost Optimizer with deterministic routing budgets, local-first preference, explicit abstention, and no provider billing integration.
 
 ## Remaining engine order
 
-Prompt Engine → AI Cost Optimizer → Proprietary BIL Intelligence → Scientific Validation & Explainability → Final Integration and AI Platform Closure.
+AI Cost Optimizer → Proprietary BIL Intelligence → Scientific Validation & Explainability → Final Integration and AI Platform Closure.
