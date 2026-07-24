@@ -253,3 +253,7 @@ The local behavioral model is deterministic and offline. It does not diagnose, p
 ## BIL-IRC-004 boundaries
 
 The canonical runtime remains offline-first and privacy-first. The composition root creates only the local database adapter and Reality Runtime; it adds no Cloud transport, network client, provider, prompt execution, or LLM dependency. The deprecated facade exists only for source compatibility and delegates every call to the canonical runtime.
+
+## Weight Evidence Requirement
+
+Local product intelligence cannot produce a supported projected weight or actionable recommendation without at least one factual weight entry inside the analysis window. Profile `currentWeight` is intentionally not substituted because it lacks measurement-event provenance. The product output safely abstains and asks the user to log a current weight.

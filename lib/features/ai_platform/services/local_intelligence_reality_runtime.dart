@@ -302,17 +302,30 @@ final class BilLocalIntelligenceRealityRuntime {
       proprietaryResult: proprietary,
       scientificResult: scientific,
     );
+    final latestWeightKg = timeline.weightedDays.isEmpty
+        ? null
+        : timeline.weightedDays.last.weightKg;
+    final missingWeight = latestWeightKg == null;
     return ProductIntelligenceOutput(
       brainResult: brain,
       noiseEstimate: estimate,
-      forecast: behavior.productForecast(
-        result: forecast,
-        latestWeightKg: timeline.weightedDays.last.weightKg!,
-      ),
+      forecast: missingWeight
+          ? const <RuntimeForecastPoint>[]
+          : behavior.productForecast(
+              result: forecast,
+              latestWeightKg: latestWeightKg,
+            ),
       adaptiveTdeeKcal: tdee,
       plateauRisk: plateauRisk,
-      primaryMessage: coach.message,
-      explanation: [...estimate.explanations, ...brain.explanation],
+      primaryMessage: missingWeight
+          ? 'Log a current weight before BIL can produce a supported forecast or action.'
+          : coach.message,
+      explanation: [
+        if (missingWeight)
+          'Safe abstention: no local weight observation exists within the analysis window.',
+        ...estimate.explanations,
+        ...brain.explanation,
+      ],
     );
   }
 

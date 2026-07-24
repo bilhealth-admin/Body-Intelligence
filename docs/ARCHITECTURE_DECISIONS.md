@@ -218,3 +218,7 @@ Product output must be translated from accepted engine results rather than fixed
 ## ADR — One canonical local intelligence production runtime
 
 `BilLocalIntelligenceRealityRuntime` is the only class permitted to own end-to-end local intelligence orchestration. Product code obtains it through `BilLocalIntelligenceCompositionRoot`. `BilLocalIntelligenceRuntime` remains solely as a deprecated compatibility facade and must contain no confidence constants, synthetic integration signals, safety defaults, candidate generation, or direct integration calls.
+
+## ADR — Canonical Runtime Requires Factual Bounded Weight Evidence
+
+The product runtime must not derive projected weight or present an action when no factual weight observation exists inside the adapter's bounded `asOf` window. Profile `currentWeight` is not silently treated as a measurement. The runtime completes the closed engine pipeline, then exposes an empty product forecast, no selected action, an explicit abstention explanation, and a request to log a current weight.

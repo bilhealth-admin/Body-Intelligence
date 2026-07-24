@@ -230,3 +230,9 @@ Parent HEAD: `fc1a2270bde13431576ad6aaccbb15627ccc1109`. Product-facing local in
 ## BIL-IRC-004 delivery candidate
 
 Parent HEAD: `2f98fcf136cbb6669f70b7531cc864f4ae3590b6`. Local intelligence runtime consolidation is ready for Product Owner verification. `BilLocalIntelligenceRealityRuntime` is the sole production orchestrator; `BilLocalIntelligenceCompositionRoot` is the product entry point; the legacy runtime delegates without independent signals, confidence, candidate, safety, or integration logic.
+
+## BIL-IRC-004-R3 Closure State
+
+Parent HEAD: `460386229e04459f4ace1b7b31b78d47cdda9efb`.
+
+`BilLocalIntelligenceRealityRuntime` remains the sole production runtime. Missing bounded weight evidence now produces explicit safe abstention with an empty forecast and no selected action. Profile `currentWeight` is not promoted to factual runtime evidence. `BIL-IRC-004` is closed subject to Product Owner verification of R3.

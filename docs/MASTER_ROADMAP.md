@@ -235,3 +235,7 @@ Closes the final local product-output gap by projecting accepted 7/14-day foreca
 ## BIL-IRC-004 — Canonical Runtime Consolidation and Product Entry Gate
 
 The product has one canonical offline intelligence entry: `BilLocalIntelligenceCompositionRoot` creates `BilLocalIntelligenceRealityRuntime`. The former `BilLocalIntelligenceRuntime` is retained only as a deprecated, logic-free compatibility facade. Database-to-product verification now executes the Reality Runtime and protects Safety, Decision Memory, Forecast, and behavioral orchestration from alternate production paths.
+
+## BIL-IRC-004-R3 — Missing Weight Safe Abstention Guard
+
+Final AI/Reality closure guard. The canonical local runtime now abstains safely when the bounded analysis window contains no factual weight observation. It emits no product forecast or selected action, does not substitute profile weight, and requests a current logged weight. Cloud Platform may begin only after Product Owner verification and commit.

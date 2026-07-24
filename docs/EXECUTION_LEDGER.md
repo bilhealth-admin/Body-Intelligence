@@ -361,3 +361,13 @@ Status: Ready for Product Owner verification on parent HEAD 4ddf5582616bdee7101e
 - Scope: canonical composition root, legacy facade consolidation, database-to-Reality-Runtime system test, and duplicate-orchestrator regression protection.
 - Cloud/Network/Provider/LLM: unchanged and excluded.
 - Status: delivery candidate pending Product Owner Verify and commit.
+
+## BIL-IRC-004-R3
+
+- Parent HEAD: `460386229e04459f4ace1b7b31b78d47cdda9efb`
+- Scope: missing-weight safe-abstention guard for the canonical local runtime.
+- Production change: eliminate unsafe `weightedDays.last` access and prevent unsupported forecast/action output.
+- Focused verification: database profile with no weight entries.
+- Regression verification: future-only weight remains excluded by `asOf`.
+- Cloud/Network/Provider/LLM changes: none.
+- Status: ready for Product Owner verification.

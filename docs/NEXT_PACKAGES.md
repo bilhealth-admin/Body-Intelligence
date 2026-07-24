@@ -31,3 +31,7 @@ Status: Ready for Product Owner verification on parent HEAD `fc1a2270bde13431576
 ## BIL-IRC-004 — Final canonical product entry gate
 
 Current delivery candidate on parent HEAD `2f98fcf136cbb6669f70b7531cc864f4ae3590b6`. After Product Owner `VERIFY: PASSED` and commit, AI Platform, Intelligence Integration, and Reality Closure are final and Cloud Platform is authorized without another AI review gate.
+
+## After BIL-IRC-004-R3
+
+`BIL-IRC-004-R3` is the final AI/Reality gate. After Product Owner verification and commit, no additional AI review package is required and Cloud Platform is the next authorized phase. Until then, Cloud Platform remains blocked.
