@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/features/ai_platform/domain/decision_memory_history.dart';
 import 'package:body_intelligence_log/features/ai_platform/domain/local_intelligence_runtime.dart';
 import 'package:body_intelligence_log/features/ai_platform/services/physiological_reality_model.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,6 +13,7 @@ void main() {
         gender: 'female',
         activityLevel: 'active',
         targetWeightKg: 70,
+        decisionHistory: const <DecisionMemoryHistory>[],
         days: [
           for (var index = 0; index < 21; index++)
             LocalDailyPhysiology(

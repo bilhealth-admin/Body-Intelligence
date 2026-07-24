@@ -2,6 +2,9 @@ import 'package:drift/drift.dart';
 
 import '../../../data/database/app_database.dart';
 import '../domain/local_intelligence_runtime.dart';
+import '../domain/decision_memory_history.dart';
+import '../domain/decision_memory_record.dart' as ai;
+import '../domain/decision_outcome_transition.dart';
 
 /// Offline-only adapter that projects the existing local database into the
 /// neutral chronological input required by the intelligence runtime.
@@ -29,20 +32,25 @@ final class LocalIntelligenceRepositoryAdapter {
     final weights =
         await (database.select(database.weightEntries)..where(
               (row) =>
-                  row.deletedAt.isNull() & row.date.isBiggerOrEqualValue(start),
+                  row.deletedAt.isNull() &
+                  row.date.isBiggerOrEqualValue(start) &
+                  row.date.isSmallerOrEqualValue(end),
             ))
             .get();
     final waters =
         await (database.select(database.waterEntries)..where(
               (row) =>
                   row.deletedAt.isNull() &
-                  row.occurredAt.isBiggerOrEqualValue(start),
+                  row.occurredAt.isBiggerOrEqualValue(start) &
+                  row.occurredAt.isSmallerOrEqualValue(asOf.toUtc()),
             ))
             .get();
     final meals =
         await (database.select(database.meals)..where(
               (row) =>
-                  row.deletedAt.isNull() & row.date.isBiggerOrEqualValue(start),
+                  row.deletedAt.isNull() &
+                  row.date.isBiggerOrEqualValue(start) &
+                  row.date.isSmallerOrEqualValue(end),
             ))
             .get();
     final mealIds = meals.map((meal) => meal.id).toSet();
@@ -52,15 +60,20 @@ final class LocalIntelligenceRepositoryAdapter {
                 (row) => row.deletedAt.isNull() & row.mealId.isIn(mealIds),
               ))
               .get();
-    final logs = await (database.select(
-      database.dailyLogs,
-    )..where((row) => row.date.isBiggerOrEqualValue(start))).get();
+    final logs =
+        await (database.select(database.dailyLogs)..where(
+              (row) =>
+                  row.date.isBiggerOrEqualValue(start) &
+                  row.date.isSmallerOrEqualValue(end),
+            ))
+            .get();
     final contexts =
         await (database.select(database.lifeContextEntries)..where(
               (row) =>
                   row.deletedAt.isNull() &
                   row.useInInsights.equals(true) &
-                  row.occurredAt.isBiggerOrEqualValue(start),
+                  row.occurredAt.isBiggerOrEqualValue(start) &
+                  row.occurredAt.isSmallerOrEqualValue(asOf.toUtc()),
             ))
             .get();
 
@@ -89,6 +102,41 @@ final class LocalIntelligenceRepositoryAdapter {
           .putIfAbsent(_key(row.occurredAt), () => <String>[])
           .add(row.type);
     }
+
+    final memoryRows =
+        await (database.select(database.decisionMemories)..where(
+              (row) =>
+                  row.deletedAt.isNull() &
+                  row.surfacedAt.isSmallerOrEqualValue(asOf.toUtc()),
+            ))
+            .get();
+    final decisionHistory = memoryRows
+        .map((row) {
+          final state = switch (row.response) {
+            'done' => DecisionOutcomeState.succeeded,
+            'dismissed' || 'notSuitable' => DecisionOutcomeState.failed,
+            _ => DecisionOutcomeState.pending,
+          };
+          return DecisionMemoryHistory(
+            record: ai.DecisionMemoryRecord(
+              id: row.uuid,
+              createdAt: row.surfacedAt,
+              decisionKey: row.recommendationKey,
+              selectedAction: row.title,
+              rationale: row.reason,
+              confidence: switch (row.confidence) {
+                'high' => 0.9,
+                'medium' => 0.7,
+                _ => 0.5,
+              },
+              evidenceIds: const <String>['local-decision-memory'],
+              outcomeState: row.response,
+            ),
+            currentState: state,
+            transitions: const <DecisionOutcomeTransition>[],
+          );
+        })
+        .toList(growable: false);
 
     final days = <LocalDailyPhysiology>[];
     for (var offset = 0; offset < lookbackDays; offset++) {
@@ -123,6 +171,7 @@ final class LocalIntelligenceRepositoryAdapter {
       waistCm: profile.waist,
       neckCm: profile.neck,
       days: days,
+      decisionHistory: decisionHistory,
     );
   }
 

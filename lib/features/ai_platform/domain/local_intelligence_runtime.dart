@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'bil_intelligence_integration.dart';
+import 'decision_memory_history.dart';
 
 final class LocalDailyPhysiology {
   LocalDailyPhysiology({
@@ -45,8 +46,13 @@ final class LocalIntelligenceTimeline {
     this.waistCm,
     this.neckCm,
     required Iterable<LocalDailyPhysiology> days,
+    required Iterable<DecisionMemoryHistory> decisionHistory,
   }) : days = UnmodifiableListView<LocalDailyPhysiology>(
          (days.toList()..sort((a, b) => a.day.compareTo(b.day))),
+       ),
+       decisionHistory = UnmodifiableListView<DecisionMemoryHistory>(
+         (decisionHistory.toList()
+           ..sort((a, b) => b.record.createdAt.compareTo(a.record.createdAt))),
        );
 
   final int age;
@@ -57,6 +63,7 @@ final class LocalIntelligenceTimeline {
   final double? waistCm;
   final double? neckCm;
   final List<LocalDailyPhysiology> days;
+  final List<DecisionMemoryHistory> decisionHistory;
 
   List<LocalDailyPhysiology> get weightedDays =>
       days.where((day) => day.weightKg != null).toList(growable: false);

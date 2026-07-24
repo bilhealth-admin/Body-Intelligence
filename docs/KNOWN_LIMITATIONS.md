@@ -241,3 +241,8 @@ The Unified Health Brain is deterministic and local. It does not call an LLM, ge
 Adds the offline local repository projection, physiological tissue/water attribution, adaptive observed TDEE, seven- and fourteen-day runtime forecast, plateau-risk estimation, automatic One Best Action candidate generation, product-facing output contract, and a single local runtime entry point that emits UnifiedHealthBrainResult from persisted user data. No Cloud, provider, network, prompt, or LLM dependency is introduced. Parent HEAD: c87dce6d63c39183813d9c910a6ee4cadb7d30b2.
 
 The local physiology runtime estimates transient mass from explicit local intake and hydration signals; it is not a diagnostic model and abstains or lowers confidence when local coverage is insufficient. Electrolytes currently come from recorded meal nutrient evidence; no unrecorded supplement intake is invented.
+
+
+## BIL-IRC-002-R1 — Complete Local Intelligence Engine Wiring and Reality Gate
+
+Status: Ready for Product Owner verification on parent HEAD 4ddf5582616bdee7101e5e5e941d5012c210137d. The local runtime now wires actual closed AI Platform engines, loads local Decision Memory, applies asOf upper bounds, and routes actions through AI Safety before integration.
