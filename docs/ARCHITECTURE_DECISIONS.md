@@ -120,3 +120,7 @@ BIL-AI-020 exposes deterministic snapshot construction and the existing integrit
 ## ADR — Body Twin freshness is explicit caller-owned policy
 
 BIL-AI-021 does not embed universal freshness assumptions inside the AI Platform. Callers supply normalized per-metric maximum ages, while the local gate compares each accepted observation with the snapshot's explicit `asOf` time. Missing policy is surfaced as `unconfigured`, stale evidence remains inspectable, and neither condition may silently pass downstream.
+
+## ADR — Body Twin consistency remains caller-owned deterministic policy
+
+BIL-AI-022 layers a pure local consistency gate over the already integrity- and freshness-accepted Body Twin snapshot. Metric units and optional minimum/maximum bounds are supplied by the caller; the AI Platform does not invent physiological ranges, convert units, repair values, diagnose conditions, or infer trends. Missing policy, unit mismatch, and out-of-bound values remain explicit and block downstream consumption.

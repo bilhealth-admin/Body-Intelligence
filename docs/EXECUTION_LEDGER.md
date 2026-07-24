@@ -211,3 +211,11 @@ Corrected the AI-009 regression fixture to use the repository-owned `TruthSignal
 - Tests: focused freshness behavior plus Body Twin non-regression coverage.
 - Non-scope: plausibility, normalization, trends, tissue/water isolation, forecasting, Decision Memory, One Best Action, AI Coach, providers, prompts, persistence, cloud, and UI.
 - Next after successful verification and commit: derive the next smallest repository-supported offline-only Body Twin package from the new baseline.
+
+## BIL-AI-022 — Body Twin Consistency Engine Foundation
+
+- Parent HEAD: `e8405282c17b7ad7a0e2c9a96cb62e4aba610e25`.
+- Scope: deterministic caller-owned unit and bounded-value consistency classification over an accepted fresh Body Twin snapshot.
+- Production mutation outside AI Platform: none.
+- Non-scope: unit conversion, physiological policy invention, diagnosis, repair, trends, tissue/water isolation, forecasting, persistence, providers, prompts, UI, recommendations, or medical interpretation.
+- Verification: focused AI-022 tests, complete AI Platform tests, Commerce regression, analyzer, full project tests, and exact diff integrity.

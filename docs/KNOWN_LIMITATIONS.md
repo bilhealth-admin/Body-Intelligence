@@ -145,3 +145,9 @@ The public Body Twin snapshot facade assembles and integrity-gates caller-suppli
 ## BIL-AI-021 limitation
 
 The freshness gate evaluates only caller-supplied maximum ages against the accepted snapshot's explicit timestamps. It does not define medically correct freshness windows, infer physiological plausibility, normalize units, calculate trends, isolate tissue or water noise, forecast metabolism, persist state, call providers, rank actions, or present UI. Metrics without explicit policy are blocked as unconfigured.
+
+## BIL-AI-022 limitations
+
+- Consistency rules are caller supplied and are not universal physiological or diagnostic ranges.
+- Units are compared exactly; no conversion or normalization is performed.
+- The engine evaluates one snapshot only and does not infer trends, tissue state, water noise, or forecasts.

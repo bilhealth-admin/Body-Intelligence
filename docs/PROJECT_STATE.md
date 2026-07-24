@@ -131,3 +131,7 @@ Issued against parent HEAD `7e4c7fb2aab097f3f30a285c11217432268fd039`. Scope is 
 ## BIL-AI-021 State
 
 Issued against parent HEAD `5967bb068c4a3d8f009edfb8e6058b7f508b4078`. Scope is deterministic freshness classification and explicit freshness-gated consumption over the accepted Body Twin snapshot foundation. Freshness limits remain caller-owned policy; the AI Platform does not invent them.
+
+## BIL-AI-022 State
+
+Issued against parent HEAD `e8405282c17b7ad7a0e2c9a96cb62e4aba610e25`. Scope is deterministic Body Twin consistency classification and explicit consistency-gated consumption over the already integrity- and freshness-accepted snapshot. Units and optional bounds remain caller-owned policy; the AI Platform does not invent or normalize them.
