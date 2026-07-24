@@ -127,3 +127,6 @@ BIL-AI-022 layers a pure local consistency gate over the already integrity- and 
 
 ## ADR — Compose Body Twin trust gates without duplicating policy
 BIL-AI-023 introduces a pure composition root that delegates to the existing foundation, freshness, and consistency engines. The pipeline preserves their evidence objects and does not recreate or weaken policy.
+
+## ADR — Public Body Twin consumption boundary
+The AI Platform exposes the composed Body Twin trust chain through a thin facade. Consumers receive an explicit accepted, incomplete, or rejected outcome; only accepted outcomes expose a snapshot. All upstream evidence remains available for explainability.

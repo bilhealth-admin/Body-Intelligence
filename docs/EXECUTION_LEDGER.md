@@ -224,3 +224,8 @@ Corrected the AI-009 regression fixture to use the repository-owned `TruthSignal
 - Status: Delivered for Product Owner verification
 - Parent HEAD: `d0a22b7030d84b6448ac9e6e0e521faca70879f3`
 - Scope: trusted Body Twin snapshot pipeline composition
+
+## BIL-AI-024
+- Status: Delivered for Product Owner verification.
+- Parent: `efcdd7c46ab0a6bdc25ce219a36718837b41bc27`.
+- Adds the public Body Twin facade and explicit outcome classification over the trusted snapshot pipeline.

@@ -154,3 +154,6 @@ The freshness gate evaluates only caller-supplied maximum ages against the accep
 
 ## BIL-AI-023 limitations
 The trusted snapshot pipeline performs no unit conversion, trend inference, tissue/water isolation, forecasting, persistence, provider access, recommendation, or medical inference. Policies remain caller-owned.
+
+## BIL-AI-024 limitations
+The public facade does not infer trends, normalize units, repair observations, persist state, access providers, recommend actions, or perform medical interpretation. Caller-owned freshness and consistency policy remains mandatory.

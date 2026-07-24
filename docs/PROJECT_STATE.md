@@ -138,3 +138,6 @@ Issued against parent HEAD `e8405282c17b7ad7a0e2c9a96cb62e4aba610e25`. Scope is 
 
 ## AI Platform Update — BIL-AI-023
 The Body Twin now exposes a single local trusted-snapshot pipeline. It preserves every upstream result and only exposes a snapshot when all existing gates pass.
+
+## BIL-AI-024 State
+Issued against parent HEAD `efcdd7c46ab0a6bdc25ce219a36718837b41bc27`. Scope is a stable public Body Twin facade and explicit accepted/incomplete/rejected outcome over BIL-AI-023. Existing evidence remains inspectable and no new inference, persistence, provider, recommendation, or medical behavior is introduced.

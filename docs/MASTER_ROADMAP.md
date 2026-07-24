@@ -140,3 +140,6 @@ Status: implementation package issued against parent `e8405282c17b7ad7a0e2c9a96c
 
 ## BIL-AI-023 — Trusted Body Twin Snapshot Pipeline
 Completed: deterministic offline composition of the existing Body Twin foundation, freshness, and consistency gates into one evidence-preserving result.
+
+## BIL-AI-024 — Body Twin Public Foundation Facade
+Adds the stable public local Body Twin outcome and facade over the complete trusted snapshot pipeline. The facade exposes accepted, incomplete, or rejected outcomes without adding inference or policy.
