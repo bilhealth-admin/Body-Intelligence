@@ -222,3 +222,10 @@ Product output must be translated from accepted engine results rather than fixed
 ## ADR — Canonical Runtime Requires Factual Bounded Weight Evidence
 
 The product runtime must not derive projected weight or present an action when no factual weight observation exists inside the adapter's bounded `asOf` window. Profile `currentWeight` is not silently treated as a measurement. The runtime completes the closed engine pipeline, then exposes an empty product forecast, no selected action, an explicit abstention explanation, and a request to log a current weight.
+
+## ADR — Cloud Platform Core remains provider-neutral and local-authoritative
+BIL Cloud uses a ports-and-contracts kernel. The local database remains authoritative; remote transport, encryption, connectivity, authentication session, and durable store are injected. Sync is owner-scoped and consent-gated, uses encrypted outbox operations and incremental cursors, preserves tombstones, and resolves conflicts deterministically. No provider SDK or credential is embedded in the application core.
+
+
+## ADR — Durable Offline-First Cloud Runtime
+Cloud is subordinate to the local database. A dedicated SQLite store persists outbox, inbox, cursors, tombstones, conflicts, idempotency receipts, dead letters, backups, devices, accounts, and redacted audit events. Provider implementations remain behind ports. Restore is checksum verified and rollback capable.

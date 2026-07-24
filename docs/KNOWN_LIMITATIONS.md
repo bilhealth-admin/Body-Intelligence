@@ -257,3 +257,10 @@ The canonical runtime remains offline-first and privacy-first. The composition r
 ## Weight Evidence Requirement
 
 Local product intelligence cannot produce a supported projected weight or actionable recommendation without at least one factual weight entry inside the analysis window. Profile `currentWeight` is intentionally not substituted because it lacks measurement-event provenance. The product output safely abstains and asks the user to log a current weight.
+
+## BIL-CLOUD-001 activation boundary
+The repository now contains the complete provider-neutral offline-first Cloud Platform Core. A real hosted transport, owned authentication service, encryption key custody, server-side RLS, monitoring backend, storage buckets, notification delivery, and disaster-recovery environment require Product Owner infrastructure and credentials. Until those ports are configured, the runtime must remain honestly local-only and must not simulate remote success.
+
+
+## Cloud provider boundaries
+`BIL-CLOUD-001-R1` supplies production local persistence and complete deterministic runtimes. Concrete remote vendor credentials, deployment configuration, OS secure-key storage, and provider-specific transport are environment integrations behind tested ports and are not embedded in source control.

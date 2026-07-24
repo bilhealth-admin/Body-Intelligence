@@ -236,3 +236,10 @@ Parent HEAD: `2f98fcf136cbb6669f70b7531cc864f4ae3590b6`. Local intelligence runt
 Parent HEAD: `460386229e04459f4ace1b7b31b78d47cdda9efb`.
 
 `BilLocalIntelligenceRealityRuntime` remains the sole production runtime. Missing bounded weight evidence now produces explicit safe abstention with an empty forecast and no selected action. Profile `currentWeight` is not promoted to factual runtime evidence. `BIL-IRC-004` is closed subject to Product Owner verification of R3.
+
+## BIL-CLOUD-001 State
+Parent HEAD: `069911be02078c93f2122fc797c0d8c3720bac41`. Cloud Platform Core is the active delivery candidate. It introduces a complete provider-neutral offline-first synchronization kernel without adding provider SDKs, credentials, network endpoints, or weakening local authority. Product Owner verification and commit are required before formal closure.
+
+
+## Cloud Platform Core
+`BIL-CLOUD-001-R1` is the complete Cloud Platform delivery candidate on parent `069911be02078c93f2122fc797c0d8c3720bac41`. Closure remains pending Product Owner `VERIFY: PASSED` and commit.

@@ -1,4 +1,4 @@
-﻿name: body_intelligence_log
+name: body_intelligence_log
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -39,6 +39,7 @@ dependencies:
   go_router: ^17.3.0
   drift: ^2.34.2
   sqlite3_flutter_libs: ^0.6.0+eol
+  sqlite3: ^3.4.0
   path_provider: ^2.1.6
   path: ^1.9.1
   shared_preferences: ^2.5.5

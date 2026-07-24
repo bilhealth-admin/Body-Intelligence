@@ -239,3 +239,10 @@ The product has one canonical offline intelligence entry: `BilLocalIntelligenceC
 ## BIL-IRC-004-R3 — Missing Weight Safe Abstention Guard
 
 Final AI/Reality closure guard. The canonical local runtime now abstains safely when the bounded analysis window contains no factual weight observation. It emits no product forecast or selected action, does not substitute profile weight, and requests a current logged weight. Cloud Platform may begin only after Product Owner verification and commit.
+
+## BIL-CLOUD-001 — Complete Offline-First Cloud Platform and Closure
+Cloud Platform Core is delivered as provider-neutral, offline-first production contracts: owner-scoped envelopes, encrypted selective sync, durable outbox semantics, incremental cursor exchange, tombstones, deterministic conflict resolution, device/session/revocation boundaries, backup/restore/export manifests, monitoring contracts, and a single composition root. Real provider activation remains an infrastructure configuration boundary; local data stays authoritative and no simulated cloud success is permitted.
+
+
+## BIL-CLOUD-001-R1 — Complete Offline-First Cloud Platform and Closure
+Status: Delivery candidate for Product Owner verification. Includes durable SQLite queues and ledgers, identity/device trust, retry/dead-letter/resume, multi-device conflict convergence, backup/restore/export/deletion, schema negotiation, product cloud state, redacted observability, and failure-injection system tests.

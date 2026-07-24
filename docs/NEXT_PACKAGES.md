@@ -35,3 +35,10 @@ Current delivery candidate on parent HEAD `2f98fcf136cbb6669f70b7531cc864f4ae359
 ## After BIL-IRC-004-R3
 
 `BIL-IRC-004-R3` is the final AI/Reality gate. After Product Owner verification and commit, no additional AI review package is required and Cloud Platform is the next authorized phase. Until then, Cloud Platform remains blocked.
+
+## After BIL-CLOUD-001
+`BIL-CLOUD-001` is the single Cloud Platform Core closure candidate. After Product Owner `VERIFY: PASSED` and commit, provider deployment/configuration and external infrastructure activation are operational boundaries, not a second competing cloud core.
+
+
+## Current gate
+No package follows `BIL-CLOUD-001-R1` until Product Owner verification. On success, Cloud Platform Core is closed and the roadmap may proceed to the next official platform stage.

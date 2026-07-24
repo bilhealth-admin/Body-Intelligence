@@ -371,3 +371,8 @@ Status: Ready for Product Owner verification on parent HEAD 4ddf5582616bdee7101e
 - Regression verification: future-only weight remains excluded by `asOf`.
 - Cloud/Network/Provider/LLM changes: none.
 - Status: ready for Product Owner verification.
+
+| BIL-CLOUD-001 | Complete Offline-First Cloud Platform and Closure | Delivery candidate | Owner-scoped encrypted selective sync, outbox/cursor delta exchange, tombstones, deterministic conflict resolution, retry, session/device/revocation, backup/export/monitoring contracts, composition root, focused/regression/full gates | Parent `069911be02078c93f2122fc797c0d8c3720bac41`; awaiting Product Owner verification |
+
+
+- BIL-CLOUD-001-R1: Complete Offline-First Cloud Platform and Closure — delivery candidate; parent `069911be02078c93f2122fc797c0d8c3720bac41`; verification pending Product Owner.
