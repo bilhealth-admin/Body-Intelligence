@@ -131,3 +131,8 @@ The stable Truth/Explain facade classifies only outcomes already validated by AI
 ## BIL-AI-018 limitations
 
 The validator checks structural and provenance consistency only. It does not judge physiological plausibility, freshness policy, unit conversion, trends, predictions, medical meaning, persistence, UI, or provider output.
+
+
+## BIL-AI-019 limitations
+
+The gate establishes structural and provenance acceptance only. It does not certify physiological plausibility or scientific correctness, normalize units, assess freshness, calculate trends, isolate tissue or water noise, forecast metabolism, persist state, call providers, rank actions, or present UI.

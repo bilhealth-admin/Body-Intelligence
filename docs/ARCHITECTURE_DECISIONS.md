@@ -106,3 +106,8 @@ BIL-AI-017 represents the Body Twin as caller-supplied local observations assemb
 ## ADR — BIL-AI-018 Body Twin provenance is derived and validated locally
 
 Body Twin provenance is projected directly from accepted immutable observations and validated against the snapshot before downstream consumption. Mismatches are surfaced as stable typed issues; the validator never repairs data or consults a provider.
+
+
+## ADR — Body Twin snapshot validation becomes an explicit consumption gate
+
+AI-019 keeps AI-018 as the single structural and provenance validator. The new gate derives acceptance exclusively from that validator, preserves the original snapshot and validation evidence for diagnostics, and exposes accepted snapshot/provenance values only when integrity succeeds. It never repairs data, estimates missing metrics, changes freshness policy, invokes providers, or introduces recommendation behavior.

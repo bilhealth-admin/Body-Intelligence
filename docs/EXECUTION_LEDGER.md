@@ -183,3 +183,12 @@ Corrected the AI-009 regression fixture to use the repository-owned `TruthSignal
 - Adds immutable metric provenance, explainable integrity issue/result types, and a pure snapshot validator.
 - Non-scope: prediction, scientific inference, Decision Memory, One Best Action, AI Coach, prompts/providers, cloud, persistence, and UI.
 - Next after successful verification and commit: next smallest repository-defined Body Twin package.
+
+
+## BIL-AI-019
+
+- Parent HEAD: `d142847a2a5c6505710bb41dd3b59e85c09bb4ce`
+- Package: Body Twin Snapshot Integrity Gate Foundation
+- Production scope: immutable gate result and pure gate service over AI-018 validation.
+- Tests: focused acceptance/rejection behavior plus deterministic immutability regression.
+- Status: delivered for Product Owner verification.

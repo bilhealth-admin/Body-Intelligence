@@ -117,3 +117,8 @@ Parent HEAD: `83dff08434af4e99504976c1b7cd5a715223e995`. AI-017 begins the autho
 ## BIL-AI-018 State
 
 Issued against parent HEAD `30008d1f5558375b02aad9f05a98272725d8ad34`. Scope is deterministic Body Twin snapshot integrity validation and typed provenance projection only.
+
+
+## BIL-AI-019 State
+
+Issued against parent HEAD `d142847a2a5c6505710bb41dd3b59e85c09bb4ce`. Scope is an explicit immutable Body Twin snapshot integrity gate over the existing AI-018 validator. Accepted snapshots and provenance are exposed only when validation succeeds; rejected envelopes remain inspectable and expose no accepted value.

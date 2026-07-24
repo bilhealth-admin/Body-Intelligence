@@ -119,3 +119,8 @@ This package starts the Body Twin track with immutable local observation and sna
 ## BIL-AI-018 — Body Twin Snapshot Integrity and Provenance Foundation
 
 Status: implementation package issued. Adds a pure local validator and immutable typed provenance projection for Body Twin snapshots. It detects future observations, map identity mismatches, orphan provenance, and source/time/reliability drift without estimating, repairing, persisting, ranking, or invoking providers.
+
+
+## BIL-AI-019 — Body Twin Snapshot Integrity Gate Foundation
+
+Status: implementation package issued against parent `d142847a2a5c6505710bb41dd3b59e85c09bb4ce`. Adds a pure local accept/reject consumption boundary over the established Body Twin snapshot validator. It preserves the original snapshot, provenance, and integrity evidence without adding estimation, repair, freshness policy, persistence, provider, prompt, UI, recommendation, or medical inference.
