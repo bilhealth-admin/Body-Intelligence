@@ -202,3 +202,6 @@ The engine does not generate candidate actions, diagnose conditions, replace AI 
 ## AI Safety Layer
 
 The engine does not author medical policy, diagnose conditions, contact emergency services, replace professional judgment, generate action candidates, persist results, or call remote providers. Rules and their clinical governance remain caller-owned.
+
+## BIL-AI-038-R1 — Automated Health Insight Summaries
+Deterministic bounded health summaries with provenance, uncertainty preservation, explicit safety gating, abstention, immutable evidence, and no diagnostic claims. Product Owner verification remains required.

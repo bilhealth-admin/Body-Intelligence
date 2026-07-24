@@ -185,3 +185,6 @@ Issued against parent HEAD `37333a7e1d5fb25fcff4758b60cbb0b831340e6c`. One Best 
 ## BIL-AI-037 delivery candidate
 
 Issued against parent HEAD `fc208f05a2e7f68f9bb78ff33803212ca188c2ea`. AI Safety Layer provides a deterministic local safety boundary over accepted One Best Action output. Caller-owned rules define advisory and blocking policy; blocking matches reject, optional advisory policy abstains, upstream rejection never leaks an action, and every issue remains explainable. The layer does not diagnose, replace clinicians, contact emergency services, generate policy, call providers, or mutate user state.
+
+## BIL-AI-038-R1 — Automated Health Insight Summaries
+Deterministic bounded health summaries with provenance, uncertainty preservation, explicit safety gating, abstention, immutable evidence, and no diagnostic claims. Product Owner verification remains required.

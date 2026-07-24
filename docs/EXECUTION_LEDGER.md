@@ -301,3 +301,6 @@ Adds immutable outcome transitions and deterministic append-only reconciliation 
 Parent HEAD: `fc208f05a2e7f68f9bb78ff33803212ca188c2ea`
 
 Closes AI Safety Layer at the deterministic local engine boundary. Awaiting Product Owner verification and commit.
+
+## BIL-AI-038-R1 — Automated Health Insight Summaries
+Deterministic bounded health summaries with provenance, uncertainty preservation, explicit safety gating, abstention, immutable evidence, and no diagnostic claims. Product Owner verification remains required.

@@ -2,12 +2,12 @@
 
 ## Current delivery candidate
 
-`BIL-AI-037` closes AI Safety Layer in one integrated package.
+`BIL-AI-038-R1` closes Automated Health Insight Summaries in one integrated deterministic package.
 
 ## Next authorized package
 
-`BIL-AI-038` — complete and close Automated Health Insight Summaries in one integrated deterministic package over accepted local engine outputs, preserving provenance, uncertainty, safety outcomes, bounded summaries, and no diagnostic claims.
+`BIL-AI-039` — complete and close AI Coach in one integrated package consuming only trusted, safety-approved local engine outputs and bounded insight summaries.
 
 ## Remaining engine order
 
-Automated Health Insight Summaries → AI Coach → Prompt Engine → AI Cost Optimizer → Proprietary BIL Intelligence → Scientific Validation & Explainability → Final Integration and AI Platform Closure.
+AI Coach → Prompt Engine → AI Cost Optimizer → Proprietary BIL Intelligence → Scientific Validation & Explainability → Final Integration and AI Platform Closure.

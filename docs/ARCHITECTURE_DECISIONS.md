@@ -174,3 +174,6 @@ One Best Action does not invent actions or safety policy. It ranks caller-suppli
 ## ADR — AI Safety policy remains caller-owned
 
 AI Safety evaluates explicit caller-supplied rules over accepted One Best Action output. The platform does not invent clinical thresholds, emergency advice, diagnosis, or user-specific policy. Blocking rules reject; advisory rules remain explainable and may trigger caller-configured abstention.
+
+## BIL-AI-038-R1 — Automated Health Insight Summaries
+Deterministic bounded health summaries with provenance, uncertainty preservation, explicit safety gating, abstention, immutable evidence, and no diagnostic claims. Product Owner verification remains required.
