@@ -1,40 +1,25 @@
-# Roadmap and activation blockers
+# BIL Roadmap and Activation Boundaries
 
-## Product Excellence program status
+## Authoritative execution baseline
 
 - Branch: `phase-3-product-excellence`
-- Reconciled baseline: `7071621`
-- Phase 3 Product Excellence: **complete**, subject to the Phase 3 Ledger Reconciliation package full verification and Product Owner commit.
-- Epics 1–8: **complete** in `docs/phase_3_execution_ledger.md`.
-- No stale ledger item authorizes reimplementation of accepted production behavior.
-- The remaining items below are activation/release blockers, not unfinished Phase 3 production Epics.
+- Baseline HEAD: `8f67e0effa480e9af0769ec546973ef0644a32f8`
 
-The offline/local product is the active implementation. The following
-capabilities require external infrastructure and must remain disabled until the
-whole activation checklist is satisfied:
+## Closed engineering stages
 
-- Account/auth: owned Supabase project, approved redirect URLs, email delivery,
-  secure token storage, verification/reset flows, session/device testing, RLS.
-- Cloud sync: audited schema, per-table RLS, outbox/inbox worker, conflict and
-  tombstone integration tests, selective-sync consent, backup/restore drills.
-- AI assistant: server-side provider key, consent, redaction, rate/cost limits,
-  abuse policy, deterministic-tool boundary, write confirmation, deletion and
-  export.
-- Coach/community/shared challenges: verified identities, membership RLS,
-  consent/revocation, block/report/moderation, retention and deletion policies.
-- Commerce: store products, server-side receipt verification, entitlement
-  service, restore/grace/refund behavior, and current regional store-policy
-  review.
-- Remote update/admin operations: authenticated signed configuration, rollout
-  and rollback controls, minimum-version policy, platform store/download links,
-  maintenance and safe-export paths.
+- Foundation — **Closed**
+- Nutrition Platform — **Closed**
+- AI Platform — **Closed**
+- BIL Intelligence Integration — **Closed**
+- BIL Intelligence Reality Closure — **Closed**
+- Cloud Platform Core — **Closed**
 
-Credentials alone are not sufficient. A capability becomes available only
-after its adapter, authorization rules, failure behavior, tests, privacy text,
-and production monitoring are verified. Service-role keys and administrator,
-payment, signing, or AI secrets must never be placed in the Flutter client.
+## Next roadmap boundary
 
-Release identity is also pending: Android and Apple projects retain example
-bundle identifiers, and Android release-mode development artifacts currently
-use debug signing. Owned identifiers, external signing credentials, store
-records, and physical-device release testing are required before publication.
+The next engineering phase is the first post-Cloud stage explicitly authorized by the Product Owner. No completed AI, intelligence-integration, reality-closure, or Cloud Core package is included in future work.
+
+## External activation boundaries
+
+Provider deployment, credentials, hosted authorization, encryption-key custody, production monitoring, store publication, signing, physical-device validation, and disaster-recovery operation require owned external infrastructure and release processes. They must remain disabled or honestly local-only until their complete activation criteria are met.
+
+Credentials alone do not activate a capability. Every external integration requires its adapter, authorization rules, failure behavior, privacy controls, tests, operational monitoring, and rollback path.

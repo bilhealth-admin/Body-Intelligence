@@ -1,44 +1,36 @@
-# BIL Intelligence Integration Next Packages
+# BIL Next Packages
 
-## Current delivery candidate
+## Authoritative execution baseline
 
-`BIL-INT-001-R1` — Complete BIL Intelligence Integration and Closure.
+- Branch: `phase-3-product-excellence`
+- Baseline HEAD: `8f67e0effa480e9af0769ec546973ef0644a32f8`
 
-## Status after Product Owner acceptance
+## Closed delivery streams
 
-BIL Intelligence Integration is formally closed when the complete Verify gate passes and the Product Owner commits the package. No `BIL-INT-002` is authorized.
+The following delivery streams are complete and are not future packages:
 
-## Next phase boundary
+- Foundation — **Closed**
+- Nutrition Platform — **Closed**
+- AI Platform — **Closed**
+- BIL Intelligence Integration — **Closed**
+- BIL Intelligence Reality Closure — **Closed**
+- Cloud Platform Core — **Closed**
 
-1. Comprehensive post-integration review.
-2. Cloud Platform planning and authorization.
-3. Cloud work remains blocked until `BIL-INT-001-R1` is accepted.
+## Next authorized package
 
-## BIL-IRC-001 — Local Intelligence Reality Closure
+No package is currently authorized by this document.
 
-Adds the offline local repository projection, physiological tissue/water attribution, adaptive observed TDEE, seven- and fourteen-day runtime forecast, plateau-risk estimation, automatic One Best Action candidate generation, product-facing output contract, and a single local runtime entry point that emits UnifiedHealthBrainResult from persisted user data. No Cloud, provider, network, prompt, or LLM dependency is introduced. Parent HEAD: c87dce6d63c39183813d9c910a6ee4cadb7d30b2.
+## Post-Cloud execution boundary
 
-BIL Intelligence Reality Closure is pending Product Owner verification. After acceptance, perform the short Reality Closure gate before authorizing Cloud Platform.
+The official next starting point is the **post-Cloud phase** defined by the governing roadmap and authorized by the Product Owner. No completed AI, intelligence-integration, reality-closure, or Cloud Core package is future work.
 
+The next package must belong to that post-Cloud phase. It must use the baseline above (or a later accepted HEAD) and must not re-list or reimplement completed AI, intelligence-integration, reality-closure, or Cloud Core packages.
 
-## BIL-IRC-002-R1 — Complete Local Intelligence Engine Wiring and Reality Gate
+## Package sequencing rule
 
-Status: Ready for Product Owner verification on parent HEAD 4ddf5582616bdee7101e5e5e941d5012c210137d. The local runtime now wires actual closed AI Platform engines, loads local Decision Memory, applies asOf upper bounds, and routes actions through AI Safety before integration.
+When the next phase is authorized:
 
-## BIL-IRC-003 — Final AI-to-Cloud reality gate
-Status: Ready for Product Owner verification on parent HEAD `fc1a2270bde13431576ad6aaccbb15627ccc1109`. After a clean full Verify and commit, no additional AI reality package is authorized and Cloud Platform may begin.
-
-## BIL-IRC-004 — Final canonical product entry gate
-
-Current delivery candidate on parent HEAD `2f98fcf136cbb6669f70b7531cc864f4ae3590b6`. After Product Owner `VERIFY: PASSED` and commit, AI Platform, Intelligence Integration, and Reality Closure are final and Cloud Platform is authorized without another AI review gate.
-
-## After BIL-IRC-004-R3
-
-`BIL-IRC-004-R3` is the final AI/Reality gate. After Product Owner verification and commit, no additional AI review package is required and Cloud Platform is the next authorized phase. Until then, Cloud Platform remains blocked.
-
-## After BIL-CLOUD-001
-`BIL-CLOUD-001` is the single Cloud Platform Core closure candidate. After Product Owner `VERIFY: PASSED` and commit, provider deployment/configuration and external infrastructure activation are operational boundaries, not a second competing cloud core.
-
-
-## Current gate
-No package follows `BIL-CLOUD-001-R1` until Product Owner verification. On success, Cloud Platform Core is closed and the roadmap may proceed to the next official platform stage.
+1. Record its accepted parent HEAD.
+2. Define its testable exit criteria.
+3. Deliver it through the Package Delivery Contract.
+4. Update this document only after Product Owner verification and commit.
