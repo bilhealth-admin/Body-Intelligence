@@ -249,3 +249,7 @@ Status: Ready for Product Owner verification on parent HEAD 4ddf5582616bdee7101e
 
 ## BIL-IRC-003 boundaries
 The local behavioral model is deterministic and offline. It does not diagnose, prescribe medication, infer unlogged data, contact providers, or use cloud/LLM services. Forecast and action output abstain when accepted upstream evidence is unavailable.
+
+## BIL-IRC-004 boundaries
+
+The canonical runtime remains offline-first and privacy-first. The composition root creates only the local database adapter and Reality Runtime; it adds no Cloud transport, network client, provider, prompt execution, or LLM dependency. The deprecated facade exists only for source compatibility and delegates every call to the canonical runtime.

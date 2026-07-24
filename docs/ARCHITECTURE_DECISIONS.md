@@ -214,3 +214,7 @@ Status: Ready for Product Owner verification on parent HEAD 4ddf5582616bdee7101e
 
 ## ADR — Product Intelligence Behavioral Reality Boundary
 Product output must be translated from accepted engine results rather than fixed signals. Plateau risk is a deterministic fusion of observed slowdown, recent flatness, supported energy balance, forecast acceptance, and physiology confidence. Sodium and potassium are opposing explicit water-noise drivers. Decision Memory outcomes modify candidate benefit/confidence before deterministic ranking, while AI Safety remains the final acceptance gate.
+
+## ADR — One canonical local intelligence production runtime
+
+`BilLocalIntelligenceRealityRuntime` is the only class permitted to own end-to-end local intelligence orchestration. Product code obtains it through `BilLocalIntelligenceCompositionRoot`. `BilLocalIntelligenceRuntime` remains solely as a deprecated compatibility facade and must contain no confidence constants, synthetic integration signals, safety defaults, candidate generation, or direct integration calls.

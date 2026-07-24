@@ -231,3 +231,7 @@ Status: Ready for Product Owner verification on parent HEAD 4ddf5582616bdee7101e
 
 ## BIL-IRC-003 — Product Intelligence Output and Behavioral Reality Gate
 Closes the final local product-output gap by projecting accepted 7/14-day forecasts, deriving plateau risk from observed slowdown and energy evidence, balancing sodium with potassium in physiological noise, adapting One Best Action candidates to local behavior and Decision Memory outcomes, and preserving AI Safety as the final action gate. Cloud, network, providers, prompts, and LLMs remain out of scope.
+
+## BIL-IRC-004 — Canonical Runtime Consolidation and Product Entry Gate
+
+The product has one canonical offline intelligence entry: `BilLocalIntelligenceCompositionRoot` creates `BilLocalIntelligenceRealityRuntime`. The former `BilLocalIntelligenceRuntime` is retained only as a deprecated, logic-free compatibility facade. Database-to-product verification now executes the Reality Runtime and protects Safety, Decision Memory, Forecast, and behavioral orchestration from alternate production paths.

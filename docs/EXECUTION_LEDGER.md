@@ -354,3 +354,10 @@ Adds the offline local repository projection, physiological tissue/water attribu
 Status: Ready for Product Owner verification on parent HEAD 4ddf5582616bdee7101e5e5e941d5012c210137d. The local runtime now wires actual closed AI Platform engines, loads local Decision Memory, applies asOf upper bounds, and routes actions through AI Safety before integration.
 
 - BIL-IRC-003 — Product Intelligence Output and Behavioral Reality Gate — delivery candidate on `fc1a2270bde13431576ad6aaccbb15627ccc1109`; pending Product Owner Verify and commit.
+
+## BIL-IRC-004 — Canonical Runtime Consolidation and Product Entry Gate
+
+- Parent HEAD: `2f98fcf136cbb6669f70b7531cc864f4ae3590b6`
+- Scope: canonical composition root, legacy facade consolidation, database-to-Reality-Runtime system test, and duplicate-orchestrator regression protection.
+- Cloud/Network/Provider/LLM: unchanged and excluded.
+- Status: delivery candidate pending Product Owner Verify and commit.

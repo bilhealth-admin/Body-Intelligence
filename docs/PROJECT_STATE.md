@@ -226,3 +226,7 @@ Status: Ready for Product Owner verification on parent HEAD 4ddf5582616bdee7101e
 
 ## BIL-IRC-003 delivery candidate
 Parent HEAD: `fc1a2270bde13431576ad6aaccbb15627ccc1109`. Product-facing local intelligence now receives real accepted forecast points, deterministic plateau risk, electrolyte-balanced water-noise attribution, adaptive candidate generation, and Decision Memory ranking effects. Product Owner verification is required before Cloud Platform authorization.
+
+## BIL-IRC-004 delivery candidate
+
+Parent HEAD: `2f98fcf136cbb6669f70b7531cc864f4ae3590b6`. Local intelligence runtime consolidation is ready for Product Owner verification. `BilLocalIntelligenceRealityRuntime` is the sole production orchestrator; `BilLocalIntelligenceCompositionRoot` is the product entry point; the legacy runtime delegates without independent signals, confidence, candidate, safety, or integration logic.
