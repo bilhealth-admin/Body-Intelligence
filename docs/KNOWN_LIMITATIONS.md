@@ -140,3 +140,8 @@ The gate establishes structural and provenance acceptance only. It does not cert
 ## BIL-AI-020 limitations
 
 The public Body Twin snapshot facade assembles and integrity-gates caller-supplied observations only. It does not determine physiological plausibility, data freshness, trends, tissue or water effects, forecasts, health insights, recommendations, medical meaning, persistence, provider use, prompts, cloud transport, or UI behavior.
+
+
+## BIL-AI-021 limitation
+
+The freshness gate evaluates only caller-supplied maximum ages against the accepted snapshot's explicit timestamps. It does not define medically correct freshness windows, infer physiological plausibility, normalize units, calculate trends, isolate tissue or water noise, forecast metabolism, persist state, call providers, rank actions, or present UI. Metrics without explicit policy are blocked as unconfigured.

@@ -115,3 +115,8 @@ AI-019 keeps AI-018 as the single structural and provenance validator. The new g
 ## ADR — Body Twin snapshot consumers use one stable gated facade
 
 BIL-AI-020 exposes deterministic snapshot construction and the existing integrity gate through one public local facade. The facade does not duplicate validation or create scientific policy. It returns the complete gate envelope for explainability and exposes a snapshot only after acceptance, keeping later AI capabilities dependent on one testable offline boundary.
+
+
+## ADR — Body Twin freshness is explicit caller-owned policy
+
+BIL-AI-021 does not embed universal freshness assumptions inside the AI Platform. Callers supply normalized per-metric maximum ages, while the local gate compares each accepted observation with the snapshot's explicit `asOf` time. Missing policy is surfaced as `unconfigured`, stale evidence remains inspectable, and neither condition may silently pass downstream.

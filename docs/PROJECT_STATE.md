@@ -126,3 +126,8 @@ Issued against parent HEAD `d142847a2a5c6505710bb41dd3b59e85c09bb4ce`. Scope is 
 ## BIL-AI-020 State
 
 Issued against parent HEAD `7e4c7fb2aab097f3f30a285c11217432268fd039`. Scope is the stable public Body Twin snapshot facade over AI-017 through AI-019. Snapshot construction and integrity enforcement remain deterministic, offline-only, provider-neutral, clock-injected, and mutation-free.
+
+
+## BIL-AI-021 State
+
+Issued against parent HEAD `5967bb068c4a3d8f009edfb8e6058b7f508b4078`. Scope is deterministic freshness classification and explicit freshness-gated consumption over the accepted Body Twin snapshot foundation. Freshness limits remain caller-owned policy; the AI Platform does not invent them.

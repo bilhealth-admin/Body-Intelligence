@@ -128,3 +128,8 @@ Status: implementation package issued against parent `d142847a2a5c6505710bb41dd3
 ## BIL-AI-020 — Body Twin Snapshot Public Foundation
 
 Status: implementation package issued against parent `7e4c7fb2aab097f3f30a285c11217432268fd039`. Adds a stable public facade over deterministic snapshot assembly and the established integrity gate. It exposes only accepted snapshots and preserves the complete gate evidence without adding inference, repair, freshness policy, persistence, provider, prompt, UI, recommendation, forecasting, or medical interpretation.
+
+
+## BIL-AI-021 — Body Twin Freshness Gate Foundation
+
+Status: implementation package issued against parent `5967bb068c4a3d8f009edfb8e6058b7f508b4078`. Adds an explicit caller-owned per-metric maximum-age policy and a deterministic local freshness gate over the accepted Body Twin snapshot foundation. Stale and unconfigured metrics remain visible and block downstream consumption. No physiological plausibility, unit conversion, trend inference, tissue/water isolation, forecasting, persistence, provider, prompt, UI, recommendation, or medical interpretation is introduced.

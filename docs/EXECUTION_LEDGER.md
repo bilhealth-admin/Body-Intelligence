@@ -201,3 +201,13 @@ Corrected the AI-009 regression fixture to use the repository-owned `TruthSignal
 - Tests: focused acceptance/completeness and regression coverage for latest-state, future exclusion, and equal-time conflict rejection.
 - Non-scope: physiological plausibility, freshness policy, trends, tissue/water isolation, forecasting, Decision Memory, One Best Action, AI Coach, providers, prompts, persistence, cloud, and UI.
 - Next after successful verification and commit: derive the next smallest repository-defined AI package from the new committed baseline.
+
+
+## BIL-AI-021 — Body Twin Freshness Gate Foundation
+
+- Parent HEAD: `5967bb068c4a3d8f009edfb8e6058b7f508b4078`.
+- Package: explicit per-metric freshness policy, explainable freshness evidence, and safe consumption gate.
+- Production: `body_twin_freshness_result.dart`, `body_twin_freshness_gate.dart`.
+- Tests: focused freshness behavior plus Body Twin non-regression coverage.
+- Non-scope: plausibility, normalization, trends, tissue/water isolation, forecasting, Decision Memory, One Best Action, AI Coach, providers, prompts, persistence, cloud, and UI.
+- Next after successful verification and commit: derive the next smallest repository-supported offline-only Body Twin package from the new baseline.
