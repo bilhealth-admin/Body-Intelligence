@@ -165,3 +165,7 @@ Decision Memory is complete at the local engine boundary: immutable records, app
 ## BIL-AI-032 — Body Twin Engine Closure
 
 Delivery candidate closes Body Twin at the deterministic local engine boundary. `BodyTwinEngine` exposes one immutable result that preserves the trusted snapshot outcome and trend-ready history, with downstream use permitted only when closure invariants confirm that the accepted latest snapshot exactly matches the latest factual trend observations. The next authorized engine is AI Context Engine.
+
+## BIL-AI-033 — AI Context Engine Closure
+
+Issued against parent HEAD `a980f73b8ec695e494d9a7c19e14584c67278670`. AI Context Engine is complete at the local deterministic boundary with immutable bounded context, explicit provenance, missing-context evidence, future-memory exclusion, integrity validation, and a trusted consumption gate. Next engine: Tissue and Water Noise Isolation.

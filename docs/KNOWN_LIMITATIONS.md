@@ -182,3 +182,7 @@ Decision Memory is complete as a deterministic local domain engine, but this pac
 ## BIL-AI-032 Body Twin closure boundary
 
 Body Twin is closed only at the deterministic local evidence engine boundary. It assembles and validates caller-provided observations, applies caller-owned freshness and consistency policy, preserves trend-ready factual history, and verifies snapshot/history reconciliation. It does not isolate tissue or water noise, interpolate missing values, forecast metabolism, infer medical meaning, rank actions, persist data, invoke providers/prompts, use cloud transport, or present UI.
+
+## AI Context Engine boundary after BIL-AI-033
+
+AI Context is local, deterministic, immutable, and provider-neutral. It does not persist data, call an LLM, generate prompts, forecast physiology, isolate tissue/water noise, recommend actions, diagnose conditions, or mutate product state. Context completeness depends on accepted upstream engine outputs and caller-declared required keys.

@@ -154,3 +154,7 @@ Decision Memory compaction separates active records from immutable audit records
 ## ADR — Body Twin closes through snapshot/history reconciliation
 
 BIL-AI-032 closes the local Body Twin Engine by composing, not replacing, the accepted snapshot trust pipeline and trend-ready factual history. The closure validator requires the latest observation for every accepted snapshot metric to match the trend state exactly and rejects unexpected or missing trend projections. This boundary remains deterministic and offline-only and deliberately excludes interpolation, forecasting, tissue/water interpretation, recommendation, persistence, providers, and medical inference.
+
+## ADR — AI Context remains a local deterministic projection
+
+AI Context may consume only accepted local engine outputs. Missing inputs are evidence, not values to infer. Decision history is caller-bounded and future records are excluded. LLMs, prompts, providers, persistence, cloud services, recommendations, forecasts, diagnosis, and UI mutation remain outside this engine boundary.

@@ -271,3 +271,11 @@ Adds immutable outcome transitions and deterministic append-only reconciliation 
 - Verification: focused closure tests, Body Twin regression suite, complete AI Platform suite, analyze, full test suite, and exact diff scope.
 - Non-scope: tissue/water isolation, forecasting, context, recommendations, providers, prompts, persistence, cloud, UI, and medical inference.
 - Next after Product Owner verification and commit: `BIL-AI-033` AI Context Engine.
+
+## BIL-AI-033
+
+- Parent HEAD: `a980f73b8ec695e494d9a7c19e14584c67278670`
+- Scope: complete AI Context Engine closure.
+- Production: immutable context/provenance/result contracts, integrity validator, deterministic bounded engine.
+- Gates: focused tests, regression tests, complete AI Platform suite, analyze, full test, exact diff scope.
+- Status: delivery candidate; Product Owner verification required.

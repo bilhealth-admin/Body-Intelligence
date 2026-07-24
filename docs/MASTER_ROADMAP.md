@@ -167,3 +167,7 @@ Closes the local deterministic Decision Memory Engine with caller-owned retentio
 ## BIL-AI-032 — Body Twin Engine Closure
 
 Status: implementation package issued against parent HEAD `dd658deb90262ed2cb0e99d7012d1d87578541d2`. Completes the repository-supported local Body Twin Engine by composing the accepted snapshot trust chain with immutable trend-ready factual history and an explicit closure-integrity validator. Existing snapshot construction, provenance, integrity, freshness, consistency, trusted composition, public facade, and trend-state foundations are reused without reimplementation. No forecasting, tissue/water inference, persistence, provider, prompt, cloud, recommendation, diagnosis, or UI behavior is introduced.
+
+## BIL-AI-033 — AI Context Engine Closure
+
+AI Context Engine is closed at the deterministic local boundary. It admits only accepted Truth/Explain, Body Twin, and Decision Memory outputs; preserves provenance and missing-context evidence; bounds historical context; and exposes downstream context only after integrity validation. No prompt, provider, persistence, cloud, UI, recommendation, forecast, or diagnosis behavior is introduced.
