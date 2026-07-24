@@ -224,3 +224,10 @@ The engine does not discover signals, infer clinical policy, call an LLM/provide
 - Evidence identifiers remain caller-supplied; this package does not retrieve or rank external literature.
 - The engine validates traceability and reproducibility contracts, not clinical truth beyond trusted upstream evidence.
 - No provider, network, diagnostic, persistence, or Cloud behavior is introduced.
+
+## BIL-AI-044 closure-boundary limitations
+
+- The closure certificate proves contract-level engine completion evidence; it does not perform runtime orchestration across every engine.
+- Engine checkpoints are caller-supplied and must be created from verified engine-specific evidence.
+- Cloud execution, remote providers, durable synchronization, billing integration, and cross-device state remain outside AI Platform closure.
+- Product-feature wiring belongs to the later BIL Intelligence Integration phase.

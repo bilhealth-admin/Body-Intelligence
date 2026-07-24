@@ -211,3 +211,7 @@ Closed as a deterministic local synthesis engine over trusted upstream signals, 
 
 ## BIL-AI-043 — Scientific Validation & Explainability
 Scientific Validation & Explainability is delivered as a deterministic local boundary with reproducible claim records, evidence traceability, explicit assumptions, uncertainty disclosure, bounded inputs, integrity validation, and abstention for unsupported claims. Next: Final Integration and AI Platform Closure.
+
+## BIL-AI-044 — Final AI Platform Integration and Closure
+
+The local AI Platform closes only through an explicit engine-checkpoint boundary. Every required engine must present a unique closed checkpoint, a non-empty contract version, and inspectable evidence. The closure boundary does not merge engine internals, call providers, select Cloud infrastructure, or weaken any engine-specific gate.

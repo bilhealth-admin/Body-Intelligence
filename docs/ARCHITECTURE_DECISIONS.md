@@ -194,3 +194,7 @@ BIL proprietary intelligence may combine only trusted caller-supplied local engi
 
 ## ADR — Scientific claims require explicit evidence and uncertainty
 Scientific Validation & Explainability never promotes an unsupported claim. Every validated record preserves claim strength, evidence identifiers, assumptions, confidence, and uncertainty disclosures. Missing evidence, low confidence, oversized input, or integrity failure results in abstention or rejection rather than invented support.
+
+## ADR — AI Platform closes through independent engine checkpoints
+
+Formal platform closure is evaluated from immutable checkpoints rather than a monolithic orchestrator. Each engine remains independently testable and owns its internal contracts. The closure engine verifies required membership, uniqueness, contract version, evidence presence, and closed status; it does not reinterpret engine outputs or create new health decisions.
