@@ -236,3 +236,11 @@ Corrected the AI-009 regression fixture to use the repository-owned `TruthSignal
 
 Parent HEAD: `3898b7dde9a47f0ff2a94e18335fde9e6cafd6b9`.
 Adds immutable outcome transitions and deterministic append-only reconciliation rules. Existing decision records remain unchanged and terminal outcomes cannot be rewritten.
+
+## BIL-AI-029-R2 — Decision Memory public facade and history projection
+
+- Parent HEAD: `ac12875d1432c8d441fcd57d6d1998dbd4b3dcb0`
+- Adds immutable `DecisionMemoryHistory` projection.
+- Adds stable `DecisionMemory` facade over the existing store and reconciler.
+- Preserves deterministic ordering, append-only transitions, and explicit unknown-record rejection.
+- Does not add persistence, providers, recommendations, forecasts, prompts, cloud, UI, or medical inference.

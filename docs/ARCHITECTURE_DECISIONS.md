@@ -137,3 +137,7 @@ Decision records preserve evidence identifiers, selected action, rationale, conf
 ## ADR — Decision outcomes are append-only transitions
 
 BIL-AI-028-R1 preserves every `DecisionMemoryRecord` as immutable history. Outcome reconciliation is represented by separate immutable transitions with explicit from/to states, local evidence, and caller-supplied timestamps. Only `pending` may transition, and only to a terminal state (`succeeded`, `failed`, or `abandoned`). Terminal outcomes cannot be rewritten. The reconciler is local-only, provider-independent, persistence-neutral, and does not evaluate medical truth or select actions.
+
+## ADR — Decision Memory consumers use one stable local facade
+
+BIL-AI-029-R2 composes the existing immutable record store and append-only outcome reconciler behind a stable public boundary. The facade projects each record with its validated transition history and current state, but does not duplicate transition policy or introduce persistence, ranking, forecasting, provider, prompt, cloud, or medical behavior.

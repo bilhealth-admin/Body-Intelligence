@@ -150,3 +150,7 @@ Introduces immutable local decision records and deterministic retrieval. Exit re
 ### BIL-AI-028-R1 — Decision Memory outcome reconciliation
 
 Status: delivery candidate. Exit criteria: immutable transition contract; deterministic current-state projection; duplicate, mismatched, retroactive, no-op, and terminal rewrites rejected; focused and regression tests; full AI Platform regression and analyzer gates.
+
+### BIL-AI-029-R2 — Decision Memory public facade and history projection
+
+Status: delivery candidate. Adds one stable local boundary that exposes immutable decision records together with their validated append-only outcome history and deterministic current-state projection. No persistence, recommendation, forecasting, provider, prompt, cloud, UI, or medical inference is introduced.

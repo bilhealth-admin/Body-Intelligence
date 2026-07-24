@@ -163,3 +163,7 @@ The public facade does not infer trends, normalize units, repair observations, p
 ## BIL-AI-028-R1 limitations
 
 Outcome reconciliation is in-memory and persistence-neutral. It does not ingest real user outcomes, infer causality, grade clinical benefit, reopen terminal outcomes, synchronize across devices, or drive One Best Action. The initial state is parsed from the existing record string and unsupported values are rejected explicitly.
+
+## BIL-AI-029-R2 limitations
+
+The public facade is local and in-memory. It does not provide durable persistence, serialization, migrations, retention policy, cross-device synchronization, outcome ingestion, causal inference, recommendation selection, forecasting, provider access, prompts, cloud transport, UI, or medical interpretation.
