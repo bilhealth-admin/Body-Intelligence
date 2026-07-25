@@ -3,7 +3,7 @@
 ## Authoritative execution baseline
 
 - Branch: `phase-3-product-excellence`
-- Baseline HEAD: `8f67e0effa480e9af0769ec546973ef0644a32f8`
+- Baseline HEAD: `9bc3b524a476280209e324637c9ac78de14daa44`
 - Ledger synchronization package: `BIL-DOC-001`
 
 ## Stage closure ledger
@@ -26,3 +26,12 @@ The next ledger entry must be created only after the Product Owner authorizes th
 ## Historical record policy
 
 Detailed package-by-package records remain available in Git history and package archives. Historical parent HEAD values are archival evidence only and do not supersede the authoritative baseline recorded above.
+
+## BIL-GLOBAL-001-FINAL verification candidate
+
+- Branch: `phase-3-product-excellence`
+- Parent HEAD: `9bc3b524a476280209e324637c9ac78de14daa44`
+- Status: **Awaiting Product Owner VERIFY; not yet adopted or committed.**
+- Engineering scope: final product composition, wearable payload preservation, native BLE session closure, embedded Arabic reporting, plugin runtime proof, commerce capability honesty, and evidence synchronization.
+- External gates: iOS/macOS build and representative device/provider certification remain explicitly separate.
+- Samsung wearable integration is not present in the production catalog and remains `Not Implemented`; no readiness claim is made.

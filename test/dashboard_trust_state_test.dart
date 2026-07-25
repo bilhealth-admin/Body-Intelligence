@@ -15,6 +15,35 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('dashboard header uses solid high-contrast copy in light theme', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          latestWeightProvider.overrideWith((ref) => Stream.value(null)),
+          measurementSystemProvider.overrideWith(
+            (ref) => Stream.value(MeasurementSystem.metric),
+          ),
+        ],
+        child: MaterialApp(
+          theme: ThemeData.light(),
+          home: const Scaffold(body: DashboardHeader()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final title = find.text('Your body intelligence, distilled for today');
+    expect(title, findsOneWidget);
+    expect(
+      find.ancestor(of: title, matching: find.byType(ShaderMask)),
+      findsNothing,
+    );
+    expect(tester.widget<Text>(title).style?.color, const Color(0xFF071D2D));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('dashboard header hides local errors behind a safe retry state', (
     tester,
   ) async {

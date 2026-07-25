@@ -5,36 +5,39 @@ import 'package:body_intelligence_log/features/ai_platform/services/body_twin_sn
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('accepts a snapshot only when every available metric is configured and fresh', () {
-    const foundation = BodyTwinSnapshotFoundation();
-    const gate = BodyTwinFreshnessGate();
-    final result = gate.evaluate(
-      foundationResult: foundation.build(
-        asOf: DateTime.utc(2026, 7, 24, 12),
-        observations: <BodyTwinObservation>[
-          BodyTwinObservation(
-            metricKey: 'body.weight.kg',
-            value: 95.1,
-            unit: 'kg',
-            observedAt: DateTime.utc(2026, 7, 24, 8),
-            source: 'local.daily_log',
-          ),
-        ],
-      ),
-      policy: BodyTwinFreshnessPolicy(
-        maxAgeByMetric: const {'body.weight.kg': Duration(hours: 24)},
-      ),
-    );
+  test(
+    'accepts a snapshot only when every available metric is configured and fresh',
+    () {
+      const foundation = BodyTwinSnapshotFoundation();
+      const gate = BodyTwinFreshnessGate();
+      final result = gate.evaluate(
+        foundationResult: foundation.build(
+          asOf: DateTime.utc(2026, 7, 24, 12),
+          observations: <BodyTwinObservation>[
+            BodyTwinObservation(
+              metricKey: 'body.weight.kg',
+              value: 95.1,
+              unit: 'kg',
+              observedAt: DateTime.utc(2026, 7, 24, 8),
+              source: 'local.daily_log',
+            ),
+          ],
+        ),
+        policy: BodyTwinFreshnessPolicy(
+          maxAgeByMetric: const {'body.weight.kg': Duration(hours: 24)},
+        ),
+      );
 
-    expect(result.canProceed, isTrue);
-    expect(result.acceptedFreshSnapshot, isNotNull);
-    expect(
-      result.assessmentsByMetric['body.weight.kg']!.status,
-      BodyTwinMetricFreshnessStatus.fresh,
-    );
-    expect(result.staleMetricKeys, isEmpty);
-    expect(result.unconfiguredMetricKeys, isEmpty);
-  });
+      expect(result.canProceed, isTrue);
+      expect(result.acceptedFreshSnapshot, isNotNull);
+      expect(
+        result.assessmentsByMetric['body.weight.kg']!.status,
+        BodyTwinMetricFreshnessStatus.fresh,
+      );
+      expect(result.staleMetricKeys, isEmpty);
+      expect(result.unconfiguredMetricKeys, isEmpty);
+    },
+  );
 
   test('rejects stale evidence while preserving exact age evidence', () {
     const foundation = BodyTwinSnapshotFoundation();

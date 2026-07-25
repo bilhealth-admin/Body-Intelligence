@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../data/database/app_database.dart';
+import '../../data/database/nutrient_evidence.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/theme/premium_design_tokens.dart';
 import '../../shared/widgets/actionable_error_state.dart';
@@ -11,9 +12,14 @@ import '../foods/providers/food_provider.dart';
 import 'providers/daily_log_provider.dart';
 
 class DailyLogPage extends ConsumerStatefulWidget {
-  const DailyLogPage({super.key, this.initialMealType});
+  const DailyLogPage({
+    super.key,
+    this.initialMealType,
+    this.focusMealEntry = false,
+  });
 
   final String? initialMealType;
+  final bool focusMealEntry;
 
   @override
   ConsumerState<DailyLogPage> createState() => _DailyLogPageState();
@@ -24,6 +30,9 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
   final water = TextEditingController(text: '250');
   final quantity = TextEditingController(text: '100');
   final foodSearch = SearchController();
+  final scrollController = ScrollController();
+  final mealEntryKey = GlobalKey();
+  bool mealFocusApplied = false;
   Food? selectedFood;
   String mealType = 'breakfast';
 
@@ -38,6 +47,23 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     }.contains(widget.initialMealType)) {
       mealType = widget.initialMealType!;
     }
+    if (widget.focusMealEntry) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _focusMealEntry());
+    }
+  }
+
+  void _focusMealEntry() {
+    final mealContext = mealEntryKey.currentContext;
+    if (!mounted || mealContext == null) return;
+    mealFocusApplied = true;
+    Scrollable.ensureVisible(
+      mealContext,
+      alignment: 0,
+      duration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   @override
@@ -46,6 +72,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     water.dispose();
     quantity.dispose();
     foodSearch.dispose();
+    scrollController.dispose();
     super.dispose();
   }
 
@@ -276,101 +303,116 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
             onRetry: () => ref.invalidate(foodsProvider),
           ),
           data: (items) {
+            if (widget.focusMealEntry && !mealFocusApplied) {
+              WidgetsBinding.instance.addPostFrameCallback(
+                (_) => _focusMealEntry(),
+              );
+            }
             return ListView(
+              controller: scrollController,
               padding: PremiumDesignTokens.screenPadding,
               children: [
-                Semantics(
-                  header: true,
-                  child: Text(
-                    context.strings.text('Record your day'),
-                    style: PremiumDesignTokens.screenHeading(context),
-                  ),
-                ),
-                const SizedBox(height: PremiumDesignTokens.spaceSm),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.calendar_today),
-                  title: Text(
-                    '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
-                  ),
-                  trailing: const Icon(Icons.edit_calendar),
-                  onTap: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: date,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime.now().add(const Duration(days: 1)),
-                    );
-                    if (picked != null) {
-                      ref.read(selectedLogDateProvider.notifier).state = picked;
-                    }
-                  },
-                ),
-                _field(
-                  notes,
-                  Localizations.localeOf(context).languageCode == 'ar'
-                      ? 'هل هناك ما قد يفسر تغيرات جسمك اليوم؟ مثل السفر أو قلة النوم أو وجبة عالية الصوديوم أو الصيام أو الضغط'
-                      : 'Anything that may explain today’s body changes? For example travel, poor sleep, a high-sodium meal, fasting, or stress',
-                  lines: 4,
-                ),
-                Row(
-                  children: [
-                    Expanded(child: _field(water, 'Water (ml)')),
-                    const SizedBox(width: 8),
-                    FilledButton.tonalIcon(
-                      onPressed: _addWater,
-                      icon: const Icon(Icons.water_drop_outlined),
-                      label: Text(context.strings.text('Add water')),
+                if (!widget.focusMealEntry) ...[
+                  Semantics(
+                    header: true,
+                    child: Text(
+                      context.strings.text('Record your day'),
+                      style: PremiumDesignTokens.screenHeading(context),
                     ),
-                  ],
-                ),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    for (final amount in const [250, 350, 500])
-                      ActionChip(
-                        avatar: const Icon(Icons.water_drop_outlined, size: 18),
-                        label: Text('+$amount ml'),
-                        onPressed: () => _addWater(amount),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                waterEntries.when(
-                  data: (rows) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                  ),
+                  const SizedBox(height: PremiumDesignTokens.spaceSm),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.calendar_today),
+                    title: Text(
+                      '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
+                    ),
+                    trailing: const Icon(Icons.edit_calendar),
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: date,
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime.now().add(const Duration(days: 1)),
+                      );
+                      if (picked != null) {
+                        ref.read(selectedLogDateProvider.notifier).state =
+                            picked;
+                      }
+                    },
+                  ),
+                  _field(
+                    notes,
+                    Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'هل هناك ما قد يفسر تغيرات جسمك اليوم؟ مثل السفر أو قلة النوم أو وجبة عالية الصوديوم أو الصيام أو الضغط'
+                        : 'Anything that may explain today’s body changes? For example travel, poor sleep, a high-sodium meal, fasting, or stress',
+                    lines: 4,
+                  ),
+                  Row(
                     children: [
-                      Text(
-                        '${context.strings.text('Water total')}: ${rows.fold<int>(0, (sum, row) => sum + row.amountMl)} ml',
+                      Expanded(child: _field(water, 'Water (ml)')),
+                      const SizedBox(width: 8),
+                      FilledButton.tonalIcon(
+                        onPressed: _addWater,
+                        icon: const Icon(Icons.water_drop_outlined),
+                        label: Text(context.strings.text('Add water')),
                       ),
-                      for (final entry in rows)
-                        ListTile(
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(Icons.water_drop_outlined),
-                          title: Text('${entry.amountMl} ml'),
-                          subtitle: Text(
-                            '${entry.occurredAt.hour.toString().padLeft(2, '0')}:${entry.occurredAt.minute.toString().padLeft(2, '0')}',
+                    ],
+                  ),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final amount in const [250, 350, 500])
+                        ActionChip(
+                          avatar: const Icon(
+                            Icons.water_drop_outlined,
+                            size: 18,
                           ),
-                          trailing: IconButton(
-                            tooltip: context.strings.text('Remove water entry'),
-                            onPressed: () => ref
-                                .read(waterRepositoryProvider)
-                                .delete(entry.id),
-                            icon: const Icon(Icons.close),
-                          ),
+                          label: Text('+$amount ml'),
+                          onPressed: () => _addWater(amount),
                         ),
                     ],
                   ),
-                  loading: () => const LinearProgressIndicator(),
-                  error: (_, _) => ActionableErrorState(
-                    title: context.strings.text('Water data unavailable'),
-                    onRetry: () => ref.invalidate(dailyWaterProvider),
+                  const SizedBox(height: 8),
+                  waterEntries.when(
+                    data: (rows) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          '${context.strings.text('Water total')}: ${rows.fold<int>(0, (sum, row) => sum + row.amountMl)} ml',
+                        ),
+                        for (final entry in rows)
+                          ListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(Icons.water_drop_outlined),
+                            title: Text('${entry.amountMl} ml'),
+                            subtitle: Text(
+                              '${entry.occurredAt.hour.toString().padLeft(2, '0')}:${entry.occurredAt.minute.toString().padLeft(2, '0')}',
+                            ),
+                            trailing: IconButton(
+                              tooltip: context.strings.text(
+                                'Remove water entry',
+                              ),
+                              onPressed: () => ref
+                                  .read(waterRepositoryProvider)
+                                  .delete(entry.id),
+                              icon: const Icon(Icons.close),
+                            ),
+                          ),
+                      ],
+                    ),
+                    loading: () => const LinearProgressIndicator(),
+                    error: (_, _) => ActionableErrorState(
+                      title: context.strings.text('Water data unavailable'),
+                      onRetry: () => ref.invalidate(dailyWaterProvider),
+                    ),
                   ),
-                ),
-                const SizedBox(height: PremiumDesignTokens.spaceLg),
+                  const SizedBox(height: PremiumDesignTokens.spaceLg),
+                ],
                 PremiumSurface(
+                  key: mealEntryKey,
                   child: Column(
                     children: [
                       Align(
@@ -595,6 +637,10 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                     ],
                   ),
                 ),
+                if (widget.focusMealEntry) ...[
+                  const SizedBox(height: PremiumDesignTokens.spaceLg),
+                  _focusedWaterControls(),
+                ],
                 const SizedBox(height: PremiumDesignTokens.spaceSm),
                 meals.when(
                   loading: () => const LinearProgressIndicator(),
@@ -628,49 +674,55 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                           children: [
                             _NutrientMetric(
                               label: 'Fiber',
-                              value: allItems.fold<double>(
-                                0,
-                                (sum, item) => sum + item.fiber,
+                              value: _knownNutrientTotal(
+                                allItems,
+                                TrackedNutrient.fiber,
+                                (item) => item.fiber,
                               ),
                               unit: 'g',
                             ),
                             _NutrientMetric(
                               label: 'Sodium',
-                              value: allItems.fold<double>(
-                                0,
-                                (sum, item) => sum + item.sodium,
+                              value: _knownNutrientTotal(
+                                allItems,
+                                TrackedNutrient.sodium,
+                                (item) => item.sodium,
                               ),
                               unit: 'mg',
                             ),
                             _NutrientMetric(
                               label: 'Potassium',
-                              value: allItems.fold<double>(
-                                0,
-                                (sum, item) => sum + item.potassium,
+                              value: _knownNutrientTotal(
+                                allItems,
+                                TrackedNutrient.potassium,
+                                (item) => item.potassium,
                               ),
                               unit: 'mg',
                             ),
                             _NutrientMetric(
                               label: 'Magnesium',
-                              value: allItems.fold<double>(
-                                0,
-                                (sum, item) => sum + item.magnesium,
+                              value: _knownNutrientTotal(
+                                allItems,
+                                TrackedNutrient.magnesium,
+                                (item) => item.magnesium,
                               ),
                               unit: 'mg',
                             ),
                             _NutrientMetric(
                               label: 'Calcium',
-                              value: allItems.fold<double>(
-                                0,
-                                (sum, item) => sum + item.calcium,
+                              value: _knownNutrientTotal(
+                                allItems,
+                                TrackedNutrient.calcium,
+                                (item) => item.calcium,
                               ),
                               unit: 'mg',
                             ),
                             _NutrientMetric(
                               label: 'Sugar',
-                              value: allItems.fold<double>(
-                                0,
-                                (sum, item) => sum + item.sugar,
+                              value: _knownNutrientTotal(
+                                allItems,
+                                TrackedNutrient.sugar,
+                                (item) => item.sugar,
                               ),
                               unit: 'g',
                             ),
@@ -777,6 +829,42 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     return value;
   }
 
+  Widget _focusedWaterControls() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          context.strings.text('Water'),
+          style: PremiumDesignTokens.cardHeading(context),
+        ),
+        const SizedBox(height: PremiumDesignTokens.spaceXs),
+        Row(
+          children: [
+            Expanded(child: _field(water, 'Water (ml)')),
+            const SizedBox(width: 8),
+            FilledButton.tonalIcon(
+              onPressed: _addWater,
+              icon: const Icon(Icons.water_drop_outlined),
+              label: Text(context.strings.text('Add water')),
+            ),
+          ],
+        ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final amount in const [250, 350, 500])
+              ActionChip(
+                avatar: const Icon(Icons.water_drop_outlined, size: 18),
+                label: Text('+$amount ml'),
+                onPressed: () => _addWater(amount),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _field(
     TextEditingController controller,
     String label, {
@@ -804,14 +892,31 @@ class _NutrientMetric extends StatelessWidget {
     required this.unit,
   });
   final String label;
-  final double value;
+  final double? value;
   final String unit;
 
   @override
   Widget build(BuildContext context) => Chip(
     avatar: const Icon(Icons.science_outlined, size: 17),
     label: Text(
-      '${context.strings.text(label)} ${value.toStringAsFixed(1)} $unit',
+      value == null
+          ? '${context.strings.text(label)}: ${context.strings.text('Unavailable')}'
+          : '${context.strings.text(label)} ${value!.toStringAsFixed(1)} $unit',
     ),
   );
+}
+
+double? _knownNutrientTotal(
+  List<MealItem> items,
+  TrackedNutrient nutrient,
+  double Function(MealItem item) valueOf,
+) {
+  if (items.isEmpty ||
+      items.any(
+        (item) =>
+            !NutrientEvidenceMask.contains(item.nutrientEvidenceMask, nutrient),
+      )) {
+    return null;
+  }
+  return items.fold<double>(0, (total, item) => total + valueOf(item));
 }

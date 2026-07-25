@@ -92,8 +92,7 @@ final class BodyTwinFreshnessResult {
   List<String> get staleMetricKeys => List<String>.unmodifiable(
     assessmentsByMetric.entries
         .where(
-          (entry) =>
-              entry.value.status == BodyTwinMetricFreshnessStatus.stale,
+          (entry) => entry.value.status == BodyTwinMetricFreshnessStatus.stale,
         )
         .map((entry) => entry.key),
   );

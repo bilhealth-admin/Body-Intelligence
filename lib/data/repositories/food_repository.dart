@@ -159,6 +159,47 @@ class FoodRepository implements UnifiedFoodRepository {
         .get();
   }
 
+  Future<void> repairBundledFoodNutrients({
+    required int id,
+    required String source,
+    required double fiber,
+    required double sugar,
+    required double sodium,
+    required double potassium,
+    required double calcium,
+    required double magnesium,
+  }) async {
+    final food = await (_database.select(
+      _database.foods,
+    )..where((row) => row.id.equals(id))).getSingle();
+    if (food.isCustom) return;
+    await (_database.update(
+      _database.foods,
+    )..where((row) => row.id.equals(id))).write(
+      FoodsCompanion(
+        fiber: Value(fiber),
+        sugar: Value(sugar),
+        sodium: Value(sodium),
+        potassium: Value(potassium),
+        calcium: Value(calcium),
+        magnesium: Value(magnesium),
+        nutrientEvidenceMask: Value(
+          NutrientEvidenceMask.fromValues(
+            fiber: fiber,
+            sugar: sugar,
+            sodium: sodium,
+            potassium: potassium,
+            calcium: calcium,
+            magnesium: magnesium,
+          ),
+        ),
+        source: Value(source),
+        verified: const Value(true),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   Future<void> updateCustomFood({
     required int id,
     required String name,

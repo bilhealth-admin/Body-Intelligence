@@ -12,6 +12,7 @@ class DashboardHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final arabic =
         Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
     final latestWeight = ref.watch(latestWeightProvider);
@@ -33,23 +34,37 @@ class DashboardHeader extends ConsumerWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    Colors.white.withValues(alpha: .11),
-                    const Color(0xFF54DAFF).withValues(alpha: .055),
-                    const Color(0xFF765DFF).withValues(alpha: .050),
-                    Colors.white.withValues(alpha: .018),
-                  ],
+                  colors: isDark
+                      ? [
+                          Colors.white.withValues(alpha: .11),
+                          const Color(0xFF54DAFF).withValues(alpha: .055),
+                          const Color(0xFF765DFF).withValues(alpha: .050),
+                          Colors.white.withValues(alpha: .018),
+                        ]
+                      : const [
+                          Color(0xFFE1EEF2),
+                          Color(0xFFD2E5EB),
+                          Color(0xFFDCE8EE),
+                          Color(0xFFE8F1F3),
+                        ],
+                ),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: .08)
+                      : const Color(0xFF55798A).withValues(alpha: .30),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF46D4FF).withValues(alpha: .16),
-                    blurRadius: 46,
-                    spreadRadius: -14,
+                    color: isDark
+                        ? const Color(0xFF46D4FF).withValues(alpha: .16)
+                        : const Color(0xFF315E73).withValues(alpha: .16),
+                    blurRadius: isDark ? 46 : 32,
+                    spreadRadius: isDark ? -14 : -10,
                   ),
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: .28),
-                    blurRadius: 28,
-                    offset: const Offset(0, 16),
+                    color: Colors.black.withValues(alpha: isDark ? .28 : .12),
+                    blurRadius: isDark ? 28 : 24,
+                    offset: const Offset(0, 12),
                   ),
                 ],
               ),
@@ -131,6 +146,14 @@ class _BodyCopy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bodyColor = isDark
+        ? const Color(0xFFB8C5D1)
+        : const Color(0xFF294858);
+    final unitColor = isDark
+        ? const Color(0xFFC8D4DE)
+        : const Color(0xFF183B4D);
+
     return Directionality(
       textDirection: arabic ? TextDirection.rtl : TextDirection.ltr,
       child: Column(
@@ -169,10 +192,11 @@ class _BodyCopy extends StatelessWidget {
               'A calm view of what matters now, why it matters, and the next useful action.',
               'نظرة هادئة لما يهم الآن، ولماذا يهم، والخطوة التالية الأكثر فائدة.',
             ),
-            style: const TextStyle(
-              color: Color(0xFFB8C5D1),
+            style: TextStyle(
+              color: bodyColor,
               fontSize: 15,
               height: 1.5,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 22),
@@ -190,8 +214,8 @@ class _BodyCopy extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 7),
                   child: Text(
                     unit,
-                    style: const TextStyle(
-                      color: Color(0xFFC8D4DE),
+                    style: TextStyle(
+                      color: unitColor,
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                     ),
@@ -323,6 +347,11 @@ class _GlassBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final foreground = isDark
+        ? const Color(0xFFD0DAE3)
+        : const Color(0xFF173B4D);
+
     final arabic =
         Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
     return Container(
@@ -330,21 +359,28 @@ class _GlassBadge extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(99),
         gradient: LinearGradient(
-          colors: [
-            Colors.white.withValues(alpha: .095),
-            const Color(0xFF51D8FF).withValues(alpha: .034),
-          ],
+          colors: isDark
+              ? [
+                  Colors.white.withValues(alpha: .095),
+                  const Color(0xFF51D8FF).withValues(alpha: .034),
+                ]
+              : const [Color(0xFFD3E5EA), Color(0xFFC9DFE7)],
+        ),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: .06)
+              : const Color(0xFF55798A).withValues(alpha: .28),
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: const Color(0xFFD7E2EA)),
+          Icon(icon, size: 16, color: foreground),
           const SizedBox(width: 7),
           Text(
             arabic ? labelAr : labelEn,
-            style: const TextStyle(
-              color: Color(0xFFD0DAE3),
+            style: TextStyle(
+              color: foreground,
               fontSize: 12,
               fontWeight: FontWeight.w800,
             ),
@@ -368,16 +404,31 @@ class _InsightGlass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bodyColor = isDark
+        ? const Color(0xFFB4C1CD)
+        : const Color(0xFF294858);
+    final iconColor = isDark
+        ? const Color(0xFFDDE6ED)
+        : const Color(0xFF123D52);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
         gradient: LinearGradient(
-          colors: [
-            Colors.white.withValues(alpha: .075),
-            const Color(0xFF58D9FF).withValues(alpha: .032),
-            Colors.white.withValues(alpha: .018),
-          ],
+          colors: isDark
+              ? [
+                  Colors.white.withValues(alpha: .075),
+                  const Color(0xFF58D9FF).withValues(alpha: .032),
+                  Colors.white.withValues(alpha: .018),
+                ]
+              : const [Color(0xFFCEE2E8), Color(0xFFD8E9ED), Color(0xFFC7DDE5)],
+        ),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: .05)
+              : const Color(0xFF55798A).withValues(alpha: .24),
         ),
       ),
       child: Row(
@@ -389,13 +440,15 @@ class _InsightGlass extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(14),
               gradient: LinearGradient(
-                colors: [
-                  Colors.white.withValues(alpha: .12),
-                  const Color(0xFF58D9FF).withValues(alpha: .06),
-                ],
+                colors: isDark
+                    ? [
+                        Colors.white.withValues(alpha: .12),
+                        const Color(0xFF58D9FF).withValues(alpha: .06),
+                      ]
+                    : const [Color(0xFFBBD9E2), Color(0xFFC8E1E8)],
               ),
             ),
-            child: Icon(icon, color: const Color(0xFFDDE6ED)),
+            child: Icon(icon, color: iconColor),
           ),
           const SizedBox(width: 13),
           Expanded(
@@ -406,9 +459,10 @@ class _InsightGlass extends StatelessWidget {
                 const SizedBox(height: 5),
                 Text(
                   body,
-                  style: const TextStyle(
-                    color: Color(0xFFB4C1CD),
+                  style: TextStyle(
+                    color: bodyColor,
                     height: 1.45,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -429,6 +483,18 @@ class _MetalText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (Theme.of(context).brightness == Brightness.light) {
+      return Text(
+        text,
+        style: TextStyle(
+          color: const Color(0xFF071D2D),
+          fontSize: size,
+          height: 1.14,
+          fontWeight: weight,
+        ),
+      );
+    }
+
     return ShaderMask(
       blendMode: BlendMode.srcIn,
       shaderCallback: (rect) => const LinearGradient(

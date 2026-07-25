@@ -61,7 +61,10 @@ void main() {
     );
 
     expect(snapshot.observationsByMetric, isEmpty);
-    expect(snapshot.missingRequiredMetricKeys, <String>['waist_cm', 'weight_kg']);
+    expect(snapshot.missingRequiredMetricKeys, <String>[
+      'waist_cm',
+      'weight_kg',
+    ]);
     expect(snapshot.isComplete, isFalse);
     expect(snapshot.completeness, 0);
   });

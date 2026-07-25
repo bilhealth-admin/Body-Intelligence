@@ -19,7 +19,8 @@ android {
         applicationId = "com.example.body_intelligence_log"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // Health Connect 1.1.0 requires Android 8.0 (API 26).
+        minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -42,4 +43,9 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+
+dependencies {
+    implementation("androidx.health.connect:connect-client:1.1.0")
 }

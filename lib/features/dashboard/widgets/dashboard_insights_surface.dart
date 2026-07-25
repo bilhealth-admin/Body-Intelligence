@@ -16,6 +16,7 @@ class DashboardInsightsSurface extends StatefulWidget {
     this.leading,
     this.childrenPadding = EdgeInsets.zero,
     this.initiallyExpanded = false,
+    this.collapsible = true,
   });
 
   final Widget title;
@@ -24,6 +25,7 @@ class DashboardInsightsSurface extends StatefulWidget {
   final List<Widget> children;
   final EdgeInsetsGeometry childrenPadding;
   final bool initiallyExpanded;
+  final bool collapsible;
 
   @override
   State<DashboardInsightsSurface> createState() =>
@@ -47,11 +49,13 @@ class _DashboardInsightsSurfaceState extends State<DashboardInsightsSurface> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Semantics(
-                button: true,
+                button: widget.collapsible,
                 expanded: expanded,
                 child: InkWell(
                   key: const Key('dashboard-insights-toggle'),
-                  onTap: () => setState(() => expanded = !expanded),
+                  onTap: widget.collapsible
+                      ? () => setState(() => expanded = !expanded)
+                      : null,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: PremiumDesignTokens.spaceMd,
@@ -76,17 +80,18 @@ class _DashboardInsightsSurfaceState extends State<DashboardInsightsSurface> {
                           ),
                         ),
                         const SizedBox(width: PremiumDesignTokens.spaceSm),
-                        AnimatedRotation(
-                          turns: expanded ? .5 : 0,
-                          duration: const Duration(milliseconds: 180),
-                          child: const Icon(Icons.expand_more_rounded),
-                        ),
+                        if (widget.collapsible)
+                          AnimatedRotation(
+                            turns: expanded ? .5 : 0,
+                            duration: const Duration(milliseconds: 180),
+                            child: const Icon(Icons.expand_more_rounded),
+                          ),
                       ],
                     ),
                   ),
                 ),
               ),
-              if (expanded)
+              if (expanded || !widget.collapsible)
                 ClipRect(
                   child: Padding(
                     key: const Key('dashboard-insights-content'),

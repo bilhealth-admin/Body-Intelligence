@@ -104,7 +104,9 @@ final class PaidPlanCatalog {
       return;
     }
     if (!visiting.add(plan)) {
-      throw StateError('Circular paid plan inheritance detected at ${plan.id}.');
+      throw StateError(
+        'Circular paid plan inheritance detected at ${plan.id}.',
+      );
     }
 
     final entry = entryFor(plan);

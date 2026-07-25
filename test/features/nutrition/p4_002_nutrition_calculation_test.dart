@@ -84,7 +84,12 @@ void main() {
         protein: 8,
         carbs: 20,
         fats: 4,
-        sodium: 0,
+        fiber: 12,
+        sodium: 80,
+        potassium: 400,
+        magnesium: 60,
+        calcium: 120,
+        sugar: 10,
       );
       final mealId = await meals.createMeal(
         date: DateTime(2026, 7, 22),
@@ -97,7 +102,12 @@ void main() {
 
       expect(snapshot.calories, 80);
       expect(snapshot.protein, 4);
-      expect(snapshot.sodium, 0);
+      expect(snapshot.fiber, 6);
+      expect(snapshot.sodium, 40);
+      expect(snapshot.potassium, 200);
+      expect(snapshot.magnesium, 30);
+      expect(snapshot.calcium, 60);
+      expect(snapshot.sugar, 5);
       expect(
         NutrientEvidenceMask.contains(
           snapshot.nutrientEvidenceMask,
@@ -108,9 +118,9 @@ void main() {
       expect(
         NutrientEvidenceMask.contains(
           snapshot.nutrientEvidenceMask,
-          TrackedNutrient.fiber,
+          TrackedNutrient.magnesium,
         ),
-        isFalse,
+        isTrue,
       );
     },
   );

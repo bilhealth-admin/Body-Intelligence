@@ -10,8 +10,11 @@ import 'app/router/app_router.dart';
 import 'app/services/app_observability.dart';
 import 'app/services/app_settings_provider.dart';
 import 'app/theme/bil_flagship_theme.dart';
+import 'features/global_platform/runtime/global_product_composition_root.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await GlobalNativeIntegrationHost.instance.initialize();
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
     AppObservability.crashes.record(

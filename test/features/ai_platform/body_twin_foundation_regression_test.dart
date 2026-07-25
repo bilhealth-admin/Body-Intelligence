@@ -66,10 +66,10 @@ void main() {
       requiredMetricKeys: const <String>['weight_kg'],
     );
 
+    expect(() => snapshot.observationsByMetric.clear(), throwsUnsupportedError);
     expect(
-      () => snapshot.observationsByMetric.clear(),
+      () => snapshot.requiredMetricKeys.add('waist_cm'),
       throwsUnsupportedError,
     );
-    expect(() => snapshot.requiredMetricKeys.add('waist_cm'), throwsUnsupportedError);
   });
 }

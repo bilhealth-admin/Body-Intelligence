@@ -27,7 +27,7 @@ class DailyReturnCard extends StatelessWidget {
   final String actionTitle;
   final String actionReason;
   final String missingEvidence;
-  final VoidCallback onPrimaryAction;
+  final VoidCallback? onPrimaryAction;
   final VoidCallback? onDismissRecommendation;
   final VoidCallback? onCorrectRecommendation;
   final VoidCallback? onRecommendationFeedback;
@@ -36,6 +36,7 @@ class DailyReturnCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
     final title = switch (report.state) {
       DailyReturnState.empty => context.strings.text('Start today calmly'),
       DailyReturnState.partial => context.strings.text('Continue today'),
@@ -50,19 +51,25 @@ class DailyReturnCard extends StatelessWidget {
         emphasized: true,
         padding: EdgeInsets.zero,
         child: Theme(
-          data: _dashboardDarkSurfaceTheme(context),
+          data: _dashboardSurfaceTheme(context),
           child: Container(
             padding: PremiumDesignTokens.cardPaddingLarge,
             decoration: BoxDecoration(
               borderRadius: PremiumDesignTokens.cardRadius,
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(0xE60A1724),
-                  Color(0xDE102235),
-                  Color(0xE607111D),
-                ],
+                colors: dark
+                    ? const [
+                        Color(0xF00A1724),
+                        Color(0xEE102235),
+                        Color(0xF207111D),
+                      ]
+                    : const [
+                        Color(0xF7F1F7F7),
+                        Color(0xF3E4F0F2),
+                        Color(0xF7EDF3EF),
+                      ],
               ),
             ),
             child: Column(
@@ -73,7 +80,7 @@ class DailyReturnCard extends StatelessWidget {
                   child: Text(
                     title,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: const Color(0xFFF3F7FA),
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.3,
                     ),
@@ -151,14 +158,16 @@ class DailyReturnCard extends StatelessWidget {
                       value: alternativeExplanation!,
                     ),
                   ],
-                  const SizedBox(height: PremiumDesignTokens.spaceMd),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: onPrimaryAction,
-                      child: Text(actionTitle),
+                  if (onPrimaryAction != null) ...[
+                    const SizedBox(height: PremiumDesignTokens.spaceMd),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: onPrimaryAction,
+                        child: Text(actionTitle),
+                      ),
                     ),
-                  ),
+                  ],
                   if (onDismissRecommendation != null ||
                       onCorrectRecommendation != null ||
                       onRecommendationFeedback != null) ...[
@@ -231,7 +240,7 @@ class _LabeledInsight extends StatelessWidget {
       Text(
         label,
         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: const Color(0xFF9FE8F4),
+          color: Theme.of(context).colorScheme.primary,
           fontWeight: FontWeight.w800,
           letterSpacing: 0.15,
         ),
@@ -240,7 +249,7 @@ class _LabeledInsight extends StatelessWidget {
       Text(
         value,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: const Color(0xFFD6E1E8),
+          color: Theme.of(context).colorScheme.onSurface,
           height: 1.48,
         ),
       ),
@@ -254,42 +263,43 @@ class _Status extends StatelessWidget {
   final bool recorded;
 
   @override
-  Widget build(BuildContext context) => Chip(
-    backgroundColor: const Color(0xFFF5F0E7),
-    side: BorderSide(
-      color: recorded ? const Color(0xFF42D9E9) : const Color(0xFF91A7B4),
-      width: 1.2,
-    ),
-    avatar: Icon(
-      recorded ? Icons.check_circle : Icons.circle_outlined,
-      size: 18,
-      color: recorded ? const Color(0xFF12BFD0) : const Color(0xFF6A8796),
-    ),
-    label: Text(
-      '$label · ${context.strings.text(recorded ? 'recorded' : 'missing')}',
-      style: const TextStyle(
-        color: Color(0xFF263B47),
-        fontWeight: FontWeight.w700,
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Chip(
+      backgroundColor: scheme.surfaceContainerHighest.withValues(alpha: .68),
+      side: BorderSide(
+        color: recorded ? const Color(0xFF42D9E9) : const Color(0xFF91A7B4),
+        width: 1.2,
       ),
-    ),
-  );
+      avatar: Icon(
+        recorded ? Icons.check_circle : Icons.circle_outlined,
+        size: 18,
+        color: recorded ? scheme.primary : scheme.onSurfaceVariant,
+      ),
+      label: Text(
+        '$label · ${context.strings.text(recorded ? 'recorded' : 'missing')}',
+        style: TextStyle(color: scheme.onSurface, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
 }
 
-ThemeData _dashboardDarkSurfaceTheme(BuildContext context) {
+ThemeData _dashboardSurfaceTheme(BuildContext context) {
   final base = Theme.of(context);
+  final dark = base.brightness == Brightness.dark;
   final textTheme = base.textTheme.apply(
-    bodyColor: const Color(0xFFD6E1E8),
-    displayColor: const Color(0xFFF3F7FA),
+    bodyColor: base.colorScheme.onSurface,
+    displayColor: base.colorScheme.onSurface,
   );
 
   return base.copyWith(
     textTheme: textTheme,
-    dividerColor: const Color(0x335ED9EA),
+    dividerColor: base.colorScheme.outlineVariant,
     colorScheme: base.colorScheme.copyWith(
-      surface: const Color(0xFF0A1724),
-      onSurface: const Color(0xFFE8F0F5),
-      primary: const Color(0xFF35D2E5),
-      onPrimary: const Color(0xFF001318),
+      surface: dark ? const Color(0xFF0A1724) : const Color(0xFFEAF2F3),
+      onSurface: base.colorScheme.onSurface,
+      primary: dark ? const Color(0xFF35D2E5) : const Color(0xFF087F91),
+      onPrimary: dark ? const Color(0xFF001318) : Colors.white,
     ),
   );
 }

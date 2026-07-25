@@ -9,10 +9,7 @@ import 'package:body_intelligence_log/features/ai_platform/services/body_twin_sn
 void main() {
   final asOf = DateTime.utc(2026, 7, 24, 12);
 
-  BodyTwinFreshnessResult freshResult({
-    double value = 95,
-    String unit = 'kg',
-  }) {
+  BodyTwinFreshnessResult freshResult({double value = 95, String unit = 'kg'}) {
     final foundation = const BodyTwinSnapshotFoundation().build(
       asOf: asOf,
       observations: [

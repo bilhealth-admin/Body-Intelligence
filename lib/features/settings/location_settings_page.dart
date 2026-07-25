@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../shared/widgets/premium_surface.dart';
@@ -26,6 +27,8 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
   bool loading = true;
   bool saving = false;
   bool automaticLocation = true;
+  String deviceTimezone = 'UTC';
+  List<String> timezoneChoices = bilTimezoneChoices;
 
   bool get arabic =>
       Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
@@ -45,15 +48,20 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
 
   Future<void> _load() async {
     final repository = ref.read(preferencesRepositoryProvider);
-    final values = await Future.wait([
+    final results = await Future.wait<Object?>([
       repository.get('countryCode'),
       repository.get('countryRegion'),
       repository.get('cityName'),
       repository.get('timezoneName'),
       repository.get('automaticLocation'),
       repository.get('locationSource'),
+      _loadDeviceTimezone(),
+      _loadTimezoneChoices(),
     ]);
     if (!mounted) return;
+    final values = results.take(6).cast<String?>().toList();
+    deviceTimezone = results[6] as String;
+    timezoneChoices = results[7] as List<String>;
 
     automaticLocation = values[4] == null
         ? values[5] != 'manual'
@@ -70,12 +78,40 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
     setState(() => loading = false);
   }
 
+  Future<String> _loadDeviceTimezone() async {
+    try {
+      return (await FlutterTimezone.getLocalTimezone()).identifier;
+    } catch (_) {
+      return inferTimezoneFromDeviceName(DateTime.now().timeZoneName) ?? 'UTC';
+    }
+  }
+
+  Future<List<String>> _loadTimezoneChoices() async {
+    try {
+      final zones = await FlutterTimezone.getAvailableTimezones();
+      final identifiers =
+          zones
+              .map((zone) => zone.identifier)
+              .where(
+                (identifier) =>
+                    identifier == 'UTC' ||
+                    (identifier.contains('/') &&
+                        !identifier.startsWith('Etc/') &&
+                        !identifier.contains('SystemV')),
+              )
+              .toSet()
+              .toList()
+            ..sort();
+      return identifiers.isEmpty ? bilTimezoneChoices : identifiers;
+    } catch (_) {
+      return bilTimezoneChoices;
+    }
+  }
+
   void _applyDeviceRegion() {
     final locale = PlatformDispatcher.instance.locale;
     final code = locale.countryCode;
-    final timezone =
-        inferTimezoneFromDeviceName(DateTime.now().timeZoneName) ??
-        DateTime.now().timeZoneName;
+    final timezone = deviceTimezone;
 
     Country? country;
     if (code != null && code.isNotEmpty) {
@@ -177,6 +213,82 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _pickTimezone() async {
+    var query = '';
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          final normalized = query.trim().toLowerCase();
+          final matches = timezoneChoices.where((identifier) {
+            if (normalized.isEmpty) return true;
+            final cityLabel = identifier
+                .split('/')
+                .last
+                .replaceAll('_', ' ')
+                .toLowerCase();
+            final catalogMatch = bilCityCatalog.values
+                .expand((cities) => cities)
+                .where((city) => city.timezone == identifier)
+                .any(
+                  (city) =>
+                      city.nameEn.toLowerCase().contains(normalized) ||
+                      city.nameAr.contains(query.trim()),
+                );
+            return identifier.toLowerCase().contains(normalized) ||
+                cityLabel.contains(normalized) ||
+                catalogMatch;
+          }).toList();
+          return SafeArea(
+            child: FractionallySizedBox(
+              heightFactor: .86,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+                    child: TextField(
+                      key: const Key('timezone-search-field'),
+                      autofocus: true,
+                      onChanged: (value) => setSheetState(() => query = value),
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.search_rounded),
+                        labelText: arabic
+                            ? 'ابحث بالدولة أو المدينة أو المنطقة الزمنية'
+                            : 'Search country, city, or timezone',
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: matches.length,
+                      itemBuilder: (context, index) {
+                        final identifier = matches[index];
+                        return ListTile(
+                          leading: const Icon(Icons.schedule_rounded),
+                          title: Text(
+                            identifier.split('/').last.replaceAll('_', ' '),
+                          ),
+                          subtitle: Text(identifier),
+                          selected: timezoneController.text == identifier,
+                          onTap: () => Navigator.pop(sheetContext, identifier),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    if (selected != null) {
+      setState(() => timezoneController.text = selected);
+    }
   }
 
   Future<void> _save() async {
@@ -344,45 +456,16 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Autocomplete<String>(
-                          initialValue: TextEditingValue(
-                            text: timezoneController.text,
+                        TextField(
+                          key: const Key('location-timezone-field'),
+                          controller: timezoneController,
+                          readOnly: true,
+                          onTap: _pickTimezone,
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(Icons.schedule_rounded),
+                            suffixIcon: const Icon(Icons.expand_more_rounded),
+                            labelText: arabic ? 'المنطقة الزمنية' : 'Timezone',
                           ),
-                          optionsBuilder: (value) {
-                            final query = value.text.toLowerCase().trim();
-                            return bilTimezoneChoices.where(
-                              (zone) =>
-                                  query.isEmpty ||
-                                  zone.toLowerCase().contains(query),
-                            );
-                          },
-                          onSelected: (value) {
-                            timezoneController.text = value;
-                          },
-                          fieldViewBuilder:
-                              (
-                                context,
-                                controller,
-                                focusNode,
-                                onFieldSubmitted,
-                              ) {
-                                controller.addListener(() {
-                                  timezoneController.text = controller.text;
-                                });
-                                return TextField(
-                                  key: const Key('location-timezone-field'),
-                                  controller: controller,
-                                  focusNode: focusNode,
-                                  decoration: InputDecoration(
-                                    prefixIcon: const Icon(
-                                      Icons.schedule_rounded,
-                                    ),
-                                    labelText: arabic
-                                        ? 'المنطقة الزمنية'
-                                        : 'Timezone',
-                                  ),
-                                );
-                              },
                         ),
                       ],
                     ),

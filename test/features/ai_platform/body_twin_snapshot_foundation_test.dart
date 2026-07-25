@@ -40,17 +40,14 @@ void main() {
     final result = foundation.build(
       asOf: DateTime.utc(2026, 7, 24, 12),
       observations: const <BodyTwinObservation>[],
-      requiredMetricKeys: const <String>[
-        'body.weight.kg',
-        'body.waist.cm',
-      ],
+      requiredMetricKeys: const <String>['body.weight.kg', 'body.waist.cm'],
     );
 
     expect(result.isAccepted, isTrue);
-    expect(
-      result.acceptedSnapshot!.missingRequiredMetricKeys,
-      const <String>['body.waist.cm', 'body.weight.kg'],
-    );
+    expect(result.acceptedSnapshot!.missingRequiredMetricKeys, const <String>[
+      'body.waist.cm',
+      'body.weight.kg',
+    ]);
     expect(result.acceptedSnapshot!.completeness, 0);
   });
 }

@@ -12,6 +12,7 @@ import '../../../engine/daily_return_engine.dart';
 import '../../../engine/intelligence_engine.dart';
 import '../../../engine/one_best_action_engine.dart';
 import '../../../engine/plan_engine.dart';
+import '../../../engine/progress_analysis.dart';
 import '../../../engine/what_changed_engine.dart';
 import '../../../engine/recovery_engine.dart';
 import '../../../data/database/date_keys.dart';
@@ -20,19 +21,21 @@ import '../../../engine/nutrient_evidence_engine.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../shared/widgets/premium_surface.dart';
 import '../../profile/providers/user_profile_provider.dart';
+import '../../history/history_page.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
 import '../../foods/providers/food_provider.dart';
 import '../../life_context/providers/life_context_provider.dart';
 import '../../weight/providers/weight_provider.dart';
 import '../providers/dashboard_provider.dart';
-import 'dashboard_water_card.dart';
 import 'confidence_ring.dart';
+import 'dashboard_water_card.dart';
 import 'dashboard_loading_skeleton.dart';
+import 'dashboard_insights_surface.dart';
 import 'weekly_progress_card.dart';
 import 'dashboard_meals_timeline.dart';
 import 'nutrient_evidence_status_text.dart';
-import 'dashboard_insights_surface.dart';
 import 'daily_return_card.dart';
+import 'premium_dashboard_benchmark.dart';
 
 class DashboardGrid extends ConsumerWidget {
   const DashboardGrid({super.key});
@@ -345,6 +348,12 @@ class DashboardGrid extends ConsumerWidget {
     final weekStartWeight = weeklyWeights.isEmpty
         ? currentWeight
         : weeklyWeights.last.weight;
+    final progressAnalysis = ProgressAnalysis.evaluate(
+      samples: weights
+          .map((row) => ProgressSample(date: row.date, weightKg: row.weight))
+          .toList(),
+      goalWeightKg: profile.targetWeight,
+    );
     final localizedBestTitle = arabic
         ? switch (bestAction.type) {
             BestActionType.weighIn => 'سجّل وزن اليوم',
@@ -511,177 +520,309 @@ class DashboardGrid extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        DailyReturnCard(
-          report: dailyReturn,
-          changedSummary: localizedChanged,
+        PremiumDashboardBenchmark(
+          arabic: arabic,
+          showRecommendation: bestAction.type == BestActionType.protein,
           actionTitle: localizedBestTitle,
           actionReason: localizedBestReason,
-          missingEvidence: honesty.missing.isEmpty
+          actionEvidence: bestAction.evidence.isEmpty
+              ? tr('Evidence is still forming', 'الأدلة لا تزال قيد التكوين')
+              : bestAction.evidence.join(' · '),
+          confidence: switch (honesty.reliability) {
+            DataReliability.insufficient => tr(
+              'Insufficient evidence',
+              'الأدلة غير كافية',
+            ),
+            DataReliability.emerging => tr('Emerging', 'قيد التكوين'),
+            DataReliability.useful => tr('Useful', 'مفيدة'),
+            DataReliability.strong => tr('Strong', 'قوية'),
+          },
+          onAction: dailyReturn.hasPrimaryAction
+              ? () {
+                  switch (bestAction.type) {
+                    case BestActionType.weighIn:
+                      context.go('/daily-check-in');
+                    case BestActionType.completeLogging:
+                    case BestActionType.protein:
+                      context.go('/daily-log?meal=breakfast&focus=meal');
+                    case BestActionType.hydration:
+                      addWater(250);
+                    case BestActionType.holdPlan:
+                    case BestActionType.none:
+                      break;
+                  }
+                }
+              : null,
+          dailyIntelligence: DailyReturnCard(
+            report: dailyReturn,
+            changedSummary: localizedChanged,
+            actionTitle: localizedBestTitle,
+            actionReason: localizedBestReason,
+            missingEvidence: honesty.missing.isEmpty
+                ? tr(
+                    'No important evidence gap for today’s next decision.',
+                    'لا توجد فجوة أدلة مهمة لقرار اليوم التالي.',
+                  )
+                : tr(
+                    honesty.missing.first,
+                    'تتحسن الثقة مع أيام محلية أكثر اكتمالًا واتساقًا.',
+                  ),
+            onPrimaryAction: null,
+          ),
+          bodyTwinSummary: twin.sufficient
               ? tr(
-                  'No important evidence gap for today’s next decision.',
-                  'لا توجد فجوة أدلة مهمة لقرار اليوم التالي.',
+                  'A cautious planning direction is available; the range matters more than a single estimate.',
+                  'يتوفر اتجاه تخطيط حذر؛ النطاق أهم من أي تقدير منفرد.',
                 )
               : tr(
-                  honesty.missing.first,
-                  'تتحسن الثقة مع أيام محلية أكثر اكتمالًا واتساقًا.',
+                  'BIL is still building a safe personal scenario.',
+                  'لا يزال BIL يبني سيناريو شخصيًا آمنًا.',
                 ),
-          onPrimaryAction: () {
-            switch (bestAction.type) {
-              case BestActionType.weighIn:
-                context.go('/daily-check-in');
-              case BestActionType.completeLogging:
-              case BestActionType.protein:
-                context.go('/daily-log');
-              case BestActionType.hydration:
-                addWater(250);
-              case BestActionType.holdPlan:
-              case BestActionType.none:
-                break;
-            }
-          },
+          bodyTwinEvidence: twin.scenario == null
+              ? tr(
+                  twin.requiredData.join(' · '),
+                  'نحتاج أيام ملاحظة ووزن وتغذية أكثر.',
+                )
+              : tr(
+                  'Cautious range ${twin.scenario!.cautiousLowKg.toStringAsFixed(1)} to ${twin.scenario!.cautiousHighKg.toStringAsFixed(1)} kg/week',
+                  'النطاق الحذر ${twin.scenario!.cautiousLowKg.toStringAsFixed(1)} إلى ${twin.scenario!.cautiousHighKg.toStringAsFixed(1)} كجم/أسبوع',
+                ),
+          nutritionSummary: meals.isEmpty
+              ? tr(
+                  'Nutrition interpretation is waiting for a meal observation.',
+                  'ينتظر تفسير التغذية تسجيل وجبة.',
+                )
+              : effectiveTargets.protein - protein.round() >= 20
+              ? tr(
+                  'Protein is the clearest actionable nutrition gap today.',
+                  'البروتين هو أوضح فجوة تغذية قابلة للتنفيذ اليوم.',
+                )
+              : tr(
+                  'No nutrition change is more important than preserving complete evidence today.',
+                  'لا يوجد تغيير غذائي أهم من الحفاظ على اكتمال الأدلة اليوم.',
+                ),
+          nutritionEvidence: meals.isEmpty
+              ? tr('No meals recorded yet', 'لم تُسجّل وجبات بعد')
+              : tr(
+                  '${meals.length} meal records · ${protein.round()} g protein recorded',
+                  '${meals.length} سجلات وجبات · ${protein.round()} جم بروتين مسجل',
+                ),
+          trendSummary: localizedChanged,
+          trendEvidence: changed.evidence.isEmpty
+              ? tr(
+                  'Comparable observations are still forming',
+                  'الملاحظات القابلة للمقارنة لا تزال قيد التكوين',
+                )
+              : changed.evidence.join(' · '),
+          loggingItems: [
+            DashboardLoggingItem(
+              label: tr('Weight', 'الوزن'),
+              recorded: dailyReturn.hasWeight,
+            ),
+            DashboardLoggingItem(
+              label: tr('Meals', 'الوجبات'),
+              recorded: dailyReturn.hasMeals,
+            ),
+            DashboardLoggingItem(
+              label: tr('Water', 'الماء'),
+              recorded: dailyReturn.hasWater,
+            ),
+          ],
         ),
         const SizedBox(height: PremiumDesignTokens.spaceMd),
-        PremiumSurface(
-          padding: PremiumDesignTokens.cardPaddingLarge,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final tileWidth = constraints.maxWidth >= 860
-                  ? (constraints.maxWidth - (4 * PremiumDesignTokens.spaceSm)) /
-                        5
-                  : constraints.maxWidth >= 560
-                  ? (constraints.maxWidth - (2 * PremiumDesignTokens.spaceSm)) /
-                        3
-                  : (constraints.maxWidth - PremiumDesignTokens.spaceSm) / 2;
-
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _DashboardSectionHeading(
-                              title: tr('Today at a glance', 'ملخص اليوم'),
-                              subtitle: tr(
-                                'The few numbers that matter right now.',
-                                'أهم الأرقام التي تحتاجها الآن فقط.',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (loggingStreak >= 2)
-                        _StreakBadge(days: loggingStreak, arabic: arabic),
-                    ],
+        Visibility(
+          visible: false,
+          maintainState: false,
+          child: DailyReturnCard(
+            report: dailyReturn,
+            changedSummary: localizedChanged,
+            actionTitle: localizedBestTitle,
+            actionReason: localizedBestReason,
+            missingEvidence: honesty.missing.isEmpty
+                ? tr(
+                    'No important evidence gap for today’s next decision.',
+                    'لا توجد فجوة أدلة مهمة لقرار اليوم التالي.',
+                  )
+                : tr(
+                    honesty.missing.first,
+                    'تتحسن الثقة مع أيام محلية أكثر اكتمالًا واتساقًا.',
                   ),
-                  const SizedBox(height: PremiumDesignTokens.spaceMd),
-                  Wrap(
-                    spacing: PremiumDesignTokens.spaceSm,
-                    runSpacing: PremiumDesignTokens.spaceSm,
-                    children: [
-                      SizedBox(
-                        width: tileWidth,
-                        child: _CompactMetricTile(
-                          icon: Icons.monitor_weight_outlined,
-                          label: tr('Weight', 'الوزن'),
-                          value: UnitConverter.weightFromKg(
-                            currentWeight,
-                            system,
-                          ).toStringAsFixed(1),
-                          unit: UnitConverter.weightUnit(system),
-                          accent: Colors.blue,
-                        ),
-                      ),
-                      SizedBox(
-                        width: tileWidth,
-                        child: _CompactMetricTile(
-                          icon: Icons.local_fire_department_outlined,
-                          label: tr('Calories', 'السعرات'),
-                          value: calories.round().toString(),
-                          unit: '/ ${effectiveTargets.calories}',
-                          progress: effectiveTargets.calories <= 0
-                              ? 0
-                              : (calories / effectiveTargets.calories).clamp(
-                                  0.0,
-                                  1.0,
-                                ),
-                          accent: Colors.orange,
-                        ),
-                      ),
-                      SizedBox(
-                        width: tileWidth,
-                        child: _CompactMetricTile(
-                          icon: Icons.fitness_center_outlined,
-                          label: tr('Protein', 'البروتين'),
-                          value: protein.round().toString(),
-                          unit: '/ ${effectiveTargets.protein} g',
-                          progress: effectiveTargets.protein <= 0
-                              ? 0
-                              : (protein / effectiveTargets.protein).clamp(
-                                  0.0,
-                                  1.0,
-                                ),
-                          accent: Colors.green,
-                        ),
-                      ),
-                      SizedBox(
-                        width: tileWidth,
-                        child: _CompactMetricTile(
-                          icon: Icons.grain_outlined,
-                          label: tr('Carbs', 'الكربوهيدرات'),
-                          value: carbs.round().toString(),
-                          unit: '/ ${effectiveTargets.carbs} g',
-                          progress: effectiveTargets.carbs <= 0
-                              ? 0
-                              : (carbs / effectiveTargets.carbs).clamp(
-                                  0.0,
-                                  1.0,
-                                ),
-                          accent: Colors.amber.shade800,
-                        ),
-                      ),
-                      SizedBox(
-                        width: tileWidth,
-                        child: _CompactMetricTile(
-                          icon: Icons.opacity_outlined,
-                          label: tr('Fat', 'الدهون'),
-                          value: fats.round().toString(),
-                          unit: '/ ${effectiveTargets.fats} g',
-                          progress: effectiveTargets.fats <= 0
-                              ? 0
-                              : (fats / effectiveTargets.fats).clamp(0.0, 1.0),
-                          accent: Colors.purple,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              );
+            onPrimaryAction: () {
+              switch (bestAction.type) {
+                case BestActionType.weighIn:
+                  context.go('/daily-check-in');
+                case BestActionType.completeLogging:
+                case BestActionType.protein:
+                  context.go('/daily-log');
+                case BestActionType.hydration:
+                  addWater(250);
+                case BestActionType.holdPlan:
+                case BestActionType.none:
+                  break;
+              }
             },
           ),
         ),
         const SizedBox(height: PremiumDesignTokens.spaceMd),
-        DashboardWaterCard(
-          consumedMl: water,
-          targetMl: effectiveTargets.water,
-          onAdd: addWater,
+        Visibility(
+          visible: false,
+          maintainState: false,
+          child: PremiumSurface(
+            padding: PremiumDesignTokens.cardPaddingLarge,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final tileWidth = constraints.maxWidth >= 860
+                    ? (constraints.maxWidth -
+                              (4 * PremiumDesignTokens.spaceSm)) /
+                          5
+                    : constraints.maxWidth >= 560
+                    ? (constraints.maxWidth -
+                              (2 * PremiumDesignTokens.spaceSm)) /
+                          3
+                    : (constraints.maxWidth - PremiumDesignTokens.spaceSm) / 2;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _DashboardSectionHeading(
+                                title: tr('Today at a glance', 'ملخص اليوم'),
+                                subtitle: tr(
+                                  'The few numbers that matter right now.',
+                                  'أهم الأرقام التي تحتاجها الآن فقط.',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (loggingStreak >= 2)
+                          _StreakBadge(days: loggingStreak, arabic: arabic),
+                      ],
+                    ),
+                    const SizedBox(height: PremiumDesignTokens.spaceMd),
+                    Wrap(
+                      spacing: PremiumDesignTokens.spaceSm,
+                      runSpacing: PremiumDesignTokens.spaceSm,
+                      children: [
+                        SizedBox(
+                          width: tileWidth,
+                          child: _CompactMetricTile(
+                            icon: Icons.monitor_weight_outlined,
+                            label: tr('Weight', 'الوزن'),
+                            value: UnitConverter.weightFromKg(
+                              currentWeight,
+                              system,
+                            ).toStringAsFixed(1),
+                            unit: UnitConverter.weightUnit(system),
+                            accent: Colors.blue,
+                          ),
+                        ),
+                        SizedBox(
+                          width: tileWidth,
+                          child: _CompactMetricTile(
+                            icon: Icons.local_fire_department_outlined,
+                            label: tr('Calories', 'السعرات'),
+                            value: calories.round().toString(),
+                            unit: '/ ${effectiveTargets.calories}',
+                            progress: effectiveTargets.calories <= 0
+                                ? 0
+                                : (calories / effectiveTargets.calories).clamp(
+                                    0.0,
+                                    1.0,
+                                  ),
+                            accent: Colors.orange,
+                          ),
+                        ),
+                        SizedBox(
+                          width: tileWidth,
+                          child: _CompactMetricTile(
+                            icon: Icons.fitness_center_outlined,
+                            label: tr('Protein', 'البروتين'),
+                            value: protein.round().toString(),
+                            unit: '/ ${effectiveTargets.protein} g',
+                            progress: effectiveTargets.protein <= 0
+                                ? 0
+                                : (protein / effectiveTargets.protein).clamp(
+                                    0.0,
+                                    1.0,
+                                  ),
+                            accent: Colors.green,
+                          ),
+                        ),
+                        SizedBox(
+                          width: tileWidth,
+                          child: _CompactMetricTile(
+                            icon: Icons.grain_outlined,
+                            label: tr('Carbs', 'الكربوهيدرات'),
+                            value: carbs.round().toString(),
+                            unit: '/ ${effectiveTargets.carbs} g',
+                            progress: effectiveTargets.carbs <= 0
+                                ? 0
+                                : (carbs / effectiveTargets.carbs).clamp(
+                                    0.0,
+                                    1.0,
+                                  ),
+                            accent: Colors.amber.shade800,
+                          ),
+                        ),
+                        SizedBox(
+                          width: tileWidth,
+                          child: _CompactMetricTile(
+                            icon: Icons.opacity_outlined,
+                            label: tr('Fat', 'الدهون'),
+                            value: fats.round().toString(),
+                            unit: '/ ${effectiveTargets.fats} g',
+                            progress: effectiveTargets.fats <= 0
+                                ? 0
+                                : (fats / effectiveTargets.fats).clamp(
+                                    0.0,
+                                    1.0,
+                                  ),
+                            accent: Colors.purple,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
         ),
         const SizedBox(height: PremiumDesignTokens.spaceMd),
-        DashboardMealsTimeline(
-          meals: meals,
-          onOpenMeal: (type) => context.go('/daily-log?meal=$type'),
-          usualBreakfastAvailable: usualBreakfast != null,
-          onRepeatBreakfast: repeatUsualBreakfast,
-          recentBreakfastAvailable:
-              usualBreakfast == null && recentBreakfast.isNotEmpty,
-          onRepeatRecentBreakfast: repeatRecentBreakfast,
+        Visibility(
+          visible: false,
+          maintainState: false,
+          child: DashboardWaterCard(
+            consumedMl: water,
+            targetMl: effectiveTargets.water,
+            onAdd: addWater,
+          ),
+        ),
+        Visibility(
+          visible: false,
+          maintainState: false,
+          child: DashboardMealsTimeline(
+            meals: meals,
+            onOpenMeal: (type) => context.go('/daily-log?meal=$type'),
+            usualBreakfastAvailable: usualBreakfast != null,
+            onRepeatBreakfast: repeatUsualBreakfast,
+            recentBreakfastAvailable:
+                usualBreakfast == null && recentBreakfast.isNotEmpty,
+            onRepeatRecentBreakfast: repeatRecentBreakfast,
+          ),
         ),
         const SizedBox(height: PremiumDesignTokens.spaceMd),
         PremiumSurface(
           padding: EdgeInsets.zero,
           child: DashboardInsightsSurface(
+            initiallyExpanded: true,
+            collapsible: false,
             leading: const Icon(Icons.insights_outlined),
             title: Text(
               tr(
@@ -694,8 +835,8 @@ class DashboardGrid extends ConsumerWidget {
             ),
             subtitle: Text(
               tr(
-                'Open only when you want the deeper explanation.',
-                'افتح هذا القسم فقط عندما تريد التفاصيل والتفسير.',
+                'What BIL knows, why it matters, and how strong the evidence is.',
+                'ما يعرفه BIL، ولماذا يهم، ومدى قوة الأدلة.',
               ),
             ),
             childrenPadding: const EdgeInsets.fromLTRB(
@@ -706,6 +847,26 @@ class DashboardGrid extends ConsumerWidget {
             ),
             children: [
               const Divider(),
+              _DetailPanel(
+                icon: Icons.show_chart_rounded,
+                title: tr('Weight over time', 'الوزن عبر الزمن'),
+                children: [
+                  WeightTrendChart(
+                    weights: weights
+                        .take(30)
+                        .toList()
+                        .reversed
+                        .map((row) => row.weight)
+                        .toList(),
+                    variability: progressAnalysis.variabilityKg,
+                    semanticsLabel: tr(
+                      'Recorded weight trend over time',
+                      'اتجاه الوزن المسجل عبر الزمن',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: PremiumDesignTokens.spaceMd),
               WeeklyProgressCard(
                 start: UnitConverter.weightFromKg(weekStartWeight, system),
                 today: UnitConverter.weightFromKg(currentWeight, system),
@@ -753,38 +914,42 @@ class DashboardGrid extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: PremiumDesignTokens.spaceMd),
-              _DetailPanel(
-                icon: Icons.task_alt_outlined,
-                title: context.strings.text('One best action'),
-                children: [
-                  Text(
-                    localizedBestTitle,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: PremiumDesignTokens.spaceXs),
-                  Text(localizedBestReason),
-                  const SizedBox(height: PremiumDesignTokens.spaceSm),
-                  Wrap(
-                    spacing: PremiumDesignTokens.spaceSm,
-                    runSpacing: PremiumDesignTokens.spaceSm,
-                    children: [
-                      FilledButton.tonal(
-                        onPressed: () => respondToAction('accepted'),
-                        child: Text(tr('Accept', 'قبول')),
-                      ),
-                      OutlinedButton(
-                        onPressed: () => respondToAction('done'),
-                        child: Text(tr('Done', 'تم')),
-                      ),
-                      TextButton(
-                        onPressed: () => respondToAction('notSuitable'),
-                        child: Text(
-                          tr('Not suitable today', 'غير مناسب اليوم'),
+              Visibility(
+                visible: false,
+                maintainState: false,
+                child: _DetailPanel(
+                  icon: Icons.task_alt_outlined,
+                  title: context.strings.text('One best action'),
+                  children: [
+                    Text(
+                      localizedBestTitle,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: PremiumDesignTokens.spaceXs),
+                    Text(localizedBestReason),
+                    const SizedBox(height: PremiumDesignTokens.spaceSm),
+                    Wrap(
+                      spacing: PremiumDesignTokens.spaceSm,
+                      runSpacing: PremiumDesignTokens.spaceSm,
+                      children: [
+                        FilledButton.tonal(
+                          onPressed: () => respondToAction('accepted'),
+                          child: Text(tr('Accept', 'قبول')),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        OutlinedButton(
+                          onPressed: () => respondToAction('done'),
+                          child: Text(tr('Done', 'تم')),
+                        ),
+                        TextButton(
+                          onPressed: () => respondToAction('notSuitable'),
+                          child: Text(
+                            tr('Not suitable today', 'غير مناسب اليوم'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: PremiumDesignTokens.spaceMd),
               ExpansionTile(

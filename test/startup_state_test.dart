@@ -49,10 +49,11 @@ void main() {
     expect(find.text('تعذر فتح بياناتك المحلية'), findsNothing);
     expect(find.bySemanticsLabel(RegExp('يُجهّز BIL')), findsOneWidget);
 
-    // Let the second stream load successfully and redirect to onboarding
+    // Let the second stream load successfully and redirect to the gateway.
+    await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
     expect(profileBuildCount, 2);
-    expect(find.text('Onboarding Page'), findsOneWidget);
+    expect(find.text('Account Gateway Page'), findsOneWidget);
   });
 
   testWidgets('Arabic startup progress has localized semantics', (
@@ -121,6 +122,11 @@ void main() {
         ],
       ),
     );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 4999));
+    expect(find.text('Dashboard Page'), findsNothing);
+    expect(find.byType(StartupPage), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 1));
     await tester.pumpAndSettle();
     expect(find.text('Dashboard Page'), findsOneWidget);
   });
@@ -138,6 +144,10 @@ Widget _app({required dynamic overrides, bool disableAnimations = false}) {
           ).copyWith(disableAnimations: disableAnimations),
           child: const StartupPage(),
         ),
+      ),
+      GoRoute(
+        path: '/account-gateway',
+        builder: (_, _) => const Scaffold(body: Text('Account Gateway Page')),
       ),
       GoRoute(
         path: '/onboarding',

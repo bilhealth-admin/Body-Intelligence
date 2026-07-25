@@ -3,7 +3,7 @@
 ## Authoritative execution baseline
 
 - Branch: `phase-3-product-excellence`
-- Baseline HEAD: `8f67e0effa480e9af0769ec546973ef0644a32f8`
+- Baseline HEAD: `9bc3b524a476280209e324637c9ac78de14daa44`
 
 ## Current authoritative decisions
 
@@ -38,3 +38,12 @@ Foundation, Nutrition Platform, AI Platform, BIL Intelligence Integration, BIL I
 ## Historical ADR policy
 
 Superseded package-status notes and historical parent HEAD references are retained in Git history and package archives. They are not active architecture decisions.
+
+## BIL-GLOBAL-001-FINAL verification candidate
+
+- Branch: `phase-3-product-excellence`
+- Parent HEAD: `9bc3b524a476280209e324637c9ac78de14daa44`
+- Status: **Awaiting Product Owner VERIFY; not yet adopted or committed.**
+- Engineering scope: final product composition, wearable payload preservation, native BLE session closure, embedded Arabic reporting, plugin runtime proof, commerce capability honesty, and evidence synchronization.
+- External gates: iOS/macOS build and representative device/provider certification remain explicitly separate.
+- Samsung wearable integration is not present in the production catalog and remains `Not Implemented`; no readiness claim is made.

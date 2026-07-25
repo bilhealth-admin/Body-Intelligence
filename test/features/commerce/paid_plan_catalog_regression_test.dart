@@ -16,7 +16,10 @@ void main() {
     expect(proCatalog, contains(CommerceEntitlement.advancedIntelligence));
     expect(localState.plan, CommercePlan.free);
     expect(localState.authority, EntitlementAuthority.localDefault);
-    expect(localState.grants(CommerceEntitlement.advancedIntelligence), isFalse);
+    expect(
+      localState.grants(CommerceEntitlement.advancedIntelligence),
+      isFalse,
+    );
   });
 
   test('all paid plans retain the complete Free foundation', () {

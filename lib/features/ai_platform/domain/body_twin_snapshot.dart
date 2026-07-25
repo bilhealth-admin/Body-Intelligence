@@ -38,8 +38,8 @@ final class BodyTwinSnapshot {
     if (requiredMetricKeys.isEmpty) {
       return 1;
     }
-    final availableRequired = requiredMetricKeys.length -
-        missingRequiredMetricKeys.length;
+    final availableRequired =
+        requiredMetricKeys.length - missingRequiredMetricKeys.length;
     return availableRequired / requiredMetricKeys.length;
   }
 
@@ -52,7 +52,11 @@ final class BodyTwinSnapshot {
     for (final key in keys) {
       final value = key.trim();
       if (value.isEmpty) {
-        throw ArgumentError.value(key, 'requiredMetricKeys', 'must not be empty');
+        throw ArgumentError.value(
+          key,
+          'requiredMetricKeys',
+          'must not be empty',
+        );
       }
       normalized.add(value);
     }

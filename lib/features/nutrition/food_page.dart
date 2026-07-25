@@ -384,64 +384,79 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
       child: ListTile(
         onTap: () => showModalBottomSheet<void>(
           context: context,
+          isScrollControlled: true,
+          useSafeArea: true,
           showDragHandle: true,
-          builder: (context) => SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    food.name,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  if (food.arabicName != null) Text(food.arabicName!),
-                  const SizedBox(height: 12),
-                  Text('${t('Source')}: ${t(food.source)}'),
-                  Text(
-                    food.verified
-                        ? t('Verified catalog record')
-                        : t('Not independently verified'),
-                  ),
-                  Text(
-                    '${t('Normalized serving')}: ${food.servingSize.toStringAsFixed(0)} ${food.servingUnit}',
-                  ),
-                  Text('${t('Updated locally')}: ${food.updatedAt.toLocal()}'),
-                  const SizedBox(height: 12),
-                  Text(
-                    '${food.calories.toStringAsFixed(0)} kcal · ${food.protein.toStringAsFixed(1)} g protein · '
-                    '${food.carbs.toStringAsFixed(1)} g carbs · ${food.fats.toStringAsFixed(1)} g fat',
-                  ),
-                  if (food.isCustom) ...[
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              _edit();
-                            },
-                            icon: const Icon(Icons.edit_outlined),
-                            label: Text(t('Edit custom food')),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              _delete();
-                            },
-                            icon: const Icon(Icons.delete_outline),
-                            label: Text(t('Delete')),
-                          ),
-                        ),
-                      ],
+          constraints: const BoxConstraints(maxWidth: 720),
+          builder: (context) => Padding(
+            padding: EdgeInsets.fromLTRB(
+              20,
+              8,
+              20,
+              24 + MediaQuery.viewPaddingOf(context).bottom,
+            ),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.sizeOf(context).height - 96,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      food.name,
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
+                    if (food.arabicName != null) Text(food.arabicName!),
+                    const SizedBox(height: 12),
+                    Text('${t('Source')}: ${t(food.source)}'),
+                    Text(
+                      food.verified
+                          ? t('Verified catalog record')
+                          : t('Not independently verified'),
+                    ),
+                    Text(
+                      '${t('Normalized serving')}: ${food.servingSize.toStringAsFixed(0)} ${food.servingUnit}',
+                    ),
+                    Text(
+                      '${t('Updated locally')}: ${food.updatedAt.toLocal()}',
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '${food.calories.toStringAsFixed(0)} kcal · ${food.protein.toStringAsFixed(1)} g protein · '
+                      '${food.carbs.toStringAsFixed(1)} g carbs · ${food.fats.toStringAsFixed(1)} g fat',
+                    ),
+                    if (food.isCustom) ...[
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                _edit();
+                              },
+                              icon: const Icon(Icons.edit_outlined),
+                              label: Text(t('Edit custom food')),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                _delete();
+                              },
+                              icon: const Icon(Icons.delete_outline),
+                              label: Text(t('Delete')),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),

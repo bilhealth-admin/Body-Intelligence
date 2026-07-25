@@ -56,12 +56,14 @@ class DashboardPage extends ConsumerWidget {
     final arabic =
         Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
     final showFirstValue = ref.watch(firstValueHandoffProvider).value ?? false;
+    final displayName = ref.watch(displayNameProvider).value;
 
     final hero = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DashboardTopBar(
           arabic: arabic,
+          displayName: displayName,
           onProfile: () => context.go('/settings'),
         ),
         const SizedBox(height: 18),

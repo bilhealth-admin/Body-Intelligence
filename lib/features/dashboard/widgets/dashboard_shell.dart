@@ -19,26 +19,36 @@ class DashboardShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: const Color(0xFF01050D),
+      backgroundColor: dark ? const Color(0xFF01050D) : const Color(0xFFDCEAF0),
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            'assets/images/v10_master/bil_hdr_starfield_master.png',
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.high,
+          Opacity(
+            opacity: dark ? 1 : .045,
+            child: Image.asset(
+              'assets/images/v10_master/bil_hdr_starfield_master.png',
+              fit: BoxFit.cover,
+              filterQuality: FilterQuality.high,
+            ),
           ),
-          const DecoratedBox(
+          DecoratedBox(
             decoration: BoxDecoration(
               gradient: RadialGradient(
                 center: Alignment(.12, -.18),
                 radius: 1.2,
-                colors: [
-                  Color(0x301E87FF),
-                  Color(0x1614C8D8),
-                  Color(0x0001050D),
-                ],
+                colors: dark
+                    ? const [
+                        Color(0x241E87FF),
+                        Color(0x1114C8D8),
+                        Color(0x0001050D),
+                      ]
+                    : const [
+                        Color(0xB8D7EEF3),
+                        Color(0x9AE5EEF0),
+                        Color(0xFFDCE7EC),
+                      ],
               ),
             ),
           ),

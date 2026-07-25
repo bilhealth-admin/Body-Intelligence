@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
+import 'premium_splash_experience.dart';
 
 class StartupPage extends ConsumerStatefulWidget {
   const StartupPage({super.key});
@@ -14,6 +17,9 @@ class StartupPage extends ConsumerStatefulWidget {
 class _StartupPageState extends ConsumerState<StartupPage>
     with SingleTickerProviderStateMixin {
   late final AnimationController controller;
+  Timer? minimumDisplayTimer;
+  bool minimumDisplayElapsed = false;
+  String? readyLocation;
   bool redirectScheduled = false;
   bool retrying = false;
 
@@ -22,14 +28,25 @@ class _StartupPageState extends ConsumerState<StartupPage>
     super.initState();
     controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 2600),
     )..forward();
+    minimumDisplayTimer = Timer(const Duration(seconds: 5), () {
+      if (!mounted) return;
+      setState(() => minimumDisplayElapsed = true);
+    });
   }
 
   @override
   void dispose() {
+    minimumDisplayTimer?.cancel();
     controller.dispose();
     super.dispose();
+  }
+
+  void _redirectIfReady() {
+    final location = readyLocation;
+    if (!minimumDisplayElapsed || location == null) return;
+    scheduleRedirect(location);
   }
 
   void scheduleRedirect(String location) {
@@ -62,11 +79,12 @@ class _StartupPageState extends ConsumerState<StartupPage>
         checkInDue.hasValue &&
         forceOnboarding.hasValue) {
       final user = profile.value;
-      scheduleRedirect(
-        forceOnboarding.value == true || user == null
-            ? '/onboarding'
-            : (checkInDue.value == true ? '/daily-check-in' : '/dashboard'),
-      );
+      readyLocation = forceOnboarding.value == true || user == null
+          ? '/account-gateway'
+          : (checkInDue.value == true ? '/daily-check-in' : '/dashboard');
+      _redirectIfReady();
+    } else {
+      readyLocation = null;
     }
 
     return Scaffold(
@@ -74,29 +92,14 @@ class _StartupPageState extends ConsumerState<StartupPage>
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            'assets/images/v10_master/bil_hdr_starfield_master.png',
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.high,
-            errorBuilder: (_, _, _) =>
-                const ColoredBox(color: Color(0xFF01050D)),
-          ),
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                radius: .78,
-                colors: [
-                  Color(0x382A8CFF),
-                  Color(0x1817CDE4),
-                  Color(0x0001050D),
-                ],
-              ),
-            ),
-          ),
+          const PremiumSplashBackdrop(),
           Center(
             child: error && !retrying
                 ? _StartupError(arabic: arabic, onRetry: retry)
-                : _StartupProgress(arabic: arabic, controller: controller),
+                : PremiumSplashExperience(
+                    arabic: arabic,
+                    controller: controller,
+                  ),
           ),
         ],
       ),
@@ -104,6 +107,8 @@ class _StartupPageState extends ConsumerState<StartupPage>
   }
 }
 
+// Kept temporarily for binary/golden continuity with the previous splash.
+// ignore: unused_element
 class _StartupProgress extends StatelessWidget {
   const _StartupProgress({required this.arabic, required this.controller});
   final bool arabic;

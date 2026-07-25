@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/analytics/analytics_page.dart';
 import '../../features/auth/login_page.dart';
+import '../../features/auth/account_gateway_page.dart';
 import '../../features/daily_log/daily_log_page.dart';
 import '../../features/daily_check_in/daily_check_in_page.dart';
 import '../../features/dashboard/dashboard_page.dart';
@@ -26,6 +27,10 @@ class AppRouter {
     routes: [
       GoRoute(path: '/startup', builder: (_, _) => const StartupPage()),
       GoRoute(path: '/login', builder: (_, _) => const LoginPage()),
+      GoRoute(
+        path: '/account-gateway',
+        builder: (_, _) => const AccountGatewayPage(),
+      ),
       GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingPage()),
       GoRoute(
         path: '/daily-check-in',
@@ -63,6 +68,7 @@ class AppRouter {
             path: '/daily-log',
             builder: (_, state) => DailyLogPage(
               initialMealType: state.uri.queryParameters['meal'],
+              focusMealEntry: state.uri.queryParameters['focus'] == 'meal',
             ),
           ),
           GoRoute(path: '/nutrition', builder: (_, _) => const FoodPage()),

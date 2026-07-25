@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 part 'welcome/welcome_screen.dart';
 part 'body_canvas/body_setup_canvas.dart';
 part 'body_canvas/body_editors.dart';
-part 'plan/plan_ready.dart';
 part 'shared/calibration_components.dart';
 
 enum BilSex { male, female }
@@ -82,7 +81,6 @@ class _BilFlagshipOnboardingState extends State<BilFlagshipOnboarding> {
   late final BilOnboardingDraft _draft;
   late final PageController _pageController;
   bool _busy = false;
-  BilInitialPlan? _plan;
 
   @override
   void initState() {
@@ -129,8 +127,7 @@ class _BilFlagshipOnboardingState extends State<BilFlagshipOnboarding> {
     try {
       final plan = await widget.calculatePlan(_draft);
       if (!mounted) return;
-      setState(() => _plan = plan);
-      await _goToStage(2);
+      await widget.onComplete(_draft, plan);
     } catch (error, stack) {
       debugPrint('BIL calibration plan failed: $error\n$stack');
       if (!mounted) return;
@@ -144,17 +141,6 @@ class _BilFlagshipOnboardingState extends State<BilFlagshipOnboarding> {
           ),
         ),
       );
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  Future<void> _complete() async {
-    final plan = _plan;
-    if (plan == null || _busy) return;
-    setState(() => _busy = true);
-    try {
-      await widget.onComplete(_draft, plan);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -205,21 +191,6 @@ class _BilFlagshipOnboardingState extends State<BilFlagshipOnboarding> {
                                   () => Navigator.maybePop(context)),
                         onChanged: () => setState(() {}),
                         onContinue: _buildPlan,
-                      ),
-                    ),
-                    _V9PageMotion(
-                      controller: _pageController,
-                      index: 2,
-                      child: _PlanReady(
-                        draft: _draft,
-                        plan: _plan,
-                        isArabic: _isArabic,
-                        busy: _busy,
-                        onBack: () => _goToStage(1),
-                        onPlanChanged: (updated) {
-                          setState(() => _plan = updated);
-                        },
-                        onEnter: _complete,
                       ),
                     ),
                   ],

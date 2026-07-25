@@ -75,10 +75,9 @@ void main() {
     );
 
     expect(result.canProceed, isTrue);
-    expect(
-      result.acceptedFreshSnapshot!.missingRequiredMetricKeys,
-      const ['body.waist.cm'],
-    );
+    expect(result.acceptedFreshSnapshot!.missingRequiredMetricKeys, const [
+      'body.waist.cm',
+    ]);
     expect(result.acceptedFreshSnapshot!.completeness, 0.5);
   });
 }

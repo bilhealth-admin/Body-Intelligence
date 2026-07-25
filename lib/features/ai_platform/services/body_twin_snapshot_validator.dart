@@ -44,7 +44,8 @@ final class BodyTwinSnapshotValidator {
       if (provenance.metricKey != observation.metricKey) {
         issues.add(
           BodyTwinSnapshotIntegrityIssue(
-            code: BodyTwinSnapshotIntegrityIssueCode.provenanceMetricKeyMismatch,
+            code:
+                BodyTwinSnapshotIntegrityIssueCode.provenanceMetricKeyMismatch,
             metricKey: metricKey,
             message: 'Provenance metric key does not match the observation.',
           ),
@@ -62,7 +63,8 @@ final class BodyTwinSnapshotValidator {
       if (!provenance.observedAt.isAtSameMomentAs(observation.observedAt)) {
         issues.add(
           BodyTwinSnapshotIntegrityIssue(
-            code: BodyTwinSnapshotIntegrityIssueCode.provenanceObservedAtMismatch,
+            code:
+                BodyTwinSnapshotIntegrityIssueCode.provenanceObservedAtMismatch,
             metricKey: metricKey,
             message: 'Provenance timestamp does not match the observation.',
           ),
@@ -71,7 +73,8 @@ final class BodyTwinSnapshotValidator {
       if (provenance.reliability != observation.reliability) {
         issues.add(
           BodyTwinSnapshotIntegrityIssue(
-            code: BodyTwinSnapshotIntegrityIssueCode.provenanceReliabilityMismatch,
+            code: BodyTwinSnapshotIntegrityIssueCode
+                .provenanceReliabilityMismatch,
             metricKey: metricKey,
             message: 'Provenance reliability does not match the observation.',
           ),
@@ -83,7 +86,8 @@ final class BodyTwinSnapshotValidator {
       if (!snapshot.observationsByMetric.containsKey(metricKey)) {
         issues.add(
           BodyTwinSnapshotIntegrityIssue(
-            code: BodyTwinSnapshotIntegrityIssueCode.provenanceMetricKeyMismatch,
+            code:
+                BodyTwinSnapshotIntegrityIssueCode.provenanceMetricKeyMismatch,
             metricKey: metricKey,
             message: 'Provenance exists for a metric absent from the snapshot.',
           ),

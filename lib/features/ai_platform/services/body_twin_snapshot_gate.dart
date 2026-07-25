@@ -18,9 +18,8 @@ final class BodyTwinSnapshotGate {
     required BodyTwinSnapshot snapshot,
     required Map<String, BodyTwinMetricProvenance> provenanceByMetric,
   }) {
-    final immutableProvenance = Map<String, BodyTwinMetricProvenance>.unmodifiable(
-      provenanceByMetric,
-    );
+    final immutableProvenance =
+        Map<String, BodyTwinMetricProvenance>.unmodifiable(provenanceByMetric);
     return BodyTwinSnapshotGateResult.from(
       snapshot: snapshot,
       provenanceByMetric: immutableProvenance,

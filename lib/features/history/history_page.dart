@@ -298,7 +298,7 @@ class HistoryPage extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: PremiumDesignTokens.spaceSm),
-                      _WeightTrendChart(
+                      WeightTrendChart(
                         weights: recent.map((row) => row.weight).toList(),
                         variability: analysis.variabilityKg,
                         semanticsLabel: context.strings.text(
@@ -389,8 +389,9 @@ String _confidenceLabel(ProgressConfidence confidence, bool arabic) =>
       ProgressConfidence.high => arabic ? 'مرتفعة' : 'high',
     };
 
-class _WeightTrendChart extends StatefulWidget {
-  const _WeightTrendChart({
+class WeightTrendChart extends StatefulWidget {
+  const WeightTrendChart({
+    super.key,
     required this.weights,
     required this.variability,
     required this.semanticsLabel,
@@ -401,10 +402,10 @@ class _WeightTrendChart extends StatefulWidget {
   final String semanticsLabel;
 
   @override
-  State<_WeightTrendChart> createState() => _WeightTrendChartState();
+  State<WeightTrendChart> createState() => _WeightTrendChartState();
 }
 
-class _WeightTrendChartState extends State<_WeightTrendChart> {
+class _WeightTrendChartState extends State<WeightTrendChart> {
   bool showRaw = false;
 
   @override

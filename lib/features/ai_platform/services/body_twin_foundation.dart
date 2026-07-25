@@ -24,7 +24,8 @@ final class BodyTwinFoundation {
       }
 
       final current = latest[observation.metricKey];
-      if (current == null || observation.observedAt.isAfter(current.observedAt)) {
+      if (current == null ||
+          observation.observedAt.isAfter(current.observedAt)) {
         latest[observation.metricKey] = observation;
         continue;
       }

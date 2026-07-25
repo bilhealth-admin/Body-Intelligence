@@ -8,6 +8,7 @@ import '../../app/localization/app_localizations.dart';
 import '../../app/services/app_settings_provider.dart';
 import '../../app/services/data_export_service.dart';
 import '../../app/services/local_data_lifecycle_service.dart';
+import '../../app/services/local_recovery_service.dart';
 import '../../app/services/external_capabilities.dart';
 import '../../core/units/measurement_units.dart';
 import '../../data/database/database_provider.dart';
@@ -115,7 +116,7 @@ class SettingsPage extends ConsumerWidget {
         title: Text(context.strings.text('Reset all local data?')),
         content: Text(
           context.strings.text(
-            'This permanently removes your profile, goals, logs, meals, custom foods, and settings.',
+            'A validated local recovery snapshot will replace any older snapshot before your profile, goals, logs, meals, custom foods, and settings are reset.',
           ),
         ),
         actions: [
@@ -176,7 +177,7 @@ class SettingsPage extends ConsumerWidget {
 
     try {
       final database = ref.read(databaseProvider);
-      await LocalDataLifecycleService(database).clearAll();
+      await LocalRecoveryService(database).resetWithRecovery();
       await SeedData.seedStarterCatalog(ref.read(foodRepositoryProvider));
 
       ref.invalidate(userProfileProvider);
@@ -194,7 +195,7 @@ class SettingsPage extends ConsumerWidget {
       await Future<void>.delayed(Duration.zero);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted) {
-          context.go('/onboarding');
+          context.go('/account-gateway');
         }
       });
     } catch (_) {

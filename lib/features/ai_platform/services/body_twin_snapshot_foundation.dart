@@ -28,8 +28,6 @@ final class BodyTwinSnapshotFoundation {
       observations: observations,
       requiredMetricKeys: requiredMetricKeys,
     );
-    return BodyTwinFoundationResult.fromGate(
-      gate.evaluateProjected(snapshot),
-    );
+    return BodyTwinFoundationResult.fromGate(gate.evaluateProjected(snapshot));
   }
 }

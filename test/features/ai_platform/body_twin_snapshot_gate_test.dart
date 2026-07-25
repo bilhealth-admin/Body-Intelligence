@@ -29,7 +29,10 @@ void main() {
     expect(result.canProceed, isTrue);
     expect(result.isRejected, isFalse);
     expect(identical(result.acceptedSnapshot, snapshot), isTrue);
-    expect(result.acceptedProvenanceByMetric!['weight_kg']!.source, 'weight_log');
+    expect(
+      result.acceptedProvenanceByMetric!['weight_kg']!.source,
+      'weight_log',
+    );
     expect(result.integrity.isValid, isTrue);
   });
 

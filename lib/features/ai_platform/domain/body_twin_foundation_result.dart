@@ -12,10 +12,7 @@ enum BodyTwinFoundationStatus { accepted, rejected }
 /// [acceptedSnapshot] only when the established validator and gate accepted the
 /// same deterministic envelope.
 final class BodyTwinFoundationResult {
-  BodyTwinFoundationResult._({
-    required this.gateResult,
-    required this.status,
-  });
+  BodyTwinFoundationResult._({required this.gateResult, required this.status});
 
   factory BodyTwinFoundationResult.fromGate(
     BodyTwinSnapshotGateResult gateResult,

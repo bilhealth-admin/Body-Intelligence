@@ -3,7 +3,7 @@
 ## Authoritative execution baseline
 
 - Branch: `phase-3-product-excellence`
-- Baseline HEAD: `8f67e0effa480e9af0769ec546973ef0644a32f8`
+- Baseline HEAD: `9bc3b524a476280209e324637c9ac78de14daa44`
 
 ## Closed delivery streams
 
@@ -34,3 +34,12 @@ When the next phase is authorized:
 2. Define its testable exit criteria.
 3. Deliver it through the Package Delivery Contract.
 4. Update this document only after Product Owner verification and commit.
+
+## BIL-GLOBAL-001-FINAL verification candidate
+
+- Branch: `phase-3-product-excellence`
+- Parent HEAD: `9bc3b524a476280209e324637c9ac78de14daa44`
+- Status: **Awaiting Product Owner VERIFY; not yet adopted or committed.**
+- Engineering scope: final product composition, wearable payload preservation, native BLE session closure, embedded Arabic reporting, plugin runtime proof, commerce capability honesty, and evidence synchronization.
+- External gates: iOS/macOS build and representative device/provider certification remain explicitly separate.
+- Samsung wearable integration is not present in the production catalog and remains `Not Implemented`; no readiness claim is made.

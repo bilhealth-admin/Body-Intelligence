@@ -19,6 +19,7 @@ void main() {
 
           await tester.pumpWidget(
             MaterialApp(
+              theme: ThemeData.dark(),
               locale: locale,
               supportedLocales: AppLocalizations.supportedLocales,
               localizationsDelegates: const [
@@ -60,7 +61,10 @@ void main() {
           );
 
           final title = tester.widget<Text>(titleFinder);
-          expect(title.style?.color, const Color(0xFFF3F7FA));
+          expect(
+            title.style?.color,
+            Theme.of(cardContext).colorScheme.onSurface,
+          );
 
           final reasonFinder = find.text(
             'Meal evidence is incomplete for today.',
@@ -68,7 +72,10 @@ void main() {
           expect(reasonFinder, findsOneWidget);
 
           final reason = tester.widget<Text>(reasonFinder);
-          expect(reason.style?.color, const Color(0xFFD6E1E8));
+          expect(
+            reason.style?.color,
+            Theme.of(cardContext).colorScheme.onSurface,
+          );
 
           expect(find.byType(DailyReturnCard), findsOneWidget);
         },

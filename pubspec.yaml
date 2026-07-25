@@ -43,11 +43,15 @@ dependencies:
   path_provider: ^2.1.6
   path: ^1.9.1
   shared_preferences: ^2.5.5
+  crypto: ^3.0.6
+  archive: ^4.0.7
+  pdf: ^3.11.3
   supabase_flutter: ^2.16.0
   share_plus: ^13.2.1
   flutter_localizations:
     sdk: flutter
   country_picker: ^2.0.28
+  flutter_timezone: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -84,6 +88,11 @@ flutter:
     - assets/images/v10_final/bil_hologram_transparent.png
     - assets/images/onboarding/bil_body_hologram_v8.webp
     - assets/images/onboarding/bil_body_hologram.webp
+    - assets/fonts/NotoNaskhArabic-Regular.ttf
+    - assets/fonts/NotoNaskhArabic-Bold.ttf
+    - assets/fonts/OFL.txt
+    - lib/l10n/app_en.arb
+    - lib/l10n/app_ar.arb
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -140,7 +149,6 @@ flutter_launcher_icons:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-
 
 
 

@@ -4,10 +4,12 @@ class DashboardTopBar extends StatelessWidget {
   const DashboardTopBar({
     super.key,
     required this.arabic,
+    required this.displayName,
     required this.onProfile,
   });
 
   final bool arabic;
+  final String? displayName;
   final VoidCallback onProfile;
 
   @override
@@ -23,11 +25,25 @@ class DashboardTopBar extends StatelessWidget {
             children: [
               const DashboardBrand(),
               const SizedBox(height: 12),
-              const SizedBox(height: 12),
+              Text(
+                displayName == null
+                    ? (arabic ? 'أهلًا بك' : 'Welcome')
+                    : (arabic
+                          ? 'أهلًا، $displayName'
+                          : 'Welcome, $displayName'),
+                key: const Key('dashboard-greeting'),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 6),
               Text(
                 date,
-                style: const TextStyle(
-                  color: Color(0xFFAEBBC7),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
@@ -50,13 +66,14 @@ class DashboardBrand extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    final scheme = Theme.of(context).colorScheme;
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'BIL®',
           style: TextStyle(
-            color: Color(0xFFE9EFF4),
+            color: scheme.onSurface,
             fontSize: 56,
             height: .84,
             fontWeight: FontWeight.w900,
@@ -68,7 +85,7 @@ class DashboardBrand extends StatelessWidget {
         Text(
           'BODY INTELLIGENCE LOG',
           style: TextStyle(
-            color: Color(0xFFC2CDD7),
+            color: scheme.onSurfaceVariant,
             fontSize: 8,
             fontWeight: FontWeight.w700,
             letterSpacing: 3.0,

@@ -3,7 +3,7 @@
 ## Authoritative execution baseline
 
 - Branch: `phase-3-product-excellence`
-- Baseline HEAD: `8f67e0effa480e9af0769ec546973ef0644a32f8`
+- Baseline HEAD: `9bc3b524a476280209e324637c9ac78de14daa44`
 - Documentation synchronized by: `BIL-DOC-001`
 
 This document is the authoritative current-state reference. Package-level parent HEAD values belong only in archived package records and must not be interpreted as the active project baseline.
@@ -32,3 +32,12 @@ All closed phases above are protected as Non-Regression. They must not be reimpl
 ## Official next boundary
 
 No AI, Intelligence Reality, or Cloud Core package is pending. The next project phase is the first post-Cloud stage authorized by the Product Owner from the governing roadmap. It must begin from the authoritative baseline recorded above and must not recreate closed work.
+
+## BIL-GLOBAL-001-FINAL verification candidate
+
+- Branch: `phase-3-product-excellence`
+- Parent HEAD: `9bc3b524a476280209e324637c9ac78de14daa44`
+- Status: **Awaiting Product Owner VERIFY; not yet adopted or committed.**
+- Engineering scope: final product composition, wearable payload preservation, native BLE session closure, embedded Arabic reporting, plugin runtime proof, commerce capability honesty, and evidence synchronization.
+- External gates: iOS/macOS build and representative device/provider certification remain explicitly separate.
+- Samsung wearable integration is not present in the production catalog and remains `Not Implemented`; no readiness claim is made.
