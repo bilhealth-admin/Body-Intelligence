@@ -51,6 +51,7 @@ class FoodRepository implements UnifiedFoodRepository {
     double? potassium,
     double? calcium,
     double? magnesium,
+    double? phosphorus,
     double iron = 0,
     double vitaminC = 0,
   }) async {
@@ -68,6 +69,7 @@ class FoodRepository implements UnifiedFoodRepository {
         potassium ?? 0,
         calcium ?? 0,
         magnesium ?? 0,
+        phosphorus ?? 0,
         iron,
         vitaminC,
       ],
@@ -94,6 +96,7 @@ class FoodRepository implements UnifiedFoodRepository {
             calcium: Value(calcium ?? 0),
             iron: Value(iron),
             magnesium: Value(magnesium ?? 0),
+            phosphorus: Value(phosphorus ?? 0),
             nutrientEvidenceMask: Value(
               NutrientEvidenceMask.fromValues(
                 fiber: fiber,
@@ -102,6 +105,7 @@ class FoodRepository implements UnifiedFoodRepository {
                 potassium: potassium,
                 calcium: calcium,
                 magnesium: magnesium,
+                phosphorus: phosphorus,
               ),
             ),
             vitaminC: Value(vitaminC),
@@ -168,6 +172,7 @@ class FoodRepository implements UnifiedFoodRepository {
     required double potassium,
     required double calcium,
     required double magnesium,
+    double? phosphorus,
   }) async {
     final food = await (_database.select(
       _database.foods,
@@ -183,6 +188,7 @@ class FoodRepository implements UnifiedFoodRepository {
         potassium: Value(potassium),
         calcium: Value(calcium),
         magnesium: Value(magnesium),
+        phosphorus: Value(phosphorus ?? 0),
         nutrientEvidenceMask: Value(
           NutrientEvidenceMask.fromValues(
             fiber: fiber,
@@ -191,6 +197,7 @@ class FoodRepository implements UnifiedFoodRepository {
             potassium: potassium,
             calcium: calcium,
             magnesium: magnesium,
+            phosphorus: phosphorus,
           ),
         ),
         source: Value(source),
@@ -218,6 +225,7 @@ class FoodRepository implements UnifiedFoodRepository {
     double? potassium,
     double? calcium,
     double? magnesium,
+    double? phosphorus,
   }) async {
     _validateFood(
       name: name,
@@ -233,6 +241,7 @@ class FoodRepository implements UnifiedFoodRepository {
         potassium ?? 0,
         calcium ?? 0,
         magnesium ?? 0,
+        phosphorus ?? 0,
       ],
     );
     final existing = await _customFood(id);
@@ -258,6 +267,7 @@ class FoodRepository implements UnifiedFoodRepository {
         potassium: Value(potassium ?? 0),
         calcium: Value(calcium ?? 0),
         magnesium: Value(magnesium ?? 0),
+        phosphorus: Value(phosphorus ?? 0),
         nutrientEvidenceMask: Value(
           NutrientEvidenceMask.fromValues(
             fiber: fiber,
@@ -266,6 +276,7 @@ class FoodRepository implements UnifiedFoodRepository {
             potassium: potassium,
             calcium: calcium,
             magnesium: magnesium,
+            phosphorus: phosphorus,
           ),
         ),
         updatedAt: Value(DateTime.now()),

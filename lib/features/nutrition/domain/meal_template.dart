@@ -34,6 +34,7 @@ class MealTemplateItem {
   final double potassium;
   final double calcium;
   final double magnesium;
+  final double phosphorus;
   final double sugar;
   final int nutrientEvidenceMask;
 
@@ -50,6 +51,7 @@ class MealTemplateItem {
     required this.potassium,
     required this.calcium,
     required this.magnesium,
+    this.phosphorus = 0,
     required this.sugar,
     required this.nutrientEvidenceMask,
   });

@@ -15,6 +15,8 @@ import '../../../engine/plan_engine.dart';
 import '../../../engine/progress_analysis.dart';
 import '../../../engine/what_changed_engine.dart';
 import '../../../engine/recovery_engine.dart';
+import '../../ai_platform/domain/personal_health_ai.dart';
+import '../../ai_platform/services/personal_health_ai_engine.dart';
 import '../../../data/database/date_keys.dart';
 import '../../../data/database/nutrient_evidence.dart';
 import '../../../engine/nutrient_evidence_engine.dart';
@@ -36,6 +38,7 @@ import 'dashboard_meals_timeline.dart';
 import 'nutrient_evidence_status_text.dart';
 import 'daily_return_card.dart';
 import 'premium_dashboard_benchmark.dart';
+import 'personal_health_ai_panel.dart';
 
 class DashboardGrid extends ConsumerWidget {
   const DashboardGrid({super.key});
@@ -209,6 +212,10 @@ class DashboardGrid extends ConsumerWidget {
     );
     final water = waterRows.fold<int>(0, (sum, item) => sum + item.amountMl);
     final currentWeight = weights.firstOrNull?.weight ?? profile.currentWeight;
+    final heightMeters = profile.height / 100;
+    final bmi = heightMeters <= 0
+        ? null
+        : currentWeight / (heightMeters * heightMeters);
     final goalType = profile.targetWeight < currentWeight
         ? 'lose'
         : profile.targetWeight > currentWeight
@@ -329,11 +336,15 @@ class DashboardGrid extends ConsumerWidget {
       nutritionDays: mealDays.length,
       observationDays: observedDays.length,
     );
-    final progressDenominator = (profile.currentWeight - profile.targetWeight)
+    final goalBaselineWeight =
+        weights.lastOrNull?.weight ?? profile.currentWeight;
+    final progressDenominator = (goalBaselineWeight - profile.targetWeight)
         .abs();
     final progress = progressDenominator == 0
         ? 1.0
-        : ((profile.currentWeight - currentWeight).abs() / progressDenominator)
+        : (1 -
+                  ((currentWeight - profile.targetWeight).abs() /
+                      progressDenominator))
               .clamp(0.0, 1.0);
     final goalDate = intelligence.goalDate;
     final weekCutoff = dayKeyFor(
@@ -517,6 +528,42 @@ class DashboardGrid extends ConsumerWidget {
       );
     }
 
+    final calorieByDay = <DateTime, double?>{};
+    for (final meal in allMeals) {
+      final day = DateTime(
+        meal.meal.date.year,
+        meal.meal.date.month,
+        meal.meal.date.day,
+      );
+      final total = meal.items.fold<double>(
+        0,
+        (sum, item) => sum + item.calories,
+      );
+      calorieByDay.update(
+        day,
+        (value) => (value ?? 0) + total,
+        ifAbsent: () => total,
+      );
+    }
+    final healthAi = const PersonalHealthAiEngine().evaluate(
+      asOf: DateTime.now(),
+      weights: [
+        for (final weight in weights)
+          WeightObservation(
+            at: weight.date,
+            kg: weight.weight,
+            comparability: weight.measurementContext == 'sameConditions'
+                ? 1
+                : 0.65,
+          ),
+      ],
+      age: profile.age,
+      heightCm: profile.height,
+      gender: profile.gender,
+      activityLevel: profile.activityLevel,
+      dailyCalories: calorieByDay,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -630,6 +677,13 @@ class DashboardGrid extends ConsumerWidget {
           ],
         ),
         const SizedBox(height: PremiumDesignTokens.spaceMd),
+        PersonalHealthAiPanel(
+          snapshot: healthAi,
+          arabic: arabic,
+          todayHasMeals: meals.isNotEmpty,
+          decisionCount: memoriesAsync.value?.length ?? 0,
+        ),
+        const SizedBox(height: PremiumDesignTokens.spaceMd),
         Visibility(
           visible: false,
           maintainState: false,
@@ -665,7 +719,7 @@ class DashboardGrid extends ConsumerWidget {
         ),
         const SizedBox(height: PremiumDesignTokens.spaceMd),
         Visibility(
-          visible: false,
+          visible: true,
           maintainState: false,
           child: PremiumSurface(
             padding: PremiumDesignTokens.cardPaddingLarge,
@@ -691,10 +745,10 @@ class DashboardGrid extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               _DashboardSectionHeading(
-                                title: tr('Today at a glance', 'ملخص اليوم'),
+                                title: tr('Today progress', 'تقدم اليوم'),
                                 subtitle: tr(
-                                  'The few numbers that matter right now.',
-                                  'أهم الأرقام التي تحتاجها الآن فقط.',
+                                  'Recorded so far against your current plan. Missing observations stay unknown.',
+                                  'المسجل حتى الآن مقابل خطتك الحالية. تبقى الملاحظات الناقصة غير معروفة.',
                                 ),
                               ),
                             ],
@@ -727,7 +781,9 @@ class DashboardGrid extends ConsumerWidget {
                           child: _CompactMetricTile(
                             icon: Icons.local_fire_department_outlined,
                             label: tr('Calories', 'السعرات'),
-                            value: calories.round().toString(),
+                            value: meals.isEmpty
+                                ? tr('Unknown', 'غير معروف')
+                                : calories.round().toString(),
                             unit: '/ ${effectiveTargets.calories}',
                             progress: effectiveTargets.calories <= 0
                                 ? 0
@@ -743,7 +799,9 @@ class DashboardGrid extends ConsumerWidget {
                           child: _CompactMetricTile(
                             icon: Icons.fitness_center_outlined,
                             label: tr('Protein', 'البروتين'),
-                            value: protein.round().toString(),
+                            value: meals.isEmpty
+                                ? tr('Unknown', 'غير معروف')
+                                : protein.round().toString(),
                             unit: '/ ${effectiveTargets.protein} g',
                             progress: effectiveTargets.protein <= 0
                                 ? 0
@@ -759,7 +817,9 @@ class DashboardGrid extends ConsumerWidget {
                           child: _CompactMetricTile(
                             icon: Icons.grain_outlined,
                             label: tr('Carbs', 'الكربوهيدرات'),
-                            value: carbs.round().toString(),
+                            value: meals.isEmpty
+                                ? tr('Unknown', 'غير معروف')
+                                : carbs.round().toString(),
                             unit: '/ ${effectiveTargets.carbs} g',
                             progress: effectiveTargets.carbs <= 0
                                 ? 0
@@ -775,7 +835,9 @@ class DashboardGrid extends ConsumerWidget {
                           child: _CompactMetricTile(
                             icon: Icons.opacity_outlined,
                             label: tr('Fat', 'الدهون'),
-                            value: fats.round().toString(),
+                            value: meals.isEmpty
+                                ? tr('Unknown', 'غير معروف')
+                                : fats.round().toString(),
                             unit: '/ ${effectiveTargets.fats} g',
                             progress: effectiveTargets.fats <= 0
                                 ? 0
@@ -784,6 +846,70 @@ class DashboardGrid extends ConsumerWidget {
                                     1.0,
                                   ),
                             accent: Colors.purple,
+                          ),
+                        ),
+                        SizedBox(
+                          width: tileWidth,
+                          child: _CompactMetricTile(
+                            icon: Icons.water_drop_outlined,
+                            label: tr('Water', 'الماء'),
+                            value: waterRows.isEmpty
+                                ? tr('Unknown', 'غير معروف')
+                                : water.toString(),
+                            unit: '/ ${effectiveTargets.water} ml',
+                            progress:
+                                waterRows.isEmpty || effectiveTargets.water <= 0
+                                ? 0
+                                : (water / effectiveTargets.water).clamp(
+                                    0.0,
+                                    1.0,
+                                  ),
+                            accent: Colors.cyan,
+                          ),
+                        ),
+                        SizedBox(
+                          width: tileWidth,
+                          child: _CompactMetricTile(
+                            icon: Icons.bolt_outlined,
+                            label: tr('TDEE', 'الاحتياج اليومي'),
+                            value: bil.tdee.round().toString(),
+                            unit: 'kcal',
+                            accent: Colors.deepOrangeAccent,
+                          ),
+                        ),
+                        if (bmi != null)
+                          SizedBox(
+                            width: tileWidth,
+                            child: _CompactMetricTile(
+                              icon: Icons.accessibility_new_rounded,
+                              label: tr('BMI', 'مؤشر كتلة الجسم'),
+                              value: bmi.toStringAsFixed(1),
+                              unit: '',
+                              accent: Colors.indigoAccent,
+                            ),
+                          ),
+                        SizedBox(
+                          width: tileWidth,
+                          child: _CompactMetricTile(
+                            icon: Icons.person_outline_rounded,
+                            label: tr('Current weight', 'الوزن الحالي'),
+                            value: UnitConverter.weightFromKg(
+                              profile.currentWeight,
+                              system,
+                            ).toStringAsFixed(1),
+                            unit: UnitConverter.weightUnit(system),
+                            accent: Colors.lightBlueAccent,
+                          ),
+                        ),
+                        SizedBox(
+                          width: tileWidth,
+                          child: _CompactMetricTile(
+                            icon: Icons.flag_outlined,
+                            label: tr('Goal progress', 'التقدم نحو الهدف'),
+                            value: '${(progress * 100).round()}%',
+                            unit: '',
+                            progress: progress,
+                            accent: Colors.tealAccent,
                           ),
                         ),
                       ],
@@ -816,6 +942,20 @@ class DashboardGrid extends ConsumerWidget {
                 usualBreakfast == null && recentBreakfast.isNotEmpty,
             onRepeatRecentBreakfast: repeatRecentBreakfast,
           ),
+        ),
+        const SizedBox(height: PremiumDesignTokens.spaceMd),
+        _BodyProfileSnapshot(
+          arabic: arabic,
+          weight:
+              '${UnitConverter.weightFromKg(currentWeight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}',
+          height: '${profile.height.toStringAsFixed(1)} cm',
+          target:
+              '${UnitConverter.weightFromKg(profile.targetWeight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}',
+          calorieTarget: '${effectiveTargets.calories} kcal',
+          proteinTarget: '${effectiveTargets.protein} g',
+          waterTarget: '${effectiveTargets.water} ml',
+          onEditProfile: () => context.go('/profile-settings'),
+          onEditPlan: () => context.go('/plan'),
         ),
         const SizedBox(height: PremiumDesignTokens.spaceMd),
         PremiumSurface(
@@ -1073,6 +1213,148 @@ class DashboardGrid extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _BodyProfileSnapshot extends StatelessWidget {
+  const _BodyProfileSnapshot({
+    required this.arabic,
+    required this.weight,
+    required this.height,
+    required this.target,
+    required this.calorieTarget,
+    required this.proteinTarget,
+    required this.waterTarget,
+    required this.onEditProfile,
+    required this.onEditPlan,
+  });
+
+  final bool arabic;
+  final String weight;
+  final String height;
+  final String target;
+  final String calorieTarget;
+  final String proteinTarget;
+  final String waterTarget;
+  final VoidCallback onEditProfile;
+  final VoidCallback onEditPlan;
+
+  String tr(String en, String ar) => arabic ? ar : en;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final values = [
+      (tr('Current weight', 'الوزن الحالي'), weight),
+      (tr('Height', 'الطول'), height),
+      (tr('Target weight', 'الوزن المستهدف'), target),
+      (tr('Daily energy plan', 'خطة الطاقة اليومية'), calorieTarget),
+      (tr('Protein target', 'هدف البروتين'), proteinTarget),
+      (tr('Water target', 'هدف الماء'), waterTarget),
+    ];
+
+    return PremiumSurface(
+      key: const Key('dashboard-body-profile'),
+      padding: PremiumDesignTokens.cardPaddingLarge,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.person_outline_rounded, color: scheme.primary),
+              const SizedBox(width: PremiumDesignTokens.spaceSm),
+              Expanded(
+                child: _DashboardSectionHeading(
+                  title: tr('Body profile & plan', 'ملف الجسم والخطة'),
+                  subtitle: tr(
+                    'Your current local baseline and active plan.',
+                    'خط أساسك المحلي الحالي وخطتك النشطة.',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceMd),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = constraints.maxWidth >= 900
+                  ? 3
+                  : constraints.maxWidth >= 520
+                  ? 2
+                  : 1;
+              final gap = PremiumDesignTokens.spaceSm;
+              final width =
+                  (constraints.maxWidth - gap * (columns - 1)) / columns;
+              return Wrap(
+                spacing: gap,
+                runSpacing: gap,
+                children: values
+                    .map(
+                      (item) => SizedBox(
+                        width: width,
+                        child: Container(
+                          padding: const EdgeInsets.all(
+                            PremiumDesignTokens.spaceSm,
+                          ),
+                          decoration: BoxDecoration(
+                            color: scheme.surfaceContainerHighest.withValues(
+                              alpha: .46,
+                            ),
+                            borderRadius: BorderRadius.circular(
+                              PremiumDesignTokens.radiusMd,
+                            ),
+                            border: Border.all(
+                              color: scheme.outlineVariant.withValues(
+                                alpha: .72,
+                              ),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.$1,
+                                style: Theme.of(context).textTheme.labelMedium
+                                    ?.copyWith(
+                                      color: scheme.onSurfaceVariant,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                item.$2,
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.w900),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              );
+            },
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceMd),
+          Wrap(
+            spacing: PremiumDesignTokens.spaceSm,
+            runSpacing: PremiumDesignTokens.spaceSm,
+            children: [
+              FilledButton.tonalIcon(
+                onPressed: onEditProfile,
+                icon: const Icon(Icons.edit_outlined),
+                label: Text(tr('Edit profile', 'تعديل الملف')),
+              ),
+              OutlinedButton.icon(
+                onPressed: onEditPlan,
+                icon: const Icon(Icons.tune_rounded),
+                label: Text(tr('Edit plan', 'تعديل الخطة')),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1386,17 +1668,20 @@ class _InformationalNutrientRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (evidence.total == null) return _UnavailableNutrientRow(label: label);
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.info_outline),
-      title: Text(label),
-      subtitle: evidence.state == NutrientEvidenceState.partial
-          ? NutrientEvidenceStatusText(
-              state: evidence.state,
-              informational: true,
-            )
-          : Text(context.strings.text('No target; informational only')),
-      trailing: Text('${evidence.total!.toStringAsFixed(0)} $unit'),
+    return Material(
+      type: MaterialType.transparency,
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: const Icon(Icons.info_outline),
+        title: Text(label),
+        subtitle: evidence.state == NutrientEvidenceState.partial
+            ? NutrientEvidenceStatusText(
+                state: evidence.state,
+                informational: true,
+              )
+            : Text(context.strings.text('No target; informational only')),
+        trailing: Text('${evidence.total!.toStringAsFixed(0)} $unit'),
+      ),
     );
   }
 }
@@ -1407,14 +1692,17 @@ class _UnavailableNutrientRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.help_outline),
-      title: Text(label),
-      subtitle: const NutrientEvidenceStatusText(
-        state: NutrientEvidenceState.unavailable,
+    return Material(
+      type: MaterialType.transparency,
+      child: ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: const Icon(Icons.help_outline),
+        title: Text(label),
+        subtitle: const NutrientEvidenceStatusText(
+          state: NutrientEvidenceState.unavailable,
+        ),
+        trailing: const Text('—'),
       ),
-      trailing: const Text('—'),
     );
   }
 }

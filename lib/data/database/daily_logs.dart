@@ -33,6 +33,14 @@ class DailyLogs extends Table {
 
   TextColumn get exerciseNotes => text().nullable()();
 
+  TextColumn get lifecycleState => text().nullable()();
+
+  DateTimeColumn get closedAt => dateTime().nullable()();
+
+  RealColumn get finalFiber => real().nullable()();
+
+  IntColumn get finalNutrientEvidenceMask => integer().nullable()();
+
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();

@@ -55,6 +55,7 @@ class MealTemplateEngine {
             potassium: item.potassium,
             calcium: item.calcium,
             magnesium: item.magnesium,
+            phosphorus: item.phosphorus,
             sugar: item.sugar,
             nutrientEvidenceMask: item.nutrientEvidenceMask,
           );
@@ -99,6 +100,7 @@ class MealTemplateEngine {
         item.potassium,
         item.calcium,
         item.magnesium,
+        item.phosphorus,
         item.sugar,
       ];
       if (nutrients.any((value) => !value.isFinite || value < 0)) {

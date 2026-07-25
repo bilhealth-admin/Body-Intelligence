@@ -114,38 +114,33 @@ class DailyReturnCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: PremiumDesignTokens.spaceMd),
-                _LabeledInsight(
-                  label: context.strings.text('What changed'),
-                  value: changedSummary,
+                _InsightGrid(
+                  insights: [
+                    (context.strings.text('What changed'), changedSummary),
+                    (
+                      context.strings.text('Important missing evidence'),
+                      missingEvidence,
+                    ),
+                    if (report.hasPrimaryAction) ...[
+                      (
+                        context.strings.text('Why this action appears'),
+                        actionReason,
+                      ),
+                      (context.strings.text('Evidence used'), changedSummary),
+                      (
+                        context.strings.text('Evidence missing'),
+                        missingEvidence,
+                      ),
+                      (
+                        context.strings.text('Confidence'),
+                        _confidenceLabel(context),
+                      ),
+                    ],
+                  ],
                 ),
-                const SizedBox(height: PremiumDesignTokens.spaceSm),
-                _LabeledInsight(
-                  label: context.strings.text('Important missing evidence'),
-                  value: missingEvidence,
-                ),
-                const SizedBox(height: PremiumDesignTokens.spaceLg),
                 if (report.hasPrimaryAction) ...[
-                  _LabeledInsight(
-                    label: context.strings.text('Why this action appears'),
-                    value: actionReason,
-                  ),
-                  const SizedBox(height: PremiumDesignTokens.spaceSm),
-                  _LabeledInsight(
-                    label: context.strings.text('Evidence used'),
-                    value: changedSummary,
-                  ),
-                  const SizedBox(height: PremiumDesignTokens.spaceSm),
-                  _LabeledInsight(
-                    label: context.strings.text('Evidence missing'),
-                    value: missingEvidence,
-                  ),
-                  const SizedBox(height: PremiumDesignTokens.spaceSm),
-                  _LabeledInsight(
-                    label: context.strings.text('Confidence'),
-                    value: _confidenceLabel(context),
-                  ),
                   if (recommendationTimeHorizon != null) ...[
-                    const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
+                    const SizedBox(height: PremiumDesignTokens.spaceSm),
                     _LabeledInsight(
                       label: context.strings.text('Time horizon'),
                       value: recommendationTimeHorizon!,
@@ -255,6 +250,52 @@ class _LabeledInsight extends StatelessWidget {
       ),
     ],
   );
+}
+
+class _InsightGrid extends StatelessWidget {
+  const _InsightGrid({required this.insights});
+
+  final List<(String, String)> insights;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth >= 1050
+            ? 3
+            : constraints.maxWidth >= 620
+            ? 2
+            : 1;
+        final gap = PremiumDesignTokens.spaceSm;
+        final width = (constraints.maxWidth - gap * (columns - 1)) / columns;
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: [
+            for (final insight in insights)
+              SizedBox(
+                width: width,
+                child: Container(
+                  constraints: const BoxConstraints(minHeight: 108),
+                  padding: const EdgeInsets.all(PremiumDesignTokens.spaceSm),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest
+                        .withValues(alpha: .36),
+                    borderRadius: BorderRadius.circular(
+                      PremiumDesignTokens.radiusMd,
+                    ),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                    ),
+                  ),
+                  child: _LabeledInsight(label: insight.$1, value: insight.$2),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 class _Status extends StatelessWidget {

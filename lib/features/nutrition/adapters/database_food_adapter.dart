@@ -54,6 +54,11 @@ abstract class BaseDatabaseFoodAdapter implements DatabaseFoodAdapter {
           FoodNutrient.magnesium,
           food.magnesium,
         ),
+        FoodNutrient.phosphorus: _optional(
+          food,
+          FoodNutrient.phosphorus,
+          food.phosphorus,
+        ),
         FoodNutrient.iron: NutrientAmount.known(food.iron),
         FoodNutrient.vitaminC: NutrientAmount.known(food.vitaminC),
       },

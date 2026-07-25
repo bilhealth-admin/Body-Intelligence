@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.body_intelligence_log"
+    namespace = "com.kadem.bil"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.body_intelligence_log"
+        applicationId = "com.kadem.bil"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         // Health Connect 1.1.0 requires Android 8.0 (API 26).

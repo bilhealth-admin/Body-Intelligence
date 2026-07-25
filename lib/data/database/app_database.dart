@@ -47,7 +47,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -144,6 +144,20 @@ class AppDatabase extends _$AppDatabase {
             (CASE WHEN magnesium != 0 THEN 16 ELSE 0 END) |
             (CASE WHEN sugar != 0 THEN 32 ELSE 0 END)
         ''');
+      }
+      if (from < 16) {
+        await _addColumns('daily_logs', <String>[
+          "lifecycle_state TEXT NOT NULL DEFAULT 'open'",
+          'closed_at INTEGER',
+          'final_fiber REAL',
+          'final_nutrient_evidence_mask INTEGER NOT NULL DEFAULT 0',
+        ]);
+        await _addColumns('foods', <String>[
+          'phosphorus REAL NOT NULL DEFAULT 0',
+        ]);
+        await _addColumns('meal_items', <String>[
+          'phosphorus REAL NOT NULL DEFAULT 0',
+        ]);
       }
     },
   );

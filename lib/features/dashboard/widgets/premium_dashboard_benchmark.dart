@@ -176,6 +176,17 @@ class PremiumDashboardBenchmark extends StatelessWidget {
           child: dailyIntelligence,
         ),
         const SizedBox(height: PremiumDesignTokens.spaceMd),
+        Semantics(
+          header: true,
+          child: Text(
+            tr('Key insights today', 'أهم رؤى اليوم'),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: contentColor,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+        const SizedBox(height: PremiumDesignTokens.spaceSm),
         LayoutBuilder(
           builder: (context, constraints) {
             final columns = constraints.maxWidth >= 1080
@@ -458,7 +469,10 @@ class _LoggingCompleteness extends StatelessWidget {
         semanticContainer: false,
         padding: EdgeInsets.zero,
         child: Container(
-          padding: PremiumDesignTokens.cardPaddingLarge,
+          padding: const EdgeInsets.symmetric(
+            horizontal: PremiumDesignTokens.spaceMd,
+            vertical: PremiumDesignTokens.spaceSm,
+          ),
           decoration: BoxDecoration(
             borderRadius: PremiumDesignTokens.cardRadius,
             gradient: LinearGradient(
@@ -470,49 +484,46 @@ class _LoggingCompleteness extends StatelessWidget {
               color: scheme.outlineVariant.withValues(alpha: dark ? .72 : .82),
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          child: Wrap(
+            spacing: PremiumDesignTokens.spaceMd,
+            runSpacing: PremiumDesignTokens.spaceXs,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              _Eyebrow(
-                label: arabic ? 'اكتمال التسجيل' : 'LOGGING COMPLETENESS',
+              SizedBox(
+                width: 190,
+                child: _Eyebrow(
+                  label: arabic ? 'اكتمال التسجيل' : 'LOGGING COMPLETENESS',
+                ),
               ),
-              const SizedBox(height: PremiumDesignTokens.spaceSm),
-              Text(
-                recorded == items.length
-                    ? (arabic
-                          ? 'أدلة اليوم الأساسية موجودة.'
-                          : 'Today’s core observations are present.')
-                    : (arabic
-                          ? 'كل ملاحظة إضافية تحسّن التفسير، دون ضغط لإكمال اليوم.'
-                          : 'Each additional observation improves interpretation—without pressure to complete the day.'),
-              ),
-              const SizedBox(height: PremiumDesignTokens.spaceMd),
-              Wrap(
-                spacing: PremiumDesignTokens.spaceSm,
-                runSpacing: PremiumDesignTokens.spaceSm,
-                children: [
-                  for (final item in items)
-                    Chip(
-                      avatar: Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: item.recorded
-                              ? scheme.tertiary
-                              : Colors.transparent,
-                          border: Border.all(
-                            color: item.recorded
-                                ? scheme.tertiary
-                                : scheme.onSurfaceVariant,
-                            width: 1.5,
-                          ),
-                        ),
+              for (final item in items)
+                Chip(
+                  visualDensity: VisualDensity.compact,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  avatar: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: item.recorded
+                          ? scheme.tertiary
+                          : Colors.transparent,
+                      border: Border.all(
+                        color: item.recorded
+                            ? scheme.tertiary
+                            : scheme.onSurfaceVariant,
+                        width: 1.5,
                       ),
-                      label: Text(item.label),
-                      side: BorderSide(color: scheme.outlineVariant),
                     ),
-                ],
+                  ),
+                  label: Text(item.label),
+                  side: BorderSide(color: scheme.outlineVariant),
+                ),
+              Text(
+                '$recorded/${items.length}',
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ],
           ),

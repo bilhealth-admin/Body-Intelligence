@@ -16,6 +16,38 @@ class DashboardTopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final date = MaterialLocalizations.of(context).formatMediumDate(now);
+    final unifiedDesktopNavigation = MediaQuery.sizeOf(context).width >= 900;
+
+    final greeting = Text(
+      displayName == null
+          ? (arabic ? 'أهلًا بك' : 'Welcome')
+          : (arabic ? 'أهلًا، $displayName' : 'Welcome, $displayName'),
+      key: const Key('dashboard-greeting'),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+        color: Theme.of(context).colorScheme.onSurface,
+        fontWeight: FontWeight.w800,
+      ),
+    );
+    final dateText = Text(
+      date,
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        fontSize: 13,
+        fontWeight: FontWeight.w700,
+      ),
+    );
+
+    if (unifiedDesktopNavigation) {
+      return Row(
+        children: [
+          Expanded(child: greeting),
+          const SizedBox(width: 16),
+          dateText,
+        ],
+      );
+    }
 
     return Row(
       children: [
@@ -25,29 +57,9 @@ class DashboardTopBar extends StatelessWidget {
             children: [
               const DashboardBrand(),
               const SizedBox(height: 12),
-              Text(
-                displayName == null
-                    ? (arabic ? 'أهلًا بك' : 'Welcome')
-                    : (arabic
-                          ? 'أهلًا، $displayName'
-                          : 'Welcome, $displayName'),
-                key: const Key('dashboard-greeting'),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
+              greeting,
               const SizedBox(height: 6),
-              Text(
-                date,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              dateText,
             ],
           ),
         ),

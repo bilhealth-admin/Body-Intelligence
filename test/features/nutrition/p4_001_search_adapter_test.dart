@@ -139,6 +139,7 @@ Food _databaseFood({
     calcium: 0,
     iron: 0,
     magnesium: 0,
+    phosphorus: 0,
     vitaminC: 0,
     nutrientEvidenceMask: nutrientEvidenceMask,
     verified: true,

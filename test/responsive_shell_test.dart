@@ -72,18 +72,29 @@ void main() {
     await tester.pumpWidget(shellApp());
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('glass-bottom-navigation')), findsOneWidget);
-    expect(find.byKey(const Key('glass-navigation-rail')), findsNothing);
+    expect(find.byKey(const Key('glass-top-navigation')), findsNothing);
   });
 
-  testWidgets('wide shell uses custom navigation rail', (tester) async {
+  testWidgets('wide shell uses unified top navigation', (tester) async {
     tester.view.physicalSize = const Size(1200, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(shellApp());
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('glass-navigation-rail')), findsOneWidget);
+    expect(find.byKey(const Key('glass-top-navigation')), findsOneWidget);
     expect(find.byKey(const Key('glass-bottom-navigation')), findsNothing);
+    for (final label in [
+      'Today',
+      'Diary',
+      'Discover',
+      'Progress',
+      'Insights',
+      'More',
+      'Profile',
+    ]) {
+      expect(find.text(label), findsOneWidget);
+    }
   });
 
   testWidgets('compact shell destination tap navigates to analytics', (

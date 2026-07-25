@@ -23,6 +23,7 @@ class NutritionPortion {
     potassium: knownValue(FoodNutrient.potassium),
     calcium: knownValue(FoodNutrient.calcium),
     magnesium: knownValue(FoodNutrient.magnesium),
+    phosphorus: knownValue(FoodNutrient.phosphorus),
   );
 }
 

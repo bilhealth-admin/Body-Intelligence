@@ -37,6 +37,8 @@ class MealItems extends Table {
 
   RealColumn get magnesium => real().withDefault(const Constant(0))();
 
+  RealColumn get phosphorus => real().withDefault(const Constant(0))();
+
   RealColumn get sugar => real().withDefault(const Constant(0))();
 
   IntColumn get nutrientEvidenceMask =>

@@ -133,15 +133,17 @@ class ResponsiveAppShell extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF01050D),
       floatingActionButton: quickButton,
-      body: Row(
+      body: Column(
         children: [
           Semantics(
             label: arabic ? 'التنقل الرئيسي' : 'Primary navigation',
-            child: _GlassNavigationRail(
-              key: const Key('glass-navigation-rail'),
+            child: _GlassTopNavigation(
+              key: const Key('glass-top-navigation'),
               selectedIndex: index,
               items: items,
               onSelected: navigate,
+              onProfile: () => context.go('/settings'),
+              profileLabel: AppLocalizations.of(context).get('profile'),
             ),
           ),
           Expanded(child: child),
@@ -151,30 +153,31 @@ class ResponsiveAppShell extends StatelessWidget {
   }
 }
 
-class _GlassNavigationRail extends StatelessWidget {
-  const _GlassNavigationRail({
+class _GlassTopNavigation extends StatelessWidget {
+  const _GlassTopNavigation({
     super.key,
     required this.selectedIndex,
     required this.items,
     required this.onSelected,
+    required this.onProfile,
+    required this.profileLabel,
   });
 
   final int selectedIndex;
   final List<({IconData icon, IconData selected, String label})> items;
   final ValueChanged<int> onSelected;
+  final VoidCallback onProfile;
+  final String profileLabel;
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: const BorderRadius.only(
-        topRight: Radius.circular(28),
-        bottomRight: Radius.circular(28),
-      ),
+      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
         child: Container(
-          width: 104,
-          padding: const EdgeInsets.fromLTRB(10, 24, 10, 90),
+          height: 76,
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
@@ -185,25 +188,46 @@ class _GlassNavigationRail extends StatelessWidget {
               ],
             ),
           ),
-          child: Column(
+          child: Row(
             children: [
               const Text(
                 'BIL®',
                 style: TextStyle(
                   color: Color(0xFFE8EEF3),
-                  fontSize: 25,
+                  fontSize: 28,
                   fontWeight: FontWeight.w900,
                 ),
               ),
-              const SizedBox(height: 30),
-              for (var i = 0; i < items.length; i++) ...[
-                _RailItem(
-                  item: items[i],
-                  selected: i == selectedIndex,
-                  onTap: () => onSelected(i),
+              const SizedBox(width: 26),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    for (var i = 0; i < items.length; i++) ...[
+                      Flexible(
+                        child: _TopNavigationItem(
+                          item: items[i],
+                          selected: i == selectedIndex,
+                          onTap: () => onSelected(i),
+                        ),
+                      ),
+                      if (i != items.length - 1) const SizedBox(width: 4),
+                    ],
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: _TopNavigationItem(
+                        item: (
+                          icon: Icons.account_circle_outlined,
+                          selected: Icons.account_circle_rounded,
+                          label: profileLabel,
+                        ),
+                        selected: false,
+                        onTap: onProfile,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 9),
-              ],
+              ),
             ],
           ),
         ),
@@ -212,8 +236,8 @@ class _GlassNavigationRail extends StatelessWidget {
   }
 }
 
-class _RailItem extends StatelessWidget {
-  const _RailItem({
+class _TopNavigationItem extends StatelessWidget {
+  const _TopNavigationItem({
     required this.item,
     required this.selected,
     required this.onTap,
@@ -228,12 +252,11 @@ class _RailItem extends StatelessWidget {
     return Tooltip(
       message: item.label,
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          width: 74,
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             gradient: selected
@@ -255,7 +278,8 @@ class _RailItem extends StatelessWidget {
                   ]
                 : null,
           ),
-          child: Column(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 selected ? item.selected : item.icon,
@@ -263,7 +287,7 @@ class _RailItem extends StatelessWidget {
                     ? const Color(0xFFF0F4F7)
                     : const Color(0xFF91A1B1),
               ),
-              const SizedBox(height: 5),
+              const SizedBox(width: 6),
               Text(
                 item.label,
                 overflow: TextOverflow.ellipsis,

@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 import '../domain/local_intelligence_runtime.dart';
+import '../domain/personal_health_ai.dart';
+import 'personal_health_ai_engine.dart';
 
 /// Explainable local physiology model. It estimates tissue change from energy
 /// balance and separately attributes transient scale movement to glycogen,
@@ -11,37 +13,24 @@ final class PhysiologicalRealityModel {
   double adaptiveTdee(LocalIntelligenceTimeline timeline) {
     final weighted = timeline.weightedDays;
     if (weighted.isEmpty) return 0;
-    final latestWeight = weighted.last.weightKg!;
-    final sexOffset = timeline.gender.toLowerCase().startsWith('f')
-        ? -161.0
-        : 5.0;
-    final bmr =
-        (10 * latestWeight) +
-        (6.25 * timeline.heightCm) -
-        (5 * timeline.age) +
-        sexOffset;
-    final factor = switch (timeline.activityLevel) {
-      'veryActive' => 1.725,
-      'active' => 1.55,
-      'moderate' => 1.375,
-      _ => 1.2,
-    };
-    final formulaTdee = bmr * factor;
-    if (weighted.length < 8) return formulaTdee;
-
-    final first = weighted.first;
-    final last = weighted.last;
-    final days = math.max(1, last.day.difference(first.day).inDays);
-    final observedDailyEnergy =
-        ((first.weightKg! - last.weightKg!) * 7700) / days;
-    final logged = timeline.days.where((day) => day.caloriesKcal > 0).toList();
-    if (logged.length < 5) return formulaTdee;
-    final averageIntake =
-        logged.fold<double>(0, (sum, day) => sum + day.caloriesKcal) /
-        logged.length;
-    final observedTdee = averageIntake + observedDailyEnergy;
-    return (formulaTdee * 0.55) +
-        (observedTdee.clamp(formulaTdee * 0.65, formulaTdee * 1.35) * 0.45);
+    return const PersonalHealthAiEngine()
+        .evaluate(
+          asOf: timeline.days.last.day.add(const Duration(hours: 23)),
+          weights: [
+            for (final day in weighted)
+              WeightObservation(at: day.day, kg: day.weightKg!),
+          ],
+          age: timeline.age,
+          heightCm: timeline.heightCm,
+          gender: timeline.gender,
+          activityLevel: timeline.activityLevel,
+          dailyCalories: {
+            for (final day in timeline.days)
+              day.day: day.caloriesKcal > 0 ? day.caloriesKcal : null,
+          },
+        )
+        .tdee
+        .kcal;
   }
 
   PhysiologicalNoiseEstimate analyze(
@@ -79,7 +68,10 @@ final class PhysiologicalRealityModel {
         ? tdeeKcal
         : logged.fold<double>(0, (sum, day) => sum + day.caloriesKcal) /
               logged.length;
-    final tissue = ((averageIntake - tdeeKcal) * intervalDays) / 7700;
+    final hasEnergyEvidence = logged.length >= 2;
+    final tissue = hasEnergyEvidence
+        ? ((averageIntake - tdeeKcal) * intervalDays) / 7700
+        : 0.0;
 
     final early = _window(relevant, true);
     final late = _window(relevant, false);
@@ -105,7 +97,9 @@ final class PhysiologicalRealityModel {
     final coverage = logged.length / math.max(1, relevant.length);
     final driverAgreement =
         1 - ((mechanistic - residual).abs() / 2.5).clamp(0.0, 1.0);
-    final confidence = (0.35 + (coverage * 0.35) + (driverAgreement * 0.3))
+    final confidence = (hasEnergyEvidence
+            ? 0.20 + (coverage * 0.35) + (driverAgreement * 0.3)
+            : math.min(0.2, coverage))
         .clamp(0.0, 1.0);
 
     return PhysiologicalNoiseEstimate(
@@ -119,7 +113,10 @@ final class PhysiologicalRealityModel {
       hydrationDriverKg: hydration,
       confidence: confidence,
       explanations: [
-        'Tissue change uses logged energy balance at 7700 kcal per kilogram.',
+        if (hasEnergyEvidence)
+          'Probable tissue direction uses logged energy balance; 7700 kcal/kg is an uncertain approximation, not a direct fat measurement.'
+        else
+          'Insufficient calorie evidence to separate tissue and fluid reliably.',
         'Sodium and potassium are modeled as opposing electrolyte water drivers.',
         'Carbohydrate driver models glycogen-bound water from intake change.',
         'Hydration and digestive-mass drivers remain explicit and independently inspectable.',

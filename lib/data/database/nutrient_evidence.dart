@@ -1,4 +1,12 @@
-enum TrackedNutrient { fiber, sodium, potassium, calcium, magnesium, sugar }
+enum TrackedNutrient {
+  fiber,
+  sodium,
+  potassium,
+  calcium,
+  magnesium,
+  sugar,
+  phosphorus,
+}
 
 class NutrientEvidenceMask {
   const NutrientEvidenceMask._();
@@ -15,6 +23,7 @@ class NutrientEvidenceMask {
     double? calcium,
     double? magnesium,
     double? sugar,
+    double? phosphorus,
   }) {
     var mask = 0;
     if (fiber != null) mask |= bit(TrackedNutrient.fiber);
@@ -23,6 +32,7 @@ class NutrientEvidenceMask {
     if (calcium != null) mask |= bit(TrackedNutrient.calcium);
     if (magnesium != null) mask |= bit(TrackedNutrient.magnesium);
     if (sugar != null) mask |= bit(TrackedNutrient.sugar);
+    if (phosphorus != null) mask |= bit(TrackedNutrient.phosphorus);
     return mask;
   }
 }

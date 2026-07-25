@@ -28,7 +28,10 @@ class DashboardHeader extends ConsumerWidget {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
             child: Container(
-              padding: EdgeInsets.all(compact ? 20 : 28),
+              padding: EdgeInsets.symmetric(
+                horizontal: compact ? 18 : 24,
+                vertical: compact ? 18 : 22,
+              ),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(34),
                 gradient: LinearGradient(
@@ -88,14 +91,14 @@ class DashboardHeader extends ConsumerWidget {
                       ? Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            _BodyCopy(
+                            _BodyCopy(arabic: arabic, hasWeight: hasWeight),
+                            const SizedBox(height: 22),
+                            _SignalOrb(
                               arabic: arabic,
                               hasWeight: hasWeight,
                               value: value,
                               unit: unit,
                             ),
-                            const SizedBox(height: 22),
-                            _SignalOrb(arabic: arabic, hasWeight: hasWeight),
                           ],
                         )
                       : Row(
@@ -105,8 +108,6 @@ class DashboardHeader extends ConsumerWidget {
                               child: _BodyCopy(
                                 arabic: arabic,
                                 hasWeight: hasWeight,
-                                value: value,
-                                unit: unit,
                               ),
                             ),
                             const SizedBox(width: 24),
@@ -115,6 +116,8 @@ class DashboardHeader extends ConsumerWidget {
                               child: _SignalOrb(
                                 arabic: arabic,
                                 hasWeight: hasWeight,
+                                value: value,
+                                unit: unit,
                               ),
                             ),
                           ],
@@ -130,17 +133,10 @@ class DashboardHeader extends ConsumerWidget {
 }
 
 class _BodyCopy extends StatelessWidget {
-  const _BodyCopy({
-    required this.arabic,
-    required this.hasWeight,
-    required this.value,
-    required this.unit,
-  });
+  const _BodyCopy({required this.arabic, required this.hasWeight});
 
   final bool arabic;
   final bool hasWeight;
-  final String value;
-  final String unit;
 
   String tr(String en, String ar) => arabic ? ar : en;
 
@@ -150,10 +146,6 @@ class _BodyCopy extends StatelessWidget {
     final bodyColor = isDark
         ? const Color(0xFFB8C5D1)
         : const Color(0xFF294858);
-    final unitColor = isDark
-        ? const Color(0xFFC8D4DE)
-        : const Color(0xFF183B4D);
-
     return Directionality(
       textDirection: arabic ? TextDirection.rtl : TextDirection.ltr,
       child: Column(
@@ -199,31 +191,6 @@ class _BodyCopy extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 22),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              _MetalText(
-                hasWeight ? value : tr('First check-in', 'أول تسجيل'),
-                size: hasWeight ? 58 : 32,
-                weight: FontWeight.w900,
-              ),
-              if (hasWeight) ...[
-                const SizedBox(width: 10),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 7),
-                  child: Text(
-                    unit,
-                    style: TextStyle(
-                      color: unitColor,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
           const SizedBox(height: 18),
           _InsightGlass(
             icon: hasWeight
@@ -249,86 +216,114 @@ class _BodyCopy extends StatelessWidget {
 }
 
 class _SignalOrb extends StatelessWidget {
-  const _SignalOrb({required this.arabic, required this.hasWeight});
+  const _SignalOrb({
+    required this.arabic,
+    required this.hasWeight,
+    required this.value,
+    required this.unit,
+  });
 
   final bool arabic;
   final bool hasWeight;
+  final String value;
+  final String unit;
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 1,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  const Color(0xFF51DCFF).withValues(alpha: .20),
-                  const Color(0xFF765DFF).withValues(alpha: .09),
-                  Colors.transparent,
-                ],
-              ),
-            ),
-          ),
-          Container(
-            width: 176,
-            height: 176,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: const SweepGradient(
-                colors: [
-                  Color(0xFF90A2B3),
-                  Color(0xFFF5F8FA),
-                  Color(0xFF59D9FF),
-                  Color(0xFF846CFF),
-                  Color(0xFF90A2B3),
-                ],
-              ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x704AD9FF),
-                  blurRadius: 36,
-                  spreadRadius: -8,
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.all(2),
-            child: Container(
-              decoration: const BoxDecoration(
+    return Align(
+      child: SizedBox.square(
+        dimension: 220,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xDB07111D),
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFF51DCFF).withValues(alpha: .20),
+                    const Color(0xFF765DFF).withValues(alpha: .09),
+                    Colors.transparent,
+                  ],
+                ),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'BIL®',
-                    style: TextStyle(
-                      color: Color(0xFFE9EFF4),
-                      fontSize: 30,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    hasWeight
-                        ? (arabic ? 'إشارة اليوم' : 'Today signal')
-                        : (arabic ? 'جاهز للبدء' : 'Ready to begin'),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Color(0xFFB7C5D1),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
+            ),
+            Container(
+              width: 176,
+              height: 176,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const SweepGradient(
+                  colors: [
+                    Color(0xFF90A2B3),
+                    Color(0xFFF5F8FA),
+                    Color(0xFF59D9FF),
+                    Color(0xFF846CFF),
+                    Color(0xFF90A2B3),
+                  ],
+                ),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x704AD9FF),
+                    blurRadius: 36,
+                    spreadRadius: -8,
                   ),
                 ],
               ),
+              padding: const EdgeInsets.all(2),
+              child: Container(
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xDB07111D),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'BIL®',
+                      style: TextStyle(
+                        color: Color(0xFFE9EFF4),
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      hasWeight ? value : '—',
+                      style: const TextStyle(
+                        color: Color(0xFFF5F8FA),
+                        fontSize: 38,
+                        height: 1,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    if (hasWeight)
+                      Text(
+                        unit,
+                        style: const TextStyle(
+                          color: Color(0xFFB7C5D1),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    const SizedBox(height: 5),
+                    Text(
+                      hasWeight
+                          ? (arabic ? 'إشارة اليوم' : 'Today signal')
+                          : (arabic ? 'جاهز للبدء' : 'Ready to begin'),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Color(0xFFB7C5D1),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

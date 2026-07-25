@@ -14,6 +14,7 @@ enum FoodNutrient {
   potassium,
   calcium,
   magnesium,
+  phosphorus,
   iron,
   vitaminC,
 }
@@ -134,6 +135,10 @@ class UnifiedFood {
       FoodNutrient.magnesium => NutrientEvidenceMask.contains(
         mask,
         TrackedNutrient.magnesium,
+      ),
+      FoodNutrient.phosphorus => NutrientEvidenceMask.contains(
+        mask,
+        TrackedNutrient.phosphorus,
       ),
       _ => true,
     };

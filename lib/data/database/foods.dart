@@ -43,6 +43,8 @@ class Foods extends Table {
 
   RealColumn get magnesium => real().withDefault(const Constant(0))();
 
+  RealColumn get phosphorus => real().withDefault(const Constant(0))();
+
   RealColumn get vitaminC => real().withDefault(const Constant(0))();
 
   IntColumn get nutrientEvidenceMask =>

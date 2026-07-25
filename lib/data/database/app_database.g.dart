@@ -150,6 +150,50 @@ class $DailyLogsTable extends DailyLogs
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _lifecycleStateMeta = const VerificationMeta(
+    'lifecycleState',
+  );
+  @override
+  late final GeneratedColumn<String> lifecycleState = GeneratedColumn<String>(
+    'lifecycle_state',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _closedAtMeta = const VerificationMeta(
+    'closedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> closedAt = GeneratedColumn<DateTime>(
+    'closed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _finalFiberMeta = const VerificationMeta(
+    'finalFiber',
+  );
+  @override
+  late final GeneratedColumn<double> finalFiber = GeneratedColumn<double>(
+    'final_fiber',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _finalNutrientEvidenceMaskMeta =
+      const VerificationMeta('finalNutrientEvidenceMask');
+  @override
+  late final GeneratedColumn<int> finalNutrientEvidenceMask =
+      GeneratedColumn<int>(
+        'final_nutrient_evidence_mask',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -190,6 +234,10 @@ class $DailyLogsTable extends DailyLogs
     sleepHours,
     steps,
     exerciseNotes,
+    lifecycleState,
+    closedAt,
+    finalFiber,
+    finalNutrientEvidenceMask,
     createdAt,
     updatedAt,
   ];
@@ -293,6 +341,36 @@ class $DailyLogsTable extends DailyLogs
         ),
       );
     }
+    if (data.containsKey('lifecycle_state')) {
+      context.handle(
+        _lifecycleStateMeta,
+        lifecycleState.isAcceptableOrUnknown(
+          data['lifecycle_state']!,
+          _lifecycleStateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('closed_at')) {
+      context.handle(
+        _closedAtMeta,
+        closedAt.isAcceptableOrUnknown(data['closed_at']!, _closedAtMeta),
+      );
+    }
+    if (data.containsKey('final_fiber')) {
+      context.handle(
+        _finalFiberMeta,
+        finalFiber.isAcceptableOrUnknown(data['final_fiber']!, _finalFiberMeta),
+      );
+    }
+    if (data.containsKey('final_nutrient_evidence_mask')) {
+      context.handle(
+        _finalNutrientEvidenceMaskMeta,
+        finalNutrientEvidenceMask.isAcceptableOrUnknown(
+          data['final_nutrient_evidence_mask']!,
+          _finalNutrientEvidenceMaskMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -370,6 +448,22 @@ class $DailyLogsTable extends DailyLogs
         DriftSqlType.string,
         data['${effectivePrefix}exercise_notes'],
       ),
+      lifecycleState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}lifecycle_state'],
+      ),
+      closedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}closed_at'],
+      ),
+      finalFiber: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}final_fiber'],
+      ),
+      finalNutrientEvidenceMask: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}final_nutrient_evidence_mask'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -402,6 +496,10 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
   final double? sleepHours;
   final int? steps;
   final String? exerciseNotes;
+  final String? lifecycleState;
+  final DateTime? closedAt;
+  final double? finalFiber;
+  final int? finalNutrientEvidenceMask;
   final DateTime createdAt;
   final DateTime updatedAt;
   const DailyLog({
@@ -419,6 +517,10 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
     this.sleepHours,
     this.steps,
     this.exerciseNotes,
+    this.lifecycleState,
+    this.closedAt,
+    this.finalFiber,
+    this.finalNutrientEvidenceMask,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -459,6 +561,20 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
     if (!nullToAbsent || exerciseNotes != null) {
       map['exercise_notes'] = Variable<String>(exerciseNotes);
     }
+    if (!nullToAbsent || lifecycleState != null) {
+      map['lifecycle_state'] = Variable<String>(lifecycleState);
+    }
+    if (!nullToAbsent || closedAt != null) {
+      map['closed_at'] = Variable<DateTime>(closedAt);
+    }
+    if (!nullToAbsent || finalFiber != null) {
+      map['final_fiber'] = Variable<double>(finalFiber);
+    }
+    if (!nullToAbsent || finalNutrientEvidenceMask != null) {
+      map['final_nutrient_evidence_mask'] = Variable<int>(
+        finalNutrientEvidenceMask,
+      );
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -498,6 +614,19 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
       exerciseNotes: exerciseNotes == null && nullToAbsent
           ? const Value.absent()
           : Value(exerciseNotes),
+      lifecycleState: lifecycleState == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lifecycleState),
+      closedAt: closedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(closedAt),
+      finalFiber: finalFiber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(finalFiber),
+      finalNutrientEvidenceMask:
+          finalNutrientEvidenceMask == null && nullToAbsent
+          ? const Value.absent()
+          : Value(finalNutrientEvidenceMask),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -523,6 +652,12 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
       sleepHours: serializer.fromJson<double?>(json['sleepHours']),
       steps: serializer.fromJson<int?>(json['steps']),
       exerciseNotes: serializer.fromJson<String?>(json['exerciseNotes']),
+      lifecycleState: serializer.fromJson<String?>(json['lifecycleState']),
+      closedAt: serializer.fromJson<DateTime?>(json['closedAt']),
+      finalFiber: serializer.fromJson<double?>(json['finalFiber']),
+      finalNutrientEvidenceMask: serializer.fromJson<int?>(
+        json['finalNutrientEvidenceMask'],
+      ),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -545,6 +680,12 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
       'sleepHours': serializer.toJson<double?>(sleepHours),
       'steps': serializer.toJson<int?>(steps),
       'exerciseNotes': serializer.toJson<String?>(exerciseNotes),
+      'lifecycleState': serializer.toJson<String?>(lifecycleState),
+      'closedAt': serializer.toJson<DateTime?>(closedAt),
+      'finalFiber': serializer.toJson<double?>(finalFiber),
+      'finalNutrientEvidenceMask': serializer.toJson<int?>(
+        finalNutrientEvidenceMask,
+      ),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -565,6 +706,10 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
     Value<double?> sleepHours = const Value.absent(),
     Value<int?> steps = const Value.absent(),
     Value<String?> exerciseNotes = const Value.absent(),
+    Value<String?> lifecycleState = const Value.absent(),
+    Value<DateTime?> closedAt = const Value.absent(),
+    Value<double?> finalFiber = const Value.absent(),
+    Value<int?> finalNutrientEvidenceMask = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => DailyLog(
@@ -584,6 +729,14 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
     exerciseNotes: exerciseNotes.present
         ? exerciseNotes.value
         : this.exerciseNotes,
+    lifecycleState: lifecycleState.present
+        ? lifecycleState.value
+        : this.lifecycleState,
+    closedAt: closedAt.present ? closedAt.value : this.closedAt,
+    finalFiber: finalFiber.present ? finalFiber.value : this.finalFiber,
+    finalNutrientEvidenceMask: finalNutrientEvidenceMask.present
+        ? finalNutrientEvidenceMask.value
+        : this.finalNutrientEvidenceMask,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -607,6 +760,16 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
       exerciseNotes: data.exerciseNotes.present
           ? data.exerciseNotes.value
           : this.exerciseNotes,
+      lifecycleState: data.lifecycleState.present
+          ? data.lifecycleState.value
+          : this.lifecycleState,
+      closedAt: data.closedAt.present ? data.closedAt.value : this.closedAt,
+      finalFiber: data.finalFiber.present
+          ? data.finalFiber.value
+          : this.finalFiber,
+      finalNutrientEvidenceMask: data.finalNutrientEvidenceMask.present
+          ? data.finalNutrientEvidenceMask.value
+          : this.finalNutrientEvidenceMask,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -629,6 +792,10 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
           ..write('sleepHours: $sleepHours, ')
           ..write('steps: $steps, ')
           ..write('exerciseNotes: $exerciseNotes, ')
+          ..write('lifecycleState: $lifecycleState, ')
+          ..write('closedAt: $closedAt, ')
+          ..write('finalFiber: $finalFiber, ')
+          ..write('finalNutrientEvidenceMask: $finalNutrientEvidenceMask, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -651,6 +818,10 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
     sleepHours,
     steps,
     exerciseNotes,
+    lifecycleState,
+    closedAt,
+    finalFiber,
+    finalNutrientEvidenceMask,
     createdAt,
     updatedAt,
   );
@@ -672,6 +843,10 @@ class DailyLog extends DataClass implements Insertable<DailyLog> {
           other.sleepHours == this.sleepHours &&
           other.steps == this.steps &&
           other.exerciseNotes == this.exerciseNotes &&
+          other.lifecycleState == this.lifecycleState &&
+          other.closedAt == this.closedAt &&
+          other.finalFiber == this.finalFiber &&
+          other.finalNutrientEvidenceMask == this.finalNutrientEvidenceMask &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -691,6 +866,10 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
   final Value<double?> sleepHours;
   final Value<int?> steps;
   final Value<String?> exerciseNotes;
+  final Value<String?> lifecycleState;
+  final Value<DateTime?> closedAt;
+  final Value<double?> finalFiber;
+  final Value<int?> finalNutrientEvidenceMask;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   const DailyLogsCompanion({
@@ -708,6 +887,10 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
     this.sleepHours = const Value.absent(),
     this.steps = const Value.absent(),
     this.exerciseNotes = const Value.absent(),
+    this.lifecycleState = const Value.absent(),
+    this.closedAt = const Value.absent(),
+    this.finalFiber = const Value.absent(),
+    this.finalNutrientEvidenceMask = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   });
@@ -726,6 +909,10 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
     this.sleepHours = const Value.absent(),
     this.steps = const Value.absent(),
     this.exerciseNotes = const Value.absent(),
+    this.lifecycleState = const Value.absent(),
+    this.closedAt = const Value.absent(),
+    this.finalFiber = const Value.absent(),
+    this.finalNutrientEvidenceMask = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
   }) : date = Value(date),
@@ -745,6 +932,10 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
     Expression<double>? sleepHours,
     Expression<int>? steps,
     Expression<String>? exerciseNotes,
+    Expression<String>? lifecycleState,
+    Expression<DateTime>? closedAt,
+    Expression<double>? finalFiber,
+    Expression<int>? finalNutrientEvidenceMask,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
   }) {
@@ -763,6 +954,11 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
       if (sleepHours != null) 'sleep_hours': sleepHours,
       if (steps != null) 'steps': steps,
       if (exerciseNotes != null) 'exercise_notes': exerciseNotes,
+      if (lifecycleState != null) 'lifecycle_state': lifecycleState,
+      if (closedAt != null) 'closed_at': closedAt,
+      if (finalFiber != null) 'final_fiber': finalFiber,
+      if (finalNutrientEvidenceMask != null)
+        'final_nutrient_evidence_mask': finalNutrientEvidenceMask,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
     });
@@ -783,6 +979,10 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
     Value<double?>? sleepHours,
     Value<int?>? steps,
     Value<String?>? exerciseNotes,
+    Value<String?>? lifecycleState,
+    Value<DateTime?>? closedAt,
+    Value<double?>? finalFiber,
+    Value<int?>? finalNutrientEvidenceMask,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
   }) {
@@ -801,6 +1001,11 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
       sleepHours: sleepHours ?? this.sleepHours,
       steps: steps ?? this.steps,
       exerciseNotes: exerciseNotes ?? this.exerciseNotes,
+      lifecycleState: lifecycleState ?? this.lifecycleState,
+      closedAt: closedAt ?? this.closedAt,
+      finalFiber: finalFiber ?? this.finalFiber,
+      finalNutrientEvidenceMask:
+          finalNutrientEvidenceMask ?? this.finalNutrientEvidenceMask,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -851,6 +1056,20 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
     if (exerciseNotes.present) {
       map['exercise_notes'] = Variable<String>(exerciseNotes.value);
     }
+    if (lifecycleState.present) {
+      map['lifecycle_state'] = Variable<String>(lifecycleState.value);
+    }
+    if (closedAt.present) {
+      map['closed_at'] = Variable<DateTime>(closedAt.value);
+    }
+    if (finalFiber.present) {
+      map['final_fiber'] = Variable<double>(finalFiber.value);
+    }
+    if (finalNutrientEvidenceMask.present) {
+      map['final_nutrient_evidence_mask'] = Variable<int>(
+        finalNutrientEvidenceMask.value,
+      );
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -877,6 +1096,10 @@ class DailyLogsCompanion extends UpdateCompanion<DailyLog> {
           ..write('sleepHours: $sleepHours, ')
           ..write('steps: $steps, ')
           ..write('exerciseNotes: $exerciseNotes, ')
+          ..write('lifecycleState: $lifecycleState, ')
+          ..write('closedAt: $closedAt, ')
+          ..write('finalFiber: $finalFiber, ')
+          ..write('finalNutrientEvidenceMask: $finalNutrientEvidenceMask, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -2876,6 +3099,18 @@ class $FoodsTable extends Foods with TableInfo<$FoodsTable, Food> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _phosphorusMeta = const VerificationMeta(
+    'phosphorus',
+  );
+  @override
+  late final GeneratedColumn<double> phosphorus = GeneratedColumn<double>(
+    'phosphorus',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _vitaminCMeta = const VerificationMeta(
     'vitaminC',
   );
@@ -3020,6 +3255,7 @@ class $FoodsTable extends Foods with TableInfo<$FoodsTable, Food> {
     calcium,
     iron,
     magnesium,
+    phosphorus,
     vitaminC,
     nutrientEvidenceMask,
     verified,
@@ -3176,6 +3412,12 @@ class $FoodsTable extends Foods with TableInfo<$FoodsTable, Food> {
         magnesium.isAcceptableOrUnknown(data['magnesium']!, _magnesiumMeta),
       );
     }
+    if (data.containsKey('phosphorus')) {
+      context.handle(
+        _phosphorusMeta,
+        phosphorus.isAcceptableOrUnknown(data['phosphorus']!, _phosphorusMeta),
+      );
+    }
     if (data.containsKey('vitamin_c')) {
       context.handle(
         _vitaminCMeta,
@@ -3328,6 +3570,10 @@ class $FoodsTable extends Foods with TableInfo<$FoodsTable, Food> {
         DriftSqlType.double,
         data['${effectivePrefix}magnesium'],
       )!,
+      phosphorus: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}phosphorus'],
+      )!,
       vitaminC: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}vitamin_c'],
@@ -3398,6 +3644,7 @@ class Food extends DataClass implements Insertable<Food> {
   final double calcium;
   final double iron;
   final double magnesium;
+  final double phosphorus;
   final double vitaminC;
   final int nutrientEvidenceMask;
   final bool verified;
@@ -3429,6 +3676,7 @@ class Food extends DataClass implements Insertable<Food> {
     required this.calcium,
     required this.iron,
     required this.magnesium,
+    required this.phosphorus,
     required this.vitaminC,
     required this.nutrientEvidenceMask,
     required this.verified,
@@ -3469,6 +3717,7 @@ class Food extends DataClass implements Insertable<Food> {
     map['calcium'] = Variable<double>(calcium);
     map['iron'] = Variable<double>(iron);
     map['magnesium'] = Variable<double>(magnesium);
+    map['phosphorus'] = Variable<double>(phosphorus);
     map['vitamin_c'] = Variable<double>(vitaminC);
     map['nutrient_evidence_mask'] = Variable<int>(nutrientEvidenceMask);
     map['verified'] = Variable<bool>(verified);
@@ -3512,6 +3761,7 @@ class Food extends DataClass implements Insertable<Food> {
       calcium: Value(calcium),
       iron: Value(iron),
       magnesium: Value(magnesium),
+      phosphorus: Value(phosphorus),
       vitaminC: Value(vitaminC),
       nutrientEvidenceMask: Value(nutrientEvidenceMask),
       verified: Value(verified),
@@ -3553,6 +3803,7 @@ class Food extends DataClass implements Insertable<Food> {
       calcium: serializer.fromJson<double>(json['calcium']),
       iron: serializer.fromJson<double>(json['iron']),
       magnesium: serializer.fromJson<double>(json['magnesium']),
+      phosphorus: serializer.fromJson<double>(json['phosphorus']),
       vitaminC: serializer.fromJson<double>(json['vitaminC']),
       nutrientEvidenceMask: serializer.fromJson<int>(
         json['nutrientEvidenceMask'],
@@ -3591,6 +3842,7 @@ class Food extends DataClass implements Insertable<Food> {
       'calcium': serializer.toJson<double>(calcium),
       'iron': serializer.toJson<double>(iron),
       'magnesium': serializer.toJson<double>(magnesium),
+      'phosphorus': serializer.toJson<double>(phosphorus),
       'vitaminC': serializer.toJson<double>(vitaminC),
       'nutrientEvidenceMask': serializer.toJson<int>(nutrientEvidenceMask),
       'verified': serializer.toJson<bool>(verified),
@@ -3625,6 +3877,7 @@ class Food extends DataClass implements Insertable<Food> {
     double? calcium,
     double? iron,
     double? magnesium,
+    double? phosphorus,
     double? vitaminC,
     int? nutrientEvidenceMask,
     bool? verified,
@@ -3656,6 +3909,7 @@ class Food extends DataClass implements Insertable<Food> {
     calcium: calcium ?? this.calcium,
     iron: iron ?? this.iron,
     magnesium: magnesium ?? this.magnesium,
+    phosphorus: phosphorus ?? this.phosphorus,
     vitaminC: vitaminC ?? this.vitaminC,
     nutrientEvidenceMask: nutrientEvidenceMask ?? this.nutrientEvidenceMask,
     verified: verified ?? this.verified,
@@ -3695,6 +3949,9 @@ class Food extends DataClass implements Insertable<Food> {
       calcium: data.calcium.present ? data.calcium.value : this.calcium,
       iron: data.iron.present ? data.iron.value : this.iron,
       magnesium: data.magnesium.present ? data.magnesium.value : this.magnesium,
+      phosphorus: data.phosphorus.present
+          ? data.phosphorus.value
+          : this.phosphorus,
       vitaminC: data.vitaminC.present ? data.vitaminC.value : this.vitaminC,
       nutrientEvidenceMask: data.nutrientEvidenceMask.present
           ? data.nutrientEvidenceMask.value
@@ -3735,6 +3992,7 @@ class Food extends DataClass implements Insertable<Food> {
           ..write('calcium: $calcium, ')
           ..write('iron: $iron, ')
           ..write('magnesium: $magnesium, ')
+          ..write('phosphorus: $phosphorus, ')
           ..write('vitaminC: $vitaminC, ')
           ..write('nutrientEvidenceMask: $nutrientEvidenceMask, ')
           ..write('verified: $verified, ')
@@ -3771,6 +4029,7 @@ class Food extends DataClass implements Insertable<Food> {
     calcium,
     iron,
     magnesium,
+    phosphorus,
     vitaminC,
     nutrientEvidenceMask,
     verified,
@@ -3806,6 +4065,7 @@ class Food extends DataClass implements Insertable<Food> {
           other.calcium == this.calcium &&
           other.iron == this.iron &&
           other.magnesium == this.magnesium &&
+          other.phosphorus == this.phosphorus &&
           other.vitaminC == this.vitaminC &&
           other.nutrientEvidenceMask == this.nutrientEvidenceMask &&
           other.verified == this.verified &&
@@ -3839,6 +4099,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
   final Value<double> calcium;
   final Value<double> iron;
   final Value<double> magnesium;
+  final Value<double> phosphorus;
   final Value<double> vitaminC;
   final Value<int> nutrientEvidenceMask;
   final Value<bool> verified;
@@ -3870,6 +4131,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     this.calcium = const Value.absent(),
     this.iron = const Value.absent(),
     this.magnesium = const Value.absent(),
+    this.phosphorus = const Value.absent(),
     this.vitaminC = const Value.absent(),
     this.nutrientEvidenceMask = const Value.absent(),
     this.verified = const Value.absent(),
@@ -3902,6 +4164,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     this.calcium = const Value.absent(),
     this.iron = const Value.absent(),
     this.magnesium = const Value.absent(),
+    this.phosphorus = const Value.absent(),
     this.vitaminC = const Value.absent(),
     this.nutrientEvidenceMask = const Value.absent(),
     this.verified = const Value.absent(),
@@ -3938,6 +4201,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     Expression<double>? calcium,
     Expression<double>? iron,
     Expression<double>? magnesium,
+    Expression<double>? phosphorus,
     Expression<double>? vitaminC,
     Expression<int>? nutrientEvidenceMask,
     Expression<bool>? verified,
@@ -3970,6 +4234,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
       if (calcium != null) 'calcium': calcium,
       if (iron != null) 'iron': iron,
       if (magnesium != null) 'magnesium': magnesium,
+      if (phosphorus != null) 'phosphorus': phosphorus,
       if (vitaminC != null) 'vitamin_c': vitaminC,
       if (nutrientEvidenceMask != null)
         'nutrient_evidence_mask': nutrientEvidenceMask,
@@ -4005,6 +4270,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     Value<double>? calcium,
     Value<double>? iron,
     Value<double>? magnesium,
+    Value<double>? phosphorus,
     Value<double>? vitaminC,
     Value<int>? nutrientEvidenceMask,
     Value<bool>? verified,
@@ -4037,6 +4303,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
       calcium: calcium ?? this.calcium,
       iron: iron ?? this.iron,
       magnesium: magnesium ?? this.magnesium,
+      phosphorus: phosphorus ?? this.phosphorus,
       vitaminC: vitaminC ?? this.vitaminC,
       nutrientEvidenceMask: nutrientEvidenceMask ?? this.nutrientEvidenceMask,
       verified: verified ?? this.verified,
@@ -4113,6 +4380,9 @@ class FoodsCompanion extends UpdateCompanion<Food> {
     if (magnesium.present) {
       map['magnesium'] = Variable<double>(magnesium.value);
     }
+    if (phosphorus.present) {
+      map['phosphorus'] = Variable<double>(phosphorus.value);
+    }
     if (vitaminC.present) {
       map['vitamin_c'] = Variable<double>(vitaminC.value);
     }
@@ -4169,6 +4439,7 @@ class FoodsCompanion extends UpdateCompanion<Food> {
           ..write('calcium: $calcium, ')
           ..write('iron: $iron, ')
           ..write('magnesium: $magnesium, ')
+          ..write('phosphorus: $phosphorus, ')
           ..write('vitaminC: $vitaminC, ')
           ..write('nutrientEvidenceMask: $nutrientEvidenceMask, ')
           ..write('verified: $verified, ')
@@ -4987,6 +5258,18 @@ class $MealItemsTable extends MealItems
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _phosphorusMeta = const VerificationMeta(
+    'phosphorus',
+  );
+  @override
+  late final GeneratedColumn<double> phosphorus = GeneratedColumn<double>(
+    'phosphorus',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _sugarMeta = const VerificationMeta('sugar');
   @override
   late final GeneratedColumn<double> sugar = GeneratedColumn<double>(
@@ -5084,6 +5367,7 @@ class $MealItemsTable extends MealItems
     potassium,
     calcium,
     magnesium,
+    phosphorus,
     sugar,
     nutrientEvidenceMask,
     createdAt,
@@ -5193,6 +5477,12 @@ class $MealItemsTable extends MealItems
       context.handle(
         _magnesiumMeta,
         magnesium.isAcceptableOrUnknown(data['magnesium']!, _magnesiumMeta),
+      );
+    }
+    if (data.containsKey('phosphorus')) {
+      context.handle(
+        _phosphorusMeta,
+        phosphorus.isAcceptableOrUnknown(data['phosphorus']!, _phosphorusMeta),
       );
     }
     if (data.containsKey('sugar')) {
@@ -5309,6 +5599,10 @@ class $MealItemsTable extends MealItems
         DriftSqlType.double,
         data['${effectivePrefix}magnesium'],
       )!,
+      phosphorus: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}phosphorus'],
+      )!,
       sugar: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}sugar'],
@@ -5362,6 +5656,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
   final double potassium;
   final double calcium;
   final double magnesium;
+  final double phosphorus;
   final double sugar;
   final int nutrientEvidenceMask;
   final DateTime createdAt;
@@ -5385,6 +5680,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     required this.potassium,
     required this.calcium,
     required this.magnesium,
+    required this.phosphorus,
     required this.sugar,
     required this.nutrientEvidenceMask,
     required this.createdAt,
@@ -5411,6 +5707,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     map['potassium'] = Variable<double>(potassium);
     map['calcium'] = Variable<double>(calcium);
     map['magnesium'] = Variable<double>(magnesium);
+    map['phosphorus'] = Variable<double>(phosphorus);
     map['sugar'] = Variable<double>(sugar);
     map['nutrient_evidence_mask'] = Variable<int>(nutrientEvidenceMask);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -5440,6 +5737,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       potassium: Value(potassium),
       calcium: Value(calcium),
       magnesium: Value(magnesium),
+      phosphorus: Value(phosphorus),
       sugar: Value(sugar),
       nutrientEvidenceMask: Value(nutrientEvidenceMask),
       createdAt: Value(createdAt),
@@ -5473,6 +5771,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       potassium: serializer.fromJson<double>(json['potassium']),
       calcium: serializer.fromJson<double>(json['calcium']),
       magnesium: serializer.fromJson<double>(json['magnesium']),
+      phosphorus: serializer.fromJson<double>(json['phosphorus']),
       sugar: serializer.fromJson<double>(json['sugar']),
       nutrientEvidenceMask: serializer.fromJson<int>(
         json['nutrientEvidenceMask'],
@@ -5503,6 +5802,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       'potassium': serializer.toJson<double>(potassium),
       'calcium': serializer.toJson<double>(calcium),
       'magnesium': serializer.toJson<double>(magnesium),
+      'phosphorus': serializer.toJson<double>(phosphorus),
       'sugar': serializer.toJson<double>(sugar),
       'nutrientEvidenceMask': serializer.toJson<int>(nutrientEvidenceMask),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -5529,6 +5829,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     double? potassium,
     double? calcium,
     double? magnesium,
+    double? phosphorus,
     double? sugar,
     int? nutrientEvidenceMask,
     DateTime? createdAt,
@@ -5552,6 +5853,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     potassium: potassium ?? this.potassium,
     calcium: calcium ?? this.calcium,
     magnesium: magnesium ?? this.magnesium,
+    phosphorus: phosphorus ?? this.phosphorus,
     sugar: sugar ?? this.sugar,
     nutrientEvidenceMask: nutrientEvidenceMask ?? this.nutrientEvidenceMask,
     createdAt: createdAt ?? this.createdAt,
@@ -5577,6 +5879,9 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       potassium: data.potassium.present ? data.potassium.value : this.potassium,
       calcium: data.calcium.present ? data.calcium.value : this.calcium,
       magnesium: data.magnesium.present ? data.magnesium.value : this.magnesium,
+      phosphorus: data.phosphorus.present
+          ? data.phosphorus.value
+          : this.phosphorus,
       sugar: data.sugar.present ? data.sugar.value : this.sugar,
       nutrientEvidenceMask: data.nutrientEvidenceMask.present
           ? data.nutrientEvidenceMask.value
@@ -5609,6 +5914,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
           ..write('potassium: $potassium, ')
           ..write('calcium: $calcium, ')
           ..write('magnesium: $magnesium, ')
+          ..write('phosphorus: $phosphorus, ')
           ..write('sugar: $sugar, ')
           ..write('nutrientEvidenceMask: $nutrientEvidenceMask, ')
           ..write('createdAt: $createdAt, ')
@@ -5637,6 +5943,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     potassium,
     calcium,
     magnesium,
+    phosphorus,
     sugar,
     nutrientEvidenceMask,
     createdAt,
@@ -5664,6 +5971,7 @@ class MealItem extends DataClass implements Insertable<MealItem> {
           other.potassium == this.potassium &&
           other.calcium == this.calcium &&
           other.magnesium == this.magnesium &&
+          other.phosphorus == this.phosphorus &&
           other.sugar == this.sugar &&
           other.nutrientEvidenceMask == this.nutrientEvidenceMask &&
           other.createdAt == this.createdAt &&
@@ -5689,6 +5997,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
   final Value<double> potassium;
   final Value<double> calcium;
   final Value<double> magnesium;
+  final Value<double> phosphorus;
   final Value<double> sugar;
   final Value<int> nutrientEvidenceMask;
   final Value<DateTime> createdAt;
@@ -5712,6 +6021,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     this.potassium = const Value.absent(),
     this.calcium = const Value.absent(),
     this.magnesium = const Value.absent(),
+    this.phosphorus = const Value.absent(),
     this.sugar = const Value.absent(),
     this.nutrientEvidenceMask = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -5736,6 +6046,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     this.potassium = const Value.absent(),
     this.calcium = const Value.absent(),
     this.magnesium = const Value.absent(),
+    this.phosphorus = const Value.absent(),
     this.sugar = const Value.absent(),
     this.nutrientEvidenceMask = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -5761,6 +6072,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     Expression<double>? potassium,
     Expression<double>? calcium,
     Expression<double>? magnesium,
+    Expression<double>? phosphorus,
     Expression<double>? sugar,
     Expression<int>? nutrientEvidenceMask,
     Expression<DateTime>? createdAt,
@@ -5785,6 +6097,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
       if (potassium != null) 'potassium': potassium,
       if (calcium != null) 'calcium': calcium,
       if (magnesium != null) 'magnesium': magnesium,
+      if (phosphorus != null) 'phosphorus': phosphorus,
       if (sugar != null) 'sugar': sugar,
       if (nutrientEvidenceMask != null)
         'nutrient_evidence_mask': nutrientEvidenceMask,
@@ -5812,6 +6125,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     Value<double>? potassium,
     Value<double>? calcium,
     Value<double>? magnesium,
+    Value<double>? phosphorus,
     Value<double>? sugar,
     Value<int>? nutrientEvidenceMask,
     Value<DateTime>? createdAt,
@@ -5836,6 +6150,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
       potassium: potassium ?? this.potassium,
       calcium: calcium ?? this.calcium,
       magnesium: magnesium ?? this.magnesium,
+      phosphorus: phosphorus ?? this.phosphorus,
       sugar: sugar ?? this.sugar,
       nutrientEvidenceMask: nutrientEvidenceMask ?? this.nutrientEvidenceMask,
       createdAt: createdAt ?? this.createdAt,
@@ -5894,6 +6209,9 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     if (magnesium.present) {
       map['magnesium'] = Variable<double>(magnesium.value);
     }
+    if (phosphorus.present) {
+      map['phosphorus'] = Variable<double>(phosphorus.value);
+    }
     if (sugar.present) {
       map['sugar'] = Variable<double>(sugar.value);
     }
@@ -5936,6 +6254,7 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
           ..write('potassium: $potassium, ')
           ..write('calcium: $calcium, ')
           ..write('magnesium: $magnesium, ')
+          ..write('phosphorus: $phosphorus, ')
           ..write('sugar: $sugar, ')
           ..write('nutrientEvidenceMask: $nutrientEvidenceMask, ')
           ..write('createdAt: $createdAt, ')
@@ -12671,6 +12990,10 @@ typedef $$DailyLogsTableCreateCompanionBuilder =
       Value<double?> sleepHours,
       Value<int?> steps,
       Value<String?> exerciseNotes,
+      Value<String?> lifecycleState,
+      Value<DateTime?> closedAt,
+      Value<double?> finalFiber,
+      Value<int?> finalNutrientEvidenceMask,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -12690,6 +13013,10 @@ typedef $$DailyLogsTableUpdateCompanionBuilder =
       Value<double?> sleepHours,
       Value<int?> steps,
       Value<String?> exerciseNotes,
+      Value<String?> lifecycleState,
+      Value<DateTime?> closedAt,
+      Value<double?> finalFiber,
+      Value<int?> finalNutrientEvidenceMask,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
     });
@@ -12770,6 +13097,26 @@ class $$DailyLogsTableFilterComposer
 
   ColumnFilters<String> get exerciseNotes => $composableBuilder(
     column: $table.exerciseNotes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lifecycleState => $composableBuilder(
+    column: $table.lifecycleState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get finalFiber => $composableBuilder(
+    column: $table.finalFiber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get finalNutrientEvidenceMask => $composableBuilder(
+    column: $table.finalNutrientEvidenceMask,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12863,6 +13210,26 @@ class $$DailyLogsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get lifecycleState => $composableBuilder(
+    column: $table.lifecycleState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get closedAt => $composableBuilder(
+    column: $table.closedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get finalFiber => $composableBuilder(
+    column: $table.finalFiber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get finalNutrientEvidenceMask => $composableBuilder(
+    column: $table.finalNutrientEvidenceMask,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -12929,6 +13296,24 @@ class $$DailyLogsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get lifecycleState => $composableBuilder(
+    column: $table.lifecycleState,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get closedAt =>
+      $composableBuilder(column: $table.closedAt, builder: (column) => column);
+
+  GeneratedColumn<double> get finalFiber => $composableBuilder(
+    column: $table.finalFiber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get finalNutrientEvidenceMask => $composableBuilder(
+    column: $table.finalNutrientEvidenceMask,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -12978,6 +13363,10 @@ class $$DailyLogsTableTableManager
                 Value<double?> sleepHours = const Value.absent(),
                 Value<int?> steps = const Value.absent(),
                 Value<String?> exerciseNotes = const Value.absent(),
+                Value<String?> lifecycleState = const Value.absent(),
+                Value<DateTime?> closedAt = const Value.absent(),
+                Value<double?> finalFiber = const Value.absent(),
+                Value<int?> finalNutrientEvidenceMask = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => DailyLogsCompanion(
@@ -12995,6 +13384,10 @@ class $$DailyLogsTableTableManager
                 sleepHours: sleepHours,
                 steps: steps,
                 exerciseNotes: exerciseNotes,
+                lifecycleState: lifecycleState,
+                closedAt: closedAt,
+                finalFiber: finalFiber,
+                finalNutrientEvidenceMask: finalNutrientEvidenceMask,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -13014,6 +13407,10 @@ class $$DailyLogsTableTableManager
                 Value<double?> sleepHours = const Value.absent(),
                 Value<int?> steps = const Value.absent(),
                 Value<String?> exerciseNotes = const Value.absent(),
+                Value<String?> lifecycleState = const Value.absent(),
+                Value<DateTime?> closedAt = const Value.absent(),
+                Value<double?> finalFiber = const Value.absent(),
+                Value<int?> finalNutrientEvidenceMask = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
               }) => DailyLogsCompanion.insert(
@@ -13031,6 +13428,10 @@ class $$DailyLogsTableTableManager
                 sleepHours: sleepHours,
                 steps: steps,
                 exerciseNotes: exerciseNotes,
+                lifecycleState: lifecycleState,
+                closedAt: closedAt,
+                finalFiber: finalFiber,
+                finalNutrientEvidenceMask: finalNutrientEvidenceMask,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
               ),
@@ -14094,6 +14495,7 @@ typedef $$FoodsTableCreateCompanionBuilder =
       Value<double> calcium,
       Value<double> iron,
       Value<double> magnesium,
+      Value<double> phosphorus,
       Value<double> vitaminC,
       Value<int> nutrientEvidenceMask,
       Value<bool> verified,
@@ -14127,6 +14529,7 @@ typedef $$FoodsTableUpdateCompanionBuilder =
       Value<double> calcium,
       Value<double> iron,
       Value<double> magnesium,
+      Value<double> phosphorus,
       Value<double> vitaminC,
       Value<int> nutrientEvidenceMask,
       Value<bool> verified,
@@ -14303,6 +14706,11 @@ class $$FoodsTableFilterComposer extends Composer<_$AppDatabase, $FoodsTable> {
 
   ColumnFilters<double> get magnesium => $composableBuilder(
     column: $table.magnesium,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get phosphorus => $composableBuilder(
+    column: $table.phosphorus,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -14541,6 +14949,11 @@ class $$FoodsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get phosphorus => $composableBuilder(
+    column: $table.phosphorus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get vitaminC => $composableBuilder(
     column: $table.vitaminC,
     builder: (column) => ColumnOrderings(column),
@@ -14666,6 +15079,11 @@ class $$FoodsTableAnnotationComposer
 
   GeneratedColumn<double> get magnesium =>
       $composableBuilder(column: $table.magnesium, builder: (column) => column);
+
+  GeneratedColumn<double> get phosphorus => $composableBuilder(
+    column: $table.phosphorus,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get vitaminC =>
       $composableBuilder(column: $table.vitaminC, builder: (column) => column);
@@ -14829,6 +15247,7 @@ class $$FoodsTableTableManager
                 Value<double> calcium = const Value.absent(),
                 Value<double> iron = const Value.absent(),
                 Value<double> magnesium = const Value.absent(),
+                Value<double> phosphorus = const Value.absent(),
                 Value<double> vitaminC = const Value.absent(),
                 Value<int> nutrientEvidenceMask = const Value.absent(),
                 Value<bool> verified = const Value.absent(),
@@ -14860,6 +15279,7 @@ class $$FoodsTableTableManager
                 calcium: calcium,
                 iron: iron,
                 magnesium: magnesium,
+                phosphorus: phosphorus,
                 vitaminC: vitaminC,
                 nutrientEvidenceMask: nutrientEvidenceMask,
                 verified: verified,
@@ -14893,6 +15313,7 @@ class $$FoodsTableTableManager
                 Value<double> calcium = const Value.absent(),
                 Value<double> iron = const Value.absent(),
                 Value<double> magnesium = const Value.absent(),
+                Value<double> phosphorus = const Value.absent(),
                 Value<double> vitaminC = const Value.absent(),
                 Value<int> nutrientEvidenceMask = const Value.absent(),
                 Value<bool> verified = const Value.absent(),
@@ -14924,6 +15345,7 @@ class $$FoodsTableTableManager
                 calcium: calcium,
                 iron: iron,
                 magnesium: magnesium,
+                phosphorus: phosphorus,
                 vitaminC: vitaminC,
                 nutrientEvidenceMask: nutrientEvidenceMask,
                 verified: verified,
@@ -15455,6 +15877,7 @@ typedef $$MealItemsTableCreateCompanionBuilder =
       Value<double> potassium,
       Value<double> calcium,
       Value<double> magnesium,
+      Value<double> phosphorus,
       Value<double> sugar,
       Value<int> nutrientEvidenceMask,
       Value<DateTime> createdAt,
@@ -15480,6 +15903,7 @@ typedef $$MealItemsTableUpdateCompanionBuilder =
       Value<double> potassium,
       Value<double> calcium,
       Value<double> magnesium,
+      Value<double> phosphorus,
       Value<double> sugar,
       Value<int> nutrientEvidenceMask,
       Value<DateTime> createdAt,
@@ -15599,6 +16023,11 @@ class $$MealItemsTableFilterComposer
 
   ColumnFilters<double> get magnesium => $composableBuilder(
     column: $table.magnesium,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get phosphorus => $composableBuilder(
+    column: $table.phosphorus,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -15758,6 +16187,11 @@ class $$MealItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get phosphorus => $composableBuilder(
+    column: $table.phosphorus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get sugar => $composableBuilder(
     column: $table.sugar,
     builder: (column) => ColumnOrderings(column),
@@ -15888,6 +16322,11 @@ class $$MealItemsTableAnnotationComposer
   GeneratedColumn<double> get magnesium =>
       $composableBuilder(column: $table.magnesium, builder: (column) => column);
 
+  GeneratedColumn<double> get phosphorus => $composableBuilder(
+    column: $table.phosphorus,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<double> get sugar =>
       $composableBuilder(column: $table.sugar, builder: (column) => column);
 
@@ -16003,6 +16442,7 @@ class $$MealItemsTableTableManager
                 Value<double> potassium = const Value.absent(),
                 Value<double> calcium = const Value.absent(),
                 Value<double> magnesium = const Value.absent(),
+                Value<double> phosphorus = const Value.absent(),
                 Value<double> sugar = const Value.absent(),
                 Value<int> nutrientEvidenceMask = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -16026,6 +16466,7 @@ class $$MealItemsTableTableManager
                 potassium: potassium,
                 calcium: calcium,
                 magnesium: magnesium,
+                phosphorus: phosphorus,
                 sugar: sugar,
                 nutrientEvidenceMask: nutrientEvidenceMask,
                 createdAt: createdAt,
@@ -16051,6 +16492,7 @@ class $$MealItemsTableTableManager
                 Value<double> potassium = const Value.absent(),
                 Value<double> calcium = const Value.absent(),
                 Value<double> magnesium = const Value.absent(),
+                Value<double> phosphorus = const Value.absent(),
                 Value<double> sugar = const Value.absent(),
                 Value<int> nutrientEvidenceMask = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -16074,6 +16516,7 @@ class $$MealItemsTableTableManager
                 potassium: potassium,
                 calcium: calcium,
                 magnesium: magnesium,
+                phosphorus: phosphorus,
                 sugar: sugar,
                 nutrientEvidenceMask: nutrientEvidenceMask,
                 createdAt: createdAt,

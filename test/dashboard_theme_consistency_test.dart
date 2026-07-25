@@ -3,13 +3,13 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('today summary uses the explicit dashboard contrast component', () {
+  test('today progress uses the explicit dashboard contrast component', () {
     final source = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
 
     expect(source, contains('_DashboardSectionHeading('));
-    expect(source, contains("title: tr('Today at a glance', 'ملخص اليوم')"));
+    expect(source, contains("title: tr('Today progress', 'تقدم اليوم')"));
     expect(source, contains("key: const Key('dashboard-today-summary-title')"));
     expect(
       source,
