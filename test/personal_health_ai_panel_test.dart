@@ -61,11 +61,18 @@ void main() {
 
     expect(find.byKey(const Key('personal-health-ai-panel')), findsOneWidget);
     expect(find.text('Personal Health AI'), findsOneWidget);
+    for (var index = 0; index < 4; index++) {
+      await tester.drag(
+        find.byKey(const Key('personal-health-ai-carousel')),
+        const Offset(-340, 0),
+      );
+      await tester.pumpAndSettle();
+    }
     expect(
       find.text('Too early for a reliable plateau assessment'),
       findsOneWidget,
     );
-    expect(find.textContaining('Low confidence'), findsWidgets);
+    expect(find.textContaining('No confidence yet'), findsWidgets);
     expect(tester.takeException(), isNull);
     await expectLater(
       find.byKey(const Key('personal-health-ai-panel')),

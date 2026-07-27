@@ -5,6 +5,7 @@ import '../../../app/theme/premium_design_tokens.dart';
 import '../../../engine/daily_return_engine.dart';
 import '../../../engine/data_honesty_engine.dart';
 import '../../../shared/widgets/premium_surface.dart';
+import 'dashboard_carousel.dart';
 
 class DailyReturnCard extends StatelessWidget {
   const DailyReturnCard({
@@ -36,177 +37,113 @@ class DailyReturnCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
+    final arabic =
+        Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
+    String tr(String en, String ar) => arabic ? ar : en;
     final title = switch (report.state) {
-      DailyReturnState.empty => context.strings.text('Start today calmly'),
-      DailyReturnState.partial => context.strings.text('Continue today'),
-      DailyReturnState.complete => context.strings.text('Today is covered'),
-      DailyReturnState.gentleReturn || DailyReturnState.rebuilding =>
-        context.strings.text('Welcome back — start with today'),
+      DailyReturnState.empty => tr('Start today calmly', 'ابدأ يومك بهدوء'),
+      DailyReturnState.partial => tr('Continue today', 'واصل يومك'),
+      DailyReturnState.complete => tr('Today is covered', 'اكتمل يومك'),
+      DailyReturnState.gentleReturn || DailyReturnState.rebuilding => tr(
+        'Welcome back — start with today',
+        'مرحبًا بعودتك — ابدأ من اليوم',
+      ),
     };
-    return Semantics(
-      container: true,
-      label: context.strings.text('Daily return summary'),
-      child: PremiumSurface(
-        emphasized: true,
-        padding: EdgeInsets.zero,
-        child: Theme(
-          data: _dashboardSurfaceTheme(context),
-          child: Container(
-            padding: PremiumDesignTokens.cardPaddingLarge,
-            decoration: BoxDecoration(
-              borderRadius: PremiumDesignTokens.cardRadius,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: dark
-                    ? const [
-                        Color(0xF00A1724),
-                        Color(0xEE102235),
-                        Color(0xF207111D),
-                      ]
-                    : const [
-                        Color(0xF7F1F7F7),
-                        Color(0xF3E4F0F2),
-                        Color(0xF7EDF3EF),
-                      ],
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Semantics(
-                  header: true,
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                ),
-                if (report.daysAway >= 4) ...[
-                  const SizedBox(height: PremiumDesignTokens.spaceXs - 2),
-                  Text(
-                    context.strings.text(
-                      'No backfill is required. Your earlier local records remain usable; today can be a fresh observation.',
-                    ),
-                  ),
-                ],
-                const SizedBox(height: PremiumDesignTokens.spaceMd),
-                Wrap(
-                  spacing: PremiumDesignTokens.spaceSm,
-                  runSpacing: PremiumDesignTokens.spaceSm,
-                  children: [
-                    _Status(
-                      label: context.strings.text('Weight'),
-                      recorded: report.hasWeight,
-                    ),
-                    _Status(
-                      label: context.strings.text('Meals'),
-                      recorded: report.hasMeals,
-                    ),
-                    _Status(
-                      label: context.strings.text('Water'),
-                      recorded: report.hasWater,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: PremiumDesignTokens.spaceMd),
-                _InsightGrid(
-                  insights: [
-                    (context.strings.text('What changed'), changedSummary),
-                    (
-                      context.strings.text('Important missing evidence'),
-                      missingEvidence,
-                    ),
-                    if (report.hasPrimaryAction) ...[
-                      (
-                        context.strings.text('Why this action appears'),
-                        actionReason,
-                      ),
-                      (context.strings.text('Evidence used'), changedSummary),
-                      (
-                        context.strings.text('Evidence missing'),
-                        missingEvidence,
-                      ),
-                      (
-                        context.strings.text('Confidence'),
-                        _confidenceLabel(context),
-                      ),
-                    ],
-                  ],
-                ),
-                if (report.hasPrimaryAction) ...[
-                  if (recommendationTimeHorizon != null) ...[
-                    const SizedBox(height: PremiumDesignTokens.spaceSm),
-                    _LabeledInsight(
-                      label: context.strings.text('Time horizon'),
-                      value: recommendationTimeHorizon!,
-                    ),
-                  ],
-                  if (alternativeExplanation != null) ...[
-                    const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
-                    _LabeledInsight(
-                      label: context.strings.text('Alternative explanation'),
-                      value: alternativeExplanation!,
-                    ),
-                  ],
-                  if (onPrimaryAction != null) ...[
-                    const SizedBox(height: PremiumDesignTokens.spaceMd),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: onPrimaryAction,
-                        child: Text(actionTitle),
-                      ),
-                    ),
-                  ],
-                  if (onDismissRecommendation != null ||
-                      onCorrectRecommendation != null ||
-                      onRecommendationFeedback != null) ...[
-                    const SizedBox(height: PremiumDesignTokens.spaceXs + 2),
-                    Wrap(
-                      spacing: PremiumDesignTokens.spaceSm,
-                      runSpacing: PremiumDesignTokens.spaceSm,
-                      children: [
-                        if (onDismissRecommendation != null)
-                          OutlinedButton(
-                            onPressed: onDismissRecommendation,
-                            child: Text(context.strings.text('Dismiss')),
-                          ),
-                        if (onCorrectRecommendation != null)
-                          OutlinedButton(
-                            onPressed: onCorrectRecommendation,
-                            child: Text(context.strings.text('Correct')),
-                          ),
-                        if (onRecommendationFeedback != null)
-                          OutlinedButton(
-                            onPressed: onRecommendationFeedback,
-                            child: Text(context.strings.text('Feedback')),
-                          ),
-                      ],
-                    ),
-                  ],
-                ] else
-                  Semantics(
-                    liveRegion: true,
-                    child: Text(
-                      context.strings.text(
-                        'No corrective action is needed from the evidence recorded today because the current evidence is insufficient or does not support a safer recommendation.',
-                      ),
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
-              ],
-            ),
-          ),
+    final desktop = MediaQuery.sizeOf(context).width >= 900;
+    final height = MediaQuery.textScalerOf(context)
+        .scale(desktop ? 92 : 132)
+        .clamp(desktop ? 92.0 : 132.0, desktop ? 120.0 : 190.0);
+    final pages = [
+      _FollowDayCard(
+        icon: Icons.monitor_weight_outlined,
+        label: tr('Weight', 'الوزن'),
+        recorded: report.hasWeight,
+        recordedText: tr('Today’s weight is recorded.', 'تم تسجيل وزن اليوم.'),
+        missingText: tr(
+          'Add a comparable weight when it suits you.',
+          'أضف قياس وزن قابلًا للمقارنة عندما يناسبك.',
         ),
       ),
+      _FollowDayCard(
+        icon: Icons.restaurant_outlined,
+        label: tr('Meals', 'الوجبات'),
+        recorded: report.hasMeals,
+        recordedText: tr(
+          'Today’s meals are contributing to your live totals.',
+          'تسهم وجبات اليوم في إجمالياتك الحالية.',
+        ),
+        missingText: tr(
+          'Record a meal to complete today’s nutrition picture.',
+          'سجّل وجبة لاستكمال صورة تغذية اليوم.',
+        ),
+      ),
+      _FollowDayCard(
+        icon: Icons.water_drop_outlined,
+        label: tr('Water', 'الماء'),
+        recorded: report.hasWater,
+        recordedText: tr(
+          'Today’s hydration is recorded.',
+          'تم تسجيل ترطيب اليوم.',
+        ),
+        missingText: tr(
+          'Record water as you move through the day.',
+          'سجّل الماء تدريجيًا خلال يومك.',
+        ),
+      ),
+    ];
+
+    final heading = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          tr('Follow Your Day', 'تابع يومك'),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+    final carousel = DashboardCarousel(
+      key: const Key('follow-your-day-carousel'),
+      height: height,
+      viewportFraction: .94,
+      semanticLabel: tr('Follow Your Day', 'تابع يومك'),
+      pages: pages,
+    );
+
+    return Semantics(
+      container: true,
+      label: tr('Follow Your Day', 'تابع يومك'),
+      child: desktop
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(width: 210, child: heading),
+                const SizedBox(width: PremiumDesignTokens.spaceMd),
+                Expanded(child: carousel),
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                heading,
+                const SizedBox(height: PremiumDesignTokens.spaceSm),
+                carousel,
+              ],
+            ),
     );
   }
 
+  // Retained for backwards-compatible recommendation semantics.
+  // ignore: unused_element
   String _confidenceLabel(BuildContext context) {
     final reliability = report.honesty.reliability;
     if (reliability == DataReliability.strong) {
@@ -219,6 +156,87 @@ class DailyReturnCard extends StatelessWidget {
       return context.strings.text('Low');
     }
     return context.strings.text('Insufficient data');
+  }
+}
+
+class _FollowDayCard extends StatelessWidget {
+  const _FollowDayCard({
+    required this.icon,
+    required this.label,
+    required this.recorded,
+    required this.recordedText,
+    required this.missingText,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool recorded;
+  final String recordedText;
+  final String missingText;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return PremiumSurface(
+      emphasized: recorded,
+      dashboardGlass: true,
+      padding: const EdgeInsets.all(PremiumDesignTokens.spaceMd),
+      child: Row(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: scheme.primary.withValues(alpha: .13),
+              border: Border.all(color: scheme.primary.withValues(alpha: .28)),
+            ),
+            child: Icon(icon, color: scheme.primary),
+          ),
+          const SizedBox(width: PremiumDesignTokens.spaceMd),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w900),
+                      ),
+                    ),
+                    Icon(
+                      recorded
+                          ? Icons.check_circle_rounded
+                          : Icons.circle_outlined,
+                      size: 20,
+                      color: recorded
+                          ? const Color(0xFF65E5B1)
+                          : scheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 7),
+                Text(
+                  recorded ? recordedText : missingText,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -252,6 +270,7 @@ class _LabeledInsight extends StatelessWidget {
   );
 }
 
+// ignore: unused_element
 class _InsightGrid extends StatelessWidget {
   const _InsightGrid({required this.insights});
 
@@ -298,6 +317,7 @@ class _InsightGrid extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _Status extends StatelessWidget {
   const _Status({required this.label, required this.recorded});
   final String label;
@@ -325,6 +345,7 @@ class _Status extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 ThemeData _dashboardSurfaceTheme(BuildContext context) {
   final base = Theme.of(context);
   final dark = base.brightness == Brightness.dark;

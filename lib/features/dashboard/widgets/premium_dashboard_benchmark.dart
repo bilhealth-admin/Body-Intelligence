@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../shared/widgets/premium_surface.dart';
+import 'dashboard_carousel.dart';
 
 /// Presentation-only benchmark for the premium dashboard hierarchy.
 ///
@@ -17,6 +18,9 @@ class PremiumDashboardBenchmark extends StatelessWidget {
     required this.confidence,
     required this.onAction,
     required this.dailyIntelligence,
+    this.hero,
+    this.progressSection,
+    this.personalHealthAi,
     required this.bodyTwinSummary,
     required this.bodyTwinEvidence,
     required this.nutritionSummary,
@@ -25,6 +29,8 @@ class PremiumDashboardBenchmark extends StatelessWidget {
     required this.trendEvidence,
     required this.loggingItems,
     this.showRecommendation = true,
+    this.insightTitle,
+    this.insightSummary,
   });
 
   final bool arabic;
@@ -34,6 +40,9 @@ class PremiumDashboardBenchmark extends StatelessWidget {
   final String confidence;
   final VoidCallback? onAction;
   final Widget dailyIntelligence;
+  final Widget? hero;
+  final Widget? progressSection;
+  final Widget? personalHealthAi;
   final String bodyTwinSummary;
   final String bodyTwinEvidence;
   final String nutritionSummary;
@@ -42,214 +51,273 @@ class PremiumDashboardBenchmark extends StatelessWidget {
   final String trendEvidence;
   final List<DashboardLoggingItem> loggingItems;
   final bool showRecommendation;
+  final String? insightTitle;
+  final String? insightSummary;
 
   String tr(String en, String ar) => arabic ? ar : en;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final highContrast = MediaQuery.highContrastOf(context);
     final dark = Theme.of(context).brightness == Brightness.dark;
     final contentColor = dark ? scheme.onSurface : const Color(0xFF061A2B);
-    final mutedColor = dark ? scheme.onSurfaceVariant : const Color(0xFF294456);
-    return Column(
+    final phone = MediaQuery.sizeOf(context).width < 600;
+    final scaledHeight = MediaQuery.textScalerOf(
+      context,
+    ).scale(phone ? 280 : 190).clamp(phone ? 280.0 : 190.0, 300.0);
+    final insightCards = <Widget>[
+      _CompactInsightCard(
+        key: const Key('dashboard-nutrition-context'),
+        eyebrow: tr('NUTRITION CONTEXT', 'سياق التغذية'),
+        title: showRecommendation
+            ? tr('Protein below target', 'البروتين أقل من الهدف')
+            : tr('Nutrition signal', 'إشارة التغذية'),
+        interpretation: nutritionSummary,
+        evidence: nutritionEvidence,
+        accent: const Color(0xFF65E5B1),
+      ),
+      _CompactInsightCard(
+        key: const Key('dashboard-action-insight'),
+        eyebrow: tr('DAILY INTELLIGENCE', 'الذكاء اليومي'),
+        title: insightTitle ?? actionTitle,
+        interpretation: insightSummary ?? actionReason,
+        evidence: actionEvidence,
+        accent: const Color(0xFF58D8FF),
+        onTap: onAction,
+      ),
+    ];
+
+    return LayoutBuilder(
       key: const Key('premium-dashboard-benchmark'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (showRecommendation)
-          Semantics(
-            container: true,
-            label: tr(
-              'Protein recommendation. $actionTitle. Evidence: $actionEvidence. '
-                  'Confidence: $confidence.',
-              'توصية البروتين. $actionTitle. الدليل: $actionEvidence. '
-                  'الثقة: $confidence.',
-            ),
-            child: PremiumSurface(
-              semanticContainer: false,
-              emphasized: true,
-              padding: EdgeInsets.zero,
-              child: Container(
-                key: const Key('dashboard-one-best-action'),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: PremiumDesignTokens.spaceLg,
-                  vertical: PremiumDesignTokens.spaceMd,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: PremiumDesignTokens.cardRadius,
-                  gradient: LinearGradient(
-                    begin: AlignmentDirectional.topStart,
-                    end: AlignmentDirectional.bottomEnd,
-                    colors: highContrast
-                        ? [scheme.surface, scheme.surface]
-                        : dark
-                        ? [
-                            const Color(0xF20A1827),
-                            const Color(0xEC102536),
-                            const Color(0xF207111D),
-                          ]
-                        : [
-                            const Color(0xFFF2F8FA),
-                            const Color(0xFFE2EFF3),
-                            const Color(0xFFEAF2F3),
-                          ],
-                  ),
-                  border: Border.all(
-                    color: highContrast
-                        ? scheme.primary
-                        : scheme.outlineVariant.withValues(alpha: .86),
-                    width: highContrast ? 2 : 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: dark
-                          ? Colors.black.withValues(alpha: .20)
-                          : const Color(0xFF4F7887).withValues(alpha: .12),
-                      blurRadius: dark ? 22 : 18,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+      builder: (context, constraints) {
+        final insights = _KeyInsightsDeck(
+          title: tr("Today's Key Insights", 'أهم رؤى اليوم'),
+          contentColor: contentColor,
+          height: scaledHeight,
+          pages: insightCards,
+          compact: phone,
+        );
+        Widget intelligenceFor(double width) {
+          if (personalHealthAi == null) return insights;
+          if (width < 340) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                personalHealthAi!,
+                const SizedBox(height: PremiumDesignTokens.spaceMd),
+                insights,
+              ],
+            );
+          }
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: personalHealthAi!),
+              const SizedBox(width: PremiumDesignTokens.spaceMd),
+              Expanded(child: insights),
+            ],
+          );
+        }
+
+        final top = hero == null
+            ? intelligenceFor(constraints.maxWidth)
+            : constraints.maxWidth < 1180
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  hero!,
+                  const SizedBox(height: PremiumDesignTokens.spaceMd),
+                  intelligenceFor(constraints.maxWidth),
+                ],
+              )
+            : Directionality(
+                textDirection: TextDirection.ltr,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _Eyebrow(
-                      label: tr('PROTEIN RECOMMENDATION', 'توصية البروتين'),
-                    ),
-                    const SizedBox(height: PremiumDesignTokens.spaceXs),
-                    Semantics(
-                      header: true,
-                      child: Text(
-                        actionTitle,
-                        style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(
-                              color: contentColor,
-                              fontWeight: FontWeight.w900,
-                              height: 1.12,
-                            ),
+                    Expanded(flex: 11, child: hero!),
+                    const SizedBox(width: PremiumDesignTokens.spaceMd),
+                    Expanded(
+                      flex: 9,
+                      child: LayoutBuilder(
+                        builder: (context, panelConstraints) =>
+                            intelligenceFor(panelConstraints.maxWidth),
                       ),
                     ),
-                    const SizedBox(height: PremiumDesignTokens.spaceXs),
-                    Text(
-                      actionReason,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: mutedColor,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: PremiumDesignTokens.spaceMd),
-                    _EvidenceSequence(
-                      evidence: actionEvidence,
-                      confidence: confidence,
-                      arabic: arabic,
-                    ),
-                    if (onAction != null) ...[
-                      const SizedBox(height: PremiumDesignTokens.spaceMd),
-                      Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: FilledButton.icon(
-                          onPressed: onAction,
-                          icon: const SizedBox.shrink(),
-                          style: FilledButton.styleFrom(
-                            textStyle: Theme.of(context).textTheme.labelLarge,
-                            backgroundColor: scheme.primary,
-                            foregroundColor: scheme.onPrimary,
-                            elevation: dark ? 2 : 1,
-                            shadowColor: scheme.primary.withValues(alpha: .28),
-                          ),
-                          label: Text(
-                            tr('Take this action', 'نفّذ هذا الإجراء'),
-                          ),
-                        ),
-                      ),
-                    ],
                   ],
                 ),
-              ),
-            ),
-          ),
-        if (showRecommendation)
-          const SizedBox(height: PremiumDesignTokens.spaceMd),
-        Semantics(
+              );
+        final dailyContent = Semantics(
           container: true,
           label: tr('Daily Intelligence', 'الذكاء اليومي'),
           child: dailyIntelligence,
-        ),
-        const SizedBox(height: PremiumDesignTokens.spaceMd),
-        Semantics(
-          header: true,
-          child: Text(
-            tr('Key insights today', 'أهم رؤى اليوم'),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: contentColor,
-              fontWeight: FontWeight.w900,
+        );
+        final pairDaySections = constraints.maxWidth >= 1400;
+        final daily = pairDaySections
+            ? PremiumSurface(
+                dashboardGlass: true,
+                padding: const EdgeInsets.all(PremiumDesignTokens.spaceMd),
+                child: dailyContent,
+              )
+            : dailyContent;
+        final dayAndProgress = progressSection != null && pairDaySections
+            ? Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: daily),
+                  const SizedBox(width: PremiumDesignTokens.spaceMd),
+                  Expanded(child: progressSection!),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  daily,
+                  if (progressSection != null) ...[
+                    const SizedBox(height: PremiumDesignTokens.spaceMd),
+                    progressSection!,
+                  ],
+                ],
+              );
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            top,
+            const SizedBox(height: PremiumDesignTokens.spaceMd),
+            dayAndProgress,
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _KeyInsightsDeck extends StatelessWidget {
+  const _KeyInsightsDeck({
+    required this.title,
+    required this.contentColor,
+    required this.height,
+    required this.pages,
+    this.compact = false,
+  });
+
+  final String title;
+  final Color contentColor;
+  final double height;
+  final List<Widget> pages;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    return PremiumSurface(
+      dashboardGlass: true,
+      padding: compact
+          ? const EdgeInsets.all(PremiumDesignTokens.spaceSm)
+          : PremiumDesignTokens.cardPaddingLarge,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(
+              title,
+              style:
+                  (compact
+                          ? Theme.of(context).textTheme.titleMedium
+                          : Theme.of(context).textTheme.titleLarge)
+                      ?.copyWith(
+                        color: contentColor,
+                        fontWeight: FontWeight.w900,
+                      ),
             ),
           ),
-        ),
-        const SizedBox(height: PremiumDesignTokens.spaceSm),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final columns = constraints.maxWidth >= 1080
-                ? 3
-                : constraints.maxWidth >= 680
-                ? 2
-                : 1;
-            final gap = PremiumDesignTokens.spaceMd;
-            final width =
-                (constraints.maxWidth - gap * (columns - 1)) / columns;
-            return Wrap(
-              spacing: gap,
-              runSpacing: gap,
-              children: [
-                SizedBox(
-                  width: width,
-                  child: _IntelligencePreview(
-                    key: const Key('dashboard-body-twin-preview'),
-                    eyebrow: tr('BODY TWIN', 'توأم الجسم'),
-                    title: tr('Modeled direction', 'الاتجاه المُنمذج'),
-                    interpretation: bodyTwinSummary,
-                    evidence: bodyTwinEvidence,
-                    unknownLabel: tr(
-                      'A scenario is not a diagnosis or certainty.',
-                      'السيناريو ليس تشخيصًا أو يقينًا.',
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: width,
-                  child: _IntelligencePreview(
-                    key: const Key('dashboard-nutrition-context'),
-                    eyebrow: tr('NUTRITION CONTEXT', 'سياق التغذية'),
-                    title: tr('What matters today', 'ما يهم اليوم'),
-                    interpretation: nutritionSummary,
-                    evidence: nutritionEvidence,
-                    unknownLabel: tr(
-                      'Unavailable nutrients remain unknown, never zero.',
-                      'العناصر غير المتاحة تظل مجهولة ولا تُعرض كصفر.',
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: width,
-                  child: _IntelligencePreview(
-                    key: const Key('dashboard-trend-explanation'),
-                    eyebrow: tr('TREND EXPLANATION', 'تفسير الاتجاه'),
-                    title: tr('What changed', 'ما الذي تغيّر'),
-                    interpretation: trendSummary,
-                    evidence: trendEvidence,
-                    unknownLabel: tr(
-                      'A single reading does not prove a cause.',
-                      'القراءة الواحدة لا تثبت سببًا.',
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-        const SizedBox(height: PremiumDesignTokens.spaceMd),
-        _LoggingCompleteness(arabic: arabic, items: loggingItems),
-      ],
+          const SizedBox(height: PremiumDesignTokens.spaceSm),
+          DashboardCarousel(
+            key: const Key('dashboard-key-insights-carousel'),
+            height: height,
+            viewportFraction: .88,
+            compactControls: compact,
+            semanticLabel: title,
+            pages: pages,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CompactInsightCard extends StatelessWidget {
+  const _CompactInsightCard({
+    super.key,
+    required this.eyebrow,
+    required this.title,
+    required this.interpretation,
+    required this.evidence,
+    required this.accent,
+    this.onTap,
+  });
+
+  final String eyebrow;
+  final String title;
+  final String interpretation;
+  final String evidence;
+  final Color accent;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return PremiumSurface(
+      onTap: onTap,
+      dashboardGlass: true,
+      padding: const EdgeInsets.all(PremiumDesignTokens.spaceSm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.auto_awesome_rounded, size: 20, color: accent),
+          const SizedBox(height: PremiumDesignTokens.spaceXs),
+          Text(
+            eyebrow,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: accent,
+              fontWeight: FontWeight.w900,
+              letterSpacing: .6,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 6),
+          Expanded(
+            child: Text(
+              interpretation,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+                height: 1.35,
+              ),
+            ),
+          ),
+          Text(
+            evidence,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -261,6 +329,7 @@ class DashboardLoggingItem {
   final bool recorded;
 }
 
+// ignore: unused_element
 class _EvidenceSequence extends StatelessWidget {
   const _EvidenceSequence({
     required this.evidence,
@@ -357,8 +426,10 @@ class _EvidencePill extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _IntelligencePreview extends StatelessWidget {
   const _IntelligencePreview({
+    // ignore: unused_element_parameter
     super.key,
     required this.eyebrow,
     required this.title,
@@ -449,6 +520,7 @@ class _IntelligencePreview extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _LoggingCompleteness extends StatelessWidget {
   const _LoggingCompleteness({required this.arabic, required this.items});
 

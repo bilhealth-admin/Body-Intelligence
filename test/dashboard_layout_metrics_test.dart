@@ -27,9 +27,9 @@ void main() {
     expect(DashboardLayoutMetrics.resolve(1280).useTwoRegions, isFalse);
   });
 
-  test('uses two useful regions on genuinely wide viewports', () {
+  test('keeps the flagship hero full width on genuinely wide viewports', () {
     final metrics = DashboardLayoutMetrics.resolve(1600);
-    expect(metrics.useTwoRegions, isTrue);
+    expect(metrics.useTwoRegions, isFalse);
     expect(metrics.contentFlex, greaterThan(metrics.heroFlex));
   });
 }

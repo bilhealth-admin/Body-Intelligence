@@ -85,7 +85,25 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('daily-log-body-context')),
+        500,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
       expect(find.text('hello notes'), findsOneWidget);
+      expect(find.byKey(const Key('body-context-other-field')), findsOneWidget);
+      expect(find.text('سياق الجسم'), findsOneWidget);
+      expect(find.text('نوم أقل من المعتاد'), findsOneWidget);
+      expect(find.text('وجبة عالية الصوديوم'), findsOneWidget);
+      expect(
+        find.textContaining('هل هناك ما قد يفسر تغيرات جسمك اليوم؟'),
+        findsNothing,
+      );
+
+      await tester.tap(find.byKey(const Key('body-context-nothingNotable')));
+      await tester.pump();
+      expect(find.byKey(const Key('body-context-other-field')), findsNothing);
 
       expect(find.textContaining('private meals detail'), findsNothing);
       expect(find.textContaining('private water detail'), findsNothing);

@@ -142,7 +142,7 @@ class ResponsiveAppShell extends StatelessWidget {
               selectedIndex: index,
               items: items,
               onSelected: navigate,
-              onProfile: () => context.go('/settings'),
+              onProfile: () => context.go('/profile-settings'),
               profileLabel: AppLocalizations.of(context).get('profile'),
             ),
           ),
@@ -216,6 +216,7 @@ class _GlassTopNavigation extends StatelessWidget {
                     const SizedBox(width: 8),
                     Flexible(
                       child: _TopNavigationItem(
+                        key: const Key('shell-profile-control'),
                         item: (
                           icon: Icons.account_circle_outlined,
                           selected: Icons.account_circle_rounded,
@@ -238,6 +239,7 @@ class _GlassTopNavigation extends StatelessWidget {
 
 class _TopNavigationItem extends StatelessWidget {
   const _TopNavigationItem({
+    super.key,
     required this.item,
     required this.selected,
     required this.onTap,
@@ -357,21 +359,20 @@ class _GlassQuickAdd extends StatelessWidget {
       height: 62,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withValues(alpha: .22),
-            const Color(0xFF54D9FF).withValues(alpha: .13),
-            const Color(0xFF765FFF).withValues(alpha: .12),
-          ],
-        ),
+        color: const Color(0xFF087FCE),
         boxShadow: const [
-          BoxShadow(color: Color(0x704BD8FF), blurRadius: 28, spreadRadius: -7),
+          BoxShadow(
+            color: Color(0x66043A68),
+            blurRadius: 22,
+            spreadRadius: 1,
+            offset: Offset(0, 8),
+          ),
         ],
       ),
       child: IconButton(
         tooltip: context.strings.text('Quick Add'),
         onPressed: onTap,
-        icon: const Icon(Icons.add_rounded, color: Color(0xFFF1F5F8), size: 30),
+        icon: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
       ),
     );
   }

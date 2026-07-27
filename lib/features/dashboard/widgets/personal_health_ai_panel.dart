@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../features/ai_platform/domain/personal_health_ai.dart';
 import '../../../shared/widgets/premium_surface.dart';
+import 'dashboard_carousel.dart';
 
 class PersonalHealthAiPanel extends StatelessWidget {
   const PersonalHealthAiPanel({
@@ -10,6 +11,7 @@ class PersonalHealthAiPanel extends StatelessWidget {
     required this.arabic,
     required this.todayHasMeals,
     required this.decisionCount,
+    this.compact = false,
     super.key,
   });
 
@@ -17,6 +19,7 @@ class PersonalHealthAiPanel extends StatelessWidget {
   final bool arabic;
   final bool todayHasMeals;
   final int decisionCount;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +41,7 @@ class PersonalHealthAiPanel extends StatelessWidget {
           'Robust timestamp-aware trend; new weights replace stale projections.',
           'اتجاه متين يراعي التوقيت؛ القياسات الجديدة تصحح التوقعات السابقة.',
         ),
-        missing: trend.missingEvidence,
+        missing: _localizedMissing(trend.missingEvidence, arabic),
       ),
       _AiCardData(
         title: tr('Adaptive TDEE', 'الإنفاق التكيفي'),
@@ -54,13 +57,16 @@ class PersonalHealthAiPanel extends StatelessWidget {
           'Formula prior calibrates only with a complete calorie ledger.',
           'تقدير أولي بالمعادلة لا يُعاير إلا بسجل سعرات مكتمل.',
         ),
-        missing: snapshot.tdee.missingEvidence,
+        missing: _localizedMissing(snapshot.tdee.missingEvidence, arabic),
       ),
       _AiCardData(
         title: tr('Tissue vs Fluid Signal', 'إشارة النسيج مقابل السوائل'),
         result: snapshot.tissueFluid.probableTissueChangeKg == null
             ? tr('Possible fluid influence', 'تأثير سوائل محتمل')
-            : tr('Mixed, calorie-supported signal', 'إشارة مختلطة مدعومة بالسعرات'),
+            : tr(
+                'Mixed, calorie-supported signal',
+                'إشارة مختلطة مدعومة بالسعرات',
+              ),
         state: snapshot.tissueFluid.probableTissueChangeKg == null
             ? HealthAiLearningState.learning
             : HealthAiLearningState.calibrating,
@@ -69,7 +75,10 @@ class PersonalHealthAiPanel extends StatelessWidget {
           'Scale change is not treated as exact fat change.',
           'تغير الميزان لا يُعامل كتغير دهون دقيق.',
         ),
-        missing: snapshot.tissueFluid.missingEvidence,
+        missing: _localizedMissing(
+          snapshot.tissueFluid.missingEvidence,
+          arabic,
+        ),
       ),
       _AiCardData(
         title: tr('Goal Forecast', 'توقع الهدف'),
@@ -82,7 +91,7 @@ class PersonalHealthAiPanel extends StatelessWidget {
           'Both current phase and full journey remain represented.',
           'تظل المرحلة الحالية والرحلة الكاملة ممثلتين.',
         ),
-        missing: trend.missingEvidence,
+        missing: _localizedMissing(trend.missingEvidence, arabic),
       ),
       _AiCardData(
         title: tr('Plateau Risk', 'خطر الثبات'),
@@ -99,7 +108,7 @@ class PersonalHealthAiPanel extends StatelessWidget {
           'قياس أو قياسان مسطحان أو مشوشان لا يطلقان تنبيهًا.',
         ),
         missing: trend.observationCount < 5
-            ? const ['more weight observations']
+            ? [tr('more weight observations', 'قياسات وزن إضافية')]
             : const [],
       ),
       _AiCardData(
@@ -114,7 +123,10 @@ class PersonalHealthAiPanel extends StatelessWidget {
           'Long-term and short-term directions are kept separate.',
           'يُفصل الاتجاه طويل المدى عن قصير المدى.',
         ),
-        missing: snapshot.fullJourney.missingEvidence,
+        missing: _localizedMissing(
+          snapshot.fullJourney.missingEvidence,
+          arabic,
+        ),
       ),
       _AiCardData(
         title: tr('Today’s Ledger Status', 'حالة سجل اليوم'),
@@ -127,13 +139,18 @@ class PersonalHealthAiPanel extends StatelessWidget {
           'Only recorded local entries contribute.',
           'تساهم الإدخالات المحلية المسجلة فقط.',
         ),
-        missing: todayHasMeals ? const [] : const ['today’s meal evidence'],
+        missing: todayHasMeals
+            ? const []
+            : [tr('today’s meal evidence', 'بيانات وجبات اليوم')],
       ),
       _AiCardData(
         title: tr('Decision Learning Status', 'حالة تعلم القرارات'),
         result: decisionCount == 0
             ? tr('No recorded outcomes yet', 'لا نتائج مسجلة بعد')
-            : tr('$decisionCount durable decisions', '$decisionCount قرارات محفوظة'),
+            : tr(
+                '$decisionCount durable decisions',
+                '$decisionCount قرارات محفوظة',
+              ),
         state: decisionCount == 0
             ? HealthAiLearningState.initial
             : HealthAiLearningState.learning,
@@ -143,7 +160,12 @@ class PersonalHealthAiPanel extends StatelessWidget {
           'لا يفترض BIL أن التوصية اتُبعت.',
         ),
         missing: decisionCount == 0
-            ? const ['an observable action and later outcome']
+            ? [
+                tr(
+                  'an observable action and later outcome',
+                  'إجراء قابل للملاحظة ونتيجة لاحقة',
+                ),
+              ]
             : const [],
       ),
     ];
@@ -153,13 +175,20 @@ class PersonalHealthAiPanel extends StatelessWidget {
       label: tr('Personal Health AI', 'الذكاء الصحي الشخصي'),
       child: PremiumSurface(
         key: const Key('personal-health-ai-panel'),
-        padding: PremiumDesignTokens.cardPaddingLarge,
+        dashboardGlass: true,
+        padding: compact
+            ? const EdgeInsets.all(PremiumDesignTokens.spaceSm)
+            : PremiumDesignTokens.cardPaddingLarge,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
               tr('Personal Health AI', 'الذكاء الصحي الشخصي'),
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: compact
+                  ? Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    )
+                  : Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: PremiumDesignTokens.spaceXs),
             Text(
@@ -167,39 +196,54 @@ class PersonalHealthAiPanel extends StatelessWidget {
                 'What BIL knows now — and what it is still learning.',
                 'ما يعرفه BIL الآن — وما زال يتعلمه.',
               ),
+              maxLines: compact ? 2 : null,
+              overflow: compact ? TextOverflow.ellipsis : null,
+              style: compact ? Theme.of(context).textTheme.bodySmall : null,
             ),
-            const SizedBox(height: PremiumDesignTokens.spaceMd),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final columns = constraints.maxWidth >= 900
-                    ? 3
-                    : constraints.maxWidth >= 560
-                    ? 2
-                    : 1;
-                final gap = PremiumDesignTokens.spaceSm;
-                final width =
-                    (constraints.maxWidth - gap * (columns - 1)) / columns;
-                return Wrap(
-                  spacing: gap,
-                  runSpacing: gap,
-                  children: [
-                    for (final card in cards)
-                      SizedBox(
-                        width: width,
-                        child: _AiCard(
-                          data: card,
-                          arabic: arabic,
-                          updatedAt: snapshot.asOf,
-                        ),
-                      ),
-                  ],
-                );
-              },
+            SizedBox(
+              height: compact
+                  ? PremiumDesignTokens.spaceSm
+                  : PremiumDesignTokens.spaceMd,
+            ),
+            DashboardCarousel(
+              key: const Key('personal-health-ai-carousel'),
+              height: MediaQuery.textScalerOf(context)
+                  .scale(compact ? 280 : 218)
+                  .clamp(compact ? 280.0 : 218.0, compact ? 300.0 : 280.0),
+              viewportFraction: .88,
+              compactControls: compact,
+              semanticLabel: tr('Personal Health AI', 'الذكاء الصحي الشخصي'),
+              pages: [
+                for (final card in cards)
+                  _AiCard(data: card, arabic: arabic, updatedAt: snapshot.asOf),
+              ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  List<String> _localizedMissing(List<String> values, bool arabic) {
+    if (!arabic) return values;
+    return values
+        .map(
+          (value) => switch (value) {
+            'a second valid weight measurement' => 'قياس وزن صالح ثانٍ',
+            'enough elapsed time between measurements' =>
+              'فاصل زمني كافٍ بين القياسات',
+            'more comparable measurements to narrow uncertainty' =>
+              'قياسات إضافية قابلة للمقارنة لتقليل عدم اليقين',
+            'complete calorie intake for at least half the interval' =>
+              'سجل سعرات مكتمل لنصف الفترة على الأقل',
+            'more complete calorie days' => 'أيام إضافية مكتملة السعرات',
+            'profile and first weight' => 'الملف الشخصي وأول قياس وزن',
+            'two valid weights' => 'قياسان صالحان للوزن',
+            'calorie evidence' => 'بيانات السعرات',
+            _ => 'بيانات إضافية قابلة للمقارنة',
+          },
+        )
+        .toList();
   }
 }
 
@@ -218,36 +262,87 @@ class _AiCard extends StatelessWidget {
   Widget build(BuildContext context) {
     String tr(String en, String ar) => arabic ? ar : en;
     final missing = data.missing.isEmpty ? null : data.missing.first;
-    return Card(
-      margin: EdgeInsets.zero,
+    final compact = MediaQuery.sizeOf(context).width < 600;
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: .105),
+            const Color(0xFF5BDAFF).withValues(alpha: .045),
+            Colors.white.withValues(alpha: .035),
+          ],
+        ),
+        border: Border.all(color: Colors.white.withValues(alpha: .14)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: .14),
+            blurRadius: 14,
+            offset: const Offset(0, 7),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(PremiumDesignTokens.spaceMd),
+        padding: EdgeInsets.all(
+          compact ? PremiumDesignTokens.spaceXs : PremiumDesignTokens.spaceSm,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(data.title, style: Theme.of(context).textTheme.labelLarge),
-            const SizedBox(height: 6),
-            Text(data.result, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
+            Text(
+              data.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(
+                context,
+              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w900),
+            ),
+            SizedBox(height: compact ? 3 : 5),
+            Text(
+              data.result,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: compact
+                  ? Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    )
+                  : Theme.of(context).textTheme.titleSmall,
+            ),
+            SizedBox(height: compact ? 3 : 6),
             Text(
               '${_state(data.state, tr)} · ${_confidence(data.confidence, tr)}',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.labelMedium,
             ),
-            const SizedBox(height: 6),
-            Text(data.explanation),
+            SizedBox(height: compact ? 3 : 5),
+            Expanded(
+              child: Text(
+                data.explanation,
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
             if (missing != null) ...[
-              const SizedBox(height: 6),
+              SizedBox(height: compact ? 3 : 5),
               Text(
                 tr('Learning: $missing', 'قيد التعلم: $missing'),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],
-            const SizedBox(height: 8),
+            SizedBox(height: compact ? 3 : 6),
             Text(
               tr(
                 'Updated ${TimeOfDay.fromDateTime(updatedAt).format(context)}',
                 'آخر تحديث ${TimeOfDay.fromDateTime(updatedAt).format(context)}',
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -271,10 +366,8 @@ class _AiCard extends StatelessWidget {
     ),
   };
 
-  String _confidence(
-    double value,
-    String Function(String, String) tr,
-  ) => value <= 0
+  String _confidence(double value, String Function(String, String) tr) =>
+      value <= 0
       ? tr('No confidence yet', 'لا ثقة بعد')
       : value < 0.45
       ? tr('Low confidence', 'ثقة منخفضة')

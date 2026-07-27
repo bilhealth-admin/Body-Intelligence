@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,29 +45,31 @@ class DashboardHeader extends ConsumerWidget {
                           const Color(0xFF765DFF).withValues(alpha: .050),
                           Colors.white.withValues(alpha: .018),
                         ]
-                      : const [
-                          Color(0xFFE1EEF2),
-                          Color(0xFFD2E5EB),
-                          Color(0xFFDCE8EE),
-                          Color(0xFFE8F1F3),
+                      : [
+                          Colors.white.withValues(alpha: .88),
+                          const Color(0xFFF1F8FF).withValues(alpha: .76),
+                          const Color(0xFFE8F5FF).withValues(alpha: .68),
+                          Colors.white.withValues(alpha: .80),
                         ],
                 ),
                 border: Border.all(
                   color: isDark
                       ? Colors.white.withValues(alpha: .08)
-                      : const Color(0xFF55798A).withValues(alpha: .30),
+                      : const Color(0xFFB9D6F1).withValues(alpha: .82),
                 ),
                 boxShadow: [
                   BoxShadow(
                     color: isDark
                         ? const Color(0xFF46D4FF).withValues(alpha: .16)
-                        : const Color(0xFF315E73).withValues(alpha: .16),
-                    blurRadius: isDark ? 46 : 32,
+                        : const Color(0xFF3187D7).withValues(alpha: .18),
+                    blurRadius: isDark ? 46 : 42,
                     spreadRadius: isDark ? -14 : -10,
                   ),
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? .28 : .12),
-                    blurRadius: isDark ? 28 : 24,
+                    color: isDark
+                        ? Colors.black.withValues(alpha: .28)
+                        : const Color(0xFF315D88).withValues(alpha: .14),
+                    blurRadius: isDark ? 28 : 30,
                     offset: const Offset(0, 12),
                   ),
                 ],
@@ -91,7 +94,7 @@ class DashboardHeader extends ConsumerWidget {
                       ? Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            _BodyCopy(arabic: arabic, hasWeight: hasWeight),
+                            _BodyCopy(arabic: arabic),
                             const SizedBox(height: 22),
                             _SignalOrb(
                               arabic: arabic,
@@ -99,28 +102,45 @@ class DashboardHeader extends ConsumerWidget {
                               value: value,
                               unit: unit,
                             ),
+                            const SizedBox(height: 12),
+                            _SignalMeaning(
+                              arabic: arabic,
+                              hasWeight: hasWeight,
+                            ),
                           ],
                         )
-                      : Row(
-                          children: [
-                            Expanded(
-                              flex: 7,
-                              child: _BodyCopy(
-                                arabic: arabic,
-                                hasWeight: hasWeight,
+                      : Directionality(
+                          textDirection: arabic
+                              ? TextDirection.rtl
+                              : TextDirection.ltr,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 7,
+                                child: _BodyCopy(arabic: arabic),
                               ),
-                            ),
-                            const SizedBox(width: 24),
-                            Expanded(
-                              flex: 4,
-                              child: _SignalOrb(
-                                arabic: arabic,
-                                hasWeight: hasWeight,
-                                value: value,
-                                unit: unit,
+                              const SizedBox(width: 24),
+                              Expanded(
+                                flex: 4,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _SignalOrb(
+                                      arabic: arabic,
+                                      hasWeight: hasWeight,
+                                      value: value,
+                                      unit: unit,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    _SignalMeaning(
+                                      arabic: arabic,
+                                      hasWeight: hasWeight,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         );
                 },
               ),
@@ -133,7 +153,32 @@ class DashboardHeader extends ConsumerWidget {
 }
 
 class _BodyCopy extends StatelessWidget {
-  const _BodyCopy({required this.arabic, required this.hasWeight});
+  const _BodyCopy({required this.arabic});
+
+  final bool arabic;
+
+  String tr(String en, String ar) => arabic ? ar : en;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: arabic ? TextDirection.rtl : TextDirection.ltr,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _MetalText(
+            tr("Today's Signal", 'إشارة اليوم'),
+            size: 30,
+            weight: FontWeight.w900,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SignalMeaning extends StatelessWidget {
+  const _SignalMeaning({required this.arabic, required this.hasWeight});
 
   final bool arabic;
   final bool hasWeight;
@@ -142,75 +187,22 @@ class _BodyCopy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bodyColor = isDark
-        ? const Color(0xFFB8C5D1)
-        : const Color(0xFF294858);
-    return Directionality(
-      textDirection: arabic ? TextDirection.rtl : TextDirection.ltr,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              const _GlassBadge(
-                icon: Icons.lock_outline_rounded,
-                labelEn: 'Local only',
-                labelAr: 'محفوظ محليًا',
-              ),
-              _GlassBadge(
-                icon: hasWeight
-                    ? Icons.verified_outlined
-                    : Icons.add_circle_outline_rounded,
-                labelEn: hasWeight ? 'Latest trusted signal' : 'Starting point',
-                labelAr: hasWeight ? 'أحدث إشارة موثوقة' : 'نقطة البداية',
-              ),
-            ],
-          ),
-          const SizedBox(height: 22),
-          _MetalText(
-            tr(
-              'Your body intelligence, distilled for today',
-              'ذكاء جسمك، مُلخّص لليوم',
+    return _InsightGlass(
+      icon: hasWeight
+          ? Icons.psychology_alt_outlined
+          : Icons.monitor_weight_outlined,
+      title: hasWeight
+          ? tr('What this signal means', 'ماذا تعني هذه الإشارة؟')
+          : tr('The best next step', 'أفضل خطوة تالية'),
+      body: hasWeight
+          ? tr(
+              'BIL will not claim a trend until comparable measurements provide enough evidence.',
+              'لن يدّعي BIL وجود اتجاه قبل توفر قياسات قابلة للمقارنة وأدلة كافية.',
+            )
+          : tr(
+              'Record one trusted daily measurement to begin your private baseline.',
+              'سجّل قياسًا يوميًا موثوقًا لبدء خط أساسك الخاص.',
             ),
-            size: 30,
-            weight: FontWeight.w900,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            tr(
-              'A calm view of what matters now, why it matters, and the next useful action.',
-              'نظرة هادئة لما يهم الآن، ولماذا يهم، والخطوة التالية الأكثر فائدة.',
-            ),
-            style: TextStyle(
-              color: bodyColor,
-              fontSize: 15,
-              height: 1.5,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 18),
-          _InsightGlass(
-            icon: hasWeight
-                ? Icons.psychology_alt_outlined
-                : Icons.monitor_weight_outlined,
-            title: hasWeight
-                ? tr('What this signal means', 'ماذا تعني هذه الإشارة؟')
-                : tr('The best next step', 'أفضل خطوة تالية'),
-            body: hasWeight
-                ? tr(
-                    'BIL will not claim a trend until comparable measurements provide enough evidence.',
-                    'لن يدّعي BIL وجود اتجاه قبل توفر قياسات قابلة للمقارنة وأدلة كافية.',
-                  )
-                : tr(
-                    'Record one trusted daily measurement to begin your private baseline.',
-                    'سجّل قياسًا يوميًا موثوقًا لبدء خط أساسك الخاص.',
-                  ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -230,51 +222,40 @@ class _SignalOrb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      child: SizedBox.square(
-        dimension: 220,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    const Color(0xFF51DCFF).withValues(alpha: .20),
-                    const Color(0xFF765DFF).withValues(alpha: .09),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-            Container(
-              width: 176,
-              height: 176,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const SweepGradient(
-                  colors: [
-                    Color(0xFF90A2B3),
-                    Color(0xFFF5F8FA),
-                    Color(0xFF59D9FF),
-                    Color(0xFF846CFF),
-                    Color(0xFF90A2B3),
-                  ],
-                ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x704AD9FF),
-                    blurRadius: 36,
-                    spreadRadius: -8,
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.all(2),
+    final reducedMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    final ring = SizedBox.square(
+      dimension: 220,
+      child: CustomPaint(
+        painter: const _PremiumSignalRingPainter(),
+        child: Center(
+          child: ClipOval(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
               child: Container(
-                decoration: const BoxDecoration(
+                width: 154,
+                height: 154,
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xDB07111D),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.white.withValues(alpha: .11),
+                      const Color(0xFF0B1725).withValues(alpha: .84),
+                      const Color(0xFF050B15).withValues(alpha: .92),
+                    ],
+                  ),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: .16),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF4AD9FF).withValues(alpha: .18),
+                      blurRadius: 28,
+                      spreadRadius: -8,
+                    ),
+                  ],
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -282,39 +263,50 @@ class _SignalOrb extends StatelessWidget {
                     const Text(
                       'BIL®',
                       style: TextStyle(
-                        color: Color(0xFFE9EFF4),
-                        fontSize: 18,
+                        color: Color(0xFFDCE7EE),
+                        fontSize: 15,
                         fontWeight: FontWeight.w900,
+                        letterSpacing: .4,
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      hasWeight ? value : '—',
-                      style: const TextStyle(
-                        color: Color(0xFFF5F8FA),
-                        fontSize: 38,
-                        height: 1,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    if (hasWeight)
-                      Text(
-                        unit,
-                        style: const TextStyle(
-                          color: Color(0xFFB7C5D1),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
+                    const SizedBox(height: 7),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: hasWeight ? value : '—',
+                              style: const TextStyle(
+                                color: Color(0xFFF8FBFD),
+                                fontSize: 36,
+                                height: 1,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -1.4,
+                              ),
+                            ),
+                            if (hasWeight)
+                              TextSpan(
+                                text: ' $unit',
+                                style: const TextStyle(
+                                  color: Color(0xFFC2D0DA),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                          ],
                         ),
+                        maxLines: 1,
                       ),
-                    const SizedBox(height: 5),
+                    ),
+                    const SizedBox(height: 8),
                     Text(
                       hasWeight
                           ? (arabic ? 'إشارة اليوم' : 'Today signal')
                           : (arabic ? 'جاهز للبدء' : 'Ready to begin'),
-                      textAlign: TextAlign.center,
                       style: const TextStyle(
-                        color: Color(0xFFB7C5D1),
-                        fontSize: 12,
+                        color: Color(0xFF9FB1BF),
+                        fontSize: 11,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -322,68 +314,86 @@ class _SignalOrb extends StatelessWidget {
                 ),
               ),
             ),
-          ],
+          ),
         ),
       ),
+    );
+
+    return Align(
+      child: reducedMotion
+          ? ring
+          : TweenAnimationBuilder<double>(
+              tween: Tween(begin: .94, end: 1),
+              duration: const Duration(milliseconds: 700),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, child) => Transform.scale(
+                scale: value,
+                child: Opacity(opacity: value, child: child),
+              ),
+              child: ring,
+            ),
     );
   }
 }
 
-class _GlassBadge extends StatelessWidget {
-  const _GlassBadge({
-    required this.icon,
-    required this.labelEn,
-    required this.labelAr,
-  });
-
-  final IconData icon;
-  final String labelEn;
-  final String labelAr;
+class _PremiumSignalRingPainter extends CustomPainter {
+  const _PremiumSignalRingPainter();
 
   @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final foreground = isDark
-        ? const Color(0xFFD0DAE3)
-        : const Color(0xFF173B4D);
-
-    final arabic =
-        Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(99),
-        gradient: LinearGradient(
-          colors: isDark
-              ? [
-                  Colors.white.withValues(alpha: .095),
-                  const Color(0xFF51D8FF).withValues(alpha: .034),
-                ]
-              : const [Color(0xFFD3E5EA), Color(0xFFC9DFE7)],
-        ),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: .06)
-              : const Color(0xFF55798A).withValues(alpha: .28),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: foreground),
-          const SizedBox(width: 7),
-          Text(
-            arabic ? labelAr : labelEn,
-            style: TextStyle(
-              color: foreground,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final rect = Rect.fromCircle(center: center, radius: size.width * .42);
+    canvas.drawOval(
+      rect.shift(const Offset(0, 9)),
+      Paint()
+        ..color = Colors.black.withValues(alpha: .34)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15),
+    );
+    canvas.drawArc(
+      rect,
+      0,
+      math.pi * 2,
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 14
+        ..shader = const SweepGradient(
+          colors: [
+            Color(0xFF607382),
+            Color(0xFFF3F7FA),
+            Color(0xFF50D8FF),
+            Color(0xFF7765FF),
+            Color(0xFF607382),
+          ],
+        ).createShader(rect),
+    );
+    canvas.drawArc(
+      rect.deflate(5),
+      math.pi * 1.06,
+      math.pi * .70,
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = 3
+        ..color = Colors.white.withValues(alpha: .72),
+    );
+    canvas.drawArc(
+      rect.inflate(2),
+      -.6,
+      1.7,
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 9
+        ..strokeCap = StrokeCap.round
+        ..color = const Color(0xFF52DCFF).withValues(alpha: .36)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
     );
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _InsightGlass extends StatelessWidget {

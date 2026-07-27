@@ -13,6 +13,7 @@ class PremiumSurface extends StatefulWidget {
     this.onTap,
     this.semanticContainer = true,
     this.emphasized = false,
+    this.dashboardGlass = false,
   });
 
   final Widget child;
@@ -20,6 +21,7 @@ class PremiumSurface extends StatefulWidget {
   final VoidCallback? onTap;
   final bool semanticContainer;
   final bool emphasized;
+  final bool dashboardGlass;
 
   @override
   State<PremiumSurface> createState() => _PremiumSurfaceState();
@@ -33,6 +35,7 @@ class _PremiumSurfaceState extends State<PremiumSurface> {
   Widget build(BuildContext context) {
     final interactive = widget.onTap != null;
     final radius = PremiumDesignTokens.cardRadius;
+    final dark = Theme.of(context).brightness == Brightness.dark;
 
     final content = Padding(
       padding: widget.padding ?? PremiumDesignTokens.cardPadding,
@@ -75,8 +78,16 @@ class _PremiumSurfaceState extends State<PremiumSurface> {
               borderRadius: radius,
               child: BackdropFilter(
                 filter: ImageFilter.blur(
-                  sigmaX: widget.emphasized ? 26 : 20,
-                  sigmaY: widget.emphasized ? 26 : 20,
+                  sigmaX: widget.dashboardGlass
+                      ? (dark
+                            ? (widget.emphasized ? 18 : 14)
+                            : (widget.emphasized ? 12 : 8))
+                      : (widget.emphasized ? 26 : 20),
+                  sigmaY: widget.dashboardGlass
+                      ? (dark
+                            ? (widget.emphasized ? 18 : 14)
+                            : (widget.emphasized ? 12 : 8))
+                      : (widget.emphasized ? 26 : 20),
                 ),
                 child: AnimatedContainer(
                   duration: PremiumMotionTokens.durationFor(
@@ -88,32 +99,78 @@ class _PremiumSurfaceState extends State<PremiumSurface> {
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [
-                        Colors.white.withValues(alpha: hovered ? .115 : .085),
-                        const Color(
-                          0xFF58D7FF,
-                        ).withValues(alpha: widget.emphasized ? .065 : .032),
-                        const Color(
-                          0xFF7B60FF,
-                        ).withValues(alpha: widget.emphasized ? .060 : .028),
-                        Colors.white.withValues(alpha: .016),
-                      ],
+                      colors: widget.dashboardGlass && !dark
+                          ? [
+                              Colors.white.withValues(
+                                alpha: hovered ? .88 : .78,
+                              ),
+                              const Color(0xFFF5FBFF).withValues(alpha: .68),
+                              const Color(0xFFEAF5FF).withValues(alpha: .56),
+                              Colors.white.withValues(alpha: .72),
+                            ]
+                          : [
+                              Colors.white.withValues(
+                                alpha: widget.dashboardGlass
+                                    ? (hovered ? .16 : .115)
+                                    : (hovered ? .115 : .085),
+                              ),
+                              const Color(0xFF58D7FF).withValues(
+                                alpha: widget.dashboardGlass
+                                    ? (widget.emphasized ? .052 : .024)
+                                    : (widget.emphasized ? .065 : .032),
+                              ),
+                              const Color(0xFF7B60FF).withValues(
+                                alpha: widget.dashboardGlass
+                                    ? (widget.emphasized ? .046 : .020)
+                                    : (widget.emphasized ? .060 : .028),
+                              ),
+                              Colors.white.withValues(
+                                alpha: widget.dashboardGlass ? .010 : .016,
+                              ),
+                            ],
                     ),
+                    border: widget.dashboardGlass
+                        ? Border.all(
+                            color: dark
+                                ? Colors.white.withValues(
+                                    alpha: hovered ? .22 : .14,
+                                  )
+                                : const Color(
+                                    0xFFBFD8F4,
+                                  ).withValues(alpha: hovered ? .92 : .68),
+                          )
+                        : null,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF42CFFF).withValues(
-                          alpha: widget.emphasized
+                        color: const Color(0xFF3287D8).withValues(
+                          alpha: !dark && widget.dashboardGlass
+                              ? (hovered ? .18 : .10)
+                              : widget.emphasized
                               ? (hovered ? .22 : .15)
                               : (hovered ? .12 : .07),
                         ),
-                        blurRadius: widget.emphasized ? 38 : 28,
+                        blurRadius: widget.dashboardGlass
+                            ? (widget.emphasized ? 32 : 24)
+                            : (widget.emphasized ? 38 : 28),
                         spreadRadius: -12,
                       ),
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: .24),
-                        blurRadius: 22,
-                        offset: const Offset(0, 12),
+                        color: dark
+                            ? Colors.black.withValues(
+                                alpha: widget.dashboardGlass ? .20 : .24,
+                              )
+                            : const Color(0xFF315D88).withValues(alpha: .14),
+                        blurRadius: widget.dashboardGlass ? 20 : 22,
+                        offset: Offset(0, widget.dashboardGlass ? 10 : 12),
                       ),
+                      if (widget.dashboardGlass)
+                        BoxShadow(
+                          color: Colors.white.withValues(
+                            alpha: dark ? .055 : .78,
+                          ),
+                          blurRadius: 1,
+                          offset: const Offset(0, 1),
+                        ),
                     ],
                   ),
                   child: content,

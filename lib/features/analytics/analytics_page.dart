@@ -329,37 +329,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                     ],
             ),
             const SizedBox(height: PremiumDesignTokens.spaceSm),
-            _SummaryCard(
-              title: tr('Weekly review', 'المراجعة الأسبوعية'),
-              lines: [
-                tr(
-                  '${weekly.trackedDays} of 7 days with at least one core record',
-                  '${weekly.trackedDays} من 7 أيام بها سجل أساسي واحد على الأقل',
-                ),
-                if (arabic)
-                  rate == null
-                      ? 'لا توجد أدلة وزن متقاربة كافية لاتجاه أسبوعي.'
-                      : 'الاتجاه الأسبوعي الممهّد: ${rate >= 0 ? '+' : ''}${rate.toStringAsFixed(2)} كجم. لا يحدد هذا تغير الدهون أو العضلات.'
-                else
-                  weekly.summary,
-                if (arabic)
-                  weekly.missingData.isNotEmpty
-                      ? 'حسّن مصدر بيانات ناقصًا واحدًا قبل تغيير الخطة.'
-                      : 'حافظ على ثبات الخطة وقارن أسبوعًا كاملًا آخر.'
-                else
-                  weekly.nextDecision,
-                ...(arabic
-                    ? [
-                        if (weekly.weightDays < 4)
-                          'تحسّن 4 أيام وزن على الأقل تفسير الاتجاه',
-                        if (weekly.nutritionDays < 5)
-                          'تحسّن أيام الوجبات المكتملة فهم المدخول',
-                        if (weekly.waterDays < 5)
-                          'تحسّن أيام الترطيب فهم الالتزام',
-                      ]
-                    : weekly.missingData),
-              ],
-            ),
+            AnalyticsWeeklyProgressCard(weekly: weekly, weeklyRateKg: rate),
             const SizedBox(height: PremiumDesignTokens.spaceSm),
             PremiumSurface(
               padding: PremiumDesignTokens.cardPaddingLarge,
@@ -511,48 +481,13 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
               ),
             ),
             const SizedBox(height: PremiumDesignTokens.spaceSm),
-            PremiumChartCard(
-              semanticLabel: tr(
-                'Weight chart with evidence explanation',
-                'مخطط الوزن مع شرح الأدلة',
-              ),
-              title: tr('Weight over time', 'الوزن عبر الزمن'),
-              subtitle: range.days == null
-                  ? tr(
-                      'Measured local check-ins across all recorded time.',
-                      'قياسات تسجيل محلية عبر كامل الفترة المسجلة.',
-                    )
-                  : tr(
-                      'Measured local check-ins across the selected ${range.days}-day range.',
-                      'قياسات تسجيل محلية عبر نطاق ${range.days} يومًا المحدد.',
-                    ),
-              chart: _WeightTrendChart(
-                weights: recentWeights,
-                system: system,
-                rangeLabel: _rangeLabel(context, range),
-              ),
-              explanation: [
-                tr(
-                  'Trend direction: ${rate == null ? 'insufficient evidence' : '${rate >= 0 ? '+' : ''}${UnitConverter.weightFromKg(rate, system).toStringAsFixed(2)} $weightUnit/week (smoothed)'}',
-                  'اتجاه المسار: ${rate == null ? 'أدلة غير كافية' : '${rate >= 0 ? '+' : ''}${UnitConverter.weightFromKg(rate, system).toStringAsFixed(2)} $weightUnit/أسبوع (ممهّد)'}',
-                ),
-                tr(
-                  'Evidence sufficiency: ${progress.sampleCount} measurements across ${progress.spanDays} days (${_localizedProgressConfidence(context, progress.confidence)}).',
-                  'كفاية الأدلة: ${progress.sampleCount} قياسًا خلال ${progress.spanDays} يومًا (ثقة ${_localizedProgressConfidence(context, progress.confidence)}).',
-                ),
-                tr(
-                  'This chart reflects measured weight only and cannot safely conclude fat or muscle change on its own.',
-                  'يعرض هذا المخطط الوزن المقاس فقط ولا يمكنه وحده استنتاج تغير الدهون أو العضلات بشكل آمن.',
-                ),
-              ],
-              footer: recentWeights.isEmpty
-                  ? Text(
-                      tr(
-                        'Add weight entries to unlock trend interpretation.',
-                        'أضف قياسات وزن لبدء تفسير الاتجاه.',
-                      ),
-                    )
-                  : null,
+            AnalyticsWeightJourneyCard(
+              weights: recentWeights,
+              system: system,
+              rangeLabel: _rangeLabel(context, range),
+              rangeDays: range.days,
+              weeklyRateKg: rate,
+              progress: progress,
             ),
             const SizedBox(height: PremiumDesignTokens.spaceSm),
             Text(
@@ -608,6 +543,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
 
 class _SummaryCard extends StatelessWidget {
   const _SummaryCard({required this.title, required this.lines});
+
   final String title;
   final List<String> lines;
 
@@ -622,6 +558,130 @@ class _SummaryCard extends StatelessWidget {
       ],
     ),
   );
+}
+
+class AnalyticsWeeklyProgressCard extends StatelessWidget {
+  const AnalyticsWeeklyProgressCard({
+    super.key,
+    required this.weekly,
+    required this.weeklyRateKg,
+  });
+
+  final WeeklyReview weekly;
+  final double? weeklyRateKg;
+
+  @override
+  Widget build(BuildContext context) {
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    String tr(String en, String ar) => arabic ? ar : en;
+    return _SummaryCard(
+      title: tr('Weekly review', 'المراجعة الأسبوعية'),
+      lines: [
+        tr(
+          '${weekly.trackedDays} of 7 days with at least one core record',
+          '${weekly.trackedDays} من 7 أيام بها سجل أساسي واحد على الأقل',
+        ),
+        if (arabic)
+          weeklyRateKg == null
+              ? 'لا توجد أدلة وزن متقاربة كافية لاتجاه أسبوعي.'
+              : 'الاتجاه الأسبوعي الممهّد: ${weeklyRateKg! >= 0 ? '+' : ''}${weeklyRateKg!.toStringAsFixed(2)} كجم. لا يحدد هذا تغير الدهون أو العضلات.'
+        else
+          weekly.summary,
+        if (arabic)
+          weekly.missingData.isNotEmpty
+              ? 'حسّن مصدر بيانات ناقصًا واحدًا قبل تغيير الخطة.'
+              : 'حافظ على ثبات الخطة وقارن أسبوعًا كاملًا آخر.'
+        else
+          weekly.nextDecision,
+        ...(arabic
+            ? [
+                if (weekly.weightDays < 4)
+                  'تحسّن 4 أيام وزن على الأقل تفسير الاتجاه',
+                if (weekly.nutritionDays < 5)
+                  'تحسّن أيام الوجبات المكتملة فهم المدخول',
+                if (weekly.waterDays < 5) 'تحسّن أيام الترطيب فهم الالتزام',
+              ]
+            : weekly.missingData),
+      ],
+    );
+  }
+}
+
+class AnalyticsWeightJourneyCard extends StatelessWidget {
+  const AnalyticsWeightJourneyCard({
+    super.key,
+    required this.weights,
+    required this.system,
+    required this.rangeLabel,
+    required this.rangeDays,
+    required this.weeklyRateKg,
+    required this.progress,
+  });
+
+  final List<WeightEntry> weights;
+  final MeasurementSystem system;
+  final String rangeLabel;
+  final int? rangeDays;
+  final double? weeklyRateKg;
+  final ProgressAnalysis progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    String tr(String en, String ar) => arabic ? ar : en;
+    final unit = UnitConverter.weightUnit(system);
+    final confidence = arabic
+        ? switch (progress.confidence) {
+            ProgressConfidence.insufficient => 'غير كافية',
+            ProgressConfidence.low => 'منخفضة',
+            ProgressConfidence.medium => 'متوسطة',
+            ProgressConfidence.high => 'مرتفعة',
+          }
+        : progress.confidence.name;
+    return PremiumChartCard(
+      semanticLabel: tr(
+        'Weight chart with evidence explanation',
+        'مخطط الوزن مع شرح الأدلة',
+      ),
+      title: tr('Weight over time', 'الوزن عبر الزمن'),
+      subtitle: rangeDays == null
+          ? tr(
+              'Measured local check-ins across all recorded time.',
+              'قياسات تسجيل محلية عبر كامل الفترة المسجلة.',
+            )
+          : tr(
+              'Measured local check-ins across the selected $rangeDays-day range.',
+              'قياسات تسجيل محلية عبر نطاق $rangeDays يومًا المحدد.',
+            ),
+      chart: _WeightTrendChart(
+        weights: weights,
+        system: system,
+        rangeLabel: rangeLabel,
+      ),
+      explanation: [
+        tr(
+          'Trend direction: ${weeklyRateKg == null ? 'insufficient evidence' : '${weeklyRateKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(weeklyRateKg!, system).toStringAsFixed(2)} $unit/week (smoothed)'}',
+          'اتجاه المسار: ${weeklyRateKg == null ? 'أدلة غير كافية' : '${weeklyRateKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(weeklyRateKg!, system).toStringAsFixed(2)} $unit/أسبوع (ممهّد)'}',
+        ),
+        tr(
+          'Evidence sufficiency: ${progress.sampleCount} measurements across ${progress.spanDays} days ($confidence).',
+          'كفاية الأدلة: ${progress.sampleCount} قياسًا خلال ${progress.spanDays} يومًا (ثقة $confidence).',
+        ),
+        tr(
+          'This chart reflects measured weight only and cannot safely conclude fat or muscle change on its own.',
+          'يعرض هذا المخطط الوزن المقاس فقط ولا يمكنه وحده استنتاج تغير الدهون أو العضلات بشكل آمن.',
+        ),
+      ],
+      footer: weights.isEmpty
+          ? Text(
+              tr(
+                'Add weight entries to unlock trend interpretation.',
+                'أضف قياسات وزن لبدء تفسير الاتجاه.',
+              ),
+            )
+          : null,
+    );
+  }
 }
 
 class _WeightTrendChart extends StatelessWidget {

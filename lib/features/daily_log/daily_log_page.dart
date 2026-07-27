@@ -30,11 +30,31 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
   final water = TextEditingController(text: '250');
   final quantity = TextEditingController(text: '100');
   final foodSearch = SearchController();
+  final otherContext = TextEditingController();
   final scrollController = ScrollController();
   final mealEntryKey = GlobalKey();
   bool mealFocusApplied = false;
   Food? selectedFood;
   String mealType = 'breakfast';
+  final Set<String> selectedContexts = {};
+  String? loadedNotes;
+
+  static const contextOptions = <String>[
+    'poorSleep',
+    'greatSleep',
+    'travel',
+    'fasting',
+    'highSodiumMeal',
+    'hardWorkout',
+    'psychologicalStress',
+    'illnessSymptoms',
+    'medication',
+    'lessWater',
+    'moreWater',
+    'constipation',
+    'nothingNotable',
+    'other',
+  ];
 
   @override
   void initState() {
@@ -72,8 +92,78 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     water.dispose();
     quantity.dispose();
     foodSearch.dispose();
+    otherContext.dispose();
     scrollController.dispose();
     super.dispose();
+  }
+
+  bool get _arabic =>
+      Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
+
+  String _tr(String en, String ar) => _arabic ? ar : en;
+
+  String _unit(String value) {
+    if (!_arabic) return value;
+    return switch (value.toLowerCase()) {
+      'g' => 'جم',
+      'mg' => 'مجم',
+      'ml' => 'مل',
+      'kcal' => 'سعرة',
+      _ => value,
+    };
+  }
+
+  String _contextLabel(String value) => switch (value) {
+    'poorSleep' => _tr('Less sleep than usual', 'نوم أقل من المعتاد'),
+    'greatSleep' => _tr('Excellent sleep', 'نوم ممتاز'),
+    'travel' => _tr('Travel', 'سفر'),
+    'fasting' => _tr('Fasting', 'صيام'),
+    'highSodiumMeal' => _tr('High-sodium meal', 'وجبة عالية الصوديوم'),
+    'hardWorkout' => _tr('Hard workout', 'تمرين قوي'),
+    'psychologicalStress' => _tr('Psychological stress', 'إجهاد نفسي'),
+    'illnessSymptoms' => _tr('Illness or symptoms', 'مرض أو أعراض'),
+    'medication' => _tr('Medication', 'تناول دواء'),
+    'lessWater' => _tr('Less water than usual', 'شرب ماء أقل من المعتاد'),
+    'moreWater' => _tr('More water than usual', 'شرب ماء أكثر من المعتاد'),
+    'constipation' => _tr('Constipation', 'إمساك'),
+    'nothingNotable' => _tr('Nothing notable', 'لا يوجد شيء مميز'),
+    'other' => _tr('Other', 'أخرى'),
+    _ => value,
+  };
+
+  void _loadContextSelection(String value) {
+    if (loadedNotes == value) return;
+    loadedNotes = value;
+    selectedContexts.clear();
+    otherContext.clear();
+    if (value.isEmpty) return;
+    final matches = RegExp(r'\[([A-Za-z]+)\]').allMatches(value).toList();
+    if (matches.isEmpty) {
+      selectedContexts.add('other');
+      otherContext.text = value;
+      return;
+    }
+    selectedContexts.addAll(
+      matches
+          .map((match) => match.group(1))
+          .whereType<String>()
+          .where(contextOptions.contains),
+    );
+    final otherMatch = RegExp(r'\[other\]\s*(.*)$').firstMatch(value);
+    if (otherMatch != null) otherContext.text = otherMatch.group(1) ?? '';
+  }
+
+  void _syncContextNotes() {
+    final ordered = contextOptions.where(selectedContexts.contains).toList();
+    final encoded = ordered
+        .where((value) => value != 'other')
+        .map((value) => '[$value]')
+        .toList();
+    if (selectedContexts.contains('other')) {
+      encoded.add('[other] ${otherContext.text.trim()}'.trim());
+    }
+    notes.text = encoded.join(' ');
+    loadedNotes = notes.text;
   }
 
   Future<void> _save() async {
@@ -289,6 +379,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       next.whenData((log) {
         final value = log?.notes ?? '';
         if (notes.text != value) notes.text = value;
+        _loadContextSelection(value);
       });
     });
 
@@ -316,7 +407,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                   Semantics(
                     header: true,
                     child: Text(
-                      context.strings.text('Record your day'),
+                      _tr('Record your day', 'سجّل يومك'),
                       style: PremiumDesignTokens.screenHeading(context),
                     ),
                   ),
@@ -341,75 +432,6 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                       }
                     },
                   ),
-                  _field(
-                    notes,
-                    Localizations.localeOf(context).languageCode == 'ar'
-                        ? 'هل هناك ما قد يفسر تغيرات جسمك اليوم؟ مثل السفر أو قلة النوم أو وجبة عالية الصوديوم أو الصيام أو الضغط'
-                        : 'Anything that may explain today’s body changes? For example travel, poor sleep, a high-sodium meal, fasting, or stress',
-                    lines: 4,
-                  ),
-                  Row(
-                    children: [
-                      Expanded(child: _field(water, 'Water (ml)')),
-                      const SizedBox(width: 8),
-                      FilledButton.tonalIcon(
-                        onPressed: _addWater,
-                        icon: const Icon(Icons.water_drop_outlined),
-                        label: Text(context.strings.text('Add water')),
-                      ),
-                    ],
-                  ),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final amount in const [250, 350, 500])
-                        ActionChip(
-                          avatar: const Icon(
-                            Icons.water_drop_outlined,
-                            size: 18,
-                          ),
-                          label: Text('+$amount ml'),
-                          onPressed: () => _addWater(amount),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  waterEntries.when(
-                    data: (rows) => Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          '${context.strings.text('Water total')}: ${rows.fold<int>(0, (sum, row) => sum + row.amountMl)} ml',
-                        ),
-                        for (final entry in rows)
-                          ListTile(
-                            dense: true,
-                            contentPadding: EdgeInsets.zero,
-                            leading: const Icon(Icons.water_drop_outlined),
-                            title: Text('${entry.amountMl} ml'),
-                            subtitle: Text(
-                              '${entry.occurredAt.hour.toString().padLeft(2, '0')}:${entry.occurredAt.minute.toString().padLeft(2, '0')}',
-                            ),
-                            trailing: IconButton(
-                              tooltip: context.strings.text(
-                                'Remove water entry',
-                              ),
-                              onPressed: () => ref
-                                  .read(waterRepositoryProvider)
-                                  .delete(entry.id),
-                              icon: const Icon(Icons.close),
-                            ),
-                          ),
-                      ],
-                    ),
-                    loading: () => const LinearProgressIndicator(),
-                    error: (_, _) => ActionableErrorState(
-                      title: context.strings.text('Water data unavailable'),
-                      onRetry: () => ref.invalidate(dailyWaterProvider),
-                    ),
-                  ),
-                  const SizedBox(height: PremiumDesignTokens.spaceLg),
                 ],
                 PremiumSurface(
                   key: mealEntryKey,
@@ -587,12 +609,16 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                     : Icons.verified_outlined,
                               ),
                               title: Text(
-                                food.arabicName == null
+                                !arabic || food.arabicName == null
                                     ? food.name
-                                    : '${food.arabicName} • ${food.name}',
+                                    : food.arabicName!,
                               ),
                               subtitle: Text(
-                                '${food.calories.toStringAsFixed(0)} kcal / ${food.servingSize.toStringAsFixed(0)} ${food.servingUnit} · ${food.source}',
+                                arabic
+                                    ? '${food.calories.toStringAsFixed(0)} سعرة / '
+                                          '${food.servingSize.toStringAsFixed(0)} ${_unit(food.servingUnit)}'
+                                    : '${food.calories.toStringAsFixed(0)} kcal / '
+                                          '${food.servingSize.toStringAsFixed(0)} ${food.servingUnit} · ${food.source}',
                               ),
                               onTap: () {
                                 setState(() => selectedFood = food);
@@ -606,9 +632,19 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading: const Icon(Icons.check_circle),
-                          title: Text(selectedFood!.name),
+                          title: Text(
+                            _arabic && selectedFood!.arabicName != null
+                                ? selectedFood!.arabicName!
+                                : selectedFood!.name,
+                          ),
                           subtitle: Text(
-                            '${selectedFood!.source} · ${context.strings.text(selectedFood!.verified ? 'Verified' : 'Unverified')}',
+                            _arabic
+                                ? context.strings.text(
+                                    selectedFood!.verified
+                                        ? 'Verified'
+                                        : 'Unverified',
+                                  )
+                                : '${selectedFood!.source} · ${context.strings.text(selectedFood!.verified ? 'Verified' : 'Unverified')}',
                           ),
                           trailing: IconButton(
                             onPressed: () =>
@@ -624,7 +660,8 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                         ),
                         decoration: InputDecoration(
                           labelText:
-                              '${context.strings.text('Quantity')} (${selectedFood?.servingUnit ?? 'g'})',
+                              '${context.strings.text('Quantity')} '
+                              '(${_unit(selectedFood?.servingUnit ?? 'g')})',
                         ),
                         onSubmitted: (_) => _saveMeal(),
                       ),
@@ -637,10 +674,6 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                     ],
                   ),
                 ),
-                if (widget.focusMealEntry) ...[
-                  const SizedBox(height: PremiumDesignTokens.spaceLg),
-                  _focusedWaterControls(),
-                ],
                 const SizedBox(height: PremiumDesignTokens.spaceSm),
                 meals.when(
                   loading: () => const LinearProgressIndicator(),
@@ -662,10 +695,15 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                             context.strings.text('Calculated nutrition'),
                           ),
                           subtitle: Text(
-                            '${allItems.fold<double>(0, (sum, item) => sum + item.calories).toStringAsFixed(0)} kcal · '
-                            '${allItems.fold<double>(0, (sum, item) => sum + item.protein).toStringAsFixed(1)} g protein · '
-                            '${allItems.fold<double>(0, (sum, item) => sum + item.carbs).toStringAsFixed(1)} g carbs · '
-                            '${allItems.fold<double>(0, (sum, item) => sum + item.fats).toStringAsFixed(1)} g fat',
+                            _arabic
+                                ? '${allItems.fold<double>(0, (sum, item) => sum + item.calories).toStringAsFixed(0)} سعرة · '
+                                      '${allItems.fold<double>(0, (sum, item) => sum + item.protein).toStringAsFixed(1)} جم بروتين · '
+                                      '${allItems.fold<double>(0, (sum, item) => sum + item.carbs).toStringAsFixed(1)} جم كربوهيدرات · '
+                                      '${allItems.fold<double>(0, (sum, item) => sum + item.fats).toStringAsFixed(1)} جم دهون'
+                                : '${allItems.fold<double>(0, (sum, item) => sum + item.calories).toStringAsFixed(0)} kcal · '
+                                      '${allItems.fold<double>(0, (sum, item) => sum + item.protein).toStringAsFixed(1)} g protein · '
+                                      '${allItems.fold<double>(0, (sum, item) => sum + item.carbs).toStringAsFixed(1)} g carbs · '
+                                      '${allItems.fold<double>(0, (sum, item) => sum + item.fats).toStringAsFixed(1)} g fat',
                           ),
                         ),
                         Wrap(
@@ -739,7 +777,8 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                     context.strings.text('Historical food'),
                               ),
                               subtitle: Text(
-                                '${context.strings.text('${meal.meal.type[0].toUpperCase()}${meal.meal.type.substring(1)}')} · ${item.quantity.toStringAsFixed(0)} ${food?.servingUnit ?? 'g'}',
+                                '${context.strings.text('${meal.meal.type[0].toUpperCase()}${meal.meal.type.substring(1)}')} · '
+                                '${item.quantity.toStringAsFixed(0)} ${_unit(food?.servingUnit ?? 'g')}',
                               ),
                               onTap: food == null || food.deletedAt != null
                                   ? null
@@ -806,6 +845,10 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                   },
                 ),
                 const SizedBox(height: PremiumDesignTokens.spaceLg),
+                _waterSection(waterEntries),
+                const SizedBox(height: PremiumDesignTokens.spaceLg),
+                _bodyContextSection(),
+                const SizedBox(height: PremiumDesignTokens.spaceLg),
                 Semantics(
                   button: true,
                   label: context.strings.text('Save log'),
@@ -829,41 +872,197 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     return value;
   }
 
-  Widget _focusedWaterControls() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          context.strings.text('Water'),
-          style: PremiumDesignTokens.cardHeading(context),
-        ),
-        const SizedBox(height: PremiumDesignTokens.spaceXs),
-        Row(
-          children: [
-            Expanded(child: _field(water, 'Water (ml)')),
-            const SizedBox(width: 8),
-            FilledButton.tonalIcon(
-              onPressed: _addWater,
-              icon: const Icon(Icons.water_drop_outlined),
-              label: Text(context.strings.text('Add water')),
-            ),
-          ],
-        ),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final amount in const [250, 350, 500])
-              ActionChip(
-                avatar: const Icon(Icons.water_drop_outlined, size: 18),
-                label: Text('+$amount ml'),
-                onPressed: () => _addWater(amount),
+  Widget _waterSection(AsyncValue<List<WaterEntry>> waterEntries) {
+    final unit = _arabic ? 'مل' : 'ml';
+    return PremiumSurface(
+      key: const Key('daily-log-water-section'),
+      padding: PremiumDesignTokens.cardPaddingLarge,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            _tr('Water', 'الماء'),
+            style: PremiumDesignTokens.cardHeading(context),
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceSm),
+          Row(
+            children: [
+              Expanded(
+                child: _field(
+                  water,
+                  _tr('Water amount (ml)', 'كمية الماء (مل)'),
+                ),
               ),
-          ],
-        ),
-      ],
+              const SizedBox(width: 8),
+              FilledButton.tonalIcon(
+                onPressed: _addWater,
+                icon: const Icon(Icons.water_drop_outlined),
+                label: Text(_tr('Add water', 'إضافة ماء')),
+              ),
+            ],
+          ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final amount in const [250, 350, 500])
+                ActionChip(
+                  avatar: const Icon(Icons.water_drop_outlined, size: 18),
+                  label: Text('+$amount $unit'),
+                  onPressed: () => _addWater(amount),
+                ),
+            ],
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceSm),
+          waterEntries.when(
+            data: (rows) => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  '${_tr('Water total', 'إجمالي الماء')}: '
+                  '${rows.fold<int>(0, (sum, row) => sum + row.amountMl)} $unit',
+                ),
+                for (final entry in rows)
+                  ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.water_drop_outlined),
+                    title: Text('${entry.amountMl} $unit'),
+                    subtitle: Text(
+                      '${entry.occurredAt.hour.toString().padLeft(2, '0')}:'
+                      '${entry.occurredAt.minute.toString().padLeft(2, '0')}',
+                    ),
+                    trailing: IconButton(
+                      tooltip: _tr('Remove water entry', 'حذف تسجيل الماء'),
+                      onPressed: () =>
+                          ref.read(waterRepositoryProvider).delete(entry.id),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ),
+              ],
+            ),
+            loading: () => const LinearProgressIndicator(),
+            error: (_, _) => ActionableErrorState(
+              title: _tr('Water data unavailable', 'بيانات الماء غير متاحة'),
+              onRetry: () => ref.invalidate(dailyWaterProvider),
+            ),
+          ),
+        ],
+      ),
     );
   }
+
+  Widget _bodyContextSection() {
+    final scheme = Theme.of(context).colorScheme;
+    return PremiumSurface(
+      key: const Key('daily-log-body-context'),
+      padding: PremiumDesignTokens.cardPaddingLarge,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            _tr('Body context', 'سياق الجسم'),
+            style: PremiumDesignTokens.cardHeading(context),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            _tr(
+              'Select anything that may help explain today’s measurements.',
+              'اختر ما قد يساعد في تفسير قياسات اليوم.',
+            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceSm),
+          Wrap(
+            alignment: _arabic ? WrapAlignment.end : WrapAlignment.start,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final option in contextOptions)
+                FilterChip(
+                  key: Key('body-context-$option'),
+                  selected: selectedContexts.contains(option),
+                  showCheckmark: true,
+                  avatar: Icon(
+                    _contextIcon(option),
+                    size: 17,
+                    color: selectedContexts.contains(option)
+                        ? scheme.onPrimaryContainer
+                        : scheme.primary,
+                  ),
+                  label: Text(_contextLabel(option)),
+                  backgroundColor: Colors.white.withValues(alpha: .055),
+                  selectedColor: scheme.primaryContainer.withValues(alpha: .82),
+                  side: BorderSide(
+                    color: selectedContexts.contains(option)
+                        ? scheme.primary.withValues(alpha: .78)
+                        : Colors.white.withValues(alpha: .14),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  onSelected: (selected) {
+                    setState(() {
+                      if (option == 'nothingNotable' && selected) {
+                        selectedContexts
+                          ..clear()
+                          ..add(option);
+                      } else {
+                        selectedContexts.remove('nothingNotable');
+                        if (selected) {
+                          selectedContexts.add(option);
+                        } else {
+                          selectedContexts.remove(option);
+                        }
+                      }
+                      if (!selectedContexts.contains('other')) {
+                        otherContext.clear();
+                      }
+                      _syncContextNotes();
+                    });
+                  },
+                ),
+            ],
+          ),
+          if (selectedContexts.contains('other')) ...[
+            const SizedBox(height: PremiumDesignTokens.spaceSm),
+            TextField(
+              key: const Key('body-context-other-field'),
+              controller: otherContext,
+              maxLines: 2,
+              onChanged: (_) => _syncContextNotes(),
+              decoration: InputDecoration(
+                labelText: _tr('Other context', 'سياق آخر'),
+                hintText: _tr(
+                  'Add a short optional note',
+                  'أضف ملاحظة قصيرة اختيارية',
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  IconData _contextIcon(String value) => switch (value) {
+    'poorSleep' => Icons.bedtime_outlined,
+    'greatSleep' => Icons.hotel_class_outlined,
+    'travel' => Icons.flight_outlined,
+    'fasting' => Icons.nights_stay_outlined,
+    'highSodiumMeal' => Icons.soup_kitchen_outlined,
+    'hardWorkout' => Icons.fitness_center_outlined,
+    'psychologicalStress' => Icons.psychology_outlined,
+    'illnessSymptoms' => Icons.sick_outlined,
+    'medication' => Icons.medication_outlined,
+    'lessWater' => Icons.water_drop_outlined,
+    'moreWater' => Icons.water_outlined,
+    'constipation' => Icons.health_and_safety_outlined,
+    'nothingNotable' => Icons.check_circle_outline,
+    _ => Icons.more_horiz,
+  };
 
   Widget _field(
     TextEditingController controller,
@@ -896,14 +1095,24 @@ class _NutrientMetric extends StatelessWidget {
   final String unit;
 
   @override
-  Widget build(BuildContext context) => Chip(
-    avatar: const Icon(Icons.science_outlined, size: 17),
-    label: Text(
-      value == null
-          ? '${context.strings.text(label)}: ${context.strings.text('Unavailable')}'
-          : '${context.strings.text(label)} ${value!.toStringAsFixed(1)} $unit',
-    ),
-  );
+  Widget build(BuildContext context) {
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    final localizedUnit = arabic
+        ? switch (unit) {
+            'g' => 'جم',
+            'mg' => 'مجم',
+            _ => unit,
+          }
+        : unit;
+    return Chip(
+      avatar: const Icon(Icons.science_outlined, size: 17),
+      label: Text(
+        value == null
+            ? '${context.strings.text(label)}: ${context.strings.text('Unavailable')}'
+            : '${context.strings.text(label)} ${value!.toStringAsFixed(1)} $localizedUnit',
+      ),
+    );
+  }
 }
 
 double? _knownNutrientTotal(

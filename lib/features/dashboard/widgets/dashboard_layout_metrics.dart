@@ -89,7 +89,7 @@ class DashboardLayoutMetrics {
       horizontalPadding: width >= ultraWideBreakpoint ? 40 : 32,
       maxContentWidth: width >= ultraWideBreakpoint ? 1680 : 1440,
       regionGap: width >= ultraWideBreakpoint ? 30 : 26,
-      useTwoRegions: true,
+      useTwoRegions: false,
       heroFlex: 4,
       contentFlex: 8,
     );

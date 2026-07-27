@@ -55,7 +55,15 @@ class DashboardTopBar extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const DashboardBrand(),
+              Align(
+                alignment: arabic
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
+                child: const Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: DashboardBrand(),
+                ),
+              ),
               const SizedBox(height: 12),
               greeting,
               const SizedBox(height: 6),
@@ -65,7 +73,7 @@ class DashboardTopBar extends StatelessWidget {
         ),
         _RoundGlassButton(
           tooltip: arabic ? 'الملف الشخصي' : 'Profile',
-          icon: Icons.account_circle_outlined,
+          icon: Icons.person_rounded,
           onTap: onProfile,
         ),
       ],
@@ -159,7 +167,27 @@ class _RoundGlassButtonState extends State<_RoundGlassButton> {
           ),
           child: IconButton(
             onPressed: widget.onTap,
-            icon: Icon(widget.icon, color: const Color(0xFFE4EBF1)),
+            icon: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFF8CEAFF).withValues(alpha: .30),
+                    const Color(0xFF7668FF).withValues(alpha: .18),
+                  ],
+                ),
+                border: Border.all(color: Colors.white.withValues(alpha: .22)),
+              ),
+              child: Icon(
+                widget.icon,
+                size: 23,
+                color: const Color(0xFFF2F7FA),
+              ),
+            ),
           ),
         ),
       ),

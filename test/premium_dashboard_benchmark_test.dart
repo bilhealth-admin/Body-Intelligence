@@ -11,29 +11,25 @@ void main() {
     await font.load();
   });
 
-  testWidgets('interpretation hierarchy precedes evidence confidence action', (
+  testWidgets('insights are compact and duplicate recommendation is removed', (
     tester,
   ) async {
     await tester.pumpWidget(const _Harness());
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('dashboard-one-best-action')), findsOneWidget);
-    expect(find.byKey(const Key('dashboard-action-evidence')), findsOneWidget);
+    expect(find.byKey(const Key('dashboard-one-best-action')), findsNothing);
     expect(
-      find.byKey(const Key('dashboard-action-confidence')),
+      find.byKey(const Key('dashboard-key-insights-carousel')),
       findsOneWidget,
     );
-    expect(find.text('Take this action'), findsOneWidget);
-
-    final evidenceY = tester
-        .getTopLeft(find.byKey(const Key('dashboard-action-evidence')))
-        .dy;
-    final confidenceY = tester
-        .getTopLeft(find.byKey(const Key('dashboard-action-confidence')))
-        .dy;
-    final actionY = tester.getTopLeft(find.text('Take this action')).dy;
-    expect(evidenceY, lessThanOrEqualTo(confidenceY));
-    expect(confidenceY, lessThan(actionY));
+    expect(
+      find.byKey(const Key('dashboard-nutrition-context')),
+      findsOneWidget,
+    );
+    expect(find.text('Protein below target'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('dashboard-carousel-next')).last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('dashboard-action-insight')), findsOneWidget);
   });
 
   testWidgets('unsupported recommendation is hidden without hiding insights', (
@@ -49,20 +45,18 @@ void main() {
     );
   });
 
-  testWidgets('light Hero title and description use readable navy contrast', (
+  testWidgets('light insight cards retain readable theme contrast', (
     tester,
   ) async {
     await tester.pumpWidget(const _Harness(light: true));
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('dashboard-carousel-next')).last);
+    await tester.pumpAndSettle();
 
     final title = tester.widget<Text>(find.text('Log today’s weight'));
-    final description = tester.widget<Text>(
-      find.text('A comparable daily check-in improves trend confidence.'),
-    );
-    expect(title.style?.color, const Color(0xFF061A2B));
     expect(title.style?.fontWeight, FontWeight.w900);
-    expect(description.style?.color, const Color(0xFF294456));
-    expect(description.style?.fontWeight, FontWeight.w700);
+    expect(find.textContaining('comparable daily check-in'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('supports RTL large text high contrast and reduced motion', (
@@ -82,8 +76,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('توصية البروتين'), findsOneWidget);
-    expect(find.text('اكتمال التسجيل'), findsOneWidget);
+    expect(find.text('البروتين أقل من الهدف'), findsOneWidget);
+    expect(find.text('اكتمال التسجيل'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -138,7 +132,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         find.byKey(const Key('dashboard-body-twin-preview')),
-        findsOneWidget,
+        findsNothing,
       );
       expect(
         find.byKey(const Key('dashboard-nutrition-context')),
@@ -146,8 +140,11 @@ void main() {
       );
       expect(
         find.byKey(const Key('dashboard-trend-explanation')),
-        findsOneWidget,
+        findsNothing,
       );
+      await tester.tap(find.byKey(const Key('dashboard-carousel-next')).last);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('dashboard-action-insight')), findsOneWidget);
       expect(tester.takeException(), isNull);
       semantics.dispose();
     },

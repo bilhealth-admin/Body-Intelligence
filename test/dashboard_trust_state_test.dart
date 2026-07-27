@@ -34,7 +34,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final title = find.text('Your body intelligence, distilled for today');
+    final title = find.text("Today's Signal");
     expect(title, findsOneWidget);
     expect(
       find.ancestor(of: title, matching: find.byType(ShaderMask)),

@@ -6,7 +6,7 @@ void main() {
   test('edit quantity dialog pops its own dialog route', () {
     final source = File(
       'lib/features/daily_log/daily_log_page.dart',
-    ).readAsStringSync();
+    ).readAsStringSync().replaceAll('\r\n', '\n');
 
     expect(
       source,

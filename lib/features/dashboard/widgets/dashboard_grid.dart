@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../engine/bil_engine.dart';
 import '../../../core/units/measurement_units.dart';
 import '../../../engine/body_profile.dart';
+import '../../../engine/body_composition_engine.dart';
 import '../../../engine/body_twin_engine.dart';
 import '../../../engine/data_honesty_engine.dart';
 import '../../../engine/daily_return_engine.dart';
@@ -15,6 +17,7 @@ import '../../../engine/plan_engine.dart';
 import '../../../engine/progress_analysis.dart';
 import '../../../engine/what_changed_engine.dart';
 import '../../../engine/recovery_engine.dart';
+import '../../../engine/weekly_review_engine.dart';
 import '../../ai_platform/domain/personal_health_ai.dart';
 import '../../ai_platform/services/personal_health_ai_engine.dart';
 import '../../../data/database/date_keys.dart';
@@ -23,25 +26,25 @@ import '../../../engine/nutrient_evidence_engine.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../shared/widgets/premium_surface.dart';
 import '../../profile/providers/user_profile_provider.dart';
-import '../../history/history_page.dart';
+import '../../analytics/analytics_page.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
 import '../../foods/providers/food_provider.dart';
 import '../../life_context/providers/life_context_provider.dart';
 import '../../weight/providers/weight_provider.dart';
 import '../providers/dashboard_provider.dart';
-import 'confidence_ring.dart';
-import 'dashboard_water_card.dart';
+import 'dashboard_carousel.dart';
 import 'dashboard_loading_skeleton.dart';
-import 'dashboard_insights_surface.dart';
-import 'weekly_progress_card.dart';
 import 'dashboard_meals_timeline.dart';
+import 'dashboard_water_card.dart';
 import 'nutrient_evidence_status_text.dart';
 import 'daily_return_card.dart';
 import 'premium_dashboard_benchmark.dart';
 import 'personal_health_ai_panel.dart';
 
 class DashboardGrid extends ConsumerWidget {
-  const DashboardGrid({super.key});
+  const DashboardGrid({super.key, this.hero});
+
+  final Widget? hero;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -55,6 +58,7 @@ class DashboardGrid extends ConsumerWidget {
     final allWaterAsync = ref.watch(allWaterProvider);
     final skippedWeightAsync = ref.watch(weightReminderSkippedTodayProvider);
     final contextAsync = ref.watch(todayLifeContextProvider);
+    final allContextsAsync = ref.watch(insightLifeContextProvider);
     final memoriesAsync = ref.watch(decisionMemoriesProvider);
     final memoryEnabled =
         ref.watch(decisionMemoryEnabledProvider).value ?? true;
@@ -77,6 +81,7 @@ class DashboardGrid extends ConsumerWidget {
       allWaterAsync,
       skippedWeightAsync,
       contextAsync,
+      allContextsAsync,
       memoriesAsync,
     ].any((value) => value.isLoading)) {
       return const DashboardLoadingSkeleton();
@@ -89,6 +94,7 @@ class DashboardGrid extends ConsumerWidget {
         allWaterAsync.hasError ||
         skippedWeightAsync.hasError ||
         contextAsync.hasError ||
+        allContextsAsync.hasError ||
         memoriesAsync.hasError) {
       return Card(
         child: Padding(
@@ -117,6 +123,7 @@ class DashboardGrid extends ConsumerWidget {
                   ref.invalidate(allWaterProvider);
                   ref.invalidate(weightReminderSkippedTodayProvider);
                   ref.invalidate(todayLifeContextProvider);
+                  ref.invalidate(insightLifeContextProvider);
                   ref.invalidate(decisionMemoriesProvider);
                 },
                 icon: const Icon(Icons.refresh),
@@ -150,6 +157,7 @@ class DashboardGrid extends ConsumerWidget {
     final waterRows = waterAsync.value ?? const [];
     final allMeals = allMealsAsync.value ?? const [];
     final allWater = allWaterAsync.value ?? const [];
+    final allContexts = allContextsAsync.value ?? const [];
     final insightContexts = (contextAsync.value ?? const [])
         .where((entry) => entry.useInInsights)
         .toList();
@@ -170,7 +178,6 @@ class DashboardGrid extends ConsumerWidget {
     final items = meals.expand((meal) => meal.items).toList();
     final calories = items.fold<double>(0, (sum, item) => sum + item.calories);
     final protein = items.fold<double>(0, (sum, item) => sum + item.protein);
-    final carbs = items.fold<double>(0, (sum, item) => sum + item.carbs);
     final fats = items.fold<double>(0, (sum, item) => sum + item.fats);
     final sodium = items.fold<double>(0, (sum, item) => sum + item.sodium);
     NutrientEvidenceReport nutrientReport(
@@ -190,32 +197,8 @@ class DashboardGrid extends ConsumerWidget {
       TrackedNutrient.fiber,
       (item) => item.fiber as double,
     );
-    final sodiumEvidence = nutrientReport(
-      TrackedNutrient.sodium,
-      (item) => item.sodium as double,
-    );
-    final potassiumEvidence = nutrientReport(
-      TrackedNutrient.potassium,
-      (item) => item.potassium as double,
-    );
-    final calciumEvidence = nutrientReport(
-      TrackedNutrient.calcium,
-      (item) => item.calcium as double,
-    );
-    final magnesiumEvidence = nutrientReport(
-      TrackedNutrient.magnesium,
-      (item) => item.magnesium as double,
-    );
-    final sugarEvidence = nutrientReport(
-      TrackedNutrient.sugar,
-      (item) => item.sugar as double,
-    );
     final water = waterRows.fold<int>(0, (sum, item) => sum + item.amountMl);
     final currentWeight = weights.firstOrNull?.weight ?? profile.currentWeight;
-    final heightMeters = profile.height / 100;
-    final bmi = heightMeters <= 0
-        ? null
-        : currentWeight / (heightMeters * heightMeters);
     final goalType = profile.targetWeight < currentWeight
         ? 'lose'
         : profile.targetWeight > currentWeight
@@ -237,6 +220,80 @@ class DashboardGrid extends ConsumerWidget {
       eatenProtein: protein.round(),
       drankWater: water,
     );
+    final bodyComposition = BodyCompositionEngine.calculate(
+      gender: profile.gender,
+      age: profile.age,
+      heightCm: profile.height,
+      currentWeightKg: currentWeight,
+      neckCm: profile.neck,
+      waistCm: profile.waist,
+    );
+    String compositionIssue(BodyCompositionIssue? issue) {
+      return switch (issue) {
+        BodyCompositionIssue.missingGender => tr(
+          'Gender is not recorded',
+          'الجنس غير مسجل',
+        ),
+        BodyCompositionIssue.unsupportedGender => tr(
+          'Gender value is unsupported',
+          'قيمة الجنس غير مدعومة',
+        ),
+        BodyCompositionIssue.missingAge => tr(
+          'Age is not recorded',
+          'العمر غير مسجل',
+        ),
+        BodyCompositionIssue.invalidAge => tr(
+          'Age value is invalid',
+          'قيمة العمر غير صالحة',
+        ),
+        BodyCompositionIssue.missingHeight => tr(
+          'Height is not recorded',
+          'الطول غير مسجل',
+        ),
+        BodyCompositionIssue.invalidHeight => tr(
+          'Height value is invalid',
+          'قيمة الطول غير صالحة',
+        ),
+        BodyCompositionIssue.missingWeight => tr(
+          'Current weight is not recorded',
+          'الوزن الحالي غير مسجل',
+        ),
+        BodyCompositionIssue.invalidWeight => tr(
+          'Current weight is invalid',
+          'الوزن الحالي غير صالح',
+        ),
+        BodyCompositionIssue.missingNeck => tr(
+          'Neck circumference is not recorded',
+          'محيط الرقبة غير مسجل',
+        ),
+        BodyCompositionIssue.invalidNeck => tr(
+          'Neck circumference is invalid',
+          'محيط الرقبة غير صالح',
+        ),
+        BodyCompositionIssue.missingWaist => tr(
+          'Waist circumference is not recorded',
+          'محيط الخصر غير مسجل',
+        ),
+        BodyCompositionIssue.invalidWaist => tr(
+          'Waist circumference is invalid',
+          'محيط الخصر غير صالح',
+        ),
+        BodyCompositionIssue.invalidBodyFat => tr(
+          'Body fat estimate is invalid',
+          'تقدير دهون الجسم غير صالح',
+        ),
+        null => tr('Unavailable', 'غير متاح'),
+      };
+    }
+
+    String compositionValue(
+      BodyCompositionMetric metric, {
+      required String unit,
+    }) {
+      if (!metric.isAvailable) return compositionIssue(metric.issue);
+      return '${metric.value!.toStringAsFixed(1)}$unit';
+    }
+
     final plan = planAsync.value;
     final effectiveTargets = PlanEngine.effective(
       bil.targets,
@@ -336,34 +393,41 @@ class DashboardGrid extends ConsumerWidget {
       nutritionDays: mealDays.length,
       observationDays: observedDays.length,
     );
-    final goalBaselineWeight =
-        weights.lastOrNull?.weight ?? profile.currentWeight;
-    final progressDenominator = (goalBaselineWeight - profile.targetWeight)
-        .abs();
-    final progress = progressDenominator == 0
-        ? 1.0
-        : (1 -
-                  ((currentWeight - profile.targetWeight).abs() /
-                      progressDenominator))
-              .clamp(0.0, 1.0);
-    final goalDate = intelligence.goalDate;
     final weekCutoff = dayKeyFor(
       DateTime.now().subtract(const Duration(days: 6)),
     );
-    final weeklyWeights = weights
-        .where(
-          (row) =>
-              (row.dayKey ?? dayKeyFor(row.date)).compareTo(weekCutoff) >= 0,
-        )
-        .toList();
-    final weekStartWeight = weeklyWeights.isEmpty
-        ? currentWeight
-        : weeklyWeights.last.weight;
+    final chronologicalWeights = weights.reversed.toList();
     final progressAnalysis = ProgressAnalysis.evaluate(
-      samples: weights
+      samples: chronologicalWeights
           .map((row) => ProgressSample(date: row.date, weightKg: row.weight))
           .toList(),
       goalWeightKg: profile.targetWeight,
+    );
+    final recentJourneyWeights = chronologicalWeights.length > 30
+        ? chronologicalWeights.sublist(chronologicalWeights.length - 30)
+        : chronologicalWeights;
+    final recentWeightDays = chronologicalWeights
+        .where((row) => dayKeyFor(row.date).compareTo(weekCutoff) >= 0)
+        .map((row) => dayKeyFor(row.date))
+        .toSet();
+    final recentMealDays = allMeals
+        .where((row) => row.meal.dayKey.compareTo(weekCutoff) >= 0)
+        .map((row) => row.meal.dayKey)
+        .toSet();
+    final recentWaterDays = allWater
+        .where((row) => row.dayKey.compareTo(weekCutoff) >= 0)
+        .map((row) => row.dayKey)
+        .toSet();
+    final recentContextDays = allContexts
+        .where((row) => row.dayKey.compareTo(weekCutoff) >= 0)
+        .map((row) => row.dayKey)
+        .toSet();
+    final weeklyReview = WeeklyReviewEngine.evaluate(
+      weightDays: recentWeightDays.length,
+      nutritionDays: recentMealDays.length,
+      waterDays: recentWaterDays.length,
+      contextDays: recentContextDays.length,
+      weeklyWeightChangeKg: progressAnalysis.weeklyDirectionKg,
     );
     final localizedBestTitle = arabic
         ? switch (bestAction.type) {
@@ -413,6 +477,7 @@ class DashboardGrid extends ConsumerWidget {
             _ => 'الأهداف اليومية متقاربة بصورة عامة',
           }
         : primaryInsight.title;
+
     Future<void> respondToAction(String response) async {
       if (!memoryEnabled) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -563,17 +628,159 @@ class DashboardGrid extends ConsumerWidget {
       activityLevel: profile.activityLevel,
       dailyCalories: calorieByDay,
     );
+    final personalHealthAiPanel = PersonalHealthAiPanel(
+      snapshot: healthAi,
+      arabic: arabic,
+      todayHasMeals: meals.isNotEmpty,
+      decisionCount: memoriesAsync.value?.length ?? 0,
+      compact: MediaQuery.sizeOf(context).width < 600,
+    );
+    final progressSection = _DashboardPagedSection(
+      title: tr("Today's Progress", 'تقدم اليوم'),
+      subtitle: tr(
+        'Your recorded nutrition and active daily references.',
+        'تغذيتك المسجلة ومراجع يومك النشطة.',
+      ),
+      badge: loggingStreak >= 2
+          ? _StreakBadge(days: loggingStreak, arabic: arabic)
+          : null,
+      pages: [
+        _MetricGridPage(
+          metrics: [
+            _MetricData(
+              Icons.local_fire_department_outlined,
+              tr('Calories', 'السعرات'),
+              meals.isEmpty
+                  ? tr('Unavailable', 'غير متاح')
+                  : calories.round().toString(),
+              meals.isEmpty ? '' : (arabic ? 'سعرة' : 'kcal'),
+              Colors.orange,
+            ),
+            _MetricData(
+              Icons.fitness_center_outlined,
+              tr('Protein', 'البروتين'),
+              meals.isEmpty
+                  ? tr('Unavailable', 'غير متاح')
+                  : protein.round().toString(),
+              meals.isEmpty ? '' : (arabic ? 'جم' : 'g'),
+              Colors.green,
+            ),
+            _MetricData(
+              Icons.opacity_outlined,
+              tr('Fat', 'الدهون'),
+              meals.isEmpty
+                  ? tr('Unavailable', 'غير متاح')
+                  : fats.round().toString(),
+              meals.isEmpty ? '' : (arabic ? 'جم' : 'g'),
+              Colors.purple,
+            ),
+            _MetricData(
+              Icons.grass_outlined,
+              tr('Fiber', 'الألياف'),
+              fiberEvidence.total == null
+                  ? tr('Unavailable', 'غير متاح')
+                  : fiberEvidence.total!.round().toString(),
+              fiberEvidence.total == null ? '' : (arabic ? 'جم' : 'g'),
+              Colors.lightGreen,
+            ),
+          ],
+        ),
+        _MetricGridPage(
+          metrics: [
+            _MetricData(
+              Icons.bolt_outlined,
+              tr('Daily Requirement', 'الاحتياج اليومي'),
+              bil.tdee.round().toString(),
+              arabic ? 'سعرة/يوم' : 'kcal/day',
+              Colors.deepOrangeAccent,
+            ),
+            _MetricData(
+              Icons.monitor_weight_outlined,
+              tr('Weight', 'الوزن'),
+              UnitConverter.weightFromKg(
+                currentWeight,
+                system,
+              ).toStringAsFixed(1),
+              arabic
+                  ? (system == MeasurementSystem.metric ? 'كجم' : 'رطل')
+                  : UnitConverter.weightUnit(system),
+              Colors.blue,
+            ),
+            _MetricData(
+              Icons.accessibility_new_rounded,
+              tr('Body mass index', 'مؤشر كتلة الجسم'),
+              compositionValue(bodyComposition.bodyMassIndex, unit: ''),
+              '',
+              Colors.cyan,
+            ),
+            _MetricData(
+              Icons.donut_large_rounded,
+              tr('Body fat', 'نسبة دهون الجسم'),
+              compositionValue(bodyComposition.bodyFatPercentage, unit: ''),
+              bodyComposition.bodyFatPercentage.isAvailable ? '%' : '',
+              Colors.pinkAccent,
+            ),
+          ],
+        ),
+      ],
+    );
+    final bodyProfile = _BodyProfileSnapshot(
+      arabic: arabic,
+      weight:
+          '${UnitConverter.weightFromKg(currentWeight, system).toStringAsFixed(1)} ${arabic ? (system == MeasurementSystem.metric ? 'كجم' : 'رطل') : UnitConverter.weightUnit(system)}',
+      height: '${profile.height.toStringAsFixed(1)} ${arabic ? 'سم' : 'cm'}',
+      target:
+          '${UnitConverter.weightFromKg(profile.targetWeight, system).toStringAsFixed(1)} ${arabic ? (system == MeasurementSystem.metric ? 'كجم' : 'رطل') : UnitConverter.weightUnit(system)}',
+      calorieTarget:
+          '${effectiveTargets.calories} ${arabic ? 'سعرة حرارية' : 'kcal'}',
+      proteinTarget: '${effectiveTargets.protein} ${arabic ? 'جم' : 'g'}',
+      waterTarget: '${effectiveTargets.water} ${arabic ? 'مل' : 'ml'}',
+      dailyMetabolism:
+          '${bil.tdee.round()} ${arabic ? 'سعرة حرارية/يوم' : 'kcal/day'}',
+      neckCircumference: profile.neck == null
+          ? tr('Neck circumference is not recorded', 'محيط الرقبة غير مسجل')
+          : '${profile.neck!.toStringAsFixed(1)} ${arabic ? 'سم' : 'cm'}',
+      waistCircumference: profile.waist == null
+          ? tr('Waist circumference is not recorded', 'محيط الخصر غير مسجل')
+          : '${profile.waist!.toStringAsFixed(1)} ${arabic ? 'سم' : 'cm'}',
+      bodyMassIndex: compositionValue(bodyComposition.bodyMassIndex, unit: ''),
+      bodyFatPercentage: compositionValue(
+        bodyComposition.bodyFatPercentage,
+        unit: '%',
+      ),
+      leanBodyMass: compositionValue(
+        bodyComposition.leanBodyMassKg,
+        unit: arabic ? ' كجم' : ' kg',
+      ),
+      onEditProfile: () => context.go('/profile-settings'),
+      onEditPlan: () => context.go('/plan'),
+    );
+    final weightJourney = AnalyticsWeightJourneyCard(
+      weights: recentJourneyWeights,
+      system: system,
+      rangeLabel: tr('Last 30 days', 'آخر 30 يومًا'),
+      rangeDays: 30,
+      weeklyRateKg: progressAnalysis.weeklyDirectionKg,
+      progress: progressAnalysis,
+    );
+    final weeklyProgress = AnalyticsWeeklyProgressCard(
+      weekly: weeklyReview,
+      weeklyRateKg: progressAnalysis.weeklyDirectionKg,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         PremiumDashboardBenchmark(
+          hero: hero,
           arabic: arabic,
           showRecommendation: bestAction.type == BestActionType.protein,
           actionTitle: localizedBestTitle,
           actionReason: localizedBestReason,
           actionEvidence: bestAction.evidence.isEmpty
               ? tr('Evidence is still forming', 'الأدلة لا تزال قيد التكوين')
+              : arabic
+              ? 'يستند إلى بياناتك المحلية المسجلة المتاحة.'
               : bestAction.evidence.join(' · '),
           confidence: switch (honesty.reliability) {
             DataReliability.insufficient => tr(
@@ -616,6 +823,8 @@ class DashboardGrid extends ConsumerWidget {
                   ),
             onPrimaryAction: null,
           ),
+          progressSection: progressSection,
+          personalHealthAi: personalHealthAiPanel,
           bodyTwinSummary: twin.sufficient
               ? tr(
                   'A cautious planning direction is available; the range matters more than a single estimate.',
@@ -675,252 +884,11 @@ class DashboardGrid extends ConsumerWidget {
               recorded: dailyReturn.hasWater,
             ),
           ],
+          insightTitle: localizedInsightTitle,
+          insightSummary: arabic
+              ? 'يستند هذا الاستنتاج إلى بياناتك المحلية المسجلة فقط.'
+              : '${primaryInsight.explanation} ${primaryInsight.suggestedAction}',
         ),
-        const SizedBox(height: PremiumDesignTokens.spaceMd),
-        PersonalHealthAiPanel(
-          snapshot: healthAi,
-          arabic: arabic,
-          todayHasMeals: meals.isNotEmpty,
-          decisionCount: memoriesAsync.value?.length ?? 0,
-        ),
-        const SizedBox(height: PremiumDesignTokens.spaceMd),
-        Visibility(
-          visible: false,
-          maintainState: false,
-          child: DailyReturnCard(
-            report: dailyReturn,
-            changedSummary: localizedChanged,
-            actionTitle: localizedBestTitle,
-            actionReason: localizedBestReason,
-            missingEvidence: honesty.missing.isEmpty
-                ? tr(
-                    'No important evidence gap for today’s next decision.',
-                    'لا توجد فجوة أدلة مهمة لقرار اليوم التالي.',
-                  )
-                : tr(
-                    honesty.missing.first,
-                    'تتحسن الثقة مع أيام محلية أكثر اكتمالًا واتساقًا.',
-                  ),
-            onPrimaryAction: () {
-              switch (bestAction.type) {
-                case BestActionType.weighIn:
-                  context.go('/daily-check-in');
-                case BestActionType.completeLogging:
-                case BestActionType.protein:
-                  context.go('/daily-log');
-                case BestActionType.hydration:
-                  addWater(250);
-                case BestActionType.holdPlan:
-                case BestActionType.none:
-                  break;
-              }
-            },
-          ),
-        ),
-        const SizedBox(height: PremiumDesignTokens.spaceMd),
-        Visibility(
-          visible: true,
-          maintainState: false,
-          child: PremiumSurface(
-            padding: PremiumDesignTokens.cardPaddingLarge,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final tileWidth = constraints.maxWidth >= 860
-                    ? (constraints.maxWidth -
-                              (4 * PremiumDesignTokens.spaceSm)) /
-                          5
-                    : constraints.maxWidth >= 560
-                    ? (constraints.maxWidth -
-                              (2 * PremiumDesignTokens.spaceSm)) /
-                          3
-                    : (constraints.maxWidth - PremiumDesignTokens.spaceSm) / 2;
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _DashboardSectionHeading(
-                                title: tr('Today progress', 'تقدم اليوم'),
-                                subtitle: tr(
-                                  'Recorded so far against your current plan. Missing observations stay unknown.',
-                                  'المسجل حتى الآن مقابل خطتك الحالية. تبقى الملاحظات الناقصة غير معروفة.',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (loggingStreak >= 2)
-                          _StreakBadge(days: loggingStreak, arabic: arabic),
-                      ],
-                    ),
-                    const SizedBox(height: PremiumDesignTokens.spaceMd),
-                    Wrap(
-                      spacing: PremiumDesignTokens.spaceSm,
-                      runSpacing: PremiumDesignTokens.spaceSm,
-                      children: [
-                        SizedBox(
-                          width: tileWidth,
-                          child: _CompactMetricTile(
-                            icon: Icons.monitor_weight_outlined,
-                            label: tr('Weight', 'الوزن'),
-                            value: UnitConverter.weightFromKg(
-                              currentWeight,
-                              system,
-                            ).toStringAsFixed(1),
-                            unit: UnitConverter.weightUnit(system),
-                            accent: Colors.blue,
-                          ),
-                        ),
-                        SizedBox(
-                          width: tileWidth,
-                          child: _CompactMetricTile(
-                            icon: Icons.local_fire_department_outlined,
-                            label: tr('Calories', 'السعرات'),
-                            value: meals.isEmpty
-                                ? tr('Unknown', 'غير معروف')
-                                : calories.round().toString(),
-                            unit: '/ ${effectiveTargets.calories}',
-                            progress: effectiveTargets.calories <= 0
-                                ? 0
-                                : (calories / effectiveTargets.calories).clamp(
-                                    0.0,
-                                    1.0,
-                                  ),
-                            accent: Colors.orange,
-                          ),
-                        ),
-                        SizedBox(
-                          width: tileWidth,
-                          child: _CompactMetricTile(
-                            icon: Icons.fitness_center_outlined,
-                            label: tr('Protein', 'البروتين'),
-                            value: meals.isEmpty
-                                ? tr('Unknown', 'غير معروف')
-                                : protein.round().toString(),
-                            unit: '/ ${effectiveTargets.protein} g',
-                            progress: effectiveTargets.protein <= 0
-                                ? 0
-                                : (protein / effectiveTargets.protein).clamp(
-                                    0.0,
-                                    1.0,
-                                  ),
-                            accent: Colors.green,
-                          ),
-                        ),
-                        SizedBox(
-                          width: tileWidth,
-                          child: _CompactMetricTile(
-                            icon: Icons.grain_outlined,
-                            label: tr('Carbs', 'الكربوهيدرات'),
-                            value: meals.isEmpty
-                                ? tr('Unknown', 'غير معروف')
-                                : carbs.round().toString(),
-                            unit: '/ ${effectiveTargets.carbs} g',
-                            progress: effectiveTargets.carbs <= 0
-                                ? 0
-                                : (carbs / effectiveTargets.carbs).clamp(
-                                    0.0,
-                                    1.0,
-                                  ),
-                            accent: Colors.amber.shade800,
-                          ),
-                        ),
-                        SizedBox(
-                          width: tileWidth,
-                          child: _CompactMetricTile(
-                            icon: Icons.opacity_outlined,
-                            label: tr('Fat', 'الدهون'),
-                            value: meals.isEmpty
-                                ? tr('Unknown', 'غير معروف')
-                                : fats.round().toString(),
-                            unit: '/ ${effectiveTargets.fats} g',
-                            progress: effectiveTargets.fats <= 0
-                                ? 0
-                                : (fats / effectiveTargets.fats).clamp(
-                                    0.0,
-                                    1.0,
-                                  ),
-                            accent: Colors.purple,
-                          ),
-                        ),
-                        SizedBox(
-                          width: tileWidth,
-                          child: _CompactMetricTile(
-                            icon: Icons.water_drop_outlined,
-                            label: tr('Water', 'الماء'),
-                            value: waterRows.isEmpty
-                                ? tr('Unknown', 'غير معروف')
-                                : water.toString(),
-                            unit: '/ ${effectiveTargets.water} ml',
-                            progress:
-                                waterRows.isEmpty || effectiveTargets.water <= 0
-                                ? 0
-                                : (water / effectiveTargets.water).clamp(
-                                    0.0,
-                                    1.0,
-                                  ),
-                            accent: Colors.cyan,
-                          ),
-                        ),
-                        SizedBox(
-                          width: tileWidth,
-                          child: _CompactMetricTile(
-                            icon: Icons.bolt_outlined,
-                            label: tr('TDEE', 'الاحتياج اليومي'),
-                            value: bil.tdee.round().toString(),
-                            unit: 'kcal',
-                            accent: Colors.deepOrangeAccent,
-                          ),
-                        ),
-                        if (bmi != null)
-                          SizedBox(
-                            width: tileWidth,
-                            child: _CompactMetricTile(
-                              icon: Icons.accessibility_new_rounded,
-                              label: tr('BMI', 'مؤشر كتلة الجسم'),
-                              value: bmi.toStringAsFixed(1),
-                              unit: '',
-                              accent: Colors.indigoAccent,
-                            ),
-                          ),
-                        SizedBox(
-                          width: tileWidth,
-                          child: _CompactMetricTile(
-                            icon: Icons.person_outline_rounded,
-                            label: tr('Current weight', 'الوزن الحالي'),
-                            value: UnitConverter.weightFromKg(
-                              profile.currentWeight,
-                              system,
-                            ).toStringAsFixed(1),
-                            unit: UnitConverter.weightUnit(system),
-                            accent: Colors.lightBlueAccent,
-                          ),
-                        ),
-                        SizedBox(
-                          width: tileWidth,
-                          child: _CompactMetricTile(
-                            icon: Icons.flag_outlined,
-                            label: tr('Goal progress', 'التقدم نحو الهدف'),
-                            value: '${(progress * 100).round()}%',
-                            unit: '',
-                            progress: progress,
-                            accent: Colors.tealAccent,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-        ),
-        const SizedBox(height: PremiumDesignTokens.spaceMd),
         Visibility(
           visible: false,
           maintainState: false,
@@ -943,276 +911,187 @@ class DashboardGrid extends ConsumerWidget {
             onRepeatRecentBreakfast: repeatRecentBreakfast,
           ),
         ),
-        const SizedBox(height: PremiumDesignTokens.spaceMd),
-        _BodyProfileSnapshot(
-          arabic: arabic,
-          weight:
-              '${UnitConverter.weightFromKg(currentWeight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}',
-          height: '${profile.height.toStringAsFixed(1)} cm',
-          target:
-              '${UnitConverter.weightFromKg(profile.targetWeight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}',
-          calorieTarget: '${effectiveTargets.calories} kcal',
-          proteinTarget: '${effectiveTargets.protein} g',
-          waterTarget: '${effectiveTargets.water} ml',
-          onEditProfile: () => context.go('/profile-settings'),
-          onEditPlan: () => context.go('/plan'),
-        ),
-        const SizedBox(height: PremiumDesignTokens.spaceMd),
-        PremiumSurface(
-          padding: EdgeInsets.zero,
-          child: DashboardInsightsSurface(
-            initiallyExpanded: true,
-            collapsible: false,
-            leading: const Icon(Icons.insights_outlined),
-            title: Text(
-              tr(
-                'Insights, progress and evidence',
-                'التحليلات والتقدم والأدلة',
-              ),
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            subtitle: Text(
-              tr(
-                'What BIL knows, why it matters, and how strong the evidence is.',
-                'ما يعرفه BIL، ولماذا يهم، ومدى قوة الأدلة.',
-              ),
-            ),
-            childrenPadding: const EdgeInsets.fromLTRB(
-              PremiumDesignTokens.spaceMd,
-              0,
-              PremiumDesignTokens.spaceMd,
-              PremiumDesignTokens.spaceMd,
-            ),
+        Visibility(
+          visible: false,
+          maintainState: false,
+          child: _DetailPanel(
+            icon: Icons.task_alt_outlined,
+            title: context.strings.text('One best action'),
             children: [
-              const Divider(),
-              _DetailPanel(
-                icon: Icons.show_chart_rounded,
-                title: tr('Weight over time', 'الوزن عبر الزمن'),
-                children: [
-                  WeightTrendChart(
-                    weights: weights
-                        .take(30)
-                        .toList()
-                        .reversed
-                        .map((row) => row.weight)
-                        .toList(),
-                    variability: progressAnalysis.variabilityKg,
-                    semanticsLabel: tr(
-                      'Recorded weight trend over time',
-                      'اتجاه الوزن المسجل عبر الزمن',
-                    ),
-                  ),
-                ],
+              FilledButton.tonal(
+                onPressed: () => respondToAction('accepted'),
+                child: Text(tr('Accept', 'قبول')),
               ),
-              const SizedBox(height: PremiumDesignTokens.spaceMd),
-              WeeklyProgressCard(
-                start: UnitConverter.weightFromKg(weekStartWeight, system),
-                today: UnitConverter.weightFromKg(currentWeight, system),
-                goal: UnitConverter.weightFromKg(profile.targetWeight, system),
-                unit: UnitConverter.weightUnit(system),
+              OutlinedButton(
+                onPressed: () => respondToAction('done'),
+                child: Text(tr('Done', 'تم')),
               ),
-              const SizedBox(height: PremiumDesignTokens.spaceMd),
-              _DetailPanel(
-                icon: Icons.flag_outlined,
-                title:
-                    '${tr('Goal progress', 'التقدم نحو الهدف')} ${(progress * 100).round()}%',
-                children: [
-                  LinearProgressIndicator(value: progress),
-                  const SizedBox(height: PremiumDesignTokens.spaceSm),
-                  Text(
-                    arabic
-                        ? 'الاحتياج اليومي المقدر ${bil.tdee.round()} سعرة · هدف السعرات ${effectiveTargets.calories}'
-                        : 'Estimated TDEE ${bil.tdee.round()} kcal · planned ${goalType == 'lose'
-                              ? 'deficit'
-                              : goalType == 'gain'
-                              ? 'surplus'
-                              : 'maintenance'} ${effectiveTargets.calories - bil.tdee.round()} kcal',
-                  ),
-                  const SizedBox(height: PremiumDesignTokens.spaceXs),
-                  Text(
-                    goalDate == null
-                        ? tr(
-                            'Goal date: more consistent weight data needed',
-                            'تاريخ الهدف: نحتاج بيانات وزن أكثر اتساقًا',
-                          )
-                        : '${tr('Estimated goal date', 'تاريخ الهدف المقدر')}: ${goalDate.year}-${goalDate.month.toString().padLeft(2, '0')}-${goalDate.day.toString().padLeft(2, '0')}',
-                  ),
-                ],
-              ),
-              const SizedBox(height: PremiumDesignTokens.spaceMd),
-              _DetailPanel(
-                icon: Icons.auto_awesome_outlined,
-                title: localizedInsightTitle,
-                children: [
-                  Text(
-                    arabic
-                        ? 'يستند هذا الاستنتاج إلى بياناتك المحلية المسجلة فقط. اجمع أيامًا إضافية قبل تغيير الخطة.'
-                        : '${primaryInsight.explanation}\n${primaryInsight.suggestedAction}',
-                  ),
-                ],
-              ),
-              const SizedBox(height: PremiumDesignTokens.spaceMd),
-              Visibility(
-                visible: false,
-                maintainState: false,
-                child: _DetailPanel(
-                  icon: Icons.task_alt_outlined,
-                  title: context.strings.text('One best action'),
-                  children: [
-                    Text(
-                      localizedBestTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: PremiumDesignTokens.spaceXs),
-                    Text(localizedBestReason),
-                    const SizedBox(height: PremiumDesignTokens.spaceSm),
-                    Wrap(
-                      spacing: PremiumDesignTokens.spaceSm,
-                      runSpacing: PremiumDesignTokens.spaceSm,
-                      children: [
-                        FilledButton.tonal(
-                          onPressed: () => respondToAction('accepted'),
-                          child: Text(tr('Accept', 'قبول')),
-                        ),
-                        OutlinedButton(
-                          onPressed: () => respondToAction('done'),
-                          child: Text(tr('Done', 'تم')),
-                        ),
-                        TextButton(
-                          onPressed: () => respondToAction('notSuitable'),
-                          child: Text(
-                            tr('Not suitable today', 'غير مناسب اليوم'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: PremiumDesignTokens.spaceMd),
-              ExpansionTile(
-                tilePadding: EdgeInsets.zero,
-                leading: ConfidenceRing(
-                  score: honesty.score,
-                  reliability: honesty.reliability,
-                ),
-                title: Text(context.strings.text('Data honesty')),
-                subtitle: Text(
-                  arabic
-                      ? 'موثوقية ${switch (honesty.reliability) {
-                          DataReliability.insufficient => 'غير كافية',
-                          DataReliability.emerging => 'قيد التكوين',
-                          DataReliability.useful => 'مفيدة',
-                          DataReliability.strong => 'قوية',
-                        }}'
-                      : '${honesty.reliability.name} reliability',
-                ),
-                children: [
-                  if (arabic)
-                    Text(
-                      'أيام الوزن: ${weightDays.length} · أيام التغذية: ${mealDays.length} · أيام الماء: ${waterDays.length}.',
-                    )
-                  else ...[
-                    if (honesty.strengths.isNotEmpty)
-                      Text('Evidence: ${honesty.strengths.join(' · ')}'),
-                    if (honesty.missing.isNotEmpty)
-                      Text(
-                        'Improve confidence: ${honesty.missing.join(' · ')}',
-                      ),
-                  ],
-                ],
-              ),
-              ExpansionTile(
-                tilePadding: EdgeInsets.zero,
-                title: Text(context.strings.text('What changed today?')),
-                subtitle: Text(localizedChanged),
-                children: [
-                  if (changed.evidence.isNotEmpty && !arabic)
-                    Text('Evidence: ${changed.evidence.join(' · ')}'),
-                  Text(
-                    arabic
-                        ? 'تفسيرات بديلة محتملة: الماء والجليكوجين ومحتوى الجهاز الهضمي وتوقيت القياس ونقص التسجيل. لا يُعد أي منها تشخيصًا.'
-                        : 'Other explanations: ${changed.alternatives.join(' · ')}',
-                  ),
-                ],
-              ),
-              ExpansionTile(
-                tilePadding: EdgeInsets.zero,
-                title: Text(context.strings.text('Body Twin')),
-                subtitle: Text(
-                  arabic
-                      ? twin.sufficient
-                            ? 'سيناريو حذر متاح من أدلتك المحلية'
-                            : 'يتعلم بأمان · نحتاج بيانات أكثر'
-                      : twin.sufficient
-                      ? 'Cautious scenario available from your local evidence'
-                      : 'Learning safely · ${twin.requiredData.join(' · ')}',
-                ),
-                children: [
-                  if (twin.scenario != null) ...[
-                    Text(
-                      '${tr('Expected planning direction', 'اتجاه التخطيط المتوقع')}: ${twin.scenario!.expectedWeeklyKg.toStringAsFixed(2)} ${tr('kg/week', 'كجم/أسبوع')}',
-                    ),
-                    Text(
-                      '${tr('Cautious range', 'النطاق الحذر')}: ${twin.scenario!.cautiousLowKg.toStringAsFixed(2)} ${tr('to', 'إلى')} ${twin.scenario!.cautiousHighKg.toStringAsFixed(2)} ${tr('kg/week', 'كجم/أسبوع')}',
-                    ),
-                  ],
-                ],
-              ),
-              ExpansionTile(
-                tilePadding: EdgeInsets.zero,
-                title: Text(
-                  tr('Available nutrient evidence', 'أدلة العناصر المتاحة'),
-                ),
-                subtitle: Text(
-                  tr(
-                    'Unavailable nutrients are never shown as zero.',
-                    'لا تظهر العناصر غير المتاحة على أنها صفر.',
-                  ),
-                ),
-                children: [
-                  _TargetRow(
-                    label: tr('Fiber', 'الألياف'),
-                    evidence: fiberEvidence,
-                    target: effectiveTargets.fiber.toDouble(),
-                    unit: 'g',
-                  ),
-                  _TargetRow(
-                    label: tr('Sodium', 'الصوديوم'),
-                    evidence: sodiumEvidence,
-                    target: effectiveTargets.sodium.toDouble(),
-                    unit: 'mg',
-                    upperLimit: true,
-                  ),
-                  _TargetRow(
-                    label: tr('Potassium', 'البوتاسيوم'),
-                    evidence: potassiumEvidence,
-                    target: effectiveTargets.potassium.toDouble(),
-                    unit: 'mg',
-                  ),
-                  _InformationalNutrientRow(
-                    label: tr('Calcium', 'الكالسيوم'),
-                    evidence: calciumEvidence,
-                    unit: 'mg',
-                  ),
-                  _InformationalNutrientRow(
-                    label: tr('Magnesium', 'المغنيسيوم'),
-                    evidence: magnesiumEvidence,
-                    unit: 'mg',
-                  ),
-                  _InformationalNutrientRow(
-                    label: tr('Sugar', 'السكر'),
-                    evidence: sugarEvidence,
-                    unit: 'g',
-                  ),
-                ],
+              TextButton(
+                onPressed: () => respondToAction('notSuitable'),
+                child: Text(tr('Not suitable today', 'غير مناسب اليوم')),
               ),
             ],
           ),
         ),
+        const SizedBox(height: PremiumDesignTokens.spaceMd),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth < 1180) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  bodyProfile,
+                  const SizedBox(height: PremiumDesignTokens.spaceMd),
+                  Text(
+                    tr('Analytics', 'التحليلات'),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: PremiumDesignTokens.spaceSm),
+                  weightJourney,
+                  const SizedBox(height: PremiumDesignTokens.spaceSm),
+                  weeklyProgress,
+                ],
+              );
+            }
+            return Directionality(
+              textDirection: TextDirection.ltr,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(flex: 6, child: weightJourney),
+                  const SizedBox(width: PremiumDesignTokens.spaceMd),
+                  Expanded(flex: 5, child: weeklyProgress),
+                  const SizedBox(width: PremiumDesignTokens.spaceMd),
+                  Expanded(flex: 9, child: bodyProfile),
+                ],
+              ),
+            );
+          },
+        ),
       ],
+    );
+  }
+}
+
+class _DashboardPagedSection extends StatelessWidget {
+  const _DashboardPagedSection({
+    required this.title,
+    required this.subtitle,
+    required this.pages,
+    this.badge,
+  });
+
+  final String title;
+  final String subtitle;
+  final List<Widget> pages;
+  final Widget? badge;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, outerConstraints) {
+        final desktop = MediaQuery.sizeOf(context).width >= 900;
+        final baseHeight = desktop
+            ? 94.0
+            : outerConstraints.maxWidth >= 560
+            ? 214.0
+            : 286.0;
+        final heading = Row(
+          children: [
+            Expanded(
+              child: _DashboardSectionHeading(title: title, subtitle: subtitle),
+            ),
+            if (badge != null) ...[
+              const SizedBox(width: PremiumDesignTokens.spaceSm),
+              badge!,
+            ],
+          ],
+        );
+        final carousel = DashboardCarousel(
+          height: MediaQuery.textScalerOf(
+            context,
+          ).scale(baseHeight).clamp(baseHeight, baseHeight + 90),
+          semanticLabel: title,
+          pages: pages,
+        );
+
+        return PremiumSurface(
+          dashboardGlass: true,
+          padding: desktop
+              ? const EdgeInsets.all(PremiumDesignTokens.spaceMd)
+              : PremiumDesignTokens.cardPaddingLarge,
+          child: desktop
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(width: 235, child: heading),
+                    const SizedBox(width: PremiumDesignTokens.spaceMd),
+                    Expanded(child: carousel),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    heading,
+                    const SizedBox(height: PremiumDesignTokens.spaceSm),
+                    carousel,
+                  ],
+                ),
+        );
+      },
+    );
+  }
+}
+
+class _MetricData {
+  const _MetricData(this.icon, this.label, this.value, this.unit, this.accent);
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final String unit;
+  final Color accent;
+}
+
+class _MetricGridPage extends StatelessWidget {
+  const _MetricGridPage({required this.metrics});
+
+  final List<_MetricData> metrics;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wideScreen = MediaQuery.sizeOf(context).width >= 900;
+        final columns = wideScreen
+            ? metrics.length
+            : constraints.maxWidth >= 560
+            ? 3
+            : 2;
+        return GridView.builder(
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columns,
+            crossAxisSpacing: PremiumDesignTokens.spaceSm,
+            mainAxisSpacing: PremiumDesignTokens.spaceSm,
+            childAspectRatio: wideScreen ? 1.55 : 1.85,
+          ),
+          itemCount: metrics.length,
+          itemBuilder: (context, index) {
+            final metric = metrics[index];
+            return _CompactMetricTile(
+              icon: metric.icon,
+              label: metric.label,
+              value: metric.value,
+              unit: metric.unit,
+              accent: metric.accent,
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -1226,6 +1105,12 @@ class _BodyProfileSnapshot extends StatelessWidget {
     required this.calorieTarget,
     required this.proteinTarget,
     required this.waterTarget,
+    required this.dailyMetabolism,
+    required this.neckCircumference,
+    required this.waistCircumference,
+    required this.bodyMassIndex,
+    required this.bodyFatPercentage,
+    required this.leanBodyMass,
     required this.onEditProfile,
     required this.onEditPlan,
   });
@@ -1237,6 +1122,12 @@ class _BodyProfileSnapshot extends StatelessWidget {
   final String calorieTarget;
   final String proteinTarget;
   final String waterTarget;
+  final String dailyMetabolism;
+  final String neckCircumference;
+  final String waistCircumference;
+  final String bodyMassIndex;
+  final String bodyFatPercentage;
+  final String leanBodyMass;
   final VoidCallback onEditProfile;
   final VoidCallback onEditPlan;
 
@@ -1245,6 +1136,7 @@ class _BodyProfileSnapshot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final values = [
       (tr('Current weight', 'الوزن الحالي'), weight),
       (tr('Height', 'الطول'), height),
@@ -1252,10 +1144,17 @@ class _BodyProfileSnapshot extends StatelessWidget {
       (tr('Daily energy plan', 'خطة الطاقة اليومية'), calorieTarget),
       (tr('Protein target', 'هدف البروتين'), proteinTarget),
       (tr('Water target', 'هدف الماء'), waterTarget),
+      (tr('Daily metabolism', 'معدل الأيض اليومي'), dailyMetabolism),
+      (tr('Neck circumference', 'محيط الرقبة'), neckCircumference),
+      (tr('Waist circumference', 'محيط الخصر'), waistCircumference),
+      (tr('Body mass index', 'مؤشر كتلة الجسم'), bodyMassIndex),
+      (tr('Body fat percentage', 'نسبة دهون الجسم'), bodyFatPercentage),
+      (tr('Lean body mass', 'الكتلة الخالية من الدهون'), leanBodyMass),
     ];
 
     return PremiumSurface(
       key: const Key('dashboard-body-profile'),
+      dashboardGlass: true,
       padding: PremiumDesignTokens.cardPaddingLarge,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1278,61 +1177,89 @@ class _BodyProfileSnapshot extends StatelessWidget {
           const SizedBox(height: PremiumDesignTokens.spaceMd),
           LayoutBuilder(
             builder: (context, constraints) {
-              final columns = constraints.maxWidth >= 900
-                  ? 3
-                  : constraints.maxWidth >= 520
-                  ? 2
-                  : 1;
+              if (constraints.maxWidth < 600) {
+                final fixedDesktopGrid = screenWidth >= 1200;
+                return Column(
+                  children: [
+                    SizedBox(
+                      height: 142,
+                      child: SvgPicture.asset(
+                        'assets/images/dashboard/bil_body_profile.svg',
+                        key: const Key('bil-body-profile-svg'),
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(height: PremiumDesignTokens.spaceSm),
+                    SizedBox(
+                      height: fixedDesktopGrid ? 192 : 184,
+                      child: GridView.builder(
+                        scrollDirection: fixedDesktopGrid
+                            ? Axis.vertical
+                            : Axis.horizontal,
+                        physics: fixedDesktopGrid
+                            ? const NeverScrollableScrollPhysics()
+                            : null,
+                        padding: EdgeInsets.zero,
+                        gridDelegate: fixedDesktopGrid
+                            ? const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 6,
+                                childAspectRatio: 1.04,
+                                crossAxisSpacing: PremiumDesignTokens.spaceXs,
+                                mainAxisSpacing: PremiumDesignTokens.spaceXs,
+                              )
+                            : const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisExtent: 176,
+                                crossAxisSpacing: PremiumDesignTokens.spaceSm,
+                                mainAxisSpacing: PremiumDesignTokens.spaceSm,
+                              ),
+                        itemCount: values.length,
+                        itemBuilder: (context, index) => _BodyProfileValue(
+                          label: values[index].$1,
+                          value: values[index].$2,
+                          compact: fixedDesktopGrid,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+              final columns = constraints.maxWidth >= 900 ? 3 : 2;
               final gap = PremiumDesignTokens.spaceSm;
-              final width =
-                  (constraints.maxWidth - gap * (columns - 1)) / columns;
-              return Wrap(
+              final informationWidth =
+                  constraints.maxWidth * .76 - PremiumDesignTokens.spaceMd;
+              final width = (informationWidth - gap * (columns - 1)) / columns;
+              final information = Wrap(
                 spacing: gap,
                 runSpacing: gap,
                 children: values
                     .map(
                       (item) => SizedBox(
                         width: width,
-                        child: Container(
-                          padding: const EdgeInsets.all(
-                            PremiumDesignTokens.spaceSm,
-                          ),
-                          decoration: BoxDecoration(
-                            color: scheme.surfaceContainerHighest.withValues(
-                              alpha: .46,
-                            ),
-                            borderRadius: BorderRadius.circular(
-                              PremiumDesignTokens.radiusMd,
-                            ),
-                            border: Border.all(
-                              color: scheme.outlineVariant.withValues(
-                                alpha: .72,
-                              ),
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.$1,
-                                style: Theme.of(context).textTheme.labelMedium
-                                    ?.copyWith(
-                                      color: scheme.onSurfaceVariant,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                item.$2,
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(fontWeight: FontWeight.w900),
-                              ),
-                            ],
-                          ),
+                        child: _BodyProfileValue(
+                          label: item.$1,
+                          value: item.$2,
                         ),
                       ),
                     )
                     .toList(),
+              );
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: constraints.maxWidth * .24,
+                    height: 220,
+                    child: SvgPicture.asset(
+                      'assets/images/dashboard/bil_body_profile.svg',
+                      key: const Key('bil-body-profile-svg'),
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  const SizedBox(width: PremiumDesignTokens.spaceMd),
+                  Expanded(child: information),
+                ],
               );
             },
           ),
@@ -1359,6 +1286,61 @@ class _BodyProfileSnapshot extends StatelessWidget {
   }
 }
 
+class _BodyProfileValue extends StatelessWidget {
+  const _BodyProfileValue({
+    required this.label,
+    required this.value,
+    this.compact = false,
+  });
+
+  final String label;
+  final String value;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      constraints: const BoxConstraints(minHeight: 84),
+      padding: EdgeInsets.all(compact ? 2 : PremiumDesignTokens.spaceSm),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: .28),
+        borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: .52)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style:
+                (compact
+                        ? Theme.of(context).textTheme.labelSmall
+                        : Theme.of(context).textTheme.labelMedium)
+                    ?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w700,
+                    ),
+          ),
+          SizedBox(height: compact ? 1 : 4),
+          Text(
+            value,
+            maxLines: compact ? 2 : 1,
+            overflow: compact ? TextOverflow.visible : TextOverflow.ellipsis,
+            style:
+                (compact
+                        ? Theme.of(context).textTheme.titleSmall
+                        : Theme.of(context).textTheme.titleMedium)
+                    ?.copyWith(fontWeight: FontWeight.w900),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _DashboardSectionHeading extends StatelessWidget {
   const _DashboardSectionHeading({required this.title, required this.subtitle});
 
@@ -1367,6 +1349,8 @@ class _DashboardSectionHeading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final dark = theme.brightness == Brightness.dark;
     return Semantics(
       header: true,
       container: true,
@@ -1376,34 +1360,38 @@ class _DashboardSectionHeading extends StatelessWidget {
           Text(
             title,
             key: const Key('dashboard-today-summary-title'),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: const Color(0xFFF4F8FB),
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: dark ? const Color(0xFFF4F8FB) : const Color(0xFF10283B),
               fontWeight: FontWeight.w900,
               letterSpacing: -0.2,
-              shadows: const [
-                Shadow(
-                  color: Color(0x80000000),
-                  blurRadius: 8,
-                  offset: Offset(0, 2),
-                ),
-              ],
+              shadows: dark
+                  ? const [
+                      Shadow(
+                        color: Color(0x80000000),
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ]
+                  : const [],
             ),
           ),
           const SizedBox(height: PremiumDesignTokens.spaceXs),
           Text(
             subtitle,
             key: const Key('dashboard-today-summary-subtitle'),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFFCAE0E8),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: dark ? const Color(0xFFCAE0E8) : const Color(0xFF526B7C),
               fontWeight: FontWeight.w600,
               height: 1.4,
-              shadows: const [
-                Shadow(
-                  color: Color(0x66000000),
-                  blurRadius: 6,
-                  offset: Offset(0, 1),
-                ),
-              ],
+              shadows: dark
+                  ? const [
+                      Shadow(
+                        color: Color(0x66000000),
+                        blurRadius: 6,
+                        offset: Offset(0, 1),
+                      ),
+                    ]
+                  : const [],
             ),
           ),
         ],
@@ -1419,7 +1407,6 @@ class _CompactMetricTile extends StatelessWidget {
     required this.value,
     required this.unit,
     required this.accent,
-    this.progress,
   });
 
   final IconData icon;
@@ -1427,17 +1414,17 @@ class _CompactMetricTile extends StatelessWidget {
   final String value;
   final String unit;
   final Color accent;
-  final double? progress;
 
   @override
   Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width >= 900;
     return Container(
-      constraints: const BoxConstraints(minHeight: 118),
-      padding: const EdgeInsets.all(PremiumDesignTokens.spaceMd),
+      constraints: BoxConstraints(minHeight: compact ? 56 : 88),
+      padding: EdgeInsets.all(compact ? 2 : PremiumDesignTokens.spaceSm),
       decoration: BoxDecoration(
         color: Theme.of(
           context,
-        ).colorScheme.surfaceContainerHighest.withValues(alpha: .42),
+        ).colorScheme.surfaceContainerHighest.withValues(alpha: .26),
         borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusLg),
         border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
@@ -1447,27 +1434,31 @@ class _CompactMetricTile extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 19, color: accent),
+              Icon(icon, size: compact ? 14 : 19, color: accent),
               const SizedBox(width: PremiumDesignTokens.spaceXs),
               Expanded(
                 child: Text(
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelLarge,
+                  style: compact
+                      ? Theme.of(context).textTheme.labelSmall
+                      : Theme.of(context).textTheme.labelLarge,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: compact ? 1 : 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 value,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w900,
-                ),
+                style:
+                    (compact
+                            ? Theme.of(context).textTheme.titleMedium
+                            : Theme.of(context).textTheme.headlineSmall)
+                        ?.copyWith(fontWeight: FontWeight.w900),
               ),
               const SizedBox(width: PremiumDesignTokens.spaceXs),
               Expanded(
@@ -1483,18 +1474,6 @@ class _CompactMetricTile extends StatelessWidget {
               ),
             ],
           ),
-          if (progress != null) ...[
-            const SizedBox(height: PremiumDesignTokens.spaceSm),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(99),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 5,
-                color: accent,
-                backgroundColor: accent.withValues(alpha: .14),
-              ),
-            ),
-          ],
         ],
       ),
     );
@@ -1528,6 +1507,7 @@ class _StreakBadge extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _DetailPanel extends StatelessWidget {
   const _DetailPanel({
     required this.icon,
@@ -1586,12 +1566,14 @@ int consecutiveLoggingDays(Set<String> observedDays, DateTime today) {
   return streak;
 }
 
+// ignore: unused_element
 class _TargetRow extends StatelessWidget {
   const _TargetRow({
     required this.label,
     required this.evidence,
     required this.target,
     required this.unit,
+    // ignore: unused_element_parameter
     this.upperLimit = false,
   });
 
@@ -1654,6 +1636,7 @@ class _TargetRow extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _InformationalNutrientRow extends StatelessWidget {
   const _InformationalNutrientRow({
     required this.label,

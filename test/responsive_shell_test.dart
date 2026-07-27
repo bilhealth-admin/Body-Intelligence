@@ -1,8 +1,11 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/router/responsive_app_shell.dart';
 import 'package:body_intelligence_log/app/theme/premium_motion_tokens.dart';
+import 'package:body_intelligence_log/features/profile/profile_settings_page.dart';
+import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,6 +16,10 @@ Widget shellApp({
   final router = GoRouter(
     initialLocation: initialLocation,
     routes: [
+      GoRoute(
+        path: '/profile-settings',
+        builder: (_, _) => const ProfileSettingsPage(),
+      ),
       ShellRoute(
         builder: (_, _, child) => ResponsiveAppShell(child: child),
         routes: [
@@ -50,16 +57,21 @@ Widget shellApp({
       ),
     ],
   );
-  return MaterialApp.router(
-    locale: locale,
-    routerConfig: router,
-    supportedLocales: AppLocalizations.supportedLocales,
-    localizationsDelegates: const [
-      AppLocalizations.delegate,
-      GlobalMaterialLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate,
-      GlobalCupertinoLocalizations.delegate,
+  return ProviderScope(
+    overrides: [
+      userProfileProvider.overrideWith((ref) => const Stream.empty()),
     ],
+    child: MaterialApp.router(
+      locale: locale,
+      routerConfig: router,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+    ),
   );
 }
 
@@ -95,6 +107,24 @@ void main() {
     ]) {
       expect(find.text(label), findsOneWidget);
     }
+  });
+
+  testWidgets('visible desktop profile control opens the profile form', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(shellApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('shell-profile-control')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.byType(ProfileSettingsPage), findsOneWidget);
+    expect(find.text('settings'), findsNothing);
   });
 
   testWidgets('compact shell destination tap navigates to analytics', (

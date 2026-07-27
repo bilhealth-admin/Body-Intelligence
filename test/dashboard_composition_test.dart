@@ -29,7 +29,9 @@ void main() {
   });
 
   for (final width in <double>[1600, 1920]) {
-    testWidgets('composition uses two regions at $width px', (tester) async {
+    testWidgets('composition preserves full-width hero at $width px', (
+      tester,
+    ) async {
       await tester.binding.setSurfaceSize(Size(width, 1000));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -45,13 +47,10 @@ void main() {
       );
 
       expect(
-        find.byKey(const Key('dashboard-composition-wide')),
+        find.byKey(const Key('dashboard-composition-stacked')),
         findsOneWidget,
       );
-      expect(
-        find.byKey(const Key('dashboard-composition-stacked')),
-        findsNothing,
-      );
+      expect(find.byKey(const Key('dashboard-composition-wide')), findsNothing);
       expect(tester.takeException(), isNull);
     });
   }

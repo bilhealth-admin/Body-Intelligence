@@ -8,7 +8,6 @@ import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
 import 'providers/dashboard_provider.dart';
 import 'widgets/dashboard_composition.dart';
-import 'widgets/dashboard_experience_frame.dart';
 import 'widgets/dashboard_grid.dart';
 import 'widgets/dashboard_header.dart';
 import 'widgets/dashboard_shell.dart';
@@ -64,7 +63,7 @@ class DashboardPage extends ConsumerWidget {
         DashboardTopBar(
           arabic: arabic,
           displayName: displayName,
-          onProfile: () => context.go('/settings'),
+          onProfile: () => context.go('/profile-settings'),
         ),
         const SizedBox(height: 18),
         if (showFirstValue) ...[
@@ -80,7 +79,6 @@ class DashboardPage extends ConsumerWidget {
           ),
           const SizedBox(height: 18),
         ],
-        const DashboardHeader(),
       ],
     );
 
@@ -88,10 +86,7 @@ class DashboardPage extends ConsumerWidget {
       onRefresh: () => refresh(context, ref),
       child: DashboardComposition(
         hero: hero,
-        content: DashboardExperienceFrame(
-          arabic: arabic,
-          child: const DashboardGrid(),
-        ),
+        content: const DashboardGrid(hero: DashboardHeader()),
       ),
     );
   }
