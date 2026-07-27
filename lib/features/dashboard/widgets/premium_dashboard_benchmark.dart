@@ -75,6 +75,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
         interpretation: nutritionSummary,
         evidence: nutritionEvidence,
         accent: const Color(0xFF65E5B1),
+        matchPersonalAiSurface: true,
       ),
       _CompactInsightCard(
         key: const Key('dashboard-action-insight'),
@@ -256,6 +257,7 @@ class _CompactInsightCard extends StatelessWidget {
     required this.evidence,
     required this.accent,
     this.onTap,
+    this.matchPersonalAiSurface = false,
   });
 
   final String eyebrow;
@@ -264,13 +266,12 @@ class _CompactInsightCard extends StatelessWidget {
   final String evidence;
   final Color accent;
   final VoidCallback? onTap;
+  final bool matchPersonalAiSurface;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return PremiumSurface(
-      onTap: onTap,
-      dashboardGlass: true,
+    final content = Padding(
       padding: const EdgeInsets.all(PremiumDesignTokens.spaceSm),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -319,6 +320,43 @@ class _CompactInsightCard extends StatelessWidget {
             ).textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
           ),
         ],
+      ),
+    );
+
+    if (!matchPersonalAiSurface) {
+      return PremiumSurface(
+        onTap: onTap,
+        dashboardGlass: true,
+        padding: EdgeInsets.zero,
+        child: content,
+      );
+    }
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white.withValues(alpha: .105),
+              const Color(0xFF5BDAFF).withValues(alpha: .045),
+              Colors.white.withValues(alpha: .035),
+            ],
+          ),
+          border: Border.all(color: Colors.white.withValues(alpha: .14)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: .14),
+              blurRadius: 14,
+              offset: const Offset(0, 7),
+            ),
+          ],
+        ),
+        child: content,
       ),
     );
   }
