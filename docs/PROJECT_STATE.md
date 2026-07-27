@@ -61,3 +61,8 @@ BIL-FOOD-004 adds the build-time normalization and quality layer on top of the c
 ## BIL-FOOD-005 — Deduplication and Canonicalization
 
 Implemented explainable duplicate decisions, conservative automatic merge gates, conflict preservation, deterministic survivor/field selection, and merge lineage. No mobile catalog, search, or Flutter integration is introduced. Next package: BIL-FOOD-006 — Mobile Catalog Builder.
+
+
+## BIL-FOOD-006 — Mobile Catalog Builder
+
+Build-time derivation of compact, profile-driven mobile catalogs from accepted canonical foods. Master evidence remains outside delivery databases. Parent baseline: `14c6cdce71a23b22d9304b2e7b32d1270050da8c`. Next package: BIL-FOOD-007 — FoodRepository and Offline Search Foundation.

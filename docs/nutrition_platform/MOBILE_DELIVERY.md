@@ -74,3 +74,8 @@ No fixed size is approved in this architecture package. Each delivery package mu
 - device storage impact.
 
 A later package sets release budgets based on measured iPhone, Android, and Windows behavior.
+
+
+## BIL-FOOD-006 — Mobile Catalog Builder
+
+Build-time derivation of compact, profile-driven mobile catalogs from accepted canonical foods. Master evidence remains outside delivery databases. Parent baseline: `14c6cdce71a23b22d9304b2e7b32d1270050da8c`. Next package: BIL-FOOD-007 — FoodRepository and Offline Search Foundation.
