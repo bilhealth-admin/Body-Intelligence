@@ -58,3 +58,7 @@ Detailed package-by-package records remain available in Git history and package 
 - Tests: deterministic normalization, policy validation, acceptance, hard rejects, persistence, and scope protection.
 - Adoption: pending Product Owner execution and commit.
 
+
+## BIL-FOOD-005 — Deduplication and Canonicalization
+
+Implemented explainable duplicate decisions, conservative automatic merge gates, conflict preservation, deterministic survivor/field selection, and merge lineage. No mobile catalog, search, or Flutter integration is introduced. Next package: BIL-FOOD-006 — Mobile Catalog Builder.

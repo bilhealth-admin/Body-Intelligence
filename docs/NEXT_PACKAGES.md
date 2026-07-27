@@ -63,3 +63,7 @@ Current candidate: `BIL-FOOD-004 — Normalization and Quality Engine`, parent `
 
 After successful Verify and commit, the next package is `BIL-FOOD-005 — Deduplication and Canonicalization`. Do not begin automatic merge logic before the BIL-FOOD-004 commit HEAD is supplied.
 
+
+## BIL-FOOD-005 — Deduplication and Canonicalization
+
+Implemented explainable duplicate decisions, conservative automatic merge gates, conflict preservation, deterministic survivor/field selection, and merge lineage. No mobile catalog, search, or Flutter integration is introduced. Next package: BIL-FOOD-006 — Mobile Catalog Builder.

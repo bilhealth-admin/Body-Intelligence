@@ -90,3 +90,9 @@ Policy `bil-food-quality-v1` stores every weighted component, threshold, warning
 
 Canonical normalization covers Unicode/whitespace normalization, search keys, documented unit aliases, and GTIN checksum validation. Unknown units remain unresolved rather than being guessed. Missing barcode is not treated as an error.
 
+
+## BIL-FOOD-005 implemented boundary
+
+BIL-FOOD-005 adds versioned, explainable duplicate decisions and canonical field selection. Automatic merges are limited to documented high-confidence evidence: the same stable source record, compatible valid GTIN/brand/package/profile evidence, or an exact compatible generic identity. Name similarity alone never auto-merges.
+
+Every decision stores reasons, conflicts, confidence, policy version, and time. Applied merges retire but never delete a BIL identity, preserve source records, and write merge lineage. Mobile catalog generation, search, Flutter integration, and delivery databases remain outside this package.

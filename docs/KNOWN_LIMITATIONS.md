@@ -78,3 +78,7 @@ Historical package limitations and delivery-candidate notes are available throug
 - Unknown units are left unresolved rather than guessed.
 - Full USDA-wide quality distribution has not been run by this package.
 
+
+## BIL-FOOD-005 — Deduplication and Canonicalization
+
+Implemented explainable duplicate decisions, conservative automatic merge gates, conflict preservation, deterministic survivor/field selection, and merge lineage. No mobile catalog, search, or Flutter integration is introduced. Next package: BIL-FOOD-006 — Mobile Catalog Builder.

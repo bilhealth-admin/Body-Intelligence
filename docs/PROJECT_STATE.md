@@ -57,3 +57,7 @@ No AI, Intelligence Reality, or Cloud Core package is pending. The next project 
 
 BIL-FOOD-004 adds the build-time normalization and quality layer on top of the canonical identity model. Verification must prove deterministic normalization, versioned scoring, explainable hard rejects, master-evidence preservation, and absence of deduplication or delivery tables. Not adopted until Product Owner Verify and commit.
 
+
+## BIL-FOOD-005 — Deduplication and Canonicalization
+
+Implemented explainable duplicate decisions, conservative automatic merge gates, conflict preservation, deterministic survivor/field selection, and merge lineage. No mobile catalog, search, or Flutter integration is introduced. Next package: BIL-FOOD-006 — Mobile Catalog Builder.

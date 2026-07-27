@@ -63,3 +63,7 @@ For `BIL-FOOD-002`, the durable checkpoint key is `(dataset, archive member name
 
 BIL quality is a deterministic, versioned policy rather than an opaque probability. Every assessment persists component scores, final score, policy version, validation status, delivery eligibility, warnings, and rejection reasons. Exclusion from delivery never deletes master evidence. Deduplication and merging are a separate architectural stage owned by BIL-FOOD-005.
 
+
+## BIL-FOOD-005 — Deduplication and Canonicalization
+
+Implemented explainable duplicate decisions, conservative automatic merge gates, conflict preservation, deterministic survivor/field selection, and merge lineage. No mobile catalog, search, or Flutter integration is introduced. Next package: BIL-FOOD-006 — Mobile Catalog Builder.
