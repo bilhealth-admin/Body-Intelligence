@@ -54,6 +54,10 @@ class CatalogActivationManager:
         version_dir.mkdir(parents=True, exist_ok=True)
         final_catalog = version_dir / "catalog.sqlite"
         final_manifest = version_dir / "manifest.json"
+        if final_catalog.exists():
+            existing_hash = _sha256_file(final_catalog)
+            if existing_hash != manifest.sha256:
+                raise CatalogActivationError("Catalog version is immutable; an existing version has a different SHA-256")
 
         with tempfile.NamedTemporaryFile(delete=False, dir=version_dir, suffix=".tmp") as tmp:
             temp_catalog = Path(tmp.name)
@@ -182,7 +186,7 @@ def _validate_sqlite(path: Path) -> None:
                     "SELECT name FROM sqlite_master WHERE type='table'"
                 ).fetchall()
             }
-            required = {"catalog_metadata", "foods"}
+            required = {"catalog_metadata", "food", "alias", "nutrient", "portion", "barcode"}
             missing = sorted(required - tables)
             if missing:
                 raise CatalogActivationError(f"Required catalog tables missing: {', '.join(missing)}")

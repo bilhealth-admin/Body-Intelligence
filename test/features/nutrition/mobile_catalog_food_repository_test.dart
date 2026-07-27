@@ -18,19 +18,21 @@ void main() {
       CREATE TABLE nutrient(bil_food_id TEXT NOT NULL, bil_nutrient_id TEXT NOT NULL, amount REAL NOT NULL, unit TEXT NOT NULL, basis TEXT NOT NULL, confidence REAL NOT NULL);
       CREATE TABLE portion(portion_id INTEGER PRIMARY KEY, bil_food_id TEXT NOT NULL, amount REAL NOT NULL, unit_code TEXT NOT NULL, gram_weight REAL, description_en TEXT, description_ar TEXT, confidence REAL NOT NULL);
       CREATE TABLE barcode(normalized_gtin TEXT NOT NULL, bil_food_id TEXT NOT NULL, market_code TEXT, confidence REAL NOT NULL);
+      CREATE VIRTUAL TABLE food_fts USING fts5(bil_food_id UNINDEXED, name_en, name_ar, aliases, tokenize='unicode61 remove_diacritics 2');
       INSERT INTO catalog_metadata VALUES('profile', '{"profile_id":"core-eg"}');
       INSERT INTO food VALUES('bil-food-1','generic','Milk','حليب','milk',98,'EG','2026-07-27T00:00:00Z');
       INSERT INTO alias(bil_food_id,language,name,normalized_name,name_type) VALUES('bil-food-1','en','Skimmed milk','skimmed milk','alias');
       INSERT INTO nutrient VALUES('bil-food-1','protein',10,'g','100g',0.95);
       INSERT INTO portion VALUES(1,'bil-food-1',1,'cup',240,'cup',NULL,0.9);
       INSERT INTO barcode VALUES('6221234567891','bil-food-1','EG',0.95);
+      INSERT INTO food_fts(bil_food_id,name_en,name_ar,aliases) VALUES('bil-food-1','Milk','حليب','Skimmed milk');
     ''');
     repository = MobileCatalogFoodRepository.fromDatabase(database);
   });
 
   tearDown(() {
     repository.close();
-    database.dispose();
+    database.close();
   });
 
   test('opens only the BIL delivery schema and exposes metadata', () {
@@ -72,7 +74,7 @@ void main() {
 
   test('invalid catalog schema is rejected', () {
     final invalid = sqlite3.openInMemory();
-    addTearDown(invalid.dispose);
+    addTearDown(invalid.close);
     expect(
       () => MobileCatalogFoodRepository.fromDatabase(invalid),
       throwsStateError,

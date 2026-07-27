@@ -90,8 +90,17 @@ CREATE INDEX idx_food_name ON food(normalized_name);
 CREATE INDEX idx_food_quality ON food(quality_score DESC, bil_food_id);
 CREATE INDEX idx_alias_name ON alias(normalized_name);
 CREATE INDEX idx_barcode_gtin ON barcode(normalized_gtin);
+CREATE VIRTUAL TABLE food_fts USING fts5(bil_food_id UNINDEXED,name_en,name_ar,aliases,tokenize='unicode61 remove_diacritics 2');
 """
 
+
+
+def _sha256_file(path: Path, chunk_size: int = 1024 * 1024) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        while chunk := handle.read(chunk_size):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 def _table_exists(conn: sqlite3.Connection, name: str) -> bool:
     return conn.execute(
@@ -99,7 +108,7 @@ def _table_exists(conn: sqlite3.Connection, name: str) -> bool:
     ).fetchone() is not None
 
 
-def _eligible_rows(conn: sqlite3.Connection, profile: CatalogProfile) -> list[sqlite3.Row]:
+def _eligible_rows(conn: sqlite3.Connection, profile: CatalogProfile):
     required = ("canonical_food", "source_record", "quality_assessment")
     missing = [name for name in required if not _table_exists(conn, name)]
     if missing:
@@ -143,7 +152,7 @@ def _eligible_rows(conn: sqlite3.Connection, profile: CatalogProfile) -> list[sq
     if profile.max_rows is not None:
         sql += " LIMIT ?"
         params.append(profile.max_rows)
-    return list(conn.execute(sql, params))
+    return conn.execute(sql, params)
 
 
 def build_mobile_catalog(master_path: Path, output_path: Path, profile: CatalogProfile) -> dict[str, object]:
@@ -164,8 +173,10 @@ def build_mobile_catalog(master_path: Path, output_path: Path, profile: CatalogP
             master.execute("PRAGMA query_only=ON")
             out.executescript(DELIVERY_SCHEMA_SQL)
             rows = _eligible_rows(master, profile)
+            row_count = 0
 
             for row in rows:
+                row_count += 1
                 bil_food_id = row["bil_food_id"]
                 normalized_row = None
                 if _table_exists(master, "source_normalization"):
@@ -208,11 +219,15 @@ def build_mobile_catalog(master_path: Path, output_path: Path, profile: CatalogP
                 if _table_exists(master, "nutrient_evidence"):
                     for nutrient in master.execute(
                         """
-                        SELECT ne.bil_nutrient_id, ne.amount, nd.unit, ne.basis, MAX(ne.confidence)
-                        FROM nutrient_evidence ne
-                        JOIN nutrient_definition nd ON nd.bil_nutrient_id = ne.bil_nutrient_id
-                        WHERE ne.bil_food_id = ?
-                        GROUP BY ne.bil_nutrient_id, ne.basis
+                        SELECT ranked.bil_nutrient_id, ranked.amount, ranked.unit, ranked.basis, ranked.confidence
+                        FROM (
+                          SELECT ne.bil_nutrient_id, ne.amount, nd.unit, ne.basis, ne.confidence,
+                                 ROW_NUMBER() OVER (PARTITION BY ne.bil_nutrient_id, ne.basis ORDER BY ne.confidence DESC, ne.nutrient_evidence_id DESC) AS rn
+                          FROM nutrient_evidence ne
+                          JOIN nutrient_definition nd ON nd.bil_nutrient_id = ne.bil_nutrient_id
+                          WHERE ne.bil_food_id = ?
+                        ) ranked
+                        WHERE ranked.rn = 1
                         """,
                         (bil_food_id,),
                     ):
@@ -241,11 +256,14 @@ def build_mobile_catalog(master_path: Path, output_path: Path, profile: CatalogP
                             (barcode[0], bil_food_id, barcode[1], barcode[2]),
                         )
 
+                alias_text = " ".join(str(value) for (value,) in out.execute("SELECT name FROM alias WHERE bil_food_id=? ORDER BY alias_id", (bil_food_id,)))
+                out.execute("INSERT INTO food_fts(bil_food_id,name_en,name_ar,aliases) VALUES(?,?,?,?)", (bil_food_id, row["canonical_name_en"] or "", row["canonical_name_ar"] or "", alias_text))
+
             metadata = {
                 "profile": asdict(profile),
                 "built_at": utc_now(),
-                "source_master_sha256": hashlib.sha256(master_path.read_bytes()).hexdigest(),
-                "row_count": len(rows),
+                "source_master_sha256": _sha256_file(master_path),
+                "row_count": row_count,
             }
             for key, value in metadata.items():
                 out.execute(
@@ -265,9 +283,9 @@ def build_mobile_catalog(master_path: Path, output_path: Path, profile: CatalogP
     elapsed = time.perf_counter() - started
     return {
         "profile_id": profile.profile_id,
-        "rows": len(rows),
+        "rows": row_count,
         "elapsed_seconds": round(elapsed, 3),
         "size_bytes": output_path.stat().st_size,
-        "sha256": hashlib.sha256(output_path.read_bytes()).hexdigest(),
+        "sha256": _sha256_file(output_path),
         "integrity": "ok",
     }

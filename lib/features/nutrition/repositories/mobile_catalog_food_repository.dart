@@ -3,12 +3,14 @@ import 'dart:convert';
 
 import 'package:sqlite3/sqlite3.dart';
 
+import '../domain/barcode_identity.dart';
 import '../domain/unified_food.dart';
 import '../repositories/unified_food_repository.dart';
 import '../services/food_deduplication_engine.dart';
 import '../services/food_foundation_integrity_engine.dart';
 import '../services/food_migration_engine.dart';
 import '../services/food_quality_engine.dart';
+import '../services/food_search_normalizer.dart';
 import '../services/offline_barcode_resolver.dart';
 import '../services/offline_food_search_pipeline.dart';
 
@@ -19,8 +21,6 @@ import '../services/offline_food_search_pipeline.dart';
 class MobileCatalogFoodRepository implements UnifiedFoodRepository {
   final Database _database;
   final bool _ownsDatabase;
-  final OfflineFoodSearchPipeline _searchPipeline;
-  final OfflineBarcodeResolver _barcodeResolver;
   List<UnifiedFood>? _cache;
   bool _closed = false;
 
@@ -30,22 +30,17 @@ class MobileCatalogFoodRepository implements UnifiedFoodRepository {
         const OfflineFoodSearchPipeline(),
     OfflineBarcodeResolver barcodeResolver = const OfflineBarcodeResolver(),
   }) : _database = sqlite3.open(path, mode: OpenMode.readOnly),
-       _ownsDatabase = true,
-       _searchPipeline = searchPipeline,
-       _barcodeResolver = barcodeResolver {
+       _ownsDatabase = true {
     _validateSchema();
   }
 
   MobileCatalogFoodRepository.fromDatabase(
-    Database database, {
-    bool ownsDatabase = false,
+    this._database, {
+    this._ownsDatabase = false,
     OfflineFoodSearchPipeline searchPipeline =
         const OfflineFoodSearchPipeline(),
     OfflineBarcodeResolver barcodeResolver = const OfflineBarcodeResolver(),
-  }) : _database = database,
-       _ownsDatabase = ownsDatabase,
-       _searchPipeline = searchPipeline,
-       _barcodeResolver = barcodeResolver {
+  }) {
     _validateSchema();
   }
 
@@ -70,7 +65,7 @@ class MobileCatalogFoodRepository implements UnifiedFoodRepository {
     if (_closed) return;
     _closed = true;
     _cache = null;
-    if (_ownsDatabase) _database.dispose();
+    if (_ownsDatabase) _database.close();
   }
 
   @override
@@ -99,8 +94,47 @@ class MobileCatalogFoodRepository implements UnifiedFoodRepository {
     String query, {
     int limit = 50,
   }) async {
-    final foods = await getAll();
-    return _searchPipeline.search(foods: foods, query: query, limit: limit);
+    _ensureOpen();
+    if (limit <= 0) return const <FoodSearchHit>[];
+    final normalized = FoodSearchNormalizer.normalize(query);
+    if (normalized.isEmpty) {
+      final ids = _database.select(
+        'SELECT bil_food_id FROM food ORDER BY quality_score DESC, bil_food_id LIMIT ?',
+        <Object?>[limit],
+      );
+      return List<FoodSearchHit>.unmodifiable(
+        ids.map(
+          (row) => FoodSearchHit(
+            food: _readFood(row['bil_food_id'] as String),
+            score: 1,
+            reasons: const ['catalog-order'],
+          ),
+        ),
+      );
+    }
+    final ftsQuery = normalized
+        .split(RegExp(r'\s+'))
+        .where((token) => token.isNotEmpty)
+        .map((token) {
+          final escaped = token.replaceAll('"', '""');
+          return '"$escaped"*';
+        })
+        .join(' AND ');
+    final ids = _database.select(
+      'SELECT f.bil_food_id, bm25(food_fts) AS rank '
+      'FROM food_fts JOIN food f ON f.bil_food_id = food_fts.bil_food_id '
+      'WHERE food_fts MATCH ? ORDER BY rank ASC, f.quality_score DESC LIMIT ?',
+      <Object?>[ftsQuery, limit],
+    );
+    return List<FoodSearchHit>.unmodifiable(
+      ids.map(
+        (row) => FoodSearchHit(
+          food: _readFood(row['bil_food_id'] as String),
+          score: 1000 - ((row['rank'] as num?)?.toDouble() ?? 0),
+          reasons: const ['sqlite-fts'],
+        ),
+      ),
+    );
   }
 
   @override
@@ -111,8 +145,33 @@ class MobileCatalogFoodRepository implements UnifiedFoodRepository {
 
   @override
   Future<BarcodeResolution> resolveBarcode(String barcode) async {
-    final foods = await getAll();
-    return _barcodeResolver.resolve(barcode: barcode, foods: foods);
+    _ensureOpen();
+    final identity = BarcodeIdentity.parse(barcode);
+    if (!identity.isValid) {
+      return BarcodeResolution(
+        identity: identity,
+        status: BarcodeResolutionStatus.invalid,
+        candidates: const <UnifiedFood>[],
+      );
+    }
+    final rows = _database.select(
+      'SELECT bil_food_id FROM barcode WHERE normalized_gtin = ? '
+      'ORDER BY confidence DESC, bil_food_id ASC',
+      <Object?>[identity.digits],
+    );
+    final candidates = rows
+        .map((row) => _readFood(row['bil_food_id'] as String))
+        .toList(growable: false);
+    final status = switch (candidates.length) {
+      0 => BarcodeResolutionStatus.notFound,
+      1 => BarcodeResolutionStatus.resolved,
+      _ => BarcodeResolutionStatus.ambiguous,
+    };
+    return BarcodeResolution(
+      identity: identity,
+      status: status,
+      candidates: List<UnifiedFood>.unmodifiable(candidates),
+    );
   }
 
   @override
@@ -270,6 +329,7 @@ class MobileCatalogFoodRepository implements UnifiedFoodRepository {
       'nutrient',
       'portion',
       'barcode',
+      'food_fts',
     };
     final rows = _database.select(
       "SELECT name FROM sqlite_master WHERE type='table'",

@@ -26,9 +26,13 @@ class CatalogActivationTest(unittest.TestCase):
         path = self.root / name
         with closing(sqlite3.connect(path)) as conn:
             conn.execute("CREATE TABLE catalog_metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL)")
-            conn.execute("CREATE TABLE foods(bil_food_id TEXT PRIMARY KEY, name TEXT NOT NULL)")
+            conn.execute("CREATE TABLE food(bil_food_id TEXT PRIMARY KEY, name_en TEXT)")
+            conn.execute("CREATE TABLE alias(alias_id INTEGER PRIMARY KEY, bil_food_id TEXT, name TEXT)")
+            conn.execute("CREATE TABLE nutrient(bil_food_id TEXT, bil_nutrient_id TEXT, amount REAL)")
+            conn.execute("CREATE TABLE portion(portion_id INTEGER PRIMARY KEY, bil_food_id TEXT)")
+            conn.execute("CREATE TABLE barcode(normalized_gtin TEXT, bil_food_id TEXT)")
             conn.execute("INSERT INTO catalog_metadata VALUES('marker', ?)", (marker,))
-            conn.execute("INSERT INTO foods VALUES('bil:1', 'Apple')")
+            conn.execute("INSERT INTO food VALUES('bil:1', 'Apple')")
             conn.commit()
         return path
 
