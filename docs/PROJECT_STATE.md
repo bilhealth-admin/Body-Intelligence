@@ -52,3 +52,8 @@ No AI, Intelligence Reality, or Cloud Core package is pending. The next project 
 - Canonical source-neutral schema and stable BIL-owned food identity.
 - Source mappings, nutrient evidence, portions, barcode claims, and merge lineage.
 - Build-time SQLite only; no mobile database or Flutter integration.
+
+## BIL-FOOD-004 candidate
+
+BIL-FOOD-004 adds the build-time normalization and quality layer on top of the canonical identity model. Verification must prove deterministic normalization, versioned scoring, explainable hard rejects, master-evidence preservation, and absence of deduplication or delivery tables. Not adopted until Product Owner Verify and commit.
+

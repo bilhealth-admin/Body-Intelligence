@@ -49,3 +49,12 @@ Detailed package-by-package records remain available in Git history and package 
 - Canonical source-neutral schema and stable BIL-owned food identity.
 - Source mappings, nutrient evidence, portions, barcode claims, and merge lineage.
 - Build-time SQLite only; no mobile database or Flutter integration.
+
+## BIL-FOOD-004 — candidate delivery
+
+- Parent: `c1e074c21548ca63c9d48679e7774fcac9ef3512`
+- Decision: separate normalization/quality from deduplication to preserve package isolation and reviewability.
+- Production: `quality_engine.py`, `run_quality_assessment.py`.
+- Tests: deterministic normalization, policy validation, acceptance, hard rejects, persistence, and scope protection.
+- Adoption: pending Product Owner execution and commit.
+

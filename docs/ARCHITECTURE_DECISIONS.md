@@ -58,3 +58,8 @@ For `BIL-FOOD-002`, the durable checkpoint key is `(dataset, archive member name
 - Canonical source-neutral schema and stable BIL-owned food identity.
 - Source mappings, nutrient evidence, portions, barcode claims, and merge lineage.
 - Build-time SQLite only; no mobile database or Flutter integration.
+
+## ADR — Versioned explainable nutrition quality policy
+
+BIL quality is a deterministic, versioned policy rather than an opaque probability. Every assessment persists component scores, final score, policy version, validation status, delivery eligibility, warnings, and rejection reasons. Exclusion from delivery never deletes master evidence. Deduplication and merging are a separate architectural stage owned by BIL-FOOD-005.
+

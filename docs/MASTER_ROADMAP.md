@@ -79,3 +79,11 @@ The Nutrition track does not authorize mobile catalog construction, Flutter inte
 - Canonical source-neutral schema and stable BIL-owned food identity.
 - Source mappings, nutrient evidence, portions, barcode claims, and merge lineage.
 - Build-time SQLite only; no mobile database or Flutter integration.
+
+## Nutrition Platform execution — BIL-FOOD-004
+
+- Status: candidate delivered for Product Owner verification.
+- Scope: deterministic normalization, versioned explainable quality scoring, quarantine/rejection reasons, and delivery eligibility.
+- Explicit boundary: no deduplication, canonical merge, mobile catalog, Flutter, repository, search, or barcode resolver.
+- Parent HEAD: `c1e074c21548ca63c9d48679e7774fcac9ef3512`.
+

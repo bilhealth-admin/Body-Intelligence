@@ -56,3 +56,10 @@ After successful full local verification and adoption, the next package is `BIL-
 - Canonical source-neutral schema and stable BIL-owned food identity.
 - Source mappings, nutrient evidence, portions, barcode claims, and merge lineage.
 - Build-time SQLite only; no mobile database or Flutter integration.
+
+## Nutrition Platform sequence update
+
+Current candidate: `BIL-FOOD-004 — Normalization and Quality Engine`, parent `c1e074c21548ca63c9d48679e7774fcac9ef3512`.
+
+After successful Verify and commit, the next package is `BIL-FOOD-005 — Deduplication and Canonicalization`. Do not begin automatic merge logic before the BIL-FOOD-004 commit HEAD is supplied.
+

@@ -81,3 +81,12 @@ When multiple source records map to one BIL identity:
 ## Conflict handling
 
 Conflicts produce explicit records. Delivery can choose the highest-quality active claim while retaining alternatives for later correction. A conflict must never silently overwrite another claim.
+
+## BIL-FOOD-004 implemented boundary
+
+BIL-FOOD-004 implements normalization and explainable quality assessment only. It does not create duplicate candidates or merge records; deduplication remains BIL-FOOD-005.
+
+Policy `bil-food-quality-v1` stores every weighted component, threshold, warning, rejection reason, eligibility decision, and policy version. Hard rejects exclude records from delivery but do not delete source or canonical evidence from the master database.
+
+Canonical normalization covers Unicode/whitespace normalization, search keys, documented unit aliases, and GTIN checksum validation. Unknown units remain unresolved rather than being guessed. Missing barcode is not treated as an error.
+

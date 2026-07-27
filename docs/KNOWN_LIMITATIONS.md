@@ -69,3 +69,12 @@ Historical package limitations and delivery-candidate notes are available throug
 - Canonical source-neutral schema and stable BIL-owned food identity.
 - Source mappings, nutrient evidence, portions, barcode claims, and merge lineage.
 - Build-time SQLite only; no mobile database or Flutter integration.
+
+## BIL-FOOD-004 limitations
+
+- Policy v1 thresholds are documented defaults and require later full-data distribution review; they are not silently tuned from synthetic tests.
+- No duplicate candidate generation or automatic merge is implemented.
+- No mobile catalog is produced.
+- Unknown units are left unresolved rather than guessed.
+- Full USDA-wide quality distribution has not been run by this package.
+
