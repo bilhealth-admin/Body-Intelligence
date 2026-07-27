@@ -72,3 +72,10 @@ No completed AI, Intelligence Integration, Reality Closure, or Cloud Core packag
 - `BIL-FOOD-003` through `BIL-FOOD-008`: remain sequentially pending.
 
 The Nutrition track does not authorize mobile catalog construction, Flutter integration, search, or barcode resolution during `BIL-FOOD-002`.
+
+
+## BIL-FOOD-003 candidate
+
+- Canonical source-neutral schema and stable BIL-owned food identity.
+- Source mappings, nutrient evidence, portions, barcode claims, and merge lineage.
+- Build-time SQLite only; no mobile database or Flutter integration.

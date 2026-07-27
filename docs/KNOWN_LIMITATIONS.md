@@ -62,3 +62,10 @@ Historical package limitations and delivery-candidate notes are available throug
 - Resume currently replays CSV parsing from the beginning of an archive member and skips rows through the last committed row. It avoids duplicate database work but ZIP/CSV streams do not provide constant-time random row seeking.
 - Raw payloads are retained as JSON in staging for source fidelity; normalized typed master tables are intentionally deferred to `BIL-FOOD-003` and later packages.
 - Generated SQLite databases and large reports are local build outputs and must not be committed.
+
+
+## BIL-FOOD-003 candidate
+
+- Canonical source-neutral schema and stable BIL-owned food identity.
+- Source mappings, nutrient evidence, portions, barcode claims, and merge lineage.
+- Build-time SQLite only; no mobile database or Flutter integration.

@@ -51,3 +51,10 @@ Superseded package-status notes and historical parent HEAD references are retain
 ## ADR — USDA raw staging checkpoint identity
 
 For `BIL-FOOD-002`, the durable checkpoint key is `(dataset, archive member name)` and progress is the last committed CSV data-row number. Raw staging records are uniquely keyed by `(dataset, member name, source row number)`. This makes each committed batch idempotent and allows a restarted process to skip already committed rows without creating duplicate records. Source archive SHA-256 is pinned; changing an archive after progress exists requires a new staging database or an explicit future reset operation.
+
+
+## BIL-FOOD-003 candidate
+
+- Canonical source-neutral schema and stable BIL-owned food identity.
+- Source mappings, nutrient evidence, portions, barcode claims, and merge lineage.
+- Build-time SQLite only; no mobile database or Flutter integration.

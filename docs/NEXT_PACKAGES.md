@@ -49,3 +49,10 @@ When the next phase is authorized:
 Current candidate: `BIL-FOOD-002`.
 
 After successful full local verification and adoption, the next package is `BIL-FOOD-003 — Canonical Identity and Evidence Model`. Do not start it before the `BIL-FOOD-002` commit HEAD is supplied.
+
+
+## BIL-FOOD-003 candidate
+
+- Canonical source-neutral schema and stable BIL-owned food identity.
+- Source mappings, nutrient evidence, portions, barcode claims, and merge lineage.
+- Build-time SQLite only; no mobile database or Flutter integration.

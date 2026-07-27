@@ -143,3 +143,8 @@ Stores component scores, rules fired, reject/quarantine reasons, policy version,
 ### `merge_event`
 
 Records every canonical merge or split, previous identities, chosen survivor, reason, evidence, and policy version. No destructive merge is allowed without lineage.
+
+
+## Implemented by BIL-FOOD-003
+
+The build-time canonical schema is implemented in `tool/nutrition_platform/canonical_model.py`. Identity generation is BIL-owned and source-neutral; source IDs and barcodes remain evidence references.

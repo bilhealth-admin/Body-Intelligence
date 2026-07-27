@@ -42,3 +42,10 @@ Detailed package-by-package records remain available in Git history and package 
 - Scope: direct ZIP streaming, source manifests, per-member row checkpoints, bounded SQLite transactions, safe interruption, resume, idempotency, integrity reports, and build indexes.
 - Excluded: canonical BIL Food identity assignment, quality scoring, deduplication, mobile delivery databases, Flutter, repository wiring, search, and barcode resolver.
 - Verification delivered: synthetic interruption/resume and idempotency tests; real USDA ZIP integrity/header inspection. Full multi-million-row import remains a local execution gate.
+
+
+## BIL-FOOD-003 candidate
+
+- Canonical source-neutral schema and stable BIL-owned food identity.
+- Source mappings, nutrient evidence, portions, barcode claims, and merge lineage.
+- Build-time SQLite only; no mobile database or Flutter integration.

@@ -45,3 +45,10 @@ No AI, Intelligence Reality, or Cloud Core package is pending. The next project 
 ## BIL-FOOD-002 candidate state
 
 `BIL-FOOD-002` introduces build-time Python tooling for direct ZIP inspection and resumable SQLite staging. It is not adopted until Preflight, Apply, and Verify pass on the official baseline and the Product Owner authorizes the selective commit. No full USDA import is claimed by this package delivery.
+
+
+## BIL-FOOD-003 candidate
+
+- Canonical source-neutral schema and stable BIL-owned food identity.
+- Source mappings, nutrient evidence, portions, barcode claims, and merge lineage.
+- Build-time SQLite only; no mobile database or Flutter integration.
