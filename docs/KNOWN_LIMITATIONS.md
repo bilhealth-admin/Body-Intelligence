@@ -87,3 +87,9 @@ Implemented explainable duplicate decisions, conservative automatic merge gates,
 ## BIL-FOOD-006 — Mobile Catalog Builder
 
 Build-time derivation of compact, profile-driven mobile catalogs from accepted canonical foods. Master evidence remains outside delivery databases. Parent baseline: `14c6cdce71a23b22d9304b2e7b32d1270050da8c`. Next package: BIL-FOOD-007 — FoodRepository and Offline Search Foundation.
+
+## BIL-FOOD-007 limitations
+
+- Catalog distribution, compatibility gates, activation, and rollback are deferred to BIL-FOOD-008.
+- Repository streams emit a snapshot because the catalog is immutable while active.
+- Full-text SQLite FTS optimization can be introduced without changing the repository contract after measured runtime need.

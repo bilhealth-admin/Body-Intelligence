@@ -67,3 +67,9 @@ Implemented explainable duplicate decisions, conservative automatic merge gates,
 ## BIL-FOOD-006 — Mobile Catalog Builder
 
 Build-time derivation of compact, profile-driven mobile catalogs from accepted canonical foods. Master evidence remains outside delivery databases. Parent baseline: `14c6cdce71a23b22d9304b2e7b32d1270050da8c`. Next package: BIL-FOOD-007 — FoodRepository and Offline Search Foundation.
+
+## BIL-FOOD-007
+
+- Parent: `a60ceb33ca548fea966cea50a8b98818744d899b`
+- Scope: read-only BIL mobile catalog repository, UnifiedFood adapter, offline search, barcode resolution.
+- Boundary: no USDA schema, no write operations, no activation/rollback.
