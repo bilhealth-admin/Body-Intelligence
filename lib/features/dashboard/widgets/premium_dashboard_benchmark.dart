@@ -68,7 +68,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
     final insightCards = <Widget>[
       _CompactInsightCard(
         key: const Key('dashboard-nutrition-context'),
-        eyebrow: tr('NUTRITION CONTEXT', 'سياق التغذية'),
+        eyebrow: '',
         title: showRecommendation
             ? tr('Protein below target', 'البروتين أقل من الهدف')
             : tr('Nutrition signal', 'إشارة التغذية'),
@@ -275,19 +275,21 @@ class _CompactInsightCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.auto_awesome_rounded, size: 20, color: accent),
-          const SizedBox(height: PremiumDesignTokens.spaceXs),
-          Text(
-            eyebrow,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: accent,
-              fontWeight: FontWeight.w900,
-              letterSpacing: .6,
+          if (eyebrow.isNotEmpty) ...[
+            Icon(Icons.auto_awesome_rounded, size: 20, color: accent),
+            const SizedBox(height: PremiumDesignTokens.spaceXs),
+            Text(
+              eyebrow,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: accent,
+                fontWeight: FontWeight.w900,
+                letterSpacing: .6,
+              ),
             ),
-          ),
-          const SizedBox(height: 5),
+            const SizedBox(height: 5),
+          ],
           Text(
             title,
             maxLines: 2,
