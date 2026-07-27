@@ -76,3 +76,7 @@ Build-time derivation of compact, profile-driven mobile catalogs from accepted c
 ## ADR — Application catalog ownership
 
 The application owns a read-only repository boundary over the BIL delivery schema. It does not depend on USDA identifiers or master-build tables. Search and barcode resolution consume `UnifiedFood`; catalog version activation is a separate responsibility.
+
+## BIL-FOOD-008
+
+Catalog activation and version management added: integrity-gated activation, immutable version directories, atomic registry replacement, compatibility checks, and rollback. Cloud distribution and remote update transport remain out of scope.

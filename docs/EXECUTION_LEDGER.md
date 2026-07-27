@@ -73,3 +73,7 @@ Build-time derivation of compact, profile-driven mobile catalogs from accepted c
 - Parent: `a60ceb33ca548fea966cea50a8b98818744d899b`
 - Scope: read-only BIL mobile catalog repository, UnifiedFood adapter, offline search, barcode resolution.
 - Boundary: no USDA schema, no write operations, no activation/rollback.
+
+## BIL-FOOD-008
+
+Catalog activation and version management added: integrity-gated activation, immutable version directories, atomic registry replacement, compatibility checks, and rollback. Cloud distribution and remote update transport remain out of scope.

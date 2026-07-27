@@ -93,3 +93,7 @@ Build-time derivation of compact, profile-driven mobile catalogs from accepted c
 - Catalog distribution, compatibility gates, activation, and rollback are deferred to BIL-FOOD-008.
 - Repository streams emit a snapshot because the catalog is immutable while active.
 - Full-text SQLite FTS optimization can be introduced without changing the repository contract after measured runtime need.
+
+## BIL-FOOD-008
+
+Catalog activation and version management added: integrity-gated activation, immutable version directories, atomic registry replacement, compatibility checks, and rollback. Cloud distribution and remote update transport remain out of scope.

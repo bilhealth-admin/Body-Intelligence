@@ -70,3 +70,7 @@ Build-time derivation of compact, profile-driven mobile catalogs from accepted c
 ## Nutrition Platform — BIL-FOOD-007 candidate
 
 Read-only mobile catalog repository and offline search/barcode integration prepared on baseline `a60ceb33ca548fea966cea50a8b98818744d899b`. No catalog update activation or rollback is included.
+
+## BIL-FOOD-008
+
+Catalog activation and version management added: integrity-gated activation, immutable version directories, atomic registry replacement, compatibility checks, and rollback. Cloud distribution and remote update transport remain out of scope.

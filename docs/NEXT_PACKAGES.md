@@ -76,3 +76,7 @@ Build-time derivation of compact, profile-driven mobile catalogs from accepted c
 ## BIL-FOOD-007 — FoodRepository and Offline Search Foundation
 
 Read-only repository over BIL delivery catalogs with UnifiedFood mapping, existing explainable search, and offline barcode lookup. Parent baseline: `a60ceb33ca548fea966cea50a8b98818744d899b`. Next package: BIL-FOOD-008 — Catalog Versioning and Atomic Updates.
+
+## BIL-FOOD-008
+
+Catalog activation and version management added: integrity-gated activation, immutable version directories, atomic registry replacement, compatibility checks, and rollback. Cloud distribution and remote update transport remain out of scope.

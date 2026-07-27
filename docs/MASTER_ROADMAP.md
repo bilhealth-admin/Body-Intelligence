@@ -100,3 +100,7 @@ Build-time derivation of compact, profile-driven mobile catalogs from accepted c
 ## BIL-FOOD-007 — FoodRepository and Offline Search Foundation
 
 Application read-only repository over the BIL mobile catalog, UnifiedFood mapping, explainable offline search, and canonical barcode lookup. Catalog updater/version activation remains BIL-FOOD-008.
+
+## BIL-FOOD-008
+
+Catalog activation and version management added: integrity-gated activation, immutable version directories, atomic registry replacement, compatibility checks, and rollback. Cloud distribution and remote update transport remain out of scope.

@@ -83,3 +83,7 @@ Build-time derivation of compact, profile-driven mobile catalogs from accepted c
 ## BIL-FOOD-007 — application repository boundary
 
 The application opens only the compact BIL delivery schema through `MobileCatalogFoodRepository`. The adapter maps BIL-owned food IDs, aliases, nutrients, portions, and barcode references to `UnifiedFood` while reusing the existing explainable offline search and barcode resolution services. USDA tables and source IDs remain outside the application boundary. The repository is read-only; catalog activation and rollback belong to BIL-FOOD-008.
+
+## BIL-FOOD-008 — Catalog Activation and Version Management
+
+Catalog activation is performed outside Flutter UI through an atomic registry. A catalog is eligible only after SHA-256, size, schema compatibility, required-table, and SQLite integrity verification. Activation copies into a versioned immutable directory, atomically replaces the catalog file, then atomically updates the registry. Rollback selects the previous verified registry entry. Download, remote configuration, cloud sync, and OTA distribution remain out of scope.
