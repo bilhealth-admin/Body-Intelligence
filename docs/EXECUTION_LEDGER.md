@@ -35,3 +35,10 @@ Detailed package-by-package records remain available in Git history and package 
 - Engineering scope: final product composition, wearable payload preservation, native BLE session closure, embedded Arabic reporting, plugin runtime proof, commerce capability honesty, and evidence synchronization.
 - External gates: iOS/macOS build and representative device/provider certification remain explicitly separate.
 - Samsung wearable integration is not present in the production catalog and remains `Not Implemented`; no readiness claim is made.
+
+## BIL-FOOD-002 — Resumable Raw / Master Importer
+
+- Parent baseline: `af9758bdb68018c5ea030476944904e201315698`.
+- Scope: direct ZIP streaming, source manifests, per-member row checkpoints, bounded SQLite transactions, safe interruption, resume, idempotency, integrity reports, and build indexes.
+- Excluded: canonical BIL Food identity assignment, quality scoring, deduplication, mobile delivery databases, Flutter, repository wiring, search, and barcode resolver.
+- Verification delivered: synthetic interruption/resume and idempotency tests; real USDA ZIP integrity/header inspection. Full multi-million-row import remains a local execution gate.

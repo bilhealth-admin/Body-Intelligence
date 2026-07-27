@@ -55,3 +55,10 @@ Historical package limitations and delivery-candidate notes are available throug
 - Engineering scope: final product composition, wearable payload preservation, native BLE session closure, embedded Arabic reporting, plugin runtime proof, commerce capability honesty, and evidence synchronization.
 - External gates: iOS/macOS build and representative device/provider certification remain explicitly separate.
 - Samsung wearable integration is not present in the production catalog and remains `Not Implemented`; no readiness claim is made.
+
+## BIL-FOOD-002 limitations
+
+- The package verifies archive structure and headers against the supplied USDA ZIPs but does not claim completion of the full multi-million-row import.
+- Resume currently replays CSV parsing from the beginning of an archive member and skips rows through the last committed row. It avoids duplicate database work but ZIP/CSV streams do not provide constant-time random row seeking.
+- Raw payloads are retained as JSON in staging for source fidelity; normalized typed master tables are intentionally deferred to `BIL-FOOD-003` and later packages.
+- Generated SQLite databases and large reports are local build outputs and must not be committed.

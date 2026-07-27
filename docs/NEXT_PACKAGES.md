@@ -43,3 +43,9 @@ When the next phase is authorized:
 - Engineering scope: final product composition, wearable payload preservation, native BLE session closure, embedded Arabic reporting, plugin runtime proof, commerce capability honesty, and evidence synchronization.
 - External gates: iOS/macOS build and representative device/provider certification remain explicitly separate.
 - Samsung wearable integration is not present in the production catalog and remains `Not Implemented`; no readiness claim is made.
+
+## Nutrition Platform
+
+Current candidate: `BIL-FOOD-002`.
+
+After successful full local verification and adoption, the next package is `BIL-FOOD-003 — Canonical Identity and Evidence Model`. Do not start it before the `BIL-FOOD-002` commit HEAD is supplied.

@@ -41,3 +41,7 @@ No AI, Intelligence Reality, or Cloud Core package is pending. The next project 
 - Engineering scope: final product composition, wearable payload preservation, native BLE session closure, embedded Arabic reporting, plugin runtime proof, commerce capability honesty, and evidence synchronization.
 - External gates: iOS/macOS build and representative device/provider certification remain explicitly separate.
 - Samsung wearable integration is not present in the production catalog and remains `Not Implemented`; no readiness claim is made.
+
+## BIL-FOOD-002 candidate state
+
+`BIL-FOOD-002` introduces build-time Python tooling for direct ZIP inspection and resumable SQLite staging. It is not adopted until Preflight, Apply, and Verify pass on the official baseline and the Product Owner authorizes the selective commit. No full USDA import is claimed by this package delivery.

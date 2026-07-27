@@ -86,3 +86,7 @@ Every output must pass:
 ## Stage 11 — publish
 
 Rename temporary outputs to final names only after verification succeeds. Generate a signed-ready manifest. Publishing to an application asset or download service is a separate approved package.
+
+## BIL-FOOD-002 implementation contract
+
+The importer implementation lives under `tool/nutrition_platform/` and stores raw source rows in a build-time SQLite staging database. Checkpoints are committed per bounded batch and keyed by dataset plus ZIP member. A source SHA-256 mismatch after progress exists is rejected. `KeyboardInterrupt` and termination signals mark the active member interrupted after committing the current bounded batch, preserving a resumable checkpoint. This package does not publish a final master or mobile database.

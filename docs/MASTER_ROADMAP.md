@@ -64,3 +64,11 @@ No completed AI, Intelligence Integration, Reality Closure, or Cloud Core packag
 - Engineering scope: final product composition, wearable payload preservation, native BLE session closure, embedded Arabic reporting, plugin runtime proof, commerce capability honesty, and evidence synchronization.
 - External gates: iOS/macOS build and representative device/provider certification remain explicitly separate.
 - Samsung wearable integration is not present in the production catalog and remains `Not Implemented`; no readiness claim is made.
+
+## Nutrition Platform execution track
+
+- `BIL-FOOD-ARCHITECTURE-001`: canonical architecture and BIL Food identity — closed at `af9758bdb68018c5ea030476944904e201315698`.
+- `BIL-FOOD-002`: resumable USDA raw/master staging importer — package implementation delivered; adoption requires local verify and commit.
+- `BIL-FOOD-003` through `BIL-FOOD-008`: remain sequentially pending.
+
+The Nutrition track does not authorize mobile catalog construction, Flutter integration, search, or barcode resolution during `BIL-FOOD-002`.

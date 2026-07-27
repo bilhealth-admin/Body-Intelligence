@@ -47,3 +47,7 @@ Superseded package-status notes and historical parent HEAD references are retain
 - Engineering scope: final product composition, wearable payload preservation, native BLE session closure, embedded Arabic reporting, plugin runtime proof, commerce capability honesty, and evidence synchronization.
 - External gates: iOS/macOS build and representative device/provider certification remain explicitly separate.
 - Samsung wearable integration is not present in the production catalog and remains `Not Implemented`; no readiness claim is made.
+
+## ADR — USDA raw staging checkpoint identity
+
+For `BIL-FOOD-002`, the durable checkpoint key is `(dataset, archive member name)` and progress is the last committed CSV data-row number. Raw staging records are uniquely keyed by `(dataset, member name, source row number)`. This makes each committed batch idempotent and allows a restarted process to skip already committed rows without creating duplicate records. Source archive SHA-256 is pinned; changing an archive after progress exists requires a new staging database or an explicit future reset operation.
