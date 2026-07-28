@@ -97,7 +97,7 @@ class DailyReturnCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          tr('Follow Your Day', 'تابع يومك'),
+          tr('Your Path Today', 'مسارك اليوم'),
           style: Theme.of(
             context,
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
@@ -115,13 +115,13 @@ class DailyReturnCard extends StatelessWidget {
       key: const Key('follow-your-day-carousel'),
       height: height,
       viewportFraction: .94,
-      semanticLabel: tr('Follow Your Day', 'تابع يومك'),
+      semanticLabel: tr('Your Path Today', 'مسارك اليوم'),
       pages: pages,
     );
 
     return Semantics(
       container: true,
-      label: tr('Follow Your Day', 'تابع يومك'),
+      label: tr('Your Path Today', 'مسارك اليوم'),
       child: desktop
           ? Row(
               crossAxisAlignment: CrossAxisAlignment.center,

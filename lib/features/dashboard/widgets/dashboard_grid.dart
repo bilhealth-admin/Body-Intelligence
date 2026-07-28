@@ -637,7 +637,7 @@ class DashboardGrid extends ConsumerWidget {
       compact: MediaQuery.sizeOf(context).width < 600,
     );
     final progressSection = _DashboardPagedSection(
-      title: tr("Today's Progress", 'تقدم اليوم'),
+      title: tr('Daily Summary', 'ملخص اليوم'),
       subtitle: tr(
         'Your recorded nutrition and active daily references.',
         'تغذيتك المسجلة ومراجع يومك النشطة.',
@@ -948,7 +948,7 @@ class DashboardGrid extends ConsumerWidget {
                   bodyProfile,
                   const SizedBox(height: 12),
                   Text(
-                    tr('Analytics', 'التحليلات'),
+                    tr('Analytics Center', 'مركز التحليلات'),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w900,
                     ),
@@ -1170,7 +1170,7 @@ class _BodyProfileSnapshot extends StatelessWidget {
               const SizedBox(width: PremiumDesignTokens.spaceSm),
               Expanded(
                 child: _DashboardSectionHeading(
-                  title: tr('Body profile & plan', 'ملف الجسم والخطة'),
+                  title: tr('Body Identity', 'هوية الجسم'),
                   subtitle: tr(
                     'Your current local baseline and active plan.',
                     'خط أساسك المحلي الحالي وخطتك النشطة.',

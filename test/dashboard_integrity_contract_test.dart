@@ -31,13 +31,13 @@ void main() {
     ).readAsStringSync();
 
     for (final label in const <String>[
-      'تقدم اليوم',
+      'ملخص اليوم',
       'السعرات',
       'البروتين',
       'الدهون',
       'الألياف',
-      'التحليلات',
-      'ملف الجسم والخطة',
+      'مركز التحليلات',
+      'هوية الجسم',
     ]) {
       expect(source, contains(label), reason: 'Missing Arabic label: $label');
     }

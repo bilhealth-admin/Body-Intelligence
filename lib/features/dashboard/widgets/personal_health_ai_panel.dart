@@ -172,7 +172,7 @@ class PersonalHealthAiPanel extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label: tr('Personal Health AI', 'الذكاء الصحي الشخصي'),
+      label: tr('Bio Intelligence', 'الذكاء الحيوي'),
       child: PremiumSurface(
         key: const Key('personal-health-ai-panel'),
         dashboardGlass: true,
@@ -183,7 +183,7 @@ class PersonalHealthAiPanel extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              tr('Personal Health AI', 'الذكاء الصحي الشخصي'),
+              tr('Bio Intelligence', 'الذكاء الحيوي'),
               style: compact
                   ? Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w900,
@@ -212,7 +212,7 @@ class PersonalHealthAiPanel extends StatelessWidget {
                   .clamp(compact ? 280.0 : 218.0, compact ? 300.0 : 280.0),
               viewportFraction: .88,
               compactControls: compact,
-              semanticLabel: tr('Personal Health AI', 'الذكاء الصحي الشخصي'),
+              semanticLabel: tr('Bio Intelligence', 'الذكاء الحيوي'),
               pages: [
                 for (final card in cards)
                   _AiCard(data: card, arabic: arabic, updatedAt: snapshot.asOf),
