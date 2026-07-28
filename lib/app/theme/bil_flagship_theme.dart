@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import '../../core/theme/app_colors.dart';
 import 'bil_flagship_tokens.dart';
 import 'premium_design_tokens.dart';
@@ -111,9 +109,12 @@ abstract final class BilFlagshipTheme {
       ),
     );
 
+    // Keep typography fully local. Arabic uses the bundled Noto Naskh
+    // assets, while non-Arabic locales use the platform text theme. This
+    // prevents silent HTTP font fetching and preserves offline/privacy claims.
     final premiumBase = isArabic
-        ? GoogleFonts.ibmPlexSansArabicTextTheme(base.textTheme)
-        : GoogleFonts.manropeTextTheme(base.textTheme);
+        ? base.textTheme.apply(fontFamily: 'NotoNaskhArabic')
+        : base.textTheme;
 
     final textTheme = premiumBase
         .copyWith(
