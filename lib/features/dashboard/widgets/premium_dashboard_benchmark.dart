@@ -97,7 +97,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
             ? 12.0
             : PremiumDesignTokens.spaceMd;
         final insights = _KeyInsightsDeck(
-          title: tr("Today's Insights", "Today's Insights"),
+          title: tr("Today's Insights", "رؤى اليوم"),
           contentColor: contentColor,
           height: scaledHeight,
           pages: insightCards,

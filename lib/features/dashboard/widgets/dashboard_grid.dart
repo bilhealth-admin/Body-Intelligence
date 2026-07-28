@@ -284,7 +284,7 @@ class DashboardGrid extends ConsumerWidget {
           'Body fat estimate is invalid',
           'تقدير دهون الجسم غير صالح',
         ),
-        null => tr('Unavailable', 'غير متاح'),
+        null => '—',
       };
     }
 
@@ -652,27 +652,21 @@ class DashboardGrid extends ConsumerWidget {
             _MetricData(
               Icons.local_fire_department_outlined,
               tr('Calories', 'السعرات'),
-              meals.isEmpty
-                  ? tr('Unavailable', 'غير متاح')
-                  : calories.round().toString(),
+              meals.isEmpty ? '—' : calories.round().toString(),
               meals.isEmpty ? '' : (arabic ? 'سعرة' : 'kcal'),
               Colors.orange,
             ),
             _MetricData(
               Icons.fitness_center_outlined,
               tr('Protein', 'البروتين'),
-              meals.isEmpty
-                  ? tr('Unavailable', 'غير متاح')
-                  : protein.round().toString(),
+              meals.isEmpty ? '—' : protein.round().toString(),
               meals.isEmpty ? '' : (arabic ? 'جم' : 'g'),
               Colors.green,
             ),
             _MetricData(
               Icons.opacity_outlined,
               tr('Fat', 'الدهون'),
-              meals.isEmpty
-                  ? tr('Unavailable', 'غير متاح')
-                  : fats.round().toString(),
+              meals.isEmpty ? '—' : fats.round().toString(),
               meals.isEmpty ? '' : (arabic ? 'جم' : 'g'),
               Colors.purple,
             ),
@@ -680,7 +674,7 @@ class DashboardGrid extends ConsumerWidget {
               Icons.grass_outlined,
               tr('Fiber', 'الألياف'),
               fiberEvidence.total == null
-                  ? tr('Unavailable', 'غير متاح')
+                  ? '—'
                   : fiberEvidence.total!.round().toString(),
               fiberEvidence.total == null ? '' : (arabic ? 'جم' : 'g'),
               Colors.lightGreen,
@@ -693,7 +687,7 @@ class DashboardGrid extends ConsumerWidget {
               Icons.bolt_outlined,
               tr('Daily Requirement', 'الاحتياج اليومي'),
               bil.tdee.round().toString(),
-              arabic ? 'سعرة/يوم' : 'kcal/day',
+              '',
               Colors.deepOrangeAccent,
             ),
             _MetricData(
@@ -733,12 +727,10 @@ class DashboardGrid extends ConsumerWidget {
       height: '${profile.height.toStringAsFixed(1)} ${arabic ? 'سم' : 'cm'}',
       target:
           '${UnitConverter.weightFromKg(profile.targetWeight, system).toStringAsFixed(1)} ${arabic ? (system == MeasurementSystem.metric ? 'كجم' : 'رطل') : UnitConverter.weightUnit(system)}',
-      calorieTarget:
-          '${effectiveTargets.calories} ${arabic ? 'سعرة حرارية' : 'kcal'}',
+      calorieTarget: effectiveTargets.calories.toString(),
       proteinTarget: '${effectiveTargets.protein} ${arabic ? 'جم' : 'g'}',
       waterTarget: '${effectiveTargets.water} ${arabic ? 'مل' : 'ml'}',
-      dailyMetabolism:
-          '${bil.tdee.round()} ${arabic ? 'سعرة حرارية/يوم' : 'kcal/day'}',
+      dailyMetabolism: bil.tdee.round().toString(),
       neckCircumference: profile.neck == null
           ? tr('Neck circumference is not recorded', 'محيط الرقبة غير مسجل')
           : '${profile.neck!.toStringAsFixed(1)} ${arabic ? 'سم' : 'cm'}',
@@ -1087,7 +1079,9 @@ class _MetricGridPage extends StatelessWidget {
             crossAxisCount: columns,
             crossAxisSpacing: PremiumDesignTokens.spaceSm,
             mainAxisSpacing: PremiumDesignTokens.spaceSm,
-            childAspectRatio: wideScreen ? 1.35 : 1.65,
+            childAspectRatio: wideScreen
+                ? 1.18
+                : (constraints.maxWidth < 420 ? 1.20 : 1.42),
           ),
           itemCount: metrics.length,
           itemBuilder: (context, index) {

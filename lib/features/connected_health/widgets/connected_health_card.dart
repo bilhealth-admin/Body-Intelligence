@@ -380,129 +380,30 @@ class _HealthHubIllustration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        Container(
-          width: 126,
-          height: 126,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: scheme.primary.withValues(alpha: .10),
-            border: Border.all(color: scheme.primary.withValues(alpha: .24)),
-          ),
-        ),
-        Container(
-          width: 78,
-          height: 98,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            color: scheme.surface.withValues(alpha: .82),
-            border: Border.all(
-              color: scheme.primary.withValues(alpha: .54),
-              width: 2,
+    return Semantics(
+      image: true,
+      label: 'ساعة صحية ذكية بإطار مستوحى من Apple Watch',
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(34),
+          boxShadow: [
+            BoxShadow(
+              color: scheme.primary.withValues(alpha: .20),
+              blurRadius: 28,
+              spreadRadius: 1,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: scheme.primary.withValues(alpha: .18),
-                blurRadius: 24,
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.favorite_rounded, color: scheme.error, size: 28),
-              const SizedBox(height: 6),
-              SizedBox(
-                width: 48,
-                height: 18,
-                child: CustomPaint(
-                  painter: _PulseLinePainter(color: scheme.primary),
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
-        Positioned(
-          left: 2,
-          bottom: 8,
-          child: _SourceChip(
-            label: ' Health',
-            icon: Icons.favorite_outline_rounded,
-          ),
+        clipBehavior: Clip.antiAlias,
+        child: Image.asset(
+          'assets/images/dashboard/bil_health_hub_watch.webp',
+          key: const Key('bil-health-hub-watch-asset'),
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.high,
         ),
-        Positioned(
-          right: 0,
-          top: 8,
-          child: _SourceChip(label: 'Health Connect', icon: Icons.hub_outlined),
-        ),
-      ],
-    );
-  }
-}
-
-class _SourceChip extends StatelessWidget {
-  const _SourceChip({required this.label, required this.icon});
-
-  final String label;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-      decoration: BoxDecoration(
-        color: scheme.surface.withValues(alpha: .88),
-        borderRadius: BorderRadius.circular(99),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: .65)),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: .12), blurRadius: 10),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 15, color: scheme.primary),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w800),
-          ),
-        ],
       ),
     );
   }
-}
-
-class _PulseLinePainter extends CustomPainter {
-  const _PulseLinePainter({required this.color});
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 2.2
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-    final path = Path()
-      ..moveTo(0, size.height * .58)
-      ..lineTo(size.width * .20, size.height * .58)
-      ..lineTo(size.width * .31, size.height * .30)
-      ..lineTo(size.width * .43, size.height * .82)
-      ..lineTo(size.width * .57, size.height * .12)
-      ..lineTo(size.width * .68, size.height * .58)
-      ..lineTo(size.width, size.height * .58);
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _PulseLinePainter oldDelegate) =>
-      oldDelegate.color != color;
 }
 
 class _HealthSlide extends StatelessWidget {
