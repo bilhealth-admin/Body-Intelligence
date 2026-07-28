@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="health_permissions_rationale_title">Health data privacy</string>
+    <string name="health_permissions_rationale_body">BIL requests only the Health Connect data types needed for features you choose to use. Your health data is processed locally by default. You can grant, deny, or revoke individual permissions at any time from Health Connect settings. BIL does not sell health data or use it for advertising.</string>
+</resources>

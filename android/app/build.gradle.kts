@@ -22,7 +22,7 @@ if (hasReleaseSigning) {
 
 android {
     namespace = "com.kadem.bil"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -34,7 +34,7 @@ android {
         applicationId = "com.kadem.bil"
         // Health Connect 1.1.0 requires Android 8.0 (API 26).
         minSdk = 26
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
