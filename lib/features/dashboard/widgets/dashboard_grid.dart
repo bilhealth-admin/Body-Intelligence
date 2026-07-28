@@ -35,6 +35,7 @@ import '../../weight/providers/weight_provider.dart';
 import '../providers/dashboard_provider.dart';
 import 'dashboard_carousel.dart';
 import 'dashboard_loading_skeleton.dart';
+import 'dashboard_motion_reveal.dart';
 import 'dashboard_meals_timeline.dart';
 import 'dashboard_water_card.dart';
 import 'nutrient_evidence_status_text.dart';
@@ -772,127 +773,129 @@ class DashboardGrid extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        PremiumDashboardBenchmark(
-          hero: hero,
-          arabic: arabic,
-          showRecommendation: bestAction.type == BestActionType.protein,
-          actionTitle: localizedBestTitle,
-          actionReason: localizedBestReason,
-          actionEvidence: bestAction.evidence.isEmpty
-              ? tr('Evidence is still forming', 'الأدلة لا تزال قيد التكوين')
-              : arabic
-              ? 'يستند إلى بياناتك المحلية المسجلة المتاحة.'
-              : bestAction.evidence.join(' · '),
-          confidence: switch (honesty.reliability) {
-            DataReliability.insufficient => tr(
-              'Insufficient evidence',
-              'الأدلة غير كافية',
-            ),
-            DataReliability.emerging => tr('Emerging', 'قيد التكوين'),
-            DataReliability.useful => tr('Useful', 'مفيدة'),
-            DataReliability.strong => tr('Strong', 'قوية'),
-          },
-          onAction: dailyReturn.hasPrimaryAction
-              ? () {
-                  switch (bestAction.type) {
-                    case BestActionType.weighIn:
-                      context.go('/daily-check-in');
-                    case BestActionType.completeLogging:
-                    case BestActionType.protein:
-                      context.go('/daily-log?meal=breakfast&focus=meal');
-                    case BestActionType.hydration:
-                      addWater(250);
-                    case BestActionType.holdPlan:
-                    case BestActionType.none:
-                      break;
-                  }
-                }
-              : null,
-          dailyIntelligence: DailyReturnCard(
-            report: dailyReturn,
-            changedSummary: localizedChanged,
+        DashboardMotionReveal(
+          child: PremiumDashboardBenchmark(
+            hero: hero,
+            arabic: arabic,
+            showRecommendation: bestAction.type == BestActionType.protein,
             actionTitle: localizedBestTitle,
             actionReason: localizedBestReason,
-            missingEvidence: honesty.missing.isEmpty
+            actionEvidence: bestAction.evidence.isEmpty
+                ? tr('Evidence is still forming', 'الأدلة لا تزال قيد التكوين')
+                : arabic
+                ? 'يستند إلى بياناتك المحلية المسجلة المتاحة.'
+                : bestAction.evidence.join(' · '),
+            confidence: switch (honesty.reliability) {
+              DataReliability.insufficient => tr(
+                'Insufficient evidence',
+                'الأدلة غير كافية',
+              ),
+              DataReliability.emerging => tr('Emerging', 'قيد التكوين'),
+              DataReliability.useful => tr('Useful', 'مفيدة'),
+              DataReliability.strong => tr('Strong', 'قوية'),
+            },
+            onAction: dailyReturn.hasPrimaryAction
+                ? () {
+                    switch (bestAction.type) {
+                      case BestActionType.weighIn:
+                        context.go('/daily-check-in');
+                      case BestActionType.completeLogging:
+                      case BestActionType.protein:
+                        context.go('/daily-log?meal=breakfast&focus=meal');
+                      case BestActionType.hydration:
+                        addWater(250);
+                      case BestActionType.holdPlan:
+                      case BestActionType.none:
+                        break;
+                    }
+                  }
+                : null,
+            dailyIntelligence: DailyReturnCard(
+              report: dailyReturn,
+              changedSummary: localizedChanged,
+              actionTitle: localizedBestTitle,
+              actionReason: localizedBestReason,
+              missingEvidence: honesty.missing.isEmpty
+                  ? tr(
+                      'No important evidence gap for today’s next decision.',
+                      'لا توجد فجوة أدلة مهمة لقرار اليوم التالي.',
+                    )
+                  : tr(
+                      honesty.missing.first,
+                      'تتحسن الثقة مع أيام محلية أكثر اكتمالًا واتساقًا.',
+                    ),
+              onPrimaryAction: null,
+            ),
+            progressSection: progressSection,
+            personalHealthAi: personalHealthAiPanel,
+            connectedHealth: ConnectedHealthCard(
+              arabic: arabic,
+              compact: MediaQuery.sizeOf(context).width < 600,
+            ),
+            bodyTwinSummary: twin.sufficient
                 ? tr(
-                    'No important evidence gap for today’s next decision.',
-                    'لا توجد فجوة أدلة مهمة لقرار اليوم التالي.',
+                    'A cautious planning direction is available; the range matters more than a single estimate.',
+                    'يتوفر اتجاه تخطيط حذر؛ النطاق أهم من أي تقدير منفرد.',
                   )
                 : tr(
-                    honesty.missing.first,
-                    'تتحسن الثقة مع أيام محلية أكثر اكتمالًا واتساقًا.',
+                    'BIL is still building a safe personal scenario.',
+                    'لا يزال BIL يبني سيناريو شخصيًا آمنًا.',
                   ),
-            onPrimaryAction: null,
+            bodyTwinEvidence: twin.scenario == null
+                ? tr(
+                    twin.requiredData.join(' · '),
+                    'نحتاج أيام ملاحظة ووزن وتغذية أكثر.',
+                  )
+                : tr(
+                    'Cautious range ${twin.scenario!.cautiousLowKg.toStringAsFixed(1)} to ${twin.scenario!.cautiousHighKg.toStringAsFixed(1)} kg/week',
+                    'النطاق الحذر ${twin.scenario!.cautiousLowKg.toStringAsFixed(1)} إلى ${twin.scenario!.cautiousHighKg.toStringAsFixed(1)} كجم/أسبوع',
+                  ),
+            nutritionSummary: meals.isEmpty
+                ? tr(
+                    'Nutrition interpretation is waiting for a meal observation.',
+                    'ينتظر تفسير التغذية تسجيل وجبة.',
+                  )
+                : effectiveTargets.protein - protein.round() >= 20
+                ? tr(
+                    'Protein is the clearest actionable nutrition gap today.',
+                    'البروتين هو أوضح فجوة تغذية قابلة للتنفيذ اليوم.',
+                  )
+                : tr(
+                    'No nutrition change is more important than preserving complete evidence today.',
+                    'لا يوجد تغيير غذائي أهم من الحفاظ على اكتمال الأدلة اليوم.',
+                  ),
+            nutritionEvidence: meals.isEmpty
+                ? tr('No meals recorded yet', 'لم تُسجّل وجبات بعد')
+                : tr(
+                    '${meals.length} meal records · ${protein.round()} g protein recorded',
+                    '${meals.length} سجلات وجبات · ${protein.round()} جم بروتين مسجل',
+                  ),
+            trendSummary: localizedChanged,
+            trendEvidence: changed.evidence.isEmpty
+                ? tr(
+                    'Comparable observations are still forming',
+                    'الملاحظات القابلة للمقارنة لا تزال قيد التكوين',
+                  )
+                : changed.evidence.join(' · '),
+            loggingItems: [
+              DashboardLoggingItem(
+                label: tr('Weight', 'الوزن'),
+                recorded: dailyReturn.hasWeight,
+              ),
+              DashboardLoggingItem(
+                label: tr('Meals', 'الوجبات'),
+                recorded: dailyReturn.hasMeals,
+              ),
+              DashboardLoggingItem(
+                label: tr('Water', 'الماء'),
+                recorded: dailyReturn.hasWater,
+              ),
+            ],
+            insightTitle: localizedInsightTitle,
+            insightSummary: arabic
+                ? 'يستند هذا الاستنتاج إلى بياناتك المحلية المسجلة فقط.'
+                : '${primaryInsight.explanation} ${primaryInsight.suggestedAction}',
           ),
-          progressSection: progressSection,
-          personalHealthAi: personalHealthAiPanel,
-          connectedHealth: ConnectedHealthCard(
-            arabic: arabic,
-            compact: MediaQuery.sizeOf(context).width < 600,
-          ),
-          bodyTwinSummary: twin.sufficient
-              ? tr(
-                  'A cautious planning direction is available; the range matters more than a single estimate.',
-                  'يتوفر اتجاه تخطيط حذر؛ النطاق أهم من أي تقدير منفرد.',
-                )
-              : tr(
-                  'BIL is still building a safe personal scenario.',
-                  'لا يزال BIL يبني سيناريو شخصيًا آمنًا.',
-                ),
-          bodyTwinEvidence: twin.scenario == null
-              ? tr(
-                  twin.requiredData.join(' · '),
-                  'نحتاج أيام ملاحظة ووزن وتغذية أكثر.',
-                )
-              : tr(
-                  'Cautious range ${twin.scenario!.cautiousLowKg.toStringAsFixed(1)} to ${twin.scenario!.cautiousHighKg.toStringAsFixed(1)} kg/week',
-                  'النطاق الحذر ${twin.scenario!.cautiousLowKg.toStringAsFixed(1)} إلى ${twin.scenario!.cautiousHighKg.toStringAsFixed(1)} كجم/أسبوع',
-                ),
-          nutritionSummary: meals.isEmpty
-              ? tr(
-                  'Nutrition interpretation is waiting for a meal observation.',
-                  'ينتظر تفسير التغذية تسجيل وجبة.',
-                )
-              : effectiveTargets.protein - protein.round() >= 20
-              ? tr(
-                  'Protein is the clearest actionable nutrition gap today.',
-                  'البروتين هو أوضح فجوة تغذية قابلة للتنفيذ اليوم.',
-                )
-              : tr(
-                  'No nutrition change is more important than preserving complete evidence today.',
-                  'لا يوجد تغيير غذائي أهم من الحفاظ على اكتمال الأدلة اليوم.',
-                ),
-          nutritionEvidence: meals.isEmpty
-              ? tr('No meals recorded yet', 'لم تُسجّل وجبات بعد')
-              : tr(
-                  '${meals.length} meal records · ${protein.round()} g protein recorded',
-                  '${meals.length} سجلات وجبات · ${protein.round()} جم بروتين مسجل',
-                ),
-          trendSummary: localizedChanged,
-          trendEvidence: changed.evidence.isEmpty
-              ? tr(
-                  'Comparable observations are still forming',
-                  'الملاحظات القابلة للمقارنة لا تزال قيد التكوين',
-                )
-              : changed.evidence.join(' · '),
-          loggingItems: [
-            DashboardLoggingItem(
-              label: tr('Weight', 'الوزن'),
-              recorded: dailyReturn.hasWeight,
-            ),
-            DashboardLoggingItem(
-              label: tr('Meals', 'الوجبات'),
-              recorded: dailyReturn.hasMeals,
-            ),
-            DashboardLoggingItem(
-              label: tr('Water', 'الماء'),
-              recorded: dailyReturn.hasWater,
-            ),
-          ],
-          insightTitle: localizedInsightTitle,
-          insightSummary: arabic
-              ? 'يستند هذا الاستنتاج إلى بياناتك المحلية المسجلة فقط.'
-              : '${primaryInsight.explanation} ${primaryInsight.suggestedAction}',
         ),
         Visibility(
           visible: false,
