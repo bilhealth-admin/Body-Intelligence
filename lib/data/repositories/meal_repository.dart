@@ -442,9 +442,7 @@ class MealRepository {
                 potassium: Value(portion.valueOrZero(FoodNutrient.potassium)),
                 calcium: Value(portion.valueOrZero(FoodNutrient.calcium)),
                 magnesium: Value(portion.valueOrZero(FoodNutrient.magnesium)),
-                phosphorus: Value(
-                  portion.valueOrZero(FoodNutrient.phosphorus),
-                ),
+                phosphorus: Value(portion.valueOrZero(FoodNutrient.phosphorus)),
                 sugar: Value(portion.valueOrZero(FoodNutrient.sugar)),
                 nutrientEvidenceMask: Value(portion.nutrientEvidenceMask),
               ),

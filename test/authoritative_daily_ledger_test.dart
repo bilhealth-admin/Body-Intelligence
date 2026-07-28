@@ -19,36 +19,42 @@ void main() {
 
   test('day opens, closes to an authoritative snapshot, and reopens', () async {
     await repository.startDay(day);
-    final foodId = await database.into(database.foods).insert(
-      FoodsCompanion.insert(
-        name: 'Known meal',
-        calories: 200,
-        protein: 10,
-        carbs: 30,
-        fats: 5,
-      ),
-    );
-    final mealId = await database.into(database.meals).insert(
-      MealsCompanion.insert(
-        date: day,
-        dayKey: dayKeyFor(day),
-        type: const Value('lunch'),
-      ),
-    );
-    await database.into(database.mealItems).insert(
-      MealItemsCompanion.insert(
-        mealId: mealId,
-        foodId: foodId,
-        calories: const Value(200),
-        protein: const Value(10),
-        carbs: const Value(30),
-        fats: const Value(5),
-        fiber: const Value(8),
-        nutrientEvidenceMask: Value(
-          NutrientEvidenceMask.bit(TrackedNutrient.fiber),
-        ),
-      ),
-    );
+    final foodId = await database
+        .into(database.foods)
+        .insert(
+          FoodsCompanion.insert(
+            name: 'Known meal',
+            calories: 200,
+            protein: 10,
+            carbs: 30,
+            fats: 5,
+          ),
+        );
+    final mealId = await database
+        .into(database.meals)
+        .insert(
+          MealsCompanion.insert(
+            date: day,
+            dayKey: dayKeyFor(day),
+            type: const Value('lunch'),
+          ),
+        );
+    await database
+        .into(database.mealItems)
+        .insert(
+          MealItemsCompanion.insert(
+            mealId: mealId,
+            foodId: foodId,
+            calories: const Value(200),
+            protein: const Value(10),
+            carbs: const Value(30),
+            fats: const Value(5),
+            fiber: const Value(8),
+            nutrientEvidenceMask: Value(
+              NutrientEvidenceMask.bit(TrackedNutrient.fiber),
+            ),
+          ),
+        );
 
     final open = await repository.readLedger(day);
     expect(open.state, DayLifecycleState.open);

@@ -117,9 +117,8 @@ class DailyLogRepository {
       _database.dailyLogs,
     )..where((row) => row.dayKey.equals(key))).getSingleOrNull();
     final weight =
-        await (_database.select(_database.weightEntries)..where(
-              (row) => row.dayKey.equals(key) & row.deletedAt.isNull(),
-            ))
+        await (_database.select(_database.weightEntries)
+              ..where((row) => row.dayKey.equals(key) & row.deletedAt.isNull()))
             .getSingleOrNull();
     if (log?.lifecycleState == 'closed') {
       final fiberKnown = NutrientEvidenceMask.contains(
@@ -143,17 +142,14 @@ class DailyLogRepository {
         evidenceCompleteness: log.calories == null ? 0 : 1,
       );
     }
-    final meals =
-        await (_database.select(_database.meals)..where(
-              (row) => row.dayKey.equals(key) & row.deletedAt.isNull(),
-            ))
-            .get();
+    final meals = await (_database.select(
+      _database.meals,
+    )..where((row) => row.dayKey.equals(key) & row.deletedAt.isNull())).get();
     final ids = meals.map((meal) => meal.id).toSet();
     final items = ids.isEmpty
         ? <MealItem>[]
-        : await (_database.select(_database.mealItems)..where(
-                (row) => row.mealId.isIn(ids) & row.deletedAt.isNull(),
-              ))
+        : await (_database.select(_database.mealItems)
+                ..where((row) => row.mealId.isIn(ids) & row.deletedAt.isNull()))
               .get();
     final allFiberKnown =
         items.isNotEmpty &&
@@ -169,7 +165,9 @@ class DailyLogRepository {
     final fiber = allFiberKnown ? sum((item) => item.fiber) : null;
     return AuthoritativeDailyLedger(
       date: date,
-      state: log == null ? DayLifecycleState.notStarted : DayLifecycleState.open,
+      state: log == null
+          ? DayLifecycleState.notStarted
+          : DayLifecycleState.open,
       weightKg: weight?.weight,
       calories: items.isEmpty ? null : sum((item) => item.calories),
       protein: items.isEmpty ? null : sum((item) => item.protein),
