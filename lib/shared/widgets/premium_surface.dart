@@ -34,7 +34,9 @@ class _PremiumSurfaceState extends State<PremiumSurface> {
   @override
   Widget build(BuildContext context) {
     final interactive = widget.onTap != null;
-    final radius = PremiumDesignTokens.cardRadius;
+    final radius = widget.dashboardGlass
+        ? PremiumDesignTokens.dashboardCardRadius
+        : PremiumDesignTokens.cardRadius;
     final dark = Theme.of(context).brightness == Brightness.dark;
 
     final content = Padding(
@@ -73,7 +75,9 @@ class _PremiumSurfaceState extends State<PremiumSurface> {
               PremiumMotionTokens.feedbackDuration,
             ),
             curve: PremiumMotionTokens.feedbackCurve,
-            scale: pressed ? .988 : (hovered ? 1.006 : 1),
+            scale: pressed
+                ? PremiumDesignTokens.dashboardCardPressedScale
+                : (hovered ? PremiumDesignTokens.dashboardCardHoverScale : 1),
             child: ClipRRect(
               borderRadius: radius,
               child: BackdropFilter(
@@ -131,42 +135,51 @@ class _PremiumSurfaceState extends State<PremiumSurface> {
                     ),
                     border: widget.dashboardGlass
                         ? Border.all(
-                            color: dark
-                                ? Colors.white.withValues(
-                                    alpha: hovered ? .22 : .14,
-                                  )
-                                : const Color(
-                                    0xFFBFD8F4,
-                                  ).withValues(alpha: hovered ? .92 : .68),
+                            color: PremiumDesignTokens.dashboardCardBorderColor(
+                              Theme.of(context).brightness,
+                              hovered: hovered,
+                            ),
+                            width: PremiumDesignTokens.dashboardCardBorderWidth,
                           )
                         : null,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF3287D8).withValues(
-                          alpha: !dark && widget.dashboardGlass
-                              ? (hovered ? .18 : .10)
-                              : widget.emphasized
-                              ? (hovered ? .22 : .15)
-                              : (hovered ? .12 : .07),
-                        ),
+                        color:
+                            PremiumDesignTokens.dashboardCardAccentShadowColor(
+                              Theme.of(context).brightness,
+                              hovered: hovered,
+                              emphasized: widget.emphasized,
+                            ),
                         blurRadius: widget.dashboardGlass
-                            ? (widget.emphasized ? 32 : 24)
+                            ? PremiumDesignTokens.dashboardCardAccentBlur
                             : (widget.emphasized ? 38 : 28),
                         spreadRadius: -12,
                       ),
                       BoxShadow(
-                        color: dark
-                            ? Colors.black.withValues(
-                                alpha: widget.dashboardGlass ? .20 : .24,
+                        color: widget.dashboardGlass
+                            ? PremiumDesignTokens.dashboardCardShadowColor(
+                                Theme.of(context).brightness,
                               )
+                            : dark
+                            ? Colors.black.withValues(alpha: .24)
                             : const Color(0xFF315D88).withValues(alpha: .14),
-                        blurRadius: widget.dashboardGlass ? 20 : 22,
-                        offset: Offset(0, widget.dashboardGlass ? 10 : 12),
+                        blurRadius: widget.dashboardGlass
+                            ? PremiumDesignTokens.dashboardCardShadowBlur
+                            : 22,
+                        offset: Offset(
+                          0,
+                          widget.dashboardGlass
+                              ? PremiumDesignTokens.dashboardCardShadowOffsetY
+                              : 12,
+                        ),
                       ),
                       if (widget.dashboardGlass)
                         BoxShadow(
                           color: Colors.white.withValues(
-                            alpha: dark ? .055 : .78,
+                            alpha: dark
+                                ? .055
+                                : PremiumDesignTokens
+                                      .dashboardCardInnerHighlightAlpha,
                           ),
                           blurRadius: 1,
                           offset: const Offset(0, 1),

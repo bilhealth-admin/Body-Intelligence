@@ -19,6 +19,15 @@ class PremiumDesignTokens {
   // Elevation
   static const double elevationNone = 0;
 
+  // Premium card system
+  static const double dashboardCardBorderWidth = 1;
+  static const double dashboardCardHoverScale = 1.004;
+  static const double dashboardCardPressedScale = .992;
+  static const double dashboardCardShadowBlur = 22;
+  static const double dashboardCardShadowOffsetY = 10;
+  static const double dashboardCardAccentBlur = 28;
+  static const double dashboardCardInnerHighlightAlpha = .72;
+
   // Type scale aliases (semantic intent)
   static TextStyle? screenHeading(BuildContext context) =>
       Theme.of(context).textTheme.headlineSmall;
@@ -34,6 +43,7 @@ class PremiumDesignTokens {
   static EdgeInsets cardPaddingLarge = const EdgeInsets.all(spaceLg);
 
   static BorderRadius cardRadius = BorderRadius.circular(radiusLg);
+  static BorderRadius dashboardCardRadius = BorderRadius.circular(radiusXl);
   static BorderRadius inputRadius = BorderRadius.circular(radiusMd);
   static BorderRadius dialogRadius = BorderRadius.circular(radiusXl);
 
@@ -41,6 +51,30 @@ class PremiumDesignTokens {
       brightness == Brightness.dark
       ? const Color(0xFF26364E)
       : const Color(0xFFE3EAF3);
+
+  static Color dashboardCardBorderColor(
+    Brightness brightness, {
+    bool hovered = false,
+  }) => brightness == Brightness.dark
+      ? Colors.white.withValues(alpha: hovered ? .22 : .14)
+      : const Color(0xFFBFD8F4).withValues(alpha: hovered ? .92 : .68);
+
+  static Color dashboardCardShadowColor(Brightness brightness) =>
+      brightness == Brightness.dark
+      ? Colors.black.withValues(alpha: .20)
+      : const Color(0xFF315D88).withValues(alpha: .14);
+
+  static Color dashboardCardAccentShadowColor(
+    Brightness brightness, {
+    bool hovered = false,
+    bool emphasized = false,
+  }) => const Color(0xFF3287D8).withValues(
+    alpha: brightness == Brightness.light
+        ? (hovered ? .18 : .10)
+        : emphasized
+        ? (hovered ? .22 : .15)
+        : (hovered ? .12 : .07),
+  );
 
   static Color inputBorderColor(Brightness brightness) =>
       brightness == Brightness.dark
