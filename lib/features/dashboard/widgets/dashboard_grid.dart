@@ -946,14 +946,14 @@ class DashboardGrid extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   bodyProfile,
-                  const SizedBox(height: PremiumDesignTokens.spaceMd),
+                  const SizedBox(height: 12),
                   Text(
                     tr('Analytics', 'التحليلات'),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                  const SizedBox(height: PremiumDesignTokens.spaceSm),
+                  const SizedBox(height: 6),
                   weightJourney,
                   const SizedBox(height: PremiumDesignTokens.spaceSm),
                   weeklyProgress,

@@ -15,6 +15,10 @@ class DashboardExperienceFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final compactVerticalRhythm = MediaQuery.sizeOf(context).width >= 900;
+    final contentGap = compactVerticalRhythm
+        ? 12.0
+        : PremiumDesignTokens.spaceMd;
     return Semantics(
       container: true,
       label: arabic
@@ -45,7 +49,7 @@ class DashboardExperienceFrame extends StatelessWidget {
               height: 1.45,
             ),
           ),
-          const SizedBox(height: PremiumDesignTokens.spaceMd),
+          SizedBox(height: contentGap),
           child,
         ],
       ),

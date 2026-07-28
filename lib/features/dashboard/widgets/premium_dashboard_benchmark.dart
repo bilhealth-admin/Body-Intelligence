@@ -93,6 +93,9 @@ class PremiumDashboardBenchmark extends StatelessWidget {
     return LayoutBuilder(
       key: const Key('premium-dashboard-benchmark'),
       builder: (context, constraints) {
+        final sectionGap = constraints.maxWidth >= 900
+            ? 12.0
+            : PremiumDesignTokens.spaceMd;
         final insights = _KeyInsightsDeck(
           title: tr("Today's Key Insights", 'أهم رؤى اليوم'),
           contentColor: contentColor,
@@ -107,7 +110,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 personalHealthAi!,
-                const SizedBox(height: PremiumDesignTokens.spaceMd),
+                SizedBox(height: sectionGap),
                 insights,
               ],
             );
@@ -129,7 +132,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   hero!,
-                  const SizedBox(height: PremiumDesignTokens.spaceMd),
+                  SizedBox(height: sectionGap),
                   intelligenceFor(constraints.maxWidth),
                 ],
               )
@@ -177,7 +180,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
                 children: [
                   daily,
                   if (progressSection != null) ...[
-                    const SizedBox(height: PremiumDesignTokens.spaceMd),
+                    SizedBox(height: sectionGap),
                     progressSection!,
                   ],
                 ],
@@ -188,10 +191,10 @@ class PremiumDashboardBenchmark extends StatelessWidget {
           children: [
             top,
             if (connectedHealth != null) ...[
-              const SizedBox(height: PremiumDesignTokens.spaceMd),
+              SizedBox(height: sectionGap),
               connectedHealth!,
             ],
-            const SizedBox(height: PremiumDesignTokens.spaceMd),
+            SizedBox(height: sectionGap),
             dayAndProgress,
           ],
         );
@@ -239,7 +242,7 @@ class _KeyInsightsDeck extends StatelessWidget {
                       ),
             ),
           ),
-          const SizedBox(height: PremiumDesignTokens.spaceSm),
+          const SizedBox(height: 6),
           DashboardCarousel(
             key: const Key('dashboard-key-insights-carousel'),
             height: height,

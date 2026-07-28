@@ -133,11 +133,7 @@ class DailyReturnCard extends StatelessWidget {
             )
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                heading,
-                const SizedBox(height: PremiumDesignTokens.spaceSm),
-                carousel,
-              ],
+              children: [heading, const SizedBox(height: 6), carousel],
             ),
     );
   }
