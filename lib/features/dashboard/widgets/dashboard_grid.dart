@@ -1001,10 +1001,10 @@ class _DashboardPagedSection extends StatelessWidget {
       builder: (context, outerConstraints) {
         final desktop = MediaQuery.sizeOf(context).width >= 900;
         final baseHeight = desktop
-            ? 94.0
+            ? 104.0
             : outerConstraints.maxWidth >= 560
-            ? 214.0
-            : 286.0;
+            ? 226.0
+            : 306.0;
         final heading = Row(
           children: [
             Expanded(
@@ -1084,7 +1084,7 @@ class _MetricGridPage extends StatelessWidget {
             crossAxisCount: columns,
             crossAxisSpacing: PremiumDesignTokens.spaceSm,
             mainAxisSpacing: PremiumDesignTokens.spaceSm,
-            childAspectRatio: wideScreen ? 1.55 : 1.85,
+            childAspectRatio: wideScreen ? 1.35 : 1.65,
           ),
           itemCount: metrics.length,
           itemBuilder: (context, index) {
@@ -1198,7 +1198,7 @@ class _BodyProfileSnapshot extends StatelessWidget {
                     ),
                     const SizedBox(height: PremiumDesignTokens.spaceSm),
                     SizedBox(
-                      height: fixedDesktopGrid ? 192 : 184,
+                      height: fixedDesktopGrid ? 216 : 196,
                       child: GridView.builder(
                         scrollDirection: fixedDesktopGrid
                             ? Axis.vertical
@@ -1210,7 +1210,7 @@ class _BodyProfileSnapshot extends StatelessWidget {
                         gridDelegate: fixedDesktopGrid
                             ? const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 6,
-                                childAspectRatio: 1.04,
+                                childAspectRatio: .88,
                                 crossAxisSpacing: PremiumDesignTokens.spaceXs,
                                 mainAxisSpacing: PremiumDesignTokens.spaceXs,
                               )
@@ -1308,8 +1308,10 @@ class _BodyProfileValue extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      constraints: const BoxConstraints(minHeight: 84),
-      padding: EdgeInsets.all(compact ? 2 : PremiumDesignTokens.spaceSm),
+      constraints: BoxConstraints(minHeight: compact ? 92 : 84),
+      padding: EdgeInsets.all(
+        compact ? PremiumDesignTokens.spaceXs : PremiumDesignTokens.spaceSm,
+      ),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest.withValues(alpha: .28),
         borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
@@ -1427,8 +1429,10 @@ class _CompactMetricTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final compact = MediaQuery.sizeOf(context).width >= 900;
     return Container(
-      constraints: BoxConstraints(minHeight: compact ? 56 : 88),
-      padding: EdgeInsets.all(compact ? 2 : PremiumDesignTokens.spaceSm),
+      constraints: BoxConstraints(minHeight: compact ? 64 : 96),
+      padding: EdgeInsets.all(
+        compact ? PremiumDesignTokens.spaceXs : PremiumDesignTokens.spaceSm,
+      ),
       decoration: BoxDecoration(
         color: Theme.of(
           context,
@@ -1474,9 +1478,11 @@ class _CompactMetricTile extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 3),
                   child: Text(
                     unit,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodySmall?.copyWith(height: 1.1),
                   ),
                 ),
               ),
