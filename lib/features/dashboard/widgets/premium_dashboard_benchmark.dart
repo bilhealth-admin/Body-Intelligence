@@ -115,13 +115,15 @@ class PremiumDashboardBenchmark extends StatelessWidget {
               ],
             );
           }
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child: personalHealthAi!),
-              const SizedBox(width: PremiumDesignTokens.spaceMd),
-              Expanded(child: insights),
-            ],
+          return IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(child: personalHealthAi!),
+                const SizedBox(width: PremiumDesignTokens.spaceMd),
+                Expanded(child: insights),
+              ],
+            ),
           );
         }
 
@@ -167,13 +169,15 @@ class PremiumDashboardBenchmark extends StatelessWidget {
               )
             : dailyContent;
         final dayAndProgress = progressSection != null && pairDaySections
-            ? Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: daily),
-                  const SizedBox(width: PremiumDesignTokens.spaceMd),
-                  Expanded(child: progressSection!),
-                ],
+            ? IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: daily),
+                    const SizedBox(width: PremiumDesignTokens.spaceMd),
+                    Expanded(child: progressSection!),
+                  ],
+                ),
               )
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

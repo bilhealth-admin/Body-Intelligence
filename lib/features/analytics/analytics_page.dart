@@ -548,16 +548,26 @@ class _SummaryCard extends StatelessWidget {
   final List<String> lines;
 
   @override
-  Widget build(BuildContext context) => PremiumSurface(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: PremiumDesignTokens.cardHeading(context)),
-        const SizedBox(height: PremiumDesignTokens.spaceXs),
-        ...lines.map(Text.new),
-      ],
-    ),
-  );
+  Widget build(BuildContext context) {
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    return PremiumSurface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            title,
+            textAlign: rtl ? TextAlign.right : TextAlign.left,
+            style: PremiumDesignTokens.cardHeading(context),
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceXs),
+          ...lines.map(
+            (line) =>
+                Text(line, textAlign: rtl ? TextAlign.right : TextAlign.left),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class AnalyticsWeeklyProgressCard extends StatelessWidget {

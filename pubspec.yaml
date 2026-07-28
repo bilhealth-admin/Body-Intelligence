@@ -90,7 +90,6 @@ flutter:
     - assets/images/onboarding/bil_body_hologram_v8.webp
     - assets/images/onboarding/bil_body_hologram.webp
     - assets/images/dashboard/bil_body_profile.svg
-    - assets/images/dashboard/bil_health_hub_watch.webp
     - assets/fonts/NotoNaskhArabic-Regular.ttf
     - assets/fonts/NotoNaskhArabic-Bold.ttf
     - assets/fonts/OFL.txt

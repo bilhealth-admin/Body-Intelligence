@@ -23,24 +23,27 @@ class PremiumChartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final rtl = Directionality.of(context) == TextDirection.rtl;
     return Semantics(
       container: true,
       label: semanticLabel,
       child: PremiumSurface(
         padding: PremiumDesignTokens.cardPaddingLarge,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Semantics(
               header: true,
               child: Text(
                 title,
+                textAlign: rtl ? TextAlign.right : TextAlign.left,
                 style: PremiumDesignTokens.cardHeading(context),
               ),
             ),
             const SizedBox(height: PremiumDesignTokens.spaceXs),
             Text(
               subtitle,
+              textAlign: rtl ? TextAlign.right : TextAlign.left,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -53,7 +56,10 @@ class PremiumChartCard extends StatelessWidget {
                 padding: const EdgeInsets.only(
                   bottom: PremiumDesignTokens.spaceXs,
                 ),
-                child: Text(line),
+                child: Text(
+                  line,
+                  textAlign: rtl ? TextAlign.right : TextAlign.left,
+                ),
               ),
             ),
             if (footer != null) ...[

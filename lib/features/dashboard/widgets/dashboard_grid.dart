@@ -284,7 +284,7 @@ class DashboardGrid extends ConsumerWidget {
           'Body fat estimate is invalid',
           'تقدير دهون الجسم غير صالح',
         ),
-        null => '—',
+        null => tr('Unavailable', 'غير متاح'),
       };
     }
 
@@ -687,7 +687,7 @@ class DashboardGrid extends ConsumerWidget {
               Icons.bolt_outlined,
               tr('Daily Requirement', 'الاحتياج اليومي'),
               bil.tdee.round().toString(),
-              '',
+              arabic ? 'سعرة/يوم' : 'kcal/day',
               Colors.deepOrangeAccent,
             ),
             _MetricData(
@@ -996,10 +996,10 @@ class _DashboardPagedSection extends StatelessWidget {
       builder: (context, outerConstraints) {
         final desktop = MediaQuery.sizeOf(context).width >= 900;
         final baseHeight = desktop
-            ? 104.0
+            ? 126.0
             : outerConstraints.maxWidth >= 560
-            ? 226.0
-            : 306.0;
+            ? 238.0
+            : 318.0;
         final heading = Row(
           children: [
             Expanded(
@@ -1080,8 +1080,8 @@ class _MetricGridPage extends StatelessWidget {
             crossAxisSpacing: PremiumDesignTokens.spaceSm,
             mainAxisSpacing: PremiumDesignTokens.spaceSm,
             childAspectRatio: wideScreen
-                ? 1.18
-                : (constraints.maxWidth < 420 ? 1.20 : 1.42),
+                ? 1.42
+                : (constraints.maxWidth < 420 ? 1.12 : 1.34),
           ),
           itemCount: metrics.length,
           itemBuilder: (context, index) {
@@ -1365,6 +1365,7 @@ class _DashboardSectionHeading extends StatelessWidget {
         children: [
           Text(
             title,
+            textAlign: TextAlign.start,
             key: const Key('dashboard-today-summary-title'),
             style: theme.textTheme.titleLarge?.copyWith(
               color: dark ? const Color(0xFFF4F8FB) : const Color(0xFF10283B),
@@ -1385,6 +1386,7 @@ class _DashboardSectionHeading extends StatelessWidget {
           const SizedBox(height: PremiumDesignTokens.spaceXs),
           Text(
             subtitle,
+            textAlign: TextAlign.start,
             key: const Key('dashboard-today-summary-subtitle'),
             style: theme.textTheme.bodyMedium?.copyWith(
               color: dark ? const Color(0xFFCAE0E8) : const Color(0xFF526B7C),
@@ -1424,9 +1426,9 @@ class _CompactMetricTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final compact = MediaQuery.sizeOf(context).width >= 900;
+    final compact = MediaQuery.sizeOf(context).width >= 1180;
     return Container(
-      constraints: BoxConstraints(minHeight: compact ? 64 : 96),
+      constraints: BoxConstraints(minHeight: compact ? 82 : 104),
       padding: EdgeInsets.all(
         compact ? PremiumDesignTokens.spaceXs : PremiumDesignTokens.spaceSm,
       ),
@@ -1448,8 +1450,8 @@ class _CompactMetricTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                  overflow: TextOverflow.visible,
                   style: compact
                       ? Theme.of(context).textTheme.labelSmall
                       : Theme.of(context).textTheme.labelLarge,

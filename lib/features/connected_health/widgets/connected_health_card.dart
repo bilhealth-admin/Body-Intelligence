@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -116,6 +119,7 @@ class _ConnectedHealthContent extends StatelessWidget {
         ),
         if (!_hasConnectedSource)
           _HealthHubEmptyState(
+            snapshot: snapshot,
             arabic: arabic,
             compact: compact,
             onConnect: onManage,
@@ -272,11 +276,13 @@ class _ConnectedHealthContent extends StatelessWidget {
 
 class _HealthHubEmptyState extends StatelessWidget {
   const _HealthHubEmptyState({
+    required this.snapshot,
     required this.arabic,
     required this.compact,
     required this.onConnect,
   });
 
+  final ConnectedHealthSnapshot snapshot;
   final bool arabic;
   final bool compact;
   final VoidCallback onConnect;
@@ -285,70 +291,94 @@ class _HealthHubEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Container(
       key: const Key('health-hub-empty-state'),
-      constraints: BoxConstraints(minHeight: compact ? 300 : 250),
+      constraints: BoxConstraints(minHeight: compact ? 390 : 300),
       padding: EdgeInsets.all(
-        compact ? PremiumDesignTokens.spaceSm : PremiumDesignTokens.spaceMd,
+        compact ? PremiumDesignTokens.spaceSm : PremiumDesignTokens.spaceLg,
       ),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
+        borderRadius: BorderRadius.circular(32),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.white.withValues(alpha: .11),
-            scheme.primary.withValues(alpha: .06),
-            Colors.white.withValues(alpha: .035),
+            Colors.white.withValues(alpha: .36),
+            const Color(0xFFDDEEFF).withValues(alpha: .30),
+            Colors.white.withValues(alpha: .14),
           ],
         ),
-        border: Border.all(color: Colors.white.withValues(alpha: .15)),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: .72),
+          width: 1.4,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF76B8E8).withValues(alpha: .15),
+            blurRadius: 32,
+            offset: const Offset(0, 16),
+          ),
+        ],
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final horizontal = !compact && constraints.maxWidth >= 760;
           final illustration = SizedBox(
-            width: horizontal ? 300 : double.infinity,
-            height: compact ? 138 : 168,
-            child: const _HealthHubIllustration(),
+            width: horizontal ? constraints.maxWidth * .43 : double.infinity,
+            height: horizontal ? 260 : 230,
+            child: _LiveHealthWatch(snapshot: snapshot, arabic: arabic),
           );
-          final message = Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: horizontal
-                ? CrossAxisAlignment.start
-                : CrossAxisAlignment.center,
-            children: [
-              Text(
-                tr(
-                  'No health source is connected yet',
-                  'لم يتم ربط أي مصدر صحي بعد',
+          final message = Directionality(
+            textDirection: arabic ? TextDirection.rtl : TextDirection.ltr,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  tr('Health Hub', 'مركزك الصحي'),
+                  textAlign: TextAlign.start,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: const Color(0xFF0A3153),
+                    fontWeight: FontWeight.w900,
+                    height: 1.1,
+                  ),
                 ),
-                textAlign: horizontal ? TextAlign.start : TextAlign.center,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-              ),
-              const SizedBox(height: PremiumDesignTokens.spaceXs),
-              Text(
-                tr(
-                  'Connect your smart watch,  Health, or Health Connect so BIL can build a more complete health picture.',
-                  'اربط ساعتك الذكية أو  Health أو Health Connect ليبني BIL صورة صحية أكثر اكتمالًا.',
+                const SizedBox(height: PremiumDesignTokens.spaceSm),
+                Text(
+                  tr(
+                    'Your verified health sources and smart-watch readings in one place.',
+                    'مصادرك الصحية الموثوقة وقراءة الساعة الذكية في مكان واحد.',
+                  ),
+                  textAlign: TextAlign.start,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: const Color(0xFF59738A),
+                    height: 1.55,
+                  ),
                 ),
-                textAlign: horizontal ? TextAlign.start : TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                  height: 1.45,
+                const SizedBox(height: PremiumDesignTokens.spaceLg),
+                FilledButton.icon(
+                  key: const Key('health-hub-connect-button'),
+                  onPressed: onConnect,
+                  icon: const Icon(Icons.link_rounded),
+                  label: Text(tr('Connect now', 'ربط الآن')),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(58),
+                    backgroundColor: Colors.white.withValues(alpha: .34),
+                    foregroundColor: const Color(0xFF0A3153),
+                    elevation: 0,
+                    side: BorderSide(
+                      color: Colors.white.withValues(alpha: .86),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(26),
+                    ),
+                    textStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: PremiumDesignTokens.spaceMd),
-              FilledButton.icon(
-                key: const Key('health-hub-connect-button'),
-                onPressed: onConnect,
-                icon: const Icon(Icons.add_link_rounded),
-                label: Text(tr('Connect', 'اتصال')),
-              ),
-            ],
+              ],
+            ),
           );
 
           if (!horizontal) {
@@ -356,17 +386,20 @@ class _HealthHubEmptyState extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 illustration,
-                const SizedBox(height: PremiumDesignTokens.spaceSm),
+                const SizedBox(height: PremiumDesignTokens.spaceMd),
                 message,
               ],
             );
           }
-          return Row(
-            children: [
-              illustration,
-              const SizedBox(width: PremiumDesignTokens.spaceLg),
-              Expanded(child: message),
-            ],
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(
+              children: [
+                Expanded(flex: 10, child: illustration),
+                const SizedBox(width: PremiumDesignTokens.spaceXl),
+                Expanded(flex: 11, child: message),
+              ],
+            ),
           );
         },
       ),
@@ -374,36 +407,371 @@ class _HealthHubEmptyState extends StatelessWidget {
   }
 }
 
-class _HealthHubIllustration extends StatelessWidget {
-  const _HealthHubIllustration();
+class _LiveHealthWatch extends StatefulWidget {
+  const _LiveHealthWatch({required this.snapshot, required this.arabic});
+
+  final ConnectedHealthSnapshot snapshot;
+  final bool arabic;
+
+  @override
+  State<_LiveHealthWatch> createState() => _LiveHealthWatchState();
+}
+
+class _LiveHealthWatchState extends State<_LiveHealthWatch> {
+  late DateTime _now;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _now = DateTime.now();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() => _now = DateTime.now());
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  ConnectedHealthSignalView? _signal(String key) {
+    for (final signal in widget.snapshot.signals) {
+      if (signal.key == key) return signal;
+    }
+    return null;
+  }
+
+  String _value(String key, {int decimals = 0}) {
+    final signal = _signal(key);
+    if (signal == null) return '—';
+    return decimals == 0
+        ? signal.value.round().toString()
+        : signal.value.toStringAsFixed(decimals);
+  }
+
+  String get _weekday {
+    const ar = [
+      'الاثنين',
+      'الثلاثاء',
+      'الأربعاء',
+      'الخميس',
+      'الجمعة',
+      'السبت',
+      'الأحد',
+    ];
+    const en = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return widget.arabic ? ar[_now.weekday - 1] : en[_now.weekday - 1];
+  }
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final hour = _now.hour % 12;
+    final minute = _now.minute;
+    final second = _now.second;
     return Semantics(
       image: true,
-      label: 'ساعة صحية ذكية بإطار مستوحى من Apple Watch',
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(34),
-          boxShadow: [
-            BoxShadow(
-              color: scheme.primary.withValues(alpha: .20),
-              blurRadius: 28,
-              spreadRadius: 1,
+      label: widget.arabic
+          ? 'ساعة صحية حية تعرض الوقت والبيانات الصحية الحقيقية المتاحة'
+          : 'Live health watch showing current time and available measured data',
+      child: AspectRatio(
+        aspectRatio: 1.05,
+        child: CustomPaint(
+          key: const Key('bil-live-health-watch'),
+          painter: _WatchPainter(hour: hour, minute: minute, second: second),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(38, 30, 48, 28),
+            child: Directionality(
+              textDirection: widget.arabic
+                  ? TextDirection.rtl
+                  : TextDirection.ltr,
+              child: Column(
+                children: [
+                  Text(
+                    _weekday,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: const Color(0xFFEAF7FF),
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  Text(
+                    widget.arabic ? '${_now.day} يوليو' : 'July ${_now.day}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: const Color(0xFFCFE8F7),
+                    ),
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _WatchMetric(
+                          icon: Icons.favorite_rounded,
+                          color: const Color(0xFFFF5B68),
+                          value: _value('heartRate'),
+                          label: widget.arabic ? 'نبضة/دقيقة' : 'bpm',
+                        ),
+                      ),
+                      Expanded(
+                        child: _WatchMetric(
+                          icon: Icons.directions_walk_rounded,
+                          color: const Color(0xFF55D66B),
+                          value: _value('steps'),
+                          label: widget.arabic ? 'خطوة' : 'steps',
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.center,
+                    child: SizedBox(
+                      width: 100,
+                      child: _WatchMetric(
+                        icon: Icons.local_fire_department_rounded,
+                        color: const Color(0xFFFF7C43),
+                        value: _value('activeEnergy'),
+                        label: widget.arabic ? 'سعرة' : 'kcal',
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF142E49).withValues(alpha: .64),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: .12),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.bedtime_rounded,
+                          color: Color(0xFFA56BFF),
+                          size: 16,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          widget.arabic ? 'النوم' : 'Sleep',
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                color: const Color(0xFFCBA8FF),
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          _value('sleep', decimals: 1),
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Image.asset(
-          'assets/images/dashboard/bil_health_hub_watch.webp',
-          key: const Key('bil-health-hub-watch-asset'),
-          fit: BoxFit.contain,
-          filterQuality: FilterQuality.high,
+          ),
         ),
       ),
     );
   }
+}
+
+class _WatchMetric extends StatelessWidget {
+  const _WatchMetric({
+    required this.icon,
+    required this.color,
+    required this.value,
+    required this.label,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, color: color, size: 18),
+        Text(
+          value,
+          maxLines: 1,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(
+            context,
+          ).textTheme.labelSmall?.copyWith(color: const Color(0xFFD9EAF4)),
+        ),
+      ],
+    );
+  }
+}
+
+class _WatchPainter extends CustomPainter {
+  const _WatchPainter({
+    required this.hour,
+    required this.minute,
+    required this.second,
+  });
+
+  final int hour;
+  final int minute;
+  final int second;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final caseRect = RRect.fromRectAndRadius(
+      rect.deflate(size.shortestSide * .025),
+      Radius.circular(size.shortestSide * .22),
+    );
+    final framePaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Color(0xFFF9FDFF),
+          Color(0xFF9DB7CB),
+          Color(0xFFF8FCFF),
+          Color(0xFF718EA4),
+        ],
+        stops: [0, .34, .66, 1],
+      ).createShader(rect);
+    canvas.drawRRect(caseRect, framePaint);
+
+    final bezel = caseRect.deflate(size.shortestSide * .055);
+    canvas.drawRRect(
+      bezel,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF35536B), Color(0xFFBBD1E0), Color(0xFF1B3449)],
+        ).createShader(rect),
+    );
+
+    final screen = bezel.deflate(size.shortestSide * .026);
+    canvas.drawRRect(
+      screen,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF315B80), Color(0xFF16344F), Color(0xFF081927)],
+        ).createShader(rect),
+    );
+
+    final center = Offset(size.width * .48, size.height * .43);
+    final radius = size.shortestSide * .255;
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = Colors.white.withValues(alpha: .18),
+    );
+    for (var i = 0; i < 60; i++) {
+      final angle = i * math.pi / 30 - math.pi / 2;
+      final outer = center + Offset(math.cos(angle), math.sin(angle)) * radius;
+      final inner =
+          center +
+          Offset(math.cos(angle), math.sin(angle)) *
+              (radius - (i % 5 == 0 ? 8 : 3));
+      canvas.drawLine(
+        inner,
+        outer,
+        Paint()
+          ..color = Colors.white.withValues(alpha: i % 5 == 0 ? .74 : .30)
+          ..strokeWidth = i % 5 == 0 ? 1.7 : .7,
+      );
+    }
+
+    void hand(double angle, double length, double width, Color color) {
+      final endpoint =
+          center + Offset(math.sin(angle), -math.cos(angle)) * length;
+      canvas.drawLine(
+        center,
+        endpoint,
+        Paint()
+          ..color = color
+          ..strokeWidth = width
+          ..strokeCap = StrokeCap.round,
+      );
+    }
+
+    hand((hour + minute / 60) * math.pi / 6, radius * .53, 6, Colors.white);
+    hand((minute + second / 60) * math.pi / 30, radius * .76, 5, Colors.white);
+    hand(second * math.pi / 30, radius * .88, 1.6, const Color(0xFF30A7FF));
+    canvas.drawCircle(center, 6, Paint()..color = const Color(0xFF33A9FF));
+    canvas.drawCircle(center, 2.5, Paint()..color = Colors.white);
+
+    final crownCenter = Offset(size.width * .985, size.height * .37);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: crownCenter, width: 15, height: 54),
+        const Radius.circular(7),
+      ),
+      Paint()
+        ..shader = const LinearGradient(
+          colors: [Color(0xFFF7FBFD), Color(0xFF7C95A7), Color(0xFFEAF3F8)],
+        ).createShader(rect),
+    );
+
+    final glass = Path()
+      ..moveTo(screen.left + 14, screen.top + 10)
+      ..quadraticBezierTo(
+        screen.center.dx,
+        screen.top - 8,
+        screen.right - 18,
+        screen.top + 28,
+      )
+      ..lineTo(screen.right - 58, screen.bottom * .62)
+      ..quadraticBezierTo(
+        screen.center.dx,
+        screen.top + 34,
+        screen.left + 14,
+        screen.top + 70,
+      )
+      ..close();
+    canvas.drawPath(
+      glass,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: .34),
+            Colors.white.withValues(alpha: .02),
+          ],
+        ).createShader(rect),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _WatchPainter oldDelegate) =>
+      oldDelegate.hour != hour ||
+      oldDelegate.minute != minute ||
+      oldDelegate.second != second;
 }
 
 class _HealthSlide extends StatelessWidget {
