@@ -4,6 +4,8 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import com.example.body_intelligence_log.BILGlobalHealthBridge
+import com.example.body_intelligence_log.BILMedicalBleBridge
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 

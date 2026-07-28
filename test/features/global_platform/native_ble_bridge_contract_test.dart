@@ -27,7 +27,7 @@ void main() {
     );
     expect(
       File(
-        'android/app/src/main/kotlin/com/example/body_intelligence_log/MainActivity.kt',
+        'android/app/src/main/kotlin/com/kadem/bil/MainActivity.kt',
       ).readAsStringSync(),
       contains('BILMedicalBleBridge'),
     );

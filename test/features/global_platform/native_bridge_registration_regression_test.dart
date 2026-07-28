@@ -15,7 +15,7 @@ void main() {
         'android/app/src/main/kotlin/com/example/body_intelligence_log/BILGlobalHealthBridge.kt',
       ).readAsStringSync();
       final activity = File(
-        'android/app/src/main/kotlin/com/example/body_intelligence_log/MainActivity.kt',
+        'android/app/src/main/kotlin/com/kadem/bil/MainActivity.kt',
       ).readAsStringSync();
       expect(swift, contains('HKAnchoredObjectQuery'));
       expect(swift, contains('requestAuthorization'));
