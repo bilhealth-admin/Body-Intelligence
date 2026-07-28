@@ -23,7 +23,7 @@ class ConnectedHealthPage extends ConsumerWidget {
               context.canPop() ? context.pop() : context.go('/dashboard'),
           icon: const Icon(Icons.arrow_back_rounded),
         ),
-        title: Text(tr('Connected Health', 'الصحة المتصلة')),
+        title: Text(tr('Health Hub', 'المركز الصحي')),
       ),
       body: SafeArea(
         child: ListView(
@@ -35,8 +35,8 @@ class ConnectedHealthPage extends ConsumerWidget {
                 dashboardGlass: true,
                 child: Text(
                   tr(
-                    'Connected Health status could not be read.',
-                    'تعذر قراءة حالة الصحة المتصلة.',
+                    'Health Hub status could not be read.',
+                    'تعذر قراءة حالة المركز الصحي.',
                   ),
                 ),
               ),
