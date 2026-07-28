@@ -1,0 +1,4 @@
+"NSHealthShareUsageDescription" = "BIL reads health data only after your explicit consent to build your private health timeline on this device.";
+"NSHealthUpdateUsageDescription" = "BIL writes only the health records you explicitly choose, after separate write consent.";
+"NSBluetoothAlwaysUsageDescription" = "BIL connects only to health devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothPeripheralUsageDescription" = "BIL connects only to health devices you explicitly pair so measurements can be imported locally.";
