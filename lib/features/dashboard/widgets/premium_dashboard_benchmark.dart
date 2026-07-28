@@ -21,6 +21,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
     this.hero,
     this.progressSection,
     this.personalHealthAi,
+    this.connectedHealth,
     required this.bodyTwinSummary,
     required this.bodyTwinEvidence,
     required this.nutritionSummary,
@@ -43,6 +44,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
   final Widget? hero;
   final Widget? progressSection;
   final Widget? personalHealthAi;
+  final Widget? connectedHealth;
   final String bodyTwinSummary;
   final String bodyTwinEvidence;
   final String nutritionSummary;
@@ -185,6 +187,10 @@ class PremiumDashboardBenchmark extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             top,
+            if (connectedHealth != null) ...[
+              const SizedBox(height: PremiumDesignTokens.spaceMd),
+              connectedHealth!,
+            ],
             const SizedBox(height: PremiumDesignTokens.spaceMd),
             dayAndProgress,
           ],

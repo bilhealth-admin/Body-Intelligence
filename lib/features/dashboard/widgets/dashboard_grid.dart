@@ -19,6 +19,7 @@ import '../../../engine/what_changed_engine.dart';
 import '../../../engine/recovery_engine.dart';
 import '../../../engine/weekly_review_engine.dart';
 import '../../ai_platform/domain/personal_health_ai.dart';
+import '../../connected_health/widgets/connected_health_card.dart';
 import '../../ai_platform/services/personal_health_ai_engine.dart';
 import '../../../data/database/date_keys.dart';
 import '../../../data/database/nutrient_evidence.dart';
@@ -825,6 +826,10 @@ class DashboardGrid extends ConsumerWidget {
           ),
           progressSection: progressSection,
           personalHealthAi: personalHealthAiPanel,
+          connectedHealth: ConnectedHealthCard(
+            arabic: arabic,
+            compact: MediaQuery.sizeOf(context).width < 600,
+          ),
           bodyTwinSummary: twin.sufficient
               ? tr(
                   'A cautious planning direction is available; the range matters more than a single estimate.',

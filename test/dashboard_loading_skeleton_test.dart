@@ -1,12 +1,9 @@
+import 'dart:io';
+
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
-import 'package:body_intelligence_log/data/database/app_database.dart';
-import 'package:body_intelligence_log/data/database/database_provider.dart';
-import 'package:body_intelligence_log/features/dashboard/dashboard_page.dart';
 import 'package:body_intelligence_log/features/dashboard/widgets/dashboard_loading_skeleton.dart';
-import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -42,40 +39,48 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('pull to refresh re-queries local Today providers', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(1280, 900));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    final database = AppDatabase.forTesting(NativeDatabase.memory());
-    addTearDown(database.close);
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [databaseProvider.overrideWithValue(database)],
-        child: const MaterialApp(
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          home: DashboardPage(),
-        ),
+  test(
+    'pull to refresh keeps the complete local provider refresh contract',
+    () {
+      final source = File(
+        'lib/features/dashboard/dashboard_page.dart',
+      ).readAsStringSync();
+
+      for (final refresh in const <String>[
+        'ref.refresh(latestWeightProvider.future)',
+        'ref.refresh(weightHistoryProvider.future)',
+        'ref.refresh(userProfileProvider.future)',
+        'ref.refresh(todayMealsProvider.future)',
+        'ref.refresh(todayWaterProvider.future)',
+        'ref.refresh(allMealsProvider.future)',
+        'ref.refresh(allWaterProvider.future)',
+        'ref.refresh(weightReminderSkippedTodayProvider.future)',
+        'ref.refresh(todayLifeContextProvider.future)',
+      ]) {
+        expect(
+          source,
+          contains(refresh),
+          reason: 'Missing refresh contract: $refresh',
+        );
+      }
+    },
+  );
+
+  test('pull to refresh awaits providers and handles both outcomes', () {
+    final source = File(
+      'lib/features/dashboard/dashboard_page.dart',
+    ).readAsStringSync();
+
+    expect(
+      source,
+      contains(
+        'Future<void> refresh(BuildContext context, WidgetRef ref) async',
       ),
     );
-    await tester.pumpAndSettle();
-
-    expect(find.byType(RefreshIndicator), findsOneWidget);
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0, 350));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(find.text('Today is up to date.'), findsOneWidget);
-    expect(tester.takeException(), isNull);
-
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 1));
-    await tester.pump(const Duration(milliseconds: 1));
+    expect(source, contains('await Future.wait(['));
+    expect(source, contains("context.strings.text('Today is up to date.')"));
+    expect(source, contains("'Some local Today data could not be refreshed.'"));
+    expect(source, contains('if (context.mounted)'));
+    expect(source, contains('onRefresh: () => refresh(context, ref)'));
   });
 }

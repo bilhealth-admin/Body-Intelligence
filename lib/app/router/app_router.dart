@@ -9,6 +9,7 @@ import '../../features/dashboard/dashboard_page.dart';
 import '../../features/history/history_page.dart';
 import '../../features/experiments/experiments_page.dart';
 import '../../features/challenges/challenges_page.dart';
+import '../../features/connected_health/connected_health_page.dart';
 import '../../features/life_context/life_context_page.dart';
 import '../../features/life_context/decision_memory_page.dart';
 import '../../features/nutrition/food_page.dart';
@@ -51,6 +52,10 @@ class AppRouter {
       GoRoute(
         path: '/profile-settings',
         builder: (_, _) => const ProfileSettingsPage(),
+      ),
+      GoRoute(
+        path: '/connected-health',
+        builder: (_, _) => const ConnectedHealthPage(),
       ),
       GoRoute(
         path: '/location-settings',
