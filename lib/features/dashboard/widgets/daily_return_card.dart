@@ -98,15 +98,19 @@ class DailyReturnCard extends StatelessWidget {
       children: [
         Text(
           tr('Your Path Today', 'مسارك اليوم'),
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.15,
+            height: 1.12,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           title,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+            height: 1.45,
           ),
         ),
       ],

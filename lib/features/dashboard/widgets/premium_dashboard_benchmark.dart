@@ -238,7 +238,9 @@ class _KeyInsightsDeck extends StatelessWidget {
                           : Theme.of(context).textTheme.titleLarge)
                       ?.copyWith(
                         color: contentColor,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.15,
+                        height: 1.12,
                       ),
             ),
           ),
@@ -304,9 +306,11 @@ class _CompactInsightCard extends StatelessWidget {
             title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.1,
+              height: 1.2,
+            ),
           ),
           const SizedBox(height: 6),
           Expanded(
@@ -316,7 +320,8 @@ class _CompactInsightCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: scheme.onSurfaceVariant,
-                height: 1.35,
+                height: 1.45,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),

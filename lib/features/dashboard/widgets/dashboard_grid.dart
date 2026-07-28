@@ -950,7 +950,9 @@ class DashboardGrid extends ConsumerWidget {
                   Text(
                     tr('Analytics Center', 'مركز التحليلات'),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.15,
+                      height: 1.12,
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -1367,8 +1369,9 @@ class _DashboardSectionHeading extends StatelessWidget {
             key: const Key('dashboard-today-summary-title'),
             style: theme.textTheme.titleLarge?.copyWith(
               color: dark ? const Color(0xFFF4F8FB) : const Color(0xFF10283B),
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.2,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.15,
+              height: 1.12,
               shadows: dark
                   ? const [
                       Shadow(
@@ -1387,7 +1390,7 @@ class _DashboardSectionHeading extends StatelessWidget {
             style: theme.textTheme.bodyMedium?.copyWith(
               color: dark ? const Color(0xFFCAE0E8) : const Color(0xFF526B7C),
               fontWeight: FontWeight.w600,
-              height: 1.4,
+              height: 1.45,
               shadows: dark
                   ? const [
                       Shadow(

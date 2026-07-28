@@ -184,11 +184,15 @@ class PersonalHealthAiPanel extends StatelessWidget {
           children: [
             Text(
               tr('Bio Intelligence', 'الذكاء الحيوي'),
-              style: compact
-                  ? Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    )
-                  : Theme.of(context).textTheme.headlineSmall,
+              style:
+                  (compact
+                          ? Theme.of(context).textTheme.titleMedium
+                          : Theme.of(context).textTheme.headlineSmall)
+                      ?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.15,
+                        height: 1.12,
+                      ),
             ),
             const SizedBox(height: PremiumDesignTokens.spaceXs),
             Text(
@@ -198,7 +202,15 @@ class PersonalHealthAiPanel extends StatelessWidget {
               ),
               maxLines: compact ? 2 : null,
               overflow: compact ? TextOverflow.ellipsis : null,
-              style: compact ? Theme.of(context).textTheme.bodySmall : null,
+              style:
+                  (compact
+                          ? Theme.of(context).textTheme.bodySmall
+                          : Theme.of(context).textTheme.bodyMedium)
+                      ?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                        height: 1.45,
+                      ),
             ),
             SizedBox(
               height: compact
