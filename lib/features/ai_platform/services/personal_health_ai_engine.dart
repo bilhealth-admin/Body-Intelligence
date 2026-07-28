@@ -23,19 +23,22 @@ final class PersonalHealthAiEngine {
     required String activityLevel,
     required Map<DateTime, double?> dailyCalories,
   }) {
-    final ordered = weights
-        .where(
-          (item) =>
-              item.kg.isFinite &&
-              item.kg > 20 &&
-              item.kg < 400 &&
-              !item.at.isAfter(asOf),
-        )
-        .toList()
-      ..sort((a, b) => a.at.compareTo(b.at));
+    final ordered =
+        weights
+            .where(
+              (item) =>
+                  item.kg.isFinite &&
+                  item.kg > 20 &&
+                  item.kg < 400 &&
+                  !item.at.isAfter(asOf),
+            )
+            .toList()
+          ..sort((a, b) => a.at.compareTo(b.at));
     final full = _trend(ordered);
     final phaseStart = asOf.subtract(const Duration(days: 28));
-    final phase = ordered.where((item) => !item.at.isBefore(phaseStart)).toList();
+    final phase = ordered
+        .where((item) => !item.at.isBefore(phaseStart))
+        .toList();
     final current = _trend(phase.length >= 2 ? phase : ordered);
     final prior = _formulaTdee(
       weightKg: ordered.isEmpty ? null : ordered.last.kg,
@@ -124,9 +127,9 @@ final class PersonalHealthAiEngine {
     final duration = (spanDays / 28).clamp(0.0, 1.0);
     final agreement = (1 - ((upper - lower).abs() / 0.35)).clamp(0.0, 1.0);
     final comparability =
-        values.map((item) => item.comparability.clamp(0.0, 1.0)).reduce(
-          (a, b) => a + b,
-        ) /
+        values
+            .map((item) => item.comparability.clamp(0.0, 1.0))
+            .reduce((a, b) => a + b) /
         values.length;
     final confidence =
         ((0.10 + density * 0.30 + duration * 0.25 + agreement * 0.20) *
@@ -199,17 +202,17 @@ final class PersonalHealthAiEngine {
         .toList();
     final coverage = logged.length / intervalDays;
     if (logged.length < 2 || coverage < 0.5) {
-      return _priorTdee(
-        prior,
-        const ['complete calorie intake for at least half the interval'],
-      );
+      return _priorTdee(prior, const [
+        'complete calorie intake for at least half the interval',
+      ]);
     }
     final intake = logged.reduce((a, b) => a + b) / logged.length;
     final observed = intake - trend.kgPerDay! * 7700;
     final bounded = observed.clamp(prior * 0.7, prior * 1.3);
-    final calibrationWeight =
-        (0.1 + coverage * 0.35 + trend.confidence * 0.25).clamp(0.1, 0.6);
-    final estimate = prior * (1 - calibrationWeight) + bounded * calibrationWeight;
+    final calibrationWeight = (0.1 + coverage * 0.35 + trend.confidence * 0.25)
+        .clamp(0.1, 0.6);
+    final estimate =
+        prior * (1 - calibrationWeight) + bounded * calibrationWeight;
     final uncertainty =
         150 + (1 - coverage) * 350 + (1 - trend.confidence) * 300;
     return AdaptiveTdeeEstimate(

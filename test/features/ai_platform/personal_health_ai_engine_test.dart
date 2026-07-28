@@ -49,7 +49,10 @@ void main() {
       WeightObservation(at: start.add(const Duration(days: 17)), kg: 89.1),
     ]);
 
-    expect(corrected.currentPhase.kgPerDay, isNot(equals(early.currentPhase.kgPerDay)));
+    expect(
+      corrected.currentPhase.kgPerDay,
+      isNot(equals(early.currentPhase.kgPerDay)),
+    );
     expect(corrected.currentPhase.kgPerDay!.abs(), lessThan(0.2));
   });
 
@@ -75,21 +78,24 @@ void main() {
     expect(result.tissueFluid.probableTissueChangeKg, isNull);
   });
 
-  test('TDEE begins calibration as soon as interval evidence is sufficient', () {
-    final weights = [
-      WeightObservation(at: start, kg: 90),
-      WeightObservation(at: start.add(const Duration(days: 3)), kg: 89.7),
-    ];
-    final calories = {
-      DateTime.utc(2026, 1, 1): 2100.0,
-      DateTime.utc(2026, 1, 2): 2050.0,
-      DateTime.utc(2026, 1, 3): 2150.0,
-      DateTime.utc(2026, 1, 4): 2100.0,
-    };
-    final result = evaluate(weights, calories: calories);
-    expect(result.tdee.state, HealthAiLearningState.calibrating);
-    expect(result.tissueFluid.probableTissueChangeKg, isNotNull);
-  });
+  test(
+    'TDEE begins calibration as soon as interval evidence is sufficient',
+    () {
+      final weights = [
+        WeightObservation(at: start, kg: 90),
+        WeightObservation(at: start.add(const Duration(days: 3)), kg: 89.7),
+      ];
+      final calories = {
+        DateTime.utc(2026, 1, 1): 2100.0,
+        DateTime.utc(2026, 1, 2): 2050.0,
+        DateTime.utc(2026, 1, 3): 2150.0,
+        DateTime.utc(2026, 1, 4): 2100.0,
+      };
+      final result = evaluate(weights, calories: calories);
+      expect(result.tdee.state, HealthAiLearningState.calibrating);
+      expect(result.tissueFluid.probableTissueChangeKg, isNotNull);
+    },
+  );
 
   test('full journey and current phase are both exposed', () {
     final values = List.generate(

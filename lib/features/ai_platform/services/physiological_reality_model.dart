@@ -97,10 +97,11 @@ final class PhysiologicalRealityModel {
     final coverage = logged.length / math.max(1, relevant.length);
     final driverAgreement =
         1 - ((mechanistic - residual).abs() / 2.5).clamp(0.0, 1.0);
-    final confidence = (hasEnergyEvidence
-            ? 0.20 + (coverage * 0.35) + (driverAgreement * 0.3)
-            : math.min(0.2, coverage))
-        .clamp(0.0, 1.0);
+    final confidence =
+        (hasEnergyEvidence
+                ? 0.20 + (coverage * 0.35) + (driverAgreement * 0.3)
+                : math.min(0.2, coverage))
+            .clamp(0.0, 1.0);
 
     return PhysiologicalNoiseEstimate(
       observedScaleChangeKg: observed,
