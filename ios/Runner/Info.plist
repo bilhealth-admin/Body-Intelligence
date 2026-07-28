@@ -26,6 +26,14 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>BIL connects only to health devices you explicitly pair so measurements can be imported locally.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>BIL connects only to health devices you explicitly pair so measurements can be imported locally.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>BIL reads health data only after explicit consent to build your private longitudinal health timeline.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>BIL writes selected health records only after separate explicit write consent.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -43,21 +51,9 @@
 					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
 					<key>UISceneStoryboardFile</key>
 					<string>Main</string>
-					<key>NSHealthShareUsageDescription</key>
-					<string>BIL reads health data only after explicit consent to build your private longitudinal health timeline.</string>
-					<key>NSHealthUpdateUsageDescription</key>
-					<string>BIL writes selected health records only after separate explicit write consent.</string>
 				</dict>
 			</array>
-			<key>NSHealthShareUsageDescription</key>
-			<string>BIL reads health data only after explicit consent to build your private longitudinal health timeline.</string>
-			<key>NSHealthUpdateUsageDescription</key>
-			<string>BIL writes selected health records only after separate explicit write consent.</string>
 		</dict>
-		<key>NSHealthShareUsageDescription</key>
-		<string>BIL reads health data only after explicit consent to build your private longitudinal health timeline.</string>
-		<key>NSHealthUpdateUsageDescription</key>
-		<string>BIL writes selected health records only after separate explicit write consent.</string>
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
@@ -78,13 +74,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSHealthShareUsageDescription</key>
-	<string>BIL reads health data only after explicit consent to build your private longitudinal health timeline.</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>BIL writes selected health records only after separate explicit write consent.</string>
-	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>BIL connects only to health devices you explicitly pair so measurements can be imported locally.</string>
-	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>BIL connects only to health devices you explicitly pair so measurements can be imported locally.</string>
 </dict>
 </plist>

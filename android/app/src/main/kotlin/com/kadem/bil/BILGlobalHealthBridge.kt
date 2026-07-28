@@ -1,4 +1,4 @@
-package com.example.body_intelligence_log
+package com.kadem.bil
 
 import android.app.Activity
 import android.content.Context
