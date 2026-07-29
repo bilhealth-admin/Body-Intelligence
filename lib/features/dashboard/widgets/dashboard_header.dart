@@ -270,33 +270,36 @@ class _SignalOrb extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 7),
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: hasWeight ? value : '—',
-                              style: const TextStyle(
-                                color: Color(0xFFF8FBFD),
-                                fontSize: 36,
-                                height: 1,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -1.4,
-                              ),
-                            ),
-                            if (hasWeight)
+                    Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
                               TextSpan(
-                                text: ' $unit',
+                                text: hasWeight ? value : '—',
                                 style: const TextStyle(
-                                  color: Color(0xFFC2D0DA),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFFF8FBFD),
+                                  fontSize: 36,
+                                  height: 1,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -1.4,
                                 ),
                               ),
-                          ],
+                              if (hasWeight)
+                                TextSpan(
+                                  text: ' $unit',
+                                  style: const TextStyle(
+                                    color: Color(0xFFC2D0DA),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          maxLines: 1,
                         ),
-                        maxLines: 1,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -342,53 +345,93 @@ class _PremiumSignalRingPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = size.center(Offset.zero);
-    final rect = Rect.fromCircle(center: center, radius: size.width * .42);
+    final outer = Rect.fromCircle(center: center, radius: size.width * .44);
+    final middle = outer.deflate(9);
+    final inner = middle.deflate(8);
+
     canvas.drawOval(
-      rect.shift(const Offset(0, 9)),
+      outer.shift(const Offset(0, 10)),
       Paint()
-        ..color = Colors.black.withValues(alpha: .34)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15),
+        ..color = Colors.black.withValues(alpha: .30)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 18),
     );
+
     canvas.drawArc(
-      rect,
+      outer,
       0,
       math.pi * 2,
       false,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 14
+        ..strokeWidth = 13
         ..shader = const SweepGradient(
           colors: [
-            Color(0xFF607382),
-            Color(0xFFF3F7FA),
-            Color(0xFF50D8FF),
-            Color(0xFF7765FF),
-            Color(0xFF607382),
+            Color(0xFF5E6870),
+            Color(0xFFEFF3F5),
+            Color(0xFF8E9BA3),
+            Color(0xFFFFFFFF),
+            Color(0xFF747F86),
+            Color(0xFFD7DEE2),
+            Color(0xFF566168),
           ],
-        ).createShader(rect),
+          stops: [0, .14, .31, .48, .66, .83, 1],
+        ).createShader(outer),
     );
+
     canvas.drawArc(
-      rect.deflate(5),
-      math.pi * 1.06,
-      math.pi * .70,
+      middle,
+      0,
+      math.pi * 2,
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 6
+        ..shader = const SweepGradient(
+          colors: [
+            Color(0xFF25313A),
+            Color(0xFFAAB6BE),
+            Color(0xFF3A4650),
+            Color(0xFFEAF0F3),
+            Color(0xFF26323B),
+          ],
+        ).createShader(middle),
+    );
+
+    canvas.drawArc(
+      inner,
+      math.pi * 1.02,
+      math.pi * .76,
       false,
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
-        ..strokeWidth = 3
-        ..color = Colors.white.withValues(alpha: .72),
+        ..strokeWidth = 2.4
+        ..color = Colors.white.withValues(alpha: .80),
     );
+
     canvas.drawArc(
-      rect.inflate(2),
-      -.6,
-      1.7,
+      outer.inflate(1.5),
+      -.72,
+      1.30,
       false,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 9
+        ..strokeWidth = 4
         ..strokeCap = StrokeCap.round
-        ..color = const Color(0xFF52DCFF).withValues(alpha: .36)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
+        ..color = Colors.white.withValues(alpha: .28)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
+    );
+
+    canvas.drawArc(
+      outer,
+      2.1,
+      1.15,
+      false,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 5
+        ..strokeCap = StrokeCap.round
+        ..color = const Color(0xFF8FA1AC).withValues(alpha: .38),
     );
   }
 
@@ -433,8 +476,16 @@ class _InsightGlass extends StatelessWidget {
         border: Border.all(
           color: isDark
               ? Colors.white.withValues(alpha: .05)
-              : const Color(0xFF55798A).withValues(alpha: .24),
+              : const Color(0xFF7E8C95).withValues(alpha: .42),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF53616A).withValues(alpha: .16),
+            blurRadius: 18,
+            spreadRadius: -7,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

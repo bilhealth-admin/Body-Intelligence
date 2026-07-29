@@ -185,7 +185,7 @@ class _RoundGlassButtonState extends State<_RoundGlassButton> {
               child: Icon(
                 widget.icon,
                 size: 23,
-                color: const Color(0xFFF2F7FA),
+                color: const Color(0xFF8D99A6),
               ),
             ),
           ),

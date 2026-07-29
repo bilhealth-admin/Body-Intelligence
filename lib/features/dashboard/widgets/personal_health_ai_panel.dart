@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../features/ai_platform/domain/personal_health_ai.dart';
-import '../../../shared/widgets/premium_surface.dart';
-import 'dashboard_carousel.dart';
+import 'dashboard_twin_deck_shell.dart';
 
 class PersonalHealthAiPanel extends StatelessWidget {
   const PersonalHealthAiPanel({
@@ -173,65 +172,16 @@ class PersonalHealthAiPanel extends StatelessWidget {
     return Semantics(
       container: true,
       label: tr('Bio Intelligence', 'الذكاء الحيوي'),
-      child: PremiumSurface(
+      child: DashboardTwinDeckShell(
         key: const Key('personal-health-ai-panel'),
-        dashboardGlass: true,
-        padding: compact
-            ? const EdgeInsets.all(PremiumDesignTokens.spaceSm)
-            : PremiumDesignTokens.cardPaddingLarge,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              tr('Bio Intelligence', 'الذكاء الحيوي'),
-              style:
-                  (compact
-                          ? Theme.of(context).textTheme.titleMedium
-                          : Theme.of(context).textTheme.headlineSmall)
-                      ?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.15,
-                        height: 1.12,
-                      ),
-            ),
-            const SizedBox(height: PremiumDesignTokens.spaceXs),
-            Text(
-              tr(
-                'What BIL knows now — and what it is still learning.',
-                'ما يعرفه BIL الآن — وما زال يتعلمه.',
-              ),
-              maxLines: compact ? 2 : null,
-              overflow: compact ? TextOverflow.ellipsis : null,
-              style:
-                  (compact
-                          ? Theme.of(context).textTheme.bodySmall
-                          : Theme.of(context).textTheme.bodyMedium)
-                      ?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                        height: 1.45,
-                      ),
-            ),
-            SizedBox(
-              height: compact
-                  ? PremiumDesignTokens.spaceSm
-                  : PremiumDesignTokens.spaceMd,
-            ),
-            DashboardCarousel(
-              key: const Key('personal-health-ai-carousel'),
-              height: MediaQuery.textScalerOf(context)
-                  .scale(compact ? 280 : 218)
-                  .clamp(compact ? 280.0 : 218.0, compact ? 300.0 : 280.0),
-              viewportFraction: .88,
-              compactControls: compact,
-              semanticLabel: tr('Bio Intelligence', 'الذكاء الحيوي'),
-              pages: [
-                for (final card in cards)
-                  _AiCard(data: card, arabic: arabic, updatedAt: snapshot.asOf),
-              ],
-            ),
-          ],
-        ),
+        title: tr('Bio Intelligence', 'الذكاء الحيوي'),
+        subtitle: tr('What BIL knows now.', 'ما يعرفه BIL الآن.'),
+        semanticLabel: tr('Bio Intelligence', 'الذكاء الحيوي'),
+        compact: compact,
+        pages: [
+          for (final card in cards)
+            _AiCard(data: card, arabic: arabic, updatedAt: snapshot.asOf),
+        ],
       ),
     );
   }
@@ -290,9 +240,9 @@ class _AiCard extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: .14)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: .14),
-            blurRadius: 14,
-            offset: const Offset(0, 7),
+            color: const Color(0xFF174E8C).withValues(alpha: .08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),

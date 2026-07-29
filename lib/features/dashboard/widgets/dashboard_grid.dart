@@ -653,21 +653,21 @@ class DashboardGrid extends ConsumerWidget {
               Icons.local_fire_department_outlined,
               tr('Calories', 'السعرات'),
               meals.isEmpty ? '—' : calories.round().toString(),
-              meals.isEmpty ? '' : (arabic ? 'سعرة' : 'kcal'),
+              meals.isEmpty ? '' : 'kcal',
               Colors.orange,
             ),
             _MetricData(
               Icons.fitness_center_outlined,
               tr('Protein', 'البروتين'),
               meals.isEmpty ? '—' : protein.round().toString(),
-              meals.isEmpty ? '' : (arabic ? 'جم' : 'g'),
+              meals.isEmpty ? '' : 'g',
               Colors.green,
             ),
             _MetricData(
               Icons.opacity_outlined,
               tr('Fat', 'الدهون'),
               meals.isEmpty ? '—' : fats.round().toString(),
-              meals.isEmpty ? '' : (arabic ? 'جم' : 'g'),
+              meals.isEmpty ? '' : 'g',
               Colors.purple,
             ),
             _MetricData(
@@ -676,7 +676,7 @@ class DashboardGrid extends ConsumerWidget {
               fiberEvidence.total == null
                   ? '—'
                   : fiberEvidence.total!.round().toString(),
-              fiberEvidence.total == null ? '' : (arabic ? 'جم' : 'g'),
+              fiberEvidence.total == null ? '' : 'g',
               Colors.lightGreen,
             ),
           ],
@@ -687,7 +687,7 @@ class DashboardGrid extends ConsumerWidget {
               Icons.bolt_outlined,
               tr('Daily Requirement', 'الاحتياج اليومي'),
               bil.tdee.round().toString(),
-              arabic ? 'سعرة/يوم' : 'kcal/day',
+              'kcal/day',
               Colors.deepOrangeAccent,
             ),
             _MetricData(
@@ -697,16 +697,14 @@ class DashboardGrid extends ConsumerWidget {
                 currentWeight,
                 system,
               ).toStringAsFixed(1),
-              arabic
-                  ? (system == MeasurementSystem.metric ? 'كجم' : 'رطل')
-                  : UnitConverter.weightUnit(system),
+              UnitConverter.weightUnit(system),
               Colors.blue,
             ),
             _MetricData(
               Icons.accessibility_new_rounded,
               tr('Body mass index', 'مؤشر كتلة الجسم'),
               compositionValue(bodyComposition.bodyMassIndex, unit: ''),
-              '',
+              bodyComposition.bodyMassIndex.isAvailable ? 'BMI' : '',
               Colors.cyan,
             ),
             _MetricData(
@@ -723,28 +721,31 @@ class DashboardGrid extends ConsumerWidget {
     final bodyProfile = _BodyProfileSnapshot(
       arabic: arabic,
       weight:
-          '${UnitConverter.weightFromKg(currentWeight, system).toStringAsFixed(1)} ${arabic ? (system == MeasurementSystem.metric ? 'كجم' : 'رطل') : UnitConverter.weightUnit(system)}',
-      height: '${profile.height.toStringAsFixed(1)} ${arabic ? 'سم' : 'cm'}',
+          '${UnitConverter.weightFromKg(currentWeight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}',
+      height: '${profile.height.toStringAsFixed(1)} cm',
       target:
-          '${UnitConverter.weightFromKg(profile.targetWeight, system).toStringAsFixed(1)} ${arabic ? (system == MeasurementSystem.metric ? 'كجم' : 'رطل') : UnitConverter.weightUnit(system)}',
-      calorieTarget: effectiveTargets.calories.toString(),
-      proteinTarget: '${effectiveTargets.protein} ${arabic ? 'جم' : 'g'}',
-      waterTarget: '${effectiveTargets.water} ${arabic ? 'مل' : 'ml'}',
-      dailyMetabolism: bil.tdee.round().toString(),
+          '${UnitConverter.weightFromKg(profile.targetWeight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}',
+      calorieTarget: '${effectiveTargets.calories} kcal',
+      proteinTarget: '${effectiveTargets.protein} g',
+      waterTarget: '${effectiveTargets.water} ml',
+      dailyMetabolism: '${bil.tdee.round()} kcal',
       neckCircumference: profile.neck == null
           ? tr('Neck circumference is not recorded', 'محيط الرقبة غير مسجل')
-          : '${profile.neck!.toStringAsFixed(1)} ${arabic ? 'سم' : 'cm'}',
+          : '${profile.neck!.toStringAsFixed(1)} cm',
       waistCircumference: profile.waist == null
           ? tr('Waist circumference is not recorded', 'محيط الخصر غير مسجل')
-          : '${profile.waist!.toStringAsFixed(1)} ${arabic ? 'سم' : 'cm'}',
-      bodyMassIndex: compositionValue(bodyComposition.bodyMassIndex, unit: ''),
+          : '${profile.waist!.toStringAsFixed(1)} cm',
+      bodyMassIndex: compositionValue(
+        bodyComposition.bodyMassIndex,
+        unit: ' BMI',
+      ),
       bodyFatPercentage: compositionValue(
         bodyComposition.bodyFatPercentage,
         unit: '%',
       ),
       leanBodyMass: compositionValue(
         bodyComposition.leanBodyMassKg,
-        unit: arabic ? ' كجم' : ' kg',
+        unit: ' kg',
       ),
       onEditProfile: () => context.go('/profile-settings'),
       onEditPlan: () => context.go('/plan'),
@@ -996,10 +997,10 @@ class _DashboardPagedSection extends StatelessWidget {
       builder: (context, outerConstraints) {
         final desktop = MediaQuery.sizeOf(context).width >= 900;
         final baseHeight = desktop
-            ? 126.0
+            ? 154.0
             : outerConstraints.maxWidth >= 560
-            ? 238.0
-            : 318.0;
+            ? 272.0
+            : 360.0;
         final heading = Row(
           children: [
             Expanded(
@@ -1080,8 +1081,8 @@ class _MetricGridPage extends StatelessWidget {
             crossAxisSpacing: PremiumDesignTokens.spaceSm,
             mainAxisSpacing: PremiumDesignTokens.spaceSm,
             childAspectRatio: wideScreen
-                ? 1.42
-                : (constraints.maxWidth < 420 ? 1.12 : 1.34),
+                ? 1.18
+                : (constraints.maxWidth < 420 ? .94 : 1.12),
           ),
           itemCount: metrics.length,
           itemBuilder: (context, index) {
@@ -1307,7 +1308,7 @@ class _BodyProfileValue extends StatelessWidget {
     return Container(
       constraints: BoxConstraints(minHeight: compact ? 92 : 84),
       padding: EdgeInsets.all(
-        compact ? PremiumDesignTokens.spaceXs : PremiumDesignTokens.spaceSm,
+        compact ? PremiumDesignTokens.spaceSm : PremiumDesignTokens.spaceMd,
       ),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest.withValues(alpha: .28),
@@ -1315,10 +1316,12 @@ class _BodyProfileValue extends StatelessWidget {
         border: Border.all(color: scheme.outlineVariant.withValues(alpha: .52)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             label,
+            textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style:
@@ -1331,15 +1334,19 @@ class _BodyProfileValue extends StatelessWidget {
                     ),
           ),
           SizedBox(height: compact ? 1 : 4),
-          Text(
-            value,
-            maxLines: compact ? 2 : 1,
-            overflow: compact ? TextOverflow.visible : TextOverflow.ellipsis,
-            style:
-                (compact
-                        ? Theme.of(context).textTheme.titleSmall
-                        : Theme.of(context).textTheme.titleMedium)
-                    ?.copyWith(fontWeight: FontWeight.w900),
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Text(
+              value,
+              textAlign: TextAlign.center,
+              maxLines: compact ? 2 : 1,
+              overflow: compact ? TextOverflow.visible : TextOverflow.ellipsis,
+              style:
+                  (compact
+                          ? Theme.of(context).textTheme.titleSmall
+                          : Theme.of(context).textTheme.titleMedium)
+                      ?.copyWith(fontWeight: FontWeight.w900),
+            ),
           ),
         ],
       ),
@@ -1428,7 +1435,7 @@ class _CompactMetricTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final compact = MediaQuery.sizeOf(context).width >= 1180;
     return Container(
-      constraints: BoxConstraints(minHeight: compact ? 82 : 104),
+      constraints: BoxConstraints(minHeight: compact ? 112 : 126),
       padding: EdgeInsets.all(
         compact ? PremiumDesignTokens.spaceXs : PremiumDesignTokens.spaceSm,
       ),
@@ -1441,15 +1448,17 @@ class _CompactMetricTile extends StatelessWidget {
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, size: compact ? 14 : 19, color: accent),
               const SizedBox(width: PremiumDesignTokens.spaceXs),
               Expanded(
                 child: Text(
                   label,
+                  textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.visible,
                   style: compact
@@ -1460,32 +1469,38 @@ class _CompactMetricTile extends StatelessWidget {
             ],
           ),
           SizedBox(height: compact ? 1 : 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                value,
-                style:
-                    (compact
-                            ? Theme.of(context).textTheme.titleMedium
-                            : Theme.of(context).textTheme.headlineSmall)
-                        ?.copyWith(fontWeight: FontWeight.w900),
-              ),
-              const SizedBox(width: PremiumDesignTokens.spaceXs),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 3),
-                  child: Text(
-                    unit,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(height: 1.1),
-                  ),
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  value,
+                  textAlign: TextAlign.center,
+                  style:
+                      (compact
+                              ? Theme.of(context).textTheme.titleMedium
+                              : Theme.of(context).textTheme.headlineSmall)
+                          ?.copyWith(fontWeight: FontWeight.w900),
                 ),
-              ),
-            ],
+                if (unit.isNotEmpty) ...[
+                  const SizedBox(width: PremiumDesignTokens.spaceXs),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 3),
+                    child: Text(
+                      unit,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(height: 1.1),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ],
       ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../shared/widgets/premium_surface.dart';
-import 'dashboard_carousel.dart';
+import 'dashboard_twin_deck_shell.dart';
 
 /// Presentation-only benchmark for the premium dashboard hierarchy.
 ///
@@ -64,9 +64,6 @@ class PremiumDashboardBenchmark extends StatelessWidget {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final contentColor = dark ? scheme.onSurface : const Color(0xFF061A2B);
     final phone = MediaQuery.sizeOf(context).width < 600;
-    final scaledHeight = MediaQuery.textScalerOf(
-      context,
-    ).scale(phone ? 280 : 190).clamp(phone ? 280.0 : 190.0, 300.0);
     final insightCards = <Widget>[
       _CompactInsightCard(
         key: const Key('dashboard-nutrition-context'),
@@ -81,7 +78,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
       ),
       _CompactInsightCard(
         key: const Key('dashboard-action-insight'),
-        eyebrow: tr('DAILY INTELLIGENCE', 'الذكاء اليومي'),
+        eyebrow: '',
         title: insightTitle ?? actionTitle,
         interpretation: insightSummary ?? actionReason,
         evidence: actionEvidence,
@@ -96,10 +93,12 @@ class PremiumDashboardBenchmark extends StatelessWidget {
         final sectionGap = constraints.maxWidth >= 900
             ? 12.0
             : PremiumDesignTokens.spaceMd;
-        final insights = _KeyInsightsDeck(
+        final insights = DashboardTwinDeckShell(
+          key: const Key('dashboard-key-insights-deck'),
           title: tr("Today's Insights", "رؤى اليوم"),
-          contentColor: contentColor,
-          height: scaledHeight,
+          semanticLabel: tr("Today's Insights", "رؤى اليوم"),
+          subtitle: tr('What BIL sees', 'ما يراه BIL'),
+          titleColor: contentColor,
           pages: insightCards,
           compact: phone,
         );
@@ -115,13 +114,17 @@ class PremiumDashboardBenchmark extends StatelessWidget {
               ],
             );
           }
-          return IntrinsicHeight(
+          final twinHeight = MediaQuery.textScalerOf(context)
+              .scale(phone ? 420.0 : 390.0)
+              .clamp(phone ? 420.0 : 390.0, phone ? 500.0 : 470.0);
+          return SizedBox(
+            height: twinHeight,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(child: personalHealthAi!),
+                Expanded(child: SizedBox.expand(child: personalHealthAi!)),
                 const SizedBox(width: PremiumDesignTokens.spaceMd),
-                Expanded(child: insights),
+                Expanded(child: SizedBox.expand(child: insights)),
               ],
             ),
           );
@@ -168,14 +171,18 @@ class PremiumDashboardBenchmark extends StatelessWidget {
                 child: dailyContent,
               )
             : dailyContent;
+        final dayPairHeight = MediaQuery.textScalerOf(
+          context,
+        ).scale(188.0).clamp(188.0, 240.0);
         final dayAndProgress = progressSection != null && pairDaySections
-            ? IntrinsicHeight(
+            ? SizedBox(
+                height: dayPairHeight,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(child: daily),
+                    Expanded(child: SizedBox.expand(child: daily)),
                     const SizedBox(width: PremiumDesignTokens.spaceMd),
-                    Expanded(child: progressSection!),
+                    Expanded(child: SizedBox.expand(child: progressSection!)),
                   ],
                 ),
               )
@@ -203,62 +210,6 @@ class PremiumDashboardBenchmark extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-class _KeyInsightsDeck extends StatelessWidget {
-  const _KeyInsightsDeck({
-    required this.title,
-    required this.contentColor,
-    required this.height,
-    required this.pages,
-    this.compact = false,
-  });
-
-  final String title;
-  final Color contentColor;
-  final double height;
-  final List<Widget> pages;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return PremiumSurface(
-      dashboardGlass: true,
-      padding: compact
-          ? const EdgeInsets.all(PremiumDesignTokens.spaceSm)
-          : PremiumDesignTokens.cardPaddingLarge,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Semantics(
-            header: true,
-            child: Text(
-              title,
-              style:
-                  (compact
-                          ? Theme.of(context).textTheme.titleMedium
-                          : Theme.of(context).textTheme.titleLarge)
-                      ?.copyWith(
-                        color: contentColor,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.15,
-                        height: 1.12,
-                      ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          DashboardCarousel(
-            key: const Key('dashboard-key-insights-carousel'),
-            height: height,
-            viewportFraction: .88,
-            compactControls: compact,
-            semanticLabel: title,
-            pages: pages,
-          ),
-        ],
-      ),
     );
   }
 }
@@ -310,11 +261,9 @@ class _CompactInsightCard extends StatelessWidget {
             title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.1,
-              height: 1.2,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 6),
           Expanded(
@@ -322,11 +271,9 @@ class _CompactInsightCard extends StatelessWidget {
               interpretation,
               maxLines: 4,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-                height: 1.45,
-                fontWeight: FontWeight.w500,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
             ),
           ),
           Text(
@@ -335,18 +282,39 @@ class _CompactInsightCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: Theme.of(
               context,
-            ).textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
+            ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
           ),
         ],
       ),
     );
 
     if (!matchPersonalAiSurface) {
-      return PremiumSurface(
+      return InkWell(
         onTap: onTap,
-        dashboardGlass: true,
-        padding: EdgeInsets.zero,
-        child: content,
+        borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withValues(alpha: .105),
+                const Color(0xFF5BDAFF).withValues(alpha: .045),
+                Colors.white.withValues(alpha: .035),
+              ],
+            ),
+            border: Border.all(color: Colors.white.withValues(alpha: .14)),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF174E8C).withValues(alpha: .08),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: content,
+        ),
       );
     }
 
@@ -368,9 +336,9 @@ class _CompactInsightCard extends StatelessWidget {
           border: Border.all(color: Colors.white.withValues(alpha: .14)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: .14),
-              blurRadius: 14,
-              offset: const Offset(0, 7),
+              color: const Color(0xFF174E8C).withValues(alpha: .08),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
         ),

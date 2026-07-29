@@ -155,7 +155,8 @@ class _DashboardCarouselState extends State<DashboardCarousel>
                         clipBehavior: Clip.hardEdge,
                         children: [
                           FractionallySizedBox(
-                            widthFactor: 1,
+                            key: const Key('dashboard-carousel-card-frame'),
+                            widthFactor: widget.viewportFraction,
                             child: AnimatedBuilder(
                               animation: _rotation,
                               builder: (context, _) {

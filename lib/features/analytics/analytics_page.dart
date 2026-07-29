@@ -707,6 +707,7 @@ class _WeightTrendChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
     if (weights.isEmpty) {
       return SizedBox(
         height: 180,
@@ -763,14 +764,14 @@ class _WeightTrendChart extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _ChartMetricChip(
-                      label: context.strings.text('Start'),
+                      label: arabic ? 'البداية' : 'Start',
                       value: '${firstValue.toStringAsFixed(1)} $unit',
                     ),
                   ),
                   const SizedBox(width: PremiumDesignTokens.spaceXs),
                   Expanded(
                     child: _ChartMetricChip(
-                      label: context.strings.text('Current'),
+                      label: arabic ? 'الحالي' : 'Current',
                       value: '${lastValue.toStringAsFixed(1)} $unit',
                       emphasize: true,
                     ),
@@ -778,7 +779,7 @@ class _WeightTrendChart extends StatelessWidget {
                   const SizedBox(width: PremiumDesignTokens.spaceXs),
                   Expanded(
                     child: _ChartMetricChip(
-                      label: context.strings.text('Range change'),
+                      label: arabic ? 'تغير النطاق' : 'Range change',
                       value:
                           '${delta >= 0 ? '+' : ''}${delta.toStringAsFixed(1)} $unit',
                     ),
@@ -895,24 +896,39 @@ class _WeightLinePainter extends CustomPainter {
     }
     canvas.drawPath(path, line);
 
-    final latestX = values.length == 1 ? size.width / 2 : size.width;
-    final latestNormalized = (values.last - minValue) / span;
-    final latestY = size.height - (latestNormalized * (size.height - 8)) - 4;
+    for (var index = 0; index < values.length; index++) {
+      final x = values.length == 1
+          ? size.width / 2
+          : (index / (values.length - 1)) * size.width;
+      final normalized = (values[index] - minValue) / span;
+      final y = size.height - (normalized * (size.height - 8)) - 4;
+      final point = Offset(x, y);
 
-    canvas.drawCircle(
-      Offset(latestX, latestY),
-      6,
-      Paint()
-        ..color = pointColor
-        ..style = PaintingStyle.fill,
-    );
-    canvas.drawCircle(
-      Offset(latestX, latestY),
-      11,
-      Paint()
-        ..color = pointColor.withValues(alpha: 0.20)
-        ..style = PaintingStyle.fill,
-    );
+      canvas.drawCircle(
+        point,
+        6,
+        Paint()
+          ..color = pointColor
+          ..style = PaintingStyle.fill,
+      );
+      canvas.drawCircle(
+        point,
+        7.5,
+        Paint()
+          ..color = Colors.white.withValues(alpha: .92)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2,
+      );
+      canvas.drawCircle(
+        point,
+        index == values.length - 1 ? 12 : 9,
+        Paint()
+          ..color = pointColor.withValues(
+            alpha: index == values.length - 1 ? .22 : .10,
+          )
+          ..style = PaintingStyle.fill,
+      );
+    }
   }
 
   @override

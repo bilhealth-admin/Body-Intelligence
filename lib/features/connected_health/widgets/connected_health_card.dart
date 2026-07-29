@@ -291,117 +291,91 @@ class _HealthHubEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final watchSize = compact ? 300.0 : 330.0;
+    final shellHeight = compact ? 438.0 : 390.0;
+    return SizedBox(
       key: const Key('health-hub-empty-state'),
-      constraints: BoxConstraints(minHeight: compact ? 390 : 300),
-      padding: EdgeInsets.all(
-        compact ? PremiumDesignTokens.spaceSm : PremiumDesignTokens.spaceLg,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: .36),
-            const Color(0xFFDDEEFF).withValues(alpha: .30),
-            Colors.white.withValues(alpha: .14),
+      height: shellHeight,
+      child: Container(
+        padding: EdgeInsets.all(
+          compact ? PremiumDesignTokens.spaceSm : PremiumDesignTokens.spaceLg,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(32),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white.withValues(alpha: .36),
+              const Color(0xFFDDEEFF).withValues(alpha: .30),
+              Colors.white.withValues(alpha: .14),
+            ],
+          ),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: .72),
+            width: 1.4,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF76B8E8).withValues(alpha: .12),
+              blurRadius: 26,
+              offset: const Offset(0, 12),
+            ),
           ],
         ),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: .72),
-          width: 1.4,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF76B8E8).withValues(alpha: .15),
-            blurRadius: 32,
-            offset: const Offset(0, 16),
-          ),
-        ],
-      ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final horizontal = !compact && constraints.maxWidth >= 760;
-          final illustration = SizedBox(
-            width: horizontal ? constraints.maxWidth * .43 : double.infinity,
-            height: horizontal ? 260 : 230,
-            child: _LiveHealthWatch(snapshot: snapshot, arabic: arabic),
-          );
-          final message = Directionality(
-            textDirection: arabic ? TextDirection.rtl : TextDirection.ltr,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  tr('Health Hub', 'مركزك الصحي'),
-                  textAlign: TextAlign.start,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: const Color(0xFF0A3153),
-                    fontWeight: FontWeight.w900,
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: PremiumDesignTokens.spaceSm),
-                Text(
-                  tr(
-                    'Your verified health sources and smart-watch readings in one place.',
-                    'مصادرك الصحية الموثوقة وقراءة الساعة الذكية في مكان واحد.',
-                  ),
-                  textAlign: TextAlign.start,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: const Color(0xFF59738A),
-                    height: 1.55,
-                  ),
-                ),
-                const SizedBox(height: PremiumDesignTokens.spaceLg),
-                FilledButton.icon(
-                  key: const Key('health-hub-connect-button'),
-                  onPressed: onConnect,
-                  icon: const Icon(Icons.link_rounded),
-                  label: Text(tr('Connect now', 'ربط الآن')),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(58),
-                    backgroundColor: Colors.white.withValues(alpha: .34),
-                    foregroundColor: const Color(0xFF0A3153),
-                    elevation: 0,
-                    side: BorderSide(
-                      color: Colors.white.withValues(alpha: .86),
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(26),
-                    ),
-                    textStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-
-          if (!horizontal) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                illustration,
-                const SizedBox(height: PremiumDesignTokens.spaceMd),
-                message,
-              ],
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final horizontal = !compact && constraints.maxWidth >= 760;
+            final illustration = Center(
+              child: SizedBox.square(
+                key: const Key('health-hub-fixed-square-watch'),
+                dimension: watchSize,
+                child: _LiveHealthWatch(snapshot: snapshot, arabic: arabic),
+              ),
             );
-          }
-          return Directionality(
-            textDirection: TextDirection.ltr,
-            child: Row(
-              children: [
-                Expanded(flex: 10, child: illustration),
-                const SizedBox(width: PremiumDesignTokens.spaceXl),
-                Expanded(flex: 11, child: message),
-              ],
-            ),
-          );
-        },
+            final connectButton = FilledButton.icon(
+              key: const Key('health-hub-connect-button'),
+              onPressed: onConnect,
+              icon: const Icon(Icons.link_rounded),
+              label: Text(tr('Connect now', 'ربط الآن')),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(250, 58),
+                backgroundColor: Colors.white.withValues(alpha: .34),
+                foregroundColor: const Color(0xFF0A3153),
+                elevation: 0,
+                side: BorderSide(color: Colors.white.withValues(alpha: .86)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(26),
+                ),
+                textStyle: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+              ),
+            );
+
+            if (!horizontal) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  illustration,
+                  const SizedBox(height: PremiumDesignTokens.spaceMd),
+                  connectButton,
+                ],
+              );
+            }
+            return Directionality(
+              textDirection: TextDirection.ltr,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox.square(dimension: watchSize, child: illustration),
+                  const SizedBox(width: PremiumDesignTokens.spaceXl),
+                  SizedBox(width: 330, child: connectButton),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -475,110 +449,86 @@ class _LiveHealthWatchState extends State<_LiveHealthWatch> {
       label: widget.arabic
           ? 'ساعة صحية حية تعرض الوقت والبيانات الصحية الحقيقية المتاحة'
           : 'Live health watch showing current time and available measured data',
-      child: AspectRatio(
-        aspectRatio: 1.05,
+      child: SizedBox.expand(
         child: CustomPaint(
           key: const Key('bil-live-health-watch'),
           painter: _WatchPainter(hour: hour, minute: minute, second: second),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(38, 30, 48, 28),
-            child: Directionality(
-              textDirection: widget.arabic
-                  ? TextDirection.rtl
-                  : TextDirection.ltr,
-              child: Column(
-                children: [
-                  Text(
-                    _weekday,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: const Color(0xFFEAF7FF),
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  Text(
-                    widget.arabic ? '${_now.day} يوليو' : 'July ${_now.day}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: const Color(0xFFCFE8F7),
-                    ),
-                  ),
-                  const Spacer(),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _WatchMetric(
-                          icon: Icons.favorite_rounded,
-                          color: const Color(0xFFFF5B68),
-                          value: _value('heartRate'),
-                          label: widget.arabic ? 'نبضة/دقيقة' : 'bpm',
-                        ),
-                      ),
-                      Expanded(
-                        child: _WatchMetric(
-                          icon: Icons.directions_walk_rounded,
-                          color: const Color(0xFF55D66B),
-                          value: _value('steps'),
-                          label: widget.arabic ? 'خطوة' : 'steps',
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.center,
-                    child: SizedBox(
-                      width: 100,
-                      child: _WatchMetric(
-                        icon: Icons.local_fire_department_rounded,
-                        color: const Color(0xFFFF7C43),
-                        value: _value('activeEnergy'),
-                        label: widget.arabic ? 'سعرة' : 'kcal',
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF142E49).withValues(alpha: .64),
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: .12),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.bedtime_rounded,
-                          color: Color(0xFFA56BFF),
-                          size: 16,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          widget.arabic ? 'النوم' : 'Sleep',
-                          style: Theme.of(context).textTheme.labelMedium
-                              ?.copyWith(
-                                color: const Color(0xFFCBA8FF),
-                                fontWeight: FontWeight.w800,
-                              ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          _value('sleep', decimals: 1),
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Positioned(
+                left: 24,
+                top: 42,
+                width: 82,
+                child: _WatchMetric(
+                  icon: Icons.directions_walk_rounded,
+                  color: const Color(0xFF55D66B),
+                  value: _value('steps'),
+                  label: widget.arabic ? 'خطوة' : 'steps',
+                ),
               ),
-            ),
+              Positioned(
+                right: 24,
+                top: 42,
+                width: 90,
+                child: _WatchMetric(
+                  icon: Icons.favorite_rounded,
+                  color: const Color(0xFFFF5B68),
+                  value: _value('heartRate'),
+                  label: widget.arabic ? 'نبضة/دقيقة' : 'bpm',
+                ),
+              ),
+              Positioned(
+                left: 24,
+                bottom: 48,
+                width: 82,
+                child: _WatchMetric(
+                  icon: Icons.local_fire_department_rounded,
+                  color: const Color(0xFFFF7C43),
+                  value: _value('activeEnergy'),
+                  label: widget.arabic ? 'سعرة' : 'kcal',
+                ),
+              ),
+              Positioned(
+                right: 24,
+                bottom: 48,
+                width: 82,
+                child: _WatchMetric(
+                  icon: Icons.bedtime_rounded,
+                  color: const Color(0xFFA56BFF),
+                  value: _value('sleep', decimals: 1),
+                  label: widget.arabic ? 'ساعة نوم' : 'sleep',
+                ),
+              ),
+              Positioned(
+                left: 112,
+                right: 112,
+                top: 30,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _weekday,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: const Color(0xFFEAF7FF),
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    Text(
+                      widget.arabic ? '${_now.day} يوليو' : 'July ${_now.day}',
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: const Color(0xFFCFE8F7),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -640,75 +590,148 @@ class _WatchPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
-    final caseRect = RRect.fromRectAndRadius(
-      rect.deflate(size.shortestSide * .025),
-      Radius.circular(size.shortestSide * .22),
-    );
-    final framePaint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          Color(0xFFF9FDFF),
-          Color(0xFF9DB7CB),
-          Color(0xFFF8FCFF),
-          Color(0xFF718EA4),
-        ],
-        stops: [0, .34, .66, 1],
-      ).createShader(rect);
-    canvas.drawRRect(caseRect, framePaint);
+    final unit = size.shortestSide;
 
-    final bezel = caseRect.deflate(size.shortestSide * .055);
+    final caseRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(
+        unit * .025,
+        unit * .025,
+        size.width - unit * .075,
+        size.height - unit * .05,
+      ),
+      Radius.circular(unit * .22),
+    );
+
+    canvas.drawRRect(
+      caseRect.shift(Offset(0, unit * .018)),
+      Paint()
+        ..color = Colors.black.withValues(alpha: .30)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, unit * .035),
+    );
+
+    canvas.drawRRect(
+      caseRect,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF2D3439),
+            Color(0xFF9CA5AB),
+            Color(0xFFF4F6F7),
+            Color(0xFF737E84),
+            Color(0xFFFFFFFF),
+            Color(0xFF5B666C),
+            Color(0xFFBBC2C6),
+            Color(0xFF30383D),
+          ],
+          stops: [0, .12, .25, .40, .52, .67, .82, 1],
+        ).createShader(rect),
+    );
+
+    canvas.drawRRect(
+      caseRect.deflate(unit * .012),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = unit * .010
+        ..shader = const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFFFFFFF), Color(0xFF7D878D), Color(0xFF20272B)],
+        ).createShader(rect),
+    );
+
+    final bezel = caseRect.deflate(unit * .050);
     canvas.drawRRect(
       bezel,
       Paint()
         ..shader = const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF35536B), Color(0xFFBBD1E0), Color(0xFF1B3449)],
+          colors: [Color(0xFF10171C), Color(0xFF515C63), Color(0xFF0B1115)],
+          stops: [0, .48, 1],
         ).createShader(rect),
     );
 
-    final screen = bezel.deflate(size.shortestSide * .026);
+    final screen = bezel.deflate(unit * .024);
     canvas.drawRRect(
       screen,
       Paint()
+        ..shader = const RadialGradient(
+          center: Alignment(-.20, -.35),
+          radius: 1.15,
+          colors: [Color(0xFF244965), Color(0xFF102B42), Color(0xFF05121E)],
+          stops: [0, .58, 1],
+        ).createShader(screen.outerRect),
+    );
+
+    canvas.drawRRect(
+      screen,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = unit * .008
         ..shader = const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF315B80), Color(0xFF16344F), Color(0xFF081927)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF8298A8), Color(0x2216232D), Color(0xFF05090C)],
         ).createShader(rect),
     );
 
-    final center = Offset(size.width * .48, size.height * .43);
-    final radius = size.shortestSide * .255;
+    final center = Offset(size.width * .500, size.height * .535);
+    final radius = unit * .225;
+    canvas.drawCircle(
+      center + Offset(0, unit * .008),
+      radius,
+      Paint()
+        ..color = Colors.black.withValues(alpha: .22)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, unit * .018),
+    );
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..shader = const RadialGradient(
+          center: Alignment(-.28, -.32),
+          radius: 1.2,
+          colors: [Color(0xFF243B50), Color(0xFF102638), Color(0xFF071522)],
+        ).createShader(Rect.fromCircle(center: center, radius: radius)),
+    );
     canvas.drawCircle(
       center,
       radius,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 1
-        ..color = Colors.white.withValues(alpha: .18),
+        ..strokeWidth = 1.2
+        ..color = Colors.white.withValues(alpha: .24),
     );
+
     for (var i = 0; i < 60; i++) {
       final angle = i * math.pi / 30 - math.pi / 2;
       final outer = center + Offset(math.cos(angle), math.sin(angle)) * radius;
+      final inset = i % 5 == 0 ? unit * .026 : unit * .010;
       final inner =
-          center +
-          Offset(math.cos(angle), math.sin(angle)) *
-              (radius - (i % 5 == 0 ? 8 : 3));
+          center + Offset(math.cos(angle), math.sin(angle)) * (radius - inset);
       canvas.drawLine(
         inner,
         outer,
         Paint()
-          ..color = Colors.white.withValues(alpha: i % 5 == 0 ? .74 : .30)
-          ..strokeWidth = i % 5 == 0 ? 1.7 : .7,
+          ..color = Colors.white.withValues(alpha: i % 5 == 0 ? .90 : .42)
+          ..strokeWidth = i % 5 == 0 ? 2.1 : .8
+          ..strokeCap = StrokeCap.round,
       );
     }
 
     void hand(double angle, double length, double width, Color color) {
       final endpoint =
           center + Offset(math.sin(angle), -math.cos(angle)) * length;
+      canvas.drawLine(
+        center + Offset(0, unit * .004),
+        endpoint + Offset(0, unit * .004),
+        Paint()
+          ..color = Colors.black.withValues(alpha: .30)
+          ..strokeWidth = width + 2
+          ..strokeCap = StrokeCap.round,
+      );
       canvas.drawLine(
         center,
         endpoint,
@@ -719,38 +742,93 @@ class _WatchPainter extends CustomPainter {
       );
     }
 
-    hand((hour + minute / 60) * math.pi / 6, radius * .53, 6, Colors.white);
-    hand((minute + second / 60) * math.pi / 30, radius * .76, 5, Colors.white);
-    hand(second * math.pi / 30, radius * .88, 1.6, const Color(0xFF30A7FF));
-    canvas.drawCircle(center, 6, Paint()..color = const Color(0xFF33A9FF));
-    canvas.drawCircle(center, 2.5, Paint()..color = Colors.white);
+    hand((hour + minute / 60) * math.pi / 6, radius * .53, 6.5, Colors.white);
+    hand(
+      (minute + second / 60) * math.pi / 30,
+      radius * .77,
+      5.2,
+      Colors.white,
+    );
+    hand(second * math.pi / 30, radius * .89, 1.7, const Color(0xFF2DA7FF));
+    canvas.drawCircle(center, 7.2, Paint()..color = const Color(0xFF168FF1));
+    canvas.drawCircle(center, 3.1, Paint()..color = const Color(0xFFF8FCFF));
 
-    final crownCenter = Offset(size.width * .985, size.height * .37);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromCenter(center: crownCenter, width: 15, height: 54),
-        const Radius.circular(7),
+    final crownCenter = Offset(size.width - unit * .035, size.height * .37);
+    final crownShadow = RRect.fromRectAndRadius(
+      Rect.fromCenter(
+        center: crownCenter + Offset(-unit * .004, unit * .008),
+        width: unit * .060,
+        height: unit * .145,
       ),
+      Radius.circular(unit * .025),
+    );
+    canvas.drawRRect(
+      crownShadow,
       Paint()
-        ..shader = const LinearGradient(
-          colors: [Color(0xFFF7FBFD), Color(0xFF7C95A7), Color(0xFFEAF3F8)],
-        ).createShader(rect),
+        ..color = Colors.black.withValues(alpha: .34)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, unit * .014),
     );
 
+    final crown = RRect.fromRectAndRadius(
+      Rect.fromCenter(
+        center: crownCenter,
+        width: unit * .056,
+        height: unit * .138,
+      ),
+      Radius.circular(unit * .024),
+    );
+    canvas.drawRRect(
+      crown,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            Color(0xFF30383D),
+            Color(0xFFAAB2B7),
+            Color(0xFFF7F8F8),
+            Color(0xFF737D82),
+            Color(0xFFD9DEE1),
+            Color(0xFF353E43),
+          ],
+          stops: [0, .18, .36, .58, .78, 1],
+        ).createShader(crown.outerRect),
+    );
+    canvas.drawRRect(
+      crown,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.1
+        ..color = const Color(0xFF1A2024),
+    );
+
+    for (var i = -5; i <= 5; i++) {
+      final y = crownCenter.dy + i * unit * .0105;
+      canvas.drawLine(
+        Offset(crown.left + unit * .008, y),
+        Offset(crown.right - unit * .007, y),
+        Paint()
+          ..color = i.isEven
+              ? Colors.white.withValues(alpha: .62)
+              : Colors.black.withValues(alpha: .44)
+          ..strokeWidth = .85,
+      );
+    }
+
     final glass = Path()
-      ..moveTo(screen.left + 14, screen.top + 10)
+      ..moveTo(screen.left + unit * .032, screen.top + unit * .018)
       ..quadraticBezierTo(
         screen.center.dx,
-        screen.top - 8,
-        screen.right - 18,
-        screen.top + 28,
+        screen.top - unit * .012,
+        screen.right - unit * .038,
+        screen.top + unit * .072,
       )
-      ..lineTo(screen.right - 58, screen.bottom * .62)
+      ..lineTo(screen.right - unit * .145, screen.center.dy - unit * .020)
       ..quadraticBezierTo(
         screen.center.dx,
-        screen.top + 34,
-        screen.left + 14,
-        screen.top + 70,
+        screen.top + unit * .065,
+        screen.left + unit * .040,
+        screen.top + unit * .145,
       )
       ..close();
     canvas.drawPath(
@@ -760,9 +838,11 @@ class _WatchPainter extends CustomPainter {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.white.withValues(alpha: .34),
-            Colors.white.withValues(alpha: .02),
+            Colors.white.withValues(alpha: .24),
+            Colors.white.withValues(alpha: .055),
+            Colors.white.withValues(alpha: .0),
           ],
+          stops: const [0, .42, 1],
         ).createShader(rect),
     );
   }
