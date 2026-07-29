@@ -735,7 +735,10 @@ class DashboardGrid extends ConsumerWidget {
       waistCircumference: profile.waist == null
           ? tr('Waist circumference is not recorded', 'محيط الخصر غير مسجل')
           : '${profile.waist!.toStringAsFixed(1)} cm',
-      bodyMassIndex: compositionValue(bodyComposition.bodyMassIndex, unit: ' BMI'),
+      bodyMassIndex: compositionValue(
+        bodyComposition.bodyMassIndex,
+        unit: ' BMI',
+      ),
       bodyFatPercentage: compositionValue(
         bodyComposition.bodyFatPercentage,
         unit: '%',
@@ -935,11 +938,11 @@ class DashboardGrid extends ConsumerWidget {
         LayoutBuilder(
           builder: (context, constraints) {
             if (constraints.maxWidth < 1180) {
+              final phone = MediaQuery.sizeOf(context).width < 600;
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  bodyProfile,
-                  const SizedBox(height: 12),
+                  if (!phone) ...[bodyProfile, const SizedBox(height: 12)],
                   Text(
                     tr('Analytics Center', 'مركز التحليلات'),
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -1177,7 +1180,6 @@ class _BodyProfileSnapshot extends StatelessWidget {
           LayoutBuilder(
             builder: (context, constraints) {
               if (constraints.maxWidth < 760) {
-                final fixedDesktopGrid = false;
                 return Column(
                   children: [
                     SizedBox(
@@ -1192,31 +1194,19 @@ class _BodyProfileSnapshot extends StatelessWidget {
                     SizedBox(
                       height: 220,
                       child: GridView.builder(
-                        scrollDirection: fixedDesktopGrid
-                            ? Axis.vertical
-                            : Axis.horizontal,
-                        physics: fixedDesktopGrid
-                            ? const NeverScrollableScrollPhysics()
-                            : null,
+                        scrollDirection: Axis.horizontal,
                         padding: EdgeInsets.zero,
-                        gridDelegate: fixedDesktopGrid
-                            ? const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 6,
-                                childAspectRatio: .88,
-                                crossAxisSpacing: PremiumDesignTokens.spaceXs,
-                                mainAxisSpacing: PremiumDesignTokens.spaceXs,
-                              )
-                            : const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                mainAxisExtent: 176,
-                                crossAxisSpacing: PremiumDesignTokens.spaceSm,
-                                mainAxisSpacing: PremiumDesignTokens.spaceSm,
-                              ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisExtent: 176,
+                              crossAxisSpacing: PremiumDesignTokens.spaceSm,
+                              mainAxisSpacing: PremiumDesignTokens.spaceSm,
+                            ),
                         itemCount: values.length,
                         itemBuilder: (context, index) => _BodyProfileValue(
                           label: values[index].$1,
                           value: values[index].$2,
-                          compact: fixedDesktopGrid,
                         ),
                       ),
                     ),
@@ -1286,24 +1276,17 @@ class _BodyProfileSnapshot extends StatelessWidget {
 }
 
 class _BodyProfileValue extends StatelessWidget {
-  const _BodyProfileValue({
-    required this.label,
-    required this.value,
-    this.compact = false,
-  });
+  const _BodyProfileValue({required this.label, required this.value});
 
   final String label;
   final String value;
-  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      constraints: BoxConstraints(minHeight: compact ? 104 : 96),
-      padding: EdgeInsets.all(
-        compact ? PremiumDesignTokens.spaceSm : PremiumDesignTokens.spaceMd,
-      ),
+      constraints: const BoxConstraints(minHeight: 96),
+      padding: const EdgeInsets.all(PremiumDesignTokens.spaceMd),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest.withValues(alpha: .28),
         borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
@@ -1318,16 +1301,12 @@ class _BodyProfileValue extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 3,
             overflow: TextOverflow.visible,
-            style:
-                (compact
-                        ? Theme.of(context).textTheme.labelSmall
-                        : Theme.of(context).textTheme.labelMedium)
-                    ?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w700,
-                    ),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          SizedBox(height: compact ? 1 : 4),
+          const SizedBox(height: 4),
           Directionality(
             textDirection: TextDirection.ltr,
             child: Text(
@@ -1335,11 +1314,9 @@ class _BodyProfileValue extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.visible,
-            style:
-                (compact
-                        ? Theme.of(context).textTheme.titleSmall
-                        : Theme.of(context).textTheme.titleMedium)
-                    ?.copyWith(fontWeight: FontWeight.w900),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
             ),
           ),
         ],
@@ -1459,10 +1436,11 @@ class _CompactMetricTile extends StatelessWidget {
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.visible,
-                  style: (compact
-                          ? Theme.of(context).textTheme.labelMedium
-                          : Theme.of(context).textTheme.titleSmall)
-                      ?.copyWith(fontWeight: FontWeight.w800, height: 1.25),
+                  style:
+                      (compact
+                              ? Theme.of(context).textTheme.labelMedium
+                              : Theme.of(context).textTheme.titleSmall)
+                          ?.copyWith(fontWeight: FontWeight.w800, height: 1.25),
                 ),
               ),
             ],
@@ -1482,20 +1460,22 @@ class _CompactMetricTile extends StatelessWidget {
                       Text(
                         value,
                         textAlign: TextAlign.center,
-                        style: (compact
-                                ? Theme.of(context).textTheme.titleLarge
-                                : Theme.of(context).textTheme.headlineSmall)
-                            ?.copyWith(fontWeight: FontWeight.w900),
+                        style:
+                            (compact
+                                    ? Theme.of(context).textTheme.titleLarge
+                                    : Theme.of(context).textTheme.headlineSmall)
+                                ?.copyWith(fontWeight: FontWeight.w900),
                       ),
                       if (unit.isNotEmpty) ...[
                         const SizedBox(width: PremiumDesignTokens.spaceXs),
                         Text(
                           unit,
                           maxLines: 1,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            height: 1.1,
-                            fontWeight: FontWeight.w700,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                height: 1.1,
+                                fontWeight: FontWeight.w700,
+                              ),
                         ),
                       ],
                     ],

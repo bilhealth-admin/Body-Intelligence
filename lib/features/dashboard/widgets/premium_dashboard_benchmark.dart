@@ -209,6 +209,15 @@ class PremiumDashboardBenchmark extends StatelessWidget {
               )
             : null;
 
+        final mobileTwin = phone
+            ? _MobileBodyTwinSnapshot(
+                arabic: arabic,
+                summary: bodyTwinSummary,
+                evidence: bodyTwinEvidence,
+                trendSummary: trendSummary,
+                trendEvidence: trendEvidence,
+              )
+            : null;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -217,15 +226,176 @@ class PremiumDashboardBenchmark extends StatelessWidget {
               SizedBox(height: sectionGap),
             ],
             top,
+            SizedBox(height: sectionGap),
+            dayAndProgress,
+            if (mobileTwin != null) ...[
+              SizedBox(height: sectionGap),
+              mobileTwin,
+            ],
             if (connectedHealth != null) ...[
               SizedBox(height: sectionGap),
               connectedHealth!,
             ],
-            SizedBox(height: sectionGap),
-            dayAndProgress,
           ],
         );
       },
+    );
+  }
+}
+
+class _MobileBodyTwinSnapshot extends StatelessWidget {
+  const _MobileBodyTwinSnapshot({
+    required this.arabic,
+    required this.summary,
+    required this.evidence,
+    required this.trendSummary,
+    required this.trendEvidence,
+  });
+
+  final bool arabic;
+  final String summary;
+  final String evidence;
+  final String trendSummary;
+  final String trendEvidence;
+
+  String tr(String en, String ar) => arabic ? ar : en;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return PremiumSurface(
+      key: const Key('dashboard-mobile-body-twin-snapshot'),
+      dashboardGlass: true,
+      padding: PremiumDesignTokens.cardPaddingLarge,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [
+                      scheme.primary.withValues(alpha: .30),
+                      scheme.tertiary.withValues(alpha: .12),
+                    ],
+                  ),
+                  border: Border.all(
+                    color: scheme.primary.withValues(alpha: .36),
+                  ),
+                ),
+                child: Icon(
+                  Icons.accessibility_new_rounded,
+                  color: scheme.primary,
+                ),
+              ),
+              const SizedBox(width: PremiumDesignTokens.spaceSm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tr('BODY TWIN', 'توأم الجسم'),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: scheme.primary,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: .65,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      tr('Your current body state', 'حالة جسمك الحالية'),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceMd),
+          Text(
+            summary,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              height: 1.45,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceSm),
+          _TwinSignalRow(
+            icon: Icons.timeline_rounded,
+            label: tr('What changed', 'ما الذي تغيّر'),
+            value: trendSummary,
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceXs),
+          _TwinSignalRow(
+            icon: Icons.science_outlined,
+            label: tr('Model evidence', 'أدلة النموذج'),
+            value: evidence,
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceXs),
+          _TwinSignalRow(
+            icon: Icons.fact_check_outlined,
+            label: tr('Trend evidence', 'أدلة الاتجاه'),
+            value: trendEvidence,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TwinSignalRow extends StatelessWidget {
+  const _TwinSignalRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(PremiumDesignTokens.spaceSm),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: .42),
+        borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: .78)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: scheme.primary),
+          const SizedBox(width: PremiumDesignTokens.spaceSm),
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: '$label · ',
+                    style: const TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                  TextSpan(text: value),
+                ],
+              ),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
