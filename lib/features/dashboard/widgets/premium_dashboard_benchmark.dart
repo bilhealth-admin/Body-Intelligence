@@ -197,9 +197,25 @@ class PremiumDashboardBenchmark extends StatelessWidget {
                 ],
               );
 
+        final mobileCommandCenter = phone
+            ? _MobileCommandCenter(
+                arabic: arabic,
+                actionTitle: actionTitle,
+                actionReason: actionReason,
+                actionEvidence: actionEvidence,
+                confidence: confidence,
+                onAction: onAction,
+                loggingItems: loggingItems,
+              )
+            : null;
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (mobileCommandCenter != null) ...[
+              mobileCommandCenter,
+              SizedBox(height: sectionGap),
+            ],
             top,
             if (connectedHealth != null) ...[
               SizedBox(height: sectionGap),
@@ -210,6 +226,112 @@ class PremiumDashboardBenchmark extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _MobileCommandCenter extends StatelessWidget {
+  const _MobileCommandCenter({
+    required this.arabic,
+    required this.actionTitle,
+    required this.actionReason,
+    required this.actionEvidence,
+    required this.confidence,
+    required this.onAction,
+    required this.loggingItems,
+  });
+
+  final bool arabic;
+  final String actionTitle;
+  final String actionReason;
+  final String actionEvidence;
+  final String confidence;
+  final VoidCallback? onAction;
+  final List<DashboardLoggingItem> loggingItems;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final recorded = loggingItems.where((item) => item.recorded).length;
+
+    return Semantics(
+      container: true,
+      label: arabic
+          ? 'أفضل خطوة الآن: $actionTitle. $actionReason. الثقة: $confidence.'
+          : 'One best action: $actionTitle. $actionReason. Confidence: $confidence.',
+      child: PremiumSurface(
+        key: const Key('dashboard-mobile-command-center'),
+        semanticContainer: false,
+        padding: PremiumDesignTokens.cardPaddingLarge,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _Eyebrow(label: arabic ? 'أفضل خطوة الآن' : 'ONE BEST ACTION'),
+            const SizedBox(height: PremiumDesignTokens.spaceSm),
+            Text(
+              actionTitle,
+              key: const Key('dashboard-mobile-command-title'),
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w900,
+                height: 1.15,
+              ),
+            ),
+            const SizedBox(height: PremiumDesignTokens.spaceXs),
+            Text(
+              actionReason,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+                height: 1.45,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: PremiumDesignTokens.spaceMd),
+            _EvidenceSequence(
+              evidence: actionEvidence,
+              confidence: confidence,
+              arabic: arabic,
+            ),
+            const SizedBox(height: PremiumDesignTokens.spaceMd),
+            Semantics(
+              label: arabic
+                  ? 'اكتمال التسجيل: $recorded من ${loggingItems.length}'
+                  : 'Logging completeness: $recorded of ${loggingItems.length}',
+              child: Wrap(
+                spacing: PremiumDesignTokens.spaceXs,
+                runSpacing: PremiumDesignTokens.spaceXs,
+                children: [
+                  for (final item in loggingItems)
+                    Chip(
+                      key: ValueKey('dashboard-mobile-log-${item.label}'),
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      avatar: Icon(
+                        item.recorded
+                            ? Icons.check_circle_rounded
+                            : Icons.radio_button_unchecked_rounded,
+                        size: 18,
+                        color: item.recorded
+                            ? scheme.tertiary
+                            : scheme.onSurfaceVariant,
+                      ),
+                      label: Text(item.label),
+                    ),
+                ],
+              ),
+            ),
+            if (onAction != null) ...[
+              const SizedBox(height: PremiumDesignTokens.spaceMd),
+              FilledButton.icon(
+                key: const Key('dashboard-mobile-command-action'),
+                onPressed: onAction,
+                icon: const Icon(Icons.arrow_forward_rounded),
+                label: Text(arabic ? 'نفّذ الخطوة' : 'Take this action'),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
