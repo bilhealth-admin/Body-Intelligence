@@ -57,3 +57,6 @@ test/failures/
 
 # Platform-generated caches
 .gradle/
+
+# BIL package backups
+.bil-package-backups/
