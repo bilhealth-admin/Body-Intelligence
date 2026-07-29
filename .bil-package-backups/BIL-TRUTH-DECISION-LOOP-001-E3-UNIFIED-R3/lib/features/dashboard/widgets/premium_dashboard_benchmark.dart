@@ -16,12 +16,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
     required this.actionReason,
     required this.actionEvidence,
     required this.confidence,
-    this.missingEvidence = '',
-    this.abstentionReason,
     required this.onAction,
-    this.onAccepted,
-    this.onDone,
-    this.onNotSuitable,
     required this.dailyIntelligence,
     this.hero,
     this.progressSection,
@@ -44,12 +39,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
   final String actionReason;
   final String actionEvidence;
   final String confidence;
-  final String missingEvidence;
-  final String? abstentionReason;
   final VoidCallback? onAction;
-  final VoidCallback? onAccepted;
-  final VoidCallback? onDone;
-  final VoidCallback? onNotSuitable;
   final Widget dailyIntelligence;
   final Widget? hero;
   final Widget? progressSection;
@@ -232,12 +222,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
                 actionReason: actionReason,
                 actionEvidence: actionEvidence,
                 confidence: confidence,
-                missingEvidence: missingEvidence,
-                abstentionReason: abstentionReason,
                 onAction: onAction,
-                onAccepted: onAccepted,
-                onDone: onDone,
-                onNotSuitable: onNotSuitable,
                 loggingItems: loggingItems,
               )
             : null;
@@ -440,12 +425,7 @@ class _MobileCommandCenter extends StatelessWidget {
     required this.actionReason,
     required this.actionEvidence,
     required this.confidence,
-    required this.missingEvidence,
-    required this.abstentionReason,
     required this.onAction,
-    required this.onAccepted,
-    required this.onDone,
-    required this.onNotSuitable,
     required this.loggingItems,
   });
 
@@ -454,12 +434,7 @@ class _MobileCommandCenter extends StatelessWidget {
   final String actionReason;
   final String actionEvidence;
   final String confidence;
-  final String missingEvidence;
-  final String? abstentionReason;
   final VoidCallback? onAction;
-  final VoidCallback? onAccepted;
-  final VoidCallback? onDone;
-  final VoidCallback? onNotSuitable;
   final List<DashboardLoggingItem> loggingItems;
 
   @override
@@ -500,22 +475,11 @@ class _MobileCommandCenter extends StatelessWidget {
               ),
             ),
             const SizedBox(height: PremiumDesignTokens.spaceMd),
-            if (missingEvidence.trim().isNotEmpty ||
-                (abstentionReason?.trim().isNotEmpty ?? false))
-              _TruthExplanationSurface(
-                arabic: arabic,
-                reason: actionReason,
-                evidence: actionEvidence,
-                confidence: confidence,
-                missingEvidence: missingEvidence,
-                abstentionReason: abstentionReason,
-              )
-            else
-              _EvidenceSequence(
-                evidence: actionEvidence,
-                confidence: confidence,
-                arabic: arabic,
-              ),
+            _EvidenceSequence(
+              evidence: actionEvidence,
+              confidence: confidence,
+              arabic: arabic,
+            ),
             const SizedBox(height: PremiumDesignTokens.spaceMd),
             Semantics(
               label: arabic
@@ -544,166 +508,17 @@ class _MobileCommandCenter extends StatelessWidget {
                 ],
               ),
             ),
-            if (onAccepted != null ||
-                onDone != null ||
-                onNotSuitable != null) ...[
-              const SizedBox(height: PremiumDesignTokens.spaceMd),
-              Wrap(
-                key: const Key('dashboard-decision-feedback'),
-                spacing: PremiumDesignTokens.spaceXs,
-                runSpacing: PremiumDesignTokens.spaceXs,
-                children: [
-                  FilledButton.tonalIcon(
-                    key: const Key('dashboard-decision-accepted'),
-                    onPressed: onAccepted,
-                    icon: const Icon(Icons.schedule_rounded),
-                    label: Text(arabic ? 'سأنفذها' : 'I’ll do it'),
-                  ),
-                  OutlinedButton.icon(
-                    key: const Key('dashboard-decision-done'),
-                    onPressed: onDone,
-                    icon: const Icon(Icons.check_circle_outline_rounded),
-                    label: Text(arabic ? 'تم' : 'Done'),
-                  ),
-                  TextButton.icon(
-                    key: const Key('dashboard-decision-not-suitable'),
-                    onPressed: onNotSuitable,
-                    icon: const Icon(Icons.block_rounded),
-                    label: Text(arabic ? 'غير مناسبة' : 'Not suitable'),
-                  ),
-                ],
-              ),
-            ],
             if (onAction != null) ...[
-              const SizedBox(height: PremiumDesignTokens.spaceSm),
+              const SizedBox(height: PremiumDesignTokens.spaceMd),
               FilledButton.icon(
                 key: const Key('dashboard-mobile-command-action'),
                 onPressed: onAction,
                 icon: const Icon(Icons.arrow_forward_rounded),
-                label: Text(arabic ? 'نفّذ الخطوة الآن' : 'Take action now'),
+                label: Text(arabic ? 'نفّذ الخطوة' : 'Take this action'),
               ),
             ],
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _TruthExplanationSurface extends StatelessWidget {
-  const _TruthExplanationSurface({
-    required this.arabic,
-    required this.reason,
-    required this.evidence,
-    required this.confidence,
-    required this.missingEvidence,
-    required this.abstentionReason,
-  });
-
-  final bool arabic;
-  final String reason;
-  final String evidence;
-  final String confidence;
-  final String missingEvidence;
-  final String? abstentionReason;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final textStyle = theme.textTheme.bodySmall?.copyWith(
-      color: scheme.onSurfaceVariant,
-      height: 1.45,
-    );
-
-    Widget explanationRow({
-      required Key key,
-      required IconData icon,
-      required String label,
-      required String value,
-    }) {
-      return Semantics(
-        key: key,
-        label: '$label: $value',
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, size: 18, color: scheme.primary),
-            const SizedBox(width: PremiumDesignTokens.spaceXs),
-            Expanded(
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: '$label\n',
-                      style: textStyle?.copyWith(fontWeight: FontWeight.w800),
-                    ),
-                    TextSpan(text: value, style: textStyle),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      key: const Key('dashboard-truth-explanation-surface'),
-      padding: const EdgeInsets.all(PremiumDesignTokens.spaceSm),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: .42),
-        borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: .65)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            arabic ? 'لماذا يعتقد BIL ذلك؟' : 'Why BIL believes this',
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-          const SizedBox(height: PremiumDesignTokens.spaceSm),
-          explanationRow(
-            key: const Key('dashboard-truth-reason'),
-            icon: Icons.psychology_alt_outlined,
-            label: arabic ? 'التفسير' : 'Interpretation',
-            value: reason,
-          ),
-          const SizedBox(height: PremiumDesignTokens.spaceSm),
-          explanationRow(
-            key: const Key('dashboard-truth-evidence'),
-            icon: Icons.fact_check_outlined,
-            label: arabic ? 'الدليل المستخدم' : 'Evidence used',
-            value: evidence,
-          ),
-          const SizedBox(height: PremiumDesignTokens.spaceSm),
-          explanationRow(
-            key: const Key('dashboard-truth-confidence'),
-            icon: Icons.verified_outlined,
-            label: arabic ? 'الثقة' : 'Confidence',
-            value: confidence,
-          ),
-          const SizedBox(height: PremiumDesignTokens.spaceSm),
-          explanationRow(
-            key: const Key('dashboard-truth-missing-evidence'),
-            icon: Icons.manage_search_rounded,
-            label: arabic ? 'فجوة الدليل' : 'Evidence gap',
-            value: missingEvidence,
-          ),
-          if (abstentionReason != null &&
-              abstentionReason!.trim().isNotEmpty) ...[
-            const SizedBox(height: PremiumDesignTokens.spaceSm),
-            explanationRow(
-              key: const Key('dashboard-truth-abstention'),
-              icon: Icons.pause_circle_outline_rounded,
-              label: arabic ? 'سبب الامتناع' : 'Why BIL is holding back',
-              value: abstentionReason!,
-            ),
-          ],
-        ],
       ),
     );
   }
