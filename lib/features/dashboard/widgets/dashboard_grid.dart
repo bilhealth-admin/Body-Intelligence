@@ -825,15 +825,10 @@ class DashboardGrid extends ConsumerWidget {
               arabic: arabic,
               compact: MediaQuery.sizeOf(context).width < 600,
             ),
-            bodyTwinSummary: twin.sufficient
-                ? tr(
-                    'A cautious planning direction is available; the range matters more than a single estimate.',
-                    'يتوفر اتجاه تخطيط حذر؛ النطاق أهم من أي تقدير منفرد.',
-                  )
-                : tr(
-                    'BIL is still building a safe personal scenario.',
-                    'لا يزال BIL يبني سيناريو شخصيًا آمنًا.',
-                  ),
+            bodyTwinSummary: tr(
+              'Current weight ${UnitConverter.weightFromKg(currentWeight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)} · BMI ${compositionValue(bodyComposition.bodyMassIndex, unit: '')} · Body fat ${compositionValue(bodyComposition.bodyFatPercentage, unit: '%')}',
+              'الوزن الحالي ${UnitConverter.weightFromKg(currentWeight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)} · مؤشر كتلة الجسم ${compositionValue(bodyComposition.bodyMassIndex, unit: '')} · نسبة الدهون ${compositionValue(bodyComposition.bodyFatPercentage, unit: '%')}',
+            ),
             bodyTwinEvidence: twin.scenario == null
                 ? tr(
                     twin.requiredData.join(' · '),

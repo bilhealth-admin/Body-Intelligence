@@ -104,27 +104,45 @@ class PremiumDashboardBenchmark extends StatelessWidget {
         );
         Widget intelligenceFor(double width) {
           if (personalHealthAi == null) return insights;
-          if (width < 340) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                personalHealthAi!,
-                SizedBox(height: sectionGap),
-                insights,
-              ],
-            );
-          }
           final twinHeight = MediaQuery.textScalerOf(context)
               .scale(phone ? 420.0 : 390.0)
               .clamp(phone ? 420.0 : 390.0, phone ? 500.0 : 470.0);
+          if (phone) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  key: const Key('dashboard-mobile-personal-ai-slot'),
+                  height: twinHeight,
+                  child: personalHealthAi!,
+                ),
+                SizedBox(height: sectionGap),
+                SizedBox(
+                  key: const Key('dashboard-mobile-insights-slot'),
+                  height: twinHeight,
+                  child: insights,
+                ),
+              ],
+            );
+          }
           return SizedBox(
             height: twinHeight,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(child: SizedBox.expand(child: personalHealthAi!)),
+                Expanded(
+                  child: SizedBox.expand(
+                    key: const Key('dashboard-tablet-personal-ai-slot'),
+                    child: personalHealthAi!,
+                  ),
+                ),
                 const SizedBox(width: PremiumDesignTokens.spaceMd),
-                Expanded(child: SizedBox.expand(child: insights)),
+                Expanded(
+                  child: SizedBox.expand(
+                    key: const Key('dashboard-tablet-insights-slot'),
+                    child: insights,
+                  ),
+                ),
               ],
             ),
           );
