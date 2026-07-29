@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('P9-R13 consolidated approved dashboard contracts are present', () {
+  test('P9-R15 consolidated approved dashboard contracts are present', () {
     final root = Directory.current.path;
     String read(String relative) =>
         File('$root${Platform.pathSeparator}$relative').readAsStringSync();
@@ -36,8 +36,8 @@ void main() {
     );
     expect(analytics, contains('index == values.length - 1 ? 12 : 9'));
 
-    expect(header, contains('Color(0xFFDDE6EC)'));
-    expect(header, contains('Color(0xFFBFCBD3)'));
+    expect(header, contains('Color(0xFFCEE2E8)'));
+    expect(header, contains('Color(0xFFD8E9ED)'));
     expect(header, contains('Color(0xFFEFF3F5)'));
     expect(header, contains('Color(0xFF53616A)'));
   });
