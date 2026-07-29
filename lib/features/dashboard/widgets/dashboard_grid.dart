@@ -4,25 +4,15 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/app_localizations.dart';
-import '../../../engine/bil_engine.dart';
 import '../../../core/units/measurement_units.dart';
-import '../../../engine/body_profile.dart';
 import '../../../engine/body_composition_engine.dart';
-import '../../../engine/body_twin_engine.dart';
 import '../../../engine/data_honesty_engine.dart';
-import '../../../engine/daily_return_engine.dart';
-import '../../../engine/intelligence_engine.dart';
 import '../../../engine/one_best_action_engine.dart';
 import '../../../engine/plan_engine.dart';
-import '../../../engine/progress_analysis.dart';
 import '../../../engine/what_changed_engine.dart';
-import '../../../engine/recovery_engine.dart';
-import '../../../engine/weekly_review_engine.dart';
 import '../../ai_platform/domain/personal_health_ai.dart';
 import '../../connected_health/widgets/connected_health_card.dart';
 import '../../ai_platform/services/personal_health_ai_engine.dart';
-import '../../../data/database/date_keys.dart';
-import '../../../data/database/nutrient_evidence.dart';
 import '../../../engine/nutrient_evidence_engine.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../shared/widgets/premium_surface.dart';
@@ -32,8 +22,13 @@ import '../../daily_log/providers/daily_log_provider.dart';
 import '../../foods/providers/food_provider.dart';
 import '../../life_context/providers/life_context_provider.dart';
 import '../../weight/providers/weight_provider.dart';
+import '../domain/dashboard_intelligence_composer.dart';
+export '../domain/dashboard_intelligence_composer.dart'
+    show consecutiveLoggingDays;
+import '../domain/dashboard_runtime_state.dart';
 import '../providers/dashboard_provider.dart';
 import 'dashboard_carousel.dart';
+import 'dashboard_data_gate.dart';
 import 'dashboard_loading_skeleton.dart';
 import 'dashboard_motion_reveal.dart';
 import 'dashboard_meals_timeline.dart';
@@ -74,7 +69,7 @@ class DashboardGrid extends ConsumerWidget {
           ..sort((a, b) => b.meal.date.compareTo(a.meal.date));
     final system =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
-    if ([
+    final runtimeState = DashboardRuntimeState.fromRequired([
       profileAsync,
       weightsAsync,
       mealsAsync,
@@ -85,55 +80,22 @@ class DashboardGrid extends ConsumerWidget {
       contextAsync,
       allContextsAsync,
       memoriesAsync,
-    ].any((value) => value.isLoading)) {
-      return const DashboardLoadingSkeleton();
-    }
-    if (profileAsync.hasError ||
-        weightsAsync.hasError ||
-        mealsAsync.hasError ||
-        waterAsync.hasError ||
-        allMealsAsync.hasError ||
-        allWaterAsync.hasError ||
-        skippedWeightAsync.hasError ||
-        contextAsync.hasError ||
-        allContextsAsync.hasError ||
-        memoriesAsync.hasError) {
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                context.strings.text('Today could not read all local data'),
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                context.strings.text(
-                  'No current insight is shown because it may be stale. Existing records remain in local storage; retry when storage is available.',
-                ),
-              ),
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                onPressed: () {
-                  ref.invalidate(userProfileProvider);
-                  ref.invalidate(weightHistoryProvider);
-                  ref.invalidate(todayMealsProvider);
-                  ref.invalidate(todayWaterProvider);
-                  ref.invalidate(allMealsProvider);
-                  ref.invalidate(allWaterProvider);
-                  ref.invalidate(weightReminderSkippedTodayProvider);
-                  ref.invalidate(todayLifeContextProvider);
-                  ref.invalidate(insightLifeContextProvider);
-                  ref.invalidate(decisionMemoriesProvider);
-                },
-                icon: const Icon(Icons.refresh),
-                label: Text(context.strings.text('Try again')),
-              ),
-            ],
-          ),
-        ),
+    ]);
+    if (!runtimeState.isReady) {
+      return DashboardDataGate(
+        state: runtimeState,
+        onRetry: () {
+          ref.invalidate(userProfileProvider);
+          ref.invalidate(weightHistoryProvider);
+          ref.invalidate(todayMealsProvider);
+          ref.invalidate(todayWaterProvider);
+          ref.invalidate(allMealsProvider);
+          ref.invalidate(allWaterProvider);
+          ref.invalidate(weightReminderSkippedTodayProvider);
+          ref.invalidate(todayLifeContextProvider);
+          ref.invalidate(insightLifeContextProvider);
+          ref.invalidate(decisionMemoriesProvider);
+        },
       );
     }
     final profile = profileAsync.value;
@@ -163,73 +125,132 @@ class DashboardGrid extends ConsumerWidget {
     final insightContexts = (contextAsync.value ?? const [])
         .where((entry) => entry.useInInsights)
         .toList();
-    final lowRatings = <String, int>{};
-    for (final memory in memoriesAsync.value ?? const []) {
-      if ((memory.helpfulness ?? 5) <= 2) {
-        lowRatings.update(
-          memory.recommendationKey,
-          (count) => count + 1,
-          ifAbsent: () => 1,
-        );
-      }
-    }
-    final suppressedActions = BestActionType.values
-        .where((type) => (lowRatings[type.name] ?? 0) >= 2)
-        .toSet();
-    final skippedWeightToday = skippedWeightAsync.value ?? false;
-    final items = meals.expand((meal) => meal.items).toList();
-    final calories = items.fold<double>(0, (sum, item) => sum + item.calories);
-    final protein = items.fold<double>(0, (sum, item) => sum + item.protein);
-    final fats = items.fold<double>(0, (sum, item) => sum + item.fats);
-    final sodium = items.fold<double>(0, (sum, item) => sum + item.sodium);
-    NutrientEvidenceReport nutrientReport(
-      TrackedNutrient nutrient,
-      double Function(dynamic item) value,
-    ) => NutrientEvidenceEngine.total([
-      for (final item in items)
-        NutrientObservation(
-          value: value(item),
-          available: NutrientEvidenceMask.contains(
-            item.nutrientEvidenceMask,
-            nutrient,
-          ),
+    final now = DateTime.now();
+    final dashboardSnapshot = const DashboardIntelligenceComposer().compose(
+      DashboardIntelligenceInput(
+        now: now,
+        profile: DashboardProfileInput(
+          age: profile.age,
+          gender: profile.gender,
+          heightCm: profile.height,
+          currentWeightKg: profile.currentWeight,
+          targetWeightKg: profile.targetWeight,
+          activityLevel: profile.activityLevel,
+          exercises: profile.exercises,
+          neckCm: profile.neck,
+          waistCm: profile.waist,
         ),
-    ]);
-    final fiberEvidence = nutrientReport(
-      TrackedNutrient.fiber,
-      (item) => item.fiber as double,
+        weights: [
+          for (final row in weights)
+            DashboardWeightInput(
+              at: row.date,
+              kg: row.weight,
+              measurementContext: row.measurementContext,
+              dayKey: row.dayKey,
+            ),
+        ],
+        todayMeals: [
+          for (final row in meals)
+            DashboardMealInput(
+              at: row.meal.date,
+              dayKey: row.meal.dayKey,
+              items: [
+                for (final item in row.items)
+                  DashboardMealItemInput(
+                    calories: item.calories,
+                    protein: item.protein,
+                    fats: item.fats,
+                    sodium: item.sodium,
+                    fiber: item.fiber,
+                    nutrientEvidenceMask: item.nutrientEvidenceMask,
+                  ),
+              ],
+            ),
+        ],
+        todayWater: [
+          for (final row in waterRows)
+            DashboardWaterInput(
+              at: row.occurredAt,
+              dayKey: row.dayKey,
+              amountMl: row.amountMl,
+            ),
+        ],
+        allMeals: [
+          for (final row in allMeals)
+            DashboardMealInput(
+              at: row.meal.date,
+              dayKey: row.meal.dayKey,
+              items: [
+                for (final item in row.items)
+                  DashboardMealItemInput(
+                    calories: item.calories,
+                    protein: item.protein,
+                    fats: item.fats,
+                    sodium: item.sodium,
+                    fiber: item.fiber,
+                    nutrientEvidenceMask: item.nutrientEvidenceMask,
+                  ),
+              ],
+            ),
+        ],
+        allWater: [
+          for (final row in allWater)
+            DashboardWaterInput(
+              at: row.occurredAt,
+              dayKey: row.dayKey,
+              amountMl: row.amountMl,
+            ),
+        ],
+        insightContexts: [
+          for (final row in insightContexts)
+            DashboardContextInput(dayKey: row.dayKey, type: row.type),
+        ],
+        allContexts: [
+          for (final row in allContexts)
+            DashboardContextInput(dayKey: row.dayKey, type: row.type),
+        ],
+        memories: [
+          for (final row in memoriesAsync.value ?? const [])
+            DashboardDecisionMemoryInput(
+              recommendationKey: row.recommendationKey,
+              helpfulness: row.helpfulness,
+            ),
+        ],
+        skippedWeightToday: skippedWeightAsync.value ?? false,
+        planOverrides: planAsync.value == null
+            ? null
+            : PlanOverrides(
+                calories: planAsync.value!.overrideCalories,
+                protein: planAsync.value!.overrideProtein,
+                carbs: planAsync.value!.overrideCarbs,
+                fats: planAsync.value!.overrideFats,
+                fiber: planAsync.value!.overrideFiber,
+                water: planAsync.value!.overrideWater,
+              ),
+      ),
     );
-    final water = waterRows.fold<int>(0, (sum, item) => sum + item.amountMl);
-    final currentWeight = weights.firstOrNull?.weight ?? profile.currentWeight;
-    final goalType = profile.targetWeight < currentWeight
-        ? 'lose'
-        : profile.targetWeight > currentWeight
-        ? 'gain'
-        : 'maintain';
-    final body = BodyProfile(
-      age: profile.age,
-      gender: profile.gender,
-      height: profile.height,
-      weight: currentWeight,
-      targetWeight: profile.targetWeight,
-      activityLevel: profile.activityLevel,
-      exercises: profile.exercises,
-      goalType: goalType,
-    );
-    final bil = BILEngine.calculate(
-      profile: body,
-      eatenCalories: calories.round(),
-      eatenProtein: protein.round(),
-      drankWater: water,
-    );
-    final bodyComposition = BodyCompositionEngine.calculate(
-      gender: profile.gender,
-      age: profile.age,
-      heightCm: profile.height,
-      currentWeightKg: currentWeight,
-      neckCm: profile.neck,
-      waistCm: profile.waist,
-    );
+    final calories = dashboardSnapshot.calories;
+    final protein = dashboardSnapshot.protein;
+    final fats = dashboardSnapshot.fats;
+    final water = dashboardSnapshot.waterMl;
+    final currentWeight = dashboardSnapshot.currentWeightKg;
+    final fiberEvidence = dashboardSnapshot.fiberEvidence;
+    final bil = dashboardSnapshot.bil;
+    final bodyComposition = dashboardSnapshot.bodyComposition;
+    final effectiveTargets = dashboardSnapshot.effectiveTargets;
+    final loggingStreak = dashboardSnapshot.loggingStreak;
+    final intelligence = dashboardSnapshot.intelligence;
+    final honesty = dashboardSnapshot.honesty;
+    final bestAction = dashboardSnapshot.bestAction;
+    final changed = dashboardSnapshot.changed;
+    final dailyReturn = dashboardSnapshot.dailyReturn;
+    final twin = dashboardSnapshot.bodyTwin;
+    final chronologicalWeights = weights.reversed.toList();
+    final progressAnalysis = dashboardSnapshot.progress;
+    final recentJourneyWeights = chronologicalWeights.length > 30
+        ? chronologicalWeights.sublist(chronologicalWeights.length - 30)
+        : chronologicalWeights;
+    final weeklyReview = dashboardSnapshot.weeklyReview;
     String compositionIssue(BodyCompositionIssue? issue) {
       return switch (issue) {
         BodyCompositionIssue.missingGender => tr(
@@ -296,141 +317,6 @@ class DashboardGrid extends ConsumerWidget {
       return '${metric.value!.toStringAsFixed(1)}$unit';
     }
 
-    final plan = planAsync.value;
-    final effectiveTargets = PlanEngine.effective(
-      bil.targets,
-      plan == null
-          ? null
-          : PlanOverrides(
-              calories: plan.overrideCalories,
-              protein: plan.overrideProtein,
-              carbs: plan.overrideCarbs,
-              fats: plan.overrideFats,
-              fiber: plan.overrideFiber,
-              water: plan.overrideWater,
-            ),
-    );
-    final chronological = weights.reversed.map((row) => row.weight).toList();
-    final mealDays = allMeals.map((row) => row.meal.dayKey).toSet();
-    final waterDays = allWater.map((row) => row.dayKey).toSet();
-    final weightDays = weights
-        .map((row) => row.dayKey ?? dayKeyFor(row.date))
-        .toSet();
-    final observedDays = {...mealDays, ...waterDays, ...weightDays};
-    final loggingStreak = consecutiveLoggingDays(observedDays, DateTime.now());
-    final comparableWeightDays = weights
-        .where((row) => row.measurementContext != 'differentConditions')
-        .length;
-    final intelligence = IntelligenceEngine.evaluate(
-      calorieTarget: effectiveTargets.calories,
-      proteinTarget: effectiveTargets.protein,
-      waterTarget: effectiveTargets.water,
-      calories: calories,
-      protein: protein,
-      waterMl: water,
-      chronologicalWeights: chronological,
-      goalWeight: profile.targetWeight,
-      sodium: sodium,
-      trackedDays: items.isEmpty && waterRows.isEmpty ? 0 : 1,
-    );
-    final honesty = DataHonestyEngine.evaluate(
-      observationDays: observedDays.length,
-      weightDays: weightDays.length,
-      nutritionDays: mealDays.length,
-      waterDays: waterDays.length,
-      consistentConditionDays: comparableWeightDays,
-    );
-    final bestAction = OneBestActionEngine.choose(
-      weighedToday:
-          weightDays.contains(dayKeyFor(DateTime.now())) || skippedWeightToday,
-      loggingComplete: meals.isNotEmpty,
-      protein: protein,
-      proteinTarget: effectiveTargets.protein,
-      waterMl: water,
-      waterTarget: effectiveTargets.water,
-      trackedDays: observedDays.length,
-      suppressedTypes: suppressedActions,
-    );
-    final changed = WhatChangedEngine.compare(
-      chronologicalWeights: chronological,
-      comparableConditions:
-          weights.length >= 2 &&
-          weights[0].measurementContext == weights[1].measurementContext &&
-          weights[0].measurementContext != 'differentConditions',
-      contextTypes: insightContexts.map((entry) => entry.type).toList(),
-    );
-    DateTime? latestTrackedAt;
-    void consider(DateTime value) {
-      if (latestTrackedAt == null || value.isAfter(latestTrackedAt!)) {
-        latestTrackedAt = value;
-      }
-    }
-
-    for (final row in weights) {
-      consider(row.date);
-    }
-    for (final row in allMeals) {
-      consider(row.meal.date);
-    }
-    for (final row in allWater) {
-      consider(row.occurredAt);
-    }
-    final recovery = RecoveryEngine.evaluate(
-      now: DateTime.now(),
-      lastTrackedAt: latestTrackedAt,
-    );
-    final dailyReturn = DailyReturnEngine.compose(
-      hasWeight: weightDays.contains(dayKeyFor(DateTime.now())),
-      hasMeals: meals.isNotEmpty,
-      hasWater: waterRows.isNotEmpty,
-      bestAction: bestAction,
-      changed: changed,
-      honesty: honesty,
-      recovery: recovery,
-    );
-    final twin = BodyTwinEngine.simulate(
-      calorieTarget: effectiveTargets.calories,
-      tdee: bil.tdee.round(),
-      weightDays: weightDays.length,
-      nutritionDays: mealDays.length,
-      observationDays: observedDays.length,
-    );
-    final weekCutoff = dayKeyFor(
-      DateTime.now().subtract(const Duration(days: 6)),
-    );
-    final chronologicalWeights = weights.reversed.toList();
-    final progressAnalysis = ProgressAnalysis.evaluate(
-      samples: chronologicalWeights
-          .map((row) => ProgressSample(date: row.date, weightKg: row.weight))
-          .toList(),
-      goalWeightKg: profile.targetWeight,
-    );
-    final recentJourneyWeights = chronologicalWeights.length > 30
-        ? chronologicalWeights.sublist(chronologicalWeights.length - 30)
-        : chronologicalWeights;
-    final recentWeightDays = chronologicalWeights
-        .where((row) => dayKeyFor(row.date).compareTo(weekCutoff) >= 0)
-        .map((row) => dayKeyFor(row.date))
-        .toSet();
-    final recentMealDays = allMeals
-        .where((row) => row.meal.dayKey.compareTo(weekCutoff) >= 0)
-        .map((row) => row.meal.dayKey)
-        .toSet();
-    final recentWaterDays = allWater
-        .where((row) => row.dayKey.compareTo(weekCutoff) >= 0)
-        .map((row) => row.dayKey)
-        .toSet();
-    final recentContextDays = allContexts
-        .where((row) => row.dayKey.compareTo(weekCutoff) >= 0)
-        .map((row) => row.dayKey)
-        .toSet();
-    final weeklyReview = WeeklyReviewEngine.evaluate(
-      weightDays: recentWeightDays.length,
-      nutritionDays: recentMealDays.length,
-      waterDays: recentWaterDays.length,
-      contextDays: recentContextDays.length,
-      weeklyWeightChangeKg: progressAnalysis.weeklyDirectionKg,
-    );
     final localizedBestTitle = arabic
         ? switch (bestAction.type) {
             BestActionType.weighIn => 'سجّل وزن اليوم',
@@ -595,23 +481,7 @@ class DashboardGrid extends ConsumerWidget {
       );
     }
 
-    final calorieByDay = <DateTime, double?>{};
-    for (final meal in allMeals) {
-      final day = DateTime(
-        meal.meal.date.year,
-        meal.meal.date.month,
-        meal.meal.date.day,
-      );
-      final total = meal.items.fold<double>(
-        0,
-        (sum, item) => sum + item.calories,
-      );
-      calorieByDay.update(
-        day,
-        (value) => (value ?? 0) + total,
-        ifAbsent: () => total,
-      );
-    }
+    final calorieByDay = dashboardSnapshot.calorieByDay;
     final healthAi = const PersonalHealthAiEngine().evaluate(
       asOf: DateTime.now(),
       weights: [
@@ -787,23 +657,6 @@ class DashboardGrid extends ConsumerWidget {
               DataReliability.useful => tr('Useful', 'مفيدة'),
               DataReliability.strong => tr('Strong', 'قوية'),
             },
-            missingEvidence: honesty.missing.isEmpty
-                ? tr(
-                    'No important evidence gap for today’s next decision.',
-                    'لا توجد فجوة أدلة مهمة لقرار اليوم التالي.',
-                  )
-                : tr(
-                    honesty.missing.first,
-                    'تتحسن الثقة مع أيام محلية أكثر اكتمالًا واتساقًا.',
-                  ),
-            abstentionReason:
-                bestAction.type == BestActionType.holdPlan ||
-                    bestAction.type == BestActionType.none
-                ? localizedBestReason
-                : null,
-            onAccepted: () => respondToAction('accepted'),
-            onDone: () => respondToAction('done'),
-            onNotSuitable: () => respondToAction('notSuitable'),
             onAction: dailyReturn.hasPrimaryAction
                 ? () {
                     switch (bestAction.type) {
@@ -842,15 +695,10 @@ class DashboardGrid extends ConsumerWidget {
               arabic: arabic,
               compact: MediaQuery.sizeOf(context).width < 600,
             ),
-            bodyTwinSummary: twin.sufficient
-                ? tr(
-                    'A cautious planning direction is available; the range matters more than a single estimate.',
-                    'يتوفر اتجاه تخطيط حذر؛ النطاق أهم من أي تقدير منفرد.',
-                  )
-                : tr(
-                    'BIL is still building a safe personal scenario.',
-                    'لا يزال BIL يبني سيناريو شخصيًا آمنًا.',
-                  ),
+            bodyTwinSummary: tr(
+              'Current weight ${UnitConverter.weightFromKg(currentWeight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)} · BMI ${compositionValue(bodyComposition.bodyMassIndex, unit: '')} · Body fat ${compositionValue(bodyComposition.bodyFatPercentage, unit: '%')}',
+              'الوزن الحالي ${UnitConverter.weightFromKg(currentWeight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)} · مؤشر كتلة الجسم ${compositionValue(bodyComposition.bodyMassIndex, unit: '')} · نسبة الدهون ${compositionValue(bodyComposition.bodyFatPercentage, unit: '%')}',
+            ),
             bodyTwinEvidence: twin.scenario == null
                 ? tr(
                     twin.requiredData.join(' · '),
@@ -1581,16 +1429,6 @@ class _DetailPanel extends StatelessWidget {
       ),
     );
   }
-}
-
-int consecutiveLoggingDays(Set<String> observedDays, DateTime today) {
-  var streak = 0;
-  var day = today;
-  while (observedDays.contains(dayKeyFor(day))) {
-    streak++;
-    day = day.subtract(const Duration(days: 1));
-  }
-  return streak;
 }
 
 // ignore: unused_element
