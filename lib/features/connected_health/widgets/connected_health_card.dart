@@ -347,9 +347,9 @@ class _HealthHubEmptyState extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(26),
                 ),
-                textStyle: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                textStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             );
 
@@ -379,6 +379,7 @@ class _HealthHubEmptyState extends StatelessWidget {
       ),
     );
   }
+
 }
 
 class _LiveHealthWatch extends StatefulWidget {
@@ -503,7 +504,7 @@ class _LiveHealthWatchState extends State<_LiveHealthWatch> {
               Positioned(
                 left: 112,
                 right: 112,
-                top: 30,
+                top: 38,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -709,8 +710,8 @@ class _WatchPainter extends CustomPainter {
       final angle = i * math.pi / 30 - math.pi / 2;
       final outer = center + Offset(math.cos(angle), math.sin(angle)) * radius;
       final inset = i % 5 == 0 ? unit * .026 : unit * .010;
-      final inner =
-          center + Offset(math.cos(angle), math.sin(angle)) * (radius - inset);
+      final inner = center +
+          Offset(math.cos(angle), math.sin(angle)) * (radius - inset);
       canvas.drawLine(
         inner,
         outer,
@@ -743,12 +744,7 @@ class _WatchPainter extends CustomPainter {
     }
 
     hand((hour + minute / 60) * math.pi / 6, radius * .53, 6.5, Colors.white);
-    hand(
-      (minute + second / 60) * math.pi / 30,
-      radius * .77,
-      5.2,
-      Colors.white,
-    );
+    hand((minute + second / 60) * math.pi / 30, radius * .77, 5.2, Colors.white);
     hand(second * math.pi / 30, radius * .89, 1.7, const Color(0xFF2DA7FF));
     canvas.drawCircle(center, 7.2, Paint()..color = const Color(0xFF168FF1));
     canvas.drawCircle(center, 3.1, Paint()..color = const Color(0xFFF8FCFF));

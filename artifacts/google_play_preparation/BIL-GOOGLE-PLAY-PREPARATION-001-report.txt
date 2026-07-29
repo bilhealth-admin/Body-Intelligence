@@ -1,0 +1,9 @@
+﻿Required files	PASSED	8 files
+Offline typography	PASSED	No runtime HTTP font dependency
+Credential hygiene	PASSED
+Flutter analyze	PASSED
+Google Play preparation contracts	PASSED
+Android release app bundle	PASSED
+Release AAB artifact	PASSED	C:\develop\projects\body_intelligence_log\build\app\outputs\bundle\release\app-release.aab
+Diff hygiene	PASSED
+BIL-GOOGLE-PLAY-PREPARATION-001	PASSED	Offline typography and truthful Play declaration inventory verified

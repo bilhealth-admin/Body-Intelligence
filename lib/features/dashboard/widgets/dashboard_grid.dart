@@ -687,7 +687,7 @@ class DashboardGrid extends ConsumerWidget {
               Icons.bolt_outlined,
               tr('Daily Requirement', 'الاحتياج اليومي'),
               bil.tdee.round().toString(),
-              'kcal/day',
+              'kcal',
               Colors.deepOrangeAccent,
             ),
             _MetricData(
@@ -735,10 +735,7 @@ class DashboardGrid extends ConsumerWidget {
       waistCircumference: profile.waist == null
           ? tr('Waist circumference is not recorded', 'محيط الخصر غير مسجل')
           : '${profile.waist!.toStringAsFixed(1)} cm',
-      bodyMassIndex: compositionValue(
-        bodyComposition.bodyMassIndex,
-        unit: ' BMI',
-      ),
+      bodyMassIndex: compositionValue(bodyComposition.bodyMassIndex, unit: ' BMI'),
       bodyFatPercentage: compositionValue(
         bodyComposition.bodyFatPercentage,
         unit: '%',
@@ -997,10 +994,10 @@ class _DashboardPagedSection extends StatelessWidget {
       builder: (context, outerConstraints) {
         final desktop = MediaQuery.sizeOf(context).width >= 900;
         final baseHeight = desktop
-            ? 154.0
+            ? 172.0
             : outerConstraints.maxWidth >= 560
-            ? 272.0
-            : 360.0;
+            ? 300.0
+            : 390.0;
         final heading = Row(
           children: [
             Expanded(
@@ -1068,10 +1065,8 @@ class _MetricGridPage extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final wideScreen = MediaQuery.sizeOf(context).width >= 900;
-        final columns = wideScreen
+        final columns = wideScreen && constraints.maxWidth >= 760
             ? metrics.length
-            : constraints.maxWidth >= 560
-            ? 3
             : 2;
         return GridView.builder(
           physics: const NeverScrollableScrollPhysics(),
@@ -1081,8 +1076,8 @@ class _MetricGridPage extends StatelessWidget {
             crossAxisSpacing: PremiumDesignTokens.spaceSm,
             mainAxisSpacing: PremiumDesignTokens.spaceSm,
             childAspectRatio: wideScreen
-                ? 1.18
-                : (constraints.maxWidth < 420 ? .94 : 1.12),
+                ? (columns == metrics.length ? 1.28 : 1.55)
+                : (constraints.maxWidth < 420 ? 1.08 : 1.42),
           ),
           itemCount: metrics.length,
           itemBuilder: (context, index) {
@@ -1141,7 +1136,6 @@ class _BodyProfileSnapshot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final screenWidth = MediaQuery.sizeOf(context).width;
     final values = [
       (tr('Current weight', 'الوزن الحالي'), weight),
       (tr('Height', 'الطول'), height),
@@ -1182,8 +1176,8 @@ class _BodyProfileSnapshot extends StatelessWidget {
           const SizedBox(height: PremiumDesignTokens.spaceMd),
           LayoutBuilder(
             builder: (context, constraints) {
-              if (constraints.maxWidth < 600) {
-                final fixedDesktopGrid = screenWidth >= 1200;
+              if (constraints.maxWidth < 760) {
+                final fixedDesktopGrid = false;
                 return Column(
                   children: [
                     SizedBox(
@@ -1196,7 +1190,7 @@ class _BodyProfileSnapshot extends StatelessWidget {
                     ),
                     const SizedBox(height: PremiumDesignTokens.spaceSm),
                     SizedBox(
-                      height: fixedDesktopGrid ? 216 : 196,
+                      height: 220,
                       child: GridView.builder(
                         scrollDirection: fixedDesktopGrid
                             ? Axis.vertical
@@ -1229,7 +1223,7 @@ class _BodyProfileSnapshot extends StatelessWidget {
                   ],
                 );
               }
-              final columns = constraints.maxWidth >= 900 ? 3 : 2;
+              final columns = constraints.maxWidth >= 1040 ? 3 : 2;
               final gap = PremiumDesignTokens.spaceSm;
               final informationWidth =
                   constraints.maxWidth * .76 - PremiumDesignTokens.spaceMd;
@@ -1306,7 +1300,7 @@ class _BodyProfileValue extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      constraints: BoxConstraints(minHeight: compact ? 92 : 84),
+      constraints: BoxConstraints(minHeight: compact ? 104 : 96),
       padding: EdgeInsets.all(
         compact ? PremiumDesignTokens.spaceSm : PremiumDesignTokens.spaceMd,
       ),
@@ -1322,8 +1316,8 @@ class _BodyProfileValue extends StatelessWidget {
           Text(
             label,
             textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+            maxLines: 3,
+            overflow: TextOverflow.visible,
             style:
                 (compact
                         ? Theme.of(context).textTheme.labelSmall
@@ -1339,13 +1333,13 @@ class _BodyProfileValue extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.center,
-              maxLines: compact ? 2 : 1,
-              overflow: compact ? TextOverflow.visible : TextOverflow.ellipsis,
-              style:
-                  (compact
-                          ? Theme.of(context).textTheme.titleSmall
-                          : Theme.of(context).textTheme.titleMedium)
-                      ?.copyWith(fontWeight: FontWeight.w900),
+              maxLines: 2,
+              overflow: TextOverflow.visible,
+            style:
+                (compact
+                        ? Theme.of(context).textTheme.titleSmall
+                        : Theme.of(context).textTheme.titleMedium)
+                    ?.copyWith(fontWeight: FontWeight.w900),
             ),
           ),
         ],
@@ -1433,9 +1427,13 @@ class _CompactMetricTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final compact = MediaQuery.sizeOf(context).width >= 1180;
+    final width = MediaQuery.sizeOf(context).width;
+    final compact = width >= 1180;
+    final phone = width < 600;
     return Container(
-      constraints: BoxConstraints(minHeight: compact ? 112 : 126),
+      constraints: BoxConstraints(
+        minHeight: compact ? 124 : (phone ? 142 : 136),
+      ),
       padding: EdgeInsets.all(
         compact ? PremiumDesignTokens.spaceXs : PremiumDesignTokens.spaceSm,
       ),
@@ -1453,7 +1451,7 @@ class _CompactMetricTile extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: compact ? 14 : 19, color: accent),
+              Icon(icon, size: compact ? 16 : 20, color: accent),
               const SizedBox(width: PremiumDesignTokens.spaceXs),
               Expanded(
                 child: Text(
@@ -1461,45 +1459,49 @@ class _CompactMetricTile extends StatelessWidget {
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.visible,
-                  style: compact
-                      ? Theme.of(context).textTheme.labelSmall
-                      : Theme.of(context).textTheme.labelLarge,
+                  style: (compact
+                          ? Theme.of(context).textTheme.labelMedium
+                          : Theme.of(context).textTheme.titleSmall)
+                      ?.copyWith(fontWeight: FontWeight.w800, height: 1.25),
                 ),
               ),
             ],
           ),
           SizedBox(height: compact ? 1 : 8),
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  value,
-                  textAlign: TextAlign.center,
-                  style:
-                      (compact
-                              ? Theme.of(context).textTheme.titleMedium
-                              : Theme.of(context).textTheme.headlineSmall)
-                          ?.copyWith(fontWeight: FontWeight.w900),
-                ),
-                if (unit.isNotEmpty) ...[
-                  const SizedBox(width: PremiumDesignTokens.spaceXs),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 3),
-                    child: Text(
-                      unit,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(height: 1.1),
-                    ),
+          Expanded(
+            child: Center(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        value,
+                        textAlign: TextAlign.center,
+                        style: (compact
+                                ? Theme.of(context).textTheme.titleLarge
+                                : Theme.of(context).textTheme.headlineSmall)
+                            ?.copyWith(fontWeight: FontWeight.w900),
+                      ),
+                      if (unit.isNotEmpty) ...[
+                        const SizedBox(width: PremiumDesignTokens.spaceXs),
+                        Text(
+                          unit,
+                          maxLines: 1,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            height: 1.1,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                ],
-              ],
+                ),
+              ),
             ),
           ),
         ],

@@ -175,7 +175,10 @@ class PersonalHealthAiPanel extends StatelessWidget {
       child: DashboardTwinDeckShell(
         key: const Key('personal-health-ai-panel'),
         title: tr('Bio Intelligence', 'الذكاء الحيوي'),
-        subtitle: tr('What BIL knows now.', 'ما يعرفه BIL الآن.'),
+        subtitle: tr(
+          'What BIL knows now.',
+          'ما يعرفه BIL الآن.',
+        ),
         semanticLabel: tr('Bio Intelligence', 'الذكاء الحيوي'),
         compact: compact,
         pages: [
@@ -255,8 +258,8 @@ class _AiCard extends StatelessWidget {
           children: [
             Text(
               data.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+              maxLines: compact ? 3 : 2,
+              overflow: TextOverflow.visible,
               style: Theme.of(
                 context,
               ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w900),
@@ -264,8 +267,8 @@ class _AiCard extends StatelessWidget {
             SizedBox(height: compact ? 3 : 5),
             Text(
               data.result,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+              maxLines: compact ? 3 : 2,
+              overflow: TextOverflow.visible,
               style: compact
                   ? Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w800,
@@ -283,8 +286,8 @@ class _AiCard extends StatelessWidget {
             Expanded(
               child: Text(
                 data.explanation,
-                maxLines: 4,
-                overflow: TextOverflow.ellipsis,
+                maxLines: compact ? 6 : 4,
+                overflow: TextOverflow.visible,
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),

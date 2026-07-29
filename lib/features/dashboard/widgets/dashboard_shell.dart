@@ -113,7 +113,7 @@ class DashboardShell extends StatelessWidget {
                       metrics.horizontalPadding,
                       16,
                       metrics.horizontalPadding,
-                      120,
+                      constraints.maxWidth < 600 ? 176 : 132,
                     ),
                     child: Center(
                       child: SizedBox(width: contentWidth, child: child),

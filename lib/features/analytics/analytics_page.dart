@@ -826,9 +826,12 @@ class _WeightTrendChart extends StatelessWidget {
                                   PremiumDesignTokens.radiusMd,
                                 ),
                               ),
-                              child: Text(
-                                '${lastValue.toStringAsFixed(1)} $unit',
-                                style: Theme.of(context).textTheme.labelSmall,
+                              child: Directionality(
+                                textDirection: TextDirection.ltr,
+                                child: Text(
+                                  '${lastValue.toStringAsFixed(1)} $unit',
+                                  style: Theme.of(context).textTheme.labelSmall,
+                                ),
                               ),
                             ),
                           ),
@@ -978,7 +981,18 @@ class _ChartMetricChip extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 2),
-          Text(value, style: theme.textTheme.labelMedium),
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                value,
+                maxLines: 1,
+                style: theme.textTheme.labelMedium,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -1009,9 +1023,18 @@ class _ChartAxisLabels extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('${top.toStringAsFixed(1)} $unit', style: textStyle),
-          Text('${middle.toStringAsFixed(1)} $unit', style: textStyle),
-          Text('${bottom.toStringAsFixed(1)} $unit', style: textStyle),
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Text('${top.toStringAsFixed(1)} $unit', style: textStyle),
+          ),
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Text('${middle.toStringAsFixed(1)} $unit', style: textStyle),
+          ),
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Text('${bottom.toStringAsFixed(1)} $unit', style: textStyle),
+          ),
         ],
       ),
     );
