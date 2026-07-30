@@ -22,6 +22,7 @@ import '../../daily_log/providers/daily_log_provider.dart';
 import '../../foods/providers/food_provider.dart';
 import '../../life_context/providers/life_context_provider.dart';
 import '../../weight/providers/weight_provider.dart';
+import '../composition/dashboard_composition.dart';
 import '../domain/dashboard_intelligence_composer.dart';
 export '../domain/dashboard_intelligence_composer.dart'
     show consecutiveLoggingDays;
@@ -802,8 +803,12 @@ class DashboardGrid extends ConsumerWidget {
         const SizedBox(height: PremiumDesignTokens.spaceMd),
         LayoutBuilder(
           builder: (context, constraints) {
-            if (constraints.maxWidth < 1180) {
-              final phone = MediaQuery.sizeOf(context).width < 600;
+            final layout = DashboardComposition.analytics(
+              viewportWidth: MediaQuery.sizeOf(context).width,
+              contentWidth: constraints.maxWidth,
+            );
+            if (!layout.analyticsHorizontal) {
+              final phone = layout.isPhone;
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -860,12 +865,12 @@ class _DashboardPagedSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, outerConstraints) {
-        final desktop = MediaQuery.sizeOf(context).width >= 900;
-        final baseHeight = desktop
-            ? 172.0
-            : outerConstraints.maxWidth >= 560
-            ? 300.0
-            : 390.0;
+        final layout = DashboardComposition.pagedSection(
+          viewportWidth: MediaQuery.sizeOf(context).width,
+          contentWidth: outerConstraints.maxWidth,
+        );
+        final desktop = layout.isDesktop;
+        final baseHeight = layout.pagedSectionBaseHeight;
         final heading = Row(
           children: [
             Expanded(
@@ -932,10 +937,12 @@ class _MetricGridPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final wideScreen = MediaQuery.sizeOf(context).width >= 900;
-        final columns = wideScreen && constraints.maxWidth >= 760
-            ? metrics.length
-            : 2;
+        final layout = DashboardComposition.metricGrid(
+          viewportWidth: MediaQuery.sizeOf(context).width,
+          contentWidth: constraints.maxWidth,
+          metricCount: metrics.length,
+        );
+        final columns = layout.metricColumns;
         return GridView.builder(
           physics: const NeverScrollableScrollPhysics(),
           padding: EdgeInsets.zero,
@@ -943,9 +950,7 @@ class _MetricGridPage extends StatelessWidget {
             crossAxisCount: columns,
             crossAxisSpacing: PremiumDesignTokens.spaceSm,
             mainAxisSpacing: PremiumDesignTokens.spaceSm,
-            childAspectRatio: wideScreen
-                ? (columns == metrics.length ? 1.28 : 1.55)
-                : (constraints.maxWidth < 420 ? 1.08 : 1.42),
+            childAspectRatio: layout.metricChildAspectRatio,
           ),
           itemCount: metrics.length,
           itemBuilder: (context, index) {
@@ -1044,7 +1049,10 @@ class _BodyProfileSnapshot extends StatelessWidget {
           const SizedBox(height: PremiumDesignTokens.spaceMd),
           LayoutBuilder(
             builder: (context, constraints) {
-              if (constraints.maxWidth < 760) {
+              final layout = DashboardComposition.bodyProfile(
+                contentWidth: constraints.maxWidth,
+              );
+              if (layout.bodyProfileCompact) {
                 return Column(
                   children: [
                     SizedBox(
@@ -1078,7 +1086,7 @@ class _BodyProfileSnapshot extends StatelessWidget {
                   ],
                 );
               }
-              final columns = constraints.maxWidth >= 1040 ? 3 : 2;
+              final columns = layout.bodyProfileColumns;
               final gap = PremiumDesignTokens.spaceSm;
               final informationWidth =
                   constraints.maxWidth * .76 - PremiumDesignTokens.spaceMd;
@@ -1269,9 +1277,11 @@ class _CompactMetricTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final compact = width >= 1180;
-    final phone = width < 600;
+    final layout = DashboardComposition.metricTile(
+      viewportWidth: MediaQuery.sizeOf(context).width,
+    );
+    final compact = layout.compactMetricTiles;
+    final phone = layout.isPhone;
     return Container(
       constraints: BoxConstraints(
         minHeight: compact ? 124 : (phone ? 142 : 136),
