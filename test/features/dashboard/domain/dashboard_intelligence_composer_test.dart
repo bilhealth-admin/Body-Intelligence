@@ -1,6 +1,7 @@
 import 'package:body_intelligence_log/data/database/date_keys.dart';
 import 'package:body_intelligence_log/data/database/nutrient_evidence.dart';
 import 'package:body_intelligence_log/engine/one_best_action_engine.dart';
+import 'package:body_intelligence_log/features/ai_platform/domain/personal_health_ai.dart';
 import 'package:body_intelligence_log/features/dashboard/domain/dashboard_intelligence_composer.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -80,6 +81,8 @@ void main() {
     expect(first.effectiveTargets.calories, second.effectiveTargets.calories);
     expect(first.progress.weeklyDirectionKg, second.progress.weeklyDirectionKg);
     expect(first.calorieByDay[DateTime(2026, 7, 29)], 500);
+    expect(first.personalHealthAi.asOf, now);
+    expect(first.personalHealthAi, isA<PersonalHealthAiSnapshot>());
   });
 
   test('preserves low-helpfulness suppression policy', () {

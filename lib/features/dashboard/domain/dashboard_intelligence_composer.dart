@@ -15,6 +15,8 @@ import '../../../engine/progress_analysis.dart';
 import '../../../engine/recovery_engine.dart';
 import '../../../engine/weekly_review_engine.dart';
 import '../../../engine/what_changed_engine.dart';
+import '../../ai_platform/domain/personal_health_ai.dart';
+import '../../ai_platform/services/personal_health_ai_engine.dart';
 
 class DashboardProfileInput {
   const DashboardProfileInput({
@@ -165,6 +167,7 @@ class DashboardIntelligenceSnapshot {
     required this.recentJourneyWeights,
     required this.weeklyReview,
     required this.calorieByDay,
+    required this.personalHealthAi,
   });
 
   final double calories;
@@ -189,6 +192,7 @@ class DashboardIntelligenceSnapshot {
   final List<DashboardWeightInput> recentJourneyWeights;
   final WeeklyReview weeklyReview;
   final Map<DateTime, double?> calorieByDay;
+  final PersonalHealthAiSnapshot personalHealthAi;
 }
 
 class DashboardIntelligenceComposer {
@@ -401,6 +405,24 @@ class DashboardIntelligenceComposer {
         ifAbsent: () => total,
       );
     }
+    final personalHealthAi = const PersonalHealthAiEngine().evaluate(
+      asOf: input.now,
+      weights: [
+        for (final weight in input.weights)
+          WeightObservation(
+            at: weight.at,
+            kg: weight.kg,
+            comparability: weight.measurementContext == 'sameConditions'
+                ? 1
+                : 0.65,
+          ),
+      ],
+      age: input.profile.age,
+      heightCm: input.profile.heightCm,
+      gender: input.profile.gender,
+      activityLevel: input.profile.activityLevel,
+      dailyCalories: calorieByDay,
+    );
     return DashboardIntelligenceSnapshot(
       calories: calories,
       protein: protein,
@@ -424,6 +446,7 @@ class DashboardIntelligenceComposer {
       recentJourneyWeights: recentJourneyWeights,
       weeklyReview: weeklyReview,
       calorieByDay: calorieByDay,
+      personalHealthAi: personalHealthAi,
     );
   }
 }

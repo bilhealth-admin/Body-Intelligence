@@ -10,9 +10,7 @@ import '../../../engine/data_honesty_engine.dart';
 import '../../../engine/one_best_action_engine.dart';
 import '../../../engine/plan_engine.dart';
 import '../../../engine/what_changed_engine.dart';
-import '../../ai_platform/domain/personal_health_ai.dart';
 import '../../connected_health/widgets/connected_health_card.dart';
-import '../../ai_platform/services/personal_health_ai_engine.dart';
 import '../../../engine/nutrient_evidence_engine.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../shared/widgets/premium_surface.dart';
@@ -482,25 +480,7 @@ class DashboardGrid extends ConsumerWidget {
       );
     }
 
-    final calorieByDay = dashboardSnapshot.calorieByDay;
-    final healthAi = const PersonalHealthAiEngine().evaluate(
-      asOf: DateTime.now(),
-      weights: [
-        for (final weight in weights)
-          WeightObservation(
-            at: weight.date,
-            kg: weight.weight,
-            comparability: weight.measurementContext == 'sameConditions'
-                ? 1
-                : 0.65,
-          ),
-      ],
-      age: profile.age,
-      heightCm: profile.height,
-      gender: profile.gender,
-      activityLevel: profile.activityLevel,
-      dailyCalories: calorieByDay,
-    );
+    final healthAi = dashboardSnapshot.personalHealthAi;
     final personalHealthAiPanel = PersonalHealthAiPanel(
       snapshot: healthAi,
       arabic: arabic,
