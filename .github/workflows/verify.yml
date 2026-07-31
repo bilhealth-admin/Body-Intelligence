@@ -12,6 +12,9 @@ permissions:
 jobs:
   flutter:
     runs-on: windows-latest
+    # BIL_KOTLIN_CACHE_REPAIR_R6
+    env:
+      GRADLE_OPTS: -Dkotlin.incremental=false -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.daemon=false
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
