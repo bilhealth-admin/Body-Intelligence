@@ -1,0 +1,44 @@
+name: android-debug-build
+
+on:
+  push:
+    branches:
+      - phase-3-product-excellence
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-debug-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    name: apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out accepted source
+        uses: actions/checkout@v4
+
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve packages
+        run: flutter pub get
+
+      - name: Build Android debug APK
+        run: flutter build apk --debug --no-pub
+
+      - name: Upload Android debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: bil-android-debug-${{ github.sha }}
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
