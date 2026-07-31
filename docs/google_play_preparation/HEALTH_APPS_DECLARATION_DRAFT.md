@@ -1,21 +1,39 @@
-# Google Play Health Apps Declaration — Working Draft
+# Google Play Health Apps Declaration — Verified Repository Draft
 
-**Status: draft only. Final answers require the released feature set and legal/developer identity.**
+**Status: repository evidence only. Do not submit unchanged. Final selections
+require Product Owner and legal approval in Play Console.**
 
-## Applicable feature categories visible in code
+## Applicable product categories
 
 - Nutrition and weight management.
-- Activity and fitness data through Health Connect.
-- Body measurements, weight, hydration, sleep, heart-related metrics, blood pressure, blood glucose, oxygen saturation, respiratory rate, exercise, and nutrition permissions where enabled by the user.
+- Activity and fitness tracking.
+- Health-data aggregation from Health Connect and paired health devices.
+- Wellness and decision support based on user-authorized evidence.
 
-## Product position
+The production permission surface can read steps, activity energy, exercise,
+sleep, weight, heart rate, resting heart rate, heart-rate variability, oxygen
+saturation, respiratory rate, blood glucose, blood pressure, hydration, and
+nutrition. Write permissions are limited to weight and hydration.
 
-BIL is a tracking and decision-support application. It is not represented as a medical device and does not diagnose, treat, cure, or prevent a medical condition. Existing onboarding and Settings surfaces state that the app does not replace qualified healthcare advice.
+## Product representation
 
-## Submission prerequisites
+BIL is a health tracking and decision-support application. It is not represented
+as a medical device and does not diagnose, treat, cure, or prevent a medical
+condition. It does not replace qualified healthcare advice or emergency care.
+User-facing health recommendations must remain evidence-gated, explainable, and
+capable of abstaining when trusted evidence is insufficient.
 
-- Verify every requested Health Connect permission is required by a user-visible core feature.
-- Prepare the public privacy policy.
-- Ensure prominent disclosure appears immediately before permission requests where policy requires it.
-- Select every applicable health category in Play Console.
-- Remove any permission not used by the final release.
+## Submission gate
+
+Before submission:
+
+1. Map every requested permission to a visible core feature and current bridge
+   capability.
+2. Verify prominent disclosure and consent immediately before permissions where
+   policy requires it.
+3. Confirm the public privacy-policy URL and in-app privacy access.
+4. Select every applicable Play health category without claiming diagnosis or
+   regulated medical-device status.
+5. Remove permissions unused by the final signed release.
+6. Complete physical-device tests for permission grant, denial, revocation,
+   partial authorization, and deletion behavior.

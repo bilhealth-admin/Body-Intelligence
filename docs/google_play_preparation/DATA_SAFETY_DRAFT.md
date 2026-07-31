@@ -1,25 +1,45 @@
-# Google Play Data Safety — Working Draft
+# Google Play Data Safety — Verified Repository Draft
 
-**Status: draft only. Do not submit until the final production SDK and cloud inventory is frozen.**
+**Status: repository evidence only. Do not submit unchanged.** The final Play
+Console declaration must match the signed AAB, enabled configuration, network
+behavior, privacy policy, and every transitive SDK.
 
-## Current code-derived position
+## Current local-first release candidate
 
-- BIL stores profile, body measurements, weight, nutrition, meals, water, preferences, and local decision evidence on device.
-- Cloud activation defaults to disabled and requires explicit build-time configuration.
-- Health Connect permissions expose sensitive health and fitness data only after user authorization.
-- No advertising SDK is present in the reviewed dependency set.
-- Billing and Play Integrity are not activated.
-- Runtime Google Fonts fetching is removed by this package.
+The app handles these categories on device:
 
-## Must be reassessed before submission
+- Profile and body attributes.
+- Weight, nutrition, meals, hydration, activity, sleep, heart-related metrics,
+  blood pressure, blood glucose, oxygen saturation, respiratory rate, exercise,
+  and provenance associated with imported health records.
+- Preferences, locale, theme, consent state, local decisions, explanations, and
+  outcome evidence.
+- Bluetooth peripheral identity and measurements after explicit pairing.
 
-- Supabase production activation and server logs.
-- AI provider or proxy activation.
-- Crash reporting, analytics, attribution, notifications, or support SDKs.
-- Account identifiers and cloud deletion workflow.
-- Any sharing/export workflow selected by the user.
-- Every transitive SDK listed in the final release lockfile.
+For the current build composition:
 
-## Play Console work
+- Developer-controlled collection: None activated.
+- Sharing with third parties: None activated.
+- Advertising, attribution, analytics, and crash reporting: None activated.
+- Accounts, cloud synchronization, remote AI, commerce, and community: None
+  activated.
+- Health Connect access: permission-gated and used for user-visible health
+  timeline and decision-support features.
+- Health Connect writes: limited to weight and hydration.
+- User export: initiated by the user through the operating-system share sheet;
+  the user selects the destination.
+- Data in transit: not applicable while remote services remain inactive.
+- Local deletion: available through the local-data lifecycle and uninstall.
 
-Complete the Data Safety form even when a release remains local-first. The declaration must match the final privacy policy and every enabled SDK.
+The presence of an inactive Supabase dependency is not evidence of collection.
+The current production capability boundary does not initialize account or sync
+flows and defaults `BIL_USE_SUPABASE` to false. If any remote configuration or
+SDK is activated, this draft is invalid until collection, sharing, purpose,
+retention, security, and deletion are reassessed.
+
+## Submission gate
+
+Before Play Console submission, compare this draft with a release-AAB dependency
+inventory and network inspection, complete the public privacy policy, confirm
+age/target-audience answers, and have the Product Owner approve every Data
+Safety selection. Console submission remains an external gate.

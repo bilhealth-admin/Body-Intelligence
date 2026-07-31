@@ -1,18 +1,27 @@
-# Public Privacy Policy Requirements
+# Public Privacy Policy Release Requirements
 
-The final policy is an external launch deliverable and is not created with invented identity or contact information.
+The public policy is an external legal and publishing deliverable. Repository
+documentation must not invent developer identity, contact details, jurisdiction,
+effective date, or legal commitments.
 
-It must include:
+Release requires:
 
-- The final app name and legal developer/entity name.
-- A privacy contact method.
-- Every personal, device, nutrition, fitness, and health data type accessed or created.
-- Whether data remains local or is transferred when optional cloud services are enabled.
-- Purposes of processing and any third parties.
-- Security practices.
-- Retention, export, and deletion behavior.
-- Account deletion behavior if accounts are enabled.
-- Health Connect handling and permission minimization.
-- A clear health disclaimer and instruction to consult a qualified healthcare professional.
+- Final app name, legal developer/entity name, jurisdiction, effective date,
+  and privacy contact method.
+- Every personal, device, nutrition, fitness, health, consent, provenance, and
+  decision-evidence category handled by the final release.
+- A distinction between on-device processing, user-directed export, developer
+  collection, and third-party sharing.
+- Purposes, recipients, security practices, retention, export, deletion,
+  permission revocation, and complaint/request procedures.
+- Account deletion rules if accounts are ever enabled.
+- Health Connect and HealthKit purpose limitation and permission minimization.
+- Bluetooth device discovery and imported-measurement handling.
+- A clear non-medical-device and qualified-care disclaimer.
+- Versioning and a commitment to update disclosures before activating new
+  remote services or SDKs.
 
-The policy must later be hosted at a public, active, non-geofenced, non-PDF URL and linked both in the application and Play Console.
+The approved policy must be hosted at a stable public, active, non-geofenced
+HTTPS webpage—not only a PDF—and linked from the application, Google Play, and
+App Store Connect. Legal approval, hosting, URL verification, and store entry
+remain external gates.
