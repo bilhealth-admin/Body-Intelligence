@@ -13,19 +13,25 @@ void main() {
     );
     final grid = read('lib/features/dashboard/widgets/dashboard_grid.dart');
     final analytics = read('lib/features/analytics/analytics_page.dart');
+    final analyticsCenter = read(
+      'lib/features/dashboard/widgets/dashboard_analytics_center.dart',
+    );
+    final profile = read(
+      'lib/features/dashboard/widgets/dashboard_body_profile_snapshot.dart',
+    );
     final header = read('lib/features/dashboard/widgets/dashboard_header.dart');
 
-    expect(health, contains('top: 30'));
+    expect(health, contains('top: 38'));
     expect(health, contains('Offset(size.width * .500, size.height * .535)'));
     expect(health, contains('Color(0xFF2D3439)'));
     expect(health, contains('crownCenter'));
 
-    expect(grid, contains("'kcal/day'"));
+    expect(grid, isNot(contains("'kcal/day'")));
     expect(grid, contains("? 'BMI' : ''"));
     expect(grid, contains("unit: ' kg'"));
-    expect(grid, contains('textDirection: TextDirection.ltr'));
-    expect(grid, contains('mainAxisAlignment: MainAxisAlignment.center'));
-    expect(grid, contains('textAlign: TextAlign.center'));
+    expect(analyticsCenter, contains('textDirection: TextDirection.ltr'));
+    expect(profile, contains('mainAxisAlignment: MainAxisAlignment.center'));
+    expect(profile, contains('textAlign: TextAlign.center'));
 
     expect(analytics, contains("arabic ? 'البداية' : 'Start'"));
     expect(analytics, contains("arabic ? 'الحالي' : 'Current'"));

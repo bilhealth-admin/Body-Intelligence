@@ -22,9 +22,11 @@ void main() {
     expect(benchmark, isNot(contains('class _KeyInsightsDeck')));
 
     expect(shell, contains("Key('dashboard-twin-header-slot')"));
-    expect(shell, contains('height: compact ? 68 : 72'));
+    expect(shell, contains('final headerBaseHeight = compact ? 68.0 : 72.0'));
+    expect(shell, contains('height: headerHeight'));
     expect(shell, contains('final pagerReserve ='));
-    expect(shell, contains('? 26.0 : 0.0'));
+    expect(shell, contains('final pagerReserve = pages.length > 1'));
+    expect(shell, contains('.scale(26.0).clamp(26.0, 48.0)'));
     expect(shell, contains("Key('dashboard-twin-deck-carousel')"));
     expect(shell, contains('viewportFraction: compact ? .94 : .96'));
     expect(shell, contains('Expanded('));

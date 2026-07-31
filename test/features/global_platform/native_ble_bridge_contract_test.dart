@@ -7,7 +7,7 @@ void main() {
       'ios/Runner/BILMedicalBleBridge.swift',
     ).readAsStringSync();
     final kotlin = File(
-      'android/app/src/main/kotlin/com/example/body_intelligence_log/BILMedicalBleBridge.kt',
+      'android/app/src/main/kotlin/com/kadem/bil/BILMedicalBleBridge.kt',
     ).readAsStringSync();
     for (final token in [
       '1810',

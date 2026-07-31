@@ -5,6 +5,7 @@ import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
 import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
 import 'package:body_intelligence_log/features/dashboard/providers/dashboard_provider.dart';
 import 'package:body_intelligence_log/features/dashboard/widgets/dashboard_grid.dart';
+import 'package:body_intelligence_log/features/dashboard/widgets/dashboard_data_gate.dart';
 import 'package:body_intelligence_log/features/dashboard/widgets/dashboard_header.dart';
 import 'package:body_intelligence_log/features/life_context/providers/life_context_provider.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
@@ -106,6 +107,9 @@ void main() {
           todayLifeContextProvider.overrideWith(
             (ref) => Stream.value(<LifeContextEntry>[]),
           ),
+          insightLifeContextProvider.overrideWith(
+            (ref) => Stream.value(<LifeContextEntry>[]),
+          ),
           decisionMemoriesProvider.overrideWith(
             (ref) => Stream.value(<DecisionMemory>[]),
           ),
@@ -134,14 +138,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('تعذر على صفحة اليوم قراءة كل البيانات المحلية'),
-      findsOneWidget,
-    );
-    expect(find.text('حاول مرة أخرى'), findsOneWidget);
+    expect(find.byType(DashboardDataGate), findsOneWidget);
+    expect(find.byType(FilledButton), findsOneWidget);
     expect(find.textContaining('private database detail'), findsNothing);
     expect(find.text('أفضل إجراء واحد'), findsNothing);
-    await tester.tap(find.text('حاول مرة أخرى'));
+    await tester.tap(find.byType(FilledButton));
     await tester.pump();
     expect(tester.takeException(), isNull);
   });

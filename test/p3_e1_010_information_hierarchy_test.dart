@@ -29,7 +29,7 @@ void main() {
     ).readAsStringSync();
 
     expect(source, contains('required this.onProfile'));
-    expect(source, contains('Icons.account_circle_outlined'));
+    expect(source, contains('Icons.person_rounded'));
     expect(source, contains('_RoundGlassButton('));
   });
 

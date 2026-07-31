@@ -21,12 +21,21 @@ void main() {
       );
       expect(apple.fiber, 2.4);
       expect(apple.sugar, 10.4);
-      for (final nutrient in TrackedNutrient.values) {
+      for (final nutrient in TrackedNutrient.values.where(
+        (nutrient) => nutrient != TrackedNutrient.phosphorus,
+      )) {
         expect(
           NutrientEvidenceMask.contains(apple.nutrientEvidenceMask, nutrient),
           isTrue,
         );
       }
+      expect(
+        NutrientEvidenceMask.contains(
+          apple.nutrientEvidenceMask,
+          TrackedNutrient.phosphorus,
+        ),
+        isFalse,
+      );
 
       final mealId = await meals.createMeal(
         date: DateTime(2026, 7, 25),

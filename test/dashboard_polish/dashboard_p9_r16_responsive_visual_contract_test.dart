@@ -7,24 +7,23 @@ void main() {
     final grid = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
-    final watch = File(
-      'lib/features/connected_health/widgets/connected_health_card.dart',
-    ).readAsStringSync();
-    final shell = File(
-      'lib/features/dashboard/widgets/dashboard_shell.dart',
+    final daily = File(
+      'lib/features/dashboard/widgets/dashboard_daily_summary.dart',
     ).readAsStringSync();
     final analytics = File(
-      'lib/features/analytics/analytics_page.dart',
+      'lib/features/dashboard/widgets/dashboard_analytics_center.dart',
+    ).readAsStringSync();
+    final composition = File(
+      'lib/features/dashboard/composition/dashboard_composition.dart',
     ).readAsStringSync();
 
     expect(grid, isNot(contains("'kcal/day'")));
     expect(grid, contains("'kcal'"));
-    expect(grid, contains('final columns = wideScreen && constraints.maxWidth >= 760'));
-    expect(grid, contains('if (constraints.maxWidth < 760)'));
-    expect(grid, contains('constraints.maxWidth >= 1040 ? 3 : 2'));
-    expect(grid, contains('FittedBox('));
-    expect(watch, contains('top: 38'));
-    expect(shell, contains('constraints.maxWidth < 600 ? 176 : 132'));
+    expect(grid, contains('DashboardDailySummarySection('));
+    expect(grid, contains('DashboardAnalyticsCenter('));
+    expect(daily, contains('DashboardComposition.pagedSection('));
+    expect(analytics, contains('DashboardComposition.analytics('));
     expect(analytics, contains('textDirection: TextDirection.ltr'));
+    expect(composition, contains('class DashboardComposition'));
   });
 }

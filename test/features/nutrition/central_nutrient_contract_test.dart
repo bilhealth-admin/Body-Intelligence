@@ -28,10 +28,7 @@ void main() {
     );
     final knownZero = NutrientEvidenceMask.fromValues(phosphorus: 0);
     expect(
-      NutrientEvidenceMask.contains(
-        knownZero,
-        TrackedNutrient.phosphorus,
-      ),
+      NutrientEvidenceMask.contains(knownZero, TrackedNutrient.phosphorus),
       isTrue,
     );
   });

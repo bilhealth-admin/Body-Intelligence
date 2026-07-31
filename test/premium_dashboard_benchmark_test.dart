@@ -19,7 +19,7 @@ void main() {
 
     expect(find.byKey(const Key('dashboard-one-best-action')), findsNothing);
     expect(
-      find.byKey(const Key('dashboard-key-insights-carousel')),
+      find.byKey(const Key('dashboard-key-insights-deck')),
       findsOneWidget,
     );
     expect(

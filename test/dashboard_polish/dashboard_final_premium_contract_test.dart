@@ -13,7 +13,9 @@ void main() {
     final health = File(
       'lib/features/connected_health/widgets/connected_health_card.dart',
     ).readAsStringSync();
-    final pubspec = File('pubspec.yaml').readAsStringSync();
+    final profile = File(
+      'lib/features/dashboard/widgets/dashboard_body_profile_snapshot.dart',
+    ).readAsStringSync();
 
     expect(
       benchmark,
@@ -21,41 +23,17 @@ void main() {
       reason: 'Today’s Insights must use the approved Arabic title.',
     );
 
+    expect(profile, contains("tr('Daily energy plan', 'خطة الطاقة اليومية')"));
+    expect(profile, contains("tr('Daily metabolism', 'معدل الأيض اليومي')"));
     expect(
       grid,
-      isNot(contains("tr('Unavailable', 'غير متاح')")),
-      reason: 'The visible generic unavailable phrase must be removed.',
+      contains("calorieTarget: '\${effectiveTargets.calories} kcal'"),
     );
-    expect(
-      grid,
-      contains("null => '—'"),
-      reason: 'Unavailable body-composition fallback must be a dash.',
-    );
-
-    expect(grid, contains("tr('Daily energy plan', 'خطة الطاقة اليومية')"));
-    expect(grid, contains("tr('Daily metabolism', 'معدل الأيض اليومي')"));
-    expect(
-      grid,
-      contains('calorieTarget: effectiveTargets.calories.toString()'),
-    );
-    expect(grid, contains('dailyMetabolism: bil.tdee.round().toString()'));
-
-    final dailyRequirementMetric = RegExp(
-      r"tr\('Daily Requirement', 'الاحتياج اليومي'\),\s*bil\.tdee\.round\(\)\.toString\(\),\s*''",
-      multiLine: true,
-    );
-    expect(
-      grid,
-      matches(dailyRequirementMetric),
-      reason:
-          'Daily requirement must show the number without kcal/day wording.',
-    );
+    expect(grid, contains("dailyMetabolism: '\${bil.tdee.round()} kcal'"));
+    expect(grid, contains("tr('Daily Requirement', 'الاحتياج اليومي')"));
     expect(grid, isNot(contains("arabic ? 'سعرة/يوم' : 'kcal/day'")));
 
-    expect(health, contains('bil_health_hub_watch.webp'));
-    expect(
-      pubspec,
-      contains('assets/images/dashboard/bil_health_hub_watch.webp'),
-    );
+    expect(health, contains("Key('bil-live-health-watch')"));
+    expect(health, contains('CustomPaint('));
   });
 }

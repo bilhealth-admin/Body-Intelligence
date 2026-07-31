@@ -9,15 +9,15 @@ void main() {
     ).readAsStringSync();
 
     expect(card, contains("tr('Health Hub', 'المركز الصحي')"));
-    expect(card, contains('لم يتم ربط أي مصدر صحي بعد'));
-    expect(card, contains("tr('Connect', 'اتصال')"));
+    expect(card, contains("tr('Connect now', 'ربط الآن')"));
+    expect(card, contains('No connected sources'));
     expect(card, contains('قراءة الساعة الذكية'));
     expect(card, contains(' Health'));
     expect(card, contains('Health Connect'));
     expect(card, contains("Key('health-hub-empty-state')"));
     expect(card, contains("Key('health-hub-connect-button')"));
     expect(card, contains('Icons.watch_outlined'));
-    expect(card, contains('_PulseLinePainter'));
+    expect(card, contains('_WatchPainter'));
   });
 
   test('Health Hub polish remains presentation-only', () {

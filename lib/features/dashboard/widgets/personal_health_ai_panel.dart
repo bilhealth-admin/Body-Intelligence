@@ -175,10 +175,7 @@ class PersonalHealthAiPanel extends StatelessWidget {
       child: DashboardTwinDeckShell(
         key: const Key('personal-health-ai-panel'),
         title: tr('Bio Intelligence', 'الذكاء الحيوي'),
-        subtitle: tr(
-          'What BIL knows now.',
-          'ما يعرفه BIL الآن.',
-        ),
+        subtitle: tr('What BIL knows now.', 'ما يعرفه BIL الآن.'),
         semanticLabel: tr('Bio Intelligence', 'الذكاء الحيوي'),
         compact: compact,
         pages: [

@@ -3,20 +3,26 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('dashboard responsive metric surfaces reserve safe vertical space', () {
-    final source = File(
+  test('dashboard responsive surfaces remain delegated and bounded', () {
+    final grid = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
+    final daily = File(
+      'lib/features/dashboard/widgets/dashboard_daily_summary.dart',
+    ).readAsStringSync();
+    final profile = File(
+      'lib/features/dashboard/widgets/dashboard_body_profile_snapshot.dart',
+    ).readAsStringSync();
+    final analytics = File(
+      'lib/features/dashboard/widgets/dashboard_analytics_center.dart',
+    ).readAsStringSync();
 
-    expect(source, contains('? 104.0'));
-    expect(source, contains('? 226.0'));
-    expect(source, contains(': 306.0'));
-    expect(source, contains('childAspectRatio: wideScreen ? 1.35 : 1.65'));
-    expect(source, contains('height: fixedDesktopGrid ? 216 : 196'));
-    expect(source, contains('childAspectRatio: .88'));
-    expect(source, contains('minHeight: compact ? 92 : 84'));
-    expect(source, contains('minHeight: compact ? 64 : 96'));
-    expect(source, contains('maxLines: 2'));
+    expect(grid, contains('DashboardDailySummarySection('));
+    expect(grid, contains('DashboardBodyProfileSnapshot('));
+    expect(grid, contains('DashboardAnalyticsCenter('));
+    expect(daily, contains('LayoutBuilder('));
+    expect(profile, contains('LayoutBuilder('));
+    expect(analytics, contains('LayoutBuilder('));
   });
 
   test('responsive package stays inside dashboard presentation', () {

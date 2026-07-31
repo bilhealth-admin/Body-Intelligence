@@ -50,7 +50,9 @@ void main() {
           expect(tester.takeException(), isNull);
 
           final cardContext = tester.element(find.byType(DailyReturnCard));
-          final localizedTitle = cardContext.strings.text('Continue today');
+          final localizedTitle = locale.languageCode == 'ar'
+              ? 'واصل يومك'
+              : 'Continue today';
 
           final titleFinder = find.text(localizedTitle);
           expect(
@@ -63,18 +65,20 @@ void main() {
           final title = tester.widget<Text>(titleFinder);
           expect(
             title.style?.color,
-            Theme.of(cardContext).colorScheme.onSurface,
+            Theme.of(cardContext).colorScheme.onSurfaceVariant,
           );
 
           final reasonFinder = find.text(
-            'Meal evidence is incomplete for today.',
+            locale.languageCode == 'ar'
+                ? 'تم تسجيل وزن اليوم.'
+                : 'Today’s weight is recorded.',
           );
           expect(reasonFinder, findsOneWidget);
 
           final reason = tester.widget<Text>(reasonFinder);
           expect(
             reason.style?.color,
-            Theme.of(cardContext).colorScheme.onSurface,
+            Theme.of(cardContext).colorScheme.onSurfaceVariant,
           );
 
           expect(find.byType(DailyReturnCard), findsOneWidget);

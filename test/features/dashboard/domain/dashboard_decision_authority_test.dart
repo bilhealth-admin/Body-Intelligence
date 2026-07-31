@@ -91,9 +91,7 @@ void main() {
         DashboardWaterInput(at: now, dayKey: todayKey, amountMl: 750),
       ],
       allMeals: [meal],
-      allWater: [
-        DashboardWaterInput(at: now, dayKey: todayKey, amountMl: 750),
-      ],
+      allWater: [DashboardWaterInput(at: now, dayKey: todayKey, amountMl: 750)],
       insightContexts: const [],
       allContexts: const [],
       memories: const [],
@@ -101,24 +99,27 @@ void main() {
     );
   }
 
-  test('delegates One Best Action selection through the authority boundary', () {
-    final authority = _RecordingDecisionAuthority();
-    final snapshot = DashboardIntelligenceComposer(
-      decisionAuthority: authority,
-    ).compose(input());
+  test(
+    'delegates One Best Action selection through the authority boundary',
+    () {
+      final authority = _RecordingDecisionAuthority();
+      final snapshot = DashboardIntelligenceComposer(
+        decisionAuthority: authority,
+      ).compose(input());
 
-    expect(authority.calls, 1);
-    expect(authority.weighedToday, isTrue);
-    expect(authority.loggingComplete, isTrue);
-    expect(authority.protein, 30);
-    expect(authority.waterMl, 750);
-    expect(authority.proteinTarget, greaterThan(0));
-    expect(authority.waterTarget, greaterThan(0));
-    expect(authority.trackedDays, 1);
-    expect(authority.suppressedTypes, isEmpty);
-    expect(snapshot.bestAction.title, 'Authority result');
-    expect(snapshot.bestAction.type, BestActionType.holdPlan);
-  });
+      expect(authority.calls, 1);
+      expect(authority.weighedToday, isTrue);
+      expect(authority.loggingComplete, isTrue);
+      expect(authority.protein, 30);
+      expect(authority.waterMl, 750);
+      expect(authority.proteinTarget, greaterThan(0));
+      expect(authority.waterTarget, greaterThan(0));
+      expect(authority.trackedDays, 1);
+      expect(authority.suppressedTypes, isEmpty);
+      expect(snapshot.bestAction.title, 'Authority result');
+      expect(snapshot.bestAction.type, BestActionType.holdPlan);
+    },
+  );
 
   test('legacy authority preserves the existing engine result', () {
     const authority = LegacyDashboardDecisionAuthority();

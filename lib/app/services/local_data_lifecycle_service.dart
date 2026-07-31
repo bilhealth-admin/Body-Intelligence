@@ -24,6 +24,9 @@ class LocalDataLifecycleService {
       'waterEntries': database.select(database.waterEntries).get(),
       'lifeContext': database.select(database.lifeContextEntries).get(),
       'decisionMemory': database.select(database.decisionMemories).get(),
+      'decisionOutcomeTransitions': database
+          .select(database.decisionOutcomeTransitions)
+          .get(),
       'personalExperiments': database
           .select(database.personalExperiments)
           .get(),
@@ -54,6 +57,7 @@ class LocalDataLifecycleService {
   }
 
   Future<void> clearAll() => database.transaction(() async {
+    await database.delete(database.decisionOutcomeTransitions).go();
     await database.delete(database.decisionMemories).go();
     await database.delete(database.lifeContextEntries).go();
     await database.delete(database.personalExperiments).go();

@@ -13,6 +13,9 @@ void main() {
     final grid = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
+    final benchmark = File(
+      'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
+    ).readAsStringSync();
 
     expect(health, contains("Key('health-hub-fixed-square-watch')"));
     expect(health, contains('SizedBox.square'));
@@ -25,15 +28,9 @@ void main() {
     expect(shell, contains("Key('dashboard-twin-deck-carousel')"));
     expect(shell, contains('viewportFraction: compact ? .94 : .96'));
 
-    expect(grid, contains('? 154.0'));
-    expect(grid, contains('? 272.0'));
-    expect(grid, contains(': 360.0'));
-    expect(grid, contains('? 1.18'));
-    expect(grid, contains('minHeight: compact ? 112 : 126'));
-    expect(grid, isNot(contains('? 126.0')));
-    expect(
-      grid,
-      isNot(contains('final shellHeight = compact ? 560.0 : 360.0')),
-    );
+    expect(grid, contains('DashboardAnalyticsCenter('));
+    expect(grid, contains('bodyTwinSummary: trustedTwinSummary'));
+    expect(benchmark, contains("Key('dashboard-mobile-body-twin-snapshot')"));
+    expect(shell, contains('final headerBaseHeight = compact ? 68.0 : 72.0'));
   });
 }

@@ -28,16 +28,17 @@ void main() {
     final grid = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
+    final analytics = File(
+      'lib/features/dashboard/widgets/dashboard_analytics_center.dart',
+    ).readAsStringSync();
 
-    expect(
-      grid,
-      contains('final phone = MediaQuery.sizeOf(context).width < 600;'),
-    );
-    expect(grid, contains('if (!phone) ...['));
+    expect(grid, contains('DashboardAnalyticsCenter('));
+    expect(analytics, contains('final phone = layout.isPhone'));
+    expect(analytics, contains('if (!phone) ...['));
     expect(
       RegExp(
         r'if \(!phone\) \.\.\.\[\s*bodyProfile,\s*const SizedBox',
-      ).hasMatch(grid),
+      ).hasMatch(analytics),
       isTrue,
     );
   });
@@ -46,6 +47,7 @@ void main() {
     const changedProductionPaths = <String>[
       'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
       'lib/features/dashboard/widgets/dashboard_grid.dart',
+      'lib/features/dashboard/widgets/dashboard_analytics_center.dart',
     ];
 
     expect(

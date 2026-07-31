@@ -4,7 +4,7 @@ import '../../../data/database/app_database.dart';
 import '../domain/local_intelligence_runtime.dart';
 import '../domain/decision_memory_history.dart';
 import '../domain/decision_memory_record.dart' as ai;
-import '../domain/decision_outcome_transition.dart';
+import '../domain/decision_outcome_transition.dart' as ai_outcome;
 
 /// Offline-only adapter that projects the existing local database into the
 /// neutral chronological input required by the intelligence runtime.
@@ -113,9 +113,10 @@ final class LocalIntelligenceRepositoryAdapter {
     final decisionHistory = memoryRows
         .map((row) {
           final state = switch (row.response) {
-            'done' => DecisionOutcomeState.succeeded,
-            'dismissed' || 'notSuitable' => DecisionOutcomeState.failed,
-            _ => DecisionOutcomeState.pending,
+            'done' => ai_outcome.DecisionOutcomeState.succeeded,
+            'dismissed' ||
+            'notSuitable' => ai_outcome.DecisionOutcomeState.failed,
+            _ => ai_outcome.DecisionOutcomeState.pending,
           };
           return DecisionMemoryHistory(
             record: ai.DecisionMemoryRecord(
@@ -133,7 +134,7 @@ final class LocalIntelligenceRepositoryAdapter {
               outcomeState: row.response,
             ),
             currentState: state,
-            transitions: const <DecisionOutcomeTransition>[],
+            transitions: const <ai_outcome.DecisionOutcomeTransition>[],
           );
         })
         .toList(growable: false);

@@ -48,22 +48,26 @@ void main() {
     addTearDown(() => tester.binding.setSurfaceSize(null));
     await tester.pumpWidget(
       MaterialApp(
-        home: SingleChildScrollView(
-          child: PersonalHealthAiPanel(
-            snapshot: snapshot,
-            arabic: false,
-            todayHasMeals: false,
-            decisionCount: 0,
+        home: Scaffold(
+          body: SizedBox(
+            height: 520,
+            child: PersonalHealthAiPanel(
+              snapshot: snapshot,
+              arabic: false,
+              todayHasMeals: false,
+              decisionCount: 0,
+              compact: true,
+            ),
           ),
         ),
       ),
     );
 
     expect(find.byKey(const Key('personal-health-ai-panel')), findsOneWidget);
-    expect(find.text('Personal Health AI'), findsOneWidget);
+    expect(find.text('Bio Intelligence'), findsOneWidget);
     for (var index = 0; index < 4; index++) {
       await tester.drag(
-        find.byKey(const Key('personal-health-ai-carousel')),
+        find.byKey(const Key('dashboard-twin-deck-carousel')),
         const Offset(-340, 0),
       );
       await tester.pumpAndSettle();

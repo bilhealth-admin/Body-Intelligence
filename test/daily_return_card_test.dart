@@ -30,12 +30,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('مرحبًا بعودتك — ابدأ من اليوم'), findsOneWidget);
-    expect(find.textContaining('لا يلزم ملء الأيام الماضية'), findsOneWidget);
-    expect(find.byType(FilledButton), findsOneWidget);
-    expect(find.bySemanticsLabel('ملخص العودة اليومية'), findsOneWidget);
-    await tester.ensureVisible(find.text('سجّل وزن اليوم'));
-    await tester.tap(find.text('سجّل وزن اليوم'));
-    expect(actions, 1);
+    expect(find.text('مسارك اليوم'), findsOneWidget);
+    expect(find.byType(FilledButton), findsNothing);
+    expect(find.byType(DailyReturnCard), findsOneWidget);
+    expect(actions, 0);
   });
 
   testWidgets('completed day presents no-action state without a button', (
@@ -56,58 +54,51 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Today is covered'), findsOneWidget);
-    expect(find.textContaining('No corrective action'), findsOneWidget);
+    expect(find.text('Today’s weight is recorded.'), findsOneWidget);
     expect(find.byType(FilledButton), findsNothing);
   });
 
-  testWidgets(
-    'primary recommendation shows transparency fields and feedback controls',
-    (tester) async {
-      var dismissed = 0;
-      var corrected = 0;
-      var feedback = 0;
+  testWidgets('daily return remains a presentation-only logging path', (
+    tester,
+  ) async {
+    var dismissed = 0;
+    var corrected = 0;
+    var feedback = 0;
 
-      await tester.pumpWidget(
-        _app(
-          DailyReturnCard(
-            report: _report(DailyReturnState.partial, primary: true),
-            changedSummary: 'Weight rose while meal timing shifted.',
-            actionTitle: 'Log today\'s weight',
-            actionReason:
-                'A comparable morning measurement improves direction confidence.',
-            missingEvidence: 'Two additional comparable days are missing.',
-            recommendationTimeHorizon: 'Reassess over the next 3 days.',
-            alternativeExplanation:
-                'Temporary fluid retention remains plausible from recent sodium intake.',
-            onPrimaryAction: () {},
-            onDismissRecommendation: () => dismissed++,
-            onCorrectRecommendation: () => corrected++,
-            onRecommendationFeedback: () => feedback++,
-          ),
-          locale: const Locale('en'),
+    await tester.pumpWidget(
+      _app(
+        DailyReturnCard(
+          report: _report(DailyReturnState.partial, primary: true),
+          changedSummary: 'Weight rose while meal timing shifted.',
+          actionTitle: 'Log today\'s weight',
+          actionReason:
+              'A comparable morning measurement improves direction confidence.',
+          missingEvidence: 'Two additional comparable days are missing.',
+          recommendationTimeHorizon: 'Reassess over the next 3 days.',
+          alternativeExplanation:
+              'Temporary fluid retention remains plausible from recent sodium intake.',
+          onPrimaryAction: () {},
+          onDismissRecommendation: () => dismissed++,
+          onCorrectRecommendation: () => corrected++,
+          onRecommendationFeedback: () => feedback++,
         ),
-      );
-      await tester.pumpAndSettle();
+        locale: const Locale('en'),
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(find.text('Why this action appears'), findsOneWidget);
-      expect(find.text('Evidence used'), findsOneWidget);
-      expect(find.text('Evidence missing'), findsOneWidget);
-      expect(find.text('Confidence'), findsOneWidget);
-      expect(find.text('Time horizon'), findsOneWidget);
-      expect(find.text('Alternative explanation'), findsOneWidget);
-      expect(find.text('Log today\'s weight'), findsOneWidget);
-
-      await tester.ensureVisible(find.text('Dismiss'));
-      await tester.tap(find.text('Dismiss'));
-      await tester.ensureVisible(find.text('Correct'));
-      await tester.tap(find.text('Correct'));
-      await tester.ensureVisible(find.text('Feedback'));
-      await tester.tap(find.text('Feedback'));
-      expect(dismissed, 1);
-      expect(corrected, 1);
-      expect(feedback, 1);
-    },
-  );
+    expect(find.text('Your Path Today'), findsOneWidget);
+    expect(find.text('Weight'), findsOneWidget);
+    expect(
+      find.text('Add a comparable weight when it suits you.'),
+      findsOneWidget,
+    );
+    expect(find.text('Why this action appears'), findsNothing);
+    expect(find.byType(FilledButton), findsNothing);
+    expect(dismissed, 0);
+    expect(corrected, 0);
+    expect(feedback, 0);
+  });
 }
 
 DailyReturnReport _report(DailyReturnState state, {required bool primary}) =>

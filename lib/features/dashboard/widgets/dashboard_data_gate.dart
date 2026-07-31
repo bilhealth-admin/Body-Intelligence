@@ -21,7 +21,10 @@ class DashboardDataGate extends StatelessWidget {
       return const DashboardLoadingSkeleton();
     }
 
-    assert(state.hasFailure, 'DashboardDataGate only handles non-ready states.');
+    assert(
+      state.hasFailure,
+      'DashboardDataGate only handles non-ready states.',
+    );
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),

@@ -25,10 +25,7 @@ void main() {
     expect(dashboard, contains('AnalyticsWeeklyProgressCard('));
     expect(dashboard, isNot(contains('WeightTrendChart(')));
     expect(
-      RegExp(
-        r'^\s*WeeklyProgressCard\(',
-        multiLine: true,
-      ).hasMatch(dashboard),
+      RegExp(r'^\s*WeeklyProgressCard\(', multiLine: true).hasMatch(dashboard),
       isFalse,
     );
     expect(dashboard, isNot(contains('_AnalyticsCarouselSection')));

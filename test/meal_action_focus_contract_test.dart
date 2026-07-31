@@ -24,7 +24,7 @@ void main() {
     expect(diary, contains('key: mealEntryKey'));
     expect(diary, contains('this.focusMealEntry = false'));
     expect(diary, contains('if (!widget.focusMealEntry) ...['));
-    expect(diary, contains('if (widget.focusMealEntry) ...['));
-    expect(diary, contains('_focusedWaterControls()'));
+    expect(diary, contains('if (widget.focusMealEntry && !mealFocusApplied)'));
+    expect(diary, contains('addPostFrameCallback((_) => _focusMealEntry())'));
   });
 }

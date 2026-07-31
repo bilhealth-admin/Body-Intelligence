@@ -46,7 +46,7 @@ void main() {
               )
               as Map<String, dynamic>;
       expect(json['format'], 'BIL local export v3');
-      expect(json['schemaVersion'], 16);
+      expect(json['schemaVersion'], 17);
       expect(json['selectedDisplayUnits'], 'imperial');
       expect(json['profile'], isNotNull);
       for (final key in const [
@@ -62,6 +62,7 @@ void main() {
         'waterEntries',
         'lifeContext',
         'decisionMemory',
+        'decisionOutcomeTransitions',
         'personalExperiments',
         'challenges',
         'preferences',
@@ -100,5 +101,9 @@ void main() {
     expect(await database.select(database.challenges).get(), isEmpty);
     expect(await database.select(database.planSettings).get(), isEmpty);
     expect(await database.select(database.personalExperiments).get(), isEmpty);
+    expect(
+      await database.select(database.decisionOutcomeTransitions).get(),
+      isEmpty,
+    );
   });
 }

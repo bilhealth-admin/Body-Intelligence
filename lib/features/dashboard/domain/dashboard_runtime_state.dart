@@ -10,13 +10,13 @@ class DashboardRuntimeState {
   const DashboardRuntimeState._({required this.phase});
 
   const DashboardRuntimeState.loading()
-      : this._(phase: DashboardRuntimePhase.loading);
+    : this._(phase: DashboardRuntimePhase.loading);
 
   const DashboardRuntimeState.failed()
-      : this._(phase: DashboardRuntimePhase.failed);
+    : this._(phase: DashboardRuntimePhase.failed);
 
   const DashboardRuntimeState.ready()
-      : this._(phase: DashboardRuntimePhase.ready);
+    : this._(phase: DashboardRuntimePhase.ready);
 
   factory DashboardRuntimeState.fromRequired(
     Iterable<AsyncValue<Object?>> requiredInputs,

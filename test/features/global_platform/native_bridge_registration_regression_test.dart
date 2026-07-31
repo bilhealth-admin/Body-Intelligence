@@ -12,7 +12,7 @@ void main() {
         'ios/Runner/AppDelegate.swift',
       ).readAsStringSync();
       final kotlin = File(
-        'android/app/src/main/kotlin/com/example/body_intelligence_log/BILGlobalHealthBridge.kt',
+        'android/app/src/main/kotlin/com/kadem/bil/BILGlobalHealthBridge.kt',
       ).readAsStringSync();
       final activity = File(
         'android/app/src/main/kotlin/com/kadem/bil/MainActivity.kt',

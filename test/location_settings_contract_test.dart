@@ -16,7 +16,7 @@ void main() {
       source,
       contains("setOrRemove('timezoneName', timezoneController.text)"),
     );
-    expect(source, contains("repository.set(\n        'locationSource'"));
+    expect(source, contains("'locationSource',"));
     expect(source, contains('PlatformDispatcher.instance.locale'));
     expect(source, contains("key: const Key('location-city-field')"));
     expect(source, contains("key: const Key('location-timezone-field')"));

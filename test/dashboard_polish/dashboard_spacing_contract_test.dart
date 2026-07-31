@@ -44,10 +44,9 @@ void main() {
     expect(daily, contains('heading, const SizedBox(height: 6), carousel'));
     expect(
       grid,
-      contains(
-        'bodyProfile, const SizedBox(height: 12), Text( tr(\'Analytics\', \'التحليلات\')',
-      ),
+      contains('const SizedBox(height: PremiumDesignTokens.spaceMd)'),
     );
+    expect(grid, contains('DashboardAnalyticsCenter('));
 
     final diff = Process.runSync('git', <String>[
       'diff',
