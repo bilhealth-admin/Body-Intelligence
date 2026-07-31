@@ -11,7 +11,6 @@ import '../../../engine/what_changed_engine.dart';
 import '../../connected_health/widgets/connected_health_card.dart';
 import '../../../engine/nutrient_evidence_engine.dart';
 import '../../../app/theme/premium_design_tokens.dart';
-import '../../../shared/widgets/premium_surface.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../../analytics/analytics_page.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
@@ -26,14 +25,13 @@ export '../domain/dashboard_intelligence_composer.dart'
     show consecutiveLoggingDays;
 import '../domain/dashboard_runtime_state.dart';
 import '../providers/dashboard_provider.dart';
-import 'dashboard_carousel.dart';
 import 'dashboard_body_profile_snapshot.dart';
+import 'dashboard_daily_summary.dart';
 import 'dashboard_data_gate.dart';
 import 'dashboard_loading_skeleton.dart';
 import 'dashboard_motion_reveal.dart';
 import 'dashboard_meals_timeline.dart';
 import 'dashboard_water_card.dart';
-import 'dashboard_section_heading.dart';
 import 'nutrient_evidence_status_text.dart';
 import 'daily_return_card.dart';
 import 'premium_dashboard_benchmark.dart';
@@ -413,40 +411,40 @@ class DashboardGrid extends ConsumerWidget {
       decisionCount: memoriesAsync.value?.length ?? 0,
       compact: MediaQuery.sizeOf(context).width < 600,
     );
-    final progressSection = _DashboardPagedSection(
+    final progressSection = DashboardDailySummarySection(
       title: tr('Daily Summary', 'ملخص اليوم'),
       subtitle: tr(
         'Your recorded nutrition and active daily references.',
         'تغذيتك المسجلة ومراجع يومك النشطة.',
       ),
       badge: loggingStreak >= 2
-          ? _StreakBadge(days: loggingStreak, arabic: arabic)
+          ? DashboardStreakBadge(days: loggingStreak, arabic: arabic)
           : null,
       pages: [
-        _MetricGridPage(
+        DashboardMetricGridPage(
           metrics: [
-            _MetricData(
+            DashboardMetricData(
               Icons.local_fire_department_outlined,
               tr('Calories', 'السعرات'),
               meals.isEmpty ? '—' : calories.round().toString(),
               meals.isEmpty ? '' : 'kcal',
               Colors.orange,
             ),
-            _MetricData(
+            DashboardMetricData(
               Icons.fitness_center_outlined,
               tr('Protein', 'البروتين'),
               meals.isEmpty ? '—' : protein.round().toString(),
               meals.isEmpty ? '' : 'g',
               Colors.green,
             ),
-            _MetricData(
+            DashboardMetricData(
               Icons.opacity_outlined,
               tr('Fat', 'الدهون'),
               meals.isEmpty ? '—' : fats.round().toString(),
               meals.isEmpty ? '' : 'g',
               Colors.purple,
             ),
-            _MetricData(
+            DashboardMetricData(
               Icons.grass_outlined,
               tr('Fiber', 'الألياف'),
               fiberEvidence.total == null
@@ -457,16 +455,16 @@ class DashboardGrid extends ConsumerWidget {
             ),
           ],
         ),
-        _MetricGridPage(
+        DashboardMetricGridPage(
           metrics: [
-            _MetricData(
+            DashboardMetricData(
               Icons.bolt_outlined,
               tr('Daily Requirement', 'الاحتياج اليومي'),
               bil.tdee.round().toString(),
               'kcal',
               Colors.deepOrangeAccent,
             ),
-            _MetricData(
+            DashboardMetricData(
               Icons.monitor_weight_outlined,
               tr('Weight', 'الوزن'),
               UnitConverter.weightFromKg(
@@ -476,14 +474,14 @@ class DashboardGrid extends ConsumerWidget {
               UnitConverter.weightUnit(system),
               Colors.blue,
             ),
-            _MetricData(
+            DashboardMetricData(
               Icons.accessibility_new_rounded,
               tr('Body mass index', 'مؤشر كتلة الجسم'),
               compositionValue(bodyComposition.bodyMassIndex, unit: ''),
               bodyComposition.bodyMassIndex.isAvailable ? 'BMI' : '',
               Colors.cyan,
             ),
-            _MetricData(
+            DashboardMetricData(
               Icons.donut_large_rounded,
               tr('Body fat', 'نسبة دهون الجسم'),
               compositionValue(bodyComposition.bodyFatPercentage, unit: ''),
@@ -753,260 +751,6 @@ class DashboardGrid extends ConsumerWidget {
   }
 }
 
-class _DashboardPagedSection extends StatelessWidget {
-  const _DashboardPagedSection({
-    required this.title,
-    required this.subtitle,
-    required this.pages,
-    this.badge,
-  });
-
-  final String title;
-  final String subtitle;
-  final List<Widget> pages;
-  final Widget? badge;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, outerConstraints) {
-        final layout = DashboardComposition.pagedSection(
-          viewportWidth: MediaQuery.sizeOf(context).width,
-          contentWidth: outerConstraints.maxWidth,
-        );
-        final desktop = layout.isDesktop;
-        final baseHeight = layout.pagedSectionBaseHeight;
-        final heading = Row(
-          children: [
-            Expanded(
-              child: DashboardSectionHeading(title: title, subtitle: subtitle),
-            ),
-            if (badge != null) ...[
-              const SizedBox(width: PremiumDesignTokens.spaceSm),
-              badge!,
-            ],
-          ],
-        );
-        final carousel = DashboardCarousel(
-          height: MediaQuery.textScalerOf(
-            context,
-          ).scale(baseHeight).clamp(baseHeight, baseHeight + 90),
-          semanticLabel: title,
-          pages: pages,
-        );
-
-        return PremiumSurface(
-          dashboardGlass: true,
-          padding: desktop
-              ? const EdgeInsets.all(PremiumDesignTokens.spaceMd)
-              : PremiumDesignTokens.cardPaddingLarge,
-          child: desktop
-              ? Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(width: 235, child: heading),
-                    const SizedBox(width: PremiumDesignTokens.spaceMd),
-                    Expanded(child: carousel),
-                  ],
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    heading,
-                    const SizedBox(height: PremiumDesignTokens.spaceSm),
-                    carousel,
-                  ],
-                ),
-        );
-      },
-    );
-  }
-}
-
-class _MetricData {
-  const _MetricData(this.icon, this.label, this.value, this.unit, this.accent);
-
-  final IconData icon;
-  final String label;
-  final String value;
-  final String unit;
-  final Color accent;
-}
-
-class _MetricGridPage extends StatelessWidget {
-  const _MetricGridPage({required this.metrics});
-
-  final List<_MetricData> metrics;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final layout = DashboardComposition.metricGrid(
-          viewportWidth: MediaQuery.sizeOf(context).width,
-          contentWidth: constraints.maxWidth,
-          metricCount: metrics.length,
-        );
-        final columns = layout.metricColumns;
-        return GridView.builder(
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columns,
-            crossAxisSpacing: PremiumDesignTokens.spaceSm,
-            mainAxisSpacing: PremiumDesignTokens.spaceSm,
-            childAspectRatio: layout.metricChildAspectRatio,
-          ),
-          itemCount: metrics.length,
-          itemBuilder: (context, index) {
-            final metric = metrics[index];
-            return _CompactMetricTile(
-              icon: metric.icon,
-              label: metric.label,
-              value: metric.value,
-              unit: metric.unit,
-              accent: metric.accent,
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-class _CompactMetricTile extends StatelessWidget {
-  const _CompactMetricTile({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.unit,
-    required this.accent,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-  final String unit;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final layout = DashboardComposition.metricTile(
-      viewportWidth: MediaQuery.sizeOf(context).width,
-    );
-    final compact = layout.compactMetricTiles;
-    final phone = layout.isPhone;
-    return Container(
-      constraints: BoxConstraints(
-        minHeight: compact ? 124 : (phone ? 142 : 136),
-      ),
-      padding: EdgeInsets.all(
-        compact ? PremiumDesignTokens.spaceXs : PremiumDesignTokens.spaceSm,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(
-          context,
-        ).colorScheme.surfaceContainerHighest.withValues(alpha: .26),
-        borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusLg),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: compact ? 16 : 20, color: accent),
-              const SizedBox(width: PremiumDesignTokens.spaceXs),
-              Expanded(
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.visible,
-                  style:
-                      (compact
-                              ? Theme.of(context).textTheme.labelMedium
-                              : Theme.of(context).textTheme.titleSmall)
-                          ?.copyWith(fontWeight: FontWeight.w800, height: 1.25),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: compact ? 1 : 8),
-          Expanded(
-            child: Center(
-              child: Directionality(
-                textDirection: TextDirection.ltr,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        value,
-                        textAlign: TextAlign.center,
-                        style:
-                            (compact
-                                    ? Theme.of(context).textTheme.titleLarge
-                                    : Theme.of(context).textTheme.headlineSmall)
-                                ?.copyWith(fontWeight: FontWeight.w900),
-                      ),
-                      if (unit.isNotEmpty) ...[
-                        const SizedBox(width: PremiumDesignTokens.spaceXs),
-                        Text(
-                          unit,
-                          maxLines: 1,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                height: 1.1,
-                                fontWeight: FontWeight.w700,
-                              ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StreakBadge extends StatelessWidget {
-  const _StreakBadge({required this.days, required this.arabic});
-
-  final int days;
-  final bool arabic;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: PremiumDesignTokens.spaceSm,
-        vertical: PremiumDesignTokens.spaceXs,
-      ),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: BorderRadius.circular(99),
-      ),
-      child: Text(
-        arabic ? '$days أيام متتالية' : '$days day streak',
-        style: Theme.of(
-          context,
-        ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w800),
-      ),
-    );
-  }
-}
-
-// ignore: unused_element
 class _DetailPanel extends StatelessWidget {
   const _DetailPanel({
     required this.icon,

@@ -7,11 +7,14 @@ void main() {
     final grid = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
+    final dailySummary = File(
+      'lib/features/dashboard/widgets/dashboard_daily_summary.dart',
+    ).readAsStringSync();
     final heading = File(
       'lib/features/dashboard/widgets/dashboard_section_heading.dart',
     ).readAsStringSync();
 
-    expect(grid, contains('DashboardSectionHeading('));
+    expect(dailySummary, contains('DashboardSectionHeading('));
     expect(grid, contains("title: tr('Daily Summary', 'ملخص اليوم')"));
     expect(
       heading,
