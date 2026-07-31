@@ -19,6 +19,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
     this.missingEvidence = '',
     this.abstentionReason,
     required this.onAction,
+    this.onExplain,
     this.onAccepted,
     this.onDone,
     this.onNotSuitable,
@@ -47,6 +48,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
   final String missingEvidence;
   final String? abstentionReason;
   final VoidCallback? onAction;
+  final VoidCallback? onExplain;
   final VoidCallback? onAccepted;
   final VoidCallback? onDone;
   final VoidCallback? onNotSuitable;
@@ -93,7 +95,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
         interpretation: insightSummary ?? actionReason,
         evidence: actionEvidence,
         accent: const Color(0xFF58D8FF),
-        onTap: onAction,
+        onTap: phone ? onAction : (onExplain ?? onAction),
       ),
     ];
 
@@ -237,6 +239,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
                 missingEvidence: missingEvidence,
                 abstentionReason: abstentionReason,
                 onAction: onAction,
+                onExplain: onExplain,
                 onAccepted: onAccepted,
                 onDone: onDone,
                 onNotSuitable: onNotSuitable,
@@ -445,6 +448,7 @@ class _MobileCommandCenter extends StatelessWidget {
     required this.missingEvidence,
     required this.abstentionReason,
     required this.onAction,
+    required this.onExplain,
     required this.onAccepted,
     required this.onDone,
     required this.onNotSuitable,
@@ -459,6 +463,7 @@ class _MobileCommandCenter extends StatelessWidget {
   final String missingEvidence;
   final String? abstentionReason;
   final VoidCallback? onAction;
+  final VoidCallback? onExplain;
   final VoidCallback? onAccepted;
   final VoidCallback? onDone;
   final VoidCallback? onNotSuitable;
@@ -519,6 +524,14 @@ class _MobileCommandCenter extends StatelessWidget {
                 arabic: arabic,
               ),
             const SizedBox(height: PremiumDesignTokens.spaceMd),
+            OutlinedButton.icon(
+              key: const Key('dashboard-explain-decision'),
+              onPressed: onExplain,
+              icon: const Icon(Icons.fact_check_outlined),
+              label: Text(
+                arabic ? 'اعرض تفاصيل القرار' : 'View decision details',
+              ),
+            ),
             Semantics(
               label: arabic
                   ? 'اكتمال التسجيل: $recorded من ${loggingItems.length}'

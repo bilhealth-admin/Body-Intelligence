@@ -6,6 +6,8 @@ import '../../features/auth/account_gateway_page.dart';
 import '../../features/daily_log/daily_log_page.dart';
 import '../../features/daily_check_in/daily_check_in_page.dart';
 import '../../features/dashboard/dashboard_page.dart';
+import '../../features/dashboard/domain/dashboard_decision_explanation.dart';
+import '../../features/dashboard/presentation/dashboard_decision_explanation_page.dart';
 import '../../features/history/history_page.dart';
 import '../../features/experiments/experiments_page.dart';
 import '../../features/challenges/challenges_page.dart';
@@ -69,6 +71,14 @@ class AppRouter {
         builder: (_, _, child) => ResponsiveAppShell(child: child),
         routes: [
           GoRoute(path: '/dashboard', builder: (_, _) => const DashboardPage()),
+          GoRoute(
+            path: '/dashboard/decision-explanation',
+            builder: (_, state) => DashboardDecisionExplanationPage(
+              explanation: state.extra is DashboardDecisionExplanation
+                  ? state.extra! as DashboardDecisionExplanation
+                  : null,
+            ),
+          ),
           GoRoute(
             path: '/daily-log',
             builder: (_, state) => DailyLogPage(

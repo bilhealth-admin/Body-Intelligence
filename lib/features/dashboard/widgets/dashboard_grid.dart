@@ -16,6 +16,8 @@ import '../../weight/providers/weight_provider.dart';
 import '../composition/dashboard_command_coordinator.dart';
 import '../composition/dashboard_intelligence_input_adapter.dart';
 import '../domain/dashboard_intelligence_composer.dart';
+import '../domain/dashboard_decision_explanation.dart';
+import '../domain/dashboard_trusted_truth_decision_adapter.dart';
 export '../domain/dashboard_intelligence_composer.dart'
     show consecutiveLoggingDays;
 import '../domain/dashboard_runtime_state.dart';
@@ -159,6 +161,30 @@ class DashboardGrid extends ConsumerWidget {
     final localizedChanged = localizer.changedSummary(changed);
     final primaryInsight = intelligence.insights.first;
     final localizedInsightTitle = localizer.insightTitle(primaryInsight.title);
+    final localizedActionEvidence = bestAction.evidence.isEmpty
+        ? tr('Evidence is still forming', 'الأدلة لا تزال قيد التكوين')
+        : arabic
+        ? 'يستند إلى بياناتك المحلية المسجلة المتاحة.'
+        : bestAction.evidence.join(' · ');
+    final localizedConfidence = switch (honesty.reliability) {
+      DataReliability.insufficient => tr(
+        'Insufficient evidence',
+        'الأدلة غير كافية',
+      ),
+      DataReliability.emerging => tr('Emerging', 'قيد التكوين'),
+      DataReliability.useful => tr('Useful', 'مفيدة'),
+      DataReliability.strong => tr('Strong', 'قوية'),
+    };
+    final decisionExplanation = DashboardDecisionExplanation(
+      actionType: bestAction.type.name,
+      title: localizedBestTitle,
+      reason: localizedBestReason,
+      evidence: bestAction.evidence,
+      confidence: localizedConfidence,
+      missingEvidence: honesty.missing,
+      engineVersion: DashboardTrustedTruthDecisionAdapter.engineVersion,
+      inputSources: DashboardTrustedTruthDecisionAdapter.inputEvidenceKeys,
+    );
 
     Future<void> addWater(int amountMl) async {
       await hydrationCommand.addWater(amountMl);
@@ -320,20 +346,15 @@ class DashboardGrid extends ConsumerWidget {
             showRecommendation: bestAction.type == BestActionType.protein,
             actionTitle: localizedBestTitle,
             actionReason: localizedBestReason,
-            actionEvidence: bestAction.evidence.isEmpty
-                ? tr('Evidence is still forming', 'الأدلة لا تزال قيد التكوين')
-                : arabic
-                ? 'يستند إلى بياناتك المحلية المسجلة المتاحة.'
-                : bestAction.evidence.join(' · '),
-            confidence: switch (honesty.reliability) {
-              DataReliability.insufficient => tr(
-                'Insufficient evidence',
-                'الأدلة غير كافية',
-              ),
-              DataReliability.emerging => tr('Emerging', 'قيد التكوين'),
-              DataReliability.useful => tr('Useful', 'مفيدة'),
-              DataReliability.strong => tr('Strong', 'قوية'),
-            },
+            actionEvidence: localizedActionEvidence,
+            confidence: localizedConfidence,
+            missingEvidence: honesty.missing.isEmpty
+                ? ''
+                : honesty.missing.join(' · '),
+            onExplain: () => context.push(
+              '/dashboard/decision-explanation',
+              extra: decisionExplanation,
+            ),
             onAction: dailyReturn.hasPrimaryAction
                 ? () {
                     switch (bestAction.type) {
