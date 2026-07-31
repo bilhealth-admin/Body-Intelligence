@@ -60,3 +60,9 @@ test/failures/
 
 # BIL package backups
 .bil-package-backups/
+
+# BIL local evidence and signing secrets
+.bil-package-evidence/
+key.properties
+*.jks
+*.keystore
