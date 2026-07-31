@@ -15,9 +15,11 @@ void main() {
       final surface = File(
         'lib/shared/widgets/premium_surface.dart',
       ).readAsStringSync();
+      final compactSurface = surface.replaceAll(RegExp(r'\s+'), '');
 
       for (final contract in <String>[
         'dashboardCardBorderWidth = 1',
+        'dashboardCardHighContrastBorderWidth = 2',
         'dashboardCardHoverScale = 1.004',
         'dashboardCardPressedScale = .992',
         'dashboardCardShadowBlur = 22',
@@ -43,6 +45,7 @@ void main() {
 
       for (final contract in <String>[
         'BilPremiumVisualFoundation.dashboardCardBorderWidth',
+        'BilPremiumVisualFoundation.dashboardCardHighContrastBorderWidth',
         'BilPremiumVisualFoundation.dashboardCardHoverScale',
         'BilPremiumVisualFoundation.dashboardCardPressedScale',
         'BilPremiumVisualFoundation.dashboardCardShadowBlur',
@@ -72,7 +75,7 @@ void main() {
         'dashboardCardInnerHighlightAlpha',
       ]) {
         expect(
-          surface,
+          compactSurface,
           contains(contract),
           reason: 'Surface does not use: $contract',
         );
