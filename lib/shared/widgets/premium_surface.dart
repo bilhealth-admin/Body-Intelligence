@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import '../../app/theme/premium_design_tokens.dart';
 import '../../app/theme/premium_motion_tokens.dart';
 
+enum PremiumSurfaceLevel { primary, supporting, detail }
+
 class PremiumSurface extends StatefulWidget {
   const PremiumSurface({
     super.key,
@@ -14,6 +16,7 @@ class PremiumSurface extends StatefulWidget {
     this.semanticContainer = true,
     this.emphasized = false,
     this.dashboardGlass = false,
+    this.level = PremiumSurfaceLevel.supporting,
   });
 
   final Widget child;
@@ -22,6 +25,7 @@ class PremiumSurface extends StatefulWidget {
   final bool semanticContainer;
   final bool emphasized;
   final bool dashboardGlass;
+  final PremiumSurfaceLevel level;
 
   @override
   State<PremiumSurface> createState() => _PremiumSurfaceState();
@@ -30,6 +34,20 @@ class PremiumSurface extends StatefulWidget {
 class _PremiumSurfaceState extends State<PremiumSurface> {
   bool hovered = false;
   bool pressed = false;
+
+  bool get _primary =>
+      widget.emphasized || widget.level == PremiumSurfaceLevel.primary;
+
+  bool get _detail => widget.level == PremiumSurfaceLevel.detail;
+
+  double _hierarchyValue(double value) {
+    if (_detail) return value * .72;
+    if (_primary) return value * 1.12;
+    return value;
+  }
+
+  Color _hierarchyColor(Color color) =>
+      _detail ? Color.lerp(Colors.transparent, color, .62)! : color;
 
   @override
   Widget build(BuildContext context) {
@@ -84,14 +102,14 @@ class _PremiumSurfaceState extends State<PremiumSurface> {
                 filter: ImageFilter.blur(
                   sigmaX: widget.dashboardGlass
                       ? (dark
-                            ? (widget.emphasized ? 18 : 14)
-                            : (widget.emphasized ? 12 : 8))
-                      : (widget.emphasized ? 26 : 20),
+                            ? (_primary ? 18 : (_detail ? 10 : 14))
+                            : (_primary ? 12 : (_detail ? 6 : 8)))
+                      : (_primary ? 26 : (_detail ? 14 : 20)),
                   sigmaY: widget.dashboardGlass
                       ? (dark
-                            ? (widget.emphasized ? 18 : 14)
-                            : (widget.emphasized ? 12 : 8))
-                      : (widget.emphasized ? 26 : 20),
+                            ? (_primary ? 18 : (_detail ? 10 : 14))
+                            : (_primary ? 12 : (_detail ? 6 : 8)))
+                      : (_primary ? 26 : (_detail ? 14 : 20)),
                 ),
                 child: AnimatedContainer(
                   duration: PremiumMotionTokens.durationFor(
@@ -120,13 +138,21 @@ class _PremiumSurfaceState extends State<PremiumSurface> {
                               ),
                               const Color(0xFF58D7FF).withValues(
                                 alpha: widget.dashboardGlass
-                                    ? (widget.emphasized ? .052 : .024)
-                                    : (widget.emphasized ? .065 : .032),
+                                    ? (_primary
+                                          ? .052
+                                          : (_detail ? .014 : .024))
+                                    : (_primary
+                                          ? .065
+                                          : (_detail ? .018 : .032)),
                               ),
                               const Color(0xFF7B60FF).withValues(
                                 alpha: widget.dashboardGlass
-                                    ? (widget.emphasized ? .046 : .020)
-                                    : (widget.emphasized ? .060 : .028),
+                                    ? (_primary
+                                          ? .046
+                                          : (_detail ? .012 : .020))
+                                    : (_primary
+                                          ? .060
+                                          : (_detail ? .016 : .028)),
                               ),
                               Colors.white.withValues(
                                 alpha: widget.dashboardGlass ? .010 : .016,
@@ -144,15 +170,18 @@ class _PremiumSurfaceState extends State<PremiumSurface> {
                         : null,
                     boxShadow: [
                       BoxShadow(
-                        color:
-                            PremiumDesignTokens.dashboardCardAccentShadowColor(
-                              Theme.of(context).brightness,
-                              hovered: hovered,
-                              emphasized: widget.emphasized,
-                            ),
+                        color: _hierarchyColor(
+                          PremiumDesignTokens.dashboardCardAccentShadowColor(
+                            Theme.of(context).brightness,
+                            hovered: hovered,
+                            emphasized: _primary,
+                          ),
+                        ),
                         blurRadius: widget.dashboardGlass
-                            ? PremiumDesignTokens.dashboardCardAccentBlur
-                            : (widget.emphasized ? 38 : 28),
+                            ? _hierarchyValue(
+                                PremiumDesignTokens.dashboardCardAccentBlur,
+                              )
+                            : _hierarchyValue(_primary ? 38 : 28),
                         spreadRadius: -12,
                       ),
                       BoxShadow(
@@ -163,9 +192,11 @@ class _PremiumSurfaceState extends State<PremiumSurface> {
                             : dark
                             ? Colors.black.withValues(alpha: .24)
                             : const Color(0xFF315D88).withValues(alpha: .14),
-                        blurRadius: widget.dashboardGlass
-                            ? PremiumDesignTokens.dashboardCardShadowBlur
-                            : 22,
+                        blurRadius: _hierarchyValue(
+                          widget.dashboardGlass
+                              ? PremiumDesignTokens.dashboardCardShadowBlur
+                              : 22,
+                        ),
                         offset: Offset(
                           0,
                           widget.dashboardGlass

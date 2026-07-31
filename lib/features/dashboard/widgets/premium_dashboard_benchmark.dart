@@ -303,6 +303,7 @@ class _MobileBodyTwinSnapshot extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return PremiumSurface(
       key: const Key('dashboard-mobile-body-twin-snapshot'),
+      level: PremiumSurfaceLevel.detail,
       dashboardGlass: true,
       padding: PremiumDesignTokens.cardPaddingLarge,
       child: Column(
@@ -482,6 +483,7 @@ class _MobileCommandCenter extends StatelessWidget {
           : 'One best action: $actionTitle. $actionReason. Confidence: $confidence.',
       child: PremiumSurface(
         key: const Key('dashboard-mobile-command-center'),
+        level: PremiumSurfaceLevel.primary,
         semanticContainer: false,
         padding: PremiumDesignTokens.cardPaddingLarge,
         child: Column(
