@@ -1,0 +1,4 @@
+"NSHealthShareUsageDescription" = "يقرأ BIL بياناتك الصحية فقط بعد موافقتك الصريحة لبناء سجلك الصحي الخاص على هذا الجهاز.";
+"NSHealthUpdateUsageDescription" = "يكتب BIL فقط السجلات الصحية التي تختارها صراحةً وبعد موافقة منفصلة على الكتابة.";
+"NSBluetoothAlwaysUsageDescription" = "يتصل BIL فقط بالأجهزة الصحية التي تقرنها بنفسك لاستيراد القياسات محليًا.";
+"NSBluetoothPeripheralUsageDescription" = "يتصل BIL فقط بالأجهزة الصحية التي تقرنها بنفسك لاستيراد القياسات محليًا.";

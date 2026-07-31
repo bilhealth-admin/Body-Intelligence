@@ -1,12 +1,11 @@
 {
-    "name": "body_intelligence_log",
-    "short_name": "body_intelligence_log",
+    "name": "BIL – Body Intelligence Log",
+    "short_name": "BIL",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#F4F7FA",
+    "theme_color": "#10253F",
+    "description": "Private, offline-first body intelligence with explainable local insights.",
     "prefer_related_applications": false,
     "icons": [
         {

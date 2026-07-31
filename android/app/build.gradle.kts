@@ -1,12 +1,28 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val releaseSigningPropertiesFile = rootProject.file("key.properties")
+val releaseSigningProperties = Properties()
+val hasReleaseSigning = releaseSigningPropertiesFile.isFile
+
+if (hasReleaseSigning) {
+    FileInputStream(releaseSigningPropertiesFile).use(releaseSigningProperties::load)
+    val requiredKeys = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
+    val missingKeys = requiredKeys.filter { releaseSigningProperties.getProperty(it).isNullOrBlank() }
+    require(missingKeys.isEmpty()) {
+        "Android release signing configuration is incomplete. Missing: ${missingKeys.joinToString()}"
+    }
+}
+
 android {
-    namespace = "com.example.body_intelligence_log"
-    compileSdk = flutter.compileSdkVersion
+    namespace = "com.kadem.bil"
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -15,21 +31,30 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.body_intelligence_log"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        applicationId = "com.kadem.bil"
+        // Health Connect 1.1.0 requires Android 8.0 (API 26).
+        minSdk = 26
+        targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = rootProject.file(releaseSigningProperties.getProperty("storeFile"))
+                storePassword = releaseSigningProperties.getProperty("storePassword")
+                keyAlias = releaseSigningProperties.getProperty("keyAlias")
+                keyPassword = releaseSigningProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Never sign a production release with the debug key. Until a private
+            // key.properties file is supplied, Gradle produces an unsigned release.
+            signingConfig = if (hasReleaseSigning) signingConfigs.getByName("release") else null
         }
     }
 }
@@ -42,4 +67,8 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    implementation("androidx.health.connect:connect-client:1.1.0")
 }

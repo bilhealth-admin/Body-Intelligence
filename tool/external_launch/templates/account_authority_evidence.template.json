@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "gate": "legal_owner_and_developer_account_authority",
+  "owner": {
+    "enrollment_type": "REQUIRED: individual|organization",
+    "legal_name": "REQUIRED",
+    "country_or_region": "REQUIRED"
+  },
+  "google_play": {
+    "account_status": "REQUIRED: active|pending|not_started",
+    "developer_account_id": "REQUIRED_WHEN_ACTIVE",
+    "payment_reference": "REQUIRED_WHEN_ACTIVE",
+    "identity_verification": "REQUIRED: verified|pending|not_started",
+    "evidence_captured_at_utc": "REQUIRED_WHEN_ACTIVE"
+  },
+  "apple_developer": {
+    "membership_status": "REQUIRED: active|pending|not_started",
+    "team_id": "REQUIRED_WHEN_ACTIVE",
+    "payment_reference": "REQUIRED_WHEN_ACTIVE",
+    "account_holder_authority": "REQUIRED: verified|pending|not_started",
+    "agreements_status": "REQUIRED: accepted|pending|not_started",
+    "evidence_captured_at_utc": "REQUIRED_WHEN_ACTIVE"
+  },
+  "secrets_included": false
+}

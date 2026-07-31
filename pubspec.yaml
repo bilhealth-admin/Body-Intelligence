@@ -1,5 +1,5 @@
 name: body_intelligence_log
-description: "A new Flutter project."
+description: "Private, explainable body intelligence and nutrition tracking."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -38,13 +38,25 @@ dependencies:
   go_router: ^17.3.0
   drift: ^2.34.2
   sqlite3_flutter_libs: ^0.6.0+eol
+  sqlite3: ^3.4.0
   path_provider: ^2.1.6
   path: ^1.9.1
+  shared_preferences: ^2.5.5
+  crypto: ^3.0.6
+  archive: ^4.0.7
+  pdf: ^3.11.3
   supabase_flutter: ^2.16.0
+  flutter_svg: ^2.2.0
+  share_plus: ^13.2.1
+  flutter_localizations:
+    sdk: flutter
+  country_picker: ^2.0.28
+  flutter_timezone: ^5.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  path_provider_platform_interface: ^2.0.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -54,17 +66,68 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   build_runner: ^2.15.1
   drift_dev: ^2.34.0
+  flutter_launcher_icons: ^0.14.4
+  change_app_package_name: ^1.5.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-
+  assets:
+    - assets/images/v10_master/bil_hologram_master.png
+    - assets/images/v10_master/bil_hdr_starfield_master.png
+    - assets/images/backgrounds/bil_hdr_space_v10.webp
+    - assets/images/onboarding/bil_body_hologram_v10.webp
+    - assets/images/branding/bil_logo_silver_v10.webp
+    - assets/images/v9/v9_hologram.webp
+    - assets/images/v9/v9_logo_registered.webp
+    - assets/images/v9/v9_glow_rings.webp
+    - assets/images/v9/v9_hdr_background.webp
+    - assets/images/branding/bil_logo_registered_v8.webp
+    - assets/images/v10_final/bil_logo_metallic_transparent.png
+    - assets/images/v10_final/bil_hologram_transparent.png
+    - assets/images/onboarding/bil_body_hologram_v8.webp
+    - assets/images/onboarding/bil_body_hologram.webp
+    - assets/images/dashboard/bil_body_profile.svg
+    - assets/fonts/NotoNaskhArabic-Regular.ttf
+    - assets/fonts/NotoNaskhArabic-Bold.ttf
+    - assets/fonts/OFL.txt
+    - lib/l10n/app_en.arb
+    - lib/l10n/app_ar.arb
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  fonts:
+    - family: NotoNaskhArabic
+      fonts:
+        - asset: assets/fonts/NotoNaskhArabic-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/NotoNaskhArabic-Bold.ttf
+          weight: 700
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/branding/bil_icon_master.png
+  remove_alpha_ios: true
+  adaptive_icon_background: "#10253F"
+  adaptive_icon_foreground: assets/branding/bil_icon_master.png
+  adaptive_icon_foreground_inset: 20
+  web:
+    generate: true
+    image_path: assets/branding/bil_icon_master.png
+    background_color: "#F4F7FA"
+    theme_color: "#10253F"
+  windows:
+    generate: true
+    image_path: assets/branding/bil_icon_master.png
+    icon_size: 256
+  macos:
+    generate: true
+    image_path: assets/branding/bil_icon_master.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -96,3 +159,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+
+
+
+
+
+

@@ -1,0 +1,14 @@
+﻿Required files PASSED
+Dart format gate PASSED
+Flutter analyze PASSED
+P9-R9 paired-deck surface contracts PASSED
+Dashboard runtime layout contracts PASSED
+Dashboard live Health Hub contracts PASSED
+Dashboard regression contracts PASSED
+Generated Flutter registrants cleanup PASSED
+Shared deck shell PASSED  One geometry implementation for both paired cards
+Nutrition surface source PASSED  Nutrition Signal implementation left unchanged
+Inner surface parity PASSED  All paired-deck cards use the exact Nutrition Signal gradient border and shadow
+Header alignment PASSED  Identical reserved title and subtitle slot
+Inner deck alignment PASSED  Matching card bounds arrows and pager baseline
+BIL-DASHBOARD-POLISH-001-P9-R9 PASSED  Paired insight decks and shared surface verified

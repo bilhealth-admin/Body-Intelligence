@@ -3,8 +3,5 @@ class DailyScore {
 
   final String message;
 
-  const DailyScore({
-    required this.score,
-    required this.message,
-  });
+  const DailyScore({required this.score, required this.message});
 }

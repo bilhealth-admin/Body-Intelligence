@@ -43,3 +43,20 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# BIL local backup markers
+.bil_*.txt
+
+# Local delivery and review bundles
+*.zip
+
+# Local runtime/debug evidence
+latest_error.txt
+runtime_error.txt
+test/failures/
+
+# Platform-generated caches
+.gradle/
+
+# BIL package backups
+.bil-package-backups/

@@ -1,0 +1,79 @@
+# BIL Execution Ledger
+
+## Authoritative execution baseline
+
+- Branch: `phase-3-product-excellence`
+- Baseline HEAD: `9bc3b524a476280209e324637c9ac78de14daa44`
+- Ledger synchronization package: `BIL-DOC-001`
+
+## Stage closure ledger
+
+| Stage | Status | Acceptance basis |
+|---|---|---|
+| Foundation | **Closed** | Accepted production foundations and regression protection |
+| Nutrition Platform | **Closed** | Accepted nutrition domain, repository, logging, and explainability capabilities |
+| AI Platform | **Closed** | Accepted deterministic engines, safety, explainability, and closure boundary |
+| BIL Intelligence Integration | **Closed** | Accepted cross-engine integration and Unified Health Brain |
+| BIL Intelligence Reality Closure | **Closed** | Accepted local adapters, canonical runtime, behavioral output, and safe-abstention gates |
+| Cloud Platform Core | **Closed** | Accepted durable provider-neutral offline-first Cloud Core and full verification |
+
+## Active ledger state
+
+There is no active AI, Intelligence Reality, or Cloud Core workstream. All packages from those streams are closed and committed.
+
+The next ledger entry must be created only after the Product Owner authorizes the post-Cloud phase and supplies its package identifier and scope.
+
+## Historical record policy
+
+Detailed package-by-package records remain available in Git history and package archives. Historical parent HEAD values are archival evidence only and do not supersede the authoritative baseline recorded above.
+
+## BIL-GLOBAL-001-FINAL verification candidate
+
+- Branch: `phase-3-product-excellence`
+- Parent HEAD: `9bc3b524a476280209e324637c9ac78de14daa44`
+- Status: **Awaiting Product Owner VERIFY; not yet adopted or committed.**
+- Engineering scope: final product composition, wearable payload preservation, native BLE session closure, embedded Arabic reporting, plugin runtime proof, commerce capability honesty, and evidence synchronization.
+- External gates: iOS/macOS build and representative device/provider certification remain explicitly separate.
+- Samsung wearable integration is not present in the production catalog and remains `Not Implemented`; no readiness claim is made.
+
+## BIL-FOOD-002 — Resumable Raw / Master Importer
+
+- Parent baseline: `af9758bdb68018c5ea030476944904e201315698`.
+- Scope: direct ZIP streaming, source manifests, per-member row checkpoints, bounded SQLite transactions, safe interruption, resume, idempotency, integrity reports, and build indexes.
+- Excluded: canonical BIL Food identity assignment, quality scoring, deduplication, mobile delivery databases, Flutter, repository wiring, search, and barcode resolver.
+- Verification delivered: synthetic interruption/resume and idempotency tests; real USDA ZIP integrity/header inspection. Full multi-million-row import remains a local execution gate.
+
+
+## BIL-FOOD-003 candidate
+
+- Canonical source-neutral schema and stable BIL-owned food identity.
+- Source mappings, nutrient evidence, portions, barcode claims, and merge lineage.
+- Build-time SQLite only; no mobile database or Flutter integration.
+
+## BIL-FOOD-004 — candidate delivery
+
+- Parent: `c1e074c21548ca63c9d48679e7774fcac9ef3512`
+- Decision: separate normalization/quality from deduplication to preserve package isolation and reviewability.
+- Production: `quality_engine.py`, `run_quality_assessment.py`.
+- Tests: deterministic normalization, policy validation, acceptance, hard rejects, persistence, and scope protection.
+- Adoption: pending Product Owner execution and commit.
+
+
+## BIL-FOOD-005 — Deduplication and Canonicalization
+
+Implemented explainable duplicate decisions, conservative automatic merge gates, conflict preservation, deterministic survivor/field selection, and merge lineage. No mobile catalog, search, or Flutter integration is introduced. Next package: BIL-FOOD-006 — Mobile Catalog Builder.
+
+
+## BIL-FOOD-006 — Mobile Catalog Builder
+
+Build-time derivation of compact, profile-driven mobile catalogs from accepted canonical foods. Master evidence remains outside delivery databases. Parent baseline: `14c6cdce71a23b22d9304b2e7b32d1270050da8c`. Next package: BIL-FOOD-007 — FoodRepository and Offline Search Foundation.
+
+## BIL-FOOD-007
+
+- Parent: `a60ceb33ca548fea966cea50a8b98818744d899b`
+- Scope: read-only BIL mobile catalog repository, UnifiedFood adapter, offline search, barcode resolution.
+- Boundary: no USDA schema, no write operations, no activation/rollback.
+
+## BIL-FOOD-008
+
+Catalog activation and version management added: integrity-gated activation, immutable version directories, atomic registry replacement, compatibility checks, and rollback. Cloud distribution and remote update transport remain out of scope.

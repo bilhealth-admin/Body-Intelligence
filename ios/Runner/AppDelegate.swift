@@ -12,5 +12,7 @@ import UIKit
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    BILGlobalHealthBridge.register(with: engineBridge.pluginRegistry.registrar(forPlugin: "BILGlobalHealthBridge")!)
+    BILMedicalBleBridge.register(with: engineBridge.pluginRegistry.registrar(forPlugin: "BILMedicalBleBridge")!)
   }
 }

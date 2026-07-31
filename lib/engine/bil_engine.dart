@@ -38,10 +38,7 @@ class BILEngine {
       activityLevel: profile.activityLevel,
     );
 
-    final targets = NutritionEngine.calculate(
-      profile: profile,
-      tdee: tdee,
-    );
+    final targets = NutritionEngine.calculate(profile: profile, tdee: tdee);
 
     final waterTarget = HydrationEngine.calculate(profile);
 

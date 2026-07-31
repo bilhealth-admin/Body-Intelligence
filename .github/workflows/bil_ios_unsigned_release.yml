@@ -1,0 +1,58 @@
+name: BIL iOS unsigned release validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unsigned-ios-release:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout accepted source
+        uses: actions/checkout@v4
+
+      - name: Install Flutter stable from the official repository
+        shell: bash
+        run: |
+          git clone --depth 1 --branch stable https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+
+      - name: Resolve Flutter and iOS dependencies
+        shell: bash
+        run: |
+          flutter --version
+          flutter config --no-analytics
+          flutter precache --ios
+          flutter pub get
+
+      - name: Analyze accepted source
+        run: flutter analyze
+
+      - name: Build unsigned iOS release application
+        run: flutter build ios --release --no-codesign
+
+      - name: Capture unsigned artifact evidence
+        shell: bash
+        run: |
+          test -d build/ios/iphoneos/Runner.app
+          ditto -c -k --sequesterRsrc --keepParent build/ios/iphoneos/Runner.app BIL-Runner-unsigned.zip
+          shasum -a 256 BIL-Runner-unsigned.zip | tee BIL-Runner-unsigned.sha256
+          stat -f '%z' BIL-Runner-unsigned.zip | tee BIL-Runner-unsigned.size
+          git rev-parse HEAD | tee BIL-source-head.txt
+          printf '%s\n' 'UNSIGNED_VALIDATION_ONLY' > BIL-signing-status.txt
+
+      - name: Upload unsigned validation evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: bil-ios-unsigned-validation-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            BIL-Runner-unsigned.zip
+            BIL-Runner-unsigned.sha256
+            BIL-Runner-unsigned.size
+            BIL-source-head.txt
+            BIL-signing-status.txt

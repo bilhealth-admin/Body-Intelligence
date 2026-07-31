@@ -1,0 +1,482 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../data/database/app_database.dart';
+import 'providers/user_profile_provider.dart';
+
+class ProfileSettingsPage extends ConsumerStatefulWidget {
+  const ProfileSettingsPage({super.key});
+
+  @override
+  ConsumerState<ProfileSettingsPage> createState() =>
+      _ProfileSettingsPageState();
+}
+
+class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
+  final formKey = GlobalKey<FormState>();
+  final age = TextEditingController();
+  final height = TextEditingController();
+  final weight = TextEditingController();
+  final target = TextEditingController();
+
+  String gender = 'male';
+  String activity = 'moderate';
+  bool exercises = true;
+  int weeklyExerciseSessions = 3;
+  String exerciseType = 'mixed';
+  String dietApproach = 'balanced';
+  bool experiencePreferencesLoaded = false;
+  bool initialized = false;
+  bool saving = false;
+  bool dirty = false;
+
+  @override
+  void dispose() {
+    age.dispose();
+    height.dispose();
+    weight.dispose();
+    target.dispose();
+    super.dispose();
+  }
+
+  void hydrate(UserProfileData profile) {
+    if (initialized) return;
+    initialized = true;
+    gender = profile.gender;
+    activity = profile.activityLevel;
+    exercises = profile.exercises;
+    age.text = profile.age.toString();
+    height.text = profile.height.toStringAsFixed(1);
+    weight.text = profile.currentWeight.toStringAsFixed(1);
+    target.text = profile.targetWeight.toStringAsFixed(1);
+    unawaited(_loadExperiencePreferences());
+  }
+
+  Future<void> _loadExperiencePreferences() async {
+    if (experiencePreferencesLoaded) return;
+    experiencePreferencesLoaded = true;
+    final repository = ref.read(preferencesRepositoryProvider);
+    final values = await Future.wait([
+      repository.get('weeklyExerciseSessions'),
+      repository.get('exerciseType'),
+      repository.get('dietApproach'),
+    ]);
+    if (!mounted) return;
+    setState(() {
+      weeklyExerciseSessions = int.tryParse(values[0] ?? '') ?? 3;
+      exerciseType = values[1] ?? 'mixed';
+      dietApproach = values[2] ?? 'balanced';
+    });
+  }
+
+  String? validate(String? value, double min, double max) {
+    final parsed = double.tryParse((value ?? '').replaceAll(',', '.'));
+    return parsed == null || parsed < min || parsed > max
+        ? '$min – $max'
+        : null;
+  }
+
+  Future<void> leave() async {
+    if (dirty) {
+      final ar = Localizations.localeOf(context).languageCode == 'ar';
+      final discard = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(ar ? 'تجاهل التغييرات؟' : 'Discard changes?'),
+          content: Text(
+            ar ? 'لديك تغييرات لم تُحفظ.' : 'You have unsaved changes.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(ar ? 'متابعة التعديل' : 'Keep editing'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(ar ? 'تجاهل' : 'Discard'),
+            ),
+          ],
+        ),
+      );
+      if (discard != true || !mounted) return;
+    }
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/settings');
+    }
+  }
+
+  Future<void> save(UserProfileData profile) async {
+    if (!(formKey.currentState?.validate() ?? false)) return;
+    setState(() => saving = true);
+    try {
+      final currentWeight = double.parse(weight.text.replaceAll(',', '.'));
+      final targetWeight = double.parse(target.text.replaceAll(',', '.'));
+      await ref
+          .read(userProfileRepositoryProvider)
+          .save(
+            gender: gender,
+            age: int.parse(age.text),
+            height: double.parse(height.text.replaceAll(',', '.')),
+            currentWeight: currentWeight,
+            targetWeight: targetWeight,
+            activityLevel: activity,
+            exercises: exercises,
+            medicalConditions: profile.medicalConditions,
+            waist: profile.waist,
+            neck: profile.neck,
+            chest: profile.chest,
+            arm: profile.arm,
+            thigh: profile.thigh,
+          );
+      final activeGoal = ref.read(activeGoalProvider).value;
+      await ref
+          .read(goalRepositoryProvider)
+          .save(
+            uuid: activeGoal?.uuid,
+            profileUuid: profile.uuid,
+            type: targetWeight < currentWeight
+                ? 'lose'
+                : targetWeight > currentWeight
+                ? 'gain'
+                : 'maintain',
+            targetWeight: targetWeight,
+            targetDate: activeGoal?.targetDate,
+          );
+      final preferences = ref.read(preferencesRepositoryProvider);
+      await preferences.set(
+        'weeklyExerciseSessions',
+        exercises ? weeklyExerciseSessions.toString() : '0',
+      );
+      await preferences.set('exerciseType', exerciseType);
+      await preferences.set('dietApproach', dietApproach);
+      ref.invalidate(userProfileProvider);
+      ref.invalidate(activeGoalProvider);
+      if (!mounted) return;
+      setState(() => dirty = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            Localizations.localeOf(context).languageCode == 'ar'
+                ? 'تم حفظ ملفك وخطتك.'
+                : 'Your profile and plan were saved.',
+          ),
+        ),
+      );
+      context.go('/settings');
+    } finally {
+      if (mounted) setState(() => saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ar = Localizations.localeOf(context).languageCode == 'ar';
+    final profileAsync = ref.watch(userProfileProvider);
+    return PopScope(
+      canPop: !dirty,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) leave();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(ar ? 'ملفي وخطتي' : 'My profile & plan'),
+          leading: IconButton(
+            key: const Key('profile-settings-back'),
+            tooltip: ar ? 'العودة إلى الإعدادات' : 'Back to settings',
+            onPressed: leave,
+            icon: const Icon(Icons.arrow_back_rounded),
+          ),
+        ),
+        body: profileAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, _) => Center(
+            child: FilledButton(
+              onPressed: () => ref.invalidate(userProfileProvider),
+              child: Text(ar ? 'إعادة المحاولة' : 'Try again'),
+            ),
+          ),
+          data: (profile) {
+            if (profile == null) {
+              return Center(
+                child: Text(ar ? 'لا يوجد ملف محلي.' : 'No local profile.'),
+              );
+            }
+            hydrate(profile);
+            return Form(
+              key: formKey,
+              onChanged: () {
+                if (!dirty) setState(() => dirty = true);
+              },
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  Text(
+                    ar ? 'بيانات الجسم' : 'Body profile',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<String>(
+                    initialValue: gender,
+                    decoration: InputDecoration(
+                      labelText: ar ? 'الجنس' : 'Sex',
+                    ),
+                    items: [
+                      DropdownMenuItem(
+                        value: 'male',
+                        child: Text(ar ? 'ذكر' : 'Male'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'female',
+                        child: Text(ar ? 'أنثى' : 'Female'),
+                      ),
+                    ],
+                    onChanged: (value) => setState(() {
+                      gender = value ?? gender;
+                      dirty = true;
+                    }),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: age,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: ar ? 'العمر' : 'Age',
+                    ),
+                    validator: (value) => validate(value, 13, 120),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: height,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: ar ? 'الطول (سم)' : 'Height (cm)',
+                    ),
+                    validator: (value) => validate(value, 100, 250),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: weight,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: ar
+                          ? 'الوزن الحالي (كغ)'
+                          : 'Current weight (kg)',
+                    ),
+                    validator: (value) => validate(value, 20, 500),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    ar ? 'الهدف والنشاط' : 'Goal & activity',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: target,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: ar
+                          ? 'الوزن المستهدف (كغ)'
+                          : 'Target weight (kg)',
+                    ),
+                    validator: (value) => validate(value, 20, 500),
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: activity,
+                    decoration: InputDecoration(
+                      labelText: ar ? 'مستوى النشاط' : 'Activity level',
+                    ),
+                    items: [
+                      DropdownMenuItem(
+                        value: 'sedentary',
+                        child: Text(ar ? 'حركة محدودة' : 'Low movement'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'light',
+                        child: Text(ar ? 'نشاط خفيف' : 'Light activity'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'moderate',
+                        child: Text(ar ? 'نشاط متوازن' : 'Balanced activity'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'active',
+                        child: Text(ar ? 'نشاط مرتفع' : 'High activity'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'very_active',
+                        child: Text(ar ? 'نشاط مكثف' : 'Intense activity'),
+                      ),
+                    ],
+                    onChanged: (value) => setState(() {
+                      activity = value ?? activity;
+                      dirty = true;
+                    }),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: exercises,
+                    title: Text(ar ? 'أمارس التمارين' : 'I exercise'),
+                    subtitle: Text(
+                      ar
+                          ? 'سنستخدم التكرار والنوع لتفسير نشاطك، لا لادعاء حرق دقيق.'
+                          : 'Frequency and type improve context without claiming exact calorie burn.',
+                    ),
+                    onChanged: (value) => setState(() {
+                      exercises = value;
+                      dirty = true;
+                    }),
+                  ),
+                  if (exercises) ...[
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<int>(
+                      key: ValueKey(weeklyExerciseSessions),
+                      initialValue: weeklyExerciseSessions,
+                      decoration: InputDecoration(
+                        labelText: ar
+                            ? 'مرات التمرين أسبوعيًا'
+                            : 'Exercise sessions per week',
+                      ),
+                      items: [
+                        for (var sessions = 1; sessions <= 7; sessions++)
+                          DropdownMenuItem(
+                            value: sessions,
+                            child: Text(
+                              ar
+                                  ? '$sessions مرات أسبوعيًا'
+                                  : '$sessions per week',
+                            ),
+                          ),
+                      ],
+                      onChanged: (value) => setState(() {
+                        weeklyExerciseSessions =
+                            value ?? weeklyExerciseSessions;
+                        dirty = true;
+                      }),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      initialValue: exerciseType,
+                      decoration: InputDecoration(
+                        labelText: ar
+                            ? 'نوع التمرين الأساسي'
+                            : 'Primary exercise type',
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: 'walking',
+                          child: Text(ar ? 'المشي' : 'Walking'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'strength',
+                          child: Text(
+                            ar ? 'تمارين المقاومة والجيم' : 'Strength & gym',
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'cardio',
+                          child: Text(ar ? 'كارديو' : 'Cardio'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'swimming',
+                          child: Text(ar ? 'السباحة' : 'Swimming'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'cycling',
+                          child: Text(ar ? 'ركوب الدراجة' : 'Cycling'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'mixed',
+                          child: Text(ar ? 'برنامج مختلط' : 'Mixed training'),
+                        ),
+                      ],
+                      onChanged: (value) => setState(() {
+                        exerciseType = value ?? exerciseType;
+                        dirty = true;
+                      }),
+                    ),
+                  ],
+                  const SizedBox(height: 20),
+                  Text(
+                    ar ? 'أسلوب التغذية' : 'Nutrition approach',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: dietApproach,
+                    decoration: InputDecoration(
+                      labelText: ar ? 'اسم خطتي' : 'My plan style',
+                      helperText: ar
+                          ? 'هذا يغيّر طريقة العرض والتفضيلات، وليس الحقائق العلمية الأساسية.'
+                          : 'This guides presentation and preferences, not core scientific facts.',
+                    ),
+                    items: [
+                      DropdownMenuItem(
+                        value: 'balanced',
+                        child: Text(ar ? 'توازن ذكي' : 'Smart Balance'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'high_protein',
+                        child: Text(ar ? 'بروتين أعلى' : 'Protein Forward'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'low_carb',
+                        child: Text(ar ? 'كربوهيدرات أقل' : 'Lower Carb'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'keto',
+                        child: Text(ar ? 'كيتو' : 'Keto'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'mediterranean',
+                        child: Text(ar ? 'متوسطي' : 'Mediterranean'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'plant_forward',
+                        child: Text(ar ? 'نباتي مرن' : 'Plant Forward'),
+                      ),
+                    ],
+                    onChanged: (value) => setState(() {
+                      dietApproach = value ?? dietApproach;
+                      dirty = true;
+                    }),
+                  ),
+                  const SizedBox(height: 20),
+                  FilledButton.icon(
+                    key: const Key('profile-settings-save'),
+                    onPressed: saving ? null : () => save(profile),
+                    icon: const Icon(Icons.save_rounded),
+                    label: Text(
+                      ar
+                          ? 'حفظ والعودة إلى الإعدادات'
+                          : 'Save and return to settings',
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: leave,
+                    icon: const Icon(Icons.settings_outlined),
+                    label: Text(
+                      ar ? 'العودة إلى الإعدادات' : 'Back to settings',
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}

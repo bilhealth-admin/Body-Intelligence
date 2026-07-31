@@ -1,0 +1,12 @@
+﻿Branch	INFO	phase-3-product-excellence
+HEAD	INFO	70fad7afe968604cbe25b5e046b8faf0045df76f
+Required files	PASSED	7 files
+CI branch contract	PASSED	phase-3-product-excellence
+Android release signing boundary	PASSED	debug signing prohibited; optional private key.properties supported
+Android native package identity	PASSED	com.kadem.bil
+iOS privacy usage descriptions	PASSED	unique top-level HealthKit and Bluetooth keys
+Flutter analyze	PASSED
+Startup and external-boundary tests	PASSED
+Android debug build	PASSED
+Diff hygiene	PASSED
+BIL-STARTUP-READINESS-001	PASSED	CI, Android release signing, native package identity, iOS privacy metadata, tests and Android debug build verified
