@@ -28,3 +28,9 @@ a pending phase.
 External accounts, credentials, legal declarations, signing ownership,
 store-console submissions, and representative-device certification remain
 external gates and may not be claimed complete by a repository-only package.
+## Program closure status
+
+Phase 3 Product Excellence: **complete**
+
+The active BIL V1 Global Launch Readiness phase is a separate repository
+release-preparation boundary and does not reopen the accepted Phase 3 scope.

@@ -34,12 +34,7 @@ void main() {
         'final contentGap = compactVerticalRhythm ? 12.0 : PremiumDesignTokens.spaceMd',
       ),
     );
-    expect(
-      benchmark,
-      contains(
-        'final sectionGap = constraints.maxWidth >= 900 ? 12.0 : PremiumDesignTokens.spaceMd',
-      ),
-    );
+    expect(benchmark, contains('BilPremiumResponsiveLayout.sectionGap('));
     expect(benchmark, contains('const SizedBox(height: 6)'));
     expect(daily, contains('heading, const SizedBox(height: 6), carousel'));
     expect(

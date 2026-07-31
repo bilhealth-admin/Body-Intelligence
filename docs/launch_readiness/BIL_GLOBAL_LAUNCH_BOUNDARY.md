@@ -52,3 +52,9 @@ Each package is applied by the Product Owner and verified on the authoritative
 environment. A package advances only after its results are reviewed, approved,
 selectively committed, and confirmed with a clean tracked worktree. External
 gates remain visible and do not become hidden repository tasks.
+## Release-candidate transition
+
+BIL-V1-LAUNCH-005 owns the deterministic release-candidate gate. After that
+gate is accepted, BIL-V1-LAUNCH-006 owns final repository closure and the
+explicit handoff to external store, signing, legal, and device-certification
+gates. Repository verification must not be represented as store approval.
