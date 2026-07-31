@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../app/localization/app_localizations.dart';
 import '../../../core/units/measurement_units.dart';
 import '../../../engine/body_composition_engine.dart';
 import '../../../engine/data_honesty_engine.dart';
@@ -29,9 +28,6 @@ import 'dashboard_daily_summary.dart';
 import 'dashboard_data_gate.dart';
 import 'dashboard_loading_skeleton.dart';
 import 'dashboard_motion_reveal.dart';
-import 'dashboard_meals_timeline.dart';
-import 'dashboard_nutrition_details.dart';
-import 'dashboard_water_card.dart';
 import 'daily_return_card.dart';
 import 'premium_dashboard_benchmark.dart';
 import 'personal_health_ai_panel.dart';
@@ -55,16 +51,6 @@ class DashboardGrid extends ConsumerWidget {
     final contextAsync = ref.watch(todayLifeContextProvider);
     final allContextsAsync = ref.watch(insightLifeContextProvider);
     final memoriesAsync = ref.watch(decisionMemoriesProvider);
-    final memoryEnabled =
-        ref.watch(decisionMemoryEnabledProvider).value ?? true;
-    final usualBreakfastCandidates =
-        ref.watch(usualMealsProvider('breakfast')).value ?? const [];
-    final usualBreakfast = usualBreakfastCandidates.firstOrNull;
-    final recentBreakfast =
-        (mealsAsync.value ?? const [])
-            .where((entry) => entry.meal.type == 'breakfast')
-            .toList()
-          ..sort((a, b) => b.meal.date.compareTo(a.meal.date));
     final system =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     final commandCoordinator = DashboardCommandCoordinator(
@@ -157,7 +143,6 @@ class DashboardGrid extends ConsumerWidget {
     final calories = dashboardSnapshot.calories;
     final protein = dashboardSnapshot.protein;
     final fats = dashboardSnapshot.fats;
-    final water = dashboardSnapshot.waterMl;
     final currentWeight = dashboardSnapshot.currentWeightKg;
     final fiberEvidence = dashboardSnapshot.fiberEvidence;
     final bil = dashboardSnapshot.bil;
@@ -187,43 +172,6 @@ class DashboardGrid extends ConsumerWidget {
     final primaryInsight = intelligence.insights.first;
     final localizedInsightTitle = localizer.insightTitle(primaryInsight.title);
 
-    Future<void> respondToAction(String response) async {
-      if (!memoryEnabled) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              tr(
-                'Decision Memory is disabled. This response was not stored.',
-                'ذاكرة القرارات معطلة. لم يُحفظ هذا الرد.',
-              ),
-            ),
-          ),
-        );
-        return;
-      }
-      await commandCoordinator.recordActionResponse(
-        action: bestAction,
-        response: response,
-      );
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              response == 'done'
-                  ? tr(
-                      'Marked done. BIL will not assume an outcome without your later feedback.',
-                      'تم وضع علامة «تم». لن يفترض BIL نتيجة دون ملاحظتك اللاحقة.',
-                    )
-                  : tr(
-                      'Your response was saved locally and can be deleted from Decision Memory.',
-                      'تم حفظ ردك محليًا ويمكن حذفه من ذاكرة القرارات.',
-                    ),
-            ),
-          ),
-        );
-      }
-    }
-
     Future<void> addWater(int amountMl) async {
       await commandCoordinator.addWater(amountMl);
       if (context.mounted) {
@@ -238,64 +186,6 @@ class DashboardGrid extends ConsumerWidget {
           ),
         );
       }
-    }
-
-    Future<void> confirmAndRepeatBreakfast({
-      required String titleEn,
-      required String titleAr,
-      required String contentEn,
-      required String contentAr,
-      required Future<void> Function() onConfirm,
-    }) async {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          title: Text(tr(titleEn, titleAr)),
-          content: Text(tr(contentEn, contentAr)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: Text(tr('Cancel', 'إلغاء')),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: Text(tr('Add breakfast', 'إضافة الفطور')),
-            ),
-          ],
-        ),
-      );
-      if (confirmed != true) return;
-      await onConfirm();
-      ref.invalidate(usualMealsProvider('breakfast'));
-    }
-
-    Future<void> repeatUsualBreakfast() async {
-      final candidate = usualBreakfast;
-      if (candidate == null) return;
-      await confirmAndRepeatBreakfast(
-        titleEn: 'Repeat usual breakfast?',
-        titleAr: 'تكرار الفطور المعتاد؟',
-        contentEn:
-            'The same saved portions and nutrition snapshots will be added to today only after confirmation.',
-        contentAr:
-            'ستُضاف نفس الحصص ولقطات التغذية المحفوظة إلى اليوم بعد التأكيد فقط.',
-        onConfirm: () => commandCoordinator.repeatUsualBreakfast(candidate),
-      );
-    }
-
-    Future<void> repeatRecentBreakfast() async {
-      final latestBreakfast = recentBreakfast.firstOrNull;
-      if (latestBreakfast == null) return;
-      await confirmAndRepeatBreakfast(
-        titleEn: 'Repeat last breakfast?',
-        titleAr: 'تكرار آخر فطور؟',
-        contentEn:
-            'Items and saved nutrition snapshots from your latest breakfast will be copied to today only after confirmation.',
-        contentAr:
-            'ستُنسخ العناصر ولقطات التغذية المحفوظة من آخر فطور إلى اليوم بعد التأكيد فقط.',
-        onConfirm: () =>
-            commandCoordinator.repeatRecentBreakfast(latestBreakfast),
-      );
     }
 
     final healthAi = dashboardSnapshot.personalHealthAi;
@@ -552,50 +442,6 @@ class DashboardGrid extends ConsumerWidget {
             insightSummary: arabic
                 ? 'يستند هذا الاستنتاج إلى بياناتك المحلية المسجلة فقط.'
                 : '${primaryInsight.explanation} ${primaryInsight.suggestedAction}',
-          ),
-        ),
-        Visibility(
-          visible: false,
-          maintainState: false,
-          child: DashboardWaterCard(
-            consumedMl: water,
-            targetMl: effectiveTargets.water,
-            onAdd: addWater,
-          ),
-        ),
-        Visibility(
-          visible: false,
-          maintainState: false,
-          child: DashboardMealsTimeline(
-            meals: meals,
-            onOpenMeal: (type) => context.go('/daily-log?meal=$type'),
-            usualBreakfastAvailable: usualBreakfast != null,
-            onRepeatBreakfast: repeatUsualBreakfast,
-            recentBreakfastAvailable:
-                usualBreakfast == null && recentBreakfast.isNotEmpty,
-            onRepeatRecentBreakfast: repeatRecentBreakfast,
-          ),
-        ),
-        Visibility(
-          visible: false,
-          maintainState: false,
-          child: DashboardDetailPanel(
-            icon: Icons.task_alt_outlined,
-            title: context.strings.text('One best action'),
-            children: [
-              FilledButton.tonal(
-                onPressed: () => respondToAction('accepted'),
-                child: Text(tr('Accept', 'قبول')),
-              ),
-              OutlinedButton(
-                onPressed: () => respondToAction('done'),
-                child: Text(tr('Done', 'تم')),
-              ),
-              TextButton(
-                onPressed: () => respondToAction('notSuitable'),
-                child: Text(tr('Not suitable today', 'غير مناسب اليوم')),
-              ),
-            ],
           ),
         ),
         const SizedBox(height: PremiumDesignTokens.spaceMd),
