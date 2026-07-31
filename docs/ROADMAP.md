@@ -34,3 +34,9 @@ Phase 3 Product Excellence: **complete**
 
 The active BIL V1 Global Launch Readiness phase is a separate repository
 release-preparation boundary and does not reopen the accepted Phase 3 scope.
+## BIL v1 repository launch closure
+
+Repository launch preparation closure: **complete** after acceptance of
+`BIL-V1-LAUNCH-006`. Operational store submission and every external gate named
+in `docs/launch_readiness/BIL_V1_GLOBAL_LAUNCH_CLOSURE.md` remain outside this
+repository completion claim.

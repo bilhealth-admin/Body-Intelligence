@@ -58,3 +58,9 @@ BIL-V1-LAUNCH-005 owns the deterministic release-candidate gate. After that
 gate is accepted, BIL-V1-LAUNCH-006 owns final repository closure and the
 explicit handoff to external store, signing, legal, and device-certification
 gates. Repository verification must not be represented as store approval.
+## Repository closure
+
+Repository launch preparation closure: **complete** only after
+`BIL-V1-LAUNCH-006` verification is reviewed, approved, and selectively
+committed. External store, signing, legal, device-certification, submission,
+review, rollout, monitoring, and rollback gates remain open.
