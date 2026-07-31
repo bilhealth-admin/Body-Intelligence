@@ -17,13 +17,13 @@ import '../../foods/providers/food_provider.dart';
 import '../../life_context/providers/life_context_provider.dart';
 import '../../weight/providers/weight_provider.dart';
 import '../composition/dashboard_command_coordinator.dart';
-import '../composition/dashboard_composition.dart';
 import '../composition/dashboard_intelligence_input_adapter.dart';
 import '../domain/dashboard_intelligence_composer.dart';
 export '../domain/dashboard_intelligence_composer.dart'
     show consecutiveLoggingDays;
 import '../domain/dashboard_runtime_state.dart';
 import '../providers/dashboard_provider.dart';
+import 'dashboard_analytics_center.dart';
 import 'dashboard_body_profile_snapshot.dart';
 import 'dashboard_daily_summary.dart';
 import 'dashboard_data_gate.dart';
@@ -703,47 +703,11 @@ class DashboardGrid extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: PremiumDesignTokens.spaceMd),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final layout = DashboardComposition.analytics(
-              viewportWidth: MediaQuery.sizeOf(context).width,
-              contentWidth: constraints.maxWidth,
-            );
-            if (!layout.analyticsHorizontal) {
-              final phone = layout.isPhone;
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (!phone) ...[bodyProfile, const SizedBox(height: 12)],
-                  Text(
-                    tr('Analytics Center', 'مركز التحليلات'),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.15,
-                      height: 1.12,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  weightJourney,
-                  const SizedBox(height: PremiumDesignTokens.spaceSm),
-                  weeklyProgress,
-                ],
-              );
-            }
-            return Directionality(
-              textDirection: TextDirection.ltr,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(flex: 6, child: weightJourney),
-                  const SizedBox(width: PremiumDesignTokens.spaceMd),
-                  Expanded(flex: 5, child: weeklyProgress),
-                  const SizedBox(width: PremiumDesignTokens.spaceMd),
-                  Expanded(flex: 9, child: bodyProfile),
-                ],
-              ),
-            );
-          },
+        DashboardAnalyticsCenter(
+          title: tr('Analytics Center', 'مركز التحليلات'),
+          weightJourney: weightJourney,
+          weeklyProgress: weeklyProgress,
+          bodyProfile: bodyProfile,
         ),
       ],
     );
