@@ -1,4 +1,5 @@
 import '../../../engine/one_best_action_engine.dart';
+import 'dashboard_decision_release_boundary.dart';
 import 'dashboard_trusted_truth_decision_adapter.dart';
 
 abstract interface class DashboardDecisionAuthority {
@@ -48,10 +49,12 @@ final class TrustedDashboardDecisionAuthority
   const TrustedDashboardDecisionAuthority({
     this.source = const LegacyDashboardDecisionAuthority(),
     this.adapter = const DashboardTrustedTruthDecisionAdapter(),
+    this.releaseBoundary = const DashboardDecisionReleaseBoundary(),
   });
 
   final DashboardDecisionAuthority source;
   final DashboardTrustedTruthDecisionAdapter adapter;
+  final DashboardDecisionReleaseBoundary releaseBoundary;
 
   @override
   BestAction choose({
@@ -95,7 +98,10 @@ final class TrustedDashboardDecisionAuthority
         proposedAction: proposed,
       ),
     );
-    return trusted.action ??
-        DashboardTrustedTruthDecisionAdapter.abstentionAction;
+    final trustedAction = trusted.action;
+    if (trustedAction == null) {
+      return DashboardTrustedTruthDecisionAdapter.abstentionAction;
+    }
+    return releaseBoundary.evaluate(trustedAction).exposedAction;
   }
 }
