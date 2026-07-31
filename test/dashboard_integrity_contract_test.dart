@@ -26,9 +26,13 @@ void main() {
   );
 
   test('approved Arabic dashboard labels remain readable', () {
-    final source = File(
+    final grid = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
+    final bodyProfile = File(
+      'lib/features/dashboard/widgets/dashboard_body_profile_snapshot.dart',
+    ).readAsStringSync();
+    final source = '$grid\n$bodyProfile';
 
     for (final label in const <String>[
       'ملخص اليوم',

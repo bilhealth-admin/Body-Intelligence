@@ -16,12 +16,15 @@ void main() {
     final grid = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
+    final bodyProfile = File(
+      'lib/features/dashboard/widgets/dashboard_body_profile_snapshot.dart',
+    ).readAsStringSync();
 
     expect(personalAi, contains("tr('Bio Intelligence', 'الذكاء الحيوي')"));
-    expect(insights, contains('tr("Today\'s Insights", "Today\'s Insights")'));
+    expect(insights, contains('tr("Today\'s Insights", "رؤى اليوم")'));
     expect(dailyPath, contains("tr('Your Path Today', 'مسارك اليوم')"));
     expect(grid, contains("tr('Daily Summary', 'ملخص اليوم')"));
-    expect(grid, contains("tr('Body Identity', 'هوية الجسم')"));
+    expect(bodyProfile, contains("tr('Body Identity', 'هوية الجسم')"));
     expect(grid, contains("tr('Analytics Center', 'مركز التحليلات')"));
   });
 
@@ -33,6 +36,7 @@ void main() {
         'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
         'lib/features/dashboard/widgets/daily_return_card.dart',
         'lib/features/dashboard/widgets/dashboard_grid.dart',
+        'lib/features/dashboard/widgets/dashboard_body_profile_snapshot.dart',
       ];
       final source = files
           .map((path) => File(path).readAsStringSync())
