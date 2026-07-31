@@ -19,6 +19,7 @@ import '../../daily_log/providers/daily_log_provider.dart';
 import '../../foods/providers/food_provider.dart';
 import '../../life_context/providers/life_context_provider.dart';
 import '../../weight/providers/weight_provider.dart';
+import '../composition/dashboard_command_coordinator.dart';
 import '../composition/dashboard_composition.dart';
 import '../composition/dashboard_intelligence_input_adapter.dart';
 import '../domain/dashboard_intelligence_composer.dart';
@@ -68,6 +69,23 @@ class DashboardGrid extends ConsumerWidget {
           ..sort((a, b) => b.meal.date.compareTo(a.meal.date));
     final system =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
+    final commandCoordinator = DashboardCommandCoordinator(
+      onRememberAction: (action) =>
+          ref.read(decisionMemoryRepositoryProvider).rememberAction(action),
+      onRespondToAction: (memoryId, response) => ref
+          .read(decisionMemoryRepositoryProvider)
+          .respond(memoryId, response),
+      onAddWater: (occurredAt, amountMl) => ref
+          .read(waterRepositoryProvider)
+          .add(occurredAt: occurredAt, amountMl: amountMl),
+      onRepeatUsualMeal: (candidate, date) => ref
+          .read(mealRepositoryProvider)
+          .repeatMeal(candidate: candidate, date: date),
+      onRepeatHistoricalMeal: (meal, date) => ref
+          .read(mealRepositoryProvider)
+          .repeatHistoricalMeal(meal: meal, date: date),
+      clock: DateTime.now,
+    );
     final runtimeState = DashboardRuntimeState.fromRequired([
       profileAsync,
       weightsAsync,
@@ -289,9 +307,10 @@ class DashboardGrid extends ConsumerWidget {
         );
         return;
       }
-      final repository = ref.read(decisionMemoryRepositoryProvider);
-      final id = await repository.rememberAction(bestAction);
-      await repository.respond(id, response);
+      await commandCoordinator.recordActionResponse(
+        action: bestAction,
+        response: response,
+      );
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -312,9 +331,7 @@ class DashboardGrid extends ConsumerWidget {
     }
 
     Future<void> addWater(int amountMl) async {
-      await ref
-          .read(waterRepositoryProvider)
-          .add(occurredAt: DateTime.now(), amountMl: amountMl);
+      await commandCoordinator.addWater(amountMl);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -368,9 +385,7 @@ class DashboardGrid extends ConsumerWidget {
             'The same saved portions and nutrition snapshots will be added to today only after confirmation.',
         contentAr:
             'ستُضاف نفس الحصص ولقطات التغذية المحفوظة إلى اليوم بعد التأكيد فقط.',
-        onConfirm: () => ref
-            .read(mealRepositoryProvider)
-            .repeatMeal(candidate: candidate, date: DateTime.now()),
+        onConfirm: () => commandCoordinator.repeatUsualBreakfast(candidate),
       );
     }
 
@@ -384,9 +399,8 @@ class DashboardGrid extends ConsumerWidget {
             'Items and saved nutrition snapshots from your latest breakfast will be copied to today only after confirmation.',
         contentAr:
             'ستُنسخ العناصر ولقطات التغذية المحفوظة من آخر فطور إلى اليوم بعد التأكيد فقط.',
-        onConfirm: () => ref
-            .read(mealRepositoryProvider)
-            .repeatHistoricalMeal(meal: latestBreakfast, date: DateTime.now()),
+        onConfirm: () =>
+            commandCoordinator.repeatRecentBreakfast(latestBreakfast),
       );
     }
 
