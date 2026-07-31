@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/premium_design_tokens.dart';
+import '../../../app/theme/bil_premium_responsive_layout.dart';
 import '../../../shared/widgets/premium_surface.dart';
 import 'dashboard_twin_deck_shell.dart';
 
@@ -75,7 +76,9 @@ class PremiumDashboardBenchmark extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final dark = Theme.of(context).brightness == Brightness.dark;
     final contentColor = dark ? scheme.onSurface : const Color(0xFF061A2B);
-    final phone = MediaQuery.sizeOf(context).width < 600;
+    final phone = BilPremiumResponsiveLayout.isPhone(
+      MediaQuery.sizeOf(context).width,
+    );
     final insightCards = <Widget>[
       _CompactInsightCard(
         key: const Key('dashboard-nutrition-context'),
@@ -102,9 +105,9 @@ class PremiumDashboardBenchmark extends StatelessWidget {
     return LayoutBuilder(
       key: const Key('premium-dashboard-benchmark'),
       builder: (context, constraints) {
-        final sectionGap = constraints.maxWidth >= 900
-            ? 12.0
-            : PremiumDesignTokens.spaceMd;
+        final sectionGap = BilPremiumResponsiveLayout.sectionGap(
+          constraints.maxWidth,
+        );
         final insights = DashboardTwinDeckShell(
           key: const Key('dashboard-key-insights-deck'),
           title: tr("Today's Insights", "رؤى اليوم"),
@@ -115,9 +118,14 @@ class PremiumDashboardBenchmark extends StatelessWidget {
           compact: phone,
         );
         Widget intelligenceFor(double width) {
-          final twinHeight = MediaQuery.textScalerOf(
-            context,
-          ).scale(phone ? 420.0 : 390.0).clamp(phone ? 420.0 : 390.0, 540.0);
+          final twinHeight = MediaQuery.textScalerOf(context)
+              .scale(
+                BilPremiumResponsiveLayout.twinBaseHeight(constraints.maxWidth),
+              )
+              .clamp(
+                BilPremiumResponsiveLayout.twinBaseHeight(constraints.maxWidth),
+                BilPremiumResponsiveLayout.maximumTwinHeight,
+              );
           if (personalHealthAi == null) {
             return SizedBox(height: twinHeight, child: insights);
           }
@@ -164,7 +172,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
 
         final top = hero == null
             ? intelligenceFor(constraints.maxWidth)
-            : constraints.maxWidth < 1180
+            : !BilPremiumResponsiveLayout.usesSplitHero(constraints.maxWidth)
             ? Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -195,7 +203,9 @@ class PremiumDashboardBenchmark extends StatelessWidget {
           label: tr('Daily Intelligence', 'الذكاء اليومي'),
           child: dailyIntelligence,
         );
-        final pairDaySections = constraints.maxWidth >= 1400;
+        final pairDaySections = BilPremiumResponsiveLayout.pairsDaySections(
+          constraints.maxWidth,
+        );
         final daily = pairDaySections
             ? PremiumSurface(
                 dashboardGlass: true,
@@ -203,9 +213,12 @@ class PremiumDashboardBenchmark extends StatelessWidget {
                 child: dailyContent,
               )
             : dailyContent;
-        final dayPairHeight = MediaQuery.textScalerOf(
-          context,
-        ).scale(188.0).clamp(188.0, 240.0);
+        final dayPairHeight = MediaQuery.textScalerOf(context)
+            .scale(BilPremiumResponsiveLayout.dayPairHeight)
+            .clamp(
+              BilPremiumResponsiveLayout.dayPairHeight,
+              BilPremiumResponsiveLayout.maximumDayPairHeight,
+            );
         final dayAndProgress = progressSection != null && pairDaySections
             ? SizedBox(
                 height: dayPairHeight,
