@@ -15,7 +15,7 @@ void main() {
     expect(grid, isNot(contains('DashboardDetailPanel(')));
     expect(grid, isNot(contains('DashboardWaterCard(')));
     expect(grid, isNot(contains('DashboardMealsTimeline(')));
-    expect(grid, contains('decisionMemoryRepositoryProvider'));
+    expect(grid, isNot(contains('decisionMemoryRepositoryProvider')));
     expect(benchmark, contains('dashboard-truth-explanation-surface'));
     expect(benchmark, contains('dashboard-decision-feedback'));
     expect(benchmark, contains('dashboard-mobile-command-center'));

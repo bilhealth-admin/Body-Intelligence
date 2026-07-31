@@ -11,7 +11,6 @@ import '../../../app/theme/premium_design_tokens.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../../analytics/analytics_page.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
-import '../../foods/providers/food_provider.dart';
 import '../../life_context/providers/life_context_provider.dart';
 import '../../weight/providers/weight_provider.dart';
 import '../composition/dashboard_command_coordinator.dart';
@@ -53,21 +52,10 @@ class DashboardGrid extends ConsumerWidget {
     final memoriesAsync = ref.watch(decisionMemoriesProvider);
     final system =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
-    final commandCoordinator = DashboardCommandCoordinator(
-      onRememberAction: (action) =>
-          ref.read(decisionMemoryRepositoryProvider).rememberAction(action),
-      onRespondToAction: (memoryId, response) => ref
-          .read(decisionMemoryRepositoryProvider)
-          .respond(memoryId, response),
+    final hydrationCommand = DashboardHydrationCommand(
       onAddWater: (occurredAt, amountMl) => ref
           .read(waterRepositoryProvider)
           .add(occurredAt: occurredAt, amountMl: amountMl),
-      onRepeatUsualMeal: (candidate, date) => ref
-          .read(mealRepositoryProvider)
-          .repeatMeal(candidate: candidate, date: date),
-      onRepeatHistoricalMeal: (meal, date) => ref
-          .read(mealRepositoryProvider)
-          .repeatHistoricalMeal(meal: meal, date: date),
       clock: DateTime.now,
     );
     final runtimeState = DashboardRuntimeState.fromRequired([
@@ -173,7 +161,7 @@ class DashboardGrid extends ConsumerWidget {
     final localizedInsightTitle = localizer.insightTitle(primaryInsight.title);
 
     Future<void> addWater(int amountMl) async {
-      await commandCoordinator.addWater(amountMl);
+      await hydrationCommand.addWater(amountMl);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

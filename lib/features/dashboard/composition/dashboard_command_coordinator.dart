@@ -11,6 +11,21 @@ typedef RepeatUsualDashboardMeal =
 typedef RepeatHistoricalDashboardMeal =
     Future<void> Function(MealWithItems meal, DateTime date);
 
+/// The active Dashboard command scope after inaccessible legacy surfaces were
+/// retired. It exposes only the hydration write used by the visible primary
+/// action and does not require unrelated repository capabilities.
+final class DashboardHydrationCommand {
+  const DashboardHydrationCommand({
+    required this.onAddWater,
+    required this.clock,
+  });
+
+  final AddDashboardWater onAddWater;
+  final DateTime Function() clock;
+
+  Future<void> addWater(int amountMl) => onAddWater(clock(), amountMl);
+}
+
 /// Coordinates dashboard write commands without owning any visual feedback.
 ///
 /// Confirmation dialogs, localized messages, navigation, and provider

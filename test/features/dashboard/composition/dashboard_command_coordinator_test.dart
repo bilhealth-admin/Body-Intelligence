@@ -6,6 +6,24 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('DashboardCommandCoordinator', () {
+    test(
+      'hydration scope requires only water and clock capabilities',
+      () async {
+        final calls = <String>[];
+        final at = DateTime(2026, 7, 31, 12, 30);
+        final command = DashboardHydrationCommand(
+          onAddWater: (occurredAt, amountMl) async {
+            calls.add('${occurredAt.toIso8601String()}:$amountMl');
+          },
+          clock: () => at,
+        );
+
+        await command.addWater(250);
+
+        expect(calls, ['2026-07-31T12:30:00.000:250']);
+      },
+    );
+
     test('remembers the action before storing its response', () async {
       final calls = <String>[];
       final coordinator = _coordinator(calls: calls);
