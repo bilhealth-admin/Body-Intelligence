@@ -7,7 +7,6 @@ import '../../../core/units/measurement_units.dart';
 import '../../../engine/body_composition_engine.dart';
 import '../../../engine/data_honesty_engine.dart';
 import '../../../engine/one_best_action_engine.dart';
-import '../../../engine/what_changed_engine.dart';
 import '../../connected_health/widgets/connected_health_card.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../profile/providers/user_profile_provider.dart';
@@ -22,6 +21,7 @@ import '../domain/dashboard_intelligence_composer.dart';
 export '../domain/dashboard_intelligence_composer.dart'
     show consecutiveLoggingDays;
 import '../domain/dashboard_runtime_state.dart';
+import '../presentation/dashboard_intelligence_localizer.dart';
 import '../providers/dashboard_provider.dart';
 import 'dashboard_analytics_center.dart';
 import 'dashboard_body_profile_snapshot.dart';
@@ -176,120 +176,16 @@ class DashboardGrid extends ConsumerWidget {
         ? chronologicalWeights.sublist(chronologicalWeights.length - 30)
         : chronologicalWeights;
     final weeklyReview = dashboardSnapshot.weeklyReview;
-    String compositionIssue(BodyCompositionIssue? issue) {
-      return switch (issue) {
-        BodyCompositionIssue.missingGender => tr(
-          'Gender is not recorded',
-          'الجنس غير مسجل',
-        ),
-        BodyCompositionIssue.unsupportedGender => tr(
-          'Gender value is unsupported',
-          'قيمة الجنس غير مدعومة',
-        ),
-        BodyCompositionIssue.missingAge => tr(
-          'Age is not recorded',
-          'العمر غير مسجل',
-        ),
-        BodyCompositionIssue.invalidAge => tr(
-          'Age value is invalid',
-          'قيمة العمر غير صالحة',
-        ),
-        BodyCompositionIssue.missingHeight => tr(
-          'Height is not recorded',
-          'الطول غير مسجل',
-        ),
-        BodyCompositionIssue.invalidHeight => tr(
-          'Height value is invalid',
-          'قيمة الطول غير صالحة',
-        ),
-        BodyCompositionIssue.missingWeight => tr(
-          'Current weight is not recorded',
-          'الوزن الحالي غير مسجل',
-        ),
-        BodyCompositionIssue.invalidWeight => tr(
-          'Current weight is invalid',
-          'الوزن الحالي غير صالح',
-        ),
-        BodyCompositionIssue.missingNeck => tr(
-          'Neck circumference is not recorded',
-          'محيط الرقبة غير مسجل',
-        ),
-        BodyCompositionIssue.invalidNeck => tr(
-          'Neck circumference is invalid',
-          'محيط الرقبة غير صالح',
-        ),
-        BodyCompositionIssue.missingWaist => tr(
-          'Waist circumference is not recorded',
-          'محيط الخصر غير مسجل',
-        ),
-        BodyCompositionIssue.invalidWaist => tr(
-          'Waist circumference is invalid',
-          'محيط الخصر غير صالح',
-        ),
-        BodyCompositionIssue.invalidBodyFat => tr(
-          'Body fat estimate is invalid',
-          'تقدير دهون الجسم غير صالح',
-        ),
-        null => tr('Unavailable', 'غير متاح'),
-      };
-    }
-
+    final localizer = DashboardIntelligenceLocalizer(arabic: arabic);
     String compositionValue(
       BodyCompositionMetric metric, {
       required String unit,
-    }) {
-      if (!metric.isAvailable) return compositionIssue(metric.issue);
-      return '${metric.value!.toStringAsFixed(1)}$unit';
-    }
-
-    final localizedBestTitle = arabic
-        ? switch (bestAction.type) {
-            BestActionType.weighIn => 'سجّل وزن اليوم',
-            BestActionType.completeLogging => 'أكمل تسجيل وجبة واحدة',
-            BestActionType.protein => 'أضف مصدر بروتين مناسبًا اليوم',
-            BestActionType.hydration => 'اشرب الماء تدريجيًا',
-            BestActionType.holdPlan => 'حافظ على الخطة دون تغيير اليوم',
-            BestActionType.none => 'لا حاجة لتغيير الخطة',
-          }
-        : bestAction.title;
-    final localizedBestReason = arabic
-        ? switch (bestAction.type) {
-            BestActionType.weighIn =>
-              'القياس اليومي المتقارب يحسن ثقة الاتجاه.',
-            BestActionType.completeLogging =>
-              'نقص تسجيل الوجبات يضعف تفسير بيانات المدخول.',
-            BestActionType.protein =>
-              'البروتين هو أكبر فجوة قابلة للتنفيذ اليوم.',
-            BestActionType.hydration => 'الماء المسجل أقل بوضوح من هدف اليوم.',
-            BestActionType.holdPlan =>
-              'جمع ملاحظات أكثر اتساقًا أكثر أمانًا من التغيير المبكر.',
-            BestActionType.none => 'الأولويات المسجلة اليوم مغطاة بصورة عامة.',
-          }
-        : bestAction.reason;
-    final localizedChanged = arabic
-        ? switch (changed.interpretation) {
-            ChangeInterpretation.insufficient =>
-              'نحتاج قياس وزن آخر في ظروف متقاربة لوصف التغير.',
-            ChangeInterpretation.stable =>
-              'الوزن مستقر بصورة عامة مقارنة بالقياس السابق.',
-            ChangeInterpretation.likelyNoise =>
-              'تغير الميزان، لكن قراءة واحدة لا تكفي لتغيير الخطة.',
-            ChangeInterpretation.directional =>
-              'سُجّل تغير محدود، ويظل الاتجاه عبر عدة أيام أكثر فائدة.',
-          }
-        : changed.summary;
+    }) => localizer.compositionValue(metric, unit: unit);
+    final localizedBestTitle = localizer.bestActionTitle(bestAction);
+    final localizedBestReason = localizer.bestActionReason(bestAction);
+    final localizedChanged = localizer.changedSummary(changed);
     final primaryInsight = intelligence.insights.first;
-    final localizedInsightTitle = arabic
-        ? switch (primaryInsight.title) {
-            'Protein below target' => 'البروتين أقل من الهدف',
-            'Hydration opportunity' => 'فرصة لتحسين شرب الماء',
-            'Possible plateau' => 'ثبات محتمل في الاتجاه',
-            'Possible short-term water retention' =>
-              'احتباس ماء قصير المدى محتمل',
-            'Build your baseline' => 'ابنِ خطك الأساسي',
-            _ => 'الأهداف اليومية متقاربة بصورة عامة',
-          }
-        : primaryInsight.title;
+    final localizedInsightTitle = localizer.insightTitle(primaryInsight.title);
 
     Future<void> respondToAction(String response) async {
       if (!memoryEnabled) {
