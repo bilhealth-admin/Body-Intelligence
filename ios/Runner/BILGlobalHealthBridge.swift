@@ -252,7 +252,10 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     }
   }
 
-  private func canWrite(_ type: HKSampleType) -> Bool { !(type is HKWorkoutType) && type != HKObjectType.categoryType(forIdentifier: .sleepAnalysis) }
+  private func canWrite(_ type: HKSampleType) -> Bool {
+    type == HKObjectType.quantityType(forIdentifier: .bodyMass) ||
+      type == HKObjectType.quantityType(forIdentifier: .dietaryWater)
+  }
 
   private func encodeAnchors(_ anchors: [String: HKQueryAnchor]) -> String? {
     var encoded: [String: String] = [:]

@@ -1,62 +1,66 @@
 # iOS readiness and release checklist
 
-iOS has been audited for source compatibility but cannot be compiled or run on
-this Windows host. The shared application no longer imports Android-only APIs.
-Drift uses its native executor on iOS and stores the SQLite file in the
-application-support directory. Shared preferences stores locale/theme settings.
-Clipboard export uses Flutter's cross-platform services API. Share Studio uses
-the platform share sheet and an in-memory PNG; it does not request photo-library
-access merely to open the sheet. Recheck plugin minimums and privacy manifests
-on the release Mac.
+The tracked iOS project is prepared for controlled verification on macOS and
+Xcode. Windows verification can lock repository contracts, but it cannot prove
+an iOS compile, device launch, archive, validation, TestFlight upload, or App
+Store acceptance.
 
-The current Xcode project still uses the development identifier
-`com.example.bodyIntelligenceLog`. Replace it with an identifier owned by the
-Apple Developer account before signing or distribution. The MVP does not use
-camera, photos, microphone, location, contacts, HealthKit, tracking, or push
-notifications, so no usage-description keys are currently required in
-`Info.plist`. Re-audit this when adding any such feature.
+## Accepted repository state
+
+- Bundle identifier: `com.kadem.bil`
+- Minimum iOS deployment target: 15.0
+- Version and build number are sourced from Flutter build metadata.
+- HealthKit and Bluetooth bridges are registered in the production runner.
+- HealthKit capability is declared in `Runner.entitlements`.
+- Health and Bluetooth usage descriptions are localized in English and Arabic.
+- `PrivacyInfo.xcprivacy` is included in Runner resources, tracking is disabled,
+  and no tracking domains are declared.
+- HealthKit read access covers the supported health timeline.
+- HealthKit write access is limited to weight and hydration, matching the
+  Android production boundary and the current product write surface.
+
+The app-owned privacy manifest describes the current app-owned runtime only.
+Every embedded SDK manifest and the final Xcode Privacy Report must still be
+reviewed on the release Mac. App Store privacy answers are a separate external
+declaration and must match the final production behavior.
 
 ## Required Mac verification
 
-Install the current stable Xcode and Flutter toolchain, accept Xcode licenses,
-open a terminal at the repository root, and run exactly:
+Install the release Xcode and Flutter toolchain, accept Xcode licenses, open a
+terminal at the repository root, and run:
 
 ```sh
 flutter doctor -v
 flutter pub get
-dart format .
+dart format --output=none --set-exit-if-changed .
 flutter analyze
 flutter test
-flutter devices
-flutter build ios --simulator
-flutter run -d <ios-simulator-id>
+flutter build ios --release --no-codesign
 ```
 
-Verify a genuinely fresh install and an upgrade containing existing data.
-Exercise English/Arabic switching and immediate RTL/LTR, system/light/dark
-themes, onboarding in metric and imperial units, wheel and typed input, profile
-editing, weights, meals, water, dashboard, analytics, JSON clipboard export,
-reset confirmation, app termination/relaunch, and database persistence.
+Then open `ios/Runner.xcworkspace` in Xcode and verify:
+
+1. The Apple Developer team owns `com.kadem.bil`.
+2. HealthKit capability and provisioning are active for that identifier.
+3. English and Arabic consent descriptions render correctly on a device.
+4. HealthKit read permission is requested only when its feature is used.
+5. HealthKit writes remain limited to explicitly selected weight or hydration
+   records after separate write consent.
+6. Bluetooth discovery occurs only after an explicit user action.
+7. A fresh install and an upgrade preserve local data correctly.
 
 ## Signing, archive, and TestFlight
 
-1. Join or select the appropriate Apple Developer Program team.
-2. Open `ios/Runner.xcworkspace` in Xcode.
-3. In Runner > Signing & Capabilities, set the owned bundle identifier, select
-   the Team, and use automatic signing or the team's managed provisioning.
-4. Confirm the deployment target against the installed Flutter stable release
-   and supported device policy. Do not lower it below plugin requirements.
-5. Set release version/build numbers and create the App Store Connect record.
-6. Complete App Privacy answers for on-device profile, health/fitness-style,
-   nutrition, and diagnostics data accurately. Local-only processing does not
-   remove the obligation to describe collected app data correctly.
-7. Test a Release build on a physical device, including clipboard export and
-   persistence after termination.
-8. In Xcode select Any iOS Device (arm64), then Product > Archive. Run Validate
-   App before Distribute App > App Store Connect > Upload.
-9. Add the uploaded build to an internal TestFlight group, complete export
-   compliance and review information, and perform the same regression suite.
+1. Select the authorized Apple Developer team in Runner signing settings.
+2. Keep certificates, provisioning profiles, App Store Connect keys, and Apple
+   credentials outside Git.
+3. Set the approved release version and monotonically increasing build number.
+4. Archive for Any iOS Device, run Validate App, and inspect the generated
+   privacy report before upload.
+5. Complete App Privacy, export-compliance, review, and health-data declarations
+   from verified production behavior.
+6. Upload to an internal TestFlight group and complete physical-device
+   regression before any external rollout.
 
-Never commit signing certificates, provisioning profiles, App Store Connect
-API keys, or Apple credentials. A successful iOS build, launch, archive, and
-TestFlight upload remain Mac-only blockers.
+These steps remain external release gates. Repository readiness does not claim
+Apple signing, archive validation, TestFlight acceptance, or App Store approval.
