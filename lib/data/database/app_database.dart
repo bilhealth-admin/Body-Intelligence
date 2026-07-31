@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import 'daily_logs.dart';
 import 'decision_memories.dart';
+import 'decision_outcome_transitions.dart';
 import 'database_ids.dart';
 import 'favorites.dart';
 import 'foods.dart';
@@ -36,6 +37,7 @@ part 'app_database.g.dart';
     Preferences,
     LifeContextEntries,
     DecisionMemories,
+    DecisionOutcomeTransitions,
     PlanSettings,
     PersonalExperiments,
     Challenges,
@@ -47,7 +49,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -60,6 +62,7 @@ class AppDatabase extends _$AppDatabase {
       await _createWeightDayIndex();
       await _createV7Indexes();
       await _createV12Indexes();
+      await _createV17Indexes();
     },
     onUpgrade: (migrator, from, to) async {
       if (from < 2) {
@@ -159,8 +162,19 @@ class AppDatabase extends _$AppDatabase {
           'phosphorus REAL NOT NULL DEFAULT 0',
         ]);
       }
+      if (from < 17) {
+        await migrator.createTable(decisionOutcomeTransitions);
+        await _createV17Indexes();
+      }
     },
   );
+
+  Future<void> _createV17Indexes() async {
+    await customStatement('''
+      CREATE INDEX IF NOT EXISTS decision_outcome_transitions_memory_time_idx
+      ON decision_outcome_transitions(decision_memory_id, occurred_at, id)
+    ''');
+  }
 
   Future<void> _upgradeToV5(Migrator migrator) async {
     await migrator.createTable(goals);

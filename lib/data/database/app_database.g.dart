@@ -9918,6 +9918,570 @@ class DecisionMemoriesCompanion extends UpdateCompanion<DecisionMemory> {
   }
 }
 
+class $DecisionOutcomeTransitionsTable extends DecisionOutcomeTransitions
+    with
+        TableInfo<$DecisionOutcomeTransitionsTable, DecisionOutcomeTransition> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DecisionOutcomeTransitionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
+  @override
+  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
+    'uuid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+    clientDefault: newDatabaseId,
+  );
+  static const VerificationMeta _decisionMemoryIdMeta = const VerificationMeta(
+    'decisionMemoryId',
+  );
+  @override
+  late final GeneratedColumn<int> decisionMemoryId = GeneratedColumn<int>(
+    'decision_memory_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES decision_memories (id) ON DELETE RESTRICT',
+    ),
+  );
+  static const VerificationMeta _fromStateMeta = const VerificationMeta(
+    'fromState',
+  );
+  @override
+  late final GeneratedColumn<String> fromState = GeneratedColumn<String>(
+    'from_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _toStateMeta = const VerificationMeta(
+    'toState',
+  );
+  @override
+  late final GeneratedColumn<String> toState = GeneratedColumn<String>(
+    'to_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _evidenceIdsJsonMeta = const VerificationMeta(
+    'evidenceIdsJson',
+  );
+  @override
+  late final GeneratedColumn<String> evidenceIdsJson = GeneratedColumn<String>(
+    'evidence_ids_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _occurredAtMeta = const VerificationMeta(
+    'occurredAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> occurredAt = GeneratedColumn<DateTime>(
+    'occurred_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    uuid,
+    decisionMemoryId,
+    fromState,
+    toState,
+    reason,
+    evidenceIdsJson,
+    occurredAt,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'decision_outcome_transitions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DecisionOutcomeTransition> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uuid')) {
+      context.handle(
+        _uuidMeta,
+        uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta),
+      );
+    }
+    if (data.containsKey('decision_memory_id')) {
+      context.handle(
+        _decisionMemoryIdMeta,
+        decisionMemoryId.isAcceptableOrUnknown(
+          data['decision_memory_id']!,
+          _decisionMemoryIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_decisionMemoryIdMeta);
+    }
+    if (data.containsKey('from_state')) {
+      context.handle(
+        _fromStateMeta,
+        fromState.isAcceptableOrUnknown(data['from_state']!, _fromStateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fromStateMeta);
+    }
+    if (data.containsKey('to_state')) {
+      context.handle(
+        _toStateMeta,
+        toState.isAcceptableOrUnknown(data['to_state']!, _toStateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_toStateMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reasonMeta);
+    }
+    if (data.containsKey('evidence_ids_json')) {
+      context.handle(
+        _evidenceIdsJsonMeta,
+        evidenceIdsJson.isAcceptableOrUnknown(
+          data['evidence_ids_json']!,
+          _evidenceIdsJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('occurred_at')) {
+      context.handle(
+        _occurredAtMeta,
+        occurredAt.isAcceptableOrUnknown(data['occurred_at']!, _occurredAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_occurredAtMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DecisionOutcomeTransition map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DecisionOutcomeTransition(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      uuid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uuid'],
+      )!,
+      decisionMemoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}decision_memory_id'],
+      )!,
+      fromState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}from_state'],
+      )!,
+      toState: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}to_state'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      )!,
+      evidenceIdsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}evidence_ids_json'],
+      )!,
+      occurredAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}occurred_at'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $DecisionOutcomeTransitionsTable createAlias(String alias) {
+    return $DecisionOutcomeTransitionsTable(attachedDatabase, alias);
+  }
+}
+
+class DecisionOutcomeTransition extends DataClass
+    implements Insertable<DecisionOutcomeTransition> {
+  final int id;
+  final String uuid;
+  final int decisionMemoryId;
+  final String fromState;
+  final String toState;
+  final String reason;
+  final String evidenceIdsJson;
+  final DateTime occurredAt;
+  final DateTime createdAt;
+  const DecisionOutcomeTransition({
+    required this.id,
+    required this.uuid,
+    required this.decisionMemoryId,
+    required this.fromState,
+    required this.toState,
+    required this.reason,
+    required this.evidenceIdsJson,
+    required this.occurredAt,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['uuid'] = Variable<String>(uuid);
+    map['decision_memory_id'] = Variable<int>(decisionMemoryId);
+    map['from_state'] = Variable<String>(fromState);
+    map['to_state'] = Variable<String>(toState);
+    map['reason'] = Variable<String>(reason);
+    map['evidence_ids_json'] = Variable<String>(evidenceIdsJson);
+    map['occurred_at'] = Variable<DateTime>(occurredAt);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  DecisionOutcomeTransitionsCompanion toCompanion(bool nullToAbsent) {
+    return DecisionOutcomeTransitionsCompanion(
+      id: Value(id),
+      uuid: Value(uuid),
+      decisionMemoryId: Value(decisionMemoryId),
+      fromState: Value(fromState),
+      toState: Value(toState),
+      reason: Value(reason),
+      evidenceIdsJson: Value(evidenceIdsJson),
+      occurredAt: Value(occurredAt),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory DecisionOutcomeTransition.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DecisionOutcomeTransition(
+      id: serializer.fromJson<int>(json['id']),
+      uuid: serializer.fromJson<String>(json['uuid']),
+      decisionMemoryId: serializer.fromJson<int>(json['decisionMemoryId']),
+      fromState: serializer.fromJson<String>(json['fromState']),
+      toState: serializer.fromJson<String>(json['toState']),
+      reason: serializer.fromJson<String>(json['reason']),
+      evidenceIdsJson: serializer.fromJson<String>(json['evidenceIdsJson']),
+      occurredAt: serializer.fromJson<DateTime>(json['occurredAt']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'uuid': serializer.toJson<String>(uuid),
+      'decisionMemoryId': serializer.toJson<int>(decisionMemoryId),
+      'fromState': serializer.toJson<String>(fromState),
+      'toState': serializer.toJson<String>(toState),
+      'reason': serializer.toJson<String>(reason),
+      'evidenceIdsJson': serializer.toJson<String>(evidenceIdsJson),
+      'occurredAt': serializer.toJson<DateTime>(occurredAt),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  DecisionOutcomeTransition copyWith({
+    int? id,
+    String? uuid,
+    int? decisionMemoryId,
+    String? fromState,
+    String? toState,
+    String? reason,
+    String? evidenceIdsJson,
+    DateTime? occurredAt,
+    DateTime? createdAt,
+  }) => DecisionOutcomeTransition(
+    id: id ?? this.id,
+    uuid: uuid ?? this.uuid,
+    decisionMemoryId: decisionMemoryId ?? this.decisionMemoryId,
+    fromState: fromState ?? this.fromState,
+    toState: toState ?? this.toState,
+    reason: reason ?? this.reason,
+    evidenceIdsJson: evidenceIdsJson ?? this.evidenceIdsJson,
+    occurredAt: occurredAt ?? this.occurredAt,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  DecisionOutcomeTransition copyWithCompanion(
+    DecisionOutcomeTransitionsCompanion data,
+  ) {
+    return DecisionOutcomeTransition(
+      id: data.id.present ? data.id.value : this.id,
+      uuid: data.uuid.present ? data.uuid.value : this.uuid,
+      decisionMemoryId: data.decisionMemoryId.present
+          ? data.decisionMemoryId.value
+          : this.decisionMemoryId,
+      fromState: data.fromState.present ? data.fromState.value : this.fromState,
+      toState: data.toState.present ? data.toState.value : this.toState,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      evidenceIdsJson: data.evidenceIdsJson.present
+          ? data.evidenceIdsJson.value
+          : this.evidenceIdsJson,
+      occurredAt: data.occurredAt.present
+          ? data.occurredAt.value
+          : this.occurredAt,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DecisionOutcomeTransition(')
+          ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
+          ..write('decisionMemoryId: $decisionMemoryId, ')
+          ..write('fromState: $fromState, ')
+          ..write('toState: $toState, ')
+          ..write('reason: $reason, ')
+          ..write('evidenceIdsJson: $evidenceIdsJson, ')
+          ..write('occurredAt: $occurredAt, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    uuid,
+    decisionMemoryId,
+    fromState,
+    toState,
+    reason,
+    evidenceIdsJson,
+    occurredAt,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DecisionOutcomeTransition &&
+          other.id == this.id &&
+          other.uuid == this.uuid &&
+          other.decisionMemoryId == this.decisionMemoryId &&
+          other.fromState == this.fromState &&
+          other.toState == this.toState &&
+          other.reason == this.reason &&
+          other.evidenceIdsJson == this.evidenceIdsJson &&
+          other.occurredAt == this.occurredAt &&
+          other.createdAt == this.createdAt);
+}
+
+class DecisionOutcomeTransitionsCompanion
+    extends UpdateCompanion<DecisionOutcomeTransition> {
+  final Value<int> id;
+  final Value<String> uuid;
+  final Value<int> decisionMemoryId;
+  final Value<String> fromState;
+  final Value<String> toState;
+  final Value<String> reason;
+  final Value<String> evidenceIdsJson;
+  final Value<DateTime> occurredAt;
+  final Value<DateTime> createdAt;
+  const DecisionOutcomeTransitionsCompanion({
+    this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
+    this.decisionMemoryId = const Value.absent(),
+    this.fromState = const Value.absent(),
+    this.toState = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.evidenceIdsJson = const Value.absent(),
+    this.occurredAt = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  DecisionOutcomeTransitionsCompanion.insert({
+    this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
+    required int decisionMemoryId,
+    required String fromState,
+    required String toState,
+    required String reason,
+    this.evidenceIdsJson = const Value.absent(),
+    required DateTime occurredAt,
+    this.createdAt = const Value.absent(),
+  }) : decisionMemoryId = Value(decisionMemoryId),
+       fromState = Value(fromState),
+       toState = Value(toState),
+       reason = Value(reason),
+       occurredAt = Value(occurredAt);
+  static Insertable<DecisionOutcomeTransition> custom({
+    Expression<int>? id,
+    Expression<String>? uuid,
+    Expression<int>? decisionMemoryId,
+    Expression<String>? fromState,
+    Expression<String>? toState,
+    Expression<String>? reason,
+    Expression<String>? evidenceIdsJson,
+    Expression<DateTime>? occurredAt,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (uuid != null) 'uuid': uuid,
+      if (decisionMemoryId != null) 'decision_memory_id': decisionMemoryId,
+      if (fromState != null) 'from_state': fromState,
+      if (toState != null) 'to_state': toState,
+      if (reason != null) 'reason': reason,
+      if (evidenceIdsJson != null) 'evidence_ids_json': evidenceIdsJson,
+      if (occurredAt != null) 'occurred_at': occurredAt,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  DecisionOutcomeTransitionsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? uuid,
+    Value<int>? decisionMemoryId,
+    Value<String>? fromState,
+    Value<String>? toState,
+    Value<String>? reason,
+    Value<String>? evidenceIdsJson,
+    Value<DateTime>? occurredAt,
+    Value<DateTime>? createdAt,
+  }) {
+    return DecisionOutcomeTransitionsCompanion(
+      id: id ?? this.id,
+      uuid: uuid ?? this.uuid,
+      decisionMemoryId: decisionMemoryId ?? this.decisionMemoryId,
+      fromState: fromState ?? this.fromState,
+      toState: toState ?? this.toState,
+      reason: reason ?? this.reason,
+      evidenceIdsJson: evidenceIdsJson ?? this.evidenceIdsJson,
+      occurredAt: occurredAt ?? this.occurredAt,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (uuid.present) {
+      map['uuid'] = Variable<String>(uuid.value);
+    }
+    if (decisionMemoryId.present) {
+      map['decision_memory_id'] = Variable<int>(decisionMemoryId.value);
+    }
+    if (fromState.present) {
+      map['from_state'] = Variable<String>(fromState.value);
+    }
+    if (toState.present) {
+      map['to_state'] = Variable<String>(toState.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (evidenceIdsJson.present) {
+      map['evidence_ids_json'] = Variable<String>(evidenceIdsJson.value);
+    }
+    if (occurredAt.present) {
+      map['occurred_at'] = Variable<DateTime>(occurredAt.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DecisionOutcomeTransitionsCompanion(')
+          ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
+          ..write('decisionMemoryId: $decisionMemoryId, ')
+          ..write('fromState: $fromState, ')
+          ..write('toState: $toState, ')
+          ..write('reason: $reason, ')
+          ..write('evidenceIdsJson: $evidenceIdsJson, ')
+          ..write('occurredAt: $occurredAt, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $PlanSettingsTable extends PlanSettings
     with TableInfo<$PlanSettingsTable, PlanSetting> {
   @override
@@ -12908,6 +13472,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DecisionMemoriesTable decisionMemories = $DecisionMemoriesTable(
     this,
   );
+  late final $DecisionOutcomeTransitionsTable decisionOutcomeTransitions =
+      $DecisionOutcomeTransitionsTable(this);
   late final $PlanSettingsTable planSettings = $PlanSettingsTable(this);
   late final $PersonalExperimentsTable personalExperiments =
       $PersonalExperimentsTable(this);
@@ -12930,6 +13496,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     preferences,
     lifeContextEntries,
     decisionMemories,
+    decisionOutcomeTransitions,
     planSettings,
     personalExperiments,
     challenges,
@@ -18423,6 +18990,43 @@ typedef $$DecisionMemoriesTableUpdateCompanionBuilder =
       Value<String> syncStatus,
     });
 
+final class $$DecisionMemoriesTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $DecisionMemoriesTable, DecisionMemory> {
+  $$DecisionMemoriesTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $DecisionOutcomeTransitionsTable,
+    List<DecisionOutcomeTransition>
+  >
+  _decisionOutcomeTransitionsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.decisionOutcomeTransitions,
+    aliasName:
+        'decision_memories__id__decision_outcome_transitions__decision_memory_id',
+  );
+
+  $$DecisionOutcomeTransitionsTableProcessedTableManager
+  get decisionOutcomeTransitionsRefs {
+    final manager = $$DecisionOutcomeTransitionsTableTableManager(
+      $_db,
+      $_db.decisionOutcomeTransitions,
+    ).filter((f) => f.decisionMemoryId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _decisionOutcomeTransitionsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
 class $$DecisionMemoriesTableFilterComposer
     extends Composer<_$AppDatabase, $DecisionMemoriesTable> {
   $$DecisionMemoriesTableFilterComposer({
@@ -18516,6 +19120,33 @@ class $$DecisionMemoriesTableFilterComposer
     column: $table.syncStatus,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> decisionOutcomeTransitionsRefs(
+    Expression<bool> Function($$DecisionOutcomeTransitionsTableFilterComposer f)
+    f,
+  ) {
+    final $$DecisionOutcomeTransitionsTableFilterComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.decisionOutcomeTransitions,
+          getReferencedColumn: (t) => t.decisionMemoryId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$DecisionOutcomeTransitionsTableFilterComposer(
+                $db: $db,
+                $table: $db.decisionOutcomeTransitions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$DecisionMemoriesTableOrderingComposer
@@ -18688,6 +19319,35 @@ class $$DecisionMemoriesTableAnnotationComposer
     column: $table.syncStatus,
     builder: (column) => column,
   );
+
+  Expression<T> decisionOutcomeTransitionsRefs<T extends Object>(
+    Expression<T> Function(
+      $$DecisionOutcomeTransitionsTableAnnotationComposer a,
+    )
+    f,
+  ) {
+    final $$DecisionOutcomeTransitionsTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.decisionOutcomeTransitions,
+          getReferencedColumn: (t) => t.decisionMemoryId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$DecisionOutcomeTransitionsTableAnnotationComposer(
+                $db: $db,
+                $table: $db.decisionOutcomeTransitions,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$DecisionMemoriesTableTableManager
@@ -18701,16 +19361,9 @@ class $$DecisionMemoriesTableTableManager
           $$DecisionMemoriesTableAnnotationComposer,
           $$DecisionMemoriesTableCreateCompanionBuilder,
           $$DecisionMemoriesTableUpdateCompanionBuilder,
-          (
-            DecisionMemory,
-            BaseReferences<
-              _$AppDatabase,
-              $DecisionMemoriesTable,
-              DecisionMemory
-            >,
-          ),
+          (DecisionMemory, $$DecisionMemoriesTableReferences),
           DecisionMemory,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool decisionOutcomeTransitionsRefs})
         > {
   $$DecisionMemoriesTableTableManager(
     _$AppDatabase db,
@@ -18802,9 +19455,48 @@ class $$DecisionMemoriesTableTableManager
                 syncStatus: syncStatus,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$DecisionMemoriesTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({decisionOutcomeTransitionsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (decisionOutcomeTransitionsRefs)
+                  db.decisionOutcomeTransitions,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (decisionOutcomeTransitionsRefs)
+                    await $_getPrefetchedData<
+                      DecisionMemory,
+                      $DecisionMemoriesTable,
+                      DecisionOutcomeTransition
+                    >(
+                      currentTable: table,
+                      referencedTable: $$DecisionMemoriesTableReferences
+                          ._decisionOutcomeTransitionsRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$DecisionMemoriesTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).decisionOutcomeTransitionsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.decisionMemoryId == item.id,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -18819,12 +19511,428 @@ typedef $$DecisionMemoriesTableProcessedTableManager =
       $$DecisionMemoriesTableAnnotationComposer,
       $$DecisionMemoriesTableCreateCompanionBuilder,
       $$DecisionMemoriesTableUpdateCompanionBuilder,
-      (
-        DecisionMemory,
-        BaseReferences<_$AppDatabase, $DecisionMemoriesTable, DecisionMemory>,
-      ),
+      (DecisionMemory, $$DecisionMemoriesTableReferences),
       DecisionMemory,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool decisionOutcomeTransitionsRefs})
+    >;
+typedef $$DecisionOutcomeTransitionsTableCreateCompanionBuilder =
+    DecisionOutcomeTransitionsCompanion Function({
+      Value<int> id,
+      Value<String> uuid,
+      required int decisionMemoryId,
+      required String fromState,
+      required String toState,
+      required String reason,
+      Value<String> evidenceIdsJson,
+      required DateTime occurredAt,
+      Value<DateTime> createdAt,
+    });
+typedef $$DecisionOutcomeTransitionsTableUpdateCompanionBuilder =
+    DecisionOutcomeTransitionsCompanion Function({
+      Value<int> id,
+      Value<String> uuid,
+      Value<int> decisionMemoryId,
+      Value<String> fromState,
+      Value<String> toState,
+      Value<String> reason,
+      Value<String> evidenceIdsJson,
+      Value<DateTime> occurredAt,
+      Value<DateTime> createdAt,
+    });
+
+final class $$DecisionOutcomeTransitionsTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $DecisionOutcomeTransitionsTable,
+          DecisionOutcomeTransition
+        > {
+  $$DecisionOutcomeTransitionsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $DecisionMemoriesTable _decisionMemoryIdTable(
+    _$AppDatabase db,
+  ) => db.decisionMemories.createAlias(
+    'decision_outcome_transitions__decision_memory_id__decision_memories__id',
+  );
+
+  $$DecisionMemoriesTableProcessedTableManager get decisionMemoryId {
+    final $_column = $_itemColumn<int>('decision_memory_id')!;
+
+    final manager = $$DecisionMemoriesTableTableManager(
+      $_db,
+      $_db.decisionMemories,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_decisionMemoryIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$DecisionOutcomeTransitionsTableFilterComposer
+    extends Composer<_$AppDatabase, $DecisionOutcomeTransitionsTable> {
+  $$DecisionOutcomeTransitionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fromState => $composableBuilder(
+    column: $table.fromState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get toState => $composableBuilder(
+    column: $table.toState,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get evidenceIdsJson => $composableBuilder(
+    column: $table.evidenceIdsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$DecisionMemoriesTableFilterComposer get decisionMemoryId {
+    final $$DecisionMemoriesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.decisionMemoryId,
+      referencedTable: $db.decisionMemories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DecisionMemoriesTableFilterComposer(
+            $db: $db,
+            $table: $db.decisionMemories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DecisionOutcomeTransitionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $DecisionOutcomeTransitionsTable> {
+  $$DecisionOutcomeTransitionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fromState => $composableBuilder(
+    column: $table.fromState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get toState => $composableBuilder(
+    column: $table.toState,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get evidenceIdsJson => $composableBuilder(
+    column: $table.evidenceIdsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$DecisionMemoriesTableOrderingComposer get decisionMemoryId {
+    final $$DecisionMemoriesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.decisionMemoryId,
+      referencedTable: $db.decisionMemories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DecisionMemoriesTableOrderingComposer(
+            $db: $db,
+            $table: $db.decisionMemories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DecisionOutcomeTransitionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DecisionOutcomeTransitionsTable> {
+  $$DecisionOutcomeTransitionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uuid =>
+      $composableBuilder(column: $table.uuid, builder: (column) => column);
+
+  GeneratedColumn<String> get fromState =>
+      $composableBuilder(column: $table.fromState, builder: (column) => column);
+
+  GeneratedColumn<String> get toState =>
+      $composableBuilder(column: $table.toState, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<String> get evidenceIdsJson => $composableBuilder(
+    column: $table.evidenceIdsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get occurredAt => $composableBuilder(
+    column: $table.occurredAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$DecisionMemoriesTableAnnotationComposer get decisionMemoryId {
+    final $$DecisionMemoriesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.decisionMemoryId,
+      referencedTable: $db.decisionMemories,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$DecisionMemoriesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.decisionMemories,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$DecisionOutcomeTransitionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DecisionOutcomeTransitionsTable,
+          DecisionOutcomeTransition,
+          $$DecisionOutcomeTransitionsTableFilterComposer,
+          $$DecisionOutcomeTransitionsTableOrderingComposer,
+          $$DecisionOutcomeTransitionsTableAnnotationComposer,
+          $$DecisionOutcomeTransitionsTableCreateCompanionBuilder,
+          $$DecisionOutcomeTransitionsTableUpdateCompanionBuilder,
+          (
+            DecisionOutcomeTransition,
+            $$DecisionOutcomeTransitionsTableReferences,
+          ),
+          DecisionOutcomeTransition,
+          PrefetchHooks Function({bool decisionMemoryId})
+        > {
+  $$DecisionOutcomeTransitionsTableTableManager(
+    _$AppDatabase db,
+    $DecisionOutcomeTransitionsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DecisionOutcomeTransitionsTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$DecisionOutcomeTransitionsTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$DecisionOutcomeTransitionsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> uuid = const Value.absent(),
+                Value<int> decisionMemoryId = const Value.absent(),
+                Value<String> fromState = const Value.absent(),
+                Value<String> toState = const Value.absent(),
+                Value<String> reason = const Value.absent(),
+                Value<String> evidenceIdsJson = const Value.absent(),
+                Value<DateTime> occurredAt = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => DecisionOutcomeTransitionsCompanion(
+                id: id,
+                uuid: uuid,
+                decisionMemoryId: decisionMemoryId,
+                fromState: fromState,
+                toState: toState,
+                reason: reason,
+                evidenceIdsJson: evidenceIdsJson,
+                occurredAt: occurredAt,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> uuid = const Value.absent(),
+                required int decisionMemoryId,
+                required String fromState,
+                required String toState,
+                required String reason,
+                Value<String> evidenceIdsJson = const Value.absent(),
+                required DateTime occurredAt,
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => DecisionOutcomeTransitionsCompanion.insert(
+                id: id,
+                uuid: uuid,
+                decisionMemoryId: decisionMemoryId,
+                fromState: fromState,
+                toState: toState,
+                reason: reason,
+                evidenceIdsJson: evidenceIdsJson,
+                occurredAt: occurredAt,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$DecisionOutcomeTransitionsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({decisionMemoryId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (decisionMemoryId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.decisionMemoryId,
+                                referencedTable:
+                                    $$DecisionOutcomeTransitionsTableReferences
+                                        ._decisionMemoryIdTable(db),
+                                referencedColumn:
+                                    $$DecisionOutcomeTransitionsTableReferences
+                                        ._decisionMemoryIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$DecisionOutcomeTransitionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DecisionOutcomeTransitionsTable,
+      DecisionOutcomeTransition,
+      $$DecisionOutcomeTransitionsTableFilterComposer,
+      $$DecisionOutcomeTransitionsTableOrderingComposer,
+      $$DecisionOutcomeTransitionsTableAnnotationComposer,
+      $$DecisionOutcomeTransitionsTableCreateCompanionBuilder,
+      $$DecisionOutcomeTransitionsTableUpdateCompanionBuilder,
+      (DecisionOutcomeTransition, $$DecisionOutcomeTransitionsTableReferences),
+      DecisionOutcomeTransition,
+      PrefetchHooks Function({bool decisionMemoryId})
     >;
 typedef $$PlanSettingsTableCreateCompanionBuilder =
     PlanSettingsCompanion Function({
@@ -20338,6 +21446,12 @@ class $AppDatabaseManager {
       $$LifeContextEntriesTableTableManager(_db, _db.lifeContextEntries);
   $$DecisionMemoriesTableTableManager get decisionMemories =>
       $$DecisionMemoriesTableTableManager(_db, _db.decisionMemories);
+  $$DecisionOutcomeTransitionsTableTableManager
+  get decisionOutcomeTransitions =>
+      $$DecisionOutcomeTransitionsTableTableManager(
+        _db,
+        _db.decisionOutcomeTransitions,
+      );
   $$PlanSettingsTableTableManager get planSettings =>
       $$PlanSettingsTableTableManager(_db, _db.planSettings);
   $$PersonalExperimentsTableTableManager get personalExperiments =>
