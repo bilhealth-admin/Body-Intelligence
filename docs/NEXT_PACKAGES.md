@@ -3,25 +3,31 @@
 ## Authoritative baseline
 
 - Branch: `phase-3-product-excellence`
-- HEAD: `9ed8e44975b6003b44c100fe4fee53ebcb383c73`
+- HEAD: `9fe26c3ceddf6e1d1de6bcb04344da043f3bb338`
 
 ## Current authorization state
 
-No implementation package is currently authorized after BIL v1 program closure
-and Premium UI phase closure. Architecture, Dashboard, Trusted Truth, Premium
-UI, and the cross-program closure gates are complete and must not be listed as
-future work.
+The Product Owner has authorized the post-program phase
+`BIL V1 Global Launch Readiness`. Its accepted parent is
+`9fe26c3ceddf6e1d1de6bcb04344da043f3bb338`. Architecture, Dashboard,
+Trusted Truth, Premium UI, and cross-program closure gates remain closed and
+must not be listed as future work.
 
-## Rule for opening the next package
+## Authorized package sequence
 
-The Product Owner must authorize a named post-program phase. Its first package
-must declare:
+1. `BIL-V1-LAUNCH-001` — phase boundary and repository audit.
+2. `BIL-V1-LAUNCH-002` — Android release identity, permissions, and signing
+   boundary.
+3. `BIL-V1-LAUNCH-003` — Apple repository preparation and privacy-manifest
+   boundary.
+4. `BIL-V1-LAUNCH-004` — privacy, Data Safety, health declarations, and store
+   evidence consistency.
+5. `BIL-V1-LAUNCH-005` — release-candidate build and non-regression gate.
+6. `BIL-V1-LAUNCH-006` — repository closure with external launch gates.
 
-- the accepted parent HEAD;
-- a bounded repository scope;
-- explicit exclusions and external gates;
-- deterministic APPLY and VERIFY scripts;
-- selective commit targets and an approval checkpoint.
+Every package must declare its accepted parent HEAD, bounded repository scope,
+external exclusions, deterministic APPLY and VERIFY scripts, selective commit
+targets, and approval checkpoint.
 
 Historical package candidates are records only. They are not authorization and
 must not be replayed against the current baseline.

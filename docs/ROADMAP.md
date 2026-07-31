@@ -3,7 +3,7 @@
 ## Authoritative baseline
 
 - Branch: `phase-3-product-excellence`
-- Baseline HEAD: `9ed8e44975b6003b44c100fe4fee53ebcb383c73`
+- Baseline HEAD: `9fe26c3ceddf6e1d1de6bcb04344da043f3bb338`
 
 ## Accepted phase state
 
@@ -13,17 +13,17 @@ and Trusted Truth are closed. The cross-program formatting, analysis, full
 test-suite, and Android release-build gates are also closed. The separately
 authorized Premium UI post-program phase is closed at the baseline above.
 
-## Post-program roadmap rule
+## Active post-program phase
 
-There is no remaining authorized implementation package in the closed BIL v1
-program. Future work must be opened as a named post-program phase by the
-Product Owner, use the authoritative baseline above, and preserve every closed
-boundary as Non-Regression.
+`BIL V1 Global Launch Readiness` is authorized from the baseline above. It
+prepares and verifies repository-owned release evidence while preserving every
+closed boundary as Non-Regression.
 
-Potential future work may include store-release operations, hosted
-infrastructure activation, or Intelligence Platform 2.0. These are planning
-categories, not authorization to implement them. Premium UI is accepted closed
-work and must not be advertised as a pending phase.
+The phase covers Android and Apple repository preparation, permission and
+privacy-declaration consistency, release-candidate verification, and an honest
+closure boundary. It does not activate hosted infrastructure or Intelligence
+Platform 2.0. Premium UI is accepted closed work and must not be advertised as
+a pending phase.
 
 External accounts, credentials, legal declarations, signing ownership,
 store-console submissions, and representative-device certification remain

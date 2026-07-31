@@ -3,7 +3,7 @@
 ## Authoritative execution baseline
 
 - Branch: `phase-3-product-excellence`
-- Baseline HEAD: `9ed8e44975b6003b44c100fe4fee53ebcb383c73`
+- Baseline HEAD: `9fe26c3ceddf6e1d1de6bcb04344da043f3bb338`
 - Program closure commit: `ea024c85365ee2a14e8594231d6a14d941acd246`
 - Premium UI closure commit: `9ed8e44975b6003b44c100fe4fee53ebcb383c73`
 
@@ -39,9 +39,9 @@ defect, an approved requirement, and a focused package scoped to that evidence.
 
 ## Next boundary
 
-No implementation package is pending after the closed BIL v1 program and the
-closed Premium UI post-program phase. The next package must belong to a newly
-authorized named phase and start from the baseline above. External credentials,
-store-console actions, hosted infrastructure, device certification, and legal
-declarations remain external gates and must not be represented as repository
-implementation work.
+The Product Owner has authorized the named `BIL V1 Global Launch Readiness`
+phase from governing HEAD `9fe26c3ceddf6e1d1de6bcb04344da043f3bb338`.
+Its first package is a repository audit and boundary contract. External
+credentials, store-console actions, hosted infrastructure, device
+certification, public URLs, signing keys, and legal declarations remain
+external gates and must not be represented as repository implementation work.

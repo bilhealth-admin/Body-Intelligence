@@ -3,7 +3,7 @@
 ## Governing baseline
 
 - Branch: `phase-3-product-excellence`
-- HEAD: `9ed8e44975b6003b44c100fe4fee53ebcb383c73`
+- HEAD: `9fe26c3ceddf6e1d1de6bcb04344da043f3bb338`
 
 ## Program closure
 
@@ -29,3 +29,13 @@ localization, and closure contracts are protected under Non-Regression.
    and device certification outside repository completion claims.
 5. Advance the baseline only after package verification, approval, selective
    commit, and final repository status review.
+
+## Active phase
+
+`BIL V1 Global Launch Readiness` is authorized from
+`9fe26c3ceddf6e1d1de6bcb04344da043f3bb338`. Repository work is limited to
+release identity, platform configuration, permissions, privacy and store
+evidence, deterministic release verification, and closure contracts. Accounts,
+credentials, signing keys, public-policy publication, store submission, legal
+approval, hosted-service activation, and physical-device certification remain
+external.

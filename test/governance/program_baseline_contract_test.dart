@@ -6,7 +6,7 @@ String _normalized(String source) => source.replaceAll(RegExp(r'\s+'), ' ');
 
 void main() {
   test('governance documents agree on the accepted current baseline', () {
-    const baseline = '9ed8e44975b6003b44c100fe4fee53ebcb383c73';
+    const baseline = '9fe26c3ceddf6e1d1de6bcb04344da043f3bb338';
     const documents = <String>[
       'docs/PROJECT_STATE.md',
       'docs/ROADMAP.md',
@@ -22,15 +22,15 @@ void main() {
     }
   });
 
-  test('closed work is not advertised as a pending package', () {
+  test('only the authorized launch phase is advertised as pending work', () {
     final nextPackages = _normalized(
       File('docs/NEXT_PACKAGES.md').readAsStringSync(),
     );
 
-    expect(nextPackages, contains('No implementation package is currently'));
+    expect(nextPackages, contains('BIL V1 Global Launch Readiness'));
+    expect(nextPackages, contains('BIL-V1-LAUNCH-001'));
     expect(nextPackages, contains('must not be listed as future work'));
     expect(nextPackages, contains('Historical package candidates are records'));
-    expect(nextPackages, contains('Premium UI phase closure'));
   });
 
   test('premium UI closure is durable and no longer future work', () {
