@@ -3,13 +3,14 @@
 ## Authoritative baseline
 
 - Branch: `phase-3-product-excellence`
-- HEAD: `ea024c85365ee2a14e8594231d6a14d941acd246`
+- HEAD: `9ed8e44975b6003b44c100fe4fee53ebcb383c73`
 
 ## Current authorization state
 
-No implementation package is currently authorized after BIL v1 program
-closure. Architecture, Dashboard, Trusted Truth, and the cross-program closure
-gates are complete and must not be listed as future work.
+No implementation package is currently authorized after BIL v1 program closure
+and Premium UI phase closure. Architecture, Dashboard, Trusted Truth, Premium
+UI, and the cross-program closure gates are complete and must not be listed as
+future work.
 
 ## Rule for opening the next package
 
