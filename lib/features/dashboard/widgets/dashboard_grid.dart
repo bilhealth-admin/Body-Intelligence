@@ -8,7 +8,6 @@ import '../../../core/units/measurement_units.dart';
 import '../../../engine/body_composition_engine.dart';
 import '../../../engine/data_honesty_engine.dart';
 import '../../../engine/one_best_action_engine.dart';
-import '../../../engine/plan_engine.dart';
 import '../../../engine/what_changed_engine.dart';
 import '../../connected_health/widgets/connected_health_card.dart';
 import '../../../engine/nutrient_evidence_engine.dart';
@@ -21,6 +20,7 @@ import '../../foods/providers/food_provider.dart';
 import '../../life_context/providers/life_context_provider.dart';
 import '../../weight/providers/weight_provider.dart';
 import '../composition/dashboard_composition.dart';
+import '../composition/dashboard_intelligence_input_adapter.dart';
 import '../domain/dashboard_intelligence_composer.dart';
 export '../domain/dashboard_intelligence_composer.dart'
     show consecutiveLoggingDays;
@@ -121,111 +121,21 @@ class DashboardGrid extends ConsumerWidget {
     final allMeals = allMealsAsync.value ?? const [];
     final allWater = allWaterAsync.value ?? const [];
     final allContexts = allContextsAsync.value ?? const [];
-    final insightContexts = (contextAsync.value ?? const [])
-        .where((entry) => entry.useInInsights)
-        .toList();
     final now = DateTime.now();
     final dashboardSnapshot = const DashboardIntelligenceComposer().compose(
-      DashboardIntelligenceInput(
+      const DashboardIntelligenceInputAdapter().adapt(
         now: now,
-        profile: DashboardProfileInput(
-          age: profile.age,
-          gender: profile.gender,
-          heightCm: profile.height,
-          currentWeightKg: profile.currentWeight,
-          targetWeightKg: profile.targetWeight,
-          activityLevel: profile.activityLevel,
-          exercises: profile.exercises,
-          neckCm: profile.neck,
-          waistCm: profile.waist,
-        ),
-        weights: [
-          for (final row in weights)
-            DashboardWeightInput(
-              at: row.date,
-              kg: row.weight,
-              measurementContext: row.measurementContext,
-              dayKey: row.dayKey,
-            ),
-        ],
-        todayMeals: [
-          for (final row in meals)
-            DashboardMealInput(
-              at: row.meal.date,
-              dayKey: row.meal.dayKey,
-              items: [
-                for (final item in row.items)
-                  DashboardMealItemInput(
-                    calories: item.calories,
-                    protein: item.protein,
-                    fats: item.fats,
-                    sodium: item.sodium,
-                    fiber: item.fiber,
-                    nutrientEvidenceMask: item.nutrientEvidenceMask,
-                  ),
-              ],
-            ),
-        ],
-        todayWater: [
-          for (final row in waterRows)
-            DashboardWaterInput(
-              at: row.occurredAt,
-              dayKey: row.dayKey,
-              amountMl: row.amountMl,
-            ),
-        ],
-        allMeals: [
-          for (final row in allMeals)
-            DashboardMealInput(
-              at: row.meal.date,
-              dayKey: row.meal.dayKey,
-              items: [
-                for (final item in row.items)
-                  DashboardMealItemInput(
-                    calories: item.calories,
-                    protein: item.protein,
-                    fats: item.fats,
-                    sodium: item.sodium,
-                    fiber: item.fiber,
-                    nutrientEvidenceMask: item.nutrientEvidenceMask,
-                  ),
-              ],
-            ),
-        ],
-        allWater: [
-          for (final row in allWater)
-            DashboardWaterInput(
-              at: row.occurredAt,
-              dayKey: row.dayKey,
-              amountMl: row.amountMl,
-            ),
-        ],
-        insightContexts: [
-          for (final row in insightContexts)
-            DashboardContextInput(dayKey: row.dayKey, type: row.type),
-        ],
-        allContexts: [
-          for (final row in allContexts)
-            DashboardContextInput(dayKey: row.dayKey, type: row.type),
-        ],
-        memories: [
-          for (final row in memoriesAsync.value ?? const [])
-            DashboardDecisionMemoryInput(
-              recommendationKey: row.recommendationKey,
-              helpfulness: row.helpfulness,
-            ),
-        ],
+        profile: profile,
+        weights: weights,
+        todayMeals: meals,
+        todayWater: waterRows,
+        allMeals: allMeals,
+        allWater: allWater,
+        todayContexts: contextAsync.value ?? const [],
+        allContexts: allContexts,
+        memories: memoriesAsync.value ?? const [],
         skippedWeightToday: skippedWeightAsync.value ?? false,
-        planOverrides: planAsync.value == null
-            ? null
-            : PlanOverrides(
-                calories: planAsync.value!.overrideCalories,
-                protein: planAsync.value!.overrideProtein,
-                carbs: planAsync.value!.overrideCarbs,
-                fats: planAsync.value!.overrideFats,
-                fiber: planAsync.value!.overrideFiber,
-                water: planAsync.value!.overrideWater,
-              ),
+        planSetting: planAsync.value,
       ),
     );
     final calories = dashboardSnapshot.calories;
