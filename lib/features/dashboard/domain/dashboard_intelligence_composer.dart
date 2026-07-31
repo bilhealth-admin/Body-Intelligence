@@ -10,6 +10,7 @@ import '../../../engine/data_honesty_engine.dart';
 import '../../../engine/intelligence_engine.dart';
 import '../../../engine/nutrient_evidence_engine.dart';
 import '../../../engine/one_best_action_engine.dart';
+import 'dashboard_decision_authority.dart';
 import '../../../engine/plan_engine.dart';
 import '../../../engine/progress_analysis.dart';
 import '../../../engine/recovery_engine.dart';
@@ -196,7 +197,12 @@ class DashboardIntelligenceSnapshot {
 }
 
 class DashboardIntelligenceComposer {
-  const DashboardIntelligenceComposer();
+  const DashboardIntelligenceComposer({
+    DashboardDecisionAuthority decisionAuthority =
+        const LegacyDashboardDecisionAuthority(),
+  }) : _decisionAuthority = decisionAuthority;
+
+  final DashboardDecisionAuthority _decisionAuthority;
 
   DashboardIntelligenceSnapshot compose(DashboardIntelligenceInput input) {
     final todayItems = input.todayMeals.expand((meal) => meal.items).toList();
@@ -304,7 +310,7 @@ class DashboardIntelligenceComposer {
         .where((type) => (lowRatings[type.name] ?? 0) >= 2)
         .toSet();
     final todayKey = dayKeyFor(input.now);
-    final bestAction = OneBestActionEngine.choose(
+    final bestAction = _decisionAuthority.choose(
       weighedToday: weightDays.contains(todayKey) || input.skippedWeightToday,
       loggingComplete: input.todayMeals.isNotEmpty,
       protein: protein,
