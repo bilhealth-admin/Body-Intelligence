@@ -27,6 +27,10 @@ class DashboardTwinDeckShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final headerBaseHeight = compact ? 68.0 : 72.0;
+    final headerHeight = MediaQuery.textScalerOf(
+      context,
+    ).scale(headerBaseHeight).clamp(headerBaseHeight, compact ? 112.0 : 120.0);
     final titleStyle =
         (compact
                 ? Theme.of(context).textTheme.titleMedium
@@ -58,7 +62,7 @@ class DashboardTwinDeckShell extends StatelessWidget {
         children: [
           SizedBox(
             key: const Key('dashboard-twin-header-slot'),
-            height: compact ? 68 : 72,
+            height: headerHeight,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -86,7 +90,11 @@ class DashboardTwinDeckShell extends StatelessWidget {
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final pagerReserve = pages.length > 1 ? 26.0 : 0.0;
+                final pagerReserve = pages.length > 1
+                    ? MediaQuery.textScalerOf(
+                        context,
+                      ).scale(26.0).clamp(26.0, 48.0)
+                    : 0.0;
                 final deckHeight = (constraints.maxHeight - pagerReserve)
                     .clamp(0.0, constraints.maxHeight)
                     .toDouble();

@@ -7,13 +7,19 @@ void main() {
     final page = File(
       'lib/features/dashboard/dashboard_page.dart',
     ).readAsStringSync();
-    final frame = File(
-      'lib/features/dashboard/widgets/dashboard_experience_frame.dart',
+    final composition = File(
+      'lib/features/dashboard/widgets/dashboard_composition.dart',
+    ).readAsStringSync();
+    final shell = File(
+      'lib/features/dashboard/widgets/dashboard_shell.dart',
     ).readAsStringSync();
 
-    expect(page, contains('DashboardExperienceFrame('));
-    expect(frame, contains("key: const Key('dashboard-priority-heading')"));
-    expect(frame, contains('Today priorities followed by supporting detail'));
-    expect(frame, contains('Your day, in priority order'));
+    expect(page, contains('DashboardShell('));
+    expect(page, contains('DashboardComposition('));
+    expect(page, contains('hero: hero'));
+    expect(page, contains('content: const DashboardGrid('));
+    expect(composition, contains("Key('dashboard-composition-wide')"));
+    expect(composition, contains("Key('dashboard-composition-stacked')"));
+    expect(shell, contains("Key('dashboard-scroll-view')"));
   });
 }

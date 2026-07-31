@@ -113,10 +113,12 @@ class PremiumDashboardBenchmark extends StatelessWidget {
           compact: phone,
         );
         Widget intelligenceFor(double width) {
-          if (personalHealthAi == null) return insights;
-          final twinHeight = MediaQuery.textScalerOf(context)
-              .scale(phone ? 420.0 : 390.0)
-              .clamp(phone ? 420.0 : 390.0, phone ? 500.0 : 470.0);
+          final twinHeight = MediaQuery.textScalerOf(
+            context,
+          ).scale(phone ? 420.0 : 390.0).clamp(phone ? 420.0 : 390.0, 540.0);
+          if (personalHealthAi == null) {
+            return SizedBox(height: twinHeight, child: insights);
+          }
           if (phone) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
