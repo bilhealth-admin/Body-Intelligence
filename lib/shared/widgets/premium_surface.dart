@@ -62,6 +62,7 @@ class _PremiumSurfaceState extends State<PremiumSurface> {
         ? PremiumDesignTokens.dashboardCardRadius
         : PremiumDesignTokens.cardRadius;
     final dark = Theme.of(context).brightness == Brightness.dark;
+    final highContrast = MediaQuery.highContrastOf(context);
 
     final content = Padding(
       padding: widget.padding ?? PremiumDesignTokens.cardPadding,
@@ -129,12 +130,16 @@ class _PremiumSurfaceState extends State<PremiumSurface> {
                 borderRadius: radius,
                 child: BackdropFilter(
                   filter: ImageFilter.blur(
-                    sigmaX: widget.dashboardGlass
+                    sigmaX: highContrast
+                        ? 0
+                        : widget.dashboardGlass
                         ? (dark
                               ? (_primary ? 18 : (_detail ? 10 : 14))
                               : (_primary ? 12 : (_detail ? 6 : 8)))
                         : (_primary ? 26 : (_detail ? 14 : 20)),
-                    sigmaY: widget.dashboardGlass
+                    sigmaY: highContrast
+                        ? 0
+                        : widget.dashboardGlass
                         ? (dark
                               ? (_primary ? 18 : (_detail ? 10 : 14))
                               : (_primary ? 12 : (_detail ? 6 : 8)))
@@ -148,8 +153,8 @@ class _PremiumSurfaceState extends State<PremiumSurface> {
                     decoration: BoxDecoration(
                       borderRadius: radius,
                       gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                        begin: AlignmentDirectional.topStart,
+                        end: AlignmentDirectional.bottomEnd,
                         colors: widget.dashboardGlass && !dark
                             ? [
                                 Colors.white.withValues(
@@ -195,8 +200,11 @@ class _PremiumSurfaceState extends State<PremiumSurface> {
                                     Theme.of(context).brightness,
                                     hovered: hovered || focused,
                                   ),
-                              width:
-                                  PremiumDesignTokens.dashboardCardBorderWidth,
+                              width: highContrast
+                                  ? PremiumDesignTokens
+                                        .dashboardCardHighContrastBorderWidth
+                                  : PremiumDesignTokens
+                                        .dashboardCardBorderWidth,
                             )
                           : null,
                       boxShadow: [

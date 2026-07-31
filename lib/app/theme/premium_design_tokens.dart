@@ -21,6 +21,8 @@ abstract final class PremiumDesignTokens {
 
   static const double dashboardCardBorderWidth =
       BilPremiumVisualFoundation.dashboardCardBorderWidth;
+  static const double dashboardCardHighContrastBorderWidth =
+      BilPremiumVisualFoundation.dashboardCardHighContrastBorderWidth;
   static const double dashboardCardHoverScale =
       BilPremiumVisualFoundation.dashboardCardHoverScale;
   static const double dashboardCardPressedScale =

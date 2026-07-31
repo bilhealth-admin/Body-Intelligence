@@ -21,6 +21,7 @@ abstract final class BilPremiumVisualFoundation {
 
   // Interactive dashboard surfaces.
   static const double dashboardCardBorderWidth = 1;
+  static const double dashboardCardHighContrastBorderWidth = 2;
   static const double dashboardCardHoverScale = 1.004;
   static const double dashboardCardPressedScale = .992;
   static const double dashboardCardShadowBlur = 22;
