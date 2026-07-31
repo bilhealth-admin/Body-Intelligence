@@ -11,6 +11,7 @@ import '../../../engine/intelligence_engine.dart';
 import '../../../engine/nutrient_evidence_engine.dart';
 import '../../../engine/one_best_action_engine.dart';
 import 'dashboard_decision_authority.dart';
+import 'dashboard_trusted_body_twin_adapter.dart';
 import '../../../engine/plan_engine.dart';
 import '../../../engine/progress_analysis.dart';
 import '../../../engine/recovery_engine.dart';
@@ -164,6 +165,7 @@ class DashboardIntelligenceSnapshot {
     required this.recovery,
     required this.dailyReturn,
     required this.bodyTwin,
+    required this.trustedBodyTwin,
     required this.progress,
     required this.recentJourneyWeights,
     required this.weeklyReview,
@@ -189,6 +191,7 @@ class DashboardIntelligenceSnapshot {
   final RecoveryReport recovery;
   final DailyReturnReport dailyReturn;
   final BodyTwinReport bodyTwin;
+  final DashboardTrustedBodyTwinSnapshot trustedBodyTwin;
   final ProgressAnalysis progress;
   final List<DashboardWeightInput> recentJourneyWeights;
   final WeeklyReview weeklyReview;
@@ -199,9 +202,11 @@ class DashboardIntelligenceSnapshot {
 class DashboardIntelligenceComposer {
   const DashboardIntelligenceComposer({
     this._decisionAuthority = const TrustedDashboardDecisionAuthority(),
+    this._bodyTwinAdapter = const DashboardTrustedBodyTwinAdapter(),
   });
 
   final DashboardDecisionAuthority _decisionAuthority;
+  final DashboardTrustedBodyTwinAdapter _bodyTwinAdapter;
 
   DashboardIntelligenceSnapshot compose(DashboardIntelligenceInput input) {
     final todayItems = input.todayMeals.expand((meal) => meal.items).toList();
@@ -364,6 +369,16 @@ class DashboardIntelligenceComposer {
       nutritionDays: mealDays.length,
       observationDays: observedDays.length,
     );
+    final trustedBodyTwin = _bodyTwinAdapter.build(
+      asOf: input.now,
+      weights: input.weights.map(
+        (weight) => DashboardBodyTwinWeightObservation(
+          kg: weight.kg,
+          observedAt: weight.at,
+          source: weight.measurementContext,
+        ),
+      ),
+    );
     final progress = ProgressAnalysis.evaluate(
       samples: chronologicalWeights
           .map((row) => ProgressSample(date: row.at, weightKg: row.kg))
@@ -447,6 +462,7 @@ class DashboardIntelligenceComposer {
       recovery: recovery,
       dailyReturn: dailyReturn,
       bodyTwin: bodyTwin,
+      trustedBodyTwin: trustedBodyTwin,
       progress: progress,
       recentJourneyWeights: recentJourneyWeights,
       weeklyReview: weeklyReview,

@@ -18,6 +18,7 @@ import '../composition/dashboard_intelligence_input_adapter.dart';
 import '../domain/dashboard_intelligence_composer.dart';
 import '../domain/dashboard_decision_explanation.dart';
 import '../domain/dashboard_trusted_truth_decision_adapter.dart';
+import '../domain/dashboard_trusted_body_twin_adapter.dart';
 export '../domain/dashboard_intelligence_composer.dart'
     show consecutiveLoggingDays;
 import '../domain/dashboard_runtime_state.dart';
@@ -145,6 +146,7 @@ class DashboardGrid extends ConsumerWidget {
     final changed = dashboardSnapshot.changed;
     final dailyReturn = dashboardSnapshot.dailyReturn;
     final twin = dashboardSnapshot.bodyTwin;
+    final trustedTwin = dashboardSnapshot.trustedBodyTwin;
     final chronologicalWeights = weights.reversed.toList();
     final progressAnalysis = dashboardSnapshot.progress;
     final recentJourneyWeights = chronologicalWeights.length > 30
@@ -185,6 +187,35 @@ class DashboardGrid extends ConsumerWidget {
       engineVersion: DashboardTrustedTruthDecisionAdapter.engineVersion,
       inputSources: DashboardTrustedTruthDecisionAdapter.inputEvidenceKeys,
     );
+    final trustedTwinSummary = switch (trustedTwin.status) {
+      DashboardBodyTwinTrustStatus.trusted => tr(
+        'Trusted local Body Twin · ${trustedTwin.weightKg!.toStringAsFixed(1)} kg',
+        'توأم جسدي محلي موثوق · ${trustedTwin.weightKg!.toStringAsFixed(1)} كجم',
+      ),
+      DashboardBodyTwinTrustStatus.stale => tr(
+        'Body Twin paused · latest weight is stale',
+        'تم إيقاف التوأم الجسدي · آخر وزن قديم',
+      ),
+      DashboardBodyTwinTrustStatus.inconsistent => tr(
+        'Body Twin blocked · local measurement is inconsistent',
+        'تم حجب التوأم الجسدي · القياس المحلي غير متسق',
+      ),
+      DashboardBodyTwinTrustStatus.unavailable => tr(
+        'Body Twin is waiting for a trusted local weight',
+        'ينتظر التوأم الجسدي وزنًا محليًا موثوقًا',
+      ),
+    };
+    final trustedTwinEvidence = trustedTwin.canExposeBodyTwin
+        ? twin.scenario == null
+              ? tr(
+                  twin.requiredData.join(' · '),
+                  'نحتاج أيام ملاحظة ووزن وتغذية أكثر.',
+                )
+              : tr(
+                  'Cautious range ${twin.scenario!.cautiousLowKg.toStringAsFixed(1)} to ${twin.scenario!.cautiousHighKg.toStringAsFixed(1)} kg/week · ${trustedTwin.engineVersion}',
+                  'النطاق الحذر ${twin.scenario!.cautiousLowKg.toStringAsFixed(1)} إلى ${twin.scenario!.cautiousHighKg.toStringAsFixed(1)} كجم/أسبوع · ${trustedTwin.engineVersion}',
+                )
+        : trustedTwin.reasons.join(' · ');
 
     Future<void> addWater(int amountMl) async {
       await hydrationCommand.addWater(amountMl);
@@ -393,19 +424,8 @@ class DashboardGrid extends ConsumerWidget {
               arabic: arabic,
               compact: MediaQuery.sizeOf(context).width < 600,
             ),
-            bodyTwinSummary: tr(
-              'Current weight ${UnitConverter.weightFromKg(currentWeight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)} · BMI ${compositionValue(bodyComposition.bodyMassIndex, unit: '')} · Body fat ${compositionValue(bodyComposition.bodyFatPercentage, unit: '%')}',
-              'الوزن الحالي ${UnitConverter.weightFromKg(currentWeight, system).toStringAsFixed(1)} ${UnitConverter.weightUnit(system)} · مؤشر كتلة الجسم ${compositionValue(bodyComposition.bodyMassIndex, unit: '')} · نسبة الدهون ${compositionValue(bodyComposition.bodyFatPercentage, unit: '%')}',
-            ),
-            bodyTwinEvidence: twin.scenario == null
-                ? tr(
-                    twin.requiredData.join(' · '),
-                    'نحتاج أيام ملاحظة ووزن وتغذية أكثر.',
-                  )
-                : tr(
-                    'Cautious range ${twin.scenario!.cautiousLowKg.toStringAsFixed(1)} to ${twin.scenario!.cautiousHighKg.toStringAsFixed(1)} kg/week',
-                    'النطاق الحذر ${twin.scenario!.cautiousLowKg.toStringAsFixed(1)} إلى ${twin.scenario!.cautiousHighKg.toStringAsFixed(1)} كجم/أسبوع',
-                  ),
+            bodyTwinSummary: trustedTwinSummary,
+            bodyTwinEvidence: trustedTwinEvidence,
             nutritionSummary: meals.isEmpty
                 ? tr(
                     'Nutrition interpretation is waiting for a meal observation.',
