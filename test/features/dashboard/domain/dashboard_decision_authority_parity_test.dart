@@ -190,7 +190,7 @@ void main() {
     test('allows retirement only after complete observable parity', () {
       final report = const DashboardDecisionAuthorityParityGate().compare(
         reference: _legacy,
-        candidate: const _DelegatingCandidateAuthority(_legacy),
+        candidate: const TrustedDashboardDecisionAuthority(),
         cases: _canonicalCases,
       );
 

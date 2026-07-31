@@ -198,9 +198,8 @@ class DashboardIntelligenceSnapshot {
 
 class DashboardIntelligenceComposer {
   const DashboardIntelligenceComposer({
-    DashboardDecisionAuthority decisionAuthority =
-        const LegacyDashboardDecisionAuthority(),
-  }) : _decisionAuthority = decisionAuthority;
+    this._decisionAuthority = const TrustedDashboardDecisionAuthority(),
+  });
 
   final DashboardDecisionAuthority _decisionAuthority;
 
