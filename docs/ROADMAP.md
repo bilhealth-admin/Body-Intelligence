@@ -1,26 +1,28 @@
-# BIL Roadmap and Activation Boundaries
+# BIL Roadmap
 
-## Authoritative execution baseline
+## Authoritative baseline
 
 - Branch: `phase-3-product-excellence`
-- Baseline HEAD: `8f67e0effa480e9af0769ec546973ef0644a32f8`
+- Baseline HEAD: `ea024c85365ee2a14e8594231d6a14d941acd246`
 
-## Closed engineering stages
+## Accepted phase state
 
-- Phase 3 Product Excellence: **complete**
-- Foundation — **Closed**
-- Nutrition Platform — **Closed**
-- AI Platform — **Closed**
-- BIL Intelligence Integration — **Closed**
-- BIL Intelligence Reality Closure — **Closed**
-- Cloud Platform Core — **Closed**
+Foundation, Nutrition Platform, AI Platform, Intelligence Integration,
+Intelligence Reality Closure, Cloud Platform Core, Architecture, Dashboard,
+and Trusted Truth are closed. The cross-program formatting, analysis, full
+test-suite, and Android release-build gates are also closed.
 
-## Next roadmap boundary
+## Post-program roadmap rule
 
-The next engineering phase is the first post-Cloud stage explicitly authorized by the Product Owner. No completed AI, intelligence-integration, reality-closure, or Cloud Core package is included in future work.
+There is no remaining authorized implementation package in the closed BIL v1
+program. Future work must be opened as a named post-program phase by the
+Product Owner, use the authoritative baseline above, and preserve every closed
+boundary as Non-Regression.
 
-## External activation boundaries
+Potential post-program work may include Premium UI evolution, store-release
+operations, hosted infrastructure activation, or Intelligence Platform 2.0.
+These are planning categories, not authorization to implement them.
 
-Provider deployment, credentials, hosted authorization, encryption-key custody, production monitoring, store publication, signing, physical-device validation, and disaster-recovery operation require owned external infrastructure and release processes. They must remain disabled or honestly local-only until their complete activation criteria are met.
-
-Credentials alone do not activate a capability. Every external integration requires its adapter, authorization rules, failure behavior, privacy controls, tests, operational monitoring, and rollback path.
+External accounts, credentials, legal declarations, signing ownership,
+store-console submissions, and representative-device certification remain
+external gates and may not be claimed complete by a repository-only package.

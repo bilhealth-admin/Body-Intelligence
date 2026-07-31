@@ -1,106 +1,25 @@
 # BIL Master Roadmap
 
-## Authoritative execution baseline
+## Governing baseline
 
 - Branch: `phase-3-product-excellence`
-- Baseline HEAD: `9bc3b524a476280209e324637c9ac78de14daa44`
-- Documentation synchronization: `BIL-DOC-001`
+- HEAD: `ea024c85365ee2a14e8594231d6a14d941acd246`
 
-## Executive closure state
+## Program closure
 
-| Roadmap stage | State |
-|---|---|
-| Foundation | **Closed** |
-| Nutrition Platform | **Closed** |
-| AI Platform | **Closed** |
-| BIL Intelligence Integration | **Closed** |
-| BIL Intelligence Reality Closure | **Closed** |
-| Cloud Platform Core | **Closed** |
+The BIL v1 Architecture, Dashboard, and Trusted Truth epics are accepted and
+closed. Their final program-level regression gates are accepted and committed.
+All earlier Foundation, Nutrition, AI, Intelligence, Reality Closure, and Cloud
+Platform Core boundaries remain closed under Non-Regression.
 
-## Delivered platform sequence
+## Governance for future execution
 
-### Foundation — Closed
-
-The application foundation, local database architecture, repository boundaries, offline-first behavior, privacy-first constraints, responsive framework, navigation, startup, profile, settings, and protected quality gates are accepted and Non-Regression.
-
-### Nutrition Platform — Closed
-
-Unified food architecture, local repositories, search, grams and units, food quality, deduplication, barcode foundations, meal building, templates, offline barcode resolution, explainable nutrition, quick logging, and recovery behavior are accepted and Non-Regression.
-
-### AI Platform — Closed
-
-Truth and Explain foundations, Body Twin, Decision Memory, AI Context, tissue and water isolation, adaptive metabolic forecasting, One Best Action, Safety, health insights, AI Coach, Prompt Engine, cost optimization, proprietary intelligence, scientific validation, and platform closure contracts are accepted and Non-Regression.
-
-### BIL Intelligence Integration — Closed
-
-Cross-engine truth fusion, confidence aggregation, reconciliation, explainability fusion, decision orchestration, unified decision trace, and the Unified Health Brain boundary are accepted and Non-Regression.
-
-### BIL Intelligence Reality Closure — Closed
-
-Local repository adapters, physiological reality modeling, canonical Database-to-Product runtime, adaptive product output, behavioral evidence gates, safe abstention, and the single production intelligence composition root are accepted and Non-Regression.
-
-### Cloud Platform Core — Closed
-
-Provider-neutral offline-first synchronization, durable SQLite cloud state, outbox/inbox/cursors/tombstones/conflicts/idempotency/dead letters, retry and restart recovery, identity and device lifecycle, backup/restore/export/deletion, consent withdrawal, schema negotiation, product-facing cloud state, redacted observability, and system simulations are accepted and Non-Regression.
-
-## Next strategic phase
-
-The official starting point for future work is the first phase after Cloud Platform Core authorized by the Product Owner under the governing roadmap.
-
-No completed AI, Intelligence Integration, Reality Closure, or Cloud Core package may be reintroduced as future work. External provider deployment and infrastructure activation remain operational integrations unless a future phase explicitly authorizes them as production scope.
-
-## Roadmap governance
-
-- Closed stages are reopened only for proven regressions or approved new requirements.
-- New packages must start from the authoritative baseline above or a later accepted HEAD.
-- Historical package details belong in archived delivery records, not in the active roadmap.
-- Current state is governed by `PROJECT_STATE.md`; future authorization is governed by `NEXT_PACKAGES.md`.
-
-## BIL-GLOBAL-001-FINAL verification candidate
-
-- Branch: `phase-3-product-excellence`
-- Parent HEAD: `9bc3b524a476280209e324637c9ac78de14daa44`
-- Status: **Awaiting Product Owner VERIFY; not yet adopted or committed.**
-- Engineering scope: final product composition, wearable payload preservation, native BLE session closure, embedded Arabic reporting, plugin runtime proof, commerce capability honesty, and evidence synchronization.
-- External gates: iOS/macOS build and representative device/provider certification remain explicitly separate.
-- Samsung wearable integration is not present in the production catalog and remains `Not Implemented`; no readiness claim is made.
-
-## Nutrition Platform execution track
-
-- `BIL-FOOD-ARCHITECTURE-001`: canonical architecture and BIL Food identity — closed at `af9758bdb68018c5ea030476944904e201315698`.
-- `BIL-FOOD-002`: resumable USDA raw/master staging importer — package implementation delivered; adoption requires local verify and commit.
-- `BIL-FOOD-003` through `BIL-FOOD-008`: remain sequentially pending.
-
-The Nutrition track does not authorize mobile catalog construction, Flutter integration, search, or barcode resolution during `BIL-FOOD-002`.
-
-
-## BIL-FOOD-003 candidate
-
-- Canonical source-neutral schema and stable BIL-owned food identity.
-- Source mappings, nutrient evidence, portions, barcode claims, and merge lineage.
-- Build-time SQLite only; no mobile database or Flutter integration.
-
-## Nutrition Platform execution — BIL-FOOD-004
-
-- Status: candidate delivered for Product Owner verification.
-- Scope: deterministic normalization, versioned explainable quality scoring, quarantine/rejection reasons, and delivery eligibility.
-- Explicit boundary: no deduplication, canonical merge, mobile catalog, Flutter, repository, search, or barcode resolver.
-- Parent HEAD: `c1e074c21548ca63c9d48679e7774fcac9ef3512`.
-
-
-## BIL-FOOD-005 — Deduplication and Canonicalization
-
-Implemented explainable duplicate decisions, conservative automatic merge gates, conflict preservation, deterministic survivor/field selection, and merge lineage. No mobile catalog, search, or Flutter integration is introduced. Next package: BIL-FOOD-006 — Mobile Catalog Builder.
-
-
-## BIL-FOOD-006 — Mobile Catalog Builder
-
-Build-time derivation of compact, profile-driven mobile catalogs from accepted canonical foods. Master evidence remains outside delivery databases. Parent baseline: `14c6cdce71a23b22d9304b2e7b32d1270050da8c`. Next package: BIL-FOOD-007 — FoodRepository and Offline Search Foundation.
-
-## BIL-FOOD-007 — FoodRepository and Offline Search Foundation
-
-Application read-only repository over the BIL mobile catalog, UnifiedFood mapping, explainable offline search, and canonical barcode lookup. Catalog updater/version activation remains BIL-FOOD-008.
-
-## BIL-FOOD-008
-
-Catalog activation and version management added: integrity-gated activation, immutable version directories, atomic registry replacement, compatibility checks, and rollback. Cloud distribution and remote update transport remain out of scope.
+1. Start every future phase from the governing baseline or a later accepted
+   commit.
+2. Do not revive historical candidates as active work.
+3. Require an explicit post-program phase name, scope, acceptance gate, and
+   package identifier before implementation.
+4. Keep external credentials, hosted services, store actions, legal decisions,
+   and device certification outside repository completion claims.
+5. Advance the baseline only after package verification, approval, selective
+   commit, and final repository status review.
