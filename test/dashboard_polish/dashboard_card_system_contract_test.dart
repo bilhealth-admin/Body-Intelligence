@@ -6,7 +6,10 @@ void main() {
   test(
     'premium dashboard cards use one semantic geometry and elevation system',
     () {
-      final tokens = File(
+      final foundation = File(
+        'lib/app/theme/bil_premium_visual_foundation.dart',
+      ).readAsStringSync();
+      final facade = File(
         'lib/app/theme/premium_design_tokens.dart',
       ).readAsStringSync();
       final surface = File(
@@ -21,15 +24,37 @@ void main() {
         'dashboardCardShadowOffsetY = 10',
         'dashboardCardAccentBlur = 28',
         'dashboardCardInnerHighlightAlpha = .72',
-        'dashboardCardRadius = BorderRadius.circular(radiusXl)',
         'dashboardCardBorderColor(',
         'dashboardCardShadowColor(',
         'dashboardCardAccentShadowColor(',
       ]) {
         expect(
-          tokens,
+          foundation,
           contains(contract),
           reason: 'Missing card token: $contract',
+        );
+      }
+
+      expect(
+        foundation,
+        contains('dashboardCardRadius = BorderRadius.circular('),
+      );
+      expect(foundation, contains('radiusXl,'));
+
+      for (final contract in <String>[
+        'BilPremiumVisualFoundation.dashboardCardBorderWidth',
+        'BilPremiumVisualFoundation.dashboardCardHoverScale',
+        'BilPremiumVisualFoundation.dashboardCardPressedScale',
+        'BilPremiumVisualFoundation.dashboardCardShadowBlur',
+        'BilPremiumVisualFoundation.dashboardCardShadowOffsetY',
+        'BilPremiumVisualFoundation.dashboardCardAccentBlur',
+        'BilPremiumVisualFoundation.dashboardCardInnerHighlightAlpha',
+        'BilPremiumVisualFoundation.dashboardCardRadius',
+      ]) {
+        expect(
+          facade,
+          contains(contract),
+          reason: 'Compatibility facade does not delegate: $contract',
         );
       }
 
@@ -58,6 +83,7 @@ void main() {
   test('P5 stays inside presentation-level card primitives', () {
     final files = <String>[
       'lib/app/theme/premium_design_tokens.dart',
+      'lib/app/theme/bil_premium_visual_foundation.dart',
       'lib/shared/widgets/premium_surface.dart',
     ];
     final combined = files
