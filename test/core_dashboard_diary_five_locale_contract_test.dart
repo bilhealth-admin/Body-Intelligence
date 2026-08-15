@@ -83,6 +83,6 @@ void main() {
     expect(phone, isNot(contains('arabic ?')));
     expect(phone, contains("'Calories': {"));
     expect(phone, contains("'Body Twin': {"));
-    expect(components, contains("_referenceText('left', 'متبقية')"));
+    expect(components, contains("_referenceText(context, 'left',"));
   });
 }
