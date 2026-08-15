@@ -87,7 +87,9 @@ jobs:
           brew tap facebook/fb
           brew trust facebook/fb
           brew install idb-companion
-          python3 -m venv "$RUNNER_TEMP/bil-idb-venv"
+          brew install python@3.11
+          /opt/homebrew/opt/python@3.11/bin/python3.11 -m venv \
+            "$RUNNER_TEMP/bil-idb-venv"
           "$RUNNER_TEMP/bil-idb-venv/bin/pip" install fb-idb
           echo "$RUNNER_TEMP/bil-idb-venv/bin" >> "$GITHUB_PATH"
 
