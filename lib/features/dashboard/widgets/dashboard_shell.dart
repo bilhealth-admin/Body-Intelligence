@@ -19,12 +19,13 @@ class DashboardShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: dark ? const Color(0xFF06101E) : const Color(0xFFF4F9FF),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         fit: StackFit.expand,
         children: [
+          ColoredBox(color: Theme.of(context).scaffoldBackgroundColor),
+          /*
           Opacity(
             opacity: dark ? .92 : .075,
             child: Image.asset(
@@ -93,6 +94,7 @@ class DashboardShell extends StatelessWidget {
               ),
             ),
           ],
+          */
           SafeArea(
             child: RefreshIndicator(
               onRefresh: onRefresh,
@@ -129,6 +131,7 @@ class DashboardShell extends StatelessWidget {
   }
 }
 
+// ignore: unused_element
 class _AtmosphericLandscapePainter extends CustomPainter {
   const _AtmosphericLandscapePainter();
 
@@ -202,6 +205,7 @@ class _AtmosphericLandscapePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
+// ignore: unused_element
 class _AtmosphericParticlePainter extends CustomPainter {
   const _AtmosphericParticlePainter();
 

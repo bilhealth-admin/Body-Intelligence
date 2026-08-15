@@ -8,6 +8,7 @@ class ActionableEmptyState extends StatelessWidget {
     required this.body,
     required this.actionLabel,
     required this.onAction,
+    this.compact = false,
   });
 
   final IconData icon;
@@ -15,13 +16,14 @@ class ActionableEmptyState extends StatelessWidget {
   final String body;
   final String actionLabel;
   final VoidCallback onAction;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) => Semantics(
     container: true,
     child: Center(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(compact ? 12 : 24),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 480),
           child: Column(
@@ -29,10 +31,10 @@ class ActionableEmptyState extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                size: 48,
+                size: compact ? 36 : 48,
                 color: Theme.of(context).colorScheme.primary,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: compact ? 8 : 16),
               Semantics(
                 header: true,
                 child: Text(
@@ -41,9 +43,9 @@ class ActionableEmptyState extends StatelessWidget {
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: compact ? 6 : 8),
               Text(body, textAlign: TextAlign.center),
-              const SizedBox(height: 20),
+              SizedBox(height: compact ? 12 : 20),
               FilledButton(onPressed: onAction, child: Text(actionLabel)),
             ],
           ),

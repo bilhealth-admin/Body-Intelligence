@@ -1,0 +1,8 @@
+"NSHealthShareUsageDescription" = "BIL 僅會讀取您選擇的健康類別——活動、睡眠、身體測量、心臟與呼吸指標、血壓、血氧、血糖、飲水及營養——用於在此裝置上顯示私密健康時間線與分析。";
+"NSHealthUpdateUsageDescription" = "在單獨寫入同意後，BIL 僅寫入您明確選擇的健康記錄。";
+"NSBluetoothAlwaysUsageDescription" = "BIL 僅連接到您明確配對的健康設備，以便可以在本地匯入測量結果。";
+"NSBluetoothPeripheralUsageDescription" = "BIL 僅連接到您明確配對的健康設備，以便可以在本地匯入測量結果。";
+"NSCameraUsageDescription" = "僅當您選擇掃描條碼、查看用餐照片或新增私人個人資料或進度照片時才使用相機。";
+"NSPhotoLibraryUsageDescription" = "選擇餐點、個人資料或進度照片以供查看，然後再儲存或上傳。";
+"NSMicrophoneUsageDescription" = "BIL僅在您選擇語音輸入用餐時才使用麥克風。";
+"NSSpeechRecognitionUsageDescription" = "BIL 將您所說的食物短語轉換為文本，以便您可以在儲存之前查看。";

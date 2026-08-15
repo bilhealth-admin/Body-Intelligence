@@ -149,6 +149,9 @@ final class GlobalNativeIntegrationHost {
         await Future.wait(<Future<GlobalLocaleCatalog>>[
           const ArbCatalogLoader().load('lib/l10n/app_en.arb', 'en'),
           const ArbCatalogLoader().load('lib/l10n/app_ar.arb', 'ar'),
+          const ArbCatalogLoader().load('lib/l10n/app_fr.arb', 'fr'),
+          const ArbCatalogLoader().load('lib/l10n/app_es.arb', 'es'),
+          const ArbCatalogLoader().load('lib/l10n/app_tr.arb', 'tr'),
         ]);
     globalization = GlobalizationRuntime(
       catalogs: catalogs,

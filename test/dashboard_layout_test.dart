@@ -57,14 +57,14 @@ void main() {
           viewportWidth: 899.99,
           contentWidth: 560,
         ).pagedSectionBaseHeight,
-        300,
+        340,
       );
       expect(
         DashboardComposition.pagedSection(
           viewportWidth: 899.99,
           contentWidth: 559.99,
         ).pagedSectionBaseHeight,
-        390,
+        470,
       );
     });
 
@@ -75,7 +75,7 @@ void main() {
         metricCount: 4,
       );
       expect(phoneNarrow.metricColumns, 2);
-      expect(phoneNarrow.metricChildAspectRatio, 1.08);
+      expect(phoneNarrow.metricChildAspectRatio, 0.82);
 
       final tablet = DashboardComposition.metricGrid(
         viewportWidth: 800,
@@ -83,7 +83,7 @@ void main() {
         metricCount: 4,
       );
       expect(tablet.metricColumns, 2);
-      expect(tablet.metricChildAspectRatio, 1.42);
+      expect(tablet.metricChildAspectRatio, 1.08);
 
       final desktopConstrained = DashboardComposition.metricGrid(
         viewportWidth: 1024,

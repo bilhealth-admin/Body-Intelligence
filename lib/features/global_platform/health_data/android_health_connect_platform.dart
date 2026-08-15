@@ -31,4 +31,13 @@ final class HealthConnectRuntime {
     required DateTime asOf,
     required GlobalConsentGrant consent,
   }) => integration.synchronize(asOf: asOf, consent: consent);
+
+  Future<void> export({
+    required List<GlobalHealthSignal> signals,
+    required GlobalConsentGrant consent,
+  }) => integration.export(
+    bridge: bridge,
+    writeConsent: consent,
+    signals: signals,
+  );
 }

@@ -14,6 +14,7 @@ import 'preferences.dart';
 import 'plan_settings.dart';
 import 'personal_experiments.dart';
 import 'challenges.dart';
+import 'body_measurement_entries.dart';
 import 'recent_foods.dart';
 import 'user_profile.dart';
 import 'water_entries.dart';
@@ -41,6 +42,7 @@ part 'app_database.g.dart';
     PlanSettings,
     PersonalExperiments,
     Challenges,
+    BodyMeasurementEntries,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -49,7 +51,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 20;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -165,6 +167,42 @@ class AppDatabase extends _$AppDatabase {
       if (from < 17) {
         await migrator.createTable(decisionOutcomeTransitions);
         await _createV17Indexes();
+      }
+      if (from < 18) {
+        await _addColumns('meal_items', <String>[
+          "food_source_snapshot TEXT NOT NULL DEFAULT 'local'",
+          'food_verified_snapshot INTEGER NOT NULL DEFAULT 0',
+          'serving_size_snapshot REAL NOT NULL DEFAULT 100',
+          "serving_unit_snapshot TEXT NOT NULL DEFAULT 'g'",
+        ]);
+        await customStatement('''
+          UPDATE meal_items
+          SET
+            food_source_snapshot = COALESCE(
+              (SELECT source FROM foods WHERE foods.id = meal_items.food_id),
+              'local'
+            ),
+            food_verified_snapshot = COALESCE(
+              (SELECT verified FROM foods WHERE foods.id = meal_items.food_id),
+              0
+            ),
+            serving_size_snapshot = COALESCE(
+              (SELECT serving_size FROM foods WHERE foods.id = meal_items.food_id),
+              100
+            ),
+            serving_unit_snapshot = COALESCE(
+              (SELECT serving_unit FROM foods WHERE foods.id = meal_items.food_id),
+              'g'
+            )
+        ''');
+      }
+      if (from < 19) {
+        await _addColumns('weight_entries', <String>[
+          'progress_photo_path TEXT',
+        ]);
+      }
+      if (from < 20) {
+        await migrator.createTable(bodyMeasurementEntries);
       }
     },
   );

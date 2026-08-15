@@ -16,7 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('dashboard header uses solid high-contrast copy in light theme', (
+  testWidgets('BIL Guide hero uses solid high-contrast copy in light theme', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -35,17 +35,17 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final title = find.text("Today's Signal");
+    final title = find.text('BIL GUIDE');
     expect(title, findsOneWidget);
     expect(
       find.ancestor(of: title, matching: find.byType(ShaderMask)),
       findsNothing,
     );
-    expect(tester.widget<Text>(title).style?.color, const Color(0xFF071D2D));
+    expect(tester.widget<Text>(title).style?.color, Colors.white);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('dashboard header hides local errors behind a safe retry state', (
+  testWidgets('BIL Guide hero stays independent from local data failures', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -73,8 +73,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(TextButton), findsOneWidget);
-    expect(find.text('إعادة المحاولة'), findsOneWidget);
+    expect(find.byIcon(Icons.psychology_alt_rounded), findsOneWidget);
+    expect(find.byType(TextButton), findsNothing);
     expect(find.textContaining('sensitive database detail'), findsNothing);
     expect(tester.takeException(), isNull);
   });

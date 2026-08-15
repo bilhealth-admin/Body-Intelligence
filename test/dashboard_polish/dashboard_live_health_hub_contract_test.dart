@@ -4,8 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('P9-R9 live Health Hub and paired deck contracts are present', () {
-    final health = File(
-      'lib/features/connected_health/widgets/connected_health_card.dart',
+    final watch = File(
+      'lib/features/connected_health/widgets/live_health_watch.dart',
+    ).readAsStringSync();
+    final emptyState = File(
+      'lib/features/connected_health/widgets/health_hub_empty_state.dart',
     ).readAsStringSync();
     final shell = File(
       'lib/features/dashboard/widgets/dashboard_twin_deck_shell.dart',
@@ -13,24 +16,28 @@ void main() {
     final grid = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
-    final benchmark = File(
-      'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
+    final mobileTwin = File(
+      'lib/features/dashboard/widgets/dashboard_mobile_body_twin_snapshot.dart',
     ).readAsStringSync();
 
-    expect(health, contains("Key('health-hub-fixed-square-watch')"));
-    expect(health, contains('SizedBox.square'));
-    expect(health, contains("Key('bil-live-health-watch')"));
-    expect(health, contains('Timer.periodic(const Duration(seconds: 1)'));
-    expect(health, contains('StackFit.expand'));
-    expect(health, contains("Text(tr('Connect now', 'ربط الآن'))"));
+    expect(emptyState, contains("Key('health-hub-fixed-square-watch')"));
+    expect(emptyState, contains('SizedBox.square'));
+    expect(watch, contains("Key('bil-live-health-watch')"));
+    expect(watch, contains('Timer.periodic(const Duration(seconds: 1)'));
+    expect(watch, contains('StackFit.expand'));
+    expect(emptyState, contains("Text(tr('Connect now', 'ربط الآن'))"));
 
     expect(shell, contains("Key('dashboard-twin-header-slot')"));
     expect(shell, contains("Key('dashboard-twin-deck-carousel')"));
-    expect(shell, contains('viewportFraction: compact ? .94 : .96'));
+    expect(shell, contains('viewportFraction: widget.compact ? .94 : .96'));
 
-    expect(grid, contains('DashboardAnalyticsCenter('));
-    expect(grid, contains('bodyTwinSummary: trustedTwinSummary'));
-    expect(benchmark, contains("Key('dashboard-mobile-body-twin-snapshot')"));
-    expect(shell, contains('final headerBaseHeight = compact ? 68.0 : 72.0'));
+    expect(grid, isNot(contains('DashboardAnalyticsCenter(')));
+    expect(grid, contains("context.go('/analytics')"));
+    expect(grid, contains('bodyTwinSummary: twinCopy.summary'));
+    expect(mobileTwin, contains("Key('dashboard-mobile-body-twin-snapshot')"));
+    expect(
+      shell,
+      contains('final headerBaseHeight = widget.compact ? 68.0 : 72.0'),
+    );
   });
 }

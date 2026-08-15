@@ -28,6 +28,7 @@ final class BlePeripheral {
 }
 
 abstract interface class BleMedicalBridge {
+  Future<void> requestPermissions();
   Future<List<BlePeripheral>> discover(Duration timeout);
   Future<void> pair(String peripheralId);
   Future<void> disconnect(String peripheralId);
@@ -35,6 +36,13 @@ abstract interface class BleMedicalBridge {
     required BlePeripheral peripheral,
     required DateTime asOf,
   });
+}
+
+/// Optional lifecycle operations. Implementations must report unknown battery
+/// state as null and must not fabricate an unpair result.
+abstract interface class ManagedBleMedicalBridge implements BleMedicalBridge {
+  Future<Map<String, Object?>> deviceStatus(String peripheralId);
+  Future<void> forget(String peripheralId);
 }
 
 final class BleMeasurementPolicy {

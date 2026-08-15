@@ -23,7 +23,7 @@ class FirstValueHandoffCard extends StatelessWidget {
               context.strings.text('Your private starting point is ready'),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: const Color(0xFFE7EDF3),
-                fontWeight: FontWeight.w900,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),

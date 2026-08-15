@@ -6,6 +6,8 @@ import '../../../data/database/seed_data.dart';
 import '../../../data/repositories/food_repository.dart';
 import '../../../data/repositories/meal_repository.dart';
 import '../../nutrition/repositories/unified_food_repository.dart';
+import '../../nutrition/services/active_mobile_catalog_resolver.dart';
+import '../../nutrition/services/food_runtime_search_authority.dart';
 
 final foodRepositoryProvider = Provider<FoodRepository>((ref) {
   final database = ref.watch(databaseProvider);
@@ -15,6 +17,21 @@ final foodRepositoryProvider = Provider<FoodRepository>((ref) {
 final unifiedFoodRepositoryProvider = Provider<UnifiedFoodRepository>((ref) {
   return ref.watch(foodRepositoryProvider);
 });
+
+final activeMobileCatalogResolverProvider =
+    Provider<ActiveMobileCatalogResolver>((ref) {
+      return ActiveMobileCatalogResolver();
+    });
+
+final foodRuntimeSearchAuthorityProvider = Provider<FoodRuntimeSearchAuthority>(
+  (ref) {
+    final catalogResolver = ref.watch(activeMobileCatalogResolverProvider);
+    return FoodRuntimeSearchAuthority(
+      ref.watch(foodRepositoryProvider),
+      catalogResolver: catalogResolver.openIfAvailable,
+    );
+  },
+);
 
 final mealRepositoryProvider = Provider<MealRepository>((ref) {
   final database = ref.watch(databaseProvider);

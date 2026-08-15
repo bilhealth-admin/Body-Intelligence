@@ -54,6 +54,10 @@ app.*.map.json
 latest_error.txt
 runtime_error.txt
 test/failures/
+full_test_output*.txt
+dashboard_polish_output.txt
+localization_audit.json
+twin_cards_layout.patch
 
 # Platform-generated caches
 .gradle/

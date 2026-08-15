@@ -1,0 +1,8 @@
+"NSHealthShareUsageDescription" = "BIL yalnızca seçtiğiniz Sağlık kategorilerini—aktivite, uyku, vücut ölçümleri, kalp ve solunum verileri, tansiyon, oksijen, glikoz, sıvı ve beslenme—bu cihazda özel bir sağlık zaman çizelgesi ve içgörüler göstermek için okur.";
+"NSHealthUpdateUsageDescription" = "BIL yalnızca açıkça seçtiğiniz sağlık kayıtlarını, ayrı yazma izninden sonra yazar.";
+"NSBluetoothAlwaysUsageDescription" = "BIL ölçümleri yerel olarak içe aktarmak için yalnızca açıkça eşleştirdiğiniz sağlık cihazlarına bağlanır.";
+"NSBluetoothPeripheralUsageDescription" = "BIL ölçümleri yerel olarak içe aktarmak için yalnızca açıkça eşleştirdiğiniz sağlık cihazlarına bağlanır.";
+"NSCameraUsageDescription" = "Kamerayı yalnızca barkod taramayı, öğün fotoğrafını incelemeyi veya özel profil ya da ilerleme fotoğrafı eklemeyi seçtiğinizde kullanın.";
+"NSPhotoLibraryUsageDescription" = "Kaydedilmeden veya yüklenmeden önce incelemek için öğün, profil ya da ilerleme fotoğrafı seçin.";
+"NSMicrophoneUsageDescription" = "BIL mikrofonu yalnızca sesli öğün girişi seçtiğinizde kullanır.";
+"NSSpeechRecognitionUsageDescription" = "BIL söylediğiniz yiyecek ifadesini kaydetmeden önce inceleyebilmeniz için metne dönüştürür.";

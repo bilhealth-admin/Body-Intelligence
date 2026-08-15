@@ -1,0 +1,12 @@
+﻿BIL v1 - Epic 2 decision contract recheck summary
+Generated: 2026-08-03T18:18:22.0882120+03:00
+PROJECT=C:\develop\projects\body_intelligence_log
+FORMAT_EXIT_CODE=0
+ANALYZE_EXIT_CODE=0
+ANALYZE_CLEAN=True
+TEST_EXIT_CODE=0
+TEST_CLEAN=True
+EPIC2_DECISION_CONTRACT_RECHECK=PASS
+FORMAT_LOG=C:\develop\projects\body_intelligence_log\artifacts\release\epic2\epic2_decision_contract_format.log
+ANALYZE_LOG=C:\develop\projects\body_intelligence_log\artifacts\release\epic2\epic2_decision_contract_analyze.log
+TEST_LOG=C:\develop\projects\body_intelligence_log\artifacts\release\epic2\epic2_decision_contract_test.log

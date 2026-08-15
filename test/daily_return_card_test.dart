@@ -29,8 +29,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('مرحبًا بعودتك — ابدأ من اليوم'), findsOneWidget);
-    expect(find.text('مسارك اليوم'), findsOneWidget);
+    expect(find.byIcon(Icons.monitor_weight_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.restaurant_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.water_drop_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.cancel_rounded), findsNWidgets(3));
     expect(find.byType(FilledButton), findsNothing);
     expect(find.byType(DailyReturnCard), findsOneWidget);
     expect(actions, 0);
@@ -53,8 +55,10 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Today is covered'), findsOneWidget);
-    expect(find.text('Today’s weight is recorded.'), findsOneWidget);
+    expect(find.text('Weight'), findsOneWidget);
+    expect(find.text('Meals'), findsOneWidget);
+    expect(find.text('Water'), findsOneWidget);
+    expect(find.byIcon(Icons.check_circle_rounded), findsNWidgets(3));
     expect(find.byType(FilledButton), findsNothing);
   });
 
@@ -87,12 +91,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Your Path Today'), findsOneWidget);
     expect(find.text('Weight'), findsOneWidget);
-    expect(
-      find.text('Add a comparable weight when it suits you.'),
-      findsOneWidget,
-    );
+    expect(find.text('Meals'), findsOneWidget);
+    expect(find.text('Water'), findsOneWidget);
+    expect(find.byIcon(Icons.check_circle_rounded), findsNothing);
+    expect(find.byIcon(Icons.cancel_rounded), findsNWidgets(3));
     expect(find.text('Why this action appears'), findsNothing);
     expect(find.byType(FilledButton), findsNothing);
     expect(dismissed, 0);

@@ -67,7 +67,8 @@ class WhatChangedEngine {
         summary:
             'The scale changed, but one reading is not enough to justify a plan change.',
         evidence: [
-          '${change >= 0 ? '+' : ''}${change.toStringAsFixed(1)} kg since the previous check-in',
+          '${change >= 0 ? '+' : ''}${change.toStringAsFixed(1)} kg',
+          'Since the previous check-in',
           if (!comparableConditions) 'Measurement conditions differed',
           ...contextEvidence,
         ],

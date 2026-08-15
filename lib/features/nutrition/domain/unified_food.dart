@@ -140,6 +140,22 @@ class UnifiedFood {
         mask,
         TrackedNutrient.phosphorus,
       ),
+      FoodNutrient.calories => NutrientEvidenceMask.contains(
+        mask,
+        TrackedNutrient.calories,
+      ),
+      FoodNutrient.protein => NutrientEvidenceMask.contains(
+        mask,
+        TrackedNutrient.protein,
+      ),
+      FoodNutrient.carbohydrates => NutrientEvidenceMask.contains(
+        mask,
+        TrackedNutrient.carbohydrates,
+      ),
+      FoodNutrient.fat => NutrientEvidenceMask.contains(
+        mask,
+        TrackedNutrient.fat,
+      ),
       _ => true,
     };
   }

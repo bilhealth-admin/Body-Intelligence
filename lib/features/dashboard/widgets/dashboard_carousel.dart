@@ -18,6 +18,8 @@ class DashboardCarousel extends StatefulWidget {
     this.viewportFraction = 1,
     this.semanticLabel,
     this.compactControls = false,
+    this.microControls = false,
+    this.onPageChanged,
   });
 
   final List<Widget> pages;
@@ -25,6 +27,8 @@ class DashboardCarousel extends StatefulWidget {
   final double viewportFraction;
   final String? semanticLabel;
   final bool compactControls;
+  final bool microControls;
+  final ValueChanged<int>? onPageChanged;
 
   @override
   State<DashboardCarousel> createState() => _DashboardCarouselState();
@@ -52,6 +56,7 @@ class _DashboardCarouselState extends State<DashboardCarousel>
         _page = page;
         _targetPage = page;
       });
+      widget.onPageChanged?.call(page);
       return;
     }
     _targetPage = page;
@@ -71,6 +76,7 @@ class _DashboardCarouselState extends State<DashboardCarousel>
               _page = _targetPage;
               _rotation.value = 0;
             });
+            widget.onPageChanged?.call(_page);
           }
         });
   }
@@ -149,7 +155,9 @@ class _DashboardCarouselState extends State<DashboardCarousel>
                   onTap: _hasNext ? () => _moveTo(_page + 1) : null,
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final controlGap = widget.compactControls ? 12.0 : 16.0;
+                      final controlGap = widget.microControls
+                          ? 4.0
+                          : (widget.compactControls ? 12.0 : 16.0);
                       final deck = Stack(
                         alignment: Alignment.center,
                         clipBehavior: Clip.hardEdge,
@@ -181,15 +189,6 @@ class _DashboardCarouselState extends State<DashboardCarousel>
                                     ),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(24),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: const Color(
-                                            0xFF174E8C,
-                                          ).withValues(alpha: .18),
-                                          blurRadius: 28,
-                                          offset: const Offset(0, 12),
-                                        ),
-                                      ],
                                     ),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(24),
@@ -206,6 +205,44 @@ class _DashboardCarouselState extends State<DashboardCarousel>
                         ],
                       );
                       if (widget.pages.length == 1) return deck;
+                      if (widget.microControls) {
+                        return Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            deck,
+                            PositionedDirectional(
+                              start: 6,
+                              top: 0,
+                              bottom: 0,
+                              child: Center(
+                                child: _CarouselArrow(
+                                  key: const Key('dashboard-carousel-previous'),
+                                  icon: Icons.chevron_left_rounded,
+                                  enabled: _hasPrevious,
+                                  onPressed: () => _moveTo(_page - 1),
+                                  compact: true,
+                                  micro: true,
+                                ),
+                              ),
+                            ),
+                            PositionedDirectional(
+                              end: 6,
+                              top: 0,
+                              bottom: 0,
+                              child: Center(
+                                child: _CarouselArrow(
+                                  key: const Key('dashboard-carousel-next'),
+                                  icon: Icons.chevron_right_rounded,
+                                  enabled: _hasNext,
+                                  onPressed: () => _moveTo(_page + 1),
+                                  compact: true,
+                                  micro: true,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -215,6 +252,7 @@ class _DashboardCarouselState extends State<DashboardCarousel>
                             enabled: _hasPrevious,
                             onPressed: () => _moveTo(_page - 1),
                             compact: widget.compactControls,
+                            micro: false,
                           ),
                           SizedBox(width: controlGap),
                           Expanded(child: deck),
@@ -225,6 +263,7 @@ class _DashboardCarouselState extends State<DashboardCarousel>
                             enabled: _hasNext,
                             onPressed: () => _moveTo(_page + 1),
                             compact: widget.compactControls,
+                            micro: false,
                           ),
                         ],
                       );
@@ -238,16 +277,6 @@ class _DashboardCarouselState extends State<DashboardCarousel>
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Directionality(
-                    textDirection: TextDirection.ltr,
-                    child: Text(
-                      '${_page + 1} / ${widget.pages.length}',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: widget.compactControls ? 5 : 10),
                   ...List.generate(
                     widget.pages.length,
                     (index) => AnimatedContainer(
@@ -257,18 +286,26 @@ class _DashboardCarouselState extends State<DashboardCarousel>
                       ),
                       curve: PremiumMotionTokens.stateChangeCurve,
                       width: index == _page
-                          ? (widget.compactControls ? 14 : 20)
+                          ? (widget.microControls
+                                ? 10
+                                : (widget.compactControls ? 14 : 20))
+                          : (widget.microControls
+                                ? 3
+                                : (widget.compactControls ? 4 : 6)),
+                      height: widget.microControls
+                          ? 3
                           : (widget.compactControls ? 4 : 6),
-                      height: widget.compactControls ? 4 : 6,
                       margin: EdgeInsets.symmetric(
-                        horizontal: widget.compactControls ? 1.5 : 3,
+                        horizontal: widget.microControls
+                            ? 1
+                            : (widget.compactControls ? 1.5 : 3),
                       ),
                       decoration: BoxDecoration(
                         color: index == _page
                             ? Theme.of(context).colorScheme.primary
                             : Theme.of(
                                 context,
-                              ).colorScheme.onSurface.withValues(alpha: .22),
+                              ).colorScheme.primary.withValues(alpha: .22),
                         borderRadius: BorderRadius.circular(99),
                       ),
                     ),
@@ -298,30 +335,36 @@ class _CarouselArrow extends StatelessWidget {
     required this.enabled,
     required this.onPressed,
     this.compact = false,
+    this.micro = false,
   });
 
   final IconData icon;
   final bool enabled;
   final VoidCallback onPressed;
   final bool compact;
+  final bool micro;
 
   @override
-  Widget build(BuildContext context) => SizedBox.square(
-    dimension: compact ? 24 : 40,
-    child: IconButton.filledTonal(
-      onPressed: enabled ? onPressed : null,
-      icon: Icon(icon, size: compact ? 18 : 24),
-      visualDensity: VisualDensity.compact,
-      padding: EdgeInsets.zero,
-      constraints: BoxConstraints.tightFor(
-        width: compact ? 24 : 40,
-        height: compact ? 24 : 40,
+  Widget build(BuildContext context) {
+    final dimension = micro ? 18.0 : (compact ? 24.0 : 40.0);
+    final iconSize = micro ? 14.0 : (compact ? 18.0 : 24.0);
+    return SizedBox.square(
+      dimension: dimension,
+      child: IconButton.filledTonal(
+        onPressed: enabled ? onPressed : null,
+        icon: Icon(icon, size: iconSize),
+        visualDensity: VisualDensity.compact,
+        padding: EdgeInsets.zero,
+        constraints: BoxConstraints.tightFor(
+          width: dimension,
+          height: dimension,
+        ),
+        style: IconButton.styleFrom(
+          backgroundColor: Theme.of(
+            context,
+          ).colorScheme.surface.withValues(alpha: .72),
+        ),
       ),
-      style: IconButton.styleFrom(
-        backgroundColor: Theme.of(
-          context,
-        ).colorScheme.surface.withValues(alpha: .72),
-      ),
-    ),
-  );
+    );
+  }
 }

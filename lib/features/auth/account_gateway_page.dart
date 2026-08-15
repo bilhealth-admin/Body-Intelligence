@@ -3,9 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/services/local_recovery_service.dart';
+import '../../app/environment/app_environment.dart';
 import '../../data/database/database_provider.dart';
+import '../../shared/widgets/bil_wordmark.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../startup/premium_splash_experience.dart';
+import 'auth_language_selector.dart';
+import 'auth_five_locale_copy.dart';
+export 'premium_account_gateway_page.dart' show AccountGatewayPage;
 
 final localRecoveryServiceProvider = Provider<LocalRecoveryService>((ref) {
   return LocalRecoveryService(ref.watch(databaseProvider));
@@ -15,14 +20,16 @@ final validRecoverySnapshotProvider = FutureProvider<bool>((ref) {
   return ref.watch(localRecoveryServiceProvider).hasValidSnapshot();
 });
 
-class AccountGatewayPage extends ConsumerStatefulWidget {
-  const AccountGatewayPage({super.key});
+class LegacyAccountGatewayPage extends ConsumerStatefulWidget {
+  const LegacyAccountGatewayPage({super.key});
 
   @override
-  ConsumerState<AccountGatewayPage> createState() => _AccountGatewayPageState();
+  ConsumerState<LegacyAccountGatewayPage> createState() =>
+      _LegacyAccountGatewayPageState();
 }
 
-class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
+class _LegacyAccountGatewayPageState
+    extends ConsumerState<LegacyAccountGatewayPage> {
   final nameController = TextEditingController();
   bool restoring = false;
 
@@ -42,7 +49,13 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
           .read(preferencesRepositoryProvider)
           .set('displayName', displayName);
     }
-    if (mounted) context.go('/onboarding');
+    await ref
+        .read(preferencesRepositoryProvider)
+        .set('accountGatewayReviewed', 'true');
+    final existingProfile = ref.read(userProfileProvider).value;
+    if (mounted) {
+      context.go(existingProfile == null ? '/onboarding' : '/dashboard');
+    }
   }
 
   Future<void> _restore() async {
@@ -52,21 +65,25 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
         title: Text(
-          arabic ? 'استعادة بياناتك السابقة؟' : 'Restore previous data?',
+          authFiveLocaleText(
+            'Restore previous data?',
+            'استعادة بياناتك السابقة؟',
+          ),
         ),
         content: Text(
-          arabic
-              ? 'سيستبدل BIL البيانات المحلية الحالية باللقطة السابقة بعد التحقق منها.'
-              : 'BIL will replace the current local data with the validated previous snapshot.',
+          authFiveLocaleText(
+            'BIL will replace the current local data with the validated previous snapshot.',
+            'سيستبدل BIL البيانات المحلية الحالية باللقطة السابقة بعد التحقق منها.',
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(arabic ? 'إلغاء' : 'Cancel'),
+            child: Text(authFiveLocaleText('Cancel', 'إلغاء')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(arabic ? 'استعادة' : 'Restore'),
+            child: Text(authFiveLocaleText('Restore', 'استعادة')),
           ),
         ],
       ),
@@ -83,9 +100,10 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            arabic
-                ? 'تعذرت استعادة اللقطة المحلية بأمان. لم تُطبّق استعادة جزئية.'
-                : 'The local snapshot could not be restored safely. No partial restore was applied.',
+            authFiveLocaleText(
+              'The local snapshot could not be restored safely. No partial restore was applied.',
+              'تعذرت استعادة اللقطة المحلية بأمان. لم تُطبّق استعادة جزئية.',
+            ),
           ),
         ),
       );
@@ -120,32 +138,31 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const Text(
-                              'BIL®',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Color(0xFFF4F7FA),
-                                fontSize: 54,
-                                fontWeight: FontWeight.w900,
-                              ),
+                            const Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: AuthLanguageSelector(),
                             ),
+                            const SizedBox(height: 16),
+                            const Center(child: BilWordmark(height: 54)),
                             const SizedBox(height: 18),
                             Text(
-                              arabic
-                                  ? 'ابدأ بخصوصية. ابنِ ذكاء جسمك محليًا.'
-                                  : 'Start privately. Build your body intelligence locally.',
+                              authFiveLocaleText(
+                                'Start privately. Build your body intelligence locally.',
+                                'ابدأ بخصوصية. ابنِ ذكاء جسمك محليًا.',
+                              ),
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.headlineSmall
                                   ?.copyWith(
                                     color: const Color(0xFFF0F5F8),
-                                    fontWeight: FontWeight.w900,
+                                    fontWeight: FontWeight.w700,
                                   ),
                             ),
                             const SizedBox(height: 10),
                             Text(
-                              arabic
-                                  ? 'تبقى بياناتك الصحية على هذا الجهاز. لا يتم إنشاء حساب أو رفع بريد إلكتروني.'
-                                  : 'Your health data stays on this device. No account is created and no email is uploaded.',
+                              authFiveLocaleText(
+                                'Your health data stays on this device. No account is created and no email is uploaded.',
+                                'تبقى بياناتك الصحية على هذا الجهاز. لا يتم إنشاء حساب أو رفع بريد إلكتروني.',
+                              ),
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                 color: Color(0xFFB9C8D3),
@@ -158,9 +175,10 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
                               textInputAction: TextInputAction.done,
                               autofillHints: const [AutofillHints.name],
                               decoration: InputDecoration(
-                                labelText: arabic
-                                    ? 'الاسم المعروض (اختياري)'
-                                    : 'Display name (optional)',
+                                labelText: authFiveLocaleText(
+                                  'Display name (optional)',
+                                  'الاسم المعروض (اختياري)',
+                                ),
                                 prefixIcon: const Icon(
                                   Icons.person_outline_rounded,
                                 ),
@@ -171,17 +189,32 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
                               key: const Key('gateway-continue-locally'),
                               onPressed: restoring ? null : _continueLocally,
                               child: Text(
-                                arabic ? 'المتابعة محليًا' : 'Continue locally',
+                                authFiveLocaleText(
+                                  'Continue locally',
+                                  'المتابعة محليًا',
+                                ),
                               ),
                             ),
                             const SizedBox(height: 10),
                             OutlinedButton.icon(
-                              onPressed: null,
-                              icon: const Icon(Icons.cloud_off_outlined),
+                              onPressed: AppEnvironment.cloudConfigured
+                                  ? () => context.go('/login')
+                                  : null,
+                              icon: Icon(
+                                AppEnvironment.cloudConfigured
+                                    ? Icons.cloud_done_outlined
+                                    : Icons.cloud_off_outlined,
+                              ),
                               label: Text(
-                                arabic
-                                    ? 'تسجيل البريد — قادم مع Cloud'
-                                    : 'Email sign-in — Coming with Cloud',
+                                AppEnvironment.cloudConfigured
+                                    ? authFiveLocaleText(
+                                        'Sign in or create account',
+                                        'تسجيل الدخول أو إنشاء حساب',
+                                      )
+                                    : authFiveLocaleText(
+                                        'Email sign-in — Coming with Cloud',
+                                        'تسجيل البريد — قادم مع Cloud',
+                                      ),
                               ),
                             ),
                             if (snapshot.value == true) ...[
@@ -198,9 +231,10 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
                                       )
                                     : const Icon(Icons.restore_rounded),
                                 label: Text(
-                                  arabic
-                                      ? 'استعادة البيانات السابقة'
-                                      : 'Restore previous data',
+                                  authFiveLocaleText(
+                                    'Restore previous data',
+                                    'استعادة البيانات السابقة',
+                                  ),
                                 ),
                               ),
                             ],

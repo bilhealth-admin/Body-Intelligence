@@ -16,6 +16,8 @@ class AppThemeData {
       surface: dark ? const Color(0xFF121A2A) : const Color(0xFFF8FAFC),
     );
 
+    final divider = dark ? const Color(0xFF273247) : const Color(0xFFE7E7EC);
+
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
@@ -35,11 +37,18 @@ class AppThemeData {
         },
       ),
       appBarTheme: AppBarTheme(
-        centerTitle: false,
+        centerTitle: true,
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: Colors.transparent,
+        backgroundColor: dark ? const Color(0xFF09111F) : Colors.white,
         foregroundColor: dark ? Colors.white : AppColors.textPrimary,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: TextStyle(
+          color: dark ? Colors.white : AppColors.textPrimary,
+          fontSize: 18,
+          height: 1.2,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       cardTheme: CardThemeData(
         elevation: PremiumDesignTokens.elevationNone,
@@ -79,10 +88,11 @@ class AppThemeData {
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        height: 72,
+        height: 68,
         backgroundColor: dark ? const Color(0xFF0E1828) : Colors.white,
-        indicatorColor: colorScheme.primaryContainer,
+        indicatorColor: colorScheme.primary.withValues(alpha: dark ? .18 : .09),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        elevation: 0,
       ),
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: dark ? const Color(0xFF0E1828) : Colors.white,
@@ -98,6 +108,55 @@ class AppThemeData {
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+      dividerColor: divider,
+      dividerTheme: DividerThemeData(color: divider, thickness: 1, space: 1),
+      listTileTheme: ListTileThemeData(
+        minTileHeight: 54,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
+        iconColor: dark ? const Color(0xFF9CA9BA) : const Color(0xFF68717D),
+        textColor: dark ? Colors.white : AppColors.textPrimary,
+        titleTextStyle: TextStyle(
+          color: dark ? Colors.white : AppColors.textPrimary,
+          fontSize: 16,
+          height: 1.25,
+          fontWeight: FontWeight.w400,
+        ),
+        subtitleTextStyle: TextStyle(
+          color: dark ? const Color(0xFF9CA9BA) : const Color(0xFF6D727C),
+          fontSize: 13,
+          height: 1.3,
+          fontWeight: FontWeight.w400,
+        ),
+      ),
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: dark ? const Color(0xFF101A2A) : Colors.white,
+        modalBackgroundColor: dark ? const Color(0xFF101A2A) : Colors.white,
+        surfaceTintColor: Colors.transparent,
+        showDragHandle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+        ),
+      ),
+      tabBarTheme: TabBarThemeData(
+        dividerColor: divider,
+        indicatorColor: colorScheme.primary,
+        indicatorSize: TabBarIndicatorSize.tab,
+        labelColor: dark ? Colors.white : AppColors.textPrimary,
+        unselectedLabelColor: dark
+            ? const Color(0xFF9CA9BA)
+            : const Color(0xFF68717D),
+        labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        elevation: 0,
+        pressElevation: 0,
+        side: BorderSide(color: divider),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }

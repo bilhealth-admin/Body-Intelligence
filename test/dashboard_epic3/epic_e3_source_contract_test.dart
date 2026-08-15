@@ -2,14 +2,16 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/dart_library_source.dart';
+
 void main() {
   test('Epic 3 keeps one authoritative visible decision surface', () {
     final grid = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
-    final benchmark = File(
+    final benchmark = readDartLibrarySource(
       'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
-    ).readAsStringSync();
+    );
 
     expect(grid, isNot(contains('Visibility(')));
     expect(grid, isNot(contains('DashboardDetailPanel(')));

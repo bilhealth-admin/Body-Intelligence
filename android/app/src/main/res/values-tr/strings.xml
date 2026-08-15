@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BIL - Beden Zekâsı Günlüğü</string>
+    <string name="health_permissions_rationale_title">Sağlık verisi gizliliği</string>
+    <string name="health_permissions_rationale_body">BIL yalnızca seçtiğiniz özellikler için gereken Health Connect veri türlerini ister. Sağlık verileriniz varsayılan olarak yerel işlenir. Her izni Health Connect ayarlarından verebilir, reddedebilir veya geri alabilirsiniz. BIL sağlık verilerini satmaz veya reklam için kullanmaz.</string>
+</resources>

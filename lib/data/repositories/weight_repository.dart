@@ -12,6 +12,8 @@ class WeightRepository {
     double weight, {
     DateTime? date,
     String? note,
+    String? progressPhotoPath,
+    bool clearProgressPhoto = false,
     String measurementContext = 'differentConditions',
   }) async {
     _validateWeight(weight);
@@ -24,6 +26,8 @@ class WeightRepository {
         weight: weight,
         date: occurredAt,
         note: note,
+        progressPhotoPath: progressPhotoPath,
+        clearProgressPhoto: clearProgressPhoto,
         measurementContext: measurementContext,
       );
       return existing.id;
@@ -36,6 +40,7 @@ class WeightRepository {
             date: Value(occurredAt),
             dayKey: Value(dayKeyFor(occurredAt)),
             note: Value(note),
+            progressPhotoPath: Value(progressPhotoPath),
             measurementContext: Value(measurementContext),
           ),
         );
@@ -60,6 +65,8 @@ class WeightRepository {
     required double weight,
     required DateTime date,
     String? note,
+    String? progressPhotoPath,
+    bool clearProgressPhoto = false,
     String measurementContext = 'differentConditions',
   }) async {
     _validateWeight(weight);
@@ -68,6 +75,13 @@ class WeightRepository {
     if (conflict != null && conflict.id != id) {
       throw StateError('A weight entry already exists for this day');
     }
+    final current = await (_database.select(
+      _database.weightEntries,
+    )..where((row) => row.id.equals(id))).getSingleOrNull();
+    if (current == null) throw StateError('Weight entry $id does not exist');
+    final resolvedPhotoPath = clearProgressPhoto
+        ? null
+        : progressPhotoPath ?? current.progressPhotoPath;
     final revision = await _nextRevision(id);
     await (_database.update(
       _database.weightEntries,
@@ -77,6 +91,7 @@ class WeightRepository {
         date: Value(date),
         dayKey: Value(dayKeyFor(date)),
         note: Value(note),
+        progressPhotoPath: Value(resolvedPhotoPath),
         measurementContext: Value(measurementContext),
         updatedAt: Value(DateTime.now()),
         revision: Value(revision),
@@ -145,6 +160,7 @@ class WeightRepository {
       'afterBathroom',
       'beforeFoodDrink',
       'differentConditions',
+      'unspecified',
     }.contains(value)) {
       throw ArgumentError.value(value, 'measurementContext');
     }

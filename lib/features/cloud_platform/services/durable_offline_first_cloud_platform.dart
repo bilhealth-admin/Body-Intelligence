@@ -84,6 +84,12 @@ final class DurableOfflineFirstCloudPlatform {
         'Consent or device trust is revoked.',
       ]);
     }
+    if (consent.ownerId != device.ownerId ||
+        consent.ownerId != session.ownerId) {
+      return _report(started, CloudPlatformAvailability.revoked, [
+        'Cloud owner identity mismatch.',
+      ], ownerId: consent.ownerId);
+    }
     if (!session.isUsableAt(started) || session.deviceId != device.deviceId) {
       return _report(started, CloudPlatformAvailability.paused, [
         'Authenticated session unavailable.',
@@ -95,6 +101,7 @@ final class DurableOfflineFirstCloudPlatform {
       ]);
     }
     final pending = await store.readReadyOperations(
+      ownerId: consent.ownerId,
       now: started,
       limit: policy.maxBatchSize,
     );
@@ -107,6 +114,17 @@ final class DurableOfflineFirstCloudPlatform {
         operations: pending,
         cursor: await store.readCursor(consent.ownerId, device.deviceId),
       );
+      final pendingIds = pending.map((value) => value.operationId).toSet();
+      if (!batch.acknowledgedOperationIds.every(pendingIds.contains)) {
+        throw const FormatException(
+          'Cloud acknowledged an operation outside the submitted batch.',
+        );
+      }
+      if (!batch.remoteRecords.every(
+        (record) => record.ownerId == consent.ownerId,
+      )) {
+        throw const FormatException('Cross-account cloud record rejected.');
+      }
       failureInjector.checkpoint('after-transport');
       await store.acknowledgeOperations(batch.acknowledgedOperationIds);
       var applied = 0;
@@ -160,7 +178,7 @@ final class DurableOfflineFirstCloudPlatform {
         pushed: batch.acknowledgedOperationIds.length,
         pulled: applied,
         conflicts: conflicts,
-        pending: await store.pendingCount(),
+        pending: await store.pendingCount(ownerId: consent.ownerId),
         availability: CloudPlatformAvailability.ready,
         diagnostics: const [],
       );
@@ -189,21 +207,22 @@ final class DurableOfflineFirstCloudPlatform {
       }
       return _report(started, CloudPlatformAvailability.paused, [
         'Synchronization failed; durable retry scheduled.',
-      ]);
+      ], ownerId: consent.ownerId);
     }
   }
 
   Future<CloudSyncReport> _report(
     DateTime started,
     CloudPlatformAvailability availability,
-    List<String> diagnostics,
-  ) async => CloudSyncReport(
+    List<String> diagnostics, {
+    String? ownerId,
+  }) async => CloudSyncReport(
     startedAt: started,
     completedAt: clock.now(),
     pushed: 0,
     pulled: 0,
     conflicts: await store.conflictCount(),
-    pending: await store.pendingCount(),
+    pending: await store.pendingCount(ownerId: ownerId),
     availability: availability,
     diagnostics: diagnostics,
   );

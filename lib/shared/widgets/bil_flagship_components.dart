@@ -131,8 +131,7 @@ class BilChoiceCard<T> extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w800),
+                        style: Theme.of(context).textTheme.titleMedium,
                       ),
                       if (subtitle != null) ...[
                         const SizedBox(height: BilFlagshipTokens.space4),

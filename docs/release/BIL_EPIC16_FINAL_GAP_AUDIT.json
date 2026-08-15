@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "audited_on": "2026-08-05",
+  "method": "static_end_to_end_trace_plus_existing_behavioral_gate_evidence",
+  "release_claim": "repository_ready_only_external_gates_remain_unclaimed",
+  "status_definitions": [
+    "complete_proven",
+    "code_complete_external_configuration",
+    "partial",
+    "mock_demo_placeholder",
+    "disconnected",
+    "missing",
+    "physical_or_human_review"
+  ],
+  "areas": [
+    {
+      "id": "routes",
+      "status": "complete_proven",
+      "chain": "GoRouter -> visible shell/settings/quick-add entries -> production pages",
+      "evidence": ["lib/app/router/app_router.dart", "test/quick_add_routing_contract_test.dart", "test/responsive_shell_test.dart"]
+    },
+    {
+      "id": "food_search_and_logging",
+      "status": "complete_proven",
+      "chain": "Daily Log -> food search -> FoodRepository -> Drift catalog and meal snapshot -> daily totals",
+      "evidence": ["lib/features/daily_log/daily_log_meal_entry.dart", "lib/data/repositories/food_repository.dart", "test/repository_test.dart"]
+    },
+    {
+      "id": "barcode",
+      "status": "complete_proven",
+      "chain": "scanner route -> barcode classifier -> trusted catalog or non-food/unknown review -> persisted confirmed meal only",
+      "evidence": ["lib/features/nutrition/presentation/food_barcode_scanner_page.dart", "lib/features/nutrition/services/offline_barcode_resolver.dart", "test/features/nutrition/epic5_product_review_trust_contract_test.dart"]
+    },
+    {
+      "id": "voice_logging",
+      "status": "complete_proven",
+      "chain": "user microphone action -> native speech bridge -> reviewed text -> trusted food match -> user confirmation -> meal repository",
+      "evidence": ["lib/features/nutrition/services/meal_voice_input_service.dart", "android/app/src/main/kotlin/com/kadem/bil/BILSpeechBridge.kt", "ios/Runner/BILSpeechBridge.swift", "test/features/nutrition/epic6_voice_vision_gateway_test.dart"]
+    },
+    {
+      "id": "meal_image_analysis",
+      "status": "code_complete_external_configuration",
+      "chain": "user camera/photo action -> authenticated HTTPS gateway -> bounded candidates/confidence/evidence -> trusted food resolution -> user confirmation",
+      "evidence": ["lib/features/nutrition/services/meal_image_analysis_service.dart", "supabase/functions/analyze-meal/index.ts", "test/features/nutrition/epic6_voice_vision_gateway_test.dart"]
+    },
+    {
+      "id": "daily_ledger_water_weight_exercise",
+      "status": "complete_proven",
+      "chain": "Daily Log/check-in -> controllers -> Drift repositories -> authoritative snapshots -> dashboard/progress/report",
+      "evidence": ["lib/features/daily_log/daily_log_page.dart", "lib/features/daily_check_in/daily_check_in_page.dart", "test/authoritative_daily_ledger_test.dart"]
+    },
+    {
+      "id": "engines_and_weekly_reports",
+      "status": "complete_proven",
+      "chain": "recorded repositories -> truth/nutrition/metabolism/trend engines -> explained confidence/evidence -> dashboard/analytics/weekly report",
+      "evidence": ["lib/features/analytics/weekly_report_page.dart", "lib/features/dashboard/providers/dashboard_provider.dart", "docs/architecture/BIL_V1_EPIC8_ENGINE_REPORT_COVERAGE.md"]
+    },
+    {
+      "id": "plans_recipes_workouts",
+      "status": "code_complete_external_configuration",
+      "chain": "visible libraries -> verified manifest/checksum/license -> installed content -> honest empty/error/offline states",
+      "evidence": ["lib/features/nutrition_plans/presentation/nutrition_pathways_page.dart", "lib/features/wellness/presentation/wellness_library_page.dart", "docs/architecture/BIL_V1_EPIC7_CONTENT_COVERAGE.md"]
+    },
+    {
+      "id": "community_messages_safety",
+      "status": "code_complete_external_configuration",
+      "chain": "guarded routes -> authenticated repositories -> Supabase RPC/RLS -> moderation/audit/deletion -> loading/empty/error/offline",
+      "evidence": ["lib/features/community/data/community_repository.dart", "supabase/migrations/202608040002_bil_community_cloud_completion.sql", "docs/architecture/BIL_V1_EPIC9_COMMUNITY_CLOUD_CLOSURE.md"]
+    },
+    {
+      "id": "push_fcm_apns_deep_links",
+      "status": "code_complete_external_configuration",
+      "chain": "explicit opt-in -> platform token seam -> protected token repository -> server dispatch -> generic lock-screen copy -> allowlisted deep link",
+      "evidence": ["lib/features/notifications/services/bil_notification_service.dart", "supabase/functions/community-push-dispatch/index.ts", "docs/architecture/BIL_V1_EPIC9_COMMUNITY_CLOUD_CLOSURE.md"]
+    },
+    {
+      "id": "health_connect_healthkit_ble",
+      "status": "physical_or_human_review",
+      "chain": "permissions/device UI -> native bridges -> provenance/unit/time validation -> deduplicated local sync -> progress/reports",
+      "evidence": ["lib/features/connected_health/connected_health_page.dart", "lib/features/connected_health/providers/connected_health_provider.dart", "docs/architecture/BIL_V1_EPIC10_HEALTH_DEVICE_COVERAGE.md"]
+    },
+    {
+      "id": "five_language_localization_accessibility",
+      "status": "physical_or_human_review",
+      "chain": "persisted locale -> balanced five-language catalogs -> RTL/LTR/formatting/semantics -> five-locale goldens",
+      "evidence": ["lib/app/localization/app_localizations.dart", "tool/epic11_localization_audit.dart", "docs/architecture/BIL_V1_EPIC11_LOCALIZATION_ACCESSIBILITY_COVERAGE.md"],
+      "external_limit": "professional completion/review of remaining legacy Arabic-English runtime copy for French, Spanish and Turkish, plus physical assistive-technology review, remain unclaimed"
+    },
+    {
+      "id": "privacy_security_export_deletion",
+      "status": "code_complete_external_configuration",
+      "chain": "Settings/account controls -> consent/auth -> local lifecycle or deletion RPC -> redacted audit -> honest result",
+      "evidence": ["lib/app/services/data_export_service.dart", "lib/app/services/local_data_lifecycle_service.dart", "supabase/functions/account-data-deletion/index.ts", "docs/architecture/BIL_V1_EPIC12_SECURITY_PRIVACY_CLOSURE.md"]
+    },
+    {
+      "id": "subscriptions_vat_restore_server_verification",
+      "status": "code_complete_external_configuration",
+      "chain": "device-store products/prices -> purchase -> server verification -> RLS entitlement -> restore/reconcile -> fail closed to Free",
+      "evidence": ["lib/features/commerce/services/verified_store_purchase_service.dart", "supabase/functions/verify-store-purchase/index.ts", "docs/architecture/BIL_V1_EPIC13_COMMERCE_CLOSURE.md"]
+    },
+    {
+      "id": "contextual_ads",
+      "status": "code_complete_external_configuration",
+      "chain": "Settings privacy entry -> persisted explicit consent -> sensitive-placement and paid-plan policy -> disabled gateway until reviewed provider",
+      "evidence": ["lib/features/ads/advertising_privacy_page.dart", "lib/features/ads/domain/ad_policy.dart", "test/launch_readiness/epic16_ad_privacy_contract_test.dart"]
+    },
+    {
+      "id": "android_release",
+      "status": "complete_proven",
+      "chain": "release config -> signed AAB -> signature/hash/size/16 KiB verification",
+      "evidence": ["artifacts/release/epic14/epic14_summary.txt", "artifacts/release/run_epic16_gate.ps1"]
+    },
+    {
+      "id": "ios_release",
+      "status": "physical_or_human_review",
+      "chain": "static project/workflows ready -> Apple membership -> signed archive -> TestFlight/device review",
+      "evidence": ["ios/Runner.xcodeproj/project.pbxproj", ".github/workflows/bil_ios_signed_release.yml"]
+    },
+    {
+      "id": "store_materials_and_visual_references",
+      "status": "physical_or_human_review",
+      "chain": "177 references -> mapped production screens/files -> refreshed verified goldens -> 65 store evidence rows -> human upload review",
+      "evidence": ["artifacts/release/visual_closure/reference/visual_reference_manifest.json", "artifacts/release/visual_closure/visual_capture_summary.txt", "docs/release/BIL_EPIC15_CONTENT_RIGHTS.json"]
+    }
+  ],
+  "confirmed_internal_fixes": [
+    "Added a persisted, five-language advertising privacy surface and guarded Settings entry.",
+    "Added an explicit /advertising-privacy route and behavioral widget coverage.",
+    "Aligned local export copy with the actual OS save/share picker instead of claiming clipboard export.",
+    "Extended the Epic 16 release audit to require the route, persisted consent, five-locale copy, and honest unavailable provider state."
+  ],
+  "external_gates": [
+    "Google Play identity/address review, console declarations, product catalog, closed-track purchase lifecycle, review credentials and publication.",
+    "Apple Developer Program enrollment/manual identity review, App Store Connect record/products, signed archive, Sandbox/TestFlight purchase lifecycle and publication.",
+    "Publication and verification of bilhealth.com legal/support/deletion pages and legal approval of jurisdiction, retention, age/content, tax and processor declarations.",
+    "Supabase migrations/functions/secrets plus credentialed two-account, anonymous and moderator RLS tests; production moderation staffing.",
+    "FCM/APNs credentials and physical push/deep-link/lock-screen verification.",
+    "Production meal-image gateway credentials/provider and real request/privacy verification.",
+    "Licensed recipe/workout/catalog content expansion and rights review before enabling remote packs.",
+    "Physical Android Health Connect, iPhone HealthKit, representative BLE/watch/medical-device tests.",
+    "Professional completion/review of remaining legacy Arabic-English runtime copy for French, Spanish and Turkish, plus TalkBack, VoiceOver, Dynamic Type, keyboard and manual contrast review.",
+    "Human penetration testing, signed-binary network inspection, store privacy reconciliation and final visual/store-art review."
+  ]
+}

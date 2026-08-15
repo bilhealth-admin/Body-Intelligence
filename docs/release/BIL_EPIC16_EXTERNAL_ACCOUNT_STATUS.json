@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "verified_on": "2026-08-05",
+  "application": "Body Intelligence Log (BIL)",
+  "public_developer_name": "BIL Health",
+  "domain": {
+    "value": "bilhealth.com",
+    "ownership": "OWNER_CONFIRMED_CLOUDFLARE_REGISTRAR",
+    "public_pages": "OWNER_EXTERNAL_ACTION_UNPUBLISHED_OR_UNVERIFIED"
+  },
+  "administrative_email": "bilhealth.app@gmail.com",
+  "proposed_mailboxes": {
+    "support@bilhealth.com": "INBOUND_FORWARDING_ACTIVE_OUTBOUND_NOT_CLAIMED",
+    "privacy@bilhealth.com": "INBOUND_FORWARDING_ACTIVE_OUTBOUND_NOT_CLAIMED"
+  },
+  "google_play": {
+    "account_type": "PERSONAL_INDIVIDUAL",
+    "registration_and_payment": "OWNER_CONFIRMED",
+    "identity_and_address_review": "OWNER_CONFIRMED_VERIFIED_SUCCESSFULLY",
+    "release": "NOT_PUBLISHED"
+  },
+  "apple": {
+    "account": "bilhealth.app@gmail.com",
+    "developer_program": "INCOMPLETE",
+    "identity_review": "MANUAL_SUPPORT_REVIEW_REQUESTED",
+    "signed_archive_or_testflight": "NOT_CLAIMED"
+  },
+  "source_control": {
+    "organization": "bilhealth",
+    "administrative_account": "bilhealth-admin",
+    "repository_ownership": "PERSONAL_REPOSITORY_RETAINED_AT_KADEMCOM_BODY_INTELLIGENCE",
+    "organization_or_transfer": "ORGANIZATION_EXISTS_TARGET_REPOSITORY_NOT_FOUND_TRANSFER_NOT_EXECUTED",
+    "cli_audit": "BLOCKED_GITHUB_CLI_NOT_INSTALLED"
+  }
+}

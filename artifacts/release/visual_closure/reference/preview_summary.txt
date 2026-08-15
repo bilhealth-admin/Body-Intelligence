@@ -1,0 +1,5 @@
+﻿VISUAL_REFERENCE_PREVIEWS=PASS
+SOURCE_COUNT=177
+PREVIEW_COUNT=177
+PREVIEW_ROOT=C:\develop\projects\body_intelligence_log\artifacts\release\visual_closure\reference\previews
+ORIGINALS_UNCHANGED=True

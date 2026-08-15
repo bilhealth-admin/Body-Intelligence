@@ -6,6 +6,7 @@ final class BILMedicalBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
   private let channel: FlutterMethodChannel
   private var central: CBCentralManager!
   private var peripherals: [UUID: CBPeripheral] = [:]
+  private var advertisedProfiles: [UUID: Set<String>] = [:]
   private var sessions: [UUID: ReadSession] = [:]
   private var discoveryResult: FlutterResult?
   private var seenPackets = Set<String>()
@@ -32,6 +33,9 @@ final class BILMedicalBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
     guard central.state == .poweredOn else { result(FlutterError(code:"bluetooth_disabled", message:"Bluetooth unavailable", details:nil)); return }
     let args = call.arguments as? [String:Any] ?? [:]
     switch call.method {
+    case "requestPermissions":
+      // CoreBluetooth presents its system authorization prompt when scanning.
+      result(nil)
     case "discover":
       guard discoveryResult == nil else { result(FlutterError(code:"operation_in_progress",message:nil,details:nil)); return }
       discoveryResult = result; central.scanForPeripherals(withServices: supportedServices, options:[CBCentralManagerScanOptionAllowDuplicatesKey:false])
@@ -49,6 +53,13 @@ final class BILMedicalBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
       }
     case "disconnect", "cancel":
       guard let p=peripheral(args) else { result(nil); return }; finish(p.identifier, error:nil); central.cancelPeripheralConnection(p); result(nil)
+    case "deviceStatus":
+      guard let p=peripheral(args) else { result(["connected":false,"batteryVerified":false]); return }
+      result(["connected":p.state == .connected,"batteryPercent":NSNull(),"batteryVerified":false])
+    case "forget":
+      guard let p=peripheral(args) else { result(nil); return }
+      finish(p.identifier,error:nil); central.cancelPeripheralConnection(p); peripherals.removeValue(forKey:p.identifier); advertisedProfiles.removeValue(forKey:p.identifier)
+      result(["forgottenLocally":true,"systemUnpairRequired":false])
     case "readMeasurements":
       guard let p=peripheral(args) else { result(FlutterError(code:"not_found",message:nil,details:nil)); return }
       if sessions[p.identifier] != nil { result(FlutterError(code:"operation_in_progress",message:nil,details:nil)); return }
@@ -63,7 +74,12 @@ final class BILMedicalBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
   private func peripheral(_ args:[String:Any])->CBPeripheral? { guard let id=args["peripheralId"] as? String, let uuid=UUID(uuidString:id) else{return nil}; return peripherals[uuid] }
   private var supportedServices:[CBUUID]{["1810","1808","181D","181B","1822","180D","1809"].map(CBUUID.init(string:))}
   func centralManagerDidUpdateState(_ central:CBCentralManager) {}
-  func centralManager(_ central:CBCentralManager,didDiscover peripheral:CBPeripheral,advertisementData:[String:Any],rssi RSSI:NSNumber){ peripherals[peripheral.identifier]=peripheral }
+  func centralManager(_ central:CBCentralManager,didDiscover peripheral:CBPeripheral,advertisementData:[String:Any],rssi RSSI:NSNumber){
+    let supported = Set(supportedServices.map { $0.uuidString })
+    let advertised = Set((advertisementData[CBAdvertisementDataServiceUUIDsKey] as? [CBUUID] ?? []).map { $0.uuidString }.filter { supported.contains($0) })
+    guard !advertised.isEmpty else { return }
+    peripherals[peripheral.identifier]=peripheral; advertisedProfiles[peripheral.identifier]=advertised
+  }
   func centralManager(_ central:CBCentralManager,didConnect peripheral:CBPeripheral){
     pendingPairResults.removeValue(forKey: peripheral.identifier)?(nil)
     peripheral.delegate=self
@@ -111,5 +127,5 @@ final class BILMedicalBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
   }
   private func completeIfReady(_ id:UUID){ guard let session=sessions[id],session.pendingServiceDiscoveries==0,session.completedCharacteristics.isSuperset(of:session.expectedCharacteristics) else{return}; finish(id,error:nil) }
   private func finish(_ id:UUID,error:FlutterError?){ guard let session=sessions.removeValue(forKey:id),!session.completed else{return};session.completed=true;session.timeout?.cancel();if let error=error{session.result(error)}else{session.result(session.packets)} }
-  private func describe(_ p:CBPeripheral)->[String:Any]{["id":p.identifier.uuidString,"name":p.name ?? "Medical device","manufacturer":"unknown","firmwareVersion":"unknown","profiles":supportedServices.map{$0.uuidString}]}
+  private func describe(_ p:CBPeripheral)->[String:Any]{["id":p.identifier.uuidString,"name":p.name ?? "Medical device","manufacturer":"unknown","firmwareVersion":"unknown","profiles":Array(advertisedProfiles[p.identifier] ?? [])]}
 }

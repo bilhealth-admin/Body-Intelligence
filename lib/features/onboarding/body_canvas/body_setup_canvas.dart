@@ -17,7 +17,8 @@ class _BodySetupCanvas extends StatelessWidget {
   final VoidCallback onChanged;
   final VoidCallback onContinue;
 
-  String tr(String en, String ar) => isArabic ? ar : en;
+  String tr(BuildContext context, String en, String ar) =>
+      _bodyCanvasText(context, en, ar);
 
   int get _completed {
     var count = 0;
@@ -62,24 +63,7 @@ class _BodySetupCanvas extends StatelessWidget {
         return Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(
-              'assets/images/v10_master/bil_hdr_starfield_master.png',
-              fit: BoxFit.cover,
-              filterQuality: FilterQuality.high,
-            ),
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(.16, -.12),
-                  radius: 1.25,
-                  colors: [
-                    Color(0x2D1C83FF),
-                    Color(0x1413D7DE),
-                    Color(0x0001050D),
-                  ],
-                ),
-              ),
-            ),
+            const ColoredBox(color: _BilColors.background),
             SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(horizontal, 12, horizontal, 18),
               child: Column(
@@ -166,6 +150,7 @@ class _BodySetupCanvas extends StatelessWidget {
                               : (desktop ? 260 : 190),
                           child: _FlagshipContinueButton(
                             label: tr(
+                              context,
                               'Create my body model',
                               'إنشاء نموذج جسمي',
                             ),
@@ -198,673 +183,6 @@ class _BodySetupCanvas extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-
-  Future<void> _editBirthDate(BuildContext context) async {
-    final picked = await showModalBottomSheet<DateTime>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) =>
-          _BirthDateEditor(initialDate: draft.birthDate, isArabic: isArabic),
-    );
-    if (picked == null) return;
-    draft.birthDate = picked;
-    onChanged();
-  }
-
-  Future<void> _editMeasurement(
-    BuildContext context, {
-    required _CanvasField type,
-  }) async {
-    final config = switch (type) {
-      _CanvasField.weight => _EditorConfig(
-        title: tr('Weight', 'الوزن'),
-        value: draft.weight,
-        min: draft.units == BilUnits.metric ? 30 : 66,
-        max: draft.units == BilUnits.metric ? 300 : 660,
-        unit: draft.units == BilUnits.metric ? 'kg' : 'lb',
-        decimals: 1,
-      ),
-      _CanvasField.height => _EditorConfig(
-        title: tr('Height', 'الطول'),
-        value: draft.height,
-        min: draft.units == BilUnits.metric ? 120 : 48,
-        max: draft.units == BilUnits.metric ? 230 : 90,
-        unit: draft.units == BilUnits.metric ? 'cm' : 'in',
-        decimals: 1,
-      ),
-      _CanvasField.waist => _EditorConfig(
-        title: tr('Waist', 'الخصر'),
-        value: draft.waist,
-        min: draft.units == BilUnits.metric ? 45 : 18,
-        max: draft.units == BilUnits.metric ? 200 : 79,
-        unit: draft.units == BilUnits.metric ? 'cm' : 'in',
-        decimals: 1,
-        optional: true,
-      ),
-      _CanvasField.neck => _EditorConfig(
-        title: tr('Neck', 'الرقبة'),
-        value: draft.neck,
-        min: draft.units == BilUnits.metric ? 20 : 8,
-        max: draft.units == BilUnits.metric ? 80 : 32,
-        unit: draft.units == BilUnits.metric ? 'cm' : 'in',
-        decimals: 1,
-        optional: true,
-      ),
-    };
-
-    final result = await showModalBottomSheet<_EditorResult>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _CanvasNumberEditor(config: config, isArabic: isArabic),
-    );
-
-    if (result == null) return;
-    final value = result.clear ? null : result.value;
-
-    switch (type) {
-      case _CanvasField.weight:
-        draft.weight = value;
-      case _CanvasField.height:
-        draft.height = value;
-      case _CanvasField.waist:
-        draft.waist = value;
-      case _CanvasField.neck:
-        draft.neck = value;
-    }
-    onChanged();
-  }
-
-  Future<void> _editSex(BuildContext context) async {
-    final value = await _showChoiceSheet<BilSex>(
-      context,
-      title: tr('Biological sex', 'الجنس البيولوجي'),
-      current: draft.sex,
-      choices: [
-        _SheetChoice(BilSex.male, tr('Male', 'ذكر'), Icons.male_rounded),
-        _SheetChoice(BilSex.female, tr('Female', 'أنثى'), Icons.female_rounded),
-      ],
-    );
-    if (value == null) return;
-    draft.sex = value;
-    draft.sexConfirmed = true;
-    onChanged();
-  }
-
-  Future<void> _editGoal(BuildContext context) async {
-    final value = await _showChoiceSheet<BilGoal>(
-      context,
-      title: tr('Goal', 'الهدف'),
-      current: draft.goal,
-      choices: [
-        _SheetChoice(
-          BilGoal.loseFat,
-          tr('Lose fat', 'خسارة دهون'),
-          Icons.trending_down_rounded,
-        ),
-        _SheetChoice(
-          BilGoal.maintain,
-          tr('Maintain', 'تثبيت الوزن'),
-          Icons.balance_rounded,
-        ),
-        _SheetChoice(
-          BilGoal.buildMuscle,
-          tr('Build muscle', 'بناء عضلات'),
-          Icons.fitness_center_rounded,
-        ),
-      ],
-    );
-    if (value == null) return;
-    draft.goal = value;
-    draft.goalConfirmed = true;
-    onChanged();
-  }
-
-  Future<void> _editActivity(BuildContext context) async {
-    final value = await _showChoiceSheet<BilActivity>(
-      context,
-      title: tr('Activity', 'النشاط'),
-      current: draft.activity,
-      choices: [
-        _SheetChoice(
-          BilActivity.low,
-          tr('Low', 'منخفض'),
-          Icons.weekend_outlined,
-        ),
-        _SheetChoice(
-          BilActivity.light,
-          tr('Light', 'خفيف'),
-          Icons.directions_walk_rounded,
-        ),
-        _SheetChoice(
-          BilActivity.moderate,
-          tr('Moderate', 'متوسط'),
-          Icons.fitness_center_rounded,
-        ),
-        _SheetChoice(
-          BilActivity.high,
-          tr('High', 'مرتفع'),
-          Icons.directions_run_rounded,
-        ),
-        _SheetChoice(
-          BilActivity.veryHigh,
-          tr('Very high', 'مرتفع جدًا'),
-          Icons.bolt_rounded,
-        ),
-      ],
-    );
-    if (value == null) return;
-    draft.activity = value;
-    draft.activityConfirmed = true;
-    onChanged();
-  }
-
-  Future<T?> _showChoiceSheet<T>(
-    BuildContext context, {
-    required String title,
-    required T current,
-    required List<_SheetChoice<T>> choices,
-  }) {
-    return showModalBottomSheet<T>(
-      context: context,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _CanvasChoiceSheet<T>(
-        title: title,
-        current: current,
-        choices: choices,
-      ),
-    );
-  }
-}
-
-class _DesktopBodyCanvas extends StatelessWidget {
-  const _DesktopBodyCanvas({
-    required this.draft,
-    required this.isArabic,
-    required this.age,
-    required this.onWeight,
-    required this.onHeight,
-    required this.onWaist,
-    required this.onNeck,
-    required this.onBirthDate,
-    required this.onSex,
-    required this.onGoal,
-    required this.onActivity,
-  });
-
-  final BilOnboardingDraft draft;
-  final bool isArabic;
-  final int? age;
-  final VoidCallback onWeight;
-  final VoidCallback onHeight;
-  final VoidCallback onWaist;
-  final VoidCallback onNeck;
-  final VoidCallback onBirthDate;
-  final VoidCallback onSex;
-  final VoidCallback onGoal;
-  final VoidCallback onActivity;
-
-  String tr(String en, String ar) => isArabic ? ar : en;
-
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: _GlassPanel(
-        padding: const EdgeInsets.all(18),
-        radius: 30,
-        glow: true,
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _PrivateFieldCard(
-                    title: tr('Goal', 'الهدف'),
-                    icon: Icons.track_changes_rounded,
-                    completed: draft.goalConfirmed,
-                    optional: false,
-                    onTap: onGoal,
-                  ),
-                  _PrivateFieldCard(
-                    title: tr('Waist', 'الخصر'),
-                    icon: Icons.straighten_rounded,
-                    completed: draft.waist != null,
-                    optional: true,
-                    onTap: onWaist,
-                  ),
-                  _PrivateFieldCard(
-                    title: tr('Neck', 'الرقبة'),
-                    icon: Icons.accessibility_new_rounded,
-                    completed: draft.neck != null,
-                    optional: true,
-                    onTap: onNeck,
-                  ),
-                  _PrivateFieldCard(
-                    title: tr('Activity', 'النشاط'),
-                    icon: Icons.directions_run_rounded,
-                    completed: draft.activityConfirmed,
-                    optional: false,
-                    onTap: onActivity,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 22),
-            const Expanded(flex: 2, child: _V8HologramStage()),
-            const SizedBox(width: 22),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _PrivateFieldCard(
-                    title: tr('Weight', 'الوزن'),
-                    icon: Icons.monitor_weight_outlined,
-                    completed: draft.weight != null,
-                    optional: false,
-                    onTap: onWeight,
-                  ),
-                  _PrivateFieldCard(
-                    title: tr('Height', 'الطول'),
-                    icon: Icons.height_rounded,
-                    completed: draft.height != null,
-                    optional: false,
-                    onTap: onHeight,
-                  ),
-                  _PrivateFieldCard(
-                    title: tr('Age', 'العمر'),
-                    icon: Icons.cake_outlined,
-                    completed: age != null,
-                    optional: false,
-                    onTap: onBirthDate,
-                  ),
-                  _PrivateFieldCard(
-                    title: tr('Biological sex', 'الجنس'),
-                    icon: draft.sex == BilSex.male
-                        ? Icons.male_rounded
-                        : Icons.female_rounded,
-                    completed: draft.sexConfirmed,
-                    optional: false,
-                    onTap: onSex,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _V8HologramStage extends StatefulWidget {
-  const _V8HologramStage();
-
-  @override
-  State<_V8HologramStage> createState() => _V8HologramStageState();
-}
-
-class _V8HologramStageState extends State<_V8HologramStage>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 6),
-    )..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, child) {
-        final pulse = 1 + controller.value * .022;
-        return Stack(
-          alignment: Alignment.center,
-          children: [
-            const Positioned.fill(child: _CanvasOrbitBackground()),
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    radius: .72,
-                    colors: [
-                      _BilColors.cyan.withValues(
-                        alpha: .10 + controller.value * .08,
-                      ),
-                      _BilColors.blue.withValues(alpha: .055),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: IgnorePointer(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Text(
-                      'BIL®',
-                      style: TextStyle(
-                        color: Color(0xFFE8EEF4),
-                        fontSize: 46,
-                        height: .88,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -2.2,
-                        shadows: [
-                          Shadow(color: Color(0x804DDCFF), blurRadius: 28),
-                          Shadow(color: Color(0x407B5FFF), blurRadius: 40),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      'BODY INTELLIGENCE LOG',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Color(0xFFD0D9E1),
-                        fontSize: 8,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 2.4,
-                        shadows: [
-                          Shadow(color: Color(0x4055CCFF), blurRadius: 12),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned.fill(
-              left: 10,
-              right: 10,
-              top: 82,
-              bottom: -24,
-              child: Transform.scale(
-                scale: pulse * .95,
-                child: Image.asset(
-                  'assets/images/v10_master/bil_hologram_master.png',
-                  fit: BoxFit.contain,
-                  filterQuality: FilterQuality.high,
-                  gaplessPlayback: true,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _PrivateFieldCard extends StatefulWidget {
-  const _PrivateFieldCard({
-    required this.title,
-    required this.icon,
-    required this.completed,
-    required this.optional,
-    required this.onTap,
-  });
-
-  final String title;
-  final IconData icon;
-  final bool completed;
-  final bool optional;
-  final VoidCallback onTap;
-
-  @override
-  State<_PrivateFieldCard> createState() => _PrivateFieldCardState();
-}
-
-class _PrivateFieldCardState extends State<_PrivateFieldCard> {
-  bool hovered = false;
-  bool pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => hovered = true),
-      onExit: (_) => setState(() {
-        hovered = false;
-        pressed = false;
-      }),
-      child: GestureDetector(
-        onTapDown: (_) => setState(() => pressed = true),
-        onTapCancel: () => setState(() => pressed = false),
-        onTapUp: (_) {
-          setState(() => pressed = false);
-          widget.onTap();
-        },
-        child: AnimatedScale(
-          scale: pressed ? .975 : (hovered ? 1.018 : 1),
-          duration: const Duration(milliseconds: 150),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 210),
-            constraints: const BoxConstraints(minHeight: 82),
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 13),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.white.withValues(alpha: hovered ? .095 : .060),
-                  _BilColors.cyan.withValues(alpha: hovered ? .095 : .035),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(21),
-              border: Border.all(
-                color: widget.completed
-                    ? Colors.white.withValues(alpha: hovered ? .28 : .10)
-                    : Colors.white.withValues(alpha: hovered ? .24 : .08),
-                width: hovered ? 1.45 : 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: widget.completed
-                      ? const Color(0xFFB9C8D6).withValues(alpha: .15)
-                      : _BilColors.cyan.withValues(alpha: .08),
-                  blurRadius: hovered ? 28 : 18,
-                  spreadRadius: -9,
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                _IconOrb(icon: widget.icon, selected: widget.completed),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    widget.title,
-                    style: const TextStyle(
-                      color: Color(0xFFD9E2EA),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                if (widget.optional && !widget.completed)
-                  const Icon(
-                    Icons.add_rounded,
-                    color: _BilColors.textDim,
-                    size: 19,
-                  ),
-                if (widget.completed)
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          const Color(0xFFB9C8D6).withValues(alpha: .35),
-                          _BilColors.cyan.withValues(alpha: .18),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(11),
-                      border: Border.all(
-                        color: const Color(0xFFB9C8D6).withValues(alpha: .55),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFB9C8D6).withValues(alpha: .32),
-                          blurRadius: 14,
-                          spreadRadius: -5,
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.check_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CompactBodyCanvas extends StatelessWidget {
-  const _CompactBodyCanvas({
-    required this.draft,
-    required this.isArabic,
-    required this.age,
-    required this.onWeight,
-    required this.onHeight,
-    required this.onWaist,
-    required this.onNeck,
-    required this.onBirthDate,
-    required this.onSex,
-    required this.onGoal,
-    required this.onActivity,
-  });
-
-  final BilOnboardingDraft draft;
-  final bool isArabic;
-  final int? age;
-  final VoidCallback onWeight;
-  final VoidCallback onHeight;
-  final VoidCallback onWaist;
-  final VoidCallback onNeck;
-  final VoidCallback onBirthDate;
-  final VoidCallback onSex;
-  final VoidCallback onGoal;
-  final VoidCallback onActivity;
-
-  String tr(String en, String ar) => isArabic ? ar : en;
-
-  @override
-  Widget build(BuildContext context) {
-    final fields = [
-      (
-        tr('Weight', 'الوزن'),
-        Icons.monitor_weight_outlined,
-        draft.weight != null,
-        false,
-        onWeight,
-      ),
-      (
-        tr('Height', 'الطول'),
-        Icons.height_rounded,
-        draft.height != null,
-        false,
-        onHeight,
-      ),
-      (
-        tr('Age', 'العمر'),
-        Icons.cake_outlined,
-        age != null,
-        false,
-        onBirthDate,
-      ),
-      (
-        tr('Biological sex', 'الجنس'),
-        draft.sex == BilSex.male ? Icons.male_rounded : Icons.female_rounded,
-        draft.sexConfirmed,
-        false,
-        onSex,
-      ),
-      (
-        tr('Goal', 'الهدف'),
-        Icons.track_changes_rounded,
-        draft.goalConfirmed,
-        false,
-        onGoal,
-      ),
-      (
-        tr('Waist', 'الخصر'),
-        Icons.straighten_rounded,
-        draft.waist != null,
-        true,
-        onWaist,
-      ),
-      (
-        tr('Neck', 'الرقبة'),
-        Icons.accessibility_new_rounded,
-        draft.neck != null,
-        true,
-        onNeck,
-      ),
-      (
-        tr('Activity', 'النشاط'),
-        Icons.directions_run_rounded,
-        draft.activityConfirmed,
-        false,
-        onActivity,
-      ),
-    ];
-
-    return Column(
-      children: [
-        const SizedBox(height: 290, child: _V8HologramStage()),
-        const SizedBox(height: 12),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final cardWidth = constraints.maxWidth >= 620
-                ? (constraints.maxWidth - 12) / 2
-                : constraints.maxWidth;
-            return Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                for (final field in fields)
-                  SizedBox(
-                    width: cardWidth,
-                    child: _PrivateFieldCard(
-                      title: field.$1,
-                      icon: field.$2,
-                      completed: field.$3,
-                      optional: field.$4,
-                      onTap: field.$5,
-                    ),
-                  ),
-              ],
-            );
-          },
-        ),
-      ],
     );
   }
 }
@@ -904,16 +222,8 @@ class _FlagshipContinueButtonState extends State<_FlagshipContinueButton> {
           borderRadius: BorderRadius.circular(22),
           gradient: LinearGradient(
             colors: active
-                ? [
-                    Colors.white.withValues(alpha: hovered ? .17 : .11),
-                    const Color(0xFF58D8FF).withValues(alpha: .075),
-                    const Color(0xFF795FFF).withValues(alpha: .075),
-                    Colors.white.withValues(alpha: .035),
-                  ]
-                : [
-                    Colors.white.withValues(alpha: .045),
-                    Colors.white.withValues(alpha: .018),
-                  ],
+                ? const [_BilColors.blue, _BilColors.emerald]
+                : const [Color(0xFFE4E7EC), Color(0xFFEAECF0)],
           ),
           boxShadow: active
               ? [
@@ -947,15 +257,17 @@ class _FlagshipContinueButtonState extends State<_FlagshipContinueButton> {
                     child: Text(
                       active
                           ? widget.label
-                          : (Directionality.of(context) == TextDirection.rtl
-                                ? 'أكمل البيانات الأساسية'
-                                : 'Complete required details'),
+                          : _bodyCanvasText(
+                              context,
+                              'Complete required details',
+                              'أكمل البيانات الأساسية',
+                            ),
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: active
                             ? const Color(0xFFEAF1F7)
                             : _BilColors.textDim,
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -988,46 +300,29 @@ class _CanvasHeader extends StatelessWidget {
       children: [
         Semantics(
           button: true,
-          label: isArabic ? 'الرجوع' : 'Back',
+          label: _bodyCanvasText(context, 'Back', 'الرجوع'),
           child: Container(
             width: 58,
             height: 58,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.white.withValues(alpha: .18),
-                  const Color(0xFF5AD9FF).withValues(alpha: .10),
-                  const Color(0xFF765FFF).withValues(alpha: .09),
-                  Colors.white.withValues(alpha: .045),
-                ],
-              ),
+              color: Colors.white,
+              border: Border.all(color: _BilColors.stroke),
               boxShadow: const [
                 BoxShadow(
-                  color: Color(0x704FD6FF),
-                  blurRadius: 28,
-                  spreadRadius: -8,
-                ),
-                BoxShadow(
-                  color: Color(0x50000000),
-                  blurRadius: 18,
-                  offset: Offset(0, 9),
+                  color: Color(0x14101828),
+                  blurRadius: 16,
+                  offset: Offset(0, 6),
                 ),
               ],
             ),
             child: IconButton(
-              tooltip: isArabic ? 'الرجوع' : 'Back',
+              tooltip: _bodyCanvasText(context, 'Back', 'الرجوع'),
               onPressed: onBack,
               iconSize: 30,
               splashRadius: 28,
-              color: const Color(0xFFF3F7FA),
-              icon: Icon(
-                isArabic
-                    ? Icons.arrow_forward_rounded
-                    : Icons.arrow_back_rounded,
-              ),
+              color: const Color(0xFF101828),
+              icon: const Icon(Icons.arrow_back_rounded),
             ),
           ),
         ),
@@ -1036,11 +331,15 @@ class _CanvasHeader extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                isArabic ? 'إعداد نموذج جسمك' : 'Build your body model',
+                _bodyCanvasText(
+                  context,
+                  'Build your body model',
+                  'إعداد نموذج جسمك',
+                ),
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF101828),
                   fontSize: 23,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 6),
@@ -1049,7 +348,7 @@ class _CanvasHeader extends StatelessWidget {
                 child: LinearProgressIndicator(
                   value: progress,
                   minHeight: 6,
-                  color: Color(0xFFB9C8D6),
+                  color: _BilColors.blue,
                   backgroundColor: _BilColors.stroke,
                 ),
               ),
@@ -1058,10 +357,10 @@ class _CanvasHeader extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         Text(
-          isArabic ? '$completed/6' : '$completed/6',
+          '$completed/6',
           style: const TextStyle(
-            color: Color(0xFFB9C8D6),
-            fontWeight: FontWeight.w900,
+            color: _BilColors.textMuted,
+            fontWeight: FontWeight.w700,
           ),
         ),
       ],
@@ -1179,7 +478,7 @@ class _SetupTileState extends State<_SetupTile> {
                                       color: Colors.white,
                                       fontSize: 22,
                                       height: 1,
-                                      fontWeight: FontWeight.w900,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                 ),
@@ -1229,7 +528,11 @@ class _ModelAccuracyBar extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              isArabic ? 'دقة النموذج' : 'Model accuracy',
+              _bodyCanvasText(
+                context,
+                'Profile completion',
+                'اكتمال الملف الشخصي',
+              ),
               style: const TextStyle(
                 color: _BilColors.textMuted,
                 fontWeight: FontWeight.w700,
@@ -1241,7 +544,7 @@ class _ModelAccuracyBar extends StatelessWidget {
             style: const TextStyle(
               color: Color(0xFFB9C8D6),
               fontSize: 22,
-              fontWeight: FontWeight.w900,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],

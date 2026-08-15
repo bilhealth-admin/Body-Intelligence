@@ -26,6 +26,7 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -37,6 +38,15 @@ android {
         targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // BIL's release targets current 64-bit Android devices. The scanner's
+        // legacy armeabi-v7a binary is 4 KB aligned, while its arm64-v8a and
+        // x86_64 binaries satisfy Android's 16 KB page-size requirement.
+        // Excluding the optional 32-bit ABI keeps the production bundle honest
+        // and installable on current 16 KB devices without removing scanning.
+        ndk {
+            abiFilters += listOf("arm64-v8a", "x86_64")
+        }
     }
 
     signingConfigs {
@@ -55,6 +65,22 @@ android {
             // Never sign a production release with the debug key. Until a private
             // key.properties file is supplied, Gradle produces an unsigned release.
             signingConfig = if (hasReleaseSigning) signingConfigs.getByName("release") else null
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+        }
+    }
+
+    packaging {
+        jniLibs {
+            // Some AAR dependencies package optional 32-bit JNI binaries even
+            // when Flutter targets only 64-bit ABIs. Exclude that ABI at the
+            // final packaging boundary; equivalent 64-bit scanner binaries
+            // remain packaged and are verified for 16 KB alignment.
+            excludes += setOf("**/armeabi-v7a/**")
         }
     }
 }
@@ -70,5 +96,6 @@ flutter {
 }
 
 dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     implementation("androidx.health.connect:connect-client:1.1.0")
 }

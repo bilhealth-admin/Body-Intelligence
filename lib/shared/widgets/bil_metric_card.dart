@@ -84,7 +84,7 @@ class BilMetricCard extends StatelessWidget {
                   text: value,
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     color: Colors.white,
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 if (unit != null)

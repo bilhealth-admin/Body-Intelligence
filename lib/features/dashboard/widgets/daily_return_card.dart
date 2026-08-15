@@ -5,7 +5,7 @@ import '../../../app/theme/premium_design_tokens.dart';
 import '../../../engine/daily_return_engine.dart';
 import '../../../engine/data_honesty_engine.dart';
 import '../../../shared/widgets/premium_surface.dart';
-import 'dashboard_carousel.dart';
+import '../dashboard_five_locale_copy.dart';
 
 class DailyReturnCard extends StatelessWidget {
   const DailyReturnCard({
@@ -16,6 +16,9 @@ class DailyReturnCard extends StatelessWidget {
     required this.actionReason,
     required this.missingEvidence,
     required this.onPrimaryAction,
+    this.onWeightTap,
+    this.onMealsTap,
+    this.onWaterTap,
     this.onDismissRecommendation,
     this.onCorrectRecommendation,
     this.onRecommendationFeedback,
@@ -29,6 +32,9 @@ class DailyReturnCard extends StatelessWidget {
   final String actionReason;
   final String missingEvidence;
   final VoidCallback? onPrimaryAction;
+  final VoidCallback? onWeightTap;
+  final VoidCallback? onMealsTap;
+  final VoidCallback? onWaterTap;
   final VoidCallback? onDismissRecommendation;
   final VoidCallback? onCorrectRecommendation;
   final VoidCallback? onRecommendationFeedback;
@@ -37,23 +43,8 @@ class DailyReturnCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final arabic =
-        Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
-    String tr(String en, String ar) => arabic ? ar : en;
-    final title = switch (report.state) {
-      DailyReturnState.empty => tr('Start today calmly', 'ابدأ يومك بهدوء'),
-      DailyReturnState.partial => tr('Continue today', 'واصل يومك'),
-      DailyReturnState.complete => tr('Today is covered', 'اكتمل يومك'),
-      DailyReturnState.gentleReturn || DailyReturnState.rebuilding => tr(
-        'Welcome back — start with today',
-        'مرحبًا بعودتك — ابدأ من اليوم',
-      ),
-    };
-    final desktop = MediaQuery.sizeOf(context).width >= 900;
-    final height = MediaQuery.textScalerOf(context)
-        .scale(desktop ? 92 : 132)
-        .clamp(desktop ? 92.0 : 132.0, desktop ? 120.0 : 190.0);
-    final pages = [
+    String tr(String en, String ar) => dashboardFiveLocaleText(en, ar);
+    final items = [
       _FollowDayCard(
         icon: Icons.monitor_weight_outlined,
         label: tr('Weight', 'الوزن'),
@@ -63,6 +54,7 @@ class DailyReturnCard extends StatelessWidget {
           'Add a comparable weight when it suits you.',
           'أضف قياس وزن قابلًا للمقارنة عندما يناسبك.',
         ),
+        onTap: onWeightTap,
       ),
       _FollowDayCard(
         icon: Icons.restaurant_outlined,
@@ -76,6 +68,7 @@ class DailyReturnCard extends StatelessWidget {
           'Record a meal to complete today’s nutrition picture.',
           'سجّل وجبة لاستكمال صورة تغذية اليوم.',
         ),
+        onTap: onMealsTap,
       ),
       _FollowDayCard(
         icon: Icons.water_drop_outlined,
@@ -89,56 +82,28 @@ class DailyReturnCard extends StatelessWidget {
           'Record water as you move through the day.',
           'سجّل الماء تدريجيًا خلال يومك.',
         ),
+        onTap: onWaterTap,
       ),
     ];
-
-    final heading = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          tr('Your Path Today', 'مسارك اليوم'),
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.15,
-            height: 1.12,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
-            height: 1.45,
-          ),
-        ),
-      ],
-    );
-    final carousel = DashboardCarousel(
-      key: const Key('follow-your-day-carousel'),
-      height: height,
-      viewportFraction: .94,
-      semanticLabel: tr('Your Path Today', 'مسارك اليوم'),
-      pages: pages,
-    );
 
     return Semantics(
       container: true,
       label: tr('Your Path Today', 'مسارك اليوم'),
-      child: desktop
-          ? Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(width: 210, child: heading),
-                const SizedBox(width: PremiumDesignTokens.spaceMd),
-                Expanded(child: carousel),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (var index = 0; index < items.length; index++) ...[
+                Expanded(child: items[index]),
+                if (index != items.length - 1)
+                  const SizedBox(width: PremiumDesignTokens.spaceXs),
               ],
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [heading, const SizedBox(height: 6), carousel],
-            ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -166,6 +131,7 @@ class _FollowDayCard extends StatelessWidget {
     required this.recorded,
     required this.recordedText,
     required this.missingText,
+    this.onTap,
   });
 
   final IconData icon;
@@ -173,68 +139,57 @@ class _FollowDayCard extends StatelessWidget {
   final bool recorded;
   final String recordedText;
   final String missingText;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return PremiumSurface(
-      emphasized: recorded,
-      dashboardGlass: true,
-      padding: const EdgeInsets.all(PremiumDesignTokens.spaceMd),
-      child: Row(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: scheme.primary.withValues(alpha: .13),
-              border: Border.all(color: scheme.primary.withValues(alpha: .28)),
-            ),
-            child: Icon(icon, color: scheme.primary),
-          ),
-          const SizedBox(width: PremiumDesignTokens.spaceMd),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w900),
-                      ),
-                    ),
-                    Icon(
-                      recorded
-                          ? Icons.check_circle_rounded
-                          : Icons.circle_outlined,
-                      size: 20,
-                      color: recorded
-                          ? const Color(0xFF65E5B1)
-                          : scheme.onSurfaceVariant,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 7),
-                Text(
-                  recorded ? recordedText : missingText,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                    height: 1.35,
+    return Semantics(
+      label: '$label. ${recorded ? recordedText : missingText}',
+      button: onTap != null,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
+        child: PremiumSurface(
+          emphasized: recorded,
+          dashboardGlass: true,
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: scheme.primary.withValues(alpha: .13),
+                  border: Border.all(
+                    color: scheme.primary.withValues(alpha: .28),
                   ),
                 ),
-              ],
-            ),
+                child: Icon(icon, color: scheme.primary),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 5),
+              Icon(
+                recorded ? Icons.check_circle_rounded : Icons.cancel_rounded,
+                size: 22,
+                color: recorded
+                    ? const Color(0xFF24B989)
+                    : const Color(0xFFE05A67),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -254,7 +209,7 @@ class _LabeledInsight extends StatelessWidget {
         label,
         style: Theme.of(context).textTheme.labelLarge?.copyWith(
           color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.w800,
+          fontWeight: FontWeight.w700,
           letterSpacing: 0.15,
         ),
       ),

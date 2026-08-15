@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../app/localization/app_localizations.dart';
 
 import '../../shared/widgets/secondary_page_app_bar.dart';
 import 'package:share_plus/share_plus.dart';
@@ -115,21 +116,21 @@ class _ShareStudioPageState extends ConsumerState<ShareStudioPage> {
   @override
   Widget build(BuildContext context) {
     final data = ref.watch(shareStudioDataProvider);
-    final ar = Localizations.localeOf(context).languageCode == 'ar';
+    final t = context.strings.text;
     return Scaffold(
-      appBar: SecondaryPageAppBar(
-        title: Text(ar ? 'استوديو المشاركة' : 'Share Studio'),
-      ),
+      appBar: SecondaryPageAppBar(title: Text(t('Share Studio'))),
       body: data.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(error.toString())),
+        error: (error, _) => Center(
+          child: Text(t('Could not prepare sharing data. Try again.')),
+        ),
         data: (value) => ListView(
           padding: const EdgeInsets.all(16),
           children: [
             Text(
-              ar
-                  ? 'اختر ما تريد إظهاره. الوزن الفعلي والبيانات الصحية الحساسة مخفية دائمًا.'
-                  : 'Choose what appears. Actual weight and sensitive health details always stay hidden.',
+              t(
+                'Choose what appears. Actual weight and sensitive health details always stay hidden.',
+              ),
             ),
             const SizedBox(height: 12),
             RepaintBoundary(
@@ -142,37 +143,28 @@ class _ShareStudioPageState extends ConsumerState<ShareStudioPage> {
                 score: score,
                 goal: goal,
                 branding: branding,
-                arabic: ar,
               ),
             ),
             const SizedBox(height: 16),
             _option(
-              ar ? 'الاستمرارية' : 'Consistency',
+              t('Consistency'),
               consistency,
               (v) => setState(() => consistency = v),
             ),
             _option(
-              ar ? 'البروتين' : 'Protein progress',
+              t('Protein progress'),
               protein,
               (v) => setState(() => protein = v),
             ),
             _option(
-              ar ? 'الترطيب' : 'Hydration',
+              t('Hydration'),
               hydration,
               (v) => setState(() => hydration = v),
             ),
+            _option(t('BIL Score'), score, (v) => setState(() => score = v)),
+            _option(t('Goal direction'), goal, (v) => setState(() => goal = v)),
             _option(
-              ar ? 'درجة BIL' : 'BIL Score',
-              score,
-              (v) => setState(() => score = v),
-            ),
-            _option(
-              ar ? 'اتجاه الهدف' : 'Goal direction',
-              goal,
-              (v) => setState(() => goal = v),
-            ),
-            _option(
-              ar ? 'علامة BIL' : 'BIL branding',
+              t('BIL branding'),
               branding,
               (v) => setState(() => branding = v),
             ),
@@ -180,17 +172,13 @@ class _ShareStudioPageState extends ConsumerState<ShareStudioPage> {
             FilledButton.icon(
               onPressed: sharing ? null : _share,
               icon: const Icon(Icons.ios_share),
-              label: Text(
-                sharing
-                    ? (ar ? 'جارٍ التجهيز…' : 'Preparing…')
-                    : (ar ? 'مشاركة كصورة' : 'Share image'),
-              ),
+              label: Text(sharing ? t('Preparing…') : t('Share image')),
             ),
             const SizedBox(height: 8),
             Text(
-              ar
-                  ? 'تفتح المشاركة قائمة النظام لتختار واتساب أو إنستغرام أو X أو حفظ الصورة حسب التطبيقات المتاحة.'
-                  : 'The system share sheet lets you choose WhatsApp, Instagram, X, or image saving when those apps are available.',
+              t(
+                'The system share sheet lets you choose WhatsApp, Instagram, X, or image saving when those apps are available.',
+              ),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -212,7 +200,6 @@ class _ShareCard extends StatelessWidget {
     required this.score,
     required this.goal,
     required this.branding,
-    required this.arabic,
   });
   final _ShareStudioData data;
   final bool consistency;
@@ -221,73 +208,64 @@ class _ShareCard extends StatelessWidget {
   final bool score;
   final bool goal;
   final bool branding;
-  final bool arabic;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(24),
-    decoration: const BoxDecoration(
-      gradient: LinearGradient(colors: [Color(0xff10253f), Color(0xff167d8d)]),
-      borderRadius: BorderRadius.all(Radius.circular(28)),
-    ),
-    child: DefaultTextStyle(
-      style: const TextStyle(color: Colors.white),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            arabic ? 'تقدمي هذا الأسبوع' : 'My week in progress',
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 16),
-          if (consistency)
-            _line(
-              Icons.calendar_month,
-              arabic
-                  ? '${data.metrics.consistentDays} من 7 أيام متابعة'
-                  : '${data.metrics.consistentDays} of 7 days tracked',
-            ),
-          if (protein)
-            _line(
-              Icons.egg_alt_outlined,
-              arabic
-                  ? '${data.metrics.proteinDays} أيام بروتين داعمة'
-                  : '${data.metrics.proteinDays} protein-supporting days',
-            ),
-          if (hydration)
-            _line(
-              Icons.water_drop_outlined,
-              arabic
-                  ? '${data.metrics.hydrationDays} أيام ترطيب داعمة'
-                  : '${data.metrics.hydrationDays} hydration-supporting days',
-            ),
-          if (score)
-            _line(
-              Icons.insights,
-              arabic
-                  ? 'درجة BIL: ${data.metrics.score}'
-                  : 'BIL Score: ${data.metrics.score}',
-            ),
-          if (goal)
-            _line(
-              Icons.flag_outlined,
-              arabic
-                  ? 'اتجاه الهدف: ${data.goal}'
-                  : 'Goal direction: ${data.goal}',
-            ),
-          if (!consistency && !protein && !hydration && !score && !goal)
-            Text(arabic ? 'اختر مقياسًا لعرضه' : 'Select a metric to show'),
-          if (branding) ...[
-            const SizedBox(height: 18),
-            const Text(
-              'BIL · Body Intelligence Log',
-              style: TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ],
-        ],
+  Widget build(BuildContext context) {
+    final t = context.strings.text;
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xff10253f), Color(0xff167d8d)],
+        ),
+        borderRadius: BorderRadius.all(Radius.circular(28)),
       ),
-    ),
-  );
+      child: DefaultTextStyle(
+        style: const TextStyle(color: Colors.white),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              t('My week in progress'),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 16),
+            if (consistency)
+              _line(
+                Icons.calendar_month,
+                '${data.metrics.consistentDays} ${t('of 7 days tracked')}',
+              ),
+            if (protein)
+              _line(
+                Icons.egg_alt_outlined,
+                '${data.metrics.proteinDays} ${t('protein-supporting days')}',
+              ),
+            if (hydration)
+              _line(
+                Icons.water_drop_outlined,
+                '${data.metrics.hydrationDays} ${t('hydration-supporting days')}',
+              ),
+            if (score)
+              _line(Icons.insights, '${t('BIL Score')}: ${data.metrics.score}'),
+            if (goal)
+              _line(
+                Icons.flag_outlined,
+                '${t('Goal direction')}: ${t(data.goal)}',
+              ),
+            if (!consistency && !protein && !hydration && !score && !goal)
+              Text(t('Select a metric to show')),
+            if (branding) ...[
+              const SizedBox(height: 18),
+              const Text(
+                'BIL · Body Intelligence Log',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _line(IconData icon, String text) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 6),

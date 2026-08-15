@@ -3,6 +3,9 @@ import 'package:body_intelligence_log/features/global_platform/core/global_platf
 import 'package:body_intelligence_log/features/global_platform/medical_devices/ble_medical_device_platform.dart';
 
 final class _Bridge implements BleMedicalBridge {
+  @override
+  Future<void> requestPermissions() async {}
+
   int reads = 0;
   int pairs = 0;
 

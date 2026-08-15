@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 enum AppLogLevel { info, warning, error }
 
 abstract interface class AppLogger {
@@ -65,6 +67,10 @@ class LocalOnlyCrashReporter implements CrashReporter {
   bool get uploadsData => false;
   @override
   void record(Object error, StackTrace stackTrace) {
+    assert(() {
+      debugPrint('BIL_DEBUG_UNCAUGHT: $error\n$stackTrace');
+      return true;
+    }());
     logger.record(
       AppLogLevel.error,
       'uncaught_error',

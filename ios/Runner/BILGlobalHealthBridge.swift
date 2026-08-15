@@ -1,5 +1,6 @@
 import Flutter
 import HealthKit
+import UIKit
 
 /// Production HealthKit bridge. Core correctness is covered by contract tests;
 /// device certification remains an external release gate because HealthKit is
@@ -18,6 +19,18 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     let instance = BILGlobalHealthBridge()
     let channel = FlutterMethodChannel(name: instance.channelName, binaryMessenger: registrar.messenger())
     registrar.addMethodCallDelegate(instance, channel: channel)
+#if DEBUG
+    // Cloud-simulator evidence hook. It is compiled out of Release builds and
+    // invokes the same production authorization path and reviewed read scope.
+    if ProcessInfo.processInfo.arguments.contains("--bil-healthkit-capture") {
+      DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+        instance.requestAuthorization(
+          arguments: ["types": Self.supportedTypeNames, "write": false],
+          result: { _ in }
+        )
+      }
+    }
+#endif
   }
 
   func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -28,6 +41,16 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       result(permissionSnapshot(arguments: call.arguments))
     case "requestPermissions":
       requestAuthorization(arguments: call.arguments, result: result)
+    case "revokeAccess":
+      // HealthKit access is withdrawn by the user in system Settings.
+      result(["revoked": false, "requiresSystemSettings": true, "platform": "healthkit"])
+    case "openSettings":
+      guard let url = URL(string: UIApplication.openSettingsURLString) else {
+        result(FlutterError(code: "settings_unavailable", message: nil, details: nil)); return
+      }
+      UIApplication.shared.open(url, options: [:]) { opened in
+        result(opened ? nil : FlutterError(code: "settings_unavailable", message: nil, details: nil))
+      }
     case "readChanges":
       readChanges(arguments: call.arguments, result: result)
     case "write":
@@ -64,7 +87,8 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     store.requestAuthorization(toShare: writeTypes, read: readTypes) { success, failure in
       DispatchQueue.main.async {
         if let failure { result(self.error("authorization_failed", failure.localizedDescription)) }
-        else { result(["granted": success]) }
+        else if !success { result(self.error("authorization_incomplete", "Health authorization did not complete.")) }
+        else { result(["requestCompleted": true, "readStatus": "indeterminate"]) }
       }
     }
   }
@@ -174,8 +198,14 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       value = quantity.quantity.doubleValue(for: preferred); unit = unitName(logicalType)
     } else if let workout = sample as? HKWorkout {
       value = workout.duration; unit = "s"
-    } else if let sleep = sample as? HKCategorySample {
-      value = Double(sleep.value); unit = "category"
+    } else if sample is HKCategorySample, logicalType == "sleep" {
+      value = sample.endDate.timeIntervalSince(sample.startDate) / 3600.0
+      unit = "h"
+    }
+    var attributes: [String: Any] = [:]
+    if let sleep = sample as? HKCategorySample, logicalType == "sleep" {
+      attributes["sleepStage"] = sleepStage(sleep.value)
+      attributes["endedAt"] = ISO8601DateFormatter().string(from: sleep.endDate)
     }
     return [
       "id": sample.uuid.uuidString,
@@ -188,6 +218,7 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       "confidence": 1.0,
       "timeZoneId": sample.metadata?[HKMetadataKeyTimeZone] as? String ?? TimeZone.current.identifier,
       "deleted": false,
+      "attributes": attributes,
     ]
   }
 
@@ -202,6 +233,7 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
   private func sampleType(_ name: String) -> HKSampleType? {
     switch name {
     case "steps": return HKObjectType.quantityType(forIdentifier: .stepCount)
+    case "distance": return HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)
     case "activeEnergy": return HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)
     case "workout": return HKObjectType.workoutType()
     case "sleep": return HKObjectType.categoryType(forIdentifier: .sleepAnalysis)
@@ -218,6 +250,13 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     case "bloodPressureDiastolic": return HKObjectType.quantityType(forIdentifier: .bloodPressureDiastolic)
     case "water": return HKObjectType.quantityType(forIdentifier: .dietaryWater)
     case "nutrition": return HKObjectType.quantityType(forIdentifier: .dietaryEnergyConsumed)
+    case "nutritionProtein": return HKObjectType.quantityType(forIdentifier: .dietaryProtein)
+    case "nutritionCarbohydrates": return HKObjectType.quantityType(forIdentifier: .dietaryCarbohydrates)
+    case "nutritionFat": return HKObjectType.quantityType(forIdentifier: .dietaryFatTotal)
+    case "nutritionFiber": return HKObjectType.quantityType(forIdentifier: .dietaryFiber)
+    case "nutritionSugar": return HKObjectType.quantityType(forIdentifier: .dietarySugar)
+    case "nutritionSodium": return HKObjectType.quantityType(forIdentifier: .dietarySodium)
+    case "nutritionPotassium": return HKObjectType.quantityType(forIdentifier: .dietaryPotassium)
     default: return nil
     }
   }
@@ -225,7 +264,10 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
   private func preferredUnit(_ name: String) -> HKUnit? {
     switch name {
     case "steps": return .count()
+    case "distance": return .meter()
     case "activeEnergy", "nutrition": return .kilocalorie()
+    case "nutritionProtein", "nutritionCarbohydrates", "nutritionFat", "nutritionFiber", "nutritionSugar": return .gram()
+    case "nutritionSodium", "nutritionPotassium": return .gramUnit(with: .milli)
     case "weight", "leanMass": return .gramUnit(with: .kilo)
     case "bodyFat", "oxygen": return .percent()
     case "heartRate", "restingHeartRate": return HKUnit.count().unitDivided(by: .minute())
@@ -240,7 +282,10 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
 
   private func unitName(_ name: String) -> String {
     switch name {
+    case "distance": return "m"
     case "activeEnergy", "nutrition": return "kcal"
+    case "nutritionProtein", "nutritionCarbohydrates", "nutritionFat", "nutritionFiber", "nutritionSugar": return "g"
+    case "nutritionSodium", "nutritionPotassium": return "mg"
     case "weight", "leanMass": return "kg"
     case "bodyFat", "oxygen": return "%"
     case "heartRate", "restingHeartRate", "respiratoryRate": return "count/min"
@@ -253,8 +298,22 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
   }
 
   private func canWrite(_ type: HKSampleType) -> Bool {
-    type == HKObjectType.quantityType(forIdentifier: .bodyMass) ||
-      type == HKObjectType.quantityType(forIdentifier: .dietaryWater)
+    type == HKObjectType.quantityType(forIdentifier: .bodyMass)
+  }
+
+  private func sleepStage(_ rawValue: Int) -> String {
+    if #available(iOS 16.0, *) {
+      switch rawValue {
+      case HKCategoryValueSleepAnalysis.awake.rawValue: return "awake"
+      case HKCategoryValueSleepAnalysis.asleepREM.rawValue: return "rem"
+      case HKCategoryValueSleepAnalysis.asleepCore.rawValue: return "core"
+      case HKCategoryValueSleepAnalysis.asleepDeep.rawValue: return "deep"
+      case HKCategoryValueSleepAnalysis.inBed.rawValue: return "inBed"
+      case HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue: return "asleepUnspecified"
+      default: return "unknown"
+      }
+    }
+    return rawValue == HKCategoryValueSleepAnalysis.inBed.rawValue ? "inBed" : "asleepUnspecified"
   }
 
   private func encodeAnchors(_ anchors: [String: HKQueryAnchor]) -> String? {
@@ -280,5 +339,12 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
 
   private func error(_ code: String, _ message: String) -> FlutterError { FlutterError(code: code, message: message, details: ["bridge": channelName]) }
 
-  static let supportedTypeNames = ["steps", "activeEnergy", "workout", "sleep", "weight", "bodyFat", "leanMass", "heartRate", "restingHeartRate", "hrv", "oxygen", "respiratoryRate", "glucose", "bloodPressureSystolic", "bloodPressureDiastolic", "water", "nutrition"]
+  static let supportedTypeNames = [
+    "steps", "distance", "activeEnergy", "workout", "sleep", "weight",
+    "bodyFat", "leanMass", "heartRate", "restingHeartRate", "hrv",
+    "oxygen", "respiratoryRate", "glucose", "bloodPressureSystolic",
+    "bloodPressureDiastolic", "water", "nutrition", "nutritionProtein",
+    "nutritionCarbohydrates", "nutritionFat", "nutritionFiber",
+    "nutritionSugar", "nutritionSodium", "nutritionPotassium"
+  ]
 }

@@ -11,23 +11,21 @@ class _CalibrationWelcome extends StatelessWidget {
   final VoidCallback onContinue;
   final VoidCallback? onSkip;
 
-  String tr(String en, String ar) => isArabic ? ar : en;
+  String tr(BuildContext context, String en, String ar) =>
+      onboardingText(context, en, ar);
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final wide = constraints.maxWidth >= 920;
-
         final content = _WelcomeContent(
           isArabic: isArabic,
           onContinue: onContinue,
         );
-        const visual = _HologramPanel();
 
         return Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: wide ? 42 : 20,
+            horizontal: constraints.maxWidth >= 920 ? 42 : 20,
             vertical: 20,
           ),
           child: Column(
@@ -38,29 +36,13 @@ class _CalibrationWelcome extends StatelessWidget {
                     : TextButton(
                         onPressed: onSkip,
                         child: Text(
-                          tr('Sign in', 'تسجيل الدخول'),
-                          style: const TextStyle(color: Colors.white70),
+                          tr(context, 'Sign in', 'تسجيل الدخول'),
+                          style: const TextStyle(color: Color(0xFF344054)),
                         ),
                       ),
               ),
               const SizedBox(height: 16),
-              Expanded(
-                child: wide
-                    ? Row(
-                        children: [
-                          Expanded(flex: 11, child: content),
-                          const SizedBox(width: 28),
-                          const Expanded(flex: 9, child: visual),
-                        ],
-                      )
-                    : ListView(
-                        children: [
-                          const SizedBox(height: 340, child: visual),
-                          const SizedBox(height: 24),
-                          content,
-                        ],
-                      ),
-              ),
+              Expanded(child: ListView(children: [content])),
             ],
           ),
         );
@@ -75,7 +57,8 @@ class _WelcomeContent extends StatelessWidget {
   final bool isArabic;
   final VoidCallback onContinue;
 
-  String tr(String en, String ar) => isArabic ? ar : en;
+  String tr(BuildContext context, String en, String ar) =>
+      onboardingText(context, en, ar);
 
   @override
   Widget build(BuildContext context) {
@@ -88,28 +71,37 @@ class _WelcomeContent extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                tr('WELCOME TO BODY CALIBRATION', 'مرحبًا بك في معايرة الجسم'),
+                tr(
+                  context,
+                  'WELCOME TO BODY CALIBRATION',
+                  'مرحبًا بك في معايرة الجسم',
+                ),
                 style: const TextStyle(
                   color: _BilColors.emerald,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: 1.4,
                   fontSize: 13,
                 ),
               ),
               const SizedBox(height: 18),
               Text(
-                tr('Let’s build your\nbody model.', 'لنَبْنِ نموذج\nجسمك.'),
+                tr(
+                  context,
+                  'Let’s build your body model.',
+                  'لنَبْنِ نموذج جسمك.',
+                ),
                 style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 48,
-                  height: 1.04,
-                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF101828),
+                  fontSize: 32,
+                  height: 1.12,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: -1.3,
                 ),
               ),
               const SizedBox(height: 18),
               Text(
                 tr(
+                  context,
                   'A focused calibration that turns a few trusted measurements into your first personal energy and nutrition plan.',
                   'معايرة مركزة تحول عددًا قليلًا من القياسات الموثوقة إلى أول خطة شخصية للطاقة والتغذية.',
                 ),
@@ -119,18 +111,17 @@ class _WelcomeContent extends StatelessWidget {
                   height: 1.55,
                 ),
               ),
-              const SizedBox(height: 28),
-              const _CalibrationCard(),
-              const SizedBox(height: 18),
+              const SizedBox(height: 22),
               _WhyCard(isArabic: isArabic),
               const SizedBox(height: 22),
               _PrimaryButton(
-                label: tr('Begin calibration', 'ابدأ المعايرة'),
+                label: tr(context, 'Begin calibration', 'ابدأ المعايرة'),
                 onPressed: onContinue,
               ),
               const SizedBox(height: 12),
               Text(
                 tr(
+                  context,
                   'Private by default. Your profile is created on this device.',
                   'خصوصيتك أولًا. يُنشأ ملفك على هذا الجهاز.',
                 ),
@@ -139,89 +130,6 @@ class _WelcomeContent extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _CalibrationCard extends StatelessWidget {
-  const _CalibrationCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final isArabic =
-        Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
-
-    return _GlassPanel(
-      padding: const EdgeInsets.all(22),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 108,
-            height: 108,
-            child: CustomPaint(
-              painter: _RingPainter(
-                progress: .71,
-                color: _BilColors.emerald,
-                track: _BilColors.stroke,
-              ),
-              child: const Center(
-                child: Text(
-                  '71%',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 28,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 22),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isArabic ? 'معايرة BIL' : 'BIL Calibration',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  isArabic
-                      ? 'نموذج أولي جيد — ستزيد الدقة مع كل إجابة.'
-                      : 'A strong starting model — accuracy improves with every answer.',
-                  style: const TextStyle(
-                    color: _BilColors.textMuted,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const Row(
-                  children: [
-                    Icon(
-                      Icons.verified_rounded,
-                      color: _BilColors.emerald,
-                      size: 18,
-                    ),
-                    SizedBox(width: 7),
-                    Text(
-                      '8 focused steps',
-                      style: TextStyle(
-                        color: _BilColors.emerald,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -242,9 +150,11 @@ class _WhyCard extends StatelessWidget {
           const SizedBox(width: 14),
           Expanded(
             child: Text(
-              isArabic
-                  ? 'نطلب كل معلومة لسبب واضح: حساب الطاقة، تخصيص الهدف، أو تحسين دقة النموذج.'
-                  : 'Every answer has a clear purpose: energy calculation, goal personalization, or better model accuracy.',
+              onboardingText(
+                context,
+                'Every answer has a clear purpose: energy calculation, goal personalization, or better model accuracy.',
+                'نطلب كل معلومة لسبب واضح: حساب الطاقة، تخصيص الهدف، أو تحسين دقة النموذج.',
+              ),
               style: const TextStyle(color: _BilColors.textMuted, height: 1.45),
             ),
           ),

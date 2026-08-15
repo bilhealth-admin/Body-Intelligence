@@ -1,3 +1,8 @@
+# RETIRED — historical record only
+
+This file is not an active execution plan. The sole current authority is
+`docs/BIL_V1_FINAL_RELEASE_CONSTITUTION.md`.
+
 # Implementation Notes
 
 The log proved that the forced-onboarding `StreamProvider` opened a real Drift

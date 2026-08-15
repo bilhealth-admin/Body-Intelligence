@@ -29,6 +29,16 @@ final class MethodChannelHealthBridge
   }
 
   @override
+  Future<Map<String, Object?>> revokeAccess() async =>
+      Map<String, Object?>.from(
+        await _channel.invokeMapMethod<String, Object?>('revokeAccess') ??
+            const <String, Object?>{},
+      );
+
+  @override
+  Future<void> openSettings() => _channel.invokeMethod<void>('openSettings');
+
+  @override
   Future<Map<String, bool>> permissions() async {
     final result = await _channel.invokeMapMethod<String, Object?>(
       'permissions',

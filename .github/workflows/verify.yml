@@ -33,7 +33,11 @@ jobs:
         run: flutter pub get
 
       - name: Check formatting
-        run: dart format --output=none --set-exit-if-changed .
+        shell: pwsh
+        run: |
+          $targets = @('lib', 'test')
+          if (Test-Path integration_test) { $targets += 'integration_test' }
+          dart format --output=none --set-exit-if-changed @targets
 
       - name: Analyze complete source
         run: flutter analyze --no-pub

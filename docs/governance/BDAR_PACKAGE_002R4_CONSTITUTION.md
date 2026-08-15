@@ -39,3 +39,6 @@ BDAR-003A must remain stored and unopened until:
 - Every BDAR-002 regression test passes.
 - Windows tester confirms title/subtitle readability in Arabic and English.
 - One focused commit is created.
+> **RETIRED — historical record only.** This file is not an execution
+> authority. The sole current authority is
+> `docs/BIL_V1_FINAL_RELEASE_CONSTITUTION.md`.

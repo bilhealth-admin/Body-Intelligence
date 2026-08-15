@@ -6,6 +6,10 @@ enum TrackedNutrient {
   magnesium,
   sugar,
   phosphorus,
+  calories,
+  protein,
+  carbohydrates,
+  fat,
 }
 
 class NutrientEvidenceMask {
@@ -24,6 +28,10 @@ class NutrientEvidenceMask {
     double? magnesium,
     double? sugar,
     double? phosphorus,
+    double? calories,
+    double? protein,
+    double? carbohydrates,
+    double? fat,
   }) {
     var mask = 0;
     if (fiber != null) mask |= bit(TrackedNutrient.fiber);
@@ -33,6 +41,12 @@ class NutrientEvidenceMask {
     if (magnesium != null) mask |= bit(TrackedNutrient.magnesium);
     if (sugar != null) mask |= bit(TrackedNutrient.sugar);
     if (phosphorus != null) mask |= bit(TrackedNutrient.phosphorus);
+    if (calories != null) mask |= bit(TrackedNutrient.calories);
+    if (protein != null) mask |= bit(TrackedNutrient.protein);
+    if (carbohydrates != null) {
+      mask |= bit(TrackedNutrient.carbohydrates);
+    }
+    if (fat != null) mask |= bit(TrackedNutrient.fat);
     return mask;
   }
 }

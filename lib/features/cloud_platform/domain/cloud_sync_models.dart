@@ -66,7 +66,11 @@ final class CloudRecordEnvelope {
 
   bool get isTombstone => deletedAt != null;
 
-  String get stableKey => '${entityKind.name}:$recordId';
+  /// Account-scoped identity used by every durable local table.
+  ///
+  /// Record ids are only unique inside an account.  Including the owner is
+  /// essential when a device signs out and another account signs in.
+  String get stableKey => '$ownerId:${entityKind.name}:$recordId';
 }
 
 final class CloudSyncOperation {

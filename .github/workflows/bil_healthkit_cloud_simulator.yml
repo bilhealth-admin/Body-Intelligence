@@ -1,0 +1,148 @@
+name: BIL HealthKit cloud simulator evidence
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cloud/healthkit-4988-4991
+
+permissions:
+  contents: read
+
+jobs:
+  healthkit-native-sheet:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - name: Checkout accepted source
+        uses: actions/checkout@v4
+
+      - name: Install Flutter stable
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies and verify HealthKit contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter pub get
+          flutter test \
+            test/features/global_platform/apple_health_runtime_test.dart \
+            test/connected_health/food_name_health_sync_policy_test.dart \
+            test/launch_readiness/apple_release_boundary_contract_test.dart
+
+      - name: Build debug simulator app with native HealthKit capability
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build ios --simulator --debug --no-codesign
+          test -d build/ios/iphonesimulator/Runner.app
+          ditto -c -k --sequesterRsrc --keepParent \
+            build/ios/iphonesimulator/Runner.app \
+            build/ios/iphonesimulator/BIL-iOS-Simulator.zip
+
+      - name: Upload interactive simulator build
+        uses: actions/upload-artifact@v4
+        with:
+          name: bil-ios-simulator-${{ github.sha }}
+          path: build/ios/iphonesimulator/BIL-iOS-Simulator.zip
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Boot an Apple simulator and install BIL
+        id: simulator
+        shell: bash
+        run: |
+          set -euo pipefail
+          UDID="$(xcrun simctl list devices available -j | python3 -c '
+          import json,sys
+          data=json.load(sys.stdin)
+          for runtime, devices in data["devices"].items():
+              if "iOS" not in runtime: continue
+              for device in devices:
+                  if device.get("isAvailable") and device["name"].startswith("iPhone"):
+                      print(device["udid"]); raise SystemExit
+          raise SystemExit("No available iPhone simulator")
+          ')"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$UDID" || true
+          open -a Simulator
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl uninstall "$UDID" com.bilhealth.bodyintelligencelog || true
+          xcrun simctl install "$UDID" build/ios/iphonesimulator/Runner.app
+
+      - name: Install headless simulator interaction bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          brew tap facebook/fb
+          brew install idb-companion
+          python3 -m pip install --user fb-idb
+          echo "$(python3 -m site --user-base)/bin" >> "$GITHUB_PATH"
+
+      - name: Open BIL HealthKit authorization and capture native states
+        shell: bash
+        env:
+          UDID: ${{ steps.simulator.outputs.udid }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/release/healthkit_native_4988_4991
+          xcrun simctl launch "$UDID" com.bilhealth.bodyintelligencelog \
+            -AppleLanguages '(en)' --bil-healthkit-capture
+          xcrun simctl openurl "$UDID" 'bil://connected-health'
+          sleep 8
+          idb ui describe-all --udid "$UDID" --json \
+            > artifacts/release/healthkit_native_4988_4991/4988_accessibility.json
+          grep -Eiq 'Allow BIL|BIL.*health|Health Access' \
+            artifacts/release/healthkit_native_4988_4991/4988_accessibility.json
+          xcrun simctl io "$UDID" screenshot \
+            artifacts/release/healthkit_native_4988_4991/4988_healthkit_top.png
+          idb ui swipe --udid "$UDID" --duration 0.5 200 720 200 260
+          sleep 2
+          xcrun simctl io "$UDID" screenshot \
+            artifacts/release/healthkit_native_4988_4991/4989_healthkit_middle_1.png
+          idb ui swipe --udid "$UDID" --duration 0.5 200 720 200 260
+          sleep 2
+          xcrun simctl io "$UDID" screenshot \
+            artifacts/release/healthkit_native_4988_4991/4990_healthkit_middle_2.png
+          idb ui swipe --udid "$UDID" --duration 0.5 200 720 200 260
+          sleep 2
+          xcrun simctl io "$UDID" screenshot \
+            artifacts/release/healthkit_native_4988_4991/4991_healthkit_bottom.png
+          idb ui describe-all --udid "$UDID" --json \
+            > artifacts/release/healthkit_native_4988_4991/4991_accessibility.json
+          grep -Eiq 'Allow All|Turn On All|Don.t Allow|Allow' \
+            artifacts/release/healthkit_native_4988_4991/4991_accessibility.json
+          shasum -a 256 artifacts/release/healthkit_native_4988_4991/*.png \
+            | tee artifacts/release/healthkit_native_4988_4991/SHA256SUMS.txt
+          test "$(cut -d ' ' -f 1 artifacts/release/healthkit_native_4988_4991/SHA256SUMS.txt | sort -u | wc -l | tr -d ' ')" = "4"
+
+          # Exercise the genuine native dismissal path and prove BIL becomes
+          # foreground again instead of remaining behind a stale sheet.
+          idb ui tap --udid "$UDID" 100 800
+          sleep 3
+          idb ui describe-all --udid "$UDID" --json \
+            > artifacts/release/healthkit_native_4988_4991/after_dismissal_accessibility.json
+          grep -Eiq 'Connected Health|Refresh status|Health access' \
+            artifacts/release/healthkit_native_4988_4991/after_dismissal_accessibility.json
+          if grep -Eiq 'Allow All|Turn On All|Don.t Allow' \
+            artifacts/release/healthkit_native_4988_4991/after_dismissal_accessibility.json; then
+            echo 'Native Health authorization sheet did not dismiss.' >&2
+            exit 1
+          fi
+          xcrun simctl io "$UDID" screenshot \
+            artifacts/release/healthkit_native_4988_4991/after_dismissal.png
+          xcodebuild -version > artifacts/release/healthkit_native_4988_4991/toolchain.txt
+          xcrun simctl list devices | grep "$UDID" \
+            >> artifacts/release/healthkit_native_4988_4991/toolchain.txt
+
+      - name: Upload native HealthKit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bil-healthkit-native-4988-4991-${{ github.sha }}
+          path: artifacts/release/healthkit_native_4988_4991
+          if-no-files-found: error
+          retention-days: 14

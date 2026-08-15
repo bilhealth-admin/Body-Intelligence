@@ -10,9 +10,9 @@ void main() {
       expect(PremiumDesignTokens.spaceSm, 12);
       expect(PremiumDesignTokens.spaceMd, 16);
       expect(PremiumDesignTokens.spaceLg, 20);
-      expect(PremiumDesignTokens.radiusMd, 14);
-      expect(PremiumDesignTokens.radiusLg, 20);
-      expect(PremiumDesignTokens.radiusXl, 24);
+      expect(PremiumDesignTokens.radiusMd, 10);
+      expect(PremiumDesignTokens.radiusLg, 14);
+      expect(PremiumDesignTokens.radiusXl, 18);
       expect(PremiumDesignTokens.elevationNone, 0);
       expect(PremiumDesignTokens.screenPadding, const EdgeInsets.all(16));
       expect(PremiumDesignTokens.cardPadding, const EdgeInsets.all(16));
@@ -22,7 +22,7 @@ void main() {
     test('exposes semantic color roles for light and dark safely', () {
       expect(
         PremiumDesignTokens.cardBorderColor(Brightness.light),
-        const Color(0xFFE3EAF3),
+        const Color(0xFFE5E5EA),
       );
       expect(
         PremiumDesignTokens.cardBorderColor(Brightness.dark),
@@ -30,7 +30,7 @@ void main() {
       );
       expect(
         PremiumDesignTokens.inputBorderColor(Brightness.light),
-        const Color(0xFFD8E1ED),
+        const Color(0xFFD9DAE0),
       );
       expect(
         PremiumDesignTokens.inputBorderColor(Brightness.dark),

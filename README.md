@@ -45,6 +45,7 @@ configured. No unavailable action reports success.
 
 ## Release documentation
 
+- [Final v1 release constitution](docs/BIL_V1_FINAL_RELEASE_CONSTITUTION.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Database and migrations](docs/DATABASE.md)
 - [Scientific and health-safety rules](docs/SCIENTIFIC_RULES.md)

@@ -17,6 +17,7 @@ abstract interface class DurableCloudStore {
     DateTime? nextAttemptAt,
   });
   Future<List<CloudSyncOperation>> readReadyOperations({
+    required String ownerId,
     required DateTime now,
     required int limit,
   });
@@ -48,7 +49,7 @@ abstract interface class DurableCloudStore {
   Future<void> appendAudit(CloudAuditEvent event);
   Future<List<CloudAuditEvent>> readAudit({int limit = 100});
 
-  Future<int> pendingCount();
+  Future<int> pendingCount({String? ownerId});
   Future<int> deadLetterCount();
   Future<int> conflictCount();
 }

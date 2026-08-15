@@ -102,6 +102,7 @@ def _sha256_file(path: Path, chunk_size: int = 1024 * 1024) -> str:
             digest.update(chunk)
     return digest.hexdigest()
 
+
 def _table_exists(conn: sqlite3.Connection, name: str) -> bool:
     return conn.execute(
         "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?", (name,)
@@ -121,13 +122,28 @@ def _eligible_rows(conn: sqlite3.Connection, profile: CatalogProfile):
         kinds.extend(["branded", "supplement"])
 
     placeholders = ",".join("?" for _ in kinds)
+    has_barcode_claim = _table_exists(conn, "barcode_claim")
+    market_select = (
+        "MAX(COALESCE(bc.market_code, ''))"
+        if has_barcode_claim
+        else "''"
+    )
+    barcode_join = (
+        """
+        LEFT JOIN barcode_claim bc
+          ON bc.bil_food_id = cf.bil_food_id
+         AND bc.claim_status = 'active'
+    """
+        if has_barcode_claim
+        else ""
+    )
     sql = f"""
         SELECT cf.bil_food_id,
                cf.food_kind,
                cf.canonical_name_en,
                cf.canonical_name_ar,
                MAX(qa.overall_score) AS quality_score,
-               MAX(COALESCE(bc.market_code, '')) AS market_code,
+               {market_select} AS market_code,
                cf.updated_at
         FROM canonical_food cf
         JOIN source_record sr
@@ -137,17 +153,37 @@ def _eligible_rows(conn: sqlite3.Connection, profile: CatalogProfile):
           ON qa.source_record_id = sr.source_record_id
          AND qa.validation_status = 'accepted'
          AND qa.delivery_eligibility = 'mobile_candidate'
-        LEFT JOIN barcode_claim bc
-          ON bc.bil_food_id = cf.bil_food_id
-         AND bc.claim_status = 'active'
+        {barcode_join}
         WHERE cf.status = 'active'
           AND cf.food_kind IN ({placeholders})
           AND qa.overall_score >= ?
     """
     params: list[object] = list(kinds) + [profile.minimum_quality_score]
     if profile.market_code:
+        if not has_barcode_claim:
+            return iter(())
         sql += " AND (bc.market_code IS NULL OR bc.market_code='' OR bc.market_code=?)"
         params.append(profile.market_code)
+    if profile.language_code:
+        language = profile.language_code.strip().lower()
+        localized_name_clause = {
+            "en": "cf.canonical_name_en IS NOT NULL",
+            "ar": "cf.canonical_name_ar IS NOT NULL",
+        }.get(language)
+        alias_clause = None
+        if _table_exists(conn, "food_name"):
+            alias_clause = (
+                "EXISTS (SELECT 1 FROM food_name fn "
+                "WHERE fn.bil_food_id=cf.bil_food_id AND lower(fn.language)=?)"
+            )
+        clauses = [clause for clause in (localized_name_clause, alias_clause) if clause]
+        if not clauses:
+            raise ValueError(
+                f"master database has no localization source for language: {language}"
+            )
+        sql += f" AND ({' OR '.join(clauses)})"
+        if alias_clause:
+            params.append(language)
     sql += " GROUP BY cf.bil_food_id ORDER BY quality_score DESC, cf.bil_food_id ASC"
     if profile.max_rows is not None:
         sql += " LIMIT ?"

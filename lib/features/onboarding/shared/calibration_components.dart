@@ -1,5 +1,167 @@
 part of '../bil_flagship_onboarding.dart';
 
+String _bodyCanvasText(BuildContext context, String english, String arabic) {
+  final code = Localizations.localeOf(context).languageCode;
+  if (code == 'ar') return arabic;
+  return _bodyCanvasCopy[english]?[code] ?? english;
+}
+
+String _bodyCanvasMonth(BuildContext context, int index) {
+  final code = Localizations.localeOf(context).languageCode;
+  const months = <String, List<String>>{
+    'ar': [
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر',
+    ],
+    'en': [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ],
+    'fr': [
+      'janv.',
+      'févr.',
+      'mars',
+      'avr.',
+      'mai',
+      'juin',
+      'juil.',
+      'août',
+      'sept.',
+      'oct.',
+      'nov.',
+      'déc.',
+    ],
+    'es': [
+      'ene',
+      'feb',
+      'mar',
+      'abr',
+      'may',
+      'jun',
+      'jul',
+      'ago',
+      'sep',
+      'oct',
+      'nov',
+      'dic',
+    ],
+    'tr': [
+      'Oca',
+      'Şub',
+      'Mar',
+      'Nis',
+      'May',
+      'Haz',
+      'Tem',
+      'Ağu',
+      'Eyl',
+      'Eki',
+      'Kas',
+      'Ara',
+    ],
+  };
+  return (months[code] ?? months['en']!)[index];
+}
+
+const _bodyCanvasCopy = <String, Map<String, String>>{
+  'Weight': {'fr': 'Poids', 'es': 'Peso', 'tr': 'Kilo'},
+  'Height': {'fr': 'Taille', 'es': 'Altura', 'tr': 'Boy'},
+  'Age': {'fr': 'Âge', 'es': 'Edad', 'tr': 'Yaş'},
+  'Biological sex': {
+    'fr': 'Sexe biologique',
+    'es': 'Sexo biológico',
+    'tr': 'Biyolojik cinsiyet',
+  },
+  'Goal': {'fr': 'Objectif', 'es': 'Objetivo', 'tr': 'Hedef'},
+  'Waist': {'fr': 'Tour de taille', 'es': 'Cintura', 'tr': 'Bel'},
+  'Neck': {'fr': 'Tour de cou', 'es': 'Cuello', 'tr': 'Boyun'},
+  'Activity': {'fr': 'Activité', 'es': 'Actividad', 'tr': 'Aktivite'},
+  'Male': {'fr': 'Homme', 'es': 'Hombre', 'tr': 'Erkek'},
+  'Female': {'fr': 'Femme', 'es': 'Mujer', 'tr': 'Kadın'},
+  'Lose fat': {
+    'fr': 'Perdre de la graisse',
+    'es': 'Perder grasa',
+    'tr': 'Yağ kaybet',
+  },
+  'Maintain': {'fr': 'Maintenir', 'es': 'Mantener', 'tr': 'Kiloyu koru'},
+  'Build muscle': {
+    'fr': 'Prendre du muscle',
+    'es': 'Ganar músculo',
+    'tr': 'Kas kazan',
+  },
+  'Low': {'fr': 'Faible', 'es': 'Baja', 'tr': 'Düşük'},
+  'Light': {'fr': 'Légère', 'es': 'Ligera', 'tr': 'Hafif'},
+  'Moderate': {'fr': 'Modérée', 'es': 'Moderada', 'tr': 'Orta'},
+  'High': {'fr': 'Élevée', 'es': 'Alta', 'tr': 'Yüksek'},
+  'Very high': {'fr': 'Très élevée', 'es': 'Muy alta', 'tr': 'Çok yüksek'},
+  'Save': {'fr': 'Enregistrer', 'es': 'Guardar', 'tr': 'Kaydet'},
+  'Choose value and precision — saves automatically': {
+    'fr': 'Choisissez la valeur et la précision — enregistrement automatique',
+    'es': 'Elige el valor y la precisión — se guarda automáticamente',
+    'tr': 'Değeri ve hassasiyeti seçin — otomatik kaydedilir',
+  },
+  'Not now': {'fr': 'Pas maintenant', 'es': 'Ahora no', 'tr': 'Şimdi değil'},
+  'Required': {'fr': 'Obligatoire', 'es': 'Obligatorio', 'tr': 'Gerekli'},
+  'Optional': {'fr': 'Facultatif', 'es': 'Opcional', 'tr': 'İsteğe bağlı'},
+  'Date of birth': {
+    'fr': 'Date de naissance',
+    'es': 'Fecha de nacimiento',
+    'tr': 'Doğum tarihi',
+  },
+  'Choose day, month and year — saves automatically': {
+    'fr': 'Choisissez le jour, le mois et l’année — enregistrement automatique',
+    'es': 'Elige día, mes y año — se guarda automáticamente',
+    'tr': 'Gün, ay ve yılı seçin — otomatik kaydedilir',
+  },
+  'Complete required details': {
+    'fr': 'Renseignez les informations requises',
+    'es': 'Completa los datos obligatorios',
+    'tr': 'Gerekli bilgileri tamamlayın',
+  },
+  'Back': {'fr': 'Retour', 'es': 'Atrás', 'tr': 'Geri'},
+  'Build your body model': {
+    'fr': 'Créez votre modèle corporel',
+    'es': 'Crea tu modelo corporal',
+    'tr': 'Vücut modelinizi oluşturun',
+  },
+  'Model accuracy': {
+    'fr': 'Précision du modèle',
+    'es': 'Precisión del modelo',
+    'tr': 'Model doğruluğu',
+  },
+  'Profile completion': {
+    'fr': 'Profil complété',
+    'es': 'Perfil completado',
+    'tr': 'Profil tamamlanma',
+  },
+  'Private': {'fr': 'Privé', 'es': 'Privado', 'tr': 'Özel'},
+  'Explainable': {
+    'fr': 'Explicable',
+    'es': 'Explicable',
+    'tr': 'Açıklanabilir',
+  },
+};
+
 class _ChoiceData<T> {
   const _ChoiceData({
     required this.value,
@@ -69,7 +231,7 @@ class _ChoiceTile<T> extends StatelessWidget {
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 17,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       if (data.subtitle != null) ...[
@@ -126,7 +288,7 @@ class _TopBar extends StatelessWidget {
           style: TextStyle(
             color: Colors.white,
             fontSize: 27,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w700,
           ),
         ),
         const Spacer(),
@@ -145,16 +307,38 @@ class _HologramPanel extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Stack(
         children: [
-          const Positioned.fill(child: _OrbitBackground()),
-          const Center(child: _BodyHologram()),
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: Image.asset(
+                'assets/images/flagship/bil_body_intelligence_journey_v1.png',
+                fit: BoxFit.cover,
+                alignment: const Alignment(0, -.18),
+              ),
+            ),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(28),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    const Color(0xFF020B16).withValues(alpha: .05),
+                    const Color(0xFF020B16).withValues(alpha: .12),
+                    const Color(0xFF020B16).withValues(alpha: .58),
+                  ],
+                ),
+              ),
+            ),
+          ),
           PositionedDirectional(
             top: 18,
             start: 18,
             child: _FloatingTag(
               icon: Icons.lock_outline_rounded,
-              label: Localizations.localeOf(context).languageCode == 'ar'
-                  ? 'خاص'
-                  : 'Private',
+              label: _bodyCanvasText(context, 'Private', 'خاص'),
             ),
           ),
           PositionedDirectional(
@@ -162,9 +346,7 @@ class _HologramPanel extends StatelessWidget {
             end: 18,
             child: _FloatingTag(
               icon: Icons.psychology_outlined,
-              label: Localizations.localeOf(context).languageCode == 'ar'
-                  ? 'قابل للتفسير'
-                  : 'Explainable',
+              label: _bodyCanvasText(context, 'Explainable', 'قابل للتفسير'),
             ),
           ),
         ],
@@ -199,126 +381,6 @@ class _FloatingTag extends StatelessWidget {
       ),
     );
   }
-}
-
-class _BodyHologram extends StatelessWidget {
-  const _BodyHologram();
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      size: const Size(360, 500),
-      painter: _BodyHologramPainter(),
-    );
-  }
-}
-
-class _BodyHologramPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height * .46);
-    final glow = Paint()
-      ..shader = RadialGradient(
-        colors: [_BilColors.cyan.withValues(alpha: .22), Colors.transparent],
-      ).createShader(Rect.fromCircle(center: center, radius: size.width * .46));
-
-    canvas.drawCircle(center, size.width * .46, glow);
-
-    final line = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..strokeWidth = math.max(3, size.width * .012)
-      ..shader = const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [_BilColors.cyan, _BilColors.blue],
-      ).createShader(Offset.zero & size);
-
-    final x = size.width / 2;
-    final path = Path()
-      ..moveTo(x, size.height * .18)
-      ..cubicTo(
-        x + size.width * .07,
-        size.height * .26,
-        x + size.width * .07,
-        size.height * .34,
-        x,
-        size.height * .40,
-      )
-      ..cubicTo(
-        x - size.width * .08,
-        size.height * .52,
-        x - size.width * .08,
-        size.height * .72,
-        x - size.width * .04,
-        size.height * .88,
-      )
-      ..moveTo(x, size.height * .40)
-      ..cubicTo(
-        x + size.width * .08,
-        size.height * .52,
-        x + size.width * .08,
-        size.height * .72,
-        x + size.width * .04,
-        size.height * .88,
-      )
-      ..moveTo(x - size.width * .04, size.height * .34)
-      ..lineTo(x - size.width * .24, size.height * .53)
-      ..moveTo(x + size.width * .04, size.height * .34)
-      ..lineTo(x + size.width * .24, size.height * .53);
-
-    canvas.drawPath(path, line);
-
-    final head = Paint()
-      ..shader =
-          const RadialGradient(
-            colors: [_BilColors.cyan, _BilColors.blue],
-          ).createShader(
-            Rect.fromCircle(
-              center: Offset(x, size.height * .12),
-              radius: size.width * .07,
-            ),
-          );
-    canvas.drawCircle(Offset(x, size.height * .12), size.width * .065, head);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _OrbitBackground extends StatelessWidget {
-  const _OrbitBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(painter: _OrbitPainter());
-  }
-}
-
-class _OrbitPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..color = _BilColors.cyan.withValues(alpha: .11);
-
-    for (final scale in const [.38, .56, .74, .92]) {
-      canvas.drawOval(
-        Rect.fromCenter(
-          center: center,
-          width: size.width * scale,
-          height: size.height * scale,
-        ),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _RingPainter extends CustomPainter {
@@ -378,23 +440,14 @@ class _GlassPanel extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white.withValues(alpha: .105),
-                const Color(0xFF87B8D9).withValues(alpha: .045),
-                const Color(0xFF07111E).withValues(alpha: .58),
-              ],
-              stops: const [0, .28, 1],
-            ),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(radius),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: .48),
-                blurRadius: 40,
-                spreadRadius: -15,
-                offset: const Offset(0, 22),
+                color: const Color(0xFF101828).withValues(alpha: .08),
+                blurRadius: 24,
+                spreadRadius: -12,
+                offset: const Offset(0, 12),
               ),
               BoxShadow(
                 color: const Color(
@@ -403,11 +456,7 @@ class _GlassPanel extends StatelessWidget {
                 blurRadius: glow ? 34 : 20,
                 spreadRadius: -12,
               ),
-              BoxShadow(
-                color: Colors.white.withValues(alpha: .09),
-                blurRadius: 2,
-                offset: const Offset(-1, -1),
-              ),
+              BoxShadow(color: _BilColors.stroke, blurRadius: 1),
             ],
           ),
           child: Padding(padding: padding, child: child),
@@ -483,7 +532,7 @@ class _PrimaryButton extends StatelessWidget {
           children: [
             Text(
               label,
-              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
             ),
             const SizedBox(width: 10),
             const Icon(Icons.arrow_forward_rounded),
@@ -500,25 +549,18 @@ class _AmbientBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: _BilColors.background,
-        gradient: RadialGradient(
-          center: Alignment(.42, -.58),
-          radius: 1.2,
-          colors: [Color(0x1A00E4C2), Color(0x0D087EAC), _BilColors.background],
-        ),
-      ),
+      decoration: const BoxDecoration(color: _BilColors.background),
     );
   }
 }
 
 abstract final class _BilColors {
-  static const background = Color(0xFF020A13);
-  static const surface = Color(0xFF071725);
-  static const stroke = Color(0xFF183244);
-  static const emerald = Color(0xFF14DFA6);
-  static const cyan = Color(0xFF11CDE4);
-  static const blue = Color(0xFF1877E8);
-  static const textMuted = Color(0xFF9EB0BE);
-  static const textDim = Color(0xFF617687);
+  static const background = Color(0xFFF7F8FB);
+  static const surface = Colors.white;
+  static const stroke = Color(0xFFE4E7EC);
+  static const emerald = Color(0xFF00A884);
+  static const cyan = Color(0xFF0066EE);
+  static const blue = Color(0xFF0066EE);
+  static const textMuted = Color(0xFF667085);
+  static const textDim = Color(0xFF98A2B3);
 }

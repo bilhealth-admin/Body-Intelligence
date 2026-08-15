@@ -17,6 +17,10 @@ class NutritionPortion {
       this.nutrient(nutrient).nullableValue;
 
   int get nutrientEvidenceMask => NutrientEvidenceMask.fromValues(
+    calories: knownValue(FoodNutrient.calories),
+    protein: knownValue(FoodNutrient.protein),
+    carbohydrates: knownValue(FoodNutrient.carbohydrates),
+    fat: knownValue(FoodNutrient.fat),
     fiber: knownValue(FoodNutrient.fiber),
     sugar: knownValue(FoodNutrient.sugar),
     sodium: knownValue(FoodNutrient.sodium),

@@ -49,39 +49,12 @@ void main() {
 
           expect(tester.takeException(), isNull);
 
-          final cardContext = tester.element(find.byType(DailyReturnCard));
-          final localizedTitle = locale.languageCode == 'ar'
-              ? 'واصل يومك'
-              : 'Continue today';
-
-          final titleFinder = find.text(localizedTitle);
-          expect(
-            titleFinder,
-            findsOneWidget,
-            reason:
-                'Daily Return title must use the active localization contract.',
-          );
-
-          final title = tester.widget<Text>(titleFinder);
-          expect(
-            title.style?.color,
-            Theme.of(cardContext).colorScheme.onSurfaceVariant,
-          );
-
-          final reasonFinder = find.text(
-            locale.languageCode == 'ar'
-                ? 'تم تسجيل وزن اليوم.'
-                : 'Today’s weight is recorded.',
-          );
-          expect(reasonFinder, findsOneWidget);
-
-          final reason = tester.widget<Text>(reasonFinder);
-          expect(
-            reason.style?.color,
-            Theme.of(cardContext).colorScheme.onSurfaceVariant,
-          );
-
           expect(find.byType(DailyReturnCard), findsOneWidget);
+          expect(find.byIcon(Icons.monitor_weight_outlined), findsOneWidget);
+          expect(find.byIcon(Icons.restaurant_outlined), findsOneWidget);
+          expect(find.byIcon(Icons.water_drop_outlined), findsOneWidget);
+          expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+          expect(find.byIcon(Icons.cancel_rounded), findsNWidgets(2));
         },
       );
     }

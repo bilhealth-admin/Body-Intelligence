@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../app/localization/app_localizations.dart';
 
 import '../../data/database/app_database.dart';
 import '../../data/database/database_provider.dart';
@@ -78,17 +79,18 @@ class ChallengesPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rows = ref.watch(challengesProvider);
-    final ar = Localizations.localeOf(context).languageCode == 'ar';
+    final t = context.strings.text;
     return Scaffold(
-      appBar: SecondaryPageAppBar(title: Text(ar ? 'التحديات' : 'Challenges')),
+      appBar: SecondaryPageAppBar(title: Text(t('Challenges'))),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _choose(context, ref, ar),
+        onPressed: () => _choose(context, ref),
         icon: const Icon(Icons.add),
-        label: Text(ar ? 'ابدأ تحديًا' : 'Start challenge'),
+        label: Text(t('Start challenge')),
       ),
       body: rows.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(error.toString())),
+        error: (error, _) =>
+            Center(child: Text(t('Could not load challenges. Try again.'))),
         data: (items) => ListView(
           padding: const EdgeInsets.all(16),
           children: [
@@ -96,9 +98,9 @@ class ChallengesPage extends ConsumerWidget {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  ar
-                      ? 'تركّز تحديات BIL على السلوك الداعم، ولا تكافئ التجويع أو العجز الشديد أو أسرع خسارة للوزن.'
-                      : 'BIL challenges reward supportive behavior—not starvation, extreme deficits, or fastest weight loss.',
+                  t(
+                    'BIL challenges reward supportive behavior—not starvation, extreme deficits, or fastest weight loss.',
+                  ),
                 ),
               ),
             ),
@@ -106,15 +108,15 @@ class ChallengesPage extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.all(24),
                 child: Text(
-                  ar
-                      ? 'لا توجد تحديات نشطة. اختر تحديًا خاصًا يعمل دون اتصال.'
-                      : 'No challenge yet. Choose a private challenge that works offline.',
+                  t(
+                    'No challenge yet. Choose a private challenge that works offline.',
+                  ),
                 ),
               ),
             for (final challenge in items) _ChallengeTile(challenge: challenge),
             const SizedBox(height: 16),
             Text(
-              ar ? 'الجماعية' : 'Shared challenges',
+              t('Shared challenges'),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             for (final audience in const [
@@ -123,14 +125,10 @@ class ChallengesPage extends ConsumerWidget {
               'Coach-created',
               'Team',
             ])
-              ListTile(
-                enabled: false,
-                leading: const Icon(Icons.lock_outline),
-                title: Text(ar ? _audienceArabic(audience) : audience),
-                subtitle: Text(
-                  ar
-                      ? 'تتطلب حسابًا موثّقًا وخدمة مشاركة آمنة وموافقة صريحة.'
-                      : 'Requires authenticated identity, a secure sharing service, and explicit consent.',
+              _LockedSharedChallengeTile(
+                title: _audienceLabel(context, audience),
+                reason: t(
+                  'Requires authenticated identity, a secure sharing service, and explicit consent.',
                 ),
               ),
             const SizedBox(height: 80),
@@ -140,6 +138,33 @@ class ChallengesPage extends ConsumerWidget {
     );
   }
 
+  static String _audienceLabel(BuildContext context, String value) {
+    final code = Localizations.localeOf(context).languageCode;
+    const labels = <String, Map<String, String>>{
+      'Friends': {
+        'ar': 'الأصدقاء',
+        'fr': 'Amis',
+        'es': 'Amigos',
+        'tr': 'Arkadaşlar',
+      },
+      'Community': {
+        'ar': 'المجتمع',
+        'fr': 'Communauté',
+        'es': 'Comunidad',
+        'tr': 'Topluluk',
+      },
+      'Coach-created': {
+        'ar': 'بإشراف مدرب',
+        'fr': 'Créés par un coach',
+        'es': 'Creados por un entrenador',
+        'tr': 'Antrenör tarafından',
+      },
+      'Team': {'ar': 'الفريق', 'fr': 'Équipe', 'es': 'Equipo', 'tr': 'Takım'},
+    };
+    return labels[value]?[code] ?? value;
+  }
+
+  // ignore: unused_element
   static String _audienceArabic(String value) => switch (value) {
     'Friends' => 'الأصدقاء',
     'Community' => 'المجتمع',
@@ -147,26 +172,21 @@ class ChallengesPage extends ConsumerWidget {
     _ => 'الفريق',
   };
 
-  Future<void> _choose(BuildContext context, WidgetRef ref, bool ar) async {
+  Future<void> _choose(BuildContext context, WidgetRef ref) async {
+    final t = context.strings.text;
     final selected = await showModalBottomSheet<(String, String, int)>(
       context: context,
       showDragHandle: true,
       builder: (context) => ListView(
         shrinkWrap: true,
         children: [
-          ListTile(
-            title: Text(
-              ar ? 'اختر تحديًا خاصًا' : 'Choose a private challenge',
-            ),
-          ),
+          ListTile(title: Text(t('Choose a private challenge'))),
           for (final preset in presets)
             ListTile(
               leading: const Icon(Icons.flag_outlined),
-              title: Text(ar ? _presetArabic(preset.$1) : preset.$2),
+              title: Text(t(preset.$2)),
               subtitle: Text(
-                ar
-                    ? '${preset.$3} أيام · خاص على هذا الجهاز'
-                    : '${preset.$3} days · private on this device',
+                '${preset.$3} ${t('days · private on this device')}',
               ),
               onTap: () => Navigator.pop(context, preset),
             ),
@@ -179,6 +199,7 @@ class ChallengesPage extends ConsumerWidget {
         .start(type: selected.$1, title: selected.$2, targetDays: selected.$3);
   }
 
+  // ignore: unused_element
   static String _presetArabic(String type) => switch (type) {
     'protein' => '7 أيام داعمة للبروتين',
     'water' => '14 يومًا للترطيب',
@@ -189,6 +210,77 @@ class ChallengesPage extends ConsumerWidget {
   };
 }
 
+class _LockedSharedChallengeTile extends StatelessWidget {
+  const _LockedSharedChallengeTile({required this.title, required this.reason});
+
+  final String title;
+  final String reason;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Semantics(
+      label: '$title. $reason',
+      enabled: false,
+      child: Container(
+        margin: const EdgeInsets.only(top: 10),
+        decoration: BoxDecoration(
+          color: colors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: colors.outlineVariant.withValues(alpha: .7),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: colors.shadow.withValues(alpha: .06),
+              blurRadius: 18,
+              offset: const Offset(0, 7),
+            ),
+          ],
+        ),
+        child: ListTile(
+          enabled: false,
+          minVerticalPadding: 14,
+          leading: Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  colors.onSurface.withValues(alpha: .13),
+                  colors.onSurface.withValues(alpha: .045),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(
+                color: colors.onSurface.withValues(alpha: .16),
+              ),
+            ),
+            child: Icon(
+              Icons.lock_outline_rounded,
+              color: colors.onSurfaceVariant,
+              size: 23,
+            ),
+          ),
+          title: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
+          ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Text(
+              reason,
+              style: const TextStyle(fontSize: 15, height: 1.3),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ChallengeTile extends ConsumerWidget {
   const _ChallengeTile({required this.challenge});
   final Challenge challenge;
@@ -196,13 +288,14 @@ class _ChallengeTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final progress = ref.watch(challengeProgressProvider(challenge));
-    final ar = Localizations.localeOf(context).languageCode == 'ar';
+    final t = context.strings.text;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: progress.when(
           loading: () => const LinearProgressIndicator(),
-          error: (error, _) => Text(error.toString()),
+          error: (error, _) =>
+              Text(t('Could not calculate challenge progress.')),
           data: (value) {
             if (value.complete && challenge.status != 'completed') {
               Future.microtask(
@@ -219,18 +312,12 @@ class _ChallengeTile extends ConsumerWidget {
                   leading: Icon(
                     value.complete ? Icons.emoji_events : Icons.flag_outlined,
                   ),
-                  title: Text(
-                    ar
-                        ? ChallengesPage._presetArabic(challenge.type)
-                        : challenge.title,
-                  ),
+                  title: Text(t(challenge.title)),
                   subtitle: Text(
-                    ar
-                        ? '${value.qualifyingDays} من ${value.targetDays} أيام مؤهلة'
-                        : '${value.qualifyingDays} of ${value.targetDays} qualifying days',
+                    '${value.qualifyingDays} ${t('of')} ${value.targetDays} ${t('qualifying days')}',
                   ),
                   trailing: IconButton(
-                    tooltip: ar ? 'حذف' : 'Delete',
+                    tooltip: t('Delete'),
                     onPressed: () => ref
                         .read(challengeRepositoryProvider)
                         .delete(challenge.id),
@@ -240,9 +327,7 @@ class _ChallengeTile extends ConsumerWidget {
                 LinearProgressIndicator(value: value.fraction),
                 const SizedBox(height: 6),
                 Text(
-                  ar
-                      ? 'يُحتسب التقدم من السجلات المحلية الفعلية فقط.'
-                      : 'Progress is calculated only from actual local records.',
+                  t('Progress is calculated only from actual local records.'),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],

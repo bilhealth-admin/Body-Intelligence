@@ -2,10 +2,17 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../auth/auth_five_locale_copy.dart';
+
 /// Presentation-only flagship splash. Startup state and routing remain owned by
 /// [StartupPage].
 class PremiumSplashBackdrop extends StatelessWidget {
-  const PremiumSplashBackdrop({super.key});
+  const PremiumSplashBackdrop({this.animate = true, super.key});
+
+  /// Keeps the ambient background alive only while startup is actively
+  /// loading. Error states are deliberately static so they remain calm,
+  /// accessible, and do not schedule frames forever.
+  final bool animate;
 
   @override
   Widget build(BuildContext context) {
@@ -14,12 +21,20 @@ class PremiumSplashBackdrop extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            'assets/images/v10_master/bil_hdr_starfield_master.png',
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.medium,
-            errorBuilder: (_, _, _) =>
-                const ColoredBox(color: Color(0xFF01050D)),
+          _LivingSplashImage(animate: animate),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0x26000512),
+                  Color(0x38000512),
+                  Color(0xB8000612),
+                ],
+                stops: [0, .55, 1],
+              ),
+            ),
           ),
           DecoratedBox(
             decoration: BoxDecoration(
@@ -27,9 +42,9 @@ class PremiumSplashBackdrop extends StatelessWidget {
                 center: const Alignment(0, -.12),
                 radius: .82,
                 colors: [
-                  Color(highContrast ? 0x4D087CA4 : 0x33196E9C),
-                  const Color(0x1A09213C),
-                  const Color(0xF201050D),
+                  Color(highContrast ? 0x52087CA4 : 0x2E196E9C),
+                  const Color(0x1409213C),
+                  const Color(0xBA01050D),
                 ],
                 stops: const [0, .48, 1],
               ),
@@ -38,6 +53,88 @@ class PremiumSplashBackdrop extends StatelessWidget {
           const CustomPaint(painter: _DepthStarsPainter()),
         ],
       ),
+    );
+  }
+}
+
+class _LivingSplashImage extends StatefulWidget {
+  const _LivingSplashImage({required this.animate});
+
+  final bool animate;
+
+  @override
+  State<_LivingSplashImage> createState() => _LivingSplashImageState();
+}
+
+class _LivingSplashImageState extends State<_LivingSplashImage>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3600),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncAnimation();
+  }
+
+  @override
+  void didUpdateWidget(covariant _LivingSplashImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.animate != widget.animate) _syncAnimation();
+  }
+
+  void _syncAnimation() {
+    final shouldAnimate =
+        widget.animate &&
+        !MediaQuery.disableAnimationsOf(context) &&
+        TickerMode.valuesOf(context).enabled;
+    if (shouldAnimate) {
+      if (!_controller.isAnimating) _controller.repeat(reverse: true);
+    } else {
+      _controller.stop(canceled: false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final reducedMotion = MediaQuery.disableAnimationsOf(context);
+    final image = Image.asset(
+      'assets/images/brand/generated/bil_body_twin_splash_v1.png',
+      fit: BoxFit.cover,
+      alignment: Alignment.center,
+      filterQuality: FilterQuality.high,
+      errorBuilder: (_, _, _) => Image.asset(
+        'assets/images/v10_master/bil_hdr_starfield_master.png',
+        fit: BoxFit.cover,
+        filterQuality: FilterQuality.medium,
+        errorBuilder: (_, _, _) => const ColoredBox(color: Color(0xFF01050D)),
+      ),
+    );
+    if (reducedMotion || !widget.animate) return image;
+    return AnimatedBuilder(
+      animation: _controller,
+      child: image,
+      builder: (context, child) {
+        final pulse = Curves.easeInOut.transform(_controller.value);
+        return Transform.translate(
+          offset: Offset(0, -3 + pulse * 6),
+          child: Transform.scale(scale: 1.018 + pulse * .012, child: child),
+        );
+      },
     );
   }
 }
@@ -57,9 +154,11 @@ class PremiumSplashExperience extends StatelessWidget {
     final reducedMotion = MediaQuery.disableAnimationsOf(context);
     return Semantics(
       liveRegion: true,
-      label: arabic
-          ? 'يُجهّز BIL بياناتك المحلية بأمان'
-          : 'BIL is preparing your local data safely',
+      label: authFiveLocaleTextFor(
+        arabicLocaleCode(context, arabic),
+        'BIL is preparing your local data safely',
+        'يُجهّز BIL بياناتك المحلية بأمان',
+      ),
       child: ExcludeSemantics(
         child: AnimatedBuilder(
           animation: controller,
@@ -97,7 +196,7 @@ class _Composition extends StatelessWidget {
       minimum: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
       child: Column(
         children: [
-          const Spacer(flex: 4),
+          const Spacer(flex: 3),
           SizedBox(
             width: markSize * 1.9,
             height: markSize * 1.5,
@@ -135,7 +234,7 @@ class _Composition extends StatelessWidget {
               child: const _BilName(),
             ),
           ),
-          const Spacer(flex: 5),
+          const Spacer(flex: 6),
           SizedBox(
             width: math.min(media.size.width * .38, 164),
             child: ClipRRect(
@@ -173,27 +272,7 @@ class _BilMark extends StatelessWidget {
           const BoxShadow(color: Color(0x246F61FF), blurRadius: 70),
         ],
       ),
-      child: SizedBox.square(
-        dimension: size,
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            'BIL®',
-            maxLines: 1,
-            style: TextStyle(
-              color: highContrast ? Colors.white : const Color(0xFFF4F7FA),
-              fontSize: 92,
-              height: .9,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -5,
-              shadows: const [
-                Shadow(color: Color(0x805BD8FF), blurRadius: 28),
-                Shadow(color: Color(0x40795EFF), blurRadius: 48),
-              ],
-            ),
-          ),
-        ),
-      ),
+      child: SizedBox.square(dimension: size),
     );
   }
 }
@@ -208,7 +287,7 @@ class _BilName extends StatelessWidget {
       child: FittedBox(
         fit: BoxFit.scaleDown,
         child: Text(
-          'BODY INTELLIGENCE LOG',
+          'BODY INTELLIGENCE LOG™',
           maxLines: 1,
           textAlign: TextAlign.center,
           style: TextStyle(

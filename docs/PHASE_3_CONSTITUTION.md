@@ -781,3 +781,6 @@ Confirmation that nothing was pushed, merged, reset, cleaned, stashed, discarded
 Do not begin Cloud, external AI Architecture, Commerce, Coach Platform, Enterprise Operations, or Global Launch implementation until this Product Excellence Program has been completed.
 
 Begin Phase 3 implementation now with Epic 1.
+> **RETIRED — historical record only.** This file is not an execution
+> authority. The sole current authority is
+> `docs/BIL_V1_FINAL_RELEASE_CONSTITUTION.md`.

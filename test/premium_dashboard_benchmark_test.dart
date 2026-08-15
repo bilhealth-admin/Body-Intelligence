@@ -11,51 +11,34 @@ void main() {
     await font.load();
   });
 
-  testWidgets('insights are compact and duplicate recommendation is removed', (
+  testWidgets('legacy insight deck is removed from the unified dashboard', (
     tester,
   ) async {
     await tester.pumpWidget(const _Harness());
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('dashboard-one-best-action')), findsNothing);
-    expect(
-      find.byKey(const Key('dashboard-key-insights-deck')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const Key('dashboard-nutrition-context')),
-      findsOneWidget,
-    );
-    expect(find.text('Protein below target'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('dashboard-carousel-next')).last);
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('dashboard-action-insight')), findsOneWidget);
+    expect(find.byKey(const Key('dashboard-key-insights-deck')), findsNothing);
+    expect(find.byKey(const Key('dashboard-nutrition-context')), findsNothing);
+    expect(find.text('Daily Intelligence'), findsOneWidget);
   });
 
-  testWidgets('unsupported recommendation is hidden without hiding insights', (
+  testWidgets('unsupported recommendation keeps daily facts visible', (
     tester,
   ) async {
     await tester.pumpWidget(const _Harness(showRecommendation: false));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('dashboard-one-best-action')), findsNothing);
-    expect(
-      find.byKey(const Key('dashboard-nutrition-context')),
-      findsOneWidget,
-    );
+    expect(find.text('Daily Intelligence'), findsOneWidget);
   });
 
-  testWidgets('light insight cards retain readable theme contrast', (
+  testWidgets('light unified dashboard retains readable theme contrast', (
     tester,
   ) async {
     await tester.pumpWidget(const _Harness(light: true));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('dashboard-carousel-next')).last);
-    await tester.pumpAndSettle();
-
-    final title = tester.widget<Text>(find.text('Log today’s weight'));
-    expect(title.style?.fontWeight, FontWeight.w900);
-    expect(find.textContaining('comparable daily check-in'), findsOneWidget);
+    expect(find.byType(_DailyNarrative), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -76,7 +59,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('البروتين أقل من الهدف'), findsOneWidget);
+    expect(find.byType(_DailyNarrative), findsOneWidget);
     expect(find.text('اكتمال التسجيل'), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -136,15 +119,14 @@ void main() {
       );
       expect(
         find.byKey(const Key('dashboard-nutrition-context')),
-        findsOneWidget,
+        findsNothing,
       );
       expect(
         find.byKey(const Key('dashboard-trend-explanation')),
         findsNothing,
       );
-      await tester.tap(find.byKey(const Key('dashboard-carousel-next')).last);
-      await tester.pumpAndSettle();
-      expect(find.byKey(const Key('dashboard-action-insight')), findsOneWidget);
+      expect(find.byType(_DailyNarrative), findsOneWidget);
+      expect(find.byKey(const Key('dashboard-action-insight')), findsNothing);
       expect(tester.takeException(), isNull);
       semantics.dispose();
     },

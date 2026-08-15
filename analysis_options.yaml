@@ -9,6 +9,16 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  exclude:
+    # Release evidence and package snapshots preserve historical source copies.
+    # They are not compiled application code and analyzing them duplicates most
+    # of the project, making the release gate unnecessarily slow.
+    - .bil-package-backups/**
+    - .bil-package-evidence/**
+    - artifacts/**
+    - build/**
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`

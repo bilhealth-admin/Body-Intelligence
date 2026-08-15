@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../dashboard_five_locale_copy.dart';
+
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../engine/nutrient_evidence_engine.dart';
@@ -40,7 +42,7 @@ class DashboardDetailPanel extends StatelessWidget {
                 child: Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
@@ -72,7 +74,6 @@ class DashboardTargetRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final arabic = Localizations.localeOf(context).languageCode == 'ar';
     final consumed = evidence.total;
     if (consumed == null) {
       return _UnavailableNutrientRow(label: label);
@@ -105,13 +106,9 @@ class DashboardTargetRow extends StatelessWidget {
                 const SizedBox(height: 4),
                 LinearProgressIndicator(value: ratio),
                 Text(
-                  arabic
-                      ? exceeded
-                            ? '${difference.abs().toStringAsFixed(0)} $unit أعلى من الهدف المرجعي'
-                            : '${difference.toStringAsFixed(0)} $unit متبقٍ'
-                      : exceeded
-                      ? '${difference.abs().toStringAsFixed(0)} $unit above the reference target'
-                      : '${difference.toStringAsFixed(0)} $unit remaining',
+                  exceeded
+                      ? '${difference.abs().toStringAsFixed(0)} $unit ${dashboardFiveLocaleText('above the reference target', 'أعلى من الهدف المرجعي')}'
+                      : '${difference.toStringAsFixed(0)} $unit ${dashboardFiveLocaleText('remaining', 'متبقٍ')}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],

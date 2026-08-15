@@ -25,12 +25,14 @@ void main() {
 
     for (final boundary in const [
       'PremiumDashboardBenchmark(',
-      'DashboardDailySummarySection(',
-      'DashboardBodyProfileSnapshot(',
-      'DashboardAnalyticsCenter(',
+      'DashboardSummaryFactory.build(',
     ]) {
       expect(grid, contains(boundary), reason: 'Missing boundary: $boundary');
     }
+
+    expect(grid, isNot(contains('DashboardBodyProfileSnapshot(')));
+    expect(grid, isNot(contains('DashboardAnalyticsCenter(')));
+    expect(grid, contains("context.go('/analytics')"));
 
     expect(grid, isNot(contains('Visibility(')));
     expect(grid, isNot(contains('DashboardWaterCard(')));
@@ -44,7 +46,10 @@ void main() {
       'lib/features/dashboard/composition/dashboard_command_coordinator.dart',
       'lib/features/dashboard/domain/dashboard_decision_authority.dart',
       'lib/features/dashboard/presentation/dashboard_intelligence_localizer.dart',
+      'lib/features/dashboard/presentation/dashboard_body_twin_copy.dart',
       'lib/features/dashboard/widgets/dashboard_daily_summary.dart',
+      'lib/features/dashboard/widgets/dashboard_summary_factory.dart',
+      'lib/features/dashboard/widgets/dashboard_profile_required_card.dart',
       'lib/features/dashboard/widgets/dashboard_body_profile_snapshot.dart',
       'lib/features/dashboard/widgets/dashboard_nutrition_details.dart',
       'lib/features/dashboard/widgets/dashboard_analytics_center.dart',

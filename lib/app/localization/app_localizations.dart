@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import 'runtime_copy.dart';
+import 'bil_locale_policy.dart';
 
 class AppLocalizations {
-  AppLocalizations(this.locale);
+  AppLocalizations(this.locale) {
+    _activeLocale = locale;
+  }
 
   final Locale locale;
+  static Locale _activeLocale = const Locale('en');
+  static Locale get activeLocale => _activeLocale;
+  static void activate(Locale locale) => _activeLocale = locale;
 
   static AppLocalizations of(BuildContext context) {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
@@ -12,7 +21,76 @@ class AppLocalizations {
   static const LocalizationsDelegate<AppLocalizations> delegate =
       _AppLocalizationsDelegate();
 
-  static const supportedLocales = <Locale>[Locale('ar'), Locale('en')];
+  static const supportedLocales = <Locale>[
+    Locale('ar'),
+    Locale('en'),
+    Locale('fr'),
+    Locale('es'),
+    Locale('tr'),
+    Locale('de'),
+    Locale('it'),
+    Locale('pt', 'BR'),
+    Locale('pt', 'PT'),
+    Locale('ur'),
+    Locale('fa'),
+    Locale('hi'),
+    Locale('id'),
+    Locale('ms'),
+    Locale('ja'),
+    Locale('ko'),
+    Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
+    Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+    Locale('ru'),
+    Locale('bn'),
+    Locale('vi'),
+    Locale('th'),
+    Locale('pl'),
+    Locale('nl'),
+    Locale('uk'),
+  ];
+
+  static const supportedLanguageCodes = <String>{
+    'ar',
+    'en',
+    'fr',
+    'es',
+    'tr',
+    'de',
+    'it',
+    'pt',
+    'ur',
+    'fa',
+    'hi',
+    'id',
+    'ms',
+    'ja',
+    'ko',
+    'zh',
+    'ru',
+    'bn',
+    'vi',
+    'th',
+    'pl',
+    'nl',
+    'uk',
+  };
+
+  static bool isRtl(Locale locale) =>
+      BilLocalePolicy.isRtlTag(BilLocalePolicy.canonicalTag(locale));
+
+  static bool get baseCatalogsBalanced {
+    final catalogs = <Map<String, String>>[_ar, _en, _fr, _es, _tr];
+    final reference = _en.keys.toSet();
+    return catalogs.every(
+      (catalog) =>
+          catalog.keys.toSet().containsAll(reference) &&
+          reference.containsAll(catalog.keys) &&
+          catalog.values.every((value) => value.trim().isNotEmpty),
+    );
+  }
+
+  static Set<String> get baseKeys => _en.keys.toSet();
+  static Set<String> get baseEnglishValues => _en.values.toSet();
 
   static const Map<String, String> _ar = {
     'app_title': 'BIL – Body Intelligence Log',
@@ -47,6 +125,11 @@ class AppLocalizations {
     'custom_food': 'طعام مخصص',
     'daily_insights': 'الرؤى اليومية',
     'empty_state': 'لا توجد بيانات بعد. ابدأ بإضافة وزنك أو وجبتك الأولى.',
+    'primary_navigation': 'التنقل الرئيسي',
+    'quick_add': 'إضافة سريعة',
+    'french': 'الفرنسية',
+    'spanish': 'الإسبانية',
+    'turkish': 'التركية',
   };
 
   static const Map<String, String> _en = {
@@ -83,12 +166,217 @@ class AppLocalizations {
     'custom_food': 'Custom food',
     'daily_insights': 'Daily insights',
     'empty_state': 'No data yet. Start by adding your first weight or meal.',
+    'primary_navigation': 'Primary navigation',
+    'quick_add': 'Quick Add',
+    'french': 'French',
+    'spanish': 'Spanish',
+    'turkish': 'Turkish',
+  };
+
+  static const Map<String, String> _fr = {
+    'app_title': 'BIL – Body Intelligence Log',
+    'welcome_back': 'Bon retour',
+    'dashboard': 'Tableau de bord',
+    'daily_log': 'Journal quotidien',
+    'nutrition': 'Nutrition',
+    'history': 'Historique',
+    'analytics': 'Analyses',
+    'settings': 'Paramètres',
+    'profile': 'Profil',
+    'weight': 'Poids',
+    'calories': 'Calories',
+    'protein': 'Protéines',
+    'water': 'Eau',
+    'save': 'Enregistrer',
+    'onboarding_title': 'Bienvenue dans BIL',
+    'onboarding_body':
+        'BIL transforme vos données en informations pratiques et explicables.',
+    'start': 'Commencer',
+    'next': 'Suivant',
+    'language': 'Langue',
+    'appearance': 'Apparence',
+    'light': 'Clair',
+    'dark': 'Sombre',
+    'system': 'Système',
+    'english': 'Anglais',
+    'arabic': 'Arabe',
+    'profile_complete': 'Profil complété',
+    'add_weight': 'Ajouter un poids',
+    'weight_history': 'Historique du poids',
+    'food_search': 'Rechercher un aliment',
+    'custom_food': 'Aliment personnalisé',
+    'daily_insights': 'Aperçus du jour',
+    'empty_state':
+        'Aucune donnée. Commencez par ajouter votre poids ou votre premier repas.',
+    'primary_navigation': 'Navigation principale',
+    'quick_add': 'Ajout rapide',
+    'french': 'Français',
+    'spanish': 'Espagnol',
+    'turkish': 'Turc',
+  };
+
+  static const Map<String, String> _es = {
+    'app_title': 'BIL – Body Intelligence Log',
+    'welcome_back': 'Te damos la bienvenida de nuevo',
+    'dashboard': 'Panel',
+    'daily_log': 'Diario',
+    'nutrition': 'Nutrición',
+    'history': 'Historial',
+    'analytics': 'Análisis',
+    'settings': 'Ajustes',
+    'profile': 'Perfil',
+    'weight': 'Peso',
+    'calories': 'Calorías',
+    'protein': 'Proteínas',
+    'water': 'Agua',
+    'save': 'Guardar',
+    'onboarding_title': 'Te damos la bienvenida a BIL',
+    'onboarding_body':
+        'BIL convierte tus datos en información práctica y explicable.',
+    'start': 'Empezar',
+    'next': 'Siguiente',
+    'language': 'Idioma',
+    'appearance': 'Apariencia',
+    'light': 'Claro',
+    'dark': 'Oscuro',
+    'system': 'Sistema',
+    'english': 'Inglés',
+    'arabic': 'Árabe',
+    'profile_complete': 'Perfil completo',
+    'add_weight': 'Añadir peso',
+    'weight_history': 'Historial de peso',
+    'food_search': 'Buscar alimentos',
+    'custom_food': 'Alimento personalizado',
+    'daily_insights': 'Información diaria',
+    'empty_state':
+        'Aún no hay datos. Empieza añadiendo tu peso o tu primera comida.',
+    'primary_navigation': 'Navegación principal',
+    'quick_add': 'Añadir rápido',
+    'french': 'Francés',
+    'spanish': 'Español',
+    'turkish': 'Turco',
+  };
+
+  static const Map<String, String> _tr = {
+    'app_title': 'BIL – Body Intelligence Log',
+    'welcome_back': 'Tekrar hoş geldiniz',
+    'dashboard': 'Gösterge paneli',
+    'daily_log': 'Günlük kayıt',
+    'nutrition': 'Beslenme',
+    'history': 'Geçmiş',
+    'analytics': 'Analizler',
+    'settings': 'Ayarlar',
+    'profile': 'Profil',
+    'weight': 'Kilo',
+    'calories': 'Kalori',
+    'protein': 'Protein',
+    'water': 'Su',
+    'save': 'Kaydet',
+    'onboarding_title': "BIL'e hoş geldiniz",
+    'onboarding_body':
+        'BIL, verilerinizi pratik ve açıklanabilir içgörülere dönüştürür.',
+    'start': 'Başla',
+    'next': 'Sonraki',
+    'language': 'Dil',
+    'appearance': 'Görünüm',
+    'light': 'Açık',
+    'dark': 'Koyu',
+    'system': 'Sistem',
+    'english': 'İngilizce',
+    'arabic': 'Arapça',
+    'profile_complete': 'Profil tamamlandı',
+    'add_weight': 'Kilo ekle',
+    'weight_history': 'Kilo geçmişi',
+    'food_search': 'Yiyecek ara',
+    'custom_food': 'Özel yiyecek',
+    'daily_insights': 'Günlük içgörüler',
+    'empty_state':
+        'Henüz veri yok. İlk kilonuzu veya öğününüzü ekleyerek başlayın.',
+    'primary_navigation': 'Ana gezinme',
+    'quick_add': 'Hızlı ekle',
+    'french': 'Fransızca',
+    'spanish': 'İspanyolca',
+    'turkish': 'Türkçe',
   };
 
   String get(String key) {
-    final value = locale.languageCode == 'ar' ? _ar[key] : _en[key];
-    return value ?? key;
+    final translations = switch (locale.languageCode) {
+      'ar' => _ar,
+      'fr' => _fr,
+      'es' => _es,
+      'tr' => _tr,
+      _ => _en,
+    };
+    final source = _en[key];
+    final extended = !const {
+      'ar',
+      'en',
+      'fr',
+      'es',
+      'tr',
+    }.contains(locale.languageCode);
+    final value = extended
+        ? source == null
+              ? null
+              : RuntimeCopy.resolve(
+                  source,
+                  BilLocalePolicy.canonicalTag(locale),
+                )
+        : translations[key];
+    assert(
+      value != null,
+      'Missing production translation: ${locale.languageCode}:$key',
+    );
+    // Preserve usable copy in release builds. Missing keys remain assertions
+    // in development, but a user must never see a translation-system error.
+    return value ?? _en[key] ?? key;
   }
+
+  bool has(String key) => switch (locale.languageCode) {
+    'ar' => _ar.containsKey(key),
+    'fr' => _fr.containsKey(key),
+    'es' => _es.containsKey(key),
+    'tr' => _tr.containsKey(key),
+    'en' => _en.containsKey(key),
+    _ =>
+      _en[key] != null &&
+          RuntimeCopy.resolve(
+                _en[key]!,
+                BilLocalePolicy.canonicalTag(locale),
+              ) !=
+              null,
+  };
+
+  String isolate(Object value) => '\u2068$value\u2069';
+
+  String number(num value, {int? decimalDigits}) =>
+      NumberFormat.decimalPatternDigits(
+        locale: locale.toLanguageTag(),
+        decimalDigits: decimalDigits,
+      ).format(value);
+
+  String date(DateTime value) =>
+      DateFormat.yMMMd(locale.toLanguageTag()).format(value.toLocal());
+
+  String time(DateTime value, {bool use24Hour = false}) => DateFormat(
+    use24Hour ? 'HH:mm' : 'jm',
+    locale.toLanguageTag(),
+  ).format(value.toLocal());
+
+  String plural(
+    num count, {
+    required String zero,
+    required String one,
+    required String other,
+  }) => Intl.plural(
+    count,
+    zero: zero,
+    one: one,
+    other: other,
+    locale: locale.languageCode,
+    args: <Object>[count],
+    name: 'bil_plural',
+  );
 
   static const Map<String, String> _arabicText = {
     'BIL is preparing your local data': 'يُجهّز BIL بياناتك المحلية',
@@ -127,6 +415,9 @@ class AppLocalizations {
     'Seven-day change': 'تغير سبعة أيام',
     'Smoothed weekly direction': 'الاتجاه الأسبوعي الممهّد',
     'At least four entries needed': 'نحتاج أربعة قياسات على الأقل',
+    'entries': 'قياسات',
+    'days': 'أيام',
+    'Direction': 'الاتجاه',
     'week': 'أسبوع',
     'Scale trends include water, glycogen, digestive content, and measurement variation; they do not prove fat or muscle change.':
         'تشمل اتجاهات الميزان الماء والجليكوجين ومحتوى الجهاز الهضمي واختلاف ظروف القياس؛ ولا تثبت تغير الدهون أو العضلات.',
@@ -421,6 +712,9 @@ class AppLocalizations {
     'Copy a JSON export to the clipboard.': 'انسخ تصدير JSON إلى الحافظة.',
     'Connected capabilities': 'الخدمات المتصلة',
     'Account': 'الحساب',
+    'Secure account sign-in and registration are available.':
+        'تسجيل الدخول وإنشاء الحساب الآمنان متاحان.',
+    'Requires Supabase client configuration.': 'يتطلب إعداد عميل Supabase.',
     'Ask BIL': 'اسأل BIL',
     'Subscriptions and purchases': 'الاشتراكات والمشتريات',
     'Community': 'المجتمع',
@@ -468,8 +762,8 @@ class AppLocalizations {
     'Continue in Local Mode': 'المتابعة في الوضع المحلي',
     'Manual barcode lookup': 'البحث اليدوي بالباركود',
     'Barcode digits': 'أرقام الباركود',
-    'Camera scanning is unavailable until a verified scanner adapter and permissions are configured.':
-        'المسح بالكاميرا غير متاح حتى إعداد محول مسح موثّق والأذونات اللازمة.',
+    'Enter an 8, 12, 13, or 14 digit GTIN. You can also use the camera scanner from the quick actions above.':
+        'أدخل رقم GTIN من 8 أو 12 أو 13 أو 14 خانة، أو استخدم ماسح الكاميرا من الإجراءات السريعة أعلاه.',
     'Search': 'بحث',
     'Barcode not found locally': 'الباركود غير موجود محليًا',
     'BIL will not invent nutrition values. You can create a food from the product label and this barcode will be prefilled.':
@@ -518,13 +812,146 @@ class AppLocalizations {
     'Helpfulness': 'درجة الفائدة',
     'Delete memory': 'حذف الذاكرة',
     'Edit': 'تعديل',
+    'Scan food barcode': 'مسح باركود الطعام',
+    'Toggle flashlight': 'تشغيل أو إطفاء الإضاءة',
+    'Camera permission or scanner startup failed.':
+        'تعذر بدء الكاميرا أو لم يُمنح الإذن.',
+    'Camera permission was denied or the camera is unavailable. You can retry or use manual barcode entry.':
+        'تم رفض إذن الكاميرا أو أن الكاميرا غير متاحة. يمكنك إعادة المحاولة أو إدخال الباركود يدويًا.',
+    'Place the product barcode inside the frame. Nothing is uploaded.':
+        'ضع باركود المنتج داخل الإطار. لا يتم رفع أي شيء.',
+    'Scan with camera': 'المسح بالكاميرا',
+    'Enter barcode manually': 'إدخال الباركود يدويًا',
+    'Barcode result source': 'مصدر نتيجة الباركود',
+    'No verified product matched this barcode.':
+        'لا يوجد منتج موثّق مطابق لهذا الباركود.',
+    'Analytics overview': 'نظرة عامة على التحليلات',
+    'Since the previous check-in': 'منذ القياس السابق',
+    'Measurement conditions differed': 'اختلفت ظروف القياس',
+    'At least 14 observation days improve trends':
+        'تحسن الاتجاهات بعد توفر 14 يوم ملاحظة على الأقل',
+    'Record similar measurement conditions on more days':
+        'سجّل القياس في ظروف متشابهة خلال أيام إضافية',
+    'Weight is broadly stable since the previous check-in.':
+        'الوزن مستقر عمومًا منذ القياس السابق.',
+    'The scale changed, but one reading is not enough to justify a plan change.':
+        'تغيّر رقم الميزان، لكن قراءة واحدة لا تكفي لتبرير تغيير الخطة.',
+    'A modest change was recorded; the multi-day trend is more informative.':
+        'سُجّل تغير محدود، ويبقى الاتجاه عبر عدة أيام أكثر فائدة.',
+    'Water and glycogen': 'الماء والجليكوجين',
+    'Digestive content': 'محتوى الجهاز الهضمي',
+    'Measurement timing or conditions': 'توقيت القياس أو ظروفه',
+    'Incomplete food logging': 'عدم اكتمال تسجيل الطعام',
+    'Small daily variation can mask the underlying trend':
+        'قد يخفي التذبذب اليومي البسيط الاتجاه الأساسي',
     'Quick Add': 'إضافة سريعة',
+    'Enter a valid 8 to 14 digit barcode':
+        'أدخل باركود صحيحًا من 8 إلى 14 رقمًا',
+    'Could not save this food. Review the values and try again.':
+        'تعذر حفظ هذا الطعام. راجع القيم وحاول مرة أخرى.',
+    'Could not delete this food. Try again.':
+        'تعذر حذف هذا الطعام. حاول مرة أخرى.',
+    'A food with this barcode already exists.':
+        'يوجد بالفعل طعام بهذا الباركود.',
     'Unavailable until the server-side AI consent and rate-limit boundary is configured.':
         'غير متاح حتى إعداد حدود موافقة الذكاء الاصطناعي وتحديد المعدل على الخادم.',
   };
 
-  String text(String english) =>
-      locale.languageCode == 'ar' ? (_arabicText[english] ?? english) : english;
+  String text(String english) {
+    final reviewed = RuntimeCopy.resolve(
+      english,
+      BilLocalePolicy.canonicalTag(locale),
+    );
+    if (reviewed != null) return reviewed;
+    if (locale.languageCode == 'en') return english;
+    if (locale.languageCode == 'ar') {
+      final exact = _arabicText[english];
+      if (exact != null) return exact;
+    }
+
+    // Engine evidence can contain a measured numeric value rather than a
+    // translatable sentence. Preserve the measured number and localize only
+    // its unit; treating the whole value as a copy key causes a debug-time
+    // assertion and incorrectly marks valid evidence as untranslated.
+    final measurement = RegExp(
+      r'^([+-]?\d+(?:\.\d+)?)\s+(kg|lb|g|mg|ml|L|cm|in|%)$',
+    ).firstMatch(english);
+    if (measurement != null) {
+      final value = measurement.group(1)!;
+      final sourceUnit = measurement.group(2)!;
+      final unit = locale.languageCode == 'ar'
+          ? switch (sourceUnit) {
+              'kg' => 'كجم',
+              'lb' => 'رطل',
+              'g' => 'غ',
+              'mg' => 'ملغ',
+              'ml' => 'مل',
+              'L' => 'لتر',
+              'cm' => 'سم',
+              'in' => 'بوصة',
+              _ => sourceUnit,
+            }
+          : sourceUnit;
+      return '$value $unit';
+    }
+
+    final weightChange = RegExp(
+      r'^([+-]?\d+(?:\.\d+)?) kg since the previous check-in$',
+    ).firstMatch(english);
+    if (weightChange != null) {
+      return '${weightChange.group(1)} كجم منذ القياس السابق';
+    }
+
+    final weightDays = RegExp(r'^(\d+) days with weight$').firstMatch(english);
+    if (weightDays != null) {
+      return '${weightDays.group(1)} أيام مسجلة للوزن';
+    }
+
+    final mealDays = RegExp(r'^(\d+) days with meal data$').firstMatch(english);
+    if (mealDays != null) {
+      return '${mealDays.group(1)} أيام ببيانات وجبات';
+    }
+
+    final hydrationDays = RegExp(
+      r'^(\d+) days with hydration data$',
+    ).firstMatch(english);
+    if (hydrationDays != null) {
+      return '${hydrationDays.group(1)} أيام ببيانات شرب الماء';
+    }
+
+    final comparable = RegExp(
+      r'^(\d+) comparable weigh-ins$',
+    ).firstMatch(english);
+    if (comparable != null) {
+      return '${comparable.group(1)} قياسات وزن قابلة للمقارنة';
+    }
+
+    final moreWeight = RegExp(
+      r'^(\d+) more weight days for a useful trend$',
+    ).firstMatch(english);
+    if (moreWeight != null) {
+      return 'نحتاج ${moreWeight.group(1)} أيام وزن إضافية لاتجاه مفيد';
+    }
+
+    final moreMeals = RegExp(
+      r'^(\d+) more complete meal days for intake context$',
+    ).firstMatch(english);
+    if (moreMeals != null) {
+      return 'نحتاج ${moreMeals.group(1)} أيام وجبات مكتملة إضافية';
+    }
+
+    // Runtime copy can contain user-derived values and server evidence. Keep
+    // the English source visible until a reviewed translation is supplied;
+    // never show an internal localization failure to the user.
+    assert(() {
+      debugPrint(
+        'Missing reviewed runtime translation: '
+        '${locale.languageCode}: $english',
+      );
+      return true;
+    }());
+    return english;
+  }
 }
 
 extension AppLocalizationContext on BuildContext {
@@ -537,7 +964,9 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) => AppLocalizations.supportedLocales.any(
-    (l) => l.languageCode == locale.languageCode,
+    (candidate) =>
+        BilLocalePolicy.canonicalTag(candidate) ==
+        BilLocalePolicy.canonicalTag(locale),
   );
 
   @override

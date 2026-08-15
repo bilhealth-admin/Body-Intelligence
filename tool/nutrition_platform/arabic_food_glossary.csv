@@ -1,0 +1,12 @@
+bil_food_id,english_name,arabic_name,aliases,confidence
+0233492a-8e01-5667-adc5-7812ad6d6147,"Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw",صدر دجاج نيئ منزوع الجلد والعظم,صدر دجاج نيئ|صدور دجاج نيئة,1.0
+b1f6196e-e43e-5be5-a8eb-3b78fa467706,"Rice, brown, long grain, unenriched, raw",أرز بني طويل الحبة نيئ,أرز بني نيئ|رز بني نيئ|أرز أسمر نيئ,1.0
+67bdfb6e-440a-526e-b611-cf3854010a56,"Rice, white, long-grain, regular, raw, unenriched",أرز أبيض طويل الحبة نيئ,أرز أبيض نيئ|رز أبيض نيئ,1.0
+97648b51-cd3d-506a-9f1f-2b6557d03c5b,"Bananas, raw",موز طازج,موز|موزة|الموز,1.0
+ce6ab4f4-a395-5d7e-a2de-e9987e72489b,"Oil, olive, extra virgin",زيت زيتون بكر ممتاز,زيت الزيتون|زيت زيتون|زيت زيتون بكر,1.0
+08e47258-5320-596d-ad21-1ffe45d9e0b9,"Egg, whole, raw, fresh",بيض دجاج كامل نيئ,بيض نيئ|بيضة نيئة|بيض دجاج,1.0
+b3e45812-ead2-5c74-8391-edb216252101,"Lentils, raw",عدس نيئ,عدس جاف|العدس النيئ,1.0
+4e2fe894-39bd-5f88-84d3-9cdef2b92dde,"Lentils, mature seeds, cooked, boiled, without salt",عدس مسلوق دون ملح,عدس مطبوخ|عدس مسلوق,1.0
+114f246a-4cb7-5d33-8b0e-989367621dd2,"Chickpeas (garbanzo beans, bengal gram), mature seeds, raw",حمص حب نيئ,حب الحمص|حمص جاف,1.0
+02d0d328-2815-5c47-9c9c-8e0b57d58d04,"Dates, medjool",تمر مجهول,تمر مجدول|تمور مجهول|حبة تمر مجهول,1.0
+d0f6cc75-4723-5539-ab46-f569e5342fa8,"Dates, deglet noor",تمر دقلة نور,تمور دقلة نور|حبة تمر دقلة نور,1.0

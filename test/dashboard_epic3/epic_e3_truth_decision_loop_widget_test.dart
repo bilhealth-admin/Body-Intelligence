@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('phone exposes truth explanation and all decision feedback', (
+  testWidgets('phone exposes the trusted Body Twin without legacy feedback', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -50,28 +50,25 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.byKey(const Key('dashboard-truth-explanation-surface')),
+      find.byKey(const Key('dashboard-mobile-body-twin-snapshot')),
       findsOneWidget,
     );
-    expect(find.byKey(const Key('dashboard-truth-evidence')), findsOneWidget);
-    expect(find.byKey(const Key('dashboard-truth-confidence')), findsOneWidget);
+    expect(find.text('A cautious direction is forming.'), findsOneWidget);
     expect(
-      find.byKey(const Key('dashboard-truth-missing-evidence')),
-      findsOneWidget,
+      find.byKey(const Key('dashboard-truth-explanation-surface')),
+      findsNothing,
     );
     expect(find.byKey(const Key('dashboard-truth-abstention')), findsNothing);
-
-    await tester.tap(find.byKey(const Key('dashboard-decision-accepted')));
-    await tester.tap(find.byKey(const Key('dashboard-decision-done')));
-    await tester.tap(find.byKey(const Key('dashboard-decision-not-suitable')));
-
-    expect(accepted, 1);
-    expect(done, 1);
-    expect(notSuitable, 1);
+    expect(find.byKey(const Key('dashboard-decision-feedback')), findsNothing);
+    expect(accepted, 0);
+    expect(done, 0);
+    expect(notSuitable, 0);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('abstention reason appears only when supplied', (tester) async {
+  testWidgets('abstention detail stays out of the compact dashboard', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -110,8 +107,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('لماذا يعتقد BIL ذلك؟'), findsOneWidget);
-    expect(find.byKey(const Key('dashboard-truth-abstention')), findsOneWidget);
+    expect(
+      find.byKey(const Key('dashboard-mobile-body-twin-snapshot')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('dashboard-truth-abstention')), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }

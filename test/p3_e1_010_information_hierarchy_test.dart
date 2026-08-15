@@ -97,8 +97,20 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Record your day'), findsOneWidget);
-      expect(find.widgetWithText(FilledButton, 'Add water'), findsOneWidget);
       expect(find.widgetWithText(FilledButton, 'Save meal'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('daily_log_add_water_action')),
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('daily_log_add_water_action')),
+        findsOneWidget,
+      );
+      expect(find.text('Add water'), findsOneWidget);
 
       await tester.drag(find.byType(ListView).first, const Offset(0, -2000));
       await tester.pumpAndSettle();

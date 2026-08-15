@@ -33,7 +33,6 @@ void main() {
       'BilPremiumResponsiveLayout.twinBaseHeight(',
       'BilPremiumResponsiveLayout.usesSplitHero(',
       'BilPremiumResponsiveLayout.pairsDaySections(',
-      'BilPremiumResponsiveLayout.dayPairHeight',
     ]) {
       expect(source, contains(contract), reason: contract);
     }

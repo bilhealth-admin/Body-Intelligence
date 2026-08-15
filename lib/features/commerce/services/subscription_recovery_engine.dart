@@ -70,7 +70,12 @@ final class SubscriptionRecoveryEngine {
         record.currentPeriodEndsAt == null ||
             now.isAfter(record.currentPeriodEndsAt!.toUtc()),
       SubscriptionLifecycle.inactive ||
+      SubscriptionLifecycle.pending ||
+      SubscriptionLifecycle.billingRetry ||
+      SubscriptionLifecycle.accountHold ||
       SubscriptionLifecycle.paused ||
+      SubscriptionLifecycle.suspended ||
+      SubscriptionLifecycle.deferred ||
       SubscriptionLifecycle.expired ||
       SubscriptionLifecycle.refunded ||
       SubscriptionLifecycle.revoked => true,

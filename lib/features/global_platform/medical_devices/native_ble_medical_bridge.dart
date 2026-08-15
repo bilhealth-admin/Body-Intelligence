@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 
 import 'ble_medical_device_platform.dart';
 
-final class MethodChannelBleMedicalBridge implements BleMedicalBridge {
+final class MethodChannelBleMedicalBridge implements ManagedBleMedicalBridge {
   MethodChannelBleMedicalBridge({
     MethodChannel? channel,
     BleGattMeasurementParser? parser,
@@ -13,6 +13,10 @@ final class MethodChannelBleMedicalBridge implements BleMedicalBridge {
 
   final MethodChannel _channel;
   final BleGattMeasurementParser _parser;
+
+  @override
+  Future<void> requestPermissions() =>
+      _channel.invokeMethod<void>('requestPermissions');
 
   @override
   Future<List<BlePeripheral>> discover(Duration timeout) async {
@@ -49,6 +53,22 @@ final class MethodChannelBleMedicalBridge implements BleMedicalBridge {
   @override
   Future<void> disconnect(String peripheralId) => _channel.invokeMethod<void>(
     'disconnect',
+    <String, Object?>{'peripheralId': peripheralId},
+  );
+
+  @override
+  Future<Map<String, Object?>> deviceStatus(String peripheralId) async =>
+      Map<String, Object?>.from(
+        await _channel.invokeMapMethod<String, Object?>(
+              'deviceStatus',
+              <String, Object?>{'peripheralId': peripheralId},
+            ) ??
+            const <String, Object?>{},
+      );
+
+  @override
+  Future<void> forget(String peripheralId) => _channel.invokeMethod<void>(
+    'forget',
     <String, Object?>{'peripheralId': peripheralId},
   );
 

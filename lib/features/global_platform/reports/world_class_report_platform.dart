@@ -40,16 +40,19 @@ final class WorldClassReportRuntime {
   Future<ReportRenderResult> render(
     ScientificReport report, {
     required ReportTheme theme,
-  }) async => ReportRenderResult(
-    pdf: await pdfRenderer.render(
-      report,
-      title: theme.title,
-      footer: theme.footer,
-    ),
-    xlsx: _xlsx(report, theme),
-    csv: ScientificReportRuntime().csv(report),
-    json: ScientificReportRuntime().json(report),
-  );
+  }) async {
+    report.validate();
+    return ReportRenderResult(
+      pdf: await pdfRenderer.render(
+        report,
+        title: theme.title,
+        footer: theme.footer,
+      ),
+      xlsx: _xlsx(report, theme),
+      csv: ScientificReportRuntime().csv(report),
+      json: ScientificReportRuntime().json(report),
+    );
+  }
 
   Uint8List _xlsx(ScientificReport report, ReportTheme theme) {
     final archive = Archive();

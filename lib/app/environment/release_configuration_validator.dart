@@ -30,6 +30,9 @@ class ReleaseConfigurationIssue {
 class ReleaseConfigurationValidator {
   const ReleaseConfigurationValidator._();
 
+  static const approvedApplicationId =
+      'com.bilhealth.bodyintelligencelog';
+
   static List<ReleaseConfigurationIssue> validate(
     ReleaseConfiguration configuration,
   ) {
@@ -41,6 +44,15 @@ class ReleaseConfigurationValidator {
         const ReleaseConfigurationIssue(
           'invalid_application_id',
           'A permanent non-template application identifier is required.',
+        ),
+      );
+    }
+
+    if (configuration.production && applicationId != approvedApplicationId) {
+      issues.add(
+        const ReleaseConfigurationIssue(
+          'unapproved_production_application_id',
+          'Production requires the owner-approved BIL application identifier.',
         ),
       );
     }

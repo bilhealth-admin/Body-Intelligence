@@ -183,12 +183,16 @@ CREATE TABLE IF NOT EXISTS cloud_audit(
 
   @override
   Future<List<CloudSyncOperation>> readReadyOperations({
+    required String ownerId,
     required DateTime now,
     required int limit,
   }) async => _db
       .select(
-        'SELECT payload FROM cloud_outbox WHERE next_attempt_at <= ? ORDER BY next_attempt_at LIMIT ?',
-        [now.toUtc().toIso8601String(), limit],
+        '''SELECT payload FROM cloud_outbox
+           WHERE next_attempt_at <= ?
+             AND json_extract(payload, '\$.record.ownerId') = ?
+           ORDER BY next_attempt_at LIMIT ?''',
+        [now.toUtc().toIso8601String(), ownerId, limit],
       )
       .map(
         (r) => _operationFromJson(
@@ -441,8 +445,13 @@ CREATE TABLE IF NOT EXISTS cloud_audit(
       .toList(growable: false);
 
   @override
-  Future<int> pendingCount() async =>
-      (_db.select('SELECT COUNT(*) AS c FROM cloud_outbox').first['c'] as int);
+  Future<int> pendingCount({String? ownerId}) async => ownerId == null
+      ? (_db.select('SELECT COUNT(*) AS c FROM cloud_outbox').first['c'] as int)
+      : (_db.select(
+              "SELECT COUNT(*) AS c FROM cloud_outbox WHERE json_extract(payload, '\$.record.ownerId') = ?",
+              [ownerId],
+            ).first['c']
+            as int);
   @override
   Future<int> deadLetterCount() async =>
       (_db.select('SELECT COUNT(*) AS c FROM cloud_dead_letters').first['c']

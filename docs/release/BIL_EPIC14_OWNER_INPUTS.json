@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "purpose": "Owner-supplied release values; this file contains no credentials and is not consumed at runtime.",
+  "android": {
+    "google_play_app_record": "CREATED_OWNER_REPORTED",
+    "play_app_signing_enrollment": "OWNER_INPUT_REQUIRED",
+    "upload_key_offline_backup": "OWNER_INPUT_REQUIRED",
+    "closed_testing_purchase_evidence": "OWNER_INPUT_REQUIRED"
+  },
+  "apple": {
+    "developer_membership": "ACTIVATION_PENDING_OWNER_REPORTED",
+    "team_id": "OWNER_INPUT_REQUIRED",
+    "app_store_connect_api_key": "OWNER_INPUT_REQUIRED_SECURE_SECRET",
+    "distribution_certificate": "OWNER_INPUT_REQUIRED_SECURE_SECRET",
+    "provisioning_profile": "OWNER_INPUT_REQUIRED_SECURE_SECRET",
+    "app_store_connect_record": "OWNER_INPUT_REQUIRED",
+    "sandbox_purchase_evidence": "OWNER_INPUT_REQUIRED"
+  },
+  "links": {
+    "verified_domain": "OWNER_INPUT_REQUIRED",
+    "privacy_url": "OWNER_INPUT_REQUIRED",
+    "terms_url": "OWNER_INPUT_REQUIRED",
+    "support_url": "OWNER_INPUT_REQUIRED",
+    "account_deletion_url": "OWNER_INPUT_REQUIRED",
+    "android_assetlinks_live": "OWNER_INPUT_REQUIRED",
+    "apple_app_site_association_live": "OWNER_INPUT_REQUIRED"
+  },
+  "messaging": {
+    "fcm_production_configuration": "OWNER_INPUT_REQUIRED_SECURE_SECRET",
+    "apns_production_configuration": "OWNER_INPUT_REQUIRED_SECURE_SECRET"
+  },
+  "commerce": {
+    "plus_monthly_product_id": "OWNER_INPUT_REQUIRED",
+    "plus_annual_product_id": "OWNER_INPUT_REQUIRED",
+    "pro_monthly_product_id": "OWNER_INPUT_REQUIRED",
+    "pro_annual_product_id": "OWNER_INPUT_REQUIRED",
+    "apple_subscription_group": "OWNER_INPUT_REQUIRED"
+  }
+}

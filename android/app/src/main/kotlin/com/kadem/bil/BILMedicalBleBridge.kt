@@ -22,6 +22,7 @@ class BILMedicalBleBridge(private val context: Context, messenger: BinaryMesseng
   private val channel = MethodChannel(messenger, CHANNEL)
   private val manager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
   private val devices = ConcurrentHashMap<String, BluetoothDevice>()
+  private val deviceProfiles = ConcurrentHashMap<String, Set<String>>()
   private val sessions = ConcurrentHashMap<String, BluetoothGatt>()
   private val seen = ConcurrentHashMap.newKeySet<String>()
   private val handler = Handler(Looper.getMainLooper())
@@ -40,6 +41,22 @@ class BILMedicalBleBridge(private val context: Context, messenger: BinaryMesseng
         "pair" -> pair(call.argument<String>("peripheralId"), result)
         "disconnect" -> disconnect(call.argument<String>("peripheralId"), result)
         "cancel" -> disconnect(call.argument<String>("peripheralId"), result)
+        "deviceStatus" -> result.success(mapOf(
+          "connected" to sessions.containsKey(call.argument<String>("peripheralId")),
+          "batteryPercent" to null,
+          "batteryVerified" to false,
+        ))
+        "forget" -> {
+          val id = call.argument<String>("peripheralId")
+          id?.let {
+            val gatt = sessions.remove(it)
+            gatt?.disconnect()
+            gatt?.close()
+            devices.remove(it)
+            deviceProfiles.remove(it)
+          }
+          result.success(mapOf("forgottenLocally" to true, "systemUnpairRequired" to true))
+        }
         "readMeasurements" -> read(call.argument<String>("peripheralId"), result)
         else -> result.notImplemented()
       }
@@ -56,7 +73,16 @@ class BILMedicalBleBridge(private val context: Context, messenger: BinaryMesseng
   private fun discover(adapter: BluetoothAdapter, timeoutMs: Int, result: MethodChannel.Result) {
     val replied = AtomicBoolean(false)
     val callback = object : ScanCallback() {
-      override fun onScanResult(type: Int, scan: ScanResult) { devices[scan.device.address] = scan.device }
+      override fun onScanResult(type: Int, scan: ScanResult) {
+        val advertised = (scan.scanRecord?.serviceUuids ?: emptyList())
+          .map { shortUuid(it.uuid.toString()) }
+          .filter { services.contains(it) }
+          .toSet()
+        if (advertised.isNotEmpty()) {
+          devices[scan.device.address] = scan.device
+          deviceProfiles[scan.device.address] = advertised
+        }
+      }
       override fun onScanFailed(errorCode: Int) { if (replied.compareAndSet(false, true)) result.error("scan_failed", errorCode.toString(), null) }
     }
     adapter.bluetoothLeScanner.startScan(callback)
@@ -146,5 +172,11 @@ class BILMedicalBleBridge(private val context: Context, messenger: BinaryMesseng
   }
 
   private fun shortUuid(value: String) = value.substring(4, 8).uppercase()
-  private fun describe(device: BluetoothDevice): Map<String, Any> = mapOf("id" to device.address, "name" to (device.name ?: "Medical device"), "manufacturer" to "unknown", "firmwareVersion" to "unknown", "profiles" to services.toList())
+  private fun describe(device: BluetoothDevice): Map<String, Any> = mapOf(
+    "id" to device.address,
+    "name" to (device.name ?: "Medical device"),
+    "manufacturer" to "unknown",
+    "firmwareVersion" to "unknown",
+    "profiles" to (deviceProfiles[device.address] ?: emptySet<String>()).toList(),
+  )
 }

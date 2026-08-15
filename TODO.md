@@ -1,4 +1,14 @@
-# Phase 3 — Epic 2 Execution TODO
+# LEGACY / RETIRED — DO NOT USE AS A CURRENT EXECUTION PLAN
+
+> هذا الملف قديم ومتقاعد، وقد أُنجز نطاقه السابق بالكامل. ليس مرجعًا لأي
+> Epic حالية أو لاحقة، ولا يجوز استخدام البنود القديمة أدناه لتحديد نطاق
+> التنفيذ. المرجع التنفيذي الحالي والملزم هو خطة **BIL v1 ذات 16 Epic**
+> وملف `BIL_V1_RC_EXECUTION_LOG.md`. Epic 2 الحالية هي إغلاق البنية وتقسيم
+> الملفات الكبيرة حسب المسؤوليات وفق الخطة المعتمدة.
+
+## Archived historical content — completed and retained only for Git history
+
+> Do not execute, resume, or infer current work from anything below this line.
 
 ## Current target
 - [ ] P3-E2-002 — Reusable premium surface primitives (cards/sections) replace duplicated layout chrome patterns.

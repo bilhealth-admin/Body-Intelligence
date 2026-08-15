@@ -22,10 +22,10 @@ void main() {
         'dashboardCardHighContrastBorderWidth = 2',
         'dashboardCardHoverScale = 1.004',
         'dashboardCardPressedScale = .992',
-        'dashboardCardShadowBlur = 22',
-        'dashboardCardShadowOffsetY = 10',
-        'dashboardCardAccentBlur = 28',
-        'dashboardCardInnerHighlightAlpha = .72',
+        'dashboardCardShadowBlur = 12',
+        'dashboardCardShadowOffsetY = 4',
+        'dashboardCardAccentBlur = 14',
+        'dashboardCardInnerHighlightAlpha = .38',
         'dashboardCardBorderColor(',
         'dashboardCardShadowColor(',
         'dashboardCardAccentShadowColor(',
@@ -67,12 +67,10 @@ void main() {
         'PremiumDesignTokens.dashboardCardHoverScale',
         'PremiumDesignTokens.dashboardCardBorderColor(',
         'PremiumDesignTokens.dashboardCardBorderWidth',
-        'PremiumDesignTokens.dashboardCardAccentShadowColor(',
-        'PremiumDesignTokens.dashboardCardAccentBlur',
-        'PremiumDesignTokens.dashboardCardShadowColor(',
-        'PremiumDesignTokens.dashboardCardShadowBlur',
-        'PremiumDesignTokens.dashboardCardShadowOffsetY',
-        'dashboardCardInnerHighlightAlpha',
+        'MediaQuery.highContrastOf(context)',
+        'colorScheme.surface',
+        'blurRadius:12',
+        'offset:Offset(0,4)',
       ]) {
         expect(
           compactSurface,
@@ -80,6 +78,12 @@ void main() {
           reason: 'Surface does not use: $contract',
         );
       }
+
+      expect(
+        compactSurface,
+        isNot(contains('dashboardCardAccentShadowColor(')),
+        reason: 'The approved clean surface must not add cyan glow.',
+      );
     },
   );
 

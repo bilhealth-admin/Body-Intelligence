@@ -5,6 +5,9 @@ import 'package:go_router/go_router.dart';
 
 import '../localization/app_localizations.dart';
 import '../theme/premium_motion_tokens.dart';
+import '../theme/bil_semantic_icons.dart';
+import '../../shared/widgets/bil_wordmark.dart';
+import 'bil_quick_add_sheet.dart';
 
 class ResponsiveAppShell extends StatelessWidget {
   const ResponsiveAppShell({super.key, required this.child});
@@ -31,45 +34,53 @@ class ResponsiveAppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentPath = GoRouterState.of(context).uri.path;
     final index = selectedIndex(context);
+    final isDashboard =
+        currentPath == '/dashboard' || currentPath.startsWith('/dashboard/');
     final wide = MediaQuery.sizeOf(context).width >= 900;
-    final arabic =
-        Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
 
     final items = <({IconData icon, IconData selected, String label})>[
       (
-        icon: Icons.dashboard_outlined,
-        selected: Icons.dashboard_rounded,
+        icon: BilSemanticIcons.today,
+        selected: BilSemanticIcons.todaySelected,
         label: context.strings.text('Today'),
       ),
       (
-        icon: Icons.edit_note_outlined,
-        selected: Icons.edit_note_rounded,
+        icon: BilSemanticIcons.diary,
+        selected: BilSemanticIcons.diarySelected,
         label: context.strings.text('Diary'),
       ),
       (
-        icon: Icons.restaurant_menu_outlined,
-        selected: Icons.restaurant_menu_rounded,
+        icon: BilSemanticIcons.discover,
+        selected: BilSemanticIcons.discoverSelected,
         label: context.strings.text('Discover'),
       ),
       (
-        icon: Icons.monitor_weight_outlined,
-        selected: Icons.monitor_weight_rounded,
+        icon: BilSemanticIcons.progress,
+        selected: BilSemanticIcons.progressSelected,
         label: context.strings.text('Progress'),
       ),
       (
-        icon: Icons.analytics_outlined,
-        selected: Icons.analytics_rounded,
+        icon: BilSemanticIcons.insights,
+        selected: BilSemanticIcons.insightsSelected,
         label: context.strings.text('Insights'),
       ),
       (
-        icon: Icons.settings_outlined,
-        selected: Icons.settings_rounded,
+        icon: BilSemanticIcons.more,
+        selected: BilSemanticIcons.moreSelected,
         label: context.strings.text('More'),
       ),
     ];
 
-    void navigate(int next) => context.go(paths[next]);
+    void navigate(int next) {
+      if (next == 1 && index != 1) {
+        final origin = Uri.encodeComponent(paths[index]);
+        context.go('/daily-log?from=$origin');
+        return;
+      }
+      context.go(paths[next]);
+    }
 
     void quickAdd() => showModalBottomSheet<void>(
       context: context,
@@ -86,23 +97,53 @@ class ResponsiveAppShell extends StatelessWidget {
           PremiumMotionTokens.stateChangeDuration,
         ),
       ),
-      builder: (sheetContext) => _QuickAddSheet(
-        arabic: arabic,
+      builder: (sheetContext) => BilQuickAddSheet(
         onWeight: () {
           Navigator.pop(sheetContext);
-          context.go('/daily-check-in');
+          context.push('/daily-check-in');
         },
         onFood: () {
           Navigator.pop(sheetContext);
-          context.go('/daily-log');
+          final origin = Uri.encodeComponent(paths[index]);
+          context.go('/daily-log?focus=meal&from=$origin');
+        },
+        onBarcode: () {
+          Navigator.pop(sheetContext);
+          final origin = Uri.encodeComponent(paths[index]);
+          context.go('/daily-log?action=barcode&from=$origin');
+        },
+        onVoice: () {
+          Navigator.pop(sheetContext);
+          final origin = Uri.encodeComponent(paths[index]);
+          context.go('/daily-log?action=voice&from=$origin');
+        },
+        onPhoto: () {
+          Navigator.pop(sheetContext);
+          final origin = Uri.encodeComponent(paths[index]);
+          context.go('/daily-log?action=photo&from=$origin');
         },
         onWater: () {
           Navigator.pop(sheetContext);
-          context.go('/daily-log');
+          final origin = Uri.encodeComponent(paths[index]);
+          context.go('/daily-log?action=water&from=$origin');
+        },
+        onExercise: () {
+          Navigator.pop(sheetContext);
+          context.push('/wellness/workouts');
+        },
+        onNotes: () {
+          Navigator.pop(sheetContext);
+          final origin = Uri.encodeComponent(paths[index]);
+          context.go('/daily-log/body-context?from=$origin');
         },
         onSearch: () {
           Navigator.pop(sheetContext);
           context.go('/nutrition');
+        },
+        onQuickMacros: () {
+          Navigator.pop(sheetContext);
+          final origin = Uri.encodeComponent(paths[index]);
+          context.go('/daily-log?action=quick-macros&from=$origin');
         },
       ),
     );
@@ -113,36 +154,57 @@ class ResponsiveAppShell extends StatelessWidget {
     );
 
     if (!wide) {
+      final mobileItems = [items[0], items[1], items[3], items[5]];
+      final mobilePaths = [paths[0], paths[1], paths[3], paths[5]];
+      final mobileIndex = switch (index) {
+        1 => 1,
+        3 || 4 => 2,
+        5 => 3,
+        _ => 0,
+      };
       return Scaffold(
-        backgroundColor: const Color(0xFF01050D),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        // The navigation surface owns real layout space. Extending content
+        // behind it made nested page FABs and final rows impossible to tap.
+        extendBody: false,
         body: child,
-        floatingActionButton: quickButton,
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         bottomNavigationBar: Semantics(
-          label: arabic ? 'التنقل الرئيسي' : 'Primary navigation',
+          label: context.strings.get('primary_navigation'),
           child: _GlassBottomNavigation(
             key: const Key('glass-bottom-navigation'),
-            selectedIndex: index,
-            items: items,
-            onSelected: navigate,
+            selectedIndex: mobileIndex,
+            items: mobileItems,
+            showQuickAdd: isDashboard,
+            onQuickAdd: quickAdd,
+            onSelected: (next) {
+              if (next == 1 && index != 1) {
+                final origin = Uri.encodeComponent(paths[index]);
+                context.go('/daily-log?from=$origin');
+                return;
+              }
+              context.go(mobilePaths[next]);
+            },
           ),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF01050D),
-      floatingActionButton: quickButton,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      // Quick Add belongs to the Today dashboard. Keeping it mounted on every
+      // wide route lets it cover page-owned controls such as the AI Coach
+      // composer, even though the compact shell already scopes it correctly.
+      floatingActionButton: isDashboard ? quickButton : null,
       body: Column(
         children: [
           Semantics(
-            label: arabic ? 'التنقل الرئيسي' : 'Primary navigation',
+            label: context.strings.get('primary_navigation'),
             child: _GlassTopNavigation(
               key: const Key('glass-top-navigation'),
               selectedIndex: index,
               items: items,
               onSelected: navigate,
-              onProfile: () => context.go('/profile-settings'),
+              onProfile: () => context.push('/profile-settings'),
               profileLabel: AppLocalizations.of(context).get('profile'),
             ),
           ),
@@ -190,13 +252,9 @@ class _GlassTopNavigation extends StatelessWidget {
           ),
           child: Row(
             children: [
-              const Text(
-                'BIL®',
-                style: TextStyle(
-                  color: Color(0xFFE8EEF3),
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                ),
+              const BilFullWordmark(
+                height: 28,
+                alignment: AlignmentDirectional.centerStart,
               ),
               const SizedBox(width: 26),
               Expanded(
@@ -290,15 +348,18 @@ class _TopNavigationItem extends StatelessWidget {
                     : const Color(0xFF91A1B1),
               ),
               const SizedBox(width: 6),
-              Text(
-                item.label,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: selected
-                      ? const Color(0xFFE2E9EF)
-                      : const Color(0xFF91A1B1),
-                  fontSize: 10,
-                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+              Flexible(
+                child: Text(
+                  item.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: selected
+                        ? const Color(0xFFE2E9EF)
+                        : const Color(0xFF91A1B1),
+                    fontSize: 10,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -315,33 +376,56 @@ class _GlassBottomNavigation extends StatelessWidget {
     required this.selectedIndex,
     required this.items,
     required this.onSelected,
+    required this.showQuickAdd,
+    required this.onQuickAdd,
   });
 
   final int selectedIndex;
   final List<({IconData icon, IconData selected, String label})> items;
   final ValueChanged<int> onSelected;
+  final bool showQuickAdd;
+  final VoidCallback onQuickAdd;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-        child: NavigationBar(
-          height: 76,
-          backgroundColor: const Color(0xC407111D),
-          indicatorColor: Colors.white.withValues(alpha: .12),
-          selectedIndex: selectedIndex,
-          onDestinationSelected: onSelected,
-          destinations: [
-            for (final item in items)
-              NavigationDestination(
-                icon: Icon(item.icon),
-                selectedIcon: Icon(item.selected),
-                label: item.label,
-              ),
-          ],
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(
+          top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
         ),
+      ),
+      child: NavigationBar(
+        height: 72,
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xB807111D)
+            : const Color(0xB8F4F8FC),
+        indicatorColor: Theme.of(context).colorScheme.primary.withValues(
+          alpha: Theme.of(context).brightness == Brightness.dark ? .18 : .12,
+        ),
+        selectedIndex: showQuickAdd && selectedIndex == 3 ? 4 : selectedIndex,
+        onDestinationSelected: (next) {
+          if (showQuickAdd && next == 3) {
+            onQuickAdd();
+            return;
+          }
+          onSelected(showQuickAdd && next > 3 ? next - 1 : next);
+        },
+        destinations: [
+          for (var index = 0; index < items.length; index++) ...[
+            if (showQuickAdd && index == 3)
+              NavigationDestination(
+                icon: const Icon(Icons.add_circle_outline_rounded),
+                selectedIcon: const Icon(Icons.add_circle_rounded),
+                label: context.strings.text('Quick Add navigation'),
+              ),
+            NavigationDestination(
+              icon: Icon(items[index].icon),
+              selectedIcon: Icon(items[index].selected),
+              label: items[index].label,
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -360,159 +444,12 @@ class _GlassQuickAdd extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: const Color(0xFF087FCE),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x66043A68),
-            blurRadius: 22,
-            spreadRadius: 1,
-            offset: Offset(0, 8),
-          ),
-        ],
+        boxShadow: const [],
       ),
       child: IconButton(
         tooltip: context.strings.text('Quick Add'),
         onPressed: onTap,
         icon: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
-      ),
-    );
-  }
-}
-
-class _QuickAddSheet extends StatelessWidget {
-  const _QuickAddSheet({
-    required this.arabic,
-    required this.onWeight,
-    required this.onFood,
-    required this.onWater,
-    required this.onSearch,
-  });
-
-  final bool arabic;
-  final VoidCallback onWeight;
-  final VoidCallback onFood;
-  final VoidCallback onWater;
-  final VoidCallback onSearch;
-
-  String tr(String en, String ar) => arabic ? ar : en;
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 640),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
-            child: Container(
-              padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    const Color(0xF20A1522),
-                    const Color(0xE9131B2D),
-                    const Color(0xEC0A111C),
-                  ],
-                ),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 52,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: Colors.white38,
-                      borderRadius: BorderRadius.circular(99),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    tr('Quick Add', 'إضافة سريعة'),
-                    style: const TextStyle(
-                      color: Color(0xFFE8EEF3),
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  _QuickAction(
-                    icon: Icons.monitor_weight_outlined,
-                    label: tr('Daily weight check-in', 'قياس الوزن اليومي'),
-                    onTap: onWeight,
-                  ),
-                  _QuickAction(
-                    icon: Icons.restaurant_menu_rounded,
-                    label: tr('Add food', 'إضافة طعام'),
-                    onTap: onFood,
-                  ),
-                  _QuickAction(
-                    icon: Icons.water_drop_outlined,
-                    label: tr('Add water', 'إضافة ماء'),
-                    onTap: onWater,
-                  ),
-                  _QuickAction(
-                    icon: Icons.search_rounded,
-                    label: tr('Search or create food', 'البحث أو إنشاء طعام'),
-                    onTap: onSearch,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _QuickAction extends StatelessWidget {
-  const _QuickAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 9),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: LinearGradient(
-              colors: [
-                Colors.white.withValues(alpha: .075),
-                const Color(0xFF54D9FF).withValues(alpha: .025),
-              ],
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: const Color(0xFFDCE5EC)),
-              const SizedBox(width: 13),
-              Expanded(
-                child: Text(
-                  label,
-                  style: const TextStyle(
-                    color: Color(0xFFDCE5EC),
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-              const Icon(Icons.chevron_right_rounded, color: Color(0xFF9BAAB9)),
-            ],
-          ),
-        ),
       ),
     );
   }

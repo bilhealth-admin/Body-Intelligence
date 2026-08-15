@@ -4,8 +4,14 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../../shared/widgets/bil_wordmark.dart';
+import 'onboarding_locale_copy.dart';
+
 part 'welcome/welcome_screen.dart';
 part 'body_canvas/body_setup_canvas.dart';
+part 'body_canvas/body_setup_canvas_actions.dart';
+part 'body_canvas/body_setup_desktop.dart';
+part 'body_canvas/body_setup_compact.dart';
 part 'body_canvas/body_editors.dart';
 part 'shared/calibration_components.dart';
 
@@ -106,7 +112,13 @@ class _BilFlagshipOnboardingState extends State<BilFlagshipOnboarding> {
   bool get _isArabic =>
       Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
 
-  String tr(String en, String ar) => _isArabic ? ar : en;
+  bool get _isRtl => const {
+    'ar',
+    'fa',
+    'ur',
+  }.contains(Localizations.localeOf(context).languageCode.toLowerCase());
+
+  String tr(String en, String ar) => onboardingText(context, en, ar);
 
   @override
   void dispose() {
@@ -152,7 +164,7 @@ class _BilFlagshipOnboardingState extends State<BilFlagshipOnboarding> {
       data: Theme.of(context).copyWith(
         scaffoldBackgroundColor: _BilColors.background,
         colorScheme: Theme.of(context).colorScheme.copyWith(
-          brightness: Brightness.dark,
+          brightness: Brightness.light,
           primary: _BilColors.emerald,
           secondary: _BilColors.cyan,
           surface: _BilColors.surface,
@@ -160,7 +172,7 @@ class _BilFlagshipOnboardingState extends State<BilFlagshipOnboarding> {
       ),
       child: Scaffold(
         body: Directionality(
-          textDirection: _isArabic ? TextDirection.rtl : TextDirection.ltr,
+          textDirection: _isRtl ? TextDirection.rtl : TextDirection.ltr,
           child: Stack(
             children: [
               const Positioned.fill(child: _AmbientBackground()),
@@ -173,7 +185,7 @@ class _BilFlagshipOnboardingState extends State<BilFlagshipOnboarding> {
                       controller: _pageController,
                       index: 0,
                       child: _CalibrationWelcome(
-                        isArabic: _isArabic,
+                        isArabic: _isRtl,
                         onContinue: () => _goToStage(1),
                         onSkip: widget.onSignIn,
                       ),
@@ -183,7 +195,7 @@ class _BilFlagshipOnboardingState extends State<BilFlagshipOnboarding> {
                       index: 1,
                       child: _BodySetupCanvas(
                         draft: _draft,
-                        isArabic: _isArabic,
+                        isArabic: _isRtl,
                         busy: _busy,
                         onBack: widget.showWelcome
                             ? () => _goToStage(0)

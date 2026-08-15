@@ -4,8 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('daily summary uses the shared dashboard contrast component', () {
-    final grid = File(
-      'lib/features/dashboard/widgets/dashboard_grid.dart',
+    final summaryFactory = File(
+      'lib/features/dashboard/widgets/dashboard_summary_factory.dart',
     ).readAsStringSync();
     final dailySummary = File(
       'lib/features/dashboard/widgets/dashboard_daily_summary.dart',
@@ -15,7 +15,10 @@ void main() {
     ).readAsStringSync();
 
     expect(dailySummary, contains('DashboardSectionHeading('));
-    expect(grid, contains("title: tr('Daily Summary', 'ملخص اليوم')"));
+    expect(
+      summaryFactory,
+      contains("title: tr('Daily Summary', 'ملخص اليوم')"),
+    );
     expect(
       heading,
       contains("key: const Key('dashboard-today-summary-title')"),

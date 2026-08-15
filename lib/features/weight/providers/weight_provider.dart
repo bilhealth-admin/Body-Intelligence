@@ -4,6 +4,7 @@ import '../../../data/database/app_database.dart';
 import '../../../data/database/database_provider.dart';
 import '../../../data/database/date_keys.dart';
 import '../../../data/repositories/weight_repository.dart';
+import '../../../data/repositories/body_measurement_repository.dart';
 import '../../profile/providers/user_profile_provider.dart';
 
 final weightRepositoryProvider = Provider<WeightRepository>((ref) {
@@ -20,6 +21,17 @@ final weightHistoryProvider = StreamProvider<List<WeightEntry>>((ref) {
   final repository = ref.watch(weightRepositoryProvider);
   return repository.watchWeights();
 });
+
+final bodyMeasurementRepositoryProvider = Provider<BodyMeasurementRepository>((
+  ref,
+) {
+  return BodyMeasurementRepository(ref.watch(databaseProvider));
+});
+
+final bodyMeasurementHistoryProvider =
+    StreamProvider<List<BodyMeasurementEntry>>((ref) {
+      return ref.watch(bodyMeasurementRepositoryProvider).watchHistory();
+    });
 
 final todayWeightProvider = StreamProvider<WeightEntry?>((ref) {
   return ref.watch(weightRepositoryProvider).watchForDay(DateTime.now());

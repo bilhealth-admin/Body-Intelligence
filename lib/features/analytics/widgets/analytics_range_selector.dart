@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../analytics_locale_copy.dart';
+
 enum AnalyticsRange { sevenDays, thirtyDays, ninetyDays, allTime }
 
 extension AnalyticsRangeDays on AnalyticsRange {
@@ -23,28 +25,31 @@ class AnalyticsRangeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final arabic = Localizations.localeOf(context).languageCode == 'ar';
     return Semantics(
-      label: arabic ? 'النطاق الزمني للتحليلات' : 'Analytics time range',
+      label: analyticsText(
+        context,
+        'Analytics time range',
+        'النطاق الزمني للتحليلات',
+      ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: SegmentedButton<AnalyticsRange>(
           segments: [
             ButtonSegment(
               value: AnalyticsRange.sevenDays,
-              label: Text(arabic ? '٧ أيام' : '7 days'),
+              label: Text(analyticsText(context, '7 days', '٧ أيام')),
             ),
             ButtonSegment(
               value: AnalyticsRange.thirtyDays,
-              label: Text(arabic ? '٣٠ يومًا' : '30 days'),
+              label: Text(analyticsText(context, '30 days', '٣٠ يومًا')),
             ),
             ButtonSegment(
               value: AnalyticsRange.ninetyDays,
-              label: Text(arabic ? '٩٠ يومًا' : '90 days'),
+              label: Text(analyticsText(context, '90 days', '٩٠ يومًا')),
             ),
             ButtonSegment(
               value: AnalyticsRange.allTime,
-              label: Text(arabic ? 'الكل' : 'All'),
+              label: Text(analyticsText(context, 'All', 'الكل')),
             ),
           ],
           selected: {value},

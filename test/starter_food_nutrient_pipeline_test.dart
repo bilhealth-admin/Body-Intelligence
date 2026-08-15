@@ -76,7 +76,19 @@ void main() {
         database.foods,
       )..where((row) => row.id.equals(appleId))).getSingle();
       expect(repaired.potassium, 107);
-      expect(repaired.nutrientEvidenceMask, 63);
+      final expectedMask = NutrientEvidenceMask.fromValues(
+        calories: repaired.calories,
+        protein: repaired.protein,
+        carbohydrates: repaired.carbs,
+        fat: repaired.fats,
+        fiber: repaired.fiber,
+        sugar: repaired.sugar,
+        sodium: repaired.sodium,
+        potassium: repaired.potassium,
+        calcium: repaired.calcium,
+        magnesium: repaired.magnesium,
+      );
+      expect(repaired.nutrientEvidenceMask, expectedMask);
       expect(repaired.verified, isTrue);
     },
   );

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">BIL - سجل ذكاء الجسم</string>
     <string name="health_permissions_rationale_title">خصوصية البيانات الصحية</string>
     <string name="health_permissions_rationale_body">يطلب BIL فقط أنواع بيانات Health Connect اللازمة للميزات التي تختار استخدامها. تُعالج بياناتك الصحية محليًا بصورة افتراضية. يمكنك منح كل إذن أو رفضه أو سحبه في أي وقت من إعدادات Health Connect. لا يبيع BIL البيانات الصحية ولا يستخدمها للإعلانات.</string>
 </resources>

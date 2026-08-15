@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 
 import '../database/app_database.dart';
@@ -63,6 +65,144 @@ class DailyLogRepository {
       updatedAt: Value(DateTime.now()),
     );
     await _database.into(_database.dailyLogs).insertOnConflictUpdate(companion);
+  }
+
+  /// Atomically records only the sleep duration for [date]. Existing notes,
+  /// steps, and exercise entries are preserved even when another feature
+  /// updates the same daily ledger concurrently.
+  Future<void> updateSleepHours({
+    required DateTime date,
+    required double sleepHours,
+  }) async {
+    if (!sleepHours.isFinite || sleepHours < 0 || sleepHours > 14) {
+      throw ArgumentError.value(sleepHours, 'sleepHours');
+    }
+    final key = dayKeyFor(date);
+    await _database.transaction(() async {
+      final existing = await (_database.select(
+        _database.dailyLogs,
+      )..where((row) => row.dayKey.equals(key))).getSingleOrNull();
+      if (existing == null) {
+        await _database
+            .into(_database.dailyLogs)
+            .insert(
+              DailyLogsCompanion.insert(
+                date: date,
+                dayKey: key,
+                sleepHours: Value(sleepHours),
+              ),
+            );
+        return;
+      }
+      await (_database.update(
+        _database.dailyLogs,
+      )..where((row) => row.id.equals(existing.id))).write(
+        DailyLogsCompanion(
+          sleepHours: Value(sleepHours),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    });
+  }
+
+  /// Atomically appends structured exercise entries without overwriting a
+  /// concurrent update to the other daily-log fields.
+  Future<void> appendExerciseNotes({
+    required DateTime date,
+    required List<String> encodedEntries,
+  }) async {
+    if (encodedEntries.isEmpty ||
+        encodedEntries.any((entry) => !_validExerciseEntry(entry))) {
+      throw ArgumentError.value(encodedEntries, 'encodedEntries');
+    }
+    final key = dayKeyFor(date);
+    await _database.transaction(() async {
+      final existing = await (_database.select(
+        _database.dailyLogs,
+      )..where((row) => row.dayKey.equals(key))).getSingleOrNull();
+      final addition = encodedEntries.join('\n');
+      if (existing == null) {
+        await _database
+            .into(_database.dailyLogs)
+            .insert(
+              DailyLogsCompanion.insert(
+                date: date,
+                dayKey: key,
+                exerciseNotes: Value(addition),
+              ),
+            );
+        return;
+      }
+      final previous = existing.exerciseNotes?.trim();
+      await (_database.update(
+        _database.dailyLogs,
+      )..where((row) => row.id.equals(existing.id))).write(
+        DailyLogsCompanion(
+          exerciseNotes: Value(
+            previous == null || previous.isEmpty
+                ? addition
+                : '$previous\n$addition',
+          ),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    });
+  }
+
+  static bool _validExerciseEntry(String entry) {
+    if (entry.trim() != entry || entry.contains('\n') || entry.contains('\r')) {
+      return false;
+    }
+    try {
+      final value = jsonDecode(entry);
+      if (value is! Map<String, dynamic> ||
+          value.keys.toSet().difference({
+            'id',
+            'name',
+            'minutes',
+            'recordedAt',
+          }).isNotEmpty ||
+          value.length != 4) {
+        return false;
+      }
+      final id = value['id'];
+      final name = value['name'];
+      final minutes = value['minutes'];
+      final recordedAt = value['recordedAt'];
+      return id is String &&
+          id.trim().isNotEmpty &&
+          id.length <= 128 &&
+          name is String &&
+          name.trim().isNotEmpty &&
+          name.length <= 200 &&
+          minutes is int &&
+          minutes >= 5 &&
+          minutes <= 120 &&
+          recordedAt is String &&
+          DateTime.tryParse(recordedAt) != null;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Updates only the private body-context note for [date].
+  ///
+  /// This deliberately avoids [save], whose full-day contract writes the
+  /// optional sleep, steps, and exercise fields supplied by its caller.
+  Future<void> saveBodyContext({required DateTime date, String? notes}) async {
+    final key = dayKeyFor(date);
+    final existing = await (_database.select(
+      _database.dailyLogs,
+    )..where((row) => row.dayKey.equals(key))).getSingleOrNull();
+    if (existing == null) {
+      await save(date: date, notes: notes);
+      return;
+    }
+    await (_database.update(
+      _database.dailyLogs,
+    )..where((row) => row.id.equals(existing.id))).write(
+      DailyLogsCompanion(notes: Value(notes), updatedAt: Value(DateTime.now())),
+    );
   }
 
   Future<void> startDay(DateTime date) => save(date: date);
@@ -186,6 +326,13 @@ class DailyLogRepository {
 
   Future<List<DailyLog>> getAll() {
     return _database.select(_database.dailyLogs).get();
+  }
+
+  Future<DailyLog?> getForDay(DateTime date) {
+    return (_database.select(_database.dailyLogs)
+          ..where((row) => row.dayKey.equals(dayKeyFor(date)))
+          ..limit(1))
+        .getSingleOrNull();
   }
 
   Stream<List<DailyLog>> watchAll() {

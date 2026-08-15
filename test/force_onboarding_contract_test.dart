@@ -4,9 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('settings can reopen onboarding without destructive reset', () {
-    final settings = File(
-      'lib/features/settings/settings_page.dart',
-    ).readAsStringSync();
+    final settings = [
+      File('lib/features/settings/settings_page.dart').readAsStringSync(),
+      File(
+        'lib/features/settings/settings_page_actions.dart',
+      ).readAsStringSync(),
+    ].join('\n');
 
     expect(settings, contains("set('forceOnboarding', 'true')"));
     expect(settings, contains("context.go('/onboarding')"));

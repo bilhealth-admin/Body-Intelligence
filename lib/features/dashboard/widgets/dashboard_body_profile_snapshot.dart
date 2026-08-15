@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../shared/widgets/premium_surface.dart';
 import '../composition/dashboard_composition.dart';
+import '../dashboard_five_locale_copy.dart';
 import 'dashboard_section_heading.dart';
 
 class DashboardBodyProfileSnapshot extends StatelessWidget {
@@ -42,7 +43,7 @@ class DashboardBodyProfileSnapshot extends StatelessWidget {
   final VoidCallback onEditProfile;
   final VoidCallback onEditPlan;
 
-  String tr(String en, String ar) => arabic ? ar : en;
+  String tr(String en, String ar) => dashboardFiveLocaleText(en, ar);
 
   @override
   Widget build(BuildContext context) {
@@ -227,7 +228,7 @@ class _BodyProfileValue extends StatelessWidget {
               overflow: TextOverflow.visible,
               style: Theme.of(
                 context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
         ],

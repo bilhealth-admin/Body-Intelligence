@@ -46,12 +46,12 @@ class DashboardComposition {
                   metricCount
               ? 1.28
               : 1.55)
-        : (contentWidth < 420 ? 1.08 : 1.42),
+        : (contentWidth < 420 ? 0.82 : 1.08),
     pagedSectionBaseHeight: viewportWidth >= desktopBreakpoint
         ? 172
         : contentWidth >= 560
-        ? 300
-        : 390,
+        ? 340
+        : 470,
     bodyProfileCompact: contentWidth < bodyProfileCompactBreakpoint,
     bodyProfileColumns: contentWidth >= bodyProfileThreeColumnBreakpoint
         ? 3
@@ -79,8 +79,8 @@ class DashboardComposition {
     pagedSectionBaseHeight: viewportWidth >= desktopBreakpoint
         ? 172
         : contentWidth >= 560
-        ? 300
-        : 390,
+        ? 340
+        : 470,
   );
 
   /// Exact extraction of `_MetricGridPage` column and ratio decisions.
@@ -99,7 +99,7 @@ class DashboardComposition {
       metricColumns: columns,
       metricChildAspectRatio: wideScreen
           ? (columns == metricCount ? 1.28 : 1.55)
-          : (contentWidth < 420 ? 1.08 : 1.42),
+          : (contentWidth < 420 ? 0.82 : 1.08),
     );
   }
 

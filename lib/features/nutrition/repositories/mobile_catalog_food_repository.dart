@@ -302,21 +302,30 @@ class MobileCatalogFoodRepository implements UnifiedFoodRepository {
   FoodNutrient? _mapNutrient(String id) {
     final normalized = id.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
     return switch (normalized) {
-      'calories' || 'energy' || 'kcal' => FoodNutrient.calories,
-      'protein' => FoodNutrient.protein,
+      'calories' ||
+      'energy' ||
+      'kcal' ||
+      'usda1008' ||
+      'usda2047' ||
+      'usda2048' => FoodNutrient.calories,
+      'protein' || 'usda1003' => FoodNutrient.protein,
       'carbohydrates' ||
       'carbohydrate' ||
-      'carbs' => FoodNutrient.carbohydrates,
-      'fat' || 'totalfat' => FoodNutrient.fat,
-      'fiber' || 'fibre' => FoodNutrient.fiber,
-      'sugar' || 'totalsugars' => FoodNutrient.sugar,
-      'sodium' => FoodNutrient.sodium,
-      'potassium' => FoodNutrient.potassium,
-      'calcium' => FoodNutrient.calcium,
-      'magnesium' => FoodNutrient.magnesium,
-      'phosphorus' => FoodNutrient.phosphorus,
-      'iron' => FoodNutrient.iron,
-      'vitaminc' => FoodNutrient.vitaminC,
+      'carbs' ||
+      'usda1005' => FoodNutrient.carbohydrates,
+      'fat' || 'totalfat' || 'usda1004' => FoodNutrient.fat,
+      'fiber' || 'fibre' || 'usda1079' => FoodNutrient.fiber,
+      'sugar' ||
+      'totalsugars' ||
+      'usda2000' ||
+      'usda1063' => FoodNutrient.sugar,
+      'sodium' || 'usda1093' => FoodNutrient.sodium,
+      'potassium' || 'usda1092' => FoodNutrient.potassium,
+      'calcium' || 'usda1087' => FoodNutrient.calcium,
+      'magnesium' || 'usda1090' => FoodNutrient.magnesium,
+      'phosphorus' || 'usda1091' => FoodNutrient.phosphorus,
+      'iron' || 'usda1089' => FoodNutrient.iron,
+      'vitaminc' || 'usda1162' => FoodNutrient.vitaminC,
       _ => null,
     };
   }

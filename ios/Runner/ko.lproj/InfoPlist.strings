@@ -1,0 +1,8 @@
+"NSHealthShareUsageDescription" = "BIL은 사용자가 선택한 건강 항목(활동, 수면, 신체 측정, 심장·호흡 지표, 혈압, 산소, 혈당, 수분, 영양)만 읽어 이 기기에 비공개 건강 타임라인과 분석을 표시합니다.";
+"NSHealthUpdateUsageDescription" = "BIL는 별도의 쓰기 동의 후 명시적으로 선택한 건강 기록만 기록합니다.";
+"NSBluetoothAlwaysUsageDescription" = "BIL는 명시적으로 페어링한 의료 장치에만 연결되므로 측정값을 로컬로 가져올 수 있습니다.";
+"NSBluetoothPeripheralUsageDescription" = "BIL는 명시적으로 페어링한 의료 장치에만 연결되므로 측정값을 로컬로 가져올 수 있습니다.";
+"NSCameraUsageDescription" = "바코드 스캔, 식사 사진 검토, 개인 프로필 추가 또는 진행 사진 추가를 선택한 경우에만 카메라를 사용하세요.";
+"NSPhotoLibraryUsageDescription" = "저장하거나 업로드하기 전에 검토할 식사, 프로필 또는 진행 상황 사진을 선택하세요.";
+"NSMicrophoneUsageDescription" = "BIL는 식사 시 음성 입력을 선택한 경우에만 마이크를 사용합니다.";
+"NSSpeechRecognitionUsageDescription" = "BIL는 사용자가 말하는 음식 문구를 텍스트로 변환하므로 저장하기 전에 검토할 수 있습니다.";

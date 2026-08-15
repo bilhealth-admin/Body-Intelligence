@@ -2,6 +2,8 @@ package com.kadem.bil
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.result.ActivityResultLauncher
 import androidx.health.connect.client.HealthConnectClient
 import androidx.health.connect.client.PermissionController
@@ -42,6 +44,21 @@ class BILGlobalHealthBridge(
             "availability" -> result.success(mapOf("available" to (availability() == HealthConnectClient.SDK_AVAILABLE), "status" to availability(), "platform" to "health_connect"))
             "permissions" -> run(result) { permissionSnapshot(call.argument<List<String>>("types") ?: supportedNames) }
             "requestPermissions" -> requestPermissions(call, result)
+            "revokeAccess" -> run(result) {
+                requireClient().permissionController.revokeAllPermissions()
+                mapOf("revoked" to true, "platform" to "health_connect")
+            }
+            "openSettings" -> {
+                val status = availability()
+                val intent = if (status == HealthConnectClient.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED) {
+                    Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.google.android.apps.healthdata"))
+                } else {
+                    Intent(HealthConnectClient.ACTION_HEALTH_CONNECT_SETTINGS)
+                }
+                runCatching { activity.startActivity(intent) }
+                    .onSuccess { result.success(null) }
+                    .onFailure { result.error("health_settings_unavailable", null, null) }
+            }
             "readChanges" -> run(result) { readChanges(call) }
             "write" -> run(result) { write(call) }
             "delete" -> run(result) { delete(call) }
@@ -143,7 +160,6 @@ class BILGlobalHealthBridge(
         val metadata = androidx.health.connect.client.records.metadata.Metadata.manualEntry()
         return when (type) {
             "weight" -> WeightRecord(at, ZoneOffset.UTC, androidx.health.connect.client.units.Mass.kilograms(value), metadata)
-            "water" -> HydrationRecord(at, ZoneOffset.UTC, at.plusSeconds(1), ZoneOffset.UTC, androidx.health.connect.client.units.Volume.liters(value / 1000.0), metadata)
             else -> null
         }
     }
@@ -170,7 +186,7 @@ class BILGlobalHealthBridge(
 
     companion object {
         const val CHANNEL = "bil/health_connect"
-        val supportedNames = listOf("steps", "activeEnergy", "workout", "sleep", "weight", "heartRate", "restingHeartRate", "hrv", "oxygen", "respiratoryRate", "glucose", "bloodPressureSystolic", "bloodPressureDiastolic", "water", "nutrition")
+        val supportedNames = listOf("steps", "activeEnergy", "workout", "weight")
         fun permissionContract(activity: Activity) = PermissionController.createRequestPermissionResultContract()
     }
 }

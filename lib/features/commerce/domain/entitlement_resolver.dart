@@ -64,7 +64,12 @@ final class EntitlementResolver {
         record.currentPeriodEndsAt,
       ),
       SubscriptionLifecycle.inactive ||
+      SubscriptionLifecycle.pending ||
+      SubscriptionLifecycle.billingRetry ||
+      SubscriptionLifecycle.accountHold ||
       SubscriptionLifecycle.paused ||
+      SubscriptionLifecycle.suspended ||
+      SubscriptionLifecycle.deferred ||
       SubscriptionLifecycle.expired ||
       SubscriptionLifecycle.refunded ||
       SubscriptionLifecycle.revoked => false,

@@ -64,7 +64,10 @@ void main() {
     var food = await database.select(database.foods).getSingle();
     expect(food.calories, 120.5);
 
-    await tester.tap(find.byTooltip('Add favorite'));
+    final favoriteButton = tester.widget<IconButton>(
+      find.widgetWithIcon(IconButton, Icons.favorite_border),
+    );
+    favoriteButton.onPressed!();
     await tester.pumpAndSettle();
     await tester.tap(find.text('Favorites'));
     await tester.pumpAndSettle();
@@ -74,7 +77,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Personal yogurt'), findsOneWidget);
 
-    await tester.tap(find.text('Personal yogurt'));
+    tester
+        .widget<ListTile>(find.widgetWithText(ListTile, 'Personal yogurt'))
+        .onTap!();
     await tester.pumpAndSettle();
     await tester.tap(find.text('Edit custom food'));
     await tester.pumpAndSettle();
@@ -88,7 +93,9 @@ void main() {
     expect(food.calories, 130);
     expect(food.revision, 2);
 
-    await tester.tap(find.text('Personal yogurt'));
+    tester
+        .widget<ListTile>(find.widgetWithText(ListTile, 'Personal yogurt'))
+        .onTap!();
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(OutlinedButton, 'Delete'));
     await tester.pumpAndSettle();

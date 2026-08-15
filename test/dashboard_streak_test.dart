@@ -1,4 +1,4 @@
-import 'package:body_intelligence_log/features/dashboard/widgets/dashboard_grid.dart';
+import 'package:body_intelligence_log/features/dashboard/domain/dashboard_intelligence_composer.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

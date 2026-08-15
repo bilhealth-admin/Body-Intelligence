@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>GADApplicationIdentifier</key>
+	<string>$(BIL_ADMOB_IOS_APP_ID)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Use the camera only when you choose to scan a barcode, review a meal photo, or add a private profile or progress photo.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Select a meal, profile, or progress photo for review before it is saved or uploaded.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -16,11 +22,16 @@
 	<array>
 		<string>ar</string>
 		<string>en</string>
+		<string>fr</string>
+		<string>es</string>
+		<string>tr</string>
 	</array>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>BIL</string>
+	<key>CFBundleURLTypes</key>
+	<array><dict><key>CFBundleURLSchemes</key><array><string>bil</string></array></dict></array>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -36,9 +47,13 @@
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>BIL connects only to health devices you explicitly pair so measurements can be imported locally.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>BIL reads health data only after explicit consent to build your private longitudinal health timeline.</string>
+	<string>BIL reads only the Health categories you choose—activity, sleep, body measurements, heart and respiratory metrics, blood pressure, oxygen, glucose, hydration, and nutrition—to show a private on-device health timeline and insights.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>BIL writes selected health records only after separate explicit write consent.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>BIL uses the microphone only when you choose voice input for a meal.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>BIL converts the food phrase you speak into text so you can review it before saving.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -62,6 +77,8 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array><string>remote-notification</string></array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

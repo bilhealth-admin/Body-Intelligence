@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('edit quantity dialog pops its own dialog route', () {
     final source = File(
-      'lib/features/daily_log/daily_log_page.dart',
+      'lib/features/daily_log/daily_log_page_actions.dart',
     ).readAsStringSync().replaceAll('\r\n', '\n');
 
     expect(
@@ -31,7 +31,7 @@ void main() {
 
   test('edit quantity dialog never pops the page context', () {
     final source = File(
-      'lib/features/daily_log/daily_log_page.dart',
+      'lib/features/daily_log/daily_log_page_actions.dart',
     ).readAsStringSync();
 
     final editStart = source.indexOf(

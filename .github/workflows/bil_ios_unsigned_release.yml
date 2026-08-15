@@ -29,7 +29,19 @@ jobs:
           flutter pub get
 
       - name: Analyze accepted source
-        run: flutter analyze
+        run: |
+          flutter analyze --no-pub
+          flutter test --no-pub --timeout 30s
+
+      - name: Validate Apple project metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          plutil -lint ios/Runner/Info.plist
+          plutil -lint ios/Runner/PrivacyInfo.xcprivacy
+          plutil -lint ios/Runner/Runner.entitlements
+          plutil -lint ios/Runner/RunnerDebug.entitlements
+          xcodebuild -project ios/Runner.xcodeproj -list
 
       - name: Build unsigned iOS release application
         run: flutter build ios --release --no-codesign

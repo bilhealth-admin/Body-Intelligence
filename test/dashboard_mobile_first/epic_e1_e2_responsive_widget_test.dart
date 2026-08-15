@@ -55,26 +55,22 @@ void main() {
     });
   }
 
-  testWidgets('phone stacks both intelligence cards at full width', (
+  testWidgets('phone exposes Body Twin and the paired intelligence rail', (
     tester,
   ) async {
     await setViewport(tester, width: 390, height: 2200);
     await tester.pumpWidget(subject());
     await tester.pumpAndSettle();
 
-    final ai = find.byKey(const Key('dashboard-mobile-personal-ai-slot'));
-    final insights = find.byKey(const Key('dashboard-mobile-insights-slot'));
-
-    expect(ai, findsOneWidget);
-    expect(insights, findsOneWidget);
-    expect(tester.getSize(ai).width, greaterThan(380));
-    expect(tester.getSize(insights).width, greaterThan(380));
     expect(
-      tester.getTopLeft(insights).dy,
-      greaterThan(tester.getTopLeft(ai).dy),
+      find.byKey(const Key('dashboard-summary-and-bio-rail')),
+      findsOneWidget,
     );
-    expect(tester.getSize(ai).height, inInclusiveRange(420, 500));
-    expect(tester.getSize(insights).height, inInclusiveRange(420, 500));
+    expect(
+      find.byKey(const Key('dashboard-mobile-summary-card')),
+      findsOneWidget,
+    );
+    expect(find.text('Personal Health AI test panel'), findsOneWidget);
     expect(
       find.byKey(const Key('dashboard-mobile-body-twin-snapshot')),
       findsOneWidget,
@@ -83,22 +79,17 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('tablet preserves side-by-side intelligence layout', (
-    tester,
-  ) async {
+  testWidgets('tablet uses its dedicated intelligence slot', (tester) async {
     await setViewport(tester, width: 800, height: 1600);
     await tester.pumpWidget(subject());
     await tester.pumpAndSettle();
 
     final ai = find.byKey(const Key('dashboard-tablet-personal-ai-slot'));
-    final insights = find.byKey(const Key('dashboard-tablet-insights-slot'));
-
     expect(ai, findsOneWidget);
-    expect(insights, findsOneWidget);
-    expect(tester.getTopLeft(ai).dy, tester.getTopLeft(insights).dy);
+    expect(find.text('Personal Health AI test panel'), findsOneWidget);
     expect(
-      tester.getTopLeft(insights).dx,
-      greaterThan(tester.getTopLeft(ai).dx),
+      find.byKey(const Key('dashboard-summary-and-bio-rail')),
+      findsNothing,
     );
     expect(
       find.byKey(const Key('dashboard-mobile-body-twin-snapshot')),

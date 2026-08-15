@@ -43,18 +43,39 @@ dependencies:
   path: ^1.9.1
   shared_preferences: ^2.5.5
   crypto: ^3.0.6
+  uuid: ^4.5.3
   archive: ^4.0.7
   pdf: ^3.11.3
   supabase_flutter: ^2.16.0
+  supabase: ^2.14.0
   flutter_svg: ^2.2.0
   share_plus: ^13.2.1
   flutter_localizations:
     sdk: flutter
+  intl: ^0.20.2
   country_picker: ^2.0.28
   flutter_timezone: ^5.1.0
+  mobile_scanner: ^7.4.0
+  simple_barcode_scanner: ^0.6.0
+  url_launcher: ^6.3.2
+  file_selector: ^1.1.0
+  image_picker: ^1.2.3
+  image: ^4.9.1
+  camera: ^0.12.0+2
+  camera_windows: ^0.2.6+4
+  flutter_local_notifications: ^22.2.0
+  timezone: ^0.11.1
+  in_app_purchase: ^3.3.0
+  in_app_purchase_android: ^0.5.2
+  app_links: ^7.0.0
+  video_player: ^2.13.0
+  google_mobile_ads: ^9.1.0
+  connectivity_plus: ^7.3.1
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
   path_provider_platform_interface: ^2.0.0
 
@@ -69,65 +90,109 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.4
   change_app_package_name: ^1.5.0
 
+# Keep Supabase deep links on the audited current release. Its Android module
+# uses AGP 9.2, matching the app toolchain configured under android/.
+dependency_overrides:
+  app_links:
+    path: tool/vendor_app_links
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
   assets:
+    - assets/branding/bil_wordmark_registered_blue.svg
+    - assets/branding/bil_wordmark_registered_white.svg
+    # Ship only recipe art consumed by the app. The generated source-image
+    # archive remains in the repository but must not inflate the APK/AAB.
+    - assets/images/professional/mediterranean_protein_bowl.png
+    - assets/images/professional/strength_training_cover.png
+    - assets/images/professional/recipes/bean_corn_salad.jpg
+    - assets/images/professional/recipes/chicken_shawarma_bowl.jpg
+    - assets/images/professional/recipes/chicken_sweet_potato.jpg
+    - assets/images/professional/recipes/chickpea_herb_salad.jpg
+    - assets/images/professional/recipes/grilled_fish_vegetables.jpg
+    - assets/images/professional/recipes/hummus_falafel_plate.jpg
+    - assets/images/professional/recipes/lentil_soup.jpg
+    - assets/images/professional/recipes/mediterranean_chicken_bowl.jpg
+    - assets/images/professional/recipes/overnight_oats_figs.jpg
+    - assets/images/professional/recipes/quinoa_tabbouleh.jpg
+    - assets/images/professional/recipes/roasted_quinoa_bowl.jpg
+    - assets/images/professional/recipes/salmon_avocado_bowl.jpg
+    - assets/images/professional/recipes/shakshuka.jpg
+    - assets/images/professional/recipes/shrimp_rice_bowl.jpg
+    - assets/images/professional/recipes/spinach_omelet.jpg
+    - assets/images/professional/recipes/tofu_vegetable_stir_fry.jpg
+    - assets/images/professional/recipes/vegetable_lentil_stew.jpg
+    - assets/images/professional/recipes/yogurt_oat_bowl.jpg
+    - assets/images/professional/workouts/
+    - assets/images/brand/generated/
+    - assets/images/workouts/
+    - assets/images/nutrition_plans/
+    - assets/images/dashboard/
+    - assets/images/daily_context/
+    - assets/images/commerce/
+    - assets/catalogs/bil_food_core.sqlite
+    # Release catalogs are metadata-only runtime assets. Workout media remains
+    # blocked until an independently reviewed, hash-verified content pack is
+    # installed. The recipe index is parsed off the UI isolate and full records
+    # are loaded from bounded, hash-verified shards on demand. Recipe pixels are
+    # deliberately not bundled here.
+    - assets/catalogs/recipes/v1/
+    - assets/catalogs/recipes/v1/shards/
+    - artifacts/workout_media/workout_release_manifest_v2.json
     - assets/images/v10_master/bil_hologram_master.png
     - assets/images/v10_master/bil_hdr_starfield_master.png
-    - assets/images/backgrounds/bil_hdr_space_v10.webp
-    - assets/images/onboarding/bil_body_hologram_v10.webp
-    - assets/images/branding/bil_logo_silver_v10.webp
-    - assets/images/v9/v9_hologram.webp
-    - assets/images/v9/v9_logo_registered.webp
-    - assets/images/v9/v9_glow_rings.webp
-    - assets/images/v9/v9_hdr_background.webp
-    - assets/images/branding/bil_logo_registered_v8.webp
-    - assets/images/v10_final/bil_logo_metallic_transparent.png
-    - assets/images/v10_final/bil_hologram_transparent.png
-    - assets/images/onboarding/bil_body_hologram_v8.webp
-    - assets/images/onboarding/bil_body_hologram.webp
     - assets/images/dashboard/bil_body_profile.svg
+    - assets/images/connected_health/bil_medical_hub.png
+    - assets/images/flagship/bil_body_intelligence_journey_v1.png
+    - assets/images/flagship/bil_meal_discovery_v1.png
+    - assets/images/flagship/bil_sleep_insights_v1.png
+    - assets/images/flagship/bil_movement_v1.png
+    - assets/images/flagship/bil_fasting_rhythm_v1.png
     - assets/fonts/NotoNaskhArabic-Regular.ttf
     - assets/fonts/NotoNaskhArabic-Bold.ttf
     - assets/fonts/OFL.txt
     - lib/l10n/app_en.arb
     - lib/l10n/app_ar.arb
+    - lib/l10n/app_fr.arb
+    - lib/l10n/app_es.arb
+    - lib/l10n/app_tr.arb
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
   fonts:
-    - family: NotoNaskhArabic
+    - family: BILArabic
       fonts:
         - asset: assets/fonts/NotoNaskhArabic-Regular.ttf
           weight: 400
+        - asset: assets/fonts/NotoNaskhArabic-Bold.ttf
+          weight: 600
         - asset: assets/fonts/NotoNaskhArabic-Bold.ttf
           weight: 700
 
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: assets/branding/bil_icon_master.png
+  image_path: assets/branding/bil_app_icon.png
   remove_alpha_ios: true
-  adaptive_icon_background: "#10253F"
-  adaptive_icon_foreground: assets/branding/bil_icon_master.png
-  adaptive_icon_foreground_inset: 20
+  adaptive_icon_background: "#050505"
+  adaptive_icon_foreground: assets/branding/bil_app_icon.png
+  adaptive_icon_foreground_inset: 8
   web:
     generate: true
-    image_path: assets/branding/bil_icon_master.png
-    background_color: "#F4F7FA"
-    theme_color: "#10253F"
+    image_path: assets/branding/bil_app_icon.png
+    background_color: "#050505"
+    theme_color: "#050505"
   windows:
     generate: true
-    image_path: assets/branding/bil_icon_master.png
+    image_path: assets/branding/bil_app_icon.png
     icon_size: 256
   macos:
     generate: true
-    image_path: assets/branding/bil_icon_master.png
+    image_path: assets/branding/bil_app_icon.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -159,10 +224,3 @@ flutter_launcher_icons:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-
-
-
-
-
-
-

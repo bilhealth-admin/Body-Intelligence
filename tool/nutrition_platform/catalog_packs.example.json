@@ -1,0 +1,25 @@
+{
+  "base_url": "https://downloads.example.com/bil/catalogs",
+  "packs": [
+    {
+      "id": "middle-east-core",
+      "version": "2026.08",
+      "title": "Middle East Foods",
+      "file": "../../dist/catalogs/middle-east-core.sqlite",
+      "remote_name": "middle-east-core-2026.08.sqlite",
+      "access": "pro",
+      "locale_codes": ["ar", "en"],
+      "country_codes": ["EG", "JO", "SA", "AE", "KW", "QA", "BH", "OM", "LB"]
+    },
+    {
+      "id": "world-branded",
+      "version": "2026.08",
+      "title": "Global Branded Products",
+      "file": "../../dist/catalogs/world-branded.sqlite",
+      "remote_name": "world-branded-2026.08.sqlite",
+      "access": "pro",
+      "locale_codes": ["ar", "en"],
+      "country_codes": []
+    }
+  ]
+}

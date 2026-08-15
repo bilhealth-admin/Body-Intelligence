@@ -6,6 +6,7 @@ import '../../app/localization/app_localizations.dart';
 import '../../core/units/measurement_units.dart';
 import '../profile/providers/user_profile_provider.dart';
 import 'bil_flagship_onboarding.dart';
+import 'onboarding_locale_copy.dart';
 import 'widgets/welcome_step.dart';
 
 class OnboardingPage extends ConsumerStatefulWidget {
@@ -39,6 +40,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
 
   bool get isArabic =>
       Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
+
+  String tr(String english, String arabic) =>
+      onboardingText(context, english, arabic);
 
   @override
   void didChangeDependencies() {
@@ -245,22 +249,21 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
-        title: Text(
-          isArabic ? 'معلومة صحية مهمة' : 'Important health information',
-        ),
+        title: Text(tr('Important health information', 'معلومة صحية مهمة')),
         content: Text(
-          isArabic
-              ? 'BIL يقدم تقديرات تعليمية وشخصية ولا يستبدل التشخيص أو الرعاية الطبية. بالمتابعة فإنك تقر بأن القرار الطبي النهائي يعود لك ولطبيبك.'
-              : 'BIL provides educational, personalized estimates and does not replace diagnosis or medical care. By continuing, you acknowledge that final medical decisions remain with you and your clinician.',
+          tr(
+            'BIL provides educational, personalized estimates and does not replace diagnosis or medical care. By continuing, you acknowledge that final medical decisions remain with you and your clinician.',
+            'BIL يقدم تقديرات تعليمية وشخصية ولا يستبدل التشخيص أو الرعاية الطبية. بالمتابعة فإنك تقر بأن القرار الطبي النهائي يعود لك ولطبيبك.',
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(isArabic ? 'رجوع' : 'Back'),
+            child: Text(tr('Back', 'رجوع')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(isArabic ? 'أوافق وأتابع' : 'Accept & continue'),
+            child: Text(tr('Accept & continue', 'أوافق وأتابع')),
           ),
         ],
       ),
@@ -342,9 +345,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            isArabic
-                ? 'تعذر حفظ الملف على هذا الجهاز. لم يتم رفع أي بيانات.'
-                : 'Could not save the profile on this device. No data was uploaded.',
+            tr(
+              'Could not save the profile on this device. No data was uploaded.',
+              'تعذر حفظ الملف على هذا الجهاز. لم يتم رفع أي بيانات.',
+            ),
           ),
         ),
       );

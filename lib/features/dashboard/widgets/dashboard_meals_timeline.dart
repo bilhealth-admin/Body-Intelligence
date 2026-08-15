@@ -84,21 +84,13 @@ class DashboardMealsTimeline extends StatelessWidget {
                     FilledButton.tonalIcon(
                       onPressed: onRepeatBreakfast,
                       icon: const Icon(Icons.replay_outlined),
-                      label: Text(
-                        Localizations.localeOf(context).languageCode == 'ar'
-                            ? 'كرر فطورك المعتاد'
-                            : 'Repeat usual breakfast',
-                      ),
+                      label: Text(_mealsTimelineCopy(context, 'repeatUsual')),
                     ),
                   if (recentBreakfastAvailable)
                     OutlinedButton.icon(
                       onPressed: onRepeatRecentBreakfast,
                       icon: const Icon(Icons.history_outlined),
-                      label: Text(
-                        Localizations.localeOf(context).languageCode == 'ar'
-                            ? 'كرر آخر فطور'
-                            : 'Repeat last breakfast',
-                      ),
+                      label: Text(_mealsTimelineCopy(context, 'repeatLast')),
                     ),
                 ],
               ),
@@ -119,6 +111,31 @@ class DashboardMealsTimeline extends StatelessWidget {
     ),
   );
 }
+
+String _mealsTimelineCopy(BuildContext context, String key) {
+  final locale = Localizations.localeOf(context).languageCode.toLowerCase();
+  return (_mealsTimelineCopies[locale] ?? _mealsTimelineCopies['en']!)[key]!;
+}
+
+const _mealsTimelineCopies = <String, Map<String, String>>{
+  'ar': {'repeatUsual': 'كرّر فطورك المعتاد', 'repeatLast': 'كرّر آخر فطور'},
+  'en': {
+    'repeatUsual': 'Repeat usual breakfast',
+    'repeatLast': 'Repeat last breakfast',
+  },
+  'fr': {
+    'repeatUsual': 'Répéter le petit-déjeuner habituel',
+    'repeatLast': 'Répéter le dernier petit-déjeuner',
+  },
+  'es': {
+    'repeatUsual': 'Repetir el desayuno habitual',
+    'repeatLast': 'Repetir el último desayuno',
+  },
+  'tr': {
+    'repeatUsual': 'Her zamanki kahvaltıyı tekrarla',
+    'repeatLast': 'Son kahvaltıyı tekrarla',
+  },
+};
 
 class _MealTimelineEntry extends StatelessWidget {
   const _MealTimelineEntry({

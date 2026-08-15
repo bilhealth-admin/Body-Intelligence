@@ -39,8 +39,8 @@ class FoodRepository implements UnifiedFoodRepository {
     required double fats,
     String? arabicName,
     String? barcode,
-    double servingSize = 100,
-    String servingUnit = 'g',
+    double? servingSize,
+    String? servingUnit,
     bool isCustom = true,
     String source = 'local',
     bool verified = false,
@@ -54,10 +54,39 @@ class FoodRepository implements UnifiedFoodRepository {
     double? phosphorus,
     double iron = 0,
     double vitaminC = 0,
+    String? uuid,
+    bool caloriesKnown = true,
+    bool proteinKnown = true,
+    bool carbsKnown = true,
+    bool fatsKnown = true,
   }) async {
+    final normalizedBarcode = _optional(barcode);
+    if (isCustom && normalizedBarcode != null) {
+      _validateCustomBarcode(normalizedBarcode);
+    }
+    if (isCustom && (servingSize == null || servingUnit == null)) {
+      throw ArgumentError(
+        'Custom foods require an explicit serving size and serving unit',
+      );
+    }
+    final effectiveServingSize = servingSize ?? 100;
+    final normalizedServingUnit = _validateServingUnit(servingUnit ?? 'g');
+    _validateNutritionBounds(
+      calories: calories,
+      protein: protein,
+      carbs: carbs,
+      fats: fats,
+      fiber: fiber,
+      sugar: sugar,
+      sodium: sodium,
+      potassium: potassium,
+      calcium: calcium,
+      magnesium: magnesium,
+      phosphorus: phosphorus,
+    );
     _validateFood(
       name: name,
-      servingSize: servingSize,
+      servingSize: effectiveServingSize,
       nutrients: [
         calories,
         protein,
@@ -74,51 +103,63 @@ class FoodRepository implements UnifiedFoodRepository {
         vitaminC,
       ],
     );
-    final rowId = await _database
-        .into(_database.foods)
-        .insert(
-          FoodsCompanion.insert(
-            name: name.trim(),
-            arabicName: Value(_optional(arabicName)),
-            category: Value(category),
-            keywords: Value(keywords.trim()),
-            barcode: Value(_optional(barcode)),
-            servingSize: Value(servingSize),
-            servingUnit: Value(servingUnit),
-            calories: calories,
-            protein: protein,
-            carbs: carbs,
-            fats: fats,
-            fiber: Value(fiber ?? 0),
-            sugar: Value(sugar ?? 0),
-            potassium: Value(potassium ?? 0),
-            sodium: Value(sodium ?? 0),
-            calcium: Value(calcium ?? 0),
-            iron: Value(iron),
-            magnesium: Value(magnesium ?? 0),
-            phosphorus: Value(phosphorus ?? 0),
-            nutrientEvidenceMask: Value(
-              NutrientEvidenceMask.fromValues(
-                fiber: fiber,
-                sugar: sugar,
-                sodium: sodium,
-                potassium: potassium,
-                calcium: calcium,
-                magnesium: magnesium,
-                phosphorus: phosphorus,
+    // Open/migrate the lazy database before entering the serialized barcode
+    // check+insert transaction. Initializing the schema from inside the first
+    // transaction can deadlock NativeDatabase during cold-start tests.
+    await (_database.select(_database.foods)..limit(1)).get();
+    return _database.transaction(() async {
+      if (isCustom && normalizedBarcode != null) {
+        await _ensureBarcodeAvailable(normalizedBarcode);
+      }
+      return _database
+          .into(_database.foods)
+          .insert(
+            FoodsCompanion.insert(
+              uuid: uuid == null ? const Value.absent() : Value(uuid),
+              name: name.trim(),
+              arabicName: Value(_optional(arabicName)),
+              category: Value(category),
+              keywords: Value(keywords.trim()),
+              barcode: Value(normalizedBarcode),
+              servingSize: Value(effectiveServingSize),
+              servingUnit: Value(normalizedServingUnit),
+              calories: calories,
+              protein: protein,
+              carbs: carbs,
+              fats: fats,
+              fiber: Value(fiber ?? 0),
+              sugar: Value(sugar ?? 0),
+              potassium: Value(potassium ?? 0),
+              sodium: Value(sodium ?? 0),
+              calcium: Value(calcium ?? 0),
+              iron: Value(iron),
+              magnesium: Value(magnesium ?? 0),
+              phosphorus: Value(phosphorus ?? 0),
+              nutrientEvidenceMask: Value(
+                NutrientEvidenceMask.fromValues(
+                  fiber: fiber,
+                  sugar: sugar,
+                  sodium: sodium,
+                  potassium: potassium,
+                  calcium: calcium,
+                  magnesium: magnesium,
+                  phosphorus: phosphorus,
+                  calories: caloriesKnown ? calories : null,
+                  protein: proteinKnown ? protein : null,
+                  carbohydrates: carbsKnown ? carbs : null,
+                  fat: fatsKnown ? fats : null,
+                ),
               ),
+              vitaminC: Value(vitaminC),
+              verified: Value(verified),
+              isCustom: Value(isCustom),
+              source: Value(source.trim().isEmpty ? 'local' : source.trim()),
             ),
-            vitaminC: Value(vitaminC),
-            verified: Value(verified),
-            isCustom: Value(isCustom),
-            source: Value(source.trim().isEmpty ? 'local' : source.trim()),
-          ),
-        );
-
-    return rowId;
+          );
+    });
   }
 
-  Stream<List<Food>> watchFavorites() {
+  Stream<List<Food>> watchFavorites() async* {
     final query =
         _database.select(_database.foods).join([
             innerJoin(
@@ -128,12 +169,13 @@ class FoodRepository implements UnifiedFoodRepository {
           ])
           ..where(_database.foods.deletedAt.isNull())
           ..orderBy([OrderingTerm.asc(_database.foods.name)]);
-    return query.watch().map(
-      (rows) => rows.map((row) => row.readTable(_database.foods)).toList(),
-    );
+    List<Food> decode(List<TypedResult> rows) =>
+        rows.map((row) => row.readTable(_database.foods)).toList();
+    yield decode(await query.get());
+    yield* query.watch().map(decode).skip(1);
   }
 
-  Stream<List<Food>> watchRecent({int limit = 20}) {
+  Stream<List<Food>> watchRecent({int limit = 20}) async* {
     final query =
         _database.select(_database.foods).join([
             innerJoin(
@@ -144,9 +186,10 @@ class FoodRepository implements UnifiedFoodRepository {
           ..where(_database.foods.deletedAt.isNull())
           ..orderBy([OrderingTerm.desc(_database.recentFoods.lastUsedAt)])
           ..limit(limit);
-    return query.watch().map(
-      (rows) => rows.map((row) => row.readTable(_database.foods)).toList(),
-    );
+    List<Food> decode(List<TypedResult> rows) =>
+        rows.map((row) => row.readTable(_database.foods)).toList();
+    yield decode(await query.get());
+    yield* query.watch().map(decode).skip(1);
   }
 
   Stream<List<Food>> watchFoods() {
@@ -190,15 +233,16 @@ class FoodRepository implements UnifiedFoodRepository {
         magnesium: Value(magnesium),
         phosphorus: Value(phosphorus ?? 0),
         nutrientEvidenceMask: Value(
-          NutrientEvidenceMask.fromValues(
-            fiber: fiber,
-            sugar: sugar,
-            sodium: sodium,
-            potassium: potassium,
-            calcium: calcium,
-            magnesium: magnesium,
-            phosphorus: phosphorus,
-          ),
+          food.nutrientEvidenceMask |
+              NutrientEvidenceMask.fromValues(
+                fiber: fiber,
+                sugar: sugar,
+                sodium: sodium,
+                potassium: potassium,
+                calcium: calcium,
+                magnesium: magnesium,
+                phosphorus: phosphorus,
+              ),
         ),
         source: Value(source),
         verified: const Value(true),
@@ -226,7 +270,29 @@ class FoodRepository implements UnifiedFoodRepository {
     double? calcium,
     double? magnesium,
     double? phosphorus,
+    bool caloriesKnown = true,
+    bool proteinKnown = true,
+    bool carbsKnown = true,
+    bool fatsKnown = true,
   }) async {
+    final normalizedBarcode = _optional(barcode);
+    if (normalizedBarcode != null) {
+      _validateCustomBarcode(normalizedBarcode);
+    }
+    final normalizedServingUnit = _validateServingUnit(servingUnit);
+    _validateNutritionBounds(
+      calories: calories,
+      protein: protein,
+      carbs: carbs,
+      fats: fats,
+      fiber: fiber,
+      sugar: sugar,
+      sodium: sodium,
+      potassium: potassium,
+      calcium: calcium,
+      magnesium: magnesium,
+      phosphorus: phosphorus,
+    );
     _validateFood(
       name: name,
       servingSize: servingSize,
@@ -244,46 +310,53 @@ class FoodRepository implements UnifiedFoodRepository {
         phosphorus ?? 0,
       ],
     );
-    final existing = await _customFood(id);
-    await (_database.update(
-      _database.foods,
-    )..where((row) => row.id.equals(id))).write(
-      FoodsCompanion(
-        name: Value(name.trim()),
-        arabicName: Value(_optional(arabicName)),
-        category: Value(category),
-        barcode: Value(_optional(barcode)),
-        servingSize: Value(servingSize),
-        servingUnit: Value(
-          servingUnit.trim().isEmpty ? 'g' : servingUnit.trim(),
-        ),
-        calories: Value(calories),
-        protein: Value(protein),
-        carbs: Value(carbs),
-        fats: Value(fats),
-        fiber: Value(fiber ?? 0),
-        sugar: Value(sugar ?? 0),
-        sodium: Value(sodium ?? 0),
-        potassium: Value(potassium ?? 0),
-        calcium: Value(calcium ?? 0),
-        magnesium: Value(magnesium ?? 0),
-        phosphorus: Value(phosphorus ?? 0),
-        nutrientEvidenceMask: Value(
-          NutrientEvidenceMask.fromValues(
-            fiber: fiber,
-            sugar: sugar,
-            sodium: sodium,
-            potassium: potassium,
-            calcium: calcium,
-            magnesium: magnesium,
-            phosphorus: phosphorus,
+    await _database.transaction(() async {
+      if (normalizedBarcode != null) {
+        await _ensureBarcodeAvailable(normalizedBarcode, excludingId: id);
+      }
+      final existing = await _customFood(id);
+      await (_database.update(
+        _database.foods,
+      )..where((row) => row.id.equals(id))).write(
+        FoodsCompanion(
+          name: Value(name.trim()),
+          arabicName: Value(_optional(arabicName)),
+          category: Value(category),
+          barcode: Value(normalizedBarcode),
+          servingSize: Value(servingSize),
+          servingUnit: Value(normalizedServingUnit),
+          calories: Value(calories),
+          protein: Value(protein),
+          carbs: Value(carbs),
+          fats: Value(fats),
+          fiber: Value(fiber ?? 0),
+          sugar: Value(sugar ?? 0),
+          sodium: Value(sodium ?? 0),
+          potassium: Value(potassium ?? 0),
+          calcium: Value(calcium ?? 0),
+          magnesium: Value(magnesium ?? 0),
+          phosphorus: Value(phosphorus ?? 0),
+          nutrientEvidenceMask: Value(
+            NutrientEvidenceMask.fromValues(
+              fiber: fiber,
+              sugar: sugar,
+              sodium: sodium,
+              potassium: potassium,
+              calcium: calcium,
+              magnesium: magnesium,
+              phosphorus: phosphorus,
+              calories: caloriesKnown ? calories : null,
+              protein: proteinKnown ? protein : null,
+              carbohydrates: carbsKnown ? carbs : null,
+              fat: fatsKnown ? fats : null,
+            ),
           ),
+          updatedAt: Value(DateTime.now()),
+          revision: Value(existing.revision + 1),
+          syncStatus: const Value('pending'),
         ),
-        updatedAt: Value(DateTime.now()),
-        revision: Value(existing.revision + 1),
-        syncStatus: const Value('pending'),
-      ),
-    );
+      );
+    });
   }
 
   Future<void> deleteCustomFood(int id) async {
@@ -299,6 +372,133 @@ class FoodRepository implements UnifiedFoodRepository {
         syncStatus: const Value('pendingDelete'),
       ),
     );
+  }
+
+  Future<Food> materializeUnifiedFood(UnifiedFood food) async {
+    final byUuid = await (_database.select(
+      _database.foods,
+    )..where((row) => row.uuid.equals(food.id))).getSingleOrNull();
+    if (byUuid != null) {
+      final incomingCalories = food.knownValue(FoodNutrient.calories);
+      final incomingProtein = food.knownValue(FoodNutrient.protein);
+      final incomingCarbs = food.knownValue(FoodNutrient.carbohydrates);
+      final incomingFats = food.knownValue(FoodNutrient.fat);
+
+      final incomingHasCoreEvidence =
+          incomingCalories != null ||
+          incomingProtein != null ||
+          incomingCarbs != null ||
+          incomingFats != null;
+      final storedCoreIsZero =
+          byUuid.calories == 0 &&
+          byUuid.protein == 0 &&
+          byUuid.carbs == 0 &&
+          byUuid.fats == 0;
+
+      if (!incomingHasCoreEvidence || !storedCoreIsZero) return byUuid;
+
+      await (_database.update(
+        _database.foods,
+      )..where((row) => row.id.equals(byUuid.id))).write(
+        FoodsCompanion(
+          name: Value(food.name),
+          arabicName: Value(_optional(food.arabicName)),
+          category: Value(food.category ?? byUuid.category),
+          keywords: Value(food.keywords.join(',')),
+          servingSize: Value(food.serving.amount),
+          servingUnit: Value(food.serving.unit),
+          calories: Value(incomingCalories ?? byUuid.calories),
+          protein: Value(incomingProtein ?? byUuid.protein),
+          carbs: Value(incomingCarbs ?? byUuid.carbs),
+          fats: Value(incomingFats ?? byUuid.fats),
+          fiber: Value(food.knownValue(FoodNutrient.fiber) ?? byUuid.fiber),
+          sugar: Value(food.knownValue(FoodNutrient.sugar) ?? byUuid.sugar),
+          sodium: Value(food.knownValue(FoodNutrient.sodium) ?? byUuid.sodium),
+          potassium: Value(
+            food.knownValue(FoodNutrient.potassium) ?? byUuid.potassium,
+          ),
+          calcium: Value(
+            food.knownValue(FoodNutrient.calcium) ?? byUuid.calcium,
+          ),
+          magnesium: Value(
+            food.knownValue(FoodNutrient.magnesium) ?? byUuid.magnesium,
+          ),
+          phosphorus: Value(
+            food.knownValue(FoodNutrient.phosphorus) ?? byUuid.phosphorus,
+          ),
+          iron: Value(food.knownValue(FoodNutrient.iron) ?? byUuid.iron),
+          vitaminC: Value(
+            food.knownValue(FoodNutrient.vitaminC) ?? byUuid.vitaminC,
+          ),
+          nutrientEvidenceMask: Value(
+            byUuid.nutrientEvidenceMask |
+                NutrientEvidenceMask.fromValues(
+                  calories: incomingCalories,
+                  protein: incomingProtein,
+                  carbohydrates: incomingCarbs,
+                  fat: incomingFats,
+                  fiber: food.knownValue(FoodNutrient.fiber),
+                  sugar: food.knownValue(FoodNutrient.sugar),
+                  sodium: food.knownValue(FoodNutrient.sodium),
+                  potassium: food.knownValue(FoodNutrient.potassium),
+                  calcium: food.knownValue(FoodNutrient.calcium),
+                  magnesium: food.knownValue(FoodNutrient.magnesium),
+                  phosphorus: food.knownValue(FoodNutrient.phosphorus),
+                ),
+          ),
+          source: Value(food.sourceLabel),
+          verified: Value(food.verified),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+
+      return (_database.select(
+        _database.foods,
+      )..where((row) => row.id.equals(byUuid.id))).getSingle();
+    }
+
+    final barcode = food.barcode?.trim();
+    if (barcode != null && barcode.isNotEmpty) {
+      final byBarcode = await (_database.select(
+        _database.foods,
+      )..where((row) => row.barcode.equals(barcode))).getSingleOrNull();
+      if (byBarcode != null) return byBarcode;
+    }
+
+    final id = await addFood(
+      uuid: food.id,
+      name: food.name,
+      arabicName: food.arabicName,
+      category: food.category ?? 'food',
+      keywords: food.keywords.join(','),
+      barcode: barcode,
+      servingSize: food.serving.amount,
+      servingUnit: food.serving.unit,
+      calories: food.knownValue(FoodNutrient.calories) ?? 0,
+      protein: food.knownValue(FoodNutrient.protein) ?? 0,
+      carbs: food.knownValue(FoodNutrient.carbohydrates) ?? 0,
+      fats: food.knownValue(FoodNutrient.fat) ?? 0,
+      fiber: food.knownValue(FoodNutrient.fiber),
+      sugar: food.knownValue(FoodNutrient.sugar),
+      sodium: food.knownValue(FoodNutrient.sodium),
+      potassium: food.knownValue(FoodNutrient.potassium),
+      calcium: food.knownValue(FoodNutrient.calcium),
+      magnesium: food.knownValue(FoodNutrient.magnesium),
+      phosphorus: food.knownValue(FoodNutrient.phosphorus),
+      iron: food.knownValue(FoodNutrient.iron) ?? 0,
+      vitaminC: food.knownValue(FoodNutrient.vitaminC) ?? 0,
+      source: food.sourceLabel,
+      isCustom: false,
+      verified: food.verified,
+      caloriesKnown: food.knownValue(FoodNutrient.calories) != null,
+      proteinKnown: food.knownValue(FoodNutrient.protein) != null,
+      carbsKnown: food.knownValue(FoodNutrient.carbohydrates) != null,
+      fatsKnown: food.knownValue(FoodNutrient.fat) != null,
+    );
+
+    return (_database.select(
+      _database.foods,
+    )..where((row) => row.id.equals(id))).getSingle();
   }
 
   Future<List<Food>> search(String query, {int limit = 50}) async {
@@ -553,6 +753,76 @@ class FoodRepository implements UnifiedFoodRepository {
     return food;
   }
 
+  void _validateCustomBarcode(String barcode) {
+    if (!RegExp(r'^\d{8,14}$').hasMatch(barcode)) {
+      throw ArgumentError.value(
+        barcode,
+        'barcode',
+        'A custom barcode must contain 8 to 14 digits',
+      );
+    }
+  }
+
+  String _validateServingUnit(String value) {
+    final unit = value.trim();
+    if (unit.isEmpty ||
+        unit.length > 24 ||
+        !RegExp(r'^[\p{L}][\p{L}\p{N} ._-]*$', unicode: true).hasMatch(unit)) {
+      throw ArgumentError.value(
+        value,
+        'servingUnit',
+        'A short serving unit is required',
+      );
+    }
+    return unit;
+  }
+
+  void _validateNutritionBounds({
+    required double calories,
+    required double protein,
+    required double carbs,
+    required double fats,
+    double? fiber,
+    double? sugar,
+    double? sodium,
+    double? potassium,
+    double? calcium,
+    double? magnesium,
+    double? phosphorus,
+  }) {
+    final macroValues = [protein, carbs, fats, fiber ?? 0, sugar ?? 0];
+    final microValues = [
+      sodium ?? 0,
+      potassium ?? 0,
+      calcium ?? 0,
+      magnesium ?? 0,
+      phosphorus ?? 0,
+    ];
+    if (calories > 10000 ||
+        macroValues.any((value) => value > 2000) ||
+        microValues.any((value) => value > 1000000)) {
+      throw ArgumentError('Food nutrition values exceed supported bounds');
+    }
+  }
+
+  Future<void> _ensureBarcodeAvailable(
+    String barcode, {
+    int? excludingId,
+  }) async {
+    final query = _database.select(_database.foods)
+      ..where(
+        (row) =>
+            row.barcode.equals(barcode) &
+            row.deletedAt.isNull() &
+            (excludingId == null
+                ? const Constant(true)
+                : row.id.equals(excludingId).not()),
+      );
+    if (await query.getSingleOrNull() != null) {
+      throw StateError('A food with this barcode already exists');
+    }
+  }
+
   void _validateFood({
     required String name,
     required double servingSize,
@@ -563,7 +833,10 @@ class FoodRepository implements UnifiedFoodRepository {
     }
     if (!servingSize.isFinite ||
         servingSize <= 0 ||
-        nutrients.any((value) => !value.isFinite || value < 0)) {
+        servingSize > 100000 ||
+        nutrients.any(
+          (value) => !value.isFinite || value < 0 || value > 1000000,
+        )) {
       throw ArgumentError('Food quantities and nutrients must be valid');
     }
   }

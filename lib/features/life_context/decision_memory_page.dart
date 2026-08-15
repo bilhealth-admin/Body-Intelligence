@@ -15,7 +15,6 @@ class DecisionMemoryPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.strings.text;
-    final arabic = Localizations.localeOf(context).languageCode == 'ar';
     final enabled = ref.watch(decisionMemoryEnabledProvider).value ?? true;
     final memories = ref.watch(decisionMemoriesProvider);
     return Scaffold(
@@ -38,7 +37,8 @@ class DecisionMemoryPage extends ConsumerWidget {
           const SizedBox(height: 8),
           memories.when(
             loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, _) => Text(error.toString()),
+            error: (error, _) =>
+                Text(t('Could not load decision memories. Try again.')),
             data: (rows) {
               if (rows.isEmpty) {
                 return Card(
@@ -58,17 +58,9 @@ class DecisionMemoryPage extends ConsumerWidget {
                     Align(
                       alignment: AlignmentDirectional.centerEnd,
                       child: TextButton.icon(
-                        onPressed: () => _confirmForgetUnhelpful(
-                          context,
-                          ref,
-                          arabic: arabic,
-                        ),
+                        onPressed: () => _confirmForgetUnhelpful(context, ref),
                         icon: const Icon(Icons.auto_delete_outlined),
-                        label: Text(
-                          arabic
-                              ? 'نسيان الذكريات غير المفيدة'
-                              : 'Forget unhelpful memories',
-                        ),
+                        label: Text(t('Forget unhelpful memories')),
                       ),
                     ),
                   ...rows.map((row) {
@@ -78,9 +70,7 @@ class DecisionMemoryPage extends ConsumerWidget {
                             .toList();
                     return Card(
                       child: ExpansionTile(
-                        title: Text(
-                          arabic ? _arabicTitle(row.title) : row.title,
-                        ),
+                        title: Text(t(row.title)),
                         subtitle: Text('${row.dayKey} · ${t(row.response)}'),
                         childrenPadding: const EdgeInsets.fromLTRB(
                           16,
@@ -92,9 +82,7 @@ class DecisionMemoryPage extends ConsumerWidget {
                           Align(
                             alignment: AlignmentDirectional.centerStart,
                             child: Text(
-                              arabic
-                                  ? '${_arabicReason(row.reason)}\nالدليل: ${evidence.map(_arabicEvidence).join(' · ')}'
-                                  : '${row.reason}\nEvidence: ${evidence.join(' · ')}',
+                              '${t(row.reason)}\n${t('Evidence')}: ${evidence.map(t).join(' · ')}',
                             ),
                           ),
                           if (row.outcome != null)
@@ -147,26 +135,25 @@ class DecisionMemoryPage extends ConsumerWidget {
 
   Future<void> _confirmForgetUnhelpful(
     BuildContext context,
-    WidgetRef ref, {
-    required bool arabic,
-  }) async {
+    WidgetRef ref,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(arabic ? 'نسيان الذكريات؟' : 'Forget memories?'),
+        title: Text(context.strings.text('Forget memories?')),
         content: Text(
-          arabic
-              ? 'سيتم حذف الذكريات التي قيّمتها بنجمتين أو أقل فقط. لا يتم حذف أي شيء تلقائيًا.'
-              : 'Only memories you rated two stars or less will be deleted. Nothing is deleted automatically.',
+          context.strings.text(
+            'Only memories you rated two stars or less will be deleted. Nothing is deleted automatically.',
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(arabic ? 'إلغاء' : 'Cancel'),
+            child: Text(context.strings.text('Cancel')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(arabic ? 'نسيان' : 'Forget'),
+            child: Text(context.strings.text('Forget')),
           ),
         ],
       ),
@@ -176,6 +163,7 @@ class DecisionMemoryPage extends ConsumerWidget {
     }
   }
 
+  // ignore: unused_element
   static String _arabicTitle(String value) {
     if (value.startsWith('Add about')) return 'أضف مصدر بروتين مناسبًا';
     if (value.startsWith('Drink')) return 'اشرب الماء تدريجيًا';
@@ -188,6 +176,7 @@ class DecisionMemoryPage extends ConsumerWidget {
     };
   }
 
+  // ignore: unused_element
   static String _arabicReason(String value) => switch (value) {
     'A comparable daily check-in improves trend confidence.' =>
       'القياس اليومي المتقارب يحسن ثقة الاتجاه.',
@@ -204,6 +193,7 @@ class DecisionMemoryPage extends ConsumerWidget {
     _ => 'تم حفظ سبب هذا الإجراء مع السجل المحلي.',
   };
 
+  // ignore: unused_element
   static String _arabicEvidence(String value) {
     if (value.contains('weight check-in')) return 'لا يوجد قياس وزن اليوم';
     if (value.contains('meal record')) return 'قد يكون سجل وجبات اليوم ناقصًا';

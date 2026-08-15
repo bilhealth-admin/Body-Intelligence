@@ -1,0 +1,24 @@
+{
+  "package": "BIL-V1-HOME-INTELLIGENCE-001",
+  "baseline": "BIL-ARCHITECTURE-BASELINE-d8bc3e2-20260801-160655",
+  "head": "d8bc3e2",
+  "scope": [
+    "AI Coach discovery and reuse",
+    "Intelligence Center: AI Coach + Ask BIL",
+    "Provider-neutral external knowledge boundary",
+    "Dashboard header compaction",
+    "Larger daily summary metric cards",
+    "Dashboard Intelligence Center entry",
+    "Offline-first regional barcode enrichment",
+    "Open Food Facts barcode lookup and local cache",
+    "Optional USDA branded lookup via BIL_USDA_API_KEY",
+    "Windows scanner preserved",
+    "Analyze/tests/Windows/Android gates"
+  ],
+  "limitations": [
+    "No public source can guarantee every Egyptian, Jordanian, or Saudi barcode.",
+    "USDA online enrichment requires a private data.gov API key.",
+    "External AI provider remains disabled until explicitly configured.",
+    "No user-data mutation is executed without an explicit repository-backed confirmation flow."
+  ]
+}

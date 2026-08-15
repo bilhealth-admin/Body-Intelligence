@@ -1,3 +1,8 @@
+# RETIRED — historical record only
+
+This constitution is superseded by
+`docs/BIL_V1_FINAL_RELEASE_CONSTITUTION.md`.
+
 # BIL Epic 003 Final R1 Constitution
 
 Purpose: fix the sole verified startup-test lifecycle defect introduced by the

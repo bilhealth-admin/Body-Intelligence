@@ -7,6 +7,9 @@ import 'cloud_observability_runtime.dart';
 import 'cloud_platform_ports.dart';
 import 'cloud_privacy_lifecycle_engine.dart';
 import 'durable_offline_first_cloud_platform.dart';
+import 'supabase_cloud_authentication_provider.dart';
+import 'supabase_cloud_transport.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 final class CloudPlatformRuntime {
   const CloudPlatformRuntime({
@@ -57,4 +60,21 @@ final class CloudPlatformCompositionRoot {
       observability: CloudObservabilityRuntime(store: store),
     );
   }
+
+  static Future<CloudPlatformRuntime> createSupabase({
+    required String databasePath,
+    required SupabaseClient client,
+    required CloudPayloadCipher cipher,
+    required CloudConnectivity connectivity,
+    CloudClock clock = const SystemCloudClock(),
+    CloudPlatformPolicy policy = const CloudPlatformPolicy(),
+  }) => create(
+    databasePath: databasePath,
+    transport: SupabaseCloudTransport(client),
+    cipher: cipher,
+    connectivity: connectivity,
+    authentication: SupabaseCloudAuthenticationProvider(client),
+    clock: clock,
+    policy: policy,
+  );
 }

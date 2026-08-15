@@ -13,11 +13,13 @@ class SecondaryPageAppBar extends StatelessWidget
     required this.title,
     this.actions,
     this.dashboardPath = '/dashboard',
+    this.showDashboardAction = true,
   });
 
   final Widget title;
   final List<Widget>? actions;
   final String dashboardPath;
+  final bool showDashboardAction;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -36,20 +38,39 @@ class SecondaryPageAppBar extends StatelessWidget
     }
 
     return AppBar(
+      centerTitle: true,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      surfaceTintColor: Colors.transparent,
       title: title,
-      leading: IconButton(
-        key: const Key('secondary-page-back'),
-        tooltip: arabic ? 'رجوع' : 'Back',
-        onPressed: leaveSecondaryPage,
-        icon: const Icon(Icons.arrow_back_rounded),
+      leadingWidth: 68,
+      leading: Padding(
+        padding: const EdgeInsetsDirectional.only(start: 12),
+        child: IconButton.filled(
+          key: const Key('secondary-page-back'),
+          tooltip: arabic ? 'رجوع' : 'Back',
+          onPressed: leaveSecondaryPage,
+          style: IconButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            foregroundColor: Theme.of(context).colorScheme.onSurface,
+          ),
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
       ),
       actions: [
-        IconButton(
-          key: const Key('secondary-page-dashboard'),
-          tooltip: arabic ? 'العودة إلى لوحة اليوم' : 'Return to Today',
-          onPressed: () => context.go(dashboardPath),
-          icon: const Icon(Icons.dashboard_rounded),
-        ),
+        if (showDashboardAction)
+          IconButton.filled(
+            key: const Key('secondary-page-dashboard'),
+            tooltip: arabic ? 'العودة إلى لوحة اليوم' : 'Return to Today',
+            onPressed: () => context.go(dashboardPath),
+            style: IconButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              foregroundColor: Theme.of(context).colorScheme.onSurface,
+            ),
+            icon: const Icon(Icons.dashboard_outlined),
+          ),
+        if (showDashboardAction) const SizedBox(width: 8),
         ...?actions,
       ],
     );

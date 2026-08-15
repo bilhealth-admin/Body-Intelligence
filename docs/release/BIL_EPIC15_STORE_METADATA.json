@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "app_identity": {
+    "name": "BIL - Body Intelligence Log",
+    "android_package": "com.kadem.bil",
+    "apple_bundle_id": "com.kadem.bil",
+    "primary_category": "Health & Fitness",
+    "secondary_apple_category": "Lifestyle",
+    "apple_age_rating": "OWNER_ACTION_REQUIRED_COMPLETE_QUESTIONNAIRE_EXPECT_13_PLUS_DUE_TO_SOCIAL_AND_MESSAGING",
+    "google_content_rating": "OWNER_ACTION_REQUIRED_COMPLETE_IARC_QUESTIONNAIRE"
+  },
+  "limits_verified_2026_08_05": {
+    "google_title": 30,
+    "google_short_description": 80,
+    "google_full_description": 4000,
+    "apple_name": 30,
+    "apple_subtitle": 30,
+    "apple_promotional_text": 170,
+    "apple_keywords": 100,
+    "apple_description": 4000,
+    "apple_screenshots_per_device": "1-10",
+    "google_feature_graphic": "1024x500 PNG/JPEG without alpha",
+    "google_icon": "512x512 32-bit PNG, <=1024KB"
+  },
+  "locales": {
+    "en-US": {
+      "title": "BIL - Body Intelligence Log",
+      "subtitle": "Your daily health intelligence",
+      "short_description": "Track food, body trends and habits with clear, privacy-first insights.",
+      "promotional_text": "Build a clearer picture of your nutrition, movement and progress—without invented data or medical diagnosis.",
+      "keywords": "nutrition,food,calories,macros,weight,fitness,health,habits,progress,wellness",
+      "full_description": "BIL brings your daily nutrition, body measurements, movement and habits into one calm, explainable experience. Log meals by search, barcode, voice or photo when those services are configured. Review calories, macros, nutrients, weight trends and weekly reports built only from your recorded data. Connect supported health platforms and BIL devices with explicit permission and clear source labels. Explore verified food catalogs, nutrition pathways, recipes and workouts when trusted content is installed. BIL explains confidence and evidence, marks missing days honestly, works locally when offline, and keeps paid access dependent on verified store entitlements. BIL supports Arabic, English, French, Spanish and Turkish. BIL is a wellness and self-tracking tool, not a medical device and not a substitute for professional medical advice.",
+      "release_notes": "First release candidate: daily logging, trusted nutrition catalogs, trends and weekly reports, connected-health foundations, privacy controls, multilingual accessibility, and verified subscription boundaries."
+    },
+    "ar": {
+      "title": "BIL - سجل ذكاء الجسم",
+      "subtitle": "ذكاء صحي واضح كل يوم",
+      "short_description": "سجّل غذاءك واتجاهات جسمك وعاداتك برؤى واضحة تحترم الخصوصية.",
+      "promotional_text": "كوّن صورة أوضح عن غذائك وحركتك وتقدمك، دون بيانات مخترعة أو تشخيص طبي.",
+      "keywords": "تغذية,طعام,سعرات,ماكروز,وزن,لياقة,صحة,عادات,تقدم,عافية",
+      "full_description": "يجمع BIL التغذية اليومية وقياسات الجسم والحركة والعادات في تجربة هادئة وقابلة للتفسير. سجّل الوجبات بالبحث أو الباركود أو الصوت أو الصورة عندما تكون الخدمات مهيأة. راجع السعرات والماكروز والعناصر الغذائية واتجاه الوزن والتقارير الأسبوعية المبنية فقط على بياناتك المسجلة. اربط منصات الصحة والأجهزة المدعومة بموافقة صريحة مع توضيح مصدر كل قراءة. استكشف كتالوجات غذاء موثقة ومسارات تغذية ووصفات وتمارين عند تثبيت محتوى موثوق. يوضح BIL الثقة والأدلة، ويعرض الأيام الناقصة بصدق، ويعمل محليًا دون اتصال، ولا يمنح الميزات المدفوعة إلا بعد تحقق المتجر. يدعم العربية والإنجليزية والفرنسية والإسبانية والتركية. BIL أداة للعافية والتتبع الذاتي، وليس جهازًا طبيًا ولا بديلًا عن استشارة مختص صحي.",
+      "release_notes": "مرشح الإصدار الأول: يوميات غذاء، كتالوجات موثقة، اتجاهات وتقارير أسبوعية، ربط صحي، خصوصية، وصول متعدد اللغات، وحدود اشتراك موثقة."
+    },
+    "fr-FR": {
+      "title": "BIL - Intelligence corporelle",
+      "subtitle": "Votre santé, expliquée",
+      "short_description": "Suivez repas, tendances et habitudes avec des données claires et privées.",
+      "promotional_text": "Comprenez mieux nutrition, activité et progrès, sans données inventées ni diagnostic médical.",
+      "keywords": "nutrition,repas,calories,macros,poids,forme,santé,habitudes,progrès,bien-être",
+      "full_description": "BIL réunit nutrition, mensurations, activité et habitudes dans une expérience claire et explicable. Enregistrez les repas par recherche, code-barres, voix ou photo lorsque les services sont configurés. Consultez calories, macronutriments, nutriments, tendances de poids et rapports hebdomadaires fondés uniquement sur vos données enregistrées. Connectez les plateformes de santé et appareils BIL pris en charge avec un consentement explicite et une source visible. Les jours manquants restent manquants; aucune mesure n’est inventée. BIL fonctionne localement hors ligne et les accès payants dépendent d’un droit vérifié par la boutique. Disponible en arabe, anglais, français, espagnol et turc. BIL est un outil de bien-être et d’auto-suivi, pas un dispositif médical ni un substitut à un avis médical professionnel.",
+      "release_notes": "Premier candidat: journal alimentaire, catalogues vérifiés, tendances, rapports hebdomadaires, santé connectée, confidentialité et accessibilité multilingue."
+    },
+    "es-ES": {
+      "title": "BIL - Inteligencia corporal",
+      "subtitle": "Tu salud diaria, explicada",
+      "short_description": "Registra comidas, tendencias y hábitos con datos claros y privados.",
+      "promotional_text": "Comprende nutrición, actividad y progreso sin datos inventados ni diagnósticos médicos.",
+      "keywords": "nutrición,comida,calorías,macros,peso,fitness,salud,hábitos,progreso,bienestar",
+      "full_description": "BIL reúne nutrición diaria, medidas corporales, actividad y hábitos en una experiencia clara y explicable. Registra comidas por búsqueda, código de barras, voz o foto cuando los servicios estén configurados. Consulta calorías, macronutrientes, nutrientes, tendencias de peso e informes semanales creados únicamente con tus datos registrados. Conecta plataformas de salud y dispositivos BIL compatibles mediante consentimiento explícito y etiquetas de origen visibles. Los días sin datos permanecen vacíos; BIL no inventa mediciones. Funciona localmente sin conexión y el acceso de pago depende de derechos verificados por la tienda. Disponible en árabe, inglés, francés, español y turco. BIL es una herramienta de bienestar y autorregistro, no un dispositivo médico ni un sustituto del consejo médico profesional.",
+      "release_notes": "Primer candidato: diario de alimentos, catálogos verificados, tendencias, informes semanales, salud conectada, privacidad y accesibilidad multilingüe."
+    },
+    "tr-TR": {
+      "title": "BIL - Beden Zekâsı Günlüğü",
+      "subtitle": "Günlük sağlığınızı anlayın",
+      "short_description": "Öğünleri, beden eğilimlerini ve alışkanlıkları açık ve özel biçimde izleyin.",
+      "promotional_text": "Beslenme, hareket ve ilerlemenizi uydurma veri veya tıbbi tanı olmadan anlayın.",
+      "keywords": "beslenme,öğün,kalori,makro,kilo,fitness,sağlık,alışkanlık,ilerleme,iyi yaşam",
+      "full_description": "BIL günlük beslenme, beden ölçümleri, hareket ve alışkanlıkları açık ve açıklanabilir bir deneyimde bir araya getirir. Hizmetler yapılandırıldığında arama, barkod, ses veya fotoğrafla öğün kaydedin. Yalnızca kaydettiğiniz verilerden oluşturulan kalorileri, makroları, besinleri, kilo eğilimlerini ve haftalık raporları inceleyin. Desteklenen sağlık platformlarını ve BIL cihazlarını açık onay ve görünür kaynak etiketleriyle bağlayın. Eksik günler eksik kalır; BIL ölçüm uydurmaz. Çevrimdışı yerel çalışır ve ücretli erişim mağaza tarafından doğrulanan haklara bağlıdır. Arapça, İngilizce, Fransızca, İspanyolca ve Türkçe desteklenir. BIL bir iyi yaşam ve kişisel takip aracıdır; tıbbi cihaz veya profesyonel tıbbi tavsi yerine geçmez.",
+      "release_notes": "İlk sürüm adayı: beslenme günlüğü, doğrulanmış kataloglar, eğilimler, haftalık raporlar, bağlı sağlık, gizlilik ve çok dilli erişilebilirlik."
+    }
+  },
+  "legal_and_support": {
+    "domain": "bilhealth.com",
+    "support_email": "bilhealth.app@gmail.com",
+    "privacy_path": "/privacy",
+    "terms_path": "/terms",
+    "support_path": "/support",
+    "account_deletion_path": "/account-deletion",
+    "status": "CONTENT_READY_OWNER_EXTERNAL_ACTION_UNPUBLISHED_OR_UNVERIFIED"
+  },
+  "subscriptions": {
+    "group": "OWNER_INPUT_REQUIRED_APPLE_SUBSCRIPTION_GROUP",
+    "products": {
+      "plus_monthly": "OWNER_INPUT_REQUIRED_BIL_STORE_PLUS_MONTHLY",
+      "plus_annual": "OWNER_INPUT_REQUIRED_BIL_STORE_PLUS_ANNUAL",
+      "pro_monthly": "OWNER_INPUT_REQUIRED_BIL_STORE_PRO_MONTHLY",
+      "pro_annual": "OWNER_INPUT_REQUIRED_BIL_STORE_PRO_ANNUAL"
+    },
+    "pricing": "OWNER_INPUT_REQUIRED_STORE_LOCAL_PRICING",
+    "free_plan": "No store product; local free entitlement"
+  },
+  "review": {
+    "demo_account": "OWNER_INPUT_REQUIRED_CREATE_REVIEW_ACCOUNT_OUTSIDE_GIT",
+    "credentials": "NEVER_STORE_IN_GIT_ENTER_ONLY_IN_STORE_REVIEW_CONSOLE",
+    "notes": "BIL is a wellness tracker, not a medical device. Cloud community, AI gateways, push, and purchases remain hidden or unavailable unless their production configuration is present. Reviewers can use local logging without an account. Health and BLE behavior requiring physical hardware is documented as external verification, never simulated as connected in production."
+  }
+}

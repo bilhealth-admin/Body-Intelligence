@@ -31,10 +31,10 @@ class ExternalCapabilities {
     return switch (capability) {
       ExternalCapability.account => CapabilityStatus(
         capability: capability,
-        available: false,
-        reason: cloud
-            ? 'Configuration found, but verified registration/session activation is not enabled in this build.'
-            : 'Requires Supabase client configuration and the BIL server boundary.',
+        available: AppEnvironment.cloudConfigured,
+        reason: AppEnvironment.cloudConfigured
+            ? 'Secure account sign-in and registration are available.'
+            : 'Requires Supabase client configuration.',
       ),
       ExternalCapability.sync => CapabilityStatus(
         capability: capability,

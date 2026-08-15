@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "pack_id": "bil-recipes-ar-seed",
+  "version": 1,
+  "type": "recipes",
+  "items": [{
+    "id": "recipe-example",
+    "locale": "ar",
+    "title": "اسم الوصفة",
+    "image_url": "https://cdn.example.com/recipes/example.webp",
+    "ingredients": ["verified-food-id:100g"],
+    "rights_holder": "Licensed content owner",
+    "license": "commercial-license-id",
+    "verified": false
+  }]
+}

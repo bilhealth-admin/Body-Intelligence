@@ -2258,6 +2258,18 @@ class $WeightEntriesTable extends WeightEntries
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _progressPhotoPathMeta = const VerificationMeta(
+    'progressPhotoPath',
+  );
+  @override
+  late final GeneratedColumn<String> progressPhotoPath =
+      GeneratedColumn<String>(
+        'progress_photo_path',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _measurementContextMeta =
       const VerificationMeta('measurementContext');
   @override
@@ -2337,6 +2349,7 @@ class $WeightEntriesTable extends WeightEntries
     dayKey,
     weight,
     note,
+    progressPhotoPath,
     measurementContext,
     createdAt,
     updatedAt,
@@ -2389,6 +2402,15 @@ class $WeightEntriesTable extends WeightEntries
       context.handle(
         _noteMeta,
         note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('progress_photo_path')) {
+      context.handle(
+        _progressPhotoPathMeta,
+        progressPhotoPath.isAcceptableOrUnknown(
+          data['progress_photo_path']!,
+          _progressPhotoPathMeta,
+        ),
       );
     }
     if (data.containsKey('measurement_context')) {
@@ -2463,6 +2485,10 @@ class $WeightEntriesTable extends WeightEntries
         DriftSqlType.string,
         data['${effectivePrefix}note'],
       ),
+      progressPhotoPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}progress_photo_path'],
+      ),
       measurementContext: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}measurement_context'],
@@ -2506,6 +2532,9 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
   final double weight;
   final String? note;
 
+  /// Private on-device progress photo associated with this measurement.
+  final String? progressPhotoPath;
+
   /// Stable, non-localized measurement condition selected by the user.
   final String measurementContext;
   final DateTime createdAt;
@@ -2520,6 +2549,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     this.dayKey,
     required this.weight,
     this.note,
+    this.progressPhotoPath,
     required this.measurementContext,
     required this.createdAt,
     required this.updatedAt,
@@ -2539,6 +2569,9 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     map['weight'] = Variable<double>(weight);
     if (!nullToAbsent || note != null) {
       map['note'] = Variable<String>(note);
+    }
+    if (!nullToAbsent || progressPhotoPath != null) {
+      map['progress_photo_path'] = Variable<String>(progressPhotoPath);
     }
     map['measurement_context'] = Variable<String>(measurementContext);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -2561,6 +2594,9 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
           : Value(dayKey),
       weight: Value(weight),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      progressPhotoPath: progressPhotoPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(progressPhotoPath),
       measurementContext: Value(measurementContext),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -2584,6 +2620,9 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       dayKey: serializer.fromJson<String?>(json['dayKey']),
       weight: serializer.fromJson<double>(json['weight']),
       note: serializer.fromJson<String?>(json['note']),
+      progressPhotoPath: serializer.fromJson<String?>(
+        json['progressPhotoPath'],
+      ),
       measurementContext: serializer.fromJson<String>(
         json['measurementContext'],
       ),
@@ -2604,6 +2643,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       'dayKey': serializer.toJson<String?>(dayKey),
       'weight': serializer.toJson<double>(weight),
       'note': serializer.toJson<String?>(note),
+      'progressPhotoPath': serializer.toJson<String?>(progressPhotoPath),
       'measurementContext': serializer.toJson<String>(measurementContext),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -2620,6 +2660,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     Value<String?> dayKey = const Value.absent(),
     double? weight,
     Value<String?> note = const Value.absent(),
+    Value<String?> progressPhotoPath = const Value.absent(),
     String? measurementContext,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -2633,6 +2674,9 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     dayKey: dayKey.present ? dayKey.value : this.dayKey,
     weight: weight ?? this.weight,
     note: note.present ? note.value : this.note,
+    progressPhotoPath: progressPhotoPath.present
+        ? progressPhotoPath.value
+        : this.progressPhotoPath,
     measurementContext: measurementContext ?? this.measurementContext,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -2648,6 +2692,9 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
       dayKey: data.dayKey.present ? data.dayKey.value : this.dayKey,
       weight: data.weight.present ? data.weight.value : this.weight,
       note: data.note.present ? data.note.value : this.note,
+      progressPhotoPath: data.progressPhotoPath.present
+          ? data.progressPhotoPath.value
+          : this.progressPhotoPath,
       measurementContext: data.measurementContext.present
           ? data.measurementContext.value
           : this.measurementContext,
@@ -2670,6 +2717,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
           ..write('dayKey: $dayKey, ')
           ..write('weight: $weight, ')
           ..write('note: $note, ')
+          ..write('progressPhotoPath: $progressPhotoPath, ')
           ..write('measurementContext: $measurementContext, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -2688,6 +2736,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
     dayKey,
     weight,
     note,
+    progressPhotoPath,
     measurementContext,
     createdAt,
     updatedAt,
@@ -2705,6 +2754,7 @@ class WeightEntry extends DataClass implements Insertable<WeightEntry> {
           other.dayKey == this.dayKey &&
           other.weight == this.weight &&
           other.note == this.note &&
+          other.progressPhotoPath == this.progressPhotoPath &&
           other.measurementContext == this.measurementContext &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -2720,6 +2770,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
   final Value<String?> dayKey;
   final Value<double> weight;
   final Value<String?> note;
+  final Value<String?> progressPhotoPath;
   final Value<String> measurementContext;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -2733,6 +2784,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     this.dayKey = const Value.absent(),
     this.weight = const Value.absent(),
     this.note = const Value.absent(),
+    this.progressPhotoPath = const Value.absent(),
     this.measurementContext = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -2747,6 +2799,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     this.dayKey = const Value.absent(),
     required double weight,
     this.note = const Value.absent(),
+    this.progressPhotoPath = const Value.absent(),
     this.measurementContext = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -2761,6 +2814,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     Expression<String>? dayKey,
     Expression<double>? weight,
     Expression<String>? note,
+    Expression<String>? progressPhotoPath,
     Expression<String>? measurementContext,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -2775,6 +2829,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
       if (dayKey != null) 'day_key': dayKey,
       if (weight != null) 'weight': weight,
       if (note != null) 'note': note,
+      if (progressPhotoPath != null) 'progress_photo_path': progressPhotoPath,
       if (measurementContext != null) 'measurement_context': measurementContext,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -2791,6 +2846,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     Value<String?>? dayKey,
     Value<double>? weight,
     Value<String?>? note,
+    Value<String?>? progressPhotoPath,
     Value<String>? measurementContext,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -2805,6 +2861,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
       dayKey: dayKey ?? this.dayKey,
       weight: weight ?? this.weight,
       note: note ?? this.note,
+      progressPhotoPath: progressPhotoPath ?? this.progressPhotoPath,
       measurementContext: measurementContext ?? this.measurementContext,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -2834,6 +2891,9 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
     }
     if (note.present) {
       map['note'] = Variable<String>(note.value);
+    }
+    if (progressPhotoPath.present) {
+      map['progress_photo_path'] = Variable<String>(progressPhotoPath.value);
     }
     if (measurementContext.present) {
       map['measurement_context'] = Variable<String>(measurementContext.value);
@@ -2865,6 +2925,7 @@ class WeightEntriesCompanion extends UpdateCompanion<WeightEntry> {
           ..write('dayKey: $dayKey, ')
           ..write('weight: $weight, ')
           ..write('note: $note, ')
+          ..write('progressPhotoPath: $progressPhotoPath, ')
           ..write('measurementContext: $measurementContext, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -5291,6 +5352,56 @@ class $MealItemsTable extends MealItems
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _foodSourceSnapshotMeta =
+      const VerificationMeta('foodSourceSnapshot');
+  @override
+  late final GeneratedColumn<String> foodSourceSnapshot =
+      GeneratedColumn<String>(
+        'food_source_snapshot',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('local'),
+      );
+  static const VerificationMeta _foodVerifiedSnapshotMeta =
+      const VerificationMeta('foodVerifiedSnapshot');
+  @override
+  late final GeneratedColumn<bool> foodVerifiedSnapshot = GeneratedColumn<bool>(
+    'food_verified_snapshot',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("food_verified_snapshot" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _servingSizeSnapshotMeta =
+      const VerificationMeta('servingSizeSnapshot');
+  @override
+  late final GeneratedColumn<double> servingSizeSnapshot =
+      GeneratedColumn<double>(
+        'serving_size_snapshot',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(100),
+      );
+  static const VerificationMeta _servingUnitSnapshotMeta =
+      const VerificationMeta('servingUnitSnapshot');
+  @override
+  late final GeneratedColumn<String> servingUnitSnapshot =
+      GeneratedColumn<String>(
+        'serving_unit_snapshot',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('g'),
+      );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -5370,6 +5481,10 @@ class $MealItemsTable extends MealItems
     phosphorus,
     sugar,
     nutrientEvidenceMask,
+    foodSourceSnapshot,
+    foodVerifiedSnapshot,
+    servingSizeSnapshot,
+    servingUnitSnapshot,
     createdAt,
     updatedAt,
     deletedAt,
@@ -5500,6 +5615,42 @@ class $MealItemsTable extends MealItems
         ),
       );
     }
+    if (data.containsKey('food_source_snapshot')) {
+      context.handle(
+        _foodSourceSnapshotMeta,
+        foodSourceSnapshot.isAcceptableOrUnknown(
+          data['food_source_snapshot']!,
+          _foodSourceSnapshotMeta,
+        ),
+      );
+    }
+    if (data.containsKey('food_verified_snapshot')) {
+      context.handle(
+        _foodVerifiedSnapshotMeta,
+        foodVerifiedSnapshot.isAcceptableOrUnknown(
+          data['food_verified_snapshot']!,
+          _foodVerifiedSnapshotMeta,
+        ),
+      );
+    }
+    if (data.containsKey('serving_size_snapshot')) {
+      context.handle(
+        _servingSizeSnapshotMeta,
+        servingSizeSnapshot.isAcceptableOrUnknown(
+          data['serving_size_snapshot']!,
+          _servingSizeSnapshotMeta,
+        ),
+      );
+    }
+    if (data.containsKey('serving_unit_snapshot')) {
+      context.handle(
+        _servingUnitSnapshotMeta,
+        servingUnitSnapshot.isAcceptableOrUnknown(
+          data['serving_unit_snapshot']!,
+          _servingUnitSnapshotMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -5611,6 +5762,22 @@ class $MealItemsTable extends MealItems
         DriftSqlType.int,
         data['${effectivePrefix}nutrient_evidence_mask'],
       )!,
+      foodSourceSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}food_source_snapshot'],
+      )!,
+      foodVerifiedSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}food_verified_snapshot'],
+      )!,
+      servingSizeSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}serving_size_snapshot'],
+      )!,
+      servingUnitSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}serving_unit_snapshot'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -5659,6 +5826,12 @@ class MealItem extends DataClass implements Insertable<MealItem> {
   final double phosphorus;
   final double sugar;
   final int nutrientEvidenceMask;
+
+  /// Immutable evidence captured when the food is added to the meal.
+  final String foodSourceSnapshot;
+  final bool foodVerifiedSnapshot;
+  final double servingSizeSnapshot;
+  final String servingUnitSnapshot;
   final DateTime createdAt;
   final DateTime updatedAt;
   final DateTime? deletedAt;
@@ -5683,6 +5856,10 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     required this.phosphorus,
     required this.sugar,
     required this.nutrientEvidenceMask,
+    required this.foodSourceSnapshot,
+    required this.foodVerifiedSnapshot,
+    required this.servingSizeSnapshot,
+    required this.servingUnitSnapshot,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -5710,6 +5887,10 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     map['phosphorus'] = Variable<double>(phosphorus);
     map['sugar'] = Variable<double>(sugar);
     map['nutrient_evidence_mask'] = Variable<int>(nutrientEvidenceMask);
+    map['food_source_snapshot'] = Variable<String>(foodSourceSnapshot);
+    map['food_verified_snapshot'] = Variable<bool>(foodVerifiedSnapshot);
+    map['serving_size_snapshot'] = Variable<double>(servingSizeSnapshot);
+    map['serving_unit_snapshot'] = Variable<String>(servingUnitSnapshot);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -5740,6 +5921,10 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       phosphorus: Value(phosphorus),
       sugar: Value(sugar),
       nutrientEvidenceMask: Value(nutrientEvidenceMask),
+      foodSourceSnapshot: Value(foodSourceSnapshot),
+      foodVerifiedSnapshot: Value(foodVerifiedSnapshot),
+      servingSizeSnapshot: Value(servingSizeSnapshot),
+      servingUnitSnapshot: Value(servingUnitSnapshot),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -5776,6 +5961,18 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       nutrientEvidenceMask: serializer.fromJson<int>(
         json['nutrientEvidenceMask'],
       ),
+      foodSourceSnapshot: serializer.fromJson<String>(
+        json['foodSourceSnapshot'],
+      ),
+      foodVerifiedSnapshot: serializer.fromJson<bool>(
+        json['foodVerifiedSnapshot'],
+      ),
+      servingSizeSnapshot: serializer.fromJson<double>(
+        json['servingSizeSnapshot'],
+      ),
+      servingUnitSnapshot: serializer.fromJson<String>(
+        json['servingUnitSnapshot'],
+      ),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -5805,6 +6002,10 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       'phosphorus': serializer.toJson<double>(phosphorus),
       'sugar': serializer.toJson<double>(sugar),
       'nutrientEvidenceMask': serializer.toJson<int>(nutrientEvidenceMask),
+      'foodSourceSnapshot': serializer.toJson<String>(foodSourceSnapshot),
+      'foodVerifiedSnapshot': serializer.toJson<bool>(foodVerifiedSnapshot),
+      'servingSizeSnapshot': serializer.toJson<double>(servingSizeSnapshot),
+      'servingUnitSnapshot': serializer.toJson<String>(servingUnitSnapshot),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -5832,6 +6033,10 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     double? phosphorus,
     double? sugar,
     int? nutrientEvidenceMask,
+    String? foodSourceSnapshot,
+    bool? foodVerifiedSnapshot,
+    double? servingSizeSnapshot,
+    String? servingUnitSnapshot,
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -5856,6 +6061,10 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     phosphorus: phosphorus ?? this.phosphorus,
     sugar: sugar ?? this.sugar,
     nutrientEvidenceMask: nutrientEvidenceMask ?? this.nutrientEvidenceMask,
+    foodSourceSnapshot: foodSourceSnapshot ?? this.foodSourceSnapshot,
+    foodVerifiedSnapshot: foodVerifiedSnapshot ?? this.foodVerifiedSnapshot,
+    servingSizeSnapshot: servingSizeSnapshot ?? this.servingSizeSnapshot,
+    servingUnitSnapshot: servingUnitSnapshot ?? this.servingUnitSnapshot,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -5886,6 +6095,18 @@ class MealItem extends DataClass implements Insertable<MealItem> {
       nutrientEvidenceMask: data.nutrientEvidenceMask.present
           ? data.nutrientEvidenceMask.value
           : this.nutrientEvidenceMask,
+      foodSourceSnapshot: data.foodSourceSnapshot.present
+          ? data.foodSourceSnapshot.value
+          : this.foodSourceSnapshot,
+      foodVerifiedSnapshot: data.foodVerifiedSnapshot.present
+          ? data.foodVerifiedSnapshot.value
+          : this.foodVerifiedSnapshot,
+      servingSizeSnapshot: data.servingSizeSnapshot.present
+          ? data.servingSizeSnapshot.value
+          : this.servingSizeSnapshot,
+      servingUnitSnapshot: data.servingUnitSnapshot.present
+          ? data.servingUnitSnapshot.value
+          : this.servingUnitSnapshot,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -5917,6 +6138,10 @@ class MealItem extends DataClass implements Insertable<MealItem> {
           ..write('phosphorus: $phosphorus, ')
           ..write('sugar: $sugar, ')
           ..write('nutrientEvidenceMask: $nutrientEvidenceMask, ')
+          ..write('foodSourceSnapshot: $foodSourceSnapshot, ')
+          ..write('foodVerifiedSnapshot: $foodVerifiedSnapshot, ')
+          ..write('servingSizeSnapshot: $servingSizeSnapshot, ')
+          ..write('servingUnitSnapshot: $servingUnitSnapshot, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -5946,6 +6171,10 @@ class MealItem extends DataClass implements Insertable<MealItem> {
     phosphorus,
     sugar,
     nutrientEvidenceMask,
+    foodSourceSnapshot,
+    foodVerifiedSnapshot,
+    servingSizeSnapshot,
+    servingUnitSnapshot,
     createdAt,
     updatedAt,
     deletedAt,
@@ -5974,6 +6203,10 @@ class MealItem extends DataClass implements Insertable<MealItem> {
           other.phosphorus == this.phosphorus &&
           other.sugar == this.sugar &&
           other.nutrientEvidenceMask == this.nutrientEvidenceMask &&
+          other.foodSourceSnapshot == this.foodSourceSnapshot &&
+          other.foodVerifiedSnapshot == this.foodVerifiedSnapshot &&
+          other.servingSizeSnapshot == this.servingSizeSnapshot &&
+          other.servingUnitSnapshot == this.servingUnitSnapshot &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt &&
@@ -6000,6 +6233,10 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
   final Value<double> phosphorus;
   final Value<double> sugar;
   final Value<int> nutrientEvidenceMask;
+  final Value<String> foodSourceSnapshot;
+  final Value<bool> foodVerifiedSnapshot;
+  final Value<double> servingSizeSnapshot;
+  final Value<String> servingUnitSnapshot;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -6024,6 +6261,10 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     this.phosphorus = const Value.absent(),
     this.sugar = const Value.absent(),
     this.nutrientEvidenceMask = const Value.absent(),
+    this.foodSourceSnapshot = const Value.absent(),
+    this.foodVerifiedSnapshot = const Value.absent(),
+    this.servingSizeSnapshot = const Value.absent(),
+    this.servingUnitSnapshot = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -6049,6 +6290,10 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     this.phosphorus = const Value.absent(),
     this.sugar = const Value.absent(),
     this.nutrientEvidenceMask = const Value.absent(),
+    this.foodSourceSnapshot = const Value.absent(),
+    this.foodVerifiedSnapshot = const Value.absent(),
+    this.servingSizeSnapshot = const Value.absent(),
+    this.servingUnitSnapshot = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -6075,6 +6320,10 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     Expression<double>? phosphorus,
     Expression<double>? sugar,
     Expression<int>? nutrientEvidenceMask,
+    Expression<String>? foodSourceSnapshot,
+    Expression<bool>? foodVerifiedSnapshot,
+    Expression<double>? servingSizeSnapshot,
+    Expression<String>? servingUnitSnapshot,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -6101,6 +6350,14 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
       if (sugar != null) 'sugar': sugar,
       if (nutrientEvidenceMask != null)
         'nutrient_evidence_mask': nutrientEvidenceMask,
+      if (foodSourceSnapshot != null)
+        'food_source_snapshot': foodSourceSnapshot,
+      if (foodVerifiedSnapshot != null)
+        'food_verified_snapshot': foodVerifiedSnapshot,
+      if (servingSizeSnapshot != null)
+        'serving_size_snapshot': servingSizeSnapshot,
+      if (servingUnitSnapshot != null)
+        'serving_unit_snapshot': servingUnitSnapshot,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -6128,6 +6385,10 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     Value<double>? phosphorus,
     Value<double>? sugar,
     Value<int>? nutrientEvidenceMask,
+    Value<String>? foodSourceSnapshot,
+    Value<bool>? foodVerifiedSnapshot,
+    Value<double>? servingSizeSnapshot,
+    Value<String>? servingUnitSnapshot,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
@@ -6153,6 +6414,10 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
       phosphorus: phosphorus ?? this.phosphorus,
       sugar: sugar ?? this.sugar,
       nutrientEvidenceMask: nutrientEvidenceMask ?? this.nutrientEvidenceMask,
+      foodSourceSnapshot: foodSourceSnapshot ?? this.foodSourceSnapshot,
+      foodVerifiedSnapshot: foodVerifiedSnapshot ?? this.foodVerifiedSnapshot,
+      servingSizeSnapshot: servingSizeSnapshot ?? this.servingSizeSnapshot,
+      servingUnitSnapshot: servingUnitSnapshot ?? this.servingUnitSnapshot,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -6218,6 +6483,24 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
     if (nutrientEvidenceMask.present) {
       map['nutrient_evidence_mask'] = Variable<int>(nutrientEvidenceMask.value);
     }
+    if (foodSourceSnapshot.present) {
+      map['food_source_snapshot'] = Variable<String>(foodSourceSnapshot.value);
+    }
+    if (foodVerifiedSnapshot.present) {
+      map['food_verified_snapshot'] = Variable<bool>(
+        foodVerifiedSnapshot.value,
+      );
+    }
+    if (servingSizeSnapshot.present) {
+      map['serving_size_snapshot'] = Variable<double>(
+        servingSizeSnapshot.value,
+      );
+    }
+    if (servingUnitSnapshot.present) {
+      map['serving_unit_snapshot'] = Variable<String>(
+        servingUnitSnapshot.value,
+      );
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -6257,6 +6540,10 @@ class MealItemsCompanion extends UpdateCompanion<MealItem> {
           ..write('phosphorus: $phosphorus, ')
           ..write('sugar: $sugar, ')
           ..write('nutrientEvidenceMask: $nutrientEvidenceMask, ')
+          ..write('foodSourceSnapshot: $foodSourceSnapshot, ')
+          ..write('foodVerifiedSnapshot: $foodVerifiedSnapshot, ')
+          ..write('servingSizeSnapshot: $servingSizeSnapshot, ')
+          ..write('servingUnitSnapshot: $servingUnitSnapshot, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -13453,6 +13740,833 @@ class ChallengesCompanion extends UpdateCompanion<Challenge> {
   }
 }
 
+class $BodyMeasurementEntriesTable extends BodyMeasurementEntries
+    with TableInfo<$BodyMeasurementEntriesTable, BodyMeasurementEntry> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $BodyMeasurementEntriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
+  @override
+  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
+    'uuid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+    clientDefault: newDatabaseId,
+  );
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _dayKeyMeta = const VerificationMeta('dayKey');
+  @override
+  late final GeneratedColumn<String> dayKey = GeneratedColumn<String>(
+    'day_key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _neckCmMeta = const VerificationMeta('neckCm');
+  @override
+  late final GeneratedColumn<double> neckCm = GeneratedColumn<double>(
+    'neck_cm',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _waistCmMeta = const VerificationMeta(
+    'waistCm',
+  );
+  @override
+  late final GeneratedColumn<double> waistCm = GeneratedColumn<double>(
+    'waist_cm',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _hipsCmMeta = const VerificationMeta('hipsCm');
+  @override
+  late final GeneratedColumn<double> hipsCm = GeneratedColumn<double>(
+    'hips_cm',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _chestCmMeta = const VerificationMeta(
+    'chestCm',
+  );
+  @override
+  late final GeneratedColumn<double> chestCm = GeneratedColumn<double>(
+    'chest_cm',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _armCmMeta = const VerificationMeta('armCm');
+  @override
+  late final GeneratedColumn<double> armCm = GeneratedColumn<double>(
+    'arm_cm',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _thighCmMeta = const VerificationMeta(
+    'thighCm',
+  );
+  @override
+  late final GeneratedColumn<double> thighCm = GeneratedColumn<double>(
+    'thigh_cm',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _revisionMeta = const VerificationMeta(
+    'revision',
+  );
+  @override
+  late final GeneratedColumn<int> revision = GeneratedColumn<int>(
+    'revision',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('local'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    uuid,
+    date,
+    dayKey,
+    neckCm,
+    waistCm,
+    hipsCm,
+    chestCm,
+    armCm,
+    thighCm,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    revision,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'body_measurement_entries';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<BodyMeasurementEntry> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uuid')) {
+      context.handle(
+        _uuidMeta,
+        uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta),
+      );
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    }
+    if (data.containsKey('day_key')) {
+      context.handle(
+        _dayKeyMeta,
+        dayKey.isAcceptableOrUnknown(data['day_key']!, _dayKeyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dayKeyMeta);
+    }
+    if (data.containsKey('neck_cm')) {
+      context.handle(
+        _neckCmMeta,
+        neckCm.isAcceptableOrUnknown(data['neck_cm']!, _neckCmMeta),
+      );
+    }
+    if (data.containsKey('waist_cm')) {
+      context.handle(
+        _waistCmMeta,
+        waistCm.isAcceptableOrUnknown(data['waist_cm']!, _waistCmMeta),
+      );
+    }
+    if (data.containsKey('hips_cm')) {
+      context.handle(
+        _hipsCmMeta,
+        hipsCm.isAcceptableOrUnknown(data['hips_cm']!, _hipsCmMeta),
+      );
+    }
+    if (data.containsKey('chest_cm')) {
+      context.handle(
+        _chestCmMeta,
+        chestCm.isAcceptableOrUnknown(data['chest_cm']!, _chestCmMeta),
+      );
+    }
+    if (data.containsKey('arm_cm')) {
+      context.handle(
+        _armCmMeta,
+        armCm.isAcceptableOrUnknown(data['arm_cm']!, _armCmMeta),
+      );
+    }
+    if (data.containsKey('thigh_cm')) {
+      context.handle(
+        _thighCmMeta,
+        thighCm.isAcceptableOrUnknown(data['thigh_cm']!, _thighCmMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('revision')) {
+      context.handle(
+        _revisionMeta,
+        revision.isAcceptableOrUnknown(data['revision']!, _revisionMeta),
+      );
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  BodyMeasurementEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return BodyMeasurementEntry(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      uuid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uuid'],
+      )!,
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date'],
+      )!,
+      dayKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}day_key'],
+      )!,
+      neckCm: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}neck_cm'],
+      ),
+      waistCm: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}waist_cm'],
+      ),
+      hipsCm: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}hips_cm'],
+      ),
+      chestCm: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}chest_cm'],
+      ),
+      armCm: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}arm_cm'],
+      ),
+      thighCm: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}thigh_cm'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      revision: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}revision'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $BodyMeasurementEntriesTable createAlias(String alias) {
+    return $BodyMeasurementEntriesTable(attachedDatabase, alias);
+  }
+}
+
+class BodyMeasurementEntry extends DataClass
+    implements Insertable<BodyMeasurementEntry> {
+  final int id;
+  final String uuid;
+  final DateTime date;
+  final String dayKey;
+  final double? neckCm;
+  final double? waistCm;
+  final double? hipsCm;
+  final double? chestCm;
+  final double? armCm;
+  final double? thighCm;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final DateTime? deletedAt;
+  final int revision;
+  final String syncStatus;
+  const BodyMeasurementEntry({
+    required this.id,
+    required this.uuid,
+    required this.date,
+    required this.dayKey,
+    this.neckCm,
+    this.waistCm,
+    this.hipsCm,
+    this.chestCm,
+    this.armCm,
+    this.thighCm,
+    required this.createdAt,
+    required this.updatedAt,
+    this.deletedAt,
+    required this.revision,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['uuid'] = Variable<String>(uuid);
+    map['date'] = Variable<DateTime>(date);
+    map['day_key'] = Variable<String>(dayKey);
+    if (!nullToAbsent || neckCm != null) {
+      map['neck_cm'] = Variable<double>(neckCm);
+    }
+    if (!nullToAbsent || waistCm != null) {
+      map['waist_cm'] = Variable<double>(waistCm);
+    }
+    if (!nullToAbsent || hipsCm != null) {
+      map['hips_cm'] = Variable<double>(hipsCm);
+    }
+    if (!nullToAbsent || chestCm != null) {
+      map['chest_cm'] = Variable<double>(chestCm);
+    }
+    if (!nullToAbsent || armCm != null) {
+      map['arm_cm'] = Variable<double>(armCm);
+    }
+    if (!nullToAbsent || thighCm != null) {
+      map['thigh_cm'] = Variable<double>(thighCm);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['revision'] = Variable<int>(revision);
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  BodyMeasurementEntriesCompanion toCompanion(bool nullToAbsent) {
+    return BodyMeasurementEntriesCompanion(
+      id: Value(id),
+      uuid: Value(uuid),
+      date: Value(date),
+      dayKey: Value(dayKey),
+      neckCm: neckCm == null && nullToAbsent
+          ? const Value.absent()
+          : Value(neckCm),
+      waistCm: waistCm == null && nullToAbsent
+          ? const Value.absent()
+          : Value(waistCm),
+      hipsCm: hipsCm == null && nullToAbsent
+          ? const Value.absent()
+          : Value(hipsCm),
+      chestCm: chestCm == null && nullToAbsent
+          ? const Value.absent()
+          : Value(chestCm),
+      armCm: armCm == null && nullToAbsent
+          ? const Value.absent()
+          : Value(armCm),
+      thighCm: thighCm == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thighCm),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      revision: Value(revision),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory BodyMeasurementEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return BodyMeasurementEntry(
+      id: serializer.fromJson<int>(json['id']),
+      uuid: serializer.fromJson<String>(json['uuid']),
+      date: serializer.fromJson<DateTime>(json['date']),
+      dayKey: serializer.fromJson<String>(json['dayKey']),
+      neckCm: serializer.fromJson<double?>(json['neckCm']),
+      waistCm: serializer.fromJson<double?>(json['waistCm']),
+      hipsCm: serializer.fromJson<double?>(json['hipsCm']),
+      chestCm: serializer.fromJson<double?>(json['chestCm']),
+      armCm: serializer.fromJson<double?>(json['armCm']),
+      thighCm: serializer.fromJson<double?>(json['thighCm']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      revision: serializer.fromJson<int>(json['revision']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'uuid': serializer.toJson<String>(uuid),
+      'date': serializer.toJson<DateTime>(date),
+      'dayKey': serializer.toJson<String>(dayKey),
+      'neckCm': serializer.toJson<double?>(neckCm),
+      'waistCm': serializer.toJson<double?>(waistCm),
+      'hipsCm': serializer.toJson<double?>(hipsCm),
+      'chestCm': serializer.toJson<double?>(chestCm),
+      'armCm': serializer.toJson<double?>(armCm),
+      'thighCm': serializer.toJson<double?>(thighCm),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'revision': serializer.toJson<int>(revision),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  BodyMeasurementEntry copyWith({
+    int? id,
+    String? uuid,
+    DateTime? date,
+    String? dayKey,
+    Value<double?> neckCm = const Value.absent(),
+    Value<double?> waistCm = const Value.absent(),
+    Value<double?> hipsCm = const Value.absent(),
+    Value<double?> chestCm = const Value.absent(),
+    Value<double?> armCm = const Value.absent(),
+    Value<double?> thighCm = const Value.absent(),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    int? revision,
+    String? syncStatus,
+  }) => BodyMeasurementEntry(
+    id: id ?? this.id,
+    uuid: uuid ?? this.uuid,
+    date: date ?? this.date,
+    dayKey: dayKey ?? this.dayKey,
+    neckCm: neckCm.present ? neckCm.value : this.neckCm,
+    waistCm: waistCm.present ? waistCm.value : this.waistCm,
+    hipsCm: hipsCm.present ? hipsCm.value : this.hipsCm,
+    chestCm: chestCm.present ? chestCm.value : this.chestCm,
+    armCm: armCm.present ? armCm.value : this.armCm,
+    thighCm: thighCm.present ? thighCm.value : this.thighCm,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    revision: revision ?? this.revision,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  BodyMeasurementEntry copyWithCompanion(BodyMeasurementEntriesCompanion data) {
+    return BodyMeasurementEntry(
+      id: data.id.present ? data.id.value : this.id,
+      uuid: data.uuid.present ? data.uuid.value : this.uuid,
+      date: data.date.present ? data.date.value : this.date,
+      dayKey: data.dayKey.present ? data.dayKey.value : this.dayKey,
+      neckCm: data.neckCm.present ? data.neckCm.value : this.neckCm,
+      waistCm: data.waistCm.present ? data.waistCm.value : this.waistCm,
+      hipsCm: data.hipsCm.present ? data.hipsCm.value : this.hipsCm,
+      chestCm: data.chestCm.present ? data.chestCm.value : this.chestCm,
+      armCm: data.armCm.present ? data.armCm.value : this.armCm,
+      thighCm: data.thighCm.present ? data.thighCm.value : this.thighCm,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      revision: data.revision.present ? data.revision.value : this.revision,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BodyMeasurementEntry(')
+          ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
+          ..write('date: $date, ')
+          ..write('dayKey: $dayKey, ')
+          ..write('neckCm: $neckCm, ')
+          ..write('waistCm: $waistCm, ')
+          ..write('hipsCm: $hipsCm, ')
+          ..write('chestCm: $chestCm, ')
+          ..write('armCm: $armCm, ')
+          ..write('thighCm: $thighCm, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('revision: $revision, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    uuid,
+    date,
+    dayKey,
+    neckCm,
+    waistCm,
+    hipsCm,
+    chestCm,
+    armCm,
+    thighCm,
+    createdAt,
+    updatedAt,
+    deletedAt,
+    revision,
+    syncStatus,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BodyMeasurementEntry &&
+          other.id == this.id &&
+          other.uuid == this.uuid &&
+          other.date == this.date &&
+          other.dayKey == this.dayKey &&
+          other.neckCm == this.neckCm &&
+          other.waistCm == this.waistCm &&
+          other.hipsCm == this.hipsCm &&
+          other.chestCm == this.chestCm &&
+          other.armCm == this.armCm &&
+          other.thighCm == this.thighCm &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.revision == this.revision &&
+          other.syncStatus == this.syncStatus);
+}
+
+class BodyMeasurementEntriesCompanion
+    extends UpdateCompanion<BodyMeasurementEntry> {
+  final Value<int> id;
+  final Value<String> uuid;
+  final Value<DateTime> date;
+  final Value<String> dayKey;
+  final Value<double?> neckCm;
+  final Value<double?> waistCm;
+  final Value<double?> hipsCm;
+  final Value<double?> chestCm;
+  final Value<double?> armCm;
+  final Value<double?> thighCm;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<int> revision;
+  final Value<String> syncStatus;
+  const BodyMeasurementEntriesCompanion({
+    this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
+    this.date = const Value.absent(),
+    this.dayKey = const Value.absent(),
+    this.neckCm = const Value.absent(),
+    this.waistCm = const Value.absent(),
+    this.hipsCm = const Value.absent(),
+    this.chestCm = const Value.absent(),
+    this.armCm = const Value.absent(),
+    this.thighCm = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+  });
+  BodyMeasurementEntriesCompanion.insert({
+    this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
+    this.date = const Value.absent(),
+    required String dayKey,
+    this.neckCm = const Value.absent(),
+    this.waistCm = const Value.absent(),
+    this.hipsCm = const Value.absent(),
+    this.chestCm = const Value.absent(),
+    this.armCm = const Value.absent(),
+    this.thighCm = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.revision = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+  }) : dayKey = Value(dayKey);
+  static Insertable<BodyMeasurementEntry> custom({
+    Expression<int>? id,
+    Expression<String>? uuid,
+    Expression<DateTime>? date,
+    Expression<String>? dayKey,
+    Expression<double>? neckCm,
+    Expression<double>? waistCm,
+    Expression<double>? hipsCm,
+    Expression<double>? chestCm,
+    Expression<double>? armCm,
+    Expression<double>? thighCm,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? revision,
+    Expression<String>? syncStatus,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (uuid != null) 'uuid': uuid,
+      if (date != null) 'date': date,
+      if (dayKey != null) 'day_key': dayKey,
+      if (neckCm != null) 'neck_cm': neckCm,
+      if (waistCm != null) 'waist_cm': waistCm,
+      if (hipsCm != null) 'hips_cm': hipsCm,
+      if (chestCm != null) 'chest_cm': chestCm,
+      if (armCm != null) 'arm_cm': armCm,
+      if (thighCm != null) 'thigh_cm': thighCm,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (revision != null) 'revision': revision,
+      if (syncStatus != null) 'sync_status': syncStatus,
+    });
+  }
+
+  BodyMeasurementEntriesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? uuid,
+    Value<DateTime>? date,
+    Value<String>? dayKey,
+    Value<double?>? neckCm,
+    Value<double?>? waistCm,
+    Value<double?>? hipsCm,
+    Value<double?>? chestCm,
+    Value<double?>? armCm,
+    Value<double?>? thighCm,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<int>? revision,
+    Value<String>? syncStatus,
+  }) {
+    return BodyMeasurementEntriesCompanion(
+      id: id ?? this.id,
+      uuid: uuid ?? this.uuid,
+      date: date ?? this.date,
+      dayKey: dayKey ?? this.dayKey,
+      neckCm: neckCm ?? this.neckCm,
+      waistCm: waistCm ?? this.waistCm,
+      hipsCm: hipsCm ?? this.hipsCm,
+      chestCm: chestCm ?? this.chestCm,
+      armCm: armCm ?? this.armCm,
+      thighCm: thighCm ?? this.thighCm,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      revision: revision ?? this.revision,
+      syncStatus: syncStatus ?? this.syncStatus,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (uuid.present) {
+      map['uuid'] = Variable<String>(uuid.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (dayKey.present) {
+      map['day_key'] = Variable<String>(dayKey.value);
+    }
+    if (neckCm.present) {
+      map['neck_cm'] = Variable<double>(neckCm.value);
+    }
+    if (waistCm.present) {
+      map['waist_cm'] = Variable<double>(waistCm.value);
+    }
+    if (hipsCm.present) {
+      map['hips_cm'] = Variable<double>(hipsCm.value);
+    }
+    if (chestCm.present) {
+      map['chest_cm'] = Variable<double>(chestCm.value);
+    }
+    if (armCm.present) {
+      map['arm_cm'] = Variable<double>(armCm.value);
+    }
+    if (thighCm.present) {
+      map['thigh_cm'] = Variable<double>(thighCm.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (revision.present) {
+      map['revision'] = Variable<int>(revision.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('BodyMeasurementEntriesCompanion(')
+          ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
+          ..write('date: $date, ')
+          ..write('dayKey: $dayKey, ')
+          ..write('neckCm: $neckCm, ')
+          ..write('waistCm: $waistCm, ')
+          ..write('hipsCm: $hipsCm, ')
+          ..write('chestCm: $chestCm, ')
+          ..write('armCm: $armCm, ')
+          ..write('thighCm: $thighCm, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('revision: $revision, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -13478,6 +14592,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PersonalExperimentsTable personalExperiments =
       $PersonalExperimentsTable(this);
   late final $ChallengesTable challenges = $ChallengesTable(this);
+  late final $BodyMeasurementEntriesTable bodyMeasurementEntries =
+      $BodyMeasurementEntriesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -13500,6 +14616,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     planSettings,
     personalExperiments,
     challenges,
+    bodyMeasurementEntries,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -14717,6 +15834,7 @@ typedef $$WeightEntriesTableCreateCompanionBuilder =
       Value<String?> dayKey,
       required double weight,
       Value<String?> note,
+      Value<String?> progressPhotoPath,
       Value<String> measurementContext,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -14732,6 +15850,7 @@ typedef $$WeightEntriesTableUpdateCompanionBuilder =
       Value<String?> dayKey,
       Value<double> weight,
       Value<String?> note,
+      Value<String?> progressPhotoPath,
       Value<String> measurementContext,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -14776,6 +15895,11 @@ class $$WeightEntriesTableFilterComposer
 
   ColumnFilters<String> get note => $composableBuilder(
     column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get progressPhotoPath => $composableBuilder(
+    column: $table.progressPhotoPath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -14849,6 +15973,11 @@ class $$WeightEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get progressPhotoPath => $composableBuilder(
+    column: $table.progressPhotoPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get measurementContext => $composableBuilder(
     column: $table.measurementContext,
     builder: (column) => ColumnOrderings(column),
@@ -14906,6 +16035,11 @@ class $$WeightEntriesTableAnnotationComposer
 
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get progressPhotoPath => $composableBuilder(
+    column: $table.progressPhotoPath,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get measurementContext => $composableBuilder(
     column: $table.measurementContext,
@@ -14967,6 +16101,7 @@ class $$WeightEntriesTableTableManager
                 Value<String?> dayKey = const Value.absent(),
                 Value<double> weight = const Value.absent(),
                 Value<String?> note = const Value.absent(),
+                Value<String?> progressPhotoPath = const Value.absent(),
                 Value<String> measurementContext = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -14980,6 +16115,7 @@ class $$WeightEntriesTableTableManager
                 dayKey: dayKey,
                 weight: weight,
                 note: note,
+                progressPhotoPath: progressPhotoPath,
                 measurementContext: measurementContext,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -14995,6 +16131,7 @@ class $$WeightEntriesTableTableManager
                 Value<String?> dayKey = const Value.absent(),
                 required double weight,
                 Value<String?> note = const Value.absent(),
+                Value<String?> progressPhotoPath = const Value.absent(),
                 Value<String> measurementContext = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -15008,6 +16145,7 @@ class $$WeightEntriesTableTableManager
                 dayKey: dayKey,
                 weight: weight,
                 note: note,
+                progressPhotoPath: progressPhotoPath,
                 measurementContext: measurementContext,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -16447,6 +17585,10 @@ typedef $$MealItemsTableCreateCompanionBuilder =
       Value<double> phosphorus,
       Value<double> sugar,
       Value<int> nutrientEvidenceMask,
+      Value<String> foodSourceSnapshot,
+      Value<bool> foodVerifiedSnapshot,
+      Value<double> servingSizeSnapshot,
+      Value<String> servingUnitSnapshot,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -16473,6 +17615,10 @@ typedef $$MealItemsTableUpdateCompanionBuilder =
       Value<double> phosphorus,
       Value<double> sugar,
       Value<int> nutrientEvidenceMask,
+      Value<String> foodSourceSnapshot,
+      Value<bool> foodVerifiedSnapshot,
+      Value<double> servingSizeSnapshot,
+      Value<String> servingUnitSnapshot,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -16605,6 +17751,26 @@ class $$MealItemsTableFilterComposer
 
   ColumnFilters<int> get nutrientEvidenceMask => $composableBuilder(
     column: $table.nutrientEvidenceMask,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get foodSourceSnapshot => $composableBuilder(
+    column: $table.foodSourceSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get foodVerifiedSnapshot => $composableBuilder(
+    column: $table.foodVerifiedSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get servingSizeSnapshot => $composableBuilder(
+    column: $table.servingSizeSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get servingUnitSnapshot => $composableBuilder(
+    column: $table.servingUnitSnapshot,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -16769,6 +17935,26 @@ class $$MealItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get foodSourceSnapshot => $composableBuilder(
+    column: $table.foodSourceSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get foodVerifiedSnapshot => $composableBuilder(
+    column: $table.foodVerifiedSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get servingSizeSnapshot => $composableBuilder(
+    column: $table.servingSizeSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get servingUnitSnapshot => $composableBuilder(
+    column: $table.servingUnitSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -16902,6 +18088,26 @@ class $$MealItemsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get foodSourceSnapshot => $composableBuilder(
+    column: $table.foodSourceSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get foodVerifiedSnapshot => $composableBuilder(
+    column: $table.foodVerifiedSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get servingSizeSnapshot => $composableBuilder(
+    column: $table.servingSizeSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get servingUnitSnapshot => $composableBuilder(
+    column: $table.servingUnitSnapshot,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -17012,6 +18218,10 @@ class $$MealItemsTableTableManager
                 Value<double> phosphorus = const Value.absent(),
                 Value<double> sugar = const Value.absent(),
                 Value<int> nutrientEvidenceMask = const Value.absent(),
+                Value<String> foodSourceSnapshot = const Value.absent(),
+                Value<bool> foodVerifiedSnapshot = const Value.absent(),
+                Value<double> servingSizeSnapshot = const Value.absent(),
+                Value<String> servingUnitSnapshot = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -17036,6 +18246,10 @@ class $$MealItemsTableTableManager
                 phosphorus: phosphorus,
                 sugar: sugar,
                 nutrientEvidenceMask: nutrientEvidenceMask,
+                foodSourceSnapshot: foodSourceSnapshot,
+                foodVerifiedSnapshot: foodVerifiedSnapshot,
+                servingSizeSnapshot: servingSizeSnapshot,
+                servingUnitSnapshot: servingUnitSnapshot,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
@@ -17062,6 +18276,10 @@ class $$MealItemsTableTableManager
                 Value<double> phosphorus = const Value.absent(),
                 Value<double> sugar = const Value.absent(),
                 Value<int> nutrientEvidenceMask = const Value.absent(),
+                Value<String> foodSourceSnapshot = const Value.absent(),
+                Value<bool> foodVerifiedSnapshot = const Value.absent(),
+                Value<double> servingSizeSnapshot = const Value.absent(),
+                Value<String> servingUnitSnapshot = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -17086,6 +18304,10 @@ class $$MealItemsTableTableManager
                 phosphorus: phosphorus,
                 sugar: sugar,
                 nutrientEvidenceMask: nutrientEvidenceMask,
+                foodSourceSnapshot: foodSourceSnapshot,
+                foodVerifiedSnapshot: foodVerifiedSnapshot,
+                servingSizeSnapshot: servingSizeSnapshot,
+                servingUnitSnapshot: servingUnitSnapshot,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
@@ -21416,6 +22638,411 @@ typedef $$ChallengesTableProcessedTableManager =
       Challenge,
       PrefetchHooks Function()
     >;
+typedef $$BodyMeasurementEntriesTableCreateCompanionBuilder =
+    BodyMeasurementEntriesCompanion Function({
+      Value<int> id,
+      Value<String> uuid,
+      Value<DateTime> date,
+      required String dayKey,
+      Value<double?> neckCm,
+      Value<double?> waistCm,
+      Value<double?> hipsCm,
+      Value<double?> chestCm,
+      Value<double?> armCm,
+      Value<double?> thighCm,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> revision,
+      Value<String> syncStatus,
+    });
+typedef $$BodyMeasurementEntriesTableUpdateCompanionBuilder =
+    BodyMeasurementEntriesCompanion Function({
+      Value<int> id,
+      Value<String> uuid,
+      Value<DateTime> date,
+      Value<String> dayKey,
+      Value<double?> neckCm,
+      Value<double?> waistCm,
+      Value<double?> hipsCm,
+      Value<double?> chestCm,
+      Value<double?> armCm,
+      Value<double?> thighCm,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<DateTime?> deletedAt,
+      Value<int> revision,
+      Value<String> syncStatus,
+    });
+
+class $$BodyMeasurementEntriesTableFilterComposer
+    extends Composer<_$AppDatabase, $BodyMeasurementEntriesTable> {
+  $$BodyMeasurementEntriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dayKey => $composableBuilder(
+    column: $table.dayKey,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get neckCm => $composableBuilder(
+    column: $table.neckCm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get waistCm => $composableBuilder(
+    column: $table.waistCm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get hipsCm => $composableBuilder(
+    column: $table.hipsCm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get chestCm => $composableBuilder(
+    column: $table.chestCm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get armCm => $composableBuilder(
+    column: $table.armCm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get thighCm => $composableBuilder(
+    column: $table.thighCm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$BodyMeasurementEntriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $BodyMeasurementEntriesTable> {
+  $$BodyMeasurementEntriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dayKey => $composableBuilder(
+    column: $table.dayKey,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get neckCm => $composableBuilder(
+    column: $table.neckCm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get waistCm => $composableBuilder(
+    column: $table.waistCm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get hipsCm => $composableBuilder(
+    column: $table.hipsCm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get chestCm => $composableBuilder(
+    column: $table.chestCm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get armCm => $composableBuilder(
+    column: $table.armCm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get thighCm => $composableBuilder(
+    column: $table.thighCm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get revision => $composableBuilder(
+    column: $table.revision,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$BodyMeasurementEntriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $BodyMeasurementEntriesTable> {
+  $$BodyMeasurementEntriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uuid =>
+      $composableBuilder(column: $table.uuid, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<String> get dayKey =>
+      $composableBuilder(column: $table.dayKey, builder: (column) => column);
+
+  GeneratedColumn<double> get neckCm =>
+      $composableBuilder(column: $table.neckCm, builder: (column) => column);
+
+  GeneratedColumn<double> get waistCm =>
+      $composableBuilder(column: $table.waistCm, builder: (column) => column);
+
+  GeneratedColumn<double> get hipsCm =>
+      $composableBuilder(column: $table.hipsCm, builder: (column) => column);
+
+  GeneratedColumn<double> get chestCm =>
+      $composableBuilder(column: $table.chestCm, builder: (column) => column);
+
+  GeneratedColumn<double> get armCm =>
+      $composableBuilder(column: $table.armCm, builder: (column) => column);
+
+  GeneratedColumn<double> get thighCm =>
+      $composableBuilder(column: $table.thighCm, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get revision =>
+      $composableBuilder(column: $table.revision, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+}
+
+class $$BodyMeasurementEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $BodyMeasurementEntriesTable,
+          BodyMeasurementEntry,
+          $$BodyMeasurementEntriesTableFilterComposer,
+          $$BodyMeasurementEntriesTableOrderingComposer,
+          $$BodyMeasurementEntriesTableAnnotationComposer,
+          $$BodyMeasurementEntriesTableCreateCompanionBuilder,
+          $$BodyMeasurementEntriesTableUpdateCompanionBuilder,
+          (
+            BodyMeasurementEntry,
+            BaseReferences<
+              _$AppDatabase,
+              $BodyMeasurementEntriesTable,
+              BodyMeasurementEntry
+            >,
+          ),
+          BodyMeasurementEntry,
+          PrefetchHooks Function()
+        > {
+  $$BodyMeasurementEntriesTableTableManager(
+    _$AppDatabase db,
+    $BodyMeasurementEntriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$BodyMeasurementEntriesTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$BodyMeasurementEntriesTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$BodyMeasurementEntriesTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> uuid = const Value.absent(),
+                Value<DateTime> date = const Value.absent(),
+                Value<String> dayKey = const Value.absent(),
+                Value<double?> neckCm = const Value.absent(),
+                Value<double?> waistCm = const Value.absent(),
+                Value<double?> hipsCm = const Value.absent(),
+                Value<double?> chestCm = const Value.absent(),
+                Value<double?> armCm = const Value.absent(),
+                Value<double?> thighCm = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+              }) => BodyMeasurementEntriesCompanion(
+                id: id,
+                uuid: uuid,
+                date: date,
+                dayKey: dayKey,
+                neckCm: neckCm,
+                waistCm: waistCm,
+                hipsCm: hipsCm,
+                chestCm: chestCm,
+                armCm: armCm,
+                thighCm: thighCm,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                revision: revision,
+                syncStatus: syncStatus,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> uuid = const Value.absent(),
+                Value<DateTime> date = const Value.absent(),
+                required String dayKey,
+                Value<double?> neckCm = const Value.absent(),
+                Value<double?> waistCm = const Value.absent(),
+                Value<double?> hipsCm = const Value.absent(),
+                Value<double?> chestCm = const Value.absent(),
+                Value<double?> armCm = const Value.absent(),
+                Value<double?> thighCm = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> revision = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+              }) => BodyMeasurementEntriesCompanion.insert(
+                id: id,
+                uuid: uuid,
+                date: date,
+                dayKey: dayKey,
+                neckCm: neckCm,
+                waistCm: waistCm,
+                hipsCm: hipsCm,
+                chestCm: chestCm,
+                armCm: armCm,
+                thighCm: thighCm,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
+                revision: revision,
+                syncStatus: syncStatus,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$BodyMeasurementEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $BodyMeasurementEntriesTable,
+      BodyMeasurementEntry,
+      $$BodyMeasurementEntriesTableFilterComposer,
+      $$BodyMeasurementEntriesTableOrderingComposer,
+      $$BodyMeasurementEntriesTableAnnotationComposer,
+      $$BodyMeasurementEntriesTableCreateCompanionBuilder,
+      $$BodyMeasurementEntriesTableUpdateCompanionBuilder,
+      (
+        BodyMeasurementEntry,
+        BaseReferences<
+          _$AppDatabase,
+          $BodyMeasurementEntriesTable,
+          BodyMeasurementEntry
+        >,
+      ),
+      BodyMeasurementEntry,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -21458,4 +23085,9 @@ class $AppDatabaseManager {
       $$PersonalExperimentsTableTableManager(_db, _db.personalExperiments);
   $$ChallengesTableTableManager get challenges =>
       $$ChallengesTableTableManager(_db, _db.challenges);
+  $$BodyMeasurementEntriesTableTableManager get bodyMeasurementEntries =>
+      $$BodyMeasurementEntriesTableTableManager(
+        _db,
+        _db.bodyMeasurementEntries,
+      );
 }

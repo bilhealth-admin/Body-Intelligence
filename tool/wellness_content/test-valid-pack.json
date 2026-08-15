@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "pack_id": "global-recipes-seed",
+  "version": 1,
+  "type": "recipes",
+  "items": [{
+    "id": "lentil-bowl",
+    "title": "Lentil bowl",
+    "locale": "en",
+    "rights_holder": "BIL test fixture",
+    "license": "Internal test only",
+    "image_url": "https://cdn.example.test/lentil.jpg",
+    "ingredients": ["lentils"]
+  }]
+}

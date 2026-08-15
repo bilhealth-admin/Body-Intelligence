@@ -1,0 +1,8 @@
+"NSHealthShareUsageDescription" = "BIL hanya membaca kategori Kesihatan yang anda pilih—aktiviti, tidur, ukuran badan, metrik jantung dan pernafasan, tekanan darah, oksigen, glukosa, hidrasi dan pemakanan—untuk memaparkan garis masa dan analisis peribadi pada peranti ini.";
+"NSHealthUpdateUsageDescription" = "BIL hanya menulis rekod kesihatan yang anda pilih secara eksplisit, selepas persetujuan tulis berasingan.";
+"NSBluetoothAlwaysUsageDescription" = "BIL hanya menyambung kepada peranti kesihatan yang anda gandingkan secara eksplisit supaya ukuran boleh diimport secara tempatan.";
+"NSBluetoothPeripheralUsageDescription" = "BIL hanya menyambung kepada peranti kesihatan yang anda gandingkan secara eksplisit supaya ukuran boleh diimport secara tempatan.";
+"NSCameraUsageDescription" = "Gunakan kamera hanya apabila anda memilih untuk mengimbas kod bar, menyemak foto makan atau menambah profil peribadi atau foto kemajuan.";
+"NSPhotoLibraryUsageDescription" = "Pilih hidangan, profil atau foto kemajuan untuk semakan sebelum ia disimpan atau dimuat naik.";
+"NSMicrophoneUsageDescription" = "BIL menggunakan mikrofon hanya apabila anda memilih input suara untuk hidangan.";
+"NSSpeechRecognitionUsageDescription" = "BIL menukar frasa makanan yang anda tuturkan kepada teks supaya anda boleh menyemaknya sebelum menyimpan.";

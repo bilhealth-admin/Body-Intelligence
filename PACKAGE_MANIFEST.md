@@ -1,3 +1,8 @@
+# RETIRED — historical record only
+
+This manifest is retained for traceability and is not a current execution
+authority. See `docs/BIL_V1_FINAL_RELEASE_CONSTITUTION.md`.
+
 # Package Manifest
 
 ## Production

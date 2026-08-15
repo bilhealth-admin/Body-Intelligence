@@ -8,6 +8,12 @@ import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 
 class MainActivity : FlutterFragmentActivity() {
+    private var speechBridge: BILSpeechBridge? = null
+    private val speechPermissionLauncher: ActivityResultLauncher<String> =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            speechBridge?.onMicrophonePermissionResult(granted)
+        }
+    private val pushProvider: BILPushProvider = BILUnconfiguredPushProvider()
     private val healthPermissionLauncher: ActivityResultLauncher<Set<String>> =
         registerForActivityResult(BILGlobalHealthBridge.permissionContract(this)) {
             // Permission state is read from Health Connect after this callback; no health payload is logged.
@@ -26,7 +32,17 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        speechBridge = BILSpeechBridge(this, flutterEngine.dartExecutor.binaryMessenger) {
+            speechPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        }
         BILGlobalHealthBridge(this, flutterEngine.dartExecutor.binaryMessenger, healthPermissionLauncher)
+        io.flutter.plugin.common.MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "bil/push").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "requestToken" -> pushProvider.requestToken(result)
+                "deleteToken" -> pushProvider.deleteToken(result)
+                else -> result.notImplemented()
+            }
+        }
         BILMedicalBleBridge(this, flutterEngine.dartExecutor.binaryMessenger) { result ->
             if (pendingBlePermissionResult != null) {
                 result.error("permission_request_in_progress", null, null)
@@ -36,5 +52,11 @@ class MainActivity : FlutterFragmentActivity() {
                 blePermissionLauncher.launch(permissions)
             }
         }
+    }
+
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        speechBridge?.dispose()
+        speechBridge = null
+        super.cleanUpFlutterEngine(flutterEngine)
     }
 }

@@ -1,32 +1,36 @@
 param(
     [Parameter(Mandatory=$true)][string]$ProjectPath,
-    [string]$SourcesPath = "$env:USERPROFILE\Downloads",
+    [string]$SourcesPath = "C:\develop\bil_food_sources",
     [string]$WorkPath = "C:\develop\bil_food_work",
     [int]$BatchSize = 2000,
     [switch]$InspectOnly
 )
 $ErrorActionPreference = 'Stop'
-$Expected = @{
-    foundation='d6d4f41dcd19a46abcdd67775379cb6f0292ff08daa7e0680fdd0982830bf57b';
-    legacy='b80817294b8850530aaedf2e515c02593b1824f763a0ff356e5c2081643e6fd0';
-    branded='26050a5d03197469813754743a21ee0fad4ccf22b6aac2a995846a987719fc49'
+$ManifestPath = Join-Path $SourcesPath 'usda_source_manifest.json'
+if (-not (Test-Path -LiteralPath $ManifestPath)) {
+    throw "Missing verified source manifest: $ManifestPath. Run download_usda_sources.ps1 first."
 }
+$Manifest = Get-Content -LiteralPath $ManifestPath -Raw | ConvertFrom-Json
 $Resolved = @{}
-foreach ($Zip in Get-ChildItem -LiteralPath $SourcesPath -Filter '*.zip' -File) {
-    $Hash = (Get-FileHash -LiteralPath $Zip.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-    foreach ($Dataset in $Expected.Keys) {
-        if ($Hash -eq $Expected[$Dataset]) { $Resolved[$Dataset] = $Zip.FullName }
+foreach ($Source in $Manifest.sources) {
+    $ZipPath = Join-Path $SourcesPath $Source.file
+    if (-not (Test-Path -LiteralPath $ZipPath)) { throw "Missing source ZIP: $ZipPath" }
+    $Hash = (Get-FileHash -LiteralPath $ZipPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($Hash -ne $Source.sha256.ToLowerInvariant()) {
+        throw "SHA-256 mismatch for $($Source.dataset): $ZipPath"
     }
+    $Resolved[$Source.dataset] = $ZipPath
 }
-foreach ($Dataset in $Expected.Keys) {
-    if (-not $Resolved.ContainsKey($Dataset)) { throw "Missing $Dataset source ZIP by SHA-256 in $SourcesPath" }
+foreach ($Dataset in @('foundation','legacy')) {
+    if (-not $Resolved.ContainsKey($Dataset)) { throw "Missing $Dataset source in $ManifestPath" }
 }
 New-Item -ItemType Directory -Path $WorkPath -Force | Out-Null
 $Python = Get-Command python -ErrorAction SilentlyContinue
 $Prefix = @()
 if (-not $Python) { $Python = Get-Command py -ErrorAction Stop; $Prefix = @('-3') }
 $Importer = Join-Path $ProjectPath 'tool/nutrition_platform/usda_importer.py'
-$Archives = @($Resolved.foundation,$Resolved.legacy,$Resolved.branded)
+$Archives = @($Resolved.foundation,$Resolved.legacy)
+if ($Resolved.ContainsKey('branded')) { $Archives += $Resolved.branded }
 if ($InspectOnly) {
     & $Python.Source @Prefix $Importer inspect @Archives --report (Join-Path $WorkPath 'source_inspection.json')
 } else {

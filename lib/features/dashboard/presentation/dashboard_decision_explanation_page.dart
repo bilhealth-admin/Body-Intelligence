@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/premium_design_tokens.dart';
+import '../dashboard_five_locale_copy.dart';
 import '../domain/dashboard_decision_explanation.dart';
 
 class DashboardDecisionExplanationPage extends StatelessWidget {
@@ -13,8 +14,7 @@ class DashboardDecisionExplanationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final arabic = Localizations.localeOf(context).languageCode == 'ar';
-    String tr(String en, String ar) => arabic ? ar : en;
+    String tr(String en, String ar) => dashboardFiveLocaleText(en, ar);
     final value = explanation;
 
     return Scaffold(
@@ -44,7 +44,7 @@ class DashboardDecisionExplanationPage extends StatelessWidget {
                     value.title,
                     key: const Key('decision-explanation-title'),
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: PremiumDesignTokens.spaceMd),
@@ -136,7 +136,7 @@ class _ExplanationSection extends StatelessWidget {
                   child: Text(
                     title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),

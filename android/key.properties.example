@@ -1,6 +1,6 @@
 # Copy this file to android/key.properties only after creating a private upload key.
 # android/key.properties and keystore files are ignored by Git.
-storeFile=../keystores/bil-upload-key.jks
+storeFile=keystores/bil-upload-key.jks
 storePassword=CHANGE_ME
 keyAlias=bil-upload
 keyPassword=CHANGE_ME

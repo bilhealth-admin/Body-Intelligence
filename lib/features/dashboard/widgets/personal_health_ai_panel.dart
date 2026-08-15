@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../features/ai_platform/domain/personal_health_ai.dart';
+import '../dashboard_five_locale_copy.dart';
 import 'dashboard_twin_deck_shell.dart';
 
 class PersonalHealthAiPanel extends StatelessWidget {
@@ -22,7 +23,7 @@ class PersonalHealthAiPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String tr(String en, String ar) => arabic ? ar : en;
+    String tr(String en, String ar) => dashboardFiveLocaleText(en, ar);
     final trend = snapshot.currentPhase;
     final cards = <_AiCardData>[
       _AiCardData(
@@ -179,8 +180,11 @@ class PersonalHealthAiPanel extends StatelessWidget {
         semanticLabel: tr('Bio Intelligence', 'الذكاء الحيوي'),
         compact: compact,
         pages: [
-          for (final card in cards)
-            _AiCard(data: card, arabic: arabic, updatedAt: snapshot.asOf),
+          _UnifiedAiCard(
+            cards: cards,
+            arabic: arabic,
+            updatedAt: snapshot.asOf,
+          ),
         ],
       ),
     );
@@ -209,6 +213,219 @@ class PersonalHealthAiPanel extends StatelessWidget {
   }
 }
 
+class _UnifiedAiCard extends StatefulWidget {
+  const _UnifiedAiCard({
+    required this.cards,
+    required this.arabic,
+    required this.updatedAt,
+  });
+
+  final List<_AiCardData> cards;
+  final bool arabic;
+  final DateTime updatedAt;
+
+  @override
+  State<_UnifiedAiCard> createState() => _UnifiedAiCardState();
+}
+
+class _UnifiedAiCardState extends State<_UnifiedAiCard> {
+  var _signal = 0;
+  var _detail = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.cards.isEmpty) return const SizedBox.shrink();
+    final scheme = Theme.of(context).colorScheme;
+    final card = widget.cards[_signal.clamp(0, widget.cards.length - 1)];
+    String tr(String en, String ar) => dashboardFiveLocaleText(en, ar);
+    final missing = card.missing.isEmpty ? null : card.missing.first;
+    final details = [
+      '${_state(card.state, tr)} · ${_confidence(card.confidence, tr)}',
+      card.explanation,
+      missing == null
+          ? tr(
+              'Updated ${TimeOfDay.fromDateTime(widget.updatedAt).format(context)}',
+              'آخر تحديث ${TimeOfDay.fromDateTime(widget.updatedAt).format(context)}',
+            )
+          : tr('Learning: $missing', 'قيد التعلم: $missing'),
+    ];
+    final labels = [
+      tr('Model', 'النموذج'),
+      tr('Meaning', 'التفسير'),
+      tr('Evidence', 'الدليل'),
+    ];
+    final icons = const [
+      Icons.verified_outlined,
+      Icons.lightbulb_outline_rounded,
+      Icons.fact_check_outlined,
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.all(PremiumDesignTokens.spaceXs),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: GridView.builder(
+              padding: EdgeInsets.zero,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: PremiumDesignTokens.spaceXs,
+                mainAxisSpacing: PremiumDesignTokens.spaceXs,
+                mainAxisExtent: 38,
+              ),
+              itemCount: widget.cards.length,
+              itemBuilder: (context, index) {
+                final selected = index == _signal;
+                return InkWell(
+                  onTap: () => setState(() => _signal = index),
+                  borderRadius: BorderRadius.circular(
+                    PremiumDesignTokens.radiusMd,
+                  ),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? scheme.primary.withValues(alpha: .14)
+                          : scheme.surfaceContainerHighest.withValues(
+                              alpha: .42,
+                            ),
+                      borderRadius: BorderRadius.circular(
+                        PremiumDesignTokens.radiusMd,
+                      ),
+                      border: Border.all(
+                        color: selected
+                            ? scheme.primary.withValues(alpha: .55)
+                            : scheme.outlineVariant.withValues(alpha: .72),
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      widget.cards[index].title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        fontWeight: selected
+                            ? FontWeight.w700
+                            : FontWeight.w700,
+                        color: selected ? scheme.primary : null,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceXs),
+          Text(
+            card.result,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceXs),
+          Row(
+            children: [
+              for (var index = 0; index < 3; index++) ...[
+                Expanded(
+                  child: InkWell(
+                    onTap: () => setState(() => _detail = index),
+                    borderRadius: BorderRadius.circular(99),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      decoration: BoxDecoration(
+                        color: index == _detail
+                            ? scheme.primary.withValues(alpha: .15)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(99),
+                        border: Border.all(
+                          color: scheme.primary.withValues(
+                            alpha: index == _detail ? .58 : .18,
+                          ),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(icons[index], size: 15, color: scheme.primary),
+                          const SizedBox(width: 3),
+                          Flexible(
+                            child: Text(
+                              labels[index],
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                if (index != 2) const SizedBox(width: 4),
+              ],
+            ],
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceXs),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+            decoration: BoxDecoration(
+              color: scheme.surfaceContainerHighest.withValues(alpha: .42),
+              borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
+              border: Border.all(
+                color: scheme.outlineVariant.withValues(alpha: .72),
+              ),
+            ),
+            child: Text(
+              details[_detail],
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _state(
+    HealthAiLearningState state,
+    String Function(String, String) tr,
+  ) => switch (state) {
+    HealthAiLearningState.unavailable => tr('Unavailable', 'غير متاح'),
+    HealthAiLearningState.initial => tr('Initial', 'أولي'),
+    HealthAiLearningState.learning => tr('Learning', 'يتعلم'),
+    HealthAiLearningState.calibrating => tr('Calibrating', 'يُعاير'),
+    HealthAiLearningState.established => tr('Established', 'راسخ'),
+    HealthAiLearningState.temporarilyUnreliable => tr(
+      'Temporarily unreliable',
+      'غير موثوق مؤقتًا',
+    ),
+  };
+
+  String _confidence(double value, String Function(String, String) tr) =>
+      value <= 0
+      ? tr('No confidence yet', 'لا ثقة بعد')
+      : value < .45
+      ? tr('Low confidence', 'ثقة منخفضة')
+      : value < .7
+      ? tr('Emerging confidence', 'ثقة ناشئة')
+      : tr('Useful confidence', 'ثقة مفيدة');
+}
+
+// Kept for non-unified layouts on larger surfaces.
+// ignore: unused_element
 class _AiCard extends StatelessWidget {
   const _AiCard({
     required this.data,
@@ -222,93 +439,60 @@ class _AiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String tr(String en, String ar) => arabic ? ar : en;
+    String tr(String en, String ar) => dashboardFiveLocaleText(en, ar);
     final missing = data.missing.isEmpty ? null : data.missing.first;
     final compact = MediaQuery.sizeOf(context).width < 600;
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white.withValues(alpha: .105),
-            const Color(0xFF5BDAFF).withValues(alpha: .045),
-            Colors.white.withValues(alpha: .035),
-          ],
-        ),
-        border: Border.all(color: Colors.white.withValues(alpha: .14)),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF174E8C).withValues(alpha: .08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+    return Padding(
+      padding: EdgeInsets.all(
+        compact ? PremiumDesignTokens.spaceXs : PremiumDesignTokens.spaceSm,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            data.title,
+            maxLines: compact ? 3 : 2,
+            overflow: TextOverflow.visible,
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          SizedBox(height: compact ? 3 : 5),
+          Text(
+            data.result,
+            maxLines: compact ? 3 : 2,
+            overflow: TextOverflow.visible,
+            style: compact
+                ? Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700)
+                : Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceSm),
+          _AiSignalRow(
+            icon: Icons.verified_outlined,
+            label: tr('Model state', 'حالة النموذج'),
+            value:
+                '${_state(data.state, tr)} · ${_confidence(data.confidence, tr)}',
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceXs),
+          _AiSignalRow(
+            icon: Icons.lightbulb_outline_rounded,
+            label: tr('Interpretation', 'التفسير'),
+            value: data.explanation,
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceXs),
+          _AiSignalRow(
+            icon: Icons.update_rounded,
+            label: tr('Evidence', 'الدليل'),
+            value: missing == null
+                ? tr(
+                    'Updated ${TimeOfDay.fromDateTime(updatedAt).format(context)}',
+                    'آخر تحديث ${TimeOfDay.fromDateTime(updatedAt).format(context)}',
+                  )
+                : tr('Learning: $missing', 'قيد التعلم: $missing'),
           ),
         ],
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(
-          compact ? PremiumDesignTokens.spaceXs : PremiumDesignTokens.spaceSm,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              data.title,
-              maxLines: compact ? 3 : 2,
-              overflow: TextOverflow.visible,
-              style: Theme.of(
-                context,
-              ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w900),
-            ),
-            SizedBox(height: compact ? 3 : 5),
-            Text(
-              data.result,
-              maxLines: compact ? 3 : 2,
-              overflow: TextOverflow.visible,
-              style: compact
-                  ? Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    )
-                  : Theme.of(context).textTheme.titleSmall,
-            ),
-            SizedBox(height: compact ? 3 : 6),
-            Text(
-              '${_state(data.state, tr)} · ${_confidence(data.confidence, tr)}',
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelMedium,
-            ),
-            SizedBox(height: compact ? 3 : 5),
-            Expanded(
-              child: Text(
-                data.explanation,
-                maxLines: compact ? 6 : 4,
-                overflow: TextOverflow.visible,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-            if (missing != null) ...[
-              SizedBox(height: compact ? 3 : 5),
-              Text(
-                tr('Learning: $missing', 'قيد التعلم: $missing'),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-            SizedBox(height: compact ? 3 : 6),
-            Text(
-              tr(
-                'Updated ${TimeOfDay.fromDateTime(updatedAt).format(context)}',
-                'آخر تحديث ${TimeOfDay.fromDateTime(updatedAt).format(context)}',
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -336,6 +520,59 @@ class _AiCard extends StatelessWidget {
       : value < 0.7
       ? tr('Emerging confidence', 'ثقة ناشئة')
       : tr('Useful confidence', 'ثقة مفيدة');
+}
+
+class _AiSignalRow extends StatelessWidget {
+  const _AiSignalRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: PremiumDesignTokens.spaceSm,
+        vertical: PremiumDesignTokens.spaceXs,
+      ),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: .42),
+        borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: .78)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: scheme.primary),
+          const SizedBox(width: PremiumDesignTokens.spaceSm),
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: '$label · ',
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  TextSpan(text: value),
+                ],
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 final class _AiCardData {

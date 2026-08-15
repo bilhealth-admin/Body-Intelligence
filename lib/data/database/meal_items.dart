@@ -44,6 +44,19 @@ class MealItems extends Table {
   IntColumn get nutrientEvidenceMask =>
       integer().withDefault(const Constant(0))();
 
+  /// Immutable evidence captured when the food is added to the meal.
+  TextColumn get foodSourceSnapshot =>
+      text().withDefault(const Constant('local'))();
+
+  BoolColumn get foodVerifiedSnapshot =>
+      boolean().withDefault(const Constant(false))();
+
+  RealColumn get servingSizeSnapshot =>
+      real().withDefault(const Constant(100))();
+
+  TextColumn get servingUnitSnapshot =>
+      text().withDefault(const Constant('g'))();
+
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();

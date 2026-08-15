@@ -1,10 +1,15 @@
 /// Stable lifecycle vocabulary for a commercial subscription.
 enum SubscriptionLifecycle {
   inactive,
+  pending,
   trial,
   active,
   gracePeriod,
+  billingRetry,
+  accountHold,
   paused,
+  suspended,
+  deferred,
   expired,
   cancelled,
   refunded,
@@ -19,7 +24,12 @@ extension SubscriptionLifecycleAccess on SubscriptionLifecycle {
     SubscriptionLifecycle.gracePeriod ||
     SubscriptionLifecycle.cancelled => true,
     SubscriptionLifecycle.inactive ||
+    SubscriptionLifecycle.pending ||
+    SubscriptionLifecycle.billingRetry ||
+    SubscriptionLifecycle.accountHold ||
     SubscriptionLifecycle.paused ||
+    SubscriptionLifecycle.suspended ||
+    SubscriptionLifecycle.deferred ||
     SubscriptionLifecycle.expired ||
     SubscriptionLifecycle.refunded ||
     SubscriptionLifecycle.revoked => false,

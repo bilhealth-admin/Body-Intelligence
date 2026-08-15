@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "verified_on": "2026-08-05",
+  "google_play": {
+    "category": "Health & Fitness",
+    "tags": ["nutrition", "fitness", "wellness", "weight management", "health tracking"],
+    "ads_declaration": "CONTEXTUAL_NON_PERSONALIZED_FREE_TIER_ONLY_DISABLED_UNTIL_REVIEWED_PROVIDER_CONFIGURATION",
+    "target_audience": "13_PLUS_GENERAL_WELLNESS_OWNER_MUST_CONFIRM_CONSOLE_QUESTIONNAIRE",
+    "content_rating": "OWNER_INPUT_REQUIRED_COMPLETE_IARC_FROM_ACTUAL_COMMUNITY_AND_MESSAGING_BEHAVIOR",
+    "data_safety": {
+      "status": "DRAFT_MATCHED_TO_CODE_OWNER_MUST_CONFIRM_DEPLOYED_CONFIGURATION",
+      "collected_when_enabled": ["account identifiers", "user content", "health and fitness activity", "purchase entitlement"],
+      "not_sold": true,
+      "encryption_in_transit": true,
+      "deletion_request_available": true,
+      "local_only_data_remains_on_device_until_user_syncs_or_exports": true
+    },
+    "health_apps_declaration": "Nutrition, activity, weight and wellness tracking; no diagnosis, treatment, prevention, or emergency use.",
+    "health_connect": {
+      "purpose": "User-requested import/export of supported weight, steps, activity, workout and energy records.",
+      "minimum_permissions": true,
+      "physical_device_verification": "EXTERNAL_REQUIRED_NOT_CLAIMED"
+    },
+    "permissions_justification": {
+      "camera": "Barcode scanning and user-invoked meal-photo capture only.",
+      "microphone": "User-invoked meal voice logging only.",
+      "notifications": "Opt-in reminders and non-sensitive status messaging.",
+      "bluetooth": "Explicitly initiated supported BIL device discovery and connection.",
+      "health": "Explicitly approved connected-health synchronization."
+    },
+    "app_access": "Core local logging works without an account. Cloud community, AI gateways, purchases, push, and hardware remain unavailable unless production configuration and permissions exist.",
+    "closed_testing": "OWNER_INPUT_REQUIRED_UPLOAD_SIGNED_AAB_INVITE_TESTERS_COMPLETE_14_DAY_OR_CURRENT_POLICY_REQUIREMENT",
+    "contact_email": "bilhealth.app@gmail.com",
+    "website": "https://bilhealth.com",
+    "privacy_policy_url": "https://bilhealth.com/privacy",
+    "account_deletion_url": "https://bilhealth.com/account-deletion"
+  },
+  "apple_app_store": {
+    "primary_category": "Health & Fitness",
+    "secondary_category": "Lifestyle",
+    "age_rating": "OWNER_INPUT_REQUIRED_COMPLETE_QUESTIONNAIRE_EXPECT_13_PLUS_DUE_TO_SOCIAL_AND_MESSAGING",
+    "copyright": "OWNER_INPUT_REQUIRED_YEAR_AND_LEGAL_OWNER",
+    "app_privacy": {
+      "status": "DRAFT_MATCHED_TO_CODE_OWNER_MUST_CONFIRM_DEPLOYED_CONFIGURATION",
+      "account_and_user_content": "Linked to user when cloud account features are enabled.",
+      "health_and_fitness": "Used for app functionality and analytics visible to the user; not advertising.",
+      "purchases": "Used to verify entitlement and restore purchases.",
+      "tracking": false,
+      "data_sale": false
+    },
+    "healthkit_explanation": "BIL reads and writes only user-selected supported wellness records. HealthKit data is never used for advertising and does not constitute medical diagnosis.",
+    "ble_explanation": "BLE access is used only after explicit user action to discover and connect supported BIL hardware. Physical-device success is not claimed without testing.",
+    "ai_photo_explanation": "Meal images are sent only after user action to a configured server gateway. Results are candidates with confidence and require review; nutrition is never invented.",
+    "restore_purchases": "Available from the plans screen and verified against the store and server entitlement boundary.",
+    "terms_and_privacy_placement": "Visible from Settings and the paywall; public HTTPS URLs remain owner input until published.",
+    "export_compliance": "USES_STANDARD_OS_AND_HTTPS_ENCRYPTION_OWNER_MUST_COMPLETE_APP_STORE_CONNECT_QUESTIONS",
+    "encryption_usage": "Standard TLS, OS key storage, and store SDK transport; no proprietary cryptography claimed.",
+    "iap_review_screenshot_plan": "Use the real unconfigured/configured paywall capture after App Store products exist; never submit a fabricated purchase success.",
+    "testflight": "OWNER_INPUT_REQUIRED_ACTIVE_APPLE_MEMBERSHIP_APP_STORE_CONNECT_RECORD_SIGNED_BUILD_AND_SANDBOX_TESTERS",
+    "support_url": "https://bilhealth.com/support",
+    "privacy_policy_url": "https://bilhealth.com/privacy",
+    "marketing_url": "https://bilhealth.com"
+  },
+  "subscription_copy": {
+    "tax_note": "Prices and applicable taxes are determined by the store for the user's country. BIL does not calculate or deduct store tax locally.",
+    "trial": "NOT_CLAIMED_NO_VERIFIED_TRIAL_CONFIGURATION",
+    "states": ["pending", "active", "grace period", "expired", "cancelled"],
+    "plans": {
+      "free": {"en": "Free", "ar": "مجاني", "fr": "Gratuit", "es": "Gratis", "tr": "Ücretsiz"},
+      "plus": {"en": "BIL Plus", "ar": "BIL بلس", "fr": "BIL Plus", "es": "BIL Plus", "tr": "BIL Plus"},
+      "pro": {"en": "BIL Pro", "ar": "BIL برو", "fr": "BIL Pro", "es": "BIL Pro", "tr": "BIL Pro"}
+    },
+    "billing_periods": ["monthly", "annual"],
+    "product_ids": "OWNER_INPUT_REQUIRED_MATCH_STORE_CATALOG_CONFIGURATION",
+    "localized_descriptions": {
+      "en": {"free": "Daily local logging and core progress.", "plus": "Trusted catalogs, richer insights and optional content packs.", "pro": "Advanced explainable intelligence and the highest configured feature tier."},
+      "ar": {"free": "تسجيل يومي محلي وتقدم أساسي.", "plus": "كتالوجات موثقة ورؤى أوسع وحزم محتوى اختيارية.", "pro": "ذكاء متقدم قابل للتفسير وأعلى مستوى ميزات مهيأ."},
+      "fr": {"free": "Journal local quotidien et progrès essentiels.", "plus": "Catalogues vérifiés, analyses enrichies et contenus optionnels.", "pro": "Intelligence explicable avancée et niveau configuré le plus complet."},
+      "es": {"free": "Registro diario local y progreso esencial.", "plus": "Catálogos verificados, más información y contenido opcional.", "pro": "Inteligencia explicable avanzada y el nivel configurado más completo."},
+      "tr": {"free": "Günlük yerel kayıt ve temel ilerleme.", "plus": "Doğrulanmış kataloglar, daha zengin içgörüler ve isteğe bağlı içerik.", "pro": "Gelişmiş açıklanabilir zekâ ve yapılandırılmış en üst özellik düzeyi."}
+    }
+  },
+  "localized_feature_highlights": {
+    "en": ["Truth before certainty", "Body trends with explainable evidence", "Privacy-first and offline-first"],
+    "ar": ["الحقيقة قبل اليقين", "اتجاهات الجسم بأدلة قابلة للتفسير", "الخصوصية والعمل دون اتصال أولًا"],
+    "fr": ["La vérité avant la certitude", "Tendances corporelles avec preuves explicables", "Confidentialité et mode hors ligne d’abord"],
+    "es": ["La verdad antes que la certeza", "Tendencias corporales con evidencia explicable", "Privacidad y uso sin conexión primero"],
+    "tr": ["Kesinlikten önce gerçek", "Açıklanabilir kanıtlarla beden eğilimleri", "Önce gizlilik ve çevrimdışı kullanım"]
+  },
+  "localized_support_privacy_review": {
+    "en": {"support": "Get help with logging, privacy, subscriptions and connected health.", "privacy": "Health data is not sold or used for advertising; cloud features require explicit configuration.", "review": "Core local logging works without an account. Hardware, AI, cloud and purchases never show success unless configured and verified."},
+    "ar": {"support": "احصل على مساعدة في التسجيل والخصوصية والاشتراكات والربط الصحي.", "privacy": "لا تُباع البيانات الصحية ولا تُستخدم للإعلانات، وتتطلب مزايا السحابة تهيئة صريحة.", "review": "يعمل التسجيل المحلي دون حساب. لا تعرض الأجهزة أو الذكاء أو السحابة أو المشتريات نجاحًا دون تهيئة وتحقق."},
+    "fr": {"support": "Aide pour le journal, la confidentialité, les abonnements et la santé connectée.", "privacy": "Les données de santé ne sont ni vendues ni utilisées pour la publicité; le cloud exige une configuration explicite.", "review": "Le journal local fonctionne sans compte. Matériel, IA, cloud et achats ne réussissent jamais sans configuration vérifiée."},
+    "es": {"support": "Ayuda con registro, privacidad, suscripciones y salud conectada.", "privacy": "Los datos de salud no se venden ni se usan para publicidad; la nube requiere configuración explícita.", "review": "El registro local funciona sin cuenta. Hardware, IA, nube y compras nunca muestran éxito sin configuración verificada."},
+    "tr": {"support": "Kayıt, gizlilik, abonelikler ve bağlı sağlık için yardım alın.", "privacy": "Sağlık verileri satılmaz veya reklam için kullanılmaz; bulut özellikleri açık yapılandırma gerektirir.", "review": "Yerel kayıt hesap olmadan çalışır. Donanım, yapay zekâ, bulut ve satın alma doğrulanmadan başarı göstermez."}
+  }
+}

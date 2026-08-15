@@ -11,7 +11,12 @@ void main() {
       'ios/Runner/Runner.entitlements',
     ).readAsStringSync();
 
-    expect(project, contains('PRODUCT_BUNDLE_IDENTIFIER = com.kadem.bil;'));
+    expect(
+      project,
+      contains(
+        'PRODUCT_BUNDLE_IDENTIFIER = com.bilhealth.bodyintelligencelog;',
+      ),
+    );
     expect(
       RegExp(r'IPHONEOS_DEPLOYMENT_TARGET = 15\.0;').allMatches(project).length,
       greaterThanOrEqualTo(3),
@@ -52,7 +57,7 @@ void main() {
     }
   });
 
-  test('HealthKit writes are restricted to weight and hydration', () {
+  test('HealthKit writes are restricted to reviewed weight records', () {
     final bridge = File(
       'ios/Runner/BILGlobalHealthBridge.swift',
     ).readAsStringSync();
@@ -62,7 +67,7 @@ void main() {
 
     expect(writeBoundary, isNotNull);
     expect(writeBoundary, contains('.bodyMass'));
-    expect(writeBoundary, contains('.dietaryWater'));
+    expect(writeBoundary, isNot(contains('.dietaryWater')));
     for (final prohibited in <String>[
       '.stepCount',
       '.activeEnergyBurned',
@@ -91,7 +96,7 @@ void main() {
       'docs/launch_readiness/BIL_APPLE_RELEASE_BOUNDARY.md',
     ).readAsStringSync();
 
-    expect(readiness, contains('`com.kadem.bil`'));
+    expect(readiness, contains('`com.bilhealth.bodyintelligencelog`'));
     expect(readiness, contains('HealthKit write access is limited'));
     expect(readiness, isNot(contains('com.example.bodyIntelligenceLog')));
     expect(readiness, isNot(contains('MVP does not use')));

@@ -44,12 +44,26 @@ class CommercePaywall extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Choose your BIL plan',
+                  _commerceLabel(
+                    context,
+                    ar: 'اختر خطة BIL',
+                    en: 'Choose your BIL plan',
+                    fr: 'Choisissez votre offre BIL',
+                    es: 'Elige tu plan BIL',
+                    tr: 'BIL planınızı seçin',
+                  ),
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Your current access is always resolved from entitlements, not from the plan label shown here.',
+                  _commerceLabel(
+                    context,
+                    ar: 'يُحدَّد وصولك دائمًا من الاستحقاقات الموثقة، وليس من اسم الخطة المعروض.',
+                    en: 'Your current access is always resolved from entitlements, not from the plan label shown here.',
+                    fr: 'Votre accès est toujours déterminé par les droits vérifiés, et non par le nom de l’offre affichée.',
+                    es: 'Tu acceso se determina siempre mediante derechos verificados, no por el nombre del plan mostrado.',
+                    tr: 'Erişiminiz her zaman doğrulanmış haklardan belirlenir; gösterilen plan adından değil.',
+                  ),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 24),
@@ -74,13 +88,47 @@ class CommercePaywall extends StatelessWidget {
                   onPressed: state.isBusy || selected == null
                       ? null
                       : onContinue,
-                  child: Text(state.isPurchasing ? 'Processing…' : 'Continue'),
+                  child: Text(
+                    state.isPurchasing
+                        ? _commerceLabel(
+                            context,
+                            ar: 'جارٍ التنفيذ…',
+                            en: 'Processing…',
+                            fr: 'Traitement…',
+                            es: 'Procesando…',
+                            tr: 'İşleniyor…',
+                          )
+                        : _commerceLabel(
+                            context,
+                            ar: 'متابعة',
+                            en: 'Continue',
+                            fr: 'Continuer',
+                            es: 'Continuar',
+                            tr: 'Devam et',
+                          ),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextButton(
                   onPressed: state.isBusy ? null : onRestore,
                   child: Text(
-                    state.isRestoring ? 'Restoring…' : 'Restore purchases',
+                    state.isRestoring
+                        ? _commerceLabel(
+                            context,
+                            ar: 'جارٍ الاستعادة…',
+                            en: 'Restoring…',
+                            fr: 'Restauration…',
+                            es: 'Restaurando…',
+                            tr: 'Geri yükleniyor…',
+                          )
+                        : _commerceLabel(
+                            context,
+                            ar: 'استعادة المشتريات',
+                            en: 'Restore purchases',
+                            fr: 'Restaurer les achats',
+                            es: 'Restaurar compras',
+                            tr: 'Satın alımları geri yükle',
+                          ),
                   ),
                 ),
               ],
@@ -131,7 +179,18 @@ class _PlanCard extends StatelessWidget {
                       ),
                     ),
                     if (plan.isRecommended)
-                      const Chip(label: Text('Recommended')),
+                      Chip(
+                        label: Text(
+                          _commerceLabel(
+                            context,
+                            ar: 'موصى به',
+                            en: 'Recommended',
+                            fr: 'Recommandé',
+                            es: 'Recomendado',
+                            tr: 'Önerilen',
+                          ),
+                        ),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -162,7 +221,17 @@ class _PlanCard extends StatelessWidget {
                       color: Theme.of(context).colorScheme.error,
                     ),
                   ),
-                if (plan.isCurrent) const Text('Current plan'),
+                if (plan.isCurrent)
+                  Text(
+                    _commerceLabel(
+                      context,
+                      ar: 'الخطة الحالية',
+                      en: 'Current plan',
+                      fr: 'Programme actuel',
+                      es: 'Plan actual',
+                      tr: 'Mevcut plan',
+                    ),
+                  ),
               ],
             ),
           ),
@@ -171,3 +240,18 @@ class _PlanCard extends StatelessWidget {
     );
   }
 }
+
+String _commerceLabel(
+  BuildContext context, {
+  required String ar,
+  required String en,
+  required String fr,
+  required String es,
+  required String tr,
+}) => switch (Localizations.localeOf(context).languageCode) {
+  'ar' => ar,
+  'fr' => fr,
+  'es' => es,
+  'tr' => tr,
+  _ => en,
+};

@@ -7,7 +7,7 @@ void main() {
       'ios/Runner/BILMedicalBleBridge.swift',
     ).readAsStringSync();
     final kotlin = File(
-      'android/app/src/main/kotlin/com/kadem/bil/BILMedicalBleBridge.kt',
+      'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILMedicalBleBridge.kt',
     ).readAsStringSync();
     for (final token in [
       '1810',
@@ -27,7 +27,7 @@ void main() {
     );
     expect(
       File(
-        'android/app/src/main/kotlin/com/kadem/bil/MainActivity.kt',
+        'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/MainActivity.kt',
       ).readAsStringSync(),
       contains('BILMedicalBleBridge'),
     );

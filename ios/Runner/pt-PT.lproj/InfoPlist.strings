@@ -1,0 +1,8 @@
+"NSHealthShareUsageDescription" = "O BIL lê apenas as categorias de Saúde que escolher—atividade, sono, medições corporais, dados cardíacos e respiratórios, tensão arterial, oxigénio, glicose, hidratação e nutrição—para apresentar uma cronologia e análises privadas neste dispositivo.";
+"NSHealthUpdateUsageDescription" = "BIL apenas grava os registos de saúde que escolhe explicitamente, após consentimento de gravação separado.";
+"NSBluetoothAlwaysUsageDescription" = "BIL liga-se apenas a dispositivos de saúde que emparelha explicitamente para que as medições possam ser importadas localmente.";
+"NSBluetoothPeripheralUsageDescription" = "BIL liga-se apenas a dispositivos de saúde que emparelha explicitamente para que as medições possam ser importadas localmente.";
+"NSCameraUsageDescription" = "Utilize a câmara apenas quando optar por ler um código de barras, rever uma fotografia de refeição ou adicionar um perfil privado ou uma fotografia de progresso.";
+"NSPhotoLibraryUsageDescription" = "Selecione uma refeição, perfil ou fotografia de progresso para análise antes de a guardar ou carregar.";
+"NSMicrophoneUsageDescription" = "BIL utiliza o microfone apenas quando escolhe a entrada de voz para uma refeição.";
+"NSSpeechRecognitionUsageDescription" = "BIL converte a frase sobre comida que fala em texto para que possa revê-la antes de guardar.";

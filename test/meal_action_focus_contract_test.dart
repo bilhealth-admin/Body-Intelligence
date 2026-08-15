@@ -11,17 +11,22 @@ void main() {
     final diary = File(
       'lib/features/daily_log/daily_log_page.dart',
     ).readAsStringSync();
+    final mealEntry = File(
+      'lib/features/daily_log/daily_log_meal_entry.dart',
+    ).readAsStringSync();
 
     expect(
       dashboard,
-      contains("context.go('/daily-log?meal=breakfast&focus=meal')"),
+      contains(
+        "context.go('/daily-log?meal=breakfast&focus=meal&from=%2Fdashboard')",
+      ),
     );
     expect(
       router,
       contains("focusMealEntry: state.uri.queryParameters['focus'] == 'meal'"),
     );
     expect(diary, contains('Scrollable.ensureVisible('));
-    expect(diary, contains('key: mealEntryKey'));
+    expect(mealEntry, contains('key: mealEntryKey'));
     expect(diary, contains('this.focusMealEntry = false'));
     expect(diary, contains('if (!widget.focusMealEntry) ...['));
     expect(diary, contains('if (widget.focusMealEntry && !mealFocusApplied)'));

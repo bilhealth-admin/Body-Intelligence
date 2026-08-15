@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
+
 import '../domain/cloud_operational_models.dart';
 import '../domain/cloud_sync_models.dart';
 import 'cloud_durable_ports.dart';
@@ -120,14 +122,8 @@ final class CloudBackupRestoreEngine {
     );
   }
 
-  static String _digest(String value) {
-    var hash = 2166136261;
-    for (final unit in utf8.encode(value)) {
-      hash ^= unit;
-      hash = (hash * 16777619) & 0xffffffff;
-    }
-    return hash.toRadixString(16).padLeft(8, '0');
-  }
+  static String _digest(String value) =>
+      sha256.convert(utf8.encode(value)).toString();
 
   static Map<String, Object?> _recordToJson(CloudRecordEnvelope r) => {
     'entityKind': r.entityKind.name,

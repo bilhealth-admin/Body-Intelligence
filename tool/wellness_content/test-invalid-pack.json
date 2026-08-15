@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "pack_id": "invalid-workout",
+  "version": 1,
+  "type": "workouts",
+  "items": [{
+    "id": "workout",
+    "title": "Workout",
+    "image_url": "https://cdn.example.test/image.jpg",
+    "video_url": "https://cdn.example.test/video.mp4",
+    "duration_minutes": 10
+  }]
+}

@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../shared/widgets/secondary_page_app_bar.dart';
+import '../../shared/widgets/bil_mobile_list.dart';
 
 import '../../app/localization/app_localizations.dart';
 import '../../engine/body_profile.dart';
 import '../../engine/plan_engine.dart';
+import '../nutrition_plans/domain/nutrition_pathway.dart';
 import 'providers/user_profile_provider.dart';
+import 'profile_locale_copy.dart';
 
 class PlanPage extends ConsumerStatefulWidget {
-  const PlanPage({super.key});
+  const PlanPage({super.key, this.pathwayId});
+
+  final String? pathwayId;
 
   @override
   ConsumerState<PlanPage> createState() => _PlanPageState();
@@ -33,6 +38,13 @@ class _PlanPageState extends ConsumerState<PlanPage> {
     final t = context.strings.text;
     final profileAsync = ref.watch(userProfileProvider);
     final goal = ref.watch(activeGoalProvider).value;
+    NutritionPathway? pathway;
+    for (final candidate in nutritionPathways) {
+      if (candidate.id == widget.pathwayId) {
+        pathway = candidate;
+        break;
+      }
+    }
     return Scaffold(
       appBar: SecondaryPageAppBar(title: Text(t('Targets and plan'))),
       body: profileAsync.when(
@@ -143,11 +155,24 @@ class _PlanPageState extends ConsumerState<PlanPage> {
           }
 
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(bottom: 120),
             children: [
-              Card(
+              BilMobilePageIntro(
+                eyebrow: t('Goals'),
+                title: t('Calorie & macro goals'),
+                description: t(
+                  'Review the recommendation, then adjust only what fits your plan.',
+                ),
+              ),
+              if (pathway != null) ...[
+                BilMobileSectionHeader(t('Selected pathway')),
+                _PathwayContextCard(pathway: pathway),
+              ],
+              BilMobileSectionHeader(t('Default goal')),
+              ColoredBox(
+                color: Theme.of(context).colorScheme.surface,
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -163,7 +188,7 @@ class _PlanPageState extends ConsumerState<PlanPage> {
                       const SizedBox(height: 8),
                       ...recommendation.assumptions.map(
                         (assumption) => Text(
-                          '• ${Localizations.localeOf(context).languageCode == 'ar' ? _arabicAssumption(assumption) : assumption}',
+                          '• ${_localizedAssumption(context, assumption)}',
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -176,19 +201,32 @@ class _PlanPageState extends ConsumerState<PlanPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              BilMobileSectionHeader(t('Custom daily goals')),
               ...List.generate(controllers.length, (index) {
                 final current =
                     int.tryParse(controllers[index].text) ?? recommended[index];
                 final delta = current - recommended[index];
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.zero,
                   child: TextField(
                     controller: controllers[index],
                     keyboardType: TextInputType.number,
                     onChanged: (_) => setState(() {}),
                     decoration: InputDecoration(
                       labelText: t(labels[index]),
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.surface,
+                      contentPadding: const EdgeInsets.fromLTRB(20, 13, 20, 10),
+                      border: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                        ),
+                      ),
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.outlineVariant,
+                        ),
+                      ),
                       helperText: delta == 0
                           ? '${t('Using recommendation')}: ${recommended[index]}'
                           : '${delta > 0 ? '+' : ''}$delta ${t('versus recommendation. Changing this may alter adherence and scenario interpretations.')}',
@@ -196,9 +234,12 @@ class _PlanPageState extends ConsumerState<PlanPage> {
                   ),
                 );
               }),
-              FilledButton(
-                onPressed: saving ? null : save,
-                child: Text(saving ? t('Saving…') : t('Save plan')),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                child: FilledButton(
+                  onPressed: saving ? null : save,
+                  child: Text(saving ? t('Saving…') : t('Save plan')),
+                ),
               ),
               TextButton(
                 onPressed: () async {
@@ -227,19 +268,93 @@ class _PlanPageState extends ConsumerState<PlanPage> {
     );
   }
 
-  String _arabicAssumption(String value) {
+  String _localizedAssumption(BuildContext context, String value) {
     if (value.startsWith('Activity factor:')) {
-      return 'معامل النشاط: ${value.split(':').last.trim()}';
+      return '${profileLocaleText(context, 'Activity factor', 'معامل النشاط')}: ${value.split(':').last.trim()}';
     }
     if (value.startsWith('Goal direction:')) {
-      return 'اتجاه الهدف: ${value.split(':').last.trim()}';
+      return '${profileLocaleText(context, 'Goal direction', 'اتجاه الهدف')}: ${value.split(':').last.trim()}';
     }
     return switch (value) {
       'Mifflin–St Jeor BMR using the saved age, sex, height, and current weight' =>
-        'معادلة ميفلين–سانت جيور باستخدام العمر والجنس والطول والوزن الحالي المحفوظ',
+        profileLocaleText(
+          context,
+          value,
+          'معادلة ميفلين–سانت جيور باستخدام العمر والجنس والطول والوزن الحالي المحفوظ',
+        ),
       'Logged scale weight cannot distinguish fat from muscle' =>
-        'وزن الميزان المسجل لا يميز بين الدهون والعضلات',
+        profileLocaleText(
+          context,
+          value,
+          'وزن الميزان المسجل لا يميز بين الدهون والعضلات',
+        ),
       _ => value,
     };
+  }
+}
+
+class _PathwayContextCard extends StatelessWidget {
+  const _PathwayContextCard({required this.pathway});
+
+  final NutritionPathway pathway;
+
+  @override
+  Widget build(BuildContext context) {
+    final reviewRequired =
+        pathway.safety == NutritionPathwaySafety.clinicianReview;
+    return ColoredBox(
+      color: Theme.of(context).colorScheme.surface,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.route_rounded),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    profileLocaleText(
+                      context,
+                      pathway.enTitle,
+                      pathway.arTitle,
+                    ),
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              profileLocaleText(
+                context,
+                pathway.enSubtitle,
+                pathway.arSubtitle,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              reviewRequired
+                  ? profileLocaleText(
+                      context,
+                      'Review draft only. Clinician review is required before activation.',
+                      'مسودة للمراجعة فقط. يلزم مختص قبل التفعيل.',
+                    )
+                  : profileLocaleText(
+                      context,
+                      'Selecting a pathway does not change your targets. No values apply until you save the plan.',
+                      'اختيار المسار لا يغيّر أهدافك. لا تُطبق أي قيم حتى تضغط حفظ الخطة.',
+                    ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: reviewRequired
+                    ? const Color(0xFF9A6700)
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

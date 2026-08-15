@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../app/localization/app_localizations.dart';
 
 import '../../data/repositories/life_context_repository.dart';
 import '../../shared/widgets/secondary_page_app_bar.dart';
@@ -8,10 +9,8 @@ import 'providers/life_context_provider.dart';
 class LifeContextPage extends ConsumerWidget {
   const LifeContextPage({super.key});
 
-  bool isArabic(BuildContext context) =>
-      Localizations.localeOf(context).languageCode == 'ar';
   String tr(BuildContext context, String en, String ar) =>
-      isArabic(context) ? ar : en;
+      context.strings.text(en);
 
   Future<void> addContext(BuildContext context, WidgetRef ref) async {
     final type = await showModalBottomSheet<String>(
@@ -116,7 +115,15 @@ class LifeContextPage extends ConsumerWidget {
       ),
       body: entries.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text(error.toString())),
+        error: (error, _) => Center(
+          child: Text(
+            tr(
+              context,
+              'Could not load life context. Try again.',
+              'تعذر تحميل سياق الحياة. حاول مجددًا.',
+            ),
+          ),
+        ),
         data: (rows) => rows.isEmpty
             ? Center(
                 child: Padding(
@@ -226,20 +233,6 @@ class LifeContextPage extends ConsumerWidget {
       'highSodiumMeal': 'High-sodium meal',
       'other': 'Other',
     };
-    const ar = {
-      'travel': 'سفر',
-      'illness': 'مرض',
-      'medicationChange': 'تغيير دواء',
-      'menstrualContext': 'سياق الدورة الشهرية',
-      'stress': 'ضغط نفسي',
-      'event': 'حدث',
-      'poorSleep': 'نوم سيئ',
-      'stoppedTraining': 'توقف التدريب',
-      'fasting': 'صيام',
-      'ramadan': 'رمضان',
-      'highSodiumMeal': 'وجبة عالية الصوديوم',
-      'other': 'أخرى',
-    };
-    return isArabic(context) ? (ar[type] ?? type) : (en[type] ?? type);
+    return context.strings.text(en[type] ?? type);
   }
 }

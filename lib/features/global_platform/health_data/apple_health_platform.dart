@@ -35,9 +35,16 @@ final class AppleHealthRuntime {
   Future<void> export({
     required List<GlobalHealthSignal> signals,
     required GlobalConsentGrant consent,
-  }) => integration.export(
-    bridge: bridge,
-    writeConsent: consent,
-    signals: signals,
-  );
+  }) async {
+    if (signals.any((signal) => signal.key != HealthDataType.weight.name)) {
+      throw StateError(
+        'Apple Health export is restricted to reviewed weight records.',
+      );
+    }
+    await integration.export(
+      bridge: bridge,
+      writeConsent: consent,
+      signals: signals,
+    );
+  }
 }

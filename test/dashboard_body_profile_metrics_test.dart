@@ -13,6 +13,9 @@ void main() {
     final composer = File(
       'lib/features/dashboard/domain/dashboard_intelligence_composer.dart',
     ).readAsStringSync();
+    final adapter = File(
+      'lib/features/dashboard/composition/dashboard_intelligence_input_adapter.dart',
+    ).readAsStringSync();
 
     for (final label in [
       'الوزن الحالي',
@@ -35,10 +38,10 @@ void main() {
 
     expect(grid, contains('bil.tdee.round()'));
     expect(composer, contains('BodyCompositionEngine.calculate('));
-    expect(grid, contains('profile.neck'));
-    expect(grid, contains('profile.waist'));
-    expect(grid, contains('محيط الرقبة غير مسجل'));
-    expect(grid, contains('محيط الخصر غير مسجل'));
+    expect(adapter, contains('profile.neck'));
+    expect(adapter, contains('profile.waist'));
+    expect(adapter, contains('neckCm: profile.neck'));
+    expect(adapter, contains('waistCm: profile.waist'));
     expect(profile, isNot(contains('BodyCompositionEngine.calculate(')));
     expect(profile, isNot(contains('DashboardIntelligenceComposer')));
   });

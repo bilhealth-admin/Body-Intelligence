@@ -1,0 +1,8 @@
+﻿VISUAL_REFERENCE_PREPARATION=PASS
+PROJECT=C:\develop\projects\body_intelligence_log
+ARCHIVE=C:\Users\HP 1040 G8\Downloads\New folder.zip
+IMAGE_ROOT=C:\develop\projects\body_intelligence_log\artifacts\release\visual_closure\reference\images
+IMAGE_COUNT=177
+FIRST_IMAGE=IMG_4821.PNG
+LAST_IMAGE=IMG_4997.PNG
+INVENTORY=C:\develop\projects\body_intelligence_log\artifacts\release\visual_closure\reference\reference_inventory.csv

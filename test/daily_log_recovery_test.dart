@@ -92,7 +92,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.text('hello notes'), findsOneWidget);
-      expect(find.byKey(const Key('body-context-other-field')), findsOneWidget);
+      expect(find.byKey(const Key('body-context-other-field')), findsNothing);
       expect(find.text('سياق الجسم'), findsOneWidget);
       expect(find.text('نوم أقل من المعتاد'), findsOneWidget);
       expect(find.text('وجبة عالية الصوديوم'), findsOneWidget);
@@ -101,9 +101,20 @@ void main() {
         findsNothing,
       );
 
+      await tester.tap(find.byKey(const Key('body-context-other')));
+      await tester.pump();
+      expect(find.byKey(const Key('body-context-other-field')), findsOneWidget);
+
       await tester.tap(find.byKey(const Key('body-context-nothingNotable')));
       await tester.pump();
       expect(find.byKey(const Key('body-context-other-field')), findsNothing);
+
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('daily-log-water-section')),
+        -400,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
 
       expect(find.textContaining('private meals detail'), findsNothing);
       expect(find.textContaining('private water detail'), findsNothing);

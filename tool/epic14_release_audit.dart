@@ -1,0 +1,141 @@
+import 'dart:io';
+
+Never _fail(String message) {
+  stderr.writeln('EPIC14_RELEASE_AUDIT=FAIL');
+  stderr.writeln(message);
+  exit(1);
+}
+
+String _read(String path) {
+  final file = File(path);
+  if (!file.existsSync()) _fail('Missing release file: $path');
+  return file.readAsStringSync();
+}
+
+void _requires(String body, String value, String path) {
+  if (!body.contains(value)) _fail('$path missing: $value');
+}
+
+void main() {
+  final pubspec = _read('pubspec.yaml');
+  final appGradle = _read('android/app/build.gradle.kts');
+  final settings = _read('android/settings.gradle.kts');
+  final properties = _read('android/gradle.properties');
+  final manifest = _read('android/app/src/main/AndroidManifest.xml');
+  final ignores = _read('.gitignore') + _read('android/.gitignore');
+  final info = _read('ios/Runner/Info.plist');
+  final entitlements = _read('ios/Runner/Runner.entitlements');
+  final debugEntitlements = _read('ios/Runner/RunnerDebug.entitlements');
+  final privacy = _read('ios/Runner/PrivacyInfo.xcprivacy');
+  final project = _read('ios/Runner.xcodeproj/project.pbxproj');
+
+  for (final pair in <(String, String)>[
+    (pubspec, 'version: 1.0.0+1'),
+    (appGradle, 'applicationId = "com.kadem.bil"'),
+    (appGradle, 'namespace = "com.kadem.bil"'),
+    (appGradle, 'compileSdk = 36'),
+    (appGradle, 'targetSdk = 36'),
+    (appGradle, 'minSdk = 26'),
+    (appGradle, 'isMinifyEnabled = true'),
+    (appGradle, 'isShrinkResources = true'),
+    (appGradle, 'proguard-rules.pro'),
+    (appGradle, 'abiFilters += listOf("arm64-v8a", "x86_64")'),
+    (appGradle, 'excludes += setOf("**/armeabi-v7a/**")'),
+    (settings, 'com.android.application") version "9.2.1"'),
+    (properties, 'android.builtInKotlin=false'),
+    (manifest, 'android:allowBackup="false"'),
+    (manifest, 'android:usesCleartextTraffic="false"'),
+    (manifest, 'android:usesPermissionFlags="neverForLocation"'),
+    (project, 'PRODUCT_BUNDLE_IDENTIFIER = com.kadem.bil;'),
+    (project, 'IPHONEOS_DEPLOYMENT_TARGET = 15.0;'),
+    (project, 'PrivacyInfo.xcprivacy in Resources'),
+    (info, 'NSHealthShareUsageDescription'),
+    (info, 'NSHealthUpdateUsageDescription'),
+    (info, 'NSMicrophoneUsageDescription'),
+    (info, 'NSSpeechRecognitionUsageDescription'),
+    (entitlements, '<key>aps-environment</key>'),
+    (entitlements, '<key>com.apple.developer.healthkit</key>'),
+    (debugEntitlements, '<key>com.apple.developer.healthkit</key>'),
+    (privacy, '<key>NSPrivacyTracking</key><false/>'),
+  ]) {
+    if (!pair.$1.contains(pair.$2)) {
+      _fail('Missing release contract: ${pair.$2}');
+    }
+  }
+  if (debugEntitlements.contains('aps-environment')) {
+    _fail('Production APNs entitlement leaked into Debug signing.');
+  }
+
+  for (final secretPattern in <String>[
+    'key.properties',
+    '*.jks',
+    '*.keystore',
+  ]) {
+    _requires(ignores, secretPattern, '.gitignore');
+  }
+
+  final androidWorkflow = _read(
+    '.github/workflows/bil_android_release_candidate.yml',
+  );
+  final unsignedIos = _read('.github/workflows/bil_ios_unsigned_release.yml');
+  final signedIos = _read('.github/workflows/bil_ios_signed_release.yml');
+  for (final value in <String>[
+    'flutter build appbundle --release --no-pub',
+    'jarsigner -verify',
+    'ANDROID_KEYSTORE_BASE64',
+  ]) {
+    _requires(androidWorkflow, value, 'Android workflow');
+  }
+  for (final value in <String>[
+    'flutter build ios --release --no-codesign',
+    'UNSIGNED_VALIDATION_ONLY',
+    'plutil -lint ios/Runner/PrivacyInfo.xcprivacy',
+  ]) {
+    _requires(unsignedIos, value, 'unsigned iOS workflow');
+  }
+
+  final ownerInputs = _read('docs/release/BIL_EPIC14_OWNER_INPUTS.json');
+  if (!ownerInputs.contains('OWNER_INPUT_REQUIRED') ||
+      ownerInputs.contains('https://example.com')) {
+    _fail('Owner input registry is missing or contains a fabricated URL.');
+  }
+  final officialRequirements = _read(
+    'docs/release/BIL_EPIC14_OFFICIAL_REQUIREMENTS.md',
+  );
+  for (final authority in <String>[
+    'developer.android.com/google/play/requirements/target-sdk',
+    'developer.android.com/guide/practices/page-sizes',
+    'developer.apple.com/documentation/bundleresources/privacy-manifest-files',
+  ]) {
+    _requires(officialRequirements, authority, 'official requirements');
+  }
+  for (final value in <String>[
+    'APPLE_DISTRIBUTION_CERTIFICATE_BASE64',
+    'APPLE_PROVISIONING_PROFILE_BASE64',
+    'APPLE_TEAM_ID',
+    'APP_STORE_CONNECT_KEY_ID',
+    'APP_STORE_CONNECT_ISSUER_ID',
+    'APP_STORE_CONNECT_PRIVATE_KEY_BASE64',
+    'flutter build ipa --release',
+    'altool --validate-app',
+  ]) {
+    _requires(signedIos, value, 'signed iOS workflow');
+  }
+
+  if (manifest.contains('android.permission.health.READ_HEART_RATE') ||
+      manifest.contains('android.permission.health.READ_SLEEP')) {
+    _fail('Android requests unsupported Health Connect data.');
+  }
+  if (appGradle.contains('signingConfigs.getByName("debug")')) {
+    _fail('Release configuration falls back to debug signing.');
+  }
+
+  stdout.writeln('EPIC14_RELEASE_AUDIT=PASS');
+  stdout.writeln('ANDROID_ID=com.kadem.bil');
+  stdout.writeln('APPLE_ID=com.kadem.bil');
+  stdout.writeln('VERSION=1.0.0+1');
+  stdout.writeln('TARGET_API=36');
+  stdout.writeln(
+    'APPLE_SIGNED_BUILD=EXTERNAL_CREDENTIALS_REQUIRED_NOT_CLAIMED',
+  );
+}

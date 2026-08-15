@@ -1,572 +1,293 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../app/environment/app_environment.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/services/app_settings_provider.dart';
 import '../../app/services/data_export_service.dart';
 import '../../app/services/local_data_lifecycle_service.dart';
 import '../../app/services/local_recovery_service.dart';
-import '../../app/services/external_capabilities.dart';
-import '../../core/units/measurement_units.dart';
 import '../../data/database/database_provider.dart';
 import '../../data/database/seed_data.dart';
 import '../foods/providers/food_provider.dart';
+import '../commerce/domain/commerce_plan.dart';
+import '../commerce/providers/commerce_providers.dart';
 import '../profile/providers/user_profile_provider.dart';
+import 'reference_settings_copy.dart';
 
+part 'settings_page_actions.dart';
+
+/// The bottom-navigation "More" destination. Its hierarchy intentionally
+/// mirrors the supplied reference: account summary first, product destinations
+/// second, and Settings/Privacy/Help/Sync at the end.
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
-  Future<void> _showInfo(BuildContext context, String title, String body) {
-    return showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(title),
-        content: SingleChildScrollView(child: Text(body)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(context.strings.text('Close')),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _export(BuildContext context, WidgetRef ref) async {
-    try {
-      final database = ref.read(databaseProvider);
-      final displayUnits =
-          await ref.read(preferencesRepositoryProvider).get('units') ??
-          'metric';
-      final document = await LocalDataLifecycleService(
-        database,
-      ).exportJson(displayUnits: displayUnits);
-      await const DataExportService().copyText(document);
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.strings.text('Local data export copied to the clipboard.'),
-          ),
-        ),
-      );
-    } catch (_) {
-      if (!context.mounted) return;
-      final arabic = Localizations.localeOf(context).languageCode == 'ar';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            arabic
-                ? 'تعذر إنشاء التصدير المحلي. لم يتم حذف أو رفع أي بيانات.'
-                : 'The local export could not be created. No data was deleted or uploaded.',
-          ),
-        ),
-      );
-    }
-  }
-
-  Future<void> _reviewSetupAgain(BuildContext context, WidgetRef ref) async {
-    final arabic =
-        Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
-    final confirmed = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(
-          arabic ? 'مراجعة الإعداد الأولي؟' : 'Review your initial setup?',
-        ),
-        content: Text(
-          arabic
-              ? 'سيُفتح الإعداد الأولي مع الاحتفاظ بملفك وسجلات الوزن والطعام وجميع بياناتك. لن يتم حذف أو رفع أي شيء.'
-              : 'Onboarding will open while keeping your profile, weight records, meals, and all local data. Nothing will be deleted or uploaded.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(arabic ? 'إلغاء' : 'Cancel'),
-          ),
-          FilledButton.icon(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            icon: const Icon(Icons.tune_rounded),
-            label: Text(arabic ? 'فتح الإعداد' : 'Open setup'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true || !context.mounted) return;
-
-    await ref
-        .read(preferencesRepositoryProvider)
-        .set('forceOnboarding', 'true');
-
-    if (!context.mounted) return;
-    context.go('/onboarding');
-  }
-
-  Future<void> _reset(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      useRootNavigator: true,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(context.strings.text('Reset all local data?')),
-        content: Text(
-          context.strings.text(
-            'A validated local recovery snapshot will replace any older snapshot before your profile, goals, logs, meals, custom foods, and settings are reset.',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(context.strings.text('Cancel')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(context.strings.text('Reset')),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true || !context.mounted) return;
-
-    BuildContext? progressDialogContext;
-    final progressDialogReady = Completer<void>();
-
-    unawaited(
-      showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        useRootNavigator: true,
-        builder: (dialogContext) {
-          progressDialogContext = dialogContext;
-          if (!progressDialogReady.isCompleted) {
-            progressDialogReady.complete();
-          }
-
-          return PopScope(
-            canPop: false,
-            child: AlertDialog(
-              content: Row(
-                children: [
-                  const SizedBox.square(
-                    dimension: 28,
-                    child: CircularProgressIndicator(strokeWidth: 3),
-                  ),
-                  const SizedBox(width: 18),
-                  Expanded(
-                    child: Text(
-                      context.strings.text(
-                        'Deleting local data. Please wait...',
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-
-    await progressDialogReady.future;
-
-    try {
-      final database = ref.read(databaseProvider);
-      await LocalRecoveryService(database).resetWithRecovery();
-      await SeedData.seedStarterCatalog(ref.read(foodRepositoryProvider));
-
-      ref.invalidate(userProfileProvider);
-      ref.invalidate(measurementSystemProvider);
-      ref.invalidate(appSettingsProvider);
-      ref.invalidate(foodRepositoryProvider);
-
-      final dialogContext = progressDialogContext;
-      if (dialogContext != null && dialogContext.mounted) {
-        Navigator.of(dialogContext).pop();
-      }
-
-      if (!context.mounted) return;
-
-      await Future<void>.delayed(Duration.zero);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (context.mounted) {
-          context.go('/account-gateway');
-        }
-      });
-    } catch (_) {
-      final dialogContext = progressDialogContext;
-      if (dialogContext != null && dialogContext.mounted) {
-        Navigator.of(dialogContext).pop();
-      }
-
-      if (!context.mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.strings.text(
-              'Your data was not reset or uploaded. Try opening it again.',
-            ),
-          ),
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final t = context.strings.text;
-    final settings = ref.watch(appSettingsProvider);
-    final measurementSystem =
-        ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
+    final copy = ReferenceSettingsCopy.of(context);
+    final profile = ref.watch(userProfileProvider).value;
+    final displayName = ref.watch(displayNameProvider).value;
+    final photo = ref.watch(profilePhotoProvider).value;
+    final subscription = ref.watch(verifiedSubscriptionStateProvider);
+    final name = displayName?.trim().isNotEmpty == true
+        ? displayName!.trim()
+        : copy('BIL member');
+    final current = profile?.currentWeight;
+    final target = profile?.targetWeight;
+    final remaining = current == null || target == null
+        ? '--'
+        : (target - current).abs().toStringAsFixed(1);
+
     return Scaffold(
-      appBar: AppBar(title: Text(context.strings.text('Settings'))),
+      appBar: AppBar(centerTitle: true, title: Text(copy('More'))),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.only(bottom: 112),
         children: [
-          DropdownButtonFormField<String>(
-            initialValue: settings.localeCode,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.language),
-              labelText: context.strings.text('Language'),
+          _ProfileSummary(
+            name: name,
+            photo: photo,
+            currentWeight: current?.toStringAsFixed(1) ?? '--',
+            goalWeight: target?.toStringAsFixed(1) ?? '--',
+            lostWeight: remaining,
+            copy: copy,
+            onTap: () => context.push('/profile-summary'),
+          ),
+          const Divider(height: 1),
+          subscription.when(
+            loading: () =>
+                _MoreStatusRow(context.strings.text('Checking subscription')),
+            error: (_, _) => _MoreStatusRow(
+              context.strings.text('Retry subscription check'),
+              onTap: () => ref.invalidate(verifiedSubscriptionStateProvider),
             ),
-            items: const [
-              DropdownMenuItem(value: 'ar', child: Text('العربية')),
-              DropdownMenuItem(value: 'en', child: Text('English')),
-            ],
-            onChanged: (value) =>
-                ref.read(appSettingsProvider.notifier).setLocale(value ?? 'en'),
+            data: (value) => value.plan == CommercePlan.free
+                ? _MoreRow(copy('Explore Premium'), '/plans', emphasized: true)
+                : _MoreRow(copy('Premium'), '/plans', emphasized: true),
           ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-            initialValue: settings.themeMode,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.dark_mode),
-              labelText: context.strings.text('Appearance'),
-            ),
-            items: [
-              DropdownMenuItem(
-                value: 'system',
-                child: Text(
-                  Localizations.localeOf(context).languageCode == 'ar'
-                      ? 'حسب الجهاز'
-                      : 'Follow device',
-                ),
-              ),
-              DropdownMenuItem(
-                value: 'light',
-                child: Text(
-                  Localizations.localeOf(context).languageCode == 'ar'
-                      ? 'ضوء النهار'
-                      : 'Daylight',
-                ),
-              ),
-              DropdownMenuItem(
-                value: 'dark',
-                child: Text(
-                  Localizations.localeOf(context).languageCode == 'ar'
-                      ? 'الوضع الليلي'
-                      : 'Night mode',
-                ),
-              ),
-            ],
-            onChanged: (value) => ref
-                .read(appSettingsProvider.notifier)
-                .setThemeMode(value ?? 'system'),
+          _MoreRow(copy('My Profile'), '/profile-summary'),
+          _MoreRow(
+            context.strings.text('Language'),
+            '/settings/language',
+            key: const Key('more-language-entry'),
           ),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            secondary: const Icon(Icons.contrast),
-            value: settings.highContrast,
-            onChanged: (value) =>
-                ref.read(appSettingsProvider.notifier).setHighContrast(value),
-            title: Text(t('High contrast')),
-            subtitle: Text(
-              t('Increase separation between text, controls, and surfaces.'),
-            ),
+          _MoreRow(copy('Intermittent Fasting'), '/wellness/fasting'),
+          _MoreRow(copy('Sleep'), '/wellness/sleep'),
+          _MoreRow(copy('Recipe Discovery'), '/wellness/recipes'),
+          _MoreRow(copy('Workout Routines'), '/wellness/workouts/routines'),
+          _MoreRow(copy('Goals'), '/goals'),
+          _MoreRow(copy('Progress'), '/history'),
+          _MoreRow(
+            copy('Weekly Report'),
+            '/weekly-report',
+            key: const Key('settings-weekly-report-entry'),
           ),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            secondary: const Icon(Icons.motion_photos_off_outlined),
-            value: settings.reduceMotion,
-            onChanged: (value) =>
-                ref.read(appSettingsProvider.notifier).setReduceMotion(value),
-            title: Text(t('Reduce motion')),
-            subtitle: Text(t('Minimize nonessential interface animation.')),
+          _MoreRow(context.strings.text('Challenges'), '/challenges'),
+          _MoreRow(
+            'AI Coach',
+            '/intelligence-center',
+            key: const Key('more-ai-coach-entry'),
           ),
-          const Divider(height: 32),
-          const _RegionTimezoneTile(),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            key: ValueKey(measurementSystem),
-            initialValue: measurementSystem.name,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.straighten),
-              labelText: context.strings.text('Units'),
-            ),
-            items: [
-              DropdownMenuItem(
-                value: 'metric',
-                child: Text(context.strings.text('Metric (kg, cm)')),
-              ),
-              DropdownMenuItem(
-                value: 'imperial',
-                child: Text(context.strings.text('Imperial (lb, in)')),
-              ),
-            ],
-            onChanged: (value) => ref
-                .read(preferencesRepositoryProvider)
-                .set('units', value ?? 'metric'),
+          _MoreRow('AI Coach settings', '/settings/ai-coach'),
+          _MoreRow(copy('Nutrition'), '/analytics/nutrition'),
+          _MoreRow(copy('My Meals, Recipes & Foods'), '/nutrition'),
+          _MoreRow(
+            copy('Reminders'),
+            '/notification-settings',
+            key: const Key('settings-notifications-entry'),
           ),
-          const Divider(height: 32),
-          ListTile(
-            leading: const Icon(Icons.person_outline_rounded),
-            title: Text(
-              Localizations.localeOf(context).languageCode == 'ar'
-                  ? 'ملفي وخطتي'
-                  : 'My profile & plan',
-            ),
-            subtitle: Text(
-              Localizations.localeOf(context).languageCode == 'ar'
-                  ? 'عدّل بيانات الجسم والهدف والنشاط دون إعادة شاشة الترحيب.'
-                  : 'Edit body data, goal, and activity without restarting onboarding.',
-            ),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/profile-settings'),
+          _MoreRow(
+            copy('Apps & Devices'),
+            '/connected-health',
+            key: const Key('settings-connected-health-entry'),
           ),
-          ListTile(
-            leading: const Icon(Icons.tune),
-            title: Text(t('Targets and plan')),
-            subtitle: Text(
-              t('Compare recommendations, assumptions, and your overrides.'),
-            ),
-            onTap: () => context.push('/plan'),
+          _MoreRow(copy('Steps'), '/connected-health/steps'),
+          _MoreRow(copy('Learn'), '/wellness/learn'),
+          if (AppEnvironment.communityConfigured) ...[
+            _MoreRow(copy('Community'), '/community'),
+            _MoreRow(copy('Friends'), '/community/people'),
+            _MoreRow(copy('Messages'), '/community/messages'),
+          ],
+          _MoreRow(copy('Settings'), '/settings/preferences'),
+          _MoreRow(copy('Privacy'), '/settings/sharing-privacy'),
+          _MoreRow(
+            copy('Advertising privacy'),
+            '/advertising-privacy',
+            key: const Key('settings-advertising-privacy-entry'),
           ),
-          ListTile(
-            leading: const Icon(Icons.analytics),
-            title: Text(context.strings.text('Analytics')),
-            onTap: () => context.push('/settings/analytics'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.psychology_alt_outlined),
-            title: Text(t('Decision Memory')),
-            subtitle: Text(
-              t('Review, rate, disable, or delete remembered actions.'),
-            ),
-            onTap: () => context.push('/decision-memory'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.event_note_outlined),
-            title: Text(t('Life context')),
-            subtitle: Text(
-              Localizations.localeOf(context).languageCode == 'ar'
-                  ? 'اختر لكل سجل ما إذا كان يمكن استخدامه في الاستنتاجات المحلية، أو احذفه.'
-                  : 'Choose per record whether it may inform local insights, or delete it.',
-            ),
-            onTap: () => context.push('/context'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.science_outlined),
-            title: Text(t('Personal experiments')),
-            subtitle: Text(
-              t('Test a cautious hypothesis and record limitations.'),
-            ),
-            onTap: () => context.push('/experiments'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.ios_share_outlined),
-            title: Text(context.strings.text('Share Studio')),
-            subtitle: Text(
-              context.strings.text(
-                'Create a privacy-safe progress image. Weight stays hidden.',
-              ),
-            ),
-            onTap: () => context.push('/share-studio'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.emoji_events_outlined),
-            title: Text(context.strings.text('Challenges')),
-            subtitle: Text(
-              context.strings.text(
-                'Behavior-first private challenges with evidence-based progress.',
-              ),
-            ),
-            onTap: () => context.push('/challenges'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.privacy_tip),
-            title: Text(context.strings.text('Privacy')),
-            subtitle: Text(t('Your data remains on this device.')),
-            onTap: () => _showInfo(
-              context,
-              t('Privacy'),
-              t(
-                'BIL stores profile, weight, meals, foods, water, and preferences locally in SQLite. No data is uploaded while cloud services are disabled.',
-              ),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.health_and_safety),
-            title: Text(context.strings.text('Health disclaimer')),
-            onTap: () => _showInfo(
-              context,
-              t('Health disclaimer'),
-              t(
-                'BIL provides general tracking information and cautious hypotheses. It does not diagnose, treat, or replace advice from a qualified healthcare professional.',
-              ),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.copy_all),
-            title: Text(context.strings.text('Export local data')),
-            subtitle: Text(t('Copy a JSON export to the clipboard.')),
-            onTap: () => _export(context, ref),
-          ),
-          ListTile(
-            leading: const Icon(Icons.info),
-            title: Text(t('App version')),
-            subtitle: const Text('1.0.0+1'),
-          ),
-          const Divider(height: 32),
-          Text(
-            t('Connected capabilities'),
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 6),
-          for (final capability in ExternalCapability.values)
-            Builder(
-              builder: (context) {
-                final status = ExternalCapabilities.status(capability);
-                return ListTile(
-                  enabled: status.available,
-                  leading: Icon(switch (capability) {
-                    ExternalCapability.account => Icons.account_circle_outlined,
-                    ExternalCapability.sync => Icons.cloud_sync_outlined,
-                    ExternalCapability.ai => Icons.auto_awesome_outlined,
-                    ExternalCapability.commerce =>
-                      Icons.workspace_premium_outlined,
-                    ExternalCapability.community => Icons.groups_outlined,
-                    ExternalCapability.coach => Icons.support_agent_outlined,
-                    ExternalCapability.updates => Icons.system_update_outlined,
-                  }),
-                  title: Text(switch (capability) {
-                    ExternalCapability.account => t('Account'),
-                    ExternalCapability.sync => context.strings.text(
-                      'Cloud sync',
-                    ),
-                    ExternalCapability.ai => t('Ask BIL'),
-                    ExternalCapability.commerce => t(
-                      'Subscriptions and purchases',
-                    ),
-                    ExternalCapability.community => t('Community'),
-                    ExternalCapability.coach => t('Coach platform'),
-                    ExternalCapability.updates => t('Remote update channel'),
-                  }),
-                  subtitle: Text(t(status.reason)),
-                  trailing: Icon(
-                    status.available
-                        ? Icons.check_circle_outline
-                        : Icons.lock_outline,
-                  ),
-                );
-              },
-            ),
-          const Divider(height: 32),
-          ListTile(
-            key: const Key('settings-review-onboarding'),
-            leading: const Icon(Icons.tune_rounded),
-            title: Text(
-              Localizations.localeOf(context).languageCode == 'ar'
-                  ? 'مراجعة الإعداد الأولي'
-                  : 'Review initial setup',
-            ),
-            subtitle: Text(
-              Localizations.localeOf(context).languageCode == 'ar'
-                  ? 'أعد فتح خطوات الإعداد دون حذف السجلات أو الملف الشخصي.'
-                  : 'Reopen onboarding without deleting your profile or records.',
-            ),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => _reviewSetupAgain(context, ref),
-          ),
-          const SizedBox(height: 8),
-          ListTile(
-            textColor: Theme.of(context).colorScheme.error,
-            iconColor: Theme.of(context).colorScheme.error,
-            leading: const Icon(Icons.delete_forever),
-            title: Text(context.strings.text('Reset local data')),
-            onTap: () => _reset(context, ref),
-          ),
+          _MoreRow(copy('Help'), '/help'),
+          _MoreRow(copy('Sync'), '/connected-health', showDivider: false),
         ],
       ),
     );
   }
 }
 
-class _RegionTimezoneTile extends ConsumerStatefulWidget {
-  const _RegionTimezoneTile();
+class _ProfileSummary extends StatelessWidget {
+  const _ProfileSummary({
+    required this.name,
+    required this.photo,
+    required this.currentWeight,
+    required this.goalWeight,
+    required this.lostWeight,
+    required this.copy,
+    required this.onTap,
+  });
 
-  @override
-  ConsumerState<_RegionTimezoneTile> createState() =>
-      _RegionTimezoneTileState();
-}
-
-class _RegionTimezoneTileState extends ConsumerState<_RegionTimezoneTile> {
-  String? country;
-  String? city;
-  String? timezone;
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    final repository = ref.read(preferencesRepositoryProvider);
-    final values = await Future.wait([
-      repository.get('countryRegion'),
-      repository.get('cityName'),
-      repository.get('timezoneName'),
-    ]);
-    if (!mounted) return;
-    setState(() {
-      country = values[0];
-      city = values[1];
-      timezone = values[2];
-    });
-  }
+  final String name;
+  final Uint8List? photo;
+  final String currentWeight;
+  final String goalWeight;
+  final String lostWeight;
+  final String Function(String) copy;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final arabic = Localizations.localeOf(context).languageCode == 'ar';
-    final parts = [
-      if (country?.isNotEmpty == true) country!,
-      if (city?.isNotEmpty == true) city!,
-      if (timezone?.isNotEmpty == true) timezone!,
-    ];
-
-    return ListTile(
-      key: const Key('settings-location-tile'),
-      contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.public_rounded),
-      title: Text(arabic ? 'الموقع والوقت المحلي' : 'Location & local time'),
-      subtitle: Text(
-        parts.isEmpty
-            ? (arabic
-                  ? 'اختر الدولة والمدينة أو استخدم إعداد الجهاز.'
-                  : 'Choose country and city or detect from this device.')
-            : parts.join(' · '),
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 34,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest,
+                  backgroundImage: photo == null ? null : MemoryImage(photo!),
+                  child: photo == null
+                      ? const Icon(Icons.person_rounded, size: 38)
+                      : null,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        copy('View profile'),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                _Metric(currentWeight, copy('Current'), copy('kg')),
+                _Metric(lostWeight, copy('Remaining'), copy('kg')),
+                _Metric(goalWeight, copy('Goal'), copy('kg')),
+              ],
+            ),
+          ],
+        ),
       ),
-      trailing: const Icon(Icons.chevron_right_rounded),
-      onTap: () async {
-        await context.push('/location-settings');
-        await _load();
-      },
     );
   }
+}
+
+class _Metric extends StatelessWidget {
+  const _Metric(this.value, this.label, this.unit);
+  final String value;
+  final String label;
+  final String unit;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+    child: Column(
+      children: [
+        Text(
+          '$value $unit',
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 3),
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
+      ],
+    ),
+  );
+}
+
+class _MoreRow extends StatelessWidget {
+  const _MoreRow(
+    this.label,
+    this.route, {
+    super.key,
+    this.emphasized = false,
+    this.showDivider = true,
+  });
+  final String label;
+  final String route;
+  final bool emphasized;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      ListTile(
+        minTileHeight: 58,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 22),
+        title: Text(
+          label,
+          style: TextStyle(
+            fontWeight: emphasized ? FontWeight.w700 : FontWeight.w500,
+            color: emphasized ? Theme.of(context).colorScheme.primary : null,
+          ),
+        ),
+        trailing: const Icon(
+          Icons.chevron_right_rounded,
+          color: Color(0xFFB7B9BD),
+        ),
+        onTap: () => context.push(route),
+      ),
+      if (showDivider) const Divider(height: 1, indent: 22),
+    ],
+  );
+}
+
+class _MoreStatusRow extends StatelessWidget {
+  const _MoreStatusRow(this.label, {this.onTap});
+
+  final String label;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      ListTile(
+        minTileHeight: 58,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 22),
+        leading: onTap == null
+            ? const SizedBox.square(
+                dimension: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.refresh_rounded),
+        title: Text(label),
+        onTap: onTap,
+      ),
+      const Divider(height: 1, indent: 22),
+    ],
+  );
 }

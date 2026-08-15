@@ -4,7 +4,10 @@ abstract final class BilFlagshipTokens {
   static const Color navy950 = Color(0xFF071120);
   static const Color navy900 = Color(0xFF0A1730);
   static const Color navy800 = Color(0xFF10254A);
-  static const Color cyan500 = Color(0xFF06B6D4);
+  // BIL action blue: reserved for links, selected values and primary actions.
+  // A single restrained accent reads more clearly than mixing cyan/green on
+  // every surface.
+  static const Color cyan500 = Color(0xFF0877D1);
   static const Color cyan400 = Color(0xFF22D3EE);
   static const Color emerald500 = Color(0xFF10B981);
   static const Color emerald400 = Color(0xFF34D399);
@@ -12,12 +15,12 @@ abstract final class BilFlagshipTokens {
   static const Color orange500 = Color(0xFFF59E0B);
   static const Color red500 = Color(0xFFEF4444);
 
-  static const Color canvasLight = Color(0xFFF4F7FB);
+  static const Color canvasLight = Color(0xFFF5F5F8);
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color surfaceMutedLight = Color(0xFFF8FAFC);
-  static const Color outlineLight = Color(0xFFDCE4EF);
-  static const Color textPrimaryLight = Color(0xFF101828);
-  static const Color textSecondaryLight = Color(0xFF5F6B7A);
+  static const Color surfaceMutedLight = Color(0xFFF7F7FA);
+  static const Color outlineLight = Color(0xFFE5E5EA);
+  static const Color textPrimaryLight = Color(0xFF101114);
+  static const Color textSecondaryLight = Color(0xFF6C6D73);
 
   static const Color canvasDark = navy950;
   static const Color surfaceDark = Color(0xFF0D1B33);
@@ -39,9 +42,11 @@ abstract final class BilFlagshipTokens {
   static const double space64 = 64;
 
   static const double radiusSm = 10;
-  static const double radiusMd = 16;
-  static const double radiusLg = 22;
-  static const double radiusXl = 30;
+  // One compact geometry scale across auth, onboarding and the signed-in app.
+  // These values intentionally match the canonical premium foundation.
+  static const double radiusMd = 12;
+  static const double radiusLg = 14;
+  static const double radiusXl = 16;
   static const double radiusPill = 999;
 
   static const LinearGradient brandGradient = LinearGradient(
@@ -57,7 +62,12 @@ abstract final class BilFlagshipTokens {
   );
 
   static const List<BoxShadow> shadowCard = [
-    BoxShadow(color: Color(0x12071920), blurRadius: 24, offset: Offset(0, 10)),
+    BoxShadow(
+      color: Color(0x12071120),
+      blurRadius: 24,
+      spreadRadius: -10,
+      offset: Offset(0, 10),
+    ),
   ];
 
   static const List<BoxShadow> shadowFloating = [

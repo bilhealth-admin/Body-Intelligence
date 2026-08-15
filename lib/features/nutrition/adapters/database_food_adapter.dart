@@ -32,10 +32,18 @@ abstract class BaseDatabaseFoodAdapter implements DatabaseFoodAdapter {
         grams: _servingGrams(food.servingSize, food.servingUnit),
       ),
       nutrients: <FoodNutrient, NutrientAmount>{
-        FoodNutrient.calories: NutrientAmount.known(food.calories),
-        FoodNutrient.protein: NutrientAmount.known(food.protein),
-        FoodNutrient.carbohydrates: NutrientAmount.known(food.carbs),
-        FoodNutrient.fat: NutrientAmount.known(food.fats),
+        FoodNutrient.calories: _core(
+          food,
+          FoodNutrient.calories,
+          food.calories,
+        ),
+        FoodNutrient.protein: _core(food, FoodNutrient.protein, food.protein),
+        FoodNutrient.carbohydrates: _core(
+          food,
+          FoodNutrient.carbohydrates,
+          food.carbs,
+        ),
+        FoodNutrient.fat: _core(food, FoodNutrient.fat, food.fats),
         FoodNutrient.fiber: _optional(food, FoodNutrient.fiber, food.fiber),
         FoodNutrient.sugar: _optional(food, FoodNutrient.sugar, food.sugar),
         FoodNutrient.sodium: _optional(food, FoodNutrient.sodium, food.sodium),
@@ -76,17 +84,47 @@ abstract class BaseDatabaseFoodAdapter implements DatabaseFoodAdapter {
         : const NutrientAmount.missing();
   }
 
+  NutrientAmount _core(Food food, FoodNutrient nutrient, double value) {
+    // Quick Add records carry an explicit per-field evidence mask so an empty
+    // field remains unknown while a user-entered zero remains known.
+    if (food.source == 'quick_add') {
+      return UnifiedFood.evidenceFromMask(food.nutrientEvidenceMask, nutrient)
+          ? NutrientAmount.known(value)
+          : const NutrientAmount.missing();
+    }
+    // Older bundled and user-created rows predate core evidence bits. Their
+    // required macro columns are authoritative. Downloaded catalog rows must
+    // prove each value instead of turning missing data into a numeric zero.
+    if (food.source != 'bil-mobile-catalog' ||
+        UnifiedFood.evidenceFromMask(food.nutrientEvidenceMask, nutrient) ||
+        value != 0) {
+      return NutrientAmount.known(value);
+    }
+    return const NutrientAmount.missing();
+  }
+
   double _servingGrams(double amount, String unit) {
     switch (unit.trim().toLowerCase()) {
       case 'kg':
+      case 'kgs':
       case 'kilogram':
+      case 'kilograms':
         return amount * 1000;
       case 'oz':
+      case 'ozs':
       case 'ounce':
+      case 'ounces':
         return amount * 28.349523125;
       case 'lb':
+      case 'lbs':
       case 'pound':
+      case 'pounds':
         return amount * 453.59237;
+      case 'mg':
+      case 'mgs':
+      case 'milligram':
+      case 'milligrams':
+        return amount / 1000;
       default:
         return amount;
     }

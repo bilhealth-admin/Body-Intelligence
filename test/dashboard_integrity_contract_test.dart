@@ -32,7 +32,13 @@ void main() {
     final bodyProfile = File(
       'lib/features/dashboard/widgets/dashboard_body_profile_snapshot.dart',
     ).readAsStringSync();
-    final source = '$grid\n$bodyProfile';
+    final summary = File(
+      'lib/features/dashboard/widgets/dashboard_summary_factory.dart',
+    ).readAsStringSync();
+    final analytics = File(
+      'lib/features/analytics/analytics_page.dart',
+    ).readAsStringSync();
+    final source = '$grid\n$bodyProfile\n$summary\n$analytics';
 
     for (final label in const <String>[
       'ملخص اليوم',
@@ -40,7 +46,7 @@ void main() {
       'البروتين',
       'الدهون',
       'الألياف',
-      'مركز التحليلات',
+      'التحليلات',
       'هوية الجسم',
     ]) {
       expect(source, contains(label), reason: 'Missing Arabic label: $label');

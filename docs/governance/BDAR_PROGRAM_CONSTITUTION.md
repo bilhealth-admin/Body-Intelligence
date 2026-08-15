@@ -47,3 +47,6 @@ A package is complete only when:
 - the commit hash is recorded.
 
 Documentation alone cannot close a production milestone.
+> **RETIRED — historical record only.** This file is not an execution
+> authority. The sole current authority is
+> `docs/BIL_V1_FINAL_RELEASE_CONSTITUTION.md`.

@@ -16,6 +16,9 @@ class WeightEntries extends Table {
 
   TextColumn get note => text().nullable()();
 
+  /// Private on-device progress photo associated with this measurement.
+  TextColumn get progressPhotoPath => text().nullable()();
+
   /// Stable, non-localized measurement condition selected by the user.
   TextColumn get measurementContext =>
       text().withDefault(const Constant('differentConditions'))();

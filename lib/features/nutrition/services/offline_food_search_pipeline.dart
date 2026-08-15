@@ -71,6 +71,10 @@ class OfflineFoodSearchPipeline {
         .where((value) => value.isNotEmpty)
         .join(' ');
     final searchable = '$name $arabicName $category $keywords'.trim();
+    final searchableTokens = searchable
+        .split(' ')
+        .where((token) => token.isNotEmpty)
+        .toSet();
     final barcode = FoodSearchNormalizer.normalizeBarcode(food.barcode ?? '');
 
     if (normalizedBarcode.isNotEmpty && barcode == normalizedBarcode) {
@@ -85,21 +89,27 @@ class OfflineFoodSearchPipeline {
       score += 500;
       reasons.add('arabic-name-exact');
     }
-    if (normalizedQuery.isNotEmpty && name.startsWith(normalizedQuery)) {
+    if (normalizedQuery.isNotEmpty &&
+        _containsQueryTokens(
+          name.split(' '),
+          FoodSearchNormalizer.tokens(normalizedQuery),
+        )) {
       score += 250;
-      reasons.add('primary-name-prefix');
+      reasons.add('primary-name-token');
     }
-    if (normalizedQuery.isNotEmpty && arabicName.startsWith(normalizedQuery)) {
+    if (normalizedQuery.isNotEmpty &&
+        _containsQueryTokens(
+          arabicName.split(' '),
+          FoodSearchNormalizer.tokens(normalizedQuery),
+        )) {
       score += 250;
-      reasons.add('arabic-name-prefix');
-    }
-    if (normalizedQuery.isNotEmpty && searchable.contains(normalizedQuery)) {
-      score += 120;
-      reasons.add('phrase-match');
+      reasons.add('arabic-name-token');
     }
 
     if (queryTokens.isNotEmpty) {
-      final matched = queryTokens.where(searchable.contains).length;
+      final matched = queryTokens
+          .where((queryToken) => _containsToken(searchableTokens, queryToken))
+          .length;
       if (matched == queryTokens.length) {
         score += 80 + matched * 5;
         reasons.add('all-tokens-match');
@@ -119,4 +129,19 @@ class OfflineFoodSearchPipeline {
       reasons: List<String>.unmodifiable(reasons),
     );
   }
+
+  bool _containsQueryTokens(
+    Iterable<String> candidateTokens,
+    Iterable<String> queryTokens,
+  ) {
+    final candidates = candidateTokens
+        .where((token) => token.isNotEmpty)
+        .toSet();
+    final queries = queryTokens.toList(growable: false);
+    return queries.isNotEmpty &&
+        queries.every((query) => _containsToken(candidates, query));
+  }
+
+  bool _containsToken(Set<String> candidates, String query) =>
+      candidates.contains(query) || candidates.contains('${query}s');
 }

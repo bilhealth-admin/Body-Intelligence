@@ -23,13 +23,19 @@ void main() {
       'firebase_analytics:',
       'firebase_crashlytics:',
       'sentry_flutter:',
-      'google_mobile_ads:',
       'appsflyer_sdk:',
       'amplitude_flutter:',
-      'in_app_purchase:',
     ]) {
       expect(pubspec, isNot(contains(dependency)), reason: dependency);
     }
+    expect(pubspec, contains('in_app_purchase:'));
+    expect(environment, contains("'BIL_PAYMENTS_ENABLED'"));
+    expect(environment, contains('paymentsEnabled'));
+    expect(capabilities, contains('ExternalCapability.commerce'));
+    expect(
+      capabilities,
+      contains('verified receipt/webhook activation is pending'),
+    );
   });
 
   test('platform health privacy boundaries match store drafts', () {
@@ -38,8 +44,8 @@ void main() {
     final appleBridge = read('ios/Runner/BILGlobalHealthBridge.swift');
 
     expect(android, contains('android.permission.health.WRITE_WEIGHT'));
-    expect(android, contains('android.permission.health.WRITE_HYDRATION'));
-    expect(android, isNot(contains('WRITE_NUTRITION')));
+    expect(android, isNot(contains('WRITE_HYDRATION')));
+    expect(android, contains('WRITE_NUTRITION'));
     expect(android, contains('ACTION_SHOW_PERMISSIONS_RATIONALE'));
 
     expect(applePrivacy, contains('<key>NSPrivacyTracking</key><false/>'));
@@ -48,7 +54,22 @@ void main() {
       contains('<key>NSPrivacyTrackingDomains</key><array/>'),
     );
     expect(appleBridge, contains('.bodyMass'));
-    expect(appleBridge, contains('.dietaryWater'));
+    for (final type in <String>[
+      'steps',
+      'distance',
+      'activeEnergy',
+      'workout',
+      'sleep',
+      'heartRate',
+      'bloodPressureSystolic',
+      'bloodPressureDiastolic',
+      'oxygen',
+      'nutritionProtein',
+      'nutritionCarbohydrates',
+      'nutritionFat',
+    ]) {
+      expect(appleBridge, contains('"$type"'));
+    }
   });
 
   test('store drafts separate repository evidence from submission claims', () {

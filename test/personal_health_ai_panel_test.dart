@@ -65,13 +65,8 @@ void main() {
 
     expect(find.byKey(const Key('personal-health-ai-panel')), findsOneWidget);
     expect(find.text('Bio Intelligence'), findsOneWidget);
-    for (var index = 0; index < 4; index++) {
-      await tester.drag(
-        find.byKey(const Key('dashboard-twin-deck-carousel')),
-        const Offset(-340, 0),
-      );
-      await tester.pumpAndSettle();
-    }
+    await tester.tap(find.text('Plateau Risk'));
+    await tester.pumpAndSettle();
     expect(
       find.text('Too early for a reliable plateau assessment'),
       findsOneWidget,

@@ -193,11 +193,11 @@ void main() {
     await tester.tap(find.byKey(const Key('shell-quick-add')));
     await tester.pumpAndSettle();
     expect(find.text('إضافة سريعة'), findsOneWidget);
-    expect(find.text('قياس الوزن اليومي'), findsOneWidget);
+    expect(find.text('تسجيل الوزن'), findsOneWidget);
     expect(find.text('إضافة طعام'), findsOneWidget);
     expect(find.text('إضافة ماء'), findsOneWidget);
     expect(find.text('البحث أو إنشاء طعام'), findsOneWidget);
-    expect(find.text('مسح الباركود'), findsNothing);
+    expect(find.text('مسح الباركود'), findsOneWidget);
     expect(find.text('اسأل BIL'), findsNothing);
     expect(
       Directionality.of(tester.element(find.text('إضافة سريعة'))),
@@ -217,11 +217,11 @@ void main() {
     await tester.tap(find.byKey(const Key('shell-quick-add')));
     await tester.pumpAndSettle();
     expect(find.text('Quick Add'), findsOneWidget);
-    expect(find.text('Daily weight check-in'), findsOneWidget);
+    expect(find.text('Record weight'), findsOneWidget);
     expect(find.text('Add food'), findsOneWidget);
     expect(find.text('Add water'), findsOneWidget);
     expect(find.text('Search or create food'), findsOneWidget);
-    expect(find.text('Scan barcode'), findsNothing);
+    expect(find.text('Scan barcode'), findsOneWidget);
     expect(find.text('Ask BIL'), findsNothing);
   });
 }

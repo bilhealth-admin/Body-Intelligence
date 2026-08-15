@@ -14,17 +14,18 @@ final class PaidPlanCatalog {
   static final entries = <CommercePlan, PlanCatalogEntry>{
     CommercePlan.plus: PlanCatalogEntry(
       plan: CommercePlan.plus,
+      rank: 20,
+      parentPlans: const <CommercePlan>{CommercePlan.pro},
+      // Meal Planner is intentionally absent until a real entitlement and
+      // end-to-end implementation exist. Premium+ therefore remains hidden.
+      addedEntitlements: const <CommerceEntitlement>{},
+    ),
+    CommercePlan.pro: PlanCatalogEntry(
+      plan: CommercePlan.pro,
       rank: 10,
       parentPlans: const <CommercePlan>{CommercePlan.free},
       addedEntitlements: const <CommerceEntitlement>{
         CommerceEntitlement.cloudSync,
-      },
-    ),
-    CommercePlan.pro: PlanCatalogEntry(
-      plan: CommercePlan.pro,
-      rank: 20,
-      parentPlans: const <CommercePlan>{CommercePlan.plus},
-      addedEntitlements: const <CommerceEntitlement>{
         CommerceEntitlement.advancedIntelligence,
       },
     ),

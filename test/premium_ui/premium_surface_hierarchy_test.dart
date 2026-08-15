@@ -27,19 +27,27 @@ void main() {
   });
 
   test('mobile decision is primary and body twin is detail', () {
-    final source = File(
-      'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
+    final benchmark =
+        [
+              'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
+              'lib/features/dashboard/widgets/premium_dashboard_command_center.dart',
+            ]
+            .map((path) => File(path).readAsStringSync())
+            .join('\n')
+            .replaceAll('\r\n', '\n');
+    final mobileTwin = File(
+      'lib/features/dashboard/widgets/dashboard_mobile_body_twin_snapshot.dart',
     ).readAsStringSync().replaceAll('\r\n', '\n');
 
     expect(
-      source,
+      benchmark,
       contains(
         "key: const Key('dashboard-mobile-command-center'),\n"
         '        level: PremiumSurfaceLevel.primary,',
       ),
     );
     expect(
-      source,
+      mobileTwin,
       contains(
         "key: const Key('dashboard-mobile-body-twin-snapshot'),\n"
         '      level: PremiumSurfaceLevel.detail,',

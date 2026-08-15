@@ -1,3 +1,5 @@
+import '../../features/commerce/domain/store_catalog_configuration.dart';
+
 enum EnvironmentProfile { development, testing, staging, production }
 
 class AppEnvironment {
@@ -12,10 +14,75 @@ class AppEnvironment {
     'SUPABASE_ANON_KEY',
   );
   static const String serverUrl = String.fromEnvironment('BIL_SERVER_URL');
+
+  /// Authenticated BIL Edge Function URL. Provider credentials must never be
+  /// supplied to the mobile build; they belong in the server secret store.
+  static const String mealVisionEndpoint = String.fromEnvironment(
+    'BIL_MEAL_VISION_ENDPOINT',
+  );
   static const bool paymentsEnabled = bool.fromEnvironment(
     'BIL_PAYMENTS_ENABLED',
     defaultValue: false,
   );
+  static const bool emailOtpEnabled = bool.fromEnvironment(
+    'BIL_EMAIL_OTP_ENABLED',
+    defaultValue: false,
+  );
+  static const bool pushEnabled = bool.fromEnvironment(
+    'BIL_PUSH_ENABLED',
+    defaultValue: false,
+  );
+  static const bool pushProviderReady = bool.fromEnvironment(
+    'BIL_PUSH_PROVIDER_READY',
+    defaultValue: false,
+  );
+  static const bool communityEnabled = bool.fromEnvironment(
+    'BIL_COMMUNITY_ENABLED',
+    defaultValue: false,
+  );
+
+  /// Advertising is opt-in at build configuration level and fails closed.
+  ///
+  /// BIL never ships fallback, demo, or test ad identifiers. Enabling this
+  /// switch alone is insufficient: a reviewed provider adapter and both
+  /// production placement identifiers must also be supplied.
+  static const bool adsEnabled = bool.fromEnvironment(
+    'BIL_ADS_ENABLED',
+    defaultValue: false,
+  );
+  static const bool adProviderReady = bool.fromEnvironment(
+    'BIL_AD_PROVIDER_READY',
+    defaultValue: false,
+  );
+  static const String androidContextualAdUnitId = String.fromEnvironment(
+    'BIL_ADMOB_ANDROID_BANNER_ID',
+  );
+  static const String iosContextualAdUnitId = String.fromEnvironment(
+    'BIL_ADMOB_IOS_BANNER_ID',
+  );
+  static const String androidAdMobAppId = String.fromEnvironment(
+    'BIL_ADMOB_ANDROID_APP_ID',
+  );
+  static const String iosAdMobAppId = String.fromEnvironment(
+    'BIL_ADMOB_IOS_APP_ID',
+  );
+  static const String adMobPublisherId = String.fromEnvironment(
+    'BIL_ADMOB_PUBLISHER_ID',
+  );
+  static const String adAllowedCountryCodes = String.fromEnvironment(
+    'BIL_AD_ALLOWED_COUNTRY_CODES',
+  );
+
+  static bool adRegionAllowed(String? countryCode) {
+    if (countryCode == null || countryCode.trim().isEmpty) return false;
+    final allowed = adAllowedCountryCodes
+        .split(',')
+        .map((value) => value.trim().toUpperCase())
+        .where((value) => value.isNotEmpty)
+        .toSet();
+    return allowed.contains(countryCode.trim().toUpperCase());
+  }
+
   static const String _profileName = String.fromEnvironment(
     'BIL_ENVIRONMENT',
     defaultValue: 'production',
@@ -34,6 +101,24 @@ class AppEnvironment {
       useSupabase && supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 
   static bool get serverConfigured => serverUrl.startsWith('https://');
+  static bool get mealVisionConfigured =>
+      cloudConfigured && mealVisionEndpoint.startsWith('https://');
   static bool get aiConfigured => serverConfigured;
-  static bool get commerceConfigured => serverConfigured && paymentsEnabled;
+  static bool get commerceConfigured =>
+      cloudConfigured &&
+      paymentsEnabled &&
+      StoreCatalogConfiguration.consumerProductsConfigured &&
+      StoreCatalogConfiguration.legalLinksConfigured;
+  static bool get communityConfigured => cloudConfigured && communityEnabled;
+  static bool get pushConfigured =>
+      communityConfigured && pushEnabled && pushProviderReady;
+
+  static bool get adsConfigured =>
+      adsEnabled &&
+      adProviderReady &&
+      androidAdMobAppId.startsWith('ca-app-pub-') &&
+      iosAdMobAppId.startsWith('ca-app-pub-') &&
+      adMobPublisherId.startsWith('pub-') &&
+      androidContextualAdUnitId.isNotEmpty &&
+      iosContextualAdUnitId.isNotEmpty;
 }

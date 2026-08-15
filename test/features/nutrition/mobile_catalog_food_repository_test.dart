@@ -23,6 +23,13 @@ void main() {
       INSERT INTO food VALUES('bil-food-1','generic','Milk','حليب','milk',98,'EG','2026-07-27T00:00:00Z');
       INSERT INTO alias(bil_food_id,language,name,normalized_name,name_type) VALUES('bil-food-1','en','Skimmed milk','skimmed milk','alias');
       INSERT INTO nutrient VALUES('bil-food-1','protein',10,'g','100g',0.95);
+      INSERT INTO nutrient VALUES('bil-food-1','usda:1008',42,'KCAL','per_100g',0.98);
+      INSERT INTO nutrient VALUES('bil-food-1','usda:1003',3.4,'G','per_100g',0.98);
+      INSERT INTO nutrient VALUES('bil-food-1','usda:1004',1,'G','per_100g',0.98);
+      INSERT INTO nutrient VALUES('bil-food-1','usda:1005',5,'G','per_100g',0.98);
+      INSERT INTO nutrient VALUES('bil-food-1','usda:1079',0.2,'G','per_100g',0.98);
+      INSERT INTO nutrient VALUES('bil-food-1','usda:1093',44,'MG','per_100g',0.98);
+      INSERT INTO nutrient VALUES('bil-food-1','usda:1092',150,'MG','per_100g',0.98);
       INSERT INTO portion VALUES(1,'bil-food-1',1,'cup',240,'cup',NULL,0.9);
       INSERT INTO barcode VALUES('6221234567891','bil-food-1','EG',0.95);
       INSERT INTO food_fts(bil_food_id,name_en,name_ar,aliases) VALUES('bil-food-1','Milk','حليب','Skimmed milk');
@@ -47,7 +54,13 @@ void main() {
       expect(food!.id, 'bil-food-1');
       expect(food.sourceLabel, 'bil-mobile-catalog');
       expect(food.serving.grams, 240);
-      expect(food.knownValue(FoodNutrient.protein), 10);
+      expect(food.knownValue(FoodNutrient.protein), 3.4);
+      expect(food.knownValue(FoodNutrient.calories), 42);
+      expect(food.knownValue(FoodNutrient.fat), 1);
+      expect(food.knownValue(FoodNutrient.carbohydrates), 5);
+      expect(food.knownValue(FoodNutrient.fiber), 0.2);
+      expect(food.knownValue(FoodNutrient.sodium), 44);
+      expect(food.knownValue(FoodNutrient.potassium), 150);
     },
   );
 

@@ -49,3 +49,6 @@ Epic 003 must not be marked complete until all of the following are true:
 - the execution ledger and Quality Board are reconciled;
 - the worktree is clean after one focused green commit;
 - no completion claim exceeds the available evidence.
+> **RETIRED — historical record only.** This file is not an execution
+> authority. The sole current authority is
+> `docs/BIL_V1_FINAL_RELEASE_CONSTITUTION.md`.

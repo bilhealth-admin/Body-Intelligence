@@ -306,8 +306,10 @@ final class BilLocalIntelligenceRealityRuntime {
         ? null
         : timeline.weightedDays.last.weightKg;
     final missingWeight = latestWeightKg == null;
+    final firstDayBaseline = timeline.weightedDays.length == 1;
     return ProductIntelligenceOutput(
       brainResult: brain,
+      bodyTwinResult: body,
       noiseEstimate: estimate,
       forecast: missingWeight
           ? const <RuntimeForecastPoint>[]
@@ -319,10 +321,14 @@ final class BilLocalIntelligenceRealityRuntime {
       plateauRisk: plateauRisk,
       primaryMessage: missingWeight
           ? 'Log a current weight before BIL can produce a supported forecast or action.'
+          : firstDayBaseline
+          ? 'Body Twin accepted your first trusted baseline at ${latestWeightKg.toStringAsFixed(1)} kg. This describes your current recorded state; it does not claim a trend yet.'
           : coach.message,
       explanation: [
         if (missingWeight)
           'Safe abstention: no local weight observation exists within the analysis window.',
+        if (firstDayBaseline)
+          'Day-one baseline passed Body Twin validation. Comparable future measurements are required before direction or tissue change can be inferred.',
         ...estimate.explanations,
         ...brain.explanation,
       ],

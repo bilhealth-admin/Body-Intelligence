@@ -28,7 +28,7 @@ class DashboardSectionHeading extends StatelessWidget {
             key: const Key('dashboard-today-summary-title'),
             style: theme.textTheme.titleLarge?.copyWith(
               color: dark ? const Color(0xFFF4F8FB) : const Color(0xFF10283B),
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               letterSpacing: -0.15,
               height: 1.12,
               shadows: dark

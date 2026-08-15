@@ -7,6 +7,9 @@ void main() {
     final grid = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
+    final summary = File(
+      'lib/features/dashboard/widgets/dashboard_summary_factory.dart',
+    ).readAsStringSync();
     final daily = File(
       'lib/features/dashboard/widgets/dashboard_daily_summary.dart',
     ).readAsStringSync();
@@ -18,9 +21,10 @@ void main() {
     ).readAsStringSync();
 
     expect(grid, isNot(contains("'kcal/day'")));
-    expect(grid, contains("'kcal'"));
-    expect(grid, contains('DashboardDailySummarySection('));
-    expect(grid, contains('DashboardAnalyticsCenter('));
+    expect(summary, contains("'kcal'"));
+    expect(summary, contains('DashboardDailySummarySection('));
+    expect(grid, isNot(contains('DashboardAnalyticsCenter(')));
+    expect(grid, contains("context.go('/analytics')"));
     expect(daily, contains('DashboardComposition.pagedSection('));
     expect(analytics, contains('DashboardComposition.analytics('));
     expect(analytics, contains('textDirection: TextDirection.ltr'));

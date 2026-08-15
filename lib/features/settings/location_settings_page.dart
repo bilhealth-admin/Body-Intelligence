@@ -30,8 +30,17 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
   String deviceTimezone = 'UTC';
   List<String> timezoneChoices = bilTimezoneChoices;
 
-  bool get arabic =>
-      Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
+  String get localeCode =>
+      Localizations.localeOf(context).languageCode.toLowerCase();
+
+  String l(String key) =>
+      _locationCopy[localeCode]?[key] ?? _locationCopy['en']![key]!;
+
+  String cityLabel(BilCityOption city) => switch (localeCode) {
+    'ar' => city.nameAr,
+    'en' || 'fr' || 'es' || 'tr' => city.nameEn,
+    _ => city.nameEn,
+  };
 
   @override
   void initState() {
@@ -129,9 +138,9 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
     final cities = bilCityCatalog[countryCode] ?? const [];
     final matching = cities.where((city) => city.timezone == timezone);
     if (matching.isNotEmpty) {
-      cityController.text = matching.first.label(arabic);
+      cityController.text = cityLabel(matching.first);
     } else if (cities.length == 1) {
-      cityController.text = cities.first.label(arabic);
+      cityController.text = cityLabel(cities.first);
     }
   }
 
@@ -149,7 +158,7 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
       countryListTheme: CountryListThemeData(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         inputDecoration: InputDecoration(
-          labelText: arabic ? 'ابحث عن دولة' : 'Search countries',
+          labelText: l('searchCountries'),
           prefixIcon: const Icon(Icons.search_rounded),
         ),
       ),
@@ -170,15 +179,9 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
   void _pickCity() {
     final cities = bilCityCatalog[countryCode] ?? const [];
     if (cities.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            arabic
-                ? 'اكتب مدينتك يدويًا؛ جميع المدن مقبولة.'
-                : 'Enter your city manually; every city is accepted.',
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l('manualCityAccepted'))));
       return;
     }
 
@@ -192,18 +195,18 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
               child: Text(
-                arabic ? 'مدن مقترحة' : 'Suggested cities',
+                l('suggestedCities'),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
             for (final city in cities)
               ListTile(
                 leading: const Icon(Icons.location_city_rounded),
-                title: Text(city.label(arabic)),
+                title: Text(cityLabel(city)),
                 subtitle: Text(city.timezone),
                 onTap: () {
                   setState(() {
-                    cityController.text = city.label(arabic);
+                    cityController.text = cityLabel(city);
                     timezoneController.text = city.timezone;
                   });
                   Navigator.pop(sheetContext);
@@ -256,9 +259,7 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
                       onChanged: (value) => setSheetState(() => query = value),
                       decoration: InputDecoration(
                         prefixIcon: const Icon(Icons.search_rounded),
-                        labelText: arabic
-                            ? 'ابحث بالدولة أو المدينة أو المنطقة الزمنية'
-                            : 'Search country, city, or timezone',
+                        labelText: l('searchTimezone'),
                       ),
                     ),
                   ),
@@ -325,16 +326,15 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            arabic
-                ? 'تم حفظ إعداد الموقع محليًا.'
-                : 'Location settings were saved locally.',
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l('saved'))));
       context.go('/settings');
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l('saveFailed'))));
     } finally {
       if (mounted) setState(() => saving = false);
     }
@@ -353,11 +353,12 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF01050D),
       appBar: AppBar(
-        title: Text(arabic ? 'الموقع والوقت المحلي' : 'Location & local time'),
+        title: Text(l('title')),
         leading: IconButton(
           key: const Key('location-settings-back'),
-          tooltip: arabic ? 'العودة إلى الإعدادات' : 'Back to settings',
-          onPressed: () => context.go('/settings'),
+          tooltip: l('back'),
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/settings'),
           icon: const Icon(Icons.arrow_back_rounded),
         ),
       ),
@@ -374,19 +375,13 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
                       Semantics(
                         header: true,
                         child: Text(
-                          arabic
-                              ? 'إعداد محلي ذكي وآمن'
-                              : 'Smart, private local setup',
+                          l('heading'),
                           style: Theme.of(context).textTheme.headlineSmall
-                              ?.copyWith(fontWeight: FontWeight.w900),
+                              ?.copyWith(fontWeight: FontWeight.w700),
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        arabic
-                            ? 'يستخدم BIL منطقة الجهاز ولغته وتوقيته لتخصيص التجربة. لا يستخدم GPS ولا يرفع موقعك.'
-                            : 'BIL uses the device region, locale, and timezone to personalize the experience. It does not use GPS or upload your location.',
-                      ),
+                      Text(l('description')),
                       const SizedBox(height: 16),
                       SwitchListTile(
                         key: const Key('automatic-location-switch'),
@@ -394,21 +389,13 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
                         secondary: const Icon(Icons.my_location_rounded),
                         value: automaticLocation,
                         onChanged: _setAutomatic,
-                        title: Text(
-                          arabic
-                              ? 'تحديد تلقائي من الجهاز'
-                              : 'Automatic device region',
-                        ),
+                        title: Text(l('automatic')),
                         subtitle: Text(
                           automaticLocation
                               ? (automaticSummary.isEmpty
-                                    ? (arabic
-                                          ? 'سيتم استخدام إعداد الجهاز عند الحفظ.'
-                                          : 'Device settings will be used when saved.')
+                                    ? l('deviceOnSave')
                                     : automaticSummary)
-                              : (arabic
-                                    ? 'أوقف التحديد التلقائي لاختيار الدولة والمدينة يدويًا.'
-                                    : 'Manual country and city selection is enabled.'),
+                              : l('manualEnabled'),
                         ),
                       ),
                     ],
@@ -423,11 +410,8 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading: const Icon(Icons.public_rounded),
-                          title: Text(arabic ? 'الدولة' : 'Country'),
-                          subtitle: Text(
-                            countryName ??
-                                (arabic ? 'اختر دولة' : 'Choose a country'),
-                          ),
+                          title: Text(l('country')),
+                          subtitle: Text(countryName ?? l('chooseCountry')),
                           trailing: const Icon(Icons.expand_more_rounded),
                           onTap: _pickCountry,
                         ),
@@ -438,18 +422,12 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
                           autofillHints: const [AutofillHints.addressCity],
                           decoration: InputDecoration(
                             prefixIcon: const Icon(Icons.location_city_rounded),
-                            labelText: arabic ? 'المدينة' : 'City',
+                            labelText: l('city'),
                             helperText: cities.isEmpty
-                                ? (arabic
-                                      ? 'اكتب أي مدينة يدويًا.'
-                                      : 'Enter any city manually.')
-                                : (arabic
-                                      ? 'يمكنك الكتابة أو اختيار اقتراح.'
-                                      : 'Type freely or choose a suggestion.'),
+                                ? l('enterAnyCity')
+                                : l('typeOrSuggest'),
                             suffixIcon: IconButton(
-                              tooltip: arabic
-                                  ? 'عرض المدن المقترحة'
-                                  : 'Show suggested cities',
+                              tooltip: l('showSuggested'),
                               onPressed: _pickCity,
                               icon: const Icon(Icons.list_alt_rounded),
                             ),
@@ -464,7 +442,7 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
                           decoration: InputDecoration(
                             prefixIcon: const Icon(Icons.schedule_rounded),
                             suffixIcon: const Icon(Icons.expand_more_rounded),
-                            labelText: arabic ? 'المنطقة الزمنية' : 'Timezone',
+                            labelText: l('timezone'),
                           ),
                         ),
                       ],
@@ -476,16 +454,144 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
                   key: const Key('location-settings-save'),
                   onPressed: saving ? null : _save,
                   icon: const Icon(Icons.save_rounded),
-                  label: Text(
-                    saving
-                        ? (arabic ? 'جارٍ الحفظ…' : 'Saving…')
-                        : (arabic
-                              ? 'حفظ والعودة إلى الإعدادات'
-                              : 'Save and return to settings'),
-                  ),
+                  label: Text(saving ? l('saving') : l('saveAndReturn')),
                 ),
               ],
             ),
     );
   }
 }
+
+const _locationCopy = <String, Map<String, String>>{
+  'en': {
+    'searchCountries': 'Search countries',
+    'manualCityAccepted': 'Enter your city manually; every city is accepted.',
+    'suggestedCities': 'Suggested cities',
+    'searchTimezone': 'Search country, city, or timezone',
+    'saved': 'Location settings were saved locally.',
+    'saveFailed': 'Location settings could not be saved. Please try again.',
+    'title': 'Location & local time',
+    'back': 'Back to settings',
+    'heading': 'Smart, private local setup',
+    'description':
+        'BIL uses the device region, locale, and timezone to personalize the experience. It does not use GPS or upload your location.',
+    'automatic': 'Automatic device region',
+    'deviceOnSave': 'Device settings will be used when saved.',
+    'manualEnabled': 'Manual country and city selection is enabled.',
+    'country': 'Country',
+    'chooseCountry': 'Choose a country',
+    'city': 'City',
+    'enterAnyCity': 'Enter any city manually.',
+    'typeOrSuggest': 'Type freely or choose a suggestion.',
+    'showSuggested': 'Show suggested cities',
+    'timezone': 'Timezone',
+    'saving': 'Saving…',
+    'saveAndReturn': 'Save and return to settings',
+  },
+  'ar': {
+    'searchCountries': 'ابحث عن دولة',
+    'manualCityAccepted': 'اكتب مدينتك يدويًا؛ جميع المدن مقبولة.',
+    'suggestedCities': 'مدن مقترحة',
+    'searchTimezone': 'ابحث بالدولة أو المدينة أو المنطقة الزمنية',
+    'saved': 'تم حفظ إعداد الموقع محليًا.',
+    'saveFailed': 'تعذّر حفظ إعدادات الموقع. حاول مرة أخرى.',
+    'title': 'الموقع والوقت المحلي',
+    'back': 'العودة إلى الإعدادات',
+    'heading': 'إعداد محلي ذكي وآمن',
+    'description':
+        'يستخدم BIL منطقة الجهاز ولغته وتوقيته لتخصيص التجربة. لا يستخدم GPS ولا يرفع موقعك.',
+    'automatic': 'تحديد تلقائي من الجهاز',
+    'deviceOnSave': 'سيتم استخدام إعداد الجهاز عند الحفظ.',
+    'manualEnabled': 'تم تفعيل الاختيار اليدوي للدولة والمدينة.',
+    'country': 'الدولة',
+    'chooseCountry': 'اختر دولة',
+    'city': 'المدينة',
+    'enterAnyCity': 'اكتب أي مدينة يدويًا.',
+    'typeOrSuggest': 'يمكنك الكتابة أو اختيار اقتراح.',
+    'showSuggested': 'عرض المدن المقترحة',
+    'timezone': 'المنطقة الزمنية',
+    'saving': 'جارٍ الحفظ…',
+    'saveAndReturn': 'حفظ والعودة إلى الإعدادات',
+  },
+  'fr': {
+    'searchCountries': 'Rechercher un pays',
+    'manualCityAccepted':
+        'Saisissez votre ville manuellement ; toutes les villes sont acceptées.',
+    'suggestedCities': 'Villes suggérées',
+    'searchTimezone': 'Rechercher un pays, une ville ou un fuseau horaire',
+    'saved': 'Les paramètres de localisation ont été enregistrés localement.',
+    'saveFailed':
+        'Impossible d’enregistrer les paramètres de localisation. Réessayez.',
+    'title': 'Localisation et heure locale',
+    'back': 'Retour aux paramètres',
+    'heading': 'Configuration locale intelligente et privée',
+    'description':
+        'BIL utilise la région, la langue et le fuseau horaire de l’appareil pour personnaliser l’expérience. Il n’utilise pas le GPS et ne transmet pas votre position.',
+    'automatic': 'Région automatique de l’appareil',
+    'deviceOnSave':
+        'Les paramètres de l’appareil seront utilisés lors de l’enregistrement.',
+    'manualEnabled':
+        'La sélection manuelle du pays et de la ville est activée.',
+    'country': 'Pays',
+    'chooseCountry': 'Choisir un pays',
+    'city': 'Ville',
+    'enterAnyCity': 'Saisissez librement une ville.',
+    'typeOrSuggest': 'Saisissez une ville ou choisissez une suggestion.',
+    'showSuggested': 'Afficher les villes suggérées',
+    'timezone': 'Fuseau horaire',
+    'saving': 'Enregistrement…',
+    'saveAndReturn': 'Enregistrer et revenir aux paramètres',
+  },
+  'es': {
+    'searchCountries': 'Buscar países',
+    'manualCityAccepted':
+        'Introduce tu ciudad manualmente; se acepta cualquier ciudad.',
+    'suggestedCities': 'Ciudades sugeridas',
+    'searchTimezone': 'Buscar país, ciudad o zona horaria',
+    'saved': 'La configuración de ubicación se guardó localmente.',
+    'saveFailed':
+        'No se pudo guardar la configuración de ubicación. Inténtalo de nuevo.',
+    'title': 'Ubicación y hora local',
+    'back': 'Volver a ajustes',
+    'heading': 'Configuración local inteligente y privada',
+    'description':
+        'BIL usa la región, el idioma y la zona horaria del dispositivo para personalizar la experiencia. No usa GPS ni sube tu ubicación.',
+    'automatic': 'Región automática del dispositivo',
+    'deviceOnSave': 'Los ajustes del dispositivo se usarán al guardar.',
+    'manualEnabled': 'La selección manual de país y ciudad está activada.',
+    'country': 'País',
+    'chooseCountry': 'Elegir un país',
+    'city': 'Ciudad',
+    'enterAnyCity': 'Introduce cualquier ciudad manualmente.',
+    'typeOrSuggest': 'Escribe libremente o elige una sugerencia.',
+    'showSuggested': 'Mostrar ciudades sugeridas',
+    'timezone': 'Zona horaria',
+    'saving': 'Guardando…',
+    'saveAndReturn': 'Guardar y volver a ajustes',
+  },
+  'tr': {
+    'searchCountries': 'Ülke ara',
+    'manualCityAccepted': 'Şehrinizi elle girin; tüm şehirler kabul edilir.',
+    'suggestedCities': 'Önerilen şehirler',
+    'searchTimezone': 'Ülke, şehir veya saat dilimi ara',
+    'saved': 'Konum ayarları yerel olarak kaydedildi.',
+    'saveFailed': 'Konum ayarları kaydedilemedi. Lütfen tekrar deneyin.',
+    'title': 'Konum ve yerel saat',
+    'back': 'Ayarlara dön',
+    'heading': 'Akıllı ve özel yerel kurulum',
+    'description':
+        'BIL deneyimi kişiselleştirmek için cihazın bölgesini, dilini ve saat dilimini kullanır. GPS kullanmaz ve konumunuzu yüklemez.',
+    'automatic': 'Otomatik cihaz bölgesi',
+    'deviceOnSave': 'Kaydedildiğinde cihaz ayarları kullanılacak.',
+    'manualEnabled': 'Elle ülke ve şehir seçimi etkin.',
+    'country': 'Ülke',
+    'chooseCountry': 'Ülke seçin',
+    'city': 'Şehir',
+    'enterAnyCity': 'Herhangi bir şehri elle girin.',
+    'typeOrSuggest': 'Serbestçe yazın veya bir öneri seçin.',
+    'showSuggested': 'Önerilen şehirleri göster',
+    'timezone': 'Saat dilimi',
+    'saving': 'Kaydediliyor…',
+    'saveAndReturn': 'Kaydet ve ayarlara dön',
+  },
+};

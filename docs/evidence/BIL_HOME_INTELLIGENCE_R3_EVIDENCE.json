@@ -1,0 +1,18 @@
+{
+  "package": "BIL-V1-HOME-INTELLIGENCE-001-R3",
+  "scope": [
+    "single three-page primary dashboard carousel on phone",
+    "larger and more readable daily summary metrics",
+    "task-oriented AI Coach onboarding",
+    "guided Ask BIL prompts",
+    "natural local greeting responses",
+    "no technical evidence labels for social replies"
+  ],
+  "explicitly_not_claimed": [
+    "external LLM provider connected",
+    "full stored-body context injected into chat",
+    "personal plan generation completed",
+    "shared persistent conversation memory completed"
+  ],
+  "commit_authorized": false
+}

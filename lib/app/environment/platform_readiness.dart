@@ -9,6 +9,7 @@ enum PlatformCapability {
   cloudSync,
   cloudAi,
   commerce,
+  contextualAds,
   storeDistribution,
 }
 
@@ -77,6 +78,11 @@ class PlatformReadinessMatrix {
         capability,
         commerceActivated,
         'Commerce requires a verified store provider and server-side receipt validation.',
+      ),
+      PlatformCapability.contextualAds => _external(
+        capability,
+        false,
+        'Contextual ads remain hidden until consent, production identifiers, and a reviewed provider adapter are configured.',
       ),
       PlatformCapability.storeDistribution => _external(
         capability,

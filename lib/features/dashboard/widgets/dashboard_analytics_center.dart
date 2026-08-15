@@ -34,7 +34,7 @@ class DashboardAnalyticsCenter extends StatelessWidget {
               Text(
                 title,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: -0.15,
                   height: 1.12,
                 ),

@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "owner": "BIL",
+  "policy": "Only BIL-owned, generated-for-BIL, or separately licensed assets may ship or appear in store materials.",
+  "owner_supplied_brand_archive": {
+    "source": "C:/Users/HP 1040 G8/Downloads/BIL-Brand-Assets-v1.zip",
+    "sha256": "c8fba5b1cd4c9a0ef31f59cffddde0980cfebc68ade6a90e333f21e3be8730ee",
+    "rights_statement": "Original AI-generated assets created specifically for BIL, supplied and approved by the owner.",
+    "source_readme": "store_assets/source/BIL-Brand-Assets-v1/README.md",
+    "derivation_rule": "All platform sizes are deterministic derivatives of these masters; the identity is not regenerated per size."
+  },
+  "generated_for_bil_2026_08_05": [
+    {"path": "store_assets/graphics/google_play/feature_graphic.png", "generator": "owner-supplied BIL Brand Assets v1 master derivative", "rights": "original_generated_for_BIL", "human_review": "required_before_upload"},
+    {"path": "store_assets/graphics/plans/free.png", "generator": "owner-supplied BIL Brand Assets v1 plan-panel derivative", "rights": "original_generated_for_BIL", "human_review": "required_before_upload"},
+    {"path": "store_assets/graphics/plans/plus.png", "generator": "owner-supplied BIL Brand Assets v1 plan-panel derivative", "rights": "original_generated_for_BIL", "human_review": "required_before_upload"},
+    {"path": "store_assets/graphics/plans/pro.png", "generator": "owner-supplied BIL Brand Assets v1 plan-panel derivative", "rights": "original_generated_for_BIL", "human_review": "required_before_upload"}
+  ],
+  "existing_bil_assets": [
+    {"path": "assets/branding/bil_icon_master.png", "owner": "BIL", "rights": "BIL brand master", "use": "master emblem and derived launcher assets"},
+    {"path": "assets/images/professional/mediterranean_protein_bowl.png", "owner": "BIL", "rights": "generated_original_for_BIL", "use": "recipe"},
+    {"path": "assets/images/professional/strength_training_cover.png", "owner": "BIL", "rights": "generated_original_for_BIL", "use": "workout"},
+    {"path": "assets/images/nutrition_plans/", "owner": "BIL", "rights": "generated_original_for_BIL", "use": "nutrition pathways"},
+    {"path": "assets/images/flagship/", "owner": "BIL", "rights": "generated_original_for_BIL", "use": "onboarding and wellness"},
+    {"path": "assets/images/connected_health/bil_medical_hub.png", "owner": "BIL", "rights": "generated_original_for_BIL", "use": "BIL watch and medical device visual"},
+    {"path": "assets/images/v10_master/bil_hologram_master.png", "owner": "BIL", "rights": "generated_original_for_BIL", "use": "Body Twin"},
+    {"path": "ios/Runner/Assets.xcassets/AppIcon.appiconset/", "owner": "BIL", "rights": "BIL brand asset", "use": "Apple icon"}
+  ],
+  "third_party_assets": [],
+  "third_party_policy": "No third-party imagery is included in Epic 15 store materials.",
+  "screenshots": {"source": "actual Flutter production pages captured by test/epic15_store_screenshot_golden_test.dart", "mockup": false},
+  "prohibited": ["MyFitnessPal logo", "MyFitnessPal screenshots", "third-party store badges without guideline compliance", "unlicensed stock media", "invented medical device evidence"]
+}

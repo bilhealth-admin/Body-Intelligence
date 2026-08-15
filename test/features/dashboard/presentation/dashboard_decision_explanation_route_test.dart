@@ -8,9 +8,10 @@ void main() {
     final grid = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
-    final surface = File(
+    final surface = [
       'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
-    ).readAsStringSync();
+      'lib/features/dashboard/widgets/premium_dashboard_command_center.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
 
     expect(router, contains("path: '/dashboard/decision-explanation'"));
     expect(router, contains('DashboardDecisionExplanationPage('));

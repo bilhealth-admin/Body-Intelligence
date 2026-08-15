@@ -116,21 +116,27 @@ class _CanvasNumberEditorState extends State<_CanvasNumberEditor> {
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 24,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           letterSpacing: -.4,
                         ),
                       ),
                     ),
                     IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close_rounded),
+                      tooltip: _bodyCanvasText(context, 'Save', 'حفظ'),
+                      onPressed: () => Navigator.pop(
+                        context,
+                        _EditorResult.value(selectedValue),
+                      ),
+                      icon: const Icon(Icons.check_rounded),
                     ),
                   ],
                 ),
                 Text(
-                  widget.isArabic
-                      ? 'اختر القيمة والدقة — تُحفظ تلقائيًا'
-                      : 'Choose value and precision — saves automatically',
+                  _bodyCanvasText(
+                    context,
+                    'Choose value and precision — saves automatically',
+                    'اختر القيمة والدقة — تُحفظ تلقائيًا',
+                  ),
                   style: const TextStyle(
                     color: _BilColors.textDim,
                     fontSize: 13,
@@ -212,7 +218,9 @@ class _CanvasNumberEditorState extends State<_CanvasNumberEditor> {
                     onPressed: () =>
                         Navigator.pop(context, const _EditorResult.clear()),
                     icon: const Icon(Icons.remove_circle_outline_rounded),
-                    label: Text(widget.isArabic ? 'ليس الآن' : 'Not now'),
+                    label: Text(
+                      _bodyCanvasText(context, 'Not now', 'ليس الآن'),
+                    ),
                   ),
                 ],
               ],
@@ -264,7 +272,7 @@ class _PrecisionWheel extends StatelessWidget {
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 36,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       letterSpacing: -1,
                     ),
                   ),
@@ -346,35 +354,6 @@ class _BirthDateEditorState extends State<_BirthDateEditor> {
 
   @override
   Widget build(BuildContext context) {
-    const monthsAr = [
-      'يناير',
-      'فبراير',
-      'مارس',
-      'أبريل',
-      'مايو',
-      'يونيو',
-      'يوليو',
-      'أغسطس',
-      'سبتمبر',
-      'أكتوبر',
-      'نوفمبر',
-      'ديسمبر',
-    ];
-    const monthsEn = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
     return Align(
       alignment: Alignment.bottomCenter,
       child: ConstrainedBox(
@@ -402,25 +381,32 @@ class _BirthDateEditorState extends State<_BirthDateEditor> {
                     const SizedBox(width: 44),
                     Expanded(
                       child: Text(
-                        widget.isArabic ? 'تاريخ الميلاد' : 'Date of birth',
+                        _bodyCanvasText(
+                          context,
+                          'Date of birth',
+                          'تاريخ الميلاد',
+                        ),
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 24,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
                     IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close_rounded),
+                      tooltip: _bodyCanvasText(context, 'Save', 'حفظ'),
+                      onPressed: () => Navigator.pop(context, selectedDate),
+                      icon: const Icon(Icons.check_rounded),
                     ),
                   ],
                 ),
                 Text(
-                  widget.isArabic
-                      ? 'اختر اليوم والشهر والسنة — تُحفظ تلقائيًا'
-                      : 'Choose day, month and year — saves automatically',
+                  _bodyCanvasText(
+                    context,
+                    'Choose day, month and year — saves automatically',
+                    'اختر اليوم والشهر والسنة — تُحفظ تلقائيًا',
+                  ),
                   style: const TextStyle(
                     color: _BilColors.textDim,
                     fontSize: 13,
@@ -465,9 +451,8 @@ class _BirthDateEditorState extends State<_BirthDateEditor> {
                             child: _DateWheel(
                               controller: monthController,
                               count: 12,
-                              labelBuilder: (index) => widget.isArabic
-                                  ? monthsAr[index]
-                                  : monthsEn[index],
+                              labelBuilder: (index) =>
+                                  _bodyCanvasMonth(context, index),
                               onChanged: (index) {
                                 setState(() => month = index + 1);
                                 _scheduleAutoSave();
@@ -596,7 +581,7 @@ class _CanvasChoiceSheet<T> extends StatelessWidget {
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 22,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),

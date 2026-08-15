@@ -22,40 +22,24 @@ void main() {
     expect(benchmark, isNot(contains('class _KeyInsightsDeck')));
 
     expect(shell, contains("Key('dashboard-twin-header-slot')"));
-    expect(shell, contains('final headerBaseHeight = compact ? 68.0 : 72.0'));
+    expect(
+      shell,
+      contains('final headerBaseHeight = widget.compact ? 68.0 : 72.0'),
+    );
     expect(shell, contains('height: headerHeight'));
     expect(shell, contains('final pagerReserve ='));
-    expect(shell, contains('final pagerReserve = pages.length > 1'));
+    expect(shell, contains('final pagerReserve = widget.pages.length > 1'));
     expect(shell, contains('.scale(26.0).clamp(26.0, 48.0)'));
     expect(shell, contains("Key('dashboard-twin-deck-carousel')"));
-    expect(shell, contains('viewportFraction: compact ? .94 : .96'));
+    expect(shell, contains('viewportFraction: widget.compact ? .94 : .96'));
     expect(shell, contains('Expanded('));
     expect(shell, contains('LayoutBuilder('));
 
     expect(carousel, contains("Key('dashboard-carousel-card-frame')"));
     expect(carousel, contains('widthFactor: widget.viewportFraction'));
 
-    const nutritionGradient = 'const Color(0xFF5BDAFF).withValues(alpha: .045)';
-    const nutritionBorder =
-        'border: Border.all(color: Colors.white.withValues(alpha: .14))';
-    const nutritionShadow = 'const Color(0xFF174E8C).withValues(alpha: .08)';
-
-    expect(
-      benchmark.split(nutritionGradient).length - 1,
-      greaterThanOrEqualTo(2),
-    );
-    expect(
-      benchmark.split(nutritionBorder).length - 1,
-      greaterThanOrEqualTo(2),
-    );
-    expect(
-      benchmark.split(nutritionShadow).length - 1,
-      greaterThanOrEqualTo(2),
-    );
-
-    expect(personal, contains(nutritionGradient));
-    expect(personal, contains(nutritionBorder));
-    expect(personal, contains(nutritionShadow));
+    expect(benchmark, contains('dashboardGlass: true'));
+    expect(personal, contains('DashboardTwinDeckShell('));
     expect(personal, isNot(contains('Colors.black.withValues(alpha: .14)')));
   });
 }

@@ -1,6 +1,7 @@
 import 'dart:collection';
 
 import 'bil_intelligence_integration.dart';
+import 'body_twin_engine_result.dart';
 import 'decision_memory_history.dart';
 
 final class LocalDailyPhysiology {
@@ -112,6 +113,7 @@ final class RuntimeForecastPoint {
 final class ProductIntelligenceOutput {
   ProductIntelligenceOutput({
     required this.brainResult,
+    required this.bodyTwinResult,
     required this.noiseEstimate,
     required Iterable<RuntimeForecastPoint> forecast,
     required this.adaptiveTdeeKcal,
@@ -122,6 +124,7 @@ final class ProductIntelligenceOutput {
        explanation = UnmodifiableListView<String>(explanation.toList());
 
   final UnifiedHealthBrainResult brainResult;
+  final BodyTwinEngineResult bodyTwinResult;
   final PhysiologicalNoiseEstimate noiseEstimate;
   final List<RuntimeForecastPoint> forecast;
   final double adaptiveTdeeKcal;

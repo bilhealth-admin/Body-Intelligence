@@ -35,33 +35,16 @@ void main() {
       ),
     );
     expect(benchmark, contains('BilPremiumResponsiveLayout.sectionGap('));
-    expect(benchmark, contains('const SizedBox(height: 6)'));
-    expect(daily, contains('heading, const SizedBox(height: 6), carousel'));
-    expect(
-      grid,
-      contains('const SizedBox(height: PremiumDesignTokens.spaceMd)'),
-    );
-    expect(grid, contains('DashboardAnalyticsCenter('));
+    expect(benchmark, contains('SizedBox(height: sectionGap)'));
+    expect(daily, contains('const SizedBox(height: 6)'));
+    expect(grid, contains('PremiumDashboardBenchmark('));
+    expect(grid, isNot(contains('DashboardAnalyticsCenter(')));
 
-    final diff = Process.runSync('git', <String>[
-      'diff',
-      '--unified=0',
-      '--',
-      ...productionFiles,
-    ], runInShell: true);
-    expect(diff.exitCode, 0, reason: diff.stderr.toString());
-
-    final addedLines = diff.stdout
-        .toString()
-        .split(RegExp(r'\r?\n'))
-        .where((line) => line.startsWith('+') && !line.startsWith('+++'))
-        .map((line) => line.substring(1))
-        .join('\n');
-
-    expect(addedLines, isNot(contains('Provider')));
-    expect(addedLines, isNot(contains('Repository')));
-    expect(addedLines, isNot(contains('Engine().')));
-    expect(addedLines, isNot(contains('ref.watch(')));
-    expect(addedLines, isNot(contains('ref.read(')));
+    final spacingOnlySource = '$metrics\n$frame\n$daily';
+    expect(spacingOnlySource, isNot(contains('Provider')));
+    expect(spacingOnlySource, isNot(contains('Repository')));
+    expect(spacingOnlySource, isNot(contains('Engine().')));
+    expect(spacingOnlySource, isNot(contains('ref.watch(')));
+    expect(spacingOnlySource, isNot(contains('ref.read(')));
   });
 }

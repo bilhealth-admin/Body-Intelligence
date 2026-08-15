@@ -50,3 +50,6 @@ Excluded:
 
 Analyzer, all three targeted tests, Windows Arabic/English inspection at compact
 and wide sizes, and one focused commit must pass.
+> **RETIRED — historical record only.** This file is not an execution
+> authority. The sole current authority is
+> `docs/BIL_V1_FINAL_RELEASE_CONSTITUTION.md`.

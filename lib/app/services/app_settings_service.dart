@@ -1,6 +1,7 @@
 import 'dart:convert';
-
 import 'settings_store.dart';
+import '../localization/bil_locale_policy.dart';
+import '../localization/bil_locale_rollout_manifest.dart';
 
 class AppSettings {
   AppSettings({
@@ -35,9 +36,18 @@ class AppSettings {
   };
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
+    final storedLocale = BilLocalePolicy.canonicalSupportedTag(
+      json['localeCode']?.toString(),
+    );
+    final storedTheme = json['themeMode']?.toString();
     return AppSettings(
-      localeCode: json['localeCode']?.toString() ?? 'en',
-      themeMode: json['themeMode']?.toString() ?? 'system',
+      localeCode: storedLocale != null &&
+              AppSettingsService.supportedLocaleCodes.contains(storedLocale)
+          ? storedLocale
+          : AppSettingsService.systemLocaleCode(),
+      // Legacy "system" followed the OS and made pages change appearance
+      // without an explicit in-app choice. Migrate it to the stable day theme.
+      themeMode: storedTheme == 'dark' ? 'dark' : 'light',
       highContrast: json['highContrast'] == true,
       reduceMotion: json['reduceMotion'] == true,
     );
@@ -50,16 +60,24 @@ class AppSettingsService {
 
   final SettingsStore _store;
 
+  static const supportedLocaleCodes = BilLocaleRolloutManifest.releaseTargets25;
+
+  static String systemLocaleCode() {
+    // English is the product default for a fresh installation. A locale that
+    // the user explicitly selects is persisted and still wins on later runs.
+    return 'en';
+  }
+
   Future<AppSettings> load() async {
     try {
       final contents = await _store.read();
       if (contents == null) {
-        return AppSettings(localeCode: 'en', themeMode: 'system');
+        return AppSettings(localeCode: systemLocaleCode(), themeMode: 'light');
       }
       final decoded = jsonDecode(contents) as Map<String, dynamic>;
       return AppSettings.fromJson(decoded);
     } catch (_) {
-      return AppSettings(localeCode: 'en', themeMode: 'system');
+      return AppSettings(localeCode: systemLocaleCode(), themeMode: 'light');
     }
   }
 

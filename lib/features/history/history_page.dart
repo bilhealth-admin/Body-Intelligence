@@ -16,6 +16,9 @@ import '../../shared/widgets/premium_surface.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
 
+part 'widgets/weight_trend_painter.dart';
+part 'widgets/history_page_components.dart';
+
 class HistoryPage extends ConsumerWidget {
   const HistoryPage({super.key});
 
@@ -271,7 +274,9 @@ class HistoryPage extends ConsumerWidget {
                 .toList(),
             goalWeightKg: profile?.targetWeight,
           );
-          final arabic = Localizations.localeOf(context).languageCode == 'ar';
+          final locale = Localizations.localeOf(
+            context,
+          ).languageCode.toLowerCase();
           final recent = chronological.length > 30
               ? chronological.sublist(chronological.length - 30)
               : chronological;
@@ -309,7 +314,7 @@ class HistoryPage extends ConsumerWidget {
                       _HistoryExplainabilityChips(
                         confidenceLabel: _confidenceLabel(
                           analysis.confidence,
-                          arabic,
+                          locale,
                         ),
                         sampleCount: analysis.sampleCount,
                         spanDays: analysis.spanDays,
@@ -324,25 +329,19 @@ class HistoryPage extends ConsumerWidget {
                         '${context.strings.text('Smoothed weekly direction')}: ${analysis.weeklyDirectionKg == null ? context.strings.text('At least four entries needed') : '${analysis.weeklyDirectionKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(analysis.weeklyDirectionKg!, system).toStringAsFixed(2)} $unit/${context.strings.text('week')}'}',
                       ),
                       Text(
-                        arabic
-                            ? 'الاتجاه الشهري التقريبي: ${analysis.monthlyDirectionKg == null ? 'نحتاج بيانات تمتد لفترة أطول' : '${analysis.monthlyDirectionKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(analysis.monthlyDirectionKg!, system).toStringAsFixed(1)} $unit'}'
-                            : 'Approximate monthly direction: ${analysis.monthlyDirectionKg == null ? 'a longer evidence window is needed' : '${analysis.monthlyDirectionKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(analysis.monthlyDirectionKg!, system).toStringAsFixed(1)} $unit'}',
+                        '${_historyText(locale, 'monthlyDirection')}: ${analysis.monthlyDirectionKg == null ? _historyText(locale, 'longerWindow') : '${analysis.monthlyDirectionKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(analysis.monthlyDirectionKg!, system).toStringAsFixed(1)} $unit'}',
                       ),
                       Text(
-                        arabic
-                            ? 'الثقة: ${_confidenceLabel(analysis.confidence, true)} · ${analysis.sampleCount} قياسًا خلال ${analysis.spanDays} يومًا'
-                            : 'Confidence: ${_confidenceLabel(analysis.confidence, false)} · ${analysis.sampleCount} measurements across ${analysis.spanDays} days',
+                        '${_historyText(locale, 'confidence')}: ${_confidenceLabel(analysis.confidence, locale)} · ${analysis.sampleCount} ${_historyText(locale, 'measurementsAcross')} ${analysis.spanDays} ${_historyText(locale, 'days')}',
                       ),
                       if (analysis.variabilityKg != null)
                         Text(
-                          arabic
-                              ? 'التذبذب حول الاتجاه: نحو ${UnitConverter.weightFromKg(analysis.variabilityKg!, system).toStringAsFixed(2)} $unit'
-                              : 'Variation around the direction: about ${UnitConverter.weightFromKg(analysis.variabilityKg!, system).toStringAsFixed(2)} $unit',
+                          '${_historyText(locale, 'variation')}: ${_historyText(locale, 'about')} ${UnitConverter.weightFromKg(analysis.variabilityKg!, system).toStringAsFixed(2)} $unit',
                         ),
                       _HistoryGoalProjectionCard(
                         analysis: analysis,
                         system: system,
-                        arabic: arabic,
+                        locale: locale,
                       ),
                       Text(
                         context.strings.text(
@@ -381,361 +380,153 @@ class HistoryPage extends ConsumerWidget {
   }
 }
 
-String _confidenceLabel(ProgressConfidence confidence, bool arabic) =>
-    switch (confidence) {
-      ProgressConfidence.insufficient => arabic ? 'غير كافية' : 'insufficient',
-      ProgressConfidence.low => arabic ? 'منخفضة' : 'low',
-      ProgressConfidence.medium => arabic ? 'متوسطة' : 'medium',
-      ProgressConfidence.high => arabic ? 'مرتفعة' : 'high',
-    };
+String _confidenceLabel(ProgressConfidence confidence, String locale) =>
+    _historyText(locale, switch (confidence) {
+      ProgressConfidence.insufficient => 'insufficient',
+      ProgressConfidence.low => 'low',
+      ProgressConfidence.medium => 'medium',
+      ProgressConfidence.high => 'high',
+    });
 
-class WeightTrendChart extends StatefulWidget {
-  const WeightTrendChart({
-    super.key,
-    required this.weights,
-    required this.variability,
-    required this.semanticsLabel,
-  });
+String _historyText(String locale, String key) =>
+    _historyCopy[locale]?[key] ?? _historyCopy['en']![key]!;
 
-  final List<double> weights;
-  final double? variability;
-  final String semanticsLabel;
-
-  @override
-  State<WeightTrendChart> createState() => _WeightTrendChartState();
-}
-
-class _WeightTrendChartState extends State<WeightTrendChart> {
-  bool showRaw = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final arabic = Localizations.localeOf(context).languageCode == 'ar';
-    return Column(
-      children: [
-        Semantics(
-          label:
-              '${widget.semanticsLabel}. ${arabic ? 'الخط الممهّد مع نطاق التذبذب' : 'Smoothed line with a variation band'}',
-          image: true,
-          child: SizedBox(
-            height: 150,
-            child: CustomPaint(
-              painter: _WeightTrendPainter(
-                weights: widget.weights,
-                variability: widget.variability,
-                showRaw: showRaw,
-                color: Theme.of(context).colorScheme.primary,
-                gridColor: Theme.of(context).dividerColor,
-              ),
-            ),
-          ),
-        ),
-        SwitchListTile.adaptive(
-          contentPadding: EdgeInsets.zero,
-          title: Text(
-            arabic ? 'إظهار القياسات الخام' : 'Show raw measurements',
-          ),
-          subtitle: Text(
-            arabic
-                ? 'النطاق المظلل يوضح التذبذب حول الاتجاه، وليس يقينًا إحصائيًا.'
-                : 'The shaded band shows variation around the trend, not statistical certainty.',
-          ),
-          value: showRaw,
-          onChanged: (value) => setState(() => showRaw = value),
-        ),
-      ],
-    );
-  }
-}
-
-class _HistorySkeletonBlock extends StatelessWidget {
-  const _HistorySkeletonBlock({required this.height});
-
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    return PremiumSurface(
-      child: SizedBox(
-        height: height,
-        child: const DecoratedBox(
-          decoration: BoxDecoration(color: Color(0x14000000)),
-        ),
-      ),
-    );
-  }
-}
-
-class _HistoryContextBanner extends StatelessWidget {
-  const _HistoryContextBanner({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return PremiumSurface(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: Theme.of(context).colorScheme.error),
-          const SizedBox(width: PremiumDesignTokens.spaceSm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: PremiumDesignTokens.cardHeading(context)),
-                const SizedBox(height: PremiumDesignTokens.spaceXs),
-                Text(subtitle),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HistoryExplainabilityChips extends StatelessWidget {
-  const _HistoryExplainabilityChips({
-    required this.confidenceLabel,
-    required this.sampleCount,
-    required this.spanDays,
-    required this.system,
-    required this.weeklyDirectionKg,
-  });
-
-  final String confidenceLabel;
-  final int sampleCount;
-  final int spanDays;
-  final MeasurementSystem system;
-  final double? weeklyDirectionKg;
-
-  @override
-  Widget build(BuildContext context) {
-    final unit = UnitConverter.weightUnit(system);
-    final directionLabel = weeklyDirectionKg == null
-        ? context.strings.text('At least four entries needed')
-        : '${weeklyDirectionKg! >= 0 ? '+' : ''}${UnitConverter.weightFromKg(weeklyDirectionKg!, system).toStringAsFixed(2)} $unit/${context.strings.text('week')}';
-    return Wrap(
-      spacing: PremiumDesignTokens.spaceXs,
-      runSpacing: PremiumDesignTokens.spaceXs,
-      children: [
-        Chip(
-          label: Text(
-            '${context.strings.text('Confidence')}: $confidenceLabel',
-          ),
-        ),
-        Chip(
-          label: Text(
-            '${context.strings.text('Evidence')}: $sampleCount ${context.strings.text('entries')} · $spanDays ${context.strings.text('days')}',
-          ),
-        ),
-        Chip(
-          label: Text('${context.strings.text('Direction')}: $directionLabel'),
-        ),
-      ],
-    );
-  }
-}
-
-class _HistoryGoalProjectionCard extends StatelessWidget {
-  const _HistoryGoalProjectionCard({
-    required this.analysis,
-    required this.system,
-    required this.arabic,
-  });
-
-  final ProgressAnalysis analysis;
-  final MeasurementSystem system;
-  final bool arabic;
-
-  @override
-  Widget build(BuildContext context) {
-    final title = arabic ? 'توقع حذر للهدف' : 'Cautious goal estimate';
-    final noEstimateMessage = arabic
-        ? 'لا يظهر تاريخ هدف حتى تصبح الأدلة كافية ويتوافق الاتجاه مع الهدف.'
-        : 'No goal date is shown until evidence is sufficient and the direction aligns with the goal.';
-    final direction = analysis.weeklyDirectionKg;
-    final unit = UnitConverter.weightUnit(system);
-
-    final reasons = <String>[
-      if (analysis.projectedGoalDate == null && analysis.sampleCount < 4)
-        arabic
-            ? 'نحتاج أربعة قياسات على الأقل قبل حساب أي تقدير.'
-            : 'At least four comparable measurements are needed before estimating a goal date.',
-      if (analysis.projectedGoalDate == null &&
-          analysis.confidence == ProgressConfidence.insufficient)
-        arabic
-            ? 'الثقة غير كافية الآن، لذا نؤجل التاريخ التقديري.'
-            : 'Confidence is insufficient right now, so the estimated date is withheld.',
-      if (analysis.projectedGoalDate == null &&
-          direction != null &&
-          direction.abs() < 0.01)
-        arabic
-            ? 'الاتجاه قريب من الثبات؛ نحتاج تغيرًا أوضح قبل التقدير.'
-            : 'The direction is near flat; a clearer change is needed before estimating.',
-    ];
-
-    String directionLine() {
-      if (direction == null) {
-        return arabic
-            ? 'الاتجاه الأسبوعي غير متاح بعد.'
-            : 'Weekly direction is not available yet.';
-      }
-      final formatted =
-          '${direction >= 0 ? '+' : ''}${UnitConverter.weightFromKg(direction, system).toStringAsFixed(2)} $unit/${context.strings.text('week')}';
-      return arabic
-          ? 'الاتجاه الحالي: $formatted'
-          : 'Current direction: $formatted';
-    }
-
-    final projectionLine = analysis.projectedGoalDate == null
-        ? noEstimateMessage
-        : '${analysis.projectedGoalDate!.year}-${analysis.projectedGoalDate!.month.toString().padLeft(2, '0')}-${analysis.projectedGoalDate!.day.toString().padLeft(2, '0')}';
-
-    return PremiumSurface(
-      child: Padding(
-        padding: PremiumDesignTokens.cardPadding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: PremiumDesignTokens.cardHeading(context)),
-            const SizedBox(height: PremiumDesignTokens.spaceXs),
-            Text(
-              analysis.projectedGoalDate == null
-                  ? noEstimateMessage
-                  : '${arabic ? 'نطاق تقديري حذر للهدف' : 'Cautious goal estimate'}: $projectionLine',
-            ),
-            const SizedBox(height: PremiumDesignTokens.spaceXs),
-            Text(directionLine()),
-            if (reasons.isNotEmpty) ...[
-              const SizedBox(height: PremiumDesignTokens.spaceXs),
-              for (final reason in reasons) Text('• $reason'),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _WeightTrendPainter extends CustomPainter {
-  const _WeightTrendPainter({
-    required this.weights,
-    required this.variability,
-    required this.showRaw,
-    required this.color,
-    required this.gridColor,
-  });
-
-  final List<double> weights;
-  final double? variability;
-  final bool showRaw;
-  final Color color;
-  final Color gridColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final grid = Paint()
-      ..color = gridColor.withValues(alpha: 0.45)
-      ..strokeWidth = 1;
-    for (var index = 0; index <= 3; index++) {
-      final y = size.height * index / 3;
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-    }
-    if (weights.isEmpty) return;
-    var minimum = weights.reduce((a, b) => a < b ? a : b);
-    var maximum = weights.reduce((a, b) => a > b ? a : b);
-    if ((maximum - minimum).abs() < 0.1) {
-      minimum -= 0.1;
-      maximum += 0.1;
-    }
-    final smoothed = <double>[
-      for (var index = 0; index < weights.length; index++)
-        weights
-                .sublist(
-                  math.max(0, index - 1),
-                  math.min(weights.length, index + 2),
-                )
-                .reduce((a, b) => a + b) /
-            (math.min(weights.length, index + 2) - math.max(0, index - 1)),
-    ];
-    Offset pointFor(int index, double value) {
-      final x = weights.length == 1
-          ? size.width / 2
-          : size.width * index / (weights.length - 1);
-      final y =
-          size.height - ((value - minimum) / (maximum - minimum)) * size.height;
-      return Offset(x, y.clamp(0, size.height));
-    }
-
-    if (variability != null && variability! > 0) {
-      final band = Path();
-      for (var index = 0; index < smoothed.length; index++) {
-        final point = pointFor(index, smoothed[index] + variability!);
-        index == 0
-            ? band.moveTo(point.dx, point.dy)
-            : band.lineTo(point.dx, point.dy);
-      }
-      for (var index = smoothed.length - 1; index >= 0; index--) {
-        final point = pointFor(index, smoothed[index] - variability!);
-        band.lineTo(point.dx, point.dy);
-      }
-      band.close();
-      canvas.drawPath(band, Paint()..color = color.withValues(alpha: 0.14));
-    }
-    if (showRaw) {
-      final raw = Path();
-      for (var index = 0; index < weights.length; index++) {
-        final point = pointFor(index, weights[index]);
-        index == 0
-            ? raw.moveTo(point.dx, point.dy)
-            : raw.lineTo(point.dx, point.dy);
-      }
-      canvas.drawPath(
-        raw,
-        Paint()
-          ..color = gridColor
-          ..strokeWidth = 1.5
-          ..style = PaintingStyle.stroke,
-      );
-    }
-    final path = Path();
-    for (var index = 0; index < smoothed.length; index++) {
-      final point = pointFor(index, smoothed[index]);
-      if (index == 0) {
-        path.moveTo(point.dx, point.dy);
-      } else {
-        path.lineTo(point.dx, point.dy);
-      }
-    }
-    final line = Paint()
-      ..color = color
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    canvas.drawPath(path, line);
-    final point = Paint()..color = color;
-    if (showRaw) {
-      for (var index = 0; index < weights.length; index++) {
-        canvas.drawCircle(pointFor(index, weights[index]), 3, point);
-      }
-    }
-    canvas.drawCircle(pointFor(smoothed.length - 1, smoothed.last), 5, point);
-  }
-
-  @override
-  bool shouldRepaint(covariant _WeightTrendPainter oldDelegate) =>
-      oldDelegate.weights != weights ||
-      oldDelegate.variability != variability ||
-      oldDelegate.showRaw != showRaw ||
-      oldDelegate.color != color ||
-      oldDelegate.gridColor != gridColor;
-}
+const _historyCopy = <String, Map<String, String>>{
+  'en': {
+    'monthlyDirection': 'Approximate monthly direction',
+    'longerWindow': 'a longer evidence window is needed',
+    'confidence': 'Confidence',
+    'measurementsAcross': 'measurements across',
+    'days': 'days',
+    'variation': 'Variation around the direction',
+    'about': 'about',
+    'insufficient': 'insufficient',
+    'low': 'low',
+    'medium': 'medium',
+    'high': 'high',
+    'smoothBand': 'Smoothed line with a variation band',
+    'showRaw': 'Show raw measurements',
+    'bandHelp':
+        'The shaded band shows variation around the trend, not statistical certainty.',
+    'goalTitle': 'Cautious goal estimate',
+    'noGoal':
+        'No goal date is shown until evidence is sufficient and the direction aligns with the goal.',
+    'needFour':
+        'At least four comparable measurements are needed before estimating a goal date.',
+    'withheld':
+        'Confidence is insufficient right now, so the estimated date is withheld.',
+    'nearFlat':
+        'The direction is near flat; a clearer change is needed before estimating.',
+    'weeklyUnavailable': 'Weekly direction is not available yet.',
+    'currentDirection': 'Current direction',
+  },
+  'ar': {
+    'monthlyDirection': 'الاتجاه الشهري التقريبي',
+    'longerWindow': 'نحتاج بيانات تمتد لفترة أطول',
+    'confidence': 'الثقة',
+    'measurementsAcross': 'قياسًا خلال',
+    'days': 'يومًا',
+    'variation': 'التذبذب حول الاتجاه',
+    'about': 'نحو',
+    'insufficient': 'غير كافية',
+    'low': 'منخفضة',
+    'medium': 'متوسطة',
+    'high': 'مرتفعة',
+    'smoothBand': 'الخط الممهّد مع نطاق التذبذب',
+    'showRaw': 'إظهار القياسات الخام',
+    'bandHelp': 'النطاق المظلل يوضح التذبذب حول الاتجاه، وليس يقينًا إحصائيًا.',
+    'goalTitle': 'توقع حذر للهدف',
+    'noGoal':
+        'لا يظهر تاريخ هدف حتى تصبح الأدلة كافية ويتوافق الاتجاه مع الهدف.',
+    'needFour':
+        'نحتاج أربعة قياسات قابلة للمقارنة على الأقل قبل حساب تاريخ الهدف.',
+    'withheld': 'الثقة غير كافية الآن، لذا نؤجل التاريخ التقديري.',
+    'nearFlat': 'الاتجاه قريب من الثبات؛ نحتاج تغيرًا أوضح قبل التقدير.',
+    'weeklyUnavailable': 'الاتجاه الأسبوعي غير متاح بعد.',
+    'currentDirection': 'الاتجاه الحالي',
+  },
+  'fr': {
+    'monthlyDirection': 'Tendance mensuelle approximative',
+    'longerWindow': 'une période de données plus longue est nécessaire',
+    'confidence': 'Confiance',
+    'measurementsAcross': 'mesures sur',
+    'days': 'jours',
+    'variation': 'Variation autour de la tendance',
+    'about': 'environ',
+    'insufficient': 'insuffisante',
+    'low': 'faible',
+    'medium': 'moyenne',
+    'high': 'élevée',
+    'smoothBand': 'Courbe lissée avec bande de variation',
+    'showRaw': 'Afficher les mesures brutes',
+    'bandHelp':
+        'La bande ombrée montre la variation autour de la tendance, pas une certitude statistique.',
+    'goalTitle': 'Estimation prudente de l’objectif',
+    'noGoal':
+        'Aucune date d’objectif n’est affichée avant que les preuves soient suffisantes et que la tendance corresponde à l’objectif.',
+    'needFour':
+        'Au moins quatre mesures comparables sont nécessaires pour estimer une date.',
+    'withheld':
+        'La confiance est actuellement insuffisante ; la date estimée est donc masquée.',
+    'nearFlat':
+        'La tendance est presque stable ; un changement plus net est nécessaire.',
+    'weeklyUnavailable':
+        'La tendance hebdomadaire n’est pas encore disponible.',
+    'currentDirection': 'Tendance actuelle',
+  },
+  'es': {
+    'monthlyDirection': 'Tendencia mensual aproximada',
+    'longerWindow': 'se necesita un periodo de datos más largo',
+    'confidence': 'Confianza',
+    'measurementsAcross': 'mediciones durante',
+    'days': 'días',
+    'variation': 'Variación alrededor de la tendencia',
+    'about': 'aproximadamente',
+    'insufficient': 'insuficiente',
+    'low': 'baja',
+    'medium': 'media',
+    'high': 'alta',
+    'smoothBand': 'Línea suavizada con banda de variación',
+    'showRaw': 'Mostrar mediciones sin procesar',
+    'bandHelp':
+        'La banda sombreada muestra variación alrededor de la tendencia, no certeza estadística.',
+    'goalTitle': 'Estimación prudente del objetivo',
+    'noGoal':
+        'No se muestra una fecha objetivo hasta que haya pruebas suficientes y la tendencia coincida con el objetivo.',
+    'needFour':
+        'Se necesitan al menos cuatro mediciones comparables para estimar una fecha.',
+    'withheld':
+        'La confianza es insuficiente, por lo que se oculta la fecha estimada.',
+    'nearFlat': 'La tendencia es casi plana; hace falta un cambio más claro.',
+    'weeklyUnavailable': 'La tendencia semanal aún no está disponible.',
+    'currentDirection': 'Tendencia actual',
+  },
+  'tr': {
+    'monthlyDirection': 'Yaklaşık aylık yön',
+    'longerWindow': 'daha uzun bir veri aralığı gerekli',
+    'confidence': 'Güven',
+    'measurementsAcross': 'ölçüm, toplam',
+    'days': 'gün',
+    'variation': 'Yön çevresindeki değişkenlik',
+    'about': 'yaklaşık',
+    'insufficient': 'yetersiz',
+    'low': 'düşük',
+    'medium': 'orta',
+    'high': 'yüksek',
+    'smoothBand': 'Değişkenlik bantlı yumuşatılmış çizgi',
+    'showRaw': 'Ham ölçümleri göster',
+    'bandHelp':
+        'Gölgeli bant eğilim çevresindeki değişimi gösterir; istatistiksel kesinlik değildir.',
+    'goalTitle': 'Temkinli hedef tahmini',
+    'noGoal':
+        'Kanıt yeterli olana ve yön hedefle uyumlu hale gelene kadar hedef tarihi gösterilmez.',
+    'needFour':
+        'Hedef tarihi tahmin etmek için en az dört karşılaştırılabilir ölçüm gerekir.',
+    'withheld':
+        'Güven şu anda yetersiz olduğundan tahmini tarih gösterilmiyor.',
+    'nearFlat':
+        'Yön neredeyse sabit; tahmin için daha belirgin değişim gerekir.',
+    'weeklyUnavailable': 'Haftalık yön henüz kullanılamıyor.',
+    'currentDirection': 'Geçerli yön',
+  },
+};
