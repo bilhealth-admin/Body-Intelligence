@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-holdout15-frozen-owned-v1",
+  "image_policy": "Previously unused BIL-owned synthetic food images annotated only from visible pixels before provider contact.",
+  "claim_scope": "Synthetic camera-like visible-component holdout only; not a real-world accuracy claim.",
+  "frozen_before_provider_contact": true,
+  "cases": [
+    {
+      "id": "h15-egg-rice-tomato",
+      "category": "visible_mixed_meal",
+      "region": "egypt",
+      "image_path": "assets/images/professional/recipes/bil-ar-egypt-egg-rice-tomato-006.png",
+      "synthetic": true,
+      "truth": [{"id": "egg tomato rice bowl", "aliases": []}],
+      "dish_identity_truth": [],
+      "visible_component_truth": [
+        {"id": "egg", "aliases": ["fried egg"]},
+        {"id": "rice", "aliases": []},
+        {"id": "tomatoes", "aliases": ["tomato"]}
+      ]
+    },
+    {
+      "id": "h15-salmon-quinoa-broccoli",
+      "category": "visible_separated_meal",
+      "region": "gulf",
+      "image_path": "assets/images/professional/recipes/bil-ar-gulf-salmon-quinoa-broccoli-223.png",
+      "synthetic": true,
+      "truth": [{"id": "salmon quinoa broccoli plate", "aliases": []}],
+      "dish_identity_truth": [],
+      "visible_component_truth": [
+        {"id": "salmon", "aliases": ["salmon fillet"]},
+        {"id": "quinoa", "aliases": []},
+        {"id": "broccoli", "aliases": []}
+      ]
+    },
+    {
+      "id": "h15-black-beans-corn-tomato",
+      "category": "visible_legume_mixture",
+      "region": "iraq",
+      "image_path": "assets/images/professional/recipes/bil-ar-iraq-black-beans-corn-tomato-099.png",
+      "synthetic": true,
+      "truth": [{"id": "black bean corn tomato stew", "aliases": []}],
+      "dish_identity_truth": [],
+      "visible_component_truth": [
+        {"id": "black beans", "aliases": ["black bean"]},
+        {"id": "corn", "aliases": ["sweetcorn"]},
+        {"id": "tomatoes", "aliases": ["tomato"]},
+        {"id": "onions", "aliases": ["onion"]}
+      ]
+    },
+    {
+      "id": "h15-turkey-sweet-potato-spinach",
+      "category": "visible_mixed_meal",
+      "region": "levant",
+      "image_path": "assets/images/professional/recipes/bil-ar-levant-turkey-sweet-potato-spinach-162.png",
+      "synthetic": true,
+      "truth": [{"id": "turkey sweet potato spinach plate", "aliases": []}],
+      "dish_identity_truth": [],
+      "visible_component_truth": [
+        {"id": "ground turkey", "aliases": ["turkey", "minced turkey"]},
+        {"id": "sweet potatoes", "aliases": ["sweet potato"]},
+        {"id": "spinach", "aliases": ["leafy greens"]},
+        {"id": "onions", "aliases": ["onion"]},
+        {"id": "pine nuts", "aliases": ["nuts"]}
+      ]
+    },
+    {
+      "id": "h15-nonfood-travel",
+      "category": "non_food",
+      "region": "global",
+      "image_path": "assets/images/daily_context/travel_v1.png",
+      "synthetic": true,
+      "truth": [],
+      "dish_identity_truth": [],
+      "visible_component_truth": []
+    }
+  ]
+}

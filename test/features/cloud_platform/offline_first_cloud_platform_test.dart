@@ -65,7 +65,7 @@ void main() {
 
       expect(report.pushed, 1);
       expect(report.pulled, 1);
-      expect(store.records['weight:remote']?.payload['weight'], 95.0);
+      expect(store.records['owner:weight:remote']?.payload['weight'], 95.0);
       expect(store.operations, isEmpty);
       expect(store.cursor, 'cursor-1');
     },

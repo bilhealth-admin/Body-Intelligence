@@ -36,7 +36,7 @@ void main() {
     expect(source, isNot(contains('FontWeight.w500')));
     expect(source, isNot(contains('FontWeight.w800')));
     expect(source, isNot(contains('FontWeight.w900')));
-    expect(tokens, contains('static const double radiusMd = 14'));
+    expect(tokens, contains('static const double radiusMd = 12'));
     expect(
       tokens,
       contains('static const Color canvasLight = Color(0xFFF5F5F8)'),

@@ -46,7 +46,7 @@ void main() {
     final text = MealItemEvidencePresenter.subtitle(
       item: item(),
       mealLabel: 'Breakfast',
-      arabic: false,
+      languageCode: 'en',
     );
 
     expect(text, 'Breakfast · 150 g · Verified USDA · reference serving 100 g');
@@ -62,7 +62,7 @@ void main() {
         quantity: 2,
       ),
       mealLabel: 'فطور',
-      arabic: true,
+      languageCode: 'ar',
     );
 
     expect(
@@ -83,7 +83,7 @@ void main() {
           quantity: 85,
         ),
         mealLabel: 'Snack',
-        arabic: false,
+        languageCode: 'en',
       );
 
       expect(text, contains('Verified catalog'));
@@ -91,4 +91,31 @@ void main() {
       expect(text, contains('85 g'));
     },
   );
+
+  test('uses locale-specific evidence labels', () {
+    expect(
+      MealItemEvidencePresenter.sourceLabel(
+        'usda',
+        verified: true,
+        languageCode: 'fr',
+      ),
+      'USDA vérifié',
+    );
+    expect(
+      MealItemEvidencePresenter.sourceLabel(
+        'local',
+        verified: false,
+        languageCode: 'es',
+      ),
+      'entrada local — no verificado',
+    );
+    expect(
+      MealItemEvidencePresenter.sourceLabel(
+        'saved',
+        verified: true,
+        languageCode: 'tr',
+      ),
+      'kayıtlı kaynak',
+    );
+  });
 }

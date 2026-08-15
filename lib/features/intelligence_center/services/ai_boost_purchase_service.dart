@@ -21,7 +21,7 @@ final class AiBoostPurchaseService extends ChangeNotifier {
   AiBoostPurchaseService({InAppPurchase? purchase})
     : _purchase = purchase ?? InAppPurchase.instance;
 
-  static const productId = 'bil_ai_boost_499';
+  static const productId = 'bil_ai_boost';
   final InAppPurchase _purchase;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
   ProductDetails? product;

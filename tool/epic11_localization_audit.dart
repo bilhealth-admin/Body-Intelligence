@@ -2,6 +2,7 @@ import 'dart:io';
 
 const _allowedDirectText = <String>{
   'BIL',
+  'BODY INTELLIGENCE LOG™',
   'English',
   'Français',
   'Español',

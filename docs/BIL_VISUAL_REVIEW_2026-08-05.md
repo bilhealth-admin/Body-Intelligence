@@ -4,7 +4,15 @@ Scope: 177 MyFitnessPal reference captures mapped to 29 current BIL production
 captures. The references are interaction and visual-quality guidance; branding
 and copyrighted artwork are not copied.
 
-Decision: `PASS`
+Decision: `SUPERSEDED — VISUAL EQUIVALENCE UNVERIFIED`
+
+This historical review covered only 29 representative production captures.
+It must not be used as proof that all 177 reference states are visually
+equivalent. The authoritative per-reference record is now
+`artifacts/release/visual_closure/reference/visual_reference_truth_matrix.csv`.
+Rows remain unapproved until their current production capture is reviewed
+against the adjacent reference image. Device-, account-, camera-, commerce-,
+BLE-, and OS-permission states also require their named external validation.
 
 The reviewer opened the current PNGs at phone resolution and checked hierarchy,
 legibility, clipping, honest empty/error states, RTL, dark mode, and real asset

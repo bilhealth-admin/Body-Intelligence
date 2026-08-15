@@ -1,8 +1,6 @@
 {
   "schema_version": 1,
   "owner_inputs": [
-    "Official HTTPS domain",
-    "Official support Gmail address",
     "Legal owner name and copyright year",
     "Final Apple and Google product IDs and localized store pricing",
     "Apple subscription group",
@@ -13,7 +11,7 @@
     "Apple Developer membership activation evidence",
     "Google Play Console listing and closed-track upload",
     "Apple App Store Connect record, certificates, signed build and TestFlight",
-    "Published HTTPS privacy, terms, support, contact and deletion pages",
+    "Independent public HTTPS verification of the owner-confirmed privacy, terms, support, contact and deletion pages",
     "Google Closed Track purchase verification",
     "Apple Sandbox/TestFlight purchase and restore verification",
     "Physical HealthKit, Health Connect and BLE device review",

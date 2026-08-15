@@ -7,8 +7,8 @@ Verified: 2026-08-05.
 
 - Product: Body Intelligence Log (BIL)
 - Public developer: BIL Health
-- Android application ID: `com.kadem.bil` (frozen for v1)
-- Apple bundle ID: `com.kadem.bil` (frozen for v1)
+- Android application ID: `com.bilhealth.bodyintelligencelog` (owner-approved for v1)
+- Apple bundle ID: `com.bilhealth.bodyintelligencelog` (owner-approved for v1)
 - Domain: `bilhealth.com`
 - Administration: `bilhealth.app@gmail.com`
 - Support receiving address: `support@bilhealth.com`
@@ -104,4 +104,3 @@ secret or unknown untracked file, verified rights, a reproducible final audit,
 and a clean Git worktree. A tag requires the additional literal owner decision
 `VISUAL_OWNER_APPROVAL=PASS`. Store upload and publication always require a
 separate owner instruction and the applicable account gates.
-

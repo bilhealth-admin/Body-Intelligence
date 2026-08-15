@@ -99,8 +99,8 @@ void main() {
   }
   final legal = metadata['legal_and_support'] as Map<String, Object?>;
   if (legal['domain'] != 'bilhealth.com' ||
-      legal['support_email'] != 'bilhealth.app@gmail.com' ||
-      !'${legal['status']}'.contains('OWNER_EXTERNAL_ACTION')) {
+      legal['support_email'] != 'support@bilhealth.com' ||
+      !'${legal['status']}'.startsWith('OWNER_CONFIRMED_PUBLISHED_')) {
     _fail('Owner-confirmed legal identity or publication blocker is stale');
   }
   final releaseSources = [

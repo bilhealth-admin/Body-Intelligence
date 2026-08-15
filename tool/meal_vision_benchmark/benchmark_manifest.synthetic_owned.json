@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-synthetic-owned-v1",
+  "image_policy": "project-owned-synthetic-local-only",
+  "claim_scope": "pipeline regression only; not real-world accuracy",
+  "cases": [
+    {
+      "id": "synthetic-egyptian-koshari",
+      "category": "arabic_egyptian",
+      "region": "egypt",
+      "image_path": "assets/images/professional/recipes/egyptian-koshari.png",
+      "fixture_only": false,
+      "synthetic": true,
+      "truth": [{"id":"koshari","aliases":["koshari"],"amount_g":420}]
+    },
+    {
+      "id": "synthetic-ful-tahini",
+      "category": "arabic_egyptian",
+      "region": "egypt",
+      "image_path": "assets/images/professional/recipes/ful-medames-tahini.png",
+      "fixture_only": false,
+      "synthetic": true,
+      "truth": [{"id":"ful-medames","aliases":["ful medames","fava beans"],"amount_g":250},{"id":"tahini","aliases":["tahini"],"amount_g":30}]
+    },
+    {
+      "id": "synthetic-maqluba",
+      "category": "middle_eastern_composite",
+      "region": "levant",
+      "image_path": "assets/images/professional/recipes/maqluba-eggplant-chicken.png",
+      "fixture_only": false,
+      "synthetic": true,
+      "truth": [{"id":"maqluba","aliases":["maqluba","chicken eggplant rice"],"amount_g":380}]
+    },
+    {
+      "id": "synthetic-chicken-kabsa",
+      "category": "middle_eastern_composite",
+      "region": "gulf",
+      "image_path": "assets/images/professional/recipes/chicken-kabsa.png",
+      "fixture_only": false,
+      "synthetic": true,
+      "truth": [{"id":"chicken","aliases":["chicken"],"amount_g":180},{"id":"kabsa-rice","aliases":["kabsa rice","rice"],"amount_g":220}]
+    },
+    {
+      "id": "synthetic-palestinian-musakhan",
+      "category": "middle_eastern_composite",
+      "region": "levant",
+      "image_path": "assets/images/professional/recipes/palestinian-musakhan.png",
+      "fixture_only": false,
+      "synthetic": true,
+      "truth": [{"id":"musakhan","aliases":["musakhan","sumac chicken flatbread"],"amount_g":360}]
+    },
+    {
+      "id": "synthetic-moroccan-harira",
+      "category": "north_african",
+      "region": "morocco",
+      "image_path": "assets/images/professional/recipes/moroccan-harira.png",
+      "fixture_only": false,
+      "synthetic": true,
+      "truth": [{"id":"harira","aliases":["harira","tomato lentil chickpea soup"],"amount_g":330}]
+    },
+    {
+      "id": "synthetic-bamia-beef",
+      "category": "arabic_egyptian_composite",
+      "region": "egypt",
+      "image_path": "assets/images/professional/recipes/bamia-beef-egyptian.png",
+      "fixture_only": false,
+      "synthetic": true,
+      "truth": [{"id":"okra-stew","aliases":["okra stew","bamia"],"amount_g":250},{"id":"beef","aliases":["beef"],"amount_g":120}]
+    }
+  ]
+}

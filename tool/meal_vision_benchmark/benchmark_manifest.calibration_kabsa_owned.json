@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-calibration-kabsa-owned-v3",
+  "image_policy": "project-owned-realistic-synthetic",
+  "claim_scope": "single-case prompt calibration only",
+  "cases": [{
+    "id":"calibration-chicken-kabsa","category":"gulf_composite","region":"gulf",
+    "image_path":"assets/images/professional/recipes/chicken-kabsa.png","synthetic":true,
+    "truth":[{"id":"chicken-kabsa","aliases":["chicken kabsa","kabsa","chicken and rice","chicken with rice","chicken and vermicelli rice pilaf","chicken rice pilaf"],"amount_g":400}]
+  }]
+}

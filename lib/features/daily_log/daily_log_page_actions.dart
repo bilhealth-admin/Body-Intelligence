@@ -447,7 +447,7 @@ extension _DailyLogPageActions on _DailyLogPageState {
     }
     final committedMealType = mealType;
     final committedDate = ref.read(selectedLogDateProvider);
-    setState(() => mealSaving = true);
+    _updateState(() => mealSaving = true);
     try {
       if (!await _ensureDiaryOpen()) return;
       final mealId = await ref
@@ -478,7 +478,7 @@ extension _DailyLogPageActions on _DailyLogPageState {
         quantityValue.truncateToDouble() == quantityValue ? 0 : 1,
       );
       if (!mounted) return;
-      setState(() {
+      _updateState(() {
         if (selectedFood?.id == food.id) selectedFood = null;
       });
       ScaffoldMessenger.of(context).showSnackBar(
@@ -488,7 +488,7 @@ extension _DailyLogPageActions on _DailyLogPageState {
       if (!mounted) return;
       _message('Your saved data was not changed. Try again.');
     } finally {
-      if (mounted) setState(() => mealSaving = false);
+      if (mounted) _updateState(() => mealSaving = false);
     }
   }
 

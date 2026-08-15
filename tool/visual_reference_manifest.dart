@@ -157,6 +157,7 @@ String referenceStateFor(int number) {
   if (number <= 4979) return 'terms or privacy policy state';
   if (number == 4980) return 'optional technology consent state';
   if (number <= 4987) return 'sharing, account security or health-access state';
+  if (number <= 4991) return 'native health data permission state';
   return 'help, troubleshooting, feedback or account-deletion state';
 }
 
@@ -482,9 +483,15 @@ ReferenceMapping mappingFor(int number) {
       route: '/connected-health',
       capability: 'sharing, account security and least-privilege health access',
     );
+  if (number <= 4991)
+    return (
+      screen: 'privacy and health access',
+      route: '/connected-health',
+      capability: 'platform health read/write permission selection',
+    );
   return (
     screen: 'help',
-    route: '/trust-support',
+    route: '/help',
     capability: 'help, feedback, troubleshooting and deletion',
   );
 }

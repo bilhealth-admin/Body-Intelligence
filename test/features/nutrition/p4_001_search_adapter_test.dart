@@ -54,6 +54,28 @@ void main() {
       expect(hits.single.reasons, contains('arabic-name-exact'));
     });
 
+    test('apple query matches Apple and Apples but not Applebees', () {
+      const adapter = UnifiedFoodAdapter();
+      final hits = const OfflineFoodSearchPipeline().search(
+        foods: <UnifiedFood>[
+          adapter.adapt(_databaseFood(id: 1, uuid: 'apple', name: 'Apple')),
+          adapter.adapt(
+            _databaseFood(id: 2, uuid: 'apples', name: 'APPLES, FUJI'),
+          ),
+          adapter.adapt(
+            _databaseFood(id: 3, uuid: 'applebees', name: 'APPLEBEES - BACON'),
+          ),
+        ],
+        query: 'apple',
+      );
+
+      expect(
+        hits.map((hit) => hit.food.id),
+        containsAll(<String>['apple', 'apples']),
+      );
+      expect(hits.map((hit) => hit.food.id), isNot(contains('applebees')));
+    });
+
     test('quality bonuses never admit unrelated foods into results', () {
       final adapter = const UnifiedFoodAdapter();
       final unrelatedVerifiedFoundation = adapter.adapt(

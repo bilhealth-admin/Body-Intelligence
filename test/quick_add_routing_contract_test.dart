@@ -15,20 +15,21 @@ void main() {
       'lib/features/daily_log/daily_log_page.dart',
     ).readAsStringSync();
 
-    for (final action in const [
-      'barcode',
-      'voice',
-      'photo',
-      'water',
-      'notes',
-      'exercise',
-    ]) {
+    for (final action in const ['barcode', 'voice', 'photo', 'water']) {
       expect(shell, contains('action=$action'));
       expect(diary, contains("case '$action':"));
     }
 
-    expect(shell, contains("context.go('/daily-check-in')"));
-    expect(shell, contains('action=exercise'));
+    expect(shell, contains("/daily-log/body-context?from="));
+    expect(router, contains("path: '/daily-log/body-context'"));
+    expect(diary, contains("case 'notes':"));
+
+    expect(shell, contains("context.push('/daily-check-in')"));
+    expect(shell, contains("context.push('/wellness/workouts')"));
+    expect(router, contains("path: '/wellness/workouts'"));
+    expect(router, contains("path: '/wellness/workouts/routines'"));
+    expect(router, contains("initialCategory:"));
+    expect(router, contains("queryParameters['category']"));
     expect(shell, contains('focus=meal'));
     expect(router, contains("queryParameters['action']"));
     expect(sheet, contains('تسجيل الطعام بالصوت'));

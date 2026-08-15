@@ -10,12 +10,16 @@ void main() {
     () {
       final environment = source('lib/app/environment/app_environment.dart');
       final settings = source('lib/features/settings/settings_page.dart');
+      final dashboard = source(
+        'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
+      );
       expect(environment, contains("'BIL_COMMUNITY_ENABLED'"));
       expect(environment, contains("'BIL_PUSH_ENABLED'"));
       expect(environment, contains('defaultValue: false'));
       expect(environment, contains('cloudConfigured && communityEnabled'));
       expect(environment, contains('communityConfigured && pushEnabled'));
       expect(settings, contains('if (AppEnvironment.communityConfigured)'));
+      expect(dashboard, contains('if (AppEnvironment.communityConfigured)'));
     },
   );
 
@@ -89,7 +93,7 @@ void main() {
       );
       final dispatch = source('supabase/functions/community_push_dispatch.ts');
       final androidBridge = source(
-        'android/app/src/main/kotlin/com/kadem/bil/BILPushProvider.kt',
+        'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILPushProvider.kt',
       );
       final android = source('android/app/src/main/AndroidManifest.xml');
       final ios = source('ios/Runner/Info.plist');
@@ -108,10 +112,10 @@ void main() {
       expect(dispatch, contains('deep_link'));
       expect(androidBridge, contains('BILPushProvider'));
       expect(androidBridge, contains('push_provider_not_configured'));
-      expect(android, contains('bil'));
-      expect(android, contains('community'));
+      expect(android, contains('android:scheme="bil"'));
       expect(ios, contains('bil'));
       expect(deepLinks, contains("uri.scheme != 'bil'"));
+      expect(deepLinks, contains("segments.first == 'community'"));
       expect(deepLinks, contains("return null"));
       expect(router, contains('CommunityDeepLink.routeFor'));
       expect(router, contains('!AppEnvironment.communityConfigured'));

@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "status": "owner_input_required",
+  "store": {
+    "google_play": {
+      "premium_monthly_product_id": null,
+      "premium_annual_product_id": null,
+      "premium_ai_coach_monthly_product_id": null,
+      "premium_ai_coach_annual_product_id": null,
+      "ai_boost_product_id": "bil_ai_boost",
+      "subscription_base_plan_ids": null,
+      "offer_ids": null,
+      "trial_configuration": null
+    },
+    "apple_app_store": {
+      "premium_monthly_product_id": null,
+      "premium_annual_product_id": null,
+      "premium_ai_coach_monthly_product_id": null,
+      "premium_ai_coach_annual_product_id": null,
+      "ai_boost_product_id": "bil_ai_boost",
+      "subscription_group_id": null,
+      "offer_ids": null,
+      "trial_configuration": null
+    },
+    "rules": [
+      "Prices, currency, trial eligibility, billing period and discounts must come from verified store metadata.",
+      "A product tap must never grant entitlement before server receipt verification.",
+      "AI Boost is repeatable and does not change subscription tier.",
+      "No placeholder subscription product ID may be queried in a production build."
+    ]
+  },
+  "admob": {
+    "publisher_id": null,
+    "android_app_id": null,
+    "android_banner_unit_id": null,
+    "ios_app_id": null,
+    "ios_banner_unit_id": null,
+    "app_ads_txt_domain": "bilhealth.com",
+    "production_enabled": false
+  },
+  "analytics": {
+    "provider": null,
+    "production_sink_configured": false,
+    "campaigns_authorized": false
+  },
+  "barcode": {
+    "usda_server_api_key_configured": false,
+    "required_secret_name": "BIL_USDA_API_KEY",
+    "rule": "Server-side only; never ship in Flutter or a client bundle."
+  }
+}

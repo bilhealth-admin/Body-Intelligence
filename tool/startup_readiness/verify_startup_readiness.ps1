@@ -34,9 +34,9 @@ $Required = @(
     '.github/workflows/verify.yml',
     'android/app/build.gradle.kts',
     'android/key.properties.example',
-    'android/app/src/main/kotlin/com/kadem/bil/MainActivity.kt',
-    'android/app/src/main/kotlin/com/kadem/bil/BILGlobalHealthBridge.kt',
-    'android/app/src/main/kotlin/com/kadem/bil/BILMedicalBleBridge.kt',
+    'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/MainActivity.kt',
+    'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILGlobalHealthBridge.kt',
+    'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILMedicalBleBridge.kt',
     'ios/Runner/Info.plist'
 )
 $Missing = @($Required | Where-Object { -not (Test-Path -LiteralPath (Join-Path $ProjectRoot $_) -PathType Leaf) })
@@ -64,14 +64,14 @@ if (Test-Path -LiteralPath $LegacyAndroidPath) {
     $LegacyFiles = @(Get-ChildItem -LiteralPath $LegacyAndroidPath -File -ErrorAction SilentlyContinue)
     if ($LegacyFiles.Count -gt 0) { throw "Legacy Android package files remain: $($LegacyFiles.Name -join ', ')" }
 }
-$KotlinFiles = Get-ChildItem -LiteralPath (Join-Path $ProjectRoot 'android/app/src/main/kotlin/com/kadem/bil') -Filter '*.kt' -File
+$KotlinFiles = Get-ChildItem -LiteralPath (Join-Path $ProjectRoot 'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog') -Filter '*.kt' -File
 foreach ($File in $KotlinFiles) {
     $Text = Get-Content -LiteralPath $File.FullName -Raw
-    if ($Text -notmatch '^package com\.kadem\.bil' -or $Text -match 'com\.example\.body_intelligence_log') {
+    if ($Text -notmatch '^package com\.bilhealth\.bodyintelligencelog' -or $Text -match 'com\.example\.body_intelligence_log|com\.kadem\.bil') {
         throw "Android package mismatch: $($File.FullName)"
     }
 }
-Add-Result 'Android native package identity' 'PASSED' 'com.kadem.bil'
+Add-Result 'Android native package identity' 'PASSED' 'com.bilhealth.bodyintelligencelog'
 
 $PlistPath = Join-Path $ProjectRoot 'ios/Runner/Info.plist'
 [xml]$Plist = Get-Content -LiteralPath $PlistPath -Raw
@@ -100,9 +100,9 @@ $AllowedChanged = @(
     '.github/workflows/verify.yml',
     'android/app/build.gradle.kts',
     'android/key.properties.example',
-    'android/app/src/main/kotlin/com/kadem/bil/MainActivity.kt',
-    'android/app/src/main/kotlin/com/kadem/bil/BILGlobalHealthBridge.kt',
-    'android/app/src/main/kotlin/com/kadem/bil/BILMedicalBleBridge.kt',
+    'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/MainActivity.kt',
+    'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILGlobalHealthBridge.kt',
+    'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILMedicalBleBridge.kt',
     'ios/Runner/Info.plist',
     'tool/startup_readiness/verify_startup_readiness.ps1',
     'docs/startup_readiness/BIL_STARTUP_READINESS_001.md'

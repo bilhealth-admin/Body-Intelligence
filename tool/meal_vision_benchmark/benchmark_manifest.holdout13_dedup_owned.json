@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-dedup-holdout13-owned-v14",
+  "image_policy": "Previously unused owned photorealistic synthetic images visually annotated from pixels before provider contact.",
+  "claim_scope": "Synthetic camera-like visible-component holdout only.",
+  "cases": [
+    {"id":"h13-chicken-sweet-potato-spinach","category":"fresh_clear_visual_annotation","region":"egypt","image_path":"assets/images/professional/recipes/bil-ar-egypt-chicken-sweet-potato-spinach-161.png","synthetic":true,"truth":[{"id":"chicken sweet potato spinach bowl","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"chicken","aliases":["chicken leg","poultry"]},{"id":"sweet potatoes","aliases":["sweet potato"]},{"id":"spinach","aliases":["leafy greens"]},{"id":"onions","aliases":["onion"]}]},
+    {"id":"h13-salmon-rice-broccoli","category":"fresh_clear_visual_annotation","region":"gulf","image_path":"assets/images/professional/recipes/bil-ar-gulf-salmon-rice-broccoli-203.png","synthetic":true,"truth":[{"id":"salmon rice broccoli plate","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"salmon","aliases":["salmon fillet"]},{"id":"rice","aliases":[]},{"id":"broccoli","aliases":[]}]},
+    {"id":"h13-fish-pasta-tomato","category":"fresh_clear_visual_annotation","region":"iraq","image_path":"assets/images/professional/recipes/bil-ar-iraq-cod-whole-wheat-pasta-tomato-074.png","synthetic":true,"truth":[{"id":"white fish pasta tomato plate","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"white fish","aliases":["cod","fish fillet"]},{"id":"whole wheat pasta","aliases":["pasta","spaghetti"]},{"id":"tomatoes","aliases":["tomato"]},{"id":"garlic","aliases":["garlic cloves"]}]},
+    {"id":"h13-red-meat-rice-spinach","category":"fresh_clear_visual_annotation","region":"maghreb","image_path":"assets/images/professional/recipes/bil-ar-maghreb-beef-rice-spinach-105.png","synthetic":true,"truth":[{"id":"red meat rice spinach bowl","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"red meat","aliases":["beef","lamb","meat cubes"]},{"id":"rice","aliases":[]},{"id":"spinach","aliases":["leafy greens"]},{"id":"chickpeas","aliases":["garbanzo beans"]},{"id":"onions","aliases":["onion"]},{"id":"green chili pepper","aliases":["green pepper","chili"]}]},
+    {"id":"h13-nonfood-medication","category":"non_food","region":"global","image_path":"assets/images/daily_context/medication_v1.png","synthetic":true,"truth":[],"dish_identity_truth":[],"visible_component_truth":[]}
+  ]
+}

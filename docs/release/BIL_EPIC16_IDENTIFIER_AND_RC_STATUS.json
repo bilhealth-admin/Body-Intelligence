@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "verified_on": "2026-08-05",
+  "verified_on": "2026-08-08",
   "version": "1.0.0+1",
-  "android_application_id": "com.kadem.bil",
-  "ios_bundle_identifier": "com.kadem.bil",
+  "android_application_id": "com.bilhealth.bodyintelligencelog",
+  "ios_bundle_identifier": "com.bilhealth.bodyintelligencelog",
   "identifier_consistency": "CONSISTENT",
-  "identity_rebranding_decision": "OWNER_APPROVAL_REQUIRED_BEFORE_ANY_IDENTIFIER_CHANGE",
+  "identity_rebranding_decision": "OWNER_APPROVED_COM_BILHEALTH_BODYINTELLIGENCELOG_2026_08_08",
   "android_release": "SIGNED_AAB_MUST_BE_REBUILT_AND_VERIFIED_BY_EPIC16_GATE",
   "ios_release": "CLOUD_AND_UNSIGNED_WORKFLOWS_READY_APPLE_MEMBERSHIP_AND_SIGNED_ARCHIVE_EXTERNAL",
   "publication": "NOT_AUTHORIZED_BY_THIS_EPIC"

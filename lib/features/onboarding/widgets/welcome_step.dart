@@ -276,36 +276,6 @@ class _MasterGlass extends StatelessWidget {
   }
 }
 
-class _WelcomeChip extends StatelessWidget {
-  const _WelcomeChip(this.icon, this.label);
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return _MasterGlass(
-      radius: 28,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: const Color(0xFF2563EB), size: 18),
-          const SizedBox(width: 8),
-          Flexible(
-            child: _MasterMetalText(
-              label,
-              size: 14,
-              weight: FontWeight.w700,
-              maxLines: 2,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _InfoCard extends StatelessWidget {
   const _InfoCard({
     required this.icon,

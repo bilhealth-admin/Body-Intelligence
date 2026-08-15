@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-holdout18-frozen-owned-v1",
+  "image_policy": "Previously unused BIL-owned synthetic images annotated from visible pixels before provider contact.",
+  "claim_scope": "Synthetic camera-like visible-component holdout only; not a real-world accuracy claim.",
+  "frozen_before_provider_contact": true,
+  "cases": [
+    {"id":"h18-chakhchoukha-visible","category":"visible_composite_meal","region":"algeria","image_path":"assets/images/professional/recipes/algerian-chakhchoukha-chicken.png","synthetic":true,"truth":[{"id":"chicken chickpea flatbread stew","aliases":["chakhchoukha"]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"chicken","aliases":["chicken breast"]},{"id":"chickpeas","aliases":["garbanzo beans"]},{"id":"torn flatbread","aliases":["flatbread","rougag","trid"]},{"id":"tomatoes","aliases":["tomato sauce"]},{"id":"onions","aliases":["onion"]}]},
+    {"id":"h18-chicken-barley-spinach","category":"visible_stew","region":"egypt","image_path":"assets/images/professional/recipes/bil-ar-egypt-chicken-barley-spinach-131.png","synthetic":true,"truth":[{"id":"chicken barley spinach stew","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"chicken","aliases":["chicken leg"]},{"id":"barley","aliases":["pearl barley"]},{"id":"spinach","aliases":["leafy greens"]},{"id":"onions","aliases":["onion"]}]},
+    {"id":"h18-egg-barley-broccoli","category":"visible_separated_meal","region":"egypt","image_path":"assets/images/professional/recipes/bil-ar-egypt-egg-barley-broccoli-236.png","synthetic":true,"truth":[{"id":"egg barley broccoli plate","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"eggs","aliases":["egg","soft-boiled eggs"]},{"id":"barley","aliases":["pearl barley"]},{"id":"broccoli","aliases":["broccoli florets"]}]},
+    {"id":"h18-chicken-quinoa-tomato","category":"visible_separated_meal","region":"egypt","image_path":"assets/images/professional/recipes/bil-ar-egypt-chicken-quinoa-tomato-021.png","synthetic":true,"truth":[{"id":"chicken quinoa tomato plate","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"chicken","aliases":["chicken legs","roasted chicken"]},{"id":"quinoa","aliases":["cooked quinoa"]},{"id":"tomatoes","aliases":["tomato sauce"]},{"id":"onions","aliases":["onion"]}]},
+    {"id":"h18-nonfood-brand-splash","category":"non_food","region":"global","image_path":"assets/images/brand/generated/bil_body_twin_splash_v1.png","synthetic":true,"truth":[],"dish_identity_truth":[],"visible_component_truth":[]}
+  ]
+}

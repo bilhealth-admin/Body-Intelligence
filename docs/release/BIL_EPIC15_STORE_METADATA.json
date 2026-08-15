@@ -2,8 +2,8 @@
   "schema_version": 1,
   "app_identity": {
     "name": "BIL - Body Intelligence Log",
-    "android_package": "com.kadem.bil",
-    "apple_bundle_id": "com.kadem.bil",
+    "android_package": "com.bilhealth.bodyintelligencelog",
+    "apple_bundle_id": "com.bilhealth.bodyintelligencelog",
     "primary_category": "Health & Fitness",
     "secondary_apple_category": "Lifestyle",
     "apple_age_rating": "OWNER_ACTION_REQUIRED_COMPLETE_QUESTIONNAIRE_EXPECT_13_PLUS_DUE_TO_SOCIAL_AND_MESSAGING",
@@ -71,22 +71,20 @@
   },
   "legal_and_support": {
     "domain": "bilhealth.com",
-    "support_email": "bilhealth.app@gmail.com",
+    "support_email": "support@bilhealth.com",
     "privacy_path": "/privacy",
     "terms_path": "/terms",
     "support_path": "/support",
     "account_deletion_path": "/account-deletion",
-    "status": "CONTENT_READY_OWNER_EXTERNAL_ACTION_UNPUBLISHED_OR_UNVERIFIED"
+    "status": "OWNER_CONFIRMED_PUBLISHED_2026_08_08"
   },
   "subscriptions": {
     "group": "OWNER_INPUT_REQUIRED_APPLE_SUBSCRIPTION_GROUP",
     "products": {
-      "plus_monthly": "OWNER_INPUT_REQUIRED_BIL_STORE_PLUS_MONTHLY",
-      "plus_annual": "OWNER_INPUT_REQUIRED_BIL_STORE_PLUS_ANNUAL",
       "pro_monthly": "OWNER_INPUT_REQUIRED_BIL_STORE_PRO_MONTHLY",
       "pro_annual": "OWNER_INPUT_REQUIRED_BIL_STORE_PRO_ANNUAL"
     },
-    "pricing": "OWNER_INPUT_REQUIRED_STORE_LOCAL_PRICING",
+    "pricing": "PRO_ANNUAL_MUST_EQUAL_70_PERCENT_OF_TWELVE_PRO_MONTHLY_PAYMENTS",
     "free_plan": "No store product; local free entitlement"
   },
   "review": {

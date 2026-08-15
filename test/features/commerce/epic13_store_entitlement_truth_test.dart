@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/entitlement_resolver.dart';
 import 'package:body_intelligence_log/features/commerce/domain/plan_policy.dart';
@@ -73,10 +74,10 @@ void main() {
       );
     });
 
-    test('only Plus and Pro are consumer store plans', () {
+    test('Premium is consumer and Premium+ remains fail-closed', () {
       expect(
         PlanPolicyCatalog.policies[CommercePlan.plus]!.exposure,
-        StoreExposure.consumerSubscription,
+        StoreExposure.hidden,
       );
       expect(
         PlanPolicyCatalog.policies[CommercePlan.pro]!.exposure,
@@ -92,6 +93,14 @@ void main() {
           StoreExposure.contractOnly,
         );
       }
+    });
+
+    test('Premium grants every free capability plus sync and intelligence', () {
+      final free = PlanPolicyCatalog.policies[CommercePlan.free]!.entitlements;
+      final pro = PlanPolicyCatalog.policies[CommercePlan.pro]!.entitlements;
+      expect(pro, containsAll(free));
+      expect(pro, contains(CommerceEntitlement.cloudSync));
+      expect(pro, contains(CommerceEntitlement.advancedIntelligence));
     });
 
     test('missing owner configuration exposes no invented products', () {
@@ -110,14 +119,24 @@ void main() {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        home: BilStorePlansPage(),
+        home: BilStorePlansPage(connectToDeviceStore: false),
       ),
     );
     await tester.pump();
-    expect(find.text('Offres'), findsOneWidget);
-    expect(find.text('Mensuel'), findsOneWidget);
-    expect(find.textContaining('Prix indisponible'), findsAtLeastNWidgets(1));
-    expect(find.textContaining('14%'), findsNothing);
+    await tester.pump();
+    expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+    expect(find.text('Gratuit'), findsOneWidget);
+    expect(find.text('Premium'), findsOneWidget);
+    expect(find.text('Premium AI Coach'), findsOneWidget);
+    expect(find.text('BIL AI Boost'), findsOneWidget);
+    expect(
+      find.text('Prix indisponible sur cet appareil'),
+      findsNWidgets(3),
+    );
+    // No price, discount, or unavailable tier is invented without live store
+    // metadata and configured owner product identifiers.
+    expect(find.textContaining(r'$'), findsNothing);
+    expect(find.textContaining('%'), findsNothing);
   });
 
   test('server verification is replay-safe and store-authoritative', () {
@@ -129,6 +148,9 @@ void main() {
     ).readAsStringSync();
     final client = File(
       'lib/features/commerce/services/verified_store_purchase_service.dart',
+    ).readAsStringSync();
+    final proOnlyMigration = File(
+      'supabase/migrations/202608100001_bil_pro_only_consumer_store.sql',
     ).readAsStringSync();
 
     expect(migration, contains('unique (provider, original_transaction_id)'));
@@ -146,5 +168,7 @@ void main() {
       contains('if (verified && purchase.pendingCompletePurchase)'),
     );
     expect(client, isNot(contains('SharedPreferences')));
+    expect(proOnlyMigration, contains("where plan_id = 'plus'"));
+    expect(proOnlyMigration, contains("not enabled or plan_id = 'pro'"));
   });
 }

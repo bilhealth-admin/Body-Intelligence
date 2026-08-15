@@ -1,0 +1,3 @@
+import 'package:sqlite3/sqlite3.dart';
+void main(){final db=sqlite3.open('assets/catalogs/bil_food_core.sqlite',mode:OpenMode.readOnly);const terms=['oat','chia','edamame','soybeans%green'];for(final term in terms){print('\n$term');final rows=db.select("SELECT fdc_id,description FROM foods WHERE lower(description) LIKE ? AND energy_kcal IS NOT NULL AND protein_g IS NOT NULL AND carbs_g IS NOT NULL AND fat_g IS NOT NULL AND fiber_g IS NOT NULL AND sugars_g IS NOT NULL AND sodium_mg IS NOT NULL AND potassium_mg IS NOT NULL LIMIT 30",['%$term%']);for(final r in rows)print('${r['fdc_id']}\t${r['description']}');}db.close();}
+// ignore_for_file: avoid_print, curly_braces_in_flow_control_structures

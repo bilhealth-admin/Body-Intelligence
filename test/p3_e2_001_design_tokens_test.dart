@@ -10,9 +10,9 @@ void main() {
       expect(PremiumDesignTokens.spaceSm, 12);
       expect(PremiumDesignTokens.spaceMd, 16);
       expect(PremiumDesignTokens.spaceLg, 20);
-      expect(PremiumDesignTokens.radiusMd, 10);
+      expect(PremiumDesignTokens.radiusMd, 12);
       expect(PremiumDesignTokens.radiusLg, 14);
-      expect(PremiumDesignTokens.radiusXl, 18);
+      expect(PremiumDesignTokens.radiusXl, 16);
       expect(PremiumDesignTokens.elevationNone, 0);
       expect(PremiumDesignTokens.screenPadding, const EdgeInsets.all(16));
       expect(PremiumDesignTokens.cardPadding, const EdgeInsets.all(16));

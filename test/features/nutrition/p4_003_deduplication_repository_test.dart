@@ -48,6 +48,8 @@ void main() {
         protein: 0.3,
         carbs: 14,
         fats: 0.2,
+        servingSize: 100,
+        servingUnit: 'g',
       );
 
       const incoming = UnifiedFood(

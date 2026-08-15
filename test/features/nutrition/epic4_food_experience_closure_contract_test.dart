@@ -16,7 +16,9 @@ void main() {
       expect(source, contains('lookupBarcodeJourney'));
     }
     expect(foodPage, isNot(contains('Camera scanning remains disabled')));
-    expect(dailyActions, contains('BIL will not invent nutrition values'));
+    expect(dailyActions, contains('MealNutritionResolution.verifiedFoodRecord'));
+    expect(dailyActions, contains('exact != null && exact.verified'));
+    expect(dailyActions, contains("visionCopy.text('no_match')"));
   });
 
   test('meal persistence keeps evidence snapshots and reversible actions', () {
@@ -57,9 +59,13 @@ void main() {
     final imageContract = File(
       'lib/features/nutrition/services/meal_image_gateway_contract.dart',
     ).readAsStringSync();
+    final environment = File(
+      'lib/app/environment/app_environment.dart',
+    ).readAsStringSync();
 
     expect(voice, contains('SpeechToText'));
-    expect(image, contains('BIL_MEAL_VISION_ENDPOINT'));
+    expect(image, contains('AppEnvironment.mealVisionEndpoint'));
+    expect(environment, contains('BIL_MEAL_VISION_ENDPOINT'));
     expect(image, contains('configured'));
     expect(imageContract, contains('confidence'));
   });

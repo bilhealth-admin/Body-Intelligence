@@ -68,18 +68,56 @@ Future<void> _loadRobotoIntoTestFamily() async {
   final arabic = FontLoader('NotoArabicEvidence')
     ..addFont(bytes(projectArabicRegular))
     ..addFont(bytes(projectArabicBold));
+  final productionArabic = FontLoader('BILArabic')
+    ..addFont(bytes(projectArabicRegular))
+    ..addFont(bytes(projectArabicBold));
   await Future.wait([
     loader.load(),
     fallback.load(),
     arabic.load(),
+    productionArabic.load(),
     icons.load(),
   ]);
 }
 
 Future<void> settleVisualAssetImages(WidgetTester tester) async {
-  final images = tester.widgetList<Image>(find.byType(Image)).toList();
-  for (final imageWidget in images) {
-    final provider = imageWidget.image;
+  final pending = <(ImageProvider<Object>, Element)>[];
+  final queued = <ImageProvider<Object>>{};
+
+  void queue(ImageProvider<Object>? provider, Finder finder) {
+    if (provider == null || !queued.add(provider)) return;
+    final elements = finder.evaluate();
+    if (elements.isEmpty) return;
+    pending.add((provider, elements.first));
+  }
+
+  for (final imageWidget in tester.widgetList<Image>(find.byType(Image))) {
+    queue(imageWidget.image, find.byWidget(imageWidget));
+  }
+  // Ink.image and background artwork render through DecorationImage rather
+  // than an Image widget. If those assets are already in the global image
+  // cache a full suite sees the photo, while an isolated golden can otherwise
+  // capture only the gradient that sits above it. Resolve both production
+  // paths explicitly so evidence never depends on test order or cache state.
+  for (final ink in tester.widgetList<Ink>(find.byType(Ink))) {
+    final decoration = ink.decoration;
+    queue(
+      decoration is BoxDecoration ? decoration.image?.image : null,
+      find.byWidget(ink),
+    );
+  }
+  for (final box in tester.widgetList<DecoratedBox>(
+    find.byType(DecoratedBox),
+  )) {
+    final decoration = box.decoration;
+    queue(
+      decoration is BoxDecoration ? decoration.image?.image : null,
+      find.byWidget(box),
+    );
+  }
+
+  for (final entry in pending) {
+    final provider = entry.$1;
     final isLocalAsset =
         provider is AssetImage ||
         (provider is ResizeImage && provider.imageProvider is AssetImage);
@@ -87,16 +125,7 @@ Future<void> settleVisualAssetImages(WidgetTester tester) async {
 
     var completed = false;
     Object? decodeError;
-    // A production page can replace an image while another asset is decoding
-    // (for example after an async provider resolves). Skip that stale snapshot
-    // instead of asking WidgetTester.element for a widget that is no longer in
-    // the tree.
-    final imageFinder = find.byWidget(imageWidget);
-    final imageElements = imageFinder.evaluate();
-    if (imageElements.isEmpty) continue;
-    final stream = provider.resolve(
-      createLocalImageConfiguration(imageElements.first),
-    );
+    final stream = provider.resolve(createLocalImageConfiguration(entry.$2));
     late final ImageStreamListener listener;
     listener = ImageStreamListener(
       (_, _) => completed = true,

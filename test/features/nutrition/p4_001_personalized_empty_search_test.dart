@@ -17,6 +17,8 @@ void main() {
       protein: 15,
       carbs: 65,
       fats: 7,
+      servingSize: 100,
+      servingUnit: 'g',
     );
     final favorite = await foods.addFood(
       name: 'Favorite yogurt',
@@ -25,6 +27,8 @@ void main() {
       protein: 8,
       carbs: 10,
       fats: 3,
+      servingSize: 100,
+      servingUnit: 'g',
     );
     await foods.addFood(
       name: 'Alphabetical apple',
@@ -33,6 +37,8 @@ void main() {
       protein: 0.3,
       carbs: 14,
       fats: 0.2,
+      servingSize: 100,
+      servingUnit: 'g',
     );
 
     await foods.recordRecent(frequent);

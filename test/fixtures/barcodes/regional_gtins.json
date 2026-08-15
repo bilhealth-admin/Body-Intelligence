@@ -1,0 +1,11 @@
+[
+  {"value":"96385074","format":"GTIN-8","market":"short-item"},
+  {"value":"036000291452","format":"UPC-A","market":"North America"},
+  {"value":"4006381333931","format":"EAN-13","market":"Europe"},
+  {"value":"10012345000017","format":"GTIN-14","market":"trade item"},
+  {"value":"6221234567891","format":"EAN-13","market":"Egypt"},
+  {"value":"6281234567895","format":"EAN-13","market":"Saudi Arabia"},
+  {"value":"6291234567894","format":"EAN-13","market":"Gulf"},
+  {"value":"8691234567890","format":"EAN-13","market":"Türkiye"},
+  {"value":"3011234567891","format":"EAN-13","market":"France"}
+]

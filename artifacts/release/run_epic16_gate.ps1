@@ -77,8 +77,7 @@ $productionFiles = Get-ChildItem -LiteralPath $productionRoots -Recurse -File -E
     $_.Extension -notin @('.lock', '.bin', '.jar', '.class', '.so', '.dll', '.dylib', '.png', '.jpg', '.jpeg', '.webp')
   }
 $placeholderHits = @($productionFiles |
-  Select-String -Pattern '\b(TODO|FIXME|HACK|CHANGEME)\b|example\.com|ca-app-pub-|testAdUnit|demoAdUnit' -CaseSensitive:$false |
-  Where-Object { $_.Line -notmatch "'Everything in Plus': 'Todo lo incluido en Plus'" })
+  Select-String -Pattern '\b(TODO|FIXME|HACK|CHANGEME)\b|example\.com|ca-app-pub-|testAdUnit|demoAdUnit' -CaseSensitive:$false)
 $placeholderHits | ForEach-Object { "$($_.Path):$($_.LineNumber):$($_.Line.Trim())" } |
   Set-Content -LiteralPath $placeholderLog -Encoding utf8
 $placeholderClean = $placeholderHits.Count -eq 0

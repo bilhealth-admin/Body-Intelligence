@@ -1,28 +1,33 @@
 {
   "schema_version": 1,
-  "verified_on": "2026-08-05",
+  "verified_on": "2026-08-08",
   "application": "Body Intelligence Log (BIL)",
   "public_developer_name": "BIL Health",
   "domain": {
     "value": "bilhealth.com",
     "ownership": "OWNER_CONFIRMED_CLOUDFLARE_REGISTRAR",
-    "public_pages": "OWNER_EXTERNAL_ACTION_UNPUBLISHED_OR_UNVERIFIED"
+    "website": "https://www.bilhealth.com",
+    "public_pages": "OWNER_CONFIRMED_PUBLISHED_2026_08_08"
   },
   "administrative_email": "bilhealth.app@gmail.com",
   "proposed_mailboxes": {
     "support@bilhealth.com": "INBOUND_FORWARDING_ACTIVE_OUTBOUND_NOT_CLAIMED",
-    "privacy@bilhealth.com": "INBOUND_FORWARDING_ACTIVE_OUTBOUND_NOT_CLAIMED"
+    "privacy@bilhealth.com": "INBOUND_FORWARDING_ACTIVE_OUTBOUND_NOT_CLAIMED",
+    "owner@bilhealth.com": "INBOUND_FORWARDING_ACTIVE_OUTBOUND_NOT_CLAIMED"
   },
   "google_play": {
     "account_type": "PERSONAL_INDIVIDUAL",
     "registration_and_payment": "OWNER_CONFIRMED",
     "identity_and_address_review": "OWNER_CONFIRMED_VERIFIED_SUCCESSFULLY",
+    "android_device_access": "OWNER_CONFIRMED_VERIFIED_SUCCESSFULLY_2026_08_08",
+    "contact_phone_verification": "SUPPORT_TICKET_OPEN_CODE_NOT_RECEIVED_2026_08_08",
+    "app_record": "NOT_CREATED_PENDING_ACCOUNT_PHONE_VERIFICATION",
     "release": "NOT_PUBLISHED"
   },
   "apple": {
     "account": "bilhealth.app@gmail.com",
-    "developer_program": "INCOMPLETE",
-    "identity_review": "MANUAL_SUPPORT_REVIEW_REQUESTED",
+    "developer_program": "OWNER_CONFIRMED_ACCOUNT_ACTIVE",
+    "identity_review": "OWNER_CONFIRMED_ACCOUNT_ACTIVE",
     "signed_archive_or_testflight": "NOT_CLAIMED"
   },
   "source_control": {

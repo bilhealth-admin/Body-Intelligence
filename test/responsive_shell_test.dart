@@ -20,6 +20,11 @@ Widget shellApp({
         path: '/profile-settings',
         builder: (_, _) => const ProfileSettingsPage(),
       ),
+      GoRoute(
+        path: '/wellness/workouts',
+        builder: (_, _) =>
+            const Scaffold(body: Center(child: Text('workout-library'))),
+      ),
       ShellRoute(
         builder: (_, _, child) => ResponsiveAppShell(child: child),
         routes: [
@@ -52,6 +57,11 @@ Widget shellApp({
             path: '/settings',
             builder: (_, _) =>
                 const Scaffold(body: Center(child: Text('settings'))),
+          ),
+          GoRoute(
+            path: '/intelligence-center',
+            builder: (_, _) =>
+                const Scaffold(body: Center(child: Text('ai-coach'))),
           ),
         ],
       ),
@@ -109,6 +119,36 @@ void main() {
     }
   });
 
+  testWidgets('compact AI route does not mount the dashboard quick add', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      shellApp(initialLocation: '/intelligence-center'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('ai-coach'), findsOneWidget);
+    expect(find.byKey(const Key('shell-quick-add')), findsNothing);
+  });
+
+  testWidgets('wide AI route does not cover its composer with quick add', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1200, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      shellApp(initialLocation: '/intelligence-center'),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('ai-coach'), findsOneWidget);
+    expect(find.byKey(const Key('shell-quick-add')), findsNothing);
+  });
+
   testWidgets('visible desktop profile control opens the profile form', (
     tester,
   ) async {
@@ -127,7 +167,7 @@ void main() {
     expect(find.text('settings'), findsNothing);
   });
 
-  testWidgets('compact shell destination tap navigates to analytics', (
+  testWidgets('compact shell destination tap navigates to progress', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(600, 900);
@@ -136,9 +176,9 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(shellApp());
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Insights'));
+    await tester.tap(find.text('Progress'));
     await tester.pumpAndSettle();
-    expect(find.text('analytics'), findsOneWidget);
+    expect(find.text('history'), findsOneWidget);
   });
 
   testWidgets('selected index uses exact path matching boundaries', (
@@ -193,14 +233,15 @@ void main() {
     await tester.tap(find.byKey(const Key('shell-quick-add')));
     await tester.pumpAndSettle();
     expect(find.text('إضافة سريعة'), findsOneWidget);
-    expect(find.text('تسجيل الوزن'), findsOneWidget);
-    expect(find.text('إضافة طعام'), findsOneWidget);
-    expect(find.text('إضافة ماء'), findsOneWidget);
-    expect(find.text('البحث أو إنشاء طعام'), findsOneWidget);
+    expect(find.text('وزن'), findsOneWidget);
+    expect(find.text('تسجيل الطعام'), findsOneWidget);
+    expect(find.text('الماء'), findsOneWidget);
+    expect(find.text('مكتبة التمارين'), findsOneWidget);
+    expect(find.textContaining('البحث عن طعام'), findsOneWidget);
     expect(find.text('مسح الباركود'), findsOneWidget);
     expect(find.text('اسأل BIL'), findsNothing);
     expect(
-      Directionality.of(tester.element(find.text('إضافة سريعة'))),
+      Directionality.of(tester.element(find.text('وزن'))),
       TextDirection.rtl,
     );
   });
@@ -217,11 +258,28 @@ void main() {
     await tester.tap(find.byKey(const Key('shell-quick-add')));
     await tester.pumpAndSettle();
     expect(find.text('Quick Add'), findsOneWidget);
-    expect(find.text('Record weight'), findsOneWidget);
-    expect(find.text('Add food'), findsOneWidget);
-    expect(find.text('Add water'), findsOneWidget);
+    expect(find.text('Weight'), findsOneWidget);
+    expect(find.text('Log food'), findsOneWidget);
+    expect(find.text('Water'), findsOneWidget);
+    expect(find.text('Exercise library'), findsOneWidget);
     expect(find.text('Search or create food'), findsOneWidget);
     expect(find.text('Scan barcode'), findsOneWidget);
     expect(find.text('Ask BIL'), findsNothing);
+  });
+
+  testWidgets('quick add exercise opens the real workout library route', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(shellApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('shell-quick-add')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Exercise library'));
+    await tester.pumpAndSettle();
+    expect(find.text('workout-library'), findsOneWidget);
   });
 }

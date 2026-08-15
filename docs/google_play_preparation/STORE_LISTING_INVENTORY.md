@@ -2,9 +2,9 @@
 
 ## Already determined from code
 
-- Package ID: `com.kadem.bil`
+- Package ID: `com.bilhealth.bodyintelligencelog`
 - Current version: `1.0.0+1`
-- Languages: Arabic and English
+- Languages: Arabic, English, French, Spanish, and Turkish
 - RTL: supported
 - Category direction: health and fitness / nutrition and weight management
 - Release artifact: Android App Bundle

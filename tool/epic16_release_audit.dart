@@ -34,13 +34,19 @@ void main() {
   final adGateway = _read(
     'lib/features/ads/services/contextual_ad_gateway.dart',
   );
+  final adMobGateway = _read(
+    'lib/features/ads/services/admob_contextual_ad_gateway.dart',
+  );
   final adProviders = _read('lib/features/ads/providers/ad_providers.dart');
   final adConsent = _read(
     'lib/features/ads/repositories/ad_consent_repository.dart',
   );
   final adPrivacyPage = _read('lib/features/ads/advertising_privacy_page.dart');
   final router = _read('lib/app/router/app_router.dart');
-  final settings = _read('lib/features/settings/settings_page.dart');
+  final settings = [
+    'lib/features/settings/settings_page.dart',
+    'lib/features/settings/settings_page_actions.dart',
+  ].map(_read).join('\n');
   final publicPages = _read('docs/release/BIL_EPIC15_PUBLIC_PAGES.md');
 
   _require(
@@ -58,11 +64,11 @@ void main() {
   final domain = external['domain']! as Map<String, Object?>;
   _require(domain['value'] == 'bilhealth.com', 'Owned domain is not pinned');
   _require(
-    '${domain['public_pages']}'.contains('UNPUBLISHED_OR_UNVERIFIED'),
-    'Domain ownership must not imply publication',
+    '${domain['public_pages']}'.startsWith('OWNER_CONFIRMED_PUBLISHED_'),
+    'Owner-confirmed public-page publication status is missing',
   );
 
-  const identifier = 'com.kadem.bil';
+  const identifier = 'com.bilhealth.bodyintelligencelog';
   _require(
     rc['android_application_id'] == identifier &&
         rc['ios_bundle_identifier'] == identifier,
@@ -84,9 +90,10 @@ void main() {
     'Store metadata identifiers are inconsistent',
   );
   _require(
-    rc['identity_rebranding_decision'] ==
-        'OWNER_APPROVAL_REQUIRED_BEFORE_ANY_IDENTIFIER_CHANGE',
-    'Identifier mutation is not owner-gated',
+    '${rc['identity_rebranding_decision']}'.startsWith(
+      'OWNER_APPROVED_COM_BILHEALTH_BODYINTELLIGENCELOG_',
+    ),
+    'Owner-approved production identifier decision is missing',
   );
 
   _require(
@@ -94,15 +101,17 @@ void main() {
     'Unexpected release version/build number',
   );
   _require(
-    !pubspec.contains('google_mobile_ads:'),
-    'Unreviewed ad SDK must not be shipped',
+    pubspec.contains('google_mobile_ads:') &&
+        adMobGateway.contains('AdRequest(nonPersonalizedAds: true)') &&
+        adMobGateway.contains('productionConfigured(platform)'),
+    'Reviewed fail-closed AdMob integration is incomplete',
   );
   for (final token in const [
     "defaultValue: false",
     "BIL_ADS_ENABLED",
     "BIL_AD_PROVIDER_READY",
-    "BIL_ANDROID_CONTEXTUAL_AD_UNIT_ID",
-    "BIL_IOS_CONTEXTUAL_AD_UNIT_ID",
+    "BIL_ADMOB_ANDROID_BANNER_ID",
+    "BIL_ADMOB_IOS_BANNER_ID",
   ]) {
     _require(
       environment.contains(token),
@@ -126,7 +135,7 @@ void main() {
   );
   _require(
     adProviders.contains('adOnlineProvider') &&
-        adProviders.contains('StateProvider<bool>((ref) => false)'),
+        adProviders.contains('value ?? false'),
     'Advertising connectivity must fail closed until asserted',
   );
   _require(
@@ -148,7 +157,7 @@ void main() {
   );
   _require(
     router.contains("path: '/advertising-privacy'") &&
-        settings.contains("context.push('/advertising-privacy')") &&
+        settings.contains("'/advertising-privacy'") &&
         settings.contains(
           "key: const Key('settings-advertising-privacy-entry')",
         ),
@@ -160,7 +169,7 @@ void main() {
     'Local export copy does not match the private OS save/share flow',
   );
   final forbiddenAdMarkers = RegExp(
-    r'ca-app-pub-|testAdUnit|sampleAdUnit|demoAdUnit',
+    r'ca-app-pub-3940256099942544|testAdUnit|sampleAdUnit|demoAdUnit',
     caseSensitive: false,
   );
   _require(
@@ -199,7 +208,9 @@ void main() {
   stdout.writeln('EPIC16_RELEASE_AUDIT=PASS');
   stdout.writeln('ANDROID_IDENTIFIER=$identifier');
   stdout.writeln('IOS_IDENTIFIER=$identifier');
-  stdout.writeln('IDENTIFIER_CHANGE=OWNER_APPROVAL_REQUIRED');
+  stdout.writeln(
+    'IDENTIFIER_CHANGE=OWNER_APPROVED_COM_BILHEALTH_BODYINTELLIGENCELOG',
+  );
   stdout.writeln('ADS_DEFAULT=FAIL_CLOSED');
-  stdout.writeln('PUBLICATION=OWNER_EXTERNAL_ACTION');
+  stdout.writeln('PUBLICATION=OWNER_CONFIRMED_PUBLISHED');
 }

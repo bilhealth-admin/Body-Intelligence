@@ -28,6 +28,8 @@ void main() {
         protein: 16.9,
         carbs: 66.3,
         fats: 6.9,
+        servingSize: 100,
+        servingUnit: 'g',
       );
       final yogurt = await foods.addFood(
         name: 'Greek yogurt',
@@ -36,6 +38,8 @@ void main() {
         protein: 10,
         carbs: 8,
         fats: 3,
+        servingSize: 100,
+        servingUnit: 'g',
       );
 
       final mealId = await meals.createMealFromDraft(
@@ -102,6 +106,8 @@ void main() {
         protein: 16.9,
         carbs: 66.3,
         fats: 6.9,
+        servingSize: 100,
+        servingUnit: 'g',
       );
 
       await expectLater(

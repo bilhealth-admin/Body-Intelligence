@@ -6,8 +6,8 @@ verification without their external evidence.
 
 ## Frozen identity and version
 
-- Android application/namespace: `com.kadem.bil`.
-- Apple bundle identifier: `com.kadem.bil`.
+- Android application/namespace: `com.bilhealth.bodyintelligencelog`.
+- Apple bundle identifier: `com.bilhealth.bodyintelligencelog`.
 - Store name: `BIL - Body Intelligence Log` on Android and `BIL` on Apple.
 - Release version: `1.0.0+1`. Future uploads increment the build number; semantic
   marketing versions change only for an intended product release.

@@ -14,10 +14,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4822,
@@ -34,10 +32,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4823,
@@ -54,10 +50,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4824,
@@ -74,10 +68,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4825,
@@ -94,10 +86,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4826,
@@ -114,10 +104,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4827,
@@ -134,10 +122,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4828,
@@ -154,10 +140,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/sleep_tracker_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_phone.png",
-    "evidence_bytes": 51088,
-    "evidence_generated_at": "2026-08-05T00:57:10.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_phone.png"
   },
   {
     "reference": 4829,
@@ -174,10 +158,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/sleep_tracker_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_phone.png",
-    "evidence_bytes": 51088,
-    "evidence_generated_at": "2026-08-05T00:57:10.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_phone.png"
   },
   {
     "reference": 4830,
@@ -194,10 +176,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/sleep_tracker_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_phone.png",
-    "evidence_bytes": 51088,
-    "evidence_generated_at": "2026-08-05T00:57:10.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_phone.png"
   },
   {
     "reference": 4831,
@@ -214,10 +194,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/sleep_tracker_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_phone.png",
-    "evidence_bytes": 51088,
-    "evidence_generated_at": "2026-08-05T00:57:10.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_phone.png"
   },
   {
     "reference": 4832,
@@ -234,10 +212,8 @@
     "gap": "screen title and horizontal rhythm diverged from the mobile reference",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/daily_log/daily_log_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_meal_entry_phone.png",
-    "evidence_bytes": 44956,
-    "evidence_generated_at": "2026-08-05T00:57:15.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_meal_entry_phone.png"
   },
   {
     "reference": 4833,
@@ -254,10 +230,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4834,
@@ -274,10 +248,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4835,
@@ -294,10 +266,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4836,
@@ -314,10 +284,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4837,
@@ -334,10 +302,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4838,
@@ -354,10 +320,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4839,
@@ -374,10 +338,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4840,
@@ -394,10 +356,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4841,
@@ -414,10 +374,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4842,
@@ -434,10 +392,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4843,
@@ -454,10 +410,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4844,
@@ -474,10 +428,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4845,
@@ -494,10 +446,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4846,
@@ -514,10 +464,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4847,
@@ -534,10 +482,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4848,
@@ -554,10 +500,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4849,
@@ -574,30 +518,26 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
   },
   {
     "reference": 4850,
     "name": "IMG_4850.PNG",
     "sha256": "cf5d9dcb2c7e3b9af1220d99c37ed0057cbcb02c1bb3aa4acc8aa333f2e3f1ed",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4850.jpg",
-    "screen": "recipe collection",
+    "screen": "subscription",
     "language": "en",
     "brightness": "light",
-    "state": "recipe discovery, collection, detail or empty state",
-    "bil_route": "/wellness/recipes",
-    "capability": "recipe grid and category details",
-    "before_state": "implemented; reference-specific visual evidence missing",
-    "gap": "library margins diverged from the canonical phone rhythm",
-    "closure_action": "production page refined; refreshed golden required",
-    "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png",
-    "evidence_bytes": 218342,
-    "evidence_generated_at": "2026-08-05T00:57:07.000Z"
+    "state": "subscription offer and entitlement state",
+    "bil_route": "/plans",
+    "capability": "honest store plans and entitlements",
+    "before_state": "store catalog unavailable in the deterministic production state",
+    "gap": "real device-store products and sandbox billing remain external",
+    "closure_action": "captured truthful unavailable state with purchase restore and manage disabled",
+    "production_file": "lib/features/commerce/presentation/bil_store_plans_page.dart",
+    "status": "limited local visual and interaction acceptance; real device-store validation pending",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_store_plans_phone.png"
   },
   {
     "reference": 4851,
@@ -610,14 +550,12 @@
     "state": "subscription offer and entitlement state",
     "bil_route": "/plans",
     "capability": "honest store plans and entitlements",
-    "before_state": "implemented with truthful unavailable states; production capture missing",
-    "gap": "dense promotional hierarchy and excessive hero rounding",
-    "closure_action": "production page refined; refreshed golden required",
+    "before_state": "deterministic fake catalog required to exercise store callbacks without granting entitlement",
+    "gap": "real product retrieval billing UI receipts and entitlement refresh remain external",
+    "closure_action": "captured injected catalog and verified purchase restore and manage dispatch exactly once",
     "production_file": "lib/features/commerce/presentation/bil_store_plans_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_store_plans_phone.png",
-    "evidence_bytes": 74060,
-    "evidence_generated_at": "2026-08-05T00:57:01.000Z"
+    "status": "limited local visual and interaction acceptance; sandbox purchase lifecycle pending",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_store_plans_phone_2.png"
   },
   {
     "reference": 4852,
@@ -634,10 +572,8 @@
     "gap": "dense promotional hierarchy and excessive hero rounding",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/commerce/presentation/bil_store_plans_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_store_plans_phone.png",
-    "evidence_bytes": 74060,
-    "evidence_generated_at": "2026-08-05T00:57:01.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_store_plans_phone.png"
   },
   {
     "reference": 4853,
@@ -654,10 +590,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png",
-    "evidence_bytes": 158862,
-    "evidence_generated_at": "2026-08-05T00:57:08.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png"
   },
   {
     "reference": 4854,
@@ -674,10 +608,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png",
-    "evidence_bytes": 158862,
-    "evidence_generated_at": "2026-08-05T00:57:08.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png"
   },
   {
     "reference": 4855,
@@ -694,10 +626,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png",
-    "evidence_bytes": 158862,
-    "evidence_generated_at": "2026-08-05T00:57:08.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png"
   },
   {
     "reference": 4856,
@@ -714,10 +644,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png",
-    "evidence_bytes": 158862,
-    "evidence_generated_at": "2026-08-05T00:57:08.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png"
   },
   {
     "reference": 4857,
@@ -734,10 +662,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png",
-    "evidence_bytes": 158862,
-    "evidence_generated_at": "2026-08-05T00:57:08.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png"
   },
   {
     "reference": 4858,
@@ -754,10 +680,8 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png",
-    "evidence_bytes": 158862,
-    "evidence_generated_at": "2026-08-05T00:57:08.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png"
   },
   {
     "reference": 4859,
@@ -774,10 +698,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
   },
   {
     "reference": 4860,
@@ -794,10 +716,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
   },
   {
     "reference": 4861,
@@ -807,17 +727,15 @@
     "screen": "apps and devices",
     "language": "en",
     "brightness": "light",
-    "state": "device source, connection or permission state",
+    "state": "permission denied with recovery actions",
     "bil_route": "/connected-health",
     "capability": "supported health and device sources",
     "before_state": "implemented with truthful unavailable states; production capture missing",
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png",
-    "evidence_bytes": 71045,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "family-equivalent local state accepted; OS grant and data external",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png"
   },
   {
     "reference": 4862,
@@ -827,17 +745,15 @@
     "screen": "apps and devices",
     "language": "en",
     "brightness": "light",
-    "state": "device source, connection or permission state",
+    "state": "supported connection compatibility disclosure",
     "bil_route": "/connected-health",
     "capability": "supported health and device sources",
     "before_state": "implemented with truthful unavailable states; production capture missing",
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png",
-    "evidence_bytes": 71045,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "family-equivalent local state accepted; physical integrations external",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_compatibility_phone.png"
   },
   {
     "reference": 4863,
@@ -847,17 +763,15 @@
     "screen": "apps and devices",
     "language": "en",
     "brightness": "light",
-    "state": "device source, connection or permission state",
+    "state": "unsupported platform unavailable state",
     "bil_route": "/connected-health",
     "capability": "supported health and device sources",
     "before_state": "implemented with truthful unavailable states; production capture missing",
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png",
-    "evidence_bytes": 71045,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "family-equivalent local state accepted; platform support external",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_unavailable_phone.png"
   },
   {
     "reference": 4864,
@@ -867,17 +781,15 @@
     "screen": "apps and devices",
     "language": "en",
     "brightness": "light",
-    "state": "device source, connection or permission state",
+    "state": "provider update required state",
     "bil_route": "/connected-health",
     "capability": "supported health and device sources",
     "before_state": "implemented with truthful unavailable states; production capture missing",
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png",
-    "evidence_bytes": 71045,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "family-equivalent local state accepted; provider install external",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_update_required_phone.png"
   },
   {
     "reference": 4865,
@@ -887,17 +799,15 @@
     "screen": "apps and devices",
     "language": "en",
     "brightness": "light",
-    "state": "device source, connection or permission state",
+    "state": "offline degraded state with local-data preservation",
     "bil_route": "/connected-health",
     "capability": "supported health and device sources",
     "before_state": "implemented with truthful unavailable states; production capture missing",
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png",
-    "evidence_bytes": 71045,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "family-equivalent local state accepted; live sync external",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_offline_phone.png"
   },
   {
     "reference": 4866,
@@ -910,14 +820,12 @@
     "state": "friend discovery, request or empty state",
     "bil_route": "/community/connections",
     "capability": "friends, requests and invitations",
-    "before_state": "implemented with truthful unavailable states; production capture missing",
-    "gap": "signed-out state lacked a mature actionable surface",
-    "closure_action": "production page refined; refreshed golden required",
+    "before_state": "authenticated repository-backed Community family state captured",
+    "gap": "external web profile layout is intentionally represented by BIL authenticated Community family evidence",
+    "closure_action": "authenticated hub and profile evidence reviewed with cloud data paths verified",
     "production_file": "lib/features/community/presentation/community_connections_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_connections_phone.png",
-    "evidence_bytes": 13407,
-    "evidence_generated_at": "2026-08-05T00:57:03.000Z"
+    "status": "direct limited equivalence accepted",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_friend_authenticated_phone.png"
   },
   {
     "reference": 4867,
@@ -934,10 +842,8 @@
     "gap": "signed-out state lacked a mature actionable surface",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/community/presentation/community_connections_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_connections_phone.png",
-    "evidence_bytes": 13407,
-    "evidence_generated_at": "2026-08-05T00:57:03.000Z"
+    "status": "direct limited equivalence accepted",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_request_authenticated_phone.png"
   },
   {
     "reference": 4868,
@@ -948,16 +854,14 @@
     "language": "en",
     "brightness": "light",
     "state": "friend discovery, request or empty state",
-    "bil_route": "/community/connections",
+    "bil_route": "/community/people",
     "capability": "friends, requests and invitations",
     "before_state": "implemented with truthful unavailable states; production capture missing",
     "gap": "signed-out state lacked a mature actionable surface",
     "closure_action": "production page refined; refreshed golden required",
-    "production_file": "lib/features/community/presentation/community_connections_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_connections_phone.png",
-    "evidence_bytes": 13407,
-    "evidence_generated_at": "2026-08-05T00:57:03.000Z"
+    "production_file": "lib/features/community/presentation/community_people_page.dart",
+    "status": "direct limited equivalence accepted",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_add_friends_authenticated_phone.png"
   },
   {
     "reference": 4869,
@@ -968,16 +872,14 @@
     "language": "en",
     "brightness": "light",
     "state": "friend discovery, request or empty state",
-    "bil_route": "/community/connections",
+    "bil_route": "/community/people",
     "capability": "friends, requests and invitations",
     "before_state": "implemented with truthful unavailable states; production capture missing",
     "gap": "signed-out state lacked a mature actionable surface",
     "closure_action": "production page refined; refreshed golden required",
-    "production_file": "lib/features/community/presentation/community_connections_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_connections_phone.png",
-    "evidence_bytes": 13407,
-    "evidence_generated_at": "2026-08-05T00:57:03.000Z"
+    "production_file": "lib/features/community/presentation/community_people_page.dart",
+    "status": "direct limited equivalence accepted",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_people_search_authenticated_phone.png"
   },
   {
     "reference": 4870,
@@ -994,10 +896,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/community/presentation/community_profile_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_phone.png",
-    "evidence_bytes": 13794,
-    "evidence_generated_at": "2026-08-05T00:57:03.000Z"
+    "status": "family-equivalent limited acceptance; live cloud device external",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png"
   },
   {
     "reference": 4871,
@@ -1014,30 +914,26 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/community/presentation/community_profile_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_phone.png",
-    "evidence_bytes": 13794,
-    "evidence_generated_at": "2026-08-05T00:57:03.000Z"
+    "status": "family-equivalent limited acceptance; live cloud device external",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png"
   },
   {
     "reference": 4872,
     "name": "IMG_4872.PNG",
     "sha256": "5e9ff8df79b1579e382ce18e36828454ff04368eaa509c3f4abf47c852c94547",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4872.jpg",
-    "screen": "community profile",
+    "screen": "community notifications",
     "language": "en",
     "brightness": "light",
-    "state": "community profile state",
-    "bil_route": "/community/profile",
-    "capability": "profile and community identity",
+    "state": "authoritative empty community updates",
+    "bil_route": "/community/notifications",
+    "capability": "friend requests and unread messages",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production page refined; refreshed golden required",
-    "production_file": "lib/features/community/presentation/community_profile_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_phone.png",
-    "evidence_bytes": 13794,
-    "evidence_generated_at": "2026-08-05T00:57:03.000Z"
+    "production_file": "lib/features/community/presentation/community_notifications_page.dart",
+    "status": "direct limited equivalence accepted; realtime push external",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_notifications_empty_authenticated_phone.png"
   },
   {
     "reference": 4873,
@@ -1054,10 +950,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/profile/premium_profile_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_phone.png",
-    "evidence_bytes": 36119,
-    "evidence_generated_at": "2026-08-05T00:57:19.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_phone.png"
   },
   {
     "reference": 4874,
@@ -1074,10 +968,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/profile/premium_profile_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_phone.png",
-    "evidence_bytes": 36119,
-    "evidence_generated_at": "2026-08-05T00:57:19.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_phone.png"
   },
   {
     "reference": 4875,
@@ -1094,10 +986,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/profile/premium_profile_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_goals_phone.png",
-    "evidence_bytes": 37862,
-    "evidence_generated_at": "2026-08-05T00:57:20.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_goals_phone.png"
   },
   {
     "reference": 4876,
@@ -1114,10 +1004,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/profile/premium_profile_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_goals_phone.png",
-    "evidence_bytes": 37862,
-    "evidence_generated_at": "2026-08-05T00:57:20.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_goals_phone.png"
   },
   {
     "reference": 4877,
@@ -1134,10 +1022,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/profile/premium_profile_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_goals_phone.png",
-    "evidence_bytes": 37862,
-    "evidence_generated_at": "2026-08-05T00:57:20.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_goals_phone.png"
   },
   {
     "reference": 4878,
@@ -1154,10 +1040,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4879,
@@ -1174,10 +1058,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4880,
@@ -1194,10 +1076,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4881,
@@ -1214,10 +1094,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4882,
@@ -1234,10 +1112,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4883,
@@ -1254,10 +1130,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4884,
@@ -1274,10 +1148,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4885,
@@ -1294,10 +1166,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4886,
@@ -1314,10 +1184,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4887,
@@ -1334,10 +1202,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4888,
@@ -1354,10 +1220,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4889,
@@ -1374,10 +1238,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4890,
@@ -1394,10 +1256,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
   },
   {
     "reference": 4891,
@@ -1414,10 +1274,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/daily_log/daily_log_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_water_entry_phone.png",
-    "evidence_bytes": 39285,
-    "evidence_generated_at": "2026-08-05T00:57:16.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_water_entry_phone.png"
   },
   {
     "reference": 4892,
@@ -1434,10 +1292,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/daily_check_in/daily_check_in_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_check_in_phone.png",
-    "evidence_bytes": 37638,
-    "evidence_generated_at": "2026-08-05T00:57:21.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_check_in_phone.png"
   },
   {
     "reference": 4893,
@@ -1454,10 +1310,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
   },
   {
     "reference": 4894,
@@ -1474,10 +1328,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
   },
   {
     "reference": 4895,
@@ -1494,10 +1346,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
   },
   {
     "reference": 4896,
@@ -1514,10 +1364,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
   },
   {
     "reference": 4897,
@@ -1534,10 +1382,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_1_phone.png"
   },
   {
     "reference": 4898,
@@ -1554,10 +1400,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_2_phone.png"
   },
   {
     "reference": 4899,
@@ -1574,10 +1418,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_3_phone.png"
   },
   {
     "reference": 4900,
@@ -1594,10 +1436,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_4_phone.png"
   },
   {
     "reference": 4901,
@@ -1614,10 +1454,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_5_phone.png"
   },
   {
     "reference": 4902,
@@ -1634,10 +1472,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_6_phone.png"
   },
   {
     "reference": 4903,
@@ -1654,10 +1490,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_7_phone.png"
   },
   {
     "reference": 4904,
@@ -1674,10 +1508,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_8_phone.png"
   },
   {
     "reference": 4905,
@@ -1694,10 +1526,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_9_phone.png"
   },
   {
     "reference": 4906,
@@ -1714,10 +1544,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_10_phone.png"
   },
   {
     "reference": 4907,
@@ -1734,10 +1562,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
   },
   {
     "reference": 4908,
@@ -1754,10 +1580,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
   },
   {
     "reference": 4909,
@@ -1774,10 +1598,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
   },
   {
     "reference": 4910,
@@ -1794,10 +1616,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 55995,
-    "evidence_generated_at": "2026-08-05T00:57:09.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
   },
   {
     "reference": 4911,
@@ -1814,10 +1634,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/daily_log/daily_log_page_actions.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_meal_photo_unavailable_phone.png",
-    "evidence_bytes": 42046,
-    "evidence_generated_at": "2026-08-05T00:57:17.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_meal_image_guide_2_phone.png"
   },
   {
     "reference": 4912,
@@ -1834,10 +1652,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/daily_log/daily_log_page_actions.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_meal_photo_unavailable_phone.png",
-    "evidence_bytes": 42046,
-    "evidence_generated_at": "2026-08-05T00:57:17.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_meal_image_guide_3_phone.png"
   },
   {
     "reference": 4913,
@@ -1854,10 +1670,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/daily_log/daily_log_page_actions.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_meal_photo_unavailable_phone.png",
-    "evidence_bytes": 42046,
-    "evidence_generated_at": "2026-08-05T00:57:17.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_meal_image_guide_4_phone.png"
   },
   {
     "reference": 4914,
@@ -1874,10 +1688,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/nutrition/presentation/food_barcode_scanner_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_barcode_unavailable_phone.png",
-    "evidence_bytes": 13562,
-    "evidence_generated_at": "2026-08-05T00:57:18.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_barcode_unavailable_phone.png"
   },
   {
     "reference": 4915,
@@ -1894,10 +1706,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/daily_log/daily_log_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_meal_entry_phone.png",
-    "evidence_bytes": 44956,
-    "evidence_generated_at": "2026-08-05T00:57:15.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_food_meal_search_phone.png"
   },
   {
     "reference": 4916,
@@ -1914,10 +1724,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/daily_log/daily_log_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_meal_entry_phone.png",
-    "evidence_bytes": 44956,
-    "evidence_generated_at": "2026-08-05T00:57:15.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_verified_result_phone.png"
   },
   {
     "reference": 4917,
@@ -1934,10 +1742,8 @@
     "gap": "screen title and horizontal rhythm diverged from the mobile reference",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/nutrition/food_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_phone.png",
-    "evidence_bytes": 185548,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_meals_phone.png"
   },
   {
     "reference": 4918,
@@ -1954,10 +1760,8 @@
     "gap": "screen title and horizontal rhythm diverged from the mobile reference",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/nutrition/food_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_phone.png",
-    "evidence_bytes": 185548,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_recipes_phone.png"
   },
   {
     "reference": 4919,
@@ -1974,10 +1778,8 @@
     "gap": "screen title and horizontal rhythm diverged from the mobile reference",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/nutrition/food_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_phone.png",
-    "evidence_bytes": 185548,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_my_foods_phone.png"
   },
   {
     "reference": 4920,
@@ -1994,10 +1796,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/nutrition/food_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_custom_food_phone.png",
-    "evidence_bytes": 47794,
-    "evidence_generated_at": "2026-08-05T00:57:08.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_custom_food_phone.png"
   },
   {
     "reference": 4921,
@@ -2014,10 +1814,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/nutrition/food_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_custom_food_phone.png",
-    "evidence_bytes": 47794,
-    "evidence_generated_at": "2026-08-05T00:57:08.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_quick_nutrition_form_phone.png"
   },
   {
     "reference": 4922,
@@ -2034,10 +1832,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/daily_log/daily_log_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png",
-    "evidence_bytes": 46200,
-    "evidence_generated_at": "2026-08-05T00:57:14.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png"
   },
   {
     "reference": 4923,
@@ -2054,10 +1850,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/daily_log/daily_log_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png",
-    "evidence_bytes": 46200,
-    "evidence_generated_at": "2026-08-05T00:57:14.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_sections_middle_phone.png"
   },
   {
     "reference": 4924,
@@ -2074,10 +1868,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/daily_log/daily_log_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png",
-    "evidence_bytes": 46200,
-    "evidence_generated_at": "2026-08-05T00:57:14.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_sections_lower_phone.png"
   },
   {
     "reference": 4925,
@@ -2093,11 +1885,9 @@
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
-    "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 133386,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "production_file": "lib/features/dashboard/presentation/dashboard_preferences_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone.png"
   },
   {
     "reference": 4926,
@@ -2108,16 +1898,14 @@
     "language": "en",
     "brightness": "light",
     "state": "progress chart, range or measurement state",
-    "bil_route": "/analytics",
+    "bil_route": "/history",
     "capability": "measurements, ranges and charts",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/analytics/analytics_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_analytics_progress_phone.png",
-    "evidence_bytes": 61461,
-    "evidence_generated_at": "2026-08-05T00:57:19.000Z"
+    "production_file": "lib/features/history/progress_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_progress_steps_month_phone.png"
   },
   {
     "reference": 4927,
@@ -2128,16 +1916,14 @@
     "language": "en",
     "brightness": "light",
     "state": "progress chart, range or measurement state",
-    "bil_route": "/analytics",
+    "bil_route": "/history",
     "capability": "measurements, ranges and charts",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/analytics/analytics_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_analytics_progress_phone.png",
-    "evidence_bytes": 61461,
-    "evidence_generated_at": "2026-08-05T00:57:19.000Z"
+    "production_file": "lib/features/history/progress_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_progress_range_picker_phone.png"
   },
   {
     "reference": 4928,
@@ -2148,16 +1934,14 @@
     "language": "en",
     "brightness": "light",
     "state": "progress chart, range or measurement state",
-    "bil_route": "/analytics",
+    "bil_route": "/history",
     "capability": "measurements, ranges and charts",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/analytics/analytics_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_analytics_progress_phone.png",
-    "evidence_bytes": 61461,
-    "evidence_generated_at": "2026-08-05T00:57:19.000Z"
+    "production_file": "lib/features/history/progress_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_progress_metric_picker_phone.png"
   },
   {
     "reference": 4929,
@@ -2168,16 +1952,14 @@
     "language": "en",
     "brightness": "light",
     "state": "progress chart, range or measurement state",
-    "bil_route": "/analytics",
+    "bil_route": "/history",
     "capability": "measurements, ranges and charts",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/analytics/analytics_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_analytics_progress_phone.png",
-    "evidence_bytes": 61461,
-    "evidence_generated_at": "2026-08-05T00:57:19.000Z"
+    "production_file": "lib/features/history/progress_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_progress_metric_picker_lower_phone.png"
   },
   {
     "reference": 4930,
@@ -2194,10 +1976,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/settings_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png",
-    "evidence_bytes": 52858,
-    "evidence_generated_at": "2026-08-05T00:57:21.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_more_phone.png"
   },
   {
     "reference": 4931,
@@ -2214,10 +1994,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/settings_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png",
-    "evidence_bytes": 52858,
-    "evidence_generated_at": "2026-08-05T00:57:21.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_more_lower_phone.png"
   },
   {
     "reference": 4932,
@@ -2228,16 +2006,14 @@
     "language": "en",
     "brightness": "light",
     "state": "empty measurement progress state",
-    "bil_route": "/analytics",
+    "bil_route": "/history",
     "capability": "empty measurement state and add action",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/analytics/analytics_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_analytics_empty_phone.png",
-    "evidence_bytes": 56543,
-    "evidence_generated_at": "2026-08-05T00:57:18.000Z"
+    "production_file": "lib/features/history/progress_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_progress_body_empty_phone.png"
   },
   {
     "reference": 4933,
@@ -2254,10 +2030,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/fasting_timer_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_fasting_phone.png",
-    "evidence_bytes": 54389,
-    "evidence_generated_at": "2026-08-05T00:57:11.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_fasting_phone.png"
   },
   {
     "reference": 4934,
@@ -2274,10 +2048,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/weekly_report_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/goldens/epic8_weekly_report_phone_ltr_light.png",
-    "evidence_bytes": 32712,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/goldens/epic8_weekly_report_phone_ltr_light.png"
   },
   {
     "reference": 4935,
@@ -2294,10 +2066,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/weekly_report_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/goldens/epic8_weekly_report_phone_ltr_light.png",
-    "evidence_bytes": 32712,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/goldens/epic8_weekly_report_coverage_phone.png"
   },
   {
     "reference": 4936,
@@ -2314,10 +2084,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/weekly_report_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/goldens/epic8_weekly_report_phone_ltr_light.png",
-    "evidence_bytes": 32712,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/goldens/epic8_weekly_report_calories_anchor.png"
   },
   {
     "reference": 4937,
@@ -2334,10 +2102,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/weekly_report_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/goldens/epic8_weekly_report_phone_ltr_light.png",
-    "evidence_bytes": 32712,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/goldens/epic8_weekly_report_frequent_anchor.png"
   },
   {
     "reference": 4938,
@@ -2354,10 +2120,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/weekly_report_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/goldens/epic8_weekly_report_phone_ltr_light.png",
-    "evidence_bytes": 32712,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/goldens/epic8_weekly_report_macros_anchor.png"
   },
   {
     "reference": 4939,
@@ -2374,10 +2138,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/weekly_report_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/goldens/epic8_weekly_report_phone_ltr_light.png",
-    "evidence_bytes": 32712,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/goldens/epic8_weekly_report_exercise_anchor.png"
   },
   {
     "reference": 4940,
@@ -2394,10 +2156,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/weekly_report_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/goldens/epic8_weekly_report_phone_ltr_light.png",
-    "evidence_bytes": 32712,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/goldens/epic8_weekly_report_alltime_anchor.png"
   },
   {
     "reference": 4941,
@@ -2408,16 +2168,14 @@
     "language": "en",
     "brightness": "light",
     "state": "calorie, macro or nutrient analytics state",
-    "bil_route": "/analytics",
+    "bil_route": "/analytics/nutrition?tab=macros",
     "capability": "calories, nutrients and macros",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/analytics/analytics_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_analytics_progress_phone.png",
-    "evidence_bytes": 61461,
-    "evidence_generated_at": "2026-08-05T00:57:19.000Z"
+    "production_file": "lib/features/analytics/nutrition_analytics_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_nutrition_analytics_macros_phone.png"
   },
   {
     "reference": 4942,
@@ -2428,16 +2186,14 @@
     "language": "en",
     "brightness": "light",
     "state": "calorie, macro or nutrient analytics state",
-    "bil_route": "/analytics",
+    "bil_route": "/analytics/nutrition?tab=nutrients",
     "capability": "calories, nutrients and macros",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/analytics/analytics_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_analytics_progress_phone.png",
-    "evidence_bytes": 61461,
-    "evidence_generated_at": "2026-08-05T00:57:19.000Z"
+    "production_file": "lib/features/analytics/nutrition_analytics_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_nutrition_analytics_nutrients_phone.png"
   },
   {
     "reference": 4943,
@@ -2448,16 +2204,14 @@
     "language": "en",
     "brightness": "light",
     "state": "calorie, macro or nutrient analytics state",
-    "bil_route": "/analytics",
+    "bil_route": "/analytics/nutrition?tab=calories",
     "capability": "calories, nutrients and macros",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/analytics/analytics_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_analytics_progress_phone.png",
-    "evidence_bytes": 61461,
-    "evidence_generated_at": "2026-08-05T00:57:19.000Z"
+    "production_file": "lib/features/analytics/nutrition_analytics_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_nutrition_analytics_calories_phone.png"
   },
   {
     "reference": 4944,
@@ -2468,16 +2222,14 @@
     "language": "en",
     "brightness": "light",
     "state": "private data export state",
-    "bil_route": "/settings",
+    "bil_route": "/settings/local-export",
     "capability": "private data export",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/settings_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png",
-    "evidence_bytes": 52858,
-    "evidence_generated_at": "2026-08-05T00:57:21.000Z"
+    "production_file": "lib/features/settings/local_export_range_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_local_export_selected_day_phone.png"
   },
   {
     "reference": 4945,
@@ -2494,10 +2246,8 @@
     "gap": "screen title and horizontal rhythm diverged from the mobile reference",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/nutrition/food_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_phone.png",
-    "evidence_bytes": 185548,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_recipes_phone.png"
   },
   {
     "reference": 4946,
@@ -2514,10 +2264,8 @@
     "gap": "screen title and horizontal rhythm diverged from the mobile reference",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/nutrition/food_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_phone.png",
-    "evidence_bytes": 185548,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_meals_phone.png"
   },
   {
     "reference": 4947,
@@ -2534,10 +2282,8 @@
     "gap": "screen title and horizontal rhythm diverged from the mobile reference",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/nutrition/food_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_phone.png",
-    "evidence_bytes": 185548,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_my_foods_phone.png"
   },
   {
     "reference": 4948,
@@ -2554,10 +2300,8 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/notifications/presentation/notification_settings_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_notification_settings_phone.png",
-    "evidence_bytes": 32072,
-    "evidence_generated_at": "2026-08-05T00:57:13.000Z"
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_notification_settings_phone.png"
   },
   {
     "reference": 4949,
@@ -2574,10 +2318,8 @@
     "gap": "signed-out state lacked a mature actionable surface",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/community/presentation/community_hub_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_signed_out_phone.png",
-    "evidence_bytes": 25862,
-    "evidence_generated_at": "2026-08-05T00:57:02.000Z"
+    "status": "limited family-equivalent acceptance; realtime device behavior excluded",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_hub_authenticated_phone.png"
   },
   {
     "reference": 4950,
@@ -2590,14 +2332,12 @@
     "state": "community home, profile or navigation state",
     "bil_route": "/community",
     "capability": "community profile and navigation",
-    "before_state": "implemented with truthful unavailable states; production capture missing",
-    "gap": "signed-out state lacked a mature actionable surface",
-    "closure_action": "production page refined; refreshed golden required",
+    "before_state": "authenticated repository-backed Community profile captured",
+    "gap": "external web scroll layout is intentionally grouped to one BIL profile editor state",
+    "closure_action": "authenticated profile editor reviewed with guarded persistence tests",
     "production_file": "lib/features/community/presentation/community_hub_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_signed_out_phone.png",
-    "evidence_bytes": 25862,
-    "evidence_generated_at": "2026-08-05T00:57:02.000Z"
+    "status": "limited family-equivalent acceptance; live device cloud UI excluded",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png"
   },
   {
     "reference": 4951,
@@ -2610,14 +2350,12 @@
     "state": "community home, profile or navigation state",
     "bil_route": "/community",
     "capability": "community profile and navigation",
-    "before_state": "implemented with truthful unavailable states; production capture missing",
-    "gap": "signed-out state lacked a mature actionable surface",
-    "closure_action": "production page refined; refreshed golden required",
+    "before_state": "authenticated Community navigation menu captured",
+    "gap": "BIL uses an in-app action menu rather than the reference web drawer",
+    "closure_action": "production navigation menu and route dispatch reviewed",
     "production_file": "lib/features/community/presentation/community_hub_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_signed_out_phone.png",
-    "evidence_bytes": 25862,
-    "evidence_generated_at": "2026-08-05T00:57:02.000Z"
+    "status": "limited family-equivalent acceptance; external web navigation excluded",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_navigation_menu_authenticated_phone.png"
   },
   {
     "reference": 4952,
@@ -2630,14 +2368,12 @@
     "state": "community home, profile or navigation state",
     "bil_route": "/community",
     "capability": "community routes and profile",
-    "before_state": "implemented with truthful unavailable states; production capture missing",
-    "gap": "signed-out state lacked a mature actionable surface",
-    "closure_action": "production page refined; refreshed golden required",
+    "before_state": "authenticated repository-backed Community family state captured",
+    "gap": "external web profile layout is intentionally represented by BIL authenticated Community family evidence",
+    "closure_action": "authenticated hub and profile evidence reviewed with cloud data paths verified",
     "production_file": "lib/features/community/presentation/community_hub_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_signed_out_phone.png",
-    "evidence_bytes": 25862,
-    "evidence_generated_at": "2026-08-05T00:57:02.000Z"
+    "status": "limited family-equivalent acceptance; realtime device behavior excluded",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_hub_authenticated_phone.png"
   },
   {
     "reference": 4953,
@@ -2650,14 +2386,12 @@
     "state": "community home, profile or navigation state",
     "bil_route": "/community",
     "capability": "community routes and profile",
-    "before_state": "implemented with truthful unavailable states; production capture missing",
-    "gap": "signed-out state lacked a mature actionable surface",
-    "closure_action": "production page refined; refreshed golden required",
+    "before_state": "authenticated repository-backed Community profile captured",
+    "gap": "external web scroll layout is intentionally grouped to one BIL profile editor state",
+    "closure_action": "authenticated profile editor reviewed with guarded persistence tests",
     "production_file": "lib/features/community/presentation/community_hub_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_signed_out_phone.png",
-    "evidence_bytes": 25862,
-    "evidence_generated_at": "2026-08-05T00:57:02.000Z"
+    "status": "limited family-equivalent acceptance; live device cloud UI excluded",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png"
   },
   {
     "reference": 4954,
@@ -2668,16 +2402,14 @@
     "language": "en",
     "brightness": "light",
     "state": "education library category or article state",
-    "bil_route": "/wellness-library",
+    "bil_route": "/wellness/learn",
     "capability": "trusted education, recipes and tools",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/wellness/presentation/wellness_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_library_phone.png",
-    "evidence_bytes": 411487,
-    "evidence_generated_at": "2026-08-05T00:57:12.000Z"
+    "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_phone.png"
   },
   {
     "reference": 4955,
@@ -2688,16 +2420,14 @@
     "language": "en",
     "brightness": "light",
     "state": "education library category or article state",
-    "bil_route": "/wellness-library",
+    "bil_route": "/wellness/learn",
     "capability": "trusted education, recipes and tools",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/wellness/presentation/wellness_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_library_phone.png",
-    "evidence_bytes": 411487,
-    "evidence_generated_at": "2026-08-05T00:57:12.000Z"
+    "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_nutrition_phone.png"
   },
   {
     "reference": 4956,
@@ -2708,16 +2438,14 @@
     "language": "en",
     "brightness": "light",
     "state": "education library category or article state",
-    "bil_route": "/wellness-library",
+    "bil_route": "/wellness/learn",
     "capability": "trusted education, recipes and tools",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/wellness/presentation/wellness_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_library_phone.png",
-    "evidence_bytes": 411487,
-    "evidence_generated_at": "2026-08-05T00:57:12.000Z"
+    "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_sleep_phone.png"
   },
   {
     "reference": 4957,
@@ -2728,16 +2456,14 @@
     "language": "en",
     "brightness": "light",
     "state": "education library category or article state",
-    "bil_route": "/wellness-library",
+    "bil_route": "/wellness/learn",
     "capability": "trusted education, recipes and tools",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/wellness/presentation/wellness_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_library_phone.png",
-    "evidence_bytes": 411487,
-    "evidence_generated_at": "2026-08-05T00:57:12.000Z"
+    "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_movement_phone.png"
   },
   {
     "reference": 4958,
@@ -2748,16 +2474,14 @@
     "language": "en",
     "brightness": "light",
     "state": "education library category or article state",
-    "bil_route": "/wellness-library",
+    "bil_route": "/wellness/learn",
     "capability": "trusted education, recipes and tools",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/wellness/presentation/wellness_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_library_phone.png",
-    "evidence_bytes": 411487,
-    "evidence_generated_at": "2026-08-05T00:57:12.000Z"
+    "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_privacy_phone.png"
   },
   {
     "reference": 4959,
@@ -2768,16 +2492,14 @@
     "language": "en",
     "brightness": "light",
     "state": "education library category or article state",
-    "bil_route": "/wellness-library",
+    "bil_route": "/wellness/learn",
     "capability": "trusted education, recipes and tools",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/wellness/presentation/wellness_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_library_phone.png",
-    "evidence_bytes": 411487,
-    "evidence_generated_at": "2026-08-05T00:57:12.000Z"
+    "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_search_phone.png"
   },
   {
     "reference": 4960,
@@ -2788,16 +2510,14 @@
     "language": "en",
     "brightness": "light",
     "state": "education library category or article state",
-    "bil_route": "/wellness-library",
+    "bil_route": "/wellness/learn",
     "capability": "trusted education, recipes and tools",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/wellness/presentation/wellness_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_library_phone.png",
-    "evidence_bytes": 411487,
-    "evidence_generated_at": "2026-08-05T00:57:12.000Z"
+    "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_sleep_phone.png"
   },
   {
     "reference": 4961,
@@ -2808,16 +2528,14 @@
     "language": "en",
     "brightness": "light",
     "state": "education library category or article state",
-    "bil_route": "/wellness-library",
+    "bil_route": "/wellness/learn",
     "capability": "trusted education, recipes and tools",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/wellness/presentation/wellness_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_library_phone.png",
-    "evidence_bytes": 411487,
-    "evidence_generated_at": "2026-08-05T00:57:12.000Z"
+    "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_movement_phone.png"
   },
   {
     "reference": 4962,
@@ -2828,16 +2546,14 @@
     "language": "en",
     "brightness": "light",
     "state": "education library category or article state",
-    "bil_route": "/wellness-library",
+    "bil_route": "/wellness/learn",
     "capability": "trusted education, recipes and tools",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/wellness/presentation/wellness_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_library_phone.png",
-    "evidence_bytes": 411487,
-    "evidence_generated_at": "2026-08-05T00:57:12.000Z"
+    "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_privacy_phone.png"
   },
   {
     "reference": 4963,
@@ -2848,16 +2564,14 @@
     "language": "en",
     "brightness": "light",
     "state": "education library category or article state",
-    "bil_route": "/wellness-library",
+    "bil_route": "/wellness/learn",
     "capability": "trusted education, recipes and tools",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/wellness/presentation/wellness_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_library_phone.png",
-    "evidence_bytes": 411487,
-    "evidence_generated_at": "2026-08-05T00:57:12.000Z"
+    "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_nutrition_phone.png"
   },
   {
     "reference": 4964,
@@ -2868,16 +2582,14 @@
     "language": "en",
     "brightness": "light",
     "state": "education library category or article state",
-    "bil_route": "/wellness-library",
+    "bil_route": "/wellness/learn",
     "capability": "trusted education, recipes and tools",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/wellness/presentation/wellness_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_library_phone.png",
-    "evidence_bytes": 411487,
-    "evidence_generated_at": "2026-08-05T00:57:12.000Z"
+    "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_nutrition_phone.png"
   },
   {
     "reference": 4965,
@@ -2888,56 +2600,50 @@
     "language": "en",
     "brightness": "light",
     "state": "education library category or article state",
-    "bil_route": "/wellness-library",
+    "bil_route": "/wellness/learn",
     "capability": "trusted education, recipes and tools",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/wellness/presentation/wellness_library_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_library_phone.png",
-    "evidence_bytes": 411487,
-    "evidence_generated_at": "2026-08-05T00:57:12.000Z"
+    "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_movement_phone.png"
   },
   {
     "reference": 4966,
     "name": "IMG_4966.PNG",
     "sha256": "c20439c65c5658385c862d9fc2510eca084272c5d078fa2154451befaea404c2",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4966.jpg",
-    "screen": "friends",
+    "screen": "learn",
     "language": "en",
     "brightness": "light",
-    "state": "friends empty state",
-    "bil_route": "/community/connections",
-    "capability": "friends empty state",
-    "before_state": "implemented with truthful unavailable states; production capture missing",
-    "gap": "signed-out state lacked a mature actionable surface",
-    "closure_action": "production page refined; refreshed golden required",
-    "production_file": "lib/features/community/presentation/community_connections_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_connections_phone.png",
-    "evidence_bytes": 13407,
-    "evidence_generated_at": "2026-08-05T00:57:03.000Z"
+    "state": "education topic state",
+    "bil_route": "/wellness/learn",
+    "capability": "original BIL education topics and article navigation",
+    "before_state": "implemented with original educational content",
+    "gap": "reference long-scroll section represented by a distinct BIL topic state",
+    "closure_action": "selected topic state and matching content captured as family-equivalent evidence",
+    "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_sleep_phone.png"
   },
   {
     "reference": 4967,
     "name": "IMG_4967.PNG",
     "sha256": "dcf4e4021d86d49b46e3546e4bd9a63d01243d80328e6cb83975487a3c3c2186",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4967.jpg",
-    "screen": "messages",
+    "screen": "friends",
     "language": "en",
     "brightness": "light",
     "state": "message inbox, chat or sent state",
-    "bil_route": "/community",
+    "bil_route": "/community/connections",
     "capability": "message inbox and sent states",
     "before_state": "implemented with truthful unavailable states; production capture missing",
     "gap": "signed-out state lacked a mature actionable surface",
     "closure_action": "production page refined; refreshed golden required",
-    "production_file": "lib/features/community/presentation/community_hub_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_messages_phone.png",
-    "evidence_bytes": 11686,
-    "evidence_generated_at": "2026-08-05T00:57:04.000Z"
+    "production_file": "lib/features/community/presentation/community_connections_page.dart",
+    "status": "direct limited equivalence accepted",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_friend_authenticated_phone.png"
   },
   {
     "reference": 4968,
@@ -2948,36 +2654,32 @@
     "language": "en",
     "brightness": "light",
     "state": "message inbox, chat or sent state",
-    "bil_route": "/community",
+    "bil_route": "/community/messages",
     "capability": "message inbox and sent states",
     "before_state": "implemented with truthful unavailable states; production capture missing",
     "gap": "signed-out state lacked a mature actionable surface",
     "closure_action": "production page refined; refreshed golden required",
-    "production_file": "lib/features/community/presentation/community_hub_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_messages_phone.png",
-    "evidence_bytes": 11686,
-    "evidence_generated_at": "2026-08-05T00:57:04.000Z"
+    "production_file": "lib/features/community/presentation/community_messages_page.dart",
+    "status": "direct limited equivalence accepted; realtime external",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_inbox_authenticated_phone.png"
   },
   {
     "reference": 4969,
     "name": "IMG_4969.PNG",
     "sha256": "86250a03e024e820da71464d38d9e6fc0f87247eb4383a0a0a64cddb91109775",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4969.jpg",
-    "screen": "settings",
+    "screen": "messages",
     "language": "en",
     "brightness": "light",
     "state": "settings, account, units or diary preference state",
-    "bil_route": "/settings",
+    "bil_route": "/community/messages",
     "capability": "profile, appearance, diary and privacy settings",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/settings_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png",
-    "evidence_bytes": 52858,
-    "evidence_generated_at": "2026-08-05T00:57:21.000Z"
+    "production_file": "lib/features/community/presentation/community_messages_page.dart",
+    "status": "direct limited equivalence accepted; realtime external",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_sent_authenticated_phone.png"
   },
   {
     "reference": 4970,
@@ -2993,151 +2695,135 @@
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/settings_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png",
-    "evidence_bytes": 52858,
-    "evidence_generated_at": "2026-08-05T00:57:21.000Z"
+    "production_file": "lib/features/settings/reference_settings_home_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png"
   },
   {
     "reference": 4971,
     "name": "IMG_4971.PNG",
     "sha256": "fe9e458b36f147da009c160bd285e5632dbdbb57d29832341d3a60fbe9b4e383",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4971.jpg",
-    "screen": "settings",
+    "screen": "profile",
     "language": "en",
     "brightness": "light",
     "state": "settings, account, units or diary preference state",
-    "bil_route": "/settings",
+    "bil_route": "/profile-settings",
     "capability": "profile, appearance, diary and privacy settings",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/settings_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png",
-    "evidence_bytes": 52858,
-    "evidence_generated_at": "2026-08-05T00:57:21.000Z"
+    "production_file": "lib/features/profile/premium_profile_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_phone.png"
   },
   {
     "reference": 4972,
     "name": "IMG_4972.PNG",
     "sha256": "de9da32eedf01f6a6fea1f483753b2528766bf14015c37fd38ce256375faaa05",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4972.jpg",
-    "screen": "settings",
+    "screen": "appearance",
     "language": "en",
     "brightness": "light",
     "state": "settings, account, units or diary preference state",
-    "bil_route": "/settings",
+    "bil_route": "/settings/appearance",
     "capability": "profile, appearance, diary and privacy settings",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/settings_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png",
-    "evidence_bytes": 52858,
-    "evidence_generated_at": "2026-08-05T00:57:21.000Z"
+    "production_file": "lib/features/settings/reference_preferences_pages.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_appearance_phone.png"
   },
   {
     "reference": 4973,
     "name": "IMG_4973.PNG",
     "sha256": "f13b87c47b647bb28015143a7e80edd85cb409dffbb60ffa535ffdd891a43dfc",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4973.jpg",
-    "screen": "settings",
+    "screen": "diary settings",
     "language": "en",
     "brightness": "light",
     "state": "settings, account, units or diary preference state",
-    "bil_route": "/settings",
+    "bil_route": "/settings/diary",
     "capability": "profile, appearance, diary and privacy settings",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/settings_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png",
-    "evidence_bytes": 52858,
-    "evidence_generated_at": "2026-08-05T00:57:21.000Z"
+    "production_file": "lib/features/settings/reference_preferences_pages.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_diary_settings_phone.png"
   },
   {
     "reference": 4974,
     "name": "IMG_4974.PNG",
     "sha256": "a3a4a837153f915d0297755131f478f301e0631429fb0cd474b729c73604f40c",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4974.jpg",
-    "screen": "settings",
+    "screen": "default search tab",
     "language": "en",
     "brightness": "light",
     "state": "settings, account, units or diary preference state",
-    "bil_route": "/settings",
+    "bil_route": "/settings/diary/search-tab",
     "capability": "profile, appearance, diary and privacy settings",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/settings_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png",
-    "evidence_bytes": 52858,
-    "evidence_generated_at": "2026-08-05T00:57:21.000Z"
+    "production_file": "lib/features/settings/reference_preferences_pages.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_default_search_tab_phone.png"
   },
   {
     "reference": 4975,
     "name": "IMG_4975.PNG",
     "sha256": "e870c1dea8d9e64b4df2ee7b6246ccd63b0d8a870f12ee6600d58f52e46035eb",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4975.jpg",
-    "screen": "settings",
+    "screen": "diary sharing",
     "language": "en",
     "brightness": "light",
     "state": "settings, account, units or diary preference state",
-    "bil_route": "/settings",
+    "bil_route": "/settings/diary/sharing",
     "capability": "profile, appearance, diary and privacy settings",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/settings_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png",
-    "evidence_bytes": 52858,
-    "evidence_generated_at": "2026-08-05T00:57:21.000Z"
+    "production_file": "lib/features/settings/reference_preferences_pages.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_diary_sharing_phone.png"
   },
   {
     "reference": 4976,
     "name": "IMG_4976.PNG",
     "sha256": "68172d47ced8bf537cf4cfb4b31300c21ec9ca27172f8e0eecbbcf6afc9d1310",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4976.jpg",
-    "screen": "settings",
+    "screen": "meal names",
     "language": "en",
     "brightness": "light",
     "state": "settings, account, units or diary preference state",
-    "bil_route": "/settings",
+    "bil_route": "/settings/diary/meal-names",
     "capability": "profile, appearance, diary and privacy settings",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/settings_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png",
-    "evidence_bytes": 52858,
-    "evidence_generated_at": "2026-08-05T00:57:21.000Z"
+    "production_file": "lib/features/settings/reference_preferences_pages.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_meal_names_phone.png"
   },
   {
     "reference": 4977,
     "name": "IMG_4977.PNG",
     "sha256": "89830c039318ab376c05259be125e3fe9c308eaf6e06a5d1d145127d033ed2d8",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4977.jpg",
-    "screen": "settings",
+    "screen": "custom dashboard",
     "language": "en",
     "brightness": "light",
     "state": "settings, account, units or diary preference state",
-    "bil_route": "/settings",
+    "bil_route": "/dashboard/preferences",
     "capability": "profile, appearance, diary and privacy settings",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/settings_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png",
-    "evidence_bytes": 52858,
-    "evidence_generated_at": "2026-08-05T00:57:21.000Z"
+    "production_file": "lib/features/dashboard/presentation/dashboard_preferences_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone.png"
   },
   {
     "reference": 4978,
@@ -3148,16 +2834,14 @@
     "language": "en",
     "brightness": "light",
     "state": "terms or privacy policy state",
-    "bil_route": "/trust-support",
+    "bil_route": "/legal/terms",
     "capability": "terms and privacy",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/trust_support_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png",
-    "evidence_bytes": 77571,
-    "evidence_generated_at": "2026-08-05T00:57:04.000Z"
+    "production_file": "lib/features/settings/legal_document_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_terms_phone.png"
   },
   {
     "reference": 4979,
@@ -3168,16 +2852,14 @@
     "language": "en",
     "brightness": "light",
     "state": "terms or privacy policy state",
-    "bil_route": "/trust-support",
+    "bil_route": "/legal/privacy",
     "capability": "terms and privacy",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/trust_support_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png",
-    "evidence_bytes": 77571,
-    "evidence_generated_at": "2026-08-05T00:57:04.000Z"
+    "production_file": "lib/features/settings/legal_document_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_privacy_policy_phone.png"
   },
   {
     "reference": 4980,
@@ -3188,236 +2870,212 @@
     "language": "en",
     "brightness": "light",
     "state": "optional technology consent state",
-    "bil_route": "/trust-support",
+    "bil_route": "/advertising-privacy",
     "capability": "optional technology consent",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/trust_support_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png",
-    "evidence_bytes": 77571,
-    "evidence_generated_at": "2026-08-05T00:57:04.000Z"
+    "production_file": "lib/features/ads/advertising_privacy_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_advertising_privacy_phone.png"
   },
   {
     "reference": 4981,
     "name": "IMG_4981.PNG",
     "sha256": "f7ee9a311ea589cd1a2afd5fc2174bb4b21e066b143823c01964afcb338fa079",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4981.jpg",
-    "screen": "privacy and health access",
+    "screen": "sharing and privacy",
     "language": "en",
     "brightness": "light",
-    "state": "sharing, account security or health-access state",
-    "bil_route": "/connected-health",
-    "capability": "sharing, account security and least-privilege health access",
+    "state": "sharing and privacy hub",
+    "bil_route": "/settings/sharing-privacy",
+    "capability": "private diary routing and fail-closed community privacy",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
-    "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png",
-    "evidence_bytes": 71045,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "production_file": "lib/features/settings/sharing_privacy_settings_page.dart",
+    "status": "family-equivalent visual accepted; cloud enforcement external",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_sharing_privacy_phone.png"
   },
   {
     "reference": 4982,
     "name": "IMG_4982.PNG",
     "sha256": "5fb6312792d33be01f51dff096f33e9de3a6dd78dbb62ead369a4ed9cab339e7",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4982.jpg",
-    "screen": "privacy and health access",
+    "screen": "diary sharing",
     "language": "en",
     "brightness": "light",
-    "state": "sharing, account security or health-access state",
-    "bil_route": "/connected-health",
-    "capability": "sharing, account security and least-privilege health access",
+    "state": "private diary sharing with unavailable cloud modes",
+    "bil_route": "/settings/diary/sharing",
+    "capability": "truthful private-only diary sharing",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
-    "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png",
-    "evidence_bytes": 71045,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "production_file": "lib/features/settings/reference_preferences_pages.dart",
+    "status": "family-equivalent visual accepted; private-only state",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_diary_sharing_phone.png"
   },
   {
     "reference": 4983,
     "name": "IMG_4983.PNG",
     "sha256": "99c21f0b35a7b27211e3713999eb445a361392a819e99d72783b9732b0642cf4",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4983.jpg",
-    "screen": "privacy and health access",
+    "screen": "email settings",
     "language": "en",
     "brightness": "light",
-    "state": "sharing, account security or health-access state",
-    "bil_route": "/connected-health",
-    "capability": "sharing, account security and least-privilege health access",
+    "state": "email preferences top unavailable state",
+    "bil_route": "/settings/email",
+    "capability": "fail-closed email delivery preferences",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
-    "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png",
-    "evidence_bytes": 71045,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "production_file": "lib/features/settings/reference_preferences_pages.dart",
+    "status": "family-equivalent visual accepted; delivery provider unavailable",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_email_settings_phone.png"
   },
   {
     "reference": 4984,
     "name": "IMG_4984.PNG",
     "sha256": "26fbe890d369c88fec761e46c8490f79bf34d2f180a883e47d5741e6b9764e06",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4984.jpg",
-    "screen": "privacy and health access",
+    "screen": "email settings",
     "language": "en",
     "brightness": "light",
-    "state": "sharing, account security or health-access state",
-    "bil_route": "/connected-health",
-    "capability": "sharing, account security and least-privilege health access",
+    "state": "email preferences lower unavailable state",
+    "bil_route": "/settings/email",
+    "capability": "fail-closed email delivery preferences",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
-    "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png",
-    "evidence_bytes": 71045,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "production_file": "lib/features/settings/reference_preferences_pages.dart",
+    "status": "family-equivalent visual accepted; delivery provider unavailable",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_email_settings_lower_phone.png"
   },
   {
     "reference": 4985,
     "name": "IMG_4985.PNG",
     "sha256": "e159ada36acacf99247b5e566e6a475f5e45c52970c0b63fddb0828c3eda10e9",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4985.jpg",
-    "screen": "privacy and health access",
+    "screen": "Facebook settings",
     "language": "en",
     "brightness": "light",
-    "state": "sharing, account security or health-access state",
-    "bil_route": "/connected-health",
-    "capability": "sharing, account security and least-privilege health access",
+    "state": "account linking unavailable",
+    "bil_route": "/settings/account-connections/facebook",
+    "capability": "fail-closed Facebook account linking",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
-    "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png",
-    "evidence_bytes": 71045,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "production_file": "lib/features/settings/account_connection_settings_page.dart",
+    "status": "local unavailable state accepted; provider activation external",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_facebook_settings_phone.png"
   },
   {
     "reference": 4986,
     "name": "IMG_4986.PNG",
     "sha256": "e4e403b0246b7408e98010ead406c50870d42f7fc3ecabe6d9f1c27cd308a143",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4986.jpg",
-    "screen": "privacy and health access",
+    "screen": "Google settings",
     "language": "en",
     "brightness": "light",
-    "state": "sharing, account security or health-access state",
-    "bil_route": "/connected-health",
-    "capability": "sharing, account security and least-privilege health access",
+    "state": "account linking unavailable",
+    "bil_route": "/settings/account-connections/google",
+    "capability": "fail-closed Google account linking",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
-    "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png",
-    "evidence_bytes": 71045,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "production_file": "lib/features/settings/account_connection_settings_page.dart",
+    "status": "local unavailable state accepted; provider activation external",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_google_settings_phone.png"
   },
   {
     "reference": 4987,
     "name": "IMG_4987.PNG",
     "sha256": "940938fd13de0d1d85d429d0c1b9d8d0fd1dd6892df8ea9c8a377a787af9e976",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4987.jpg",
-    "screen": "privacy and health access",
+    "screen": "change password",
     "language": "en",
     "brightness": "light",
-    "state": "sharing, account security or health-access state",
-    "bil_route": "/connected-health",
-    "capability": "sharing, account security and least-privilege health access",
+    "state": "validated account password update",
+    "bil_route": "/settings/account-password",
+    "capability": "authenticated password update with fail-closed validation",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
-    "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png",
-    "evidence_bytes": 71045,
-    "evidence_generated_at": "2026-08-05T00:57:06.000Z"
+    "production_file": "lib/features/settings/account_password_page.dart",
+    "status": "source, interaction and visual accepted; backend account run external",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_account_password_phone.png"
   },
   {
     "reference": 4988,
     "name": "IMG_4988.PNG",
     "sha256": "67229dcad4f1433efade45c27b98283d9bafa2b2fb1da95aaa15ddbab13f77de",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4988.jpg",
-    "screen": "help",
+    "screen": "privacy and health access",
     "language": "en",
     "brightness": "light",
-    "state": "help, troubleshooting, feedback or account-deletion state",
-    "bil_route": "/trust-support",
-    "capability": "help, feedback, troubleshooting and deletion",
+    "state": "native health data permission state",
+    "bil_route": "/connected-health",
+    "capability": "platform health read/write permission selection",
     "before_state": "implemented; reference-specific visual evidence missing",
-    "gap": "required refreshed production evidence against the reference family",
-    "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/trust_support_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png",
-    "evidence_bytes": 77571,
-    "evidence_generated_at": "2026-08-05T00:57:04.000Z"
+    "gap": "content margins diverged from the canonical phone rhythm",
+    "closure_action": "production page refined; refreshed golden required",
+    "production_file": "lib/features/connected_health/connected_health_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png"
   },
   {
     "reference": 4989,
     "name": "IMG_4989.PNG",
     "sha256": "f852f3532fbbfc9e684acb779817c87d3fb2b9aa4e576d6b09ee174ab1be06f8",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4989.jpg",
-    "screen": "help",
+    "screen": "privacy and health access",
     "language": "en",
     "brightness": "light",
-    "state": "help, troubleshooting, feedback or account-deletion state",
-    "bil_route": "/trust-support",
-    "capability": "help, feedback, troubleshooting and deletion",
+    "state": "native health data permission state",
+    "bil_route": "/connected-health",
+    "capability": "platform health read/write permission selection",
     "before_state": "implemented; reference-specific visual evidence missing",
-    "gap": "required refreshed production evidence against the reference family",
-    "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/trust_support_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png",
-    "evidence_bytes": 77571,
-    "evidence_generated_at": "2026-08-05T00:57:04.000Z"
+    "gap": "content margins diverged from the canonical phone rhythm",
+    "closure_action": "production page refined; refreshed golden required",
+    "production_file": "lib/features/connected_health/connected_health_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png"
   },
   {
     "reference": 4990,
     "name": "IMG_4990.PNG",
     "sha256": "48b38c3a0662a50cf9c3db162ec564efdd3d78f49ffd4546495bffe6b9e6a018",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4990.jpg",
-    "screen": "help",
+    "screen": "privacy and health access",
     "language": "en",
     "brightness": "light",
-    "state": "help, troubleshooting, feedback or account-deletion state",
-    "bil_route": "/trust-support",
-    "capability": "help, feedback, troubleshooting and deletion",
+    "state": "native health data permission state",
+    "bil_route": "/connected-health",
+    "capability": "platform health read/write permission selection",
     "before_state": "implemented; reference-specific visual evidence missing",
-    "gap": "required refreshed production evidence against the reference family",
-    "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/trust_support_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png",
-    "evidence_bytes": 77571,
-    "evidence_generated_at": "2026-08-05T00:57:04.000Z"
+    "gap": "content margins diverged from the canonical phone rhythm",
+    "closure_action": "production page refined; refreshed golden required",
+    "production_file": "lib/features/connected_health/connected_health_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png"
   },
   {
     "reference": 4991,
     "name": "IMG_4991.PNG",
     "sha256": "200c3d69a17b800c64a735e6567d7a42a011ba9f420cb8335d1472a784b43c58",
     "reference_preview": "artifacts/release/visual_closure/reference/previews/IMG_4991.jpg",
-    "screen": "help",
+    "screen": "privacy and health access",
     "language": "en",
     "brightness": "light",
-    "state": "help, troubleshooting, feedback or account-deletion state",
-    "bil_route": "/trust-support",
-    "capability": "help, feedback, troubleshooting and deletion",
+    "state": "native health data permission state",
+    "bil_route": "/connected-health",
+    "capability": "platform health read/write permission selection",
     "before_state": "implemented; reference-specific visual evidence missing",
-    "gap": "required refreshed production evidence against the reference family",
-    "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/trust_support_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png",
-    "evidence_bytes": 77571,
-    "evidence_generated_at": "2026-08-05T00:57:04.000Z"
+    "gap": "content margins diverged from the canonical phone rhythm",
+    "closure_action": "production page refined; refreshed golden required",
+    "production_file": "lib/features/connected_health/connected_health_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png"
   },
   {
     "reference": 4992,
@@ -3428,16 +3086,14 @@
     "language": "en",
     "brightness": "light",
     "state": "help, troubleshooting, feedback or account-deletion state",
-    "bil_route": "/trust-support",
+    "bil_route": "/help",
     "capability": "help, feedback, troubleshooting and deletion",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/trust_support_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png",
-    "evidence_bytes": 77571,
-    "evidence_generated_at": "2026-08-05T00:57:04.000Z"
+    "production_file": "lib/features/settings/help_center_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_help_center_phone.png"
   },
   {
     "reference": 4993,
@@ -3448,16 +3104,14 @@
     "language": "en",
     "brightness": "light",
     "state": "help, troubleshooting, feedback or account-deletion state",
-    "bil_route": "/trust-support",
+    "bil_route": "/help/faq",
     "capability": "help, feedback, troubleshooting and deletion",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/trust_support_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png",
-    "evidence_bytes": 77571,
-    "evidence_generated_at": "2026-08-05T00:57:04.000Z"
+    "production_file": "lib/features/settings/help_center_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_help_faq_targets_phone.png"
   },
   {
     "reference": 4994,
@@ -3468,16 +3122,14 @@
     "language": "en",
     "brightness": "light",
     "state": "help, troubleshooting, feedback or account-deletion state",
-    "bil_route": "/trust-support",
+    "bil_route": "/help/faq",
     "capability": "help, feedback, troubleshooting and deletion",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/trust_support_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png",
-    "evidence_bytes": 77571,
-    "evidence_generated_at": "2026-08-05T00:57:04.000Z"
+    "production_file": "lib/features/settings/help_center_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_help_faq_offline_phone.png"
   },
   {
     "reference": 4995,
@@ -3488,16 +3140,14 @@
     "language": "en",
     "brightness": "light",
     "state": "help, troubleshooting, feedback or account-deletion state",
-    "bil_route": "/trust-support",
+    "bil_route": "/help/faq",
     "capability": "help, feedback, troubleshooting and deletion",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/trust_support_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png",
-    "evidence_bytes": 77571,
-    "evidence_generated_at": "2026-08-05T00:57:04.000Z"
+    "production_file": "lib/features/settings/help_center_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_help_faq_medical_phone.png"
   },
   {
     "reference": 4996,
@@ -3508,16 +3158,14 @@
     "language": "en",
     "brightness": "light",
     "state": "help, troubleshooting, feedback or account-deletion state",
-    "bil_route": "/trust-support",
+    "bil_route": "/help",
     "capability": "help, feedback, troubleshooting and deletion",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/trust_support_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png",
-    "evidence_bytes": 77571,
-    "evidence_generated_at": "2026-08-05T00:57:04.000Z"
+    "production_file": "lib/features/settings/help_center_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_help_troubleshooting_phone.png"
   },
   {
     "reference": 4997,
@@ -3528,15 +3176,13 @@
     "language": "en",
     "brightness": "light",
     "state": "help, troubleshooting, feedback or account-deletion state",
-    "bil_route": "/trust-support",
+    "bil_route": "/help",
     "capability": "help, feedback, troubleshooting and deletion",
     "before_state": "implemented; reference-specific visual evidence missing",
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
-    "production_file": "lib/features/settings/trust_support_page.dart",
-    "status": "verified production golden",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_trust_support_rtl_dark_phone.png",
-    "evidence_bytes": 77571,
-    "evidence_generated_at": "2026-08-05T00:57:04.000Z"
+    "production_file": "lib/features/settings/help_center_page.dart",
+    "status": "awaiting refreshed production golden verification",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_help_service_status_phone.png"
   }
 ]

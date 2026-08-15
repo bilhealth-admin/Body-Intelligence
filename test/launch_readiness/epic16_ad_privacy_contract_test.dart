@@ -1,11 +1,13 @@
 import 'package:body_intelligence_log/features/ads/domain/ad_policy.dart';
 import 'package:body_intelligence_log/features/ads/advertising_privacy_page.dart';
 import 'package:body_intelligence_log/features/ads/services/contextual_ad_gateway.dart';
+import 'package:body_intelligence_log/features/ads/services/safe_contextual_ad_controller.dart';
 import 'package:body_intelligence_log/features/ads/repositories/ad_consent_repository.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -44,6 +46,24 @@ void main() {
       );
     },
   );
+
+  test('suppressed decision never invokes the provider gateway', () async {
+    final gateway = _RecordingGateway();
+    final controller = SafeContextualAdController(gateway);
+    final decision = policy.evaluate(
+      subscription: FreePlan.createState(),
+      consent: AdConsentStatus.declined,
+      placement: AdPlacement.generalDiscovery,
+      providerConfigured: true,
+      isOnline: true,
+    );
+    final result = await controller.requestIfAllowed(
+      decision: decision,
+      placement: AdPlacement.generalDiscovery,
+    );
+    expect(result, ContextualAdResult.unavailable);
+    expect(gateway.calls, 0);
+  });
 
   test('sensitive routes never request advertising', () {
     final free = FreePlan.createState();
@@ -90,6 +110,42 @@ void main() {
   });
 
   test(
+    'unknown age, minors, and unknown or restricted regions fail closed',
+    () {
+      final free = FreePlan.createState();
+      AdPolicyDecision decision(
+        AdAgeEligibility age,
+        AdRegionEligibility region,
+      ) => policy.evaluate(
+        subscription: free,
+        consent: AdConsentStatus.contextualOnly,
+        placement: AdPlacement.wellnessLibrary,
+        providerConfigured: true,
+        isOnline: true,
+        ageEligibility: age,
+        regionEligibility: region,
+      );
+
+      expect(
+        decision(AdAgeEligibility.unknown, AdRegionEligibility.eligible).reason,
+        AdSuppressionReason.ageUnknown,
+      );
+      expect(
+        decision(AdAgeEligibility.under18, AdRegionEligibility.eligible).reason,
+        AdSuppressionReason.underage,
+      );
+      expect(
+        decision(AdAgeEligibility.adult, AdRegionEligibility.unknown).reason,
+        AdSuppressionReason.regionUnknown,
+      );
+      expect(
+        decision(AdAgeEligibility.adult, AdRegionEligibility.restricted).reason,
+        AdSuppressionReason.regionRestricted,
+      );
+    },
+  );
+
+  test(
     'offline and disabled gateway fail closed without invented fill',
     () async {
       final free = FreePlan.createState();
@@ -127,7 +183,22 @@ void main() {
   });
 
   test('advertising privacy entry is reviewed in every production locale', () {
-    for (final locale in const <String>['ar', 'en', 'fr', 'es', 'tr']) {
+    expect(RuntimeCopy.supported, hasLength(25));
+    final english = advertisingPrivacySurfaceCopy('en');
+    expect(english, hasLength(24));
+    for (final locale in RuntimeCopy.supported) {
+      final surface = advertisingPrivacySurfaceCopy(locale);
+      expect(surface, hasLength(english.length));
+      expect(surface.every((value) => value.trim().isNotEmpty), isTrue);
+      if (locale != 'en') {
+        for (var index = 0; index < surface.length; index++) {
+          expect(
+            surface[index],
+            isNot(english[index]),
+            reason: 'English fallback at $locale/$index',
+          );
+        }
+      }
       expect(advertisingPrivacyEntryTitle(locale).trim(), isNotEmpty);
       expect(
         advertisingPrivacyEntryStatus(locale, contextualAllowed: false).trim(),
@@ -153,4 +224,15 @@ void main() {
     expect(find.byKey(const Key('advertising-consent-declined')), findsOne);
     expect(find.byKey(const Key('advertising-consent-contextual')), findsOne);
   });
+}
+
+final class _RecordingGateway implements ContextualAdGateway {
+  int calls = 0;
+  @override
+  bool get isConfigured => true;
+  @override
+  Future<ContextualAdResult> show(AdPlacement placement) async {
+    calls++;
+    return ContextualAdResult.displayed;
+  }
 }

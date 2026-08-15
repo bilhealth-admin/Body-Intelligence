@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -108,9 +107,6 @@ class _BilFlagshipOnboardingState extends State<BilFlagshipOnboarding> {
       ..neck = source?.neck;
     _pageController = PageController(initialPage: widget.showWelcome ? 0 : 1);
   }
-
-  bool get _isArabic =>
-      Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
 
   bool get _isRtl => const {
     'ar',

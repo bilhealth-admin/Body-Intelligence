@@ -31,8 +31,8 @@ void main() {
 
   for (final pair in <(String, String)>[
     (pubspec, 'version: 1.0.0+1'),
-    (appGradle, 'applicationId = "com.kadem.bil"'),
-    (appGradle, 'namespace = "com.kadem.bil"'),
+    (appGradle, 'applicationId = "com.bilhealth.bodyintelligencelog"'),
+    (appGradle, 'namespace = "com.bilhealth.bodyintelligencelog"'),
     (appGradle, 'compileSdk = 36'),
     (appGradle, 'targetSdk = 36'),
     (appGradle, 'minSdk = 26'),
@@ -46,7 +46,7 @@ void main() {
     (manifest, 'android:allowBackup="false"'),
     (manifest, 'android:usesCleartextTraffic="false"'),
     (manifest, 'android:usesPermissionFlags="neverForLocation"'),
-    (project, 'PRODUCT_BUNDLE_IDENTIFIER = com.kadem.bil;'),
+    (project, 'PRODUCT_BUNDLE_IDENTIFIER = com.bilhealth.bodyintelligencelog;'),
     (project, 'IPHONEOS_DEPLOYMENT_TARGET = 15.0;'),
     (project, 'PrivacyInfo.xcprivacy in Resources'),
     (info, 'NSHealthShareUsageDescription'),
@@ -131,8 +131,8 @@ void main() {
   }
 
   stdout.writeln('EPIC14_RELEASE_AUDIT=PASS');
-  stdout.writeln('ANDROID_ID=com.kadem.bil');
-  stdout.writeln('APPLE_ID=com.kadem.bil');
+  stdout.writeln('ANDROID_ID=com.bilhealth.bodyintelligencelog');
+  stdout.writeln('APPLE_ID=com.bilhealth.bodyintelligencelog');
   stdout.writeln('VERSION=1.0.0+1');
   stdout.writeln('TARGET_API=36');
   stdout.writeln(

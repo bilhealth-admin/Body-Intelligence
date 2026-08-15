@@ -2,7 +2,8 @@ import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/date_keys.dart';
 import 'package:body_intelligence_log/data/database/nutrient_evidence.dart';
 import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
-import 'package:drift/drift.dart' hide isNull;
+import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
+import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -73,4 +74,111 @@ void main() {
     expect(reopened.state, DayLifecycleState.open);
     expect(reopened.calories, 999);
   });
+
+  test(
+    'completion is explicit per day and records a closure timestamp',
+    () async {
+      final firstDay = DateTime(2026, 7, 24, 19, 30);
+      final secondDay = DateTime(2026, 7, 25, 7, 15);
+
+      await repository.startDay(firstDay);
+      await repository.closeDay(firstDay);
+
+      final first = await repository.getForDay(firstDay);
+      expect(first, isNotNull);
+      expect(first!.lifecycleState, 'closed');
+      expect(first.closedAt, isNotNull);
+      expect(
+        (await repository.readLedger(firstDay)).state,
+        DayLifecycleState.closed,
+      );
+      expect(
+        (await repository.readLedger(secondDay)).state,
+        DayLifecycleState.notStarted,
+        reason: 'Completing one diary day must not complete adjacent days.',
+      );
+    },
+  );
+
+  test(
+    'quick macros preserve selected day, timestamp, and exact totals',
+    () async {
+      final meals = MealRepository(database);
+      final selectedDay = DateTime(2026, 7, 20);
+      await meals.addQuickMacroEntry(
+        date: selectedDay,
+        mealType: 'snack',
+        calories: 321,
+        protein: 22,
+        carbohydrates: 33,
+        fat: 11,
+        caloriesKnown: true,
+        proteinKnown: true,
+        carbohydratesKnown: true,
+        fatKnown: true,
+        occurredAt: DateTime(2026, 7, 20, 16, 45),
+      );
+
+      final logged = await meals.watchMealsForDate(selectedDay).first;
+      expect(logged, hasLength(1));
+      expect(logged.single.meal.date.hour, 16);
+      expect(logged.single.meal.date.minute, 45);
+      expect(logged.single.items.single.calories, 321);
+      expect(logged.single.items.single.protein, 22);
+      expect(logged.single.items.single.carbs, 33);
+      expect(logged.single.items.single.fats, 11);
+    },
+  );
+
+  test(
+    'quick macros distinguish blank nutrients from an explicit zero',
+    () async {
+      final meals = MealRepository(database);
+      final selectedDay = DateTime(2026, 7, 21);
+      await meals.addQuickMacroEntry(
+        date: selectedDay,
+        mealType: 'snack',
+        calories: 210,
+        protein: 0,
+        carbohydrates: 0,
+        fat: 0,
+        caloriesKnown: true,
+        proteinKnown: true,
+        carbohydratesKnown: false,
+        fatKnown: false,
+      );
+
+      final logged = await meals.watchMealsForDate(selectedDay).first;
+      final mask = logged.single.items.single.nutrientEvidenceMask;
+      expect(
+        NutrientEvidenceMask.contains(mask, TrackedNutrient.calories),
+        isTrue,
+      );
+      expect(
+        NutrientEvidenceMask.contains(mask, TrackedNutrient.protein),
+        isTrue,
+      );
+      expect(
+        NutrientEvidenceMask.contains(mask, TrackedNutrient.carbohydrates),
+        isFalse,
+      );
+      expect(NutrientEvidenceMask.contains(mask, TrackedNutrient.fat), isFalse);
+
+      await expectLater(
+        meals.addQuickMacroEntry(
+          date: selectedDay,
+          mealType: 'snack',
+          calories: 50,
+          protein: 2,
+          carbohydrates: 0,
+          fat: 0,
+          caloriesKnown: true,
+          proteinKnown: false,
+          carbohydratesKnown: false,
+          fatKnown: false,
+        ),
+        throwsArgumentError,
+      );
+    },
+  );
 }

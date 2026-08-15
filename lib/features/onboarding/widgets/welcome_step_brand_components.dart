@@ -20,13 +20,11 @@ class _MasterMetalText extends StatelessWidget {
     this.text, {
     required this.size,
     this.weight = FontWeight.w700,
-    this.maxLines,
   });
 
   final String text;
   final double size;
   final FontWeight weight;
-  final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +42,6 @@ class _MasterMetalText extends StatelessWidget {
       ).createShader(rect),
       child: Text(
         text,
-        maxLines: maxLines,
-        overflow: maxLines == null ? null : TextOverflow.ellipsis,
         style: TextStyle(
           color: Colors.white,
           fontSize: size,

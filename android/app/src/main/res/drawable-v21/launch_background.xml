@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Modify this file to customize your launch splash screen -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/bil_launch_background" />
+    <!-- Keep a real BIL frame visible while the Flutter engine is loading. -->
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@drawable/bil_splash" />
+            android:src="@drawable/bil_splash_wordmark" />
     </item>
 </layer-list>

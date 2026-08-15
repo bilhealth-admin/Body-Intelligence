@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-v1",
+  "image_policy": "licensed-local-only",
+  "cases": [
+    {"id":"arabic-koshari","category":"arabic","region":"mena","image_path":null,"fixture_only":true,"quality":"good","composite":true,"truth":[{"id":"koshari","aliases":["koshari","كشري"],"amount_g":420}]},
+    {"id":"egyptian-ful-breakfast","category":"egyptian","region":"egypt","image_path":null,"fixture_only":true,"quality":"good","composite":true,"truth":[{"id":"ful-medames","aliases":["ful medames","فول مدمس"],"amount_g":250},{"id":"baladi-bread","aliases":["baladi bread","عيش بلدي"],"amount_g":90}]},
+    {"id":"mena-maqluba","category":"middle_eastern","region":"mena","image_path":null,"fixture_only":true,"quality":"good","composite":true,"truth":[{"id":"maqluba","aliases":["maqluba","مقلوبة"],"amount_g":380}]},
+    {"id":"global-sushi","category":"global","region":"japan","image_path":null,"fixture_only":true,"quality":"good","composite":false,"truth":[{"id":"salmon-sushi","aliases":["salmon sushi","sushi"],"amount_g":180}]},
+    {"id":"non-food-cosmetics","category":"non_food","region":"global","image_path":null,"fixture_only":true,"quality":"good","composite":false,"truth":[]},
+    {"id":"low-quality-lentil-soup","category":"low_quality","region":"mena","image_path":null,"fixture_only":true,"quality":"blurred_low_light","composite":false,"truth":[{"id":"lentil-soup","aliases":["lentil soup","شوربة عدس"],"amount_g":300}]},
+    {"id":"composite-grill-platter","category":"composite","region":"mena","image_path":null,"fixture_only":true,"quality":"good","composite":true,"truth":[{"id":"grilled-chicken","aliases":["grilled chicken","دجاج مشوي"],"amount_g":180},{"id":"rice","aliases":["rice","أرز"],"amount_g":220},{"id":"tahini","aliases":["tahini","طحينة"],"amount_g":45},{"id":"salad","aliases":["salad","سلطة"],"amount_g":120}]}
+  ]
+}

@@ -7,6 +7,7 @@ import {
   importPKCS8,
   importX509,
 } from 'npm:jose@6.1.0';
+import { X509Certificate } from 'node:crypto';
 
 type Provider = 'google' | 'apple';
 type Lifecycle =
@@ -28,12 +29,26 @@ type VerifiedPurchase = {
   autoRenews?: boolean;
 };
 
+type VerifiedConsumable = {
+  provider: Provider;
+  productId: string;
+  transactionId: string;
+  packageOrBundleId: string;
+  environment: 'sandbox' | 'production';
+  verifiedAt: string;
+};
+
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status,
   headers: { 'content-type': 'application/json', 'cache-control': 'no-store' },
 });
 
 const env = (name: string) => Deno.env.get(name)?.trim() ?? '';
+const storeEnvironment = (): 'sandbox' | 'production' => {
+  const value = env('BIL_STORE_ENVIRONMENT').toLowerCase();
+  if (value === 'sandbox' || value === 'production') return value;
+  throw new Error('invalid_store_environment');
+};
 const bytesToHex = (value: ArrayBuffer) =>
   [...new Uint8Array(value)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
 const digest = async (value: string) =>
@@ -44,6 +59,31 @@ const fingerprint = async (value: string) => (await digest(value)).slice(0, 24);
 
 const decodeBase64Bytes = (value: string) =>
   Uint8Array.from(atob(value), (character) => character.charCodeAt(0));
+
+function verifiedAppleCertificateChain(x5c: string[]) {
+  if (x5c.length < 2) throw new Error('invalid_apple_certificate_chain');
+  const certificates = x5c.map((encoded) =>
+    new X509Certificate(decodeBase64Bytes(encoded)));
+  const now = Date.now();
+  for (const certificate of certificates) {
+    const validFrom = Date.parse(certificate.validFrom);
+    const validTo = Date.parse(certificate.validTo);
+    if (!Number.isFinite(validFrom) || !Number.isFinite(validTo) ||
+        now < validFrom || now > validTo) {
+      throw new Error('apple_certificate_expired');
+    }
+  }
+  if (certificates[0].ca) throw new Error('invalid_apple_leaf_certificate');
+  for (let index = 1; index < certificates.length; index += 1) {
+    if (!certificates[index].ca) throw new Error('invalid_apple_ca_certificate');
+    if (!certificates[index - 1].verify(certificates[index].publicKey)) {
+      throw new Error('invalid_apple_certificate_chain');
+    }
+  }
+  const root = certificates.at(-1)!;
+  if (!root.verify(root.publicKey)) throw new Error('invalid_apple_root_certificate');
+  return certificates;
+}
 
 function clients(authorization?: string) {
   const url = env('SUPABASE_URL');
@@ -102,8 +142,7 @@ async function verifyGoogle(packageName: string, purchaseToken: string): Promise
   const data = await response.json();
   const line = data.lineItems?.[0] ?? {};
   const environment = data.testPurchase ? 'sandbox' : 'production';
-  const expectedEnvironment = env('BIL_STORE_ENVIRONMENT') === 'sandbox'
-    ? 'sandbox' : 'production';
+  const expectedEnvironment = storeEnvironment();
   if (environment !== expectedEnvironment) throw new Error('wrong_environment');
   return {
     provider: 'google',
@@ -117,6 +156,41 @@ async function verifyGoogle(packageName: string, purchaseToken: string): Promise
     expiresAt: line.expiryTime,
     autoRenews: Boolean(line.autoRenewingPlan?.autoRenewEnabled),
   };
+}
+
+async function verifyGoogleConsumable(
+  packageName: string, productId: string, purchaseToken: string,
+): Promise<VerifiedConsumable> {
+  if (packageName !== env('GOOGLE_PLAY_PACKAGE_NAME')) throw new Error('wrong_package');
+  if (productId !== 'bil_ai_boost') throw new Error('wrong_product');
+  const token = await googleAccessToken();
+  const endpoint = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${encodeURIComponent(packageName)}/purchases/products/${encodeURIComponent(productId)}/tokens/${encodeURIComponent(purchaseToken)}`;
+  const response = await fetch(endpoint, { headers: { authorization: `Bearer ${token}` } });
+  if (!response.ok) throw new Error('google_verification_failed');
+  const data = await response.json() as Record<string, unknown>;
+  if (Number(data.purchaseState ?? -1) !== 0) throw new Error('purchase_not_completed');
+  const environment: 'sandbox' | 'production' = Number(data.purchaseType ?? -1) === 0
+    ? 'sandbox' : 'production';
+  if (environment !== storeEnvironment()) throw new Error('wrong_environment');
+  return {
+    provider: 'google', productId, transactionId: purchaseToken,
+    packageOrBundleId: packageName, environment,
+    verifiedAt: new Date().toISOString(),
+  };
+}
+
+async function consumeGoogleConsumable(
+  packageName: string, productId: string, purchaseToken: string,
+) {
+  const token = await googleAccessToken();
+  const endpoint = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${encodeURIComponent(packageName)}/purchases/products/${encodeURIComponent(productId)}/tokens/${encodeURIComponent(purchaseToken)}:consume`;
+  const response = await fetch(endpoint, {
+    method: 'POST', headers: { authorization: `Bearer ${token}` },
+  });
+  // A retry can observe an already-consumed purchase after the idempotent
+  // credit committed. Google reports 409 in that case and no second grant is
+  // possible because the transaction ledger is unique.
+  if (!response.ok && response.status !== 409) throw new Error('google_consume_failed');
 }
 
 async function googleVoidedPurchaseTokens(): Promise<Set<string>> {
@@ -148,10 +222,17 @@ async function verifyAppleJws(jws: string): Promise<Record<string, unknown>> {
   if (header.alg !== 'ES256' || !Array.isArray(header.x5c) || header.x5c.length < 2) {
     throw new Error('invalid_apple_jws_header');
   }
+  if (!header.x5c.every((certificate): certificate is string =>
+    typeof certificate === 'string' && certificate.length > 0)) {
+    throw new Error('invalid_apple_jws_header');
+  }
+  const certificates = verifiedAppleCertificateChain(header.x5c);
   const pinnedRoot = env('APPLE_ROOT_CA_SHA256').toLowerCase().replaceAll(':', '');
   if (!pinnedRoot) throw new Error('apple_root_pin_missing');
   // Certificate pins are SHA-256 fingerprints of the raw DER certificate,
   // never of a UTF-8 reinterpretation of its binary bytes.
+  // Hash the exact DER bytes carried in the signed x5c header after the same
+  // bytes have passed full X509 path validation above.
   const rootDigest = await digestBytes(decodeBase64Bytes(header.x5c.at(-1)!));
   if (rootDigest !== pinnedRoot) throw new Error('apple_chain_untrusted');
   const leaf = `-----BEGIN CERTIFICATE-----\n${header.x5c[0]}\n-----END CERTIFICATE-----`;
@@ -171,9 +252,12 @@ async function verifyApple(transactionJws: string): Promise<VerifiedPurchase> {
   const payload = await verifyAppleJws(transactionJws);
   const bundleId = String(payload.bundleId ?? '');
   if (bundleId !== env('APPLE_BUNDLE_ID')) throw new Error('wrong_bundle');
-  const environment = String(payload.environment ?? '').toLowerCase() === 'sandbox'
-    ? 'sandbox' : 'production';
-  if (environment !== (env('BIL_STORE_ENVIRONMENT') === 'sandbox' ? 'sandbox' : 'production')) {
+  const rawEnvironment = String(payload.environment ?? '').toLowerCase();
+  if (rawEnvironment !== 'sandbox' && rawEnvironment !== 'production') {
+    throw new Error('wrong_environment');
+  }
+  const environment = rawEnvironment as 'sandbox' | 'production';
+  if (environment !== storeEnvironment()) {
     throw new Error('wrong_environment');
   }
   return {
@@ -205,7 +289,7 @@ async function appleServerToken() {
 }
 
 async function reconcileApple(originalTransactionId: string) {
-  const sandbox = env('BIL_STORE_ENVIRONMENT') === 'sandbox';
+  const sandbox = storeEnvironment() === 'sandbox';
   const host = sandbox ? 'api.storekit-sandbox.itunes.apple.com' : 'api.storekit.itunes.apple.com';
   const response = await fetch(
     `https://${host}/inApps/v1/subscriptions/${encodeURIComponent(originalTransactionId)}`,
@@ -253,48 +337,32 @@ async function persistVerified(
   if (!purchase.productId || !purchase.originalTransactionId || !purchase.transactionId) {
     throw new Error('incomplete_store_result');
   }
-  const { data: registry } = await admin.from('bil_store_product_registry')
-    .select('product_id,provider,package_or_bundle_id,plan_id,enabled')
-    .eq('product_id', purchase.productId).eq('provider', purchase.provider)
-    .eq('package_or_bundle_id', purchase.packageOrBundleId).eq('enabled', true).maybeSingle();
-  if (!registry) throw new Error('product_not_enabled');
-  const active = ['trial', 'active', 'grace_period'].includes(purchase.lifecycle);
-  const row = {
-    owner_id: ownerId,
-    provider: purchase.provider,
-    product_id: purchase.productId,
-    plan_id: registry.plan_id,
-    lifecycle: purchase.lifecycle,
-    original_transaction_id: purchase.originalTransactionId,
-    latest_transaction_id: purchase.transactionId,
-    environment: purchase.environment,
-    started_at: purchase.startedAt,
-    expires_at: purchase.expiresAt,
-    grace_period_ends_at: purchase.gracePeriodEndsAt,
-    auto_renews: purchase.autoRenews,
-    verified_at: new Date().toISOString(),
-  };
-  const { error } = await admin.from('bil_subscriptions').upsert(row, { onConflict: 'owner_id' });
-  if (error) throw new Error(error.code === '23505' ? 'purchase_owned_by_another_account' : 'persistence_failed');
-  await admin.from('bil_entitlements').upsert({
-    owner_id: ownerId,
-    entitlement_id: `plan:${registry.plan_id}`,
-    product_id: purchase.productId,
-    provider: purchase.provider,
-    active,
-    starts_at: purchase.startedAt ?? new Date().toISOString(),
-    expires_at: purchase.expiresAt,
-    source_transaction_id: purchase.transactionId,
-    server_updated_at: new Date().toISOString(),
-  }, { onConflict: 'owner_id,entitlement_id' });
-  await admin.from('bil_store_entitlement_audit').insert({
-    owner_id: ownerId,
-    provider: purchase.provider,
-    product_id: purchase.productId,
-    lifecycle: purchase.lifecycle,
-    reason: 'store_verification',
-    transaction_fingerprint: await fingerprint(purchase.transactionId),
-  });
+  const verifiedAt = new Date().toISOString();
+  const { data: active, error } = await admin.rpc(
+    'bil_persist_verified_store_purchase',
+    {
+      p_owner_id: ownerId,
+      p_provider: purchase.provider,
+      p_product_id: purchase.productId,
+      p_package_or_bundle_id: purchase.packageOrBundleId,
+      p_lifecycle: purchase.lifecycle,
+      p_original_transaction_id: purchase.originalTransactionId,
+      p_latest_transaction_id: purchase.transactionId,
+      p_environment: purchase.environment,
+      p_started_at: purchase.startedAt,
+      p_expires_at: purchase.expiresAt,
+      p_grace_period_ends_at: purchase.gracePeriodEndsAt,
+      p_auto_renews: purchase.autoRenews,
+      p_verified_at: verifiedAt,
+      p_transaction_fingerprint: await fingerprint(purchase.transactionId),
+    },
+  );
+  if (error) {
+    if (error.code === '23505') throw new Error('purchase_owned_by_another_account');
+    if (error.message?.includes('product_not_enabled')) throw new Error('product_not_enabled');
+    throw new Error('persistence_failed');
+  }
+  if (typeof active !== 'boolean') throw new Error('persistence_failed');
   return active;
 }
 
@@ -337,6 +405,57 @@ async function verifyPurchase(request: Request, body: Record<string, unknown>) {
   return json({ verified: true, entitlement_active: active, lifecycle: purchase.lifecycle });
 }
 
+async function verifyAiBoost(request: Request, body: Record<string, unknown>) {
+  const { user, auth, admin } = await authenticatedUser(request);
+  const { error: rateError } = await auth.rpc('bil_consume_rate_limit', {
+    p_action: 'ai_boost_purchase_verification', p_limit: 20, p_window_seconds: 3600,
+  });
+  if (rateError) throw new Error('rate_limited');
+  const source = String(body.source ?? '');
+  const productId = String(body.product_id ?? '');
+  const verification = String(body.verification_data ?? '');
+  if (productId !== 'bil_ai_boost') throw new Error('wrong_product');
+  if (!verification) throw new Error('invalid_receipt_payload');
+  let purchase: VerifiedConsumable;
+  if (source === 'google_play') {
+    purchase = await verifyGoogleConsumable(
+      env('GOOGLE_PLAY_PACKAGE_NAME'), productId, verification,
+    );
+  } else if (source === 'app_store') {
+    const apple = await verifyApple(verification);
+    if (apple.productId !== productId || apple.lifecycle !== 'active') {
+      throw new Error('purchase_not_completed');
+    }
+    purchase = {
+      provider: 'apple', productId, transactionId: apple.transactionId,
+      packageOrBundleId: apple.packageOrBundleId,
+      environment: apple.environment, verifiedAt: new Date().toISOString(),
+    };
+  } else {
+    throw new Error('invalid_store_source');
+  }
+  const store = purchase.provider === 'google' ? 'google_play' : 'app_store';
+  const { data, error } = await admin.rpc('bil_credit_ai_boost_verified', {
+    p_owner_id: user.id, p_store: store,
+    p_transaction_id: purchase.transactionId, p_product_id: productId,
+    p_verified_at: purchase.verifiedAt,
+    p_raw_receipt_hash: await digest(verification),
+  });
+  if (error) {
+    if (error.code === '23505') throw new Error('purchase_owned_by_another_account');
+    throw new Error('persistence_failed');
+  }
+  if (purchase.provider === 'google') {
+    await consumeGoogleConsumable(
+      purchase.packageOrBundleId, productId, purchase.transactionId,
+    );
+  }
+  return json({
+    verified: true, product_id: productId,
+    credited: Boolean((data as Record<string, unknown> | null)?.credited),
+  });
+}
+
 async function verifyGooglePush(request: Request, body: Record<string, unknown>) {
   const bearer = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '') ?? '';
   const tokenInfo = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(bearer)}`);
@@ -352,7 +471,7 @@ async function verifyGooglePush(request: Request, body: Record<string, unknown>)
   const { admin } = clients();
   const { data: claimed } = await admin.rpc('bil_claim_store_notification', {
     p_provider: 'google', p_notification_id: notificationId,
-    p_payload_digest: await digest(encoded), p_environment: env('BIL_STORE_ENVIRONMENT'),
+    p_payload_digest: await digest(encoded), p_environment: storeEnvironment(),
   });
   if (!claimed) return json({ accepted: true, duplicate: true });
   const purchase = await verifyGoogle(env('GOOGLE_PLAY_PACKAGE_NAME'), purchaseToken);
@@ -482,6 +601,7 @@ export async function handler(request: Request): Promise<Response> {
     if (body.signedPayload) return await verifyAppleNotification(body);
     if (body.message) return await verifyGooglePush(request, body);
     if (body.action === 'verify_purchase') return await verifyPurchase(request, body);
+    if (body.action === 'verify_ai_boost') return await verifyAiBoost(request, body);
     return json({ error: 'invalid_action' }, 400);
   } catch (error) {
     const code = error instanceof Error ? error.message : 'verification_failed';

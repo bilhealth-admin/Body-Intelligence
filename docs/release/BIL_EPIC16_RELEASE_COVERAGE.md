@@ -16,7 +16,7 @@ It records rather than disguises external blockers.
 - Public legal URLs: content/path ready, publication must be verified externally.
 - Store products and real transactions: external sandbox/closed-track proof remains required.
 - iOS signed archive and TestFlight: require Apple membership and macOS/cloud signing credentials.
-- Android/iOS IDs are currently consistent as `com.kadem.bil`; no rename is authorized.
+- Android/iOS IDs are consistent as owner-approved `com.bilhealth.bodyintelligencelog`.
 - Advertising is disabled until explicit consent and reviewed production configuration.
 - No publish, upload, push, account creation, identifier mutation, or credential handling is performed by the gate.
 

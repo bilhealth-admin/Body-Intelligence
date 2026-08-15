@@ -10,6 +10,9 @@ plugins {
 val releaseSigningPropertiesFile = rootProject.file("key.properties")
 val releaseSigningProperties = Properties()
 val hasReleaseSigning = releaseSigningPropertiesFile.isFile
+val bilAdMobAndroidAppId = providers.gradleProperty("BIL_ADMOB_ANDROID_APP_ID")
+    .orElse(providers.environmentVariable("BIL_ADMOB_ANDROID_APP_ID"))
+    .orElse("ca-app-pub-0000000000000000~0000000000")
 
 if (hasReleaseSigning) {
     FileInputStream(releaseSigningPropertiesFile).use(releaseSigningProperties::load)
@@ -21,7 +24,7 @@ if (hasReleaseSigning) {
 }
 
 android {
-    namespace = "com.kadem.bil"
+    namespace = "com.bilhealth.bodyintelligencelog"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
@@ -32,12 +35,13 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.kadem.bil"
+        applicationId = "com.bilhealth.bodyintelligencelog"
         // Health Connect 1.1.0 requires Android 8.0 (API 26).
         minSdk = 26
         targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["bilAdMobAndroidAppId"] = bilAdMobAndroidAppId.get()
 
         // BIL's release targets current 64-bit Android devices. The scanner's
         // legacy armeabi-v7a binary is 4 KB aligned, while its arm64-v8a and

@@ -1,16 +1,56 @@
 {
-  "schema_version": 1,
-  "pack_id": "bil-recipes-ar-seed",
+  "schema_version": 2,
+  "pack_id": "bil-workouts-v1",
   "version": 1,
-  "type": "recipes",
+  "type": "workouts",
+  "categories": ["replace-with-the-10-reviewed-release-categories"],
+  "template_note": "GENERATION DRAFT ONLY. Publishing requires exactly 10 categories, 20 videos per category, 200 total seven-second videos, and explicit human safety and rights review.",
   "items": [{
-    "id": "recipe-example",
-    "locale": "ar",
-    "title": "اسم الوصفة",
-    "image_url": "https://cdn.example.com/recipes/example.webp",
-    "ingredients": ["verified-food-id:100g"],
-    "rights_holder": "Licensed content owner",
-    "license": "commercial-license-id",
-    "verified": false
+    "id": "strength-squat-001",
+    "type": "workouts",
+    "locale": "en",
+    "title": "Supported bodyweight squat",
+    "description": "A reviewed, beginner-friendly squat demonstration.",
+    "category": "strength",
+    "category_description": "Foundational strength routines.",
+    "category_order": 0,
+    "equipment": ["chair"],
+    "steps": [
+      "Stand in front of a stable chair.",
+      "Lower under control while keeping the knees aligned.",
+      "Touch the chair lightly, then stand tall."
+    ],
+    "duration_seconds": 7,
+    "audience": "men",
+    "presenter": "adult_male",
+    "synthetic_performer": true,
+    "human_safety_reviewed": false,
+    "author": "Qualified exercise professional",
+    "attribution": "Produced for BIL under the named commercial license.",
+    "publisher": "Licensed content publisher",
+    "source_url": "https://cdn.example.com/workouts/strength-squat-001",
+    "license_name": "Commercial mobile and offline license",
+    "license_url": "https://cdn.example.com/licenses/workouts",
+    "rights": {"mobile": true, "paid": true, "offline": true},
+    "reviewed_at": "2026-01-15T12:00:00Z",
+    "safety_reviewed": false,
+    "verified": false,
+    "media": {
+      "image": {
+        "url": "https://cdn.example.com/workouts/strength-squat-001.webp",
+        "mime_type": "image/webp",
+        "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "size_bytes": 24000,
+        "media_role": "preview"
+      },
+      "video": {
+        "url": "https://cdn.example.com/workouts/v1/movements/strength-squat-001.mp4",
+        "mime_type": "video/mp4",
+        "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "size_bytes": 1200000,
+        "media_role": "preview"
+      }
+    },
+    "segments": []
   }]
 }

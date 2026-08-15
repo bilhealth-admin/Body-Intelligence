@@ -47,7 +47,7 @@ void main() {
     final settings = File('android/settings.gradle.kts').readAsStringSync();
     final pubspec = File('pubspec.yaml').readAsStringSync();
     final speechBridge = File(
-      'android/app/src/main/kotlin/com/kadem/bil/BILSpeechBridge.kt',
+      'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILSpeechBridge.kt',
     ).readAsStringSync();
 
     // Flutter versions before 3.47 need the audited AGP 9 compatibility

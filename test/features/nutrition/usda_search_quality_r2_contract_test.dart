@@ -26,8 +26,15 @@ void main() {
     expect(materializer, contains('storedCoreIsZero'));
     expect(materializer, contains('incomingHasCoreEvidence'));
     expect(authority, contains('byIdentity'));
-    expect(foodPage, contains('g ألياف'));
-    expect(foodPage, contains('mg صوديوم'));
-    expect(foodPage, contains('mg بوتاسيوم'));
+    expect(
+      foodPage,
+      contains("final arabic = Localizations.localeOf(context)"),
+    );
+    expect(foodPage, contains('food.fiber.toStringAsFixed(1)'));
+    expect(foodPage, contains('food.sodium.toStringAsFixed(0)'));
+    expect(foodPage, contains('food.potassium.toStringAsFixed(0)'));
+    expect(foodPage, contains("nutritionText(context, 'fiber'"));
+    expect(foodPage, contains("nutritionText(context, 'sodium'"));
+    expect(foodPage, contains("nutritionText(context, 'potassium'"));
   });
 }

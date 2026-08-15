@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-holdout5-frozen-owned-v6",
+  "image_policy": "Project-owned synthetic assets; truth aliases human-authored and frozen before any provider call.",
+  "claim_scope": "Synthetic holdout only; no real-world accuracy claim.",
+  "cases": [
+    {
+      "id": "h5-new-england-fish-chowder",
+      "category": "fresh_human_annotated_composite",
+      "region": "united-states",
+      "image_path": "assets/images/professional/recipes/new-england-fish-chowder.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "new-england-fish-chowder",
+          "aliases": [
+            "new england fish chowder",
+            "fish chowder",
+            "creamy fish soup",
+            "creamy fish and potato soup"
+          ],
+          "amount_g": 350
+        }
+      ]
+    },
+    {
+      "id": "h5-cassoulet-haricots-dinde",
+      "category": "fresh_human_annotated_composite",
+      "region": "france",
+      "image_path": "assets/images/professional/recipes/cassoulet-haricots-dinde.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "cassoulet-haricots-dinde",
+          "aliases": [
+            "turkey bean cassoulet",
+            "turkey and bean stew",
+            "white bean and turkey stew",
+            "cassoulet with turkey"
+          ],
+          "amount_g": 305
+        }
+      ]
+    },
+    {
+      "id": "h5-pozole-rojo-pollo",
+      "category": "fresh_human_annotated_composite",
+      "region": "mexico",
+      "image_path": "assets/images/professional/recipes/pozole-rojo-pollo.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "pozole-rojo-pollo",
+          "aliases": [
+            "chicken pozole",
+            "red chicken pozole",
+            "pozole rojo with chicken",
+            "chicken hominy soup"
+          ],
+          "amount_g": 310
+        }
+      ]
+    },
+    {
+      "id": "h5-soupe-patate-douce-arachide",
+      "category": "fresh_human_annotated_composite",
+      "region": "west-africa",
+      "image_path": "assets/images/professional/recipes/soupe-patate-douce-arachide.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "soupe-patate-douce-arachide",
+          "aliases": [
+            "sweet potato peanut soup",
+            "sweet potato and peanut soup",
+            "peanut sweet potato stew"
+          ],
+          "amount_g": 270
+        }
+      ]
+    },
+    {
+      "id": "h5-quiche-epinards-saumon",
+      "category": "fresh_human_annotated_composite",
+      "region": "france",
+      "image_path": "assets/images/professional/recipes/quiche-epinards-saumon.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "quiche-epinards-saumon",
+          "aliases": [
+            "salmon spinach quiche",
+            "spinach and salmon quiche",
+            "salmon quiche"
+          ],
+          "amount_g": 310
+        }
+      ]
+    },
+    {
+      "id": "h5-salade-lentilles-saumon",
+      "category": "fresh_human_annotated_composite",
+      "region": "france",
+      "image_path": "assets/images/professional/recipes/salade-lentilles-saumon.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "salade-lentilles-saumon",
+          "aliases": [
+            "salmon lentil salad",
+            "lentil salad with salmon",
+            "salmon and lentil salad"
+          ],
+          "amount_g": 325
+        }
+      ]
+    },
+    {
+      "id": "h5-frijoles-negros-calabaza",
+      "category": "fresh_human_annotated_composite",
+      "region": "caribbean",
+      "image_path": "assets/images/professional/recipes/frijoles-negros-calabaza.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "frijoles-negros-calabaza",
+          "aliases": [
+            "black bean squash stew",
+            "black beans with squash",
+            "black bean and pumpkin stew"
+          ],
+          "amount_g": 288
+        }
+      ]
+    },
+    {
+      "id": "h5-chorba-lentilles",
+      "category": "fresh_human_annotated_composite",
+      "region": "maghreb",
+      "image_path": "assets/images/professional/recipes/chorba-lentilles.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "chorba-lentilles",
+          "aliases": [
+            "lentil chorba",
+            "lentil soup",
+            "chorba lentil soup"
+          ],
+          "amount_g": 215
+        }
+      ]
+    },
+    {
+      "id": "h5-harees-chicken",
+      "category": "fresh_human_annotated_composite",
+      "region": "gulf",
+      "image_path": "assets/images/professional/recipes/harees-chicken.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "harees-chicken",
+          "aliases": [
+            "chicken harees",
+            "harees with chicken",
+            "chicken and wheat porridge",
+            "savory chicken wheat porridge"
+          ],
+          "amount_g": 212
+        }
+      ]
+    },
+    {
+      "id": "h5-yassa-poisson-riz",
+      "category": "fresh_human_annotated_composite",
+      "region": "west-africa",
+      "image_path": "assets/images/professional/recipes/yassa-poisson-riz.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "yassa-poisson-riz",
+          "aliases": [
+            "fish yassa with rice",
+            "fish and rice with onion sauce",
+            "yassa fish rice",
+            "fish yassa"
+          ],
+          "amount_g": 300
+        }
+      ]
+    },
+    {
+      "id": "h5-nonfood-mobility",
+      "category": "non_food",
+      "region": "global",
+      "image_path": "assets/images/professional/workouts/gentle_stretching.jpg",
+      "synthetic": true,
+      "truth": []
+    }
+  ]
+}

@@ -49,6 +49,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Analytics overview'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.textContaining(
+          'A personal comparison needs at least 7 earlier and 3 recent days',
+        ),
+        420,
+        scrollable: find.byType(Scrollable).first,
+      );
       expect(
         find.textContaining(
           'A personal comparison needs at least 7 earlier and 3 recent days',

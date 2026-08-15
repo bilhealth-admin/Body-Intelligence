@@ -35,13 +35,13 @@ void main() {
     final info = File('ios/Runner/Info.plist').readAsStringSync();
 
     expect(pubspec, contains('version: 1.0.0+1'));
-    expect(gradle, contains('applicationId = "com.kadem.bil"'));
+    expect(gradle, contains('applicationId = "com.bilhealth.bodyintelligencelog"'));
     expect(gradle, contains('minSdk = 26'));
     expect(gradle, contains('targetSdk = 36'));
     expect(gradle, contains('signingConfig = if (hasReleaseSigning)'));
     expect(manifest, contains('android:usesCleartextTraffic="false"'));
     expect(manifest, contains('android:allowBackup="false"'));
-    expect(project, contains('PRODUCT_BUNDLE_IDENTIFIER = com.kadem.bil;'));
+    expect(project, contains('PRODUCT_BUNDLE_IDENTIFIER = com.bilhealth.bodyintelligencelog;'));
     expect(project, contains('IPHONEOS_DEPLOYMENT_TARGET = 15.0;'));
     expect(project, contains('PrivacyInfo.xcprivacy in Resources'));
     expect(info, contains('NSHealthShareUsageDescription'));

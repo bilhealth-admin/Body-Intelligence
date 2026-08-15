@@ -21,13 +21,11 @@ Release artifacts must be signed with credentials supplied outside Git. Record
 the minimum/target Android versions from the generated Gradle configuration at
 release time and test install/upgrade on a physical supported device.
 
-The current development Gradle file deliberately signs release-mode artifacts
-with the debug key and still uses `com.example.body_intelligence_log`. The
-successfully generated APK/AAB prove release compilation only; they are not
-store-upload candidates. Before distribution, choose an owned application ID,
-configure an upload key through ignored/environment-provided properties,
-remove debug signing from the release build type, and repeat release and
-physical-device verification.
+The release Gradle configuration uses the owner-approved application ID
+`com.bilhealth.bodyintelligencelog`, never falls back to debug signing, and
+loads upload credentials only from the ignored `android/key.properties` file.
+A signed AAB and physical install/upgrade verification remain external release
+steps; this document does not claim they have run.
 
 ## Windows
 
@@ -70,9 +68,10 @@ an upgrade, export, and storage clearing in current Chrome plus another browser.
 
 ## iOS readiness
 
-The project and local database path are iOS-compatible. This MVP requests no
-camera, photo, location, HealthKit, or tracking permissions. Compilation and
-signing require macOS with Xcode:
+The project and local database path are iOS-compatible. Its current Info.plist
+contains purpose strings for user-invoked camera/photo/voice input, Bluetooth
+device connection, and HealthKit access. It does not request advertising
+tracking permission. Compilation and signing require macOS with Xcode:
 
 ```sh
 flutter pub get
@@ -80,8 +79,8 @@ flutter build ios --simulator
 flutter run -d ios
 ```
 
-Before distribution, replace the example bundle identifier in
-`ios/Runner.xcworkspace`, select a development team, configure signing, confirm
+Before distribution, register the owner-approved bundle identifier
+`com.bilhealth.bodyintelligencelog`, select a development team, configure signing, confirm
 the deployment target supported by the installed Flutter release, and provide
 App Store privacy disclosures. Validate language switching, RTL, themes,
 restart persistence, migration, and reset on a simulator and physical device.

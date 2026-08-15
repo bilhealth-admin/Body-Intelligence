@@ -7,8 +7,8 @@ void main() {
     final gradle = File('android/app/build.gradle.kts').readAsStringSync();
 
     for (final contract in <String>[
-      'namespace = "com.kadem.bil"',
-      'applicationId = "com.kadem.bil"',
+      'namespace = "com.bilhealth.bodyintelligencelog"',
+      'applicationId = "com.bilhealth.bodyintelligencelog"',
       'compileSdk = 36',
       'minSdk = 26',
       'targetSdk = 36',
@@ -55,7 +55,7 @@ void main() {
       'android/app/src/main/AndroidManifest.xml',
     ).readAsStringSync();
     final bridge = File(
-      'android/app/src/main/kotlin/com/kadem/bil/BILGlobalHealthBridge.kt',
+      'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILGlobalHealthBridge.kt',
     ).readAsStringSync();
 
     for (final permission in <String>[
@@ -66,6 +66,8 @@ void main() {
       'android.permission.health.READ_EXERCISE',
       'android.permission.health.READ_WEIGHT',
       'android.permission.health.WRITE_WEIGHT',
+      'android.permission.health.READ_NUTRITION',
+      'android.permission.health.WRITE_NUTRITION',
     ]) {
       expect(manifest, contains(permission), reason: 'Missing: $permission');
     }
@@ -73,12 +75,11 @@ void main() {
     expect(manifest, isNot(contains('READ_SLEEP')));
     expect(manifest, isNot(contains('READ_HEART_RATE')));
     expect(manifest, isNot(contains('READ_HYDRATION')));
-    expect(manifest, isNot(contains('READ_NUTRITION')));
     expect(bridge, contains('"weight" -> WeightRecord('));
     expect(
       bridge,
       contains(
-        'supportedNames = listOf("steps", "activeEnergy", "workout", "weight")',
+        'supportedNames = listOf("steps", "activeEnergy", "workout", "weight", "nutrition")',
       ),
     );
     expect(bridge, contains('else -> null'));

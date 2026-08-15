@@ -37,7 +37,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('تعذر فتح بياناتك المحلية'), findsOneWidget);
+
+    expect(find.text('تعذّر فتح بياناتك المحلية'), findsOneWidget);
     expect(find.text('حاول مرة أخرى'), findsOneWidget);
     expect(find.textContaining('private database detail'), findsNothing);
     expect(find.byIcon(Icons.refresh), findsOneWidget);
@@ -47,11 +48,14 @@ void main() {
     await tester.pump();
 
     // Verify error message is replaced by loading screen
-    expect(find.text('تعذر فتح بياناتك المحلية'), findsNothing);
-    expect(find.bySemanticsLabel(RegExp('يُجهّز BIL')), findsOneWidget);
+    expect(find.text('تعذّر فتح بياناتك المحلية'), findsNothing);
+    expect(
+      find.bySemanticsLabel(RegExp('بودي إنتليجنس لوج.*يجهّز')),
+      findsOneWidget,
+    );
 
     // Let the second stream load successfully and redirect to the gateway.
-    await tester.pump(const Duration(seconds: 5));
+    await tester.pump(const Duration(milliseconds: 2200));
     await tester.pumpAndSettle();
     expect(profileBuildCount, 2);
     expect(find.text('Account Gateway Page'), findsOneWidget);
@@ -73,7 +77,10 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.bySemanticsLabel(RegExp('يُجهّز BIL')), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp('بودي إنتليجنس لوج.*يجهّز')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('reduced motion shows static progress indicator', (tester) async {
@@ -127,7 +134,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 4999));
+    await tester.pump(const Duration(milliseconds: 2199));
     expect(find.text('Dashboard Page'), findsNothing);
     expect(find.byType(StartupPage), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 1));

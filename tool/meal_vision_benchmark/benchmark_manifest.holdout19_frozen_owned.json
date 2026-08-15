@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-holdout19-frozen-owned-v1",
+  "image_policy": "Previously unused BIL-owned synthetic images annotated from visible pixels before provider contact.",
+  "claim_scope": "Synthetic visible-component holdout only; not a real-camera release claim.",
+  "frozen_before_provider_contact": true,
+  "cases": [
+    {"id":"h19-chicken-chickpea-spinach","category":"visible_stew","region":"egypt","image_path":"assets/images/professional/recipes/bil-ar-egypt-chicken-corn-spinach-191.png","synthetic":true,"truth":[{"id":"chicken chickpea spinach stew","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"chicken","aliases":["chicken pieces"]},{"id":"chickpeas","aliases":["garbanzo beans"]},{"id":"spinach","aliases":["leafy greens"]}]},
+    {"id":"h19-egg-quinoa-tomato","category":"visible_mixed_meal","region":"egypt","image_path":"assets/images/professional/recipes/bil-ar-egypt-egg-quinoa-tomato-026.png","synthetic":true,"truth":[{"id":"egg quinoa tomato bowl","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"egg","aliases":["fried egg"]},{"id":"quinoa","aliases":["cooked quinoa"]},{"id":"tomatoes","aliases":["tomato"]},{"id":"fresh herbs","aliases":["parsley","cilantro"]}]},
+    {"id":"h19-salmon-rice-spinach","category":"visible_separated_meal","region":"gulf","image_path":"assets/images/professional/recipes/bil-ar-gulf-salmon-rice-spinach-103.png","synthetic":true,"truth":[{"id":"salmon rice spinach plate","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"salmon","aliases":["salmon fillet"]},{"id":"rice","aliases":["cooked rice"]},{"id":"spinach","aliases":["leafy greens"]},{"id":"pine nuts","aliases":["nuts"]},{"id":"onions","aliases":["onion"]},{"id":"raisins","aliases":[]}]},
+    {"id":"h19-lentil-potato-broccoli","category":"visible_stew","region":"levant","image_path":"assets/images/professional/recipes/bil-ar-levant-lentils-potato-broccoli-257.png","synthetic":true,"truth":[{"id":"lentil potato broccoli stew","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"lentils","aliases":["brown lentils"]},{"id":"potatoes","aliases":["potato"]},{"id":"broccoli","aliases":["broccoli florets"]},{"id":"onions","aliases":["onion"]}]},
+    {"id":"h19-nonfood-medical-hub","category":"non_food","region":"global","image_path":"assets/images/connected_health/bil_medical_hub.png","synthetic":true,"truth":[],"dish_identity_truth":[],"visible_component_truth":[]}
+  ]
+}

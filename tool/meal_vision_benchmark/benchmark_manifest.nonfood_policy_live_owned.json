@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-nonfood-policy-live-owned-v1",
+  "image_policy": "Two distinct BIL-owned non-food assets for settlement-policy verification.",
+  "claim_scope": "Billing and quota policy only; not an accuracy benchmark.",
+  "frozen_before_provider_contact": true,
+  "cases": [
+    {"id":"nonfood-policy-brand","category":"non_food","region":"global","image_path":"assets/images/brand/generated/bil_dashboard_body_twin_hero_v1.png","synthetic":true,"truth":[],"dish_identity_truth":[],"visible_component_truth":[]},
+    {"id":"nonfood-policy-commerce","category":"non_food","region":"global","image_path":"assets/images/commerce/bil_paywall_glass_background_textless_v2.png","synthetic":true,"truth":[],"dish_identity_truth":[],"visible_component_truth":[]}
+  ]
+}

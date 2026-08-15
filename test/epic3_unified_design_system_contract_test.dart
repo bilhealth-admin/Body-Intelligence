@@ -9,8 +9,8 @@ void main() {
   group('Epic 3 unified design system', () {
     test('canonical geometry and native typography are stable', () {
       expect(BilFlagshipTokens.radiusSm, 10);
-      expect(BilFlagshipTokens.radiusMd, 14);
-      expect(BilFlagshipTokens.radiusXl, 18);
+      expect(BilFlagshipTokens.radiusMd, 12);
+      expect(BilFlagshipTokens.radiusXl, 16);
 
       final light = BilFlagshipTheme.light();
       final dark = BilFlagshipTheme.dark();
@@ -24,10 +24,7 @@ void main() {
         light.textTheme.bodyLarge?.fontFamily,
         nativeLight.bodyLarge?.fontFamily,
       );
-      expect(
-        arabic.textTheme.bodyLarge?.fontFamily,
-        nativeLight.bodyLarge?.fontFamily,
-      );
+      expect(arabic.textTheme.bodyLarge?.fontFamily, 'BILArabic');
       expect(light.textTheme.bodyLarge?.fontWeight, FontWeight.w400);
       expect(light.textTheme.titleLarge?.fontWeight, FontWeight.w600);
       expect(light.textTheme.headlineLarge?.fontWeight, FontWeight.w700);

@@ -2,14 +2,19 @@
 
 ## Release truth
 
-Free is always available locally. Plus and Pro are the only consumer store
-subscriptions. Coach, Clinic, and Enterprise remain contract-only and hidden
-from consumer purchase flows; Elite remains a reserved hidden identifier.
+Free is always available locally. BIL Pro is the only consumer store
+subscription, offered monthly and annually. The annual store price must be
+configured at exactly 70% of twelve monthly payments (30% saving). Plus remains
+only as a hidden compatibility identifier for historical server records and is
+never displayed or sold. Coach, Clinic, and Enterprise remain contract-only;
+Elite remains a reserved hidden identifier.
 
 The device store is the sole source for displayed price, currency, billing
-period, tax treatment, offers, and trials. BIL contains no fallback price, VAT
-percentage, invented discount, or invented trial. Missing products make the
-paywall unavailable without changing user data.
+period, tax treatment, offers, and trials. The 30% annual saving is a product
+configuration requirement and must be verified against the live monthly and
+annual store prices before release. BIL contains no fallback price, VAT
+percentage, or invented trial. Missing products make the paywall unavailable
+without changing user data.
 
 ## End-to-end authority
 
@@ -37,19 +42,22 @@ paywall unavailable without changing user data.
 No passwords, OTPs, private keys, receipts, or purchase tokens belong in source
 control or chat. Supply secrets through Supabase, GitHub, or CI secret stores.
 
-- `BIL_PAYMENTS_ENABLED=true` only after both stores are ready.
+- `BIL_PAYMENTS_ENABLED=true` per platform only after that platform is ready.
 - Google package: `BIL_GOOGLE_PACKAGE_NAME` / server
   `GOOGLE_PLAY_PACKAGE_NAME`.
 - Apple bundle: `BIL_APPLE_BUNDLE_ID` / server `APPLE_BUNDLE_ID`.
-- Plus/Pro monthly and annual product IDs:
-  `BIL_STORE_PLUS_MONTHLY`, `BIL_STORE_PLUS_ANNUAL`,
+- Pro monthly and annual product IDs:
   `BIL_STORE_PRO_MONTHLY`, `BIL_STORE_PRO_ANNUAL`.
+- The live annual price must equal 70% of twelve monthly payments. The client
+  never manufactures a price; Google Play and App Store remain authoritative.
 - Google base plans/offers in Play Console; service-account JSON only in
   `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`.
 - Pub/Sub push audience and identity:
   `GOOGLE_PUBSUB_AUDIENCE`, `GOOGLE_PUBSUB_SERVICE_ACCOUNT`; notification URL
   points to the deployed verification function.
-- Apple subscription group, App Store Connect issuer/key IDs, ES256 private
+- Apple may remain disabled while its external account issue is unresolved.
+  Its client path and bundle configuration are retained. When enabled, supply
+  the Apple subscription group, App Store Connect issuer/key IDs, ES256 private
   key in `APPLE_PRIVATE_KEY`, and Apple root CA SHA-256 pin in
   `APPLE_ROOT_CA_SHA256`.
 - `BIL_STORE_ENVIRONMENT` is explicitly `sandbox` or `production`; never mix.

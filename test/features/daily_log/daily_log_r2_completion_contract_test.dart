@@ -16,8 +16,15 @@ void main() {
 
     expect(mealEntry, contains("Key('daily-log-serving-choices')"));
     expect(mealEntry, contains('selectedFood!.servingSize * multiplier'));
+    expect(mealEntry, contains('quantity.text = serving.toStringAsFixed'));
     expect(inputSections, contains("Key('daily-log-note-field')"));
     expect(inputSections, contains("Key('daily-log-exercise-section')"));
     expect(actions, contains('exerciseNotes: exerciseNotes.text.trim()'));
+    expect(
+      actions.indexOf('final quantityValue = _parsePositiveQuantity'),
+      lessThan(
+        actions.indexOf('final mealId = await mealRepository.createMeal'),
+      ),
+    );
   });
 }

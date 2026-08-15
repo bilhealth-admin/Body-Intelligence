@@ -35,7 +35,7 @@
       "id": "voice_logging",
       "status": "complete_proven",
       "chain": "user microphone action -> native speech bridge -> reviewed text -> trusted food match -> user confirmation -> meal repository",
-      "evidence": ["lib/features/nutrition/services/meal_voice_input_service.dart", "android/app/src/main/kotlin/com/kadem/bil/BILSpeechBridge.kt", "ios/Runner/BILSpeechBridge.swift", "test/features/nutrition/epic6_voice_vision_gateway_test.dart"]
+      "evidence": ["lib/features/nutrition/services/meal_voice_input_service.dart", "android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILSpeechBridge.kt", "ios/Runner/BILSpeechBridge.swift", "test/features/nutrition/epic6_voice_vision_gateway_test.dart"]
     },
     {
       "id": "meal_image_analysis",

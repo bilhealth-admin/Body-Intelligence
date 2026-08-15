@@ -9,7 +9,7 @@ Never _fail(String message) {
 String read(String path) {
   final file = File(path);
   if (!file.existsSync()) _fail('Missing required file: $path');
-  return file.readAsStringSync();
+  return file.readAsStringSync().replaceAll('\r\n', '\n');
 }
 
 void requireText(String source, String value, String message) {
@@ -34,9 +34,14 @@ void main() {
   final migration = read(
     'supabase/migrations/202608040004_bil_store_entitlement_truth.sql',
   );
-  final paywall = read(
-    'lib/features/commerce/presentation/bil_store_plans_page.dart',
+  final atomicPersistenceMigration = read(
+    'supabase/migrations/202608090001_bil_store_atomic_entitlement_persistence.sql',
   );
+  final paywall = [
+    'lib/features/commerce/presentation/bil_store_plans_page.dart',
+    'lib/features/commerce/presentation/bil_dynamic_store_offers.dart',
+    'lib/features/commerce/presentation/glass_store_offer.dart',
+  ].map(read).join('\n');
   final pubspec = read('pubspec.yaml');
 
   reject(
@@ -63,6 +68,11 @@ void main() {
     environment,
     'StoreCatalogConfiguration.consumerProductsConfigured',
     'Commerce must remain hidden until real products are configured.',
+  );
+  requireText(
+    environment,
+    'StoreCatalogConfiguration.legalLinksConfigured',
+    'Commerce must remain hidden until HTTPS terms and privacy links are configured.',
   );
   requireText(
     client,
@@ -149,6 +159,11 @@ void main() {
     'bil_consume_rate_limit',
     'Verification rate limit missing.',
   );
+  requireText(
+    backend,
+    "if (value === 'sandbox' || value === 'production')",
+    'Sandbox and production store environments must be validated strictly.',
+  );
 
   requireText(
     migration,
@@ -165,6 +180,21 @@ void main() {
     migration,
     'grant select on public.bil_subscriptions to authenticated',
     'Owner-readable entitlement projection missing.',
+  );
+  requireText(
+    atomicPersistenceMigration,
+    'primary key (provider, product_id)',
+    'Store product identity must be scoped by provider.',
+  );
+  requireText(
+    atomicPersistenceMigration,
+    'bil_persist_verified_store_purchase',
+    'Atomic subscription and entitlement persistence is missing.',
+  );
+  requireText(
+    backend,
+    "admin.rpc(\n    'bil_persist_verified_store_purchase'",
+    'The verification backend must use atomic entitlement persistence.',
   );
 
   requireText(paywall, 'CommercePlan.plus', 'Plus consumer plan missing.');

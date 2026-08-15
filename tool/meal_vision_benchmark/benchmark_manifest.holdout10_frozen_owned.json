@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-frozen-holdout10-owned-v11",
+  "image_policy": "Previously unused owned synthetic images visually inspected and exhaustively annotated before any provider call.",
+  "claim_scope": "Synthetic visible-component frozen holdout only; no real-world accuracy claim.",
+  "cases": [
+    {
+      "id": "h10-chicken-rice-eggplant",
+      "category": "fresh_exhaustive_visual_annotation",
+      "region": "egypt",
+      "image_path": "assets/images/professional/recipes/bil-ar-egypt-chicken-rice-tomato-001.png",
+      "synthetic": true,
+      "truth": [{"id": "chicken rice plate", "aliases": []}],
+      "dish_identity_truth": [],
+      "visible_component_truth": [
+        {"id": "chicken", "aliases": ["chicken breast"]},
+        {"id": "rice", "aliases": []},
+        {"id": "tomatoes", "aliases": ["tomato"]},
+        {"id": "eggplant", "aliases": ["aubergine"]},
+        {"id": "yogurt", "aliases": ["yoghurt"]}
+      ]
+    },
+    {
+      "id": "h10-salmon-potato-tomato",
+      "category": "fresh_exhaustive_visual_annotation",
+      "region": "gulf",
+      "image_path": "assets/images/professional/recipes/bil-ar-gulf-salmon-potato-tomato-053.png",
+      "synthetic": true,
+      "truth": [{"id": "salmon potato tomato plate", "aliases": []}],
+      "dish_identity_truth": [],
+      "visible_component_truth": [
+        {"id": "salmon", "aliases": ["salmon fillet"]},
+        {"id": "potatoes", "aliases": ["potato"]},
+        {"id": "tomatoes", "aliases": ["tomato"]},
+        {"id": "herbs", "aliases": ["parsley"]}
+      ]
+    },
+    {
+      "id": "h10-lentil-couscous",
+      "category": "fresh_exhaustive_visual_annotation",
+      "region": "levant",
+      "image_path": "assets/images/professional/recipes/bil-ar-levant-lentils-couscous-tomato-087.png",
+      "synthetic": true,
+      "truth": [{"id": "lentil couscous plate", "aliases": []}],
+      "dish_identity_truth": [],
+      "visible_component_truth": [
+        {"id": "lentils", "aliases": ["brown lentils"]},
+        {"id": "pearl couscous", "aliases": ["couscous", "moghrabieh"]},
+        {"id": "tomatoes", "aliases": ["tomato"]},
+        {"id": "onions", "aliases": ["onion"]},
+        {"id": "herbs", "aliases": ["cilantro", "coriander"]}
+      ]
+    },
+    {
+      "id": "h10-cod-corn-tomato",
+      "category": "fresh_exhaustive_visual_annotation",
+      "region": "iraq",
+      "image_path": "assets/images/professional/recipes/bil-ar-iraq-cod-corn-tomato-094.png",
+      "synthetic": true,
+      "truth": [{"id": "cod corn tomato plate", "aliases": []}],
+      "dish_identity_truth": [],
+      "visible_component_truth": [
+        {"id": "cod", "aliases": ["white fish", "fish fillet"]},
+        {"id": "corn", "aliases": ["sweetcorn"]},
+        {"id": "tomatoes", "aliases": ["tomato"]},
+        {"id": "onions", "aliases": ["onion"]}
+      ]
+    },
+    {
+      "id": "h10-tofu-barley-spinach",
+      "category": "fresh_exhaustive_visual_annotation",
+      "region": "maghreb",
+      "image_path": "assets/images/professional/recipes/bil-ar-maghreb-tofu-barley-spinach-140.png",
+      "synthetic": true,
+      "truth": [{"id": "tofu barley spinach stew", "aliases": []}],
+      "dish_identity_truth": [],
+      "visible_component_truth": [
+        {"id": "tofu", "aliases": ["tofu cubes"]},
+        {"id": "barley", "aliases": ["pearl barley"]},
+        {"id": "spinach", "aliases": ["leafy greens"]},
+        {"id": "onions", "aliases": ["onion"]}
+      ]
+    },
+    {
+      "id": "h10-nonfood-recovery-atlas",
+      "category": "non_food",
+      "region": "global",
+      "image_path": "assets/images/professional/workouts/bil_recovery_atlas_v1.png",
+      "synthetic": true,
+      "truth": [],
+      "dish_identity_truth": [],
+      "visible_component_truth": []
+    }
+  ]
+}

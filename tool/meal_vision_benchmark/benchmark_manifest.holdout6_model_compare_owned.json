@@ -1,0 +1,204 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-model-comparison-h6-owned-v7",
+  "image_policy": "Project-owned synthetic assets; pixel-observable aliases frozen before either model call.",
+  "claim_scope": "Synthetic paired model comparison only; no real-world claim.",
+  "cases": [
+    {
+      "id": "h6-ankara-tava",
+      "category": "model_comparison_visible_label",
+      "region": "central-anatolia",
+      "image_path": "assets/images/professional/recipes/ankara-tava.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "ankara-tava",
+          "aliases": [
+            "ankara tava",
+            "lamb and rice casserole",
+            "meat and rice casserole",
+            "rice casserole with meat"
+          ],
+          "amount_g": 268
+        }
+      ]
+    },
+    {
+      "id": "h6-antalya-piyaz",
+      "category": "model_comparison_visible_label",
+      "region": "mediterranean",
+      "image_path": "assets/images/professional/recipes/antalya-piyaz.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "antalya-piyaz",
+          "aliases": [
+            "antalya piyaz",
+            "white bean salad",
+            "bean salad with egg",
+            "turkish bean salad"
+          ],
+          "amount_g": 285
+        }
+      ]
+    },
+    {
+      "id": "h6-arroz-con-gandules",
+      "category": "model_comparison_visible_label",
+      "region": "caribbean",
+      "image_path": "assets/images/professional/recipes/arroz-con-gandules.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "arroz-con-gandules",
+          "aliases": [
+            "arroz con gandules",
+            "rice with pigeon peas",
+            "pigeon pea rice",
+            "rice and peas"
+          ],
+          "amount_g": 238
+        }
+      ]
+    },
+    {
+      "id": "h6-cazuela-pescado",
+      "category": "model_comparison_visible_label",
+      "region": "south-america",
+      "image_path": "assets/images/professional/recipes/cazuela-pescado.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "cazuela-pescado",
+          "aliases": [
+            "fish cazuela",
+            "fish stew",
+            "fish and vegetable stew",
+            "cazuela de pescado"
+          ],
+          "amount_g": 355
+        }
+      ]
+    },
+    {
+      "id": "h6-ege-zeytinyagli-enginar",
+      "category": "model_comparison_visible_label",
+      "region": "aegean",
+      "image_path": "assets/images/professional/recipes/ege-zeytinyagli-enginar.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "ege-zeytinyagli-enginar",
+          "aliases": [
+            "artichokes in olive oil",
+            "artichoke vegetable dish",
+            "turkish artichokes",
+            "zeytinyagli enginar"
+          ],
+          "amount_g": 322
+        }
+      ]
+    },
+    {
+      "id": "h6-enchiladas-frijol-pollo",
+      "category": "model_comparison_visible_label",
+      "region": "mexico",
+      "image_path": "assets/images/professional/recipes/enchiladas-frijol-pollo.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "enchiladas-frijol-pollo",
+          "aliases": [
+            "chicken bean enchiladas",
+            "chicken enchiladas",
+            "bean and chicken enchiladas"
+          ],
+          "amount_g": 313
+        }
+      ]
+    },
+    {
+      "id": "h6-fabada-ligera",
+      "category": "model_comparison_visible_label",
+      "region": "spain",
+      "image_path": "assets/images/professional/recipes/fabada-ligera.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "fabada-ligera",
+          "aliases": [
+            "white bean stew",
+            "fabada",
+            "bean and sausage stew",
+            "asturian bean stew"
+          ],
+          "amount_g": 247
+        }
+      ]
+    },
+    {
+      "id": "h6-izmir-kofte",
+      "category": "model_comparison_visible_label",
+      "region": "aegean",
+      "image_path": "assets/images/professional/recipes/izmir-kofte.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "izmir-kofte",
+          "aliases": [
+            "izmir kofte",
+            "meatballs with potatoes and tomato",
+            "turkish meatball stew",
+            "meatball potato casserole"
+          ],
+          "amount_g": 328
+        }
+      ]
+    },
+    {
+      "id": "h6-lentejas-verduras",
+      "category": "model_comparison_visible_label",
+      "region": "spain",
+      "image_path": "assets/images/professional/recipes/lentejas-verduras.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "lentejas-verduras",
+          "aliases": [
+            "lentil vegetable stew",
+            "lentils with vegetables",
+            "vegetable lentil soup",
+            "lentil soup"
+          ],
+          "amount_g": 233
+        }
+      ]
+    },
+    {
+      "id": "h6-spinach-omelet",
+      "category": "model_comparison_visible_label",
+      "region": "global",
+      "image_path": "assets/images/professional/recipes/spinach_omelet.jpg",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "spinach-omelet",
+          "aliases": [
+            "spinach omelet",
+            "omelet with spinach",
+            "spinach egg omelette"
+          ],
+          "amount_g": 250
+        }
+      ]
+    },
+    {
+      "id": "h6-nonfood-strength",
+      "category": "non_food",
+      "region": "global",
+      "image_path": "assets/images/professional/workouts/full_body_strength.jpg",
+      "synthetic": true,
+      "truth": []
+    }
+  ]
+}

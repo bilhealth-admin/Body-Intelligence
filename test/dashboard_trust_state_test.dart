@@ -16,7 +16,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('BIL Guide hero uses solid high-contrast copy in light theme', (
+  testWidgets('AI Coach hero uses solid high-contrast copy in light theme', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -35,7 +35,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final title = find.text('BIL GUIDE');
+    final title = find.text('AI COACH');
     expect(title, findsOneWidget);
     expect(
       find.ancestor(of: title, matching: find.byType(ShaderMask)),
@@ -45,7 +45,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('BIL Guide hero stays independent from local data failures', (
+  testWidgets('AI Coach hero stays independent from local data failures', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -73,7 +73,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.psychology_alt_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.auto_awesome_rounded), findsOneWidget);
     expect(find.byType(TextButton), findsNothing);
     expect(find.textContaining('sensitive database detail'), findsNothing);
     expect(tester.takeException(), isNull);
@@ -145,5 +145,10 @@ void main() {
     await tester.tap(find.byType(FilledButton));
     await tester.pump();
     expect(tester.takeException(), isNull);
+
+    // Dispose Drift-backed provider streams and flush their zero-duration
+    // close callbacks before the test binding verifies pending timers.
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
   });
 }

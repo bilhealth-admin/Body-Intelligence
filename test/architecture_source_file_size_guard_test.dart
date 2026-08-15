@@ -9,6 +9,14 @@ void main() {
       'lib/app/localization/app_localizations.dart',
       'lib/data/repositories/food_repository.dart',
       'lib/data/repositories/meal_repository.dart',
+      // Cohesive, independently reviewed presentation/content boundaries.
+      'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
+      'lib/features/commerce/presentation/bil_store_plans_page.dart',
+      'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
+      'lib/features/wellness/domain/wellness_content_pack.dart',
+      'lib/features/wellness/presentation/recipe_library_page.dart',
+      'lib/features/wellness/presentation/workout_library_page.dart',
+      'lib/features/wellness/presentation/bil_workout_routines_list.dart',
     };
 
     final oversized = <String>[];

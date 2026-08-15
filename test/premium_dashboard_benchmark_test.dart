@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'visual_closure/visual_evidence_font.dart';
+
 void main() {
   setUpAll(() async {
     final font = FontLoader('NotoNaskhArabic')
@@ -59,7 +61,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(_DailyNarrative), findsOneWidget);
+    expect(
+      find.byKey(const Key('dashboard-compact-one-best-action')),
+      findsOneWidget,
+    );
     expect(find.text('اكتمال التسجيل'), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -74,6 +79,8 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await tester.pumpWidget(const _Harness());
+      await tester.pumpAndSettle();
+      await settleVisualAssetImages(tester);
       await tester.pumpAndSettle();
       await expectLater(
         find.byType(MaterialApp),
@@ -91,6 +98,8 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(const _Harness(light: true));
+    await tester.pumpAndSettle();
+    await settleVisualAssetImages(tester);
     await tester.pumpAndSettle();
     await expectLater(
       find.byType(MaterialApp),

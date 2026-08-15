@@ -26,11 +26,7 @@ const textExtensions = <String>{
 
 void main() {
   final findings = <String>[];
-  for (final entity in Directory.current.listSync(
-    recursive: true,
-    followLinks: false,
-  )) {
-    if (entity is! File) continue;
+  for (final entity in _walkReadableFiles(Directory.current)) {
     final path = entity.path.replaceAll('\\', '/');
     if (excluded.any(path.contains)) continue;
     if (!textExtensions.any(path.endsWith)) continue;
@@ -70,4 +66,22 @@ void main() {
     return;
   }
   stdout.writeln('EPIC12_SECRET_TLS_LOG_AUDIT=PASS');
+}
+
+Iterable<File> _walkReadableFiles(Directory directory) sync* {
+  List<FileSystemEntity> children;
+  try {
+    children = directory.listSync(followLinks: false);
+  } on FileSystemException {
+    return;
+  }
+  for (final entity in children) {
+    final path = entity.path.replaceAll('\\', '/');
+    if (excluded.any(path.contains)) continue;
+    if (entity is File) {
+      yield entity;
+    } else if (entity is Directory) {
+      yield* _walkReadableFiles(entity);
+    }
+  }
 }

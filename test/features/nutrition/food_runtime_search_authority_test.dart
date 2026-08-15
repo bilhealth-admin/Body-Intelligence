@@ -76,6 +76,8 @@ void main() {
       protein: 1,
       carbs: 1,
       fats: 1,
+      servingSize: 100,
+      servingUnit: 'g',
     );
     await repository.addFood(
       name: 'Beta',
@@ -84,6 +86,8 @@ void main() {
       protein: 2,
       carbs: 2,
       fats: 2,
+      servingSize: 100,
+      servingUnit: 'g',
     );
     await repository.setFavorite(firstId, true);
 

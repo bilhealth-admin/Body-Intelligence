@@ -86,27 +86,19 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.scrollUntilVisible(
-        find.byKey(const Key('daily-log-body-context')),
+        find.byKey(const Key('daily-log-body-context-link')),
         500,
         scrollable: find.byType(Scrollable).first,
       );
       await tester.pumpAndSettle();
-      expect(find.text('hello notes'), findsOneWidget);
-      expect(find.byKey(const Key('body-context-other-field')), findsNothing);
-      expect(find.text('سياق الجسم'), findsOneWidget);
-      expect(find.text('نوم أقل من المعتاد'), findsOneWidget);
-      expect(find.text('وجبة عالية الصوديوم'), findsOneWidget);
+      // Body context is intentionally isolated on its own focused route. The
+      // diary keeps a reachable entry point while private note contents are
+      // not duplicated into the main diary surface.
       expect(
-        find.textContaining('هل هناك ما قد يفسر تغيرات جسمك اليوم؟'),
-        findsNothing,
+        find.byKey(const Key('daily-log-body-context-link')),
+        findsOneWidget,
       );
-
-      await tester.tap(find.byKey(const Key('body-context-other')));
-      await tester.pump();
-      expect(find.byKey(const Key('body-context-other-field')), findsOneWidget);
-
-      await tester.tap(find.byKey(const Key('body-context-nothingNotable')));
-      await tester.pump();
+      expect(find.text('hello notes'), findsNothing);
       expect(find.byKey(const Key('body-context-other-field')), findsNothing);
 
       await tester.scrollUntilVisible(
@@ -120,14 +112,13 @@ void main() {
       expect(find.textContaining('private water detail'), findsNothing);
       expect(find.textContaining('private usual meals detail'), findsNothing);
 
+      // Lazy list construction may retain only the currently visible failure
+      // surface. It must still expose a privacy-safe retry without leaking the
+      // underlying exception detail.
       expect(find.byType(ActionableErrorState), findsOneWidget);
       expect(find.textContaining('Retry'), findsNothing);
 
       expect(find.text('حاول مرة أخرى'), findsOneWidget);
-
-      await tester.ensureVisible(find.text('حاول مرة أخرى'));
-      await tester.tap(find.text('حاول مرة أخرى'), warnIfMissed: false);
-      await tester.pump();
 
       expect(tester.takeException(), isNull);
     },

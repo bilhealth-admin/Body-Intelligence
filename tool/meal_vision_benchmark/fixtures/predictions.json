@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "provider":"fixture-provider",
+  "model_revision":"fixture-v1",
+  "runs":[
+    {"case_id":"arabic-koshari","latency_ms":820,"cost_usd":0.001,"components":[{"name":"كشري","amount_g":400,"confidence":0.95}]},
+    {"case_id":"egyptian-ful-breakfast","latency_ms":910,"cost_usd":0.001,"components":[{"name":"ful medames","amount_g":230,"confidence":0.93},{"name":"baladi bread","amount_g":100,"confidence":0.88}]},
+    {"case_id":"mena-maqluba","latency_ms":870,"cost_usd":0.001,"components":[{"name":"maqluba","amount_g":360,"confidence":0.9}]},
+    {"case_id":"global-sushi","latency_ms":760,"cost_usd":0.001,"components":[{"name":"salmon sushi","amount_g":175,"confidence":0.94}]},
+    {"case_id":"non-food-cosmetics","latency_ms":640,"cost_usd":0.001,"components":[]},
+    {"case_id":"low-quality-lentil-soup","latency_ms":1200,"cost_usd":0.001,"components":[{"name":"lentil soup","amount_g":260,"confidence":0.65}]},
+    {"case_id":"composite-grill-platter","latency_ms":1050,"cost_usd":0.001,"components":[{"name":"grilled chicken","amount_g":170,"confidence":0.91},{"name":"rice","amount_g":240,"confidence":0.89},{"name":"salad","amount_g":100,"confidence":0.78},{"name":"hummus","amount_g":40,"confidence":0.55}]}
+  ]
+}

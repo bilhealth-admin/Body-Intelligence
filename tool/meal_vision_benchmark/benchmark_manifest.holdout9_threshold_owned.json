@@ -1,0 +1,300 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-threshold-holdout9-owned-v10",
+  "image_policy": "Previously unused owned images visually inspected and exhaustively annotated before threshold deployment/provider call.",
+  "claim_scope": "Synthetic visible-component threshold holdout only.",
+  "cases": [
+    {
+      "id": "h9-mediterranean-chicken",
+      "category": "fresh_exhaustive_visual_annotation",
+      "region": "global",
+      "image_path": "assets/images/professional/recipes/mediterranean_chicken_bowl.jpg",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "mediterranean chicken hummus salad bowl",
+          "aliases": []
+        }
+      ],
+      "dish_identity_truth": [
+        {
+          "id": "mediterranean chicken bowl",
+          "aliases": [
+            "chicken hummus salad bowl"
+          ]
+        }
+      ],
+      "visible_component_truth": [
+        {
+          "id": "chicken",
+          "aliases": [
+            "grilled chicken",
+            "chicken breast"
+          ]
+        },
+        {
+          "id": "hummus",
+          "aliases": [
+            "chickpea dip"
+          ]
+        },
+        {
+          "id": "cucumber",
+          "aliases": []
+        },
+        {
+          "id": "tomatoes",
+          "aliases": [
+            "tomato"
+          ]
+        },
+        {
+          "id": "olives",
+          "aliases": []
+        },
+        {
+          "id": "feta cheese",
+          "aliases": [
+            "feta",
+            "white cheese"
+          ]
+        },
+        {
+          "id": "leafy greens",
+          "aliases": [
+            "spinach",
+            "lettuce"
+          ]
+        },
+        {
+          "id": "red onion",
+          "aliases": [
+            "onion"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "h9-roasted-quinoa",
+      "category": "fresh_exhaustive_visual_annotation",
+      "region": "global",
+      "image_path": "assets/images/professional/recipes/roasted_quinoa_bowl.jpg",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "quinoa roasted vegetable bowl",
+          "aliases": []
+        }
+      ],
+      "dish_identity_truth": [
+        {
+          "id": "roasted vegetable quinoa bowl",
+          "aliases": [
+            "quinoa vegetable bowl"
+          ]
+        }
+      ],
+      "visible_component_truth": [
+        {
+          "id": "quinoa",
+          "aliases": []
+        },
+        {
+          "id": "broccoli",
+          "aliases": []
+        },
+        {
+          "id": "zucchini",
+          "aliases": [
+            "courgette"
+          ]
+        },
+        {
+          "id": "red pepper",
+          "aliases": [
+            "bell pepper"
+          ]
+        },
+        {
+          "id": "yellow pepper",
+          "aliases": []
+        },
+        {
+          "id": "red onion",
+          "aliases": [
+            "onion"
+          ]
+        },
+        {
+          "id": "herbs",
+          "aliases": [
+            "parsley"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "h9-tashreeb",
+      "category": "fresh_exhaustive_visual_annotation",
+      "region": "global",
+      "image_path": "assets/images/professional/recipes/iraqi-tashreeb-chicken.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "chicken chickpea bread stew",
+          "aliases": []
+        }
+      ],
+      "dish_identity_truth": [
+        {
+          "id": "chicken tashreeb",
+          "aliases": [
+            "iraqi chicken tashreeb"
+          ]
+        }
+      ],
+      "visible_component_truth": [
+        {
+          "id": "chicken",
+          "aliases": []
+        },
+        {
+          "id": "chickpeas",
+          "aliases": [
+            "garbanzo beans"
+          ]
+        },
+        {
+          "id": "tomatoes",
+          "aliases": [
+            "tomato"
+          ]
+        },
+        {
+          "id": "onions",
+          "aliases": [
+            "onion"
+          ]
+        },
+        {
+          "id": "flatbread",
+          "aliases": [
+            "bread pieces"
+          ]
+        },
+        {
+          "id": "broth",
+          "aliases": [
+            "stew sauce",
+            "sauce"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "h9-chicken-grain-salad",
+      "category": "fresh_exhaustive_visual_annotation",
+      "region": "global",
+      "image_path": "assets/images/professional/recipes/tavuklu-bostana.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "grilled chicken grain salad plate",
+          "aliases": []
+        }
+      ],
+      "dish_identity_truth": [],
+      "visible_component_truth": [
+        {
+          "id": "chicken",
+          "aliases": [
+            "grilled chicken",
+            "chicken breast"
+          ]
+        },
+        {
+          "id": "grain",
+          "aliases": [
+            "bulgur",
+            "pearl couscous"
+          ]
+        },
+        {
+          "id": "cucumber",
+          "aliases": []
+        },
+        {
+          "id": "tomatoes",
+          "aliases": [
+            "tomato"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "h9-salmon-blueberry",
+      "category": "fresh_exhaustive_visual_annotation",
+      "region": "global",
+      "image_path": "assets/images/professional/recipes/saumon-bleuet-orge.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "salmon blueberry grain plate",
+          "aliases": []
+        }
+      ],
+      "dish_identity_truth": [
+        {
+          "id": "salmon with blueberry sauce",
+          "aliases": [
+            "blueberry glazed salmon"
+          ]
+        }
+      ],
+      "visible_component_truth": [
+        {
+          "id": "salmon",
+          "aliases": [
+            "salmon fillet"
+          ]
+        },
+        {
+          "id": "blueberries",
+          "aliases": [
+            "blueberry"
+          ]
+        },
+        {
+          "id": "blueberry sauce",
+          "aliases": [
+            "berry sauce",
+            "glaze"
+          ]
+        },
+        {
+          "id": "barley",
+          "aliases": [
+            "cooked barley",
+            "grain"
+          ]
+        },
+        {
+          "id": "green beans",
+          "aliases": [
+            "string beans"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "h9-nonfood-atlas",
+      "category": "non_food",
+      "region": "global",
+      "image_path": "assets/images/professional/workouts/bil_workout_atlas_v1.png",
+      "synthetic": true,
+      "truth": [],
+      "dish_identity_truth": [],
+      "visible_component_truth": []
+    }
+  ]
+}

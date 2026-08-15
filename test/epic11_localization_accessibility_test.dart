@@ -61,20 +61,18 @@ Widget _localizedHarness(Locale locale, {double textScale = 1}) => MaterialApp(
 
 void main() {
   test(
-    'all production catalogs use the same complete five-language contract',
+    'all production catalogs use the complete 25-locale contract',
     () {
-      expect(AppLocalizations.supportedLanguageCodes, {
-        'ar',
-        'en',
-        'fr',
-        'es',
-        'tr',
-      });
+      expect(AppLocalizations.supportedLocales, hasLength(25));
+      expect(RuntimeCopy.supported, hasLength(25));
       expect(AppLocalizations.baseCatalogsBalanced, isTrue);
       expect(FeatureStrings.catalogsBalanced, isTrue);
       expect(RuntimeCopy.balanced, isTrue);
       for (final translations in RuntimeCopy.values.values) {
-        expect(translations.keys.toSet(), RuntimeCopy.supported);
+        expect(
+          translations.keys.toSet(),
+          const <String>{'ar', 'en', 'fr', 'es', 'tr'},
+        );
         expect(translations.values, everyElement(isNotEmpty));
       }
     },
@@ -123,6 +121,23 @@ void main() {
     },
   );
 
+  test('regional and script locale choices round-trip exactly', () async {
+    for (final tag in const ['pt-BR', 'pt-PT', 'zh-Hans', 'zh-Hant']) {
+      final store = _MemorySettingsStore();
+      final service = AppSettingsService(store: store);
+      await service.save(AppSettings(localeCode: tag, themeMode: 'light'));
+      final restored = await service.load();
+      expect(restored.localeCode, tag, reason: tag);
+      expect(jsonDecode(store.value!)['localeCode'], tag, reason: tag);
+    }
+  });
+
+  test('a fresh installation starts in English', () async {
+    final service = AppSettingsService(store: _MemorySettingsStore());
+    final settings = await service.load();
+    expect(settings.localeCode, 'en');
+  });
+
   for (final locale in AppLocalizations.supportedLocales) {
     testWidgets(
       '${locale.languageCode} renders translated reachable copy at 200%',
@@ -140,7 +155,9 @@ void main() {
         );
         expect(
           direction.textDirection,
-          locale.languageCode == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+          AppLocalizations.isRtl(locale)
+              ? TextDirection.rtl
+              : TextDirection.ltr,
         );
         final buttonSize = tester.getSize(find.byType(FilledButton));
         expect(buttonSize.height, greaterThanOrEqualTo(44));

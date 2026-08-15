@@ -28,7 +28,7 @@ void main() {
     'native health bridges expose honest availability and revoke behavior',
     () {
       final android = File(
-        'android/app/src/main/kotlin/com/kadem/bil/BILGlobalHealthBridge.kt',
+        'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILGlobalHealthBridge.kt',
       ).readAsStringSync();
       final ios = File(
         'ios/Runner/BILGlobalHealthBridge.swift',

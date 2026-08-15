@@ -30,10 +30,10 @@
     },
     "app_access": "Core local logging works without an account. Cloud community, AI gateways, purchases, push, and hardware remain unavailable unless production configuration and permissions exist.",
     "closed_testing": "OWNER_INPUT_REQUIRED_UPLOAD_SIGNED_AAB_INVITE_TESTERS_COMPLETE_14_DAY_OR_CURRENT_POLICY_REQUIREMENT",
-    "contact_email": "bilhealth.app@gmail.com",
-    "website": "https://bilhealth.com",
-    "privacy_policy_url": "https://bilhealth.com/privacy",
-    "account_deletion_url": "https://bilhealth.com/account-deletion"
+    "contact_email": "support@bilhealth.com",
+    "website": "https://www.bilhealth.com",
+    "privacy_policy_url": "https://www.bilhealth.com/privacy",
+    "account_deletion_url": "https://www.bilhealth.com/account-deletion"
   },
   "apple_app_store": {
     "primary_category": "Health & Fitness",
@@ -57,9 +57,9 @@
     "encryption_usage": "Standard TLS, OS key storage, and store SDK transport; no proprietary cryptography claimed.",
     "iap_review_screenshot_plan": "Use the real unconfigured/configured paywall capture after App Store products exist; never submit a fabricated purchase success.",
     "testflight": "OWNER_INPUT_REQUIRED_ACTIVE_APPLE_MEMBERSHIP_APP_STORE_CONNECT_RECORD_SIGNED_BUILD_AND_SANDBOX_TESTERS",
-    "support_url": "https://bilhealth.com/support",
-    "privacy_policy_url": "https://bilhealth.com/privacy",
-    "marketing_url": "https://bilhealth.com"
+    "support_url": "https://www.bilhealth.com/support",
+    "privacy_policy_url": "https://www.bilhealth.com/privacy",
+    "marketing_url": "https://www.bilhealth.com"
   },
   "subscription_copy": {
     "tax_note": "Prices and applicable taxes are determined by the store for the user's country. BIL does not calculate or deduct store tax locally.",

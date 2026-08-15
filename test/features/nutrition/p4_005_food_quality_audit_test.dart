@@ -41,6 +41,8 @@ void main() {
       protein: 0,
       carbs: 0,
       fats: 0,
+      servingSize: 100,
+      servingUnit: 'g',
       source: 'local',
       verified: false,
     );

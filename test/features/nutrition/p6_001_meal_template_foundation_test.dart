@@ -26,6 +26,8 @@ void main() {
       carbs: 66.3,
       fats: 6.9,
       fiber: 10.6,
+      servingSize: 100,
+      servingUnit: 'g',
     );
     final yogurtId = await foods.addFood(
       name: 'Greek yogurt',
@@ -34,6 +36,8 @@ void main() {
       protein: 10,
       carbs: 8,
       fats: 3,
+      servingSize: 100,
+      servingUnit: 'g',
     );
     final sourceDate = DateTime(2026, 7, 20);
     final mealId = await meals.createMeal(
@@ -73,6 +77,8 @@ void main() {
       carbs: 10,
       fats: 8,
       sodium: 100,
+      servingSize: 100,
+      servingUnit: 'g',
     );
     final sourceDate = DateTime(2026, 7, 20);
     final sourceMealId = await meals.createMeal(
@@ -129,6 +135,8 @@ void main() {
         protein: 1,
         carbs: 1,
         fats: 1,
+        servingSize: 100,
+        servingUnit: 'g',
       );
       final date = DateTime(2026, 7, 23);
       final mealId = await meals.createMeal(

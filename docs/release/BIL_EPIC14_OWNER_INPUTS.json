@@ -2,7 +2,7 @@
   "schema_version": 1,
   "purpose": "Owner-supplied release values; this file contains no credentials and is not consumed at runtime.",
   "android": {
-    "google_play_app_record": "CREATED_OWNER_REPORTED",
+    "google_play_app_record": "NOT_CREATED_ACCOUNT_PHONE_VERIFICATION_SUPPORT_TICKET_PENDING_2026_08_08",
     "play_app_signing_enrollment": "OWNER_INPUT_REQUIRED",
     "upload_key_offline_backup": "OWNER_INPUT_REQUIRED",
     "closed_testing_purchase_evidence": "OWNER_INPUT_REQUIRED"
@@ -17,11 +17,11 @@
     "sandbox_purchase_evidence": "OWNER_INPUT_REQUIRED"
   },
   "links": {
-    "verified_domain": "OWNER_INPUT_REQUIRED",
-    "privacy_url": "OWNER_INPUT_REQUIRED",
-    "terms_url": "OWNER_INPUT_REQUIRED",
-    "support_url": "OWNER_INPUT_REQUIRED",
-    "account_deletion_url": "OWNER_INPUT_REQUIRED",
+    "verified_domain": "OWNER_CONFIRMED_CLOUDFLARE_REGISTRAR_BILHEALTH_COM",
+    "privacy_url": "OWNER_CONFIRMED_PUBLISHED_HTTPS_WWW_BILHEALTH_COM_PRIVACY",
+    "terms_url": "OWNER_CONFIRMED_PUBLISHED_HTTPS_WWW_BILHEALTH_COM_TERMS",
+    "support_url": "OWNER_CONFIRMED_PUBLISHED_HTTPS_WWW_BILHEALTH_COM_SUPPORT",
+    "account_deletion_url": "OWNER_CONFIRMED_PUBLISHED_HTTPS_WWW_BILHEALTH_COM_ACCOUNT_DELETION",
     "android_assetlinks_live": "OWNER_INPUT_REQUIRED",
     "apple_app_site_association_live": "OWNER_INPUT_REQUIRED"
   },

@@ -7,7 +7,11 @@ the public privacy policy. Update it whenever a connector changes.
 
 - BIL is a health and nutrition logger, not a medical diagnosis product.
 - The default experience is local-first; cloud features are opt-in.
-- There is no advertising SDK or cross-app tracking.
+- The Free plan can use the bundled AdMob SDK only for contextual,
+  non-personalized ads after adult, region and explicit-consent gates pass.
+  Ad requests are restricted to general discovery surfaces; health, nutrition,
+  weight, location, profile, search and private-community data are not ad
+  targeting inputs. Pro is ad-free.
 - AI suggestions require confirmation and never invent measurements.
 
 ## Data handled on device

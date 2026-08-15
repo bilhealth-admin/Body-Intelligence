@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-holdout16-frozen-owned-v1",
+  "image_policy": "Previously unused BIL-owned synthetic images annotated from visible pixels before provider contact.",
+  "claim_scope": "Synthetic camera-like visible-component holdout only; not a real-world accuracy claim.",
+  "frozen_before_provider_contact": true,
+  "cases": [
+    {"id":"h16-chicken-barley-broccoli","category":"visible_separated_meal","region":"egypt","image_path":"assets/images/professional/recipes/bil-ar-egypt-chicken-barley-broccoli-231.png","synthetic":true,"truth":[{"id":"chicken barley broccoli plate","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"chicken","aliases":["shredded chicken"]},{"id":"barley","aliases":["pearl barley"]},{"id":"broccoli","aliases":["broccoli florets"]}]},
+    {"id":"h16-egg-potato-broccoli","category":"visible_sheet_pan_meal","region":"egypt","image_path":"assets/images/professional/recipes/bil-ar-egypt-egg-potato-broccoli-256.png","synthetic":true,"truth":[{"id":"egg potato broccoli tray","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"eggs","aliases":["egg","baked eggs"]},{"id":"potatoes","aliases":["potato","roasted potatoes"]},{"id":"broccoli","aliases":["broccoli florets"]},{"id":"onions","aliases":["onion"]}]},
+    {"id":"h16-white-fish-rice-broccoli","category":"visible_separated_meal","region":"iraq","image_path":"assets/images/professional/recipes/bil-ar-iraq-cod-rice-broccoli-204.png","synthetic":true,"truth":[{"id":"white fish rice broccoli plate","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"white fish","aliases":["cod","fish fillet"]},{"id":"rice","aliases":["white rice"]},{"id":"toasted vermicelli","aliases":["vermicelli","pasta noodles"]},{"id":"broccoli","aliases":["broccoli florets"]}]},
+    {"id":"h16-tofu-corn-tomato","category":"visible_mixed_meal","region":"maghreb","image_path":"assets/images/professional/recipes/bil-ar-maghreb-tofu-corn-tomato-100.png","synthetic":true,"truth":[{"id":"tofu corn tomato stew","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"tofu","aliases":["tofu cubes"]},{"id":"corn","aliases":["sweetcorn"]},{"id":"tomatoes","aliases":["tomato"]},{"id":"onions","aliases":["onion"]},{"id":"green peppers","aliases":["green bell pepper","bell pepper"]},{"id":"tomato sauce","aliases":[]}]},
+    {"id":"h16-nonfood-medication","category":"non_food","region":"global","image_path":"assets/images/daily_context/medication_v1.png","synthetic":true,"truth":[],"dish_identity_truth":[],"visible_component_truth":[]}
+  ]
+}

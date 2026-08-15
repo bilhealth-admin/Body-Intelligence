@@ -1,9 +1,9 @@
 # BIL public pages — publication-ready source
 
-The owner-confirmed domain is `bilhealth.com` and the verified administrative
-contact is `bilhealth.app@gmail.com`. Domain ownership does not prove that these
-pages are live. Publish each page over public HTTPS and verify a `200` response
-without login or geofencing before entering a URL in either store. The domain
+The owner-confirmed domain is `bilhealth.com`, the published website is
+`https://www.bilhealth.com`, and the administrative account is
+`bilhealth.app@gmail.com`. The owner confirmed publication on 2026-08-08;
+public HTTP status and page-content verification remain a release check. The domain
 mailboxes `support@bilhealth.com` and `privacy@bilhealth.com` are verified for
 inbound forwarding to the administrative mailbox only; outbound sending from
 those aliases is not claimed.
@@ -19,7 +19,7 @@ Cloud processing uses encrypted transport and access controls. Users may revoke
 health permissions, disconnect devices, delete community content, clear local
 data and request account deletion. Retention is limited to providing the
 service, security, legal obligations and user-requested backup/sync. Contact:
-`bilhealth.app@gmail.com`. This policy must be expanded with the
+`privacy@bilhealth.com`. This policy must be expanded with the
 owner’s legal entity, jurisdiction, processors and effective date before public
 store submission.
 
@@ -39,12 +39,13 @@ legal entity, governing law, effective date and contact before publication.
 Support topics: account access, data export/deletion, food logging, catalog
 sources, subscriptions and restore, Health Connect/HealthKit permissions, BLE
 devices, offline behavior, accessibility and reporting unsafe community
-content. Contact: `bilhealth.app@gmail.com`. Never send passwords,
+content. Contact: `support@bilhealth.com`. Never send passwords,
 store receipts, raw health exports or API keys by email.
 
 ## `/contact`
 
-Official product and privacy contact: `bilhealth.app@gmail.com`.
+Official owner contact: `owner@bilhealth.com`. Privacy requests:
+`privacy@bilhealth.com`. Support requests: `support@bilhealth.com`.
 The public page must identify the verified legal operator and use the official
 BIL domain. Security reports should contain reproduction steps but never user
 passwords, tokens, receipts, or raw health records.
@@ -53,7 +54,7 @@ passwords, tokens, receipts, or raw health records.
 
 Users can initiate account and cloud-data deletion from the in-app privacy and
 account controls after authentication. If the app is unavailable, send a
-request from the account email to `bilhealth.app@gmail.com`. State
+request from the account email to `privacy@bilhealth.com`. State
 which account should be deleted; do not attach sensitive health data. Identity
 must be verified before deletion. The published page must disclose deletion
 scope, any legally required retention and expected completion period based on
@@ -65,7 +66,7 @@ Authenticated users can delete eligible cloud records and community content
 from the app, clear local data from privacy controls, and revoke connected
 health permissions in the operating system. Account deletion includes the
 associated cloud data subject to documented legal retention. A public request
-path remains available through `bilhealth.app@gmail.com` without
+path remains available through `privacy@bilhealth.com` without
 requiring installation of the app.
 
 ## `/subscription-terms`
@@ -81,7 +82,7 @@ Trials are not advertised unless an active store configuration proves one.
 
 BIL-owned, generated-for-BIL, or separately licensed material may appear in
 the product. Rights holders can contact
-`bilhealth.app@gmail.com` with the work, URL, ownership evidence,
+`owner@bilhealth.com` with the work, URL, ownership evidence,
 and requested action. Reports are reviewed and auditable; false or abusive
 requests may be rejected.
 

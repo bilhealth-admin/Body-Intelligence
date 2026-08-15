@@ -21,8 +21,8 @@ void main() {
       ),
     );
     await tester.pump(const Duration(milliseconds: 2600));
-    expect(find.text('BIL®'), findsOneWidget);
-    expect(find.text('BODY INTELLIGENCE LOG'), findsOneWidget);
+    expect(find.text('BODY INTELLIGENCE LOG™'), findsWidgets);
+    expect(find.textContaining('®'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -31,8 +31,8 @@ void main() {
   ) async {
     await tester.pumpWidget(const _SplashHarness(reducedMotion: true));
     await tester.pump();
-    expect(find.text('BIL®'), findsOneWidget);
-    expect(find.text('BODY INTELLIGENCE LOG'), findsOneWidget);
+    expect(find.text('BODY INTELLIGENCE LOG™'), findsWidgets);
+    expect(find.textContaining('®'), findsNothing);
     final indicator = tester.widget<LinearProgressIndicator>(
       find.byType(LinearProgressIndicator),
     );

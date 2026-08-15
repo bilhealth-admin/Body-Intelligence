@@ -40,7 +40,7 @@ Entries below are appended as gates are completed.
 - Authoritative application: Body Intelligence Log (BIL); public developer:
   BIL Health; owner-confirmed domain: `bilhealth.com`; administrative contact:
   `bilhealth.app@gmail.com`.
-- Current Android and iOS identifiers are consistently `com.kadem.bil`. No
+- Current Android and iOS identifiers are consistently `com.bilhealth.bodyintelligencelog`. The
   identifier change is authorized; any rebranding decision requires explicit
   owner approval.
 - Free download with monthly/annual Plus and Pro subscriptions. Free-tier

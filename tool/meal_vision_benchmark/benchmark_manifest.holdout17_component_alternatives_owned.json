@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-holdout17-component-alternatives-owned-v1",
+  "image_policy": "Previously unused BIL-owned synthetic images annotated from visible pixels before provider contact and after calibration only.",
+  "claim_scope": "Synthetic camera-like visible-component holdout only; not a real-world accuracy claim.",
+  "frozen_before_provider_contact": true,
+  "cases": [
+    {"id":"h17-salmon-rice-spinach-tomato","category":"visible_mixed_meal","region":"gulf","image_path":"assets/images/professional/recipes/bil-ar-gulf-salmon-rice-tomato-003.png","synthetic":true,"truth":[{"id":"salmon rice spinach tomato bowl","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"salmon","aliases":["salmon fillet"]},{"id":"rice","aliases":["white rice"]},{"id":"spinach","aliases":["leafy greens"]},{"id":"tomatoes","aliases":["tomato"]}]},
+    {"id":"h17-egg-quinoa-spinach","category":"visible_mixed_meal","region":"egypt","image_path":"assets/images/professional/recipes/bil-ar-egypt-egg-quinoa-spinach-126.png","synthetic":true,"truth":[{"id":"egg quinoa spinach bowl","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"egg","aliases":["fried egg"]},{"id":"quinoa","aliases":[]},{"id":"spinach","aliases":["leafy greens"]}]},
+    {"id":"h17-tofu-barley-broccoli","category":"visible_mixed_meal","region":"maghreb","image_path":"assets/images/professional/recipes/bil-ar-maghreb-tofu-barley-broccoli-240.png","synthetic":true,"truth":[{"id":"tofu barley broccoli bowl","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"tofu","aliases":["tofu triangles"]},{"id":"barley","aliases":["pearl barley"]},{"id":"chickpeas","aliases":["garbanzo beans"]},{"id":"broccoli","aliases":["broccoli florets"]}]},
+    {"id":"h17-lentils-pearl-couscous-spinach","category":"visible_legume_mixture","region":"levant","image_path":"assets/images/professional/recipes/bil-ar-levant-lentils-couscous-spinach-187.png","synthetic":true,"truth":[{"id":"lentil pearl couscous spinach bowl","aliases":[]}],"dish_identity_truth":[],"visible_component_truth":[{"id":"lentils","aliases":["brown lentils"]},{"id":"pearl couscous","aliases":["couscous","Israeli couscous"]},{"id":"spinach","aliases":["leafy greens"]}]},
+    {"id":"h17-nonfood-stress","category":"non_food","region":"global","image_path":"assets/images/daily_context/psychological_stress_v1.png","synthetic":true,"truth":[],"dish_identity_truth":[],"visible_component_truth":[]}
+  ]
+}

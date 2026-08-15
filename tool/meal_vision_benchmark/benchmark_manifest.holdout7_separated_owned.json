@@ -1,0 +1,333 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-separated-holdout7-owned-v8",
+  "image_policy": "Previously unused project-owned synthetic assets; observable description, optional identity, and visible-component labels frozen before provider call.",
+  "claim_scope": "Synthetic schema/abstention holdout only; no real-camera claim.",
+  "cases": [
+    {
+      "id": "h7-bacalao-pisto-espanol",
+      "category": "fresh_observable_separation",
+      "region": "global",
+      "image_path": "assets/images/professional/recipes/bacalao-pisto-espanol.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "Spanish cod with vegetables",
+          "aliases": [
+            "cod with vegetable stew",
+            "white fish with vegetables"
+          ]
+        }
+      ],
+      "dish_identity_truth": [
+        {
+          "id": "bacalao-pisto-espanol",
+          "aliases": [
+            "bacalao with pisto",
+            "spanish cod with pisto"
+          ]
+        }
+      ],
+      "visible_component_truth": [
+        {
+          "id": "cod",
+          "aliases": [
+            "white fish",
+            "fish fillet"
+          ]
+        },
+        {
+          "id": "vegetables",
+          "aliases": [
+            "tomato vegetables",
+            "vegetable stew"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "h7-ayran-asi-corbasi",
+      "category": "fresh_observable_separation",
+      "region": "global",
+      "image_path": "assets/images/professional/recipes/ayran-asi-corbasi.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "yogurt grain soup",
+          "aliases": [
+            "yogurt soup",
+            "creamy grain soup"
+          ]
+        }
+      ],
+      "dish_identity_truth": [
+        {
+          "id": "ayran-asi-corbasi",
+          "aliases": [
+            "ayran asi soup",
+            "turkish yogurt soup"
+          ]
+        }
+      ],
+      "visible_component_truth": [
+        {
+          "id": "yogurt soup",
+          "aliases": [
+            "creamy soup"
+          ]
+        },
+        {
+          "id": "grain",
+          "aliases": [
+            "wheat",
+            "rice"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "h7-etli-nohut",
+      "category": "fresh_observable_separation",
+      "region": "global",
+      "image_path": "assets/images/professional/recipes/etli-nohut.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "meat and chickpea stew",
+          "aliases": [
+            "chickpea meat stew",
+            "chickpeas with meat"
+          ]
+        }
+      ],
+      "dish_identity_truth": [
+        {
+          "id": "etli-nohut",
+          "aliases": [
+            "etli nohut",
+            "turkish meat chickpea stew"
+          ]
+        }
+      ],
+      "visible_component_truth": [
+        {
+          "id": "chickpeas",
+          "aliases": [
+            "garbanzo beans"
+          ]
+        },
+        {
+          "id": "meat",
+          "aliases": [
+            "beef",
+            "lamb"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "h7-fellah-koftesi",
+      "category": "fresh_observable_separation",
+      "region": "global",
+      "image_path": "assets/images/professional/recipes/fellah-koftesi.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "bulgur dumplings in tomato sauce",
+          "aliases": [
+            "bulgur balls with tomato sauce",
+            "grain dumplings tomato sauce"
+          ]
+        }
+      ],
+      "dish_identity_truth": [
+        {
+          "id": "fellah-koftesi",
+          "aliases": [
+            "fellah koftesi",
+            "fellah meatballs"
+          ]
+        }
+      ],
+      "visible_component_truth": [
+        {
+          "id": "bulgur dumplings",
+          "aliases": [
+            "grain balls",
+            "bulgur balls"
+          ]
+        },
+        {
+          "id": "tomato sauce",
+          "aliases": [
+            "red sauce"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "h7-hamsili-pilav",
+      "category": "fresh_observable_separation",
+      "region": "global",
+      "image_path": "assets/images/professional/recipes/hamsili-pilav.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "fish and rice pilaf",
+          "aliases": [
+            "fish rice dish",
+            "small fish with rice"
+          ]
+        }
+      ],
+      "dish_identity_truth": [
+        {
+          "id": "hamsili-pilav",
+          "aliases": [
+            "hamsili pilav",
+            "anchovy rice pilaf"
+          ]
+        }
+      ],
+      "visible_component_truth": [
+        {
+          "id": "fish",
+          "aliases": [
+            "anchovies",
+            "small fish"
+          ]
+        },
+        {
+          "id": "rice",
+          "aliases": [
+            "rice pilaf"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "h7-jareesh-chicken",
+      "category": "fresh_observable_separation",
+      "region": "global",
+      "image_path": "assets/images/professional/recipes/jareesh-chicken.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "savory wheat porridge with chicken",
+          "aliases": [
+            "chicken wheat porridge",
+            "cracked wheat with chicken"
+          ]
+        }
+      ],
+      "dish_identity_truth": [
+        {
+          "id": "jareesh-chicken",
+          "aliases": [
+            "chicken jareesh",
+            "jareesh with chicken"
+          ]
+        }
+      ],
+      "visible_component_truth": [
+        {
+          "id": "wheat porridge",
+          "aliases": [
+            "cracked wheat",
+            "grain porridge"
+          ]
+        },
+        {
+          "id": "chicken",
+          "aliases": [
+            "chicken meat"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "h7-kabak-sinkonta",
+      "category": "fresh_observable_separation",
+      "region": "global",
+      "image_path": "assets/images/professional/recipes/kabak-sinkonta.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "baked squash dish",
+          "aliases": [
+            "roasted squash",
+            "squash casserole"
+          ]
+        }
+      ],
+      "dish_identity_truth": [
+        {
+          "id": "kabak-sinkonta",
+          "aliases": [
+            "kabak sinkonta",
+            "turkish baked pumpkin"
+          ]
+        }
+      ],
+      "visible_component_truth": [
+        {
+          "id": "squash",
+          "aliases": [
+            "pumpkin",
+            "zucchini"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "h7-kapuska-etli",
+      "category": "fresh_observable_separation",
+      "region": "global",
+      "image_path": "assets/images/professional/recipes/kapuska-etli.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "cabbage and meat stew",
+          "aliases": [
+            "meat cabbage stew",
+            "cooked cabbage with meat"
+          ]
+        }
+      ],
+      "dish_identity_truth": [
+        {
+          "id": "kapuska-etli",
+          "aliases": [
+            "etli kapuska",
+            "turkish cabbage meat stew"
+          ]
+        }
+      ],
+      "visible_component_truth": [
+        {
+          "id": "cabbage",
+          "aliases": [
+            "cooked cabbage"
+          ]
+        },
+        {
+          "id": "meat",
+          "aliases": [
+            "beef",
+            "lamb"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "h7-nonfood-cycling",
+      "category": "non_food",
+      "region": "global",
+      "image_path": "assets/images/professional/workouts/cycling.jpg",
+      "synthetic": true,
+      "truth": [],
+      "dish_identity_truth": [],
+      "visible_component_truth": []
+    }
+  ]
+}

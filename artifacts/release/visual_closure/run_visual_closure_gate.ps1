@@ -52,6 +52,36 @@ $formatExit = Invoke-Logged { & dart format @formatTargets } $formatLog
 $reviewExit = Invoke-Logged {
   & dart run tool/visual_reference_review_audit.dart
 } $reviewLog
+$reviewText = Read-Log $reviewLog
+$reviewClean = $reviewExit -eq 0 -and
+  $reviewText -match 'VISUAL_MANUAL_REVIEW=PASS' -and
+  $reviewText -match 'REVIEWED_REFERENCES=177' -and
+  $reviewText -match 'UNVERIFIED_REFERENCES=0' -and
+  $reviewText -match 'EXTERNAL_VALIDATION_PENDING=0'
+
+if (-not $reviewClean) {
+  @"
+BIL v1 - 177-reference visual closure final gate summary
+Generated: $(Get-Date -Format o)
+Project: $project
+FORMAT_EXIT_CODE=$formatExit
+FORMAT_CLEAN=$($formatExit -eq 0)
+VISUAL_REVIEW_EXIT_CODE=$reviewExit
+VISUAL_REVIEW_CLEAN=False
+REVIEWED_REFERENCES=$(if ($reviewText -match 'REVIEWED_REFERENCES=(\d+)') { $Matches[1] } else { 'unknown' })
+UNVERIFIED_REFERENCES=$(if ($reviewText -match 'UNVERIFIED_REFERENCES=(\d+)') { $Matches[1] } else { 'unknown' })
+EXTERNAL_VALIDATION_PENDING=$(if ($reviewText -match 'EXTERNAL_VALIDATION_PENDING=(\d+)') { $Matches[1] } else { 'unknown' })
+GOLDEN_VERIFY_CLEAN=NOT_RUN
+ANALYZE_CLEAN=NOT_RUN
+TEST_CLEAN=NOT_RUN
+ANDROID_BUILD_CLEAN=NOT_RUN
+VISUAL_CLOSURE_GATE=FAIL
+
+The gate stopped before tests and build because visual-equivalence approval is incomplete.
+"@ | Set-Content -LiteralPath $summaryFile -Encoding utf8
+  Get-Content -LiteralPath $summaryFile
+  exit 1
+}
 $goldenExit = Invoke-Logged {
   & flutter test @visualTests --timeout 60s
 } $goldenLog
@@ -60,11 +90,6 @@ $testExit = Invoke-Logged { & flutter test --timeout 30s } $testsLog
 $buildExit = Invoke-Logged { & flutter build apk --debug } $buildLog
 
 $formatClean = $formatExit -eq 0
-$reviewText = Read-Log $reviewLog
-$reviewClean = $reviewExit -eq 0 -and
-  $reviewText -match 'VISUAL_MANUAL_REVIEW=PASS' -and
-  $reviewText -match 'REVIEWED_REFERENCES=177' -and
-  $reviewText -match 'REVIEWED_UNIQUE_EVIDENCE=29'
 $goldenClean = $goldenExit -eq 0 -and
   (Read-Log $goldenLog) -match 'All tests passed!'
 $analyzeClean = $analyzeExit -eq 0 -and
@@ -95,7 +120,8 @@ FORMAT_CLEAN=$formatClean
 VISUAL_REVIEW_EXIT_CODE=$reviewExit
 VISUAL_REVIEW_CLEAN=$reviewClean
 REVIEWED_REFERENCES=177
-REVIEWED_UNIQUE_EVIDENCE=29
+UNVERIFIED_REFERENCES=$(if ($reviewText -match 'UNVERIFIED_REFERENCES=(\d+)') { $Matches[1] } else { 'unknown' })
+EXTERNAL_VALIDATION_PENDING=$(if ($reviewText -match 'EXTERNAL_VALIDATION_PENDING=(\d+)') { $Matches[1] } else { 'unknown' })
 GOLDEN_VERIFY_EXIT_CODE=$goldenExit
 GOLDEN_VERIFY_CLEAN=$goldenClean
 ANALYZE_EXIT_CODE=$analyzeExit
@@ -110,7 +136,7 @@ VISUAL_CLOSURE_GATE=$gate
 
 SUCCESS CRITERIA:
 1. FORMAT_CLEAN=True
-2. VISUAL_REVIEW_CLEAN=True with 177 references and 29 evidence files
+2. VISUAL_REVIEW_CLEAN=True only when all 177 references have explicit visual-equivalence approval and no external validation remains pending
 3. GOLDEN_VERIFY_CLEAN=True
 4. ANALYZE_CLEAN=True
 5. TEST_CLEAN=True

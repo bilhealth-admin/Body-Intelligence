@@ -10,10 +10,12 @@ require Product Owner and legal approval in Play Console.**
 - Health-data aggregation from Health Connect and paired health devices.
 - Wellness and decision support based on user-authorized evidence.
 
-The production permission surface can read steps, activity energy, exercise,
-sleep, weight, heart rate, resting heart rate, heart-rate variability, oxygen
-saturation, respiratory rate, blood glucose, blood pressure, hydration, and
-nutrition. Write permissions are limited to weight and hydration.
+The Android v1 production permission surface reads steps, active energy,
+exercise sessions, weight, and nutrition from Health Connect. Write permission
+is limited to weight and nutrition records explicitly selected by the user for
+synchronization. Other measurements shown by BIL can come from explicit manual
+entry or separately paired BLE devices; they are not Health Connect permissions
+in this release.
 
 ## Product representation
 

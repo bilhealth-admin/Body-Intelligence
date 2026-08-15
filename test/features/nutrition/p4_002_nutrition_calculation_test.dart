@@ -80,6 +80,7 @@ void main() {
         name: 'Snapshot food',
         category: 'custom',
         servingSize: 80,
+        servingUnit: 'g',
         calories: 160,
         protein: 8,
         carbs: 20,

@@ -1,14 +1,17 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/services/app_settings_provider.dart';
 import 'package:body_intelligence_log/app/services/app_settings_service.dart';
-import 'package:body_intelligence_log/app/theme/app_theme_data.dart';
+import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/features/onboarding/widgets/welcome_step.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'visual_closure/visual_evidence_font.dart';
+
 void main() {
+  setUpAll(loadVisualEvidenceFont);
   for (final locale in const [Locale('en'), Locale('ar')]) {
     testWidgets('Welcome V10 ${locale.languageCode} visual baseline', (
       tester,
@@ -45,7 +48,12 @@ Widget _welcome(Locale locale) => ProviderScope(
       GlobalWidgetsLocalizations.delegate,
       GlobalCupertinoLocalizations.delegate,
     ],
-    theme: AppThemeData.lightTheme(Brightness.light),
+    theme: visualEvidenceTheme(
+      BilFlagshipTheme.light(isArabic: locale.languageCode == 'ar'),
+      fontFamily: locale.languageCode == 'ar'
+          ? 'NotoArabicEvidence'
+          : 'RobotoEvidence',
+    ),
     home: WelcomeStep(onContinue: _noop),
   ),
 );

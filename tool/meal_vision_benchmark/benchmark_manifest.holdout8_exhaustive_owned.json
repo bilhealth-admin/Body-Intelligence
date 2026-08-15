@@ -1,0 +1,280 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-exhaustive-holdout8-owned-v9",
+  "image_policy": "Previously unused project-owned synthetic assets visually inspected and exhaustively annotated before provider call.",
+  "claim_scope": "Synthetic visible-component holdout only; no real-camera claim.",
+  "cases": [
+    {
+      "id": "h8-lentil-bulgur",
+      "image_path": "assets/images/professional/recipes/mercimekli-bulgur-pilavi.png",
+      "truth": [
+        {
+          "id": "lentil bulgur pilaf",
+          "aliases": [
+            "lentils with bulgur",
+            "lentil and grain pilaf"
+          ]
+        }
+      ],
+      "dish_identity_truth": [
+        {
+          "id": "mercimekli-bulgur-pilavi",
+          "aliases": [
+            "lentil bulgur pilaf",
+            "turkish lentil bulgur pilaf"
+          ]
+        }
+      ],
+      "visible_component_truth": [
+        {
+          "id": "lentils",
+          "aliases": [
+            "brown lentils"
+          ]
+        },
+        {
+          "id": "bulgur",
+          "aliases": [
+            "cooked bulgur",
+            "grain",
+            "cooked grain"
+          ]
+        }
+      ],
+      "category": "fresh_exhaustive_visual_annotation",
+      "region": "global",
+      "synthetic": true
+    },
+    {
+      "id": "h8-borek-yogurt",
+      "image_path": "assets/images/professional/recipes/otlu-borek-yogurt.png",
+      "truth": [
+        {
+          "id": "spinach cheese pastry with yogurt",
+          "aliases": [
+            "herb cheese pastry and yogurt",
+            "savory pastry with yogurt"
+          ]
+        }
+      ],
+      "dish_identity_truth": [
+        {
+          "id": "otlu borek",
+          "aliases": [
+            "herb borek",
+            "spinach cheese borek"
+          ]
+        }
+      ],
+      "visible_component_truth": [
+        {
+          "id": "pastry",
+          "aliases": [
+            "borek",
+            "phyllo pastry",
+            "savory pastry"
+          ]
+        },
+        {
+          "id": "spinach filling",
+          "aliases": [
+            "herb filling",
+            "greens"
+          ]
+        },
+        {
+          "id": "white cheese",
+          "aliases": [
+            "cheese",
+            "feta cheese"
+          ]
+        },
+        {
+          "id": "yogurt",
+          "aliases": [
+            "plain yogurt"
+          ]
+        }
+      ],
+      "category": "fresh_exhaustive_visual_annotation",
+      "region": "global",
+      "synthetic": true
+    },
+    {
+      "id": "h8-chicken-hummus",
+      "image_path": "assets/images/professional/recipes/tavuklu-humus-kasesi.png",
+      "truth": [
+        {
+          "id": "chicken hummus bowl",
+          "aliases": [
+            "grilled chicken with hummus and vegetables"
+          ]
+        }
+      ],
+      "dish_identity_truth": [
+        {
+          "id": "chicken hummus bowl",
+          "aliases": [
+            "tavuklu humus kasesi"
+          ]
+        }
+      ],
+      "visible_component_truth": [
+        {
+          "id": "chicken",
+          "aliases": [
+            "grilled chicken",
+            "chicken breast"
+          ]
+        },
+        {
+          "id": "hummus",
+          "aliases": [
+            "chickpea dip"
+          ]
+        },
+        {
+          "id": "tomatoes",
+          "aliases": [
+            "diced tomatoes",
+            "tomato"
+          ]
+        },
+        {
+          "id": "cucumber",
+          "aliases": [
+            "diced cucumber"
+          ]
+        },
+        {
+          "id": "oil",
+          "aliases": [
+            "olive oil",
+            "oil drizzle"
+          ]
+        }
+      ],
+      "category": "fresh_exhaustive_visual_annotation",
+      "region": "global",
+      "synthetic": true
+    },
+    {
+      "id": "h8-fish-quinoa",
+      "image_path": "assets/images/professional/recipes/truite-erable-quinoa.png",
+      "truth": [
+        {
+          "id": "fish quinoa plate with green beans",
+          "aliases": [
+            "fish with quinoa and green beans"
+          ]
+        }
+      ],
+      "dish_identity_truth": [],
+      "visible_component_truth": [
+        {
+          "id": "fish fillet",
+          "aliases": [
+            "cooked fish",
+            "salmon fillet",
+            "trout fillet"
+          ]
+        },
+        {
+          "id": "quinoa",
+          "aliases": [
+            "cooked quinoa"
+          ]
+        },
+        {
+          "id": "green beans",
+          "aliases": [
+            "string beans"
+          ]
+        },
+        {
+          "id": "glaze",
+          "aliases": [
+            "sauce",
+            "maple glaze"
+          ]
+        }
+      ],
+      "category": "fresh_exhaustive_visual_annotation",
+      "region": "global",
+      "synthetic": true
+    },
+    {
+      "id": "h8-ratatouille-beans",
+      "image_path": "assets/images/professional/recipes/ratatouille-haricots-blancs.png",
+      "truth": [
+        {
+          "id": "white bean ratatouille",
+          "aliases": [
+            "white beans with stewed vegetables",
+            "bean vegetable stew"
+          ]
+        }
+      ],
+      "dish_identity_truth": [
+        {
+          "id": "white bean ratatouille",
+          "aliases": [
+            "ratatouille with white beans"
+          ]
+        }
+      ],
+      "visible_component_truth": [
+        {
+          "id": "white beans",
+          "aliases": [
+            "beans"
+          ]
+        },
+        {
+          "id": "eggplant",
+          "aliases": [
+            "aubergine"
+          ]
+        },
+        {
+          "id": "zucchini",
+          "aliases": [
+            "courgette"
+          ]
+        },
+        {
+          "id": "tomatoes",
+          "aliases": [
+            "tomato"
+          ]
+        },
+        {
+          "id": "onions",
+          "aliases": [
+            "onion"
+          ]
+        },
+        {
+          "id": "tomato sauce",
+          "aliases": [
+            "red sauce",
+            "stew sauce"
+          ]
+        }
+      ],
+      "category": "fresh_exhaustive_visual_annotation",
+      "region": "global",
+      "synthetic": true
+    },
+    {
+      "id": "h8-nonfood-walk",
+      "category": "non_food",
+      "region": "global",
+      "image_path": "assets/images/professional/workouts/brisk_walk.jpg",
+      "synthetic": true,
+      "truth": [],
+      "dish_identity_truth": [],
+      "visible_component_truth": []
+    }
+  ]
+}

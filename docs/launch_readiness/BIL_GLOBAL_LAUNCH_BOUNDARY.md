@@ -12,13 +12,13 @@
 The accepted baseline currently establishes these release-relevant facts:
 
 - Flutter version identity is `1.0.0+1`.
-- Android namespace and application ID are `com.kadem.bil`.
+- Android namespace and application ID are `com.bilhealth.bodyintelligencelog`.
 - Android uses minimum API 26 and target API 36.
 - Android release signing reads an optional private `key.properties`; it does
   not fall back to the debug signing key.
 - Android disables cleartext traffic and application backup.
 - Health Connect and Bluetooth permissions are explicit in the manifest.
-- iOS deployment target is 15.0 and bundle identity is `com.kadem.bil`.
+- iOS deployment target is 15.0 and bundle identity is `com.bilhealth.bodyintelligencelog`.
 - HealthKit and Bluetooth purpose strings are present.
 - `PrivacyInfo.xcprivacy` is tracked and included in Runner resources.
 - English and Arabic application localizations are declared.

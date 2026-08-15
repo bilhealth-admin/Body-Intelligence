@@ -170,10 +170,12 @@ void main() {
   ]) {
     _require(environment.contains(flag), 'Missing fail-closed flag $flag');
   }
+  final mealVision = _read(
+    'lib/features/nutrition/services/meal_image_analysis_service.dart',
+  );
   _require(
-    _read(
-      'lib/features/nutrition/services/meal_image_analysis_service.dart',
-    ).contains('BIL_MEAL_VISION_ENDPOINT'),
+    mealVision.contains('AppEnvironment.mealVisionEndpoint') &&
+        environment.contains('BIL_MEAL_VISION_ENDPOINT'),
     'Missing fail-closed meal-image endpoint configuration',
   );
 

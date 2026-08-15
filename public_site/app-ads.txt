@@ -1,0 +1,4 @@
+# BIL AdMob publisher record intentionally pending owner-provided production
+# publisher ID. Do not add test publisher IDs or fabricated authorization.
+# Required production format after ownership verification:
+# google.com, pub-OWNER_PROVIDED_ID, DIRECT, f08c47fec0942fa0

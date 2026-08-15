@@ -68,7 +68,7 @@ void main() {
     final issues = ReleaseConfigurationValidator.validate(
       const ReleaseConfiguration(
         production: false,
-        applicationId: 'com.kadem.bil',
+        applicationId: 'com.bilhealth.bodyintelligencelog.dev',
         cloudEnabled: false,
         supabaseUrl: '',
         supabaseAnonKey: '',

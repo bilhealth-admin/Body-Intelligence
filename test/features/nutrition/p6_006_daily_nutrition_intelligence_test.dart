@@ -29,6 +29,8 @@ void main() {
         fiber: 8,
         sodium: 400,
         potassium: 800,
+        servingSize: 100,
+        servingUnit: 'g',
       );
       final date = DateTime(2026, 7, 23, 12);
       final mealId = await meals.createMeal(
@@ -81,6 +83,8 @@ void main() {
         protein: 5,
         carbs: 15,
         fats: 2,
+        servingSize: 100,
+        servingUnit: 'g',
       );
       final date = DateTime(2026, 7, 24, 12);
       final mealId = await meals.createMeal(

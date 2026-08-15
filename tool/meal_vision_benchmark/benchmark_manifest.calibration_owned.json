@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-calibration-owned-v2",
+  "image_policy": "project-owned-realistic-synthetic",
+  "claim_scope": "prompt calibration only; excluded from holdout accuracy",
+  "cases": [
+    {
+      "id": "calibration-egyptian-koshari",
+      "category": "arabic_egyptian_composite",
+      "region": "egypt",
+      "image_path": "assets/images/professional/recipes/egyptian-koshari.png",
+      "synthetic": true,
+      "truth": [{"id":"koshari","aliases":["koshari","koshary","kushari","egyptian koshari"],"amount_g":420}]
+    },
+    {
+      "id": "calibration-ful-medames",
+      "category": "arabic_egyptian_composite",
+      "region": "egypt",
+      "image_path": "assets/images/professional/recipes/ful-medames-tahini.png",
+      "synthetic": true,
+      "truth": [{"id":"ful-medames","aliases":["ful medames","foul medames","fava bean dish","fava bean stew"],"amount_g":300}]
+    },
+    {
+      "id": "calibration-chicken-kabsa",
+      "category": "gulf_separate_major_items",
+      "region": "gulf",
+      "image_path": "assets/images/professional/recipes/chicken-kabsa.png",
+      "synthetic": true,
+      "truth": [{"id":"chicken-kabsa","aliases":["chicken kabsa","kabsa","chicken and rice","chicken with rice","chicken and vermicelli rice pilaf","chicken rice pilaf"],"amount_g":400}]
+    }
+  ]
+}

@@ -25,7 +25,7 @@ Owner-supplied values that cannot be inferred remain explicitly marked
 ## Apple App Store
 
 - Wait for Apple Developer activation, create the App Store Connect record and
-  keep bundle ID `com.kadem.bil`.
+  use the owner-approved bundle ID `com.bilhealth.bodyintelligencelog`.
 - Enter the five localized metadata sets and upload 1–10 actual screenshots per
   selected device family. Screenshots and the 1024 icon must have no alpha.
 - Complete App Privacy, age-rating and export-compliance questionnaires based on

@@ -37,6 +37,57 @@ void main() {
     expect(rows.single.dayKey, '2026-07-18');
   });
 
+  test('body context update preserves the rest of the daily record', () async {
+    final repository = DailyLogRepository(database);
+    final date = DateTime(2026, 7, 19, 8);
+    await repository.save(
+      date: date,
+      notes: 'before',
+      sleepHours: 7.5,
+      steps: 8100,
+      exerciseNotes: 'walk',
+    );
+
+    await repository.saveBodyContext(date: date, notes: '[greatSleep]');
+
+    final row = await repository.getForDay(date);
+    expect(row?.notes, '[greatSleep]');
+    expect(row?.sleepHours, 7.5);
+    expect(row?.steps, 8100);
+    expect(row?.exerciseNotes, 'walk');
+  });
+
+  test('sleep update preserves every other daily-ledger field', () async {
+    final repository = DailyLogRepository(database);
+    final date = DateTime(2026, 7, 20, 21);
+    await repository.save(
+      date: date,
+      notes: 'private note',
+      steps: 7200,
+      exerciseNotes: 'strength session',
+    );
+
+    await repository.updateSleepHours(date: date, sleepHours: 8.25);
+
+    final row = await repository.getForDay(date);
+    expect(row?.sleepHours, 8.25);
+    expect(row?.notes, 'private note');
+    expect(row?.steps, 7200);
+    expect(row?.exerciseNotes, 'strength session');
+  });
+
+  test('sleep update rejects non-finite and out-of-range values', () async {
+    final repository = DailyLogRepository(database);
+    final date = DateTime(2026, 7, 20);
+    for (final value in [double.nan, double.infinity, -0.5, 14.5]) {
+      await expectLater(
+        repository.updateSleepHours(date: date, sleepHours: value),
+        throwsArgumentError,
+      );
+    }
+    expect(await repository.getForDay(date), isNull);
+  });
+
   test('personal experiments preserve cautious evidence states', () async {
     final repository = ExperimentRepository(database);
     final id = await repository.create(
@@ -142,7 +193,14 @@ void main() {
       final updatedItem = await database.select(database.mealItems).getSingle();
       expect(updatedItem.calories, closeTo(233.4, 0.001));
       expect(updatedItem.protein, closeTo(10.14, 0.001));
+      final deletionObserved = meals
+          .watchMealsForDate(DateTime(2026, 7, 18))
+          .firstWhere((rows) => rows.single.items.isEmpty);
       await meals.deleteMealItem(storedItem.id);
+      await expectLater(
+        deletionObserved.timeout(const Duration(seconds: 2)),
+        completes,
+      );
       final deletedItem = await database.select(database.mealItems).getSingle();
       expect(deletedItem.revision, 3);
       expect(deletedItem.syncStatus, 'pendingDelete');
@@ -153,6 +211,31 @@ void main() {
       expect(await database.select(database.mealItems).get(), isEmpty);
     },
   );
+
+  test('reviewed image meal batch rolls back every item on failure', () async {
+    final foods = FoodRepository(database);
+    final meals = MealRepository(database);
+    final foodId = await foods.addFood(
+      name: 'Reviewed oats',
+      category: 'grain',
+      calories: 100,
+      protein: 4,
+      carbs: 18,
+      fats: 2,
+    );
+
+    await expectLater(
+      meals.addReviewedMealItemsAtomically(
+        date: DateTime(2026, 8, 13),
+        mealType: 'breakfast',
+        items: [(foodId: foodId, quantity: 50), (foodId: 999999, quantity: 25)],
+      ),
+      throwsStateError,
+    );
+
+    expect(await database.select(database.meals).get(), isEmpty);
+    expect(await database.select(database.mealItems).get(), isEmpty);
+  });
 
   test(
     'usual meals require repetition and copy only after confirmation',
@@ -248,6 +331,40 @@ void main() {
     expect(duplicate.calories, 200);
     expect(duplicate.position, greaterThan(watched.items[1].position));
   });
+
+  test(
+    'meal item moves atomically to another meal type on the same day',
+    () async {
+      final foods = FoodRepository(database);
+      final meals = MealRepository(database);
+      final foodId = await foods.addFood(
+        name: 'Move me',
+        category: 'custom',
+        calories: 120,
+        protein: 4,
+        carbs: 20,
+        fats: 3,
+      );
+      final breakfastId = await meals.createMeal(
+        date: DateTime(2026, 8, 11),
+        name: 'breakfast',
+        type: 'breakfast',
+      );
+      await meals.addMealItem(
+        mealId: breakfastId,
+        foodId: foodId,
+        quantity: 100,
+      );
+      final before = await meals.watchMealsForDate(DateTime(2026, 8, 11)).first;
+      final item = before.single.items.single;
+      await meals.moveMealItemToType(id: item.id, mealType: 'dinner');
+      final after = await meals.watchMealsForDate(DateTime(2026, 8, 11)).first;
+      final dinner = after.singleWhere((meal) => meal.meal.type == 'dinner');
+      expect(dinner.items.single.id, item.id);
+      expect(dinner.items.single.revision, item.revision + 1);
+      expect(dinner.items.single.syncStatus, 'pending');
+    },
+  );
 
   test('food search matches Arabic names and favorites are unique', () async {
     final foods = FoodRepository(database);
@@ -506,6 +623,20 @@ void main() {
     )..where((row) => row.id.equals(firstId))).getSingle();
     expect(deleted.revision, 2);
     expect(deleted.syncStatus, 'pendingDelete');
+  });
+
+  test('water repository enforces the shared 1 to 5000 ml contract', () async {
+    final water = WaterRepository(database);
+    final date = DateTime(2026, 7, 18);
+    for (final invalid in const [0, -1, 5001]) {
+      expect(
+        () => water.add(occurredAt: date, amountMl: invalid),
+        throwsArgumentError,
+      );
+    }
+    await water.add(occurredAt: date, amountMl: 1);
+    await water.add(occurredAt: date, amountMl: 5000);
+    expect(await water.totalForDay(date), 5001);
   });
 
   test('profile edits update the singleton row', () async {

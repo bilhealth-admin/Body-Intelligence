@@ -23,6 +23,28 @@ void main() {
     expect(source, contains("Key('advanced-body-measurements-action')"));
     expect(source, contains("context.push('/advanced-body-measurements')"));
     expect(router, contains("path: '/advanced-body-measurements'"));
+    for (final row in const [
+      'profile-display-name-row',
+      'profile-photo-row',
+      'profile-height-row',
+      'profile-sex-row',
+      'profile-date-of-birth-row',
+      'profile-location-row',
+      'profile-timezone-row',
+      'profile-email-row',
+      'profile-units-row',
+      'profile-goals-row',
+    ]) {
+      expect(source, contains("Key('$row')"));
+    }
+    expect(source, contains("context.push(route)"));
+    expect(source, contains("'/settings/account-email'"));
+    expect(source, contains("'/settings/units'"));
+    expect(source, contains("'/location-settings'"));
+    expect(source, contains("'/goals'"));
+    expect(source, contains("Key('profile-height-editor')"));
+    expect(source, contains("repo.get('profileDateOfBirth')"));
+    expect(source, contains("repo.set('profileDateOfBirth'"));
   });
 
   test('advanced profile exposes identity body location units and goals', () {
@@ -31,8 +53,9 @@ void main() {
     ).readAsStringSync();
 
     for (final contract in <String>[
-      'Personal identity',
+      'Personal details',
       'Profile photo',
+      'Date of birth',
       'Body details',
       'Location & preferences',
       'Time zone',

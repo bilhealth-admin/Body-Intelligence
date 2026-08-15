@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-holdout4-frozen-owned-v5",
+  "image_policy": "Project-owned synthetic assets; frozen before prompt vNext changes.",
+  "claim_scope": "Synthetic holdout only; no real-world accuracy claim.",
+  "cases": [
+    {
+      "id": "h4-iraqi-masgouf-rice",
+      "category": "fresh_composite",
+      "region": "iraq",
+      "image_path": "assets/images/professional/recipes/iraqi-masgouf-rice.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "iraqi-masgouf-rice",
+          "aliases": [
+            "iraqi masgouf rice"
+          ],
+          "amount_g": 415
+        }
+      ]
+    },
+    {
+      "id": "h4-tunisian-couscous-vegetables",
+      "category": "fresh_composite",
+      "region": "maghreb",
+      "image_path": "assets/images/professional/recipes/tunisian-couscous-vegetables.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "tunisian-couscous-vegetables",
+          "aliases": [
+            "tunisian couscous vegetables"
+          ],
+          "amount_g": 235
+        }
+      ]
+    },
+    {
+      "id": "h4-moroccan-tagine-fish",
+      "category": "fresh_composite",
+      "region": "maghreb",
+      "image_path": "assets/images/professional/recipes/moroccan-tagine-fish.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "moroccan-tagine-fish",
+          "aliases": [
+            "moroccan tagine fish"
+          ],
+          "amount_g": 377
+        }
+      ]
+    },
+    {
+      "id": "h4-gallo-pinto-huevo",
+      "category": "fresh_composite",
+      "region": "central-america",
+      "image_path": "assets/images/professional/recipes/gallo-pinto-huevo.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "gallo-pinto-huevo",
+          "aliases": [
+            "gallo pinto huevo"
+          ],
+          "amount_g": 298
+        }
+      ]
+    },
+    {
+      "id": "h4-turkey-three-bean-chili",
+      "category": "fresh_composite",
+      "region": "united-states",
+      "image_path": "assets/images/professional/recipes/turkey-three-bean-chili.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "turkey-three-bean-chili",
+          "aliases": [
+            "Turkey three-bean chili",
+            "turkey three bean chili"
+          ],
+          "amount_g": 303
+        }
+      ]
+    },
+    {
+      "id": "h4-chicken-shawarma-bowl",
+      "category": "fresh_composite",
+      "region": "global",
+      "image_path": "assets/images/professional/recipes/chicken_shawarma_bowl.jpg",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "chicken-shawarma-bowl",
+          "aliases": [
+            "Chicken shawarma grain bowl",
+            "chicken shawarma bowl"
+          ],
+          "amount_g": 500
+        }
+      ]
+    },
+    {
+      "id": "h4-machboos-fish",
+      "category": "fresh_composite",
+      "region": "gulf",
+      "image_path": "assets/images/professional/recipes/machboos-fish.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "machboos-fish",
+          "aliases": [
+            "machboos fish"
+          ],
+          "amount_g": 295
+        }
+      ]
+    },
+    {
+      "id": "h4-tacos-pescado-col",
+      "category": "fresh_composite",
+      "region": "mexico",
+      "image_path": "assets/images/professional/recipes/tacos-pescado-col.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "tacos-pescado-col",
+          "aliases": [
+            "tacos pescado col"
+          ],
+          "amount_g": 400
+        }
+      ]
+    },
+    {
+      "id": "h4-couscous-poisson-legumes",
+      "category": "fresh_composite",
+      "region": "maghreb",
+      "image_path": "assets/images/professional/recipes/couscous-poisson-legumes.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "couscous-poisson-legumes",
+          "aliases": [
+            "couscous poisson legumes"
+          ],
+          "amount_g": 345
+        }
+      ]
+    },
+    {
+      "id": "h4-sopa-tortilla-pollo",
+      "category": "fresh_composite",
+      "region": "mexico",
+      "image_path": "assets/images/professional/recipes/sopa-tortilla-pollo.png",
+      "synthetic": true,
+      "truth": [
+        {
+          "id": "sopa-tortilla-pollo",
+          "aliases": [
+            "sopa tortilla pollo"
+          ],
+          "amount_g": 262
+        }
+      ]
+    },
+    {
+      "id": "h4-nonfood-easy-run",
+      "category": "non_food",
+      "region": "global",
+      "image_path": "assets/images/professional/workouts/easy_run.jpg",
+      "synthetic": true,
+      "truth": []
+    }
+  ]
+}

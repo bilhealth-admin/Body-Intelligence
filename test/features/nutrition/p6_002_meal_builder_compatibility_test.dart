@@ -25,6 +25,8 @@ void main() {
       carbs: 0,
       fats: 3.6,
       sodium: 74,
+      servingSize: 100,
+      servingUnit: 'g',
     );
 
     final lunchId = await meals.createMeal(
@@ -69,6 +71,8 @@ void main() {
       protein: 2.7,
       carbs: 28,
       fats: 0.3,
+      servingSize: 100,
+      servingUnit: 'g',
     );
     final date = DateTime(2026, 7, 23);
     final mealId = await meals.createMeal(

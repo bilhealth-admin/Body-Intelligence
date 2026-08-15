@@ -18,8 +18,8 @@ void main() {
     expect(pubspec, isNot(contains('family: NotoNaskhArabic')));
     expect(pubspec, contains('assets/fonts/NotoNaskhArabic-Regular.ttf'));
     expect(pubspec, contains('assets/fonts/NotoNaskhArabic-Bold.ttf'));
-    expect(typography, contains('const String? displayFamily = null'));
-    expect(typography, contains('const String? bodyFamily = null'));
+    expect(typography, contains("isArabic ? 'BILArabic' : null"));
+    expect(typography, isNot(contains('GoogleFonts.')));
   });
 
   test('Google Play preparation preserves truthful Android boundaries', () {
@@ -30,7 +30,7 @@ void main() {
       'lib/features/onboarding/widgets/profile_step.dart',
     );
 
-    expect(gradle, contains('applicationId = "com.kadem.bil"'));
+    expect(gradle, contains('applicationId = "com.bilhealth.bodyintelligencelog"'));
     expect(gradle, contains('targetSdk = 36'));
     expect(gradle, isNot(contains('signingConfigs.getByName("debug")')));
     expect(manifest, contains('android:usesCleartextTraffic="false"'));

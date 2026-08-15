@@ -25,7 +25,8 @@ For the current build composition:
   activated.
 - Health Connect access: permission-gated and used for user-visible health
   timeline and decision-support features.
-- Health Connect writes: limited to weight and hydration.
+- Health Connect writes: limited to weight and nutrition records explicitly
+  selected by the user for synchronization.
 - User export: initiated by the user through the operating-system share sheet;
   the user selects the destination.
 - Data in transit: not applicable while remote services remain inactive.

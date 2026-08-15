@@ -70,3 +70,54 @@ twin_cards_layout.patch
 key.properties
 *.jks
 *.keystore
+# Workout video generation: secrets, disposable environments, and raw outputs.
+# Keep reviewed catalog code/metadata tracked; never commit provider credentials
+# or unreviewed generated footage.
+.venv-workout-media/
+tool/workout_media/pipeline/.env
+tool/workout_media/pipeline/.env.*
+!tool/workout_media/pipeline/.env.example
+tool/workout_media/pipeline/secrets/
+tool/workout_media/pipeline/start_images/private/
+tool/workout_media/pipeline/runs/source/
+tool/workout_media/pipeline/runs/branded/
+tool/workout_media/pipeline/runs/diagnostics/
+tool/workout_media/pipeline/runs/manifests/
+tool/workout_media/pipeline/runs/rejected/
+tool/workout_media/pipeline/**/*.token
+tool/workout_media/pipeline/**/*.key
+tool/workout_media/pipeline/**/*.secret
+tool/workout_media/pipeline/**/credentials*.json
+tool/workout_media/pipeline/**/provider-response*.json
+artifacts/workout_media/generated_raw/
+artifacts/workout_media/processed/
+artifacts/workout_media/provider_ledger.json
+artifacts/workout_media/provider_ledger.json.tmp
+artifacts/workout_media/output/fal_longcat_pilot/
+artifacts/workout_media/output/fal_longcat_remaining_998/
+
+# Local Codex/runtime secrets and disposable tool state.
+.codex_runtime_keys.json
+supabase/.temp/
+android/.kotlin/
+tmp/
+build_codex_visual/
+
+# Generated golden-test failure diagnostics are not release evidence.
+test/visual_closure/failures/
+
+# Historical/raw audit captures stay local. Only curated release evidence,
+# approved references, and final proof packs are eligible for review.
+artifacts/*
+!artifacts/my_fit_reference_177/
+!artifacts/my_fit_reference_177/**
+!artifacts/brand/
+!artifacts/brand/**
+!artifacts/workout_media/
+!artifacts/workout_media/**
+!artifacts/final_release_proof/
+!artifacts/final_release_proof/**
+
+# Generated workout-provider runs are local inputs/diagnostics. Runtime media
+# is accepted only through reviewed assets and release manifests.
+tool/workout_media/

@@ -13,12 +13,12 @@ void main() {
               ).readAsStringSync(),
             )
             as Map<String, Object?>;
-    expect(status['android_application_id'], 'com.kadem.bil');
-    expect(status['ios_bundle_identifier'], 'com.kadem.bil');
+    expect(status['android_application_id'], 'com.bilhealth.bodyintelligencelog');
+    expect(status['ios_bundle_identifier'], 'com.bilhealth.bodyintelligencelog');
     expect(status['identifier_consistency'], 'CONSISTENT');
     expect(
       status['identity_rebranding_decision'],
-      'OWNER_APPROVAL_REQUIRED_BEFORE_ANY_IDENTIFIER_CHANGE',
+      'OWNER_APPROVED_COM_BILHEALTH_BODYINTELLIGENCELOG_2026_08_08',
     );
   });
 
@@ -47,7 +47,7 @@ void main() {
         'OWNER_CONFIRMED_VERIFIED_SUCCESSFULLY',
       );
       expect(google['release'], 'NOT_PUBLISHED');
-      expect(apple['developer_program'], 'INCOMPLETE');
+      expect(apple['developer_program'], 'OWNER_CONFIRMED_ACCOUNT_ACTIVE');
       expect(apple['signed_archive_or_testflight'], 'NOT_CLAIMED');
     },
   );

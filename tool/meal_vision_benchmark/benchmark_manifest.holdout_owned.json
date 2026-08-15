@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "suite_id": "bil-meal-vision-holdout-owned-v2",
+  "image_policy": "project-owned-realistic-synthetic-and-owned-brand-negative",
+  "claim_scope": "frozen holdout regression; not a licensed real-camera accuracy claim",
+  "cases": [
+    {
+      "id":"holdout-maqluba","category":"middle_eastern_composite","region":"levant",
+      "image_path":"assets/images/professional/recipes/maqluba-eggplant-chicken.png","synthetic":true,
+      "truth":[{"id":"maqluba","aliases":["maqluba","maklouba","makluba","chicken eggplant maqluba","chicken eggplant rice"],"amount_g":450}]
+    },
+    {
+      "id":"holdout-musakhan","category":"middle_eastern_composite","region":"levant",
+      "image_path":"assets/images/professional/recipes/palestinian-musakhan.png","synthetic":true,
+      "truth":[{"id":"musakhan","aliases":["musakhan","mussakhan","palestinian musakhan","sumac chicken flatbread"],"amount_g":450}]
+    },
+    {
+      "id":"holdout-harira","category":"north_african_composite","region":"morocco",
+      "image_path":"assets/images/professional/recipes/moroccan-harira.png","synthetic":true,
+      "truth":[{"id":"harira","aliases":["harira","moroccan harira","moroccan lentil soup","lentil chickpea soup"],"amount_g":350}]
+    },
+    {
+      "id":"holdout-bamia-beef","category":"arabic_egyptian_composite","region":"egypt",
+      "image_path":"assets/images/professional/recipes/bamia-beef-egyptian.png","synthetic":true,
+      "truth":[{"id":"bamia-beef","aliases":["bamia beef","bamia with beef","okra stew with beef","beef okra stew","okra stew"],"amount_g":400}]
+    },
+    {
+      "id":"holdout-spinach-omelet","category":"global_separate_major_items","region":"global",
+      "image_path":"assets/images/professional/recipes/spinach_omelet.jpg","synthetic":true,
+      "truth":[
+        {"id":"spinach-omelet","aliases":["spinach omelet","spinach omelette","omelet","omelette"],"amount_g":180},
+        {"id":"side-salad","aliases":["side salad","green salad","arugula salad","rocket salad"],"amount_g":90}
+      ]
+    },
+    {
+      "id":"holdout-low-resolution-oats","category":"low_resolution_food","region":"global",
+      "image_path":"assets/images/professional/recipes/overnight_oats_figs.jpg","synthetic":true,
+      "truth":[{"id":"overnight-oats","aliases":["overnight oats","oatmeal with figs","oats with figs","oatmeal"],"amount_g":300}]
+    },
+    {
+      "id":"holdout-non-food-brand-icon","category":"non_food","region":"global",
+      "image_path":"assets/branding/bil_app_icon.png","synthetic":false,
+      "truth":[]
+    }
+  ]
+}

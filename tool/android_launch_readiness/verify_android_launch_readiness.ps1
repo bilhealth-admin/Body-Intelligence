@@ -26,7 +26,7 @@ function Invoke-Flutter([string[]]$Arguments, [string]$Name) {
 $RequiredFiles = @(
     "android/app/build.gradle.kts",
     "android/app/src/main/AndroidManifest.xml",
-    "android/app/src/main/kotlin/com/kadem/bil/PermissionsRationaleActivity.kt",
+    "android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/PermissionsRationaleActivity.kt",
     "android/app/src/main/res/values/strings.xml",
     "android/app/src/main/res/values-ar/strings.xml",
     "test/android_launch_readiness/android_launch_contract_test.dart"
@@ -64,7 +64,7 @@ Add-Result "Release AAB artifact" "PASSED" $Bundle
 $Allowed = @(
     "android/app/build.gradle.kts",
     "android/app/src/main/AndroidManifest.xml",
-    "android/app/src/main/kotlin/com/kadem/bil/PermissionsRationaleActivity.kt",
+    "android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/PermissionsRationaleActivity.kt",
     "android/app/src/main/res/values/strings.xml",
     "android/app/src/main/res/values-ar/strings.xml",
     "test/android_launch_readiness/android_launch_contract_test.dart",

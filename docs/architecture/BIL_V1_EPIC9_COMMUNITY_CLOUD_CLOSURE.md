@@ -2,7 +2,9 @@
 
 Epic 9 is fail-closed. Community requires `BIL_USE_SUPABASE`, valid Supabase
 configuration, and `BIL_COMMUNITY_ENABLED=true`. Push additionally requires
-`BIL_PUSH_ENABLED=true`. Without those release flags the surfaces are hidden
+`BIL_PUSH_ENABLED=true`, and `BIL_PUSH_PROVIDER_READY=true` only after the
+native APNs/FCM provider is installed and device-certified. Without those
+release flags the surfaces are hidden
 and no token, message, or health value is uploaded.
 
 ## Closed boundaries

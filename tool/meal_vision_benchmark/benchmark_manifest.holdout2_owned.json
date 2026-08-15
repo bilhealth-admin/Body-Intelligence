@@ -1,0 +1,15 @@
+{
+  "schema_version":1,
+  "suite_id":"bil-meal-vision-holdout2-owned-v3",
+  "image_policy":"project-owned-realistic-synthetic-and-owned-negative",
+  "claim_scope":"frozen second holdout; not used for prompt calibration",
+  "cases":[
+    {"id":"holdout2-shakshuka","category":"mena_composite","region":"mena","image_path":"assets/images/professional/recipes/shakshuka.jpg","synthetic":true,"truth":[{"id":"shakshuka","aliases":["shakshuka","shakshouka","eggs in tomato sauce","poached eggs in tomato sauce"],"amount_g":420}]},
+    {"id":"holdout2-lentil-soup","category":"global_composite","region":"global","image_path":"assets/images/professional/recipes/lentil_soup.jpg","synthetic":true,"truth":[{"id":"lentil-soup","aliases":["lentil soup","red lentil soup","lentil stew"],"amount_g":400}]},
+    {"id":"holdout2-aji-gallina","category":"latin_composite","region":"peru","image_path":"assets/images/professional/recipes/aji-gallina-ligero.png","synthetic":true,"truth":[{"id":"aji-de-gallina","aliases":["aji de gallina","ají de gallina","peruvian creamy chicken","creamy shredded chicken","chicken in yellow sauce"],"amount_g":350}]},
+    {"id":"holdout2-low-resolution-bean-corn-salad","category":"low_resolution_composite","region":"global","image_path":"assets/images/professional/recipes/bean_corn_salad.jpg","synthetic":true,"truth":[{"id":"bean-corn-salad","aliases":["bean and corn salad","bean corn salad","black bean and corn salad","mixed bean salad"],"amount_g":320}]},
+    {"id":"holdout2-grilled-fish-vegetables","category":"global_separate_major_items","region":"global","image_path":"assets/images/professional/recipes/grilled_fish_vegetables.jpg","synthetic":true,"truth":[{"id":"grilled-fish","aliases":["grilled fish","grilled white fish","fish fillet","grilled fish fillet"],"amount_g":180},{"id":"grilled-vegetables","aliases":["grilled vegetables","roasted vegetables","mixed vegetables","vegetable medley"],"amount_g":220}]},
+    {"id":"holdout2-hummus-falafel-plate","category":"mena_separate_major_items","region":"levant","image_path":"assets/images/professional/recipes/hummus_falafel_plate.jpg","synthetic":true,"truth":[{"id":"hummus","aliases":["hummus","houmous"],"amount_g":140},{"id":"falafel","aliases":["falafel","falafel balls"],"amount_g":150},{"id":"pita","aliases":["pita","pita bread","flatbread"],"amount_g":70},{"id":"cucumber-tomato-salad","aliases":["cucumber tomato salad","cucumber and tomato salad","side salad","chopped salad"],"amount_g":100}]},
+    {"id":"holdout2-non-food-workout","category":"non_food","region":"global","image_path":"assets/images/professional/workouts/easy_run.jpg","synthetic":true,"truth":[]}
+  ]
+}

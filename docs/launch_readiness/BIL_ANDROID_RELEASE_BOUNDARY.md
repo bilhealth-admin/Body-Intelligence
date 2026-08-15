@@ -8,8 +8,8 @@
 
 ## Production identity
 
-- Namespace: `com.kadem.bil`
-- Application ID: `com.kadem.bil`
+- Namespace: `com.bilhealth.bodyintelligencelog`
+- Application ID: `com.bilhealth.bodyintelligencelog`
 - Minimum Android API: 26
 - Target and compile API: 36
 - Java and Kotlin target: 17

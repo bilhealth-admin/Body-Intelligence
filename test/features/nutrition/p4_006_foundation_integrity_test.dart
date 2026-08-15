@@ -48,6 +48,8 @@ void main() {
       protein: 16.9,
       carbs: 66.3,
       fats: 6.9,
+      servingSize: 100,
+      servingUnit: 'g',
     );
 
     final before = await repository.getFoods();

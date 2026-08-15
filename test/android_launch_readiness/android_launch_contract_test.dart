@@ -9,12 +9,12 @@ void main() {
       'android/app/src/main/AndroidManifest.xml',
     ).readAsStringSync();
     final rationale = File(
-      'android/app/src/main/kotlin/com/kadem/bil/PermissionsRationaleActivity.kt',
+      'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/PermissionsRationaleActivity.kt',
     ).readAsStringSync();
 
     expect(gradle, contains('compileSdk = 36'));
     expect(gradle, contains('targetSdk = 36'));
-    expect(gradle, contains('applicationId = "com.kadem.bil"'));
+    expect(gradle, contains('applicationId = "com.bilhealth.bodyintelligencelog"'));
     expect(gradle, isNot(contains('signingConfigs.getByName("debug")')));
 
     expect(manifest, contains('android:usesCleartextTraffic="false"'));
