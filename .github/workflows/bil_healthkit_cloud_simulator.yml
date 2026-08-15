@@ -130,7 +130,11 @@ jobs:
           # authorization sheet. The approval is retained by this simulator.
           xcrun simctl launch "$UDID" com.bilhealth.bodyintelligencelog \
             -AppleLanguages '(en)'
-          sleep 5
+          sleep 8
+          # Decline the unrelated first-launch notification prompt in this
+          # disposable evidence simulator. It must not cover HealthKit.
+          idb ui tap --udid "$UDID" 100 520
+          sleep 2
           xcrun simctl openurl "$UDID" 'bil://connected-health'
           sleep 2
           idb ui tap --udid "$UDID" 270 470
