@@ -36,7 +36,76 @@ const _coachToken = 'ZXQPAICOACHBRAND9X7ZXQP';
 const _reviewedOverrides = <(String, String), String>{
   ('vi', 'Low carb'): 'Ít carbohydrate',
   ('uk', 'Custom'): 'Користувацький',
+  (
+    'de',
+    _invalidLink,
+  ): 'Dieser Link kann nicht sicher geöffnet werden. Kehren Sie zum Dashboard zurück und versuchen Sie es erneut.',
+  (
+    'it',
+    _invalidLink,
+  ): 'Questo link non può essere aperto in sicurezza. Torna alla dashboard e riprova.',
+  (
+    'pt-BR',
+    _invalidLink,
+  ): 'Não é possível abrir este link com segurança. Volte ao painel e tente novamente.',
+  (
+    'pt-PT',
+    _invalidLink,
+  ): 'Não é possível abrir esta ligação em segurança. Volte ao painel e tente novamente.',
+  (
+    'ur',
+    _invalidLink,
+  ): 'اس لنک کو محفوظ طریقے سے نہیں کھولا جا سکتا۔ ڈیش بورڈ پر واپس جائیں اور دوبارہ کوشش کریں۔',
+  (
+    'fa',
+    _invalidLink,
+  ): 'این پیوند را نمی‌توان با اطمینان باز کرد. به داشبورد برگردید و دوباره تلاش کنید.',
+  (
+    'hi',
+    _invalidLink,
+  ): 'इस लिंक को सुरक्षित रूप से नहीं खोला जा सकता। डैशबोर्ड पर लौटें और फिर कोशिश करें।',
+  (
+    'id',
+    _invalidLink,
+  ): 'Tautan ini tidak dapat dibuka dengan aman. Kembali ke dasbor dan coba lagi.',
+  (
+    'ms',
+    _invalidLink,
+  ): 'Pautan ini tidak dapat dibuka dengan selamat. Kembali ke papan pemuka dan cuba lagi.',
+  ('ja', _invalidLink): 'このリンクは安全に開けません。ダッシュボードに戻って、もう一度お試しください。',
+  ('ko', _invalidLink): '이 링크를 안전하게 열 수 없습니다. 대시보드로 돌아가 다시 시도하세요.',
+  ('zh-Hans', _invalidLink): '无法安全打开此链接。请返回仪表板后重试。',
+  ('zh-Hant', _invalidLink): '無法安全開啟此連結。請返回儀表板後再試一次。',
+  (
+    'ru',
+    _invalidLink,
+  ): 'Эту ссылку невозможно безопасно открыть. Вернитесь на панель и повторите попытку.',
+  ('bn', _invalidLink):
+      'এই লিংকটি নিরাপদভাবে খোলা যাচ্ছে না। ড্যাশবোর্ডে ফিরে আবার চেষ্টা করুন।',
+  (
+    'vi',
+    _invalidLink,
+  ): 'Không thể mở liên kết này một cách an toàn. Hãy quay lại bảng điều khiển và thử lại.',
+  (
+    'th',
+    _invalidLink,
+  ): 'ไม่สามารถเปิดลิงก์นี้ได้อย่างปลอดภัย โปรดกลับไปที่แดชบอร์ดแล้วลองอีกครั้ง',
+  (
+    'pl',
+    _invalidLink,
+  ): 'Nie można bezpiecznie otworzyć tego linku. Wróć do panelu i spróbuj ponownie.',
+  (
+    'nl',
+    _invalidLink,
+  ): 'Deze link kan niet veilig worden geopend. Ga terug naar het dashboard en probeer het opnieuw.',
+  (
+    'uk',
+    _invalidLink,
+  ): 'Це посилання неможливо безпечно відкрити. Поверніться на панель і спробуйте ще раз.',
 };
+
+const _invalidLink =
+    'This link cannot be opened safely. Return to the dashboard and try again.';
 
 Future<void> main(List<String> args) async {
   final mergeMissing = args.contains('--merge-missing');

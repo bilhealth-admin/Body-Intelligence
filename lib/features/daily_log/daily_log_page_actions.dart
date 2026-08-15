@@ -41,7 +41,8 @@ extension _DailyLogPageActions on _DailyLogPageState {
     }
   }
 
-  // TODO: Remove after the extracted dialog has shipped through one migration.
+  // Legacy fallback retained for one persisted-draft migration window. New
+  // entry points use the extracted V2 dialog above.
   // ignore: unused_element
   Future<void> _quickAddMacros() async {
     if (!await _ensureDiaryOpen() || !mounted) return;

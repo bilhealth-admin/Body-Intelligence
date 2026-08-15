@@ -7,7 +7,9 @@ class CommunityDeepLink {
     'connected-health/capabilities': '/connected-health/capabilities',
     'goals': '/goals',
     'weekly-report': '/weekly-report',
+    'weekly-digest': '/weekly-report',
     'profile-summary': '/profile-summary',
+    'profile': '/profile-summary',
     'profile-settings': '/profile-settings',
     'daily-log': '/daily-log',
     'nutrition': '/nutrition',
@@ -22,12 +24,16 @@ class CommunityDeepLink {
     'wellness/learn': '/wellness/learn',
     'wellness/sleep': '/wellness/sleep',
     'wellness/workouts': '/wellness/workouts',
+    'workouts': '/wellness/workouts',
     'wellness/workouts/routines': '/wellness/workouts/routines',
     'wellness/workouts/log': '/wellness/workouts/log',
     'wellness/fasting': '/wellness/fasting',
+    'fasting': '/wellness/fasting',
     'wellness/recipes': '/wellness/recipes',
+    'recipes': '/wellness/recipes',
     'meal-planner': '/meal-planner',
     'dashboard': '/dashboard',
+    'more': '/settings',
     'dashboard/preferences': '/dashboard/preferences',
     'settings/preferences': '/settings/preferences',
     'settings/language': '/settings/language',
@@ -54,7 +60,7 @@ class CommunityDeepLink {
     final segments = <String>[
       if (uri.host.isNotEmpty) uri.host,
       ...uri.pathSegments,
-    ];
+    ].where((value) => value.isNotEmpty).toList(growable: false);
     if (segments.isEmpty) return null;
 
     final alias = _appAliases[segments.join('/')];

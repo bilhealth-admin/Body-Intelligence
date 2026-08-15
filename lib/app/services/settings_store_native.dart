@@ -19,12 +19,21 @@ class _NativeSettingsStore implements SettingsStore {
     final legacy = File('${directory.path}/app_settings.json');
     if (!await legacy.exists()) return null;
     final value = await legacy.readAsString();
-    await preferences.setString(key, value);
+    final migrated = await preferences.setString(key, value);
+    if (!migrated) {
+      throw StateError('Legacy settings migration was not persisted.');
+    }
     return value;
   }
 
   @override
   Future<void> write(String value) async {
-    await (await SharedPreferences.getInstance()).setString(key, value);
+    final persisted = await (await SharedPreferences.getInstance()).setString(
+      key,
+      value,
+    );
+    if (!persisted) {
+      throw StateError('App settings were not persisted.');
+    }
   }
 }

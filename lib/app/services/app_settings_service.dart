@@ -41,13 +41,14 @@ class AppSettings {
     );
     final storedTheme = json['themeMode']?.toString();
     return AppSettings(
-      localeCode: storedLocale != null &&
+      localeCode:
+          storedLocale != null &&
               AppSettingsService.supportedLocaleCodes.contains(storedLocale)
           ? storedLocale
           : AppSettingsService.systemLocaleCode(),
-      // Legacy "system" followed the OS and made pages change appearance
-      // without an explicit in-app choice. Migrate it to the stable day theme.
-      themeMode: storedTheme == 'dark' ? 'dark' : 'light',
+      themeMode: const {'system', 'light', 'dark'}.contains(storedTheme)
+          ? storedTheme!
+          : 'light',
       highContrast: json['highContrast'] == true,
       reduceMotion: json['reduceMotion'] == true,
     );

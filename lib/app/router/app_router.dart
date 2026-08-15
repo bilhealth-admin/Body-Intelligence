@@ -81,11 +81,16 @@ import '../../features/profile/premium_profile_page.dart';
 import '../../features/profile/profile_settings_page.dart';
 import '../../features/profile/profile_summary_page.dart';
 import '../../features/startup/startup_page.dart';
+import 'invalid_route_page.dart';
 import 'responsive_app_shell.dart';
+
+String? _safeDailyReturnPath(String? value) =>
+    const {'/dashboard', '/daily-log'}.contains(value) ? value : null;
 
 class AppRouter {
   static final router = GoRouter(
     initialLocation: '/startup',
+    errorBuilder: (_, _) => const InvalidRoutePage(),
     redirect: (_, state) {
       if (state.uri.scheme == 'bil' && state.uri.host == 'auth-callback') {
         final isPasswordRecovery =
@@ -465,13 +470,17 @@ class AppRouter {
               initialMealType: state.uri.queryParameters['meal'],
               focusMealEntry: state.uri.queryParameters['focus'] == 'meal',
               initialAction: state.uri.queryParameters['action'],
-              returnPath: state.uri.queryParameters['from'],
+              returnPath: _safeDailyReturnPath(
+                state.uri.queryParameters['from'],
+              ),
             ),
           ),
           GoRoute(
             path: '/daily-log/body-context',
             builder: (_, state) => DailyBodyContextPage(
-              returnPath: state.uri.queryParameters['from'],
+              returnPath: _safeDailyReturnPath(
+                state.uri.queryParameters['from'],
+              ),
             ),
           ),
           GoRoute(

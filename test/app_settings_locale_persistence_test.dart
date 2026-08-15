@@ -21,4 +21,13 @@ void main() {
     }
     expect(AppSettingsService.supportedLocaleCodes.length, 25);
   });
+
+  test('system theme persists across service restart', () async {
+    final store = MemorySettingsStore();
+    final first = AppSettingsService(store: store);
+    await first.save(AppSettings(localeCode: 'en', themeMode: 'system'));
+
+    final restarted = AppSettingsService(store: store);
+    expect((await restarted.load()).themeMode, 'system');
+  });
 }

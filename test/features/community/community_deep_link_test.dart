@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:body_intelligence_log/features/notifications/domain/community_deep_link.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -105,6 +107,68 @@ void main() {
       ),
       '/daily-log?action=barcode&from=%2Fdashboard',
     );
+  });
+
+  test('every static app alias accepts a trailing slash', () {
+    final source = File(
+      'lib/features/notifications/domain/community_deep_link.dart',
+    ).readAsStringSync();
+    final start = source.indexOf('static const _appAliases');
+    final end = source.indexOf('  };', start);
+    expect(start, greaterThanOrEqualTo(0));
+    expect(end, greaterThan(start));
+    final entries = RegExp(
+      r"'([^']+)':\s*'([^']+)'",
+    ).allMatches(source.substring(start, end));
+    expect(entries.length, greaterThan(30));
+    for (final entry in entries) {
+      final alias = entry.group(1)!;
+      final route = entry.group(2)!;
+      expect(
+        CommunityDeepLink.routeFor(Uri.parse('bil://$alias/')),
+        route,
+        reason: 'Trailing slash must preserve bil://$alias.',
+      );
+    }
+  });
+
+  test('community and settings routes accept a trailing slash', () {
+    const expected = <String, String>{
+      'community/': '/community',
+      'community/connections/': '/community/connections',
+      'community/people/': '/community/people',
+      'community/messages/': '/community/messages',
+      'community/messages/new/': '/community/messages/new',
+      'community/safety/': '/community/safety',
+      'settings/': '/settings',
+      'settings/notifications/': '/notification-settings',
+    };
+    for (final entry in expected.entries) {
+      expect(
+        CommunityDeepLink.routeFor(Uri.parse('bil://${entry.key}')),
+        entry.value,
+      );
+    }
+  });
+
+  test('historical top-level aliases remain backward compatible', () {
+    const expected = <String, String>{
+      'more': '/settings',
+      'weekly-digest': '/weekly-report',
+      'recipes': '/wellness/recipes',
+      'workouts': '/wellness/workouts',
+      'fasting': '/wellness/fasting',
+      'profile': '/profile-summary',
+    };
+    for (final entry in expected.entries) {
+      for (final suffix in const ['', '/']) {
+        expect(
+          CommunityDeepLink.routeFor(Uri.parse('bil://${entry.key}$suffix')),
+          entry.value,
+          reason: 'Historical bil://${entry.key}$suffix must remain valid.',
+        );
+      }
+    }
   });
 
   test('rejects external and unknown schemes', () {

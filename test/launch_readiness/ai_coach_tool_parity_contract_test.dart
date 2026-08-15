@@ -24,4 +24,35 @@ void main() {
     expect(server, contains('allowedActions.has(type)'));
     expect(server, contains('requires_confirmation: true'));
   });
+
+  test(
+    'language tool executes through the same 25-locale policy it validates',
+    () {
+      final page = File(
+        'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
+      ).readAsStringSync();
+      expect(
+        page,
+        contains(
+          "final locale = BilLocalePolicy.canonicalSupportedTag(\n"
+          "            action.payload['locale']?.toString(),",
+        ),
+      );
+      expect(
+        page,
+        isNot(contains("{'ar', 'en', 'fr', 'es', 'tr'}.contains(locale)")),
+      );
+    },
+  );
+
+  test('AI Coach deep-link barcode uses the canonical validator', () {
+    final page = File(
+      'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
+    ).readAsStringSync();
+    expect(page, contains('final identity = BarcodeIdentity.parse(barcode);'));
+    expect(page, contains('if (!identity.isValid)'));
+    expect(page, contains("text: tr('Invalid barcode', 'باركود غير صالح')"));
+    expect(page, contains('final canonicalBarcode = identity.digits;'));
+    expect(page, isNot(contains("final evidenceKey = 'barcode:\$barcode';")));
+  });
 }

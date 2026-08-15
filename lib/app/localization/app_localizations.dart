@@ -127,6 +127,8 @@ class AppLocalizations {
     'empty_state': 'لا توجد بيانات بعد. ابدأ بإضافة وزنك أو وجبتك الأولى.',
     'primary_navigation': 'التنقل الرئيسي',
     'quick_add': 'إضافة سريعة',
+    'invalid_link':
+        'لا يمكن فتح هذا الرابط بأمان. ارجع إلى لوحة القيادة وحاول مرة أخرى.',
     'french': 'الفرنسية',
     'spanish': 'الإسبانية',
     'turkish': 'التركية',
@@ -168,6 +170,8 @@ class AppLocalizations {
     'empty_state': 'No data yet. Start by adding your first weight or meal.',
     'primary_navigation': 'Primary navigation',
     'quick_add': 'Quick Add',
+    'invalid_link':
+        'This link cannot be opened safely. Return to the dashboard and try again.',
     'french': 'French',
     'spanish': 'Spanish',
     'turkish': 'Turkish',
@@ -210,6 +214,8 @@ class AppLocalizations {
         'Aucune donnée. Commencez par ajouter votre poids ou votre premier repas.',
     'primary_navigation': 'Navigation principale',
     'quick_add': 'Ajout rapide',
+    'invalid_link':
+        'Ce lien ne peut pas être ouvert en toute sécurité. Revenez au tableau de bord et réessayez.',
     'french': 'Français',
     'spanish': 'Espagnol',
     'turkish': 'Turc',
@@ -252,6 +258,8 @@ class AppLocalizations {
         'Aún no hay datos. Empieza añadiendo tu peso o tu primera comida.',
     'primary_navigation': 'Navegación principal',
     'quick_add': 'Añadir rápido',
+    'invalid_link':
+        'Este enlace no se puede abrir de forma segura. Vuelve al panel e inténtalo de nuevo.',
     'french': 'Francés',
     'spanish': 'Español',
     'turkish': 'Turco',
@@ -294,6 +302,8 @@ class AppLocalizations {
         'Henüz veri yok. İlk kilonuzu veya öğününüzü ekleyerek başlayın.',
     'primary_navigation': 'Ana gezinme',
     'quick_add': 'Hızlı ekle',
+    'invalid_link':
+        'Bu bağlantı güvenli bir şekilde açılamıyor. Gösterge paneline dönüp yeniden deneyin.',
     'french': 'Fransızca',
     'spanish': 'İspanyolca',
     'turkish': 'Türkçe',

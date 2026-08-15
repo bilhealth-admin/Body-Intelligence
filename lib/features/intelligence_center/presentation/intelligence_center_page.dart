@@ -27,6 +27,7 @@ import '../services/intelligence_health_context_provider.dart';
 import '../services/coach_context_provider.dart';
 import '../services/local_coach_api.dart';
 import '../services/local_model_gateway.dart';
+import '../../nutrition/domain/barcode_identity.dart';
 import '../../nutrition/services/bil_speech_to_text.dart';
 import '../../nutrition/services/meal_image_analysis_service.dart';
 import '../../nutrition/presentation/meal_image_review_dialog.dart';
@@ -191,7 +192,31 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   void _applyInitialBarcode(String? rawBarcode) {
     final barcode = rawBarcode?.trim();
     if (barcode == null || barcode.isEmpty) return;
-    final evidenceKey = 'barcode:$barcode';
+    final identity = BarcodeIdentity.parse(barcode);
+    if (!identity.isValid) {
+      final evidenceKey =
+          'barcode-invalid:${identity.issue?.name ?? 'unknown'}';
+      if (messages.any((message) => message.evidence.contains(evidenceKey))) {
+        return;
+      }
+      setState(
+        () => messages.add(
+          IntelligenceMessage(
+            id: 'barcode-invalid-${DateTime.now().microsecondsSinceEpoch}',
+            role: IntelligenceMessageRole.bil,
+            kind: IntelligenceMessageKind.coach,
+            text: tr('Invalid barcode', 'باركود غير صالح'),
+            createdAt: DateTime.now(),
+            evidence: <String>[evidenceKey],
+            confidence: 1,
+          ),
+        ),
+      );
+      _scrollToLatest();
+      return;
+    }
+    final canonicalBarcode = identity.digits;
+    final evidenceKey = 'barcode:$canonicalBarcode';
     if (messages.any((message) => message.evidence.contains(evidenceKey))) {
       return;
     }
@@ -202,8 +227,8 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
           role: IntelligenceMessageRole.user,
           kind: IntelligenceMessageKind.coach,
           text: tr(
-            'Review product label for barcode $barcode',
-            'راجع ملصق المنتج للباركود $barcode',
+            'Review product label for barcode $canonicalBarcode',
+            'راجع ملصق المنتج للباركود $canonicalBarcode',
           ),
           createdAt: DateTime.now(),
           evidence: <String>[evidenceKey],
@@ -764,9 +789,11 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
             _showActionCompleted(tr('Appearance updated.', 'تم تحديث المظهر.'));
           }
         case IntelligenceActionType.setLanguage:
-          final locale = action.payload['locale']?.toString();
-          if (!const {'ar', 'en', 'fr', 'es', 'tr'}.contains(locale)) return;
-          await ref.read(appSettingsProvider.notifier).setLocale(locale!);
+          final locale = BilLocalePolicy.canonicalSupportedTag(
+            action.payload['locale']?.toString(),
+          );
+          if (locale == null) return;
+          await ref.read(appSettingsProvider.notifier).setLocale(locale);
           if (mounted) {
             _showActionCompleted(tr('Language updated.', 'تم تحديث اللغة.'));
           }
