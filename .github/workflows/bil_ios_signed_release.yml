@@ -2,6 +2,12 @@ name: BIL iOS signed release candidate
 
 on:
   workflow_dispatch:
+    inputs:
+      upload_to_testflight:
+        description: Upload the validated build to TestFlight
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -50,10 +56,23 @@ jobs:
         shell: bash
         env:
           PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           set -euo pipefail
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
-          printf '%s' "$PROFILE_BASE64" | base64 --decode > "$HOME/Library/MobileDevice/Provisioning Profiles/BIL.mobileprovision"
+          PROFILE="$HOME/Library/MobileDevice/Provisioning Profiles/BIL.mobileprovision"
+          printf '%s' "$PROFILE_BASE64" | base64 --decode > "$PROFILE"
+          security cms -D -i "$PROFILE" > "$RUNNER_TEMP/BIL-profile.plist"
+          PROFILE_APP_ID="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' "$RUNNER_TEMP/BIL-profile.plist")"
+          test "$PROFILE_APP_ID" = "$APPLE_TEAM_ID.com.bilhealth.bodyintelligencelog" || {
+            echo 'Provisioning profile does not authorize the BIL production bundle identifier.' >&2
+            exit 1
+          }
+          /usr/libexec/PlistBuddy -c 'Print :Entitlements:com.apple.developer.healthkit' "$RUNNER_TEMP/BIL-profile.plist" \
+            | grep -Eiq 'true|YES' || {
+              echo 'Provisioning profile does not authorize HealthKit.' >&2
+              exit 1
+            }
 
       - name: Resolve and validate source
         run: |
@@ -76,11 +95,20 @@ jobs:
 
       - name: Capture signed IPA evidence
         shell: bash
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           set -euo pipefail
           IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
           test -s "$IPA"
           codesign -dv --verbose=4 build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app 2> BIL-ios-codesign.txt
+          codesign -d --entitlements :- \
+            build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app \
+            > BIL-ios-entitlements.plist
+          test "$(plutil -extract application-identifier raw BIL-ios-entitlements.plist)" \
+            = "$APPLE_TEAM_ID.com.bilhealth.bodyintelligencelog"
+          plutil -extract com.apple.developer.healthkit raw BIL-ios-entitlements.plist \
+            | grep -Eiq 'true|YES'
           shasum -a 256 "$IPA" | tee BIL-ios-ipa.sha256
           stat -f '%z' "$IPA" | tee BIL-ios-ipa.size
           git rev-parse HEAD | tee BIL-source-head.txt
@@ -98,6 +126,18 @@ jobs:
           IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
           xcrun altool --validate-app -f "$IPA" -t ios --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
 
+      - name: Upload validated build to TestFlight
+        if: ${{ inputs.upload_to_testflight }}
+        shell: bash
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
+          xcrun altool --upload-app -f "$IPA" -t ios \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+
       - name: Upload signed candidate
         uses: actions/upload-artifact@v4
         with:
@@ -107,6 +147,7 @@ jobs:
           path: |
             build/ios/ipa/*.ipa
             BIL-ios-codesign.txt
+            BIL-ios-entitlements.plist
             BIL-ios-ipa.sha256
             BIL-ios-ipa.size
             BIL-source-head.txt
