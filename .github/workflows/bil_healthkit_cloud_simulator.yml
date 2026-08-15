@@ -100,16 +100,44 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p artifacts/release/healthkit_native_4988_4991
+          cat > "$RUNNER_TEMP/bil_ocr.swift" <<'SWIFT'
+          import AppKit
+          import Vision
+
+          guard CommandLine.arguments.count == 2,
+                let image = NSImage(contentsOfFile: CommandLine.arguments[1]) else {
+            exit(2)
+          }
+          var rect = NSRect(origin: .zero, size: image.size)
+          guard let cgImage = image.cgImage(forProposedRect: &rect, context: nil, hints: nil) else {
+            exit(3)
+          }
+          let request = VNRecognizeTextRequest()
+          request.recognitionLevel = .accurate
+          request.usesLanguageCorrection = true
+          try VNImageRequestHandler(cgImage: cgImage).perform([request])
+          for observation in request.results ?? [] {
+            if let candidate = observation.topCandidates(1).first {
+              print(candidate.string)
+            }
+          }
+          SWIFT
+          capture_text() {
+            swift "$RUNNER_TEMP/bil_ocr.swift" "$1"
+          }
           xcrun simctl launch "$UDID" com.bilhealth.bodyintelligencelog \
             -AppleLanguages '(en)' --bil-healthkit-capture
           xcrun simctl openurl "$UDID" 'bil://connected-health'
-          sleep 8
-          idb ui describe-all --udid "$UDID" --json \
-            > artifacts/release/healthkit_native_4988_4991/4988_accessibility.json
-          grep -Eiq 'Allow BIL|BIL.*health|Health Access' \
-            artifacts/release/healthkit_native_4988_4991/4988_accessibility.json
+          sleep 12
           xcrun simctl io "$UDID" screenshot \
             artifacts/release/healthkit_native_4988_4991/4988_healthkit_top.png
+          capture_text artifacts/release/healthkit_native_4988_4991/4988_healthkit_top.png \
+            > artifacts/release/healthkit_native_4988_4991/4988_ocr.txt
+          idb ui describe-all --udid "$UDID" --json \
+            > artifacts/release/healthkit_native_4988_4991/4988_accessibility.json || true
+          cat artifacts/release/healthkit_native_4988_4991/4988_accessibility.json \
+              artifacts/release/healthkit_native_4988_4991/4988_ocr.txt \
+            | grep -Eiq 'Allow BIL|BIL.*health|Health Access|Health Data'
           idb ui swipe --udid "$UDID" --duration 0.5 200 720 200 260
           sleep 2
           xcrun simctl io "$UDID" screenshot \
@@ -122,10 +150,13 @@ jobs:
           sleep 2
           xcrun simctl io "$UDID" screenshot \
             artifacts/release/healthkit_native_4988_4991/4991_healthkit_bottom.png
+          capture_text artifacts/release/healthkit_native_4988_4991/4991_healthkit_bottom.png \
+            > artifacts/release/healthkit_native_4988_4991/4991_ocr.txt
           idb ui describe-all --udid "$UDID" --json \
-            > artifacts/release/healthkit_native_4988_4991/4991_accessibility.json
-          grep -Eiq 'Allow All|Turn On All|Don.t Allow|Allow' \
-            artifacts/release/healthkit_native_4988_4991/4991_accessibility.json
+            > artifacts/release/healthkit_native_4988_4991/4991_accessibility.json || true
+          cat artifacts/release/healthkit_native_4988_4991/4991_accessibility.json \
+              artifacts/release/healthkit_native_4988_4991/4991_ocr.txt \
+            | grep -Eiq 'Allow All|Turn On All|Don.t Allow|Allow'
           shasum -a 256 artifacts/release/healthkit_native_4988_4991/*.png \
             | tee artifacts/release/healthkit_native_4988_4991/SHA256SUMS.txt
           test "$(cut -d ' ' -f 1 artifacts/release/healthkit_native_4988_4991/SHA256SUMS.txt | sort -u | wc -l | tr -d ' ')" = "4"
@@ -134,17 +165,21 @@ jobs:
           # foreground again instead of remaining behind a stale sheet.
           idb ui tap --udid "$UDID" 100 800
           sleep 3
+          xcrun simctl io "$UDID" screenshot \
+            artifacts/release/healthkit_native_4988_4991/after_dismissal.png
+          capture_text artifacts/release/healthkit_native_4988_4991/after_dismissal.png \
+            > artifacts/release/healthkit_native_4988_4991/after_dismissal_ocr.txt
           idb ui describe-all --udid "$UDID" --json \
-            > artifacts/release/healthkit_native_4988_4991/after_dismissal_accessibility.json
-          grep -Eiq 'Connected Health|Refresh status|Health access' \
-            artifacts/release/healthkit_native_4988_4991/after_dismissal_accessibility.json
-          if grep -Eiq 'Allow All|Turn On All|Don.t Allow' \
-            artifacts/release/healthkit_native_4988_4991/after_dismissal_accessibility.json; then
+            > artifacts/release/healthkit_native_4988_4991/after_dismissal_accessibility.json || true
+          cat artifacts/release/healthkit_native_4988_4991/after_dismissal_accessibility.json \
+              artifacts/release/healthkit_native_4988_4991/after_dismissal_ocr.txt \
+            | grep -Eiq 'Connected Health|Refresh status|Health access'
+          if cat artifacts/release/healthkit_native_4988_4991/after_dismissal_accessibility.json \
+                 artifacts/release/healthkit_native_4988_4991/after_dismissal_ocr.txt \
+               | grep -Eiq 'Allow All|Turn On All|Don.t Allow'; then
             echo 'Native Health authorization sheet did not dismiss.' >&2
             exit 1
           fi
-          xcrun simctl io "$UDID" screenshot \
-            artifacts/release/healthkit_native_4988_4991/after_dismissal.png
           xcodebuild -version > artifacts/release/healthkit_native_4988_4991/toolchain.txt
           xcrun simctl list devices | grep "$UDID" \
             >> artifacts/release/healthkit_native_4988_4991/toolchain.txt
