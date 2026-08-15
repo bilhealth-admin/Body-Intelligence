@@ -37,6 +37,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/bil-launch-screen"
+          xcrun ibtool \
+            --errors --warnings --notices \
+            --target-device iphone \
+            --minimum-deployment-target 15.0 \
+            --compile "$RUNNER_TEMP/bil-launch-screen/LaunchScreen.storyboardc" \
+            ios/Runner/Base.lproj/LaunchScreen.storyboard
           flutter build ios --simulator --debug --no-codesign -v
           test -d build/ios/iphonesimulator/Runner.app
           ditto -c -k --sequesterRsrc --keepParent \
