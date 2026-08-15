@@ -70,7 +70,10 @@ dependencies:
   app_links: ^7.0.0
   video_player: ^2.13.0
   google_mobile_ads: ^9.1.0
-  connectivity_plus: ^7.3.1
+  # 7.1+ references the iOS 26-only NWPath.isUltraConstrained symbol at
+  # compile time. Keep the cloud/release Xcode matrix compatible until the
+  # minimum Apple toolchain includes that SDK.
+  connectivity_plus: 7.0.0
 
 dev_dependencies:
   flutter_test:
