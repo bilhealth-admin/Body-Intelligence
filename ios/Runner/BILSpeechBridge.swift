@@ -46,7 +46,7 @@ final class BILSpeechBridge: NSObject, FlutterStreamHandler {
         self?.fail("speech_permission_denied", result: result)
         return
       }
-      AVAudioApplication.requestRecordPermission { granted in
+      self?.requestMicrophonePermission { granted in
         guard granted else {
           self?.fail("microphone_permission_denied", result: result)
           return
@@ -55,6 +55,16 @@ final class BILSpeechBridge: NSObject, FlutterStreamHandler {
           self?.start(localeId: localeId, result: result)
         }
       }
+    }
+  }
+
+  private func requestMicrophonePermission(
+    completion: @escaping (Bool) -> Void
+  ) {
+    if #available(iOS 17.0, *) {
+      AVAudioApplication.requestRecordPermission(completionHandler: completion)
+    } else {
+      AVAudioSession.sharedInstance().requestRecordPermission(completion)
     }
   }
 
