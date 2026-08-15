@@ -87,8 +87,9 @@ jobs:
           brew tap facebook/fb
           brew trust facebook/fb
           brew install idb-companion
-          python3 -m pip install --user fb-idb
-          echo "$(python3 -m site --user-base)/bin" >> "$GITHUB_PATH"
+          python3 -m venv "$RUNNER_TEMP/bil-idb-venv"
+          "$RUNNER_TEMP/bil-idb-venv/bin/pip" install fb-idb
+          echo "$RUNNER_TEMP/bil-idb-venv/bin" >> "$GITHUB_PATH"
 
       - name: Open BIL HealthKit authorization and capture native states
         shell: bash
