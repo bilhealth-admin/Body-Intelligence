@@ -7,17 +7,18 @@ Store acceptance.
 
 ## Accepted repository state
 
-- Bundle identifier: `com.kadem.bil`
+- Bundle identifier: `com.bilhealth.bodyintelligencelog`
 - Minimum iOS deployment target: 15.0
 - Version and build number are sourced from Flutter build metadata.
 - HealthKit and Bluetooth bridges are registered in the production runner.
 - HealthKit capability is declared in `Runner.entitlements`.
-- Health and Bluetooth usage descriptions are localized in English and Arabic.
+- Health, Bluetooth, camera, photo-library, microphone, and speech-recognition
+  usage descriptions are tracked for all 25 supported locales.
 - `PrivacyInfo.xcprivacy` is included in Runner resources, tracking is disabled,
   and no tracking domains are declared.
 - HealthKit read access covers the supported health timeline.
-- HealthKit write access is limited to weight and hydration, matching the
-  Android production boundary and the current product write surface.
+- HealthKit write access is limited to explicitly reviewed weight records.
+  The broader activity, sleep, vital, hydration, and nutrition scope is read-only.
 
 The app-owned privacy manifest describes the current app-owned runtime only.
 Every embedded SDK manifest and the final Xcode Privacy Report must still be
@@ -40,12 +41,13 @@ flutter build ios --release --no-codesign
 
 Then open `ios/Runner.xcworkspace` in Xcode and verify:
 
-1. The Apple Developer team owns `com.kadem.bil`.
+1. Register `com.bilhealth.bodyintelligencelog` with the Apple Developer team.
 2. HealthKit capability and provisioning are active for that identifier.
-3. English and Arabic consent descriptions render correctly on a device.
+3. Consent descriptions render correctly in representative LTR and RTL
+   locales on a device, with a release check covering all 25 tracked locales.
 4. HealthKit read permission is requested only when its feature is used.
-5. HealthKit writes remain limited to explicitly selected weight or hydration
-   records after separate write consent.
+5. HealthKit writes remain limited to explicitly selected weight records after
+   separate write consent.
 6. Bluetooth discovery occurs only after an explicit user action.
 7. A fresh install and an upgrade preserve local data correctly.
 

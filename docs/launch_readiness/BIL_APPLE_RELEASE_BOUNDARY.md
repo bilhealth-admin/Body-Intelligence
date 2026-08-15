@@ -8,15 +8,16 @@
 
 ## Repository-controlled boundary
 
-- The release candidate bundle identifier is `com.kadem.bil`.
+- The owner-approved release candidate bundle identifier is `com.bilhealth.bodyintelligencelog`.
 - The deployment target is iOS 15.0.
 - HealthKit capability is declared without embedding a team, certificate,
   provisioning profile, or credential.
-- English and Arabic HealthKit and Bluetooth consent text are tracked.
+- Native HealthKit, Bluetooth, camera, photo-library, microphone, and speech
+  consent text is tracked for all 25 supported locales.
 - The app-owned privacy manifest is embedded in Runner resources, declares no
   tracking, and contains no tracking domains.
-- The production bridge limits HealthKit writes to body weight and dietary
-  water. Other supported types are read-only.
+- The production bridge limits HealthKit writes to body weight. Activity,
+  sleep, vital, hydration, and nutrition types are read-only.
 - Apple preparation documentation reflects the current production project and
   no longer reports the obsolete example identifier or absence of HealthKit.
 
