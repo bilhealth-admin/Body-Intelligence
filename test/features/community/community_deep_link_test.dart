@@ -66,6 +66,36 @@ void main() {
       CommunityDeepLink.routeFor(Uri.parse('bil://legal/health-disclaimer')),
       '/legal/health-disclaimer',
     );
+
+    const canonicalPaths = <String>[
+      '/food-libraries',
+      '/foods',
+      '/advertising-privacy',
+      '/notification-settings',
+      '/intelligence-center',
+      '/wellness/learn',
+      '/wellness/sleep',
+      '/settings/appearance',
+      '/settings/diary',
+      '/settings/diary/search-tab',
+      '/settings/diary/sharing',
+      '/settings/diary/meal-names',
+      '/settings/sharing-privacy',
+      '/settings/local-export',
+      '/settings/nutrition-goals',
+    ];
+    for (final path in canonicalPaths) {
+      expect(
+        CommunityDeepLink.routeFor(Uri.parse('bil:/$path')),
+        path,
+        reason: 'The installed app must normalize bil:/$path to $path.',
+      );
+      expect(
+        CommunityDeepLink.routeFor(Uri.parse('bil://$path')),
+        path,
+        reason: 'The installed app must normalize bil://$path to $path.',
+      );
+    }
   });
 
   test('product aliases preserve action and return query parameters', () {
