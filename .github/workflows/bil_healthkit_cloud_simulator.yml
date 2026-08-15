@@ -85,6 +85,7 @@ jobs:
         run: |
           set -euo pipefail
           brew tap facebook/fb
+          brew trust facebook/fb
           brew install idb-companion
           python3 -m pip install --user fb-idb
           echo "$(python3 -m site --user-base)/bin" >> "$GITHUB_PATH"
