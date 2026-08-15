@@ -125,6 +125,18 @@ jobs:
           capture_text() {
             swift "$RUNNER_TEMP/bil_ocr.swift" "$1"
           }
+          # Accept the simulator's one-time custom-scheme confirmation before
+          # the HealthKit evidence launch, so it cannot obscure the native
+          # authorization sheet. The approval is retained by this simulator.
+          xcrun simctl launch "$UDID" com.bilhealth.bodyintelligencelog \
+            -AppleLanguages '(en)'
+          sleep 5
+          xcrun simctl openurl "$UDID" 'bil://connected-health'
+          sleep 2
+          idb ui tap --udid "$UDID" 270 470
+          sleep 4
+          xcrun simctl terminate "$UDID" com.bilhealth.bodyintelligencelog
+
           xcrun simctl launch "$UDID" com.bilhealth.bodyintelligencelog \
             -AppleLanguages '(en)' --bil-healthkit-capture
           xcrun simctl openurl "$UDID" 'bil://connected-health'
