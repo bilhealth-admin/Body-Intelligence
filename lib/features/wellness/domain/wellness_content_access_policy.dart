@@ -25,7 +25,9 @@ bool wellnessContentAccessGranted(
     WellnessContentAccess.free => true,
     WellnessContentAccess.plus => plan != CommercePlan.free,
     WellnessContentAccess.pro =>
-      plan == CommercePlan.pro ||
+      plan == CommercePlan.premium ||
+          plan == CommercePlan.premiumAiCoach ||
+          plan == CommercePlan.pro ||
           plan == CommercePlan.elite ||
           plan == CommercePlan.coach ||
           plan == CommercePlan.clinic ||

@@ -51,29 +51,44 @@ final class PlanPolicyCatalog {
       ),
       entitlements: FreePlan.entitlements,
     ),
-    CommercePlan.plus: PlanPolicy(
-      plan: CommercePlan.plus,
-      // Reserved for Premium+; hidden until Meal Planner is implemented.
-      exposure: StoreExposure.hidden,
-      limits: const PlanUsageLimits(
-        cloudSync: true,
-        advancedIntelligence: true,
-        professionalWorkspace: false,
-        catalogTier: CommercePlan.plus,
-      ),
-      entitlements: PaidPlanCatalog.composedEntitlementsFor(CommercePlan.plus),
-    ),
-    CommercePlan.pro: PlanPolicy(
-      plan: CommercePlan.pro,
+    CommercePlan.premium: PlanPolicy(
+      plan: CommercePlan.premium,
       exposure: StoreExposure.consumerSubscription,
       limits: const PlanUsageLimits(
         cloudSync: true,
         advancedIntelligence: true,
         professionalWorkspace: false,
-        catalogTier: CommercePlan.pro,
+        catalogTier: CommercePlan.premium,
       ),
-      entitlements: PaidPlanCatalog.composedEntitlementsFor(CommercePlan.pro),
+      entitlements: PaidPlanCatalog.composedEntitlementsFor(
+        CommercePlan.premium,
+      ),
     ),
+    CommercePlan.premiumAiCoach: PlanPolicy(
+      plan: CommercePlan.premiumAiCoach,
+      exposure: StoreExposure.consumerSubscription,
+      limits: const PlanUsageLimits(
+        cloudSync: true,
+        advancedIntelligence: true,
+        professionalWorkspace: false,
+        catalogTier: CommercePlan.premiumAiCoach,
+      ),
+      entitlements: PaidPlanCatalog.composedEntitlementsFor(
+        CommercePlan.premiumAiCoach,
+      ),
+    ),
+    for (final plan in <CommercePlan>[CommercePlan.plus, CommercePlan.pro])
+      plan: PlanPolicy(
+        plan: plan,
+        exposure: StoreExposure.hidden,
+        limits: PlanUsageLimits(
+          cloudSync: true,
+          advancedIntelligence: true,
+          professionalWorkspace: false,
+          catalogTier: plan,
+        ),
+        entitlements: PaidPlanCatalog.composedEntitlementsFor(plan),
+      ),
     for (final plan in <CommercePlan>[
       CommercePlan.coach,
       CommercePlan.clinic,

@@ -37,17 +37,18 @@ void main() {
   final atomicPersistenceMigration = read(
     'supabase/migrations/202608090001_bil_store_atomic_entitlement_persistence.sql',
   );
+  final canonicalTiersMigration = read(
+    'supabase/migrations/202608160001_bil_canonical_consumer_tiers.sql',
+  );
   final paywall = [
     'lib/features/commerce/presentation/bil_store_plans_page.dart',
     'lib/features/commerce/presentation/bil_dynamic_store_offers.dart',
-    'lib/features/commerce/presentation/glass_store_offer.dart',
   ].map(read).join('\n');
   final pubspec = read('pubspec.yaml');
 
   reject(
-    RegExp(r"defaultValue:\s*'bil_(plus|pro|coach)"),
-    configuration +
-        read('lib/features/commerce/services/app_store_purchase_service.dart'),
+    RegExp(r"defaultValue:\s*'bil_(plus|pro|premium|coach)"),
+    configuration,
     'Invented fallback product ID found.',
   );
   reject(
@@ -197,8 +198,53 @@ void main() {
     'The verification backend must use atomic entitlement persistence.',
   );
 
-  requireText(paywall, 'CommercePlan.plus', 'Plus consumer plan missing.');
-  requireText(paywall, 'CommercePlan.pro', 'Pro consumer plan missing.');
+  requireText(
+    configuration,
+    'CommercePlan.premiumAiCoach',
+    'Premium AI Coach must be a canonical store tier.',
+  );
+  requireText(
+    configuration,
+    'BIL_STORE_PREMIUM_AI_COACH_MONTHLY',
+    'Premium AI Coach monthly store binding is missing.',
+  );
+  requireText(
+    configuration,
+    'BIL_STORE_PREMIUM_AI_COACH_ANNUAL',
+    'Premium AI Coach annual store binding is missing.',
+  );
+  reject(
+    RegExp(r'BIL_STORE_(?:PLUS|PRO|PREMIUM_PLUS)'),
+    configuration,
+    'A legacy consumer product binding remains sellable.',
+  );
+  requireText(
+    canonicalTiersMigration,
+    "when 'plus' then 'legacy_plus'",
+    'Legacy Plus must remain isolated from Premium AI Coach.',
+  );
+  requireText(
+    canonicalTiersMigration,
+    "new.plan_id = 'premium_ai_coach'",
+    'Verified Premium AI Coach purchases must drive the AI quota authority.',
+  );
+  requireText(
+    canonicalTiersMigration,
+    'bil_sync_ai_coach_store_subscription_trigger',
+    'The verified subscription to AI Coach mirror trigger is missing.',
+  );
+
+  requireText(paywall, "'premium'", 'Premium consumer offer is missing.');
+  requireText(
+    paywall,
+    "'premium_ai_coach'",
+    'Premium AI Coach consumer offer is missing.',
+  );
+  reject(
+    RegExp(r'CommercePlan\.(plus|pro)'),
+    paywall,
+    'A legacy Plus/Pro tier remains reachable from the active paywall.',
+  );
   requireText(
     pubspec,
     'path: tool/vendor_app_links',

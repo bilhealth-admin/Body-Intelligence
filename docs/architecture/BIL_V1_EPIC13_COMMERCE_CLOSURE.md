@@ -2,19 +2,18 @@
 
 ## Release truth
 
-Free is always available locally. BIL Pro is the only consumer store
-subscription, offered monthly and annually. The annual store price must be
-configured at exactly 70% of twelve monthly payments (30% saving). Plus remains
-only as a hidden compatibility identifier for historical server records and is
-never displayed or sold. Coach, Clinic, and Enterprise remain contract-only;
-Elite remains a reserved hidden identifier.
+Free is always available locally. Premium and Premium AI Coach are the only
+consumer subscriptions, each offered monthly and annually. Premium AI Coach
+inherits Premium. Historical Pro maps to Premium; historical Plus remains a
+hidden compatibility identifier and never acquires AI Coach access. Coach,
+Clinic, and Enterprise remain contract-only; Elite remains reserved and hidden.
 
 The device store is the sole source for displayed price, currency, billing
-period, tax treatment, offers, and trials. The 30% annual saving is a product
-configuration requirement and must be verified against the live monthly and
-annual store prices before release. BIL contains no fallback price, VAT
-percentage, or invented trial. Missing products make the paywall unavailable
-without changing user data.
+period, tax treatment, offers, discounts, savings, and trials. BIL contains no
+fallback price, fixed saving, VAT percentage, or invented trial. The requested
+seven-day Premium AI Coach trial is displayed only when the store returns that
+offer and the current account is eligible. Missing products make the paywall
+unavailable without changing user data.
 
 ## End-to-end authority
 
@@ -46,10 +45,16 @@ control or chat. Supply secrets through Supabase, GitHub, or CI secret stores.
 - Google package: `BIL_GOOGLE_PACKAGE_NAME` / server
   `GOOGLE_PLAY_PACKAGE_NAME`.
 - Apple bundle: `BIL_APPLE_BUNDLE_ID` / server `APPLE_BUNDLE_ID`.
-- Pro monthly and annual product IDs:
-  `BIL_STORE_PRO_MONTHLY`, `BIL_STORE_PRO_ANNUAL`.
-- The live annual price must equal 70% of twelve monthly payments. The client
-  never manufactures a price; Google Play and App Store remain authoritative.
+- Premium monthly and annual product IDs:
+  `BIL_STORE_PREMIUM_MONTHLY`, `BIL_STORE_PREMIUM_ANNUAL`.
+- Premium AI Coach monthly and annual product IDs:
+  `BIL_STORE_PREMIUM_AI_COACH_MONTHLY`,
+  `BIL_STORE_PREMIUM_AI_COACH_ANNUAL`.
+- AI Boost uses the price-neutral immutable ID `bil_ai_boost`. It is available
+  to every authenticated tier, does not change tier, and does not unlock
+  Barcode for Free.
+- The client never manufactures a price, discount, saving, currency, or trial;
+  Google Play and App Store metadata remain authoritative.
 - Google base plans/offers in Play Console; service-account JSON only in
   `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`.
 - Pub/Sub push audience and identity:

@@ -27,6 +27,13 @@ void main() {
       BilLaunchDeepLink.parse(Uri.parse('bil://connected-health'))?.route,
       '/connected-health',
     );
+    expect(BilLaunchDeepLink.parse(Uri.parse('bil://goals'))?.route, '/goals');
+    expect(
+      BilLaunchDeepLink.parse(
+        Uri.parse('bil://analytics/nutrition?tab=macros&token=secret'),
+      )?.route,
+      '/analytics/nutrition?tab=macros',
+    );
   });
 
   test(
@@ -55,6 +62,8 @@ void main() {
         await controller.handle(Uri.parse('https://evil.test/plans')),
         false,
       );
+      expect(await controller.handle(Uri.parse('bil://goals')), isTrue);
+      expect(route, '/goals');
     },
   );
 

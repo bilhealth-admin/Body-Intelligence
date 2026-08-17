@@ -1,11 +1,14 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
+import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   for (final locale in AppLocalizations.supportedLocales) {
-    testWidgets('locale golden ${locale.languageCode}', (tester) async {
+    final tag = BilLocalePolicy.canonicalTag(locale);
+    final artifactTag = tag.replaceAll('-', '_');
+    testWidgets('locale golden $tag', (tester) async {
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
@@ -57,7 +60,7 @@ void main() {
       await tester.pumpAndSettle();
       await expectLater(
         find.byKey(const Key('epic11-locale-golden')),
-        matchesGoldenFile('goldens/epic11_${locale.languageCode}_phone.png'),
+        matchesGoldenFile('goldens/epic11_${artifactTag}_phone.png'),
       );
     });
   }

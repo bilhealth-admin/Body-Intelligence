@@ -55,7 +55,7 @@ class CommunityDeepLink {
   };
 
   static String? routeFor(Uri uri) {
-    if (uri.scheme != 'bil') return null;
+    if (uri.scheme.toLowerCase() != 'bil') return null;
 
     final segments = <String>[
       if (uri.host.isNotEmpty) uri.host,
@@ -65,11 +65,10 @@ class CommunityDeepLink {
 
     final alias = _appAliases[segments.join('/')];
     if (alias != null) {
+      final safeQuery = _safeQueryFor(alias, uri.queryParameters);
       return Uri(
         path: alias,
-        queryParameters: uri.queryParameters.isEmpty
-            ? null
-            : uri.queryParameters,
+        queryParameters: safeQuery.isEmpty ? null : safeQuery,
       ).toString();
     }
 
@@ -93,7 +92,13 @@ class CommunityDeepLink {
         return '/community/safety';
       }
       if (segments[1] == 'chat' && segments.length == 3) {
-        final userId = Uri.encodeComponent(segments[2]);
+        final rawUserId = segments[2];
+        if (!RegExp(
+          r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
+        ).hasMatch(rawUserId)) {
+          return null;
+        }
+        final userId = Uri.encodeComponent(rawUserId.toLowerCase());
         return '/community/chat/$userId';
       }
       return null;
@@ -107,5 +112,64 @@ class CommunityDeepLink {
       return null;
     }
     return null;
+  }
+
+  static Map<String, String> _safeQueryFor(
+    String route,
+    Map<String, String> input,
+  ) {
+    final output = <String, String>{};
+    void accept(String key, bool Function(String value) valid) {
+      final value = input[key]?.trim();
+      if (value != null && value.length <= 128 && valid(value)) {
+        output[key] = value;
+      }
+    }
+
+    switch (route) {
+      case '/daily-log':
+        accept(
+          'meal',
+          const {'breakfast', 'lunch', 'dinner', 'snack'}.contains,
+        );
+        accept('focus', const {'meal'}.contains);
+        accept(
+          'action',
+          const {
+            'barcode',
+            'voice',
+            'photo',
+            'water',
+            'notes',
+            'exercise',
+            'quick-macros',
+          }.contains,
+        );
+        accept('from', const {'/dashboard', '/daily-log'}.contains);
+      case '/analytics/nutrition':
+        accept('tab', const {'calories', 'nutrients', 'macros'}.contains);
+      case '/intelligence-center':
+        accept('vision', const {'capture'}.contains);
+        accept('barcode', (value) => RegExp(r'^[0-9]{8,14}$').hasMatch(value));
+      case '/wellness/workouts/log':
+        accept(
+          'category',
+          const {'all', 'cardio', 'strength', 'recovery'}.contains,
+        );
+      case '/settings/local-export':
+        accept('from', _canonicalDate);
+        accept('to', _canonicalDate);
+    }
+    return output;
+  }
+
+  static bool _canonicalDate(String value) {
+    final match = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$').firstMatch(value);
+    if (match == null) return false;
+    final year = int.parse(match.group(1)!);
+    final month = int.parse(match.group(2)!);
+    final day = int.parse(match.group(3)!);
+    final parsed = DateTime(year, month, day);
+    return parsed.year == year && parsed.month == month && parsed.day == day;
   }
 }

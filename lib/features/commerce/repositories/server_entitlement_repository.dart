@@ -41,11 +41,8 @@ final class ServerEntitlementRepository {
               const Duration(hours: 72)) {
         return FreePlan.createState();
       }
-      final plan = CommercePlan.values.firstWhere(
-        (candidate) => candidate.id == row['plan_id'],
-        orElse: () => CommercePlan.free,
-      );
-      if (plan != CommercePlan.plus && plan != CommercePlan.pro) {
+      final plan = _plan('${row['plan_id']}');
+      if (plan == CommercePlan.free) {
         return FreePlan.createState();
       }
       final lifecycle = _lifecycle('${row['lifecycle']}');
@@ -75,6 +72,16 @@ final class ServerEntitlementRepository {
       return FreePlan.createState();
     }
   }
+
+  CommercePlan _plan(String value) => switch (value.trim()) {
+    'premium' => CommercePlan.premium,
+    'premium_ai_coach' => CommercePlan.premiumAiCoach,
+    // Read-only compatibility for receipts verified before the canonical
+    // consumer tier migration. New registry rows cannot use these IDs.
+    'pro' => CommercePlan.premium,
+    'plus' || 'legacy_plus' => CommercePlan.plus,
+    _ => CommercePlan.free,
+  };
 
   SubscriptionLifecycle _lifecycle(String value) => switch (value) {
     'pending' => SubscriptionLifecycle.pending,

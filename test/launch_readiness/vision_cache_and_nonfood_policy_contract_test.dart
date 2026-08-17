@@ -16,6 +16,9 @@ void main() {
     final edge = File(
       'supabase/functions/analyze-meal/index.ts',
     ).readAsStringSync();
+    final liveRunner = File(
+      'tool/meal_vision_benchmark/run_live_supabase_e2e.ps1',
+    ).readAsStringSync();
 
     expect(migration, contains("result_kind='food'"));
     expect(migration, contains("state='succeeded'"));
@@ -38,5 +41,10 @@ void main() {
     expect(throttleMigration, contains('retry_after_seconds'));
     expect(edge, contains('bil_check_vision_nonfood_throttle'));
     expect(edge, contains('vision_nonfood_throttled'));
+    expect(liveRunner, contains(r'$duplicateResponse.cache.hit -eq $true'));
+    expect(liveRunner, contains(r'$duplicateResponse.cache.charged -eq $true'));
+    expect(liveRunner, contains('exact_duplicate_handled'));
+    expect(liveRunner, contains('exact_duplicate_cache_hit'));
+    expect(liveRunner, contains('exact_duplicate_charged'));
   });
 }

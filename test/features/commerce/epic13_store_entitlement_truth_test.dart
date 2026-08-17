@@ -17,7 +17,7 @@ void main() {
   group('server entitlement truth', () {
     SubscriptionRecord record(SubscriptionLifecycle lifecycle) =>
         SubscriptionRecord(
-          plan: CommercePlan.pro,
+          plan: CommercePlan.premium,
           lifecycle: lifecycle,
           authorityVerified: true,
           provider: SubscriptionProvider.google,
@@ -61,7 +61,7 @@ void main() {
               now: DateTime.utc(2026, 1, 15),
             )
             .plan,
-        CommercePlan.pro,
+        CommercePlan.premium,
       );
       expect(
         resolver
@@ -74,13 +74,21 @@ void main() {
       );
     });
 
-    test('Premium is consumer and Premium+ remains fail-closed', () {
+    test('only canonical Premium tiers are consumer subscriptions', () {
       expect(
         PlanPolicyCatalog.policies[CommercePlan.plus]!.exposure,
         StoreExposure.hidden,
       );
       expect(
         PlanPolicyCatalog.policies[CommercePlan.pro]!.exposure,
+        StoreExposure.hidden,
+      );
+      expect(
+        PlanPolicyCatalog.policies[CommercePlan.premium]!.exposure,
+        StoreExposure.consumerSubscription,
+      );
+      expect(
+        PlanPolicyCatalog.policies[CommercePlan.premiumAiCoach]!.exposure,
         StoreExposure.consumerSubscription,
       );
       for (final plan in <CommercePlan>[
@@ -97,10 +105,14 @@ void main() {
 
     test('Premium grants every free capability plus sync and intelligence', () {
       final free = PlanPolicyCatalog.policies[CommercePlan.free]!.entitlements;
-      final pro = PlanPolicyCatalog.policies[CommercePlan.pro]!.entitlements;
-      expect(pro, containsAll(free));
-      expect(pro, contains(CommerceEntitlement.cloudSync));
-      expect(pro, contains(CommerceEntitlement.advancedIntelligence));
+      final premium =
+          PlanPolicyCatalog.policies[CommercePlan.premium]!.entitlements;
+      final coach =
+          PlanPolicyCatalog.policies[CommercePlan.premiumAiCoach]!.entitlements;
+      expect(premium, containsAll(free));
+      expect(premium, contains(CommerceEntitlement.cloudSync));
+      expect(premium, contains(CommerceEntitlement.advancedIntelligence));
+      expect(coach, containsAll(premium));
     });
 
     test('missing owner configuration exposes no invented products', () {
@@ -129,10 +141,7 @@ void main() {
     expect(find.text('Premium'), findsOneWidget);
     expect(find.text('Premium AI Coach'), findsOneWidget);
     expect(find.text('BIL AI Boost'), findsOneWidget);
-    expect(
-      find.text('Prix indisponible sur cet appareil'),
-      findsNWidgets(3),
-    );
+    expect(find.text('Prix indisponible sur cet appareil'), findsNWidgets(3));
     // No price, discount, or unavailable tier is invented without live store
     // metadata and configured owner product identifiers.
     expect(find.textContaining(r'$'), findsNothing);
@@ -149,8 +158,8 @@ void main() {
     final client = File(
       'lib/features/commerce/services/verified_store_purchase_service.dart',
     ).readAsStringSync();
-    final proOnlyMigration = File(
-      'supabase/migrations/202608100001_bil_pro_only_consumer_store.sql',
+    final canonicalMigration = File(
+      'supabase/migrations/202608160001_bil_canonical_consumer_tiers.sql',
     ).readAsStringSync();
 
     expect(migration, contains('unique (provider, original_transaction_id)'));
@@ -168,7 +177,13 @@ void main() {
       contains('if (verified && purchase.pendingCompletePurchase)'),
     );
     expect(client, isNot(contains('SharedPreferences')));
-    expect(proOnlyMigration, contains("where plan_id = 'plus'"));
-    expect(proOnlyMigration, contains("not enabled or plan_id = 'pro'"));
+    expect(canonicalMigration, contains("when 'pro' then 'premium'"));
+    expect(canonicalMigration, contains("when 'plus' then 'legacy_plus'"));
+    expect(
+      canonicalMigration,
+      contains("plan_id in ('premium', 'premium_ai_coach')"),
+    );
+    expect(canonicalMigration, contains('bil_ai_coach_subscriptions'));
+    expect(canonicalMigration, contains("new.plan_id = 'premium_ai_coach'"));
   });
 }

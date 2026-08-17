@@ -1,3 +1,5 @@
+import '../../features/notifications/domain/community_deep_link.dart';
+
 /// Privacy-safe launch-link parsing. Only known routes and bounded campaign
 /// fields survive; arbitrary redirect targets and health data are discarded.
 final class BilLaunchDeepLink {
@@ -35,9 +37,25 @@ final class BilLaunchDeepLink {
       if (isCustom && uri.host.isNotEmpty) uri.host,
       ...uri.pathSegments,
     ].where((value) => value.isNotEmpty).toList(growable: false);
-    if (segments.length != 1) return null;
-    final route = _routes[segments.single.toLowerCase()];
-    if (route == null) return null;
+    if (segments.isEmpty) return null;
+    final route = segments.length == 1
+        ? _routes[segments.single.toLowerCase()]
+        : null;
+    final normalizedRoute =
+        route ??
+        (isCustom
+            ? CommunityDeepLink.routeFor(uri)
+            : CommunityDeepLink.routeFor(
+                Uri(
+                  scheme: 'bil',
+                  host: segments.first,
+                  pathSegments: segments.skip(1),
+                  queryParameters: uri.queryParameters.isEmpty
+                      ? null
+                      : uri.queryParameters,
+                ),
+              ));
+    if (normalizedRoute == null) return null;
 
     final attribution = <String, String>{};
     for (final entry in uri.queryParameters.entries) {
@@ -48,7 +66,7 @@ final class BilLaunchDeepLink {
       attribution[entry.key] = value;
     }
     return BilLaunchDeepLink(
-      route: route,
+      route: normalizedRoute,
       attribution: Map.unmodifiable(attribution),
     );
   }

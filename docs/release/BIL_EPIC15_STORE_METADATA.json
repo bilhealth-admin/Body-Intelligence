@@ -81,10 +81,14 @@
   "subscriptions": {
     "group": "OWNER_INPUT_REQUIRED_APPLE_SUBSCRIPTION_GROUP",
     "products": {
-      "pro_monthly": "OWNER_INPUT_REQUIRED_BIL_STORE_PRO_MONTHLY",
-      "pro_annual": "OWNER_INPUT_REQUIRED_BIL_STORE_PRO_ANNUAL"
+      "premium_monthly": "OWNER_INPUT_REQUIRED_BIL_STORE_PREMIUM_MONTHLY",
+      "premium_annual": "OWNER_INPUT_REQUIRED_BIL_STORE_PREMIUM_ANNUAL",
+      "premium_ai_coach_monthly": "OWNER_INPUT_REQUIRED_BIL_STORE_PREMIUM_AI_COACH_MONTHLY",
+      "premium_ai_coach_annual": "OWNER_INPUT_REQUIRED_BIL_STORE_PREMIUM_AI_COACH_ANNUAL",
+      "ai_boost": "bil_ai_boost"
     },
-    "pricing": "PRO_ANNUAL_MUST_EQUAL_70_PERCENT_OF_TWELVE_PRO_MONTHLY_PAYMENTS",
+    "pricing": "STORE_METADATA_ONLY_NO_CLIENT_PRICE_OR_DISCOUNT_ASSUMPTIONS",
+    "trial": "PREMIUM_AI_COACH_7_DAY_OFFER_MUST_BE_CONFIGURED_AND_RETURNED_BY_THE_STORE",
     "free_plan": "No store product; local free entitlement"
   },
   "review": {

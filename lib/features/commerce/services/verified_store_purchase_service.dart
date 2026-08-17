@@ -25,6 +25,29 @@ enum VerifiedStoreState {
   failed,
 }
 
+/// Selects deterministically when Play returns multiple eligible offers for
+/// the same product id. An eligible free-trial offer wins over a paid-only
+/// offer; otherwise the first response remains authoritative.
+ProductDetails preferredStoreProduct(
+  ProductDetails current,
+  ProductDetails candidate,
+) {
+  bool hasTrial(ProductDetails value) {
+    if (value is! GooglePlayProductDetails || value.subscriptionIndex == null) {
+      return false;
+    }
+    final offers = value.productDetails.subscriptionOfferDetails;
+    final index = value.subscriptionIndex!;
+    if (offers == null || index < 0 || index >= offers.length) return false;
+    return offers[index].pricingPhases.any(
+      (phase) => phase.priceAmountMicros == 0,
+    );
+  }
+
+  if (!hasTrial(current) && hasTrial(candidate)) return candidate;
+  return current;
+}
+
 final class VerifiedStoreEntitlement {
   const VerifiedStoreEntitlement({
     required this.plan,
@@ -106,9 +129,13 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       final response = await _purchase.queryProductDetails(
         StoreCatalogConfiguration.productIds,
       );
-      final loaded = {
-        for (final product in response.productDetails) product.id: product,
-      };
+      final loaded = <String, ProductDetails>{};
+      for (final product in response.productDetails) {
+        final existing = loaded[product.id];
+        loaded[product.id] = existing == null
+            ? product
+            : preferredStoreProduct(existing, product);
+      }
       final missing = StoreCatalogConfiguration.productIds.difference(
         loaded.keys.toSet(),
       );

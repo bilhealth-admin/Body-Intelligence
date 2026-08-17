@@ -66,13 +66,11 @@ void main() {
       'lib/features/notifications/presentation/notification_settings_copy.dart',
     ).readAsStringSync();
     final storeCopy = File(
-      'lib/features/commerce/presentation/bil_store_plans_page.dart',
+      'lib/features/commerce/presentation/bil_store_copy.dart',
     ).readAsStringSync();
     for (final locale in const ['ar', 'en', 'fr', 'es', 'tr']) {
       expect(notificationCopy, contains("'$locale':"));
-      if (locale != 'ar' && locale != 'en') {
-        expect(storeCopy, contains("'$locale':"));
-      }
+      expect(storeCopy, contains("'$locale':"));
     }
   });
 }

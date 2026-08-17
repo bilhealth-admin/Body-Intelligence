@@ -117,14 +117,19 @@ try {
 
   $duplicateRejected = $false
   $duplicateStatus = $null
+  $duplicateCacheHit = $false
+  $duplicateCharged = $null
   try {
     $duplicateHeaders = @{
       apikey = $publishableKey
       Authorization = "Bearer $accessToken"
       'x-idempotency-key' = "bilvision$([guid]::NewGuid().ToString('N'))"
     }
-    [void](Invoke-RestMethod -Method Post -Uri $endpoint -Headers $duplicateHeaders `
-      -ContentType 'application/json' -Body $payload -TimeoutSec 75)
+    $duplicateResponse = Invoke-RestMethod -Method Post -Uri $endpoint -Headers $duplicateHeaders `
+      -ContentType 'application/json' -Body $payload -TimeoutSec 75
+    $duplicateStatus = 200
+    $duplicateCacheHit = $duplicateResponse.cache.hit -eq $true
+    $duplicateCharged = $duplicateResponse.cache.charged -eq $true
   } catch {
     $duplicateStatus = [int]$_.Exception.Response.StatusCode
     $duplicateRejected = $duplicateStatus -eq 409
@@ -151,6 +156,9 @@ try {
     quota_used = $usage.used
     quota_reserved = $usage.reserved
     replay_same_request = ($replay.request_id -eq $first.request_id)
+    exact_duplicate_handled = ($duplicateRejected -or ($duplicateCacheHit -and -not $duplicateCharged))
+    exact_duplicate_cache_hit = $duplicateCacheHit
+    exact_duplicate_charged = $duplicateCharged
     duplicate_image_rejected = $duplicateRejected
     duplicate_status = $duplicateStatus
     requires_review = $true

@@ -19,18 +19,22 @@ void main() {
       final ranks = entries.map((entry) => entry.rank).toList();
 
       expect(ranks.toSet().length, ranks.length);
-      expect(ranks, orderedEquals(<int>[10, 20, 30, 40, 50, 60]));
+      expect(ranks, orderedEquals(<int>[10, 20, 30, 40, 50, 60, 80, 90]));
     });
 
     test('composes individual tiers without duplicate entitlement logic', () {
-      final plus = PaidPlanCatalog.composedEntitlementsFor(CommercePlan.plus);
-      final pro = PaidPlanCatalog.composedEntitlementsFor(CommercePlan.pro);
+      final premium = PaidPlanCatalog.composedEntitlementsFor(
+        CommercePlan.premium,
+      );
+      final premiumAiCoach = PaidPlanCatalog.composedEntitlementsFor(
+        CommercePlan.premiumAiCoach,
+      );
       final elite = PaidPlanCatalog.composedEntitlementsFor(CommercePlan.elite);
 
-      expect(plus, contains(CommerceEntitlement.cloudSync));
-      expect(pro, containsAll(plus));
-      expect(pro, contains(CommerceEntitlement.advancedIntelligence));
-      expect(elite, containsAll(pro));
+      expect(premium, contains(CommerceEntitlement.cloudSync));
+      expect(premium, contains(CommerceEntitlement.advancedIntelligence));
+      expect(premiumAiCoach, containsAll(premium));
+      expect(elite, containsAll(premium));
     });
 
     test('composes professional and enterprise capabilities explicitly', () {
@@ -56,7 +60,7 @@ void main() {
 
     test('returns immutable composed entitlement sets', () {
       final entitlements = PaidPlanCatalog.composedEntitlementsFor(
-        CommercePlan.pro,
+        CommercePlan.premium,
       );
 
       expect(

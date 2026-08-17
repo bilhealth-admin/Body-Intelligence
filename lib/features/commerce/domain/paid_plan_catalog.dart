@@ -12,17 +12,33 @@ final class PaidPlanCatalog {
   const PaidPlanCatalog._();
 
   static final entries = <CommercePlan, PlanCatalogEntry>{
+    CommercePlan.premium: PlanCatalogEntry(
+      plan: CommercePlan.premium,
+      rank: 10,
+      parentPlans: const <CommercePlan>{CommercePlan.free},
+      addedEntitlements: const <CommerceEntitlement>{
+        CommerceEntitlement.cloudSync,
+        CommerceEntitlement.advancedIntelligence,
+      },
+    ),
+    CommercePlan.premiumAiCoach: PlanCatalogEntry(
+      plan: CommercePlan.premiumAiCoach,
+      rank: 20,
+      parentPlans: const <CommercePlan>{CommercePlan.premium},
+      // AI usage is authorized by the server-owned AI Coach subscription and
+      // quota ledger. It is deliberately not represented by a client flag.
+      addedEntitlements: const <CommerceEntitlement>{},
+    ),
+    // Historical plans remain readable for existing records only.
     CommercePlan.plus: PlanCatalogEntry(
       plan: CommercePlan.plus,
-      rank: 20,
+      rank: 90,
       parentPlans: const <CommercePlan>{CommercePlan.pro},
-      // Meal Planner is intentionally absent until a real entitlement and
-      // end-to-end implementation exist. Premium+ therefore remains hidden.
       addedEntitlements: const <CommerceEntitlement>{},
     ),
     CommercePlan.pro: PlanCatalogEntry(
       plan: CommercePlan.pro,
-      rank: 10,
+      rank: 80,
       parentPlans: const <CommercePlan>{CommercePlan.free},
       addedEntitlements: const <CommerceEntitlement>{
         CommerceEntitlement.cloudSync,

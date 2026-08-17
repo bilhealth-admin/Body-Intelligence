@@ -109,6 +109,31 @@ void main() {
     );
   });
 
+  test('product aliases strip unknown and malformed query parameters', () {
+    expect(
+      CommunityDeepLink.routeFor(
+        Uri.parse(
+          'bil:/daily-log?action=destroy&from=https%3A%2F%2Fevil.test&token=secret',
+        ),
+      ),
+      '/daily-log',
+    );
+    expect(
+      CommunityDeepLink.routeFor(
+        Uri.parse(
+          'bil:/analytics/nutrition?tab=macros&redirect=https%3A%2F%2Fevil.test',
+        ),
+      ),
+      '/analytics/nutrition?tab=macros',
+    );
+    expect(
+      CommunityDeepLink.routeFor(
+        Uri.parse('bil:/settings/local-export?from=2026-02-30&to=2026-08-16'),
+      ),
+      '/settings/local-export?to=2026-08-16',
+    );
+  });
+
   test('every static app alias accepts a trailing slash', () {
     final source = File(
       'lib/features/notifications/domain/community_deep_link.dart',
@@ -185,6 +210,10 @@ void main() {
       CommunityDeepLink.routeFor(
         Uri.parse('bil://community/connections/unexpected'),
       ),
+      isNull,
+    );
+    expect(
+      CommunityDeepLink.routeFor(Uri.parse('bil://community/chat/not-a-uuid')),
       isNull,
     );
     expect(

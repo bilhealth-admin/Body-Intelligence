@@ -731,12 +731,6 @@ Future<Set<String>> _releaseSurfaceEnglishValues() async {
   });
   values.addAll(
     await _englishMapValues(
-      'lib/features/commerce/presentation/glass_store_offer.dart',
-      "  'en': {",
-    ),
-  );
-  values.addAll(
-    await _englishMapValues(
       'lib/features/commerce/presentation/bil_store_copy.dart',
       "    'en': {",
     ),

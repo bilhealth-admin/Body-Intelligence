@@ -28,56 +28,52 @@ final class StoreCatalogConfiguration {
         uri.host.isNotEmpty;
   }
 
-  static const proMonthly = String.fromEnvironment('BIL_STORE_PRO_MONTHLY');
-  static const proAnnual = String.fromEnvironment('BIL_STORE_PRO_ANNUAL');
-  static const premiumPlusMonthly = String.fromEnvironment(
-    'BIL_STORE_PREMIUM_PLUS_MONTHLY',
+  static const premiumMonthly = String.fromEnvironment(
+    'BIL_STORE_PREMIUM_MONTHLY',
   );
-  static const premiumPlusAnnual = String.fromEnvironment(
-    'BIL_STORE_PREMIUM_PLUS_ANNUAL',
+  static const premiumAnnual = String.fromEnvironment(
+    'BIL_STORE_PREMIUM_ANNUAL',
   );
-
-  /// Code-owned gate: do not expose Premium+ until its Meal Planner routes,
-  /// persistence and entitlement checks are implemented and reviewed.
-  static const premiumPlusMealPlannerReady = false;
+  static const premiumAiCoachMonthly = String.fromEnvironment(
+    'BIL_STORE_PREMIUM_AI_COACH_MONTHLY',
+  );
+  static const premiumAiCoachAnnual = String.fromEnvironment(
+    'BIL_STORE_PREMIUM_AI_COACH_ANNUAL',
+  );
 
   static const products = <StoreProductBinding>[
     StoreProductBinding(
-      plan: CommercePlan.pro,
+      plan: CommercePlan.premium,
       term: SubscriptionTerm.oneMonth,
-      productId: proMonthly,
+      productId: premiumMonthly,
     ),
     StoreProductBinding(
-      plan: CommercePlan.pro,
+      plan: CommercePlan.premium,
       term: SubscriptionTerm.oneYear,
-      productId: proAnnual,
+      productId: premiumAnnual,
     ),
     StoreProductBinding(
-      plan: CommercePlan.plus,
+      plan: CommercePlan.premiumAiCoach,
       term: SubscriptionTerm.oneMonth,
-      productId: premiumPlusMonthly,
+      productId: premiumAiCoachMonthly,
     ),
     StoreProductBinding(
-      plan: CommercePlan.plus,
+      plan: CommercePlan.premiumAiCoach,
       term: SubscriptionTerm.oneYear,
-      productId: premiumPlusAnnual,
+      productId: premiumAiCoachAnnual,
     ),
   ];
 
   static bool get consumerProductsConfigured {
     final normalized = products
-        .where((binding) => binding.plan == CommercePlan.pro)
         .map((binding) => binding.productId.trim())
         .toList(growable: false);
-    return normalized.every((id) => id.isNotEmpty) &&
+    return normalized.length == 4 &&
+        normalized.every((id) => id.isNotEmpty) &&
         normalized.toSet().length == normalized.length;
   }
 
   static Set<String> get productIds => products
-      .where(
-        (binding) =>
-            binding.plan == CommercePlan.pro || premiumPlusMealPlannerReady,
-      )
       .map((binding) => binding.productId.trim())
       .where((id) => id.isNotEmpty)
       .toSet();

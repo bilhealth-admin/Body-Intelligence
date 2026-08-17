@@ -24,12 +24,29 @@ void main() {
   test('verified plan hierarchy grants only its documented levels', () {
     final plus = _state(CommercePlan.plus, EntitlementAuthority.verifiedServer);
     final pro = _state(CommercePlan.pro, EntitlementAuthority.verifiedServer);
+    final premium = _state(
+      CommercePlan.premium,
+      EntitlementAuthority.verifiedServer,
+    );
+    final premiumAiCoach = _state(
+      CommercePlan.premiumAiCoach,
+      EntitlementAuthority.verifiedServer,
+    );
 
     expect(workoutAccessGranted(WellnessContentAccess.plus, plus), isTrue);
     expect(workoutAccessGranted(WellnessContentAccess.pro, plus), isFalse);
     expect(workoutAccessGranted(WellnessContentAccess.plus, pro), isTrue);
     expect(workoutAccessGranted(WellnessContentAccess.pro, pro), isTrue);
     expect(workoutAccessGranted(WellnessContentAccess.coach, pro), isFalse);
+    expect(workoutAccessGranted(WellnessContentAccess.pro, premium), isTrue);
+    expect(
+      workoutAccessGranted(WellnessContentAccess.pro, premiumAiCoach),
+      isTrue,
+    );
+    expect(
+      workoutAccessGranted(WellnessContentAccess.coach, premiumAiCoach),
+      isFalse,
+    );
   });
 
   test('stale or revoked verified snapshots cannot retain paid access', () {

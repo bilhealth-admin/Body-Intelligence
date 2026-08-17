@@ -14,8 +14,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
+    "evidence_bytes": 57938,
+    "evidence_sha256": "1309aecb4dbbcfde66b382c680ec366488dc6554cfc58e727f7f4b7820444e07"
   },
   {
     "reference": 4822,
@@ -32,8 +34,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_2.png",
+    "evidence_bytes": 117471,
+    "evidence_sha256": "6b1288a7d904ee2354f475ab47d01a57e93d1910f84de44b0ebd613fb90eea34"
   },
   {
     "reference": 4823,
@@ -50,8 +54,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_3.png",
+    "evidence_bytes": 263746,
+    "evidence_sha256": "758a5e68cab50c4133713e08a9cef4efebb705886b0189f96d8ad24e148d9bb8"
   },
   {
     "reference": 4824,
@@ -68,8 +74,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_4.png",
+    "evidence_bytes": 240320,
+    "evidence_sha256": "59b4cf2b20903ffba79eb502707034ac1bcfa85a52fbec7380f48f5811f905a5"
   },
   {
     "reference": 4825,
@@ -86,8 +94,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_5.png",
+    "evidence_bytes": 57261,
+    "evidence_sha256": "0ca7ff400c5d990d0c2d81f4036a4bcb0f81936f5036717c619a7de38d187733"
   },
   {
     "reference": 4826,
@@ -104,8 +114,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_6.png",
+    "evidence_bytes": 52613,
+    "evidence_sha256": "8980fe6c59ecc9d1ea8c06a0da2dbb7a451283a5b59a4fc98e77a343d9fabbe8"
   },
   {
     "reference": 4827,
@@ -122,8 +134,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_7.png",
+    "evidence_bytes": 52665,
+    "evidence_sha256": "2bf23f97e334c3e4222cdf1514f71bda9806cc1987fe13ff8108658546a88334"
   },
   {
     "reference": 4828,
@@ -140,8 +154,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/sleep_tracker_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_learn_phone.png",
+    "evidence_bytes": 58104,
+    "evidence_sha256": "6cbafc3327284c8540e5f38acdbdc423ae5cc021af6450b835c1ef7e7e20078a"
   },
   {
     "reference": 4829,
@@ -158,8 +174,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/sleep_tracker_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_learn_phone_2.png",
+    "evidence_bytes": 60783,
+    "evidence_sha256": "03f83654440293aab639e77cfc4faf73784c3cda5c3d10ded8800e862a95b342"
   },
   {
     "reference": 4830,
@@ -176,8 +194,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/sleep_tracker_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_learn_phone_3.png",
+    "evidence_bytes": 55460,
+    "evidence_sha256": "80adcf16bf99e8285800df5c1f714144040c66b28d32c376e09f78ae1cdaabfe"
   },
   {
     "reference": 4831,
@@ -194,8 +214,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/sleep_tracker_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_trend_phone.png",
+    "evidence_bytes": 92255,
+    "evidence_sha256": "dd66e31ad4ec18487f50ca5445932adae9e3c82c98ffdd29b2c6362faea5b868"
   },
   {
     "reference": 4832,
@@ -212,8 +234,10 @@
     "gap": "screen title and horizontal rhythm diverged from the mobile reference",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/daily_log/daily_log_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_meal_entry_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_food_meal_search_phone.png",
+    "evidence_bytes": 21193,
+    "evidence_sha256": "6b2110ae7bb43708be1e34c98d61bf96655b3a99d0d75a67819a5c762efb3974"
   },
   {
     "reference": 4833,
@@ -230,8 +254,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone.png",
+    "evidence_bytes": 34835,
+    "evidence_sha256": "d2422fb8565ecd20f02cb9fd06134f936a18eb91dcbc7911c693596a91650016"
   },
   {
     "reference": 4834,
@@ -248,8 +274,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_2.png",
+    "evidence_bytes": 32404,
+    "evidence_sha256": "052ffbc9968b53b791967da2eeb88958a04efe888eb63bb837b78bbce0071b7b"
   },
   {
     "reference": 4835,
@@ -266,8 +294,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_3.png",
+    "evidence_bytes": 39794,
+    "evidence_sha256": "1f845d15c5ac3267c5fc94b9d39c3c14be3be64a3fb212598a233bd8be66b683"
   },
   {
     "reference": 4836,
@@ -284,8 +314,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_4.png",
+    "evidence_bytes": 40197,
+    "evidence_sha256": "0cf2d509b1737415aad656bd72d8caf690869baa2efc5c661d653ad7f99b89fb"
   },
   {
     "reference": 4837,
@@ -302,8 +334,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_5.png",
+    "evidence_bytes": 35803,
+    "evidence_sha256": "b8297228f0ccb7a972b80dd17f65a458b0d42ad6e22fc850fc293fa30f2de776"
   },
   {
     "reference": 4838,
@@ -320,8 +354,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_6.png",
+    "evidence_bytes": 32643,
+    "evidence_sha256": "27b75f8bd48362a182822b50d8e0add1239bc12914c997bf0e8abab235838772"
   },
   {
     "reference": 4839,
@@ -338,8 +374,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_7.png",
+    "evidence_bytes": 34069,
+    "evidence_sha256": "ba7319f1ff620abb76884d873a25b6634a29fc0f92c69f6b5da65ba5c2dd1f0c"
   },
   {
     "reference": 4840,
@@ -356,8 +394,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_8.png",
+    "evidence_bytes": 33136,
+    "evidence_sha256": "17ab74f7e75684bfab44a2f87685b990dca1fbe711ee9297c301afed136ae524"
   },
   {
     "reference": 4841,
@@ -374,8 +414,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_9.png",
+    "evidence_bytes": 32126,
+    "evidence_sha256": "e72ff20dd0a361cb6aa403cdd526ff261c56ea346879af3ab876dd767adf0365"
   },
   {
     "reference": 4842,
@@ -392,8 +434,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_10.png",
+    "evidence_bytes": 39650,
+    "evidence_sha256": "aade1957bc0ddb1ae8b4bf96b15c7e0da1c075837a0569886b765f02f1a52cc9"
   },
   {
     "reference": 4843,
@@ -410,8 +454,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_11.png",
+    "evidence_bytes": 40274,
+    "evidence_sha256": "dca94ef0ae4538bef9df5840e0680d634e6f3dd65125f6897968ac49578eb48d"
   },
   {
     "reference": 4844,
@@ -428,8 +474,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_12.png",
+    "evidence_bytes": 37113,
+    "evidence_sha256": "ed4dcd53b3d996b29449c458b996d27780e8f046bf965588db1753767828d031"
   },
   {
     "reference": 4845,
@@ -446,8 +494,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_13.png",
+    "evidence_bytes": 38033,
+    "evidence_sha256": "67e8d891693ed1a624ae7a1fa8a01c0acabaa6ef4da0c68b8b6edb3b6056b5d2"
   },
   {
     "reference": 4846,
@@ -464,8 +514,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_collection_plant_phone.png",
+    "evidence_bytes": 431554,
+    "evidence_sha256": "f31fe9b9d2949d090a2e305d8d5b6f4d552a03d13e45d9d231b2667329d0444a"
   },
   {
     "reference": 4847,
@@ -482,8 +534,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_collection_quick_phone.png",
+    "evidence_bytes": 413994,
+    "evidence_sha256": "50eafc57b254290fc9cfaa7994fc30e3056e4973647db04425aeca26dab6a5ec"
   },
   {
     "reference": 4848,
@@ -500,8 +554,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_collection_regional_phone.png",
+    "evidence_bytes": 361388,
+    "evidence_sha256": "7a204ddfb96c66ff4ef58070e7b373793ab2fe04e0df561fe3ad06b6927dd1d8"
   },
   {
     "reference": 4849,
@@ -518,8 +574,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_collection_saved_phone.png",
+    "evidence_bytes": 19726,
+    "evidence_sha256": "a0c38a8fd933c1274690d0d0e9c7807378f9478e0b39cf2e9e8ce2c97562f86d"
   },
   {
     "reference": 4850,
@@ -536,8 +594,10 @@
     "gap": "real device-store products and sandbox billing remain external",
     "closure_action": "captured truthful unavailable state with purchase restore and manage disabled",
     "production_file": "lib/features/commerce/presentation/bil_store_plans_page.dart",
-    "status": "limited local visual and interaction acceptance; real device-store validation pending",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_store_plans_phone.png"
+    "status": "independent_visual_review_limited_state_acceptance",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_store_plans_phone.png",
+    "evidence_bytes": 26592,
+    "evidence_sha256": "a4a8bffa99d1844d59c85471d7177337d4893626c8dc3b39e86d8f034a542653"
   },
   {
     "reference": 4851,
@@ -554,8 +614,10 @@
     "gap": "real product retrieval billing UI receipts and entitlement refresh remain external",
     "closure_action": "captured injected catalog and verified purchase restore and manage dispatch exactly once",
     "production_file": "lib/features/commerce/presentation/bil_store_plans_page.dart",
-    "status": "limited local visual and interaction acceptance; sandbox purchase lifecycle pending",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_store_plans_phone_2.png"
+    "status": "independent_visual_review_limited_state_acceptance",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_store_plans_phone_2.png",
+    "evidence_bytes": 30693,
+    "evidence_sha256": "53fc624752fc59cafbcc6f35340ab9ee0c026605f7325522d86a26e3928abf45"
   },
   {
     "reference": 4852,
@@ -566,14 +628,16 @@
     "language": "en",
     "brightness": "light",
     "state": "subscription offer and entitlement state",
-    "bil_route": "/plans",
+    "bil_route": "/wellness/workouts",
     "capability": "honest store plans and entitlements",
     "before_state": "implemented with truthful unavailable states; production capture missing",
     "gap": "dense promotional hierarchy and excessive hero rounding",
     "closure_action": "production page refined; refreshed golden required",
-    "production_file": "lib/features/commerce/presentation/bil_store_plans_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_store_plans_phone.png"
+    "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png",
+    "evidence_bytes": 162239,
+    "evidence_sha256": "7d040b896e9386f3a84fe381cd50378babc9606b5e7eaf8e6124a15c418a5022"
   },
   {
     "reference": 4853,
@@ -590,8 +654,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
+    "evidence_bytes": 114276,
+    "evidence_sha256": "b69e6aa737d085ee1c1bcae9fd2292e2ea34a67983f9bf133911b501fe088a37"
   },
   {
     "reference": 4854,
@@ -608,8 +674,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone_2.png",
+    "evidence_bytes": 113752,
+    "evidence_sha256": "f8f2b332700f1c475321d2c5d2279e36b444813f8f0f6a568fb488f5e8a707c1"
   },
   {
     "reference": 4855,
@@ -626,8 +694,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone_3.png",
+    "evidence_bytes": 117281,
+    "evidence_sha256": "4c9436b54260499beefe1049830f35c905c16b1aecf98cdbaccc0b43708feb26"
   },
   {
     "reference": 4856,
@@ -644,8 +714,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone_4.png",
+    "evidence_bytes": 114776,
+    "evidence_sha256": "5ea3ea15433065b351862fc55970c5fd3c43e16231757044d45b6e36b4e3b6e7"
   },
   {
     "reference": 4857,
@@ -662,8 +734,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_my_exercises_phone.png",
+    "evidence_bytes": 116808,
+    "evidence_sha256": "247a50e918890725100792b1a09ffa661db690fdebe95eee8cd783a68ff96ec6"
   },
   {
     "reference": 4858,
@@ -680,8 +754,10 @@
     "gap": "library margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_library_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_core_phone.png",
+    "evidence_bytes": 28763,
+    "evidence_sha256": "6cfb3e28c968eb69c47563a68401be47f2679a72d7cfa00a8c4318fc27de6c67"
   },
   {
     "reference": 4859,
@@ -698,8 +774,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_routines_saved_phone.png",
+    "evidence_bytes": 54742,
+    "evidence_sha256": "4b03cb271b142d060487e5a8fb687706500ef86a1eef94e2357f6163248549e3"
   },
   {
     "reference": 4860,
@@ -716,8 +794,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_routine_builder_phone.png",
+    "evidence_bytes": 22093,
+    "evidence_sha256": "4eb2546d7dfd84b1c62bd4936aee0bf5e6f88d3a150e1fab7117a48fb7a42c5a"
   },
   {
     "reference": 4861,
@@ -734,8 +814,10 @@
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "family-equivalent local state accepted; OS grant and data external",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png"
+    "status": "independent_visual_review_limited_family_acceptance",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png",
+    "evidence_bytes": 70003,
+    "evidence_sha256": "0ef31821a7f404900f2aa57774b63d30014e2a842fec47d2585e08a8087d40bc"
   },
   {
     "reference": 4862,
@@ -752,8 +834,10 @@
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "family-equivalent local state accepted; physical integrations external",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_compatibility_phone.png"
+    "status": "independent_visual_review_limited_family_acceptance",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_compatibility_phone.png",
+    "evidence_bytes": 59862,
+    "evidence_sha256": "2b9c3b3e6787a85b8232b4d43e1b1a390619c2ee43341bf6a9062d79286a51a4"
   },
   {
     "reference": 4863,
@@ -770,8 +854,10 @@
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "family-equivalent local state accepted; platform support external",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_unavailable_phone.png"
+    "status": "independent_visual_review_limited_family_acceptance",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_unavailable_phone.png",
+    "evidence_bytes": 72484,
+    "evidence_sha256": "5679cca609b0d721e2a6bf65bd02131e8ec69eb8379180017a8812e84bf04f5c"
   },
   {
     "reference": 4864,
@@ -788,8 +874,10 @@
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "family-equivalent local state accepted; provider install external",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_update_required_phone.png"
+    "status": "independent_visual_review_limited_family_acceptance",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_update_required_phone.png",
+    "evidence_bytes": 69606,
+    "evidence_sha256": "a27f7bb2859f04e00bbe9927255c945829ff817433c9621f747ba2978eb01d50"
   },
   {
     "reference": 4865,
@@ -806,8 +894,10 @@
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "family-equivalent local state accepted; live sync external",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_offline_phone.png"
+    "status": "independent_visual_review_limited_family_acceptance",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_offline_phone.png",
+    "evidence_bytes": 69763,
+    "evidence_sha256": "36f0afdd3c22fbef1d4888a53465f0c4a3665f82558bd8359bcf1773341d4811"
   },
   {
     "reference": 4866,
@@ -824,8 +914,10 @@
     "gap": "external web profile layout is intentionally represented by BIL authenticated Community family evidence",
     "closure_action": "authenticated hub and profile evidence reviewed with cloud data paths verified",
     "production_file": "lib/features/community/presentation/community_connections_page.dart",
-    "status": "direct limited equivalence accepted",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_friend_authenticated_phone.png"
+    "status": "direct_limited_equivalence_accepted",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_friend_authenticated_phone.png",
+    "evidence_bytes": 19671,
+    "evidence_sha256": "3c74075fe51fdfd7e8f8a9eddfb2d015bfd463876345c01ac609e67b35aa9ef8"
   },
   {
     "reference": 4867,
@@ -842,8 +934,10 @@
     "gap": "signed-out state lacked a mature actionable surface",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/community/presentation/community_connections_page.dart",
-    "status": "direct limited equivalence accepted",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_request_authenticated_phone.png"
+    "status": "direct_limited_equivalence_accepted",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_request_authenticated_phone.png",
+    "evidence_bytes": 21627,
+    "evidence_sha256": "ca0c6f1d8d9ac21b871c2e62beaad21dbb7d99227e9187f60c99cd772065fdc3"
   },
   {
     "reference": 4868,
@@ -860,8 +954,10 @@
     "gap": "signed-out state lacked a mature actionable surface",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/community/presentation/community_people_page.dart",
-    "status": "direct limited equivalence accepted",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_add_friends_authenticated_phone.png"
+    "status": "direct_limited_equivalence_accepted",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_add_friends_authenticated_phone.png",
+    "evidence_bytes": 17884,
+    "evidence_sha256": "d204128cb1e9e94ae7f7b9b26f6f80c3fb3468cf685b0209a060345cb6e6f73e"
   },
   {
     "reference": 4869,
@@ -878,8 +974,10 @@
     "gap": "signed-out state lacked a mature actionable surface",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/community/presentation/community_people_page.dart",
-    "status": "direct limited equivalence accepted",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_people_search_authenticated_phone.png"
+    "status": "direct_limited_equivalence_accepted",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_people_search_authenticated_phone.png",
+    "evidence_bytes": 17481,
+    "evidence_sha256": "a12202f5b1e7f66e22fe841004daf5eac2438578994f223939621bfa25223459"
   },
   {
     "reference": 4870,
@@ -896,8 +994,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/community/presentation/community_profile_page.dart",
-    "status": "family-equivalent limited acceptance; live cloud device external",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png"
+    "status": "family_equivalent_limited_acceptance",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png",
+    "evidence_bytes": 41353,
+    "evidence_sha256": "5cacf0a0c3195e600c28559452edc012552ede13d4d6af2f3d761d47e6bb46e3"
   },
   {
     "reference": 4871,
@@ -914,8 +1014,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/community/presentation/community_profile_page.dart",
-    "status": "family-equivalent limited acceptance; live cloud device external",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png"
+    "status": "family_equivalent_limited_acceptance",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png",
+    "evidence_bytes": 41353,
+    "evidence_sha256": "5cacf0a0c3195e600c28559452edc012552ede13d4d6af2f3d761d47e6bb46e3"
   },
   {
     "reference": 4872,
@@ -932,8 +1034,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/community/presentation/community_notifications_page.dart",
-    "status": "direct limited equivalence accepted; realtime push external",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_notifications_empty_authenticated_phone.png"
+    "status": "direct_limited_equivalence_accepted",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_notifications_empty_authenticated_phone.png",
+    "evidence_bytes": 15600,
+    "evidence_sha256": "89d8b8261c2c599b094a4806c81db21d10f3d541992672561c5f1e247e736b02"
   },
   {
     "reference": 4873,
@@ -950,8 +1054,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/profile/premium_profile_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_phone.png",
+    "evidence_bytes": 37786,
+    "evidence_sha256": "836240adbc545e1c00ee58105e13b6a545c2e7a53bbec6efc9997c0584eab531"
   },
   {
     "reference": 4874,
@@ -968,8 +1074,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/profile/premium_profile_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_goals_phone.png",
+    "evidence_bytes": 52766,
+    "evidence_sha256": "e8c3ff2403c39eccbc0d64e18fd5630b9e6e251acd77282f0e12f4cb2c3dcc19"
   },
   {
     "reference": 4875,
@@ -986,8 +1094,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/profile/premium_profile_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_goals_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_goals_phone.png",
+    "evidence_bytes": 52766,
+    "evidence_sha256": "e8c3ff2403c39eccbc0d64e18fd5630b9e6e251acd77282f0e12f4cb2c3dcc19"
   },
   {
     "reference": 4876,
@@ -1004,8 +1114,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/profile/premium_profile_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_goals_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
+    "evidence_bytes": 57938,
+    "evidence_sha256": "1309aecb4dbbcfde66b382c680ec366488dc6554cfc58e727f7f4b7820444e07"
   },
   {
     "reference": 4877,
@@ -1022,8 +1134,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/profile/premium_profile_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_goals_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_calories_phone.png",
+    "evidence_bytes": 45006,
+    "evidence_sha256": "4ab8e21eb75fbbd3622444a6aa1c991ddb26c93717116741c8edbfad717b15dc"
   },
   {
     "reference": 4878,
@@ -1040,8 +1154,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone.png",
+    "evidence_bytes": 48368,
+    "evidence_sha256": "705597214a0b86dd96f2944f8e3351303d5c5999a937dd127967c9c0368a1f65"
   },
   {
     "reference": 4879,
@@ -1058,8 +1174,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone_2.png",
+    "evidence_bytes": 45423,
+    "evidence_sha256": "7095ef6f251a87ab9e090dc688669707aae8ee98786cf48aef1d4b136c5b16f0"
   },
   {
     "reference": 4880,
@@ -1076,8 +1194,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_calories_phone.png",
+    "evidence_bytes": 45006,
+    "evidence_sha256": "4ab8e21eb75fbbd3622444a6aa1c991ddb26c93717116741c8edbfad717b15dc"
   },
   {
     "reference": 4881,
@@ -1094,8 +1214,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_macros_phone.png",
+    "evidence_bytes": 45744,
+    "evidence_sha256": "c5feba59847a20a17a1b10529db4ecd7f9733bb3a64e964c16fcbe23a6f3114a"
   },
   {
     "reference": 4882,
@@ -1112,8 +1234,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_activity_phone.png",
+    "evidence_bytes": 45745,
+    "evidence_sha256": "f0016eb297069187a44f1b314125a9fbd77f5ee4989996ba9a018b3d0d523417"
   },
   {
     "reference": 4883,
@@ -1130,8 +1254,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_quick_log_phone.png",
+    "evidence_bytes": 44205,
+    "evidence_sha256": "ce4df1a6fd7fd5ae397af36758dae68b51c3070205bf6d2aa3553f81c9b7c278"
   },
   {
     "reference": 4884,
@@ -1148,8 +1274,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_discover_phone.png",
+    "evidence_bytes": 39931,
+    "evidence_sha256": "a69fb423213e31b6b5bf84eba6e002033b17b851c1a448faaeb8a4c678163c1a"
   },
   {
     "reference": 4885,
@@ -1166,8 +1294,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_best_action_phone.png",
+    "evidence_bytes": 44420,
+    "evidence_sha256": "0db8a5ce5dc4c45331c9076632d00d4364e4b62ac64be2ed06cf979258541256"
   },
   {
     "reference": 4886,
@@ -1184,8 +1314,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_daily_intelligence_phone.png",
+    "evidence_bytes": 39805,
+    "evidence_sha256": "317a6bd19f20411fb53361b310d6b0018bba9ca00149ef4fc9f3799751d3c44d"
   },
   {
     "reference": 4887,
@@ -1202,8 +1334,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_progress_phone.png",
+    "evidence_bytes": 41534,
+    "evidence_sha256": "88f8a47d86a9443c20f1710fc03906d5a36f4c3af69cf0b6caecbaeaf3c9e4e7"
   },
   {
     "reference": 4888,
@@ -1220,8 +1354,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_connected_health_phone.png",
+    "evidence_bytes": 41560,
+    "evidence_sha256": "fe7ce16164438785d2c642dd8d840b06d4be95c0fbea9693d92905502151fe87"
   },
   {
     "reference": 4889,
@@ -1238,8 +1374,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_body_twin_phone.png",
+    "evidence_bytes": 40934,
+    "evidence_sha256": "34a5f41e8a53ba7e301d445d5eb2b6e854c10ca82a7cbc945becbb06790d0d7a"
   },
   {
     "reference": 4890,
@@ -1256,8 +1394,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/dashboard_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/quick_add_en_light_phone.png",
+    "evidence_bytes": 46372,
+    "evidence_sha256": "75fdca70080c513fb38e678b2bfbf64142451c51b859be8ce762fe56763c5868"
   },
   {
     "reference": 4891,
@@ -1274,8 +1414,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/daily_log/daily_log_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_water_entry_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_water_entry_phone.png",
+    "evidence_bytes": 39393,
+    "evidence_sha256": "fd446bce32ebfa967a7d2e7ae547a6f2d2a1681e4d4fc52fd707a22024b26d95"
   },
   {
     "reference": 4892,
@@ -1292,8 +1434,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/daily_check_in/daily_check_in_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_check_in_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_check_in_phone.png",
+    "evidence_bytes": 30275,
+    "evidence_sha256": "df41fb2e79ec0b7e6b2180d890f5e21b1c4302c094f01b3cae6d9f30cc194464"
   },
   {
     "reference": 4893,
@@ -1310,8 +1454,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_walk_phone.png",
+    "evidence_bytes": 28901,
+    "evidence_sha256": "8e61b75ffe7cbb1330ec4f75fc69aaefe137ba049ce502a63ffb461fabc5edd1"
   },
   {
     "reference": 4894,
@@ -1328,8 +1474,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_run_phone.png",
+    "evidence_bytes": 29621,
+    "evidence_sha256": "c5fde9b3afa7fe4d40dc5d3518751ab55a948fdec6a7ed45ee1f9ba3d1da5ce2"
   },
   {
     "reference": 4895,
@@ -1346,8 +1494,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_cycle_phone.png",
+    "evidence_bytes": 30471,
+    "evidence_sha256": "b7554d0a1d01913379e2f3e86c247b38762353789fb851cd2122ea7d0b927aa1"
   },
   {
     "reference": 4896,
@@ -1364,8 +1514,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_swim_phone.png",
+    "evidence_bytes": 27606,
+    "evidence_sha256": "70ee44aa9ad9e097be641033d73ebdfd3c5c3d817231f44bb0310517536c3635"
   },
   {
     "reference": 4897,
@@ -1382,8 +1534,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_1_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_strength_phone.png",
+    "evidence_bytes": 31908,
+    "evidence_sha256": "633bb8750af593d25ad6cba0a2c822fc1abc0134b8975dad1d24a23497652506"
   },
   {
     "reference": 4898,
@@ -1400,8 +1554,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_2_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_upper_phone.png",
+    "evidence_bytes": 31607,
+    "evidence_sha256": "af45a096a6e530d467c4f7230c98358313c52a9dec5141529bf9a837ee03e52b"
   },
   {
     "reference": 4899,
@@ -1418,8 +1574,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_3_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_lower_phone.png",
+    "evidence_bytes": 30223,
+    "evidence_sha256": "f651f01f126d2ca050c3b2354b0c1399f31c7a593b12e18a73d4538d3a5bbc7f"
   },
   {
     "reference": 4900,
@@ -1436,8 +1594,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_4_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_core_phone.png",
+    "evidence_bytes": 28763,
+    "evidence_sha256": "6cfb3e28c968eb69c47563a68401be47f2679a72d7cfa00a8c4318fc27de6c67"
   },
   {
     "reference": 4901,
@@ -1454,8 +1614,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_5_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_circuit_phone.png",
+    "evidence_bytes": 29048,
+    "evidence_sha256": "1e65ea3d0690291724cb557c993cefae216a803a099548c578f69b5cc0e3ef3c"
   },
   {
     "reference": 4902,
@@ -1472,8 +1634,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_6_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_row_phone.png",
+    "evidence_bytes": 28272,
+    "evidence_sha256": "e428b2631980383a83d91dd3b3221d96b33bfbd86e9eb9bdc7349b0d10ce8053"
   },
   {
     "reference": 4903,
@@ -1490,8 +1654,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_7_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_stairs_phone.png",
+    "evidence_bytes": 29272,
+    "evidence_sha256": "1797c1415e8914dae1635de4ed474e262f784df8e079947d94485da67f2d052a"
   },
   {
     "reference": 4904,
@@ -1508,8 +1674,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_8_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_hike_phone.png",
+    "evidence_bytes": 27488,
+    "evidence_sha256": "06df3dc82709d9d317639a22e0649be25b618824218bf2586725373231c3d81b"
   },
   {
     "reference": 4905,
@@ -1526,8 +1694,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_9_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_dance_phone.png",
+    "evidence_bytes": 28655,
+    "evidence_sha256": "b5b2d66ff98d2437c2202af91b23296a50a1674487f6a3f875c3c788fdf901cd"
   },
   {
     "reference": 4906,
@@ -1544,8 +1714,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_strength_all_scroll_10_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_yoga_phone.png",
+    "evidence_bytes": 28340,
+    "evidence_sha256": "90d7faa72460068620737c8d7d3cfbf553663eeaf4e3de6f677dcebae668f56b"
   },
   {
     "reference": 4907,
@@ -1562,8 +1734,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_pilates_phone.png",
+    "evidence_bytes": 28333,
+    "evidence_sha256": "f6126eb12bee074b0b52172873dc7881582225aac66b3f95658c8628873393aa"
   },
   {
     "reference": 4908,
@@ -1580,8 +1754,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_mobility_phone.png",
+    "evidence_bytes": 49226,
+    "evidence_sha256": "e935bebafc9b22bdebe1c606f271bea3c1b9493ce24a2bcdbf8363bc58c131fb"
   },
   {
     "reference": 4909,
@@ -1598,8 +1774,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_stretch_phone.png",
+    "evidence_bytes": 28397,
+    "evidence_sha256": "bf24e8ed017999d6d33f47bbcf4a39e7d965e2fbb1e5c56dc644ae332d5f1fe2"
   },
   {
     "reference": 4910,
@@ -1616,8 +1794,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_breathing_phone.png",
+    "evidence_bytes": 29818,
+    "evidence_sha256": "3d5e82f17ea6fd49fbd7472bf9024d21323545729daab89f1a796efa7c3e2cd3"
   },
   {
     "reference": 4911,
@@ -1634,8 +1814,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/daily_log/daily_log_page_actions.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_meal_image_guide_2_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_meal_image_guide_1_phone.png",
+    "evidence_bytes": 32435,
+    "evidence_sha256": "5010ebb5c3348bc35b4a61fc41838901bb21c92ee7c09098c9cb7dad80bfffa7"
   },
   {
     "reference": 4912,
@@ -1652,8 +1834,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/daily_log/daily_log_page_actions.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_meal_image_guide_3_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_meal_image_guide_2_phone.png",
+    "evidence_bytes": 39104,
+    "evidence_sha256": "47517fac03c5042470b69b98f6917e16862575efd6c29033da8297e83d544790"
   },
   {
     "reference": 4913,
@@ -1670,8 +1854,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/daily_log/daily_log_page_actions.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_meal_image_guide_4_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_meal_image_guide_3_phone.png",
+    "evidence_bytes": 34338,
+    "evidence_sha256": "e60c80f7966dcdef62d4c364c286fdbc2995a92a25492b97c3015b7090e79f27"
   },
   {
     "reference": 4914,
@@ -1688,8 +1874,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/nutrition/presentation/food_barcode_scanner_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_barcode_unavailable_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_barcode_unavailable_phone.png",
+    "evidence_bytes": 15915,
+    "evidence_sha256": "98b48f6f5c902e70a1eadfbd3eeed925f9d1c6014aaa9f93320a20f780e16cf9"
   },
   {
     "reference": 4915,
@@ -1706,8 +1894,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/daily_log/daily_log_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_food_meal_search_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_meal_entry_phone.png",
+    "evidence_bytes": 37314,
+    "evidence_sha256": "5286ecbe938dbfe491c487a87eafd18ad03e18ff9f69d98495c29307d86c0818"
   },
   {
     "reference": 4916,
@@ -1724,8 +1914,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/daily_log/daily_log_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_verified_result_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_meal_image_guide_4_phone.png",
+    "evidence_bytes": 43188,
+    "evidence_sha256": "2939e66f280272263c8ccb5375a5b921ab0c6c91bd633955b86ae1aae2c5aa0d"
   },
   {
     "reference": 4917,
@@ -1742,8 +1934,10 @@
     "gap": "screen title and horizontal rhythm diverged from the mobile reference",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/nutrition/food_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_meals_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_verified_result_phone.png",
+    "evidence_bytes": 188067,
+    "evidence_sha256": "136e8c2928d4f8911cd56df15ea3922b58fd3cefcae9763f5c08d61bc403f12f"
   },
   {
     "reference": 4918,
@@ -1760,8 +1954,10 @@
     "gap": "screen title and horizontal rhythm diverged from the mobile reference",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/nutrition/food_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_recipes_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_favorite_result_phone.png",
+    "evidence_bytes": 188272,
+    "evidence_sha256": "56ac18ff3aa1cb16fe21d70efd7f14347bda166e4f0110160efafdc8e2ab77eb"
   },
   {
     "reference": 4919,
@@ -1778,8 +1974,10 @@
     "gap": "screen title and horizontal rhythm diverged from the mobile reference",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/nutrition/food_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_my_foods_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_recent_result_phone.png",
+    "evidence_bytes": 188519,
+    "evidence_sha256": "c1caef46aac2b776af78081b46a79ab5438416ade2cb05f8201d6113eb47440e"
   },
   {
     "reference": 4920,
@@ -1796,8 +1994,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/nutrition/food_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_custom_food_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_custom_food_phone.png",
+    "evidence_bytes": 45867,
+    "evidence_sha256": "b2f6c89a825a6995b5bf9d99e2f856cd1316bf4ffaddfe3b04a6d4a39bc7a436"
   },
   {
     "reference": 4921,
@@ -1814,8 +2014,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/nutrition/food_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_quick_nutrition_form_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_phone.png",
+    "evidence_bytes": 186747,
+    "evidence_sha256": "7c40f5cb2b54f333d54203ee4d5203b3eb57d287951acfd640a2552bf35d5f0a"
   },
   {
     "reference": 4922,
@@ -1832,8 +2034,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/daily_log/daily_log_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png",
+    "evidence_bytes": 39734,
+    "evidence_sha256": "ff65276340d8da764e0cab9360b534d2db7ecbd18902cf95968a0a40623bc673"
   },
   {
     "reference": 4923,
@@ -1850,8 +2054,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/daily_log/daily_log_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_sections_middle_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_sections_middle_phone.png",
+    "evidence_bytes": 42925,
+    "evidence_sha256": "8bbc2844c4b8eaec6a16822bb6679c46ac3844491ac51891876653b5576a05d6"
   },
   {
     "reference": 4924,
@@ -1868,8 +2074,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/daily_log/daily_log_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_sections_lower_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_sections_lower_phone.png",
+    "evidence_bytes": 36833,
+    "evidence_sha256": "bf8bcce45924598a0de723e53f590ce4608ee564c07dd2e0aa205ff980660552"
   },
   {
     "reference": 4925,
@@ -1886,8 +2094,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "production surface refined in dashboard header and top bar; refreshed golden required",
     "production_file": "lib/features/dashboard/presentation/dashboard_preferences_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone.png",
+    "evidence_bytes": 48368,
+    "evidence_sha256": "705597214a0b86dd96f2944f8e3351303d5c5999a937dd127967c9c0368a1f65"
   },
   {
     "reference": 4926,
@@ -1904,8 +2114,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/history/progress_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_progress_steps_month_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_progress_steps_month_phone.png",
+    "evidence_bytes": 31696,
+    "evidence_sha256": "9ab4384759b8536957ac6c42a2e30e2a161e2aacf967ee92af179c8c0605e709"
   },
   {
     "reference": 4927,
@@ -1922,8 +2134,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/history/progress_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_progress_range_picker_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_progress_range_picker_phone.png",
+    "evidence_bytes": 19646,
+    "evidence_sha256": "3e3de48a790da5d773d10ab4b01964f3c07be9a62704f34aec72c2ad8e1bc92a"
   },
   {
     "reference": 4928,
@@ -1940,8 +2154,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/history/progress_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_progress_metric_picker_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_progress_metric_picker_phone.png",
+    "evidence_bytes": 25628,
+    "evidence_sha256": "2d0728f67de638335c2324bd7b2205cf3fc180a465463ef78b9d3a8ac4f8d53e"
   },
   {
     "reference": 4929,
@@ -1958,8 +2174,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/history/progress_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_progress_metric_picker_lower_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_progress_metric_picker_lower_phone.png",
+    "evidence_bytes": 24361,
+    "evidence_sha256": "703866d8258eb7e9fdaf3e57f8b9f515369cbd77b01b31a36b0620e0fd95d546"
   },
   {
     "reference": 4930,
@@ -1976,8 +2194,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/settings_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_more_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_more_phone.png",
+    "evidence_bytes": 26446,
+    "evidence_sha256": "6901200abaef306d2af2afff72f028c5d141213769632dfe9f2661dac8903f5b"
   },
   {
     "reference": 4931,
@@ -1994,8 +2214,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/settings_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_more_lower_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_more_lower_phone.png",
+    "evidence_bytes": 22679,
+    "evidence_sha256": "823468a4cfc83477342bb1cf7591ea39b487052dddcd5c37294a9da8ace6d22a"
   },
   {
     "reference": 4932,
@@ -2012,8 +2234,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/history/progress_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_progress_body_empty_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_progress_body_empty_phone.png",
+    "evidence_bytes": 16932,
+    "evidence_sha256": "662e5fec709921258f1f8c83296fb61f814641610e1079a4ee31463fcb48f5d6"
   },
   {
     "reference": 4933,
@@ -2030,8 +2254,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/fasting_timer_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_fasting_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_fasting_phone.png",
+    "evidence_bytes": 59672,
+    "evidence_sha256": "e4e573c10c01c55169955d2b1be5d3d088560d08f12484dc696a53ff7e8a7d49"
   },
   {
     "reference": 4934,
@@ -2048,8 +2274,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/weekly_report_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/goldens/epic8_weekly_report_phone_ltr_light.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/goldens/epic8_weekly_report_phone_ltr_light.png",
+    "evidence_bytes": 64611,
+    "evidence_sha256": "1ed466af866cac158a92a220998b04f67caf2ade78bd5c09637601df1fb10bd0"
   },
   {
     "reference": 4935,
@@ -2066,8 +2294,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/weekly_report_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/goldens/epic8_weekly_report_coverage_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/goldens/epic8_weekly_report_coverage_phone.png",
+    "evidence_bytes": 55293,
+    "evidence_sha256": "e4568803d6e4d02d42c506f7097c354be1d91e40cd148d1cf04c1fdfb46d02e0"
   },
   {
     "reference": 4936,
@@ -2084,8 +2314,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/weekly_report_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/goldens/epic8_weekly_report_calories_anchor.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/goldens/epic8_weekly_report_calories_anchor.png",
+    "evidence_bytes": 44523,
+    "evidence_sha256": "e48ece46a69ce44c16cce991dfec9e4865be06970195906187a0669074a0763a"
   },
   {
     "reference": 4937,
@@ -2102,8 +2334,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/weekly_report_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/goldens/epic8_weekly_report_frequent_anchor.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/goldens/epic8_weekly_report_frequent_anchor.png",
+    "evidence_bytes": 36850,
+    "evidence_sha256": "78b2052f9b0d682e0be9076036c44f6c3f2515e0ddb54d916113c5aec0c77e0a"
   },
   {
     "reference": 4938,
@@ -2120,8 +2354,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/weekly_report_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/goldens/epic8_weekly_report_macros_anchor.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/goldens/epic8_weekly_report_macros_anchor.png",
+    "evidence_bytes": 42179,
+    "evidence_sha256": "ab070003325f417dab3c206202b9a931fc77a36dc0d8edd38772c4f7f8f7b41c"
   },
   {
     "reference": 4939,
@@ -2138,8 +2374,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/weekly_report_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/goldens/epic8_weekly_report_exercise_anchor.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/goldens/epic8_weekly_report_exercise_anchor.png",
+    "evidence_bytes": 41301,
+    "evidence_sha256": "28c46e76704ab2b373c5ea774eb7a420f4de486139683fcaed2cf5843dc82130"
   },
   {
     "reference": 4940,
@@ -2156,8 +2394,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/weekly_report_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/goldens/epic8_weekly_report_alltime_anchor.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/goldens/epic8_weekly_report_alltime_anchor.png",
+    "evidence_bytes": 28001,
+    "evidence_sha256": "d63964f32196b4ac3bc3aa0ed4d6eaf9ca4154e1cb6bf84140e7523a9147efd6"
   },
   {
     "reference": 4941,
@@ -2174,8 +2414,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/nutrition_analytics_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_nutrition_analytics_macros_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_nutrition_analytics_macros_phone.png",
+    "evidence_bytes": 23029,
+    "evidence_sha256": "07d022a39dbd60ca9f32a707e30e73dbbb122d2d6a6a40bf36c13bb4dfe08856"
   },
   {
     "reference": 4942,
@@ -2192,8 +2434,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/nutrition_analytics_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_nutrition_analytics_nutrients_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_nutrition_analytics_nutrients_phone.png",
+    "evidence_bytes": 26317,
+    "evidence_sha256": "19bc2fe6631907733074a9c9eeb97cacd47b758e9620612c1837023049338921"
   },
   {
     "reference": 4943,
@@ -2210,8 +2454,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/analytics/nutrition_analytics_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_nutrition_analytics_calories_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_nutrition_analytics_calories_phone.png",
+    "evidence_bytes": 22006,
+    "evidence_sha256": "4f5f9ee22471a9ae0027218aa185146af8c72ddbf29af86a929f81735b632ebc"
   },
   {
     "reference": 4944,
@@ -2228,8 +2474,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/local_export_range_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_local_export_selected_day_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_local_export_selected_day_phone.png",
+    "evidence_bytes": 27594,
+    "evidence_sha256": "5e2f264a090567f5639af7790f7667d373b01f8e5499cb18c1af2b5e8a212bcf"
   },
   {
     "reference": 4945,
@@ -2246,8 +2494,10 @@
     "gap": "screen title and horizontal rhythm diverged from the mobile reference",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/nutrition/food_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_recipes_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_recipes_phone.png",
+    "evidence_bytes": 25237,
+    "evidence_sha256": "19062b8b81fe22b9c988e8fa47507a58de03b6eb23807ba61bb7563b536ec11f"
   },
   {
     "reference": 4946,
@@ -2264,8 +2514,10 @@
     "gap": "screen title and horizontal rhythm diverged from the mobile reference",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/nutrition/food_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_meals_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_meals_phone.png",
+    "evidence_bytes": 21100,
+    "evidence_sha256": "d1cb1daa2b727fcbcd54842e85b6863283b1c06f6fb245bedef02fdb4130dc53"
   },
   {
     "reference": 4947,
@@ -2282,8 +2534,10 @@
     "gap": "screen title and horizontal rhythm diverged from the mobile reference",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/nutrition/food_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_my_foods_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_my_foods_phone.png",
+    "evidence_bytes": 189264,
+    "evidence_sha256": "78f19742830c995629d421af7406d26b4b248aabed6b5b48da9e6c70801d81ff"
   },
   {
     "reference": 4948,
@@ -2300,8 +2554,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/notifications/presentation/notification_settings_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_notification_settings_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_notification_settings_phone.png",
+    "evidence_bytes": 34724,
+    "evidence_sha256": "c22a12e7c33fbfa5bc6db811afcbc2973e4038b01d48c577c568bc52a66001a1"
   },
   {
     "reference": 4949,
@@ -2318,8 +2574,10 @@
     "gap": "signed-out state lacked a mature actionable surface",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/community/presentation/community_hub_page.dart",
-    "status": "limited family-equivalent acceptance; realtime device behavior excluded",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_hub_authenticated_phone.png"
+    "status": "limited_family_equivalent_independent_review_passed",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_hub_authenticated_phone.png",
+    "evidence_bytes": 29941,
+    "evidence_sha256": "a8a6df6cf7616d9dd244ac107861d84cbb839febb351c6e58545f0d08329cad8"
   },
   {
     "reference": 4950,
@@ -2330,14 +2588,16 @@
     "language": "en",
     "brightness": "light",
     "state": "community home, profile or navigation state",
-    "bil_route": "/community",
+    "bil_route": "/community/profile",
     "capability": "community profile and navigation",
     "before_state": "authenticated repository-backed Community profile captured",
     "gap": "external web scroll layout is intentionally grouped to one BIL profile editor state",
     "closure_action": "authenticated profile editor reviewed with guarded persistence tests",
-    "production_file": "lib/features/community/presentation/community_hub_page.dart",
-    "status": "limited family-equivalent acceptance; live device cloud UI excluded",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png"
+    "production_file": "lib/features/community/presentation/community_profile_page.dart",
+    "status": "limited_family_equivalent_independent_review_passed",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png",
+    "evidence_bytes": 41353,
+    "evidence_sha256": "5cacf0a0c3195e600c28559452edc012552ede13d4d6af2f3d761d47e6bb46e3"
   },
   {
     "reference": 4951,
@@ -2354,8 +2614,10 @@
     "gap": "BIL uses an in-app action menu rather than the reference web drawer",
     "closure_action": "production navigation menu and route dispatch reviewed",
     "production_file": "lib/features/community/presentation/community_hub_page.dart",
-    "status": "limited family-equivalent acceptance; external web navigation excluded",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_navigation_menu_authenticated_phone.png"
+    "status": "limited_family_equivalent_independent_review_passed",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_navigation_menu_authenticated_phone.png",
+    "evidence_bytes": 34767,
+    "evidence_sha256": "4a6742bd326ac2710f3a8bd3b35387a754f4d450e014966ad15965fd5ffdbc15"
   },
   {
     "reference": 4952,
@@ -2372,8 +2634,10 @@
     "gap": "external web profile layout is intentionally represented by BIL authenticated Community family evidence",
     "closure_action": "authenticated hub and profile evidence reviewed with cloud data paths verified",
     "production_file": "lib/features/community/presentation/community_hub_page.dart",
-    "status": "limited family-equivalent acceptance; realtime device behavior excluded",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_hub_authenticated_phone.png"
+    "status": "limited_family_equivalent_independent_review_passed",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_hub_authenticated_phone.png",
+    "evidence_bytes": 29941,
+    "evidence_sha256": "a8a6df6cf7616d9dd244ac107861d84cbb839febb351c6e58545f0d08329cad8"
   },
   {
     "reference": 4953,
@@ -2384,14 +2648,16 @@
     "language": "en",
     "brightness": "light",
     "state": "community home, profile or navigation state",
-    "bil_route": "/community",
+    "bil_route": "/community/profile",
     "capability": "community routes and profile",
     "before_state": "authenticated repository-backed Community profile captured",
     "gap": "external web scroll layout is intentionally grouped to one BIL profile editor state",
     "closure_action": "authenticated profile editor reviewed with guarded persistence tests",
-    "production_file": "lib/features/community/presentation/community_hub_page.dart",
-    "status": "limited family-equivalent acceptance; live device cloud UI excluded",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png"
+    "production_file": "lib/features/community/presentation/community_profile_page.dart",
+    "status": "limited_family_equivalent_independent_review_passed",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png",
+    "evidence_bytes": 41353,
+    "evidence_sha256": "5cacf0a0c3195e600c28559452edc012552ede13d4d6af2f3d761d47e6bb46e3"
   },
   {
     "reference": 4954,
@@ -2408,8 +2674,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_phone.png",
+    "evidence_bytes": 238519,
+    "evidence_sha256": "d22df0a6350742eead565097e49bf79197bddb92120db0329349de1517e709f7"
   },
   {
     "reference": 4955,
@@ -2426,8 +2694,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_nutrition_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_nutrition_phone.png",
+    "evidence_bytes": 67617,
+    "evidence_sha256": "08efb9342f851b9a6c9e92c48b18130a6386db4a4efd8524fadc23c540ce6864"
   },
   {
     "reference": 4956,
@@ -2444,8 +2714,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_sleep_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_sleep_phone.png",
+    "evidence_bytes": 54825,
+    "evidence_sha256": "10540536f03d3d39e04af8a5109a21ad01f52ce04022453f5f5ee461e452f726"
   },
   {
     "reference": 4957,
@@ -2462,8 +2734,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_movement_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_movement_phone.png",
+    "evidence_bytes": 67251,
+    "evidence_sha256": "f7d1cdacebaa8492c696aa24a6ae82e9040dcc807aea222379d803c0243ccbd3"
   },
   {
     "reference": 4958,
@@ -2480,8 +2754,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_privacy_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_privacy_phone.png",
+    "evidence_bytes": 53916,
+    "evidence_sha256": "53be3ec217141956a6f14ef80abba23dd7663f00ed11a309cb04dd39168295e7"
   },
   {
     "reference": 4959,
@@ -2498,8 +2774,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_search_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_search_phone.png",
+    "evidence_bytes": 53566,
+    "evidence_sha256": "3c64b0e4a7cc3a2a1dd5c1d8fc10629c4a05ebf9fd5d0e2f80f0ea74fabff4f9"
   },
   {
     "reference": 4960,
@@ -2516,8 +2794,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_sleep_phone.png"
+    "status": "family_equivalent_distinct_article_state",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_sleep_phone.png",
+    "evidence_bytes": 87148,
+    "evidence_sha256": "08c36bac4370f4d450b5ba9500202ffb04d5bfd2faf909bda929eab312caf63d"
   },
   {
     "reference": 4961,
@@ -2534,8 +2814,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_movement_phone.png"
+    "status": "family_equivalent_distinct_article_state",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_movement_phone.png",
+    "evidence_bytes": 104704,
+    "evidence_sha256": "087c6ce6856ca106e56d1c1a1c5fd83957776ca02b7283c4bc49a11c96166893"
   },
   {
     "reference": 4962,
@@ -2552,8 +2834,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_privacy_phone.png"
+    "status": "family_equivalent_distinct_article_state",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_privacy_phone.png",
+    "evidence_bytes": 64637,
+    "evidence_sha256": "53f6cde94a3b4a010c797afda8f1b84b216b0774eb52ff093e61fd6aae411547"
   },
   {
     "reference": 4963,
@@ -2570,8 +2854,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_nutrition_phone.png"
+    "status": "family_equivalent_distinct_article_state",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_nutrition_phone.png",
+    "evidence_bytes": 79095,
+    "evidence_sha256": "5792fa77976a2c96124bffe2432d80a574419dfa2635c000bbdeaf9541c6bd19"
   },
   {
     "reference": 4964,
@@ -2588,8 +2874,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_nutrition_phone.png"
+    "status": "family_equivalent_distinct_topic_state",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_nutrition_phone.png",
+    "evidence_bytes": 67617,
+    "evidence_sha256": "08efb9342f851b9a6c9e92c48b18130a6386db4a4efd8524fadc23c540ce6864"
   },
   {
     "reference": 4965,
@@ -2606,8 +2894,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_movement_phone.png"
+    "status": "family_equivalent_distinct_topic_state",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_movement_phone.png",
+    "evidence_bytes": 67251,
+    "evidence_sha256": "f7d1cdacebaa8492c696aa24a6ae82e9040dcc807aea222379d803c0243ccbd3"
   },
   {
     "reference": 4966,
@@ -2624,8 +2914,10 @@
     "gap": "reference long-scroll section represented by a distinct BIL topic state",
     "closure_action": "selected topic state and matching content captured as family-equivalent evidence",
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_sleep_phone.png"
+    "status": "family_equivalent_distinct_topic_state",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_sleep_phone.png",
+    "evidence_bytes": 54825,
+    "evidence_sha256": "10540536f03d3d39e04af8a5109a21ad01f52ce04022453f5f5ee461e452f726"
   },
   {
     "reference": 4967,
@@ -2642,8 +2934,10 @@
     "gap": "signed-out state lacked a mature actionable surface",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/community/presentation/community_connections_page.dart",
-    "status": "direct limited equivalence accepted",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_friend_authenticated_phone.png"
+    "status": "direct_limited_equivalence_accepted",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_friend_authenticated_phone.png",
+    "evidence_bytes": 19671,
+    "evidence_sha256": "3c74075fe51fdfd7e8f8a9eddfb2d015bfd463876345c01ac609e67b35aa9ef8"
   },
   {
     "reference": 4968,
@@ -2660,8 +2954,10 @@
     "gap": "signed-out state lacked a mature actionable surface",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/community/presentation/community_messages_page.dart",
-    "status": "direct limited equivalence accepted; realtime external",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_inbox_authenticated_phone.png"
+    "status": "direct_limited_equivalence_accepted",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_inbox_authenticated_phone.png",
+    "evidence_bytes": 13520,
+    "evidence_sha256": "f568d4cb219ee026ff65b41560ccb5bce1d6f4e99d5c7b1cb0c442688bd46383"
   },
   {
     "reference": 4969,
@@ -2678,8 +2974,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/community/presentation/community_messages_page.dart",
-    "status": "direct limited equivalence accepted; realtime external",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_community_sent_authenticated_phone.png"
+    "status": "direct_limited_equivalence_accepted",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_community_sent_authenticated_phone.png",
+    "evidence_bytes": 12899,
+    "evidence_sha256": "736a90edbea059597d49734c2bdadfc14829cb41bcb1d18fb3da3bfff36c2e02"
   },
   {
     "reference": 4970,
@@ -2696,8 +2994,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/reference_settings_home_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png",
+    "evidence_bytes": 55799,
+    "evidence_sha256": "e0d0bf660dfcd297178cf306374dc4b1ba26bcbd63cf8fb98c2bf5321a9a2312"
   },
   {
     "reference": 4971,
@@ -2714,8 +3014,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/profile/premium_profile_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_profile_phone.png",
+    "evidence_bytes": 37786,
+    "evidence_sha256": "836240adbc545e1c00ee58105e13b6a545c2e7a53bbec6efc9997c0584eab531"
   },
   {
     "reference": 4972,
@@ -2732,8 +3034,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/reference_preferences_pages.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_appearance_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_appearance_phone.png",
+    "evidence_bytes": 13510,
+    "evidence_sha256": "63bf44ade3a634b6a370ec947b9adf42e302379e68edd26f74c2fcb5ffffa2ca"
   },
   {
     "reference": 4973,
@@ -2750,8 +3054,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/reference_preferences_pages.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_diary_settings_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_diary_settings_phone.png",
+    "evidence_bytes": 45429,
+    "evidence_sha256": "1d797b9a812e38b7f095ed7609cf7493413e319b73969f80f933236c197f92fa"
   },
   {
     "reference": 4974,
@@ -2768,8 +3074,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/reference_preferences_pages.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_default_search_tab_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_default_search_tab_phone.png",
+    "evidence_bytes": 9461,
+    "evidence_sha256": "5190ed2228edea49883d67ff2d6ce7bbd0ea09b7112844c6499d2a5c9a9a21f4"
   },
   {
     "reference": 4975,
@@ -2786,8 +3094,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/reference_preferences_pages.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_diary_sharing_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_diary_sharing_phone.png",
+    "evidence_bytes": 19046,
+    "evidence_sha256": "6b9105c0bbc322357eaee6e59ef78fbcb3cfa0869fc1958d2532a08ffdd9bd7f"
   },
   {
     "reference": 4976,
@@ -2804,8 +3114,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/reference_preferences_pages.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_meal_names_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_meal_names_phone.png",
+    "evidence_bytes": 24072,
+    "evidence_sha256": "b28f4e2cd6c911b6c158847bf6df35e0ce771fd8681a45bad3d1d2bc7cc450df"
   },
   {
     "reference": 4977,
@@ -2822,8 +3134,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/dashboard/presentation/dashboard_preferences_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone.png",
+    "evidence_bytes": 48368,
+    "evidence_sha256": "705597214a0b86dd96f2944f8e3351303d5c5999a937dd127967c9c0368a1f65"
   },
   {
     "reference": 4978,
@@ -2840,8 +3154,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/legal_document_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_terms_phone.png"
+    "status": "family_equivalent_embedded_legal_document",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_terms_phone.png",
+    "evidence_bytes": 71820,
+    "evidence_sha256": "8fbe5478da3c6f7340beaa35f71b51415b0135cbea47757aecf7493b70523c89"
   },
   {
     "reference": 4979,
@@ -2858,8 +3174,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/legal_document_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_privacy_policy_phone.png"
+    "status": "family_equivalent_embedded_legal_document",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_privacy_policy_phone.png",
+    "evidence_bytes": 75098,
+    "evidence_sha256": "25f61f4ebf3d319f7d1815adb62468437be392aa93d44ace8675da4c54e7cadd"
   },
   {
     "reference": 4980,
@@ -2876,8 +3194,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/ads/advertising_privacy_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_advertising_privacy_phone.png"
+    "status": "family_equivalent_fail_closed_advertising_state",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_advertising_privacy_phone.png",
+    "evidence_bytes": 42197,
+    "evidence_sha256": "3491c06c5927dd07329eef1b1b26640455e545d56a5f94e5474dc150c7e74f7d"
   },
   {
     "reference": 4981,
@@ -2894,8 +3214,10 @@
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/settings/sharing_privacy_settings_page.dart",
-    "status": "family-equivalent visual accepted; cloud enforcement external",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_sharing_privacy_phone.png"
+    "status": "family_equivalent_review_passed",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_sharing_privacy_phone.png",
+    "evidence_bytes": 43120,
+    "evidence_sha256": "cc9c38f95c036ac1ec04a3de7eb5ef58cae2192d0fb7b7d13bcef08ecc458105"
   },
   {
     "reference": 4982,
@@ -2912,8 +3234,10 @@
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/settings/reference_preferences_pages.dart",
-    "status": "family-equivalent visual accepted; private-only state",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_diary_sharing_phone.png"
+    "status": "family_equivalent_review_passed",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_diary_sharing_phone.png",
+    "evidence_bytes": 19046,
+    "evidence_sha256": "6b9105c0bbc322357eaee6e59ef78fbcb3cfa0869fc1958d2532a08ffdd9bd7f"
   },
   {
     "reference": 4983,
@@ -2930,8 +3254,10 @@
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/settings/reference_preferences_pages.dart",
-    "status": "family-equivalent visual accepted; delivery provider unavailable",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_email_settings_phone.png"
+    "status": "family_equivalent_review_passed",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_email_settings_phone.png",
+    "evidence_bytes": 55142,
+    "evidence_sha256": "cac03e718c1cec56c71ef02ba6648af7dea2fbe1c0b00b18cace9e87e1da3b17"
   },
   {
     "reference": 4984,
@@ -2948,8 +3274,10 @@
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/settings/reference_preferences_pages.dart",
-    "status": "family-equivalent visual accepted; delivery provider unavailable",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_email_settings_lower_phone.png"
+    "status": "family_equivalent_review_passed",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_email_settings_lower_phone.png",
+    "evidence_bytes": 54788,
+    "evidence_sha256": "ba9bdd49eca2fe9526381a2a4e5952db272e92c701c5740824cf80f6b397dd09"
   },
   {
     "reference": 4985,
@@ -2966,8 +3294,10 @@
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/settings/account_connection_settings_page.dart",
-    "status": "local unavailable state accepted; provider activation external",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_facebook_settings_phone.png"
+    "status": "family_equivalent_review_passed",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_facebook_settings_phone.png",
+    "evidence_bytes": 19207,
+    "evidence_sha256": "aa492b1dddd0b4adb64901e2edad57e83c6c631bbb12663f41cb69aca3008031"
   },
   {
     "reference": 4986,
@@ -2984,8 +3314,10 @@
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/settings/account_connection_settings_page.dart",
-    "status": "local unavailable state accepted; provider activation external",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_google_settings_phone.png"
+    "status": "family_equivalent_review_passed",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_google_settings_phone.png",
+    "evidence_bytes": 19485,
+    "evidence_sha256": "778f220b7b40efa3dbe70d4a71b2593ee9f2d5c3a5d60357067b7912ad37f8ea"
   },
   {
     "reference": 4987,
@@ -3002,8 +3334,10 @@
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/settings/account_password_page.dart",
-    "status": "source, interaction and visual accepted; backend account run external",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_account_password_phone.png"
+    "status": "family_equivalent_review_passed",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_account_password_phone.png",
+    "evidence_bytes": 20094,
+    "evidence_sha256": "051acc199c940cbfc7e50b15cdddcab6c07cc0f12b3110c01d341f7eef660ff6"
   },
   {
     "reference": 4988,
@@ -3020,8 +3354,10 @@
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/goldens/epic15_iphone_69_ar_06_connected_health.png",
+    "evidence_bytes": 85906,
+    "evidence_sha256": "820c1d1375ede3b34a1e61eca844bfbf1517958a307e8bca653d10d589247c16"
   },
   {
     "reference": 4989,
@@ -3038,8 +3374,10 @@
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/goldens/epic15_iphone_69_en_05_connected_health.png",
+    "evidence_bytes": 79044,
+    "evidence_sha256": "7fa4512379b4f4c6021ee524b68f94e77c3fb6581cf82f77ad90a0e9b447b445"
   },
   {
     "reference": 4990,
@@ -3056,8 +3394,10 @@
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/goldens/epic15_iphone_69_ar_08_privacy_settings_dark.png",
+    "evidence_bytes": 66642,
+    "evidence_sha256": "2b474bcbb0b5b99e087c5e8e5af2b045c99fdf9d6dbe84fe398d4047d4c3f66b"
   },
   {
     "reference": 4991,
@@ -3074,8 +3414,10 @@
     "gap": "content margins diverged from the canonical phone rhythm",
     "closure_action": "production page refined; refreshed golden required",
     "production_file": "lib/features/connected_health/connected_health_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png"
+    "status": "unmatched_until_human_or_pixel_review_passes",
+    "evidence_after": "test/goldens/epic15_android_phone_ar_06_connected_health.png",
+    "evidence_bytes": 56575,
+    "evidence_sha256": "32d46b4bd8749320582c203a9ca22b2646ac6beb5f3e994aa9c294fae106d1b3"
   },
   {
     "reference": 4992,
@@ -3092,8 +3434,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/help_center_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_help_center_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_help_center_phone.png",
+    "evidence_bytes": 24617,
+    "evidence_sha256": "480b856122af1a03600bd5c2ad41db6414f82fcf1a35571e13b02af6f04b556e"
   },
   {
     "reference": 4993,
@@ -3110,8 +3454,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/help_center_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_help_faq_targets_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_help_faq_targets_phone.png",
+    "evidence_bytes": 22740,
+    "evidence_sha256": "a19e4a432887693c5f25941d9ecf5e01dbe83978d389048d63fe3e3044b3b4b3"
   },
   {
     "reference": 4994,
@@ -3128,8 +3474,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/help_center_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_help_faq_offline_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_help_faq_offline_phone.png",
+    "evidence_bytes": 23517,
+    "evidence_sha256": "ef8fd4c84c12d796678de3bb14c326ca7e47f01180f2935152c0da0603e99ccd"
   },
   {
     "reference": 4995,
@@ -3146,8 +3494,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/help_center_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_help_faq_medical_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_help_faq_medical_phone.png",
+    "evidence_bytes": 22850,
+    "evidence_sha256": "68683a0df6a97fe3302ad1bbf6805a12496deaedef53416804bd1ced26a67d17"
   },
   {
     "reference": 4996,
@@ -3164,8 +3514,10 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/help_center_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_help_troubleshooting_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_help_troubleshooting_phone.png",
+    "evidence_bytes": 28498,
+    "evidence_sha256": "64628bdeb25532cc514eb12061fd67596fe880cac76adbb6b74fa152c0fcb226"
   },
   {
     "reference": 4997,
@@ -3182,7 +3534,9 @@
     "gap": "required refreshed production evidence against the reference family",
     "closure_action": "pre-existing production flow retained; refreshed golden proves current implementation",
     "production_file": "lib/features/settings/help_center_page.dart",
-    "status": "awaiting refreshed production golden verification",
-    "evidence_after": "test/visual_closure/goldens/visual_closure_help_service_status_phone.png"
+    "status": "approved_visual_equivalence",
+    "evidence_after": "test/visual_closure/goldens/visual_closure_help_service_status_phone.png",
+    "evidence_bytes": 30168,
+    "evidence_sha256": "5035f906ad2174b2d0ab5c8bf1c23480bc94213ef84fe9e3d4b1719a40835b80"
   }
 ]
