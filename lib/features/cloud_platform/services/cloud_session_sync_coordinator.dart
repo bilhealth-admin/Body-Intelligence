@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../domain/cloud_identity_models.dart';
 import '../domain/cloud_platform_policy.dart';
 import '../domain/cloud_sync_models.dart';
+import 'cloud_durable_ports.dart';
 import 'cloud_platform_composition_root.dart';
 import 'supabase_cloud_authentication_provider.dart';
 
@@ -11,7 +12,7 @@ import 'supabase_cloud_authentication_provider.dart';
 /// A coordinator belongs to exactly one account and one device.  Callers must
 /// discard it on auth-state changes; every operation revalidates the current
 /// Supabase user so a stale provider cannot leak data after account switching.
-final class CloudSessionSyncCoordinator {
+final class CloudSessionSyncCoordinator implements CloudRecordOutboxSink {
   const CloudSessionSyncCoordinator({
     required this.runtime,
     required this.client,
@@ -24,8 +25,16 @@ final class CloudSessionSyncCoordinator {
   final CloudDeviceRegistration device;
   final CloudPrivacyConsent consent;
 
+  @override
   String get ownerId => consent.ownerId;
 
+  @override
+  String get deviceId => device.deviceId;
+
+  @override
+  bool allows(CloudEntityKind kind) => consent.policy.allows(kind);
+
+  @override
   Future<void> enqueue(CloudRecordEnvelope record) async {
     _requireCurrentOwner();
     if (record.ownerId != ownerId ||

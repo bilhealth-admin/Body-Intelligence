@@ -54,6 +54,13 @@ abstract interface class DurableCloudStore {
   Future<int> conflictCount();
 }
 
+abstract interface class CloudRecordOutboxSink {
+  String get ownerId;
+  String get deviceId;
+  bool allows(CloudEntityKind kind);
+  Future<void> enqueue(CloudRecordEnvelope record);
+}
+
 abstract interface class CloudAuthenticationProvider {
   Future<CloudAccount> signUp({required String email, required String secret});
   Future<CloudSession> signIn({
