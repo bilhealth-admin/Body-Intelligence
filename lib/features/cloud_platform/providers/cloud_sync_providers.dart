@@ -162,7 +162,6 @@ final cloudRuntimePreparationProvider =
             enabledKinds: const <CloudEntityKind>{
               CloudEntityKind.profile,
               CloudEntityKind.weight,
-              CloudEntityKind.nutrition,
               CloudEntityKind.hydration,
             },
           ),
