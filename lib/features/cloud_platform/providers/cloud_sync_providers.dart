@@ -12,6 +12,7 @@ import '../services/aes_gcm_cloud_payload_cipher.dart';
 import '../services/app_database_cloud_outbox_producer.dart';
 import '../services/cloud_account_key_repository.dart';
 import '../services/cloud_device_identity_repository.dart';
+import '../services/cloud_manual_sync_service.dart';
 import '../services/cloud_platform_composition_root.dart';
 import '../services/cloud_platform_ports.dart';
 import '../services/cloud_runtime_access_gate.dart';
@@ -119,6 +120,21 @@ final localDataAccountBindingProvider =
           .watch(localDataAccountBoundaryProvider)
           .bindAuthenticatedOwner(user.id);
     });
+
+/// Explicit user-triggered one-shot cloud synchronization.
+///
+/// Startup remains transport-locked. This provider only exposes the guarded
+/// manual service used by the Sharing & Privacy "Sync now" action.
+final cloudManualSyncServiceProvider = Provider<CloudManualSyncService>((ref) {
+  if (!AppEnvironment.cloudConfigured || !Supabase.instance.isInitialized) {
+    throw StateError('BIL manual cloud sync is not configured.');
+  }
+  return CloudManualSyncService(
+    client: Supabase.instance.client,
+    database: ref.watch(databaseProvider),
+    accountBoundary: ref.watch(localDataAccountBoundaryProvider),
+  );
+});
 
 /// Production preparation pass for encrypted cloud sync.
 ///

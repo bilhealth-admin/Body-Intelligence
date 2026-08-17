@@ -48,6 +48,11 @@ const _privacyCopy = <String, Map<String, String>>{
     'Cloud sync preference updated.': 'Cloud sync preference updated.',
     'Could not update cloud sync. Try again.':
         'Could not update cloud sync. Try again.',
+    'Sync now': 'Sync now',
+    'Run a one-time encrypted sync now.': 'Run a one-time encrypted sync now.',
+    'Encrypted cloud sync completed.': 'Encrypted cloud sync completed.',
+    'Cloud sync could not run. Check Premium, consent, and internet.':
+        'Cloud sync could not run. Check Premium, consent, and internet.',
   },
   'ar': {
     'Diary sharing': 'مشاركة اليوميات',
@@ -82,6 +87,11 @@ const _privacyCopy = <String, Map<String, String>>{
     'Cloud sync preference updated.': 'تم تحديث تفضيل المزامنة السحابية.',
     'Could not update cloud sync. Try again.':
         'تعذر تحديث المزامنة السحابية. حاول مرة أخرى.',
+    'Sync now': 'مزامنة الآن',
+    'Run a one-time encrypted sync now.': 'شغّل مزامنة مشفّرة لمرة واحدة الآن.',
+    'Encrypted cloud sync completed.': 'اكتملت المزامنة السحابية المشفّرة.',
+    'Cloud sync could not run. Check Premium, consent, and internet.':
+        'تعذر تشغيل المزامنة. تحقق من Premium والموافقة والإنترنت.',
   },
   'fr': {
     'Diary sharing': 'Partage du journal',
@@ -120,6 +130,13 @@ const _privacyCopy = <String, Map<String, String>>{
         'Préférence de synchronisation cloud mise à jour.',
     'Could not update cloud sync. Try again.':
         'Impossible de mettre à jour la synchronisation cloud. Réessayez.',
+    'Sync now': 'Synchroniser maintenant',
+    'Run a one-time encrypted sync now.':
+        'Exécuter maintenant une synchronisation chiffrée unique.',
+    'Encrypted cloud sync completed.':
+        'Synchronisation cloud chiffrée terminée.',
+    'Cloud sync could not run. Check Premium, consent, and internet.':
+        'La synchronisation n’a pas pu démarrer. Vérifiez Premium, le consentement et Internet.',
   },
   'es': {
     'Diary sharing': 'Compartir diario',
@@ -158,6 +175,12 @@ const _privacyCopy = <String, Map<String, String>>{
         'Preferencia de sincronización en la nube actualizada.',
     'Could not update cloud sync. Try again.':
         'No se pudo actualizar la sincronización en la nube. Inténtalo de nuevo.',
+    'Sync now': 'Sincronizar ahora',
+    'Run a one-time encrypted sync now.':
+        'Ejecuta ahora una sincronización cifrada única.',
+    'Encrypted cloud sync completed.': 'Sincronización cifrada completada.',
+    'Cloud sync could not run. Check Premium, consent, and internet.':
+        'No se pudo sincronizar. Comprueba Premium, el consentimiento e Internet.',
   },
   'tr': {
     'Diary sharing': 'Günlük paylaşımı',
@@ -193,6 +216,12 @@ const _privacyCopy = <String, Map<String, String>>{
     'Cloud sync preference updated.': 'Bulut eşitleme tercihi güncellendi.',
     'Could not update cloud sync. Try again.':
         'Bulut eşitleme güncellenemedi. Tekrar deneyin.',
+    'Sync now': 'Şimdi eşitle',
+    'Run a one-time encrypted sync now.':
+        'Şimdi tek seferlik şifreli eşitleme çalıştırın.',
+    'Encrypted cloud sync completed.': 'Şifreli bulut eşitleme tamamlandı.',
+    'Cloud sync could not run. Check Premium, consent, and internet.':
+        'Bulut eşitleme çalıştırılamadı. Premium, onay ve interneti kontrol edin.',
   },
 };
 
@@ -298,6 +327,7 @@ class _CloudSyncConsentTile extends ConsumerStatefulWidget {
 
 class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
   bool _saving = false;
+  bool _syncing = false;
 
   @override
   Widget build(BuildContext context) {
@@ -336,23 +366,80 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
             'Sync profile, weight and water across your devices. Nutrition stays local until supported.',
           ),
         };
-        return SwitchListTile.adaptive(
-          key: const Key('encrypted-cloud-sync-consent'),
-          value: value.granted,
-          onChanged: !_saving && value.canChange
-              ? (next) => _setConsent(next, value)
-              : null,
-          title: Text(_privacyText(context, 'Encrypted cloud sync')),
-          subtitle: Text(subtitle),
-          secondary: _saving
-              ? const SizedBox.square(
-                  dimension: 22,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.cloud_outlined),
+        return Column(
+          children: [
+            SwitchListTile.adaptive(
+              key: const Key('encrypted-cloud-sync-consent'),
+              value: value.granted,
+              onChanged: !_saving && !_syncing && value.canChange
+                  ? (next) => _setConsent(next, value)
+                  : null,
+              title: Text(_privacyText(context, 'Encrypted cloud sync')),
+              subtitle: Text(subtitle),
+              secondary: _saving
+                  ? const SizedBox.square(
+                      dimension: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.cloud_outlined),
+            ),
+            if (value.granted &&
+                value.availability == CloudSyncConsentAvailability.available)
+              ListTile(
+                key: const Key('encrypted-cloud-sync-now'),
+                leading: _syncing
+                    ? const SizedBox.square(
+                        dimension: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.sync_rounded),
+                title: Text(_privacyText(context, 'Sync now')),
+                subtitle: Text(
+                  _privacyText(context, 'Run a one-time encrypted sync now.'),
+                ),
+                enabled: !_saving && !_syncing,
+                onTap: !_saving && !_syncing ? _runManualSync : null,
+              ),
+          ],
         );
       },
     );
+  }
+
+  Future<void> _runManualSync() async {
+    if (_saving || _syncing) return;
+    setState(() => _syncing = true);
+    try {
+      final result = await ref.read(cloudManualSyncServiceProvider).runOnce();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _privacyText(
+              context,
+              result.completed
+                  ? 'Encrypted cloud sync completed.'
+                  : 'Cloud sync could not run. Check Premium, consent, and internet.',
+            ),
+          ),
+        ),
+      );
+      ref.invalidate(cloudRuntimePreparationProvider);
+    } on Object {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _privacyText(
+              context,
+              'Cloud sync could not run. Check Premium, consent, and internet.',
+            ),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _syncing = false);
+    }
   }
 
   Future<void> _setConsent(bool granted, CloudSyncConsentState current) async {
