@@ -12,6 +12,7 @@ import '../../features/auth/login_page.dart';
 import '../../features/auth/register_page.dart';
 import '../../features/auth/verify_email_page.dart';
 import '../../features/auth/account_gateway_page.dart';
+import '../../features/auth/account_data_conflict_page.dart';
 import '../../features/auth/auth_callback_page.dart';
 import '../../features/auth/reset_password_page.dart';
 import '../../features/daily_log/daily_log_page.dart';
@@ -131,6 +132,10 @@ class AppRouter {
       GoRoute(
         path: '/account-gateway',
         builder: (_, _) => const AccountGatewayPage(),
+      ),
+      GoRoute(
+        path: '/account-data-conflict',
+        builder: (_, _) => const AccountDataConflictPage(),
       ),
       GoRoute(path: '/onboarding', builder: (_, _) => const OnboardingPage()),
       GoRoute(

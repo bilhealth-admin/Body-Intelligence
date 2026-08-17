@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../app/environment/app_environment.dart';
 import '../profile/providers/user_profile_provider.dart';
+import '../cloud_platform/providers/cloud_sync_providers.dart';
 import '../weight/providers/weight_provider.dart';
 import '../auth/auth_five_locale_copy.dart';
 import 'light_startup_splash_experience.dart';
@@ -80,6 +81,7 @@ class _StartupPageState extends ConsumerState<StartupPage>
     ref.invalidate(dailyCheckInDueProvider);
     ref.invalidate(forceOnboardingProvider);
     ref.invalidate(accountGatewayReviewedProvider);
+    ref.invalidate(localDataAccountBindingProvider);
     // Preserve one complete loading frame before surfacing the result of the
     // new attempt. This prevents a stale AsyncError from flashing after the
     // tap, while a repeated failure still becomes visible and retryable.
@@ -98,18 +100,21 @@ class _StartupPageState extends ConsumerState<StartupPage>
     final checkInDue = ref.watch(dailyCheckInDueProvider);
     final forceOnboarding = ref.watch(forceOnboardingProvider);
     final accountGatewayReviewed = ref.watch(accountGatewayReviewedProvider);
+    final localAccountBinding = ref.watch(localDataAccountBindingProvider);
     final error =
         profile.hasError ||
         checkInDue.hasError ||
         forceOnboarding.hasError ||
-        accountGatewayReviewed.hasError;
+        accountGatewayReviewed.hasError ||
+        localAccountBinding.hasError;
     final showError = error && !retrying;
 
     if (!error &&
         profile.hasValue &&
         checkInDue.hasValue &&
         forceOnboarding.hasValue &&
-        accountGatewayReviewed.hasValue) {
+        accountGatewayReviewed.hasValue &&
+        localAccountBinding.hasValue) {
       final user = profile.value;
       final signedIn =
           AppEnvironment.cloudConfigured &&
@@ -118,10 +123,19 @@ class _StartupPageState extends ConsumerState<StartupPage>
           AppEnvironment.cloudConfigured &&
           !signedIn &&
           accountGatewayReviewed.value != true;
-      readyLocation =
-          forceOnboarding.value == true || user == null || needsAccountChoice
-          ? '/account-gateway'
-          : (checkInDue.value == true ? '/daily-check-in' : '/dashboard');
+      final accountConflict =
+          localAccountBinding.value?.requiresAccountResolution == true;
+      if (accountConflict) {
+        readyLocation = '/account-data-conflict';
+      } else if (forceOnboarding.value == true ||
+          user == null ||
+          needsAccountChoice) {
+        readyLocation = '/account-gateway';
+      } else {
+        readyLocation = checkInDue.value == true
+            ? '/daily-check-in'
+            : '/dashboard';
+      }
       _redirectIfReady();
     } else {
       readyLocation = null;
