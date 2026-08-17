@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../app/environment/app_environment.dart';
 import '../../shared/widgets/bil_account_surface.dart';
 import 'auth_language_selector.dart';
+import 'auth_error_localizer.dart';
 import 'supabase_auth_service.dart';
 import 'auth_five_locale_copy.dart';
 
@@ -60,14 +61,9 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
       await SupabaseAuthService(
         Supabase.instance.client,
       ).verifySignupCode(email: widget.email, code: code.text);
-      if (mounted) context.go('/dashboard');
-    } on AuthException {
-      if (mounted) {
-        setState(
-          () => status =
-              'The code could not be verified. Request a new code and try again.',
-        );
-      }
+      if (mounted) context.go('/startup');
+    } on AuthException catch (error) {
+      if (mounted) setState(() => status = localizedAuthError(context, error));
     } catch (_) {
       if (mounted) {
         setState(
@@ -95,15 +91,20 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
       if (mounted) {
         startTimer();
         setState(
-          () => status = tr('A new code was sent.', 'تم إرسال رمز جديد.'),
+          () => status = tr(
+            'If this email is awaiting verification, a new verification message was requested.',
+            'إذا كان هذا البريد بانتظار التحقق، فقد تم طلب رسالة تحقق جديدة.',
+          ),
         );
       }
+    } on AuthException catch (error) {
+      if (mounted) setState(() => status = localizedAuthError(context, error));
     } catch (_) {
       if (mounted) {
         setState(
           () => status = tr(
-            'Wait, then try resending the code.',
-            'انتظر قليلًا ثم حاول إعادة الإرسال.',
+            'Wait, then try resending the verification message.',
+            'انتظر قليلًا ثم حاول إعادة إرسال رسالة التحقق.',
           ),
         );
       }
@@ -158,12 +159,12 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                     Text(
                       codeEnabled
                           ? tr(
-                              'Enter the 6-digit code sent to ${widget.email}.',
-                              'أدخل الرمز المكوّن من 6 أرقام المرسل إلى ${widget.email}.',
+                              'If this is a new account, enter the 6-digit verification code for ${widget.email}. If you already have a BIL account with this email, return to sign in instead.',
+                              'إذا كان هذا حسابًا جديدًا، فأدخل رمز التحقق المكوّن من 6 أرقام للبريد ${widget.email}. وإذا كان لديك حساب BIL بهذا البريد بالفعل، فعد إلى تسجيل الدخول.',
                             )
                           : tr(
-                              'We sent a secure confirmation link to ${widget.email}. Open it to activate your account, then return to sign in.',
-                              'أرسلنا رابط تأكيد آمنًا إلى ${widget.email}. افتحه لتفعيل حسابك، ثم عد لتسجيل الدخول.',
+                              'If this is a new account, a secure confirmation link was requested for ${widget.email}. Open it to activate the account. If you already registered this email, return to sign in instead.',
+                              'إذا كان هذا حسابًا جديدًا، فقد تم طلب رابط تأكيد آمن للبريد ${widget.email}. افتحه لتفعيل الحساب. وإذا كنت قد سجلت هذا البريد سابقًا، فعد إلى تسجيل الدخول بدلًا من ذلك.',
                             ),
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyLarge?.copyWith(

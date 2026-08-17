@@ -160,7 +160,7 @@ class _LoginPageState extends State<LoginPage> {
       await SupabaseAuthService(
         Supabase.instance.client,
       ).signIn(email: email.text.trim().toLowerCase(), password: password.text);
-      if (mounted) context.go('/dashboard');
+      if (mounted) context.go('/startup');
     } on AuthException catch (error) {
       if (mounted) setState(() => status = localizedAuthError(context, error));
     } catch (_) {

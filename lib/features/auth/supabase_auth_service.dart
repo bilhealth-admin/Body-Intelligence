@@ -8,6 +8,7 @@ class SupabaseAuthService {
   final SupabaseClient client;
 
   static const oauthRedirectUri = 'bil://auth-callback';
+  static const emailRedirectUri = oauthRedirectUri;
 
   Future<bool> signInWithOAuth(OAuthProvider provider) =>
       client.auth.signInWithOAuth(provider, redirectTo: oauthRedirectUri);
@@ -31,8 +32,11 @@ class SupabaseAuthService {
     required String code,
   }) => client.auth.verifyOTP(email: email, token: code, type: OtpType.signup);
 
-  Future<void> resendSignupCode(String email) =>
-      client.auth.resend(type: OtpType.signup, email: email);
+  Future<void> resendSignupCode(String email) => client.auth.resend(
+    type: OtpType.signup,
+    email: email,
+    emailRedirectTo: emailRedirectUri,
+  );
 
   Future<void> signOutEverywhere() =>
       client.auth.signOut(scope: SignOutScope.global);
@@ -46,6 +50,7 @@ class SupabaseAuthService {
     final response = await client.auth.signUp(
       email: email,
       password: password,
+      emailRedirectTo: emailRedirectUri,
       data: <String, dynamic>{'full_name': fullName, 'phone': phone},
     );
     return response.session == null

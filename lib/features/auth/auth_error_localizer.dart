@@ -15,6 +15,14 @@ String localizedAuthError(BuildContext context, AuthException error) {
       'تم بلوغ الحد المؤقت لإرسال الرسائل. انتظر حتى ساعة ثم حاول مرة واحدة.',
     );
   }
+  if (code == 'provider_disabled' ||
+      message.contains('provider is not enabled') ||
+      message.contains('provider is disabled')) {
+    return authFiveLocaleText(
+      'This sign-in provider is unavailable or not configured.',
+      'مزود تسجيل الدخول هذا غير متاح أو غير مهيأ.',
+    );
+  }
   if (code == 'invalid_credentials' ||
       message.contains('invalid login credentials')) {
     return authFiveLocaleText(

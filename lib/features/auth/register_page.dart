@@ -59,7 +59,7 @@ class _RegisterPageState extends State<RegisterPage> {
       if (outcome == BilAuthOutcome.confirmationRequired) {
         context.go('/verify-email', extra: email.text.trim().toLowerCase());
       } else {
-        context.go('/dashboard');
+        context.go('/startup');
       }
     } on AuthException catch (error) {
       if (mounted) setState(() => status = localizedAuthError(context, error));

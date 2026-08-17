@@ -41,7 +41,7 @@ class _LegacyLoginPageState extends State<LegacyLoginPage> {
       await SupabaseAuthService(
         Supabase.instance.client,
       ).signIn(email: email.text.trim().toLowerCase(), password: password.text);
-      if (mounted) context.go('/dashboard');
+      if (mounted) context.go('/startup');
     } on AuthException {
       if (mounted) {
         setState(

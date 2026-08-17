@@ -12,6 +12,7 @@ import '../../features/auth/login_page.dart';
 import '../../features/auth/register_page.dart';
 import '../../features/auth/verify_email_page.dart';
 import '../../features/auth/account_gateway_page.dart';
+import '../../features/auth/auth_callback_page.dart';
 import '../../features/auth/reset_password_page.dart';
 import '../../features/daily_log/daily_log_page.dart';
 import '../../features/daily_log/daily_body_context_page.dart';
@@ -93,12 +94,11 @@ class AppRouter {
     errorBuilder: (_, _) => const InvalidRoutePage(),
     redirect: (_, state) {
       if (state.uri.scheme == 'bil' && state.uri.host == 'auth-callback') {
+        if (!AppEnvironment.cloudConfigured) return '/login';
         final isPasswordRecovery =
             state.uri.pathSegments.length == 1 &&
             state.uri.pathSegments.single == 'reset-password';
-        return AppEnvironment.cloudConfigured && isPasswordRecovery
-            ? '/reset-password'
-            : '/login';
+        return isPasswordRecovery ? '/reset-password' : '/auth-callback';
       }
       final launchLink = BilLaunchDeepLink.parse(state.uri);
       if (launchLink != null) return launchLink.route;
@@ -113,6 +113,10 @@ class AppRouter {
     routes: [
       GoRoute(path: '/startup', builder: (_, _) => const StartupPage()),
       GoRoute(path: '/login', builder: (_, _) => const LoginPage()),
+      GoRoute(
+        path: '/auth-callback',
+        builder: (_, _) => const AuthCallbackPage(),
+      ),
       GoRoute(
         path: '/reset-password',
         builder: (_, _) => const ResetPasswordPage(),
