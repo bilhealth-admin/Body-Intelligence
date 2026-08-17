@@ -5,6 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/environment/app_environment.dart';
 import '../../app/localization/app_localizations.dart';
+import '../cloud_platform/providers/cloud_sync_providers.dart';
+import '../cloud_platform/services/cloud_sync_consent_repository.dart';
 import 'reference_settings_copy.dart';
 
 String _privacyText(BuildContext context, String key) {
@@ -29,6 +31,23 @@ const _privacyCopy = <String, Map<String, String>>{
     'Export my data': 'Export my data',
     'Export could not be opened': 'Export could not be opened',
     'Change password': 'Change password',
+    'Encrypted cloud sync': 'Encrypted cloud sync',
+    'Sync profile, weight and water across your devices. Nutrition stays local until supported.':
+        'Sync profile, weight and water across your devices. Nutrition stays local until supported.',
+    'Sign in to manage cloud sync.': 'Sign in to manage cloud sync.',
+    'Premium is required to turn on cloud sync.':
+        'Premium is required to turn on cloud sync.',
+    'Cloud sync is temporarily unavailable.':
+        'Cloud sync is temporarily unavailable.',
+    'Checking cloud sync…': 'Checking cloud sync…',
+    'Turn on encrypted cloud sync?': 'Turn on encrypted cloud sync?',
+    'BIL encrypts profile, weight and water before cloud storage. You can turn sync off at any time.':
+        'BIL encrypts profile, weight and water before cloud storage. You can turn sync off at any time.',
+    'Cancel': 'Cancel',
+    'Turn on': 'Turn on',
+    'Cloud sync preference updated.': 'Cloud sync preference updated.',
+    'Could not update cloud sync. Try again.':
+        'Could not update cloud sync. Try again.',
   },
   'ar': {
     'Diary sharing': 'مشاركة اليوميات',
@@ -46,6 +65,23 @@ const _privacyCopy = <String, Map<String, String>>{
     'Export my data': 'تصدير بياناتي',
     'Export could not be opened': 'تعذر فتح التصدير',
     'Change password': 'تغيير كلمة المرور',
+    'Encrypted cloud sync': 'المزامنة السحابية المشفّرة',
+    'Sync profile, weight and water across your devices. Nutrition stays local until supported.':
+        'زامن الملف الشخصي والوزن والماء بين أجهزتك. تبقى بيانات التغذية محلية حتى يتم دعمها.',
+    'Sign in to manage cloud sync.': 'سجّل الدخول لإدارة المزامنة السحابية.',
+    'Premium is required to turn on cloud sync.':
+        'يلزم Premium لتشغيل المزامنة السحابية.',
+    'Cloud sync is temporarily unavailable.':
+        'المزامنة السحابية غير متاحة مؤقتًا.',
+    'Checking cloud sync…': 'جارٍ التحقق من المزامنة السحابية…',
+    'Turn on encrypted cloud sync?': 'تشغيل المزامنة السحابية المشفّرة؟',
+    'BIL encrypts profile, weight and water before cloud storage. You can turn sync off at any time.':
+        'يشفّر BIL الملف الشخصي والوزن والماء قبل التخزين السحابي. يمكنك إيقاف المزامنة في أي وقت.',
+    'Cancel': 'إلغاء',
+    'Turn on': 'تشغيل',
+    'Cloud sync preference updated.': 'تم تحديث تفضيل المزامنة السحابية.',
+    'Could not update cloud sync. Try again.':
+        'تعذر تحديث المزامنة السحابية. حاول مرة أخرى.',
   },
   'fr': {
     'Diary sharing': 'Partage du journal',
@@ -64,6 +100,26 @@ const _privacyCopy = <String, Map<String, String>>{
     'Export my data': 'Exporter mes données',
     'Export could not be opened': 'Impossible d’ouvrir l’exportation',
     'Change password': 'Modifier le mot de passe',
+    'Encrypted cloud sync': 'Synchronisation cloud chiffrée',
+    'Sync profile, weight and water across your devices. Nutrition stays local until supported.':
+        'Synchronisez profil, poids et eau entre vos appareils. La nutrition reste locale jusqu’à sa prise en charge.',
+    'Sign in to manage cloud sync.':
+        'Connectez-vous pour gérer la synchronisation cloud.',
+    'Premium is required to turn on cloud sync.':
+        'Premium est requis pour activer la synchronisation cloud.',
+    'Cloud sync is temporarily unavailable.':
+        'La synchronisation cloud est temporairement indisponible.',
+    'Checking cloud sync…': 'Vérification de la synchronisation cloud…',
+    'Turn on encrypted cloud sync?':
+        'Activer la synchronisation cloud chiffrée ?',
+    'BIL encrypts profile, weight and water before cloud storage. You can turn sync off at any time.':
+        'BIL chiffre le profil, le poids et l’eau avant le stockage cloud. Vous pouvez désactiver la synchronisation à tout moment.',
+    'Cancel': 'Annuler',
+    'Turn on': 'Activer',
+    'Cloud sync preference updated.':
+        'Préférence de synchronisation cloud mise à jour.',
+    'Could not update cloud sync. Try again.':
+        'Impossible de mettre à jour la synchronisation cloud. Réessayez.',
   },
   'es': {
     'Diary sharing': 'Compartir diario',
@@ -82,6 +138,26 @@ const _privacyCopy = <String, Map<String, String>>{
     'Export my data': 'Exportar mis datos',
     'Export could not be opened': 'No se pudo abrir la exportación',
     'Change password': 'Cambiar contraseña',
+    'Encrypted cloud sync': 'Sincronización cifrada en la nube',
+    'Sync profile, weight and water across your devices. Nutrition stays local until supported.':
+        'Sincroniza perfil, peso y agua entre tus dispositivos. La nutrición permanece local hasta que sea compatible.',
+    'Sign in to manage cloud sync.':
+        'Inicia sesión para gestionar la sincronización en la nube.',
+    'Premium is required to turn on cloud sync.':
+        'Se requiere Premium para activar la sincronización en la nube.',
+    'Cloud sync is temporarily unavailable.':
+        'La sincronización en la nube no está disponible temporalmente.',
+    'Checking cloud sync…': 'Comprobando la sincronización en la nube…',
+    'Turn on encrypted cloud sync?':
+        '¿Activar la sincronización cifrada en la nube?',
+    'BIL encrypts profile, weight and water before cloud storage. You can turn sync off at any time.':
+        'BIL cifra el perfil, el peso y el agua antes del almacenamiento en la nube. Puedes desactivar la sincronización en cualquier momento.',
+    'Cancel': 'Cancelar',
+    'Turn on': 'Activar',
+    'Cloud sync preference updated.':
+        'Preferencia de sincronización en la nube actualizada.',
+    'Could not update cloud sync. Try again.':
+        'No se pudo actualizar la sincronización en la nube. Inténtalo de nuevo.',
   },
   'tr': {
     'Diary sharing': 'Günlük paylaşımı',
@@ -99,6 +175,24 @@ const _privacyCopy = <String, Map<String, String>>{
     'Export my data': 'Verilerimi dışa aktar',
     'Export could not be opened': 'Dışa aktarma açılamadı',
     'Change password': 'Parolayı değiştir',
+    'Encrypted cloud sync': 'Şifreli bulut eşitleme',
+    'Sync profile, weight and water across your devices. Nutrition stays local until supported.':
+        'Profil, kilo ve su verilerini cihazlarınız arasında eşitleyin. Beslenme verileri desteklenene kadar yerel kalır.',
+    'Sign in to manage cloud sync.':
+        'Bulut eşitlemeyi yönetmek için oturum açın.',
+    'Premium is required to turn on cloud sync.':
+        'Bulut eşitlemeyi açmak için Premium gerekir.',
+    'Cloud sync is temporarily unavailable.':
+        'Bulut eşitleme geçici olarak kullanılamıyor.',
+    'Checking cloud sync…': 'Bulut eşitleme kontrol ediliyor…',
+    'Turn on encrypted cloud sync?': 'Şifreli bulut eşitleme açılsın mı?',
+    'BIL encrypts profile, weight and water before cloud storage. You can turn sync off at any time.':
+        'BIL, bulut depolamadan önce profil, kilo ve su verilerini şifreler. Eşitlemeyi istediğiniz zaman kapatabilirsiniz.',
+    'Cancel': 'İptal',
+    'Turn on': 'Aç',
+    'Cloud sync preference updated.': 'Bulut eşitleme tercihi güncellendi.',
+    'Could not update cloud sync. Try again.':
+        'Bulut eşitleme güncellenemedi. Tekrar deneyin.',
   },
 };
 
@@ -118,6 +212,7 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/settings/diary/sharing'),
           ),
+          const _CloudSyncConsentTile(),
           _UnavailableCloudPrivacyTile(
             title: _privacyText(context, 'Profile visibility'),
           ),
@@ -190,6 +285,137 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+}
+
+class _CloudSyncConsentTile extends ConsumerStatefulWidget {
+  const _CloudSyncConsentTile();
+
+  @override
+  ConsumerState<_CloudSyncConsentTile> createState() =>
+      _CloudSyncConsentTileState();
+}
+
+class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
+  bool _saving = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(cloudSyncConsentStateProvider);
+    return state.when(
+      loading: () => SwitchListTile.adaptive(
+        value: false,
+        onChanged: null,
+        title: Text(_privacyText(context, 'Encrypted cloud sync')),
+        subtitle: Text(_privacyText(context, 'Checking cloud sync…')),
+      ),
+      error: (_, _) => SwitchListTile.adaptive(
+        value: false,
+        onChanged: null,
+        title: Text(_privacyText(context, 'Encrypted cloud sync')),
+        subtitle: Text(
+          _privacyText(context, 'Cloud sync is temporarily unavailable.'),
+        ),
+      ),
+      data: (value) {
+        final subtitle = switch (value.availability) {
+          CloudSyncConsentAvailability.signedOut => _privacyText(
+            context,
+            'Sign in to manage cloud sync.',
+          ),
+          CloudSyncConsentAvailability.premiumRequired => _privacyText(
+            context,
+            'Premium is required to turn on cloud sync.',
+          ),
+          CloudSyncConsentAvailability.unavailable => _privacyText(
+            context,
+            'Cloud sync is temporarily unavailable.',
+          ),
+          CloudSyncConsentAvailability.available => _privacyText(
+            context,
+            'Sync profile, weight and water across your devices. Nutrition stays local until supported.',
+          ),
+        };
+        return SwitchListTile.adaptive(
+          key: const Key('encrypted-cloud-sync-consent'),
+          value: value.granted,
+          onChanged: !_saving && value.canChange
+              ? (next) => _setConsent(next, value)
+              : null,
+          title: Text(_privacyText(context, 'Encrypted cloud sync')),
+          subtitle: Text(subtitle),
+          secondary: _saving
+              ? const SizedBox.square(
+                  dimension: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.cloud_outlined),
+        );
+      },
+    );
+  }
+
+  Future<void> _setConsent(bool granted, CloudSyncConsentState current) async {
+    if (_saving) return;
+    if (granted && !current.canEnable) return;
+    if (!granted && !current.canDisable) return;
+
+    if (granted) {
+      final confirmed =
+          await showDialog<bool>(
+            context: context,
+            builder: (dialogContext) => AlertDialog(
+              title: Text(
+                _privacyText(context, 'Turn on encrypted cloud sync?'),
+              ),
+              content: Text(
+                _privacyText(
+                  context,
+                  'BIL encrypts profile, weight and water before cloud storage. You can turn sync off at any time.',
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(false),
+                  child: Text(_privacyText(context, 'Cancel')),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(true),
+                  child: Text(_privacyText(context, 'Turn on')),
+                ),
+              ],
+            ),
+          ) ??
+          false;
+      if (!confirmed || !mounted) return;
+    }
+
+    setState(() => _saving = true);
+    try {
+      await ref.read(cloudSyncConsentRepositoryProvider).setGranted(granted);
+      ref.invalidate(cloudSyncConsentStateProvider);
+      ref.invalidate(cloudRuntimePreparationProvider);
+      await ref.read(cloudSyncConsentStateProvider.future);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _privacyText(context, 'Cloud sync preference updated.'),
+          ),
+        ),
+      );
+    } on Object {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _privacyText(context, 'Could not update cloud sync. Try again.'),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 }
 

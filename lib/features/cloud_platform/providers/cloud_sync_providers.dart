@@ -17,6 +17,7 @@ import '../services/cloud_platform_ports.dart';
 import '../services/cloud_runtime_access_gate.dart';
 import '../services/cloud_runtime_preparation.dart';
 import '../services/cloud_session_sync_coordinator.dart';
+import '../services/cloud_sync_consent_repository.dart';
 import '../services/cloud_transport_activation_lock.dart';
 import '../services/local_data_account_boundary.dart';
 
@@ -85,6 +86,25 @@ final localDataAccountBoundaryProvider = Provider<LocalDataAccountBoundary>((
 ) {
   return LocalDataAccountBoundary(ref.watch(databaseProvider));
 });
+
+final cloudSyncConsentRepositoryProvider = Provider<CloudSyncConsentRepository>(
+  (ref) {
+    if (!AppEnvironment.cloudConfigured || !Supabase.instance.isInitialized) {
+      throw StateError('BIL cloud consent is not configured.');
+    }
+    return CloudSyncConsentRepository(client: Supabase.instance.client);
+  },
+);
+
+final cloudSyncConsentStateProvider =
+    FutureProvider.autoDispose<CloudSyncConsentState>((ref) async {
+      if (!AppEnvironment.cloudConfigured || !Supabase.instance.isInitialized) {
+        return const CloudSyncConsentState(
+          availability: CloudSyncConsentAvailability.unavailable,
+        );
+      }
+      return ref.watch(cloudSyncConsentRepositoryProvider).read();
+    });
 
 /// Binds guest/local data to the first authenticated account and fails closed
 /// if another account later attempts to enter the same non-empty local store.
