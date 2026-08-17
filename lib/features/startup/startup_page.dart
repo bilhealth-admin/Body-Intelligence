@@ -82,6 +82,7 @@ class _StartupPageState extends ConsumerState<StartupPage>
     ref.invalidate(forceOnboardingProvider);
     ref.invalidate(accountGatewayReviewedProvider);
     ref.invalidate(localDataAccountBindingProvider);
+    ref.invalidate(cloudRuntimePreparationProvider);
     // Preserve one complete loading frame before surfacing the result of the
     // new attempt. This prevents a stale AsyncError from flashing after the
     // tap, while a repeated failure still becomes visible and retryable.
@@ -101,6 +102,9 @@ class _StartupPageState extends ConsumerState<StartupPage>
     final forceOnboarding = ref.watch(forceOnboardingProvider);
     final accountGatewayReviewed = ref.watch(accountGatewayReviewedProvider);
     final localAccountBinding = ref.watch(localDataAccountBindingProvider);
+    // Optional Premium cloud preparation must never block local-first startup.
+    // It remains transport-locked until inbound merge is closed.
+    ref.watch(cloudRuntimePreparationProvider);
     final error =
         profile.hasError ||
         checkInDue.hasError ||

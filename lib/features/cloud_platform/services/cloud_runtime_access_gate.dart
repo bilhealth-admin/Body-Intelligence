@@ -14,10 +14,15 @@ enum CloudRuntimeAccessDisposition {
 }
 
 final class CloudRuntimeAccessDecision {
-  const CloudRuntimeAccessDecision(this.disposition, {this.ownerId});
+  const CloudRuntimeAccessDecision(
+    this.disposition, {
+    this.ownerId,
+    this.consentGrantedAt,
+  });
 
   final CloudRuntimeAccessDisposition disposition;
   final String? ownerId;
+  final DateTime? consentGrantedAt;
 
   bool get isReady => disposition == CloudRuntimeAccessDisposition.ready;
 }
@@ -71,7 +76,7 @@ final class CloudRuntimeAccessGate {
     try {
       final rows = await _client
           .from('bil_consent_receipts')
-          .select('granted')
+          .select('granted, recorded_at')
           .eq('user_id', ownerId)
           .eq('purpose', consentPurpose)
           .eq('policy_version', consentPolicyVersion)
@@ -83,17 +88,26 @@ final class CloudRuntimeAccessGate {
           ownerId: ownerId,
         );
       }
+      final grantedAt = DateTime.tryParse(
+        '${rows.first['recorded_at']}',
+      )?.toUtc();
+      if (grantedAt == null) {
+        return CloudRuntimeAccessDecision(
+          CloudRuntimeAccessDisposition.unavailable,
+          ownerId: ownerId,
+        );
+      }
+      return CloudRuntimeAccessDecision(
+        CloudRuntimeAccessDisposition.ready,
+        ownerId: ownerId,
+        consentGrantedAt: grantedAt,
+      );
     } on Object {
       return CloudRuntimeAccessDecision(
         CloudRuntimeAccessDisposition.unavailable,
         ownerId: ownerId,
       );
     }
-
-    return CloudRuntimeAccessDecision(
-      CloudRuntimeAccessDisposition.ready,
-      ownerId: ownerId,
-    );
   }
 
   Future<void> recordConsent({required bool granted}) async {
