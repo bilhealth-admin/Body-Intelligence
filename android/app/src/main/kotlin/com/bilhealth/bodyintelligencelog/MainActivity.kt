@@ -14,6 +14,7 @@ class MainActivity : FlutterFragmentActivity() {
     private var speechBridge: BILSpeechBridge? = null
     private var textToSpeechBridge: BILTextToSpeechBridge? = null
     private var healthBridge: BILGlobalHealthBridge? = null
+    private var playIntegrityBridge: BILPlayIntegrityBridge? = null
     private val speechPermissionLauncher: ActivityResultLauncher<String> =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             speechBridge?.onMicrophonePermissionResult(granted)
@@ -80,6 +81,7 @@ class MainActivity : FlutterFragmentActivity() {
         }
         textToSpeechBridge = BILTextToSpeechBridge(this, flutterEngine.dartExecutor.binaryMessenger)
         healthBridge = BILGlobalHealthBridge(this, flutterEngine.dartExecutor.binaryMessenger, healthPermissionLauncher)
+        playIntegrityBridge = BILPlayIntegrityBridge(this, flutterEngine.dartExecutor.binaryMessenger)
         io.flutter.plugin.common.MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "bil/push").setMethodCallHandler { call, result ->
             when (call.method) {
                 "requestToken" -> pushProvider.requestToken(result)
@@ -122,6 +124,8 @@ class MainActivity : FlutterFragmentActivity() {
         textToSpeechBridge?.dispose()
         textToSpeechBridge = null
         healthBridge = null
+        playIntegrityBridge?.dispose()
+        playIntegrityBridge = null
         super.cleanUpFlutterEngine(flutterEngine)
     }
 }

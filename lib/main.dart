@@ -14,6 +14,7 @@ import 'app/analytics/bil_launch_event.dart';
 import 'app/localization/app_localizations.dart';
 import 'app/localization/bil_locale_policy.dart';
 import 'app/router/app_router.dart';
+import 'app/security/bil_play_integrity_service.dart';
 import 'app/services/app_switcher_privacy_shield.dart';
 import 'app/services/app_observability.dart';
 import 'app/services/app_settings_provider.dart';
@@ -43,6 +44,7 @@ Future<void> main() async {
   };
 
   runApp(const ProviderScope(child: _BILBootstrap()));
+  unawaited(BilPlayIntegrityService.instance.prepare());
 }
 
 class _BILBootstrap extends StatefulWidget {
@@ -73,7 +75,16 @@ class _BILBootstrapState extends State<_BILBootstrap> {
       await Supabase.initialize(
         url: AppEnvironment.supabaseUrl,
         publishableKey: AppEnvironment.supabaseAnonKey,
-      );
+      );      if (Supabase.instance.client.auth.currentSession != null) {
+        unawaited(
+          BilPlayIntegrityService.instance.observe(
+            action: 'session.bootstrap',
+            payload: const <String, Object?>{
+              'phase': 'closed_testing',
+            },
+          ),
+        );
+      }
       if (!mounted) return;
       setState(() => ready = true);
     } catch (error, stack) {
