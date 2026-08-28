@@ -1,5 +1,8 @@
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
+import 'package:in_app_purchase_storekit/store_kit_2_wrappers.dart';
+import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 
 import '../domain/commerce_plan.dart';
 import '../domain/store_catalog_configuration.dart';
@@ -26,6 +29,129 @@ final class GooglePlayOfferMetadata {
   final String? basePlanId;
   final String? trialPeriodIso8601;
   final bool trialEligible;
+}
+
+final class AppleStoreOfferMetadata {
+  const AppleStoreOfferMetadata({
+    required this.billingPeriodIso8601,
+    required this.trialPeriodIso8601,
+    required this.trialEligible,
+  });
+
+  final String? billingPeriodIso8601;
+  final String? trialPeriodIso8601;
+  final bool trialEligible;
+}
+
+typedef AppleIntroductoryEligibility = Future<bool> Function(String productId);
+
+String? _storeKit2PeriodIso8601(
+  SK2SubscriptionPeriod period, {
+  int multiplier = 1,
+}) {
+  final value = period.value * multiplier;
+  if (value <= 0) return null;
+  final unit = switch (period.unit) {
+    SK2SubscriptionPeriodUnit.day => 'D',
+    SK2SubscriptionPeriodUnit.week => 'W',
+    SK2SubscriptionPeriodUnit.month => 'M',
+    SK2SubscriptionPeriodUnit.year => 'Y',
+  };
+  return 'P$value$unit';
+}
+
+String? _storeKit1PeriodIso8601(
+  SKProductSubscriptionPeriodWrapper? period, {
+  int multiplier = 1,
+}) {
+  if (period == null) return null;
+  final value = period.numberOfUnits * multiplier;
+  if (value <= 0) return null;
+  final unit = switch (period.unit) {
+    SKSubscriptionPeriodUnit.day => 'D',
+    SKSubscriptionPeriodUnit.week => 'W',
+    SKSubscriptionPeriodUnit.month => 'M',
+    SKSubscriptionPeriodUnit.year => 'Y',
+  };
+  return 'P$value$unit';
+}
+
+Future<bool> _defaultAppleIntroductoryEligibility(String productId) async {
+  try {
+    return await SK2Product.isIntroductoryOfferEligible(productId);
+  } on Object {
+    // Eligibility must be authoritative. A platform failure cannot turn an
+    // introductory offer into a user-visible free-trial promise.
+    return false;
+  }
+}
+
+/// Reads only a configured, zero-price Apple introductory free trial and then
+/// asks StoreKit whether the current account is eligible. Missing metadata or
+/// an eligibility error fails closed.
+Future<AppleStoreOfferMetadata?> appleStoreOfferMetadata(
+  ProductDetails product, {
+  AppleIntroductoryEligibility? isIntroductoryOfferEligible,
+}) async {
+  String? billingPeriod;
+  String? configuredTrialPeriod;
+
+  if (product is AppStoreProduct2Details) {
+    final subscription = product.sk2Product.subscription;
+    if (subscription == null) return null;
+    billingPeriod = _storeKit2PeriodIso8601(subscription.subscriptionPeriod);
+    for (final offer in subscription.promotionalOffers) {
+      if (offer.type == SK2SubscriptionOfferType.introductory &&
+          offer.paymentMode == SK2SubscriptionOfferPaymentMode.freeTrial &&
+          offer.price == 0) {
+        configuredTrialPeriod = _storeKit2PeriodIso8601(
+          offer.period,
+          multiplier: offer.periodCount,
+        );
+        break;
+      }
+    }
+  } else if (product is AppStoreProductDetails) {
+    billingPeriod = _storeKit1PeriodIso8601(
+      product.skProduct.subscriptionPeriod,
+    );
+    final offer = product.skProduct.introductoryPrice;
+    if (offer != null &&
+        offer.type == SKProductDiscountType.introductory &&
+        offer.paymentMode == SKProductDiscountPaymentMode.freeTrail &&
+        double.tryParse(offer.price) == 0) {
+      configuredTrialPeriod = _storeKit1PeriodIso8601(
+        offer.subscriptionPeriod,
+        multiplier: offer.numberOfPeriods,
+      );
+    }
+  } else {
+    return null;
+  }
+
+  if (configuredTrialPeriod == null) {
+    return AppleStoreOfferMetadata(
+      billingPeriodIso8601: billingPeriod,
+      trialPeriodIso8601: null,
+      trialEligible: false,
+    );
+  }
+
+  final eligibility =
+      isIntroductoryOfferEligible ?? _defaultAppleIntroductoryEligibility;
+  var eligible = false;
+  try {
+    eligible = await eligibility(product.id);
+  } on Object {
+    // StoreKit eligibility is authoritative. If it cannot be resolved, hide
+    // the trial instead of presenting an offer the account may not receive.
+    eligible = false;
+  }
+  return AppleStoreOfferMetadata(
+    billingPeriodIso8601: billingPeriod,
+    trialPeriodIso8601: eligible ? configuredTrialPeriod : null,
+    trialEligible: eligible,
+  );
 }
 
 final class GooglePlayOneTimeDiscountMetadata {
@@ -169,56 +295,62 @@ final class VerifiedStoreCatalogAdapter implements BilStoreCatalogGateway {
   @override
   Future<List<BilStoreOfferMetadata>> loadOffers(Set<String> productIds) async {
     if (store.products.isEmpty) await store.initialize();
-    return store.products.values
-        .where((product) => productIds.contains(product.id))
-        .map((product) {
-          if (product.id == StoreCatalogConfiguration.aiBoost) {
-            final discount = googlePlayOneTimeDiscountMetadata(product);
-            return BilStoreOfferMetadata(
-              productId: product.id,
-              kind: BilStoreProductKind.aiBoostConsumable,
-              localizedTitle: product.title,
-              localizedPrice: discount?.localizedPrice ?? product.price,
-              currencyCode: discount?.currencyCode ?? product.currencyCode,
-              priceMicros:
-                  discount?.priceMicros ?? (product.rawPrice * 1000000).round(),
-              localizedOriginalPrice: discount?.localizedOriginalPrice,
-              originalPriceMicros: discount?.originalPriceMicros,
-              savingsPercent: discount?.savingsPercent,
-              offerId: discount?.offerId,
-              purchaseOfferToken: discount?.offerToken,
-            );
-          }
-          final binding = StoreCatalogConfiguration.bindingForProduct(
-            product.id,
-          );
-          if (binding == null) return null;
-          final playOffer = googlePlayOfferMetadata(product);
-          return BilStoreOfferMetadata(
+    final offers = <BilStoreOfferMetadata>[];
+    for (final product in store.products.values.where(
+      (product) => productIds.contains(product.id),
+    )) {
+      if (product.id == StoreCatalogConfiguration.aiBoost) {
+        final discount = googlePlayOneTimeDiscountMetadata(product);
+        offers.add(
+          BilStoreOfferMetadata(
             productId: product.id,
-            kind: binding.plan == CommercePlan.premiumAiCoach
-                ? BilStoreProductKind.premiumAiCoachSubscription
-                : BilStoreProductKind.premiumSubscription,
+            kind: BilStoreProductKind.aiBoostConsumable,
             localizedTitle: product.title,
-            localizedPrice: playOffer?.localizedPrice ?? product.price,
-            currencyCode: playOffer?.currencyCode ?? product.currencyCode,
+            localizedPrice: discount?.localizedPrice ?? product.price,
+            currencyCode: discount?.currencyCode ?? product.currencyCode,
             priceMicros:
-                playOffer?.priceMicros ?? (product.rawPrice * 1000000).round(),
-            billingPeriodIso8601:
-                playOffer?.billingPeriodIso8601 ??
-                switch (binding.term.months) {
-                  1 => 'P1M',
-                  12 => 'P1Y',
-                  _ => null,
-                },
-            offerId: playOffer?.offerId,
-            basePlanId: playOffer?.basePlanId,
-            trialPeriodIso8601: playOffer?.trialPeriodIso8601,
-            trialEligible: playOffer?.trialEligible,
-          );
-        })
-        .whereType<BilStoreOfferMetadata>()
-        .toList(growable: false);
+                discount?.priceMicros ?? (product.rawPrice * 1000000).round(),
+            localizedOriginalPrice: discount?.localizedOriginalPrice,
+            originalPriceMicros: discount?.originalPriceMicros,
+            savingsPercent: discount?.savingsPercent,
+            offerId: discount?.offerId,
+            purchaseOfferToken: discount?.offerToken,
+          ),
+        );
+        continue;
+      }
+      final binding = StoreCatalogConfiguration.bindingForProduct(product.id);
+      if (binding == null) continue;
+      final playOffer = googlePlayOfferMetadata(product);
+      final appleOffer = await appleStoreOfferMetadata(product);
+      offers.add(
+        BilStoreOfferMetadata(
+          productId: product.id,
+          kind: binding.plan == CommercePlan.premiumAiCoach
+              ? BilStoreProductKind.premiumAiCoachSubscription
+              : BilStoreProductKind.premiumSubscription,
+          localizedTitle: product.title,
+          localizedPrice: playOffer?.localizedPrice ?? product.price,
+          currencyCode: playOffer?.currencyCode ?? product.currencyCode,
+          priceMicros:
+              playOffer?.priceMicros ?? (product.rawPrice * 1000000).round(),
+          billingPeriodIso8601:
+              playOffer?.billingPeriodIso8601 ??
+              appleOffer?.billingPeriodIso8601 ??
+              switch (binding.term.months) {
+                1 => 'P1M',
+                12 => 'P1Y',
+                _ => null,
+              },
+          offerId: playOffer?.offerId,
+          basePlanId: playOffer?.basePlanId,
+          trialPeriodIso8601:
+              playOffer?.trialPeriodIso8601 ?? appleOffer?.trialPeriodIso8601,
+          trialEligible: playOffer?.trialEligible ?? appleOffer?.trialEligible,
+        ),
+      );
+    }
+    return offers;
   }
 
   @override

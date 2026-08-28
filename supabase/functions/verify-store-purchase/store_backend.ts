@@ -8,6 +8,11 @@ import {
   importX509,
 } from 'npm:jose@6.1.0';
 import { X509Certificate } from 'node:crypto';
+import {
+  appleServerStatusLifecycle,
+  appleTransactionLifecycle,
+} from './apple_subscription_lifecycle.ts';
+import { googleLifecycle } from './google_play_subscription_lifecycle.ts';
 
 type Provider = 'google' | 'apple';
 type Lifecycle =
@@ -121,19 +126,6 @@ async function googleAccessToken() {
   return String((await response.json()).access_token ?? '');
 }
 
-function googleLifecycle(state: string, lineItem: Record<string, unknown>): Lifecycle {
-  if (lineItem.expiryTime && new Date(String(lineItem.expiryTime)) < new Date()) return 'expired';
-  return ({
-    SUBSCRIPTION_STATE_PENDING: 'pending',
-    SUBSCRIPTION_STATE_ACTIVE: 'active',
-    SUBSCRIPTION_STATE_PAUSED: 'paused',
-    SUBSCRIPTION_STATE_IN_GRACE_PERIOD: 'grace_period',
-    SUBSCRIPTION_STATE_ON_HOLD: 'account_hold',
-    SUBSCRIPTION_STATE_CANCELED: 'cancelled',
-    SUBSCRIPTION_STATE_EXPIRED: 'expired',
-  } as Record<string, Lifecycle>)[state] ?? 'suspended';
-}
-
 async function verifyGoogle(packageName: string, purchaseToken: string): Promise<VerifiedPurchase> {
   if (packageName !== env('GOOGLE_PLAY_PACKAGE_NAME')) throw new Error('wrong_package');
   const token = await googleAccessToken();
@@ -243,13 +235,6 @@ async function verifyAppleJws(jws: string): Promise<Record<string, unknown>> {
   return JSON.parse(new TextDecoder().decode(verified.payload));
 }
 
-function appleLifecycle(payload: Record<string, unknown>): Lifecycle {
-  if (payload.revocationDate) return 'revoked';
-  const expires = Number(payload.expiresDate ?? 0);
-  if (expires > 0 && expires <= Date.now()) return 'expired';
-  return 'active';
-}
-
 async function verifyApple(transactionJws: string): Promise<VerifiedPurchase> {
   const payload = await verifyAppleJws(transactionJws);
   const bundleId = String(payload.bundleId ?? '');
@@ -270,7 +255,7 @@ async function verifyApple(transactionJws: string): Promise<VerifiedPurchase> {
     packageOrBundleId: bundleId,
     environment,
     storeCountryCode: String(payload.storefront ?? '').trim().toUpperCase() || undefined,
-    lifecycle: appleLifecycle(payload),
+    lifecycle: appleTransactionLifecycle(payload),
     startedAt: payload.purchaseDate ? new Date(Number(payload.purchaseDate)).toISOString() : undefined,
     expiresAt: payload.expiresDate ? new Date(Number(payload.expiresDate)).toISOString() : undefined,
   };
@@ -319,19 +304,6 @@ async function reconcileApple(originalTransactionId: string) {
     purchase.autoRenews = Number(renewal.autoRenewStatus ?? 0) === 1;
   }
   return purchase;
-}
-
-function appleServerStatusLifecycle(
-  status: number,
-  verifiedLifecycle: Lifecycle,
-): Lifecycle {
-  return ({
-    1: 'active',
-    2: 'expired',
-    3: 'billing_retry',
-    4: 'grace_period',
-    5: 'revoked',
-  } as Record<number, Lifecycle>)[status] ?? verifiedLifecycle;
 }
 
 async function persistVerified(
