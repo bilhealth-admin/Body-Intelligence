@@ -138,7 +138,10 @@ jobs:
             -C "$RUNNER_TEMP/bil-idb-bin"
           chmod +x \
             "$RUNNER_TEMP/bil-idb-bin/idb-companion.universal/bin/idb_companion"
-          python3 -m venv "$RUNNER_TEMP/bil-idb-venv"
+          # fb-idb 1.1.x predates Python 3.14's asyncio API change.
+          brew install python@3.11
+          /opt/homebrew/opt/python@3.11/bin/python3.11 -m venv \
+            "$RUNNER_TEMP/bil-idb-venv"
           "$RUNNER_TEMP/bil-idb-venv/bin/pip" install 'fb-idb==1.1.7'
           echo "$RUNNER_TEMP/bil-idb-bin/idb-companion.universal/bin" \
             >> "$GITHUB_PATH"
