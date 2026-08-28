@@ -64,6 +64,7 @@ void main() {
       expect(ios, contains('requestedGender == "male" ? 0.82'));
       expect(ios, contains('requestedLanguage.lowercased() == "zh-hans"'));
       expect(ios, contains('requiresExactVoice'));
+      expect(ios, contains('result: @escaping FlutterResult'));
     },
   );
 }

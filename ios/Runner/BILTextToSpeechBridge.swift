@@ -16,7 +16,10 @@ final class BILTextToSpeechBridge: NSObject, AVSpeechSynthesizerDelegate {
     }
   }
 
-  private func handle(_ call: FlutterMethodCall, result: FlutterResult) {
+  private func handle(
+    _ call: FlutterMethodCall,
+    result: @escaping FlutterResult
+  ) {
     switch call.method {
     case "available":
       result(true)
