@@ -105,17 +105,43 @@ jobs:
           xcrun simctl uninstall "$UDID" com.bilhealth.bodyintelligencelog || true
           xcrun simctl install "$UDID" build/ios/iphonesimulator/Runner.app
 
+      - name: Launch BIL on the clean simulator
+        shell: bash
+        env:
+          UDID: ${{ steps.simulator.outputs.udid }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/release/ios_simulator_runtime
+          xcrun simctl get_app_container \
+            "$UDID" com.bilhealth.bodyintelligencelog app \
+            > artifacts/release/ios_simulator_runtime/app_container.txt
+          xcrun simctl launch "$UDID" com.bilhealth.bodyintelligencelog \
+            -AppleLanguages '(en)' \
+            | tee artifacts/release/ios_simulator_runtime/launch.txt
+          sleep 10
+          xcrun simctl io "$UDID" screenshot \
+            artifacts/release/ios_simulator_runtime/startup.png
+
       - name: Install headless simulator interaction bridge
         shell: bash
         run: |
           set -euo pipefail
-          brew tap facebook/fb
-          brew trust facebook/fb
-          brew install idb-companion
-          brew install python@3.11
-          /opt/homebrew/opt/python@3.11/bin/python3.11 -m venv \
-            "$RUNNER_TEMP/bil-idb-venv"
-          "$RUNNER_TEMP/bil-idb-venv/bin/pip" install fb-idb
+          # Homebrew's rolling formula currently requires Xcode 26 even on a
+          # macos-15 runner. Pin the last universal companion/client pair that
+          # supports the runner's Xcode 16 toolchain instead of accepting an
+          # unreviewed moving dependency.
+          mkdir -p "$RUNNER_TEMP/bil-idb-bin"
+          curl --fail --location --retry 3 \
+            https://github.com/facebook/idb/releases/download/v1.1.8/idb-companion.universal.tar.gz \
+            --output "$RUNNER_TEMP/idb-companion.tar.gz"
+          tar -xzf "$RUNNER_TEMP/idb-companion.tar.gz" \
+            -C "$RUNNER_TEMP/bil-idb-bin"
+          chmod +x \
+            "$RUNNER_TEMP/bil-idb-bin/idb-companion.universal/bin/idb_companion"
+          python3 -m venv "$RUNNER_TEMP/bil-idb-venv"
+          "$RUNNER_TEMP/bil-idb-venv/bin/pip" install 'fb-idb==1.1.7'
+          echo "$RUNNER_TEMP/bil-idb-bin/idb-companion.universal/bin" \
+            >> "$GITHUB_PATH"
           echo "$RUNNER_TEMP/bil-idb-venv/bin" >> "$GITHUB_PATH"
 
       - name: Open BIL HealthKit authorization and capture native states
@@ -231,6 +257,15 @@ jobs:
         with:
           name: bil-healthkit-native-4988-4991-${{ github.sha }}
           path: artifacts/release/healthkit_native_4988_4991
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload iOS simulator launch evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bil-ios-simulator-runtime-${{ github.sha }}
+          path: artifacts/release/ios_simulator_runtime
           if-no-files-found: error
           retention-days: 14
 
