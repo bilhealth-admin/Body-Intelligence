@@ -43,7 +43,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
         .watch(verifiedSubscriptionStateProvider)
         .value
         ?.plan;
-    final medicalDevicesUnlocked =
+    final fitnessDevicesUnlocked =
         verifiedPlan != null && verifiedPlan != CommercePlan.free;
 
     return Scaffold(
@@ -349,8 +349,8 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
                           ),
                           const SizedBox(height: PremiumDesignTokens.spaceMd),
                           PremiumDashboardCardLock(
-                            key: const Key('medical-devices-premium-gate'),
-                            locked: !medicalDevicesUnlocked,
+                            key: const Key('fitness-devices-premium-gate'),
+                            locked: !fitnessDevicesUnlocked,
                             title: tr(
                               'Premium fitness device connections',
                               'اتصال أجهزة اللياقة ضمن Premium',
@@ -361,7 +361,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
                             ),
                             onTap: () =>
                                 context.push('/plans?focus=subscription'),
-                            child: const _MedicalDeviceSection(),
+                            child: const _FitnessDeviceSection(),
                           ),
                           const SizedBox(height: PremiumDesignTokens.spaceMd),
                           const FoodNameHealthSyncCard(),

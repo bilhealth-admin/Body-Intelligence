@@ -81,8 +81,8 @@ class _HealthDevicePagerState extends State<HealthDevicePager> {
   }
 }
 
-class BilMedicalMonitor extends ConsumerWidget {
-  const BilMedicalMonitor({
+class BilFitnessMonitor extends ConsumerWidget {
+  const BilFitnessMonitor({
     super.key,
     required this.snapshot,
     required this.languageCode,
@@ -110,7 +110,7 @@ class BilMedicalMonitor extends ConsumerWidget {
         'شاشة BIL لأجهزة اللياقة عبر البلوتوث. لا تظهر القيم إلا عند استلامها من جهاز لياقة متصل.',
       ),
       child: Container(
-        key: const Key('bil-live-medical-monitor'),
+        key: const Key('bil-live-fitness-monitor'),
         margin: EdgeInsets.all(compact ? 5 : 8),
         padding: EdgeInsets.all(compact ? 5 : 10),
         decoration: BoxDecoration(
@@ -232,7 +232,7 @@ class BilMedicalMonitor extends ConsumerWidget {
                     : Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _MedicalReading(
+                          _FitnessReading(
                             packet: readings.first,
                             languageCode: languageCode,
                             primary: true,
@@ -243,7 +243,7 @@ class BilMedicalMonitor extends ConsumerWidget {
                               children: [
                                 for (final packet in readings.skip(1))
                                   Expanded(
-                                    child: _MedicalReading(
+                                    child: _FitnessReading(
                                       packet: packet,
                                       languageCode: languageCode,
                                     ),
@@ -295,8 +295,8 @@ class BilMedicalMonitor extends ConsumerWidget {
   }
 }
 
-class _MedicalReading extends StatelessWidget {
-  const _MedicalReading({
+class _FitnessReading extends StatelessWidget {
+  const _FitnessReading({
     required this.packet,
     required this.languageCode,
     this.primary = false,

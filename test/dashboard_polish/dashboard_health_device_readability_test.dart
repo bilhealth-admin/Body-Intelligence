@@ -243,10 +243,7 @@ void main() {
           ),
           findsNothing,
         );
-        expect(
-          find.byKey(const Key('dashboard-medical-device-slot')),
-          findsNothing,
-        );
+        expect(find.byType(PageView), findsNothing);
         expect(tester.takeException(), isNull);
 
         await tester.pumpWidget(const SizedBox.shrink());

@@ -172,8 +172,8 @@ class _CompatibilitySection extends StatelessWidget {
   };
 }
 
-class _MedicalDeviceSection extends ConsumerWidget {
-  const _MedicalDeviceSection();
+class _FitnessDeviceSection extends ConsumerWidget {
+  const _FitnessDeviceSection();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -186,7 +186,7 @@ class _MedicalDeviceSection extends ConsumerWidget {
         snapshot.status == MedicalDeviceConnectionStatus.connecting;
 
     return PremiumSurface(
-      key: const Key('medical-bluetooth-section'),
+      key: const Key('fitness-bluetooth-section'),
       dashboardGlass: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -202,7 +202,7 @@ class _MedicalDeviceSection extends ConsumerWidget {
             builder: (context, constraints) {
               final image = Image.asset(
                 'assets/images/connected_health/bil_medical_hub.png',
-                key: const Key('bil-medical-device-image'),
+                key: const Key('bil-fitness-device-image'),
                 fit: BoxFit.contain,
                 semanticLabel: tr(
                   'Bluetooth fitness device and smart watch',
@@ -225,12 +225,12 @@ class _MedicalDeviceSection extends ConsumerWidget {
                   const SizedBox(height: PremiumDesignTokens.spaceXs),
                   Text(
                     tr(
-                      'Weight, body composition, heart rate, and SpO₂ from compatible fitness devices.',
-                      'الوزن وتركيب الجسم ومعدل ضربات القلب وSpO₂ من أجهزة اللياقة المتوافقة.',
+                      'Weight, body composition, and heart rate from compatible fitness devices.',
+                      'الوزن وتركيب الجسم ومعدل ضربات القلب من أجهزة اللياقة المتوافقة.',
                     ),
                   ),
                   const SizedBox(height: PremiumDesignTokens.spaceSm),
-                  _MedicalStatusText(
+                  _FitnessDeviceStatusText(
                     snapshot: snapshot,
                     languageCode: Localizations.localeOf(context).languageCode,
                   ),
@@ -257,7 +257,7 @@ class _MedicalDeviceSection extends ConsumerWidget {
             const SizedBox(height: PremiumDesignTokens.spaceSm),
             for (final device in snapshot.devices)
               ListTile(
-                key: Key('medical-device-${device.id}'),
+                key: Key('fitness-device-${device.id}'),
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.bluetooth_connected_rounded),
                 title: Text(device.name),
@@ -291,7 +291,7 @@ class _MedicalDeviceSection extends ConsumerWidget {
           ],
           const SizedBox(height: PremiumDesignTokens.spaceSm),
           FilledButton.icon(
-            key: const Key('scan-medical-devices-button'),
+            key: const Key('scan-fitness-devices-button'),
             onPressed: !snapshot.supported || busy ? null : controller.scan,
             icon: busy
                 ? const SizedBox.square(
@@ -308,8 +308,8 @@ class _MedicalDeviceSection extends ConsumerWidget {
           const SizedBox(height: PremiumDesignTokens.spaceXs),
           Text(
             tr(
-              'BIL imports only values actually received after permission. Bluetooth scan is the supported pairing path; no QR connection is claimed. SpO₂ is for wellness display only, not diagnosis.',
-              'لا يستورد BIL إلا القيم المستلمة فعليًا بعد الإذن. البحث عبر البلوتوث هو مسار الربط المدعوم ولا يدّعي التطبيق وجود ربط QR. عرض SpO₂ للعافية فقط وليس للتشخيص.',
+              'BIL imports only fitness values actually received after permission. Bluetooth scan is the supported pairing path; no QR connection is claimed.',
+              'لا يستورد BIL إلا قيم اللياقة المستلمة فعليًا بعد الإذن. البحث عبر البلوتوث هو مسار الربط المدعوم ولا يدّعي التطبيق وجود ربط QR.',
             ),
             style: Theme.of(context).textTheme.bodySmall,
           ),
@@ -319,8 +319,8 @@ class _MedicalDeviceSection extends ConsumerWidget {
   }
 }
 
-class _MedicalStatusText extends StatelessWidget {
-  const _MedicalStatusText({
+class _FitnessDeviceStatusText extends StatelessWidget {
+  const _FitnessDeviceStatusText({
     required this.snapshot,
     required this.languageCode,
   });
@@ -371,7 +371,7 @@ class _MedicalStatusText extends StatelessWidget {
     };
     return Text(
       text,
-      key: const Key('medical-device-status'),
+      key: const Key('fitness-device-status'),
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
         color: snapshot.status == MedicalDeviceConnectionStatus.failed
             ? Theme.of(context).colorScheme.error

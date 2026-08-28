@@ -129,14 +129,14 @@ void main() {
       ).readAsStringSync();
 
       expect(dashboard, isNot(contains('Smart-watch and health sync')));
-      expect(page, contains("Key('medical-devices-premium-gate')"));
+      expect(page, contains("Key('fitness-devices-premium-gate')"));
       expect(page, contains("Key('connected-health-live-watch-card')"));
-      expect(page, contains('child: const _MedicalDeviceSection()'));
+      expect(page, contains('child: const _FitnessDeviceSection()'));
       expect(card, contains('LiveHealthWatch('));
       expect(card, contains("Key('dashboard-live-fitness-watch-slot')"));
       expect(card, contains("Key('dashboard-fitness-link-action')"));
       expect(card, contains("Key('dashboard-fitness-last-sync')"));
-      expect(card, isNot(contains("Key('dashboard-medical-device-preview')")));
+      expect(card, isNot(contains('HealthDevicePager(')));
       expect(card, contains("context.push('/connected-health')"));
     },
   );

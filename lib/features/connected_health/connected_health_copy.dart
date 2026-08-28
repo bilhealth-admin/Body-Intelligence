@@ -37,8 +37,8 @@ const _translations = <String, Map<String, String>>{
     'Unavailable on this device.': 'Indisponible sur cet appareil.',
     'Allow weight and nutrition export':
         'Autoriser l’export du poids et de la nutrition',
-    'BIL imports fitness measurements only after your permission. It supports compatible fitness BLE profiles and is not a medical device.':
-        'BIL importe les mesures de fitness uniquement avec votre autorisation. Il prend en charge les profils BLE d’appareils de fitness compatibles et n’est pas un dispositif médical.',
+    'BIL imports fitness measurements only after your permission and supports compatible fitness BLE profiles.':
+        'BIL importe les mesures de fitness uniquement avec votre autorisation et prend en charge les profils BLE de fitness compatibles.',
     'Health Hub': 'Centre de santé',
     'Sync now': 'Synchroniser',
     'Refresh status': 'Actualiser l’état',
@@ -124,8 +124,8 @@ const _translations = <String, Map<String, String>>{
     'Search connections': 'Buscar conexiones',
     'Unavailable on this device.': 'No disponible en este dispositivo.',
     'Allow weight and nutrition export': 'Permitir exportar peso y nutrición',
-    'BIL imports fitness measurements only after your permission. It supports compatible fitness BLE profiles and is not a medical device.':
-        'BIL importa mediciones de fitness solo con tu permiso. Admite perfiles BLE de dispositivos de fitness compatibles y no es un dispositivo médico.',
+    'BIL imports fitness measurements only after your permission and supports compatible fitness BLE profiles.':
+        'BIL importa mediciones de fitness solo con tu permiso y admite perfiles BLE de fitness compatibles.',
     'Health Hub': 'Centro de salud',
     'Sync now': 'Sincronizar ahora',
     'Refresh status': 'Actualizar estado',
@@ -211,8 +211,8 @@ const _translations = <String, Map<String, String>>{
     'Unavailable on this device.': 'Bu cihazda kullanılamıyor.',
     'Allow weight and nutrition export':
         'Kilo ve beslenme dışa aktarımına izin ver',
-    'BIL imports fitness measurements only after your permission. It supports compatible fitness BLE profiles and is not a medical device.':
-        'BIL fitness ölçümlerini yalnızca izninizle içe aktarır. Uyumlu fitness cihazlarının BLE profillerini destekler ve tıbbi bir cihaz değildir.',
+    'BIL imports fitness measurements only after your permission and supports compatible fitness BLE profiles.':
+        'BIL fitness ölçümlerini yalnızca izninizle içe aktarır ve uyumlu fitness BLE profillerini destekler.',
     'Health Hub': 'Sağlık Merkezi',
     'Sync now': 'Şimdi eşitle',
     'Refresh status': 'Durumu yenile',

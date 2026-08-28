@@ -41828,45 +41828,45 @@ abstract final class ExtendedRuntimeCopy {
       "nl": "Export van gewicht en voeding toestaan",
       "uk": "Дозволити експорт ваги та поживних речовин",
     },
-    "BIL imports fitness measurements only after your permission. It supports compatible fitness BLE profiles and is not a medical device.": {
+    "BIL imports fitness measurements only after your permission and supports compatible fitness BLE profiles.": {
       "de":
-          "BIL importiert Fitnessmessungen nur mit Ihrer Erlaubnis. Es unterstützt kompatible BLE-Profile für Fitnessgeräte und ist kein Medizinprodukt.",
+          "BIL importiert Fitnessmessungen nur mit Ihrer Erlaubnis und unterstützt kompatible Fitness-BLE-Profile.",
       "it":
-          "BIL importa le misurazioni fitness solo con la tua autorizzazione. Supporta i profili BLE di dispositivi fitness compatibili e non è un dispositivo medico.",
+          "BIL importa le misurazioni fitness solo con la tua autorizzazione e supporta profili BLE fitness compatibili.",
       "pt-BR":
-          "O BIL importa medições de fitness somente com sua permissão. Ele suporta perfis BLE de dispositivos de fitness compatíveis e não é um dispositivo médico.",
+          "O BIL importa medições de fitness somente com sua permissão e suporta perfis BLE de fitness compatíveis.",
       "pt-PT":
-          "O BIL importa medições de fitness apenas com a sua permissão. Suporta perfis BLE de dispositivos de fitness compatíveis e não é um dispositivo médico.",
+          "O BIL importa medições de fitness apenas com a sua permissão e suporta perfis BLE de fitness compatíveis.",
       "ur":
-          "BIL فٹنس پیمائش صرف آپ کی اجازت کے بعد درآمد کرتا ہے۔ یہ ہم آہنگ فٹنس BLE پروفائلز کو سپورٹ کرتا ہے اور طبی آلہ نہیں ہے۔",
+          "BIL فٹنس پیمائش صرف آپ کی اجازت کے بعد درآمد کرتا ہے اور ہم آہنگ فٹنس BLE پروفائلز کو سپورٹ کرتا ہے۔",
       "fa":
-          "BIL اندازه‌گیری‌های تناسب اندام را فقط با اجازه شما وارد می‌کند. از پروفایل‌های BLE دستگاه‌های تناسب اندام سازگار پشتیبانی می‌کند و دستگاه پزشکی نیست.",
+          "BIL اندازه‌گیری‌های تناسب اندام را فقط با اجازه شما وارد می‌کند و از پروفایل‌های BLE سازگار پشتیبانی می‌کند.",
       "hi":
-          "BIL आपकी अनुमति के बाद ही फिटनेस माप आयात करता है। यह संगत फिटनेस BLE प्रोफाइल का समर्थन करता है और चिकित्सा उपकरण नहीं है।",
+          "BIL आपकी अनुमति के बाद ही फिटनेस माप आयात करता है और संगत फिटनेस BLE प्रोफाइल का समर्थन करता है।",
       "id":
-          "BIL mengimpor pengukuran kebugaran hanya dengan izin Anda. BIL mendukung profil BLE perangkat kebugaran yang kompatibel dan bukan perangkat medis.",
+          "BIL mengimpor pengukuran kebugaran hanya dengan izin Anda dan mendukung profil BLE kebugaran yang kompatibel.",
       "ms":
-          "BIL mengimport ukuran kecergasan hanya dengan kebenaran anda. Ia menyokong profil BLE peranti kecergasan yang serasi dan bukan peranti perubatan.",
+          "BIL mengimport ukuran kecergasan hanya dengan kebenaran anda dan menyokong profil BLE kecergasan yang serasi.",
       "ja":
-          "BIL は許可を得た場合にのみフィットネス測定値をインポートします。対応フィットネスデバイスの BLE プロファイルをサポートしますが、医療機器ではありません。",
+          "BIL は許可を得た場合にのみフィットネス測定値をインポートし、対応するフィットネス BLE プロファイルをサポートします。",
       "ko":
-          "BIL은 사용자의 허가 후에만 피트니스 측정값을 가져옵니다. 호환 피트니스 기기의 BLE 프로필을 지원하며 의료 기기가 아닙니다.",
-      "zh-Hans": "BIL 仅在您许可后导入健身测量值。它支持兼容健身设备的 BLE 配置文件，不是医疗设备。",
-      "zh-Hant": "BIL 僅在您許可後匯入健身測量值。它支援相容健身裝置的 BLE 設定檔，不是醫療裝置。",
+          "BIL은 사용자의 허가 후에만 피트니스 측정값을 가져오며 호환 피트니스 BLE 프로필을 지원합니다.",
+      "zh-Hans": "BIL 仅在您许可后导入健身测量值，并支持兼容的健身 BLE 配置文件。",
+      "zh-Hant": "BIL 僅在您許可後匯入健身測量值，並支援相容的健身 BLE 設定檔。",
       "ru":
-          "BIL импортирует фитнес-измерения только с вашего разрешения. Он поддерживает BLE-профили совместимых фитнес-устройств и не является медицинским устройством.",
+          "BIL импортирует фитнес-измерения только с вашего разрешения и поддерживает совместимые фитнес-профили BLE.",
       "bn":
-          "BIL আপনার অনুমতির পরেই ফিটনেস পরিমাপ আমদানি করে। এটি সামঞ্জস্যপূর্ণ ফিটনেস ডিভাইসের BLE প্রোফাইল সমর্থন করে এবং চিকিৎসা ডিভাইস নয়।",
+          "BIL আপনার অনুমতির পরেই ফিটনেস পরিমাপ আমদানি করে এবং সামঞ্জস্যপূর্ণ ফিটনেস BLE প্রোফাইল সমর্থন করে।",
       "vi":
-          "BIL chỉ nhập số đo thể dục khi được bạn cho phép. Ứng dụng hỗ trợ hồ sơ BLE của thiết bị thể dục tương thích và không phải là thiết bị y tế.",
+          "BIL chỉ nhập số đo thể dục khi được bạn cho phép và hỗ trợ hồ sơ BLE thể dục tương thích.",
       "th":
-          "BIL นำเข้าค่าการออกกำลังกายเมื่อคุณอนุญาตเท่านั้น รองรับโปรไฟล์ BLE ของอุปกรณ์ฟิตเนสที่รองรับและไม่ใช่อุปกรณ์ทางการแพทย์",
+          "BIL นำเข้าค่าการออกกำลังกายเมื่อคุณอนุญาตเท่านั้นและรองรับโปรไฟล์ BLE ฟิตเนสที่เข้ากันได้",
       "pl":
-          "BIL importuje pomiary fitness tylko za Twoją zgodą. Obsługuje profile BLE zgodnych urządzeń fitness i nie jest wyrobem medycznym.",
+          "BIL importuje pomiary fitness tylko za Twoją zgodą i obsługuje zgodne profile fitness BLE.",
       "nl":
-          "BIL importeert fitnessmetingen alleen met uw toestemming. Het ondersteunt BLE-profielen van compatibele fitnessapparaten en is geen medisch apparaat.",
+          "BIL importeert fitnessmetingen alleen met uw toestemming en ondersteunt compatibele fitness-BLE-profielen.",
       "uk":
-          "BIL імпортує фітнес-вимірювання лише з вашого дозволу. Він підтримує BLE-профілі сумісних фітнес-пристроїв і не є медичним пристроєм.",
+          "BIL імпортує фітнес-вимірювання лише з вашого дозволу та підтримує сумісні фітнес-профілі BLE.",
     },
     "Health Hub": {
       "de": "Gesundheitszentrum",

@@ -34,7 +34,7 @@ class ConnectedHealthCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(connectedHealthProvider);
-    final medical = ref.watch(medicalDeviceProvider);
+    final fitnessDevices = ref.watch(medicalDeviceProvider);
     return Semantics(
       container: true,
       label: tr('Health Hub', 'المركز الصحي'),
@@ -52,7 +52,7 @@ class ConnectedHealthCard extends ConsumerWidget {
           ),
           data: (snapshot) => _ConnectedHealthContent(
             snapshot: snapshot,
-            medical: medical,
+            fitnessDevices: fitnessDevices,
             languageCode: languageCode,
             compact: compact,
             dashboardCompact: dashboardCompact,
@@ -96,7 +96,7 @@ class _DashboardDevicePreview extends StatelessWidget {
 class _ConnectedHealthContent extends StatelessWidget {
   const _ConnectedHealthContent({
     required this.snapshot,
-    required this.medical,
+    required this.fitnessDevices,
     required this.languageCode,
     required this.compact,
     required this.dashboardCompact,
@@ -105,7 +105,7 @@ class _ConnectedHealthContent extends StatelessWidget {
   });
 
   final ConnectedHealthSnapshot snapshot;
-  final MedicalDeviceSnapshot medical;
+  final MedicalDeviceSnapshot fitnessDevices;
   final String languageCode;
   final bool compact;
   final bool dashboardCompact;
@@ -134,7 +134,7 @@ class _ConnectedHealthContent extends StatelessWidget {
           borderRadius: BorderRadius.circular(28),
           child: _DashboardHealthDeviceSection(
             snapshot: snapshot,
-            medical: medical,
+            fitnessDevices: fitnessDevices,
             languageCode: languageCode,
             onManage: onManage,
           ),
@@ -389,13 +389,13 @@ class _ConnectedHealthContent extends StatelessWidget {
 class _DashboardHealthDeviceSection extends StatelessWidget {
   const _DashboardHealthDeviceSection({
     required this.snapshot,
-    required this.medical,
+    required this.fitnessDevices,
     required this.languageCode,
     required this.onManage,
   });
 
   final ConnectedHealthSnapshot snapshot;
-  final MedicalDeviceSnapshot medical;
+  final MedicalDeviceSnapshot fitnessDevices;
   final String languageCode;
   final VoidCallback onManage;
 
@@ -404,7 +404,7 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
 
   List<({String kind, double value, String unit})> get _readings {
     final values = <String, ({String kind, double value, String unit})>{};
-    for (final packet in medical.measurements) {
+    for (final packet in fitnessDevices.measurements) {
       final kind = packet['kind'] as String?;
       final value = packet['value'];
       final unit = packet['unit'] as String?;
