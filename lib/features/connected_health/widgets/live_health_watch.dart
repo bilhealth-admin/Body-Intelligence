@@ -22,6 +22,8 @@ class LiveHealthWatch extends ConsumerStatefulWidget {
     this.onHeartTap,
     this.onActiveEnergyTap,
     this.onSleepTap,
+    this.showConnectControl = true,
+    this.showMetrics = true,
   });
 
   final ConnectedHealthSnapshot snapshot;
@@ -32,6 +34,8 @@ class LiveHealthWatch extends ConsumerStatefulWidget {
   final VoidCallback? onHeartTap;
   final VoidCallback? onActiveEnergyTap;
   final VoidCallback? onSleepTap;
+  final bool showConnectControl;
+  final bool showMetrics;
 
   @override
   ConsumerState<LiveHealthWatch> createState() => _LiveHealthWatchState();
@@ -99,7 +103,8 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch> {
     final second = _now.second;
     final hasMeasuredData =
         widget.snapshot.deviceVerified && widget.snapshot.signals.isNotEmpty;
-    final compactConnectOnly = widget.compact && !hasMeasuredData;
+    final showMeasuredMetrics = hasMeasuredData && widget.showMetrics;
+    final compactConnectOnly = widget.compact && !showMeasuredMetrics;
     final digitalHour = _now.hour.toString().padLeft(2, '0');
     final digitalMinute = _now.minute.toString().padLeft(2, '0');
     final digitalSecond = _now.second.toString().padLeft(2, '0');
@@ -192,7 +197,7 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch> {
                             color: Colors.white.withValues(alpha: .12),
                           ),
                   ),
-                  child: hasMeasuredData
+                  child: showMeasuredMetrics
                       ? Row(
                           children: [
                             Expanded(
@@ -273,14 +278,16 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch> {
                             ),
                           ],
                         )
+                      : !widget.showConnectControl
+                      ? const SizedBox.shrink()
                       : widget.compact
                       ? Center(
                           child: _CompactWatchConnectButton(
                             onPressed: widget.onConnectTap,
                             semanticLabel: connectedHealthTextForLanguage(
                               widget.languageCode,
-                              'Not connected. Connect health',
-                              'غير متصل. ربط الصحة',
+                              'Link fitness',
+                              'ربط اللياقة',
                             ),
                           ),
                         )
@@ -293,8 +300,8 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch> {
                             label: Text(
                               connectedHealthTextForLanguage(
                                 widget.languageCode,
-                                'Not connected · Connect',
-                                'غير متصل · ربط',
+                                'Connect fitness',
+                                'ربط اللياقة',
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

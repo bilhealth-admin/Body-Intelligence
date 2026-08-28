@@ -1,8 +1,4 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
-import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
-import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
-import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
-import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_model.dart';
 import 'package:body_intelligence_log/features/connected_health/providers/connected_health_provider.dart';
 import 'package:body_intelligence_log/features/connected_health/widgets/connected_health_card.dart';
@@ -23,7 +19,7 @@ final class _ReadableHealthGateway implements ConnectedHealthGateway {
       for (final signal in const [
         ('steps', 6842.0, 'steps'),
         ('heartRate', 72.0, 'bpm'),
-        ('oxygen', 98.0, '%'),
+        ('weight', 80.0, 'kg'),
         ('sleep', 7.4, 'h'),
       ])
         ConnectedHealthSignalView(
@@ -60,20 +56,44 @@ final class _ReadableHealthGateway implements ConnectedHealthGateway {
   Future<ConnectedHealthSnapshot> synchronize() async => snapshot;
 }
 
-Widget _subject({required Locale locale, required double textScale}) {
-  final premium = SubscriptionState(
-    plan: CommercePlan.pro,
-    entitlements: const {CommerceEntitlement.advancedIntelligence},
-    authority: EntitlementAuthority.verifiedServer,
-    isPurchasable: true,
-    canRestorePurchases: true,
+final class _EmptyHealthGateway implements ConnectedHealthGateway {
+  const _EmptyHealthGateway();
+
+  static final snapshot = ConnectedHealthSnapshot(
+    status: ConnectedHealthStatus.permissionRequired,
+    platformSource: null,
+    availableSources: const [],
+    signals: const [],
+    importedCount: 0,
+    lastSyncAt: null,
+    failureCode: null,
   );
+
+  @override
+  Future<ConnectedHealthSnapshot> load() async => snapshot;
+  @override
+  Future<void> openSystemSettings() async {}
+  @override
+  Future<ConnectedHealthSnapshot> requestPermissions() async => snapshot;
+  @override
+  Future<ConnectedHealthSnapshot> requestWeightWritePermission() async =>
+      snapshot;
+  @override
+  Future<ConnectedHealthSnapshot> revokePermissions() async => snapshot;
+  @override
+  Future<ConnectedHealthSnapshot> synchronize() async => snapshot;
+}
+
+Widget _subject({
+  required Locale locale,
+  required double textScale,
+  bool empty = false,
+}) {
   return ProviderScope(
     overrides: [
       connectedHealthGatewayProvider.overrideWithValue(
-        const _ReadableHealthGateway(),
+        empty ? const _EmptyHealthGateway() : const _ReadableHealthGateway(),
       ),
-      verifiedSubscriptionStateProvider.overrideWithValue(AsyncData(premium)),
       liveHealthNowProvider.overrideWithValue(
         () => DateTime(2026, 8, 21, 10, 19, 42),
       ),
@@ -108,8 +128,29 @@ Widget _subject({required Locale locale, required double textScale}) {
 }
 
 void main() {
+  testWidgets('empty dashboard widget shows only the external link control', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      _subject(locale: const Locale('ar'), textScale: 1.6, empty: true),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const Key('dashboard-fitness-link-action')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('dashboard-fitness-last-sync')), findsNothing);
+    expect(find.text('غير متصل'), findsNothing);
+    expect(find.text('Not connected'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
-    'all 25 locales keep both dashboard watch pages contained at 160%',
+    'all 25 locales keep the unified dashboard fitness widget contained at 160%',
     (tester) async {
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1;
@@ -120,26 +161,14 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 350));
         expect(
-          find.byKey(const Key('dashboard-live-health-watch-slot')),
+          find.byKey(const Key('dashboard-live-fitness-watch-slot')),
           findsOneWidget,
           reason: locale.toLanguageTag(),
         );
         expect(tester.takeException(), isNull, reason: locale.toLanguageTag());
 
-        await tester.fling(
-          find.byType(PageView),
-          Offset(
-            Directionality.of(tester.element(find.byType(PageView))) ==
-                    TextDirection.rtl
-                ? 360
-                : -360,
-            0,
-          ),
-          1200,
-        );
-        await tester.pump(const Duration(milliseconds: 800));
         expect(
-          find.byKey(const Key('dashboard-medical-device-slot')),
+          find.byKey(const Key('dashboard-fitness-link-action')),
           findsOneWidget,
           reason: locale.toLanguageTag(),
         );
@@ -156,7 +185,7 @@ void main() {
     (locale: Locale('ar'), scale: 1.6),
   ]) {
     testWidgets(
-      '${configuration.locale.languageCode} keeps watch and fitness-device art readable at ${configuration.scale}x',
+      '${configuration.locale.languageCode} keeps the unified fitness widget readable at ${configuration.scale}x',
       (tester) async {
         tester.view.physicalSize = const Size(390, 844);
         tester.view.devicePixelRatio = 1;
@@ -172,22 +201,14 @@ void main() {
         await tester.pump(const Duration(milliseconds: 350));
 
         final watchSlot = find.byKey(
-          const Key('dashboard-live-health-watch-slot'),
-        );
-        final medicalSlot = find.byKey(
-          const Key('dashboard-medical-device-slot'),
+          const Key('dashboard-live-fitness-watch-slot'),
         );
         expect(watchSlot, findsOneWidget);
-        expect(medicalSlot, findsOneWidget);
-        for (final artwork in [
-          find.byKey(const Key('bil-live-health-watch')),
-          find.byKey(const Key('bil-live-medical-monitor')),
-        ]) {
-          expect(artwork, findsOneWidget);
-          final size = tester.getSize(artwork);
-          expect(size.width, inInclusiveRange(176, 188));
-          expect(size.height, inInclusiveRange(176, 188));
-        }
+        final artwork = find.byKey(const Key('bil-live-health-watch'));
+        expect(artwork, findsOneWidget);
+        final size = tester.getSize(artwork);
+        expect(size.width, inInclusiveRange(190, 212));
+        expect(size.height, inInclusiveRange(190, 212));
         expect(
           Directionality.of(tester.element(watchSlot)),
           configuration.locale.languageCode == 'ar'
@@ -202,52 +223,31 @@ void main() {
         );
         expect(tester.takeException(), isNull);
         expect(
-          find.text(
-            configuration.locale.languageCode == 'ar'
-                ? 'مصدر الصحة متصل'
-                : 'Health source connected',
-          ),
+          find.byKey(const Key('dashboard-fitness-last-sync')),
           findsOneWidget,
         );
-
-        await tester.fling(
-          find.byType(PageView),
-          Offset(configuration.locale.languageCode == 'ar' ? 360 : -360, 0),
-          1200,
-        );
-        await tester.pump(const Duration(milliseconds: 800));
         expect(
-          find.byKey(const Key('bil-live-medical-monitor')).hitTestable(),
+          find.byKey(const Key('dashboard-fitness-reading-weight')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('dashboard-fitness-link-action')),
           findsOneWidget,
         );
         expect(find.text('Connected'), findsNothing);
-        expect(
-          find.byKey(const Key('dashboard-medical-status-label')),
-          findsOneWidget,
-        );
         expect(
           find.text(
             configuration.locale.languageCode == 'ar'
                 ? 'غير متصل'
                 : 'Not connected',
           ),
-          findsOneWidget,
+          findsNothing,
         );
-        final medicalDot = tester.widget<Container>(
-          find.byKey(const Key('dashboard-medical-status-dot')),
+        expect(
+          find.byKey(const Key('dashboard-medical-device-slot')),
+          findsNothing,
         );
-        final medicalDecoration = medicalDot.decoration! as BoxDecoration;
-        expect(medicalDecoration.color, const Color(0xFF9CA3AF));
         expect(tester.takeException(), isNull);
-        if (configuration.locale.languageCode == 'en' &&
-            configuration.scale == 1) {
-          await expectLater(
-            find.byType(Scaffold),
-            matchesGoldenFile(
-              'goldens/dashboard_health_medical_readable_390.png',
-            ),
-          );
-        }
 
         await tester.pumpWidget(const SizedBox.shrink());
         await tester.pump();

@@ -13,7 +13,7 @@ require Product Owner and legal approval in Play Console.**
 
 The Android v1 production permission surface reads steps, active energy,
 exercise sessions, sleep sessions, heart rate, resting heart rate, heart-rate
-variability, oxygen saturation, weight, and nutrition from Health Connect.
+variability, weight, and nutrition from Health Connect.
 These readings power the user-visible watch, sleep, recovery, and activity
 views. Write permission
 is limited to weight and nutrition records explicitly selected by the user for
@@ -29,9 +29,8 @@ state that the app is not a medical device, and state that it does not diagnose,
 treat, cure, or prevent a medical condition. The owner limited this Android
 release to compatible external fitness devices. BLE discovery, restore/connect,
 parsing, policy, and display allow only the standard weight-scale (`181D`), body-
-composition (`181B`), and heart-rate (`180D`) profiles. Blood-pressure (`1810`),
-glucose (`1808`), pulse-oximetry (`1822`), and thermometer (`1809`) BLE profiles
-are excluded from the product paths. On that code, device, purpose, and claims
+composition (`181B`), and heart-rate (`180D`) profiles. Every other BLE profile
+is excluded from the product paths by a positive allow-list. On that code, device, purpose, and claims
 boundary, **Medical Device Apps is not applicable to this release**. Re-evaluate
 before submission if the final signed AAB or intended devices/claims expand.
 
@@ -56,4 +55,4 @@ Before submission:
 6. Complete physical-device tests for permission grant, denial, revocation,
    partial authorization, and deletion behavior.
 7. Test weight-scale, body-composition, and heart-rate BLE peripherals and verify
-   that unsupported medical profiles never appear, reconnect, parse, or display.
+   that unsupported profiles never appear, reconnect, parse, or display.

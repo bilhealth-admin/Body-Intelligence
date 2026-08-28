@@ -115,29 +115,31 @@ void main() {
     expect(components, isNot(contains('entry.protocol')));
   });
 
-  test('watch sync stays free while fitness-device Bluetooth is Premium', () {
-    final dashboard = File(
-      'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
-    ).readAsStringSync();
-    final page = File(
-      'lib/features/connected_health/connected_health_page.dart',
-    ).readAsStringSync();
-    final card = File(
-      'lib/features/connected_health/widgets/connected_health_card.dart',
-    ).readAsStringSync();
+  test(
+    'dashboard exposes one truthful fitness widget without a side device card',
+    () {
+      final dashboard = File(
+        'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
+      ).readAsStringSync();
+      final page = File(
+        'lib/features/connected_health/connected_health_page.dart',
+      ).readAsStringSync();
+      final card = File(
+        'lib/features/connected_health/widgets/connected_health_card.dart',
+      ).readAsStringSync();
 
-    expect(dashboard, isNot(contains('Smart-watch and health sync')));
-    expect(page, contains("Key('medical-devices-premium-gate')"));
-    expect(page, contains("Key('connected-health-live-watch-card')"));
-    expect(page, contains('child: const _MedicalDeviceSection()'));
-    expect(card, contains('LiveHealthWatch('));
-    expect(card, contains('BilMedicalMonitor('));
-    expect(card, contains('PremiumDashboardCardLock('));
-    expect(card, contains('locked: !widget.medicalDevicesUnlocked'));
-    expect(card, contains("Key('dashboard-live-health-watch-slot')"));
-    expect(card, contains("Key('dashboard-medical-device-preview')"));
-    expect(card, contains("context.push('/connected-health')"));
-  });
+      expect(dashboard, isNot(contains('Smart-watch and health sync')));
+      expect(page, contains("Key('medical-devices-premium-gate')"));
+      expect(page, contains("Key('connected-health-live-watch-card')"));
+      expect(page, contains('child: const _MedicalDeviceSection()'));
+      expect(card, contains('LiveHealthWatch('));
+      expect(card, contains("Key('dashboard-live-fitness-watch-slot')"));
+      expect(card, contains("Key('dashboard-fitness-link-action')"));
+      expect(card, contains("Key('dashboard-fitness-last-sync')"));
+      expect(card, isNot(contains("Key('dashboard-medical-device-preview')")));
+      expect(card, contains("context.push('/connected-health')"));
+    },
+  );
 
   test('all connected health presentation uses the direct25 contract', () {
     final presentation = Directory('lib/features/connected_health')

@@ -26,7 +26,8 @@ void main() {
     expect(surface, contains("Key('health-hub-connect-button')"));
     expect(surface, contains("Key('health-hub-device-carousel')"));
     expect(surface, contains("Key('health-hub-fixed-square-watch')"));
-    expect(surface, contains('BilMedicalMonitor('));
+    expect(surface, contains("Key('dashboard-live-fitness-watch-slot')"));
+    expect(surface, isNot(contains("Key('dashboard-medical-device-slot')")));
   });
 
   test('Health Hub polish remains presentation-only', () {

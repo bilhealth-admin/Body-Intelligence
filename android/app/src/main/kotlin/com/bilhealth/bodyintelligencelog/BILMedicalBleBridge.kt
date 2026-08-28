@@ -24,7 +24,7 @@ class BILMedicalBleBridge(private val context: Context, messenger: BinaryMesseng
   private val seen = ConcurrentHashMap.newKeySet<String>()
   private val handler = Handler(Looper.getMainLooper())
   // Production scope: compatible fitness scales, body-composition devices,
-  // heart-rate sensors and Pulse Oximeter Service (wellness display only).
+  // and heart-rate sensors only.
   private val services = setOf("181D", "181B", "180D")
   private val measurementCharacteristics = setOf("2A9D", "2A9C", "2A37")
 

@@ -19,15 +19,13 @@ must be published/applied in the live site and Play Console before submission.
 The app handles these categories on device:
 
 - Profile and body attributes.
-- Weight, nutrition, meals, hydration, activity, sleep, heart-related metrics,
-  blood pressure, blood glucose, oxygen saturation, respiratory rate, exercise,
-  and provenance associated with imported health records.
+- Weight, nutrition, meals, hydration, activity, sleep, heart-rate metrics,
+  exercise, and provenance associated with imported fitness records.
 - Preferences, locale, theme, consent state, local decisions, explanations, and
   outcome evidence.
 - Compatible fitness-peripheral identity plus weight, body-composition, and
   heart-rate measurements after explicit Bluetooth pairing. The product BLE
-  paths do not support blood-pressure, glucose, pulse-oximetry, or thermometer
-  profiles in this release.
+  paths expose only the explicitly supported fitness profiles in this release.
 
 Under Google's Data Safety definition, those on-device-only uses are **not
 collection** unless the app or one of its SDKs transmits the data off-device.
