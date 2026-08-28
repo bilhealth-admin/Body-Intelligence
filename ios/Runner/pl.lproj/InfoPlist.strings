@@ -1,8 +1,8 @@
-"NSHealthShareUsageDescription" = "BIL odczytuje tylko wybrane przez Ciebie kategorie Zdrowia—aktywność, sen, pomiary ciała, serca i oddechu, ciśnienie, tlen, glukozę, nawodnienie i odżywianie—aby wyświetlać prywatną oś czasu i analizy na tym urządzeniu.";
+"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
 "NSHealthUpdateUsageDescription" = "BIL zapisuje wyłącznie wyraźnie wybraną przez Ciebie dokumentację medyczną, po uzyskaniu odrębnej zgody na jej zapisanie.";
-"NSBluetoothAlwaysUsageDescription" = "BIL łączy się tylko z urządzeniami medycznymi, które wyraźnie sparujesz, dzięki czemu pomiary można importować lokalnie.";
-"NSBluetoothPeripheralUsageDescription" = "BIL łączy się tylko z urządzeniami medycznymi, które wyraźnie sparujesz, dzięki czemu pomiary można importować lokalnie.";
+"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Używaj aparatu tylko wtedy, gdy chcesz zeskanować kod kreskowy, przejrzeć zdjęcie posiłku lub dodać prywatny profil lub zdjęcie postępu.";
 "NSPhotoLibraryUsageDescription" = "Wybierz posiłek, profil lub zdjęcie postępu do przejrzenia przed zapisaniem lub przesłaniem.";
-"NSMicrophoneUsageDescription" = "BIL używa mikrofonu tylko wtedy, gdy wybierzesz wprowadzanie głosowe podczas posiłku.";
-"NSSpeechRecognitionUsageDescription" = "BIL konwertuje wypowiadaną frazę dotyczącą jedzenia na tekst, dzięki czemu możesz ją przejrzeć przed zapisaniem.";
+"NSMicrophoneUsageDescription" = "BIL używa mikrofonu tylko wtedy, gdy wybierzesz głosowe rejestrowanie posiłku lub bezpośrednią rozmowę z BIL AI Coach.";
+"NSSpeechRecognitionUsageDescription" = "BIL zamienia mowę uruchomioną do rejestrowania posiłku lub BIL AI Coach na tekst, który możesz sprawdzić lub wysłać.";

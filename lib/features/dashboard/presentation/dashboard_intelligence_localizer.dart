@@ -1,11 +1,35 @@
 import '../../../engine/body_composition_engine.dart';
 import '../../../engine/one_best_action_engine.dart';
 import '../../../engine/what_changed_engine.dart';
+import '../../../app/localization/runtime_copy.dart';
 
 class DashboardIntelligenceLocalizer {
-  const DashboardIntelligenceLocalizer({required this.arabic});
+  const DashboardIntelligenceLocalizer({bool? arabic, String? localeTag})
+    : localeTag = localeTag ?? (arabic == true ? 'ar' : 'en');
 
-  final bool arabic;
+  final String localeTag;
+
+  DashboardIntelligenceLocalizer forLocale(String tag) =>
+      DashboardIntelligenceLocalizer(localeTag: tag);
+
+  bool get arabic =>
+      localeTag.toLowerCase().split(RegExp('[-_]')).first == 'ar';
+
+  String _localized(String english) {
+    final protein = RegExp(r'^Add about (\d+) g protein$').firstMatch(english);
+    if (protein != null) {
+      return (RuntimeCopy.resolve('Add about {count} g protein', localeTag) ??
+              english)
+          .replaceFirst('{count}', protein.group(1)!);
+    }
+    final hydration = RegExp(r'^Drink (\d+) ml gradually$').firstMatch(english);
+    if (hydration != null) {
+      return (RuntimeCopy.resolve('Drink {count} ml gradually', localeTag) ??
+              english)
+          .replaceFirst('{count}', hydration.group(1)!);
+    }
+    return RuntimeCopy.resolve(english, localeTag) ?? english;
+  }
 
   String compositionValue(
     BodyCompositionMetric metric, {
@@ -30,10 +54,12 @@ class DashboardIntelligenceLocalizer {
       BodyCompositionIssue.missingWaist =>
         'Waist circumference is not recorded',
       BodyCompositionIssue.invalidWaist => 'Waist circumference is invalid',
+      BodyCompositionIssue.missingHip => 'Hip circumference is not recorded',
+      BodyCompositionIssue.invalidHip => 'Hip circumference is invalid',
       BodyCompositionIssue.invalidBodyFat => 'Body fat estimate is invalid',
       null => 'Unavailable',
     };
-    if (!arabic) return english;
+    if (!arabic) return _localized(english);
     return switch (issue) {
       BodyCompositionIssue.missingGender => 'الجنس غير مسجل',
       BodyCompositionIssue.unsupportedGender => 'قيمة الجنس غير مدعومة',
@@ -47,13 +73,15 @@ class DashboardIntelligenceLocalizer {
       BodyCompositionIssue.invalidNeck => 'محيط الرقبة غير صالح',
       BodyCompositionIssue.missingWaist => 'محيط الخصر غير مسجل',
       BodyCompositionIssue.invalidWaist => 'محيط الخصر غير صالح',
+      BodyCompositionIssue.missingHip => 'محيط الورك غير مسجل',
+      BodyCompositionIssue.invalidHip => 'محيط الورك غير صالح',
       BodyCompositionIssue.invalidBodyFat => 'تقدير دهون الجسم غير صالح',
       null => 'غير متاح',
     };
   }
 
   String bestActionTitle(BestAction action) {
-    if (!arabic) return action.title;
+    if (!arabic) return _localized(action.title);
     return switch (action.type) {
       BestActionType.weighIn => 'سجّل وزن اليوم',
       BestActionType.completeLogging => 'أكمل تسجيل وجبة واحدة',
@@ -65,7 +93,7 @@ class DashboardIntelligenceLocalizer {
   }
 
   String bestActionReason(BestAction action) {
-    if (!arabic) return action.reason;
+    if (!arabic) return _localized(action.reason);
     return switch (action.type) {
       BestActionType.weighIn => 'القياس اليومي المتقارب يحسن ثقة الاتجاه.',
       BestActionType.completeLogging =>
@@ -79,7 +107,7 @@ class DashboardIntelligenceLocalizer {
   }
 
   String changedSummary(WhatChangedReport changed) {
-    if (!arabic) return changed.summary;
+    if (!arabic) return _localized(changed.summary);
     return switch (changed.interpretation) {
       ChangeInterpretation.insufficient =>
         'نحتاج قياس وزن آخر في ظروف متقاربة لوصف التغير.',
@@ -93,7 +121,7 @@ class DashboardIntelligenceLocalizer {
   }
 
   String insightTitle(String title) {
-    if (!arabic) return title;
+    if (!arabic) return _localized(title);
     return switch (title) {
       'Protein below target' => 'البروتين أقل من الهدف',
       'Hydration opportunity' => 'فرصة لتحسين شرب الماء',

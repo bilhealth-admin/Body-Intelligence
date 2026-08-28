@@ -1,11 +1,14 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../app/router/app_router.dart';
 import '../domain/daily_reminder.dart';
 import 'bil_notification_service.dart';
+import 'bil_notification_navigation.dart';
 import 'daily_reminder_store.dart';
 
 /// Keeps the optional 24-hour return reminder aligned with real app absence.
@@ -35,6 +38,9 @@ class _InactivityReminderCoordinatorState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      BilNotificationNavigation.configure(navigate: AppRouter.router.go);
+    }
     unawaited(_cancelSafely());
   }
 

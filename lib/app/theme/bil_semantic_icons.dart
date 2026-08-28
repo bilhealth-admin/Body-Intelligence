@@ -12,8 +12,9 @@ abstract final class BilSemanticIcons {
   static const progressSelected = Icons.insights_rounded;
   static const insights = Icons.auto_awesome_outlined;
   static const insightsSelected = Icons.auto_awesome_rounded;
-  static const more = Icons.grid_view_outlined;
-  static const moreSelected = Icons.grid_view_rounded;
+  // Keep "More" visually distinct from the dashboard grid used by Today.
+  static const more = Icons.more_horiz_rounded;
+  static const moreSelected = Icons.more_horiz_rounded;
   static const water = Icons.water_drop_outlined;
   static const weight = Icons.monitor_weight_outlined;
   static const meal = Icons.restaurant_rounded;

@@ -138,7 +138,7 @@ class LocalCoachCommandParser {
         ];
       }
     }
-    if (_contains(value, const [
+    final hasWeightConcept = _contains(value, const [
       'weight',
       'weigh',
       'kg',
@@ -150,7 +150,8 @@ class LocalCoachCommandParser {
       'peso',
       'kilo',
       'ağırlık',
-    ])) {
+    ]);
+    if (hasWeightConcept) {
       if (number != null && number >= 20 && number <= 500) {
         final date = dateResolver.resolve(
           input,
@@ -169,16 +170,29 @@ class LocalCoachCommandParser {
           ),
         ];
       }
-      return [
-        IntelligenceAction(
-          id: 'review-weight',
-          type: IntelligenceActionType.addWeight,
-          label: tr('Open weight check-in', 'فتح تسجيل الوزن'),
-          requiresConfirmation: false,
-        ),
-      ];
+      final hasWeightActionIntent = _contains(value, const [
+        'log weight',
+        'record weight',
+        'add weight',
+        'open weight',
+        'open my weight',
+        'weight check-in',
+        'سجل الوزن',
+        'اضف الوزن',
+        'افتح سجل الوزن',
+      ]);
+      if (hasWeightActionIntent) {
+        return [
+          IntelligenceAction(
+            id: 'review-weight',
+            type: IntelligenceActionType.addWeight,
+            label: tr('Open weight check-in', 'فتح تسجيل الوزن'),
+            requiresConfirmation: false,
+          ),
+        ];
+      }
     }
-    if (_contains(value, const [
+    final hasMealConcept = _contains(value, const [
       'i ate',
       'meal',
       'food',
@@ -191,7 +205,20 @@ class LocalCoachCommandParser {
       'comida',
       'yemek',
       'öğün',
-    ])) {
+    ]);
+    final hasMealActionIntent = _contains(value, const [
+      'i ate',
+      'log meal',
+      'add meal',
+      'record meal',
+      'open meal log',
+      'أكلت',
+      'اكلت',
+      'سجل وجبة',
+      'اضف وجبة',
+      'افتح سجل الوجبات',
+    ]);
+    if (hasMealConcept && hasMealActionIntent) {
       return [
         IntelligenceAction(
           id: 'review-meal',
@@ -202,7 +229,7 @@ class LocalCoachCommandParser {
         ),
       ];
     }
-    if (_contains(value, const [
+    final hasWorkoutConcept = _contains(value, const [
       'i trained',
       'workout',
       'exercise',
@@ -215,7 +242,19 @@ class LocalCoachCommandParser {
       'ejercicio',
       'antrenman',
       'egzersiz',
-    ])) {
+    ]);
+    final hasWorkoutActionIntent = _contains(value, const [
+      'i trained',
+      'log workout',
+      'add workout',
+      'record workout',
+      'open workout',
+      'تمرنت',
+      'سجل تمرين',
+      'اضف تمرين',
+      'افتح التمارين',
+    ]);
+    if (hasWorkoutConcept && hasWorkoutActionIntent) {
       return [
         IntelligenceAction(
           id: 'review-workout',

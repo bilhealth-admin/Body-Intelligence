@@ -53,6 +53,15 @@ class _SafeContextualBannerSlotState
 
   Future<void> _load(ContextualBannerGateway gateway) async {
     if (_loading || _handle != null) return;
+    final currentDecision = ref.read(adDecisionProvider(widget.placement));
+    final currentGateway = ref.read(contextualAdGatewayProvider);
+    if (!_appActive ||
+        !currentDecision.mayRequestAd ||
+        currentGateway is! ContextualBannerGateway ||
+        !identical(currentGateway, gateway) ||
+        !gateway.isConfigured) {
+      return;
+    }
     final generation = _generation;
     final placement = widget.placement;
     _loading = true;
@@ -98,10 +107,21 @@ class _SafeContextualBannerSlotState
 
   void _scheduleLoad(ContextualBannerGateway gateway) {
     if (_loadScheduled || _loading || _attempted || _handle != null) return;
+    final scheduledGeneration = _generation;
     _loadScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadScheduled = false;
-      if (!mounted) return;
+      if (!mounted || scheduledGeneration != _generation || !_appActive) {
+        return;
+      }
+      final currentDecision = ref.read(adDecisionProvider(widget.placement));
+      final currentGateway = ref.read(contextualAdGatewayProvider);
+      if (!currentDecision.mayRequestAd ||
+          currentGateway is! ContextualBannerGateway ||
+          !identical(currentGateway, gateway) ||
+          !gateway.isConfigured) {
+        return;
+      }
       _load(gateway);
     });
   }
@@ -114,12 +134,14 @@ class _SafeContextualBannerSlotState
         !decision.mayRequestAd ||
         gateway is! ContextualBannerGateway ||
         !gateway.isConfigured) {
-      if (_handle != null || _loading || _loadScheduled) _invalidate();
+      if (_handle != null || _loading || _loadScheduled) {
+        _invalidate(immediate: true);
+      }
       return const SizedBox.shrink();
     }
     if ((_activeGateway != null && !identical(_activeGateway, gateway)) ||
         (_activePlacement != null && _activePlacement != widget.placement)) {
-      _invalidate();
+      _invalidate(immediate: true);
     }
     if (_handle == null && !_loading && !_attempted) {
       _scheduleLoad(gateway);
@@ -130,7 +152,10 @@ class _SafeContextualBannerSlotState
     return Semantics(
       label: MaterialLocalizations.of(context).alertDialogLabel,
       container: true,
-      child: Center(child: handle.widget),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Center(child: handle.widget),
+      ),
     );
   }
 }

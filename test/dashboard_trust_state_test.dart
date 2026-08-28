@@ -101,6 +101,9 @@ void main() {
             (ref) => Stream.value(<MealWithItems>[]),
           ),
           allWaterProvider.overrideWith((ref) => Stream.value(<WaterEntry>[])),
+          dashboardDailyLogsProvider.overrideWith(
+            (ref) => Stream.value(<DailyLog>[]),
+          ),
           weightReminderSkippedTodayProvider.overrideWith(
             (ref) => Stream.value(false),
           ),

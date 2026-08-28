@@ -1,3 +1,3 @@
-import { handler } from './server.ts';
+import { handler } from "./server.ts";
 
-Deno.serve(handler);
+Deno.serve((request) => handler(request));

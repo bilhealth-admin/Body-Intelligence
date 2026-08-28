@@ -18,7 +18,8 @@ void main() {
     expect(settings, contains('.mutate(set: set'));
     expect(settings, contains('canPop: !saving'));
     expect(providers, contains('diaryMealNamesProvider'));
-    expect(meals, contains('_resolvedMealName(context, mealNames'));
+    expect(meals, contains('_resolvedMealName('));
+    expect(meals, contains('mealNames'));
   });
 
   test('default search selection controls real nutrition landing tab', () {

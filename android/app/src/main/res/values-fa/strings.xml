@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BIL - گزارش هوش بدن</string>
+    <string name="health_permissions_rationale_title">حریم خصوصی داده های سلامت</string>
+    <string name="health_permissions_rationale_body">BIL فقط انواع داده های Health Connect را درخواست می کند که برای ویژگی هایی که انتخاب می کنید استفاده کنید. داده های سلامتی شما به صورت پیش فرض به صورت محلی پردازش می شود. می‌توانید در هر زمان از تنظیمات Health Connect مجوزهای فردی را اعطا، رد یا لغو کنید. BIL داده های سلامتی را نمی فروشد و از آنها برای تبلیغات استفاده نمی کند.</string>
+    <string name="health_permissions_privacy_policy_action">سیاست حفظ حریم خصوصی کامل BIL را بخوانید</string>
+</resources>

@@ -21,6 +21,9 @@ import '../services/cloud_session_sync_coordinator.dart';
 import '../services/cloud_sync_consent_repository.dart';
 import '../services/cloud_transport_activation_lock.dart';
 import '../services/local_data_account_boundary.dart';
+import '../services/app_database_cloud_inbox_applier.dart';
+import '../services/startup_cloud_profile_restore_service.dart';
+import '../services/supabase_startup_cloud_profile_reader.dart';
 
 /// Bootstrap input deliberately excludes credentials. Supabase owns its
 /// ephemeral session and the payload cipher owns its key material.
@@ -90,7 +93,7 @@ final localDataAccountBoundaryProvider = Provider<LocalDataAccountBoundary>((
 
 final cloudSyncConsentRepositoryProvider = Provider<CloudSyncConsentRepository>(
   (ref) {
-    if (!AppEnvironment.cloudConfigured || !Supabase.instance.isInitialized) {
+    if (!AppEnvironment.supabaseRuntimeReady) {
       throw StateError('BIL cloud consent is not configured.');
     }
     return CloudSyncConsentRepository(client: Supabase.instance.client);
@@ -99,7 +102,7 @@ final cloudSyncConsentRepositoryProvider = Provider<CloudSyncConsentRepository>(
 
 final cloudSyncConsentStateProvider =
     FutureProvider.autoDispose<CloudSyncConsentState>((ref) async {
-      if (!AppEnvironment.cloudConfigured || !Supabase.instance.isInitialized) {
+      if (!AppEnvironment.supabaseRuntimeReady) {
         return const CloudSyncConsentState(
           availability: CloudSyncConsentAvailability.unavailable,
         );
@@ -107,11 +110,12 @@ final cloudSyncConsentStateProvider =
       return ref.watch(cloudSyncConsentRepositoryProvider).read();
     });
 
-/// Binds guest/local data to the first authenticated account and fails closed
-/// if another account later attempts to enter the same non-empty local store.
+/// Verifies the active account owns its isolated local database namespace.
+/// Guest/legacy adoption is handled by the database connection layer; this
+/// remains a fail-closed guard against ownership corruption.
 final localDataAccountBindingProvider =
     FutureProvider.autoDispose<LocalDataAccountBinding?>((ref) async {
-      if (!AppEnvironment.cloudConfigured || !Supabase.instance.isInitialized) {
+      if (!AppEnvironment.supabaseRuntimeReady) {
         return null;
       }
       final user = Supabase.instance.client.auth.currentUser;
@@ -126,7 +130,7 @@ final localDataAccountBindingProvider =
 /// Startup remains transport-locked. This provider only exposes the guarded
 /// manual service used by the Sharing & Privacy "Sync now" action.
 final cloudManualSyncServiceProvider = Provider<CloudManualSyncService>((ref) {
-  if (!AppEnvironment.cloudConfigured || !Supabase.instance.isInitialized) {
+  if (!AppEnvironment.supabaseRuntimeReady) {
     throw StateError('BIL manual cloud sync is not configured.');
   }
   return CloudManualSyncService(
@@ -135,6 +139,42 @@ final cloudManualSyncServiceProvider = Provider<CloudManualSyncService>((ref) {
     accountBoundary: ref.watch(localDataAccountBoundaryProvider),
   );
 });
+
+/// Bounded profile-only recovery for an already-bound local account namespace.
+/// The Supabase adapter performs SELECT only and requires an existing local
+/// payload key; no general synchronization or remote mutation can start here.
+final startupCloudProfileRestoreServiceProvider =
+    Provider<StartupCloudProfileRestoreService>((ref) {
+      if (!AppEnvironment.supabaseRuntimeReady) {
+        throw StateError('BIL startup profile recovery is not configured.');
+      }
+      final client = Supabase.instance.client;
+      final database = ref.watch(databaseProvider);
+      final boundary = ref.watch(localDataAccountBoundaryProvider);
+      final reader = SupabaseStartupCloudProfileReader(
+        client: client,
+        keyRepository: CloudAccountKeyRepository(client: client),
+      );
+      return StartupCloudProfileRestoreService(
+        currentOwnerId: () => client.auth.currentUser?.id,
+        readBoundOwnerId: boundary.readBoundOwnerId,
+        hasLocalProfile: () async =>
+            (await database.select(database.userProfile).get()).isNotEmpty,
+        reader: reader,
+        applyLocalProfile: (profile) async {
+          final report =
+              await AppDatabaseCloudInboxApplier(
+                database: database,
+                accountBoundary: boundary,
+              ).apply(
+                ownerId: profile.ownerId,
+                localDeviceId: 'startup-read-only-profile',
+                records: <CloudRecordEnvelope>[profile],
+              );
+          return report.applied == 1 || report.acknowledged == 1;
+        },
+      );
+    });
 
 /// Production preparation pass for encrypted cloud sync.
 ///
@@ -145,7 +185,7 @@ final cloudManualSyncServiceProvider = Provider<CloudManualSyncService>((ref) {
 /// offline in this phase, so no health record can leave the device yet.
 final cloudRuntimePreparationProvider =
     FutureProvider.autoDispose<CloudRuntimePreparation>((ref) async {
-      if (!AppEnvironment.cloudConfigured || !Supabase.instance.isInitialized) {
+      if (!AppEnvironment.supabaseRuntimeReady) {
         return const CloudRuntimePreparation(
           disposition: CloudRuntimeAccessDisposition.unavailable,
         );

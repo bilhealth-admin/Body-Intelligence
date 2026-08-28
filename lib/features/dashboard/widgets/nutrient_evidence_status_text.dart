@@ -15,20 +15,24 @@ class NutrientEvidenceStatusText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context);
     final text = switch (state) {
       NutrientEvidenceState.unavailable => dashboardFiveLocaleText(
         'Value unavailable in the logged food evidence.',
         'القيمة غير متاحة في أدلة الطعام المسجلة.',
+        locale: locale,
       ),
       NutrientEvidenceState.partial =>
         informational
             ? dashboardFiveLocaleText(
                 'Partial evidence; foods with unavailable values are excluded.',
                 'دليل جزئي؛ لا يشمل الإجمالي الأطعمة ذات القيم غير المتاحة.',
+                locale: locale,
               )
             : dashboardFiveLocaleText(
                 'Partial evidence: total includes only foods with known values.',
                 'دليل جزئي: الإجمالي يشمل الأطعمة ذات القيم المعروفة فقط.',
+                locale: locale,
               ),
       NutrientEvidenceState.complete => '',
     };

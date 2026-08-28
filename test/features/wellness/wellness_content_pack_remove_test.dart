@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:body_intelligence_log/features/wellness/domain/wellness_content_pack.dart';
+import 'package:body_intelligence_log/features/wellness/domain/workout_release_catalog_item.dart';
+import 'package:body_intelligence_log/features/wellness/repositories/workout_release_catalog_repository.dart';
 import 'package:body_intelligence_log/features/wellness/services/wellness_content_pack_manager.dart';
 import 'package:body_intelligence_log/features/wellness/services/wellness_media_cache.dart';
 import 'package:crypto/crypto.dart';
@@ -105,16 +107,18 @@ void main() {
     expect(await manager.installedPacks(), hasLength(1));
   });
 
-  test('trusted installed items inherit persisted pack access', () async {
+  test('installed but unapproved workout items remain fail-closed', () async {
     final fixture = await _writeInstalledWorkoutPack(
       packsDirectory,
       cacheDirectory,
       minimumAccess: WellnessContentAccess.pro,
     );
+    final release = _loadApprovedWorkoutRelease();
     final manager = WellnessContentPackManager(
       client: managerClient,
       mediaCache: mediaCache,
       packsDirectory: packsDirectory,
+      workoutReleaseLoader: () async => release,
     );
 
     final installed = await manager.installedPacks();
@@ -124,9 +128,130 @@ void main() {
     );
 
     expect(installed.single.minimumAccess, WellnessContentAccess.pro);
-    expect(items.single.minimumAccess, WellnessContentAccess.pro);
+    expect(items, isEmpty);
     expect(await fixture.packFile.exists(), isTrue);
   });
+
+  test('only owner-approved path SHA and size reaches trusted items', () async {
+    final release = _loadApprovedWorkoutRelease();
+    final approval = release.firstWhere((item) => item.canPlay);
+    final category = approval.primaryGroupId;
+    const packId = 'bil-workouts-home-v1';
+    final packFile = File(p.join(packsDirectory.path, '$packId-1.json'));
+    final item = <String, dynamic>{
+      'id': approval.variationId,
+      'type': 'workouts',
+      'locale': 'en',
+      'title': 'Approved workout',
+      'description': 'Owner-approved workout demonstration.',
+      'publisher': 'BIL Health',
+      'source_url': 'https://bilhealth.com/workouts/${approval.variationId}',
+      'license_name': 'BIL licensed content',
+      'license_url': 'https://bilhealth.com/licenses/workouts',
+      'verified': true,
+      'duration_seconds': approval.durationMilliseconds! ~/ 1000,
+      'category': category,
+      'category_description': 'Approved workout category.',
+      'category_order': 0,
+      'equipment': <String>['none'],
+      'steps': <String>['Move under control.'],
+      'author': 'BIL exercise review',
+      'attribution': 'BIL owner-approved media.',
+      'reviewed_at': '2026-08-22T00:00:00Z',
+      'safety_reviewed': true,
+      'rights': <String, dynamic>{
+        'mobile': true,
+        'paid': true,
+        'offline': true,
+      },
+      'media': <String, dynamic>{
+        'image': _media(
+          'https://cdn.example.test/${approval.variationId}.webp',
+          'image/webp',
+          List<String>.filled(64, 'a').join(),
+          1000,
+        ),
+        'video': _media(
+          'https://cdn.example.test/${approval.objectPath}',
+          'video/mp4',
+          approval.expectedSha256!,
+          approval.expectedBytes!,
+        ),
+      },
+      'segments': <Map<String, dynamic>>[],
+    };
+    await packFile.writeAsString(
+      jsonEncode(<String, dynamic>{
+        'schema_version': 2,
+        'pack_id': packId,
+        'version': 1,
+        'type': 'workouts',
+        'categories': <String>[category],
+        'items': <Map<String, dynamic>>[item],
+      }),
+      flush: true,
+    );
+    final installed = InstalledWellnessContentPack(
+      id: packId,
+      version: 1,
+      path: packFile.path,
+      installedAt: DateTime.utc(2026),
+      minimumAccess: WellnessContentAccess.pro,
+    );
+    await File(p.join(packsDirectory.path, 'installed.json')).writeAsString(
+      jsonEncode(<Map<String, dynamic>>[installed.toJson()]),
+      flush: true,
+    );
+    final manager = WellnessContentPackManager(
+      client: managerClient,
+      mediaCache: mediaCache,
+      packsDirectory: packsDirectory,
+      workoutReleaseLoader: () async => release,
+    );
+
+    final trusted = await manager.loadTrustedInstalledItems(
+      WellnessContentType.workouts,
+      locale: 'en',
+    );
+    expect(trusted, hasLength(1));
+    expect(trusted.single.id, approval.variationId);
+    expect(trusted.single.minimumAccess, WellnessContentAccess.pro);
+
+    item['media']['video']['sha256'] = List<String>.filled(64, 'b').join();
+    await packFile.writeAsString(
+      jsonEncode(<String, dynamic>{
+        'schema_version': 2,
+        'pack_id': packId,
+        'version': 1,
+        'type': 'workouts',
+        'categories': <String>[category],
+        'items': <Map<String, dynamic>>[item],
+      }),
+      flush: true,
+    );
+    expect(
+      await manager.loadTrustedInstalledItems(
+        WellnessContentType.workouts,
+        locale: 'en',
+      ),
+      isEmpty,
+    );
+  });
+}
+
+List<WorkoutReleaseCatalogItem> _loadApprovedWorkoutRelease() {
+  final descriptors = WorkoutReleaseCatalogRepository.parseRegistry(
+    File(WorkoutReleaseCatalogRepository.registryAssetPath).readAsStringSync(),
+  );
+  return [
+    for (final descriptor in descriptors)
+      ...WorkoutReleaseCatalogRepository.parseBundleManifest(
+        File(descriptor.manifestAsset).readAsStringSync(),
+        expectedBundleId: descriptor.bundleId,
+        expectedContentPackId: descriptor.contentPackId,
+        expectedRecordCount: descriptor.playableCount,
+      ),
+  ];
 }
 
 Future<_InstalledFixture> _writeInstalledWorkoutPack(

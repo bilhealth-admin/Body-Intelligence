@@ -10,19 +10,63 @@ void main() {
     await font.load();
   });
 
-  testWidgets('completed splash adapts to RTL and large text', (tester) async {
+  testWidgets('2026 splash exposes the full identity without loading chrome', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(const _SplashHarness());
+    await tester.pump();
+
+    expect(find.text('BIL'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('premium-splash-wordmark')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('premium-splash-loading-label')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey('premium-splash-progress')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('premium-splash-spinner')), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.textContaining('®'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('premium splash stays stable with RTL and large text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
     await tester.pumpWidget(
       const _SplashHarness(
         locale: Locale('ar'),
         textScaler: TextScaler.linear(2),
       ),
     );
-    await tester.pump(const Duration(milliseconds: 2600));
-    expect(find.text('BODY INTELLIGENCE LOG™'), findsWidgets);
-    expect(find.textContaining('®'), findsNothing);
+    await tester.pump();
+
+    expect(find.text('BIL'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('premium-splash-wordmark')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('premium-splash-loading-label')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey('premium-splash-progress')),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -31,52 +75,62 @@ void main() {
   ) async {
     await tester.pumpWidget(const _SplashHarness(reducedMotion: true));
     await tester.pump();
-    expect(find.text('BODY INTELLIGENCE LOG™'), findsWidgets);
-    expect(find.textContaining('®'), findsNothing);
-    final indicator = tester.widget<LinearProgressIndicator>(
-      find.byType(LinearProgressIndicator),
+
+    expect(find.text('BIL'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('premium-splash-wordmark')),
+      findsOneWidget,
     );
-    expect(indicator.value, .5);
+    expect(find.byKey(const ValueKey('premium-splash-video')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('premium-splash-progress')),
+      findsOneWidget,
+    );
+    final fallback = tester.widget<AnimatedOpacity>(
+      find.byKey(const ValueKey('premium-splash-first-frame-fallback')),
+    );
+    expect(fallback.opacity, 1);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
-  testWidgets('phone splash golden', (tester) async {
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
-    await tester.pumpWidget(const _SplashHarness());
-    await tester.pump(const Duration(milliseconds: 2600));
-    await expectLater(
-      find.byType(MaterialApp),
-      matchesGoldenFile('goldens/premium_splash_phone.png'),
-    );
-  });
-
-  testWidgets('tablet splash golden', (tester) async {
+  testWidgets('premium splash scales safely on tablet', (tester) async {
     tester.view.physicalSize = const Size(1024, 1366);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
+
     await tester.pumpWidget(const _SplashHarness(highContrast: true));
-    await tester.pump(const Duration(milliseconds: 2600));
-    await expectLater(
-      find.byType(MaterialApp),
-      matchesGoldenFile('goldens/premium_splash_tablet.png'),
+    await tester.pump();
+
+    expect(find.text('BIL'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('premium-splash-wordmark')),
+      findsOneWidget,
     );
+    expect(
+      find.byKey(const ValueKey('premium-splash-progress')),
+      findsOneWidget,
+    );
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
-  testWidgets('animation keyframes stay visually coherent', (tester) async {
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1;
+  testWidgets('native launch continuity matches the single Flutter splash', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.5;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(const _SplashHarness());
-    for (var frame = 0; frame < 9; frame++) {
-      if (frame > 0) await tester.pump(const Duration(milliseconds: 325));
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesGoldenFile(
-          'goldens/premium_splash_frames/frame_${frame.toString().padLeft(2, '0')}.png',
-        ),
-      );
-    }
+
+    await tester.pumpWidget(
+      const _SplashHarness(reducedMotion: true, showSpinner: false),
+    );
+    await tester.pump();
+
+    await expectLater(
+      find.byType(Scaffold),
+      matchesGoldenFile('goldens/premium_splash_native.png'),
+    );
   });
 }
 
@@ -86,12 +140,14 @@ class _SplashHarness extends StatefulWidget {
     this.reducedMotion = false,
     this.highContrast = false,
     this.textScaler = TextScaler.noScaling,
+    this.showSpinner = true,
   });
 
   final Locale locale;
   final bool reducedMotion;
   final bool highContrast;
   final TextScaler textScaler;
+  final bool showSpinner;
 
   @override
   State<_SplashHarness> createState() => _SplashHarnessState();
@@ -106,7 +162,7 @@ class _SplashHarnessState extends State<_SplashHarness>
     super.initState();
     controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2600),
+      duration: bilSplashMinimumDisplayDuration,
     )..forward();
   }
 
@@ -130,7 +186,7 @@ class _SplashHarnessState extends State<_SplashHarness>
             textScaler: widget.textScaler,
           ),
           child: Scaffold(
-            backgroundColor: const Color(0xFF01050D),
+            backgroundColor: const Color(0xFF061A69),
             body: Stack(
               fit: StackFit.expand,
               children: [
@@ -138,7 +194,8 @@ class _SplashHarnessState extends State<_SplashHarness>
                 Center(
                   child: PremiumSplashExperience(
                     controller: controller,
-                    arabic: widget.locale.languageCode == 'ar',
+                    showSpinner: widget.showSpinner,
+                    showLoadingLabel: widget.showSpinner,
                   ),
                 ),
               ],

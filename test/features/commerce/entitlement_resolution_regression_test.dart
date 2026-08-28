@@ -24,7 +24,7 @@ void main() {
       for (final state in [direct, repository, providerState]) {
         expect(state.plan, CommercePlan.free);
         expect(state.entitlements, containsAll(FreePlan.entitlements));
-        expect(state.grants(CommerceEntitlement.cloudSync), isFalse);
+        expect(state.grants(CommerceEntitlement.cloudSync), isTrue);
       }
     },
   );

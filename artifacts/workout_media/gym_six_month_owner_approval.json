@@ -1,0 +1,21 @@
+{
+  "schema": "bil.workout-media.owner-approval.v1",
+  "approvalScope": "bil-gym-six-month-video-plan-v1",
+  "approvedBy": "BIL owner",
+  "approvedAt": "2026-08-22T23:17:42Z",
+  "decision": "accept_all_102_including_visual_advisories",
+  "approvedCount": 102,
+  "approvedVariationIdsSha256": "a222240e841d71d21226a675b2df84450ad4366d5893fdd586f693813e9270bb",
+  "qualifiedBiomechanicsCertification": false,
+  "technicalEvidence": {
+    "ledgerSha256": "7f603e9fc95dff38dde065d3de2391c33c4e84d73d54830821bff47ef83a9bef",
+    "processedComplete": 102,
+    "paidAttemptExactlyOnce": 102,
+    "duration10Seconds": 102,
+    "brandQcPassed": 102,
+    "automatedAdvisoryCount": 51,
+    "automatedAdvisoryType": "wall_pixel_correlation",
+    "automatedAdvisoryTerminal": false,
+    "processedBytes": 1689035579
+  }
+}

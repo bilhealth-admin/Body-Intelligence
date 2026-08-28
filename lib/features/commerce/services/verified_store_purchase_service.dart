@@ -48,6 +48,30 @@ ProductDetails preferredStoreProduct(
   return current;
 }
 
+/// Builds the purchase request with the exact eligible one-time offer token
+/// that produced the displayed price. Other platforms keep their native
+/// ProductDetails selection unchanged.
+PurchaseParam verifiedBoostPurchaseParam({
+  required ProductDetails product,
+  required String accountHash,
+  required TargetPlatform platform,
+  String? offerToken,
+}) {
+  if (platform == TargetPlatform.android &&
+      product is GooglePlayProductDetails) {
+    return GooglePlayPurchaseParam(
+      productDetails: product,
+      applicationUserName: accountHash,
+      obfuscatedProfileId: accountHash,
+      offerToken: offerToken,
+    );
+  }
+  return PurchaseParam(
+    productDetails: product,
+    applicationUserName: accountHash,
+  );
+}
+
 final class VerifiedStoreEntitlement {
   const VerifiedStoreEntitlement({
     required this.plan,
@@ -127,7 +151,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         return;
       }
       final response = await _purchase.queryProductDetails(
-        StoreCatalogConfiguration.productIds,
+        StoreCatalogConfiguration.storefrontProductIds,
       );
       final loaded = <String, ProductDetails>{};
       for (final product in response.productDetails) {
@@ -136,10 +160,11 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
             ? product
             : preferredStoreProduct(existing, product);
       }
-      final missing = StoreCatalogConfiguration.productIds.difference(
-        loaded.keys.toSet(),
-      );
-      if (response.error != null || missing.isNotEmpty) {
+      // Regional availability deliberately returns a partial catalog: a
+      // profitable market exposes Premium AI Coach, while a localized market
+      // exposes Premium. Treating the other tier as "missing" would make the
+      // whole paywall unusable in every correctly configured country.
+      if (response.error != null || loaded.isEmpty) {
         products = const {};
         state = VerifiedStoreState.unavailable;
         messageCode = 'prices_unavailable';
@@ -217,6 +242,40 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     try {
       final started = await _purchase.buyNonConsumable(
         purchaseParam: purchaseParam,
+      );
+      if (started) return;
+      state = VerifiedStoreState.failed;
+      messageCode = 'purchase_not_started';
+      notifyListeners();
+    } on Object {
+      state = VerifiedStoreState.failed;
+      messageCode = 'purchase_failed';
+      notifyListeners();
+    }
+  }
+
+  Future<void> purchaseBoost({String? offerToken}) async {
+    final user = Supabase.instance.client.auth.currentUser;
+    final product = products[StoreCatalogConfiguration.aiBoost];
+    if (user == null || product == null || state != VerifiedStoreState.ready) {
+      messageCode = 'purchase_unavailable';
+      notifyListeners();
+      return;
+    }
+    state = VerifiedStoreState.purchasePending;
+    messageCode = null;
+    notifyListeners();
+    final accountHash = sha256.convert(utf8.encode(user.id)).toString();
+    final purchaseParam = verifiedBoostPurchaseParam(
+      product: product,
+      accountHash: accountHash,
+      platform: defaultTargetPlatform,
+      offerToken: offerToken,
+    );
+    try {
+      final started = await _purchase.buyConsumable(
+        purchaseParam: purchaseParam,
+        autoConsume: false,
       );
       if (started) return;
       state = VerifiedStoreState.failed;
@@ -365,18 +424,28 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
           notifyListeners();
         case PurchaseStatus.purchased:
         case PurchaseStatus.restored:
-          final verified = await _verifyOnServer(purchase);
-          if (verified && purchase is GooglePlayPurchaseDetails) {
+          final boost = purchase.productID == StoreCatalogConfiguration.aiBoost;
+          final verified = boost
+              ? await _verifyBoostOnServer(purchase)
+              : await _verifyOnServer(purchase);
+          if (!boost && verified && purchase is GooglePlayPurchaseDetails) {
             _activeGooglePurchase = purchase;
           }
+          // Google consumables are consumed by the server only after the
+          // durable, idempotent credit succeeds. StoreKit still requires the
+          // transaction to be completed on-device.
           if (verified && purchase.pendingCompletePurchase) {
-            await _purchase.completePurchase(purchase);
+            if (!boost || defaultTargetPlatform != TargetPlatform.android) {
+              await _purchase.completePurchase(purchase);
+            }
           }
           state = verified
               ? VerifiedStoreState.verified
               : VerifiedStoreState.failed;
           messageCode = verified
-              ? 'subscription_verified'
+              ? boost
+                    ? 'ai_boost_verified'
+                    : 'subscription_verified'
               : 'verification_failed';
           notifyListeners();
       }
@@ -417,6 +486,25 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
           data['entitlement_active'] == true;
       if (verified) await refreshEntitlement();
       return verified && entitlement?.grantsPaidAccess == true;
+    } on Object {
+      return false;
+    }
+  }
+
+  Future<bool> _verifyBoostOnServer(PurchaseDetails purchase) async {
+    if (purchase.productID != StoreCatalogConfiguration.aiBoost) return false;
+    try {
+      final response = await Supabase.instance.client.functions.invoke(
+        'verify-store-purchase',
+        body: <String, Object?>{
+          'action': 'verify_ai_boost',
+          'product_id': purchase.productID,
+          'source': purchase.verificationData.source,
+          'verification_data': purchase.verificationData.serverVerificationData,
+        },
+      );
+      final data = response.data;
+      return response.status == 200 && data is Map && data['verified'] == true;
     } on Object {
       return false;
     }

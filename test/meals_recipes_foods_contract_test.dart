@@ -6,14 +6,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('nutrition shell exposes real meals recipes and food CRUD', () {
-    final source = File(
+    final source = [
       'lib/features/nutrition/presentation/meals_recipes_foods_page.dart',
-    ).readAsStringSync();
+      'lib/features/nutrition/presentation/meals_tab.dart',
+      'lib/features/nutrition/presentation/recipes_tab.dart',
+      'lib/features/nutrition/presentation/meals_recipes_components.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
     for (final contract in const [
       "Key('my-meals-tab')",
       "Key('my-recipes-tab')",
-      'FoodPage(embedded: true)',
+      'FoodPage(embedded: true, userOwnedOnly: true)',
       'usualMealsProvider',
       'createTemplateFromHistoricalMeal',
       'instantiateTemplate',

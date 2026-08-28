@@ -11,6 +11,12 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
     with SingleTickerProviderStateMixin, _WellnessCopy {
   double? hours;
   double? recordedHours;
+  DateTime? manualUpdatedAt;
+  int insightWindowDays = 7;
+  SleepSchedule sleepSchedule = const SleepSchedule.defaults();
+  late final SleepScheduleStore sleepScheduleStore;
+  bool scheduleLoading = true;
+  bool scheduleSaving = false;
   bool saving = false;
   bool recordLoading = true;
   Object? recordError;
@@ -20,13 +26,17 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
   late final TabController tabController;
   late Stream<List<DailyLog>> insightsStream;
 
+  void _updateState(VoidCallback update) => setState(update);
+
   @override
   void initState() {
     super.initState();
     recordDate = DateTime.now();
     tabController = TabController(length: 3, vsync: this);
     insightsStream = ref.read(dailyLogRepositoryProvider).watchAll();
+    sleepScheduleStore = SleepScheduleStore();
     Future<void>.microtask(_loadRecord);
+    Future<void>.microtask(_loadSleepSchedule);
   }
 
   @override
@@ -61,9 +71,17 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
               if (saving) tabController.index = 0;
             },
             tabs: [
-              Tab(text: tr('Log', 'تسجيل')),
-              Tab(text: tr('Insights', 'الرؤى')),
-              Tab(text: tr('Learn', 'تعلّم')),
+              for (final label in [
+                tr('Log', 'تسجيل'),
+                tr('Insights', 'الرؤى'),
+                tr('Learn', 'تعلّم'),
+              ])
+                Tab(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(label, maxLines: 1),
+                  ),
+                ),
             ],
           ),
         ),
@@ -76,67 +94,180 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
     );
   }
 
-  Widget _recordTab(DateTime today) => ListView(
-    key: const Key('sleep-log-tab'),
-    padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
-    children: [
-      _HeroPanel(
-        imageAsset: 'assets/images/brand/generated/sleep_hero_photoreal_v1.png',
-        icon: Icons.bedtime_rounded,
-        title: tr('Record last night', 'سجّل نوم الليلة الماضية'),
-        subtitle: tr(
-          'Your real sleep record can inform recovery guidance and Body Twin confidence.',
-          'يساعد سجل نومك الحقيقي في فهم التعافي ورفع ثقة التوأم الجسدي.',
-        ),
-      ),
-      const SizedBox(height: 18),
-      if (recordLoading)
-        const Card(
-          child: SizedBox(
-            height: 220,
-            child: Center(child: CircularProgressIndicator()),
+  Widget _recordTab(DateTime today) {
+    final connected = ref.watch(connectedHealthProvider).value;
+    final connectedSleep = _connectedSleepEvidence(connected);
+    return ListView(
+      key: const Key('sleep-log-tab'),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
+      children: [
+        _HeroPanel(
+          imageAsset:
+              'assets/images/brand/generated/sleep_hero_photoreal_v1.png',
+          icon: Icons.bedtime_rounded,
+          title: tr('Record last night', 'سجّل نوم الليلة الماضية'),
+          subtitle: tr(
+            'Your real sleep record can inform recovery guidance and Body Twin confidence.',
+            'يساعد سجل نومك الحقيقي في فهم التعافي ورفع ثقة التوأم الجسدي.',
           ),
-        )
-      else if (recordError != null)
-        Card(
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(20),
-            leading: const Icon(Icons.error_outline_rounded),
-            title: Text(tr('Sleep history unavailable', 'سجل النوم غير متاح')),
-            subtitle: Text(
+        ),
+        const SizedBox(height: 18),
+        if (connectedSleep != null) ...[
+          Card(
+            key: const Key('sleep-connected-source'),
+            child: ListTile(
+              leading: const Icon(Icons.watch_rounded),
+              title: Text(
+                '${connectedSleep.signal.value.toStringAsFixed(1)} ${tr('hours', 'ساعة')}',
+              ),
+              subtitle: Text(
+                '${tr('Measured by', 'مقاس بواسطة')} ${connectedSleep.signal.source} · '
+                '${tr('Last sync', 'آخر مزامنة')} ${MaterialLocalizations.of(context).formatShortDate(connectedSleep.lastSyncAt)}',
+              ),
+              trailing: const Icon(Icons.verified_rounded, color: Colors.green),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Text(
               tr(
-                'Your saved data was not changed. Try again.',
-                'لم تتغير بياناتك المحفوظة. حاول مجددًا.',
+                'Connected sleep is the source for this night. Manual entry remains a fallback when no measured record is available.',
+                'النوم المتصل هو مصدر هذه الليلة. يبقى الإدخال اليدوي بديلًا عند غياب سجل مقاس.',
               ),
             ),
-            trailing: TextButton(
-              onPressed: _loadRecord,
-              child: Text(tr('Retry', 'إعادة المحاولة')),
+          ),
+          if (connectedSleep.measuredStages.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Card(
+              key: const Key('sleep-measured-stages'),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tr('Sleep', 'النوم'),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final stage in connectedSleep.measuredStages)
+                          Chip(label: Text(stage)),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      tr(
+                        'Sleep stages appear only when a connected device supplies measured stage records.',
+                        'تظهر مراحل النوم فقط عندما يرسل جهاز متصل سجلات مراحل مقاسة.',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 14),
+        ],
+        if (recordLoading)
+          const Card(
+            child: SizedBox(
+              height: 220,
+              child: Center(child: CircularProgressIndicator()),
+            ),
+          )
+        else if (recordError != null)
+          Card(
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(20),
+              leading: const Icon(Icons.error_outline_rounded),
+              title: Text(
+                tr('Sleep history unavailable', 'سجل النوم غير متاح'),
+              ),
+              subtitle: Text(
+                tr(
+                  'Your saved data was not changed. Try again.',
+                  'لم تتغير بياناتك المحفوظة. حاول مجددًا.',
+                ),
+              ),
+              trailing: TextButton(
+                onPressed: _loadRecord,
+                child: Text(tr('Retry', 'إعادة المحاولة')),
+              ),
+            ),
+          )
+        else if (connectedSleep == null)
+          _sleepEditorCard(),
+        if (connectedSleep == null && recordedHours != null) ...[
+          const SizedBox(height: 10),
+          Card(
+            key: const Key('sleep-manual-source'),
+            child: ListTile(
+              leading: const Icon(Icons.edit_note_rounded),
+              title: Text('${tr('Source', 'المصدر')}: ${tr('Manual', 'يدوي')}'),
+              subtitle: Text(
+                manualUpdatedAt == null
+                    ? tr('Updated locally', 'محدّث محليًا')
+                    : '${tr('Updated locally', 'محدّث محليًا')} · '
+                          '${MaterialLocalizations.of(context).formatShortDate(manualUpdatedAt!.toLocal())} '
+                          '${TimeOfDay.fromDateTime(manualUpdatedAt!.toLocal()).format(context)}',
+              ),
             ),
           ),
-        )
-      else
-        _sleepEditorCard(),
-      const SizedBox(height: 14),
-      FilledButton.icon(
-        onPressed:
-            saving || recordLoading || recordError != null || hours == null
-            ? null
-            : () => _save(today),
-        icon: const Icon(Icons.check_rounded),
-        label: Text(
-          saving ? tr('Saving…', 'جارٍ الحفظ…') : tr('Save sleep', 'حفظ النوم'),
+        ],
+        const SizedBox(height: 14),
+        if (connectedSleep == null)
+          FilledButton.icon(
+            onPressed:
+                saving || recordLoading || recordError != null || hours == null
+                ? null
+                : () => _save(today),
+            icon: const Icon(Icons.check_rounded),
+            label: Text(
+              saving
+                  ? tr('Saving…', 'جارٍ الحفظ…')
+                  : tr('Save sleep', 'حفظ النوم'),
+            ),
+          ),
+        const SizedBox(height: 18),
+        _sleepScheduleCard(),
+        const SizedBox(height: 18),
+        _SafetyNote(
+          text: tr(
+            'Sleep duration is a personal log, not a medical measurement or diagnosis.',
+            'مدة النوم سجل شخصي وليست قياسًا طبيًا أو تشخيصًا.',
+          ),
         ),
-      ),
-      const SizedBox(height: 18),
-      _SafetyNote(
-        text: tr(
-          'Sleep duration is a personal log, not a medical measurement or diagnosis.',
-          'مدة النوم سجل شخصي وليست قياسًا طبيًا أو تشخيصًا.',
-        ),
-      ),
-    ],
-  );
+      ],
+    );
+  }
+
+  _ConnectedSleepEvidence? _connectedSleepEvidence(
+    ConnectedHealthSnapshot? snapshot,
+  ) {
+    if (snapshot == null || !snapshot.deviceVerified) return null;
+    ConnectedHealthSignalView? latest;
+    for (final signal in snapshot.signals) {
+      if (signal.key != 'sleep' ||
+          !signal.value.isFinite ||
+          signal.value <= 0 ||
+          signal.value > 14) {
+        continue;
+      }
+      if (latest == null || signal.observedAt.isAfter(latest.observedAt)) {
+        latest = signal;
+      }
+    }
+    final sync = snapshot.lastSyncAt;
+    if (latest == null || sync == null) return null;
+    if (DateTime.now().difference(latest.observedAt.toLocal()).inHours > 36) {
+      return null;
+    }
+    return _ConnectedSleepEvidence(signal: latest, lastSyncAt: sync);
+  }
 
   Widget _sleepEditorCard() => Card(
     child: Padding(
@@ -160,8 +291,24 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
             onChanged: saving ? null : (value) => setState(() => hours = value),
           ),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [Text(tr('0 h', '0 س')), Text(tr('14 h', '14 س'))],
+            children: [
+              Expanded(
+                child: Text(
+                  tr('0 h', '0 س'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.start,
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  tr('14 h', '14 س'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end,
+                ),
+              ),
+            ],
           ),
           if (recordedHours != null) ...[
             const SizedBox(height: 12),
@@ -176,6 +323,105 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
       ),
     ),
   );
+
+  Widget _sleepScheduleCard() {
+    final material = MaterialLocalizations.of(context);
+    final scheduleLabels = bilSleepScheduleLabels(
+      Localizations.localeOf(context).toLanguageTag(),
+    );
+    String formatTime(int hour, int minute) =>
+        material.formatTimeOfDay(TimeOfDay(hour: hour, minute: minute));
+    final goalHours = sleepSchedule.goalMinutes / 60;
+    return Card(
+      key: const Key('sleep-schedule-card'),
+      child: Column(
+        children: [
+          SwitchListTile.adaptive(
+            key: const Key('sleep-schedule-toggle'),
+            secondary: const Icon(Icons.notifications_active_outlined),
+            title: Text(
+              '${tr('Sleep', 'النوم')} · ${tr('Daily reminders', 'التذكيرات اليومية')}',
+            ),
+            value: sleepSchedule.enabled,
+            onChanged: scheduleLoading || scheduleSaving
+                ? null
+                : _setSleepScheduleEnabled,
+          ),
+          const Divider(height: 1),
+          ListTile(
+            enabled: !scheduleLoading && !scheduleSaving,
+            leading: const Icon(Icons.bedtime_outlined),
+            title: Text(scheduleLabels.$1),
+            trailing: Text(
+              formatTime(sleepSchedule.bedHour, sleepSchedule.bedMinute),
+            ),
+            onTap: () => _chooseSleepTime(wake: false),
+          ),
+          ListTile(
+            enabled: !scheduleLoading && !scheduleSaving,
+            leading: const Icon(Icons.wb_sunny_outlined),
+            title: Text(scheduleLabels.$2),
+            trailing: Text(
+              formatTime(sleepSchedule.wakeHour, sleepSchedule.wakeMinute),
+            ),
+            onTap: () => _chooseSleepTime(wake: true),
+          ),
+          ListTile(
+            leading: const Icon(Icons.flag_outlined),
+            title: Text('${tr('Sleep', 'النوم')} · ${tr('Goal', 'الهدف')}'),
+            subtitle: Text(
+              '${goalHours.toStringAsFixed(goalHours % 1 == 0 ? 0 : 1)} ${tr('hours', 'ساعة')}',
+            ),
+            trailing: PopupMenuButton<int>(
+              enabled: !scheduleLoading && !scheduleSaving,
+              tooltip: tr('Goal', 'الهدف'),
+              onSelected: (minutes) => _saveSleepSchedule(
+                sleepSchedule.copyWith(goalMinutes: minutes),
+              ),
+              itemBuilder: (_) => [
+                for (final minutes in const [360, 420, 450, 480, 540])
+                  PopupMenuItem(
+                    value: minutes,
+                    child: Text(
+                      '${(minutes / 60).toStringAsFixed(minutes % 60 == 0 ? 0 : 1)} ${tr('hours', 'ساعة')}',
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.nights_stay_outlined),
+            title: Text('${tr('Sleep', 'النوم')} · ${tr('Reminder', 'تذكير')}'),
+            subtitle: Text(
+              tr(
+                '${sleepSchedule.windDownMinutes} min',
+                '${sleepSchedule.windDownMinutes} د',
+              ),
+            ),
+            trailing: PopupMenuButton<int>(
+              enabled: !scheduleLoading && !scheduleSaving,
+              tooltip: tr('Time', 'الوقت'),
+              onSelected: (minutes) => _saveSleepSchedule(
+                sleepSchedule.copyWith(windDownMinutes: minutes),
+              ),
+              itemBuilder: (_) => [
+                for (final minutes in const [15, 30, 45, 60])
+                  PopupMenuItem(
+                    value: minutes,
+                    child: Text(tr('$minutes min', '$minutes د')),
+                  ),
+              ],
+            ),
+          ),
+          if (scheduleSaving)
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: LinearProgressIndicator(),
+            ),
+        ],
+      ),
+    );
+  }
 
   Widget _insightsTab() => StreamBuilder<List<DailyLog>>(
     key: ValueKey(insightsRevision),
@@ -198,9 +444,12 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
       if (!snapshot.hasData) {
         return const Center(child: CircularProgressIndicator());
       }
+      final cutoff = DateTime.now().subtract(Duration(days: insightWindowDays));
       final recorded = snapshot.data!
-          .where((entry) => entry.sleepHours != null)
-          .take(7)
+          .where(
+            (entry) => entry.sleepHours != null && !entry.date.isBefore(cutoff),
+          )
+          .take(insightWindowDays)
           .toList()
           .reversed
           .toList();
@@ -213,6 +462,23 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
         key: const Key('sleep-insights-tab'),
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
         children: [
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: SegmentedButton<int>(
+              key: const Key('sleep-insight-window'),
+              segments: [
+                ButtonSegment(value: 7, label: Text(tr('7 days', '7 أيام'))),
+                ButtonSegment(
+                  value: 30,
+                  label: Text(tr('30 days', '30 يومًا')),
+                ),
+              ],
+              selected: <int>{insightWindowDays},
+              onSelectionChanged: (selection) =>
+                  setState(() => insightWindowDays = selection.single),
+            ),
+          ),
+          const SizedBox(height: 14),
           Card(
             key: const Key('sleep-stage-overview'),
             child: Padding(
@@ -252,22 +518,11 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
                       ),
                       const SizedBox(width: 20),
                       Expanded(
-                        child: Column(
-                          children: [
-                            _sleepStageRow(
-                              Colors.redAccent,
-                              tr('Awake', 'الاستيقاظ'),
-                            ),
-                            _sleepStageRow(const Color(0xFF9C91FF), 'REM'),
-                            _sleepStageRow(
-                              const Color(0xFF4747F0),
-                              tr('Core', 'الأساسي'),
-                            ),
-                            _sleepStageRow(
-                              const Color(0xFF15158C),
-                              tr('Deep', 'العميق'),
-                            ),
-                          ],
+                        child: Text(
+                          tr(
+                            'Sleep stages appear only when a connected device supplies measured stage records.',
+                            'تظهر مراحل النوم فقط عندما يرسل جهاز متصل سجلات مراحل مقاسة.',
+                          ),
                         ),
                       ),
                     ],
@@ -414,363 +669,120 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
     },
   );
 
-  Widget _sleepStageRow(Color color, String label) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 5),
-    child: Row(
-      children: [
-        Container(
-          width: 5,
-          height: 28,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        const SizedBox(width: 9),
-        Expanded(child: Text(label)),
-        Text(
-          tr('N/A', 'غير متاح'),
-          style: const TextStyle(fontWeight: FontWeight.w800),
-        ),
-      ],
-    ),
-  );
+  Future<void> _loadSleepSchedule() async {
+    final value = await sleepScheduleStore.load();
+    if (!mounted) return;
+    setState(() {
+      sleepSchedule = value;
+      scheduleLoading = false;
+    });
+  }
 
-  Widget _educationTab() {
-    final pages = <({String title, String body, int visual})>[
-      (
-        title: tr(
-          'How does food affect your sleep?',
-          'كيف يؤثر الطعام في نومك؟',
-        ),
-        body: tr(
-          'Spot trends, adjust your routine, and sleep well with BIL.',
-          'اكتشف الأنماط وعدّل روتينك وحسّن نومك مع BIL.',
-        ),
-        visual: 0,
-      ),
-      (
-        title: tr(
-          "Find out what's keeping you awake",
-          'اكتشف ما يبقيك مستيقظًا',
-        ),
-        body: tr(
-          'Your eating and fitness habits might be making it hard to fall asleep and stay asleep.',
-          'قد تجعل عاداتك الغذائية والرياضية النوم والاستمرار فيه أكثر صعوبة.',
-        ),
-        visual: 1,
-      ),
-      (
-        title: tr('Time your meals for the best rest', 'وقّت وجباتك لنوم أفضل'),
-        body: tr(
-          'When you eat can be as important as what you eat, especially later in the day.',
-          'قد يكون توقيت طعامك مهمًا بقدر نوعه، خصوصًا في وقت متأخر من اليوم.',
-        ),
-        visual: 2,
-      ),
-    ];
-    return Column(
-      key: const Key('sleep-learn-tab'),
-      children: [
-        Expanded(
-          child: PageView.builder(
-            key: const Key('sleep-education-carousel'),
-            itemCount: pages.length,
-            onPageChanged: (value) => setState(() => educationPage = value),
-            itemBuilder: (context, index) {
-              final page = pages[index];
-              return ListView(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-                children: [
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(22, 30, 22, 24),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF17178C), Color(0xFF4545EE)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          page.title,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.headlineMedium
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w900,
-                                height: 1.12,
-                              ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          tr('Illustration only', 'رسم توضيحي فقط'),
-                          style: const TextStyle(
-                            color: Color(0xFFCCCCE8),
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 26),
-                        _sleepEducationVisual(page.visual),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    page.body,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      height: 1.45,
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            pages.length,
-            (index) => AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              width: index == educationPage ? 28 : 10,
-              height: 10,
-              margin: const EdgeInsets.symmetric(horizontal: 5),
-              decoration: BoxDecoration(
-                color: index == educationPage
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(99),
+  Future<void> _setSleepScheduleEnabled(bool enabled) async {
+    if (scheduleSaving) return;
+    if (enabled) {
+      try {
+        final allowed = await ref
+            .read(fastingNotificationServiceProvider)
+            .requestPermission();
+        if (!mounted) return;
+        if (!allowed) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                tr(
+                  'Notification permission is off. You can enable it in phone settings.',
+                  'إذن الإشعارات متوقف. يمكنك تفعيله من إعدادات الهاتف.',
+                ),
+              ),
+              action: SnackBarAction(
+                label: tr('Settings', 'الإعدادات'),
+                onPressed: () => ref
+                    .read(fastingNotificationServiceProvider)
+                    .openSystemSettings(),
+              ),
+            ),
+          );
+          return;
+        }
+      } on Object {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              tr(
+                'Notification permission is off. You can enable it in phone settings.',
+                'إذن الإشعارات متوقف. يمكنك تفعيله من إعدادات الهاتف.',
               ),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
-          child: SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              key: const Key('sleep-see-my-data'),
-              onPressed: () => tabController.animateTo(1),
-              child: Text(tr('See my data', 'عرض بياناتي')),
+        );
+        return;
+      }
+    }
+    await _saveSleepSchedule(sleepSchedule.copyWith(enabled: enabled));
+  }
+
+  Future<void> _chooseSleepTime({required bool wake}) async {
+    final initial = TimeOfDay(
+      hour: wake ? sleepSchedule.wakeHour : sleepSchedule.bedHour,
+      minute: wake ? sleepSchedule.wakeMinute : sleepSchedule.bedMinute,
+    );
+    final selected = await showTimePicker(
+      context: context,
+      initialTime: initial,
+    );
+    if (selected == null || !mounted) return;
+    await _saveSleepSchedule(
+      wake
+          ? sleepSchedule.copyWith(
+              wakeHour: selected.hour,
+              wakeMinute: selected.minute,
+            )
+          : sleepSchedule.copyWith(
+              bedHour: selected.hour,
+              bedMinute: selected.minute,
             ),
-          ),
-        ),
-      ],
     );
   }
 
-  Widget _sleepEducationVisual(int visual) => Container(
-    height: 260,
-    width: double.infinity,
-    padding: const EdgeInsets.all(22),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-    ),
-    child: ExcludeSemantics(
-      child: switch (visual) {
-        0 => Row(
-          children: [
-            const Expanded(
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: CircularProgressIndicator(
-                  value: .72,
-                  strokeWidth: 14,
-                  color: Color(0xFF4545EE),
-                  backgroundColor: Color(0xFFE9E9F1),
-                ),
-              ),
+  Future<void> _saveSleepSchedule(SleepSchedule value) async {
+    if (scheduleSaving) return;
+    final languageCode = Localizations.localeOf(context).languageCode;
+    setState(() => scheduleSaving = true);
+    try {
+      await sleepScheduleStore.save(value);
+      final notifications = ref.read(fastingNotificationServiceProvider);
+      if (value.enabled) {
+        await notifications.scheduleSleepSchedule(
+          bedHour: value.bedHour,
+          bedMinute: value.bedMinute,
+          wakeHour: value.wakeHour,
+          wakeMinute: value.wakeMinute,
+          windDownMinutes: value.windDownMinutes,
+          languageCode: languageCode,
+        );
+      } else {
+        await notifications.cancelSleepSchedule();
+      }
+      if (!mounted) return;
+      setState(() => sleepSchedule = value);
+    } on Object {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            tr(
+              'The notification preference could not be saved.',
+              'تعذر حفظ تفضيل الإشعار.',
             ),
-            const SizedBox(width: 24),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  4,
-                  (index) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 9),
-                    child: LinearProgressIndicator(
-                      value: .42 + index * .12,
-                      minHeight: 9,
-                      color: const Color(0xFF4545EE),
-                      backgroundColor: const Color(0xFFE9E9F1),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
-        1 => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: Text(
-                tr('Sleep factors', 'عوامل النوم'),
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ),
-            for (final factor in [
-              (tr('Sugar', 'السكر'), .46),
-              (tr('Water', 'الماء'), .25),
-              (tr('Exercise', 'التمرين'), .67),
-            ]) ...[
-              Text(
-                factor.$1,
-                style: const TextStyle(
-                  color: Color(0xFF30303A),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 5),
-              LinearProgressIndicator(
-                value: factor.$2,
-                minHeight: 10,
-                borderRadius: BorderRadius.circular(99),
-                color: const Color(0xFF2688FF),
-                backgroundColor: const Color(0xFFE9E9F1),
-              ),
-              const SizedBox(height: 12),
-            ],
-          ],
-        ),
-        _ => Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Icon(Icons.restaurant_menu_rounded, color: Color(0xFF4545EE)),
-            const SizedBox(height: 18),
-            for (var index = 0; index < 3; index++)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 11,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE9E9F1),
-                          borderRadius: BorderRadius.circular(99),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 28),
-                    const Icon(
-                      Icons.circle,
-                      size: 10,
-                      color: Color(0xFF4545EE),
-                    ),
-                  ],
-                ),
-              ),
-          ],
-        ),
-      },
-    ),
-  );
-
-  // Retained below the reference carousel as reusable evidence copy for future
-  // accessibility surfaces; it is intentionally not the primary Learn view.
-  // ignore: unused_element
-  Widget _legacyEducationTab() => ListView(
-    key: const Key('sleep-learn-tab'),
-    padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
-    children: [
-      _HeroPanel(
-        icon: Icons.school_outlined,
-        title: tr('Understand your sleep', 'افهم نومك'),
-        subtitle: tr(
-          'Use recorded patterns as context—not as a diagnosis.',
-          'استخدم الأنماط المسجلة كسياق، وليس كتشخيص.',
-        ),
-      ),
-      const SizedBox(height: 16),
-      _sleepLesson(
-        Icons.restaurant_outlined,
-        tr('Food and sleep', 'الطعام والنوم'),
-        tr(
-          'Large late meals may affect comfort for some people. Record timing and compare your own repeated observations.',
-          'قد تؤثر الوجبات الكبيرة المتأخرة في الراحة لدى بعض الأشخاص. سجّل التوقيت وقارن ملاحظاتك المتكررة.',
-        ),
-      ),
-      _sleepLesson(
-        Icons.wb_sunny_outlined,
-        tr('Morning context', 'سياق الصباح'),
-        tr(
-          'Sleep duration alone does not explain energy. Activity, stress, illness, and schedule can matter.',
-          'مدة النوم وحدها لا تفسر الطاقة. قد يؤثر النشاط والضغط والمرض والجدول.',
-        ),
-      ),
-      _sleepLesson(
-        Icons.timeline_rounded,
-        tr('Look for repeated patterns', 'ابحث عن أنماط متكررة'),
-        tr(
-          'One night is not a trend. Use several recorded nights and keep missing days visible.',
-          'ليلة واحدة ليست اتجاهًا. استخدم عدة ليالٍ مسجلة وأبقِ الأيام الناقصة ظاهرة.',
-        ),
-      ),
-      const SizedBox(height: 8),
-      _SafetyNote(
-        text: tr(
-          'Seek qualified medical care for persistent sleep problems, breathing concerns, or severe daytime sleepiness.',
-          'اطلب رعاية طبية مؤهلة عند استمرار مشاكل النوم أو صعوبات التنفس أو النعاس الشديد نهارًا.',
-        ),
-      ),
-    ],
-  );
-
-  Widget _sleepLesson(IconData icon, String title, String body) => Card(
-    margin: const EdgeInsets.only(bottom: 12),
-    child: ListTile(
-      contentPadding: const EdgeInsets.all(16),
-      leading: CircleAvatar(child: Icon(icon)),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Text(body),
-      ),
-    ),
-  );
-
-  Widget _sleepState(
-    IconData icon,
-    String title,
-    String body, {
-    VoidCallback? onRetry,
-  }) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 48),
-          const SizedBox(height: 14),
-          Text(title, style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: 8),
-          Text(body, textAlign: TextAlign.center),
-          if (onRetry != null) ...[
-            const SizedBox(height: 14),
-            OutlinedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: Text(tr('Retry', 'إعادة المحاولة')),
-            ),
-          ],
-        ],
-      ),
-    ),
-  );
+      );
+    } finally {
+      if (mounted) setState(() => scheduleSaving = false);
+    }
+  }
 
   Future<void> _loadRecord() async {
     if (mounted) {
@@ -787,6 +799,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
       setState(() {
         recordedHours = record?.sleepHours;
         hours = record?.sleepHours;
+        manualUpdatedAt = record?.sleepHours == null ? null : record?.updatedAt;
         recordLoading = false;
       });
     } catch (error) {
@@ -806,7 +819,12 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
       final repository = ref.read(dailyLogRepositoryProvider);
       await repository.updateSleepHours(date: date, sleepHours: selectedHours);
       if (!mounted) return;
-      setState(() => recordedHours = selectedHours);
+      final saved = await repository.getForDay(date);
+      if (!mounted) return;
+      setState(() {
+        recordedHours = selectedHours;
+        manualUpdatedAt = saved?.updatedAt ?? DateTime.now();
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -832,5 +850,39 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
     } finally {
       if (mounted) setState(() => saving = false);
     }
+  }
+}
+
+final class _ConnectedSleepEvidence {
+  const _ConnectedSleepEvidence({
+    required this.signal,
+    required this.lastSyncAt,
+  });
+
+  final ConnectedHealthSignalView signal;
+  final DateTime lastSyncAt;
+
+  List<String> get measuredStages {
+    final raw =
+        signal.attributes['measuredStages'] ?? signal.attributes['stages'];
+    if (raw is! List) return const <String>[];
+    final result = <String>{};
+    for (final value in raw) {
+      final stage = value is Map
+          ? value['stage']?.toString()
+          : value?.toString();
+      if (stage == null || stage.trim().isEmpty) continue;
+      final normalized = stage.trim();
+      if (const {
+        'awake',
+        'inBed',
+        'unknown',
+        'unspecified',
+      }.contains(normalized)) {
+        continue;
+      }
+      result.add(normalized);
+    }
+    return result.toList(growable: false);
   }
 }

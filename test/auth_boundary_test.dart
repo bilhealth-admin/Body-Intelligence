@@ -7,7 +7,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('unconfigured account fields are disabled but autofill-ready', (
+  test('store reviewer password path accepts only its dedicated account', () {
+    expect(
+      StoreReviewerLoginPage.acceptsReviewerEmail(
+        ' PLAY-REVIEW@BILHEALTH.COM ',
+      ),
+      isTrue,
+    );
+    expect(
+      StoreReviewerLoginPage.acceptsReviewerEmail('person@example.com'),
+      isFalse,
+    );
+  });
+
+  testWidgets('production passwordless login is enabled by default', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -31,31 +44,30 @@ void main() {
     final fields = tester
         .widgetList<TextFormField>(find.byType(TextFormField))
         .toList();
-    expect(fields, hasLength(2));
-    expect(fields.every((field) => field.enabled == false), isTrue);
+    expect(fields, hasLength(1));
+    expect(fields.single.enabled, isTrue);
+
     final editableFields = tester
         .widgetList<EditableText>(find.byType(EditableText))
         .toList();
-    expect(editableFields, hasLength(2));
-    expect(editableFields.first.autofillHints, contains(AutofillHints.email));
-    expect(editableFields.last.autofillHints, contains(AutofillHints.password));
-    expect(editableFields.last.obscureText, isTrue);
+    expect(editableFields, hasLength(1));
+    expect(editableFields.single.autofillHints, contains(AutofillHints.email));
+    expect(editableFields.single.obscureText, isFalse);
 
-    final signIn = tester.widget<FilledButton>(
+    final verify = tester.widget<FilledButton>(
       find.byKey(const Key('login-submit')),
     );
-    expect(signIn.onPressed, isNull);
-    final localMode = tester.widget<TextButton>(
-      find.widgetWithText(TextButton, 'Continue privately on this device'),
-    );
-    expect(localMode.onPressed, isNotNull);
+    expect(verify.onPressed, isNotNull);
+    expect(find.byKey(const Key('login-password')), findsNothing);
+    expect(find.byKey(const Key('forgot-password')), findsNothing);
+    expect(find.byKey(const Key('open-register')), findsNothing);
     expect(
-      find.text('Cloud account configuration is not enabled in this build.'),
-      findsOneWidget,
+      find.text('Cloud account is not enabled on this build.'),
+      findsNothing,
     );
   });
 
-  testWidgets('registration is a separate complete account screen', (
+  testWidgets('registration remains a separate legacy-compatible screen', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -87,5 +99,53 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('register-submit')), findsOneWidget);
+  });
+
+  testWidgets('store reviewer has dedicated password access without bypass', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MaterialApp(
+          locale: Locale('en'),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: StoreReviewerLoginPage(),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Store reviewer access'), findsOneWidget);
+    expect(find.byKey(const Key('login-email')), findsOneWidget);
+    expect(find.byKey(const Key('login-password')), findsOneWidget);
+    expect(find.byKey(const Key('login-submit')), findsOneWidget);
+    expect(find.byKey(const Key('reviewer-login-back')), findsOneWidget);
+    expect(find.byKey(const Key('forgot-password')), findsNothing);
+    expect(find.byKey(const Key('open-register')), findsNothing);
+    expect(find.text('Continue privately on this device'), findsNothing);
+
+    await tester.enterText(
+      find.byKey(const Key('login-email')),
+      'person@example.com',
+    );
+    await tester.enterText(
+      find.byKey(const Key('login-password')),
+      'not-a-reviewer-password',
+    );
+    await tester.tap(find.byKey(const Key('login-submit')));
+    await tester.pump();
+
+    expect(
+      find.text(
+        'Use only the dedicated credentials supplied in the store review notes.',
+      ),
+      findsAtLeastNWidgets(1),
+    );
   });
 }

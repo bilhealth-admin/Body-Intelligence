@@ -14,8 +14,13 @@ void main() {
       );
 
       expect(result.bodyMassIndex.value, closeTo(28.6621, 0.0001));
-      expect(result.bodyFatPercentage.value, closeTo(24.9892, 0.0001));
-      expect(result.leanBodyMassKg.value, closeTo(70.4351, 0.0001));
+      expect(result.bodyFatPercentage.value, closeTo(25.1039, 0.0001));
+      expect(result.leanBodyMassKg.value, closeTo(70.3274, 0.0001));
+      expect(
+        result.bodyFatPercentage.method,
+        BodyFatEstimateMethod.circumferenceHodgdonBeckett,
+      );
+      expect(result.waistToHeightRatio.value, closeTo(100 / 181, 0.0001));
     });
 
     test('female path preserves shipped BMI-age calculation', () {
@@ -31,9 +36,39 @@ void main() {
       expect(result.bodyMassIndex.value, closeTo(24.9770, 0.0001));
       expect(result.bodyFatPercentage.value, closeTo(32.6225, 0.0001));
       expect(result.leanBodyMassKg.value, closeTo(45.8167, 0.0001));
+      expect(
+        result.bodyFatPercentage.method,
+        BodyFatEstimateMethod.bmiAgeFallback,
+      );
+      expect(result.bodyFatPercentage.uncertainty, EstimateUncertainty.higher);
     });
 
-    test('missing neck identifies the exact field', () {
+    test(
+      'female circumference path requires and uses hip with waist and neck',
+      () {
+        final result = BodyCompositionEngine.calculate(
+          gender: 'female',
+          age: 35,
+          heightCm: 165,
+          currentWeightKg: 68,
+          neckCm: 34,
+          waistCm: 82,
+          hipCm: 100,
+        );
+
+        expect(result.bodyFatPercentage.value, closeTo(32.6728, 0.0001));
+        expect(
+          result.bodyFatPercentage.method,
+          BodyFatEstimateMethod.circumferenceHodgdonBeckett,
+        );
+        expect(
+          result.fatFreeMassKg.value,
+          closeTo(68 * (1 - result.bodyFatPercentage.value! / 100), 0.0001),
+        );
+      },
+    );
+
+    test('missing optional neck uses higher-uncertainty male fallback', () {
       final result = BodyCompositionEngine.calculate(
         gender: 'male',
         age: 35,
@@ -43,11 +78,16 @@ void main() {
         waistCm: 100,
       );
 
-      expect(result.bodyFatPercentage.issue, BodyCompositionIssue.missingNeck);
-      expect(result.leanBodyMassKg.issue, BodyCompositionIssue.missingNeck);
+      expect(result.bodyFatPercentage.isAvailable, isTrue);
+      expect(
+        result.bodyFatPercentage.method,
+        BodyFatEstimateMethod.bmiAgeFallback,
+      );
+      expect(result.bodyFatPercentage.uncertainty, EstimateUncertainty.higher);
+      expect(result.leanBodyMassKg.isAvailable, isTrue);
     });
 
-    test('missing waist identifies the exact field', () {
+    test('missing optional waist uses higher-uncertainty male fallback', () {
       final result = BodyCompositionEngine.calculate(
         gender: 'male',
         age: 35,
@@ -57,8 +97,13 @@ void main() {
         waistCm: null,
       );
 
-      expect(result.bodyFatPercentage.issue, BodyCompositionIssue.missingWaist);
-      expect(result.leanBodyMassKg.issue, BodyCompositionIssue.missingWaist);
+      expect(result.bodyFatPercentage.isAvailable, isTrue);
+      expect(
+        result.bodyFatPercentage.method,
+        BodyFatEstimateMethod.bmiAgeFallback,
+      );
+      expect(result.bodyFatPercentage.uncertainty, EstimateUncertainty.higher);
+      expect(result.leanBodyMassKg.isAvailable, isTrue);
     });
 
     test('invalid height is unavailable with a structured reason', () {

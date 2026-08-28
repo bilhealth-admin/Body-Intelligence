@@ -2,6 +2,61 @@
 /// architecture source-size ceiling.
 abstract final class RuntimeCopySecondary {
   static const values = <String, Map<String, String>>{
+    'Keep your BIL data safe?': {
+      'ar': 'هل تريد الاحتفاظ ببيانات BIL بأمان؟',
+      'en': 'Keep your BIL data safe?',
+      'fr': 'Protéger vos données BIL ?',
+      'es': '¿Quieres proteger tus datos de BIL?',
+      'tr': 'BIL verileriniz güvende kalsın mı?',
+    },
+    'Encrypted backup stores your profile, weight and water so BIL can restore them after reinstalling or changing devices. Nutrition stays on this device.': {
+      'ar':
+          'تحتفظ النسخة المشفّرة بملفك ووزنك ومياهك ليستعيدها BIL بعد إعادة التثبيت أو تغيير الجهاز. تبقى بيانات التغذية على هذا الجهاز.',
+      'en':
+          'Encrypted backup stores your profile, weight and water so BIL can restore them after reinstalling or changing devices. Nutrition stays on this device.',
+      'fr':
+          'La sauvegarde chiffrée conserve votre profil, votre poids et votre eau afin que BIL puisse les restaurer après une réinstallation ou un changement d’appareil. La nutrition reste sur cet appareil.',
+      'es':
+          'La copia cifrada guarda tu perfil, peso y agua para que BIL pueda restaurarlos tras reinstalar o cambiar de dispositivo. La nutrición permanece en este dispositivo.',
+      'tr':
+          'Şifreli yedek, yeniden yükleme veya cihaz değişikliğinden sonra BIL’in geri yükleyebilmesi için profil, kilo ve su verilerinizi saklar. Beslenme verileri bu cihazda kalır.',
+    },
+    'If you later turn sync off, future uploads stop. An existing cloud copy is retained until you delete your account or request data deletion in Privacy.': {
+      'ar':
+          'إذا أوقفت المزامنة لاحقًا، تتوقف عمليات الرفع الجديدة. تبقى النسخة السحابية الموجودة حتى تحذف حسابك أو تطلب حذف البيانات من الخصوصية.',
+      'en':
+          'If you later turn sync off, future uploads stop. An existing cloud copy is retained until you delete your account or request data deletion in Privacy.',
+      'fr':
+          'Si vous désactivez ensuite la synchronisation, les futurs envois s’arrêtent. Une copie cloud existante reste conservée jusqu’à la suppression du compte ou une demande d’effacement dans Confidentialité.',
+      'es':
+          'Si desactivas la sincronización más adelante, se detendrán las futuras cargas. La copia existente se conservará hasta que elimines tu cuenta o solicites borrar los datos en Privacidad.',
+      'tr':
+          'Eşitlemeyi daha sonra kapatırsanız yeni yüklemeler durur. Mevcut bulut kopyası, hesabınızı silene veya Gizlilik bölümünden veri silme talebinde bulunana kadar saklanır.',
+    },
+    'Keep only on this device': {
+      'ar': 'الاحتفاظ على هذا الجهاز فقط',
+      'en': 'Keep only on this device',
+      'fr': 'Conserver sur cet appareil uniquement',
+      'es': 'Guardar solo en este dispositivo',
+      'tr': 'Yalnızca bu cihazda tut',
+    },
+    'Enable encrypted backup': {
+      'ar': 'تشغيل النسخة المشفّرة',
+      'en': 'Enable encrypted backup',
+      'fr': 'Activer la sauvegarde chiffrée',
+      'es': 'Activar copia cifrada',
+      'tr': 'Şifreli yedeklemeyi aç',
+    },
+    'Cloud sync could not run. Check consent and internet.': {
+      'ar': 'تعذر تشغيل المزامنة. تحقق من الموافقة والاتصال بالإنترنت.',
+      'en': 'Cloud sync could not run. Check consent and internet.',
+      'fr':
+          'La synchronisation a échoué. Vérifiez le consentement et la connexion Internet.',
+      'es':
+          'No se pudo sincronizar. Comprueba el consentimiento y la conexión a Internet.',
+      'tr':
+          'Bulut eşitleme çalıştırılamadı. Onayı ve internet bağlantısını kontrol edin.',
+    },
     'Export local data': {
       'ar': 'تصدير البيانات المحلية',
       'en': 'Export local data',
@@ -319,15 +374,16 @@ abstract final class RuntimeCopySecondary {
       'es': 'Dispositivos y salud conectada',
       'tr': 'Cihazlar ve bağlı sağlık',
     },
-    'Manage the watch, medical device, and supported measurement sources.': {
-      'ar': 'إدارة الساعة والجهاز الطبي ومصادر القياس المدعومة.',
+    'Manage the watch, compatible fitness devices, and supported measurement sources.': {
+      'ar': 'إدارة الساعة وأجهزة اللياقة المتوافقة ومصادر القياس المدعومة.',
       'en':
-          'Manage the watch, medical device, and supported measurement sources.',
+          'Manage the watch, compatible fitness devices, and supported measurement sources.',
       'fr':
-          'Gérez la montre, l’appareil médical et les sources de mesure prises en charge.',
+          'Gérez la montre, les appareils de fitness compatibles et les sources de mesure prises en charge.',
       'es':
-          'Gestiona el reloj, el dispositivo médico y las fuentes de medición compatibles.',
-      'tr': 'Saati, tıbbi cihazı ve desteklenen ölçüm kaynaklarını yönetin.',
+          'Gestiona el reloj, los dispositivos de fitness compatibles y las fuentes de medición admitidas.',
+      'tr':
+          'Saati, uyumlu fitness cihazlarını ve desteklenen ölçüm kaynaklarını yönetin.',
     },
     'Daily reminders': {
       'ar': 'التنبيهات اليومية',
@@ -482,6 +538,20 @@ abstract final class RuntimeCopySecondary {
       'fr': 'Point mesuré actuel',
       'es': 'Punto medido actual',
       'tr': 'Mevcut ölçüm noktası',
+    },
+    'Potassium': {
+      'ar': 'البوتاسيوم',
+      'en': 'Potassium',
+      'fr': 'Potassium',
+      'es': 'Potasio',
+      'tr': 'Potasyum',
+    },
+    'Magnesium': {
+      'ar': 'المغنيسيوم',
+      'en': 'Magnesium',
+      'fr': 'Magnésium',
+      'es': 'Magnesio',
+      'tr': 'Magnezyum',
     },
   };
 }

@@ -38,7 +38,7 @@ void main() {
     'supabase/migrations/202608090001_bil_store_atomic_entitlement_persistence.sql',
   );
   final canonicalTiersMigration = read(
-    'supabase/migrations/202608160001_bil_canonical_consumer_tiers.sql',
+    'supabase/migrations/20260815225624_bil_canonical_consumer_tiers.sql',
   );
   final paywall = [
     'lib/features/commerce/presentation/bil_store_plans_page.dart',
@@ -50,6 +50,11 @@ void main() {
     RegExp(r"defaultValue:\s*'bil_(plus|pro|premium|coach)"),
     configuration,
     'Invented fallback product ID found.',
+  );
+  reject(
+    RegExp(r"String\.fromEnvironment\(\s*'BIL_STORE_"),
+    configuration,
+    'Release product IDs must not depend on optional build defines.',
   );
   reject(
     RegExp(r'\b14\s*%|\bVAT\s*14|\b0\.14\b', caseSensitive: false),
@@ -203,16 +208,19 @@ void main() {
     'CommercePlan.premiumAiCoach',
     'Premium AI Coach must be a canonical store tier.',
   );
-  requireText(
-    configuration,
-    'BIL_STORE_PREMIUM_AI_COACH_MONTHLY',
-    'Premium AI Coach monthly store binding is missing.',
-  );
-  requireText(
-    configuration,
-    'BIL_STORE_PREMIUM_AI_COACH_ANNUAL',
-    'Premium AI Coach annual store binding is missing.',
-  );
+  for (final productId in const [
+    'bil_premium',
+    'bil_premium_annual',
+    'bil_premium_ai_coach',
+    'bil_premium_ai_coach_annual',
+    'bil_ai_boost',
+  ]) {
+    requireText(
+      configuration,
+      "'$productId'",
+      'Immutable store binding is missing: $productId.',
+    );
+  }
   reject(
     RegExp(r'BIL_STORE_(?:PLUS|PRO|PREMIUM_PLUS)'),
     configuration,

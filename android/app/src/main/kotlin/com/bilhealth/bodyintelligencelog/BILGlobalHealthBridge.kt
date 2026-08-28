@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.ZoneOffset
+import kotlin.reflect.KClass
 
 /** Production Health Connect bridge. Device/OEM certification is tracked separately. */
 class BILGlobalHealthBridge(
@@ -80,7 +81,10 @@ class BILGlobalHealthBridge(
 
     private suspend fun permissionSnapshot(names: List<String>): Map<String, Boolean> {
         val granted = requireClient().permissionController.getGrantedPermissions()
-        return names.associateWith { name -> recordClass(name)?.let { HealthPermission.getReadPermission(it) in granted } ?: false }
+        return names.associateWith { name ->
+            if (name !in supportedNames) false
+            else recordClass(name)?.let { HealthPermission.getReadPermission(it) in granted } ?: false
+        }
     }
 
     private fun requestPermissions(call: MethodCall, result: MethodChannel.Result) {
@@ -90,7 +94,7 @@ class BILGlobalHealthBridge(
         }
         val names = call.argument<List<String>>("types") ?: supportedNames
         val write = call.argument<Boolean>("write") == true
-        val permissions = names.mapNotNull(::recordClass).flatMap { klass ->
+        val permissions = names.filter(supportedNames::contains).mapNotNull(::recordClass).flatMap { klass ->
             buildList { add(HealthPermission.getReadPermission(klass)); if (write) add(HealthPermission.getWritePermission(klass)) }
         }.toSet()
         pendingPermissionResult = result
@@ -106,22 +110,30 @@ class BILGlobalHealthBridge(
     private suspend fun readChanges(call: MethodCall): Map<String, Any?> {
         val client = requireClient()
         val names = call.argument<List<String>>("types") ?: supportedNames
-        val classes = names.mapNotNull(::recordClass).toSet()
+        val supportedRequestedNames = names.filter(supportedNames::contains).distinct()
+        val classes = supportedRequestedNames.mapNotNull(::recordClass).toSet()
         val incomingToken = call.argument<String>("anchor")
-        // A changes token only observes mutations that occur after the token
-        // is created. Bootstrap the reviewed writable records before creating
-        // the first token, otherwise a record exported before the first Sync
-        // now action can never be read back by BIL.
+        // A changes token only observes mutations after it is created. Read a
+        // bounded history for every requested type before creating the first
+        // token, otherwise existing sleep/activity/watch records are invisible
+        // forever on a user's first synchronization.
         val records = mutableListOf<Map<String, Any?>>()
         if (incomingToken == null) {
             val since = TimeRangeFilter.after(Instant.now().minusSeconds(366L * 24L * 60L * 60L))
-            if ("nutrition" in names) {
-                client.readRecords(ReadRecordsRequest(NutritionRecord::class, since))
+            suspend fun <T : Record> readInitial(recordType: KClass<T>) {
+                client.readRecords(ReadRecordsRequest(recordType, since))
                     .records.mapNotNullTo(records, ::serialize)
             }
-            if ("weight" in names) {
-                client.readRecords(ReadRecordsRequest(WeightRecord::class, since))
-                    .records.mapNotNullTo(records, ::serialize)
+            for (name in supportedRequestedNames) when (name) {
+                "steps" -> readInitial(StepsRecord::class)
+                "activeEnergy" -> readInitial(ActiveCaloriesBurnedRecord::class)
+                "workout" -> readInitial(ExerciseSessionRecord::class)
+                "sleep" -> readInitial(SleepSessionRecord::class)
+                "weight" -> readInitial(WeightRecord::class)
+                "heartRate" -> readInitial(HeartRateRecord::class)
+                "restingHeartRate" -> readInitial(RestingHeartRateRecord::class)
+                "hrv" -> readInitial(HeartRateVariabilityRmssdRecord::class)
+                "nutrition" -> readInitial(NutritionRecord::class)
             }
         }
         val token = incomingToken ?: client.getChangesToken(ChangesTokenRequest(classes))
@@ -167,13 +179,30 @@ class BILGlobalHealthBridge(
             is StepsRecord -> output("steps", record.count.toDouble(), "count", record.startTime)
             is WeightRecord -> output("weight", record.weight.inKilograms, "kg", record.time)
             is ActiveCaloriesBurnedRecord -> output("activeEnergy", record.energy.inKilocalories, "kcal", record.startTime)
+            is HeartRateRecord -> record.samples.lastOrNull()?.let { sample ->
+                output("heartRate", sample.beatsPerMinute.toDouble(), "count/min", sample.time)
+            }
             is RestingHeartRateRecord -> output("restingHeartRate", record.beatsPerMinute.toDouble(), "count/min", record.time)
             is HeartRateVariabilityRmssdRecord -> output("hrv", record.heartRateVariabilityMillis, "ms", record.time)
-            is OxygenSaturationRecord -> output("oxygen", record.percentage.value, "%", record.time)
-            is RespiratoryRateRecord -> output("respiratoryRate", record.rate, "count/min", record.time)
-            is BloodGlucoseRecord -> output("glucose", record.level.inMilligramsPerDeciliter, "mg/dL", record.time)
             is HydrationRecord -> output("water", record.volume.inLiters * 1000.0, "mL", record.startTime)
-            is SleepSessionRecord -> output("sleep", java.time.Duration.between(record.startTime, record.endTime).seconds.toDouble(), "s", record.startTime)
+            is SleepSessionRecord -> output(
+                "sleep",
+                java.time.Duration.between(record.startTime, record.endTime).toMillis() / 3_600_000.0,
+                "h",
+                record.startTime,
+            ) + mapOf(
+                "timeZoneId" to (record.startZoneOffset?.id ?: "UTC"),
+                "attributes" to mapOf(
+                    "sessionId" to metadata.id,
+                    "endedAt" to record.endTime.toString(),
+                    "endTimeZoneOffset" to record.endZoneOffset?.id,
+                    "stages" to record.stages.map { stage -> mapOf(
+                        "stage" to stage.stage,
+                        "startedAt" to stage.startTime.toString(),
+                        "endedAt" to stage.endTime.toString(),
+                    ) },
+                ).filterValues { it != null },
+            )
             is ExerciseSessionRecord -> output("workout", java.time.Duration.between(record.startTime, record.endTime).seconds.toDouble(), "s", record.startTime)
             is NutritionRecord -> output("nutrition", record.energy?.inKilocalories ?: 0.0, "kcal", record.startTime) + mapOf(
                 "attributes" to mapOf(
@@ -223,10 +252,6 @@ class BILGlobalHealthBridge(
         "heartRate" -> HeartRateRecord::class
         "restingHeartRate" -> RestingHeartRateRecord::class
         "hrv" -> HeartRateVariabilityRmssdRecord::class
-        "oxygen" -> OxygenSaturationRecord::class
-        "respiratoryRate" -> RespiratoryRateRecord::class
-        "glucose" -> BloodGlucoseRecord::class
-        "bloodPressureSystolic", "bloodPressureDiastolic" -> BloodPressureRecord::class
         "water" -> HydrationRecord::class
         "nutrition" -> NutritionRecord::class
         else -> null
@@ -236,7 +261,10 @@ class BILGlobalHealthBridge(
 
     companion object {
         const val CHANNEL = "bil/health_connect"
-        val supportedNames = listOf("steps", "activeEnergy", "workout", "weight", "nutrition")
+        val supportedNames = listOf(
+            "steps", "activeEnergy", "workout", "sleep", "weight",
+            "heartRate", "restingHeartRate", "hrv", "nutrition",
+        )
         fun permissionContract(activity: Activity) = PermissionController.createRequestPermissionResultContract()
     }
 }

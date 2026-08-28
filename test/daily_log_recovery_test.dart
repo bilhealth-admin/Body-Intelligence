@@ -10,7 +10,6 @@ import 'package:body_intelligence_log/features/daily_log/providers/daily_log_pro
 import 'package:body_intelligence_log/features/foods/providers/food_provider.dart';
 import 'package:body_intelligence_log/core/units/measurement_units.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
-import 'package:body_intelligence_log/shared/widgets/actionable_error_state.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -22,7 +21,6 @@ void main() {
     'DailyLogPage shows privacy-safe retry for meals/water/usual meals and preserves notes',
     (tester) async {
       final database = AppDatabase.forTesting(NativeDatabase.memory());
-      addTearDown(database.close);
 
       final initialDate = DateTime(2026, 7, 18);
 
@@ -102,7 +100,7 @@ void main() {
       expect(find.byKey(const Key('body-context-other-field')), findsNothing);
 
       await tester.scrollUntilVisible(
-        find.byKey(const Key('daily-log-water-section')),
+        find.byKey(const Key('daily-log-water-shortcut')),
         -400,
         scrollable: find.byType(Scrollable).first,
       );
@@ -112,15 +110,20 @@ void main() {
       expect(find.textContaining('private water detail'), findsNothing);
       expect(find.textContaining('private usual meals detail'), findsNothing);
 
-      // Lazy list construction may retain only the currently visible failure
-      // surface. It must still expose a privacy-safe retry without leaking the
-      // underlying exception detail.
-      expect(find.byType(ActionableErrorState), findsOneWidget);
-      expect(find.textContaining('Retry'), findsNothing);
-
-      expect(find.text('حاول مرة أخرى'), findsOneWidget);
+      // Water stays compact in the diary. Its safe status does not leak the
+      // underlying exception; retry controls live on the focused water page.
+      expect(
+        find.byKey(const Key('daily-log-water-shortcut-status')),
+        findsOneWidget,
+      );
 
       expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+      await tester.pump(Duration.zero);
+      await tester.idle();
+      await database.close();
+      await tester.pump();
     },
   );
 }

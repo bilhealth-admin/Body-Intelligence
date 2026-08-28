@@ -19,10 +19,9 @@ class DashboardSummaryFactory {
     required int dailyRequirement,
     required String weight,
     required String weightUnit,
-    required String bodyMassIndex,
-    required String bodyMassIndexUnit,
     required String bodyFat,
     required String bodyFatUnit,
+    required String fatFreeMass,
   }) => DashboardDailySummarySection(
     title: tr('Daily Summary', 'ملخص اليوم'),
     subtitle: tr(
@@ -82,18 +81,18 @@ class DashboardSummaryFactory {
             Colors.blue,
           ),
           DashboardMetricData(
-            Icons.accessibility_new_rounded,
-            tr('Body mass index', 'مؤشر كتلة الجسم'),
-            bodyMassIndex,
-            bodyMassIndexUnit,
-            Colors.cyan,
-          ),
-          DashboardMetricData(
             Icons.donut_large_rounded,
             tr('Body fat', 'نسبة دهون الجسم'),
             bodyFat,
             bodyFatUnit,
             Colors.pinkAccent,
+          ),
+          DashboardMetricData(
+            Icons.accessibility_new_rounded,
+            tr('Expected fat-free mass', 'الكتلة الخالية من الدهون المتوقعة'),
+            fatFreeMass,
+            '',
+            Colors.teal,
           ),
         ],
       ),

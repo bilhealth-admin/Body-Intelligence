@@ -114,6 +114,11 @@ class MealImageAnalysisService {
         MealImageAnalysisFailure.authenticationRequired,
       );
     }
+    if (response.statusCode == 402) {
+      throw const MealImageAnalysisException(
+        MealImageAnalysisFailure.boostRequired,
+      );
+    }
     if (response.statusCode == HttpStatus.tooManyRequests) {
       throw const MealImageAnalysisException(
         MealImageAnalysisFailure.rateLimited,

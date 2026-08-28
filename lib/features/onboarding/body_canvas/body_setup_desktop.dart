@@ -9,6 +9,7 @@ class _DesktopBodyCanvas extends StatelessWidget {
     required this.onHeight,
     required this.onWaist,
     required this.onNeck,
+    required this.onHips,
     required this.onBirthDate,
     required this.onSex,
     required this.onGoal,
@@ -22,6 +23,7 @@ class _DesktopBodyCanvas extends StatelessWidget {
   final VoidCallback onHeight;
   final VoidCallback onWaist;
   final VoidCallback onNeck;
+  final VoidCallback onHips;
   final VoidCallback onBirthDate;
   final VoidCallback onSex;
   final VoidCallback onGoal;
@@ -85,6 +87,18 @@ class _DesktopBodyCanvas extends StatelessWidget {
                   optional: true,
                   onTap: onNeck,
                 ),
+                if (draft.sexConfirmed && draft.sex == BilSex.female)
+                  _PrivateFieldCard(
+                    title: tr('Hips', 'الورك'),
+                    icon: Icons.accessibility_rounded,
+                    completed: draft.hips != null,
+                    value: measurement(
+                      draft.hips,
+                      draft.units == BilUnits.metric ? 'cm' : 'in',
+                    ),
+                    optional: true,
+                    onTap: onHips,
+                  ),
                 _PrivateFieldCard(
                   title: tr('Activity', 'النشاط'),
                   icon: Icons.directions_run_rounded,
@@ -142,7 +156,7 @@ class _DesktopBodyCanvas extends StatelessWidget {
                   onTap: onBirthDate,
                 ),
                 _PrivateFieldCard(
-                  title: tr('Biological sex', 'الجنس'),
+                  title: tr('Sex', 'الجنس'),
                   icon: !draft.sexConfirmed
                       ? Icons.wc_outlined
                       : draft.sex == BilSex.male
@@ -376,18 +390,18 @@ class _PrivateFieldCardState extends State<_PrivateFieldCard> {
                       ],
                     ),
                   ),
-                if (widget.optional && !widget.completed)
-                  const Icon(
-                    Icons.add_rounded,
-                    color: _BilColors.textMuted,
-                    size: 19,
-                  ),
-                if (!widget.optional && !widget.completed)
-                  const Icon(
-                    Icons.chevron_right_rounded,
-                    color: _BilColors.textMuted,
-                    size: 24,
-                  ),
+                  if (widget.optional && !widget.completed)
+                    const Icon(
+                      Icons.add_rounded,
+                      color: _BilColors.textMuted,
+                      size: 19,
+                    ),
+                  if (!widget.optional && !widget.completed)
+                    const Icon(
+                      Icons.chevron_right_rounded,
+                      color: _BilColors.textMuted,
+                      size: 24,
+                    ),
                   if (widget.completed)
                     Container(
                       width: 34,

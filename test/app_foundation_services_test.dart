@@ -8,12 +8,15 @@ void main() {
     expect(AppEnvironment.profile, EnvironmentProfile.production);
   });
 
-  test('external feature flags remain off without configuration', () {
-    expect(FeatureFlags.remoteOverridesAvailable, isFalse);
-    expect(FeatureFlags.enabled(AppFeature.cloud), isFalse);
-    expect(FeatureFlags.enabled(AppFeature.artificialIntelligence), isFalse);
-    expect(FeatureFlags.enabled(AppFeature.commerce), isFalse);
-  });
+  test(
+    'production cloud and AI are ready while paid commerce fails closed',
+    () {
+      expect(FeatureFlags.remoteOverridesAvailable, isFalse);
+      expect(FeatureFlags.enabled(AppFeature.cloud), isTrue);
+      expect(FeatureFlags.enabled(AppFeature.artificialIntelligence), isTrue);
+      expect(FeatureFlags.enabled(AppFeature.commerce), isFalse);
+    },
+  );
 
   test('structured logger redacts health and identity attributes', () {
     final lines = <String>[];

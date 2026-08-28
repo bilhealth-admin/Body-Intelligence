@@ -1,8 +1,8 @@
-"NSHealthShareUsageDescription" = "BIL liest nur die von Ihnen ausgewählten Gesundheitskategorien—Aktivität, Schlaf, Körpermesswerte, Herz- und Atemwerte, Blutdruck, Sauerstoff, Glukose, Flüssigkeit und Ernährung—für eine private Gesundheitszeitleiste und Auswertungen auf diesem Gerät.";
+"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
 "NSHealthUpdateUsageDescription" = "BIL schreibt nur die Gesundheitsakten, die Sie nach gesonderter Schreiberlaubnis ausdrücklich auswählen.";
-"NSBluetoothAlwaysUsageDescription" = "BIL stellt nur eine Verbindung zu Gesundheitsgeräten her, die Sie explizit koppeln, sodass Messungen lokal importiert werden können.";
-"NSBluetoothPeripheralUsageDescription" = "BIL stellt nur eine Verbindung zu Gesundheitsgeräten her, die Sie explizit koppeln, sodass Messungen lokal importiert werden können.";
+"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Verwenden Sie die Kamera nur, wenn Sie einen Barcode scannen, ein Essensfoto überprüfen oder ein privates Profil oder Fortschrittsfoto hinzufügen möchten.";
 "NSPhotoLibraryUsageDescription" = "Wählen Sie eine Mahlzeit, ein Profil oder ein Fortschrittsfoto zur Überprüfung aus, bevor es gespeichert oder hochgeladen wird.";
-"NSMicrophoneUsageDescription" = "BIL nutzt das Mikrofon nur, wenn Sie für eine Mahlzeit die Spracheingabe wählen.";
-"NSSpeechRecognitionUsageDescription" = "BIL wandelt die von Ihnen gesprochene Essensphrase in Text um, sodass Sie sie vor dem Speichern überprüfen können.";
+"NSMicrophoneUsageDescription" = "BIL nutzt das Mikrofon nur, wenn Sie eine Mahlzeit per Sprache erfassen oder direkt mit BIL AI Coach sprechen.";
+"NSSpeechRecognitionUsageDescription" = "BIL wandelt von Ihnen gestartete Sprache für die Mahlzeitenerfassung oder BIL AI Coach in Text um, damit Sie ihn prüfen oder senden können.";

@@ -5,9 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('reference diary settings expose persisted functional subpages', () {
-    final page = File(
+    final page = [
       'lib/features/settings/reference_preferences_pages.dart',
-    ).readAsStringSync();
+      'lib/features/settings/reference_preferences_controls.dart',
+      'lib/features/settings/reference_preferences_numeric.dart',
+      'lib/features/settings/reference_preferences_macros.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
     for (final route in const [
       '/settings/diary/search-tab',

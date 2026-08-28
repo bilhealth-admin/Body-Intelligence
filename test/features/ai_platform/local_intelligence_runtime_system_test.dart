@@ -36,6 +36,7 @@ void main() {
         sodium: 2100,
         potassium: 3200,
         servingSize: 100,
+        servingUnit: 'g',
       );
 
       final start = DateTime.utc(2026, 6, 15);

@@ -6,6 +6,7 @@ import '../../app/localization/app_localizations.dart';
 import '../../app/localization/bil_locale_policy.dart';
 import '../../app/localization/runtime_copy.dart';
 import '../../app/theme/premium_design_tokens.dart';
+import 'domain/daily_body_context_codec.dart';
 import 'presentation/daily_log_input_sections.dart';
 import 'presentation/daily_log_summary_widgets.dart';
 import 'providers/daily_log_provider.dart';
@@ -21,22 +22,7 @@ class DailyBodyContextPage extends ConsumerStatefulWidget {
 }
 
 class _DailyBodyContextPageState extends ConsumerState<DailyBodyContextPage> {
-  static const options = <String>[
-    'poorSleep',
-    'greatSleep',
-    'travel',
-    'fasting',
-    'highSodiumMeal',
-    'hardWorkout',
-    'psychologicalStress',
-    'illnessSymptoms',
-    'medication',
-    'lessWater',
-    'moreWater',
-    'constipation',
-    'nothingNotable',
-    'other',
-  ];
+  static const options = DailyBodyContextCodec.optionKeys;
 
   final dailyNote = TextEditingController();
   final otherContext = TextEditingController();
@@ -62,42 +48,17 @@ class _DailyBodyContextPageState extends ConsumerState<DailyBodyContextPage> {
     selected.clear();
     otherContext.clear();
     dailyNote.clear();
-    if (value.isEmpty) return;
-    final matches = RegExp(r'\[([A-Za-z]+)\]').allMatches(value).toList();
-    if (matches.isEmpty) {
-      dailyNote.text = value;
-      return;
-    }
-    selected.addAll(
-      matches
-          .map((match) => match.group(1))
-          .whereType<String>()
-          .where(options.contains),
-    );
-    final noteMatch = RegExp(
-      r'\[note\]\s*(.*?)(?=\s*\[[A-Za-z]+\]|$)',
-    ).firstMatch(value);
-    if (noteMatch != null) dailyNote.text = noteMatch.group(1) ?? '';
-    final otherMatch = RegExp(
-      r'\[other\]\s*(.*?)(?=\s*\[[A-Za-z]+\]|$)',
-    ).firstMatch(value);
-    if (otherMatch != null) otherContext.text = otherMatch.group(1) ?? '';
+    final decoded = DailyBodyContextCodec.decode(value);
+    selected.addAll(decoded.selected);
+    dailyNote.text = decoded.note;
+    otherContext.text = decoded.other;
   }
 
-  String encodeSelection() {
-    final encoded = options
-        .where(selected.contains)
-        .where((value) => value != 'other')
-        .map((value) => '[$value]')
-        .toList();
-    if (dailyNote.text.trim().isNotEmpty) {
-      encoded.insert(0, '[note] ${dailyNote.text.trim()}');
-    }
-    if (selected.contains('other')) {
-      encoded.add('[other] ${otherContext.text.trim()}'.trim());
-    }
-    return encoded.join(' ');
-  }
+  String encodeSelection() => DailyBodyContextCodec.encode(
+    selected: selected,
+    note: dailyNote.text,
+    other: otherContext.text,
+  );
 
   Future<void> save() async {
     final notes = encodeSelection();

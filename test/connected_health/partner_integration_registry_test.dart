@@ -35,5 +35,10 @@ void main() {
     for (final locale in const ['en', 'ar', 'fr', 'es', 'tr']) {
       expect(page, contains("'$locale': {"));
     }
+    expect(page, isNot(contains('OAuth')));
+    expect(page, isNot(contains('runtime registration')));
+    expect(page, isNot(contains('Native bridge')));
+    expect(page, isNot(contains("entry.dataTypes.join")));
+    expect(page, contains('Not available yet'));
   });
 }

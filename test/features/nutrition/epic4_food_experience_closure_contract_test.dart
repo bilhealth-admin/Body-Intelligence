@@ -7,30 +7,54 @@ void main() {
     final foodPage = File(
       'lib/features/nutrition/food_page.dart',
     ).readAsStringSync();
-    final dailyActions = File(
-      'lib/features/daily_log/daily_log_page_actions.dart',
-    ).readAsStringSync();
+    final dailyActions =
+        [
+              'daily_log_page_actions.dart',
+              'daily_log_mutation_actions.dart',
+              'daily_log_capture_actions.dart',
+            ]
+            .map(
+              (name) => File('lib/features/daily_log/$name').readAsStringSync(),
+            )
+            .join('\n');
 
     for (final source in [foodPage, dailyActions]) {
       expect(source, contains('FoodBarcodeScannerPage'));
       expect(source, contains('lookupBarcodeJourney'));
     }
     expect(foodPage, isNot(contains('Camera scanning remains disabled')));
-    expect(dailyActions, contains('MealNutritionResolution.verifiedFoodRecord'));
+    expect(
+      dailyActions,
+      contains('MealNutritionResolution.verifiedFoodRecord'),
+    );
     expect(dailyActions, contains('exact != null && exact.verified'));
     expect(dailyActions, contains("visionCopy.text('no_match')"));
   });
 
   test('meal persistence keeps evidence snapshots and reversible actions', () {
-    final repository = File(
-      'lib/data/repositories/meal_repository.dart',
-    ).readAsStringSync();
+    final repository =
+        [
+              'meal_repository.dart',
+              'meal_repository_queries.dart',
+              'meal_repository_copying.dart',
+            ]
+            .map(
+              (name) => File('lib/data/repositories/$name').readAsStringSync(),
+            )
+            .join('\n');
     final mealEntry = File(
       'lib/features/daily_log/daily_log_meal_entry.dart',
     ).readAsStringSync();
-    final dailyActions = File(
-      'lib/features/daily_log/daily_log_page_actions.dart',
-    ).readAsStringSync();
+    final dailyActions =
+        [
+              'daily_log_page_actions.dart',
+              'daily_log_mutation_actions.dart',
+              'daily_log_capture_actions.dart',
+            ]
+            .map(
+              (name) => File('lib/features/daily_log/$name').readAsStringSync(),
+            )
+            .join('\n');
 
     for (final snapshotField in [
       'nutrientEvidenceMask',
@@ -44,7 +68,8 @@ void main() {
     expect(repository, contains('duplicateMealItem'));
     expect(repository, contains('repeatMeal'));
     expect(repository, contains("syncStatus: const Value('pendingDelete')"));
-    expect(mealEntry, contains('watchFavorites'));
+    expect(mealEntry, contains('isFavorite(selectedFood!.id)'));
+    expect(mealEntry, contains('setFavorite(selectedFood!.id, !favorite)'));
     expect(mealEntry, contains('repeatMeal'));
     expect(dailyActions, contains('recordRecent'));
   });

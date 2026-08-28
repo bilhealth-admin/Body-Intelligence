@@ -23,6 +23,7 @@ void main() {
             weightHistoryProvider.overrideWith((ref) => completer),
             allMealsProvider.overrideWith((ref) => completer),
             allWaterProvider.overrideWith((ref) => completer),
+            dashboardDailyLogsProvider.overrideWith((ref) => completer),
             insightLifeContextProvider.overrideWith((ref) => completer),
             measurementSystemProvider.overrideWith(
               (ref) => Stream.value(MeasurementSystem.metric),
@@ -70,6 +71,9 @@ void main() {
             (ref) => Stream.value(const <MealWithItems>[]),
           ),
           allWaterProvider.overrideWith((ref) => Stream.value(<WaterEntry>[])),
+          dashboardDailyLogsProvider.overrideWith(
+            (ref) => Stream.value(<DailyLog>[]),
+          ),
           insightLifeContextProvider.overrideWith(
             (ref) => Stream.value(<LifeContextEntry>[]),
           ),
@@ -91,7 +95,8 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
     expect(find.textContaining('private analytics detail'), findsNothing);
     expect(find.text('تعذر تحميل بيانات التحليلات.'), findsOneWidget);

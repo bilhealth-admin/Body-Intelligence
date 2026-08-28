@@ -15,10 +15,10 @@ void main() {
 
     expect(find.text('Free'), findsOneWidget);
     expect(find.text('Premium'), findsOneWidget);
-    expect(find.text('Premium AI Coach'), findsOneWidget);
+    expect(find.text('Premium AI Coach'), findsNothing);
     expect(find.text('BIL AI Boost'), findsOneWidget);
     expect(find.textContaining(r'$'), findsNothing);
-    expect(find.text('Price unavailable on this device'), findsNWidgets(3));
+    expect(find.text('Price unavailable on this device'), findsNWidgets(2));
     expect(find.textContaining('Loading price'), findsNothing);
     expect(tester.takeException(), isNull);
   });

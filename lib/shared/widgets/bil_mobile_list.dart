@@ -99,12 +99,17 @@ class BilMobileListRow extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      label,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: destructive ? colors.error : colors.onSurface,
-                        fontWeight: FontWeight.w400,
-                        height: 1.25,
+                    Tooltip(
+                      message: label,
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: destructive ? colors.error : colors.onSurface,
+                          fontWeight: FontWeight.w400,
+                          height: 1.25,
+                        ),
                       ),
                     ),
                     if (subtitle != null) ...[
@@ -125,15 +130,19 @@ class BilMobileListRow extends StatelessWidget {
               if (value != null) ...[
                 const SizedBox(width: 12),
                 Flexible(
-                  child: Text(
-                    value!,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.end,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: action,
-                      fontWeight: FontWeight.w400,
-                      height: 1.25,
+                  child: Tooltip(
+                    message: value!,
+                    child: Text(
+                      value!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      softWrap: false,
+                      textAlign: TextAlign.end,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: action,
+                        fontWeight: FontWeight.w400,
+                        height: 1.25,
+                      ),
                     ),
                   ),
                 ),

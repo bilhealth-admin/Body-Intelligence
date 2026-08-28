@@ -16,6 +16,28 @@ void main() {
     },
   );
 
+  test('iOS Bluetooth bridge scans fitness GATT services only', () {
+    final source = File(
+      'ios/Runner/BILMedicalBleBridge.swift',
+    ).readAsStringSync();
+    final serviceList = RegExp(
+      r'private var supportedServices:\s*\[CBUUID\]\s*\{\s*\[(.*?)\]\.map',
+      dotAll: true,
+    ).firstMatch(source)?.group(1);
+
+    expect(serviceList, isNotNull);
+    final serviceUuids = RegExp(
+      r'"([0-9A-Fa-f]{4})"',
+    ).allMatches(serviceList!).map((match) => match.group(1)!.toUpperCase());
+    expect(
+      serviceUuids,
+      unorderedEquals(<String>['181D', '181B', '180D']),
+    );
+
+    expect(source, contains('"Fitness device"'));
+    expect(source, isNot(contains('"Medical device"')));
+  });
+
   test('Android Bluetooth and internet permissions are declared', () {
     final manifest = File(
       'android/app/src/main/AndroidManifest.xml',

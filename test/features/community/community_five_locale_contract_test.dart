@@ -25,16 +25,21 @@ void main() {
     for (final locale in const ['fr', 'es', 'tr']) {
       expect(copy, contains("'$locale': {"), reason: locale);
     }
-    final localizedPages =
-        [
-          'community_profile_page.dart',
-          'community_people_page.dart',
-          'community_connections_page.dart',
-        ].map(
-          (name) => File(
-            'lib/features/community/presentation/$name',
-          ).readAsStringSync(),
-        );
+    final localizedPages = <String>[
+      File(
+        'lib/features/community/presentation/community_profile_page.dart',
+      ).readAsStringSync(),
+      ['community_people_page.dart', 'community_chat_page.dart']
+          .map(
+            (name) => File(
+              'lib/features/community/presentation/$name',
+            ).readAsStringSync(),
+          )
+          .join('\n'),
+      File(
+        'lib/features/community/presentation/community_connections_page.dart',
+      ).readAsStringSync(),
+    ];
     for (final source in localizedPages) {
       for (final locale in const ["'ar'", "'fr'", "'es'", "'tr'"]) {
         expect(source, contains(locale));

@@ -9,6 +9,8 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../app/localization/app_localizations.dart';
+import '../../app/services/runtime_permission_policy.dart';
+import '../cloud_platform/presentation/cloud_sync_consent_notice.dart';
 import '../life_context/providers/life_context_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
@@ -19,6 +21,11 @@ import 'widgets/dashboard_header.dart';
 import 'widgets/dashboard_shell.dart';
 import 'widgets/dashboard_top_bar.dart';
 import 'widgets/first_value_handoff_card.dart';
+
+/// Keeps pull-to-refresh responsive even when a provider or device source is
+/// slow. The refresh work continues safely after the indicator is dismissed.
+@visibleForTesting
+const dashboardRefreshIndicatorMaximum = Duration(milliseconds: 850);
 
 class DashboardPage extends ConsumerWidget {
   const DashboardPage({super.key});
@@ -85,6 +92,10 @@ class DashboardPage extends ConsumerWidget {
     }
 
     if (action == 'camera') {
+      if (!kIsWeb && defaultTargetPlatform != TargetPlatform.windows) {
+        final allowed = await _ensureCameraPermission(context);
+        if (!allowed || !context.mounted) return;
+      }
       try {
         final captured =
             !kIsWeb && defaultTargetPlatform == TargetPlatform.windows
@@ -139,7 +150,65 @@ class DashboardPage extends ConsumerWidget {
     }
   }
 
+  Future<bool> _ensureCameraPermission(BuildContext context) async {
+    const policy = BilRuntimePermissionPolicy();
+    final current = await policy.status(BilRuntimeCapability.camera);
+    if (current == BilRuntimePermissionState.granted) return true;
+    if (!context.mounted) return false;
+    final blocked = current == BilRuntimePermissionState.permanentlyDenied ||
+        current == BilRuntimePermissionState.restricted;
+    final proceed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          context.strings.text(
+            blocked ? 'Camera access is off' : 'Allow camera for this action?',
+          ),
+        ),
+        content: Text(
+          context.strings.text(
+            blocked
+                ? 'Enable camera access in system settings to take a profile photo. You can still choose a photo with the system picker.'
+                : 'BIL opens the camera only after you choose Take photo now. It never requests camera access at startup.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(context.strings.text('Not now')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              context.strings.text(
+                blocked ? 'Open system settings' : 'Continue',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (proceed != true) return false;
+    if (blocked) {
+      await policy.openSettings();
+      return false;
+    }
+    return await policy.request(BilRuntimeCapability.camera) ==
+        BilRuntimePermissionState.granted;
+  }
+
   Future<void> refresh(BuildContext context, WidgetRef ref) async {
+    final refreshWork = _refreshDashboardData(context, ref);
+    await Future.any<void>([
+      refreshWork,
+      Future<void>.delayed(dashboardRefreshIndicatorMaximum),
+    ]);
+  }
+
+  Future<void> _refreshDashboardData(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     try {
       await Future.wait([
         ref.refresh(latestWeightProvider.future),
@@ -151,7 +220,7 @@ class DashboardPage extends ConsumerWidget {
         ref.refresh(allWaterProvider.future),
         ref.refresh(weightReminderSkippedTodayProvider.future),
         ref.refresh(todayLifeContextProvider.future),
-      ]);
+      ], eagerError: true).timeout(const Duration(seconds: 6));
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.strings.text('Today is up to date.'))),
@@ -180,20 +249,17 @@ class DashboardPage extends ConsumerWidget {
     // process-wide fallback may still be English during the first frame.
     AppLocalizations.activate(resolvedLocale);
     final locale = resolvedLocale.languageCode.toLowerCase();
-    final arabic = locale == 'ar';
     final showFirstValue = ref.watch(firstValueHandoffProvider).value ?? false;
-    final displayName = ref.watch(displayNameProvider).value;
     final profilePhoto = ref.watch(profilePhotoProvider).value;
-    final now = ref.watch(dashboardClockProvider)();
+    final profilePhotoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
 
     final hero = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        const CloudSyncConsentNotice(),
         DashboardTopBar(
-          arabic: arabic,
-          now: now,
-          displayName: displayName,
           profilePhoto: profilePhoto,
+          profilePhotoUrl: profilePhotoUrl,
           onProfile: () =>
               manageProfilePhoto(context, ref, profilePhoto, locale),
         ),
@@ -223,11 +289,24 @@ class DashboardPage extends ConsumerWidget {
       ],
     );
 
-    return DashboardShell(
-      onRefresh: () => refresh(context, ref),
-      child: DashboardComposition(
-        hero: hero,
-        content: const DashboardGrid(hero: DashboardHeader()),
+    const dashboardIconBlue = Color(0xFF2563EB);
+    final baseTheme = Theme.of(context);
+    final dashboardTheme = baseTheme.copyWith(
+      colorScheme: baseTheme.colorScheme.copyWith(
+        primary: dashboardIconBlue,
+        primaryContainer: const Color(0xFFE4EDFF),
+      ),
+      iconTheme: baseTheme.iconTheme.copyWith(color: dashboardIconBlue),
+    );
+
+    return Theme(
+      data: dashboardTheme,
+      child: DashboardShell(
+        onRefresh: () => refresh(context, ref),
+        child: DashboardComposition(
+          hero: hero,
+          content: const DashboardGrid(hero: DashboardHeader()),
+        ),
       ),
     );
   }

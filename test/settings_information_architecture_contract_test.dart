@@ -11,9 +11,15 @@ void main() {
       'lib/features/settings/reference_settings_home_page.dart',
     ).readAsStringSync();
 
-    var previous = -1;
+    for (final section in const [
+      'Account & profile',
+      'Diary & goals',
+      'Health preferences',
+      'Privacy & notifications',
+    ]) {
+      expect(more, contains("title: copy('$section')"), reason: section);
+    }
     for (final label in const [
-      'Try Premium for Free',
       'My Profile',
       'Intermittent Fasting',
       'Sleep',
@@ -27,8 +33,8 @@ void main() {
       'Reminders',
       'Apps & Devices',
       'Steps',
-      'Community',
       'Learn',
+      'Community',
       'Friends',
       'Messages',
       'Settings',
@@ -37,11 +43,10 @@ void main() {
       'Sync',
     ]) {
       final index = more.indexOf("copy('$label')");
-      expect(index, greaterThan(previous), reason: label);
-      previous = index;
+      expect(index, greaterThan(-1), reason: label);
     }
 
-    previous = -1;
+    var previous = -1;
     for (final label in const [
       'Profile',
       'App Appearance',

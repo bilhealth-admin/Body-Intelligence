@@ -37,11 +37,19 @@ void main() {
     }
 
     expect(grid, contains('bil.tdee.round()'));
-    expect(composer, contains('BodyCompositionEngine.calculate('));
+    expect(composer, contains('bil.bodyModel.composition'));
+    expect(composer, isNot(contains('BodyCompositionEngine.calculate(')));
     expect(adapter, contains('profile.neck'));
     expect(adapter, contains('profile.waist'));
-    expect(adapter, contains('neckCm: profile.neck'));
-    expect(adapter, contains('waistCm: profile.waist'));
+    expect(
+      adapter,
+      contains('neckCm: latestBodyMeasurement?.neckCm ?? profile.neck'),
+    );
+    expect(
+      adapter,
+      contains('waistCm: latestBodyMeasurement?.waistCm ?? profile.waist'),
+    );
+    expect(adapter, contains('hipsCm: latestBodyMeasurement?.hipsCm'));
     expect(profile, isNot(contains('BodyCompositionEngine.calculate(')));
     expect(profile, isNot(contains('DashboardIntelligenceComposer')));
   });

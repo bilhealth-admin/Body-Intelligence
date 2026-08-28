@@ -58,9 +58,9 @@ In a branched/new Codex session opened at this repository, say:
 ### Supabase
 
 - Project: `tgmanzhqulksykhslrzb` (`body-intelligence-log`, eu-west-1).
-- Applied `202608160001_bil_canonical_consumer_tiers.sql`.
+- Applied `20260815225624_bil_canonical_consumer_tiers.sql`.
 - Remote state after migration: old Pro subscription became Premium; canonical vision limits exist; invalid enabled products=0; stale plan entitlements=0; mirror trigger present.
-- Applied `202608160002_bil_security_definer_execute_hardening.sql`.
+- Applied `20260815225751_bil_security_definer_execute_hardening.sql`.
 - Anonymous executable SECURITY DEFINER functions=0; service-role executable=51/51.
 - External Supabase setting still open: leaked-password protection.
 - Performance-advisor warnings still need review; do not blindly rewrite intentional RLS.

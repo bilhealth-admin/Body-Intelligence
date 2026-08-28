@@ -1,0 +1,20 @@
+{
+  "schema": "bil.workout-media.owner-approval.v1",
+  "approvalScope": "bil-workout-release-exact200-v2",
+  "approvedBy": "BIL owner",
+  "approvedAt": "2026-08-23T00:26:40Z",
+  "decision": "accept_all_200_including_visual_advisories",
+  "approvedCount": 200,
+  "approvedVariationIdsSha256": "227be9a32154d051614d2716e024f56f285d4136ee8f9fcc1c5322093277c2c4",
+  "qualifiedBiomechanicsCertification": false,
+  "approvalBasis": {
+    "newlyGeneratedOwnerApproved": 102,
+    "previouslyConformingOwnerApproved": 98,
+    "oldSevenSecondReplaced": 53,
+    "oldMissingReplaced": 8,
+    "remainingNonconformant": 0,
+    "remainingMissing": 0,
+    "automatedAdvisoryCount": 51,
+    "automatedAdvisoryTerminal": false
+  }
+}

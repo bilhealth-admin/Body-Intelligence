@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BIL - Log Kecerdasan Tubuh</string>
+    <string name="health_permissions_rationale_title">Privasi data kesehatan</string>
+    <string name="health_permissions_rationale_body">BIL hanya meminta tipe data Health Connect yang diperlukan untuk fitur yang Anda pilih untuk digunakan. Data kesehatan Anda diproses secara lokal secara default. Anda dapat memberikan, menolak, atau mencabut izin individu kapan saja dari pengaturan Health Connect. BIL tidak menjual data kesehatan atau menggunakannya untuk iklan.</string>
+    <string name="health_permissions_privacy_policy_action">Baca kebijakan privasi lengkap BIL</string>
+</resources>

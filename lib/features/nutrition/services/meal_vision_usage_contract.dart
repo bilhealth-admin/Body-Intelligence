@@ -34,22 +34,26 @@ final class MealVisionUsage {
     );
   }
 
-  /// Parses the authoritative standalone AI Coach + paid Boost status.
-  /// Weekly allowance is consumed first; paid grants stack and do not reset.
+  /// Parses the shared BIL AI Token balance used by text, Vision, and voice.
+  /// Weekly tokens are consumed first; paid grants stack and do not reset.
   factory MealVisionUsage.fromAiUsageStatus(Map<String, Object?> json) {
-    final capabilities = json['capabilities'];
-    if (capabilities is! Map) {
-      throw const FormatException('invalid_ai_usage_status');
+    final rawCredits = json['credits'];
+    final Map<String, Object?> credits;
+    if (rawCredits is Map) {
+      credits = rawCredits.cast<String, Object?>();
+    } else {
+      // Compatibility with servers from before the unified-token migration.
+      final capabilities = json['capabilities'];
+      final rawVision = capabilities is Map ? capabilities['vision'] : null;
+      if (rawVision is! Map) {
+        throw const FormatException('invalid_ai_usage_status');
+      }
+      credits = rawVision.cast<String, Object?>();
     }
-    final rawVision = capabilities['vision'];
-    if (rawVision is! Map) {
-      throw const FormatException('invalid_ai_vision_usage');
-    }
-    final vision = rawVision.cast<String, Object?>();
     int integral(String key) {
-      final raw = vision[key];
+      final raw = credits[key];
       if (raw is! num || !raw.isFinite || raw < 0 || raw != raw.round()) {
-        throw const FormatException('invalid_ai_vision_usage');
+        throw const FormatException('invalid_ai_credit_usage');
       }
       return raw.toInt();
     }
@@ -64,7 +68,7 @@ final class MealVisionUsage {
     final paidRemaining = integral('paid_remaining');
     if (weeklyUsed + weeklyReserved + weeklyRemaining != weeklyLimit ||
         paidUsed + paidReserved + paidRemaining != paidGranted) {
-      throw const FormatException('inconsistent_ai_vision_usage');
+      throw const FormatException('inconsistent_ai_credit_usage');
     }
     return MealVisionUsage(
       limit: weeklyLimit + paidGranted,

@@ -6,6 +6,7 @@ import 'package:body_intelligence_log/features/nutrition/domain/barcode_identity
 import 'package:body_intelligence_log/features/nutrition/domain/product_identity.dart';
 import 'package:body_intelligence_log/features/nutrition/domain/unified_food.dart';
 import 'package:body_intelligence_log/features/nutrition/services/barcode_food_contract.dart';
+import 'package:body_intelligence_log/features/nutrition/presentation/barcode_runtime_copy.dart';
 
 void main() {
   test('regional fixtures cover GTIN-8/12/13/14 with valid check digits', () {
@@ -102,6 +103,57 @@ void main() {
     expect(source, contains('GTIN-14'));
     expect(source, contains('will not invent nutrition values'));
   });
+
+  test(
+    'barcode runtime errors resolve without English fallback in deep 20',
+    () {
+      const tags = <String>{
+        'de',
+        'it',
+        'pt-BR',
+        'pt-PT',
+        'ur',
+        'fa',
+        'hi',
+        'id',
+        'ms',
+        'ja',
+        'ko',
+        'zh-Hans',
+        'zh-Hant',
+        'ru',
+        'bn',
+        'vi',
+        'th',
+        'pl',
+        'nl',
+        'uk',
+      };
+      final english = BarcodeRuntimeCopy.of('en');
+      for (final tag in tags) {
+        final copy = BarcodeRuntimeCopy.of(tag);
+        expect(copy.invalidTitle, isNot(english.invalidTitle), reason: tag);
+        expect(copy.notFoundTitle, isNot(english.notFoundTitle), reason: tag);
+        expect(
+          copy.unavailableTitle,
+          isNot(english.unavailableTitle),
+          reason: tag,
+        );
+        expect(
+          <String>[
+            copy.invalidTitle,
+            copy.invalidBody,
+            copy.notFoundTitle,
+            copy.notFoundBody,
+            copy.unavailableTitle,
+            copy.unavailableBody,
+          ].join(),
+          isNot(contains('ZXQP')),
+          reason: tag,
+        );
+      }
+    },
+  );
 }
 
 UnifiedFood _food({

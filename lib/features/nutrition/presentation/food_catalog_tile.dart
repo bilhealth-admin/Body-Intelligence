@@ -34,31 +34,37 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
       barrierDismissible: false,
       builder: (_) => _CustomFoodDialog(
         food: widget.food,
-        onSave: (draft) => ref
-            .read(foodRepositoryProvider)
-            .updateCustomFood(
-              id: widget.food.id,
-              name: draft.name,
-              arabicName: draft.arabicName,
-              barcode: draft.barcode,
-              category: 'custom',
-              servingSize: draft.servingSize,
-              servingUnit: draft.servingUnit,
-              calories: draft.calories,
-              protein: draft.protein,
-              carbs: draft.carbs,
-              fats: draft.fats,
-              caloriesKnown: draft.caloriesKnown,
-              proteinKnown: draft.proteinKnown,
-              carbsKnown: draft.carbsKnown,
-              fatsKnown: draft.fatsKnown,
-              fiber: draft.fiber,
-              sodium: draft.sodium,
-              potassium: draft.potassium,
-              calcium: draft.calcium,
-              magnesium: draft.magnesium,
-              sugar: draft.sugar,
-            ),
+        onSave: (draft) async {
+          final localeCode = Localizations.localeOf(context).toLanguageTag();
+          await ref
+              .read(foodRepositoryProvider)
+              .updateCustomFood(
+                id: widget.food.id,
+                name: draft.name,
+                arabicName: draft.arabicName,
+                barcode: draft.barcode,
+                category: 'custom',
+                servingSize: draft.servingSize,
+                servingUnit: draft.servingUnit,
+                calories: draft.calories,
+                protein: draft.protein,
+                carbs: draft.carbs,
+                fats: draft.fats,
+                caloriesKnown: draft.caloriesKnown,
+                proteinKnown: draft.proteinKnown,
+                carbsKnown: draft.carbsKnown,
+                fatsKnown: draft.fatsKnown,
+                fiber: draft.fiber,
+                sodium: draft.sodium,
+                potassium: draft.potassium,
+                calcium: draft.calcium,
+                magnesium: draft.magnesium,
+                sugar: draft.sugar,
+              );
+          await ref
+              .read(communityFoodSyncServiceProvider)
+              .publishFood(widget.food.id, localeCode: localeCode);
+        },
       ),
     );
     if (draft == null) return;
@@ -112,9 +118,13 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
                             error = null;
                           });
                           try {
+                            final localFoodUuid = widget.food.uuid;
                             await ref
                                 .read(foodRepositoryProvider)
                                 .deleteCustomFood(widget.food.id);
+                            await ref
+                                .read(communityFoodSyncServiceProvider)
+                                .withdrawFood(localFoodUuid);
                             if (dialogContext.mounted) {
                               Navigator.pop(dialogContext, true);
                             }
@@ -153,7 +163,7 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
     final food = widget.food;
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: ListTile(
         onTap: () => showModalBottomSheet<void>(
           context: context,
@@ -199,11 +209,7 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
                       '${t('Updated locally')}: ${food.updatedAt.toLocal()}',
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      '${food.calories.toStringAsFixed(0)} kcal · ${food.protein.toStringAsFixed(1)} g protein · '
-                      '${food.carbs.toStringAsFixed(1)} g carbs · ${food.fats.toStringAsFixed(1)} g fat',
-                      textDirection: TextDirection.ltr,
-                    ),
+                    _FoodNutrientSummary(food: food, expanded: true),
                     if (food.isCustom) ...[
                       const SizedBox(height: 16),
                       Row(
@@ -242,6 +248,9 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
           arabic && food.arabicName?.trim().isNotEmpty == true
               ? food.arabicName!.trim()
               : food.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,34 +260,24 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
                 textDirection: TextDirection.ltr,
                 child: Text(food.name),
               ),
-            Directionality(
-              textDirection: TextDirection.ltr,
-              child: Text(
-                '${food.calories.toStringAsFixed(0)} kcal · '
-                '${food.protein.toStringAsFixed(1)} g ${nutritionText(context, 'protein', 'بروتين')} · '
-                '${food.carbs.toStringAsFixed(1)} g ${nutritionText(context, 'carbs', 'كربوهيدرات')} · '
-                '${food.fats.toStringAsFixed(1)} g ${nutritionText(context, 'fat', 'دهون')}',
-              ),
-            ),
-            Directionality(
-              textDirection: TextDirection.ltr,
-              child: Text(
-                '${food.fiber.toStringAsFixed(1)} g ${nutritionText(context, 'fiber', 'ألياف')} · '
-                '${food.sodium.toStringAsFixed(0)} mg ${nutritionText(context, 'sodium', 'صوديوم')} · '
-                '${food.potassium.toStringAsFixed(0)} mg ${nutritionText(context, 'potassium', 'بوتاسيوم')}',
-              ),
-            ),
+            const SizedBox(height: 8),
+            _FoodNutrientSummary(food: food),
+            const SizedBox(height: 6),
             Directionality(
               textDirection: TextDirection.ltr,
               child: Text(
                 '${food.servingSize.toStringAsFixed(0)} ${food.servingUnit} · '
                 '${food.source} · '
                 '${t(food.verified ? 'verified' : 'unverified')}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
         ),
         isThreeLine: false,
+        contentPadding: const EdgeInsetsDirectional.fromSTEB(14, 4, 8, 4),
+        minVerticalPadding: 6,
         trailing: IconButton(
           tooltip: t(favorite ? 'Remove favorite' : 'Add favorite'),
           icon: Icon(favorite ? Icons.favorite : Icons.favorite_border),

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-
-import 'auth_five_locale_copy.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../app/services/app_settings_provider.dart';
 import '../../app/localization/bil_locale_names.dart';
-import '../../app/localization/bil_locale_policy.dart';
+import '../../app/services/app_settings_provider.dart';
+import 'auth_entry_locale_copy.dart';
 
 class AuthLanguageSelector extends ConsumerWidget {
   const AuthLanguageSelector({super.key});
@@ -14,77 +12,66 @@ class AuthLanguageSelector extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(appSettingsProvider).localeCode;
     const languages = BilLocaleNames.native;
+    final label = authEntryTextForTag(
+      selected,
+      AuthEntryCopyKey.chooseLanguage,
+    );
+    final displayedLanguage = languages[selected] ?? languages['en']!;
+
     return Semantics(
-      label: authFiveLocaleTextFor(selected, 'Choose language', 'اختيار اللغة'),
-      child: PopupMenuButton<String>(
-        key: const Key('auth-language-selector'),
-        tooltip: authFiveLocaleTextFor(
-          selected,
-          'Choose language',
-          'اختيار اللغة',
-        ),
-        initialValue: selected,
-        onSelected: (value) {
-          ref.read(appSettingsProvider.notifier).setLocale(value);
-        },
-        itemBuilder: (context) => languages.entries
-            .map(
-              (entry) => PopupMenuItem<String>(
-                value: entry.key,
-                child: Row(
-                  children: [
-                    if (entry.key == selected)
-                      const Icon(Icons.check_rounded, size: 18)
-                    else
-                      const SizedBox(width: 18),
-                    const SizedBox(width: 10),
-                    Text(
-                      entry.value,
-                      style: const TextStyle(fontFamilyFallback: ['BILArabic']),
-                    ),
-                  ],
-                ),
-              ),
-            )
-            .toList(growable: false),
-        child: Directionality(
-          textDirection: BilLocalePolicy.isRtlTag(selected)
-              ? TextDirection.rtl
-              : TextDirection.ltr,
+      label: label,
+      button: true,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: const Key('auth-language-selector'),
+          borderRadius: BorderRadius.circular(18),
+          onTap: () => _showLanguageSheet(
+            context: context,
+            ref: ref,
+            selected: selected,
+          ),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            constraints: const BoxConstraints(minWidth: 118, maxWidth: 250),
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 11),
             decoration: BoxDecoration(
-              color: const Color(0xFFE3E6E9),
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: const Color(0xFF68727C), width: 1.1),
+              color: const Color(0xFFF2F2F7),
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x09000000),
+                  blurRadius: 12,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
+            child: Directionality(
+              textDirection: _isRtlLocaleTag(selected)
+                  ? TextDirection.rtl
+                  : TextDirection.ltr,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
-                    Icons.language_rounded,
-                    size: 14,
-                    color: Color(0xFF303942),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    languages[selected] ?? languages['en']!,
-                    textDirection: BilLocalePolicy.isRtlTag(selected)
-                        ? TextDirection.rtl
-                        : TextDirection.ltr,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: const Color(0xFF252D34),
-                      fontWeight: FontWeight.w600,
-                      fontFamilyFallback: const ['BILArabic'],
+                  Flexible(
+                    child: Text(
+                      displayedLanguage,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Color(0xFF1C1C1E),
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.w700,
+                        fontFamilyFallback: ['BILArabic'],
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 5),
+                  const SizedBox(width: 7),
                   const Icon(
                     Icons.keyboard_arrow_down_rounded,
-                    size: 15,
-                    color: Color(0xFF303942),
+                    size: 17,
+                    color: Color(0xFF8E8E93),
                   ),
                 ],
               ),
@@ -94,4 +81,153 @@ class AuthLanguageSelector extends ConsumerWidget {
       ),
     );
   }
+
+  Future<void> _showLanguageSheet({
+    required BuildContext context,
+    required WidgetRef ref,
+    required String selected,
+  }) async {
+    const languages = BilLocaleNames.native;
+    final orderedKeys = <String>[
+      ...BilLocaleNames.englishFirstAlphabeticalTags.where(
+        languages.containsKey,
+      ),
+    ];
+    final extras =
+        languages.keys
+            .where((key) => !orderedKeys.contains(key))
+            .toList(growable: false)
+          ..sort(
+            (left, right) => languages[left]!.toLowerCase().compareTo(
+              languages[right]!.toLowerCase(),
+            ),
+          );
+    orderedKeys.addAll(extras);
+
+    await showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: const Color(0x52000000),
+      builder: (sheetContext) => FractionallySizedBox(
+        heightFactor: .72,
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x22000000),
+                blurRadius: 30,
+                offset: Offset(0, -8),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              Container(
+                width: 38,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD1D1D6),
+                  borderRadius: BorderRadius.circular(99),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
+                  authEntryTextForTag(
+                    selected,
+                    AuthEntryCopyKey.chooseLanguage,
+                  ),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Color(0xFF1C1C1E),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -.25,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Divider(height: 1, color: Color(0xFFE9E9ED)),
+              Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 18),
+                  itemCount: orderedKeys.length,
+                  separatorBuilder: (_, _) => const Divider(
+                    height: 1,
+                    indent: 14,
+                    endIndent: 14,
+                    color: Color(0xFFF0F0F3),
+                  ),
+                  itemBuilder: (context, index) {
+                    final key = orderedKeys[index];
+                    final isSelected = key == selected;
+                    return Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(14),
+                        onTap: () {
+                          ref.read(appSettingsProvider.notifier).setLocale(key);
+                          Navigator.of(sheetContext).pop();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 13,
+                          ),
+                          child: Directionality(
+                            textDirection: _isRtlLocaleTag(key)
+                                ? TextDirection.rtl
+                                : TextDirection.ltr,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    languages[key]!,
+                                    style: TextStyle(
+                                      color: const Color(0xFF1C1C1E),
+                                      fontSize: 16,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w700
+                                          : FontWeight.w500,
+                                      fontFamilyFallback: const ['BILArabic'],
+                                    ),
+                                  ),
+                                ),
+                                if (isSelected)
+                                  const Icon(
+                                    Icons.check_rounded,
+                                    size: 20,
+                                    color: Color(0xFF007AFF),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+bool _isRtlLocaleTag(String localeTag) {
+  final language = localeTag
+      .trim()
+      .replaceAll('_', '-')
+      .toLowerCase()
+      .split('-')
+      .first;
+  return const <String>{'ar', 'fa', 'he', 'ur'}.contains(language);
 }

@@ -22,6 +22,7 @@ type VerifiedPurchase = {
   transactionId: string;
   packageOrBundleId: string;
   environment: 'sandbox' | 'production';
+  storeCountryCode?: string;
   lifecycle: Lifecycle;
   startedAt?: string;
   expiresAt?: string;
@@ -151,6 +152,7 @@ async function verifyGoogle(packageName: string, purchaseToken: string): Promise
     transactionId: purchaseToken,
     packageOrBundleId: packageName,
     environment,
+    storeCountryCode: String(data.regionCode ?? '').trim().toUpperCase() || undefined,
     lifecycle: googleLifecycle(String(data.subscriptionState ?? ''), line),
     startedAt: data.startTime,
     expiresAt: line.expiryTime,
@@ -267,6 +269,7 @@ async function verifyApple(transactionJws: string): Promise<VerifiedPurchase> {
     transactionId: String(payload.transactionId ?? ''),
     packageOrBundleId: bundleId,
     environment,
+    storeCountryCode: String(payload.storefront ?? '').trim().toUpperCase() || undefined,
     lifecycle: appleLifecycle(payload),
     startedAt: payload.purchaseDate ? new Date(Number(payload.purchaseDate)).toISOString() : undefined,
     expiresAt: payload.expiresDate ? new Date(Number(payload.expiresDate)).toISOString() : undefined,
@@ -349,6 +352,7 @@ async function persistVerified(
       p_original_transaction_id: purchase.originalTransactionId,
       p_latest_transaction_id: purchase.transactionId,
       p_environment: purchase.environment,
+      p_store_country_code: purchase.storeCountryCode,
       p_started_at: purchase.startedAt,
       p_expires_at: purchase.expiresAt,
       p_grace_period_ends_at: purchase.gracePeriodEndsAt,
@@ -360,6 +364,8 @@ async function persistVerified(
   if (error) {
     if (error.code === '23505') throw new Error('purchase_owned_by_another_account');
     if (error.message?.includes('product_not_enabled')) throw new Error('product_not_enabled');
+    if (error.message?.includes('market_plan_mismatch')) throw new Error('market_plan_mismatch');
+    if (error.message?.includes('store_country_required')) throw new Error('store_country_required');
     throw new Error('persistence_failed');
   }
   if (typeof active !== 'boolean') throw new Error('persistence_failed');
@@ -402,7 +408,12 @@ async function verifyPurchase(request: Request, body: Record<string, unknown>) {
   }
   if (purchase.productId !== String(body.product_id ?? '')) throw new Error('wrong_product');
   const active = await persistVerified(admin, user.id, purchase);
-  return json({ verified: true, entitlement_active: active, lifecycle: purchase.lifecycle });
+  return json({
+    verified: true,
+    entitlement_active: active,
+    lifecycle: purchase.lifecycle,
+    store_country_code: purchase.storeCountryCode,
+  });
 }
 
 async function verifyAiBoost(request: Request, body: Record<string, unknown>) {
@@ -608,7 +619,8 @@ export async function handler(request: Request): Promise<Response> {
     const clientCodes = new Set([
       'authentication_required', 'invalid_session', 'invalid_receipt_payload',
       'wrong_product', 'wrong_package', 'wrong_bundle', 'wrong_environment',
-      'purchase_owned_by_another_account',
+      'purchase_owned_by_another_account', 'market_plan_mismatch',
+      'store_country_required',
     ]);
     return json({ error: code, verified: false, entitlement_active: false },
       code === 'authentication_required' || code === 'invalid_session' ? 401 :

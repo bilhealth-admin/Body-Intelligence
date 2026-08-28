@@ -5,22 +5,19 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../shared/widgets/bil_wordmark.dart';
+import '../../../shared/widgets/bil_account_avatar.dart';
 
 class DashboardTopBar extends StatelessWidget {
   const DashboardTopBar({
     super.key,
-    required this.arabic,
-    this.now,
-    required this.displayName,
     required this.onProfile,
     this.profilePhoto,
+    this.profilePhotoUrl,
   });
 
-  final bool arabic;
-  final DateTime? now;
-  final String? displayName;
   final VoidCallback onProfile;
   final Uint8List? profilePhoto;
+  final String? profilePhotoUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -30,151 +27,75 @@ class DashboardTopBar extends StatelessWidget {
         _dashboardTopBarCopy['en']!.map(
           (key, value) => MapEntry(key, context.strings.text(value)),
         );
-    final date = MaterialLocalizations.of(
-      context,
-    ).formatMediumDate(now ?? DateTime.now());
-    final unifiedDesktopNavigation = MediaQuery.sizeOf(context).width >= 900;
 
-    final greeting = Text(
-      displayName == null
-          ? copy['welcome']!
-          : '${copy['welcomeName']} $displayName',
-      key: const Key('dashboard-greeting'),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        color: Theme.of(context).colorScheme.onSurface,
-        fontWeight: FontWeight.w700,
-      ),
-    );
-    final dateText = Text(
-      date,
-      style: TextStyle(
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-        fontSize: 13,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-
-    if (!unifiedDesktopNavigation) {
-      return _ReferenceMobileTopBar(
-        copy: copy,
-        date: dateText,
-        greeting: greeting,
-        onProfile: onProfile,
-        profilePhoto: profilePhoto,
-      );
-    }
-
-    if (unifiedDesktopNavigation) {
-      return Row(
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(2, 0, 2, 2),
+      child: Row(
         children: [
-          Expanded(child: greeting),
-          const SizedBox(width: 16),
-          dateText,
-        ],
-      );
-    }
-
-    return Row(
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [greeting, const SizedBox(height: 4), dateText],
+          _RoundProfileButton(
+            tooltip: copy['profile']!,
+            onTap: onProfile,
+            imageBytes: profilePhoto,
+            imageUrl: profilePhotoUrl,
           ),
-        ),
-        const SizedBox(width: 12),
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: DashboardBrand(compact: true),
-        ),
-        const SizedBox(width: 12),
-        _RoundGlassButton(
-          tooltip: copy['profile']!,
-          icon: Icons.person_rounded,
-          onTap: onProfile,
-          imageBytes: profilePhoto,
-        ),
-      ],
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: BilFullWordmark(height: 32),
+            ),
+          ),
+          IconButton(
+            tooltip: copy['notifications']!,
+            onPressed: () => context.push('/notification-settings'),
+            icon: const Icon(Icons.notifications_none_rounded),
+          ),
+          _DashboardEditButton(tooltip: copy['edit']!),
+        ],
+      ),
     );
   }
 }
 
-class _ReferenceMobileTopBar extends StatelessWidget {
-  const _ReferenceMobileTopBar({
-    required this.copy,
-    required this.date,
-    required this.greeting,
-    required this.onProfile,
-    required this.profilePhoto,
-  });
+class _DashboardEditButton extends StatelessWidget {
+  const _DashboardEditButton({required this.tooltip});
 
-  final Map<String, String> copy;
-  final Widget date;
-  final Widget greeting;
-  final VoidCallback onProfile;
-  final Uint8List? profilePhoto;
+  final String tooltip;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            _RoundGlassButton(
-              tooltip: copy['profile']!,
-              icon: Icons.person_rounded,
-              onTap: onProfile,
-              imageBytes: profilePhoto,
-            ),
-            const SizedBox(width: 14),
-            const Expanded(child: BilFullWordmark(height: 40)),
-            const SizedBox(width: 8),
-            IconButton(
-              tooltip: copy['notifications']!,
-              onPressed: () => context.push('/notification-settings'),
-              icon: const Icon(Icons.notifications_none_rounded),
+    return Tooltip(
+      message: tooltip,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF12394E), Color(0xFF2563EB)],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF12394E).withValues(alpha: .18),
+              blurRadius: 16,
+              offset: const Offset(0, 7),
             ),
           ],
         ),
-        const SizedBox(height: 18),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    copy['today']!,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  date,
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                TextButton(
-                  key: const Key('dashboard-edit-today'),
-                  onPressed: () => context.push('/dashboard/preferences'),
-                  child: Text(copy['edit']!),
-                ),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 230),
-                  child: greeting,
-                ),
-              ],
-            ),
-          ],
+        child: IconButton(
+          key: const Key('dashboard-edit-today'),
+          onPressed: () => context.push('/dashboard/preferences'),
+          style: IconButton.styleFrom(
+            minimumSize: const Size.square(40),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          icon: const Icon(
+            Icons.dashboard_customize_rounded,
+            color: Colors.white,
+            size: 20,
+          ),
         ),
-      ],
+      ),
     );
   }
 }
@@ -195,69 +116,55 @@ class DashboardBrand extends StatelessWidget {
 
 const _dashboardTopBarCopy = <String, Map<String, String>>{
   'ar': {
-    'welcome': 'أهلًا بك',
-    'welcomeName': 'أهلًا،',
     'profile': 'الملف الشخصي',
     'notifications': 'الإشعارات',
-    'today': 'اليوم',
-    'edit': 'تعديل',
+    'edit': 'تخصيص الداشبورد',
   },
   'en': {
-    'welcome': 'Welcome',
-    'welcomeName': 'Welcome,',
     'profile': 'Profile',
     'notifications': 'Notifications',
-    'today': 'Today',
-    'edit': 'Edit',
+    'edit': 'Customize dashboard',
   },
   'fr': {
-    'welcome': 'Bienvenue',
-    'welcomeName': 'Bienvenue,',
     'profile': 'Profil',
     'notifications': 'Notifications',
-    'today': 'Aujourd’hui',
-    'edit': 'Modifier',
+    'edit': 'Personnaliser le tableau de bord',
   },
   'es': {
-    'welcome': 'Bienvenido',
-    'welcomeName': 'Bienvenido,',
     'profile': 'Perfil',
     'notifications': 'Notificaciones',
-    'today': 'Hoy',
-    'edit': 'Editar',
+    'edit': 'Personalizar el panel',
   },
   'tr': {
-    'welcome': 'Hoş geldiniz',
-    'welcomeName': 'Hoş geldin,',
     'profile': 'Profil',
     'notifications': 'Bildirimler',
-    'today': 'Bugün',
-    'edit': 'Düzenle',
+    'edit': 'Paneli özelleştir',
   },
 };
 
-class _RoundGlassButton extends StatefulWidget {
-  const _RoundGlassButton({
+class _RoundProfileButton extends StatefulWidget {
+  const _RoundProfileButton({
     required this.tooltip,
-    required this.icon,
     required this.onTap,
-    this.imageBytes,
+    required this.imageBytes,
+    this.imageUrl,
   });
 
   final String tooltip;
-  final IconData icon;
   final VoidCallback onTap;
   final Uint8List? imageBytes;
+  final String? imageUrl;
 
   @override
-  State<_RoundGlassButton> createState() => _RoundGlassButtonState();
+  State<_RoundProfileButton> createState() => _RoundProfileButtonState();
 }
 
-class _RoundGlassButtonState extends State<_RoundGlassButton> {
+class _RoundProfileButtonState extends State<_RoundProfileButton> {
   bool hovered = false;
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Tooltip(
       message: widget.tooltip,
       child: MouseRegion(
@@ -266,47 +173,40 @@ class _RoundGlassButtonState extends State<_RoundGlassButton> {
         onExit: (_) => setState(() => hovered = false),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          width: 52,
-          height: 52,
+          width: 42,
+          height: 42,
+          padding: const EdgeInsets.all(2),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Theme.of(context).colorScheme.surface,
+            color: const Color(0xFFC8F3FF),
             border: Border.all(
-              color: hovered
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.outlineVariant,
+              color: hovered ? scheme.primary : scheme.outlineVariant,
+              width: hovered ? 2 : 1.2,
             ),
-          ),
-          child: IconButton(
-            onPressed: widget.onTap,
-            icon: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF071923).withValues(alpha: .1),
+                blurRadius: 16,
+                offset: const Offset(0, 7),
               ),
-              child: widget.imageBytes == null
-                  ? DecoratedBox(
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [Color(0xFF111827), Color(0xFF2563EB)],
-                        ),
-                      ),
-                      child: Icon(widget.icon, size: 22, color: Colors.white),
-                    )
-                  : ClipOval(
-                      child: Image.memory(
-                        widget.imageBytes!,
-                        fit: BoxFit.cover,
-                        width: 36,
-                        height: 36,
-                        gaplessPlayback: true,
-                      ),
-                    ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            shape: const CircleBorder(),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: widget.onTap,
+              child: BilAccountAvatar(
+                key:
+                    widget.imageBytes == null &&
+                        (widget.imageUrl?.trim().isEmpty ?? true)
+                    ? const Key('dashboard-default-profile-avatar')
+                    : const Key('dashboard-user-profile-avatar'),
+                radius: 19,
+                photoBytes: widget.imageBytes,
+                networkUrl: widget.imageUrl,
+              ),
             ),
           ),
         ),

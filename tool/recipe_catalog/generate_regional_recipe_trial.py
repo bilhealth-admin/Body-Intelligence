@@ -78,7 +78,7 @@ ar|gulf|machboos-fish|مجبوس السمك|steam|25|50|6|snapper=850,rice=420,t
 ar|gulf|jareesh-chicken|جريش بالدجاج|simmer|20|75|6|wheat=420,chicken breast=700,yogurt=250,onion=180
 ar|iraq|iraqi-tashreeb-chicken|تشريب الدجاج العراقي|layer|20|55|6|chicken breast=800,chickpeas=300,pita bread=320,tomato=350,onion=180
 ar|iraq|iraqi-lentil-kubba-soup|شوربة كبة العدس|simmer|35|55|6|lentils=320,bulgur=250,ground beef=350,onion=180,tomato=250
-ar|maghreb|algerian-chakhchoukha-chicken|شخشوخة بالدجاج|layer|35|55|6|chicken breast=800,flatbread=400,chickpeas=250,tomato=400,onion=180
+ar|maghreb|algerian-chakhchoukha-chicken|الشخشوخة الجزائرية بالدجاج|layer|35|55|6|chicken breast=800,flatbread=400,chickpeas=250,tomato=400,onion=180
 ar|maghreb|moroccan-tagine-fish|طاجن السمك المغربي|bake|25|40|5|cod=800,potato=450,tomato=350,bell pepper=250,olive oil=35
 fr|france|cassoulet-haricots-dinde|Cassoulet léger à la dinde|bake|25|65|6|white beans=500,turkey breast=600,tomato=350,carrot=200,onion=180
 fr|france|cabillaud-poireaux-pommes|Cabillaud aux poireaux et pommes de terre|bake|20|35|4|cod=700,leek=350,potato=600,milk=250

@@ -9,9 +9,24 @@ class SupabaseAuthService {
 
   static const oauthRedirectUri = 'bil://auth-callback';
   static const emailRedirectUri = oauthRedirectUri;
+  static const passwordResetRedirectUri =
+      'https://www.bilhealth.com/auth/reset-password';
 
   Future<bool> signInWithOAuth(OAuthProvider provider) =>
       client.auth.signInWithOAuth(provider, redirectTo: oauthRedirectUri);
+
+  Future<void> sendEmailOtp(String email) => client.auth.signInWithOtp(
+    email: email,
+    emailRedirectTo: emailRedirectUri,
+    shouldCreateUser: true,
+  );
+
+  Future<void> verifyEmailOtp({
+    required String email,
+    required String code,
+  }) async {
+    await client.auth.verifyOTP(email: email, token: code, type: OtpType.email);
+  }
 
   Future<BilAuthOutcome> signIn({
     required String email,
@@ -21,22 +36,27 @@ class SupabaseAuthService {
     return BilAuthOutcome.signedIn;
   }
 
-  Future<void> sendPasswordReset(String email) =>
-      client.auth.resetPasswordForEmail(
-        email,
-        redirectTo: 'bil://auth-callback/reset-password',
-      );
+  Future<void> sendPasswordReset(String email) => client.auth
+      .resetPasswordForEmail(email, redirectTo: passwordResetRedirectUri);
 
   Future<void> verifySignupCode({
     required String email,
     required String code,
-  }) => client.auth.verifyOTP(email: email, token: code, type: OtpType.signup);
+  }) async {
+    await client.auth.verifyOTP(
+      email: email,
+      token: code,
+      type: OtpType.signup,
+    );
+  }
 
-  Future<void> resendSignupCode(String email) => client.auth.resend(
-    type: OtpType.signup,
-    email: email,
-    emailRedirectTo: emailRedirectUri,
-  );
+  Future<void> resendSignupCode(String email) async {
+    await client.auth.resend(
+      type: OtpType.signup,
+      email: email,
+      emailRedirectTo: emailRedirectUri,
+    );
+  }
 
   Future<void> signOutEverywhere() =>
       client.auth.signOut(scope: SignOutScope.global);

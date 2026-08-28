@@ -243,9 +243,9 @@ class _ProfileStepState extends State<ProfileStep> {
               ),
               const SizedBox(height: 20),
 
-              // Premium Biological Sex Selector
+              // Sex selector
               Text(
-                tr(context, 'Biological Sex', 'الجنس البيولوجي'),
+                tr(context, 'Sex', 'الجنس'),
                 style: Theme.of(
                   context,
                 ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),

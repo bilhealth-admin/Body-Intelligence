@@ -22,11 +22,6 @@ abstract final class BilHealthScope {
     HealthDataType.heartRate,
     HealthDataType.restingHeartRate,
     HealthDataType.hrv,
-    HealthDataType.oxygen,
-    HealthDataType.respiratoryRate,
-    HealthDataType.glucose,
-    HealthDataType.bloodPressureSystolic,
-    HealthDataType.bloodPressureDiastolic,
     HealthDataType.water,
     HealthDataType.nutrition,
     HealthDataType.nutritionProtein,
@@ -42,6 +37,40 @@ abstract final class BilHealthScope {
     HealthDataType.weight,
     HealthDataType.nutrition,
   };
+
+  /// Reject every provider key that is not part of the explicit fitness-only
+  /// contract. This positive allow-list also safely drops unknown historical
+  /// observations without retaining clinical identifiers in the runtime.
+  static bool excludesKey(Object? rawKey) {
+    final key = rawKey?.toString().trim().toLowerCase().replaceAll(
+      RegExp('[^a-z0-9]'),
+      '',
+    );
+    return !const <String>{
+      'steps',
+      'distance',
+      'activeenergy',
+      'workout',
+      'exercise',
+      'sleep',
+      'weight',
+      'bodyfat',
+      'bodycomposition',
+      'leanmass',
+      'heartrate',
+      'restingheartrate',
+      'hrv',
+      'water',
+      'nutrition',
+      'nutritionprotein',
+      'nutritioncarbohydrates',
+      'nutritionfat',
+      'nutritionfiber',
+      'nutritionsugar',
+      'nutritionsodium',
+      'nutritionpotassium',
+    }.contains(key);
+  }
 }
 
 /// Resolves duplicate observations without erasing their provenance. Explicit
@@ -90,11 +119,6 @@ enum HealthDataType {
   heartRate,
   restingHeartRate,
   hrv,
-  oxygen,
-  respiratoryRate,
-  glucose,
-  bloodPressureSystolic,
-  bloodPressureDiastolic,
   water,
   nutrition,
   nutritionProtein,
@@ -202,7 +226,12 @@ final class UnifiedHealthDataRuntime {
     Set<HealthDataType>? types,
   }) async {
     if (!consent.permits) return const <GlobalHealthSignal>[];
-    final requestedTypes = types ?? BilHealthScope.read;
+    final requestedTypes = (types ?? BilHealthScope.read)
+        .where(BilHealthScope.read.contains)
+        .toSet();
+    if (requestedTypes.isEmpty) return const <GlobalHealthSignal>[];
+    final scopeSignature = requestedTypes.map((type) => type.name).toList()
+      ..sort();
     final collected = <GlobalHealthSignal>[];
     final backgroundEligible = <NativeHealthCapabilityBridge>[];
     for (final bridge in bridges) {
@@ -231,12 +260,17 @@ final class UnifiedHealthDataRuntime {
           .map((e) => e.name)
           .toSet();
       if (allowed.isEmpty) continue;
-      String? anchor =
-          (await store.get('health_anchor', bridge.id))?['anchor'] as String?;
+      final anchorState = await store.get('health_anchor', bridge.id);
+      final anchor =
+          anchorState != null &&
+              anchorState['scope'] == scopeSignature.join(',')
+          ? anchorState['anchor'] as String?
+          : null;
+      var nextAnchor = anchor;
       var pages = 0;
       while (pages++ < pageLimit) {
         final page = await bridge.readChanges(
-          anchor: anchor,
+          anchor: nextAnchor,
           asOf: asOf,
           types: allowed,
         );
@@ -253,6 +287,19 @@ final class UnifiedHealthDataRuntime {
         }
         for (final record in page.records) {
           if (record.observedAt.isAfter(asOf.toUtc())) continue;
+          if (!BilHealthScope.read.contains(record.type)) {
+            await audit.record(
+              GlobalAuditEvent(
+                action: 'health.record.rejected',
+                subjectId: '${bridge.id}:${record.id}:${record.type.name}',
+                at: asOf,
+                metadata: const <String, Object?>{
+                  'reason': 'outside_fitness_scope',
+                },
+              ),
+            );
+            continue;
+          }
           final identity = '${bridge.id}:${record.id}:${record.type.name}';
           final fingerprint =
               '${record.value}:${record.unit}:${record.observedAt.toIso8601String()}:${record.deleted}';
@@ -282,9 +329,10 @@ final class UnifiedHealthDataRuntime {
             );
           }
         }
-        anchor = page.nextAnchor;
+        nextAnchor = page.nextAnchor;
         await store.put('health_anchor', bridge.id, <String, Object?>{
-          'anchor': anchor,
+          'anchor': nextAnchor,
+          'scope': scopeSignature.join(','),
         });
         if (!page.hasMore) break;
       }
@@ -332,9 +380,12 @@ final class UnifiedHealthDataRuntime {
       value = value / 2.2046226218;
       unit = 'kg';
     }
-    if (record.type == HealthDataType.glucose && unit == 'mmol/L') {
-      value = value * 18;
-      unit = 'mg/dL';
+    // Backward compatibility for Health Connect records imported by builds
+    // that serialized SleepSessionRecord duration as seconds. The canonical
+    // app contract is hours on both Android and iOS.
+    if (record.type == HealthDataType.sleep && unit == 's') {
+      value = value / 3600;
+      unit = 'h';
     }
     final valid = switch (record.type) {
       HealthDataType.steps => unit == 'count' && value >= 0 && value <= 1000000,
@@ -342,6 +393,7 @@ final class UnifiedHealthDataRuntime {
       HealthDataType.activeEnergy =>
         unit == 'kcal' && value >= 0 && value <= 100000,
       HealthDataType.workout => unit == 's' && value >= 0 && value <= 172800,
+      HealthDataType.sleep => unit == 'h' && value >= 0 && value <= 24,
       HealthDataType.weight => unit == 'kg' && value >= 20 && value <= 500,
       _ => value.isFinite,
     };

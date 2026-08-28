@@ -1,8 +1,8 @@
-"NSHealthShareUsageDescription" = "BIL শুধু আপনার বেছে নেওয়া স্বাস্থ্য বিভাগ—কার্যকলাপ, ঘুম, শরীরের মাপ, হৃদ্‌যন্ত্র ও শ্বাসের সূচক, রক্তচাপ, অক্সিজেন, গ্লুকোজ, পানি ও পুষ্টি—পড়ে, যাতে এই ডিভাইসে ব্যক্তিগত স্বাস্থ্য সময়রেখা ও বিশ্লেষণ দেখানো যায়।";
+"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
 "NSHealthUpdateUsageDescription" = "BIL পৃথক লিখার সম্মতির পরে শুধুমাত্র আপনি স্পষ্টভাবে বেছে নেওয়া স্বাস্থ্য রেকর্ডগুলি লেখেন।";
-"NSBluetoothAlwaysUsageDescription" = "BIL শুধুমাত্র স্বাস্থ্য ডিভাইসগুলির সাথে সংযোগ করে যা আপনি স্পষ্টভাবে যুক্ত করেন যাতে পরিমাপ স্থানীয়ভাবে আমদানি করা যায়।";
-"NSBluetoothPeripheralUsageDescription" = "BIL শুধুমাত্র স্বাস্থ্য ডিভাইসগুলির সাথে সংযোগ করে যা আপনি স্পষ্টভাবে যুক্ত করেন যাতে পরিমাপ স্থানীয়ভাবে আমদানি করা যায়।";
+"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "আপনি যখন বারকোড স্ক্যান করতে, খাবারের ছবি পর্যালোচনা করতে বা একটি ব্যক্তিগত প্রোফাইল বা অগ্রগতির ছবি যোগ করতে বেছে নেন তখনই ক্যামেরা ব্যবহার করুন।";
 "NSPhotoLibraryUsageDescription" = "সংরক্ষণ বা আপলোড করার আগে পর্যালোচনার জন্য একটি খাবার, প্রোফাইল বা অগ্রগতির ছবি নির্বাচন করুন।";
-"NSMicrophoneUsageDescription" = "BIL শুধুমাত্র তখনই মাইক্রোফোন ব্যবহার করে যখন আপনি খাবারের জন্য ভয়েস ইনপুট বেছে নেন।";
-"NSSpeechRecognitionUsageDescription" = "BIL আপনি যে খাবারের বাক্যাংশটি বলেন তা পাঠ্যে রূপান্তর করে যাতে আপনি সংরক্ষণ করার আগে এটি পর্যালোচনা করতে পারেন।";
+"NSMicrophoneUsageDescription" = "আপনি খাবার ভয়েসে লগ করতে বা BIL AI Coach-এর সঙ্গে সরাসরি কথা বলতে বেছে নিলেই BIL মাইক্রোফোন ব্যবহার করে।";
+"NSSpeechRecognitionUsageDescription" = "খাবার লগিং বা BIL AI Coach-এর জন্য আপনার শুরু করা কথাকে BIL পাঠ্যে রূপান্তর করে, যাতে আপনি তা পর্যালোচনা বা পাঠাতে পারেন।";

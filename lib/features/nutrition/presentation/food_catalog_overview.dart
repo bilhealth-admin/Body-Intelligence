@@ -1,5 +1,193 @@
 part of '../food_page.dart';
 
+/// Keeps the two real entry points above the fold: find an existing food or
+/// start one add journey. Capture methods live behind the single Add action so
+/// the catalog is not displaced by a row of competing tools.
+class _NutritionTaskBar extends StatelessWidget {
+  const _NutritionTaskBar({required this.searchField, required this.onAddFood});
+
+  final Widget searchField;
+  final VoidCallback onAddFood;
+
+  @override
+  Widget build(BuildContext context) {
+    final addButton = FilledButton.icon(
+      key: const Key('food-primary-add-action'),
+      onPressed: onAddFood,
+      style: FilledButton.styleFrom(
+        minimumSize: const Size(0, 56),
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      icon: const Icon(Icons.add_rounded),
+      label: Text(
+        context.strings.text('Add food'),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final largeText = MediaQuery.textScalerOf(context).scale(1) >= 1.45;
+        if (largeText || constraints.maxWidth < 340) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [searchField, const SizedBox(height: 8), addButton],
+          );
+        }
+        return Row(
+          children: [
+            Expanded(child: searchField),
+            const SizedBox(width: 10),
+            ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 112, maxWidth: 132),
+              child: addButton,
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _FoodAddActionSheet extends StatelessWidget {
+  const _FoodAddActionSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.strings.text;
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              t('Add food'),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            _FoodAddActionTile(
+              actionKey: const Key('food-add-scan-barcode'),
+              icon: Icons.qr_code_scanner_rounded,
+              label: nutritionText(context, 'Scan barcode', 'مسح الباركود'),
+              premium: true,
+              onTap: () => Navigator.pop(context, _FoodAddMethod.scanBarcode),
+            ),
+            _FoodAddActionTile(
+              actionKey: const Key('food-add-manual-barcode'),
+              icon: Icons.dialpad_rounded,
+              label: t('Enter barcode manually'),
+              premium: true,
+              onTap: () => Navigator.pop(context, _FoodAddMethod.manualBarcode),
+            ),
+            _FoodAddActionTile(
+              actionKey: const Key('food-add-meal-photo'),
+              icon: Icons.center_focus_strong_rounded,
+              label: nutritionText(
+                context,
+                'Analyze meal photo',
+                'تحليل صورة الوجبة',
+              ),
+              onTap: () => Navigator.pop(context, _FoodAddMethod.mealPhoto),
+            ),
+            _FoodAddActionTile(
+              actionKey: const Key('food-add-custom-food'),
+              icon: Icons.edit_note_rounded,
+              label: customFoodText(context, 'Create custom food'),
+              onTap: () => Navigator.pop(context, _FoodAddMethod.customFood),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FoodAddActionTile extends StatelessWidget {
+  const _FoodAddActionTile({
+    required this.actionKey,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.premium = false,
+  });
+
+  final Key actionKey;
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool premium;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 58),
+      child: ListTile(
+        key: actionKey,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        leading: DecoratedBox(
+          decoration: BoxDecoration(
+            color: scheme.primaryContainer,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Icon(icon, color: scheme.onPrimaryContainer),
+          ),
+        ),
+        title: Text(
+          label,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontWeight: FontWeight.w700),
+        ),
+        trailing: premium
+            ? Semantics(
+                label: 'Premium',
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF2C6),
+                    borderRadius: BorderRadius.circular(99),
+                    border: Border.all(color: const Color(0x66C68A12)),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.workspace_premium_rounded,
+                          size: 17,
+                          color: Color(0xFF9A6500),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Premium',
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: const Color(0xFF704800),
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            : const Icon(Icons.chevron_right_rounded),
+        onTap: onTap,
+      ),
+    );
+  }
+}
+
 class _NutritionHero extends StatelessWidget {
   const _NutritionHero({required this.languageCode});
 
@@ -94,12 +282,12 @@ class _NutritionQuickActions extends StatelessWidget {
     final actions = <(IconData, String, VoidCallback)>[
       (
         Icons.qr_code_scanner_rounded,
-        nutritionTextForLanguage(languageCode, 'Scan', 'مسح المنتج'),
+        '${nutritionTextForLanguage(languageCode, 'Scan', 'مسح المنتج')} · Premium',
         onScan,
       ),
       (
         Icons.dialpad_rounded,
-        nutritionTextForLanguage(languageCode, 'Barcode', 'الباركود'),
+        '${nutritionTextForLanguage(languageCode, 'Barcode', 'الباركود')} · Premium',
         onManualBarcode,
       ),
       (

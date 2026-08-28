@@ -10,9 +10,10 @@ void main() {
     () {
       final environment = source('lib/app/environment/app_environment.dart');
       final settings = source('lib/features/settings/settings_page.dart');
-      final dashboard = source(
+      final dashboard = [
         'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
-      );
+        'lib/features/dashboard/widgets/dashboard_reference_phone_sections.dart',
+      ].map(source).join('\n');
       expect(environment, contains("'BIL_COMMUNITY_ENABLED'"));
       expect(environment, contains("'BIL_PUSH_ENABLED'"));
       expect(environment, contains('defaultValue: false'));
@@ -114,7 +115,7 @@ void main() {
       expect(androidBridge, contains('push_provider_not_configured'));
       expect(android, contains('android:scheme="bil"'));
       expect(ios, contains('bil'));
-      expect(deepLinks, contains("uri.scheme != 'bil'"));
+      expect(deepLinks, contains("uri.scheme.toLowerCase() != 'bil'"));
       expect(deepLinks, contains("segments.first == 'community'"));
       expect(deepLinks, contains("return null"));
       expect(router, contains('CommunityDeepLink.routeFor'));

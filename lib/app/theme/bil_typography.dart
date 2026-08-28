@@ -11,10 +11,6 @@ abstract final class BilTypography {
     required Color foreground,
     required bool isArabic,
   }) {
-    // Intentionally leave the family unset. Flutter then uses San Francisco on
-    // iOS, the Android system sans family on Android, and Segoe UI on Windows.
-    // This also keeps Arabic in the platform's modern UI fallback instead of
-    // forcing the heavier Naskh face across the whole product.
     // Keep the family unset for every locale. This lets iOS use San Francisco
     // and Android use its modern system sans Arabic instead of forcing the
     // editorial Naskh asset across controls, cards, and navigation.

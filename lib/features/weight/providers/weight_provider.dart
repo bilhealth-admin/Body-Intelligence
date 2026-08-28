@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../data/database/app_database.dart';
 import '../../../data/database/database_provider.dart';
@@ -15,6 +16,23 @@ final weightRepositoryProvider = Provider<WeightRepository>((ref) {
 final latestWeightProvider = StreamProvider<WeightEntry?>((ref) {
   final repository = ref.watch(weightRepositoryProvider);
   return repository.watchLatestWeight();
+});
+
+@visibleForTesting
+double? resolveEffectiveCurrentWeight({
+  required double? latestMeasurement,
+  required double? profileFallback,
+}) => latestMeasurement ?? profileFallback;
+
+/// One read authority for any surface or engine that needs "current weight".
+/// A real measurement outranks the onboarding/profile fallback.
+final effectiveCurrentWeightProvider = Provider<double?>((ref) {
+  final latest = ref.watch(latestWeightProvider).value?.weight;
+  final profile = ref.watch(userProfileProvider).value;
+  return resolveEffectiveCurrentWeight(
+    latestMeasurement: latest,
+    profileFallback: profile?.currentWeight,
+  );
 });
 
 final weightHistoryProvider = StreamProvider<List<WeightEntry>>((ref) {

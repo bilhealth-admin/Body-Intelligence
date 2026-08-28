@@ -1,0 +1,12 @@
+{
+  "name": "BIL Health",
+  "short_name": "BIL",
+  "description": "Nutrition, progress, connected health, and privacy-conscious AI coaching.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#07111f",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

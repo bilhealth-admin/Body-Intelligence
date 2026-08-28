@@ -1,15 +1,8 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../commerce/domain/commerce_entitlement.dart';
-import '../../commerce/repositories/server_entitlement_repository.dart';
 import 'cloud_runtime_access_gate.dart';
 
-enum CloudSyncConsentAvailability {
-  unavailable,
-  signedOut,
-  premiumRequired,
-  available,
-}
+enum CloudSyncConsentAvailability { unavailable, signedOut, available }
 
 final class CloudSyncConsentState {
   const CloudSyncConsentState({
@@ -28,28 +21,21 @@ final class CloudSyncConsentState {
       availability == CloudSyncConsentAvailability.available && !granted;
 
   bool get canDisable =>
-      granted &&
-      (availability == CloudSyncConsentAvailability.available ||
-          availability == CloudSyncConsentAvailability.premiumRequired);
+      granted && availability == CloudSyncConsentAvailability.available;
 
   bool get canChange => canEnable || canDisable;
 }
 
 /// Reads and writes the explicit cloud-sync privacy choice.
 ///
-/// Turning sync on requires a current server-verified cloud-sync entitlement.
-/// Turning it off only requires the authenticated owner so consent can always
-/// be revoked even after a subscription expires.
+/// Basic encrypted account continuity is available to every authenticated
+/// BIL account. Consent remains explicit because profile, weight, and hydration
+/// are sensitive wellness data. Paid AI and analytics capabilities are gated
+/// independently and never affect the user's ability to recover core data.
 final class CloudSyncConsentRepository {
-  CloudSyncConsentRepository({
-    required SupabaseClient client,
-    ServerEntitlementRepository entitlementRepository =
-        const ServerEntitlementRepository(),
-  }) : _client = client,
-       _entitlementRepository = entitlementRepository;
+  CloudSyncConsentRepository({required this._client});
 
   final SupabaseClient _client;
-  final ServerEntitlementRepository _entitlementRepository;
 
   Future<CloudSyncConsentState> read() async {
     final user = _client.auth.currentUser;
@@ -73,13 +59,8 @@ final class CloudSyncConsentRepository {
         '${row?['recorded_at'] ?? ''}',
       )?.toUtc();
 
-      final subscription = await _entitlementRepository.current();
-      final premium = subscription.grants(CommerceEntitlement.cloudSync);
-
       return CloudSyncConsentState(
-        availability: premium
-            ? CloudSyncConsentAvailability.available
-            : CloudSyncConsentAvailability.premiumRequired,
+        availability: CloudSyncConsentAvailability.available,
         ownerId: user.id,
         granted: granted,
         recordedAt: recordedAt,
@@ -96,15 +77,6 @@ final class CloudSyncConsentRepository {
     final user = _client.auth.currentUser;
     if (user == null) {
       throw StateError('Authentication is required before cloud consent.');
-    }
-
-    if (granted) {
-      final subscription = await _entitlementRepository.current();
-      if (!subscription.grants(CommerceEntitlement.cloudSync)) {
-        throw StateError(
-          'A server-verified Premium entitlement is required for cloud sync.',
-        );
-      }
     }
 
     await _client.rpc(

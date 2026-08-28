@@ -3,4 +3,5 @@
     <string name="app_name">BIL - Journal d’intelligence corporelle</string>
     <string name="health_permissions_rationale_title">Confidentialité des données de santé</string>
     <string name="health_permissions_rationale_body">BIL demande uniquement les types de données Health Connect nécessaires aux fonctions que vous choisissez. Par défaut, vos données de santé sont traitées localement. Vous pouvez accorder, refuser ou révoquer chaque autorisation dans Health Connect. BIL ne vend pas les données de santé et ne les utilise pas à des fins publicitaires.</string>
+    <string name="health_permissions_privacy_policy_action">Lire la politique de confidentialité complète de BIL</string>
 </resources>

@@ -36,7 +36,7 @@ class _AccountEmailPageState extends State<AccountEmailPage> {
     if (widget.initialEmail != null) {
       _email.text = widget.initialEmail!;
     } else if (AppEnvironment.cloudConfigured &&
-        Supabase.instance.isInitialized) {
+        AppEnvironment.supabaseRuntimeReady) {
       _email.text = Supabase.instance.client.auth.currentUser?.email ?? '';
     }
   }
@@ -64,7 +64,7 @@ class _AccountEmailPageState extends State<AccountEmailPage> {
     }
     if (widget.emailUpdater == null &&
         (!AppEnvironment.cloudConfigured ||
-            !Supabase.instance.isInitialized ||
+            !AppEnvironment.supabaseRuntimeReady ||
             Supabase.instance.client.auth.currentUser == null)) {
       _message(
         _text(

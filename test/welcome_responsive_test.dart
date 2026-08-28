@@ -31,9 +31,33 @@ void main() {
       expect(find.byType(WelcomeStep), findsOneWidget);
     });
   }
+
+  for (final locale in AppLocalizations.supportedLocales) {
+    testWidgets(
+      'Welcome V10 supports ${locale.toLanguageTag()} at 390x844 and 160% text',
+      (tester) async {
+        await tester.binding.setSurfaceSize(const Size(390, 844));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+
+        await tester.pumpWidget(_welcome(locale, textScale: 1.6));
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull, reason: locale.toLanguageTag());
+        expect(find.byType(WelcomeStep), findsOneWidget);
+        final message = tester.widget<Text>(
+          find.byKey(const Key('welcome-message')),
+        );
+        expect(
+          message.style?.fontSize,
+          lessThanOrEqualTo(17),
+          reason: '${locale.toLanguageTag()} must keep welcome copy secondary',
+        );
+      },
+    );
+  }
 }
 
-Widget _welcome(Locale locale) => ProviderScope(
+Widget _welcome(Locale locale, {double textScale = 1}) => ProviderScope(
   overrides: [
     appSettingsServiceProvider.overrideWithValue(
       _ResponsiveSettingsService(locale.languageCode),
@@ -49,6 +73,12 @@ Widget _welcome(Locale locale) => ProviderScope(
       GlobalWidgetsLocalizations.delegate,
       GlobalCupertinoLocalizations.delegate,
     ],
+    builder: (context, child) => MediaQuery(
+      data: MediaQuery.of(
+        context,
+      ).copyWith(textScaler: TextScaler.linear(textScale)),
+      child: child ?? const SizedBox.shrink(),
+    ),
     home: WelcomeStep(onContinue: _noop),
   ),
 );

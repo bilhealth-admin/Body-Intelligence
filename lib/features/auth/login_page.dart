@@ -5,21 +5,26 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../app/environment/app_environment.dart';
 import '../../shared/widgets/bil_wordmark.dart';
 import '../startup/premium_splash_experience.dart';
+import 'auth_entry_locale_copy.dart';
 import 'auth_language_selector.dart';
-import 'supabase_auth_service.dart';
-import 'auth_input_validation.dart';
-import 'auth_error_localizer.dart';
 import 'auth_five_locale_copy.dart';
+import 'auth_input_validation.dart';
+import 'supabase_auth_service.dart';
 export 'premium_login_page.dart' show LoginPage;
 
-class LegacyLoginPage extends StatefulWidget {
-  const LegacyLoginPage({super.key});
+class StoreReviewerLoginPage extends StatefulWidget {
+  const StoreReviewerLoginPage({super.key});
+
+  static const reviewerEmail = 'play-review@bilhealth.com';
+
+  static bool acceptsReviewerEmail(String value) =>
+      value.trim().toLowerCase() == reviewerEmail;
 
   @override
-  State<LegacyLoginPage> createState() => _LegacyLoginPageState();
+  State<StoreReviewerLoginPage> createState() => _StoreReviewerLoginPageState();
 }
 
-class _LegacyLoginPageState extends State<LegacyLoginPage> {
+class _StoreReviewerLoginPageState extends State<StoreReviewerLoginPage> {
   final formKey = GlobalKey<FormState>();
   final email = TextEditingController();
   final password = TextEditingController();
@@ -27,12 +32,13 @@ class _LegacyLoginPageState extends State<LegacyLoginPage> {
   bool loading = false;
   String? status;
 
-  bool get arabic => Localizations.localeOf(context).languageCode == 'ar';
-  String tr(String en, String ar) => authFiveLocaleText(en, ar);
+  String tr(String en, String ar) => authFiveLocaleTextOf(context, en, ar);
 
   Future<void> submit() async {
     if (loading || !AppEnvironment.cloudConfigured) return;
     if (formKey.currentState?.validate() != true) return;
+    final normalized = email.text.trim().toLowerCase();
+    if (!StoreReviewerLoginPage.acceptsReviewerEmail(normalized)) return;
     setState(() {
       loading = true;
       status = null;
@@ -40,64 +46,23 @@ class _LegacyLoginPageState extends State<LegacyLoginPage> {
     try {
       await SupabaseAuthService(
         Supabase.instance.client,
-      ).signIn(email: email.text.trim().toLowerCase(), password: password.text);
+      ).signIn(email: normalized, password: password.text);
       if (mounted) context.go('/startup');
     } on AuthException {
       if (mounted) {
         setState(
-          () => status =
-              'Sign-in could not be completed. Check your details and try again.',
+          () => status = authEntryText(
+            context,
+            AuthEntryCopyKey.authenticationFailed,
+          ),
         );
       }
     } catch (_) {
       if (mounted) {
         setState(
-          () => status = tr(
-            'Secure connection failed. Try again.',
-            'تعذر الاتصال الآمن. حاول مرة أخرى.',
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => loading = false);
-    }
-  }
-
-  Future<void> resetPassword() async {
-    final normalized = email.text.trim().toLowerCase();
-    if (!AuthInputValidation.isValidEmail(normalized)) {
-      setState(
-        () => status = tr(
-          'Enter your email first.',
-          'أدخل بريدك الإلكتروني أولًا.',
-        ),
-      );
-      return;
-    }
-    setState(() {
-      loading = true;
-      status = null;
-    });
-    try {
-      await SupabaseAuthService(
-        Supabase.instance.client,
-      ).sendPasswordReset(normalized);
-      if (mounted) {
-        setState(
-          () => status = tr(
-            'Password reset instructions were sent if this account exists.',
-            'أُرسلت تعليمات استعادة كلمة المرور إذا كان الحساب موجودًا.',
-          ),
-        );
-      }
-    } on AuthException catch (error) {
-      if (mounted) setState(() => status = localizedAuthError(context, error));
-    } catch (_) {
-      if (mounted) {
-        setState(
-          () => status = tr(
-            'Could not send reset instructions. Try again.',
-            'تعذر إرسال تعليمات الاستعادة. حاول مرة أخرى.',
+          () => status = authEntryText(
+            context,
+            AuthEntryCopyKey.secureConnectionFailure,
           ),
         );
       }
@@ -148,15 +113,32 @@ class _LegacyLoginPageState extends State<LegacyLoginPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const Align(
-                                alignment: AlignmentDirectional.centerStart,
-                                child: AuthLanguageSelector(),
+                              Row(
+                                children: [
+                                  IconButton(
+                                    key: const Key('reviewer-login-back'),
+                                    tooltip: authEntryText(
+                                      context,
+                                      AuthEntryCopyKey.back,
+                                    ),
+                                    onPressed: () => context.go('/login'),
+                                    icon: const Icon(
+                                      Icons.arrow_back_rounded,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  const AuthLanguageSelector(),
+                                ],
                               ),
                               const SizedBox(height: 16),
                               const Center(child: BilWordmark(height: 48)),
                               const SizedBox(height: 12),
                               Text(
-                                tr('Welcome back', 'مرحبًا بعودتك'),
+                                tr(
+                                  'Store reviewer access',
+                                  'دخول مراجع المتجر',
+                                ),
                                 textAlign: TextAlign.center,
                                 style: Theme.of(context)
                                     .textTheme
@@ -169,8 +151,8 @@ class _LegacyLoginPageState extends State<LegacyLoginPage> {
                               const SizedBox(height: 6),
                               Text(
                                 tr(
-                                  'Continue your private body intelligence journey.',
-                                  'تابع رحلة ذكاء جسمك بخصوصية وأمان.',
+                                  'Use only the dedicated credentials supplied in the store review notes.',
+                                  'استخدم فقط بيانات المراجع المخصصة والموجودة في ملاحظات مراجعة المتجر.',
                                 ),
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
@@ -193,16 +175,31 @@ class _LegacyLoginPageState extends State<LegacyLoginPage> {
                                     FocusScope.of(context).nextFocus(),
                                 style: const TextStyle(color: Colors.white),
                                 decoration: _decoration(
-                                  tr('Email', 'البريد الإلكتروني'),
+                                  authEntryText(
+                                    context,
+                                    AuthEntryCopyKey.emailAddress,
+                                  ),
                                   Icons.email_outlined,
                                 ),
-                                validator: (value) =>
-                                    AuthInputValidation.isValidEmail(value)
-                                    ? null
-                                    : tr(
-                                        'Enter a valid email.',
-                                        'أدخل بريدًا صحيحًا.',
-                                      ),
+                                validator: (value) {
+                                  if (!AuthInputValidation.isValidEmail(
+                                    value,
+                                  )) {
+                                    return authEntryText(
+                                      context,
+                                      AuthEntryCopyKey.invalidEmail,
+                                    );
+                                  }
+                                  if (!StoreReviewerLoginPage.acceptsReviewerEmail(
+                                    value!,
+                                  )) {
+                                    return tr(
+                                      'Use only the dedicated credentials supplied in the store review notes.',
+                                      'استخدم فقط بيانات المراجع المخصصة والموجودة في ملاحظات مراجعة المتجر.',
+                                    );
+                                  }
+                                  return null;
+                                },
                               ),
                               const SizedBox(height: 14),
                               TextFormField(
@@ -233,22 +230,10 @@ class _LegacyLoginPageState extends State<LegacyLoginPage> {
                                 validator: (value) => (value?.length ?? 0) >= 8
                                     ? null
                                     : tr(
-                                        'Use at least 8 characters.',
-                                        'استخدم 8 أحرف على الأقل.',
+                                        'Use only the dedicated credentials supplied in the store review notes.',
+                                        'استخدم فقط بيانات المراجع المخصصة والموجودة في ملاحظات مراجعة المتجر.',
                                       ),
                                 onFieldSubmitted: (_) => submit(),
-                              ),
-                              Align(
-                                alignment: AlignmentDirectional.centerEnd,
-                                child: TextButton(
-                                  key: const Key('forgot-password'),
-                                  onPressed: configured && !loading
-                                      ? resetPassword
-                                      : null,
-                                  child: Text(
-                                    tr('Forgot password?', 'نسيت كلمة المرور؟'),
-                                  ),
-                                ),
                               ),
                               if (status != null) ...[
                                 const SizedBox(height: 12),
@@ -274,7 +259,12 @@ class _LegacyLoginPageState extends State<LegacyLoginPage> {
                                         ),
                                       )
                                     : const Icon(Icons.arrow_forward_rounded),
-                                label: Text(tr('Sign in', 'تسجيل الدخول')),
+                                label: Text(
+                                  authEntryText(
+                                    context,
+                                    AuthEntryCopyKey.signIn,
+                                  ),
+                                ),
                                 style: FilledButton.styleFrom(
                                   minimumSize: const Size.fromHeight(56),
                                   backgroundColor: const Color(0xFF0BB7D1),
@@ -283,35 +273,11 @@ class _LegacyLoginPageState extends State<LegacyLoginPage> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                              OutlinedButton(
-                                key: const Key('open-register'),
-                                onPressed: configured && !loading
-                                    ? () => context.push('/register')
-                                    : null,
-                                style: OutlinedButton.styleFrom(
-                                  minimumSize: const Size.fromHeight(54),
-                                ),
-                                child: Text(
-                                  tr('Create a new account', 'إنشاء حساب جديد'),
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              TextButton.icon(
-                                onPressed: () => context.go('/dashboard'),
-                                icon: const Icon(Icons.shield_outlined),
-                                label: Text(
-                                  tr(
-                                    'Continue privately on this device',
-                                    'المتابعة بخصوصية على هذا الجهاز',
-                                  ),
-                                ),
-                              ),
                               if (!configured)
                                 Text(
-                                  tr(
-                                    'Cloud account configuration is not enabled in this build.',
-                                    'إعداد الحساب السحابي غير مفعّل في هذه النسخة.',
+                                  authEntryText(
+                                    context,
+                                    AuthEntryCopyKey.cloudNotEnabled,
                                   ),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(

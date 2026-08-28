@@ -12,6 +12,7 @@ class OnboardingDraft {
     this.targetWeightKg = 60,
     this.waistCm,
     this.neckCm,
+    this.hipsCm,
     this.region = '',
     this.gender,
     this.activity,
@@ -29,6 +30,7 @@ class OnboardingDraft {
   final double targetWeightKg;
   final double? waistCm;
   final double? neckCm;
+  final double? hipsCm;
   final String region;
   final String? gender;
   final String? activity;
@@ -45,6 +47,7 @@ class OnboardingDraft {
     'targetWeightKg': targetWeightKg,
     'waistCm': waistCm,
     'neckCm': neckCm,
+    'hipsCm': hipsCm,
     'region': region,
     'gender': gender,
     'activity': activity,
@@ -72,6 +75,7 @@ class OnboardingDraft {
         targetWeightKg: number('targetWeightKg', 60),
         waistCm: optionalNumber('waistCm'),
         neckCm: optionalNumber('neckCm'),
+        hipsCm: optionalNumber('hipsCm'),
         region: value['region'] is String ? value['region'] as String : '',
         gender: value['gender'] as String?,
         activity: value['activity'] as String?,

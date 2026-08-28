@@ -3,9 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../../../app/localization/bil_locale_policy.dart';
 import '../../nutrition/domain/product_identity.dart';
 import '../data/community_repository.dart';
 import '../domain/community_models.dart';
+import '../domain/community_text_policy.dart';
 import 'community_copy.dart';
 
 Future<bool> showProductReviewSubmissionDialog(
@@ -13,7 +15,9 @@ Future<bool> showProductReviewSubmissionDialog(
   required String barcode,
   ProductIdentity? suggestedProduct,
 }) async {
-  final languageCode = Localizations.localeOf(context).languageCode;
+  final languageCode = BilLocalePolicy.canonicalTag(
+    Localizations.localeOf(context),
+  );
   String t(String en, String ar) =>
       communityTextForLanguage(languageCode, en, ar);
   if (!AppEnvironment.cloudConfigured ||
@@ -150,6 +154,18 @@ class _ProductReviewSubmissionDialogState
         ),
       );
       if (mounted) Navigator.pop(context, true);
+    } on CommunityTextPolicyException catch (error) {
+      if (!mounted) return;
+      setState(() => submitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error.localizedMessage(
+              Localizations.localeOf(context).toLanguageTag(),
+            ),
+          ),
+        ),
+      );
     } catch (_) {
       if (!mounted) return;
       setState(() => submitting = false);

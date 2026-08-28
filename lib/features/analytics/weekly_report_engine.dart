@@ -39,11 +39,48 @@ final class WeeklyActivityObservation {
     required this.dayKey,
     this.steps,
     this.exerciseNotes,
+    this.estimatedBurnedCaloriesKcal,
+    this.verifiedActiveEnergyKcal,
   });
   final String dayKey;
   final int? steps;
   final String? exerciseNotes;
+  final double? estimatedBurnedCaloriesKcal;
+  final double? verifiedActiveEnergyKcal;
   bool get hasExercise => exerciseNotes?.trim().isNotEmpty == true;
+}
+
+final class WeeklySleepObservation {
+  const WeeklySleepObservation({
+    required this.dayKey,
+    required this.hours,
+    required this.observedAt,
+    this.deviceVerified = false,
+  });
+  final String dayKey;
+  final double hours;
+  final DateTime observedAt;
+  final bool deviceVerified;
+}
+
+final class WeeklyFastingObservation {
+  const WeeklyFastingObservation({
+    required this.dayKey,
+    required this.durationMinutes,
+    required this.reachedTarget,
+  });
+  final String dayKey;
+  final int durationMinutes;
+  final bool reachedTarget;
+}
+
+final class WeeklyBodyContextObservation {
+  const WeeklyBodyContextObservation({
+    required this.dayKey,
+    required this.types,
+  });
+  final String dayKey;
+  final Set<String> types;
 }
 
 final class WeeklyReportDay {
@@ -52,21 +89,44 @@ final class WeeklyReportDay {
     required this.hasNutrition,
     required this.hasWater,
     required this.hasWeight,
+    required this.hasExercise,
+    required this.hasSleep,
+    required this.hasFasting,
+    required this.hasBodyContext,
     required this.calories,
     required this.proteinG,
     required this.carbsG,
     required this.fatG,
     required this.sodiumMg,
     required this.waterMl,
+    this.sleepHours,
+    this.verifiedActiveEnergyKcal,
     this.steps,
+    this.calorieGoal,
   });
   final String dayKey;
-  final bool hasNutrition, hasWater, hasWeight;
+  final bool hasNutrition,
+      hasWater,
+      hasWeight,
+      hasExercise,
+      hasSleep,
+      hasFasting,
+      hasBodyContext;
   final double calories, proteinG, carbsG, fatG, sodiumMg;
   final int waterMl;
+  final double? sleepHours, verifiedActiveEnergyKcal;
   final int? steps;
+  final double? calorieGoal;
   bool get hasAnyRecord =>
-      hasNutrition || hasWater || hasWeight || steps != null;
+      hasNutrition ||
+      hasWater ||
+      hasWeight ||
+      hasExercise ||
+      hasSleep ||
+      hasFasting ||
+      hasBodyContext ||
+      steps != null ||
+      verifiedActiveEnergyKcal != null;
 }
 
 enum WeeklyReportConfidence { insufficient, low, medium, high }
@@ -95,6 +155,13 @@ final class WeeklyReportSnapshot {
     this.allTimeExerciseDays = 0,
     this.allTimeSteps,
     this.dailyCalorieGoal,
+    this.totalEstimatedBurnedCaloriesKcal,
+    this.totalVerifiedActiveEnergyKcal,
+    this.averageSleepHours,
+    this.sleepDays = 0,
+    this.fastingSessions = 0,
+    this.fastingTargetsReached = 0,
+    this.bodyContextDays = 0,
     this.loggingStreakDays = 0,
     Map<String, int> frequentFoods = const {},
   }) : days = UnmodifiableListView(days),
@@ -111,6 +178,9 @@ final class WeeklyReportSnapshot {
       totalSodiumMg;
   final int? totalSteps, allTimeSteps;
   final int? dailyCalorieGoal;
+  final double? totalEstimatedBurnedCaloriesKcal;
+  final double? totalVerifiedActiveEnergyKcal, averageSleepHours;
+  final int sleepDays, fastingSessions, fastingTargetsReached, bodyContextDays;
   final int exerciseDays,
       allTimeFoodCount,
       allTimeMealCount,
@@ -123,6 +193,10 @@ final class WeeklyReportSnapshot {
   final List<String> sources, limitations;
   final Map<String, int> foodCategoryCounts;
   final Map<String, int> frequentFoods;
+  double? get weeklyCalorieGoal =>
+      days.isNotEmpty && days.every((day) => day.calorieGoal != null)
+      ? days.fold<double>(0, (sum, day) => sum + day.calorieGoal!)
+      : null;
   int get trackedDays => days.where((day) => day.hasAnyRecord).length;
   int get missingDays => days.length - trackedDays;
   bool get isEmpty => trackedDays == 0;
@@ -139,6 +213,9 @@ final class WeeklyReportEngine {
     required Iterable<WeeklyWaterObservation> water,
     required Iterable<WeeklyWeightObservation> weights,
     Iterable<WeeklyActivityObservation> activity = const [],
+    Iterable<WeeklySleepObservation> sleep = const [],
+    Iterable<WeeklyFastingObservation> fasting = const [],
+    Iterable<WeeklyBodyContextObservation> bodyContext = const [],
     required int mealCount,
     int allTimeMealCount = 0,
     int allTimeFoodCount = 0,
@@ -146,6 +223,7 @@ final class WeeklyReportEngine {
     int allTimeExerciseDays = 0,
     int? allTimeSteps,
     int? dailyCalorieGoal,
+    Map<String, double> calorieGoalsByDay = const {},
     int loggingStreakDays = 0,
   }) {
     if (mealCount < 0) {
@@ -177,7 +255,8 @@ final class WeeklyReportEngine {
       if (allowed.contains(row.dayKey)) {
         nutritionByDay.putIfAbsent(row.dayKey, () => []).add(row);
         final category = row.foodCategory?.trim().toLowerCase();
-        if (category != null && category.isNotEmpty) {
+        final isSyntheticSummary = _isSyntheticNutritionSummary(row);
+        if (!isSyntheticSummary && category != null && category.isNotEmpty) {
           foodCategoryCounts.update(
             category,
             (value) => value + 1,
@@ -185,7 +264,7 @@ final class WeeklyReportEngine {
           );
         }
         final foodName = row.foodName?.trim();
-        if (foodName != null && foodName.isNotEmpty) {
+        if (!isSyntheticSummary && foodName != null && foodName.isNotEmpty) {
           foodCounts.update(foodName, (value) => value + 1, ifAbsent: () => 1);
         }
       }
@@ -216,9 +295,57 @@ final class WeeklyReportEngine {
     validWeights.sort((a, b) => a.observedAt.compareTo(b.observedAt));
     final weightKeys = validWeights.map((row) => row.dayKey).toSet();
     final activityByDay = {
-      for (final row in activity.where((row) => allowed.contains(row.dayKey)))
+      for (final row in activity.where((row) {
+        final estimate = row.estimatedBurnedCaloriesKcal;
+        if (estimate != null) {
+          _finite(estimate, 'estimatedBurnedCaloriesKcal');
+          if (estimate <= 0 || estimate > 5000) {
+            throw ArgumentError.value(estimate, 'estimatedBurnedCaloriesKcal');
+          }
+        }
+        final verified = row.verifiedActiveEnergyKcal;
+        if (verified != null) {
+          _finite(verified, 'verifiedActiveEnergyKcal');
+          if (verified <= 0 || verified > 5000) {
+            throw ArgumentError.value(verified, 'verifiedActiveEnergyKcal');
+          }
+        }
+        return allowed.contains(row.dayKey);
+      }))
         row.dayKey: row,
     };
+    final sleepByDay = <String, WeeklySleepObservation>{};
+    for (final row in sleep) {
+      _finite(row.hours, 'sleepHours');
+      if (row.hours <= 0 || row.hours > 24 || !allowed.contains(row.dayKey)) {
+        if (row.hours <= 0 || row.hours > 24) {
+          throw ArgumentError.value(row.hours, 'sleepHours');
+        }
+        continue;
+      }
+      final current = sleepByDay[row.dayKey];
+      if (current == null ||
+          (row.deviceVerified && !current.deviceVerified) ||
+          (row.deviceVerified == current.deviceVerified &&
+              row.observedAt.isAfter(current.observedAt))) {
+        sleepByDay[row.dayKey] = row;
+      }
+    }
+    final fastingRows = <WeeklyFastingObservation>[];
+    for (final row in fasting) {
+      if (row.durationMinutes <= 0 || row.durationMinutes > 10080) {
+        throw ArgumentError.value(row.durationMinutes, 'durationMinutes');
+      }
+      if (allowed.contains(row.dayKey)) fastingRows.add(row);
+    }
+    final fastingDays = fastingRows.map((row) => row.dayKey).toSet();
+    final bodyContextByDay = <String, Set<String>>{};
+    for (final row in bodyContext) {
+      if (!allowed.contains(row.dayKey) || row.types.isEmpty) continue;
+      bodyContextByDay
+          .putIfAbsent(row.dayKey, () => <String>{})
+          .addAll(row.types.where((type) => type.trim().isNotEmpty));
+    }
     final days = <WeeklyReportDay>[];
     for (final key in keys) {
       final nutrients = nutritionByDay[key] ?? const [];
@@ -228,20 +355,28 @@ final class WeeklyReportEngine {
           hasNutrition: nutrients.isNotEmpty,
           hasWater: waterByDay.containsKey(key),
           hasWeight: weightKeys.contains(key),
+          hasExercise: activityByDay[key]?.hasExercise == true,
+          hasSleep: sleepByDay.containsKey(key),
+          hasFasting: fastingDays.contains(key),
+          hasBodyContext: bodyContextByDay[key]?.isNotEmpty == true,
           calories: nutrients.fold(0, (sum, row) => sum + row.calories),
           proteinG: nutrients.fold(0, (sum, row) => sum + row.proteinG),
           carbsG: nutrients.fold(0, (sum, row) => sum + row.carbsG),
           fatG: nutrients.fold(0, (sum, row) => sum + row.fatG),
           sodiumMg: nutrients.fold(0, (sum, row) => sum + row.sodiumMg),
           waterMl: waterByDay[key] ?? 0,
+          sleepHours: sleepByDay[key]?.hours,
+          verifiedActiveEnergyKcal:
+              activityByDay[key]?.verifiedActiveEnergyKcal,
           steps: activityByDay[key]?.steps,
+          calorieGoal: calorieGoalsByDay[key] ?? dailyCalorieGoal?.toDouble(),
         ),
       );
     }
     final tracked = days.where((day) => day.hasAnyRecord).length;
     final nutritionDays = days.where((day) => day.hasNutrition).length;
     final confidence = switch ((tracked, nutritionDays, validWeights.length)) {
-      (0, _, _) || (_, 0, 0) => WeeklyReportConfidence.insufficient,
+      (0, _, _) || (_, 0, _) => WeeklyReportConfidence.insufficient,
       (< 4, _, _) => WeeklyReportConfidence.low,
       (_, >= 5, >= 2) => WeeklyReportConfidence.high,
       _ => WeeklyReportConfidence.medium,
@@ -260,10 +395,17 @@ final class WeeklyReportEngine {
           ? null
           : validWeights.last.weightKg - validWeights.first.weightKg,
       confidence: confidence,
-      sources: const [
+      sources: [
         'local.meals+meal_items',
         'local.water_entries',
         'local.weight_entries',
+        'local.daily_logs',
+        'local.fasting_history',
+        if (sleepByDay.values.any((row) => row.deviceVerified) ||
+            activityByDay.values.any(
+              (row) => row.verifiedActiveEnergyKcal != null,
+            ))
+          'connected_health.device_verified_only',
       ],
       limitations: [
         if (tracked < 7) '${7 - tracked} day(s) have no saved records.',
@@ -288,6 +430,34 @@ final class WeeklyReportEngine {
       allTimeExerciseDays: allTimeExerciseDays,
       allTimeSteps: allTimeSteps,
       dailyCalorieGoal: dailyCalorieGoal,
+      totalEstimatedBurnedCaloriesKcal:
+          activityByDay.values.any(
+            (row) => row.estimatedBurnedCaloriesKcal != null,
+          )
+          ? activityByDay.values.fold<double>(
+              0,
+              (sum, row) => sum + (row.estimatedBurnedCaloriesKcal ?? 0),
+            )
+          : null,
+      totalVerifiedActiveEnergyKcal:
+          activityByDay.values.any(
+            (row) => row.verifiedActiveEnergyKcal != null,
+          )
+          ? activityByDay.values.fold<double>(
+              0,
+              (sum, row) => sum + (row.verifiedActiveEnergyKcal ?? 0),
+            )
+          : null,
+      sleepDays: sleepByDay.length,
+      averageSleepHours: sleepByDay.isEmpty
+          ? null
+          : sleepByDay.values.fold<double>(0, (sum, row) => sum + row.hours) /
+                sleepByDay.length,
+      fastingSessions: fastingRows.length,
+      fastingTargetsReached: fastingRows
+          .where((row) => row.reachedTarget)
+          .length,
+      bodyContextDays: bodyContextByDay.length,
       loggingStreakDays: loggingStreakDays,
       frequentFoods: Map.fromEntries(
         (foodCounts.entries.toList()
@@ -301,6 +471,19 @@ final class WeeklyReportEngine {
     if (!value.isFinite) {
       throw ArgumentError.value(value, name, 'must be finite');
     }
+  }
+
+  static bool _isSyntheticNutritionSummary(
+    WeeklyNutritionObservation observation,
+  ) {
+    final category = observation.foodCategory?.trim().toLowerCase();
+    final name = observation.foodName?.trim().toLowerCase();
+    if (category == 'historical-total' || category == 'quick_add') return true;
+    if (name == 'recorded daily calories' ||
+        name?.startsWith('quick add •') == true) {
+      return true;
+    }
+    return false;
   }
 
   static String _key(DateTime value) {

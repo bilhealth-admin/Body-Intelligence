@@ -137,6 +137,53 @@ void main() {
     expect(outcome.foods.single.uuid, 'bil-usda-orange');
   });
 
+  test('catalog matching accepts a supported non-English query', () async {
+    final authority = FoodRuntimeSearchAuthority(
+      local,
+      catalogResolver: () async =>
+          _FakeCatalog([_food(id: 'bil-usda-apple', name: 'Apple')]),
+    );
+
+    for (final query in ['яблоко', 'りんご', '苹果', 'सेब']) {
+      final outcome = await authority.searchDetailed(query);
+      expect(outcome.foods.single.uuid, 'bil-usda-apple', reason: query);
+    }
+  });
+
+  test(
+    'materialization repairs missing nutrient evidence and stale label',
+    () async {
+      await local.materializeUnifiedFood(
+        _food(id: 'bil-usda-apple', name: 'Apple', arabicName: 'بط'),
+      );
+      final repaired = await local.materializeUnifiedFood(
+        _food(
+          id: 'bil-usda-apple',
+          name: 'Apple',
+          nutrients: const {
+            FoodNutrient.calories: NutrientAmount.known(52),
+            FoodNutrient.protein: NutrientAmount.known(0.3),
+            FoodNutrient.carbohydrates: NutrientAmount.known(14),
+            FoodNutrient.fat: NutrientAmount.known(0.2),
+            FoodNutrient.potassium: NutrientAmount.known(107),
+            FoodNutrient.calcium: NutrientAmount.known(6),
+          },
+        ),
+      );
+
+      expect(repaired.arabicName, isNull);
+      expect(repaired.potassium, 107);
+      expect(repaired.calcium, 6);
+      expect(
+        UnifiedFood.evidenceFromMask(
+          repaired.nutrientEvidenceMask,
+          FoodNutrient.potassium,
+        ),
+        isTrue,
+      );
+    },
+  );
+
   test('catalog search failure degrades safely to local results', () async {
     await local.addFood(
       name: 'Local oats',
@@ -254,6 +301,7 @@ UnifiedFood _food({
   required String name,
   String? arabicName,
   String? barcode,
+  Map<FoodNutrient, NutrientAmount>? nutrients,
 }) {
   return UnifiedFood(
     id: id,
@@ -262,12 +310,14 @@ UnifiedFood _food({
     category: 'generic',
     barcode: barcode,
     serving: const FoodServing(amount: 100, unit: 'g', grams: 100),
-    nutrients: const {
-      FoodNutrient.calories: NutrientAmount.known(52),
-      FoodNutrient.protein: NutrientAmount.known(0.3),
-      FoodNutrient.carbohydrates: NutrientAmount.known(14),
-      FoodNutrient.fat: NutrientAmount.known(0.2),
-    },
+    nutrients:
+        nutrients ??
+        const {
+          FoodNutrient.calories: NutrientAmount.known(52),
+          FoodNutrient.protein: NutrientAmount.known(0.3),
+          FoodNutrient.carbohydrates: NutrientAmount.known(14),
+          FoodNutrient.fat: NutrientAmount.known(0.2),
+        },
     source: FoodDataSource.foundation,
     sourceLabel: 'bil-mobile-catalog',
     verified: true,

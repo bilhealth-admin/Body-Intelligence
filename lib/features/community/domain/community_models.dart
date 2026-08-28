@@ -58,6 +58,12 @@ class CommunityPost {
     required this.createdAt,
     this.authorName,
     this.authorAvatarUrl,
+    this.mediaObjectPath,
+    this.mediaUrl,
+    this.mediaMimeType,
+    this.mediaBytes,
+    this.mediaWidth,
+    this.mediaHeight,
   });
 
   final String id;
@@ -66,6 +72,28 @@ class CommunityPost {
   final DateTime createdAt;
   final String? authorName;
   final String? authorAvatarUrl;
+  final String? mediaObjectPath;
+  final String? mediaUrl;
+  final String? mediaMimeType;
+  final int? mediaBytes;
+  final int? mediaWidth;
+  final int? mediaHeight;
+
+  bool get hasImage =>
+      mediaObjectPath != null &&
+      mediaMimeType != null &&
+      mediaBytes != null &&
+      mediaWidth != null &&
+      mediaHeight != null;
+
+  double? get mediaAspectRatio {
+    final width = mediaWidth;
+    final height = mediaHeight;
+    if (width == null || height == null || width <= 0 || height <= 0) {
+      return null;
+    }
+    return width / height;
+  }
 
   factory CommunityPost.fromJson(Map<String, dynamic> json) => CommunityPost(
     id: json['id'] as String,
@@ -74,6 +102,12 @@ class CommunityPost {
     createdAt: DateTime.parse(json['created_at'] as String),
     authorName: json['author_name'] as String?,
     authorAvatarUrl: json['author_avatar_url'] as String?,
+    mediaObjectPath: json['media_object_path'] as String?,
+    mediaUrl: json['media_url'] as String?,
+    mediaMimeType: json['media_mime_type'] as String?,
+    mediaBytes: json['media_bytes'] as int?,
+    mediaWidth: json['media_width'] as int?,
+    mediaHeight: json['media_height'] as int?,
   );
 }
 

@@ -4,8 +4,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/localization/app_localizations.dart';
 import '../../core/units/measurement_units.dart';
+import '../../data/database/date_keys.dart';
+import '../../engine/body_model_engine.dart';
+import '../../engine/body_profile.dart';
+import '../intelligence_center/services/coach_context_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
+import '../weight/providers/weight_provider.dart';
 import 'bil_flagship_onboarding.dart';
+import 'domain/adult_eligibility.dart';
 import 'onboarding_locale_copy.dart';
 import 'widgets/welcome_step.dart';
 
@@ -26,6 +32,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   double targetWeightKg = 60;
   double? waistCm;
   double? neckCm;
+  double? hipsCm;
   String? gender;
   String? activity;
   String goalType = 'maintain';
@@ -63,6 +70,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       final profile = await ref
           .read(userProfileRepositoryProvider)
           .getProfile();
+      final latestMeasurements = await ref
+          .read(bodyMeasurementRepositoryProvider)
+          .getLatest();
 
       if (!mounted) return;
       setState(() {
@@ -73,8 +83,9 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           heightCm = profile.height;
           currentWeightKg = profile.currentWeight;
           targetWeightKg = profile.targetWeight;
-          waistCm = profile.waist;
-          neckCm = profile.neck;
+          waistCm = latestMeasurements?.waistCm ?? profile.waist;
+          neckCm = latestMeasurements?.neckCm ?? profile.neck;
+          hipsCm = latestMeasurements?.hipsCm;
           gender = profile.gender;
           activity = profile.activityLevel;
           goalType = profile.targetWeight < profile.currentWeight
@@ -91,6 +102,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           targetWeightKg = savedDraft.targetWeightKg;
           waistCm = savedDraft.waistCm;
           neckCm = savedDraft.neckCm;
+          hipsCm = savedDraft.hipsCm;
           regionController.text = savedDraft.region;
           gender = savedDraft.gender;
           activity = savedDraft.activity;
@@ -122,13 +134,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 
   int _ageFromBirthDate(DateTime birthDate) {
-    final today = DateTime.now();
-    var age = today.year - birthDate.year;
-    final birthdayPassed =
-        today.month > birthDate.month ||
-        (today.month == birthDate.month && today.day >= birthDate.day);
-    if (!birthdayPassed) age--;
-    return age;
+    return BilAdultEligibility.ageOn(birthDate);
   }
 
   BilOnboardingDraft _initialFlagshipDraft() {
@@ -156,51 +162,61 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       ..sexConfirmed = draftRestored || profileRestored
       ..goalConfirmed = draftRestored || profileRestored
       ..activityConfirmed = draftRestored || profileRestored
-      ..weight = (draftRestored || profileRestored) ? currentWeightKg : null
-      ..height = (draftRestored || profileRestored) ? heightCm : null
-      ..waist = (draftRestored || profileRestored) ? waistCm : null
-      ..neck = (draftRestored || profileRestored) ? neckCm : null;
+      ..weight = (draftRestored || profileRestored)
+          ? (system == MeasurementSystem.metric
+                ? currentWeightKg
+                : currentWeightKg * BilOnboardingDraft.poundsPerKilogram)
+          : null
+      ..height = (draftRestored || profileRestored)
+          ? (system == MeasurementSystem.metric
+                ? heightCm
+                : heightCm / BilOnboardingDraft.centimetersPerInch)
+          : null
+      ..waist = (draftRestored || profileRestored)
+          ? _displayLength(waistCm)
+          : null
+      ..neck = (draftRestored || profileRestored)
+          ? _displayLength(neckCm)
+          : null
+      ..hips = (draftRestored || profileRestored)
+          ? _displayLength(hipsCm)
+          : null;
   }
 
-  double _activityFactor(BilActivity value) {
-    return switch (value) {
-      BilActivity.low => 1.2,
-      BilActivity.light => 1.375,
-      BilActivity.moderate => 1.55,
-      BilActivity.high => 1.725,
-      BilActivity.veryHigh => 1.9,
-    };
-  }
+  double? _displayLength(double? centimeters) => centimeters == null
+      ? null
+      : system == MeasurementSystem.metric
+      ? centimeters
+      : centimeters / BilOnboardingDraft.centimetersPerInch;
 
   Future<BilInitialPlan> _calculatePlan(BilOnboardingDraft draft) async {
     final birthDate = draft.birthDate;
-    final weight = draft.weight;
-    final height = draft.height;
+    final weight = draft.weightKg;
+    final height = draft.heightCm;
 
     if (birthDate == null || weight == null || height == null) {
       throw StateError('Missing required body calibration values.');
     }
+    if (!BilAdultEligibility.isEligibleBirthDate(birthDate)) {
+      throw StateError('adult_eligibility_required');
+    }
 
     final age = _ageFromBirthDate(birthDate);
-    final sexOffset = draft.sex == BilSex.male ? 5.0 : -161.0;
-    final bmr = (10 * weight) + (6.25 * height) - (5 * age) + sexOffset;
-    final maintenance = bmr * _activityFactor(draft.activity);
-
-    final calories = switch (draft.goal) {
-      BilGoal.loseFat => (maintenance - 400).round(),
-      BilGoal.maintain => maintenance.round(),
-      BilGoal.buildMuscle => (maintenance + 250).round(),
-    }.clamp(1200, 6000);
-
-    final proteinPerKg = switch (draft.goal) {
-      BilGoal.loseFat => 1.8,
-      BilGoal.maintain => 1.6,
-      BilGoal.buildMuscle => 1.8,
-    };
-    final protein = (weight * proteinPerKg).round();
-    final fat = (weight * .8).round().clamp(40, 180);
-    final remainingCalories = calories - (protein * 4) - (fat * 9);
-    final carbs = (remainingCalories / 4).round().clamp(50, 800);
+    final model = BodyModelEngine.calculate(
+      BodyProfile(
+        age: age,
+        gender: draft.sex == BilSex.male ? 'male' : 'female',
+        height: height,
+        weight: weight,
+        targetWeight: _suggestedTargetWeight(draft),
+        activityLevel: _activityValue(draft.activity),
+        exercises: draft.activity != BilActivity.low,
+        goalType: _goalValue(draft.goal),
+        waistCm: draft.waistCm,
+        neckCm: draft.neckCm,
+        hipCm: draft.hipsCm,
+      ),
+    );
 
     final weeklyPace = switch (draft.goal) {
       BilGoal.loseFat => -0.4,
@@ -209,10 +225,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     };
 
     return BilInitialPlan(
-      calories: calories,
-      protein: protein,
-      carbs: carbs,
-      fat: fat,
+      calories: model.targets.calories,
+      protein: model.targets.protein,
+      carbs: model.targets.carbs,
+      fat: model.targets.fats,
       weeklyPace: weeklyPace,
     );
   }
@@ -236,7 +252,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 
   double _suggestedTargetWeight(BilOnboardingDraft draft) {
-    final weight = draft.weight!;
+    final weight = draft.weightKg!;
     return switch (draft.goal) {
       BilGoal.loseFat => weight * .90,
       BilGoal.maintain => weight,
@@ -276,14 +292,18 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     BilInitialPlan plan,
   ) async {
     if (saving) return;
+    final birthDate = draft.birthDate;
+    if (birthDate == null ||
+        !BilAdultEligibility.isEligibleBirthDate(birthDate)) {
+      return;
+    }
     final accepted = await _confirmHealthDisclaimer();
     if (!accepted || !mounted) return;
 
     setState(() => saving = true);
     try {
-      final birthDate = draft.birthDate!;
       final age = _ageFromBirthDate(birthDate);
-      final currentWeight = draft.weight!;
+      final currentWeight = draft.weightKg!;
       final targetWeight = _suggestedTargetWeight(draft);
       final activityValue = _activityValue(draft.activity);
       final goalValue = _goalValue(draft.goal);
@@ -292,13 +312,13 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       await repository.save(
         gender: draft.sex == BilSex.male ? 'male' : 'female',
         age: age,
-        height: draft.height!,
+        height: draft.heightCm!,
         currentWeight: currentWeight,
         targetWeight: targetWeight,
         activityLevel: activityValue,
         exercises: activityValue != 'sedentary',
-        waist: draft.waist,
-        neck: draft.neck,
+        waist: draft.waistCm,
+        neck: draft.neckCm,
       );
 
       final profile = await repository.getProfile();
@@ -312,12 +332,27 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
             );
       }
 
+      final measurementRepository = ref.read(bodyMeasurementRepositoryProvider);
+      final now = DateTime.now();
+      final latestMeasurement = await measurementRepository.getLatest();
+      final sameDay = latestMeasurement?.dayKey == dayKeyFor(now);
+      await measurementRepository.saveForDay(
+        date: now,
+        neckCm: draft.neckCm,
+        waistCm: draft.waistCm,
+        hipsCm: draft.hipsCm,
+        chestCm: sameDay ? latestMeasurement?.chestCm : null,
+        armCm: sameDay ? latestMeasurement?.armCm : null,
+        thighCm: sameDay ? latestMeasurement?.thighCm : null,
+      );
+
       final preferences = ref.read(preferencesRepositoryProvider);
       await preferences.set(
         'units',
         draft.units == BilUnits.imperial ? 'imperial' : 'metric',
       );
       await preferences.set('healthDisclaimerAccepted', 'true');
+      await preferences.set('profileDateOfBirth', birthDate.toIso8601String());
 
       final region = regionController.text.trim();
       if (region.isEmpty) {
@@ -326,7 +361,6 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         await preferences.set('countryRegion', region);
       }
 
-      final now = DateTime.now();
       await preferences.set('timezoneName', now.timeZoneName);
       await preferences.set(
         'timezoneOffsetMinutes',
@@ -335,7 +369,18 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       await preferences.set('firstValueHandoffPending', 'false');
       await preferences.set('forceOnboarding', 'false');
 
+      // Establish the versioned dietary contract during first-run setup even
+      // when the user keeps the neutral default. Existing restored choices
+      // are preserved instead of being reset by re-onboarding.
+      final dietaryRepository = ref.read(dietaryPreferencesRepositoryProvider);
+      await dietaryRepository.save(await dietaryRepository.read());
+
       await ref.read(onboardingDraftRepositoryProvider).clear();
+
+      // Weight, sex and activity already drive the local plan above. Refresh
+      // the cached bounded Coach context as part of the same committed setup
+      // so the next AI turn sees the identical profile evidence.
+      ref.invalidate(coachContextSnapshotProvider);
 
       if (mounted) context.go('/dashboard');
     } catch (error, stack) {

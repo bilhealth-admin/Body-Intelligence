@@ -66,7 +66,8 @@ void main() {
 
     expect(find.text('Macros'), findsOneWidget);
     expect(find.byKey(const Key('dashboard-preferences-done')), findsOneWidget);
-    expect(DashboardSectionIds.all, hasLength(11));
+    expect(DashboardSectionIds.all, hasLength(10));
+    expect(DashboardSectionIds.all, isNot(contains('daily_intelligence')));
     for (final section in DashboardSectionIds.all) {
       final sectionFinder = find.byKey(Key('dashboard-section-$section'));
       expect(sectionFinder, findsOneWidget);
@@ -217,14 +218,12 @@ void main() {
           'Quick log',
           'Discover',
           'Personal intelligence',
-          'Daily intelligence',
           'Progress',
           'Connected health',
           'Body Twin',
           'A private conversation with your health intelligence',
           'Goal, food, exercise, and remaining energy',
-          'Protein and fat progress',
-          'Steps and exercise status',
+          'Macro and nutrient trends',
           'Food, water, and weight shortcuts',
           'Sleep, recipes, workouts, and community',
           'One Best Action, evidence, and Body Twin',
@@ -312,7 +311,7 @@ void main() {
     expect(await repository.get('dashboard.preset'), 'custom');
     expect(await repository.get('dashboard.section.macros'), 'true');
 
-    await repository.set('dashboard.nutrientGoalCards', 'protein,fiber');
+    await repository.set('dashboard.nutrientGoalCards', 'fat,fiber');
     final restore = find.text('Restore default view');
     await tester.scrollUntilVisible(
       restore,
@@ -439,14 +438,19 @@ void main() {
     );
     await tester.tap(trigger);
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('dashboard-nutrient-goal-protein')));
+    expect(
+      find.byKey(const Key('dashboard-nutrient-goal-protein')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const Key('dashboard-nutrient-goal-carbohydrates')),
+      findsNothing,
+    );
+    await tester.tap(find.byKey(const Key('dashboard-nutrient-goal-fat')));
     await tester.tap(find.byKey(const Key('dashboard-nutrient-goal-fiber')));
     await tester.tap(find.text('Save cards'));
     await tester.pumpAndSettle();
-    expect(
-      await repository.get('dashboard.nutrientGoalCards'),
-      'protein,fiber',
-    );
+    expect(await repository.get('dashboard.nutrientGoalCards'), 'fat,fiber');
     expect(await repository.get('dashboard.preset'), 'custom');
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
@@ -500,13 +504,13 @@ void main() {
     );
     await tester.tap(trigger);
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('dashboard-nutrient-goal-protein')));
+    await tester.tap(find.byKey(const Key('dashboard-nutrient-goal-fat')));
     await tester.tap(find.text('Save cards'));
     await tester.pump();
     expect(
       tester
           .widget<CheckboxListTile>(
-            find.byKey(const Key('dashboard-nutrient-goal-protein')),
+            find.byKey(const Key('dashboard-nutrient-goal-fat')),
           )
           .onChanged,
       isNull,

@@ -1,8 +1,8 @@
-"NSHealthShareUsageDescription" = "BIL केवल आपकी चुनी हुई स्वास्थ्य श्रेणियाँ—गतिविधि, नींद, शरीर माप, हृदय व श्वसन संकेतक, रक्तचाप, ऑक्सीजन, ग्लूकोज़, जल और पोषण—पढ़ता है ताकि इस डिवाइस पर निजी स्वास्थ्य टाइमलाइन और जानकारी दिखाई जा सके।";
+"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
 "NSHealthUpdateUsageDescription" = "BIL अलग-अलग लिखित सहमति के बाद केवल आपके द्वारा स्पष्ट रूप से चुने गए स्वास्थ्य रिकॉर्ड लिखता है।";
-"NSBluetoothAlwaysUsageDescription" = "BIL केवल उन स्वास्थ्य उपकरणों से जुड़ता है जिन्हें आप स्पष्ट रूप से जोड़ते हैं ताकि माप स्थानीय स्तर पर आयात किया जा सके।";
-"NSBluetoothPeripheralUsageDescription" = "BIL केवल उन स्वास्थ्य उपकरणों से जुड़ता है जिन्हें आप स्पष्ट रूप से जोड़ते हैं ताकि माप स्थानीय स्तर पर आयात किया जा सके।";
+"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "कैमरे का उपयोग केवल तभी करें जब आप बारकोड को स्कैन करना, भोजन की तस्वीर की समीक्षा करना, या एक निजी प्रोफ़ाइल या प्रगति फोटो जोड़ना चुनते हैं।";
 "NSPhotoLibraryUsageDescription" = "सहेजे या अपलोड करने से पहले समीक्षा के लिए भोजन, प्रोफ़ाइल या प्रगति फ़ोटो का चयन करें।";
-"NSMicrophoneUsageDescription" = "BIL माइक्रोफ़ोन का उपयोग केवल तभी करता है जब आप भोजन के लिए ध्वनि इनपुट चुनते हैं।";
-"NSSpeechRecognitionUsageDescription" = "BIL आपके द्वारा बोले गए खाद्य वाक्यांश को टेक्स्ट में परिवर्तित करता है ताकि आप सहेजने से पहले इसकी समीक्षा कर सकें।";
+"NSMicrophoneUsageDescription" = "BIL माइक्रोफ़ोन का उपयोग केवल तब करता है जब आप आवाज़ से भोजन लॉग करना या BIL AI Coach से सीधे बात करना चुनते हैं।";
+"NSSpeechRecognitionUsageDescription" = "BIL भोजन लॉगिंग या BIL AI Coach के लिए आपके द्वारा शुरू की गई आवाज़ को टेक्स्ट में बदलता है, ताकि आप उसे देख या भेज सकें।";

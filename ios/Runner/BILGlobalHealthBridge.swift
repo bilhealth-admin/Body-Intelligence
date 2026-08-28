@@ -57,8 +57,6 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       write(arguments: call.arguments, result: result)
     case "delete":
       delete(arguments: call.arguments, result: result)
-    case "enableBackgroundDelivery":
-      enableBackgroundDelivery(arguments: call.arguments, result: result)
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -178,19 +176,6 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     }
   }
 
-  private func enableBackgroundDelivery(arguments: Any?, result: @escaping FlutterResult) {
-    let names = ((arguments as? [String: Any])?["types"] as? [String]) ?? Self.supportedTypeNames
-    let group = DispatchGroup(); let lock = NSLock(); var failures: [String] = []
-    for name in names {
-      guard let type = sampleType(name) else { continue }
-      group.enter()
-      store.enableBackgroundDelivery(for: type, frequency: .hourly) { success, error in
-        lock.lock(); if !success { failures.append(error?.localizedDescription ?? name) }; lock.unlock(); group.leave()
-      }
-    }
-    group.notify(queue: .main) { result(["enabled": failures.isEmpty, "failures": failures]) }
-  }
-
   private func serialize(sample: HKSample, logicalType: String) -> [String: Any]? {
     let source = sample.sourceRevision.source
     var value = 1.0; var unit = "count"
@@ -243,11 +228,6 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     case "heartRate": return HKObjectType.quantityType(forIdentifier: .heartRate)
     case "restingHeartRate": return HKObjectType.quantityType(forIdentifier: .restingHeartRate)
     case "hrv": return HKObjectType.quantityType(forIdentifier: .heartRateVariabilitySDNN)
-    case "oxygen": return HKObjectType.quantityType(forIdentifier: .oxygenSaturation)
-    case "respiratoryRate": return HKObjectType.quantityType(forIdentifier: .respiratoryRate)
-    case "glucose": return HKObjectType.quantityType(forIdentifier: .bloodGlucose)
-    case "bloodPressureSystolic": return HKObjectType.quantityType(forIdentifier: .bloodPressureSystolic)
-    case "bloodPressureDiastolic": return HKObjectType.quantityType(forIdentifier: .bloodPressureDiastolic)
     case "water": return HKObjectType.quantityType(forIdentifier: .dietaryWater)
     case "nutrition": return HKObjectType.quantityType(forIdentifier: .dietaryEnergyConsumed)
     case "nutritionProtein": return HKObjectType.quantityType(forIdentifier: .dietaryProtein)
@@ -269,12 +249,9 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     case "nutritionProtein", "nutritionCarbohydrates", "nutritionFat", "nutritionFiber", "nutritionSugar": return .gram()
     case "nutritionSodium", "nutritionPotassium": return .gramUnit(with: .milli)
     case "weight", "leanMass": return .gramUnit(with: .kilo)
-    case "bodyFat", "oxygen": return .percent()
+    case "bodyFat": return .percent()
     case "heartRate", "restingHeartRate": return HKUnit.count().unitDivided(by: .minute())
     case "hrv": return .secondUnit(with: .milli)
-    case "respiratoryRate": return HKUnit.count().unitDivided(by: .minute())
-    case "glucose": return HKUnit.gramUnit(with: .milli).unitDivided(by: .literUnit(with: .deci))
-    case "bloodPressureSystolic", "bloodPressureDiastolic": return .millimeterOfMercury()
     case "water": return .literUnit(with: .milli)
     default: return nil
     }
@@ -287,11 +264,9 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     case "nutritionProtein", "nutritionCarbohydrates", "nutritionFat", "nutritionFiber", "nutritionSugar": return "g"
     case "nutritionSodium", "nutritionPotassium": return "mg"
     case "weight", "leanMass": return "kg"
-    case "bodyFat", "oxygen": return "%"
-    case "heartRate", "restingHeartRate", "respiratoryRate": return "count/min"
+    case "bodyFat": return "%"
+    case "heartRate", "restingHeartRate": return "count/min"
     case "hrv": return "ms"
-    case "glucose": return "mg/dL"
-    case "bloodPressureSystolic", "bloodPressureDiastolic": return "mmHg"
     case "water": return "mL"
     default: return "count"
     }
@@ -342,8 +317,7 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
   static let supportedTypeNames = [
     "steps", "distance", "activeEnergy", "workout", "sleep", "weight",
     "bodyFat", "leanMass", "heartRate", "restingHeartRate", "hrv",
-    "oxygen", "respiratoryRate", "glucose", "bloodPressureSystolic",
-    "bloodPressureDiastolic", "water", "nutrition", "nutritionProtein",
+    "water", "nutrition", "nutritionProtein",
     "nutritionCarbohydrates", "nutritionFat", "nutritionFiber",
     "nutritionSugar", "nutritionSodium", "nutritionPotassium"
   ]

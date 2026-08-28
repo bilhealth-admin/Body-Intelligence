@@ -145,6 +145,19 @@ class BilToolDescriptor {
         }
       case 'delete_meal_item':
         if (raw['itemId'] is! int || (raw['itemId'] as int) < 1) return null;
+      case 'save_memory':
+        final text = raw['text']?.toString().trim() ?? '';
+        if (text.isEmpty || text.length > 500) return null;
+        final kind = raw['kind']?.toString() ?? 'user_fact';
+        if (!const {
+          'user_fact',
+          'preference',
+          'constraint',
+          'goal',
+          'routine',
+        }.contains(kind)) {
+          return null;
+        }
       case 'move_meal_item':
         if (raw['itemId'] is! int || (raw['itemId'] as int) < 1) return null;
         if (!const {
@@ -335,6 +348,14 @@ class BilToolRegistry {
       trustBoundary: BilToolTrustBoundary.trustedLocalRepository,
       requiredArguments: {'weightKg'},
       allowedArguments: {'weightKg', 'date'},
+    ),
+    'save_memory': BilToolDescriptor(
+      name: 'save_memory',
+      type: IntelligenceActionType.saveMemory,
+      risk: BilToolRisk.reversibleWrite,
+      trustBoundary: BilToolTrustBoundary.trustedLocalRepository,
+      requiredArguments: {'text'},
+      allowedArguments: {'text', 'kind'},
     ),
   };
 

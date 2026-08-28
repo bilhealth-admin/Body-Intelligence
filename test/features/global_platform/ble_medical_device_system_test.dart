@@ -16,10 +16,17 @@ final class _Bridge implements BleMedicalBridge {
   Future<List<BlePeripheral>> discover(Duration timeout) async =>
       <BlePeripheral>[
         const BlePeripheral(
-          id: 'bp',
-          name: 'BP',
-          profiles: <BleMedicalProfile>{BleMedicalProfile.bloodPressure},
+          id: 'scale',
+          name: 'Scale',
+          profiles: <BleMedicalProfile>{BleMedicalProfile.weightScale},
           firmwareVersion: '1.2',
+          manufacturer: 'BIL',
+        ),
+        const BlePeripheral(
+          id: 'unsupported',
+          name: 'Unsupported',
+          profiles: <BleMedicalProfile>{},
+          firmwareVersion: '1.0',
           manufacturer: 'BIL',
         ),
       ];
@@ -41,23 +48,42 @@ final class _Bridge implements BleMedicalBridge {
     return <Map<String, Object?>>[
       <String, Object?>{
         'sampleId': 's1',
-        'kind': 'blood_pressure_systolic',
-        'value': 120,
-        'unit': 'mmHg',
+        'kind': 'weight',
+        'value': 80,
+        'unit': 'kg',
         'observedAt': asOf.add(const Duration(minutes: 1)).toIso8601String(),
         'deviceClockOffsetSeconds': 60,
         'confidence': .95,
         'calibrated': true,
-        'userConfirmed': true,
       },
       <String, Object?>{
         'sampleId': 'bad',
-        'kind': 'blood_pressure_systolic',
+        'kind': 'weight',
         'value': 900,
-        'unit': 'mmHg',
+        'unit': 'kg',
         'observedAt': asOf.toIso8601String(),
-        'userConfirmed': true,
       },
+      <String, Object?>{
+        'sampleId': 'regulated',
+        'kind': 'glucose',
+        'value': 100,
+        'unit': 'mg/dL',
+        'observedAt': asOf.toIso8601String(),
+      },
+      for (final kind in <String>[
+        'oxygen',
+        'blood_pressure_systolic',
+        'blood_pressure_diastolic',
+        'temperature',
+        'respiratory_rate',
+      ])
+        <String, Object?>{
+          'sampleId': 'regulated-$kind',
+          'kind': kind,
+          'value': 100,
+          'unit': 'legacy-unit',
+          'observedAt': asOf.toIso8601String(),
+        },
     ];
   }
 }
@@ -81,10 +107,23 @@ void main() {
         deviceId: devices.single.id,
         asOf: DateTime.utc(2026),
       );
-      expect(first.single.value, 120);
+      expect(first.single.value, 80);
       expect(second, isEmpty);
+      for (final sampleId in <String>[
+        'regulated',
+        'regulated-oxygen',
+        'regulated-blood_pressure_systolic',
+        'regulated-blood_pressure_diastolic',
+        'regulated-temperature',
+        'regulated-respiratory_rate',
+      ]) {
+        expect(
+          await store.get('medical_packet_seen', 'scale:$sampleId'),
+          isNull,
+        );
+      }
       expect(
-        (await store.get('medical_device_registry', 'bp'))?['pairingState'],
+        (await store.get('medical_device_registry', 'scale'))?['pairingState'],
         'ready',
       );
     },

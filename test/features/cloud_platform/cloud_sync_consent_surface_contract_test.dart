@@ -21,7 +21,10 @@ void main() {
     expect(settings, contains('cloudSyncConsentStateProvider'));
     expect(settings, contains('.setGranted(granted)'));
     expect(settings, contains('cloudRuntimePreparationProvider'));
-    expect(settings, contains('Premium is required to turn on cloud sync.'));
+    expect(
+      settings,
+      isNot(contains('CloudSyncConsentAvailability.premiumRequired')),
+    );
 
     expect(
       providers,
@@ -32,7 +35,10 @@ void main() {
       isNot(contains('SystemCloudConnectivitySnapshot.current')),
     );
     expect(repository, contains("'bil_record_consent'"));
-    expect(repository, contains('CommerceEntitlement.cloudSync'));
+    expect(
+      repository,
+      isNot(contains('Premium entitlement is required for cloud sync')),
+    );
     expect(repository, isNot(contains('.synchronize(')));
     expect(connectivity, contains('checkConnectivity()'));
   });

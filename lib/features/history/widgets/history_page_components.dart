@@ -23,12 +23,15 @@ class _WeightTrendChartState extends State<WeightTrendChart> {
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).languageCode.toLowerCase();
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Semantics(
           label:
               '${widget.semanticsLabel}. ${_historyText(locale, 'smoothBand')}',
           image: true,
           child: SizedBox(
+            key: const Key('weight-trend-canvas'),
+            width: double.infinity,
             height: 150,
             child: CustomPaint(
               painter: _WeightTrendPainter(

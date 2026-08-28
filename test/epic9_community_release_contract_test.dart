@@ -48,9 +48,10 @@ void main() {
   test(
     'chat preserves drafts, reports safe errors, and exposes read state',
     () {
-      final people = source(
+      final people = [
         'lib/features/community/presentation/community_people_page.dart',
-      );
+        'lib/features/community/presentation/community_chat_page.dart',
+      ].map(source).join('\n');
       expect(people, contains('bool _sending = false'));
       expect(people, contains('await _repository!.markConversationRead'));
       expect(people, contains('message.isRead'));
@@ -64,9 +65,10 @@ void main() {
   test(
     'feed and relationship surfaces expose attribution and safety actions',
     () {
-      final hub = source(
+      final hub = [
         'lib/features/community/presentation/community_hub_page.dart',
-      );
+        'lib/features/community/presentation/community_feed_tab.dart',
+      ].map(source).join('\n');
       final connections = source(
         'lib/features/community/presentation/community_connections_page.dart',
       );

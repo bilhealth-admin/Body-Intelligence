@@ -3,8 +3,10 @@
 ## Already determined from code
 
 - Package ID: `com.bilhealth.bodyintelligencelog`
-- Current version: `1.0.0+1`
-- Languages: Arabic, English, French, Spanish, and Turkish
+- Current version: `1.0.0+3`
+- Languages: 25 configured Android locales, including Arabic, English, French,
+  Spanish, and Turkish. Final localized-listing availability is a separate Play
+  Console choice and must not be overstated.
 - RTL: supported
 - Category direction: health and fitness / nutrition and weight management
 - Release artifact: Android App Bundle

@@ -1,0 +1,448 @@
+part of 'auth_entry_locale_copy.dart';
+
+const _authEntryCopyGroupB = <String, Map<AuthEntryCopyKey, String>>{
+  "ur": <AuthEntryCopyKey, String>{
+    AuthEntryCopyKey.chooseLanguage: "زبان منتخب کریں",
+    AuthEntryCopyKey.welcomeTo: "خوش آمدید",
+    AuthEntryCopyKey.signIn: "سائن اِن کریں",
+    AuthEntryCopyKey.continueWithoutAccount: "اکاؤنٹ کے بغیر جاری رکھیں",
+    AuthEntryCopyKey.taglineTitle: "آپ کا جسم۔ آپ کی ذہانت۔",
+    AuthEntryCopyKey.taglineBody:
+        "آپ کے لیے بنائی گئی نجی صحت کی سہولت۔ آپ کا ڈیٹا آپ ہی کا رہتا ہے، اور کلاؤڈ سنک ہمیشہ آپ کی مرضی سے ہوتا ہے۔",
+    AuthEntryCopyKey.progressTitle: "آپ کی صلاحیت کے مطابق پیش رفت",
+    AuthEntryCopyKey.progressBody:
+        "رہنمائی سب پر ایک ہی منصوبہ تھوپنے کے بجائے آپ کی حقیقی رفتار کے مطابق ڈھلتی ہے۔",
+    AuthEntryCopyKey.rhythmTitle: "اپنی رفتار کو سمجھیں",
+    AuthEntryCopyKey.rhythmBody:
+        "صرف اپنے حقیقی ریکارڈ کی بنیاد پر نیند اور بحالی کو جوڑیں۔",
+    AuthEntryCopyKey.nutritionTitle: "اندازوں کے بغیر غذائیت",
+    AuthEntryCopyKey.nutritionBody:
+        "تصدیق شدہ اور ذاتی ڈیٹا میں واضح فرق کے ساتھ تلاش، اسکین اور اندراج کریں۔",
+    AuthEntryCopyKey.privacyFooter:
+        "رازداری پہلے  •  طبی تشخیص نہیں  •  اختیار آپ کے پاس",
+    AuthEntryCopyKey.cloudNotEnabled: "اس ورژن میں کلاؤڈ اکاؤنٹ فعال نہیں ہے۔",
+    AuthEntryCopyKey.restorePreviousData: "پچھلا ڈیٹا بحال کریں",
+    AuthEntryCopyKey.restorePreviousDataQuestion: "پچھلا ڈیٹا بحال کریں؟",
+    AuthEntryCopyKey.restoreDialogBody:
+        "BIL موجودہ مقامی ڈیٹا کو تصدیق شدہ پچھلی نقل سے بدل دے گا۔",
+    AuthEntryCopyKey.cancel: "منسوخ کریں",
+    AuthEntryCopyKey.restore: "بحال کریں",
+    AuthEntryCopyKey.back: "واپس",
+    AuthEntryCopyKey.emailAddress: "ای میل پتہ",
+    AuthEntryCopyKey.invalidEmail: "درست ای میل پتہ درج کریں۔",
+    AuthEntryCopyKey.verify: "تصدیق کریں",
+    AuthEntryCopyKey.orLabel: "یا",
+    AuthEntryCopyKey.continueGoogle: "Google کے ساتھ جاری رکھیں",
+    AuthEntryCopyKey.continueApple: "Apple کے ساتھ جاری رکھیں",
+    AuthEntryCopyKey.continueFacebook: "Facebook کے ساتھ جاری رکھیں",
+    AuthEntryCopyKey.privacyPolicy: "رازداری کی پالیسی",
+    AuthEntryCopyKey.providerUnavailable:
+        "یہ سائن اِن فراہم کنندہ دستیاب نہیں یا ترتیب نہیں دیا گیا۔",
+    AuthEntryCopyKey.openSecureFailure:
+        "محفوظ سائن اِن نہیں کھل سکا۔ دوبارہ کوشش کریں۔",
+    AuthEntryCopyKey.secureConnectionFailure:
+        "محفوظ کنکشن ناکام ہوگیا۔ دوبارہ کوشش کریں۔",
+    AuthEntryCopyKey.verifyEmail: "ای میل کی تصدیق کریں",
+    AuthEntryCopyKey.enterVerificationCode: "تصدیقی کوڈ درج کریں",
+    AuthEntryCopyKey.codeSentTo: "ہم نے {email} پر 6 ہندسوں کا کوڈ بھیجا ہے",
+    AuthEntryCopyKey.codeVerificationFailed:
+        "کوڈ کی تصدیق نہیں ہوسکی۔ دوبارہ کوشش کریں۔",
+    AuthEntryCopyKey.newCodeSent: "نیا تصدیقی کوڈ بھیج دیا گیا ہے۔",
+    AuthEntryCopyKey.resendFailed:
+        "کوڈ دوبارہ نہیں بھیجا جا سکا۔ دوبارہ کوشش کریں۔",
+    AuthEntryCopyKey.resendCode: "کوڈ دوبارہ بھیجیں",
+    AuthEntryCopyKey.resendCodeIn: "کوڈ {time} میں دوبارہ بھیجیں",
+    AuthEntryCopyKey.changeEmail: "ای میل تبدیل کریں",
+    AuthEntryCopyKey.rateLimit60:
+        "دوسرا کوڈ مانگنے سے پہلے 60 سیکنڈ انتظار کریں۔",
+    AuthEntryCopyKey.verificationExpired:
+        "تصدیقی کوڈ کی مدت ختم ہوگئی ہے۔ نیا کوڈ مانگیں۔",
+    AuthEntryCopyKey.signupUnavailable:
+        "اکاؤنٹ بنانا عارضی طور پر دستیاب نہیں ہے۔",
+    AuthEntryCopyKey.authenticationFailed:
+        "اس وقت تصدیق مکمل نہیں ہوسکی۔ بعد میں دوبارہ کوشش کریں۔",
+  },
+  "fa": <AuthEntryCopyKey, String>{
+    AuthEntryCopyKey.chooseLanguage: "انتخاب زبان",
+    AuthEntryCopyKey.welcomeTo: "خوش آمدید به",
+    AuthEntryCopyKey.signIn: "ورود",
+    AuthEntryCopyKey.continueWithoutAccount: "ادامه بدون حساب",
+    AuthEntryCopyKey.taglineTitle: "بدن شما. هوشمندی شما.",
+    AuthEntryCopyKey.taglineBody:
+        "یک تجربه سلامت خصوصی که پیرامون شما ساخته شده است. داده‌هایتان متعلق به خودتان می‌ماند و همگام‌سازی ابری همیشه انتخاب شماست.",
+    AuthEntryCopyKey.progressTitle: "پیشرفتی متناسب با توانایی شما",
+    AuthEntryCopyKey.progressBody:
+        "راهنمایی با سرعت واقعی شما سازگار می‌شود، نه اینکه یک برنامه را به همه تحمیل کند.",
+    AuthEntryCopyKey.rhythmTitle: "ریتم خود را بشناسید",
+    AuthEntryCopyKey.rhythmBody:
+        "خواب و بازیابی را فقط با استفاده از سوابق واقعی خود مرتبط کنید.",
+    AuthEntryCopyKey.nutritionTitle: "تغذیه بدون حدس",
+    AuthEntryCopyKey.nutritionBody:
+        "جست‌وجو، اسکن و ثبت با مرزی روشن میان داده‌های تأییدشده و سفارشی.",
+    AuthEntryCopyKey.privacyFooter:
+        "اول حریم خصوصی  •  بدون تشخیص پزشکی  •  کنترل در دست شماست",
+    AuthEntryCopyKey.cloudNotEnabled: "حساب ابری در این نسخه فعال نیست.",
+    AuthEntryCopyKey.restorePreviousData: "بازیابی داده‌های قبلی",
+    AuthEntryCopyKey.restorePreviousDataQuestion: "داده‌های قبلی بازیابی شوند؟",
+    AuthEntryCopyKey.restoreDialogBody:
+        "BIL داده‌های محلی فعلی را با نسخه قبلی تأییدشده جایگزین می‌کند.",
+    AuthEntryCopyKey.cancel: "لغو",
+    AuthEntryCopyKey.restore: "بازیابی",
+    AuthEntryCopyKey.back: "بازگشت",
+    AuthEntryCopyKey.emailAddress: "نشانی ایمیل",
+    AuthEntryCopyKey.invalidEmail: "یک نشانی ایمیل معتبر وارد کنید.",
+    AuthEntryCopyKey.verify: "تأیید",
+    AuthEntryCopyKey.orLabel: "یا",
+    AuthEntryCopyKey.continueGoogle: "ادامه با Google",
+    AuthEntryCopyKey.continueApple: "ادامه با Apple",
+    AuthEntryCopyKey.continueFacebook: "ادامه با Facebook",
+    AuthEntryCopyKey.privacyPolicy: "سیاست حفظ حریم خصوصی",
+    AuthEntryCopyKey.providerUnavailable:
+        "این ارائه‌دهنده ورود در دسترس نیست یا پیکربندی نشده است.",
+    AuthEntryCopyKey.openSecureFailure: "ورود امن باز نشد. دوباره تلاش کنید.",
+    AuthEntryCopyKey.secureConnectionFailure:
+        "اتصال امن ناموفق بود. دوباره تلاش کنید.",
+    AuthEntryCopyKey.verifyEmail: "تأیید ایمیل",
+    AuthEntryCopyKey.enterVerificationCode: "کد تأیید را وارد کنید",
+    AuthEntryCopyKey.codeSentTo: "یک کد ۶ رقمی به {email} فرستادیم.",
+    AuthEntryCopyKey.codeVerificationFailed: "کد تأیید نشد. دوباره تلاش کنید.",
+    AuthEntryCopyKey.newCodeSent: "کد تأیید جدید ارسال شد.",
+    AuthEntryCopyKey.resendFailed:
+        "ارسال دوباره کد ممکن نشد. دوباره تلاش کنید.",
+    AuthEntryCopyKey.resendCode: "ارسال دوباره کد",
+    AuthEntryCopyKey.resendCodeIn: "ارسال دوباره کد تا {time}",
+    AuthEntryCopyKey.changeEmail: "تغییر ایمیل",
+    AuthEntryCopyKey.rateLimit60: "پیش از درخواست کد دیگر ۶۰ ثانیه صبر کنید.",
+    AuthEntryCopyKey.verificationExpired:
+        "اعتبار کد تأیید تمام شده است. کد جدیدی درخواست کنید.",
+    AuthEntryCopyKey.signupUnavailable: "ایجاد حساب موقتاً در دسترس نیست.",
+    AuthEntryCopyKey.authenticationFailed:
+        "احراز هویت اکنون کامل نشد. بعداً دوباره تلاش کنید.",
+  },
+  "hi": <AuthEntryCopyKey, String>{
+    AuthEntryCopyKey.chooseLanguage: "भाषा चुनें",
+    AuthEntryCopyKey.welcomeTo: "आपका स्वागत है",
+    AuthEntryCopyKey.signIn: "साइन इन करें",
+    AuthEntryCopyKey.continueWithoutAccount: "बिना खाते के जारी रखें",
+    AuthEntryCopyKey.taglineTitle: "आपका शरीर। आपकी बुद्धिमत्ता।",
+    AuthEntryCopyKey.taglineBody:
+        "आपके लिए बनाया गया एक निजी स्वास्थ्य अनुभव। आपका डेटा आपका ही रहता है और क्लाउड सिंक हमेशा आपकी पसंद है।",
+    AuthEntryCopyKey.progressTitle: "आपकी क्षमता के अनुरूप प्रगति",
+    AuthEntryCopyKey.progressBody:
+        "मार्गदर्शन सभी पर एक योजना थोपने के बजाय आपकी वास्तविक गति के अनुसार ढलता है।",
+    AuthEntryCopyKey.rhythmTitle: "अपनी लय समझें",
+    AuthEntryCopyKey.rhythmBody:
+        "केवल अपने वास्तविक रिकॉर्ड से नींद और रिकवरी को जोड़ें।",
+    AuthEntryCopyKey.nutritionTitle: "बिना अनुमान के पोषण",
+    AuthEntryCopyKey.nutritionBody:
+        "सत्यापित और कस्टम डेटा के बीच स्पष्ट अंतर रखते हुए खोजें, स्कैन करें और लॉग करें।",
+    AuthEntryCopyKey.privacyFooter:
+        "पहले गोपनीयता  •  कोई चिकित्सीय निदान नहीं  •  नियंत्रण आपके पास",
+    AuthEntryCopyKey.cloudNotEnabled: "इस बिल्ड में क्लाउड खाता सक्षम नहीं है।",
+    AuthEntryCopyKey.restorePreviousData: "पिछला डेटा पुनर्स्थापित करें",
+    AuthEntryCopyKey.restorePreviousDataQuestion:
+        "क्या पिछला डेटा पुनर्स्थापित करें?",
+    AuthEntryCopyKey.restoreDialogBody:
+        "BIL वर्तमान स्थानीय डेटा को सत्यापित पिछले स्नैपशॉट से बदल देगा।",
+    AuthEntryCopyKey.cancel: "रद्द करें",
+    AuthEntryCopyKey.restore: "पुनर्स्थापित करें",
+    AuthEntryCopyKey.back: "वापस",
+    AuthEntryCopyKey.emailAddress: "ईमेल पता",
+    AuthEntryCopyKey.invalidEmail: "एक मान्य ईमेल पता दर्ज करें।",
+    AuthEntryCopyKey.verify: "सत्यापित करें",
+    AuthEntryCopyKey.orLabel: "या",
+    AuthEntryCopyKey.continueGoogle: "Google के साथ जारी रखें",
+    AuthEntryCopyKey.continueApple: "Apple के साथ जारी रखें",
+    AuthEntryCopyKey.continueFacebook: "Facebook के साथ जारी रखें",
+    AuthEntryCopyKey.privacyPolicy: "गोपनीयता नीति",
+    AuthEntryCopyKey.providerUnavailable:
+        "यह साइन-इन प्रदाता उपलब्ध नहीं है या कॉन्फ़िगर नहीं है।",
+    AuthEntryCopyKey.openSecureFailure:
+        "सुरक्षित साइन-इन नहीं खुल सका। फिर प्रयास करें।",
+    AuthEntryCopyKey.secureConnectionFailure:
+        "सुरक्षित कनेक्शन विफल रहा। फिर प्रयास करें।",
+    AuthEntryCopyKey.verifyEmail: "ईमेल सत्यापित करें",
+    AuthEntryCopyKey.enterVerificationCode: "सत्यापन कोड दर्ज करें",
+    AuthEntryCopyKey.codeSentTo: "हमने {email} पर 6 अंकों का कोड भेजा है।",
+    AuthEntryCopyKey.codeVerificationFailed:
+        "कोड सत्यापित नहीं हो सका। फिर प्रयास करें।",
+    AuthEntryCopyKey.newCodeSent: "नया सत्यापन कोड भेजा गया।",
+    AuthEntryCopyKey.resendFailed:
+        "कोड दोबारा नहीं भेजा जा सका। फिर प्रयास करें।",
+    AuthEntryCopyKey.resendCode: "कोड दोबारा भेजें",
+    AuthEntryCopyKey.resendCodeIn: "{time} में कोड दोबारा भेजें",
+    AuthEntryCopyKey.changeEmail: "ईमेल बदलें",
+    AuthEntryCopyKey.rateLimit60:
+        "दूसरा कोड माँगने से पहले 60 सेकंड प्रतीक्षा करें।",
+    AuthEntryCopyKey.verificationExpired:
+        "सत्यापन कोड की अवधि समाप्त हो गई है। नया कोड माँगें।",
+    AuthEntryCopyKey.signupUnavailable:
+        "खाता बनाना अस्थायी रूप से उपलब्ध नहीं है।",
+    AuthEntryCopyKey.authenticationFailed:
+        "प्रमाणीकरण अभी पूरा नहीं हो सका। बाद में फिर प्रयास करें।",
+  },
+  "id": <AuthEntryCopyKey, String>{
+    AuthEntryCopyKey.chooseLanguage: "Pilih bahasa",
+    AuthEntryCopyKey.welcomeTo: "Selamat datang di",
+    AuthEntryCopyKey.signIn: "Masuk",
+    AuthEntryCopyKey.continueWithoutAccount: "Lanjutkan tanpa akun",
+    AuthEntryCopyKey.taglineTitle: "Tubuh Anda. Kecerdasan Anda.",
+    AuthEntryCopyKey.taglineBody:
+        "Pengalaman kesehatan pribadi yang dibangun untuk Anda. Data Anda tetap milik Anda, dan sinkronisasi cloud selalu menjadi pilihan Anda.",
+    AuthEntryCopyKey.progressTitle: "Kemajuan yang sesuai kemampuan Anda",
+    AuthEntryCopyKey.progressBody:
+        "Panduan menyesuaikan dengan ritme nyata Anda, bukan memaksakan satu rencana untuk semua orang.",
+    AuthEntryCopyKey.rhythmTitle: "Pahami ritme Anda",
+    AuthEntryCopyKey.rhythmBody:
+        "Hubungkan tidur dan pemulihan hanya dengan catatan nyata Anda.",
+    AuthEntryCopyKey.nutritionTitle: "Nutrisi tanpa menebak",
+    AuthEntryCopyKey.nutritionBody:
+        "Cari, pindai, dan catat dengan pemisahan jelas antara data terverifikasi dan data khusus.",
+    AuthEntryCopyKey.privacyFooter:
+        "Privasi dahulu  •  Tanpa diagnosis medis  •  Anda tetap memegang kendali",
+    AuthEntryCopyKey.cloudNotEnabled:
+        "Akun cloud tidak diaktifkan pada build ini.",
+    AuthEntryCopyKey.restorePreviousData: "Pulihkan data sebelumnya",
+    AuthEntryCopyKey.restorePreviousDataQuestion: "Pulihkan data sebelumnya?",
+    AuthEntryCopyKey.restoreDialogBody:
+        "BIL akan mengganti data lokal saat ini dengan snapshot sebelumnya yang telah divalidasi.",
+    AuthEntryCopyKey.cancel: "Batal",
+    AuthEntryCopyKey.restore: "Pulihkan",
+    AuthEntryCopyKey.back: "Kembali",
+    AuthEntryCopyKey.emailAddress: "Alamat email",
+    AuthEntryCopyKey.invalidEmail: "Masukkan alamat email yang valid.",
+    AuthEntryCopyKey.verify: "Verifikasi",
+    AuthEntryCopyKey.orLabel: "ATAU",
+    AuthEntryCopyKey.continueGoogle: "Lanjutkan dengan Google",
+    AuthEntryCopyKey.continueApple: "Lanjutkan dengan Apple",
+    AuthEntryCopyKey.continueFacebook: "Lanjutkan dengan Facebook",
+    AuthEntryCopyKey.privacyPolicy: "Kebijakan Privasi",
+    AuthEntryCopyKey.providerUnavailable:
+        "Penyedia masuk ini tidak tersedia atau belum dikonfigurasi.",
+    AuthEntryCopyKey.openSecureFailure:
+        "Tidak dapat membuka proses masuk aman. Coba lagi.",
+    AuthEntryCopyKey.secureConnectionFailure: "Koneksi aman gagal. Coba lagi.",
+    AuthEntryCopyKey.verifyEmail: "Verifikasi email",
+    AuthEntryCopyKey.enterVerificationCode: "Masukkan kode verifikasi",
+    AuthEntryCopyKey.codeSentTo: "Kami mengirim kode 6 digit ke {email}.",
+    AuthEntryCopyKey.codeVerificationFailed:
+        "Kode tidak dapat diverifikasi. Coba lagi.",
+    AuthEntryCopyKey.newCodeSent: "Kode verifikasi baru telah dikirim.",
+    AuthEntryCopyKey.resendFailed:
+        "Tidak dapat mengirim ulang kode. Coba lagi.",
+    AuthEntryCopyKey.resendCode: "Kirim ulang kode",
+    AuthEntryCopyKey.resendCodeIn: "Kirim ulang kode dalam {time}",
+    AuthEntryCopyKey.changeEmail: "Ubah email",
+    AuthEntryCopyKey.rateLimit60: "Tunggu 60 detik sebelum meminta kode lain.",
+    AuthEntryCopyKey.verificationExpired:
+        "Kode verifikasi telah kedaluwarsa. Minta kode baru.",
+    AuthEntryCopyKey.signupUnavailable:
+        "Pembuatan akun sementara tidak tersedia.",
+    AuthEntryCopyKey.authenticationFailed:
+        "Autentikasi tidak dapat diselesaikan sekarang. Coba lagi nanti.",
+  },
+  "ms": <AuthEntryCopyKey, String>{
+    AuthEntryCopyKey.chooseLanguage: "Pilih bahasa",
+    AuthEntryCopyKey.welcomeTo: "Selamat datang ke",
+    AuthEntryCopyKey.signIn: "Log masuk",
+    AuthEntryCopyKey.continueWithoutAccount: "Teruskan tanpa akaun",
+    AuthEntryCopyKey.taglineTitle: "Tubuh anda. Kecerdasan anda.",
+    AuthEntryCopyKey.taglineBody:
+        "Pengalaman kesihatan peribadi yang dibina untuk anda. Data anda kekal milik anda dan penyegerakan awan sentiasa pilihan anda.",
+    AuthEntryCopyKey.progressTitle:
+        "Kemajuan yang sesuai dengan kemampuan anda",
+    AuthEntryCopyKey.progressBody:
+        "Panduan menyesuaikan diri dengan kadar sebenar anda dan bukannya memaksa satu pelan untuk semua.",
+    AuthEntryCopyKey.rhythmTitle: "Fahami rentak anda",
+    AuthEntryCopyKey.rhythmBody:
+        "Hubungkan tidur dan pemulihan hanya menggunakan rekod sebenar anda.",
+    AuthEntryCopyKey.nutritionTitle: "Pemakanan tanpa teka-teki",
+    AuthEntryCopyKey.nutritionBody:
+        "Cari, imbas dan catat dengan pemisahan jelas antara data disahkan dan data tersuai.",
+    AuthEntryCopyKey.privacyFooter:
+        "Privasi dahulu  •  Tiada diagnosis perubatan  •  Anda kekal mengawal",
+    AuthEntryCopyKey.cloudNotEnabled:
+        "Akaun awan tidak didayakan dalam binaan ini.",
+    AuthEntryCopyKey.restorePreviousData: "Pulihkan data terdahulu",
+    AuthEntryCopyKey.restorePreviousDataQuestion: "Pulihkan data terdahulu?",
+    AuthEntryCopyKey.restoreDialogBody:
+        "BIL akan menggantikan data setempat semasa dengan syot kilat terdahulu yang telah disahkan.",
+    AuthEntryCopyKey.cancel: "Batal",
+    AuthEntryCopyKey.restore: "Pulihkan",
+    AuthEntryCopyKey.back: "Kembali",
+    AuthEntryCopyKey.emailAddress: "Alamat e-mel",
+    AuthEntryCopyKey.invalidEmail: "Masukkan alamat e-mel yang sah.",
+    AuthEntryCopyKey.verify: "Sahkan",
+    AuthEntryCopyKey.orLabel: "ATAU",
+    AuthEntryCopyKey.continueGoogle: "Teruskan dengan Google",
+    AuthEntryCopyKey.continueApple: "Teruskan dengan Apple",
+    AuthEntryCopyKey.continueFacebook: "Teruskan dengan Facebook",
+    AuthEntryCopyKey.privacyPolicy: "Dasar Privasi",
+    AuthEntryCopyKey.providerUnavailable:
+        "Penyedia log masuk ini tidak tersedia atau belum dikonfigurasi.",
+    AuthEntryCopyKey.openSecureFailure:
+        "Tidak dapat membuka log masuk selamat. Cuba lagi.",
+    AuthEntryCopyKey.secureConnectionFailure:
+        "Sambungan selamat gagal. Cuba lagi.",
+    AuthEntryCopyKey.verifyEmail: "Sahkan e-mel",
+    AuthEntryCopyKey.enterVerificationCode: "Masukkan kod pengesahan",
+    AuthEntryCopyKey.codeSentTo: "Kami menghantar kod 6 digit ke {email}.",
+    AuthEntryCopyKey.codeVerificationFailed:
+        "Kod tidak dapat disahkan. Cuba lagi.",
+    AuthEntryCopyKey.newCodeSent: "Kod pengesahan baharu telah dihantar.",
+    AuthEntryCopyKey.resendFailed:
+        "Tidak dapat menghantar semula kod. Cuba lagi.",
+    AuthEntryCopyKey.resendCode: "Hantar semula kod",
+    AuthEntryCopyKey.resendCodeIn: "Hantar semula kod dalam {time}",
+    AuthEntryCopyKey.changeEmail: "Tukar e-mel",
+    AuthEntryCopyKey.rateLimit60: "Tunggu 60 saat sebelum meminta kod lain.",
+    AuthEntryCopyKey.verificationExpired:
+        "Kod pengesahan telah tamat tempoh. Minta kod baharu.",
+    AuthEntryCopyKey.signupUnavailable:
+        "Penciptaan akaun tidak tersedia buat sementara waktu.",
+    AuthEntryCopyKey.authenticationFailed:
+        "Pengesahan tidak dapat diselesaikan sekarang. Cuba lagi kemudian.",
+  },
+  "ja": <AuthEntryCopyKey, String>{
+    AuthEntryCopyKey.chooseLanguage: "言語を選択",
+    AuthEntryCopyKey.welcomeTo: "ようこそ",
+    AuthEntryCopyKey.signIn: "サインイン",
+    AuthEntryCopyKey.continueWithoutAccount: "アカウントなしで続行",
+    AuthEntryCopyKey.taglineTitle: "あなたの体。あなたの知性。",
+    AuthEntryCopyKey.taglineBody:
+        "あなたを中心に設計されたプライベートな健康体験。データはあなたのものであり、クラウド同期も常にあなたが選べます。",
+    AuthEntryCopyKey.progressTitle: "あなたの力に合った進歩",
+    AuthEntryCopyKey.progressBody:
+        "すべての人に同じ計画を押しつけるのではなく、実際のペースに合わせてガイダンスが変化します。",
+    AuthEntryCopyKey.rhythmTitle: "自分のリズムを理解する",
+    AuthEntryCopyKey.rhythmBody: "実際の記録だけを使って、睡眠と回復を結び付けます。",
+    AuthEntryCopyKey.nutritionTitle: "推測に頼らない栄養管理",
+    AuthEntryCopyKey.nutritionBody: "確認済みデータとカスタムデータを明確に分けて、検索・スキャン・記録できます。",
+    AuthEntryCopyKey.privacyFooter: "プライバシー優先  •  医療診断ではありません  •  主導権はあなたに",
+    AuthEntryCopyKey.cloudNotEnabled: "このビルドではクラウドアカウントが有効になっていません。",
+    AuthEntryCopyKey.restorePreviousData: "以前のデータを復元",
+    AuthEntryCopyKey.restorePreviousDataQuestion: "以前のデータを復元しますか？",
+    AuthEntryCopyKey.restoreDialogBody:
+        "BIL は現在のローカルデータを検証済みの以前のスナップショットに置き換えます。",
+    AuthEntryCopyKey.cancel: "キャンセル",
+    AuthEntryCopyKey.restore: "復元",
+    AuthEntryCopyKey.back: "戻る",
+    AuthEntryCopyKey.emailAddress: "メールアドレス",
+    AuthEntryCopyKey.invalidEmail: "有効なメールアドレスを入力してください。",
+    AuthEntryCopyKey.verify: "確認",
+    AuthEntryCopyKey.orLabel: "または",
+    AuthEntryCopyKey.continueGoogle: "Google で続行",
+    AuthEntryCopyKey.continueApple: "Apple で続行",
+    AuthEntryCopyKey.continueFacebook: "Facebook で続行",
+    AuthEntryCopyKey.privacyPolicy: "プライバシーポリシー",
+    AuthEntryCopyKey.providerUnavailable: "このサインインプロバイダーは利用できないか、設定されていません。",
+    AuthEntryCopyKey.openSecureFailure: "安全なサインインを開けませんでした。もう一度お試しください。",
+    AuthEntryCopyKey.secureConnectionFailure: "安全な接続に失敗しました。もう一度お試しください。",
+    AuthEntryCopyKey.verifyEmail: "メールを確認",
+    AuthEntryCopyKey.enterVerificationCode: "確認コードを入力",
+    AuthEntryCopyKey.codeSentTo: "{email} に6桁のコードを送信しました。",
+    AuthEntryCopyKey.codeVerificationFailed: "コードを確認できませんでした。もう一度お試しください。",
+    AuthEntryCopyKey.newCodeSent: "新しい確認コードを送信しました。",
+    AuthEntryCopyKey.resendFailed: "コードを再送信できませんでした。もう一度お試しください。",
+    AuthEntryCopyKey.resendCode: "コードを再送信",
+    AuthEntryCopyKey.resendCodeIn: "{time} 後にコードを再送信",
+    AuthEntryCopyKey.changeEmail: "メールアドレスを変更",
+    AuthEntryCopyKey.rateLimit60: "別のコードを要求する前に60秒お待ちください。",
+    AuthEntryCopyKey.verificationExpired: "確認コードの有効期限が切れました。新しいコードを要求してください。",
+    AuthEntryCopyKey.signupUnavailable: "アカウント作成は一時的に利用できません。",
+    AuthEntryCopyKey.authenticationFailed: "現在認証を完了できません。後でもう一度お試しください。",
+  },
+  "ko": <AuthEntryCopyKey, String>{
+    AuthEntryCopyKey.chooseLanguage: "언어 선택",
+    AuthEntryCopyKey.welcomeTo: "환영합니다",
+    AuthEntryCopyKey.signIn: "로그인",
+    AuthEntryCopyKey.continueWithoutAccount: "계정 없이 계속",
+    AuthEntryCopyKey.taglineTitle: "당신의 몸. 당신의 지능.",
+    AuthEntryCopyKey.taglineBody:
+        "당신을 중심으로 설계된 비공개 건강 경험입니다. 데이터는 계속 당신의 것이며 클라우드 동기화도 언제나 당신이 선택합니다.",
+    AuthEntryCopyKey.progressTitle: "당신의 능력에 맞는 진전",
+    AuthEntryCopyKey.progressBody: "모두에게 같은 계획을 강요하지 않고 실제 속도에 맞춰 안내가 조정됩니다.",
+    AuthEntryCopyKey.rhythmTitle: "나만의 리듬 이해하기",
+    AuthEntryCopyKey.rhythmBody: "실제 기록만 사용해 수면과 회복을 연결합니다.",
+    AuthEntryCopyKey.nutritionTitle: "추측 없는 영양 관리",
+    AuthEntryCopyKey.nutritionBody: "검증된 데이터와 사용자 데이터를 명확히 구분하며 검색, 스캔, 기록합니다.",
+    AuthEntryCopyKey.privacyFooter: "개인정보 보호 우선  •  의료 진단 아님  •  통제권은 당신에게",
+    AuthEntryCopyKey.cloudNotEnabled: "이 빌드에서는 클라우드 계정이 활성화되어 있지 않습니다.",
+    AuthEntryCopyKey.restorePreviousData: "이전 데이터 복원",
+    AuthEntryCopyKey.restorePreviousDataQuestion: "이전 데이터를 복원할까요?",
+    AuthEntryCopyKey.restoreDialogBody: "BIL이 현재 로컬 데이터를 검증된 이전 스냅샷으로 교체합니다.",
+    AuthEntryCopyKey.cancel: "취소",
+    AuthEntryCopyKey.restore: "복원",
+    AuthEntryCopyKey.back: "뒤로",
+    AuthEntryCopyKey.emailAddress: "이메일 주소",
+    AuthEntryCopyKey.invalidEmail: "올바른 이메일 주소를 입력하세요.",
+    AuthEntryCopyKey.verify: "확인",
+    AuthEntryCopyKey.orLabel: "또는",
+    AuthEntryCopyKey.continueGoogle: "Google로 계속",
+    AuthEntryCopyKey.continueApple: "Apple로 계속",
+    AuthEntryCopyKey.continueFacebook: "Facebook으로 계속",
+    AuthEntryCopyKey.privacyPolicy: "개인정보 처리방침",
+    AuthEntryCopyKey.providerUnavailable: "이 로그인 제공업체를 사용할 수 없거나 설정되지 않았습니다.",
+    AuthEntryCopyKey.openSecureFailure: "보안 로그인을 열 수 없습니다. 다시 시도하세요.",
+    AuthEntryCopyKey.secureConnectionFailure: "보안 연결에 실패했습니다. 다시 시도하세요.",
+    AuthEntryCopyKey.verifyEmail: "이메일 확인",
+    AuthEntryCopyKey.enterVerificationCode: "확인 코드 입력",
+    AuthEntryCopyKey.codeSentTo: "{email}로 6자리 코드를 보냈습니다.",
+    AuthEntryCopyKey.codeVerificationFailed: "코드를 확인할 수 없습니다. 다시 시도하세요.",
+    AuthEntryCopyKey.newCodeSent: "새 확인 코드를 보냈습니다.",
+    AuthEntryCopyKey.resendFailed: "코드를 다시 보낼 수 없습니다. 다시 시도하세요.",
+    AuthEntryCopyKey.resendCode: "코드 다시 보내기",
+    AuthEntryCopyKey.resendCodeIn: "{time} 후 코드 다시 보내기",
+    AuthEntryCopyKey.changeEmail: "이메일 변경",
+    AuthEntryCopyKey.rateLimit60: "다른 코드를 요청하기 전에 60초 기다리세요.",
+    AuthEntryCopyKey.verificationExpired: "확인 코드가 만료되었습니다. 새 코드를 요청하세요.",
+    AuthEntryCopyKey.signupUnavailable: "계정 생성은 일시적으로 사용할 수 없습니다.",
+    AuthEntryCopyKey.authenticationFailed: "지금 인증을 완료할 수 없습니다. 나중에 다시 시도하세요.",
+  },
+  "zh-Hans": <AuthEntryCopyKey, String>{
+    AuthEntryCopyKey.chooseLanguage: "选择语言",
+    AuthEntryCopyKey.welcomeTo: "欢迎来到",
+    AuthEntryCopyKey.signIn: "登录",
+    AuthEntryCopyKey.continueWithoutAccount: "不登录继续",
+    AuthEntryCopyKey.taglineTitle: "你的身体，你的智能。",
+    AuthEntryCopyKey.taglineBody: "围绕你打造的私密健康体验。你的数据始终属于你，云同步始终由你选择。",
+    AuthEntryCopyKey.progressTitle: "适合你能力的进步",
+    AuthEntryCopyKey.progressBody: "指导会根据你的真实节奏调整，而不是让所有人使用同一套计划。",
+    AuthEntryCopyKey.rhythmTitle: "了解你的节奏",
+    AuthEntryCopyKey.rhythmBody: "仅根据你的真实记录关联睡眠与恢复。",
+    AuthEntryCopyKey.nutritionTitle: "营养不靠猜",
+    AuthEntryCopyKey.nutritionBody: "搜索、扫描并记录，清楚区分已验证数据和自定义数据。",
+    AuthEntryCopyKey.privacyFooter: "隐私优先  •  不作医疗诊断  •  由你掌控",
+    AuthEntryCopyKey.cloudNotEnabled: "此版本未启用云账户。",
+    AuthEntryCopyKey.restorePreviousData: "恢复之前的数据",
+    AuthEntryCopyKey.restorePreviousDataQuestion: "恢复之前的数据？",
+    AuthEntryCopyKey.restoreDialogBody: "BIL 将用已验证的先前快照替换当前本地数据。",
+    AuthEntryCopyKey.cancel: "取消",
+    AuthEntryCopyKey.restore: "恢复",
+    AuthEntryCopyKey.back: "返回",
+    AuthEntryCopyKey.emailAddress: "电子邮箱",
+    AuthEntryCopyKey.invalidEmail: "请输入有效的电子邮箱。",
+    AuthEntryCopyKey.verify: "验证",
+    AuthEntryCopyKey.orLabel: "或",
+    AuthEntryCopyKey.continueGoogle: "使用 Google 继续",
+    AuthEntryCopyKey.continueApple: "使用 Apple 继续",
+    AuthEntryCopyKey.continueFacebook: "使用 Facebook 继续",
+    AuthEntryCopyKey.privacyPolicy: "隐私政策",
+    AuthEntryCopyKey.providerUnavailable: "此登录提供商不可用或未配置。",
+    AuthEntryCopyKey.openSecureFailure: "无法打开安全登录。请重试。",
+    AuthEntryCopyKey.secureConnectionFailure: "安全连接失败。请重试。",
+    AuthEntryCopyKey.verifyEmail: "验证邮箱",
+    AuthEntryCopyKey.enterVerificationCode: "输入验证码",
+    AuthEntryCopyKey.codeSentTo: "我们已向 {email} 发送 6 位验证码",
+    AuthEntryCopyKey.codeVerificationFailed: "无法验证该代码。请重试。",
+    AuthEntryCopyKey.newCodeSent: "新的验证码已发送。",
+    AuthEntryCopyKey.resendFailed: "无法重新发送验证码。请重试。",
+    AuthEntryCopyKey.resendCode: "重新发送验证码",
+    AuthEntryCopyKey.resendCodeIn: "{time} 后可重新发送验证码",
+    AuthEntryCopyKey.changeEmail: "更改邮箱",
+    AuthEntryCopyKey.rateLimit60: "请等待 60 秒后再请求新的验证码。",
+    AuthEntryCopyKey.verificationExpired: "验证码已过期。请申请新的验证码。",
+    AuthEntryCopyKey.signupUnavailable: "暂时无法创建账户。",
+    AuthEntryCopyKey.authenticationFailed: "暂时无法完成身份验证。请稍后重试。",
+  },
+};

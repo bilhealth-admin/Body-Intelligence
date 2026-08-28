@@ -1,0 +1,121 @@
+{
+  "schema": "bil.static-artwork-replacement.v1",
+  "generatedAt": "2026-08-24T00:00:00Z",
+  "rasterMutationPerformed": false,
+  "excludedScope": {
+    "workoutVideoPosterCount": 302,
+    "policy": "Do not replace, rewrite, regenerate, remap, upload, or edit workout video posters, workout videos, or their release manifests."
+  },
+  "accountGateway": {
+    "renderContract": {
+      "cardAspectRatio": "1:1",
+      "fit": "cover",
+      "alignment": "center",
+      "replacementPixelSize": "1200x1200",
+      "safeSubjectArea": "Keep all critical subject detail inside the centered 70%; no text or logos in the outer 15%.",
+      "accessibility": "The viewport, card, crop, and copy slot remain invariant through RTL swipes at 160% text."
+    },
+    "keepUnchanged": [
+      {
+        "asset": "assets/images/flagship/bil_body_intelligence_journey_v1.png",
+        "titleEn": "Progress that fits your ability",
+        "titleAr": "تقدّم يناسب قدرتك",
+        "currentPixelSize": "941x830",
+        "currentSha256": "e79de37e5622cf9a264630a7bf76362b9247e9ad2d222bac4418e27397dc3e00"
+      }
+    ],
+    "replaceWithVersionedAssets": [
+      {
+        "asset": "assets/images/flagship/bil_sleep_insights_v2.png",
+        "previousAssetRetainedUnused": "assets/images/flagship/bil_sleep_insights_v1.png",
+        "titleEn": "Understand your rhythm",
+        "titleAr": "افهم إيقاعك",
+        "currentPixelSize": "1200x1200",
+        "currentAspectRatio": "1:1",
+        "currentSha256": "cb5b39e393c937c523cc4044e821aeddf09266c60381e91d8a4cb72b2aa2375e",
+        "requiredPixelSize": "1200x1200",
+        "requiredAspectRatio": "1:1"
+      },
+      {
+        "asset": "assets/images/flagship/bil_meal_discovery_v2.png",
+        "previousAssetRetainedUnused": "assets/images/flagship/bil_meal_discovery_v1.png",
+        "titleEn": "Nutrition without guesswork",
+        "titleAr": "التغذية بلا تخمين",
+        "currentPixelSize": "1200x1200",
+        "currentAspectRatio": "1:1",
+        "currentSha256": "0aabb5ebcf96ffecb51e226fcf0cd8a715f193971a7a0d4c00be2723732036f3",
+        "requiredPixelSize": "1200x1200",
+        "requiredAspectRatio": "1:1"
+      }
+    ]
+  },
+  "staticWorkoutArtwork": {
+    "manualLoggerSurface": {
+      "route": "/wellness/workouts/log",
+      "staticImageReferenceCount": 2,
+      "textOnlyExerciseTitleCount": 18,
+      "visibleReferences": [
+        {
+          "titleEn": "Full-body strength",
+          "asset": "assets/images/workouts/workout_strength_cover_v1.png"
+        },
+        {
+          "titleEn": "Mobility flow",
+          "asset": "assets/images/workouts/workout_mobility_cover_v1.png"
+        }
+      ]
+    },
+    "sharedCoverContract": {
+      "replacementMode": "replace in place; keep the exact filenames below",
+      "requiredPixelSize": "1600x900",
+      "requiredAspectRatio": "16:9",
+      "fit": "cover",
+      "safeCrop": "Compose the primary human action inside the centered 70% width so the same file remains readable in the approximately 5:4 featured-card crop and wider fallback surfaces.",
+      "content": "Natural editorial fitness photography, anatomically credible action, realistic gym/home environment, no holograms, no synthetic anatomy, no embedded BIL wordmark, no text.",
+      "files": [
+        {
+          "category": "Strength",
+          "asset": "assets/images/workouts/workout_strength_cover_v1.png",
+          "currentPixelSize": "1672x941",
+          "currentSha256": "f18fd46a9cf8c287c9bc578e42e1a8a22e29a2d2082b764bf92ab601c1e88892"
+        },
+        {
+          "category": "Cardio",
+          "asset": "assets/images/workouts/workout_cardio_cover_v1.png",
+          "currentPixelSize": "1672x941",
+          "currentSha256": "75e47b42ec4b772b942936f4280d03cdbebc733c83e06834465e5c91b876c373"
+        },
+        {
+          "category": "Mobility",
+          "asset": "assets/images/workouts/workout_mobility_cover_v1.png",
+          "currentPixelSize": "1672x941",
+          "currentSha256": "b6b1bd4c06aef3ceadb09214b044442149fea464dd26d7f089235cfbee13e499"
+        },
+        {
+          "category": "HIIT",
+          "asset": "assets/images/workouts/workout_hiit_cover_v1.png",
+          "currentPixelSize": "1672x941",
+          "currentSha256": "5efe2026ddf081bd99acd7ddd9edc5520845a2c908375e1c8563628967770b7a"
+        },
+        {
+          "category": "Kettlebell",
+          "asset": "assets/images/workouts/workout_kettlebell_cover_v1.png",
+          "currentPixelSize": "1672x941",
+          "currentSha256": "027a175b7f3cb4b23d8be3dfa18a3784bf7e13797eb548820db32a9efec81b5f"
+        },
+        {
+          "category": "Recovery",
+          "asset": "assets/images/workouts/workout_recovery_cover_v1.png",
+          "currentPixelSize": "1672x941",
+          "currentSha256": "fe9ea691bea5cf820627d065d28c9d6176c76ed9acf8eb7acee33da56e772f6c"
+        }
+      ]
+    },
+    "sourceLocations": [
+      "lib/features/wellness/domain/static_workout_artwork.dart",
+      "lib/features/wellness/presentation/workout_library_components.dart",
+      "lib/features/wellness/presentation/bil_workout_routine_visuals.dart",
+      "lib/features/wellness/presentation/bil_workout_routines_states.dart"
+    ]
+  }
+}

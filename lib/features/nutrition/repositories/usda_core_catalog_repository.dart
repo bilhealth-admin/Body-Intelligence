@@ -137,12 +137,15 @@ class UsdaCoreCatalogRepository implements UnifiedFoodRepository {
       'WHERE food_fts MATCH ? '
       // FoodData Central contains component/derivation rows whose names are
       // searchable but whose core macro columns are intentionally null. They
-      // are useful source records, not usable diary candidates. Prefer a
-      // complete calorie + macro record before applying dataset/FTS ranking
-      // so an exact everyday query cannot surface a misleading all-zero row.
-      'ORDER BY CASE WHEN f.energy_kcal IS NOT NULL '
-      'AND f.protein_g IS NOT NULL AND f.carbs_g IS NOT NULL '
-      'AND f.fat_g IS NOT NULL THEN 0 ELSE 1 END, '
+      // are useful source records, not usable diary candidates. Runtime
+      // search materializes every returned row for diary compatibility, so
+      // exclude incomplete rows instead of persisting misleading all-zero
+      // records beside the complete food the user actually reviewed.
+      'AND f.energy_kcal IS NOT NULL '
+      'AND f.protein_g IS NOT NULL '
+      'AND f.carbs_g IS NOT NULL '
+      'AND f.fat_g IS NOT NULL '
+      'ORDER BY '
       "CASE f.source_dataset "
       "WHEN 'foundation' THEN 0 WHEN 'sr_legacy' THEN 1 ELSE 2 END, "
       'rank ASC, f.normalized_description ASC LIMIT ?',
@@ -282,6 +285,12 @@ class UsdaCoreCatalogRepository implements UnifiedFoodRepository {
     _put(nutrients, FoodNutrient.potassium, row['potassium_mg']);
     _put(nutrients, FoodNutrient.calcium, row['calcium_mg']);
     _put(nutrients, FoodNutrient.iron, row['iron_mg']);
+    final hasDiaryCoreEvidence = const <FoodNutrient>[
+      FoodNutrient.calories,
+      FoodNutrient.protein,
+      FoodNutrient.carbohydrates,
+      FoodNutrient.fat,
+    ].every((nutrient) => nutrients[nutrient]?.isKnown == true);
 
     final brand = (row['brand_name'] as String?)?.trim();
     final owner = (row['brand_owner'] as String?)?.trim();
@@ -302,7 +311,7 @@ class UsdaCoreCatalogRepository implements UnifiedFoodRepository {
       nutrients: Map<FoodNutrient, NutrientAmount>.unmodifiable(nutrients),
       source: source,
       sourceLabel: 'USDA FoodData Central — $sourceDataset',
-      verified: sourceDataset != 'branded',
+      verified: sourceDataset != 'branded' && hasDiaryCoreEvidence,
       isCustom: false,
       updatedAt: DateTime.tryParse(row['publication_date'] as String? ?? ''),
     );

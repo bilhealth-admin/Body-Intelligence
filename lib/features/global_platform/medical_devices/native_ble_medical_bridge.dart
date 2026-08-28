@@ -33,14 +33,19 @@ final class MethodChannelBleMedicalBridge implements ManagedBleMedicalBridge {
             final parsed = _profileFromNative(value.toString());
             if (parsed != null) profiles.add(parsed);
           }
-          return BlePeripheral(
+          final peripheral = BlePeripheral(
             id: row['id']! as String,
-            name: row['name'] as String? ?? 'Medical device',
+            name: row['name'] as String? ?? 'Fitness device',
             profiles: profiles,
             firmwareVersion: row['firmwareVersion'] as String? ?? 'unknown',
             manufacturer: row['manufacturer'] as String? ?? 'unknown',
           );
+          return peripheral;
         })
+        .where(
+          (peripheral) =>
+              peripheral.profiles.intersection(bleFitnessProfiles).isNotEmpty,
+        )
         .toList(growable: false);
   }
 
@@ -77,12 +82,14 @@ final class MethodChannelBleMedicalBridge implements ManagedBleMedicalBridge {
     required BlePeripheral peripheral,
     required DateTime asOf,
   }) async {
+    final profiles = peripheral.profiles.intersection(bleFitnessProfiles);
+    if (profiles.isEmpty) return const <Map<String, Object?>>[];
     final rows =
         await _channel.invokeListMethod<Map<Object?, Object?>>(
           'readMeasurements',
           <String, Object?>{
             'peripheralId': peripheral.id,
-            'profiles': peripheral.profiles.map((e) => e.name).toList(),
+            'profiles': profiles.map((e) => e.name).toList(),
             'asOf': asOf.toUtc().toIso8601String(),
           },
         ) ??
@@ -97,13 +104,9 @@ final class MethodChannelBleMedicalBridge implements ManagedBleMedicalBridge {
   BleMedicalProfile? _profileFromNative(String value) {
     final normalized = value.toUpperCase().replaceAll('-', '');
     return switch (normalized) {
-      '1810' || 'BLOODPRESSURE' => BleMedicalProfile.bloodPressure,
-      '1808' || 'GLUCOSE' => BleMedicalProfile.glucose,
       '181D' || 'WEIGHTSCALE' => BleMedicalProfile.weightScale,
       '181B' || 'BODYCOMPOSITION' => BleMedicalProfile.bodyComposition,
-      '1822' || 'PULSEOXIMETER' => BleMedicalProfile.pulseOximeter,
       '180D' || 'HEARTRATE' => BleMedicalProfile.heartRate,
-      '1809' || 'THERMOMETER' => BleMedicalProfile.thermometer,
       _ => null,
     };
   }
@@ -127,57 +130,11 @@ final class BleGattMeasurementParser {
     final samplePrefix = '$peripheralId:$characteristic:${base64Encode(bytes)}';
 
     return switch (characteristic) {
-      '2A35' => _bloodPressure(bytes, samplePrefix, observedAt),
-      '2A18' => _glucose(bytes, samplePrefix, observedAt),
       '2A9D' => _weight(bytes, samplePrefix, observedAt),
       '2A9C' => _bodyComposition(bytes, samplePrefix, observedAt),
-      '2A5F' => _oxygen(bytes, samplePrefix, observedAt),
       '2A37' => _heartRate(bytes, samplePrefix, observedAt),
-      '2A1C' => _temperature(bytes, samplePrefix, observedAt),
       _ => const <Map<String, Object?>>[],
     };
-  }
-
-  List<Map<String, Object?>> _bloodPressure(
-    Uint8List data,
-    String id,
-    DateTime at,
-  ) {
-    if (data.length < 7) return const <Map<String, Object?>>[];
-    final unit = (data[0] & 0x01) == 0 ? 'mmHg' : 'kPa';
-    return <Map<String, Object?>>[
-      _packet(
-        '$id:s',
-        'blood_pressure_systolic',
-        _sfloat(data, 1),
-        unit,
-        at,
-        confirmed: false,
-      ),
-      _packet(
-        '$id:d',
-        'blood_pressure_diastolic',
-        _sfloat(data, 3),
-        unit,
-        at,
-        confirmed: false,
-      ),
-    ];
-  }
-
-  List<Map<String, Object?>> _glucose(Uint8List data, String id, DateTime at) {
-    if (data.length < 12) return const <Map<String, Object?>>[];
-    final molar = (data[0] & 0x04) != 0;
-    return <Map<String, Object?>>[
-      _packet(
-        id,
-        'glucose',
-        _sfloat(data, 10),
-        molar ? 'mmol/L' : 'mg/dL',
-        at,
-        confirmed: false,
-      ),
-    ];
   }
 
   List<Map<String, Object?>> _weight(Uint8List data, String id, DateTime at) {
@@ -205,13 +162,6 @@ final class BleGattMeasurementParser {
     return <Map<String, Object?>>[_packet(id, 'body_fat', raw * 0.1, '%', at)];
   }
 
-  List<Map<String, Object?>> _oxygen(Uint8List data, String id, DateTime at) {
-    if (data.length < 3) return const <Map<String, Object?>>[];
-    return <Map<String, Object?>>[
-      _packet(id, 'oxygen', _sfloat(data, 1), '%', at, confirmed: false),
-    ];
-  }
-
   List<Map<String, Object?>> _heartRate(
     Uint8List data,
     String id,
@@ -224,25 +174,6 @@ final class BleGattMeasurementParser {
         ? (data[1] | (data[2] << 8)).toDouble()
         : data[1].toDouble();
     return <Map<String, Object?>>[_packet(id, 'heart_rate', value, 'bpm', at)];
-  }
-
-  List<Map<String, Object?>> _temperature(
-    Uint8List data,
-    String id,
-    DateTime at,
-  ) {
-    if (data.length < 5) return const <Map<String, Object?>>[];
-    final fahrenheit = (data[0] & 0x01) != 0;
-    return <Map<String, Object?>>[
-      _packet(
-        id,
-        'temperature',
-        _float32(data, 1),
-        fahrenheit ? 'fahrenheit' : 'celsius',
-        at,
-        confirmed: false,
-      ),
-    ];
   }
 
   Map<String, Object?> _packet(
@@ -273,43 +204,5 @@ final class BleGattMeasurementParser {
     return normalized.replaceAll('-', '').length == 4
         ? normalized.replaceAll('-', '')
         : normalized;
-  }
-
-  double _sfloat(Uint8List data, int offset) {
-    if (offset + 1 >= data.length) return double.nan;
-    final raw = data[offset] | (data[offset + 1] << 8);
-    var mantissa = raw & 0x0FFF;
-    var exponent = raw >> 12;
-    if ((mantissa & 0x0800) != 0) mantissa -= 0x1000;
-    if ((exponent & 0x0008) != 0) exponent -= 0x0010;
-    return mantissa * _pow10(exponent);
-  }
-
-  double _float32(Uint8List data, int offset) {
-    if (offset + 3 >= data.length) return double.nan;
-    final raw =
-        data[offset] |
-        (data[offset + 1] << 8) |
-        (data[offset + 2] << 16) |
-        (data[offset + 3] << 24);
-    var mantissa = raw & 0x00FFFFFF;
-    var exponent = (raw >> 24) & 0xFF;
-    if ((mantissa & 0x00800000) != 0) mantissa -= 0x01000000;
-    if ((exponent & 0x80) != 0) exponent -= 0x100;
-    return mantissa * _pow10(exponent);
-  }
-
-  double _pow10(int exponent) {
-    var result = 1.0;
-    if (exponent >= 0) {
-      for (var i = 0; i < exponent; i++) {
-        result *= 10;
-      }
-    } else {
-      for (var i = 0; i > exponent; i--) {
-        result /= 10;
-      }
-    }
-    return result;
   }
 }

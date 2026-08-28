@@ -26,6 +26,11 @@ SHA = re.compile(r"^[0-9a-f]{64}$")
 SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 MOJIBAKE = ("\u00c3", "\u00c2", "\u00e2\u20ac", "\ufffd")
 IMAGE_EXTENSIONS = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg"}
+SUPPORTED_LOCALES = {
+    "ar", "en", "fr", "es", "tr", "de", "it", "pt-BR", "pt-PT", "ur",
+    "fa", "hi", "id", "ms", "ja", "ko", "zh-Hans", "zh-Hant", "ru",
+    "bn", "vi", "th", "pl", "nl", "uk",
+}
 
 
 def _pairs(items):
@@ -112,7 +117,7 @@ def validate_record(record: dict) -> None:
     if not isinstance(fingerprint, str) or not SHA.fullmatch(fingerprint):
         raise ValueError(f"invalid fingerprint: {recipe_id}")
     locale = record.get("primaryLocale")
-    if locale not in {"ar", "en", "es", "fr", "tr"} or locale not in record.get("localizations", {}):
+    if locale not in SUPPORTED_LOCALES or locale not in record.get("localizations", {}):
         raise ValueError(f"invalid primary locale: {recipe_id}")
     timing = record.get("timing", {})
     if timing.get("totalMinutes") != timing.get("prepMinutes") + timing.get("cookMinutes"):
@@ -129,7 +134,7 @@ def validate_record(record: dict) -> None:
     if any(marker in text for text in localized_strings(record) for marker in MOJIBAKE):
         raise ValueError(f"residual mojibake: {recipe_id}")
     for code, localization in record["localizations"].items():
-        if code not in {"ar", "en", "es", "fr", "tr"} or not isinstance(localization, dict):
+        if code not in SUPPORTED_LOCALES or not isinstance(localization, dict):
             raise ValueError(f"invalid localization: {recipe_id}")
         if not isinstance(localization.get("title"), str) or not localization["title"].strip():
             raise ValueError(f"empty localized title: {recipe_id}")
@@ -293,6 +298,11 @@ def build(canonical_path: Path, clean_path: Path, image_root: Path, output: Path
                     "diet_tags": record["dietTags"],
                     "allergens": record["allergens"],
                     "image_status": "external_candidate" if record["canonicalId"] in images else "placeholder",
+                    "region": record["region"],
+                    "cuisine_key": (
+                        "turkey" if record["primaryLocale"] == "tr" and record["region"] != "global"
+                        else record["countryTags"][0]
+                    ),
                 })
         index_path = stage / "recipe-index.json"
         write_json(index_path, {"schema_version": 1, "record_count": COUNT, "entries": index_entries})

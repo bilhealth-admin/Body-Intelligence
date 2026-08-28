@@ -101,6 +101,34 @@ void main() {
       expect(keys.toSet(), hasLength(1));
     });
 
+    test('maps a paid Boost boundary to a dedicated failure', () async {
+      final service = MealImageAnalysisService(
+        endpoint: 'https://example.test/functions/v1/analyze-meal',
+        accessToken: () => 'session',
+        gatewayPost: ({required uri, required headers, required body}) async {
+          return const MealImageGatewayResponse(
+            statusCode: 402,
+            body: '{"error":"ai_boost_required"}',
+          );
+        },
+      );
+      await expectLater(
+        service.analyze(
+          XFile.fromData(
+            Uint8List.fromList([0xff, 0xd8, 0xff, 0x00]),
+            mimeType: 'image/jpeg',
+          ),
+        ),
+        throwsA(
+          isA<MealImageAnalysisException>().having(
+            (error) => error.failure,
+            'failure',
+            MealImageAnalysisFailure.boostRequired,
+          ),
+        ),
+      );
+    });
+
     test('rejects malformed or provenance-free responses', () {
       for (final body in <String>[
         '{}',
@@ -143,5 +171,6 @@ void main() {
     expect(gateway, contains('nutrition_resolution'));
     expect(gateway, contains('request_id: idempotencyKey'));
     expect(gateway, contains('AbortController'));
+    expect(gateway, contains("error: 'ai_boost_required'"));
   });
 }

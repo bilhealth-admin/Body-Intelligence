@@ -44,7 +44,11 @@ class _WellnessContentPacksPageState extends State<WellnessContentPacksPage> {
                 'Catalog unavailable',
                 'تعذر تحميل دليل الحزم',
               ),
-              message: snapshot.error.toString(),
+              message: wellnessCopy(
+                context,
+                'Your saved data was not changed. Try again.',
+                'لم تتغير بياناتك المحفوظة. حاول مجددًا.',
+              ),
               action: _reload,
               actionLabel: wellnessCopy(context, 'Retry', 'إعادة المحاولة'),
             );
@@ -97,8 +101,8 @@ class _WellnessContentPacksPageState extends State<WellnessContentPacksPage> {
     try {
       await manager.install(pack);
       if (mounted) _reload();
-    } catch (error) {
-      if (mounted) _showError(error);
+    } catch (_) {
+      if (mounted) _showError();
     } finally {
       if (mounted) setState(() => busyPack = null);
     }
@@ -109,16 +113,24 @@ class _WellnessContentPacksPageState extends State<WellnessContentPacksPage> {
     try {
       await manager.remove(id);
       if (mounted) _reload();
-    } catch (error) {
-      if (mounted) _showError(error);
+    } catch (_) {
+      if (mounted) _showError();
     } finally {
       if (mounted) setState(() => busyPack = null);
     }
   }
 
-  void _showError(Object error) => ScaffoldMessenger.of(
-    context,
-  ).showSnackBar(SnackBar(content: Text(error.toString())));
+  void _showError() => ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        wellnessCopy(
+          context,
+          'Your saved data was not changed. Try again.',
+          'لم تتغير بياناتك المحفوظة. حاول مجددًا.',
+        ),
+      ),
+    ),
+  );
 }
 
 class _PackCard extends StatelessWidget {

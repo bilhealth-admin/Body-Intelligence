@@ -20,6 +20,7 @@ final class ConnectedHealthSignalView {
     required this.source,
     required this.observedAt,
     required this.confidence,
+    this.attributes = const <String, Object?>{},
   });
 
   factory ConnectedHealthSignalView.fromSignal(GlobalHealthSignal signal) =>
@@ -32,6 +33,7 @@ final class ConnectedHealthSignalView {
             : signal.provenance.sourceId,
         observedAt: signal.provenance.observedAt,
         confidence: signal.provenance.confidence,
+        attributes: Map<String, Object?>.unmodifiable(signal.attributes),
       );
 
   final String key;
@@ -40,6 +42,7 @@ final class ConnectedHealthSignalView {
   final String source;
   final DateTime observedAt;
   final double confidence;
+  final Map<String, Object?> attributes;
 }
 
 final class ConnectedHealthSnapshot {

@@ -56,9 +56,14 @@ void main() {
   });
 
   test('intelligence center remains task-oriented and bounded', () {
-    final page = File(
-      'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
-    ).readAsStringSync();
+    final page =
+        File(
+          'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
+        ).readAsStringSync() +
+        File(
+          'lib/features/intelligence_center/presentation/'
+          'intelligence_center_widgets.dart',
+        ).readAsStringSync();
     final engine = File(
       'lib/features/intelligence_center/services/intelligence_center_engine.dart',
     ).readAsStringSync();

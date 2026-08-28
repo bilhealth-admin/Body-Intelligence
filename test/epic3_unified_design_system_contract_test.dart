@@ -24,7 +24,10 @@ void main() {
         light.textTheme.bodyLarge?.fontFamily,
         nativeLight.bodyLarge?.fontFamily,
       );
-      expect(arabic.textTheme.bodyLarge?.fontFamily, 'BILArabic');
+      expect(
+        arabic.textTheme.bodyLarge?.fontFamily,
+        nativeLight.bodyLarge?.fontFamily,
+      );
       expect(light.textTheme.bodyLarge?.fontWeight, FontWeight.w400);
       expect(light.textTheme.titleLarge?.fontWeight, FontWeight.w600);
       expect(light.textTheme.headlineLarge?.fontWeight, FontWeight.w700);
@@ -51,18 +54,19 @@ void main() {
     });
 
     test('active account flows consume the shared themed surface', () {
-      for (final path in <String>[
+      final register = File(
         'lib/features/auth/register_page.dart',
+      ).readAsStringSync();
+      final verification = File(
         'lib/features/auth/verify_email_page.dart',
-      ]) {
-        final source = File(path).readAsStringSync();
-        expect(source, contains('BilAccountSurface('), reason: path);
-        expect(source, isNot(contains('0xFFF7F8FB')), reason: path);
-        expect(
-          source,
-          isNot(contains('BorderRadius.circular(32)')),
-          reason: path,
-        );
+      ).readAsStringSync();
+      expect(register, contains('BilAccountSurface('));
+      expect(verification, contains('_VerifyTopBar('));
+      expect(verification, contains("Key('verification-code-boxes')"));
+      expect(verification, contains('SafeArea('));
+      for (final source in [register, verification]) {
+        expect(source, isNot(contains('0xFFF7F8FB')));
+        expect(source, isNot(contains('BorderRadius.circular(32)')));
       }
     });
   });

@@ -5,8 +5,11 @@ import 'package:body_intelligence_log/app/localization/bil_locale_catalog_qualit
 import 'package:body_intelligence_log/app/localization/bil_locale_rollout_manifest.dart';
 import 'package:body_intelligence_log/app/localization/bil_reviewed_locale_catalog.dart';
 
-void main() {
+import 'localization/locale_fallback_closure.dart';
+
+Future<void> main() async {
   final quality = BilLocaleCatalogQuality.audit(BilDraftLocaleCatalogs.all);
+  final fallbackClosure = await auditLocaleFallbackClosure();
   final draftByTag = {
     for (final catalog in BilDraftLocaleCatalogs.all)
       catalog.localeTag.toLowerCase(): catalog,
@@ -35,6 +38,7 @@ void main() {
     final ready =
         originalProduction ||
         (automatedCatalogReady &&
+            fallbackClosure.passed &&
             (draft.eligibleForProduction || deviceMatrixTags.contains(tag)));
     rows.add({
       'locale': exactTag,
@@ -45,6 +49,7 @@ void main() {
       'glossary_complete': originalProduction || draft!.glossaryComplete,
       'automated_catalog_quality_passed':
           originalProduction || automatedCatalogReady,
+      'fallback_closure_passed': originalProduction || fallbackClosure.passed,
       'independent_review_passed':
           originalProduction ||
           draft?.humanReviewed == true ||
@@ -67,12 +72,14 @@ void main() {
       'hidden_not_ready_count': rows.length - readyCount,
       'catalog_quality_errors': quality.errorCount,
       'catalog_quality_warnings': quality.warningCount,
+      'fallback_closure': fallbackClosure.toJson(),
       'locales': rows,
     }),
   );
 
   if (quality.errorCount != 0 ||
       quality.warningCount != 0 ||
+      !fallbackClosure.passed ||
       readyCount != BilLocaleRolloutManifest.releaseTargets25.length) {
     exitCode = 1;
   }

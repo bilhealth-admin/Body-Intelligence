@@ -6,9 +6,11 @@ void main() {
   test(
     'recipe add sheet exposes web import and manual entry in five languages',
     () {
-      final source = File(
+      final source = [
         'lib/features/nutrition/presentation/meals_recipes_foods_page.dart',
-      ).readAsStringSync();
+        'lib/features/nutrition/presentation/meals_recipes_components.dart',
+        'lib/features/nutrition/presentation/recipes_tab.dart',
+      ].map((path) => File(path).readAsStringSync()).join('\n');
 
       expect(source, contains("Key('add-recipe-choice-sheet')"));
       expect(source, contains("Key('import-recipe-from-web')"));

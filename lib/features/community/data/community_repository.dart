@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
 import '../domain/community_models.dart';
+import '../domain/community_text_policy.dart';
+import '../services/community_post_image_picker.dart';
+import 'community_post_cloud_store.dart';
 
 class CommunityRepository {
   CommunityRepository(this._client);
@@ -17,19 +22,19 @@ class CommunityRepository {
 
   Future<List<Map<String, dynamic>>> searchProfiles(String query) async {
     final text = query.trim();
-    var request = _client
-        .from('bil_public_profiles')
-        .select('user_id,display_name,avatar_url,bio,locale_code')
-        .neq('user_id', _user.id)
-        .eq('discoverable', true);
-    if (text.isNotEmpty) request = request.ilike('display_name', '%$text%');
-    final rows = await request.order('display_name').limit(30);
+    final response = await _client.rpc(
+      'bil_search_community_profiles',
+      params: {'p_query': text, 'p_limit': 30},
+    );
+    if (response is! List) {
+      throw const FormatException('Invalid community profile search result');
+    }
+    final rows = response.whereType<Map>().map(Map<String, dynamic>.from);
     return rows
         .where((row) {
           final id = row['user_id'];
           final name = row['display_name'];
           final avatar = row['avatar_url'];
-          final bio = row['bio'];
           return id is String &&
               _uuid.hasMatch(id) &&
               name is String &&
@@ -37,10 +42,14 @@ class CommunityRepository {
               name.trim().length <= 60 &&
               !_unsafeText.hasMatch(name) &&
               (avatar == null || avatar is String) &&
-              (bio == null ||
-                  (bio is String &&
-                      bio.length <= 280 &&
-                      !_unsafeText.hasMatch(bio)));
+              row.keys.every(
+                const {
+                  'user_id',
+                  'display_name',
+                  'avatar_url',
+                  'locale_code',
+                }.contains,
+              );
         })
         .toList(growable: false);
   }
@@ -85,6 +94,10 @@ class CommunityRepository {
     if (about != null && about.length > 280) {
       throw const FormatException('Community bio is too long');
     }
+    CommunityTextPolicy.enforceAll({
+      CommunityTextSurface.profileDisplayName: name,
+      CommunityTextSurface.profileBio: about,
+    });
     await _client.from('bil_public_profiles').upsert({
       'user_id': _user.id,
       'display_name': name,
@@ -99,45 +112,16 @@ class CommunityRepository {
     }, onConflict: 'user_id');
   }
 
-  Future<List<CommunityPost>> loadFeed({int limit = 40}) async {
-    final rows = await _client
-        .from('bil_community_posts')
-        .select('id,author_id,body,created_at')
-        .order('created_at', ascending: false)
-        .limit(limit);
-    if (rows.isEmpty) return const [];
-    final authorIds = rows
-        .map((row) => row['author_id'] as String)
-        .toSet()
-        .toList(growable: false);
-    final profiles = await _client
-        .from('bil_public_profiles')
-        .select('user_id,display_name,avatar_url')
-        .inFilter('user_id', authorIds);
-    final profilesById = {
-      for (final profile in profiles) profile['user_id'] as String: profile,
-    };
-    return rows
-        .map((row) {
-          final profile = profilesById[row['author_id'] as String];
-          return CommunityPost.fromJson({
-            ...row,
-            'author_name': profile?['display_name'],
-            'author_avatar_url': profile?['avatar_url'],
-          });
-        })
-        .toList(growable: false);
-  }
+  Future<List<CommunityPost>> loadFeed({int limit = 40}) =>
+      CommunityPostCloudStore(_client, _user).loadFeed(limit: limit);
 
-  Future<void> publishPost(String body) async {
-    final text = body.trim();
-    if (text.isEmpty) return;
-    await _client.from('bil_community_posts').insert({
-      'author_id': _user.id,
-      'body': text,
-      'visibility': 'community',
-    });
-  }
+  Future<void> publishPost(String body) =>
+      CommunityPostCloudStore(_client, _user).publishText(body);
+
+  Future<void> publishPostWithImage(
+    String body,
+    CommunityPostImageDraft image,
+  ) => CommunityPostCloudStore(_client, _user).publishWithImage(body, image);
 
   Future<List<Map<String, dynamic>>> loadFriendships() async {
     return await _client
@@ -147,12 +131,21 @@ class CommunityRepository {
   }
 
   Future<List<Map<String, dynamic>>> loadFriendshipsWithProfiles() async {
-    final friendships = (await loadFriendships())
+    final response = await _client.rpc('bil_list_community_connections');
+    if (response is! List) {
+      throw const FormatException('Invalid community connections result');
+    }
+    return response
+        .whereType<Map>()
+        .map(Map<String, dynamic>.from)
         .where((row) {
           final id = row['id'];
           final requester = row['requester_id'];
           final addressee = row['addressee_id'];
           final status = row['status'];
+          final otherUserId = row['other_user_id'];
+          final displayName = row['display_name'];
+          final avatarUrl = row['avatar_url'];
           return id is String &&
               _uuid.hasMatch(id) &&
               requester is String &&
@@ -161,34 +154,23 @@ class CommunityRepository {
               _uuid.hasMatch(addressee) &&
               (requester == _user.id || addressee == _user.id) &&
               status is String &&
-              const {'pending', 'accepted'}.contains(status);
+              const {'pending', 'accepted'}.contains(status) &&
+              otherUserId is String &&
+              _uuid.hasMatch(otherUserId) &&
+              displayName is String &&
+              displayName.trim().length >= 2 &&
+              displayName.trim().length <= 60 &&
+              !_unsafeText.hasMatch(displayName) &&
+              (avatarUrl == null || avatarUrl is String);
         })
-        .toList(growable: false);
-    if (friendships.isEmpty) return const [];
-    final myId = _user.id;
-    final ids = friendships
-        .map(
-          (row) => row['requester_id'] == myId
-              ? row['addressee_id'] as String
-              : row['requester_id'] as String,
-        )
-        .toSet()
-        .toList();
-    final profiles = await _client
-        .from('bil_public_profiles')
-        .select('user_id,display_name,avatar_url,bio')
-        .inFilter('user_id', ids);
-    final byId = <String, Map<String, dynamic>>{};
-    for (final row in profiles) {
-      final id = row['user_id'];
-      if (id is String && _uuid.hasMatch(id)) byId[id] = row;
-    }
-    return friendships
         .map((row) {
-          final otherId = row['requester_id'] == myId
-              ? row['addressee_id'] as String
-              : row['requester_id'] as String;
-          return {...row, 'other_user_id': otherId, 'profile': byId[otherId]};
+          return {
+            ...row,
+            'profile': {
+              'display_name': row['display_name'],
+              'avatar_url': row['avatar_url'],
+            },
+          };
         })
         .toList(growable: false);
   }
@@ -257,6 +239,48 @@ class CommunityRepository {
         .toList(growable: false);
   }
 
+  Stream<void> watchConversationChanges(String otherUserId) {
+    final currentUserId = _user.id;
+    if (!_uuid.hasMatch(otherUserId) || otherUserId == currentUserId) {
+      throw ArgumentError.value(otherUserId, 'otherUserId');
+    }
+
+    Stream<void> changesWhere(String column) => _client
+        .from('bil_messages')
+        .stream(primaryKey: const ['id'])
+        .eq(column, otherUserId)
+        .order('created_at')
+        .limit(1)
+        .map<void>((_) {});
+
+    final streams = <Stream<void>>[
+      // With message RLS, these are respectively other -> current and
+      // current -> other. No rows from unrelated conversations are visible.
+      changesWhere('sender_id'),
+      changesWhere('recipient_id'),
+    ];
+    final subscriptions = <StreamSubscription<void>>[];
+    late final StreamController<void> controller;
+    controller = StreamController<void>(
+      onListen: () {
+        for (final stream in streams) {
+          subscriptions.add(
+            stream.listen(
+              (_) => controller.add(null),
+              onError: controller.addError,
+            ),
+          );
+        }
+      },
+      onCancel: () async {
+        for (final subscription in subscriptions) {
+          await subscription.cancel();
+        }
+      },
+    );
+    return controller.stream;
+  }
+
   Future<List<Map<String, dynamic>>> loadInboxMessages() async {
     final rows = await _client
         .from('bil_messages')
@@ -266,6 +290,14 @@ class CommunityRepository {
         .limit(100);
     return _enrichMessageRows(rows, profileKey: 'sender_id');
   }
+
+  Stream<void> watchInboxChanges() => _client
+      .from('bil_messages')
+      .stream(primaryKey: const ['id'])
+      .eq('recipient_id', _user.id)
+      .order('created_at')
+      .limit(1)
+      .map<void>((_) {});
 
   Future<List<Map<String, dynamic>>> loadSentMessages() async {
     final rows = await _client
@@ -360,6 +392,7 @@ class CommunityRepository {
     if (text.isEmpty || text.length > 4200 || _unsafeText.hasMatch(text)) {
       throw ArgumentError.value(body, 'body');
     }
+    CommunityTextPolicy.enforce(text, surface: CommunityTextSurface.message);
     await _client.from('bil_messages').insert({
       'sender_id': _user.id,
       'recipient_id': recipientId,
@@ -436,13 +469,8 @@ class CommunityRepository {
     );
   }
 
-  Future<void> deletePost(String postId) async {
-    await _client
-        .from('bil_community_posts')
-        .update({'deleted_at': DateTime.now().toUtc().toIso8601String()})
-        .eq('id', postId)
-        .eq('author_id', _user.id);
-  }
+  Future<void> deletePost(String postId) =>
+      CommunityPostCloudStore(_client, _user).delete(postId);
 
   Future<List<Map<String, dynamic>>> loadReviewableFoods() async {
     final response = await _client.rpc('bil_list_reviewable_products');
@@ -457,6 +485,7 @@ class CommunityRepository {
     required String verdict,
     String? note,
   }) async {
+    CommunityTextPolicy.enforceAll({CommunityTextSurface.peerReviewNote: note});
     await _client.from('bil_food_peer_reviews').upsert({
       'submission_id': submissionId,
       'reviewer_id': _user.id,
@@ -476,6 +505,10 @@ class CommunityRepository {
   }
 
   Future<void> submitFood(CommunityFoodDraft draft) async {
+    CommunityTextPolicy.enforce(
+      draft.name,
+      surface: CommunityTextSurface.foodName,
+    );
     await _client.from('bil_community_food_submissions').insert({
       'contributor_id': _user.id,
       'canonical_name': draft.name.trim(),
@@ -501,16 +534,24 @@ class CommunityRepository {
       return normalized == null || normalized.isEmpty ? null : normalized;
     }
 
+    final brand = optional(draft.brand);
+    final note = optional(draft.note);
+    CommunityTextPolicy.enforceAll({
+      CommunityTextSurface.foodName: draft.name,
+      CommunityTextSurface.foodBrand: brand,
+      CommunityTextSurface.foodReviewNote: note,
+    });
+
     await _client.from('bil_community_food_submissions').insert({
       'contributor_id': _user.id,
       'canonical_name': draft.name.trim(),
       'localized_names': <String, String>{},
       'barcode': draft.barcode.trim(),
-      'brand': optional(draft.brand),
+      'brand': brand,
       'product_kind': productKindWireValue(draft.kind),
       'country_code': optional(draft.countryCode)?.toUpperCase(),
       'evidence_url': optional(draft.evidenceUrl),
-      'review_note': optional(draft.note),
+      'review_note': note,
       'submission_source': 'user_submission',
       'submission_confidence': 'low',
       'observed_source': optional(draft.observedSource),

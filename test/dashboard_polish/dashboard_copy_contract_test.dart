@@ -29,7 +29,7 @@ void main() {
     expect(dailyPath, contains("label: tr('Your Path Today', 'مسارك اليوم')"));
     expect(summary, contains("tr('Daily Summary', 'ملخص اليوم')"));
     expect(bodyProfile, contains("tr('Body Identity', 'هوية الجسم')"));
-    expect(grid, contains("arabic ? 'التحليلات' : 'Analytics'"));
+    expect(grid, contains("context.strings.text('Analytics')"));
   });
 
   test(

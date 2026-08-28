@@ -26,12 +26,15 @@ void main() {
   });
 
   test('daily log visible actions use five-locale lookup', () {
-    final page = File(
-      'lib/features/daily_log/daily_log_page.dart',
-    ).readAsStringSync();
-    final actions = File(
-      'lib/features/daily_log/daily_log_page_actions.dart',
-    ).readAsStringSync();
+    final page = ['daily_log_page.dart', 'daily_log_copy.dart']
+        .map((name) => File('lib/features/daily_log/$name').readAsStringSync())
+        .join('\n');
+    final actions =
+        ['daily_log_page_actions.dart', 'daily_log_capture_actions.dart']
+            .map(
+              (name) => File('lib/features/daily_log/$name').readAsStringSync(),
+            )
+            .join('\n');
 
     for (final key in const [
       'Copy yesterday’s meals?',
@@ -75,9 +78,18 @@ void main() {
     final phone = File(
       'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
     ).readAsStringSync();
-    final components = File(
-      'lib/features/dashboard/widgets/dashboard_reference_phone_components.dart',
-    ).readAsStringSync();
+    final components =
+        [
+              'dashboard_reference_phone_components.dart',
+              'dashboard_reference_goal_components.dart',
+              'dashboard_reference_phone_sections.dart',
+            ]
+            .map(
+              (name) => File(
+                'lib/features/dashboard/widgets/$name',
+              ).readAsStringSync(),
+            )
+            .join('\n');
 
     expect(phone, isNot(contains('=> arabic ? ar : en')));
     expect(phone, isNot(contains('arabic ?')));

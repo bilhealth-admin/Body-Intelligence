@@ -17,8 +17,14 @@ void main() {
       expect(source, contains('verifiedSubscriptionStateProvider'));
       expect(source, isNot(contains('ref.watch(subscriptionStateProvider)')));
       expect(source, contains('friends?.toString()'));
-      expect(source, contains('progress?.toStringAsFixed(1)'));
-      expect(source, contains('goal?.createdAt'));
+      expect(source, contains('profileWeightChangeKg'));
+      expect(source, contains('measurementSystemProvider'));
+      expect(source, contains('UnitConverter.weightFromKg'));
+      expect(source, contains("label: _copy(context, 'Weight change')"));
+      expect(source, contains('Semantics('));
+      expect(source, contains('ExcludeSemantics('));
+      expect(source, contains('TextDirection.ltr'));
+      expect(source, isNot(contains('goal?.createdAt')));
       expect(source, contains('weightsState.isLoading'));
       expect(source, isNot(contains("_Metric(value: '0'")));
       expect(source, isNot(contains("_copy(context, 'Today')")));
@@ -67,6 +73,7 @@ void main() {
       'Weight lost',
       'Weight gained',
       'Weight change',
+      'Insufficient data',
       'Friends',
       'Go Premium',
       'Edit Profile',

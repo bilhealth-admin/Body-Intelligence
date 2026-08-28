@@ -4,9 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('reference settings are persisted and routed', () {
-    final pages = File(
+    final pages = [
       'lib/features/settings/reference_preferences_pages.dart',
-    ).readAsStringSync();
+      'lib/features/settings/reference_preferences_controls.dart',
+      'lib/features/settings/reference_preferences_numeric.dart',
+      'lib/features/settings/reference_preferences_macros.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
     final settings = File(
       'lib/features/settings/reference_settings_home_page.dart',
@@ -54,12 +57,9 @@ void main() {
     expect(settings, contains("'/settings/nutrition-goals'"));
     expect(sharingPrivacy, contains("context.push('/settings/diary/sharing')"));
     expect(sharingPrivacy, contains("context.push('/settings/email')"));
-    expect(sharingPrivacy, contains('_UnavailableCloudPrivacyTile'));
-    expect(sharingPrivacy, contains('Sign in to manage community privacy.'));
-    expect(
-      sharingPrivacy,
-      contains('Community privacy controls are unavailable on this build.'),
-    );
+    expect(sharingPrivacy, contains("context.push('/community/profile')"));
+    expect(sharingPrivacy, contains("context.push('/community/connections')"));
+    expect(sharingPrivacy, isNot(contains('_UnavailableCloudPrivacyTile')));
     expect(sharingPrivacy, isNot(contains("'privacy.profile'")));
     expect(sharingPrivacy, isNot(contains("'privacy.search'")));
     expect(sharingPrivacy, isNot(contains("'privacy.community'")));

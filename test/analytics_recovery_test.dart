@@ -27,6 +27,7 @@ void main() {
             measurementSystemProvider.overrideWith(
               (ref) => Stream.value(MeasurementSystem.metric),
             ),
+            userProfileProvider.overrideWith((ref) => Stream.value(null)),
             weightHistoryProvider.overrideWith(
               (ref) =>
                   Stream.error(Exception('private analytics weight detail')),
@@ -38,6 +39,10 @@ void main() {
             allWaterProvider.overrideWith(
               (ref) =>
                   Stream.error(Exception('private analytics water detail')),
+            ),
+            dashboardDailyLogsProvider.overrideWith(
+              (ref) =>
+                  Stream.error(Exception('private analytics diary detail')),
             ),
             insightLifeContextProvider.overrideWith(
               (ref) =>

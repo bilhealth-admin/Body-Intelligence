@@ -1,6 +1,9 @@
 import '../../../data/database/app_database.dart';
+import '../../../data/database/date_keys.dart';
 import '../../../data/repositories/meal_repository.dart';
+import '../../../data/repositories/nutrition_goal_schedule_repository.dart';
 import '../../../engine/plan_engine.dart';
+import '../../daily_log/domain/daily_body_context_codec.dart';
 import '../domain/dashboard_intelligence_composer.dart';
 
 /// Adapts persisted dashboard records to the engine-facing input contract.
@@ -18,39 +21,53 @@ final class DashboardIntelligenceInputAdapter {
     required List<WaterEntry> todayWater,
     required List<MealWithItems> allMeals,
     required List<WaterEntry> allWater,
+    required List<DailyLog> dailyLogs,
     required List<LifeContextEntry> todayContexts,
     required List<LifeContextEntry> allContexts,
     required List<DecisionMemory> memories,
     required bool skippedWeightToday,
     required PlanSetting? planSetting,
+    BodyMeasurementEntry? latestBodyMeasurement,
+    NutritionGoalTarget? dailyNutritionTarget,
   }) {
+    final bridgedContexts = <DashboardContextInput>[
+      for (final row in dailyLogs)
+        for (final type in DailyBodyContextCodec.engineTypes(row.notes))
+          DashboardContextInput(dayKey: row.dayKey, type: type),
+    ];
+    final todayKey = dayKeyFor(now);
     return DashboardIntelligenceInput(
       now: now,
       profile: DashboardProfileInput(
         age: profile.age,
         gender: profile.gender,
         heightCm: profile.height,
-        currentWeightKg: profile.currentWeight,
+        currentWeightKg: weights.isEmpty
+            ? profile.currentWeight
+            : weights.first.weight,
         targetWeightKg: profile.targetWeight,
         activityLevel: profile.activityLevel,
         exercises: profile.exercises,
-        neckCm: profile.neck,
-        waistCm: profile.waist,
+        neckCm: latestBodyMeasurement?.neckCm ?? profile.neck,
+        waistCm: latestBodyMeasurement?.waistCm ?? profile.waist,
+        hipsCm: latestBodyMeasurement?.hipsCm,
       ),
       weights: [..._adaptWeights(weights)],
       todayMeals: [..._adaptMeals(todayMeals)],
       todayWater: [..._adaptWater(todayWater)],
       allMeals: [..._adaptMeals(allMeals)],
       allWater: [..._adaptWater(allWater)],
-      insightContexts: [
+      insightContexts: _dedupeContexts([
         for (final row in todayContexts)
           if (row.useInInsights)
             DashboardContextInput(dayKey: row.dayKey, type: row.type),
-      ],
-      allContexts: [
+        ...bridgedContexts.where((row) => row.dayKey == todayKey),
+      ]),
+      allContexts: _dedupeContexts([
         for (final row in allContexts)
           DashboardContextInput(dayKey: row.dayKey, type: row.type),
-      ],
+        ...bridgedContexts,
+      ]),
       memories: [
         for (final row in memories)
           DashboardDecisionMemoryInput(
@@ -59,7 +76,31 @@ final class DashboardIntelligenceInputAdapter {
           ),
       ],
       skippedWeightToday: skippedWeightToday,
-      planOverrides: planSetting == null
+      planOverrides: dailyNutritionTarget != null
+          ? PlanOverrides(
+              calories: dailyNutritionTarget.calories.round(),
+              protein:
+                  (dailyNutritionTarget.calories *
+                          dailyNutritionTarget.proteinPercent /
+                          100 /
+                          4)
+                      .round(),
+              carbs:
+                  (dailyNutritionTarget.calories *
+                          dailyNutritionTarget.carbsPercent /
+                          100 /
+                          4)
+                      .round(),
+              fats:
+                  (dailyNutritionTarget.calories *
+                          dailyNutritionTarget.fatPercent /
+                          100 /
+                          9)
+                      .round(),
+              fiber: planSetting?.overrideFiber,
+              water: planSetting?.overrideWater,
+            )
+          : planSetting == null
           ? null
           : PlanOverrides(
               calories: planSetting.overrideCalories,
@@ -70,6 +111,16 @@ final class DashboardIntelligenceInputAdapter {
               water: planSetting.overrideWater,
             ),
     );
+  }
+
+  List<DashboardContextInput> _dedupeContexts(
+    Iterable<DashboardContextInput> rows,
+  ) {
+    final seen = <String>{};
+    return [
+      for (final row in rows)
+        if (seen.add('${row.dayKey}\u0000${row.type}')) row,
+    ];
   }
 
   Iterable<DashboardWeightInput> _adaptWeights(List<WeightEntry> rows) sync* {

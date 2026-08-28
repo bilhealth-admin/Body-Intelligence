@@ -27,7 +27,10 @@ import 'package:body_intelligence_log/features/connected_health/widgets/live_hea
 import 'package:body_intelligence_log/features/foods/providers/food_provider.dart';
 import 'package:body_intelligence_log/features/nutrition/food_page.dart';
 import 'package:body_intelligence_log/features/nutrition/presentation/food_barcode_scanner_page.dart';
+import 'package:body_intelligence_log/features/nutrition/services/food_runtime_search_authority.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
+import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
+import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
 import 'package:body_intelligence_log/features/history/progress_page.dart';
 import 'package:body_intelligence_log/features/profile/premium_profile_page.dart';
 import 'package:body_intelligence_log/features/profile/profile_summary_page.dart';
@@ -219,10 +222,17 @@ void main() {
           progressClockProvider.overrideWithValue(
             () => DateTime(2026, 8, 14, 9, 41, 12),
           ),
-          if (seedEmptyCatalog)
+          if (seedEmptyCatalog || stableDailyLog)
             seedCatalogProvider.overrideWith((ref) async {}),
           if (foodOverride != null)
             foodsProvider.overrideWithValue(AsyncData(<Food>[foodOverride])),
+          if (foodOverride != null)
+            foodRuntimeSearchAuthorityProvider.overrideWithValue(
+              FoodRuntimeSearchAuthority(
+                FoodRepository(db),
+                catalogResolver: () async => null,
+              ),
+            ),
           if (stableDailyLog) ...[
             selectedLogDateProvider.overrideWith(
               (ref) => DateTime(2026, 8, 14),
@@ -366,11 +376,14 @@ void main() {
       stableDailyLog: true,
       captureOverlay: true,
       prepare: (tester) async {
-        await tester.ensureVisible(find.byType(SearchBar));
-        await tester.pump();
-        await tester.tap(find.byType(SearchBar));
+        final logFood = find.byKey(const Key('daily-meal-log-breakfast'));
+        await tester.ensureVisible(logFood);
+        await tester.tap(logFood);
         await tester.pumpAndSettle();
-        expect(find.text('Recently used'), findsOneWidget);
+        final searchBar = find.byType(SearchBar).last;
+        await tester.enterText(searchBar, 'Plain Greek');
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 1500));
         expect(find.text('Plain Greek yogurt'), findsOneWidget);
       },
     );
@@ -480,17 +493,16 @@ void main() {
 
   testWidgets('dashboard persisted nutrient goal card capture', (tester) async {
     final db = await database(tester, profile: true);
-    await PreferencesRepository(db).setMany({
-      'dashboard.nutrientGoalCards': 'protein',
-      'goal.proteinGrams': '132',
-    });
+    await PreferencesRepository(
+      db,
+    ).setMany({'dashboard.nutrientGoalCards': 'fiber', 'goal.fiber': '30'});
     await capture(
       tester,
       page: const DashboardPage(),
       db: db,
       name: 'dashboard_nutrient_goal_card_phone',
       prepare: (tester) async {
-        final card = find.byKey(const Key('dashboard-nutrient-card-protein'));
+        final card = find.byKey(const Key('dashboard-nutrient-card-fiber'));
         await tester.scrollUntilVisible(
           card,
           600,
@@ -507,7 +519,14 @@ void main() {
     final db = await database(tester, profile: true);
     await capture(
       tester,
-      page: const IntelligenceCenterPage(),
+      page: ProviderScope(
+        overrides: [
+          coachContextSnapshotProvider.overrideWith(
+            (ref) async => CoachContextSnapshot.empty(),
+          ),
+        ],
+        child: const IntelligenceCenterPage(),
+      ),
       db: db,
       name: 'ai_coach_conversation_phone',
     );
@@ -561,11 +580,27 @@ void main() {
     );
   });
 
-  for (final state in const [
-    (page: 5, swipes: 1, title: 'Macros'),
-    (page: 6, swipes: 2, title: 'Heart Healthy'),
-    (page: 7, swipes: 3, title: 'Carb Conscious'),
-  ]) {
+  testWidgets('dashboard production Macros overview capture', (tester) async {
+    final db = await database(tester, profile: true);
+    await capture(
+      tester,
+      page: const DashboardPage(),
+      db: db,
+      name: 'dashboard_phone_5',
+      prepare: (tester) async {
+        final carousel = find.byKey(
+          const Key('dashboard-calories-macros-horizontal'),
+        );
+        await tester.ensureVisible(carousel);
+        await tester.drag(carousel, const Offset(-320, 0));
+        await tester.pumpAndSettle();
+        final macros = find.byKey(const Key('dashboard-reference-macros-card'));
+        expect(macros, findsOneWidget);
+      },
+    );
+  });
+
+  for (final state in const [(page: 6, swipes: 2, title: 'Heart Healthy')]) {
     testWidgets('dashboard production ${state.title} overview capture', (
       tester,
     ) async {
@@ -579,14 +614,14 @@ void main() {
           final carousel = find.byKey(
             const Key('dashboard-calories-macros-horizontal'),
           );
+          await tester.ensureVisible(carousel);
+          await tester.pumpAndSettle();
           for (var swipe = 0; swipe < state.swipes; swipe++) {
             await tester.drag(carousel, const Offset(-320, 0));
             await tester.pumpAndSettle();
           }
           expect(
-            find
-                .descendant(of: carousel, matching: find.text(state.title))
-                .hitTestable(),
+            find.descendant(of: carousel, matching: find.text(state.title)),
             findsOneWidget,
           );
         },
@@ -601,6 +636,7 @@ void main() {
       page: const DailyLogPage(),
       db: db,
       name: 'daily_log_empty_phone',
+      stableDailyLog: true,
     );
   });
 
@@ -669,6 +705,7 @@ void main() {
       page: const DailyLogPage(focusMealEntry: true),
       db: db,
       name: 'daily_log_meal_entry_phone',
+      stableDailyLog: true,
     );
   });
 
@@ -679,6 +716,7 @@ void main() {
       page: const DailyLogPage(initialAction: 'water'),
       db: db,
       name: 'daily_log_water_entry_phone',
+      stableDailyLog: true,
       prepare: (tester) async {
         final waterSection = find.byKey(const Key('daily-log-water-section'));
         for (

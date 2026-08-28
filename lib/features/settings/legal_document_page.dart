@@ -5,9 +5,9 @@ import '../../app/localization/runtime_copy.dart';
 enum BilLegalDocument { terms, privacy, healthDisclaimer }
 
 const bilLegalPolicyId = 'BIL-LEGAL';
-const bilLegalPolicyRevision = '2026-08-R1';
+const bilLegalPolicyRevision = '2026-08-27';
 const bilLegalEntity = 'BIL Health';
-const bilLegalPublicationStatus = 'NOT_PUBLISHED';
+const bilLegalPublicationStatus = 'PUBLISHED';
 
 class LegalDocumentPage extends StatelessWidget {
   const LegalDocumentPage({super.key, required this.document});
@@ -16,11 +16,17 @@ class LegalDocumentPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context).languageCode.toLowerCase();
+    final locale = Localizations.localeOf(
+      context,
+    ).toLanguageTag().toLowerCase();
     final copy = _legalPageCopy[locale] ?? _extendedLegalCopy(locale);
     final title = copy.titles[document]!;
     final heading = copy.headings[document]!;
-    final sections = copy.sections[document]!;
+    final sections = <(String, String)>[
+      ...copy.sections[document]!,
+      if (document == BilLegalDocument.privacy)
+        _facebookLoginPrivacySection(locale),
+    ];
     // The legal entity is rendered from the immutable metadata line below.
     // Translation services must never localize or rename it.
     final effectiveStatus = copy.effective.split(' • ').take(2).join(' • ');
@@ -63,6 +69,39 @@ class LegalDocumentPage extends StatelessWidget {
       ),
     );
   }
+}
+
+(String, String) _facebookLoginPrivacySection(String locale) {
+  const english = (
+    '7. Optional Facebook Login',
+    'If Facebook Login is available and you choose it, Meta may provide BIL and its authentication processor, Supabase, with an app-scoped Facebook user identifier and public-profile information returned by Meta, such as your name and profile picture. Your email is received only when you grant the email permission and Meta makes it available. BIL requests only public_profile and email for this flow and uses the result only to create, sign in to, secure, or link your BIL account. BIL does not post to Facebook or use Facebook account data to personalize health, nutrition, AI, or advertising. You can disconnect the provider where available or delete your BIL account and eligible associated data.',
+  );
+  const localized = <String, (String, String)>{
+    'ar': (
+      '7. تسجيل الدخول الاختياري عبر Facebook',
+      'إذا كان تسجيل الدخول عبر Facebook متاحًا واخترت استخدامه، فقد تزود Meta تطبيق BIL ومعالج المصادقة لديه Supabase بمعرّف Facebook خاص بالتطبيق ومعلومات الملف العام التي تعيدها Meta، مثل الاسم وصورة الملف. لا يصل البريد الإلكتروني إلا إذا منحت إذن email وكان متاحًا لدى Meta. يطلب BIL فقط public_profile وemail لهذا المسار، ويستخدم النتيجة فقط لإنشاء حساب BIL أو تسجيل الدخول إليه أو حمايته أو ربطه. لا ينشر BIL على Facebook ولا يستخدم بيانات Facebook لتخصيص الصحة أو التغذية أو الذكاء الاصطناعي أو الإعلانات. يمكنك فصل المزود حيث تتوفر هذه الإمكانية أو حذف حساب BIL وبياناته المؤهلة المرتبطة.',
+    ),
+    'fr': (
+      '7. Connexion Facebook facultative',
+      'Si la connexion Facebook est disponible et que vous la choisissez, Meta peut fournir à BIL et à son prestataire d’authentification Supabase un identifiant Facebook propre à l’application et les informations de profil public renvoyées par Meta, comme le nom et la photo. L’adresse e-mail n’est reçue que si vous accordez l’autorisation email et si Meta la rend disponible. BIL demande uniquement public_profile et email pour créer, connecter, sécuriser ou lier votre compte BIL. BIL ne publie rien sur Facebook et n’utilise pas ces données pour personnaliser la santé, la nutrition, l’IA ou la publicité. Vous pouvez déconnecter le fournisseur lorsqu’il est disponible ou supprimer votre compte BIL et les données associées éligibles.',
+    ),
+    'es': (
+      '7. Inicio de sesión opcional con Facebook',
+      'Si el inicio de sesión con Facebook está disponible y decides usarlo, Meta puede proporcionar a BIL y a su procesador de autenticación Supabase un identificador de Facebook específico de la aplicación y la información de perfil público que Meta devuelva, como el nombre y la foto. El correo solo se recibe si concedes el permiso email y Meta lo facilita. BIL solicita únicamente public_profile y email para crear, iniciar, proteger o vincular tu cuenta BIL. BIL no publica en Facebook ni usa estos datos para personalizar salud, nutrición, IA o publicidad. Puedes desconectar el proveedor cuando esté disponible o eliminar tu cuenta BIL y los datos asociados que correspondan.',
+    ),
+    'tr': (
+      '7. İsteğe bağlı Facebook ile giriş',
+      'Facebook ile giriş kullanılabiliyorsa ve bunu seçerseniz Meta, BIL’e ve kimlik doğrulama işlemcisi Supabase’e uygulamaya özel bir Facebook kullanıcı kimliği ile adınız ve profil fotoğrafınız gibi Meta tarafından döndürülen herkese açık profil bilgilerini sağlayabilir. E-posta yalnızca email iznini verdiğinizde ve Meta bunu sunduğunda alınır. BIL bu akışta yalnızca public_profile ve email ister; sonucu sadece BIL hesabınızı oluşturmak, açmak, korumak veya bağlamak için kullanır. BIL Facebook’ta paylaşım yapmaz ve bu verileri sağlık, beslenme, yapay zekâ veya reklam kişiselleştirmesi için kullanmaz. Mümkün olduğunda sağlayıcının bağlantısını kesebilir veya BIL hesabınızı ve uygun ilişkili verileri silebilirsiniz.',
+    ),
+  };
+
+  final languageCode = locale.split(RegExp('[-_]')).first;
+  final direct = localized[languageCode];
+  if (direct != null) return direct;
+  return (
+    RuntimeCopy.resolve(english.$1, locale) ?? english.$1,
+    RuntimeCopy.resolve(english.$2, locale) ?? english.$2,
+  );
 }
 
 _LegalPageCopy _extendedLegalCopy(String locale) {
@@ -517,8 +556,7 @@ const _legalPageCopy = <String, _LegalPageCopy>{
       BilLegalDocument.privacy: _privacySections,
       BilLegalDocument.healthDisclaimer: _healthDisclaimerSections,
     },
-    effective:
-        'Embedded draft • Effective date pending external publication • BIL Health',
+    effective: 'Last updated: 22 August 2026 • BIL Health',
     contact:
         'Questions: privacy@bilhealth.com • Support: support@bilhealth.com',
   ),
@@ -538,7 +576,7 @@ const _legalPageCopy = <String, _LegalPageCopy>{
       BilLegalDocument.privacy: _privacySectionsAr,
       BilLegalDocument.healthDisclaimer: _healthDisclaimerSectionsAr,
     },
-    effective: 'مسودة مضمّنة • تاريخ السريان ينتظر النشر الخارجي • BIL Health',
+    effective: 'آخر تحديث: 22 أغسطس 2026 • BIL Health',
     contact: 'الخصوصية: privacy@bilhealth.com • الدعم: support@bilhealth.com',
   ),
   'fr': _LegalPageCopy(
@@ -557,8 +595,7 @@ const _legalPageCopy = <String, _LegalPageCopy>{
       BilLegalDocument.privacy: _privacySectionsFr,
       BilLegalDocument.healthDisclaimer: _healthDisclaimerSectionsFr,
     },
-    effective:
-        'Projet intégré • Date d’entrée en vigueur en attente de publication externe • BIL Health',
+    effective: 'Dernière mise à jour : 22 août 2026 • BIL Health',
     contact:
         'Confidentialité : privacy@bilhealth.com • Assistance : support@bilhealth.com',
   ),
@@ -578,8 +615,7 @@ const _legalPageCopy = <String, _LegalPageCopy>{
       BilLegalDocument.privacy: _privacySectionsEs,
       BilLegalDocument.healthDisclaimer: _healthDisclaimerSectionsEs,
     },
-    effective:
-        'Borrador integrado • Fecha de vigencia pendiente de publicación externa • BIL Health',
+    effective: 'Última actualización: 22 de agosto de 2026 • BIL Health',
     contact:
         'Privacidad: privacy@bilhealth.com • Soporte: support@bilhealth.com',
   ),
@@ -599,8 +635,7 @@ const _legalPageCopy = <String, _LegalPageCopy>{
       BilLegalDocument.privacy: _privacySectionsTr,
       BilLegalDocument.healthDisclaimer: _healthDisclaimerSectionsTr,
     },
-    effective:
-        'Uygulamaya gömülü taslak • Yürürlük tarihi dış yayını bekliyor • BIL Health',
+    effective: 'Son güncelleme: 22 Ağustos 2026 • BIL Health',
     contact: 'Gizlilik: privacy@bilhealth.com • Destek: support@bilhealth.com',
   ),
 };

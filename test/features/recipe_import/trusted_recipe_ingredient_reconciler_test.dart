@@ -18,6 +18,8 @@ void main() {
       protein: 2,
       carbs: 22,
       fats: 1,
+      servingSize: 100,
+      servingUnit: 'g',
     );
     final authority = FoodRuntimeSearchAuthority(
       foods,
@@ -56,6 +58,8 @@ void main() {
         protein: 8.9,
         carbs: 27.4,
         fats: 2.6,
+        servingSize: 100,
+        servingUnit: 'g',
       );
     }
     final authority = FoodRuntimeSearchAuthority(

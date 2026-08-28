@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/localization/app_localizations.dart';
 import '../domain/trusted_recipe.dart';
 import '../providers/trusted_recipe_providers.dart';
 import '../repositories/trusted_recipe_repository.dart';
@@ -170,8 +171,10 @@ class _TrustedRecipeImportPageState
           onChanged: _allResolved
               ? (value) => setState(() => _confirmed = value == true)
               : null,
-          title: const Text(
-            'I reviewed the ingredients, serving size, and source links.',
+          title: Text(
+            context.strings.text(
+              'I reviewed the ingredients, serving size, and source links.',
+            ),
           ),
           subtitle: Text(
             _allResolved

@@ -41,6 +41,7 @@ double? mealImageAmountInGrams({
 enum MealImageAnalysisFailure {
   notConfigured,
   authenticationRequired,
+  boostRequired,
   invalidImage,
   serviceUnavailable,
   rateLimited,
@@ -82,6 +83,13 @@ const _messages = <MealImageAnalysisFailure, Map<String, String>>{
     'es':
         'Inicia sesión antes de enviar una imagen de comida para un análisis seguro.',
     'tr': 'Güvenli analiz için yemek görselini göndermeden önce oturum açın.',
+  },
+  MealImageAnalysisFailure.boostRequired: {
+    'en': 'AI Boost credit is required to analyze a meal photo.',
+    'ar': 'يلزم رصيد AI Boost مدفوع لتحليل صورة الوجبة.',
+    'fr': 'Un crédit AI Boost est requis pour analyser une photo de repas.',
+    'es': 'Se requiere crédito de AI Boost para analizar una foto de comida.',
+    'tr': 'Bir yemek fotoğrafını analiz etmek için AI Boost kredisi gerekir.',
   },
   MealImageAnalysisFailure.invalidImage: {
     'en': 'Choose a JPG, PNG, or WebP image up to 12 MB.',
@@ -150,6 +158,13 @@ const _utf8Messages = <MealImageAnalysisFailure, Map<String, String>>{
     'es':
         'Inicia sesión antes de enviar una imagen de comida para un análisis seguro.',
     'tr': 'Güvenli analiz için yemek görselini göndermeden önce oturum açın.',
+  },
+  MealImageAnalysisFailure.boostRequired: {
+    'en': 'AI Boost credit is required to analyze a meal photo.',
+    'ar': 'يلزم رصيد AI Boost مدفوع لتحليل صورة الوجبة.',
+    'fr': 'Un crédit AI Boost est requis pour analyser une photo de repas.',
+    'es': 'Se requiere crédito de AI Boost para analizar una foto de comida.',
+    'tr': 'Bir yemek fotoğrafını analiz etmek için AI Boost kredisi gerekir.',
   },
   MealImageAnalysisFailure.invalidImage: {
     'en': 'Choose a JPG, PNG, or WebP image up to 12 MB.',

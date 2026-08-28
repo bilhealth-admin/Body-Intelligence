@@ -1,0 +1,373 @@
+part of 'runtime_copy_small_features.dart';
+
+const _runtimeCopySmallB = <String, Map<String, String>>{
+  'Could not load life context. Try again.': {
+    'ar': 'تعذر تحميل سياق الحياة. حاول مجددًا.',
+    'en': 'Could not load life context. Try again.',
+    'fr': 'Impossible de charger le contexte. Réessayez.',
+    'es': 'No se pudo cargar el contexto. Inténtalo de nuevo.',
+    'tr': 'Yaşam bağlamı yüklenemedi. Tekrar deneyin.',
+  },
+  'Allow in insights': {
+    'ar': 'السماح في الرؤى',
+    'en': 'Allow in insights',
+    'fr': 'Autoriser dans les analyses',
+    'es': 'Permitir en análisis',
+    'tr': 'İçgörülerde kullan',
+  },
+  'Exclude from insights': {
+    'ar': 'استبعاد من الرؤى',
+    'en': 'Exclude from insights',
+    'fr': 'Exclure des analyses',
+    'es': 'Excluir de análisis',
+    'tr': 'İçgörülerden çıkar',
+  },
+  'Used with consent': {
+    'ar': 'مستخدم بموافقتك',
+    'en': 'Used with consent',
+    'fr': 'Utilisé avec consentement',
+    'es': 'Usado con consentimiento',
+    'tr': 'Onayla kullanılıyor',
+  },
+  'Excluded from insights': {
+    'ar': 'مستبعد من الرؤى',
+    'en': 'Excluded from insights',
+    'fr': 'Exclu des analyses',
+    'es': 'Excluido de análisis',
+    'tr': 'İçgörülerden çıkarıldı',
+  },
+  'Correlation is not treated as causation.': {
+    'ar': 'لا يُعامل الارتباط على أنه سببية.',
+    'en': 'Correlation is not treated as causation.',
+    'fr': 'Une corrélation n’est pas considérée comme une causalité.',
+    'es': 'La correlación no se considera causalidad.',
+    'tr': 'Korelasyon nedensellik olarak değerlendirilmez.',
+  },
+  'Travel': {
+    'ar': 'سفر',
+    'en': 'Travel',
+    'fr': 'Voyage',
+    'es': 'Viaje',
+    'tr': 'Seyahat',
+  },
+  'Illness': {
+    'ar': 'مرض',
+    'en': 'Illness',
+    'fr': 'Maladie',
+    'es': 'Enfermedad',
+    'tr': 'Hastalık',
+  },
+  'Medication change': {
+    'ar': 'تغيير دواء',
+    'en': 'Medication change',
+    'fr': 'Changement de traitement',
+    'es': 'Cambio de medicación',
+    'tr': 'İlaç değişikliği',
+  },
+  'Menstrual context': {
+    'ar': 'سياق الدورة الشهرية',
+    'en': 'Menstrual context',
+    'fr': 'Contexte menstruel',
+    'es': 'Contexto menstrual',
+    'tr': 'Adet dönemi bağlamı',
+  },
+  'Stress': {
+    'ar': 'ضغط نفسي',
+    'en': 'Stress',
+    'fr': 'Stress',
+    'es': 'Estrés',
+    'tr': 'Stres',
+  },
+  'Event': {
+    'ar': 'حدث',
+    'en': 'Event',
+    'fr': 'Événement',
+    'es': 'Evento',
+    'tr': 'Olay',
+  },
+  'Poor sleep': {
+    'ar': 'نوم سيئ',
+    'en': 'Poor sleep',
+    'fr': 'Mauvais sommeil',
+    'es': 'Mal sueño',
+    'tr': 'Kötü uyku',
+  },
+  'Stopped training': {
+    'ar': 'توقف التدريب',
+    'en': 'Stopped training',
+    'fr': 'Entraînement interrompu',
+    'es': 'Entrenamiento interrumpido',
+    'tr': 'Antrenmana ara verildi',
+  },
+  'Fasting': {
+    'ar': 'صيام',
+    'en': 'Fasting',
+    'fr': 'Jeûne',
+    'es': 'Ayuno',
+    'tr': 'Oruç',
+  },
+  'Ramadan': {
+    'ar': 'رمضان',
+    'en': 'Ramadan',
+    'fr': 'Ramadan',
+    'es': 'Ramadán',
+    'tr': 'Ramazan',
+  },
+  'High-sodium meal': {
+    'ar': 'وجبة عالية الصوديوم',
+    'en': 'High-sodium meal',
+    'fr': 'Repas riche en sodium',
+    'es': 'Comida alta en sodio',
+    'tr': 'Yüksek sodyumlu öğün',
+  },
+  'Other': {
+    'ar': 'أخرى',
+    'en': 'Other',
+    'fr': 'Autre',
+    'es': 'Otro',
+    'tr': 'Diğer',
+  },
+  'Polyunsaturated fat': {
+    'ar': 'الدهون المتعددة غير المشبعة',
+    'en': 'Polyunsaturated fat',
+    'fr': 'Graisses polyinsaturées',
+    'es': 'Grasa poliinsaturada',
+    'tr': 'Çoklu doymamış yağ',
+  },
+  'Monounsaturated fat': {
+    'ar': 'الدهون الأحادية غير المشبعة',
+    'en': 'Monounsaturated fat',
+    'fr': 'Graisses mono-insaturées',
+    'es': 'Grasa monoinsaturada',
+    'tr': 'Tekli doymamış yağ',
+  },
+  'Trans fat': {
+    'ar': 'الدهون المتحولة',
+    'en': 'Trans fat',
+    'fr': 'Graisses trans',
+    'es': 'Grasas trans',
+    'tr': 'Trans yağ',
+  },
+  'Email delivery is not configured yet. These controls stay off until BIL can verify server delivery.': {
+    'ar':
+        'لم يتم إعداد إرسال البريد الإلكتروني بعد. ستبقى هذه الخيارات متوقفة حتى تتمكن BIL من التحقق من الإرسال عبر الخادم.',
+    'en':
+        'Email delivery is not configured yet. These controls stay off until BIL can verify server delivery.',
+    'fr':
+        'L’envoi d’e-mails n’est pas encore configuré. Ces options restent désactivées jusqu’à ce que BIL puisse vérifier l’envoi par le serveur.',
+    'es':
+        'El envío de correos aún no está configurado. Estas opciones permanecerán desactivadas hasta que BIL pueda verificar el envío del servidor.',
+    'tr':
+        'E-posta gönderimi henüz yapılandırılmadı. BIL sunucu gönderimini doğrulayana kadar bu seçenekler kapalı kalır.',
+  },
+  'Today’s recorded summary': {
+    'ar': 'ملخص السجلات المسجلة اليوم',
+    'en': 'Today’s recorded summary',
+    'fr': 'Résumé des données enregistrées aujourd’hui',
+    'es': 'Resumen de los datos registrados hoy',
+    'tr': 'Bugün kaydedilenlerin özeti',
+  },
+  'ml water': {
+    'ar': 'مل ماء',
+    'en': 'ml water',
+    'fr': 'ml d’eau',
+    'es': 'ml de agua',
+    'tr': 'ml su',
+  },
+  'BIL shows only what you recorded and never fills missing values automatically.': {
+    'ar': 'تعرض BIL ما سجلته فقط، ولا تملأ القيم المفقودة تلقائيًا.',
+    'en':
+        'BIL shows only what you recorded and never fills missing values automatically.',
+    'fr':
+        'BIL affiche uniquement ce que vous avez enregistré et ne complète jamais automatiquement les valeurs manquantes.',
+    'es':
+        'BIL muestra únicamente lo que registraste y nunca completa automáticamente los valores que faltan.',
+    'tr':
+        'BIL yalnızca kaydettiğiniz verileri gösterir ve eksik değerleri hiçbir zaman otomatik olarak doldurmaz.',
+  },
+  'Sign in to manage community privacy.': {
+    'ar': 'سجّل الدخول لإدارة خصوصية المجتمع.',
+    'en': 'Sign in to manage community privacy.',
+    'fr': 'Connectez-vous pour gérer la confidentialité de la communauté.',
+    'es': 'Inicia sesión para gestionar la privacidad de la comunidad.',
+    'tr': 'Topluluk gizliliğini yönetmek için giriş yapın.',
+  },
+  'Change password': {
+    'ar': 'تغيير كلمة المرور',
+    'en': 'Change password',
+    'fr': 'Modifier le mot de passe',
+    'es': 'Cambiar contraseña',
+    'tr': 'Parolayı değiştir',
+  },
+  'Choose a unique password for your BIL account.': {
+    'ar': 'اختر كلمة مرور فريدة لحساب BIL الخاص بك.',
+    'en': 'Choose a unique password for your BIL account.',
+    'fr': 'Choisissez un mot de passe unique pour votre compte BIL.',
+    'es': 'Elige una contraseña única para tu cuenta BIL.',
+    'tr': 'BIL hesabınız için benzersiz bir parola seçin.',
+  },
+  'New password': {
+    'ar': 'كلمة المرور الجديدة',
+    'en': 'New password',
+    'fr': 'Nouveau mot de passe',
+    'es': 'Nueva contraseña',
+    'tr': 'Yeni parola',
+  },
+  'Confirm password': {
+    'ar': 'تأكيد كلمة المرور',
+    'en': 'Confirm password',
+    'fr': 'Confirmer le mot de passe',
+    'es': 'Confirmar contraseña',
+    'tr': 'Parolayı doğrula',
+  },
+  'Update password': {
+    'ar': 'تحديث كلمة المرور',
+    'en': 'Update password',
+    'fr': 'Mettre à jour le mot de passe',
+    'es': 'Actualizar contraseña',
+    'tr': 'Parolayı güncelle',
+  },
+  'Use at least 8 characters.': {
+    'ar': 'استخدم 8 أحرف على الأقل.',
+    'en': 'Use at least 8 characters.',
+    'fr': 'Utilisez au moins 8 caractères.',
+    'es': 'Usa al menos 8 caracteres.',
+    'tr': 'En az 8 karakter kullanın.',
+  },
+  'The passwords do not match.': {
+    'ar': 'كلمتا المرور غير متطابقتين.',
+    'en': 'The passwords do not match.',
+    'fr': 'Les mots de passe ne correspondent pas.',
+    'es': 'Las contraseñas no coinciden.',
+    'tr': 'Parolalar eşleşmiyor.',
+  },
+  'Sign in before changing your password.': {
+    'ar': 'سجّل الدخول قبل تغيير كلمة المرور.',
+    'en': 'Sign in before changing your password.',
+    'fr': 'Connectez-vous avant de modifier votre mot de passe.',
+    'es': 'Inicia sesión antes de cambiar la contraseña.',
+    'tr': 'Parolanızı değiştirmeden önce giriş yapın.',
+  },
+  'Password updated securely.': {
+    'ar': 'تم تحديث كلمة المرور بأمان.',
+    'en': 'Password updated securely.',
+    'fr': 'Mot de passe mis à jour en toute sécurité.',
+    'es': 'Contraseña actualizada de forma segura.',
+    'tr': 'Parola güvenli biçimde güncellendi.',
+  },
+  'Password could not be updated. Try again.': {
+    'ar': 'تعذّر تحديث كلمة المرور. حاول مرة أخرى.',
+    'en': 'Password could not be updated. Try again.',
+    'fr': 'Impossible de mettre à jour le mot de passe. Réessayez.',
+    'es': 'No se pudo actualizar la contraseña. Inténtalo de nuevo.',
+    'tr': 'Parola güncellenemedi. Yeniden deneyin.',
+  },
+  'Account email': {
+    'ar': 'بريد الحساب',
+    'en': 'Account email',
+    'fr': 'E-mail du compte',
+    'es': 'Correo de la cuenta',
+    'tr': 'Hesap e-postası',
+  },
+  'This changes the address used to sign in. Supabase may require confirmation from both the old and new address.': {
+    'ar':
+        'يغيّر هذا العنوان المستخدم لتسجيل الدخول. قد يطلب Supabase التأكيد من العنوانين القديم والجديد.',
+    'en':
+        'This changes the address used to sign in. Supabase may require confirmation from both the old and new address.',
+    'fr':
+        'Cela modifie l’adresse de connexion. Supabase peut demander une confirmation aux deux adresses.',
+    'es':
+        'Esto cambia la dirección de acceso. Supabase puede pedir confirmación en ambas direcciones.',
+    'tr':
+        'Bu, giriş adresini değiştirir. Supabase iki adresten de onay isteyebilir.',
+  },
+  'Email address': {
+    'ar': 'البريد الإلكتروني',
+    'en': 'Email address',
+    'fr': 'Adresse e-mail',
+    'es': 'Correo electrónico',
+    'tr': 'E-posta adresi',
+  },
+  'Update email': {
+    'ar': 'تحديث البريد',
+    'en': 'Update email',
+    'fr': 'Mettre à jour l’e-mail',
+    'es': 'Actualizar correo',
+    'tr': 'E-postayı güncelle',
+  },
+  'Enter a valid email address.': {
+    'ar': 'أدخل بريدًا إلكترونيًا صالحًا.',
+    'en': 'Enter a valid email address.',
+    'fr': 'Saisissez une adresse e-mail valide.',
+    'es': 'Introduce un correo válido.',
+    'tr': 'Geçerli bir e-posta adresi girin.',
+  },
+  'Sign in to change your account email.': {
+    'ar': 'سجّل الدخول لتغيير بريد الحساب.',
+    'en': 'Sign in to change your account email.',
+    'fr': 'Connectez-vous pour modifier l’e-mail du compte.',
+    'es': 'Inicia sesión para cambiar el correo de la cuenta.',
+    'tr': 'Hesap e-postasını değiştirmek için giriş yapın.',
+  },
+  'Check both email addresses to confirm the change.': {
+    'ar': 'تحقق من بريديك الإلكترونيين لتأكيد التغيير.',
+    'en': 'Check both email addresses to confirm the change.',
+    'fr': 'Consultez les deux adresses pour confirmer le changement.',
+    'es': 'Revisa ambas direcciones para confirmar el cambio.',
+    'tr': 'Değişikliği onaylamak için iki e-posta adresini de kontrol edin.',
+  },
+  'Email could not be changed. Try again.': {
+    'ar': 'تعذّر تغيير البريد. حاول مرة أخرى.',
+    'en': 'Email could not be changed. Try again.',
+    'fr': 'Impossible de modifier l’e-mail. Réessayez.',
+    'es': 'No se pudo cambiar el correo. Inténtalo de nuevo.',
+    'tr': 'E-posta değiştirilemedi. Yeniden deneyin.',
+  },
+  'Facebook settings': {
+    'ar': 'إعدادات Facebook',
+    'en': 'Facebook settings',
+    'fr': 'Paramètres Facebook',
+    'es': 'Ajustes de Facebook',
+    'tr': 'Facebook ayarları',
+  },
+  'Google settings': {
+    'ar': 'إعدادات Google',
+    'en': 'Google settings',
+    'fr': 'Paramètres Google',
+    'es': 'Ajustes de Google',
+    'tr': 'Google ayarları',
+  },
+  'Account linking is unavailable on this build.': {
+    'ar': 'ربط الحساب غير متاح في هذا الإصدار.',
+    'en': 'Account linking is unavailable on this build.',
+    'fr': 'La liaison de compte n’est pas disponible dans cette version.',
+    'es': 'La vinculación de cuentas no está disponible en esta versión.',
+    'tr': 'Hesap bağlama bu sürümde kullanılamıyor.',
+  },
+  'BIL will enable this control only after the provider consent and account-linking flow is verified.': {
+    'ar':
+        'ستفعّل BIL هذا التحكم فقط بعد التحقق من موافقة المزوّد ومسار ربط الحساب.',
+    'en':
+        'BIL will enable this control only after the provider consent and account-linking flow is verified.',
+    'fr':
+        'BIL activera ce contrôle uniquement après vérification du consentement du fournisseur et du parcours de liaison du compte.',
+    'es':
+        'BIL habilitará este control solo después de verificar el consentimiento del proveedor y el flujo de vinculación de la cuenta.',
+    'tr':
+        'BIL bu denetimi yalnızca sağlayıcı onayı ve hesap bağlama akışı doğrulandıktan sonra etkinleştirir.',
+  },
+  'Connect Facebook': {
+    'ar': 'ربط Facebook',
+    'en': 'Connect Facebook',
+    'fr': 'Connecter Facebook',
+    'es': 'Conectar Facebook',
+    'tr': 'Facebook’u bağla',
+  },
+  'Connect Google': {
+    'ar': 'ربط Google',
+    'en': 'Connect Google',
+    'fr': 'Connecter Google',
+    'es': 'Conectar Google',
+    'tr': 'Google’ı bağla',
+  },
+};

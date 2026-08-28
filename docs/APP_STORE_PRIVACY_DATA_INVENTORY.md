@@ -49,6 +49,33 @@ the public privacy policy. Update it whenever a connector changes.
 - Delete account and associated cloud data through a verified backend flow.
 - Report/block/moderation controls before public community is enabled.
 
+## App Store Connect data-type map
+
+All types below are collected, linked to the user's account, and not used for
+tracking. This map mirrors `ios/Runner/PrivacyInfo.xcprivacy` and the current
+cloud paths; it must be re-audited before enabling any additional iOS SDK.
+
+| App Store data type | Purposes |
+| --- | --- |
+| Contact Info — Name | App Functionality; Product Personalization |
+| Contact Info — Email Address | App Functionality |
+| Contact Info — Phone Number | App Functionality |
+| Health & Fitness — Health | App Functionality; Product Personalization |
+| Health & Fitness — Fitness | App Functionality; Product Personalization |
+| Identifiers — User ID | App Functionality |
+| Identifiers — Device ID | App Functionality |
+| User Content — Other User Content | App Functionality; Product Personalization |
+| User Content — Emails or Text Messages | App Functionality |
+| User Content — Photos or Videos | App Functionality |
+| Purchases — Purchase History | App Functionality |
+| Usage Data — Product Interaction | App Functionality |
+
+Do not declare Payment Information because Apple and Google process the card
+details. Do not declare Contacts, raw Audio Data, precise Location, Crash Data,
+Performance Data or Advertising Data unless a later source/SDK audit proves
+that the iOS production build collects them. The current speech flow submits
+recognized text, not the raw microphone recording.
+
 ## Submission gate
 
 - Public privacy, terms, support and deletion URLs are live.

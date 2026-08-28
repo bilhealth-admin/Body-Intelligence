@@ -1,0 +1,12 @@
+﻿{
+    "schema":  "bil.workout-media.local-integrity-audit.v1",
+    "auditedAtUtc":  "2026-08-23T03:04:28Z",
+    "recordCount":  200,
+    "sizeMatched":  200,
+    "sha256Matched":  200,
+    "allPassed":  true,
+    "totalMediaBytes":  3877964251,
+    "sourceManifest":  "artifacts/workout_media/workout_release_manifest_gym_six_month_strict.json",
+    "sourceManifestSha256":  "133073940346e3ae47a65ac6857e5bf8bc9b6bfc859765b9ac91ce26238dfef8",
+    "runtimeManifestSha256":  "758753ced108ad1aeccca82870e1f33e6ca3bc0afe749fb92ab08239cb6e6aef"
+}

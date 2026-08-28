@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../domain/wellness_content_pack.dart';
+import 'wellness_access_token.dart';
 
 enum WellnessMediaCacheStatus { ready, unavailableOffline }
 
@@ -40,14 +41,19 @@ class WellnessMediaCacheResult {
 /// temporary file until HTTPS transfer, exact length, and digest have passed;
 /// corrupt cache entries fail closed and are removed.
 class WellnessMediaCache {
-  WellnessMediaCache({HttpClient? client, Directory? directory})
-    : _client = client ?? HttpClient(),
-      _ownsClient = client == null,
-      _injectedDirectory = directory;
+  WellnessMediaCache({
+    HttpClient? client,
+    Directory? directory,
+    WellnessAccessTokenLoader? accessTokenLoader,
+  }) : _client = client ?? HttpClient(),
+       _ownsClient = client == null,
+       _injectedDirectory = directory,
+       _accessTokenLoader = accessTokenLoader ?? loadCurrentWellnessAccessToken;
 
   final HttpClient _client;
   final bool _ownsClient;
   final Directory? _injectedDirectory;
+  final WellnessAccessTokenLoader _accessTokenLoader;
   final Map<String, Future<WellnessMediaCacheResult>> _inFlight = {};
 
   Future<WellnessMediaCacheResult> resolve(
@@ -80,6 +86,8 @@ class WellnessMediaCache {
 
     try {
       final request = await _client.getUrl(asset.url);
+      request.followRedirects = false;
+      applyWellnessBearer(request, _accessTokenLoader, asset.url);
       final response = await request.close();
       if (response.statusCode != HttpStatus.ok) {
         throw HttpException(

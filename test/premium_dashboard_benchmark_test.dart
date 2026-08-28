@@ -1,6 +1,7 @@
 import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/features/dashboard/widgets/premium_dashboard_benchmark.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -162,109 +163,111 @@ class _Harness extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = Locale(arabic ? 'ar' : 'en');
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      locale: locale,
-      themeMode: light ? ThemeMode.light : ThemeMode.dark,
-      theme:
-          BilFlagshipTheme.light(
-            highContrast: highContrast,
-            isArabic: arabic,
-          ).copyWith(
-            textTheme: BilFlagshipTheme.light(
+    return ProviderScope(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        locale: locale,
+        themeMode: light ? ThemeMode.light : ThemeMode.dark,
+        theme:
+            BilFlagshipTheme.light(
               highContrast: highContrast,
               isArabic: arabic,
-            ).textTheme.apply(fontFamily: 'NotoNaskhArabic'),
-          ),
-      darkTheme:
-          BilFlagshipTheme.dark(
-            highContrast: highContrast,
-            isArabic: arabic,
-          ).copyWith(
-            textTheme: BilFlagshipTheme.dark(
+            ).copyWith(
+              textTheme: BilFlagshipTheme.light(
+                highContrast: highContrast,
+                isArabic: arabic,
+              ).textTheme.apply(fontFamily: 'NotoNaskhArabic'),
+            ),
+        darkTheme:
+            BilFlagshipTheme.dark(
               highContrast: highContrast,
               isArabic: arabic,
-            ).textTheme.apply(fontFamily: 'NotoNaskhArabic'),
-          ),
-      home: Builder(
-        builder: (context) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            highContrast: highContrast,
-            disableAnimations: reducedMotion,
-            textScaler: textScaler,
-          ),
-          child: Scaffold(
-            backgroundColor: light
-                ? const Color(0xFFEAF2F4)
-                : const Color(0xFF01050D),
-            body: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment(.1, -.3),
-                  radius: 1.1,
-                  colors: light
-                      ? const [
-                          Color(0xFFE1F2F3),
-                          Color(0xFFF1F4EA),
-                          Color(0xFFE7EFF1),
-                        ]
-                      : const [
-                          Color(0x402071A5),
-                          Color(0xFF071120),
-                          Color(0xFF01050D),
-                        ],
+            ).copyWith(
+              textTheme: BilFlagshipTheme.dark(
+                highContrast: highContrast,
+                isArabic: arabic,
+              ).textTheme.apply(fontFamily: 'NotoNaskhArabic'),
+            ),
+        home: Builder(
+          builder: (context) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              highContrast: highContrast,
+              disableAnimations: reducedMotion,
+              textScaler: textScaler,
+            ),
+            child: Scaffold(
+              backgroundColor: light
+                  ? const Color(0xFFEAF2F4)
+                  : const Color(0xFF01050D),
+              body: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment(.1, -.3),
+                    radius: 1.1,
+                    colors: light
+                        ? const [
+                            Color(0xFFE1F2F3),
+                            Color(0xFFF1F4EA),
+                            Color(0xFFE7EFF1),
+                          ]
+                        : const [
+                            Color(0x402071A5),
+                            Color(0xFF071120),
+                            Color(0xFF01050D),
+                          ],
+                  ),
                 ),
-              ),
-              child: SafeArea(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: PremiumDashboardBenchmark(
-                    arabic: arabic,
-                    showRecommendation: showRecommendation,
-                    actionTitle: arabic
-                        ? 'سجّل وزن اليوم'
-                        : 'Log today’s weight',
-                    actionReason: arabic
-                        ? 'القياس اليومي المتقارب يحسّن ثقة الاتجاه.'
-                        : 'A comparable daily check-in improves trend confidence.',
-                    actionEvidence: arabic
-                        ? 'لم يُسجّل وزن اليوم'
-                        : 'No weight check-in recorded today',
-                    confidence: arabic ? 'قيد التكوين' : 'Emerging',
-                    onAction: () {},
-                    dailyIntelligence: _DailyNarrative(arabic: arabic),
-                    bodyTwinSummary: arabic
-                        ? 'لا يزال BIL يبني سيناريو شخصيًا آمنًا.'
-                        : 'BIL is still building a safe personal scenario.',
-                    bodyTwinEvidence: arabic
-                        ? 'نحتاج 4 أيام وزن و6 أيام تغذية إضافية.'
-                        : '4 more weight days · 6 more nutrition days',
-                    nutritionSummary: arabic
-                        ? 'البروتين هو أوضح فجوة تغذية قابلة للتنفيذ اليوم.'
-                        : 'Protein is the clearest actionable nutrition gap today.',
-                    nutritionEvidence: arabic
-                        ? 'وجبتان · 62 جم بروتين مسجل'
-                        : '2 meal records · 62 g protein recorded',
-                    trendSummary: arabic
-                        ? 'القراءة الأخيرة لا تكفي لتغيير الخطة.'
-                        : 'The latest reading is not enough to change the plan.',
-                    trendEvidence: arabic
-                        ? 'ظروف القياس مختلفة'
-                        : 'Measurement conditions differed',
-                    loggingItems: [
-                      DashboardLoggingItem(
-                        label: arabic ? 'الوزن' : 'Weight',
-                        recorded: false,
-                      ),
-                      DashboardLoggingItem(
-                        label: arabic ? 'الوجبات' : 'Meals',
-                        recorded: true,
-                      ),
-                      DashboardLoggingItem(
-                        label: arabic ? 'الماء' : 'Water',
-                        recorded: true,
-                      ),
-                    ],
+                child: SafeArea(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: PremiumDashboardBenchmark(
+                      arabic: arabic,
+                      showRecommendation: showRecommendation,
+                      actionTitle: arabic
+                          ? 'سجّل وزن اليوم'
+                          : 'Log today’s weight',
+                      actionReason: arabic
+                          ? 'القياس اليومي المتقارب يحسّن ثقة الاتجاه.'
+                          : 'A comparable daily check-in improves trend confidence.',
+                      actionEvidence: arabic
+                          ? 'لم يُسجّل وزن اليوم'
+                          : 'No weight check-in recorded today',
+                      confidence: arabic ? 'قيد التكوين' : 'Emerging',
+                      onAction: () {},
+                      dailyIntelligence: _DailyNarrative(arabic: arabic),
+                      bodyTwinSummary: arabic
+                          ? 'لا يزال BIL يبني سيناريو شخصيًا آمنًا.'
+                          : 'BIL is still building a safe personal scenario.',
+                      bodyTwinEvidence: arabic
+                          ? 'نحتاج 4 أيام وزن و6 أيام تغذية إضافية.'
+                          : '4 more weight days · 6 more nutrition days',
+                      nutritionSummary: arabic
+                          ? 'البروتين هو أوضح فجوة تغذية قابلة للتنفيذ اليوم.'
+                          : 'Protein is the clearest actionable nutrition gap today.',
+                      nutritionEvidence: arabic
+                          ? 'وجبتان · 62 جم بروتين مسجل'
+                          : '2 meal records · 62 g protein recorded',
+                      trendSummary: arabic
+                          ? 'القراءة الأخيرة لا تكفي لتغيير الخطة.'
+                          : 'The latest reading is not enough to change the plan.',
+                      trendEvidence: arabic
+                          ? 'ظروف القياس مختلفة'
+                          : 'Measurement conditions differed',
+                      loggingItems: [
+                        DashboardLoggingItem(
+                          label: arabic ? 'الوزن' : 'Weight',
+                          recorded: false,
+                        ),
+                        DashboardLoggingItem(
+                          label: arabic ? 'الوجبات' : 'Meals',
+                          recorded: true,
+                        ),
+                        DashboardLoggingItem(
+                          label: arabic ? 'الماء' : 'Water',
+                          recorded: true,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

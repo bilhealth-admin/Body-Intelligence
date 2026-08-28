@@ -17,7 +17,13 @@ final class PaidPlanCatalog {
       rank: 10,
       parentPlans: const <CommercePlan>{CommercePlan.free},
       addedEntitlements: const <CommerceEntitlement>{
-        CommerceEntitlement.cloudSync,
+        CommerceEntitlement.adFree,
+        CommerceEntitlement.advancedAnalytics,
+        CommerceEntitlement.mealPlanning,
+        CommerceEntitlement.connectedHealth,
+        CommerceEntitlement.premiumPrograms,
+        CommerceEntitlement.communityFriends,
+        CommerceEntitlement.customGoals,
         CommerceEntitlement.advancedIntelligence,
       },
     ),
@@ -39,9 +45,8 @@ final class PaidPlanCatalog {
     CommercePlan.pro: PlanCatalogEntry(
       plan: CommercePlan.pro,
       rank: 80,
-      parentPlans: const <CommercePlan>{CommercePlan.free},
+      parentPlans: const <CommercePlan>{CommercePlan.premium},
       addedEntitlements: const <CommerceEntitlement>{
-        CommerceEntitlement.cloudSync,
         CommerceEntitlement.advancedIntelligence,
       },
     ),

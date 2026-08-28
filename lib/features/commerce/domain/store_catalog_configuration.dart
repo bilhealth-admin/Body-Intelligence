@@ -28,18 +28,16 @@ final class StoreCatalogConfiguration {
         uri.host.isNotEmpty;
   }
 
-  static const premiumMonthly = String.fromEnvironment(
-    'BIL_STORE_PREMIUM_MONTHLY',
-  );
-  static const premiumAnnual = String.fromEnvironment(
-    'BIL_STORE_PREMIUM_ANNUAL',
-  );
-  static const premiumAiCoachMonthly = String.fromEnvironment(
-    'BIL_STORE_PREMIUM_AI_COACH_MONTHLY',
-  );
-  static const premiumAiCoachAnnual = String.fromEnvironment(
-    'BIL_STORE_PREMIUM_AI_COACH_ANNUAL',
-  );
+  /// Immutable cross-store product identifiers. Prices, trials, availability,
+  /// tax and localized display text are always read from the active store.
+  static const premiumMonthly = 'bil_premium';
+  static const premiumAnnual = 'bil_premium_annual';
+  static const premiumAiCoachMonthly = 'bil_premium_ai_coach';
+  static const premiumAiCoachAnnual = 'bil_premium_ai_coach_annual';
+
+  /// Repeatable AI credit pack. This identifier is intentionally stable
+  /// across storefronts; regional price and availability remain store-owned.
+  static const aiBoost = 'bil_ai_boost';
 
   static const products = <StoreProductBinding>[
     StoreProductBinding(
@@ -77,6 +75,11 @@ final class StoreCatalogConfiguration {
       .map((binding) => binding.productId.trim())
       .where((id) => id.isNotEmpty)
       .toSet();
+
+  /// All products queried from the device store. Subscription products may be
+  /// intentionally absent because Play/App Store availability is mutually
+  /// exclusive by market; AI Boost remains globally queryable.
+  static Set<String> get storefrontProductIds => {...productIds, aiBoost};
 
   static StoreProductBinding? bindingFor({
     required CommercePlan plan,

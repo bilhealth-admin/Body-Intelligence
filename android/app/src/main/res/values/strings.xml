@@ -3,4 +3,6 @@
     <string name="app_name">BIL - Body Intelligence Log</string>
     <string name="health_permissions_rationale_title">Health data privacy</string>
     <string name="health_permissions_rationale_body">BIL requests only the Health Connect data types needed for features you choose to use. Your health data is processed locally by default. You can grant, deny, or revoke individual permissions at any time from Health Connect settings. BIL does not sell health data or use it for advertising.</string>
+    <string name="health_permissions_privacy_policy_action">Read the full BIL privacy policy</string>
+    <string name="health_privacy_policy_url" translatable="false">https://www.bilhealth.com/privacy</string>
 </resources>

@@ -71,67 +71,53 @@ class _WidgetSettingsService extends AppSettingsService {
 void _noop() {}
 
 void main() {
-  testWidgets('Arabic V10 welcome uses RTL and approved content', (
+  testWidgets('Arabic welcome uses the approved personal-model message', (
     tester,
   ) async {
     await tester.pumpWidget(buildWelcomeApp(const Locale('ar')));
     await tester.pumpAndSettle();
 
-    expect(find.text('مرحبًا بك'), findsOneWidget);
-    expect(find.text('ابدأ رحلتك'), findsOneWidget);
-    expect(find.text('خصوصية تامة'), findsOneWidget);
-    expect(find.text('يعمل دون إنترنت'), findsOneWidget);
-    expect(find.text('نتائج قابلة للتفسير'), findsOneWidget);
+    const body =
+        'ابدأ رحلتك نحو جسم أكثر صحة وقوة وذكاء مع نموذج شخصي يتعلم من بياناتك.';
+    expect(find.text(body), findsOneWidget);
+    expect(find.text('متابعة'), findsOneWidget);
     expect(
-      find.text('لا يلزم إنشاء حساب، ولا يتم رفع أي بيانات.'),
+      find.byKey(const Key('onboarding-welcome-continue')),
       findsOneWidget,
     );
 
-    final direction = Directionality.of(tester.element(find.text('مرحبًا بك')));
+    final direction = Directionality.of(tester.element(find.text(body)));
     expect(direction, TextDirection.rtl);
   });
 
-  testWidgets('English V10 welcome uses LTR and approved content', (
+  testWidgets('English welcome uses the approved personal-model message', (
     tester,
   ) async {
     await tester.pumpWidget(buildWelcomeApp(const Locale('en')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome'), findsOneWidget);
-    expect(find.text('Start your journey'), findsOneWidget);
-    expect(find.text('Private'), findsOneWidget);
-    expect(find.text('Offline'), findsOneWidget);
-    expect(find.text('Explainable'), findsOneWidget);
-    expect(find.text('Understand every insight'), findsOneWidget);
-    expect(find.text('Science first'), findsOneWidget);
-    expect(
-      find.text('No account required. Nothing is uploaded.'),
-      findsOneWidget,
-    );
-    expect(find.text('Optional account and sync'), findsNothing);
+    const body =
+        'Start your journey toward a healthier, stronger, smarter body with a personal model that learns from your data.';
+    expect(find.text(body), findsOneWidget);
+    expect(find.text('Continue'), findsOneWidget);
 
-    final direction = Directionality.of(tester.element(find.text('Welcome')));
+    final direction = Directionality.of(tester.element(find.text(body)));
     expect(direction, TextDirection.ltr);
   });
 
-  testWidgets('Welcome language selection updates direction and persists', (
-    tester,
-  ) async {
-    final service = _WidgetSettingsService('en');
+  testWidgets('Welcome honors the persisted French locale', (tester) async {
+    final service = _WidgetSettingsService('fr');
     await tester.pumpWidget(_buildReactiveWelcomeApp(service));
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome'), findsOneWidget);
-
-    await tester.tap(find.text('العربية'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('مرحبًا بك'), findsOneWidget);
+    const body =
+        'Commencez votre parcours vers un corps plus sain, plus fort et plus intelligent avec un modèle personnel qui apprend de vos données.';
+    expect(find.text(body), findsOneWidget);
+    expect(find.text('Continuer'), findsOneWidget);
     expect(
-      Directionality.of(tester.element(find.text('مرحبًا بك'))),
-      TextDirection.rtl,
+      Directionality.of(tester.element(find.text(body))),
+      TextDirection.ltr,
     );
-    expect(service.value.localeCode, 'ar');
-    expect(find.text('Welcome'), findsNothing);
+    expect(service.value.localeCode, 'fr');
   });
 }

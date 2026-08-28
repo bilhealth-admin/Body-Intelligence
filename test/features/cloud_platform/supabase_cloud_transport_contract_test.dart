@@ -14,7 +14,10 @@ void main() {
     expect(sql, contains('jsonb_array_length(p_operations) > 100'));
     expect(sql, contains('device_revision_mismatch'));
     expect(sql, contains('bil_cloud_operations'));
-    expect(sql, contains("change_sequence = nextval('public.bil_cloud_change_sequence')"));
+    expect(
+      sql,
+      contains("change_sequence = nextval('public.bil_cloud_change_sequence')"),
+    );
     expect(sql, contains("raise exception 'invalid_operation_id'"));
     expect(sql, contains('grant execute on function public.bil_sync_records'));
   });
@@ -27,8 +30,28 @@ void main() {
     expect(source, contains("client.rpc(\n      'bil_sync_records'"));
     expect(source, contains('user.id != ownerId'));
     expect(source, contains('session.deviceId != deviceId'));
-    expect(source, contains('Cross-account or cross-device sync batch rejected.'));
+    expect(
+      source,
+      contains('Cross-account or cross-device sync batch rejected.'),
+    );
     expect(source, contains('Cross-account BIL cloud response.'));
     expect(source, contains('CloudSyncBatchResult'));
   });
+
+  test(
+    'production schema compatibility keeps both cloud column pairs valid',
+    () {
+      final sql = File(
+        'supabase/migrations/'
+        '20260822070041_bil_cloud_sync_legacy_column_compatibility.sql',
+      ).readAsStringSync();
+      expect(sql, contains('device_id, revision_device_id'));
+      expect(sql, contains('client_updated_at, updated_at'));
+      expect(sql, contains('device_id = excluded.device_id'));
+      expect(sql, contains('client_updated_at = excluded.client_updated_at'));
+      expect(sql, contains("raise exception 'device_revoked'"));
+      expect(sql, contains('jsonb_array_length(p_operations) > 100'));
+      expect(sql, contains('security invoker'));
+    },
+  );
 }

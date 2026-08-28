@@ -1,12 +1,22 @@
 import 'package:flutter/widgets.dart';
 
 import '../../app/localization/app_localizations.dart';
+import '../../app/localization/runtime_copy.dart';
 
 class ReferenceSettingsCopy {
   static String Function(String) of(BuildContext context) {
-    final code = Localizations.localeOf(context).languageCode;
-    return (key) =>
-        _copy[code]?[key] ?? context.strings.text(_copy['en']?[key] ?? key);
+    final tag = Localizations.localeOf(context).toLanguageTag();
+    return (key) => resolve(key, tag) ?? context.strings.text(key);
+  }
+
+  /// Resolves one settings phrase without crossing into a different UI
+  /// language. The reviewed five-locale table wins; the complete 25-locale
+  /// runtime catalog supplies every remaining locale.
+  static String? resolve(String key, String localeTag) {
+    final normalized = localeTag.replaceAll('_', '-');
+    final language = normalized.split('-').first.toLowerCase();
+    if (language == 'en') return key;
+    return _copy[language]?[key] ?? RuntimeCopy.resolve(key, normalized);
   }
 
   static const _copy = <String, Map<String, String>>{
@@ -27,6 +37,22 @@ class ReferenceSettingsCopy {
       'Goal': 'الهدف',
       'kg': 'كجم',
       'Try Premium for Free': 'جرّب Premium مجانًا',
+      'Checking subscription': 'جارٍ التحقق من الاشتراك',
+      'Retry subscription check': 'إعادة التحقق من الاشتراك',
+      'BIL Premium': 'BIL Premium',
+      'Premium': 'Premium',
+      'Start 7-day free trial': 'ابدأ تجربة مجانية لمدة 7 أيام',
+      'Language': 'اللغة',
+      'Location & local time': 'الموقع والوقت المحلي',
+      'Challenges': 'التحديات',
+      'Exercise calories': 'سعرات التمارين',
+      'Review initial setup': 'مراجعة الإعداد الأولي',
+      'Reopen onboarding without deleting your profile or records.':
+          'أعد فتح الإعداد الأولي دون حذف ملفك الشخصي أو سجلاتك.',
+      'AI Coach': 'مدرب BIL الذكي',
+      'AI Coach settings': 'إعدادات المدرب الذكي',
+      'Advertising privacy': 'خصوصية الإعلانات',
+      'Delete account': 'حذف الحساب',
       'My Profile': 'ملفي الشخصي',
       'Intermittent Fasting': 'الصيام المتقطع',
       'Sleep': 'النوم',
@@ -74,6 +100,22 @@ class ReferenceSettingsCopy {
       'Goal': 'Objectif',
       'kg': 'kg',
       'Try Premium for Free': 'Essayer Premium gratuitement',
+      'Checking subscription': 'Vérification de l’abonnement',
+      'Retry subscription check': 'Revérifier l’abonnement',
+      'BIL Premium': 'BIL Premium',
+      'Premium': 'Premium',
+      'Start 7-day free trial': 'Commencer l’essai gratuit de 7 jours',
+      'Language': 'Langue',
+      'Location & local time': 'Lieu et heure locale',
+      'Challenges': 'Défis',
+      'Exercise calories': 'Calories d’exercice',
+      'Review initial setup': 'Revoir la configuration initiale',
+      'Reopen onboarding without deleting your profile or records.':
+          'Rouvrez la configuration initiale sans supprimer votre profil ni vos données.',
+      'AI Coach': 'Coach IA BIL',
+      'AI Coach settings': 'Réglages du coach IA',
+      'Advertising privacy': 'Confidentialité publicitaire',
+      'Delete account': 'Supprimer le compte',
       'My Profile': 'Mon profil',
       'Intermittent Fasting': 'Jeûne intermittent',
       'Sleep': 'Sommeil',
@@ -121,6 +163,22 @@ class ReferenceSettingsCopy {
       'Goal': 'Objetivo',
       'kg': 'kg',
       'Try Premium for Free': 'Prueba Premium gratis',
+      'Checking subscription': 'Comprobando la suscripción',
+      'Retry subscription check': 'Volver a comprobar la suscripción',
+      'BIL Premium': 'BIL Premium',
+      'Premium': 'Premium',
+      'Start 7-day free trial': 'Iniciar prueba gratuita de 7 días',
+      'Language': 'Idioma',
+      'Location & local time': 'Ubicación y hora local',
+      'Challenges': 'Desafíos',
+      'Exercise calories': 'Calorías del ejercicio',
+      'Review initial setup': 'Revisar configuración inicial',
+      'Reopen onboarding without deleting your profile or records.':
+          'Vuelve a abrir la configuración inicial sin eliminar tu perfil ni tus registros.',
+      'AI Coach': 'Coach de IA de BIL',
+      'AI Coach settings': 'Ajustes del coach de IA',
+      'Advertising privacy': 'Privacidad publicitaria',
+      'Delete account': 'Eliminar cuenta',
       'My Profile': 'Mi perfil',
       'Intermittent Fasting': 'Ayuno intermitente',
       'Sleep': 'Sueño',
@@ -168,6 +226,22 @@ class ReferenceSettingsCopy {
       'Goal': 'Hedef',
       'kg': 'kg',
       'Try Premium for Free': 'Premium’u ücretsiz dene',
+      'Checking subscription': 'Abonelik kontrol ediliyor',
+      'Retry subscription check': 'Aboneliği yeniden kontrol et',
+      'BIL Premium': 'BIL Premium',
+      'Premium': 'Premium',
+      'Start 7-day free trial': '7 günlük ücretsiz denemeyi başlat',
+      'Language': 'Dil',
+      'Location & local time': 'Konum ve yerel saat',
+      'Challenges': 'Meydan okumalar',
+      'Exercise calories': 'Egzersiz kalorileri',
+      'Review initial setup': 'İlk kurulumu gözden geçir',
+      'Reopen onboarding without deleting your profile or records.':
+          'Profilinizi veya kayıtlarınızı silmeden ilk kurulumu yeniden açın.',
+      'AI Coach': 'BIL Yapay Zekâ Koçu',
+      'AI Coach settings': 'Yapay zekâ koçu ayarları',
+      'Advertising privacy': 'Reklam gizliliği',
+      'Delete account': 'Hesabı sil',
       'My Profile': 'Profilim',
       'Intermittent Fasting': 'Aralıklı oruç',
       'Sleep': 'Uyku',

@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 void main() {
-  testWidgets('first-time gateway is honest and continues to onboarding', (
+  testWidgets('first-time gateway enables sign-in and continues locally', (
     tester,
   ) async {
     final database = AppDatabase.forTesting(NativeDatabase.memory());
@@ -45,7 +45,7 @@ void main() {
       tester
           .widget<FilledButton>(find.byKey(const Key('gateway-account-action')))
           .onPressed,
-      isNull,
+      isNotNull,
     );
 
     final continueLocally = find.byKey(const Key('gateway-continue-locally'));
@@ -65,27 +65,17 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('Dashboard greeting uses name and neutral fallback', (
+  testWidgets('Dashboard top bar keeps brand and removes greeting', (
     tester,
   ) async {
-    Future<String> greeting(String? name) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: DashboardTopBar(
-              arabic: false,
-              displayName: name,
-              onProfile: () {},
-            ),
-          ),
-        ),
-      );
-      return tester
-          .widget<Text>(find.byKey(const Key('dashboard-greeting')))
-          .data!;
-    }
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: DashboardTopBar(onProfile: () {})),
+      ),
+    );
 
-    expect(await greeting('Kadem'), 'Welcome, Kadem');
-    expect(await greeting(null), 'Welcome');
+    expect(find.text('Welcome'), findsNothing);
+    expect(find.byTooltip('Profile'), findsOneWidget);
+    expect(find.byKey(const Key('dashboard-edit-today')), findsOneWidget);
   });
 }

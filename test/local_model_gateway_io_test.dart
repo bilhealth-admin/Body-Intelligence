@@ -6,6 +6,10 @@ import 'package:body_intelligence_log/features/intelligence_center/services/loca
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('default build skips nonexistent emulator model without delay', () {
+    expect(const LlamaCppLocalGateway().endpoint, isEmpty);
+  });
+
   test('loopback local model works without a network bearer secret', () async {
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     addTearDown(() => server.close(force: true));
@@ -35,24 +39,24 @@ void main() {
     final gateway = LlamaCppLocalGateway(
       endpoint: 'http://127.0.0.1:${server.port}',
     );
-    final answer = await gateway.answer(
+    final result = await gateway.answer(
       question: 'How am I doing?',
       locale: 'en',
       context: _emptyContext(),
     );
 
-    expect(answer?.text, 'Grounded local answer');
-    expect(answer?.action, isNull);
+    expect(result.answer?.text, 'Grounded local answer');
+    expect(result.answer?.action, isNull);
   });
 
   test('remote model without a strong secret fails closed', () async {
     const gateway = LlamaCppLocalGateway(endpoint: 'https://example.com');
-    final answer = await gateway.answer(
+    final result = await gateway.answer(
       question: 'test',
       locale: 'en',
       context: _emptyContext(),
     );
-    expect(answer, isNull);
+    expect(result.answer, isNull);
   });
 }
 

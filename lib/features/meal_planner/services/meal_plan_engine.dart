@@ -1,14 +1,26 @@
 import '../domain/meal_plan.dart';
+import '../../nutrition/domain/dietary_preferences.dart';
 
 class MealPlanEngine {
   const MealPlanEngine();
 
-  WeeklyMealPlan generate(MealPlanPreferences preferences) {
+  WeeklyMealPlan generate(
+    MealPlanPreferences preferences, {
+    DietaryPreferences dietaryPreferences = const DietaryPreferences(),
+  }) {
     final eligible = plannerRecipes
         .where((recipe) {
           if (recipe.minutes > preferences.maxMinutes) return false;
           if (preferences.budget == MealPlanBudget.value &&
               recipe.cost != MealPlanBudget.value) {
+            return false;
+          }
+          if (!DietaryCompatibility.allows(
+            preferences: dietaryPreferences,
+            dietTags: recipe.dietTags,
+            allergens: recipe.allergens,
+            ingredients: recipe.ingredients.keys,
+          )) {
             return false;
           }
           return switch (preferences.diet) {
@@ -18,14 +30,18 @@ class MealPlanEngine {
           };
         })
         .toList(growable: false);
-    final source = eligible.isEmpty ? plannerRecipes : eligible;
+    final source = eligible;
     return WeeklyMealPlan(
       createdAt: DateTime.now(),
-      meals: List.generate(
-        7,
-        (day) =>
-            PlannedMeal(day: day, recipeId: source[day % source.length].id),
-      ),
+      meals: source.isEmpty
+          ? const <PlannedMeal>[]
+          : List.generate(
+              7,
+              (day) => PlannedMeal(
+                day: day,
+                recipeId: source[day % source.length].id,
+              ),
+            ),
     );
   }
 
@@ -207,6 +223,13 @@ const plannerRecipes = <PlannerRecipe>[
     vegetarian: true,
     highProtein: false,
     ingredients: {'Red lentils (cups)': .5, 'Onion': .5, 'Carrot': .5},
+    dietTags: {
+      'vegan',
+      'vegetarian',
+      'pescatarian',
+      'gluten_free',
+      'lactose_free',
+    },
   ),
   PlannerRecipe(
     id: 'yogurt_oats',
@@ -217,6 +240,8 @@ const plannerRecipes = <PlannerRecipe>[
     vegetarian: true,
     highProtein: true,
     ingredients: {'Plain yogurt (cups)': 1, 'Oats (cups)': .5, 'Fruit': 1},
+    dietTags: {'vegetarian', 'pescatarian', 'gluten_free'},
+    allergens: {'milk'},
   ),
   PlannerRecipe(
     id: 'chicken_rice',
@@ -231,6 +256,7 @@ const plannerRecipes = <PlannerRecipe>[
       'Rice (cups)': .5,
       'Mixed vegetables (cups)': 1,
     },
+    dietTags: {'gluten_free', 'lactose_free'},
   ),
   PlannerRecipe(
     id: 'bean_wrap',
@@ -245,6 +271,8 @@ const plannerRecipes = <PlannerRecipe>[
       'Beans (cups)': .5,
       'Salad (cups)': 1,
     },
+    dietTags: {'vegan', 'vegetarian', 'pescatarian', 'lactose_free'},
+    allergens: {'wheat'},
   ),
   PlannerRecipe(
     id: 'tuna_potato',
@@ -255,6 +283,8 @@ const plannerRecipes = <PlannerRecipe>[
     vegetarian: false,
     highProtein: true,
     ingredients: {'Potato': 1, 'Tuna (cans)': .5, 'Plain yogurt (tbsp)': 1},
+    dietTags: {'pescatarian', 'gluten_free'},
+    allergens: {'fish', 'milk'},
   ),
   PlannerRecipe(
     id: 'egg_shakshuka',
@@ -265,6 +295,8 @@ const plannerRecipes = <PlannerRecipe>[
     vegetarian: true,
     highProtein: true,
     ingredients: {'Eggs': 2, 'Tomatoes (cups)': 1, 'Bell pepper': .5},
+    dietTags: {'vegetarian', 'pescatarian', 'gluten_free', 'lactose_free'},
+    allergens: {'egg'},
   ),
   PlannerRecipe(
     id: 'chickpea_bowl',
@@ -278,6 +310,13 @@ const plannerRecipes = <PlannerRecipe>[
       'Chickpeas (cups)': .75,
       'Grain (cups)': .5,
       'Vegetables (cups)': 1,
+    },
+    dietTags: {
+      'vegan',
+      'vegetarian',
+      'pescatarian',
+      'gluten_free',
+      'lactose_free',
     },
   ),
 ];

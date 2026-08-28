@@ -14,7 +14,9 @@ import 'auth_five_locale_copy.dart';
 /// persisted the resulting session instead of immediately returning to the
 /// sign-in screen.
 class AuthCallbackPage extends StatefulWidget {
-  const AuthCallbackPage({super.key});
+  const AuthCallbackPage({super.key, this.initiallyFailed = false});
+
+  final bool initiallyFailed;
 
   @override
   State<AuthCallbackPage> createState() => _AuthCallbackPageState();
@@ -26,12 +28,29 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
   StreamSubscription<AuthState>? _subscription;
   Timer? _timer;
   bool _completed = false;
-  bool _failed = false;
+  late bool _failed;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_complete()));
+    _failed = widget.initiallyFailed;
+    if (!_failed) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => unawaited(_complete()),
+      );
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant AuthCallbackPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.initiallyFailed && widget.initiallyFailed && !_completed) {
+      _timer?.cancel();
+      unawaited(_subscription?.cancel());
+      // GoRouter can retain this State when only the callback query changes.
+      // Update synchronously because a rebuild is already in progress.
+      _failed = true;
+    }
   }
 
   Future<void> _complete() async {
@@ -43,9 +62,15 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
       return;
     }
 
-    _subscription = auth.onAuthStateChange.listen((state) {
-      if (state.session != null) _finish();
-    });
+    _subscription = auth.onAuthStateChange.listen(
+      (state) {
+        if (state.session != null) _finish();
+      },
+      onError: (Object _, StackTrace _) {
+        if (!mounted || _completed) return;
+        setState(() => _failed = true);
+      },
+    );
 
     // Close the tiny race between the first synchronous check and installing
     // the auth-state listener. Any later PKCE completion is caught by the

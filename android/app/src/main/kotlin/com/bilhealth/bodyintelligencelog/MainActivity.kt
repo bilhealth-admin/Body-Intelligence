@@ -76,6 +76,16 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        io.flutter.plugin.common.MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            "bil/launch",
+        ).setMethodCallHandler { call, result ->
+            if (call.method == "ready") {
+                result.success(null)
+            } else {
+                result.notImplemented()
+            }
+        }
         speechBridge = BILSpeechBridge(this, flutterEngine.dartExecutor.binaryMessenger) {
             speechPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }

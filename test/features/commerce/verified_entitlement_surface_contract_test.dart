@@ -27,7 +27,7 @@ void main() {
     final settings = File(surfaces[0]).readAsStringSync();
     final profile = File(surfaces[1]).readAsStringSync();
     expect(settings, contains('Retry subscription check'));
-    expect(settings, contains("copy('Explore Premium')"));
+    expect(settings, contains("copy('Start 7-day free trial')"));
     expect(settings, isNot(contains("copy('Try Premium for Free')")));
     expect(profile, contains('Retry subscription check'));
   });
@@ -36,11 +36,41 @@ void main() {
     final source = File(
       'lib/features/commerce/repositories/server_entitlement_repository.dart',
     ).readAsStringSync();
-    expect(source, contains('Supabase.instance.isInitialized'));
+    expect(source, contains('AppEnvironment.supabaseRuntimeReady'));
     expect(source, contains('return FreePlan.createState();'));
     expect(
-      source.indexOf('Supabase.instance.isInitialized'),
+      source.indexOf('AppEnvironment.supabaseRuntimeReady'),
       lessThan(source.indexOf('Supabase.instance.client')),
     );
+  });
+
+  test('verified entitlement follows the Supabase owner lifecycle', () {
+    final source = File(
+      'lib/features/commerce/providers/commerce_providers.dart',
+    ).readAsStringSync();
+
+    expect(source, contains('verifiedEntitlementOwnerProvider'));
+    expect(source, contains('auth.currentUser?.id'));
+    expect(source, contains('auth.onAuthStateChange'));
+    expect(source, contains('state.session?.user.id'));
+    expect(source, contains('ref.watch(verifiedEntitlementOwnerProvider)'));
+  });
+
+  test('closed-test grant is a server-owned Premium AI Coach overlay', () {
+    final source = File(
+      'lib/features/commerce/repositories/server_entitlement_repository.dart',
+    ).readAsStringSync();
+    expect(source, contains("from('bil_ai_closed_test_grants')"));
+    expect(source, contains('closedTestActive'));
+    expect(source, contains('CommercePlan.premiumAiCoach'));
+    expect(source, isNot(contains('userMetadata')));
+    expect(source, isNot(contains('raw_user_meta_data')));
+
+    final migration = File(
+      'supabase/migrations/202608220002_closed_test_ai_overlay.sql',
+    ).readAsStringSync();
+    expect(migration, contains('bil_sync_ai_closed_test_grant'));
+    expect(migration, contains("'closed_test'"));
+    expect(migration, contains("'bil_closed_test'"));
   });
 }

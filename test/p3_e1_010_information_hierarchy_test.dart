@@ -7,6 +7,7 @@ import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/data/database/date_keys.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
+import 'package:body_intelligence_log/data/repositories/nutrition_goal_schedule_repository.dart';
 import 'package:body_intelligence_log/data/repositories/water_repository.dart';
 import 'package:body_intelligence_log/features/analytics/analytics_page.dart';
 import 'package:body_intelligence_log/features/daily_log/daily_log_page.dart';
@@ -29,13 +30,18 @@ void main() {
     ).readAsStringSync();
 
     expect(source, contains('required this.onProfile'));
-    expect(source, contains('Icons.person_rounded'));
-    expect(source, contains('_RoundGlassButton('));
+    expect(source, contains('BilAccountAvatar('));
+    expect(source, contains('_RoundProfileButton('));
+    expect(source, contains("Key('dashboard-default-profile-avatar')"));
   });
 
   testWidgets(
     'P3-E1-010 Daily Log keeps one primary completion action and secondary actions available',
     (tester) async {
+      tester.view.physicalSize = const Size(390, 4000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
       final database = AppDatabase.forTesting(NativeDatabase.memory());
       addTearDown(database.close);
 
@@ -71,6 +77,28 @@ void main() {
             selectedDailyLogProvider.overrideWith(
               (ref) => Stream.value(dailyLog),
             ),
+            diaryMealNamesProvider.overrideWithValue(
+              const AsyncData(<String?>[null, null, null, null]),
+            ),
+            for (final key in const <String>[
+              'diary.foodInsights',
+              'diary.showAllMeals',
+              'diary.showFoodTimestamps',
+              'diary.useNetCarbs',
+              'diary.alwaysShowWater',
+            ])
+              dailyLogPreferenceProvider(key).overrideWithValue(
+                AsyncData(
+                  const {
+                    'diary.foodInsights',
+                    'diary.showAllMeals',
+                    'diary.alwaysShowWater',
+                  }.contains(key),
+                ),
+              ),
+            nutritionGoalScheduleProvider.overrideWithValue(
+              const AsyncData(NutritionGoalSchedule()),
+            ),
             userProfileProvider.overrideWith((ref) => Stream.value(null)),
             foodRepositoryProvider.overrideWithValue(FoodRepository(database)),
             mealRepositoryProvider.overrideWithValue(MealRepository(database)),
@@ -96,25 +124,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Record your day'), findsOneWidget);
-      expect(find.widgetWithText(FilledButton, 'Save meal'), findsOneWidget);
-
-      await tester.scrollUntilVisible(
-        find.byKey(const Key('daily_log_add_water_action')),
-        300,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pumpAndSettle();
-
-      expect(
-        find.byKey(const Key('daily_log_add_water_action')),
-        findsOneWidget,
-      );
-      expect(find.text('Add water'), findsOneWidget);
-
-      await tester.drag(find.byType(ListView).first, const Offset(0, -2000));
-      await tester.pumpAndSettle();
-
+      expect(find.byKey(const Key('daily-log-today-summary')), findsOneWidget);
+      expect(find.byKey(const Key('daily-log-action-row')), findsOneWidget);
+      expect(find.byKey(const Key('daily-log-water-shortcut')), findsOneWidget);
+      expect(find.text('Water'), findsOneWidget);
       expect(
         find.byKey(const Key('daily_log_save_primary_action')),
         findsOneWidget,
@@ -137,12 +150,16 @@ void main() {
             allWaterProvider.overrideWith(
               (ref) => Stream.value(<WaterEntry>[]),
             ),
+            dashboardDailyLogsProvider.overrideWith(
+              (ref) => Stream.value(<DailyLog>[]),
+            ),
             insightLifeContextProvider.overrideWith(
               (ref) => Stream.value(<LifeContextEntry>[]),
             ),
             measurementSystemProvider.overrideWith(
               (ref) => Stream.value(MeasurementSystem.metric),
             ),
+            userProfileProvider.overrideWith((ref) => Stream.value(null)),
           ],
           child: const MaterialApp(
             locale: Locale('en'),

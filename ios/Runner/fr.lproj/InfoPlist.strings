@@ -1,8 +1,8 @@
-"NSHealthShareUsageDescription" = "BIL lit uniquement les catégories Santé que vous choisissez—activité, sommeil, mesures corporelles, données cardiaques et respiratoires, tension, oxygène, glucose, hydratation et nutrition—afin d’afficher un historique et des analyses privés sur cet appareil.";
+"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
 "NSHealthUpdateUsageDescription" = "BIL écrit uniquement les données de santé que vous choisissez, après une autorisation distincte.";
-"NSBluetoothAlwaysUsageDescription" = "BIL se connecte uniquement aux appareils de santé que vous associez explicitement afin d’importer les mesures localement.";
-"NSBluetoothPeripheralUsageDescription" = "BIL se connecte uniquement aux appareils de santé que vous associez explicitement afin d’importer les mesures localement.";
+"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Utilisez la caméra uniquement pour scanner un code-barres, examiner une photo de repas ou ajouter une photo privée de profil ou de progression.";
 "NSPhotoLibraryUsageDescription" = "Sélectionnez une photo de repas, de profil ou de progression pour l’examiner avant son enregistrement ou son envoi.";
-"NSMicrophoneUsageDescription" = "BIL utilise le microphone uniquement lorsque vous choisissez la saisie vocale d’un repas.";
-"NSSpeechRecognitionUsageDescription" = "BIL convertit votre description du repas en texte afin que vous puissiez la vérifier avant l’enregistrement.";
+"NSMicrophoneUsageDescription" = "BIL utilise le microphone uniquement lorsque vous choisissez de saisir un repas à la voix ou de parler directement à BIL AI Coach.";
+"NSSpeechRecognitionUsageDescription" = "BIL convertit en texte la parole que vous lancez pour enregistrer un repas ou utiliser BIL AI Coach, afin que vous puissiez la vérifier ou l’envoyer.";

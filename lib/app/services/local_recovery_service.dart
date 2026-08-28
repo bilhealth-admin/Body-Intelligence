@@ -24,7 +24,7 @@ class LocalRecoveryService {
   }) : _directoryResolver = directoryResolver ?? getApplicationSupportDirectory;
 
   static const snapshotFormatVersion = 1;
-  static const _fileName = 'bil_local_recovery_v1.sqlite';
+  static const _fileNamePrefix = 'bil_local_recovery_v1';
   static const _tables = <String>[
     'daily_logs',
     'user_profile',
@@ -54,7 +54,12 @@ class LocalRecoveryService {
     if (!directory.existsSync()) {
       await directory.create(recursive: true);
     }
-    final target = File(path.join(directory.path, _fileName));
+    final target = File(
+      path.join(
+        directory.path,
+        '${_fileNamePrefix}_${database.localStorageScope}.sqlite',
+      ),
+    );
     final previous = File('${target.path}.previous');
     if (!target.existsSync() && previous.existsSync()) {
       await previous.rename(target.path);

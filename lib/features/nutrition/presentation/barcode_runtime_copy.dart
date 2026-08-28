@@ -1,3 +1,5 @@
+import '../../../app/localization/runtime_copy.dart';
+
 class BarcodeRuntimeCopy {
   const BarcodeRuntimeCopy({
     required this.invalidTitle,
@@ -11,8 +13,22 @@ class BarcodeRuntimeCopy {
   final String invalidTitle, invalidBody, notFoundTitle, notFoundBody;
   final String unavailableTitle, unavailableBody;
 
-  static BarcodeRuntimeCopy of(String languageCode) =>
-      _all[languageCode.toLowerCase()] ?? _all['en']!;
+  static BarcodeRuntimeCopy of(String localeTag) {
+    final languageCode = localeTag.split(RegExp('[-_]')).first.toLowerCase();
+    final authored = _all[languageCode];
+    if (authored != null) return authored;
+    final english = _all['en']!;
+    String translated(String source) =>
+        RuntimeCopy.resolve(source, localeTag) ?? source;
+    return BarcodeRuntimeCopy(
+      invalidTitle: translated(english.invalidTitle),
+      invalidBody: translated(english.invalidBody),
+      notFoundTitle: translated(english.notFoundTitle),
+      notFoundBody: translated(english.notFoundBody),
+      unavailableTitle: translated(english.unavailableTitle),
+      unavailableBody: translated(english.unavailableBody),
+    );
+  }
 
   static const _all = <String, BarcodeRuntimeCopy>{
     'en': BarcodeRuntimeCopy(

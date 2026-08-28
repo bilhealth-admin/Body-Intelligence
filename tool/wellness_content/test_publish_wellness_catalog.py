@@ -3,11 +3,24 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tool.wellness_content.publish_wellness_catalog import publish, validate_payload
+from tool.wellness_content.publish_wellness_catalog import (
+    load_approved_workout_release,
+    publish,
+    validate_payload,
+)
 
 
 class WellnessCatalogPublisherTest(unittest.TestCase):
     fixtures = Path(__file__).resolve().parent
+
+    @classmethod
+    def setUpClass(cls):
+        cls.approved_bundles = load_approved_workout_release()
+        cls.approved_release = cls.approved_bundles["bil-workouts-home-v1"]
+        cls.approved_items = list(cls.approved_release.items())
+        cls.approved_categories = list(dict.fromkeys(
+            entry["category"] for entry in cls.approved_release.values()
+        ))
 
     def test_accepts_licensed_https_content(self):
         payload = validate_payload(self.fixtures / "test-valid-pack.json")
@@ -18,21 +31,24 @@ class WellnessCatalogPublisherTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "rights_holder"):
             validate_payload(self.fixtures / "test-invalid-pack.json")
 
-    @staticmethod
-    def workout_item(index, category="strength"):
+    def workout_item(self, index):
+        item_id, approval = self.approved_items[index]
+        category = approval["category"]
+        category_order = self.approved_categories.index(category)
         suffix = f"{index:03d}"
         return {
-            "id": f"{category}-{suffix}",
+            "id": item_id,
             "type": "workouts",
             "locale": "en",
             "title": f"Workout {suffix}",
             "description": "Reviewed workout demonstration.",
             "category": category,
             "category_description": f"{category.title()} workout routines.",
-            "category_order": 0,
+            "category_order": category_order,
             "equipment": ["none"],
             "steps": ["Start in a stable position.", "Move under control."],
             "duration_minutes": 5,
+            "duration_seconds": approval["duration_seconds"],
             "audience": "all",
             "presenter": "neutral",
             "synthetic_performer": False,
@@ -48,63 +64,42 @@ class WellnessCatalogPublisherTest(unittest.TestCase):
             "verified": True,
             "media": {
                 "image": {
-                    "url": f"https://cdn.example.test/{suffix}.webp",
+                    "url": f"https://cdn.example.test/{item_id}.webp",
                     "mime_type": "image/webp",
                     "sha256": f"{index + 1000:064x}",
                     "size_bytes": 1000 + index,
                     "media_role": "preview",
                 },
                 "video": {
-                    "url": f"https://cdn.example.test/{suffix}.mp4",
+                    "url": f"https://cdn.example.test/{approval['object_path']}",
                     "mime_type": "video/mp4",
-                    "sha256": f"{index + 1:064x}",
-                    "size_bytes": 100000 + index,
+                    "sha256": approval["sha256"],
+                    "size_bytes": approval["size_bytes"],
                     "media_role": "preview",
                 },
             },
-            "segments": [{
-                "id": f"movement-{suffix}",
-                "title": f"Movement {suffix}",
-                "instruction": "Move under control through a comfortable range.",
-                "reps": 8,
-                "rest_seconds": 20,
-                "optional": False,
-                "media": {
-                    "image": {
-                        "url": f"https://cdn.example.test/{suffix}-movement.webp",
-                        "mime_type": "image/webp",
-                        "sha256": f"{index + 2000:064x}",
-                        "size_bytes": 800 + index,
-                        "media_role": "instruction",
-                    },
-                    "video": {
-                        "url": f"https://cdn.example.test/{suffix}-movement.mp4",
-                        "mime_type": "video/mp4",
-                        "sha256": f"{index + 3000:064x}",
-                        "size_bytes": 80000 + index,
-                        "media_role": "instruction",
-                    },
-                },
-            }],
+            "segments": [],
         }
 
-    def write_workout_pack(self, root, count=100):
+    def write_workout_pack(self, root, count=200):
+        categories = self.approved_categories
         path = Path(root) / "workouts.json"
         path.write_text(json.dumps({
             "schema_version": 2,
-            "pack_id": "strength-v2",
+            "pack_id": "bil-workouts-home-v1",
             "version": 1,
             "type": "workouts",
-            "categories": ["strength"],
+            "categories": categories,
             "items": [self.workout_item(index) for index in range(count)],
         }), encoding="utf-8")
         return path
 
-    def test_accepts_one_hundred_licensed_videos_per_category(self):
+    def test_accepts_exact_release_distribution(self):
         with tempfile.TemporaryDirectory() as root:
             payload = validate_payload(self.write_workout_pack(root))
         self.assertEqual(payload["schema_version"], 2)
-        self.assertEqual(len(payload["items"]), 100)
+        self.assertEqual(len(payload["items"]), 200)
+        self.assertEqual(set(payload["categories"]), set(self.approved_categories))
 
     def test_accepts_reviewed_gender_specific_synthetic_presenters(self):
         with tempfile.TemporaryDirectory() as root:
@@ -155,12 +150,6 @@ class WellnessCatalogPublisherTest(unittest.TestCase):
                 ),
                 "media_role must be preview",
             ),
-            (
-                lambda item: item["segments"][0]["media"]["video"].update(
-                    {"media_role": "preview"}
-                ),
-                "media_role must be instruction",
-            ),
         )
         for mutate, message in mutations:
             with self.subTest(message=message), tempfile.TemporaryDirectory() as root:
@@ -187,21 +176,26 @@ class WellnessCatalogPublisherTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "explicit human safety review"):
                 validate_payload(path)
 
-    def test_generation_template_is_not_publishable_before_human_review(self):
+    def test_generation_template_is_not_a_complete_release_pack(self):
         template = self.fixtures / "pack-template.json"
-        with self.assertRaisesRegex(ValueError, "explicit human safety review"):
+        with self.assertRaisesRegex(
+            ValueError,
+            "categories must match the approved release",
+        ):
             validate_payload(template)
 
     def test_rejects_undersized_or_duplicate_workout_categories(self):
         with tempfile.TemporaryDirectory() as root:
-            with self.assertRaisesRegex(ValueError, "at least 100 videos"):
-                validate_payload(self.write_workout_pack(root, count=99))
+            with self.assertRaisesRegex(ValueError, "complete approved bundle"):
+                validate_payload(self.write_workout_pack(root, count=199))
 
             path = self.write_workout_pack(root)
             payload = json.loads(path.read_text(encoding="utf-8"))
-            payload["items"][-1]["media"]["video"] = payload["items"][0]["media"]["video"]
+            payload["items"][-1]["media"]["video"]["sha256"] = payload["items"][0][
+                "media"
+            ]["video"]["sha256"]
             path.write_text(json.dumps(payload), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "Duplicate workout video"):
+            with self.assertRaisesRegex(ValueError, "approved path/SHA/size evidence"):
                 validate_payload(path)
 
     def test_rejects_insecure_or_unlicensed_workout_video(self):
@@ -219,15 +213,13 @@ class WellnessCatalogPublisherTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "not licensed"):
                 validate_payload(path)
 
-    def test_rejects_duplicate_segment_media(self):
+    def test_rejects_unapproved_extra_segment_video(self):
         with tempfile.TemporaryDirectory() as root:
             path = self.write_workout_pack(root)
             payload = json.loads(path.read_text(encoding="utf-8"))
-            duplicate = json.loads(json.dumps(payload["items"][0]["segments"][0]))
-            duplicate["id"] = "duplicate-movement"
-            payload["items"][0]["segments"].append(duplicate)
+            payload["items"][0]["segments"].append({"id": "unapproved-extra"})
             path.write_text(json.dumps(payload), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "Duplicate workout video media"):
+            with self.assertRaisesRegex(ValueError, "must be empty"):
                 validate_payload(path)
 
     def test_rejects_inconsistent_category_metadata(self):
@@ -239,10 +231,17 @@ class WellnessCatalogPublisherTest(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "inconsistent category_description"):
                 validate_payload(path)
 
-            payload["items"][-1]["category_description"] = payload["items"][0][
+            same_category = next(
+                item
+                for item in payload["items"][:-1]
+                if item["category"] == payload["items"][-1]["category"]
+            )
+            payload["items"][-1]["category_description"] = same_category[
                 "category_description"
             ]
-            payload["items"][-1]["category_order"] = 1
+            payload["items"][-1]["category_order"] = (
+                same_category["category_order"] + 1
+            )
             path.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "inconsistent category_order"):
                 validate_payload(path)

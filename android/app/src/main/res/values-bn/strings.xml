@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BIL - শারীরিক বুদ্ধিমত্তা লগ</string>
+    <string name="health_permissions_rationale_title">স্বাস্থ্য তথ্য গোপনীয়তা</string>
+    <string name="health_permissions_rationale_body">BIL শুধুমাত্র Health Connect ডেটার প্রকারের অনুরোধ করে যা আপনি ব্যবহার করতে বেছে নেওয়া বৈশিষ্ট্যগুলির জন্য প্রয়োজন৷ আপনার স্বাস্থ্য তথ্য স্থানীয়ভাবে ডিফল্টরূপে প্রক্রিয়া করা হয়. আপনি Health Connect সেটিংস থেকে যে কোনো সময় পৃথক অনুমতি মঞ্জুর করতে, অস্বীকার করতে বা প্রত্যাহার করতে পারেন৷ BIL স্বাস্থ্য ডেটা বিক্রি করে না বা বিজ্ঞাপনের জন্য ব্যবহার করে না।</string>
+    <string name="health_permissions_privacy_policy_action">BIL-এর সম্পূর্ণ গোপনীয়তা নীতি পড়ুন</string>
+</resources>

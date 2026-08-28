@@ -42,8 +42,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Explore'), findsOneWidget);
-      expect(find.text('My Routines'), findsOneWidget);
+      expect(find.text('Gym'), findsOneWidget);
+      expect(find.text('Home'), findsOneWidget);
+      expect(find.text('My plans'), findsOneWidget);
       expect(find.text('Foundation strength'), findsOneWidget);
       expect(find.text('25 min'), findsOneWidget);
       expect(find.text('Dumbbells • Mat'), findsOneWidget);
@@ -65,7 +66,7 @@ void main() {
 
       await tester.pageBack();
       await tester.pumpAndSettle();
-      await tester.tap(find.text('My Routines'));
+      await tester.tap(find.text('My plans'));
       await tester.pumpAndSettle();
 
       expect(find.text('Foundation strength'), findsOneWidget);
@@ -89,7 +90,7 @@ void main() {
 
     await pumpPage();
     await tester.pumpAndSettle();
-    await tester.tap(find.text('My Routines'));
+    await tester.tap(find.text('My plans'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('build-custom-routine')));
     await tester.pumpAndSettle();
@@ -117,7 +118,7 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await pumpPage();
     await tester.pumpAndSettle();
-    await tester.tap(find.text('My Routines'));
+    await tester.tap(find.text('My plans'));
     await tester.pumpAndSettle();
     expect(find.text('Balanced foundations'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
@@ -139,7 +140,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('My Routines'));
+    await tester.tap(find.text('My plans'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('build-custom-routine')));
     await tester.pumpAndSettle();
@@ -200,7 +201,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('My Routines'));
+    await tester.tap(find.text('My plans'));
     await tester.pumpAndSettle();
     expect(find.text('Valid routine'), findsOneWidget);
     expect(find.text('Duplicate id'), findsNothing);
@@ -418,6 +419,24 @@ void main() {
               asset: 'workout_recovery_cover_v1.png',
               safetyLabel: 'not an exercise instruction',
             ),
+            (
+              locale: const Locale('en'),
+              category: 'home-core-stability',
+              asset: 'workout_strength_cover_v1.png',
+              safetyLabel: 'not an exercise instruction',
+            ),
+            (
+              locale: const Locale('en'),
+              category: 'home-balance-coordination',
+              asset: 'workout_mobility_cover_v1.png',
+              safetyLabel: 'not an exercise instruction',
+            ),
+            (
+              locale: const Locale('en'),
+              category: 'gym-push',
+              asset: 'workout_strength_cover_v1.png',
+              safetyLabel: 'not an exercise instruction',
+            ),
           ];
 
       for (var index = 0; index < cases.length; index++) {
@@ -426,7 +445,10 @@ void main() {
         await tester.pumpWidget(
           _TestApp(
             locale: entry.locale,
-            child: BilWorkoutRoutinesPage(loader: (_) async => [item]),
+            child: BilWorkoutRoutinesPage(
+              key: ValueKey('visual-cover-$index'),
+              loader: (_) async => [item],
+            ),
           ),
         );
         await tester.pumpAndSettle();
@@ -450,6 +472,56 @@ void main() {
       semantics.dispose();
     },
   );
+
+  testWidgets('one premium hub keeps Gym and Home in bounded plan sections', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(430, 1050));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    final gym = List.generate(
+      6,
+      (index) => _workoutForCategory(
+        'gym-push-$index',
+        'Strength',
+        title: 'Push movement $index',
+        releaseBundleId: 'gym-six-month',
+        primaryPlanGroupId: 'gym-push',
+        planGroupIds: const ['gym-push'],
+      ),
+    );
+    final home = _workoutForCategory(
+      'home-core-0',
+      'Core',
+      releaseBundleId: 'home-training',
+      primaryPlanGroupId: 'home-core-stability',
+      planGroupIds: const ['home-core-stability'],
+    );
+    await tester.pumpWidget(
+      _TestApp(
+        child: BilWorkoutRoutinesPage(loader: (_) async => [...gym, home]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Push'), findsOneWidget);
+    var row = tester.widget<ListView>(
+      find.byKey(const ValueKey('workout-category-Push')),
+    );
+    expect(row.childrenDelegate.estimatedChildCount, 9);
+    await tester.tap(find.text('See all'));
+    await tester.pumpAndSettle();
+    row = tester.widget<ListView>(
+      find.byKey(const ValueKey('workout-category-Push')),
+    );
+    expect(row.childrenDelegate.estimatedChildCount, 11);
+
+    await tester.tap(find.text('Home'));
+    await tester.pumpAndSettle();
+    expect(find.text('Core Stability'), findsOneWidget);
+    expect(find.text('Push'), findsNothing);
+  });
 
   testWidgets(
     'presenter filter uses explicit metadata without claiming medical eligibility',
@@ -656,6 +728,9 @@ WellnessContentItem _workoutForCategory(
   WellnessWorkoutAudience audience = WellnessWorkoutAudience.all,
   WellnessWorkoutPresenter presenter = WellnessWorkoutPresenter.neutral,
   bool syntheticPreview = false,
+  String? releaseBundleId,
+  String? primaryPlanGroupId,
+  List<String> planGroupIds = const [],
 }) => WellnessContentItem(
   id: id,
   type: WellnessContentType.workouts,
@@ -671,6 +746,10 @@ WellnessContentItem _workoutForCategory(
   audience: audience,
   presenter: presenter,
   syntheticPerformer: syntheticPreview,
+  releaseBundleId: releaseBundleId,
+  releaseKey: releaseBundleId == null ? null : '$releaseBundleId:$id',
+  primaryPlanGroupId: primaryPlanGroupId,
+  planGroupIds: planGroupIds,
   videoMedia: syntheticPreview
       ? WellnessMediaAsset(
           url: Uri.parse('https://cdn.bilhealth.com/workouts/$id.mp4'),

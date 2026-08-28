@@ -4,13 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('goal editors write real profile and preference repositories', () {
-    final goals = File(
+    final goals = [
       'lib/features/settings/reference_goals_page.dart',
-    ).readAsStringSync();
+      'lib/features/settings/reference_goals_components.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     expect(goals, contains('startingWeightEditor'));
     expect(goals, contains("Key('goals-starting-date')"));
-    expect(goals, contains("repo.set('goals.startingWeight'"));
-    expect(goals, contains("repo.set('goals.startingDate'"));
+    expect(goals, contains('repo.setMany('));
+    expect(goals, contains("'goals.startingWeight':"));
+    expect(goals, contains("'goals.startingDate':"));
     expect(goals, contains('userProfileRepositoryProvider'));
     expect(goals, contains("'goals.workoutsPerWeek' ? 14 : 300"));
     expect(goals, contains('if (_numberEditorOpen) return null'));
@@ -18,9 +20,12 @@ void main() {
   });
 
   test('nutrition goals include complete persisted nutrient key set', () {
-    final nutrition = File(
+    final nutrition = [
       'lib/features/settings/reference_preferences_pages.dart',
-    ).readAsStringSync();
+      'lib/features/settings/reference_preferences_controls.dart',
+      'lib/features/settings/reference_preferences_numeric.dart',
+      'lib/features/settings/reference_preferences_macros.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     for (final key in [
       'goal.calories',
       'goal.carbsPercent',

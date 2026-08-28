@@ -14,7 +14,9 @@ import '../../shared/widgets/actionable_empty_state.dart';
 import '../../shared/widgets/actionable_error_state.dart';
 import '../../shared/widgets/premium_surface.dart';
 import '../profile/providers/user_profile_provider.dart';
+import '../nutrition/services/bil_speech_to_text.dart';
 import '../weight/providers/weight_provider.dart';
+import '../weight/services/weight_voice_input_service.dart';
 
 part 'widgets/weight_trend_painter.dart';
 part 'widgets/history_page_components.dart';
@@ -29,7 +31,11 @@ class HistoryPage extends ConsumerWidget {
   ]) async {
     final system =
         ref.read(measurementSystemProvider).value ?? MeasurementSystem.metric;
-    var displayed = UnitConverter.weightFromKg(entry?.weight ?? 60, system);
+    final currentWeight = ref.read(effectiveCurrentWeightProvider);
+    var displayed = UnitConverter.weightFromKg(
+      entry?.weight ?? currentWeight ?? 60,
+      system,
+    );
     var selectedDate = entry?.date ?? DateTime.now();
     var measurementContext = entry?.measurementContext ?? 'differentConditions';
     final value =
@@ -50,7 +56,7 @@ class HistoryPage extends ConsumerWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      WheelNumberField(
+                      SmartWeightScaleField(
                         value: displayed,
                         minimum: UnitConverter.weightFromKg(20, system),
                         maximum: UnitConverter.weightFromKg(350, system),
@@ -60,6 +66,30 @@ class HistoryPage extends ConsumerWidget {
                         label: context.strings.text('Weight'),
                         onChanged: (next) =>
                             setDialogState(() => displayed = next),
+                      ),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: FilledButton.tonalIcon(
+                          key: const Key('add-weight-by-voice'),
+                          onPressed: () async {
+                            final candidate =
+                                await WeightVoiceInputService(
+                                  SpeechToText(),
+                                ).capture(
+                                  context: dialogContext,
+                                  fallbackSystem: system,
+                                );
+                            if (candidate == null) return;
+                            final next = UnitConverter.weightFromKg(
+                              candidate.kilograms,
+                              system,
+                            );
+                            setDialogState(() => displayed = next);
+                          },
+                          icon: const Icon(Icons.mic_none_rounded),
+                          label: Text(context.strings.text('Voice input')),
+                        ),
                       ),
                       const SizedBox(height: 12),
                       ListTile(
@@ -277,9 +307,6 @@ class HistoryPage extends ConsumerWidget {
           final locale = Localizations.localeOf(
             context,
           ).languageCode.toLowerCase();
-          final recent = chronological.length > 30
-              ? chronological.sublist(chronological.length - 30)
-              : chronological;
           return ListView(
             padding: const EdgeInsets.fromLTRB(
               PremiumDesignTokens.spaceMd,
@@ -304,7 +331,13 @@ class HistoryPage extends ConsumerWidget {
                       ),
                       const SizedBox(height: PremiumDesignTokens.spaceSm),
                       WeightTrendChart(
-                        weights: recent.map((row) => row.weight).toList(),
+                        // Weight history is an all-time surface. Keep the
+                        // chart on the same complete series used by the
+                        // evidence engine instead of silently clipping it to
+                        // the latest 30 entries.
+                        weights: chronological
+                            .map((row) => row.weight)
+                            .toList(),
                         variability: analysis.variabilityKg,
                         semanticsLabel: context.strings.text(
                           'Recorded weight trend over time',

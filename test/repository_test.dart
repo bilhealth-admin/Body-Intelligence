@@ -157,6 +157,8 @@ void main() {
       final foodId = await foods.addFood(
         name: 'Oats',
         category: 'grain',
+        servingSize: 100,
+        servingUnit: 'g',
         calories: 389,
         protein: 16.9,
         carbs: 66.3,
@@ -218,6 +220,8 @@ void main() {
     final foodId = await foods.addFood(
       name: 'Reviewed oats',
       category: 'grain',
+      servingSize: 100,
+      servingUnit: 'g',
       calories: 100,
       protein: 4,
       carbs: 18,
@@ -245,6 +249,8 @@ void main() {
       final foodId = await foods.addFood(
         name: 'Repeat oats',
         category: 'grain',
+        servingSize: 100,
+        servingUnit: 'g',
         calories: 380,
         protein: 15,
         carbs: 65,
@@ -289,6 +295,8 @@ void main() {
     final firstFood = await foods.addFood(
       name: 'First',
       category: 'custom',
+      servingSize: 100,
+      servingUnit: 'g',
       calories: 100,
       protein: 1,
       carbs: 1,
@@ -297,6 +305,8 @@ void main() {
     final secondFood = await foods.addFood(
       name: 'Second',
       category: 'custom',
+      servingSize: 100,
+      servingUnit: 'g',
       calories: 200,
       protein: 2,
       carbs: 2,
@@ -340,6 +350,8 @@ void main() {
       final foodId = await foods.addFood(
         name: 'Move me',
         category: 'custom',
+        servingSize: 100,
+        servingUnit: 'g',
         calories: 120,
         protein: 4,
         carbs: 20,
@@ -372,6 +384,8 @@ void main() {
       name: 'Lentils',
       arabicName: 'عدس',
       category: 'legume',
+      servingSize: 100,
+      servingUnit: 'g',
       calories: 116,
       protein: 9,
       carbs: 20,
@@ -395,6 +409,8 @@ void main() {
     final foodId = await foods.addFood(
       name: 'Personal yogurt',
       category: 'custom',
+      servingSize: 100,
+      servingUnit: 'g',
       calories: 120,
       protein: 10,
       carbs: 12,
@@ -443,6 +459,8 @@ void main() {
       final frequent = await foods.addFood(
         name: 'Frequent oats',
         category: 'grain',
+        servingSize: 100,
+        servingUnit: 'g',
         barcode: '123456789',
         calories: 380,
         protein: 15,
@@ -452,6 +470,8 @@ void main() {
       final favorite = await foods.addFood(
         name: 'Favorite yogurt',
         category: 'dairy',
+        servingSize: 100,
+        servingUnit: 'g',
         calories: 95,
         protein: 8,
         carbs: 10,
@@ -460,6 +480,8 @@ void main() {
       await foods.addFood(
         name: 'Alphabetical apple',
         category: 'fruit',
+        servingSize: 100,
+        servingUnit: 'g',
         calories: 52,
         protein: 0.3,
         carbs: 14,
@@ -794,6 +816,8 @@ void main() {
       final foodId = await foods.addFood(
         name: 'Known sodium-free food',
         category: 'custom',
+        servingSize: 100,
+        servingUnit: 'g',
         calories: 10,
         protein: 1,
         carbs: 1,

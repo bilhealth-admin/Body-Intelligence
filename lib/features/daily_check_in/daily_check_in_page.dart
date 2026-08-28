@@ -1,19 +1,21 @@
-import 'dart:io';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
+import '../../app/localization/app_localizations.dart';
+import '../../app/services/store_review_prompt_service.dart';
 import '../../core/units/measurement_units.dart';
 import '../../data/database/date_keys.dart';
-import '../profile/providers/user_profile_provider.dart';
-import '../profile/profile_locale_copy.dart';
-import '../weight/providers/weight_provider.dart';
 import '../../shared/widgets/actionable_error_state.dart';
+import '../nutrition/services/bil_speech_to_text.dart';
+import '../intelligence_center/services/coach_context_provider.dart';
+import '../profile/providers/user_profile_provider.dart';
+import '../weight/providers/weight_provider.dart';
+import '../weight/services/weight_voice_input_service.dart';
 import 'check_in_mutation_coordinator.dart';
+import 'daily_check_in_locale_copy.dart';
 
 class DailyCheckInPage extends ConsumerStatefulWidget {
   const DailyCheckInPage({super.key});
@@ -24,16 +26,13 @@ class DailyCheckInPage extends ConsumerStatefulWidget {
 
 class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
   double? weightKg;
-  String measurementContext = 'unspecified';
+  bool weightEdited = false;
+  String measurementContext = 'morning';
   bool initialized = false;
   late final CheckInMutationCoordinator mutations;
-  bool get saving => mutations.active == CheckInMutationKind.save;
-  bool get deleting => mutations.active == CheckInMutationKind.delete;
-  bool get skipping => mutations.active == CheckInMutationKind.skip;
-  String? progressPhotoPath;
-  bool clearProgressPhoto = false;
 
-  String tr(String en, String ar) => profileLocaleText(context, en, ar);
+  bool get saving => mutations.active == CheckInMutationKind.save;
+  bool get skipping => mutations.active == CheckInMutationKind.skip;
 
   @override
   void initState() {
@@ -45,86 +44,8 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
     );
   }
 
-  Future<void> pickProgressPhoto() async {
-    if (saving || deleting || skipping) return;
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                tr('Progress photo', 'صورة التقدّم'),
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 12),
-              FilledButton.tonalIcon(
-                onPressed: () =>
-                    Navigator.pop(sheetContext, ImageSource.camera),
-                icon: const Icon(Icons.photo_camera_outlined),
-                label: Text(tr('Take a private photo', 'التقط صورة خاصة')),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton.icon(
-                onPressed: () =>
-                    Navigator.pop(sheetContext, ImageSource.gallery),
-                icon: const Icon(Icons.photo_library_outlined),
-                label: Text(tr('Choose from device', 'اختر من الجهاز')),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    if (source == null) return;
-    try {
-      final picked = await ImagePicker().pickImage(
-        source: source,
-        imageQuality: 88,
-        maxWidth: 1800,
-      );
-      if (picked == null) return;
-      final documents = await getApplicationDocumentsDirectory();
-      final folder = Directory(
-        p.join(documents.path, 'bil', 'progress_photos'),
-      );
-      await folder.create(recursive: true);
-      final extension = p.extension(picked.path).isEmpty
-          ? '.jpg'
-          : p.extension(picked.path);
-      final target = File(
-        p.join(
-          folder.path,
-          'weight_${DateTime.now().microsecondsSinceEpoch}$extension',
-        ),
-      );
-      await File(picked.path).copy(target.path);
-      if (!mounted) return;
-      setState(() {
-        progressPhotoPath = target.path;
-        clearProgressPhoto = false;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            tr(
-              'Camera is unavailable here. Choose a photo from the device.',
-              'الكاميرا غير متاحة هنا. اختر صورة محفوظة على الجهاز.',
-            ),
-          ),
-        ),
-      );
-    }
-  }
-
   Future<void> enterWeight(MeasurementSystem system) async {
-    if (saving || deleting || skipping) return;
+    if (saving || skipping) return;
     final current = weightKg == null
         ? null
         : UnitConverter.weightFromKg(weightKg!, system);
@@ -134,34 +55,30 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
     final entered = await showDialog<double>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(tr('Enter weight', 'أدخل الوزن')),
+        title: Text(dailyCheckInText(context, 'Enter weight')),
         content: TextField(
           controller: controller,
           autofocus: true,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: InputDecoration(
             suffixText: UnitConverter.weightUnit(system),
-            helperText: tr(
-              'Use the value shown on your scale.',
-              'استخدم القيمة الظاهرة على الميزان.',
-            ),
           ),
-          onSubmitted: (value) {
-            final parsed = double.tryParse(value.replaceAll(',', '.'));
-            Navigator.pop(dialogContext, parsed);
-          },
+          onSubmitted: (value) => Navigator.pop(
+            dialogContext,
+            double.tryParse(value.replaceAll(',', '.')),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text(tr('Cancel', 'إلغاء')),
+            child: Text(context.strings.text('Cancel')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(
               dialogContext,
               double.tryParse(controller.text.replaceAll(',', '.')),
             ),
-            child: Text(tr('Apply', 'تطبيق')),
+            child: Text(dailyCheckInText(context, 'Apply')),
           ),
         ],
       ),
@@ -173,12 +90,27 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(tr('Enter a valid weight.', 'أدخل وزنًا صالحًا.')),
+          content: Text(dailyCheckInText(context, 'Enter a valid weight.')),
         ),
       );
       return;
     }
-    setState(() => weightKg = kilograms);
+    setState(() {
+      weightEdited = true;
+      weightKg = kilograms;
+    });
+  }
+
+  Future<void> enterWeightByVoice(MeasurementSystem system) async {
+    if (saving || skipping) return;
+    final candidate = await WeightVoiceInputService(
+      SpeechToText(),
+    ).capture(context: context, fallbackSystem: system);
+    if (!mounted || candidate == null) return;
+    setState(() {
+      weightEdited = true;
+      weightKg = candidate.kilograms;
+    });
   }
 
   Future<void> save() async {
@@ -187,28 +119,21 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
     final outcome = await mutations.run(CheckInMutationKind.save, () async {
       await ref
           .read(weightRepositoryProvider)
-          .addWeight(
-            value,
-            measurementContext: measurementContext,
-            progressPhotoPath: progressPhotoPath,
-            clearProgressPhoto: clearProgressPhoto,
-          );
+          .addWeight(value, measurementContext: measurementContext);
+      // The choice is measurement evidence, not decoration. Rebuild the
+      // bounded AI context immediately so the next local/remote Coach turn
+      // receives both the value and the conditions under which it was taken.
+      ref.invalidate(coachContextSnapshotProvider);
     });
+    if (!mounted) return;
     if (outcome == CheckInMutationOutcome.success) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            tr(
-              'Check-in saved. Consistent conditions make your trend clearer.',
-              'تم حفظ القياس. ثبات ظروف القياس يجعل اتجاهك أوضح.',
-            ),
-          ),
-        ),
+      unawaited(
+        ref
+            .read(storeReviewPromptServiceProvider)
+            .recordPositiveMoment(StoreReviewMoment.dailyCheckIn),
       );
       context.go('/dashboard');
     } else if (outcome == CheckInMutationOutcome.failure) {
-      if (!mounted) return;
       _showStorageFailure();
     }
   }
@@ -220,50 +145,11 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
           .read(preferencesRepositoryProvider)
           .set('weightReminderSkippedDay', dayKeyFor(DateTime.now()));
     });
+    if (!mounted) return;
     if (outcome == CheckInMutationOutcome.success) {
-      if (mounted) context.go('/dashboard');
-    } else if (outcome == CheckInMutationOutcome.failure && mounted) {
+      context.go('/dashboard');
+    } else if (outcome == CheckInMutationOutcome.failure) {
       _showStorageFailure();
-    }
-  }
-
-  Future<void> deleteToday(int id) async {
-    if (mutations.busy) return;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(tr("Delete today's weight?", 'حذف وزن اليوم؟')),
-        content: Text(
-          tr(
-            'This removes today’s check-in from trend calculations.',
-            'سيؤدي ذلك إلى إزالة قياس اليوم من حسابات الاتجاه.',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(tr('Cancel', 'إلغاء')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(tr('Delete', 'حذف')),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true) {
-      final outcome = await mutations.run(CheckInMutationKind.delete, () async {
-        await ref.read(weightRepositoryProvider).deleteWeight(id);
-      });
-      if (outcome == CheckInMutationOutcome.success) {
-        if (mounted) {
-          setState(() {
-            initialized = false;
-          });
-        }
-      } else if (outcome == CheckInMutationOutcome.failure && mounted) {
-        _showStorageFailure();
-      }
     }
   }
 
@@ -271,9 +157,9 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          tr(
+          dailyCheckInText(
+            context,
             'The check-in could not be changed on this device. Try again.',
-            'تعذر تعديل القياس على هذا الجهاز. حاول مرة أخرى.',
           ),
         ),
       ),
@@ -283,6 +169,7 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
   @override
   Widget build(BuildContext context) {
     final today = ref.watch(todayWeightProvider);
+    final latest = ref.watch(latestWeightProvider);
     final profileState = ref.watch(userProfileProvider);
     final systemState = ref.watch(measurementSystemProvider);
     final loading =
@@ -294,29 +181,37 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
     final existing = today.value;
     if (!initialized && !loading && !hasError && system != null) {
       initialized = true;
-      weightKg = existing?.weight ?? profile?.currentWeight;
-      measurementContext = existing?.measurementContext ?? 'unspecified';
-      progressPhotoPath = existing?.progressPhotoPath;
+      weightKg =
+          existing?.weight ?? latest.value?.weight ?? profile?.currentWeight;
+      measurementContext = existing?.measurementContext == 'afterFood'
+          ? 'afterFood'
+          : existing?.measurementContext == 'differentConditions'
+          ? 'differentConditions'
+          : 'morning';
     }
-    final canonical = weightKg ?? profile?.currentWeight;
-    final display = canonical == null
+    if (initialized &&
+        !weightEdited &&
+        existing == null &&
+        latest.value?.weight != null) {
+      weightKg = latest.value!.weight;
+    }
+    final canonical =
+        weightKg ?? latest.value?.weight ?? profile?.currentWeight;
+    final display = canonical == null || system == null
         ? null
-        : UnitConverter.weightFromKg(canonical, system!);
+        : UnitConverter.weightFromKg(canonical, system);
 
     return PopScope(
-      canPop: !saving && !deleting && !skipping,
+      canPop: !saving && !skipping,
       child: Scaffold(
         appBar: AppBar(
-          centerTitle: true,
-          title: Text(tr('Daily check-in', 'القياس اليومي')),
           leading: IconButton(
-            tooltip: tr('Not now', 'ليس الآن'),
-            onPressed: saving || deleting || skipping
-                ? null
-                : () => context.canPop()
-                      ? context.pop()
-                      : context.go('/dashboard'),
-            icon: const Icon(Icons.close),
+            tooltip: dailyCheckInText(context, 'Not now'),
+            // Closing the reminder is the same explicit choice as "Skip
+            // today". Persist it before leaving so reopening the dashboard
+            // cannot immediately present the same check-in again.
+            onPressed: saving || skipping ? null : skipToday,
+            icon: const Icon(Icons.close_rounded),
           ),
         ),
         body: SafeArea(
@@ -327,9 +222,9 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
                   child: Padding(
                     padding: const EdgeInsets.all(24),
                     child: ActionableErrorState(
-                      title: tr(
+                      title: dailyCheckInText(
+                        context,
                         'Weight data could not be loaded.',
-                        'تعذر تحميل بيانات الوزن.',
                       ),
                       onRetry: () {
                         ref.invalidate(todayWeightProvider);
@@ -340,153 +235,87 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
                   ),
                 )
               : SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 104),
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
                   child: Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 620),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Icon(
-                            Icons.monitor_weight_outlined,
-                            size: 44,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            tr('Good morning', 'صباح الخير'),
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            tr('Shall we log your weight?', 'نسجّل وزنك؟'),
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.headlineSmall,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            existing == null
-                                ? tr(
-                                    'A quick check-in for a clearer trend.',
-                                    'تسجيل سريع لاتجاه أوضح.',
-                                  )
-                                : '${tr('Last measurement', 'آخر قياس')}: ${display!.toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}',
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 18,
-                              vertical: 22,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface,
-                              borderRadius: BorderRadius.circular(28),
-                              border: Border.all(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.outlineVariant,
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(28),
+                            child: AspectRatio(
+                              aspectRatio: 16 / 8.2,
+                              child: Image.asset(
+                                'assets/images/daily_context/daily_weight_checkin_hero_v1.png',
+                                key: const Key('daily-check-in-hero'),
+                                fit: BoxFit.cover,
                               ),
                             ),
-                            child: Row(
-                              children: [
-                                IconButton.outlined(
-                                  onPressed:
-                                      weightKg == null ||
-                                          saving ||
-                                          deleting ||
-                                          skipping
-                                      ? null
-                                      : () => setState(
-                                          () => weightKg = (weightKg! - 0.1)
-                                              .clamp(20, 500),
-                                        ),
-                                  icon: const Icon(Icons.remove_rounded),
-                                ),
-                                Expanded(
-                                  child: InkWell(
-                                    borderRadius: BorderRadius.circular(18),
-                                    onTap: saving || deleting || skipping
-                                        ? null
-                                        : () => enterWeight(system),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 8,
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            display?.toStringAsFixed(1) ?? '—',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .displayMedium
-                                                ?.copyWith(
-                                                  fontWeight: FontWeight.w700,
-                                                ),
-                                          ),
-                                          Text(
-                                            '${UnitConverter.weightUnit(system)} · ${tr('tap to enter', 'اضغط للإدخال')}',
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                IconButton.outlined(
-                                  onPressed:
-                                      weightKg == null ||
-                                          saving ||
-                                          deleting ||
-                                          skipping
-                                      ? null
-                                      : () => setState(
-                                          () => weightKg = (weightKg! + 0.1)
-                                              .clamp(20, 500),
-                                        ),
-                                  icon: const Icon(Icons.add_rounded),
-                                ),
-                              ],
-                            ),
                           ),
-                          const SizedBox(height: 20),
-                          _ProgressPhotoCard(
-                            path: progressPhotoPath,
-                            onPick: pickProgressPhoto,
-                            onRemove:
-                                progressPhotoPath == null ||
-                                    saving ||
-                                    deleting ||
-                                    skipping
+                          const SizedBox(height: 22),
+                          Text(
+                            dailyCheckInText(
+                              context,
+                              'How much do you weigh today?',
+                            ),
+                            textAlign: TextAlign.center,
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                          const SizedBox(height: 18),
+                          _WeightEntryCard(
+                            display: display,
+                            system: system,
+                            busy: saving || skipping,
+                            onDecrease: weightKg == null
                                 ? null
                                 : () => setState(() {
-                                    progressPhotoPath = null;
-                                    clearProgressPhoto = true;
+                                    weightEdited = true;
+                                    weightKg = (weightKg! - 0.1).clamp(20, 500);
                                   }),
+                            onIncrease: weightKg == null
+                                ? null
+                                : () => setState(() {
+                                    weightEdited = true;
+                                    weightKg = (weightKg! + 0.1).clamp(20, 500);
+                                  }),
+                            onEnter: () => enterWeight(system),
+                            onVoice: () => enterWeightByVoice(system),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 16),
                           Wrap(
+                            key: const Key(
+                              'daily-check-in-measurement-context',
+                            ),
                             alignment: WrapAlignment.center,
                             spacing: 8,
                             runSpacing: 8,
                             children: [
-                              for (final option in <(String, String, String)>[
-                                ('morning', 'After waking', 'بعد الاستيقاظ'),
+                              for (final option in const [
+                                ('morning', 'Morning', Icons.wb_sunny_outlined),
                                 (
-                                  'afterBathroom',
-                                  'After bathroom',
-                                  'بعد الحمام',
+                                  'afterFood',
+                                  'After eating',
+                                  Icons.restaurant_outlined,
                                 ),
                                 (
                                   'differentConditions',
                                   'Different time',
-                                  'وقت مختلف',
+                                  Icons.schedule_rounded,
                                 ),
                               ])
                                 ChoiceChip(
+                                  key: Key(
+                                    'daily-check-in-context-${option.$1}',
+                                  ),
+                                  showCheckmark: false,
                                   selected: measurementContext == option.$1,
-                                  label: Text(tr(option.$2, option.$3)),
-                                  onSelected: saving || deleting || skipping
+                                  avatar: Icon(option.$3, size: 18),
+                                  label: Text(
+                                    dailyCheckInText(context, option.$2),
+                                  ),
+                                  onSelected: saving || skipping
                                       ? null
                                       : (_) => setState(
                                           () => measurementContext = option.$1,
@@ -494,44 +323,26 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
                                 ),
                             ],
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 18),
                           SizedBox(
-                            height: 58,
-                            child: FilledButton.icon(
+                            height: 56,
+                            child: FilledButton(
                               key: const ValueKey('daily-check-in-save'),
-                              onPressed:
-                                  saving ||
-                                      deleting ||
-                                      skipping ||
-                                      weightKg == null
+                              onPressed: saving || skipping || weightKg == null
                                   ? null
                                   : save,
-                              icon: saving
+                              child: saving
                                   ? const SizedBox.square(
-                                      dimension: 18,
+                                      dimension: 20,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
                                       ),
                                     )
-                                  : const Icon(
-                                      Icons.check_circle_outline_rounded,
-                                    ),
-                              label: Text(
-                                existing == null
-                                    ? weightKg == null
-                                          ? tr('Enter weight', 'أدخل الوزن')
-                                          : '${tr('Record', 'تسجيل')} ${display!.toStringAsFixed(1)} ${UnitConverter.weightUnit(system)}'
-                                    : tr(
-                                        "Update today's weight",
-                                        'تحديث وزن اليوم',
-                                      ),
-                              ),
+                                  : Text(context.strings.text('Save')),
                             ),
                           ),
                           TextButton(
-                            onPressed: saving || deleting || skipping
-                                ? null
-                                : skipToday,
+                            onPressed: saving || skipping ? null : skipToday,
                             child: skipping
                                 ? const SizedBox.square(
                                     dimension: 18,
@@ -539,25 +350,8 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : Text(tr('Later', 'لاحقًا')),
+                                : Text(dailyCheckInText(context, 'Skip today')),
                           ),
-                          if (existing != null)
-                            TextButton.icon(
-                              onPressed: saving || deleting || skipping
-                                  ? null
-                                  : () => deleteToday(existing.id),
-                              icon: deleting
-                                  ? const SizedBox.square(
-                                      dimension: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Icon(Icons.delete_outline),
-                              label: Text(
-                                tr("Delete today's weight", 'حذف وزن اليوم'),
-                              ),
-                            ),
                         ],
                       ),
                     ),
@@ -569,96 +363,201 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
   }
 }
 
-class _ProgressPhotoCard extends StatelessWidget {
-  const _ProgressPhotoCard({
-    required this.path,
-    required this.onPick,
-    required this.onRemove,
+class _WeightEntryCard extends StatelessWidget {
+  const _WeightEntryCard({
+    required this.display,
+    required this.system,
+    required this.busy,
+    required this.onDecrease,
+    required this.onIncrease,
+    required this.onEnter,
+    required this.onVoice,
   });
 
-  final String? path;
-  final VoidCallback onPick;
-  final VoidCallback? onRemove;
+  final double? display;
+  final MeasurementSystem system;
+  final bool busy;
+  final VoidCallback? onDecrease;
+  final VoidCallback? onIncrease;
+  final VoidCallback onEnter;
+  final VoidCallback onVoice;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.surface,
+      borderRadius: BorderRadius.circular(28),
+      border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x10000000),
+          blurRadius: 24,
+          offset: Offset(0, 10),
+        ),
+      ],
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            _RepeatWeightButton(
+              key: const Key('daily-check-in-weight-decrease'),
+              tooltip: '− 0.1 ${UnitConverter.weightUnit(system)}',
+              onPressed: busy ? null : onDecrease,
+              icon: Icons.remove_rounded,
+            ),
+            Expanded(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(18),
+                onTap: busy ? null : onEnter,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Column(
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          display?.toStringAsFixed(1) ?? '—',
+                          style: Theme.of(context).textTheme.displayMedium
+                              ?.copyWith(fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                      Text(
+                        UnitConverter.weightUnit(system),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            _RepeatWeightButton(
+              key: const Key('daily-check-in-weight-increase'),
+              tooltip: '+ 0.1 ${UnitConverter.weightUnit(system)}',
+              onPressed: busy ? null : onIncrease,
+              icon: Icons.add_rounded,
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        Center(
+          child: Tooltip(
+            message: dailyCheckInText(context, 'Voice input'),
+            child: FilledButton.tonalIcon(
+              key: const Key('daily-check-in-weight-voice'),
+              onPressed: busy ? null : onVoice,
+              icon: const Icon(Icons.mic_rounded),
+              label: Text(dailyCheckInText(context, 'Voice input')),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size(168, 48),
+                shape: const StadiumBorder(),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// A 100 g stepper that behaves like a real scale control: one short press is
+/// one step, while holding continues at a bounded repeat rate until release.
+class _RepeatWeightButton extends StatefulWidget {
+  const _RepeatWeightButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+    super.key,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback? onPressed;
+
+  @override
+  State<_RepeatWeightButton> createState() => _RepeatWeightButtonState();
+}
+
+class _RepeatWeightButtonState extends State<_RepeatWeightButton> {
+  Timer? _repeatDelay;
+  Timer? _repeatTimer;
+  bool _pressed = false;
+
+  void _begin() {
+    final action = widget.onPressed;
+    if (action == null) return;
+    _stop();
+    setState(() => _pressed = true);
+    action();
+    _repeatDelay = Timer(const Duration(milliseconds: 340), () {
+      if (!mounted || !_pressed || widget.onPressed == null) return;
+      _repeatTimer = Timer.periodic(const Duration(milliseconds: 75), (_) {
+        if (mounted && _pressed) widget.onPressed?.call();
+      });
+    });
+  }
+
+  void _stop() {
+    _repeatDelay?.cancel();
+    _repeatTimer?.cancel();
+    _repeatDelay = null;
+    _repeatTimer = null;
+    if (_pressed && mounted) setState(() => _pressed = false);
+  }
+
+  @override
+  void didUpdateWidget(covariant _RepeatWeightButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.onPressed == null) _stop();
+  }
+
+  @override
+  void dispose() {
+    _repeatDelay?.cancel();
+    _repeatTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final file = path == null ? null : File(path!);
-    final available = file?.existsSync() ?? false;
-    return Container(
-      key: const Key('daily-check-in-progress-photo'),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (available)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(18),
-              child: AspectRatio(
-                aspectRatio: 4 / 3,
-                child: Image.file(file!, fit: BoxFit.cover),
+    final enabled = widget.onPressed != null;
+    final scheme = Theme.of(context).colorScheme;
+    return Tooltip(
+      message: widget.tooltip,
+      child: Semantics(
+        button: true,
+        enabled: enabled,
+        label: widget.tooltip,
+        onTap: enabled ? widget.onPressed : null,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: enabled ? (_) => _begin() : null,
+          onTapUp: enabled ? (_) => _stop() : null,
+          onTapCancel: enabled ? _stop : null,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 90),
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _pressed
+                  ? scheme.primaryContainer
+                  : scheme.surfaceContainerLowest,
+              border: Border.all(
+                color: enabled
+                    ? scheme.outlineVariant
+                    : scheme.outlineVariant.withValues(alpha: .45),
               ),
-            )
-          else
-            const SizedBox(
-              height: 92,
-              child: Icon(Icons.add_a_photo_outlined, size: 38),
             ),
-          const SizedBox(height: 10),
-          Text(
-            profileLocaleText(
-              context,
-              'Private progress photo',
-              'صورة تقدّم خاصة',
+            alignment: Alignment.center,
+            child: Icon(
+              widget.icon,
+              color: enabled ? scheme.onSurface : scheme.onSurfaceVariant,
             ),
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium,
           ),
-          Text(
-            profileLocaleText(
-              context,
-              'Linked to today’s measurement and kept on this device.',
-              'ترتبط بقياس اليوم وتبقى على جهازك.',
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: onPick,
-                  icon: Icon(
-                    available
-                        ? Icons.edit_outlined
-                        : Icons.add_a_photo_outlined,
-                  ),
-                  label: Text(
-                    available
-                        ? profileLocaleText(context, 'Change', 'تغيير')
-                        : profileLocaleText(context, 'Add photo', 'إضافة صورة'),
-                  ),
-                ),
-              ),
-              if (onRemove != null) ...[
-                const SizedBox(width: 8),
-                IconButton.outlined(
-                  tooltip: profileLocaleText(
-                    context,
-                    'Remove photo',
-                    'إزالة الصورة',
-                  ),
-                  onPressed: onRemove,
-                  icon: const Icon(Icons.delete_outline),
-                ),
-              ],
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }

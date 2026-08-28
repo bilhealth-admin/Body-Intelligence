@@ -37,9 +37,10 @@ void main() {
   });
 
   test('settings and scheduler consume the persisted delivery contract', () {
-    final page = File(
+    final page = [
       'lib/features/notifications/presentation/notification_settings_page.dart',
-    ).readAsStringSync();
+      'lib/features/notifications/presentation/notification_settings_actions.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final service = File(
       'lib/features/notifications/services/bil_notification_service.dart',
     ).readAsStringSync();

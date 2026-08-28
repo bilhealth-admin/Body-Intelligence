@@ -3,16 +3,21 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart' show NumberFormat;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/database/app_database.dart';
 import '../../data/database/nutrient_evidence.dart';
 import '../../app/localization/app_localizations.dart';
+import '../../app/services/runtime_permission_policy.dart';
 import '../../app/theme/bil_flagship_tokens.dart';
 import '../foods/providers/food_provider.dart';
 import '../community/presentation/product_review_submission_dialog.dart';
+import '../commerce/presentation/premium_barcode_access.dart';
+import '../commerce/presentation/premium_nutrition_glass.dart';
 import 'services/food_runtime_search_authority.dart';
 import 'services/food_search_assistance.dart';
+import 'domain/unified_food.dart';
 import 'presentation/food_barcode_scanner_page.dart';
 import 'presentation/product_identity_copy.dart';
 import 'presentation/barcode_runtime_copy.dart';
@@ -23,10 +28,14 @@ import '../../shared/widgets/actionable_error_state.dart';
 
 part 'presentation/food_catalog_overview.dart';
 part 'presentation/food_catalog_tile.dart';
+part 'presentation/food_nutrient_values.dart';
 part 'presentation/custom_food_dialog.dart';
 part 'presentation/custom_food_locale_copy.dart';
+part 'presentation/food_search_locale_copy.dart';
 
 enum _CatalogView { all, favorites, recent }
+
+enum _FoodAddMethod { scanBarcode, manualBarcode, mealPhoto, customFood }
 
 enum _UnverifiedBarcodeAction {
   dismiss,
@@ -44,9 +53,14 @@ enum _RuntimeSearchUiState {
 }
 
 class FoodPage extends ConsumerStatefulWidget {
-  const FoodPage({super.key, this.embedded = false});
+  const FoodPage({
+    super.key,
+    this.embedded = false,
+    this.userOwnedOnly = false,
+  });
 
   final bool embedded;
+  final bool userOwnedOnly;
 
   @override
   ConsumerState<FoodPage> createState() => _FoodPageState();
@@ -87,14 +101,21 @@ class _FoodPageState extends ConsumerState<FoodPage> {
       );
     }
 
-    final outcome = await ref
-        .read(foodRuntimeSearchAuthorityProvider)
-        .searchDetailed(value);
+    final outcome = widget.userOwnedOnly
+        ? FoodRuntimeSearchResult(
+            foods: _foodsInScope(
+              await ref.read(foodRepositoryProvider).searchCustomFoods(value),
+            ),
+            source: FoodRuntimeSearchSource.localOnly,
+          )
+        : await ref
+              .read(foodRuntimeSearchAuthorityProvider)
+              .searchDetailed(value);
 
     if (mounted && generation == searchGeneration) {
       setState(() {
-        results = outcome.foods;
-        correction = outcome.foods.isEmpty
+        results = _foodsInScope(outcome.foods);
+        correction = results!.isEmpty
             ? _assistance.correctionFor(trimmed)
             : null;
         runtimeSearchState = switch (outcome.source) {
@@ -113,11 +134,29 @@ class _FoodPageState extends ConsumerState<FoodPage> {
 
   void _scheduleSearch(String value) {
     debounce?.cancel();
+    final trimmed = value.trim();
+    // Rebuild immediately. Waiting for the debounce left the browse filters
+    // and a false empty state visible underneath an active search.
+    setState(() {
+      runtimeSearchState = trimmed.isEmpty
+          ? _RuntimeSearchUiState.idle
+          : _RuntimeSearchUiState.searching;
+      results = null;
+      correction = null;
+    });
+    if (trimmed.isEmpty) {
+      searchGeneration++;
+      return;
+    }
     debounce = Timer(
       const Duration(milliseconds: 180),
       () => _runSearch(value),
     );
   }
+
+  List<Food> _foodsInScope(Iterable<Food> foods) => widget.userOwnedOnly
+      ? foods.where((food) => food.isCustom).toList(growable: false)
+      : foods.toList(growable: false);
 
   Future<void> _createFood([String? initialBarcode]) async {
     final created = await showDialog<_FoodDraft>(
@@ -125,30 +164,36 @@ class _FoodPageState extends ConsumerState<FoodPage> {
       barrierDismissible: false,
       builder: (_) => _CustomFoodDialog(
         initialBarcode: initialBarcode,
-        onSave: (draft) => ref
-            .read(foodRepositoryProvider)
-            .addFood(
-              name: draft.name,
-              arabicName: draft.arabicName,
-              barcode: draft.barcode,
-              category: 'custom',
-              servingSize: draft.servingSize,
-              servingUnit: draft.servingUnit,
-              calories: draft.calories,
-              protein: draft.protein,
-              carbs: draft.carbs,
-              fats: draft.fats,
-              caloriesKnown: draft.caloriesKnown,
-              proteinKnown: draft.proteinKnown,
-              carbsKnown: draft.carbsKnown,
-              fatsKnown: draft.fatsKnown,
-              fiber: draft.fiber,
-              sodium: draft.sodium,
-              potassium: draft.potassium,
-              calcium: draft.calcium,
-              magnesium: draft.magnesium,
-              sugar: draft.sugar,
-            ),
+        onSave: (draft) async {
+          final localeCode = Localizations.localeOf(context).toLanguageTag();
+          final id = await ref
+              .read(foodRepositoryProvider)
+              .addFood(
+                name: draft.name,
+                arabicName: draft.arabicName,
+                barcode: draft.barcode,
+                category: 'custom',
+                servingSize: draft.servingSize,
+                servingUnit: draft.servingUnit,
+                calories: draft.calories,
+                protein: draft.protein,
+                carbs: draft.carbs,
+                fats: draft.fats,
+                caloriesKnown: draft.caloriesKnown,
+                proteinKnown: draft.proteinKnown,
+                carbsKnown: draft.carbsKnown,
+                fatsKnown: draft.fatsKnown,
+                fiber: draft.fiber,
+                sodium: draft.sodium,
+                potassium: draft.potassium,
+                calcium: draft.calcium,
+                magnesium: draft.magnesium,
+                sugar: draft.sugar,
+              );
+          await ref
+              .read(communityFoodSyncServiceProvider)
+              .publishFood(id, localeCode: localeCode);
+        },
       ),
     );
     if (created == null) return;
@@ -156,6 +201,8 @@ class _FoodPageState extends ConsumerState<FoodPage> {
   }
 
   Future<void> _cameraBarcodeLookup() async {
+    if (!await requestPremiumBarcodeAccess(context, ref) || !mounted) return;
+    if (!await _ensureCameraPermission() || !mounted) return;
     final barcode = await Navigator.of(context).push<String>(
       MaterialPageRoute<String>(builder: (_) => const FoodBarcodeScannerPage()),
     );
@@ -163,10 +210,58 @@ class _FoodPageState extends ConsumerState<FoodPage> {
     await _lookupBarcodeValue(barcode);
   }
 
+  Future<bool> _ensureCameraPermission() async {
+    const policy = BilRuntimePermissionPolicy();
+    final current = await policy.status(BilRuntimeCapability.camera);
+    if (current == BilRuntimePermissionState.granted) return true;
+    if (!mounted) return false;
+    final blocked =
+        current == BilRuntimePermissionState.permanentlyDenied ||
+        current == BilRuntimePermissionState.restricted;
+    final proceed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          context.strings.text(
+            blocked ? 'Camera access is off' : 'Allow camera for this action?',
+          ),
+        ),
+        content: Text(
+          context.strings.text(
+            blocked
+                ? 'Enable camera access in system settings to scan a barcode. Manual barcode entry remains available.'
+                : 'BIL opens the camera only for the barcode scan you selected and never at startup.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(context.strings.text('Not now')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              context.strings.text(
+                blocked ? 'Open system settings' : 'Continue',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (proceed != true) return false;
+    if (blocked) {
+      await policy.openSettings();
+      return false;
+    }
+    return await policy.request(BilRuntimeCapability.camera) ==
+        BilRuntimePermissionState.granted;
+  }
+
   Future<void> _lookupBarcodeValue(String barcode) async {
     final t = context.strings.text;
     final barcodeCopy = BarcodeRuntimeCopy.of(
-      Localizations.localeOf(context).languageCode,
+      Localizations.localeOf(context).toLanguageTag(),
     );
     final outcome = await ref
         .read(foodRuntimeSearchAuthorityProvider)
@@ -194,7 +289,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
     if (outcome.found) {
       search.text = outcome.normalizedBarcode;
       setState(() {
-        results = outcome.foods;
+        results = _foodsInScope(outcome.foods);
         runtimeSearchState = switch (outcome.source) {
           FoodRuntimeSearchSource.catalogAndLocal =>
             _RuntimeSearchUiState.catalogAndLocal,
@@ -328,6 +423,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
   }
 
   Future<void> _barcodeLookup() async {
+    if (!await requestPremiumBarcodeAccess(context, ref) || !mounted) return;
     final t = context.strings.text;
     final barcode = await showDialog<String>(
       context: context,
@@ -341,6 +437,37 @@ class _FoodPageState extends ConsumerState<FoodPage> {
     if (barcode == null) return;
 
     await _lookupBarcodeValue(barcode);
+  }
+
+  Future<void> _showAddFoodActions() async {
+    final method = await showModalBottomSheet<_FoodAddMethod>(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      isScrollControlled: true,
+      constraints: const BoxConstraints(maxWidth: 640),
+      builder: (_) => const _FoodAddActionSheet(),
+    );
+    if (!mounted || method == null) return;
+    switch (method) {
+      case _FoodAddMethod.scanBarcode:
+        await _cameraBarcodeLookup();
+        return;
+      case _FoodAddMethod.manualBarcode:
+        await _barcodeLookup();
+        return;
+      case _FoodAddMethod.mealPhoto:
+        final origin = widget.embedded ? '/nutrition' : '/foods';
+        final route = Uri(
+          path: '/daily-log',
+          queryParameters: {'action': 'photo', 'from': origin},
+        ).toString();
+        await context.push(route);
+        return;
+      case _FoodAddMethod.customFood:
+        await _createFood();
+        return;
+    }
   }
 
   Future<void> _openOfficialUsdaDownloads() async {
@@ -374,7 +501,7 @@ class _FoodPageState extends ConsumerState<FoodPage> {
       floatingActionButton: widget.embedded
           ? null
           : FloatingActionButton.extended(
-              onPressed: _createFood,
+              onPressed: _showAddFoodActions,
               elevation: 0,
               highlightElevation: 0,
               shape: RoundedRectangleBorder(
@@ -384,16 +511,21 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                 ),
               ),
               icon: const Icon(Icons.add),
-              label: Text(context.strings.text('Custom food')),
+              label: Text(context.strings.text('Add food')),
             ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+            padding: EdgeInsets.fromLTRB(
+              widget.embedded ? 16 : 20,
+              widget.embedded ? 10 : 12,
+              widget.embedded ? 16 : 20,
+              8,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (search.text.trim().isEmpty) ...[
+                if (!widget.embedded && search.text.trim().isEmpty) ...[
                   _NutritionHero(
                     languageCode: Localizations.localeOf(context).languageCode,
                   ),
@@ -418,25 +550,46 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                   ),
                   const SizedBox(height: 16),
                 ],
-                SearchBar(
-                  controller: search,
-                  hintText: t('English, Arabic, keyword, or barcode'),
-                  leading: const Icon(Icons.search),
-                  elevation: const WidgetStatePropertyAll(0),
-                  backgroundColor: WidgetStatePropertyAll(
-                    Theme.of(context).colorScheme.surface,
-                  ),
-                  side: WidgetStatePropertyAll(
-                    BorderSide(
-                      color: Theme.of(context).colorScheme.outlineVariant,
+                _NutritionTaskBar(
+                  searchField: SearchBar(
+                    key: const Key('food-primary-search'),
+                    controller: search,
+                    hintText: nutritionText(
+                      context,
+                      'Search foods',
+                      'البحث عن الأطعمة',
                     ),
-                  ),
-                  shape: WidgetStatePropertyAll(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                    leading: const Icon(Icons.search),
+                    elevation: const WidgetStatePropertyAll(0),
+                    backgroundColor: WidgetStatePropertyAll(
+                      Theme.of(context).colorScheme.surface,
                     ),
+                    side: WidgetStatePropertyAll(
+                      BorderSide(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
+                    ),
+                    shape: WidgetStatePropertyAll(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    trailing: search.text.trim().isEmpty
+                        ? const <Widget>[]
+                        : <Widget>[
+                            IconButton(
+                              key: const Key('food-search-clear'),
+                              tooltip: t('Clear'),
+                              onPressed: () {
+                                search.clear();
+                                _scheduleSearch('');
+                              },
+                              icon: const Icon(Icons.close_rounded),
+                            ),
+                          ],
+                    onChanged: _scheduleSearch,
                   ),
-                  onChanged: _scheduleSearch,
+                  onAddFood: _showAddFoodActions,
                 ),
                 if (runtimeSearchState != _RuntimeSearchUiState.idle) ...[
                   const SizedBox(height: 8),
@@ -458,41 +611,44 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                     },
                   ),
                 ],
-                const SizedBox(height: 12),
-                SegmentedButton<_CatalogView>(
-                  showSelectedIcon: false,
-                  segments: [
-                    ButtonSegment(
-                      value: _CatalogView.all,
-                      label: Text(nutritionText(context, 'All', 'الكل')),
-                    ),
-                    ButtonSegment(
-                      value: _CatalogView.favorites,
-                      label: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          nutritionText(context, 'Favorites', 'المفضلة'),
-                          maxLines: 1,
-                        ),
+                if (search.text.trim().isEmpty) ...[
+                  const SizedBox(height: 12),
+                  SegmentedButton<_CatalogView>(
+                    key: const Key('food-browse-filters'),
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(
+                        value: _CatalogView.all,
+                        label: Text(nutritionText(context, 'All', 'الكل')),
                       ),
-                      icon: const Icon(Icons.favorite_outline),
-                    ),
-                    ButtonSegment(
-                      value: _CatalogView.recent,
-                      label: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          nutritionText(context, 'Recent', 'الأخيرة'),
-                          maxLines: 1,
+                      ButtonSegment(
+                        value: _CatalogView.favorites,
+                        label: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            nutritionText(context, 'Favorites', 'المفضلة'),
+                            maxLines: 1,
+                          ),
                         ),
+                        icon: const Icon(Icons.favorite_outline),
                       ),
-                      icon: const Icon(Icons.history),
-                    ),
-                  ],
-                  selected: {catalogView},
-                  onSelectionChanged: (selection) =>
-                      setState(() => catalogView = selection.first),
-                ),
+                      ButtonSegment(
+                        value: _CatalogView.recent,
+                        label: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            nutritionText(context, 'Recent', 'الأخيرة'),
+                            maxLines: 1,
+                          ),
+                        ),
+                        icon: const Icon(Icons.history),
+                      ),
+                    ],
+                    selected: {catalogView},
+                    onSelectionChanged: (selection) =>
+                        setState(() => catalogView = selection.first),
+                  ),
+                ],
               ],
             ),
           ),
@@ -526,40 +682,54 @@ class _FoodPageState extends ConsumerState<FoodPage> {
                     },
                   );
                 }
-                final selectedRows = switch (catalogView) {
+                final selectedRows = _foodsInScope(switch (catalogView) {
                   _CatalogView.all => foods,
                   _CatalogView.favorites => favorites.value ?? const <Food>[],
                   _CatalogView.recent => recent.value ?? const <Food>[],
-                };
+                });
                 final visible = search.text.trim().isNotEmpty
-                    ? (results ?? const <Food>[])
+                    ? _foodsInScope(results ?? const <Food>[])
                     : selectedRows;
+                if (search.text.trim().isNotEmpty &&
+                    runtimeSearchState == _RuntimeSearchUiState.searching) {
+                  return const Center(
+                    key: Key('food-search-results-loading'),
+                    child: CircularProgressIndicator(),
+                  );
+                }
                 if (visible.isEmpty) {
                   final favoritesEmpty = catalogView == _CatalogView.favorites;
                   final recentEmpty = catalogView == _CatalogView.recent;
                   return Padding(
                     padding: EdgeInsets.only(bottom: widget.embedded ? 0 : 96),
                     child: ActionableEmptyState(
+                      key: const Key('food-search-empty-state'),
                       compact: widget.embedded,
                       icon: favoritesEmpty
                           ? Icons.favorite_outline
                           : recentEmpty
                           ? Icons.history
                           : Icons.search_off,
-                      title: t(
-                        favoritesEmpty
-                            ? 'Your favorites will stay one tap away'
-                            : recentEmpty
-                            ? 'Recent foods appear after your first log'
-                            : 'No local food matches this search',
-                      ),
-                      body: t(
-                        favoritesEmpty
-                            ? 'Favorite any food you trust to make future logging faster.'
-                            : recentEmpty
-                            ? 'BIL ranks foods you actually use without uploading your history.'
-                            : 'BIL will not invent a match. Create a custom food from verified label evidence.',
-                      ),
+                      title: favoritesEmpty || recentEmpty
+                          ? t(
+                              favoritesEmpty
+                                  ? 'Your favorites will stay one tap away'
+                                  : 'Recent foods appear after your first log',
+                            )
+                          : _foodSearchText(
+                              context,
+                              'No local food matches this search',
+                            ),
+                      body: favoritesEmpty || recentEmpty
+                          ? t(
+                              favoritesEmpty
+                                  ? 'Favorite any food you trust to make future logging faster.'
+                                  : 'BIL ranks foods you actually use without uploading your history.',
+                            )
+                          : _foodSearchText(
+                              context,
+                              'BIL will not invent a match. Create a custom food from verified label evidence.',
+                            ),
                       actionLabel: t(
                         widget.embedded
                             ? 'Custom food'

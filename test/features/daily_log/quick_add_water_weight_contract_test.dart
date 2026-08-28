@@ -62,20 +62,17 @@ void main() {
     expect(source, contains('systemState.hasError'));
     expect(source, contains('ActionableErrorState'));
     expect(source, contains('PopScope('));
-    expect(source, contains('canPop: !saving && !deleting && !skipping'));
+    expect(source, contains('canPop: !saving && !skipping'));
     expect(source, contains('kilograms > 500'));
     expect(source, contains('.clamp(20, 500)'));
-    expect(source, contains('if (saving || deleting || skipping) return;'));
+    expect(source, contains('if (saving || skipping) return;'));
     expect(source, isNot(contains('?? 60')));
     expect(source, isNot(contains("text: '60'")));
   });
 
   test('water entry validates bounds and blocks duplicate submissions', () {
-    final actions = File(
-      'lib/features/daily_log/daily_log_page_actions.dart',
-    ).readAsStringSync();
-    final page = File(
-      'lib/features/daily_log/daily_log_page.dart',
+    final waterPage = File(
+      'lib/features/daily_log/daily_water_page.dart',
     ).readAsStringSync();
     final section = File(
       'lib/features/daily_log/presentation/daily_log_input_sections.dart',
@@ -83,15 +80,17 @@ void main() {
     final coordinator = File(
       'lib/features/daily_log/water_mutation_coordinator.dart',
     ).readAsStringSync();
-    expect(actions, contains('if (waterSaving) return;'));
-    expect(actions, contains('amount > 5000'));
+    expect(
+      waterPage,
+      contains('if (saving || !await ensureDiaryOpen()) return;'),
+    );
+    expect(waterPage, contains('amount > 5000'));
     expect(coordinator, contains('if (_busy) return'));
     expect(coordinator, contains('onBusyChanged(true)'));
     expect(coordinator, contains('onBusyChanged(false)'));
-    expect(actions, contains('Water could not be saved. Try again.'));
-    expect(page, contains('bool get waterSaving => waterMutations.busy;'));
-    expect(page, contains('final mutationBusy = mealSaving || waterSaving;'));
-    expect(page, contains('if (didPop || mutationBusy) return;'));
+    expect(waterPage, contains('Water could not be saved. Try again.'));
+    expect(waterPage, contains('canPop: false'));
+    expect(waterPage, contains('if (!didPop && !saving) leave();'));
     expect(section, contains('enabled: !saving'));
     expect(section, contains('onPressed: saving ? null'));
   });

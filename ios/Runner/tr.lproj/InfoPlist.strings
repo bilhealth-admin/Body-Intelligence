@@ -1,8 +1,8 @@
-"NSHealthShareUsageDescription" = "BIL yalnızca seçtiğiniz Sağlık kategorilerini—aktivite, uyku, vücut ölçümleri, kalp ve solunum verileri, tansiyon, oksijen, glikoz, sıvı ve beslenme—bu cihazda özel bir sağlık zaman çizelgesi ve içgörüler göstermek için okur.";
+"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
 "NSHealthUpdateUsageDescription" = "BIL yalnızca açıkça seçtiğiniz sağlık kayıtlarını, ayrı yazma izninden sonra yazar.";
-"NSBluetoothAlwaysUsageDescription" = "BIL ölçümleri yerel olarak içe aktarmak için yalnızca açıkça eşleştirdiğiniz sağlık cihazlarına bağlanır.";
-"NSBluetoothPeripheralUsageDescription" = "BIL ölçümleri yerel olarak içe aktarmak için yalnızca açıkça eşleştirdiğiniz sağlık cihazlarına bağlanır.";
+"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Kamerayı yalnızca barkod taramayı, öğün fotoğrafını incelemeyi veya özel profil ya da ilerleme fotoğrafı eklemeyi seçtiğinizde kullanın.";
 "NSPhotoLibraryUsageDescription" = "Kaydedilmeden veya yüklenmeden önce incelemek için öğün, profil ya da ilerleme fotoğrafı seçin.";
-"NSMicrophoneUsageDescription" = "BIL mikrofonu yalnızca sesli öğün girişi seçtiğinizde kullanır.";
-"NSSpeechRecognitionUsageDescription" = "BIL söylediğiniz yiyecek ifadesini kaydetmeden önce inceleyebilmeniz için metne dönüştürür.";
+"NSMicrophoneUsageDescription" = "BIL mikrofonu yalnızca sesle öğün kaydetmeyi veya BIL AI Coach ile doğrudan konuşmayı seçtiğinizde kullanır.";
+"NSSpeechRecognitionUsageDescription" = "BIL, öğün kaydı veya BIL AI Coach için başlattığınız konuşmayı inceleyip gönderebilmeniz için metne dönüştürür.";

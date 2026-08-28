@@ -4,7 +4,15 @@ class FoodSearchNormalizer {
   static final RegExp _diacritics = RegExp(
     r'[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]',
   );
-  static final RegExp _separators = RegExp(r'[^a-z0-9\u0600-\u06ff]+');
+  // Food search is intentionally script agnostic. The previous ASCII + Arabic
+  // allow-list silently erased Cyrillic, Devanagari, Bengali, Thai, CJK, Hangul
+  // and every accented Latin character. A non-empty query such as `яблоко` or
+  // `りんご` therefore became an empty query and surfaced the fixed default
+  // catalog rows instead of search results.
+  static final RegExp _separators = RegExp(
+    r'[^\p{L}\p{M}\p{N}]+',
+    unicode: true,
+  );
   static final RegExp _spaces = RegExp(r'\s+');
 
   static String normalize(String input) {

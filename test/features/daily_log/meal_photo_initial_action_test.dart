@@ -60,15 +60,27 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  test('Daily Log photo initial action uses the production guide launcher', () {
+  test('Daily Log photo action verifies Boost then offers camera or gallery', () {
     final page = File(
       'lib/features/daily_log/daily_log_page.dart',
     ).readAsStringSync();
-    final actions = File(
-      'lib/features/daily_log/daily_log_page_actions.dart',
+    final captureActions = File(
+      'lib/features/daily_log/daily_log_capture_actions.dart',
     ).readAsStringSync();
     expect(page, contains("case 'photo':"));
     expect(page, contains('await _analyzeMealImage();'));
-    expect(actions, contains('await openMealImageGuide(context)'));
+    expect(
+      captureActions,
+      contains('ref.read(aiBoostVisionAccessProvider.future)'),
+    );
+    expect(captureActions, contains("context.push('/plans?focus=boost')"));
+    expect(
+      captureActions,
+      contains('showModalBottomSheet<ImageSource>'),
+    );
+    expect(captureActions, contains('ImageSource.camera'));
+    expect(captureActions, contains('ImageSource.gallery'));
+    expect(captureActions, contains('source: imageSource'));
+    expect(captureActions, isNot(contains('openMealImageGuide(context)')));
   });
 }

@@ -5,12 +5,19 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/theme/premium_design_tokens.dart';
 import '../../shared/widgets/premium_surface.dart';
+import '../commerce/domain/commerce_plan.dart';
+import '../commerce/providers/commerce_providers.dart';
+import '../dashboard/widgets/premium_dashboard_card_lock.dart';
+import '../global_platform/medical_devices/ble_medical_device_platform.dart';
 import 'connected_health_model.dart';
 import 'connected_health_copy.dart';
 import 'device_compatibility.dart';
 import 'providers/connected_health_provider.dart';
 import 'providers/medical_device_provider.dart';
 import 'widgets/food_name_health_sync_card.dart';
+import 'widgets/live_health_watch.dart';
+
+part 'connected_health_components.dart';
 
 @visibleForTesting
 bool connectedHealthCanRequestPermissions(ConnectedHealthStatus status) =>
@@ -32,6 +39,12 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
   Widget build(BuildContext context) {
     String tr(String en, String ar) => connectedHealthText(context, en, ar);
     final state = ref.watch(connectedHealthProvider);
+    final verifiedPlan = ref
+        .watch(verifiedSubscriptionStateProvider)
+        .value
+        ?.plan;
+    final medicalDevicesUnlocked =
+        verifiedPlan != null && verifiedPlan != CommercePlan.free;
 
     return Scaffold(
       appBar: AppBar(
@@ -80,7 +93,10 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
         ),
       ),
       body: _connectedOnly
-          ? _ConnectedSourcesView(snapshot: state)
+          ? _ConnectedSourcesView(
+              snapshot: state,
+              onConnect: () => setState(() => _connectedOnly = false),
+            )
           : SafeArea(
               child: Semantics(
                 container: true,
@@ -103,6 +119,54 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
                       data: (snapshot) => Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          PremiumSurface(
+                            key: const Key('connected-health-live-watch-card'),
+                            dashboardGlass: true,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        tr(
+                                          'Smart-watch reading',
+                                          'قراءة الساعة الذكية',
+                                        ),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w900,
+                                            ),
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.sync_rounded,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(
+                                  height: PremiumDesignTokens.spaceSm,
+                                ),
+                                Center(
+                                  child: SizedBox.square(
+                                    dimension: 276,
+                                    child: LiveHealthWatch(
+                                      snapshot: snapshot,
+                                      languageCode: Localizations.localeOf(
+                                        context,
+                                      ).languageCode,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: PremiumDesignTokens.spaceMd),
                           PremiumSurface(
                             dashboardGlass: true,
                             child: Column(
@@ -284,7 +348,21 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
                             ),
                           ),
                           const SizedBox(height: PremiumDesignTokens.spaceMd),
-                          const _MedicalDeviceSection(),
+                          PremiumDashboardCardLock(
+                            key: const Key('medical-devices-premium-gate'),
+                            locked: !medicalDevicesUnlocked,
+                            title: tr(
+                              'Premium fitness device connections',
+                              'اتصال أجهزة اللياقة ضمن Premium',
+                            ),
+                            detail: tr(
+                              'Weight, body composition, and heart rate',
+                              'الوزن وتركيب الجسم ومعدل ضربات القلب',
+                            ),
+                            onTap: () =>
+                                context.push('/plans?focus=subscription'),
+                            child: const _MedicalDeviceSection(),
+                          ),
                           const SizedBox(height: PremiumDesignTokens.spaceMd),
                           const FoodNameHealthSyncCard(),
                           const SizedBox(height: PremiumDesignTokens.spaceMd),
@@ -404,8 +482,8 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
                 title: Text(
                   connectedHealthText(
                     context,
-                    'Bluetooth medical devices',
-                    'أجهزة طبية عبر البلوتوث',
+                    'Bluetooth fitness devices',
+                    'أجهزة اللياقة عبر البلوتوث',
                   ),
                 ),
               ),
@@ -464,362 +542,4 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
       ),
     };
   }
-}
-
-class _ConnectionTab extends StatelessWidget {
-  const _ConnectionTab({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    child: Container(
-      height: 54,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: selected
-                ? Theme.of(context).colorScheme.primary
-                : Colors.transparent,
-            width: 3,
-          ),
-        ),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-          fontWeight: selected ? FontWeight.w800 : FontWeight.w500,
-        ),
-      ),
-    ),
-  );
-}
-
-class _ConnectedSourcesView extends StatelessWidget {
-  const _ConnectedSourcesView({required this.snapshot});
-
-  final AsyncValue<ConnectedHealthSnapshot> snapshot;
-
-  @override
-  Widget build(BuildContext context) => snapshot.when(
-    loading: () => const Center(child: CircularProgressIndicator()),
-    error: (_, _) => Center(
-      child: Text(
-        connectedHealthText(
-          context,
-          'Connection status is unavailable.',
-          'حالة الاتصال غير متاحة.',
-        ),
-      ),
-    ),
-    data: (value) {
-      final connected =
-          value.status == ConnectedHealthStatus.ready ||
-          value.status == ConnectedHealthStatus.syncing ||
-          value.status == ConnectedHealthStatus.synchronized ||
-          value.status == ConnectedHealthStatus.degraded;
-      return ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          Text(
-            connectedHealthText(
-              context,
-              'Connected (${connected ? 1 : 0})',
-              'المتصلة (${connected ? 1 : 0})',
-            ),
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-          ),
-          const SizedBox(height: 16),
-          if (connected)
-            ListTile(
-              leading: const CircleAvatar(
-                child: Icon(Icons.health_and_safety_outlined),
-              ),
-              title: Text(value.platformSource ?? 'Health Connect'),
-              subtitle: Text(
-                connectedHealthText(
-                  context,
-                  'Connected and ready to synchronize',
-                  'متصل وجاهز للمزامنة',
-                ),
-              ),
-            )
-          else
-            PremiumSurface(
-              dashboardGlass: true,
-              child: Text(
-                connectedHealthText(
-                  context,
-                  'No health source is connected yet.',
-                  'لا يوجد مصدر صحي متصل بعد.',
-                ),
-              ),
-            ),
-        ],
-      );
-    },
-  );
-}
-
-class _CompatibilitySection extends StatelessWidget {
-  const _CompatibilitySection({required this.languageCode});
-
-  final String languageCode;
-
-  @override
-  Widget build(BuildContext context) {
-    String tr(String en, String ar) => connectedHealthText(context, en, ar);
-    return PremiumSurface(
-      key: const Key('health-device-compatibility'),
-      dashboardGlass: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            tr('Supported connections', 'الاتصالات المدعومة'),
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: PremiumDesignTokens.spaceSm),
-          for (final entry in BilDeviceCompatibilityMatrix.entries)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.verified_outlined),
-              title: Text(entry.protocol),
-              subtitle: Text(
-                '${entry.platforms.join(' / ')} • ${entry.minimumVersion}\n'
-                '${tr('Implementation ready; physical-device verification required', 'جاهز برمجيًا؛ يلزم تحقق بجهاز فعلي')}',
-              ),
-              isThreeLine: true,
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MedicalDeviceSection extends ConsumerWidget {
-  const _MedicalDeviceSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    String tr(String en, String ar) => connectedHealthText(context, en, ar);
-    final snapshot = ref.watch(medicalDeviceProvider);
-    final controller = ref.read(medicalDeviceProvider.notifier);
-    final busy =
-        snapshot.status == MedicalDeviceConnectionStatus.scanning ||
-        snapshot.status == MedicalDeviceConnectionStatus.requestingPermission ||
-        snapshot.status == MedicalDeviceConnectionStatus.connecting;
-
-    return PremiumSurface(
-      key: const Key('medical-bluetooth-section'),
-      dashboardGlass: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            tr('Medical devices', 'الأجهزة الطبية'),
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: PremiumDesignTokens.spaceSm),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final image = Image.asset(
-                'assets/images/connected_health/bil_medical_hub.png',
-                key: const Key('bil-medical-device-image'),
-                fit: BoxFit.contain,
-                semanticLabel: tr(
-                  'Bluetooth medical monitor and smart watch',
-                  'جهاز مراقبة طبي وساعة ذكية عبر البلوتوث',
-                ),
-              );
-              final copy = Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    tr(
-                      'Connect verified Bluetooth measurements',
-                      'اربط قياسات البلوتوث الموثوقة',
-                    ),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: PremiumDesignTokens.spaceXs),
-                  Text(
-                    tr(
-                      'Blood pressure, glucose, weight, body composition, oxygen, heart rate and temperature.',
-                      'ضغط الدم، السكر، الوزن، تركيب الجسم، الأكسجين، النبض والحرارة.',
-                    ),
-                  ),
-                  const SizedBox(height: PremiumDesignTokens.spaceSm),
-                  _MedicalStatusText(
-                    snapshot: snapshot,
-                    languageCode: Localizations.localeOf(context).languageCode,
-                  ),
-                ],
-              );
-              if (constraints.maxWidth < 620) {
-                return Column(
-                  children: [
-                    SizedBox(height: 190, child: image),
-                    copy,
-                  ],
-                );
-              }
-              return Row(
-                children: [
-                  Expanded(child: SizedBox(height: 210, child: image)),
-                  const SizedBox(width: PremiumDesignTokens.spaceMd),
-                  Expanded(child: copy),
-                ],
-              );
-            },
-          ),
-          if (snapshot.devices.isNotEmpty) ...[
-            const SizedBox(height: PremiumDesignTokens.spaceSm),
-            for (final device in snapshot.devices)
-              ListTile(
-                key: Key('medical-device-${device.id}'),
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.bluetooth_connected_rounded),
-                title: Text(device.name),
-                subtitle: Text(
-                  device.profiles.map((profile) => profile.name).join(' • '),
-                ),
-                trailing: snapshot.connectedDeviceId == device.id
-                    ? Wrap(
-                        children: [
-                          IconButton(
-                            tooltip: tr('Disconnect', 'قطع الاتصال'),
-                            onPressed: controller.disconnect,
-                            icon: const Icon(Icons.link_off_rounded),
-                          ),
-                          IconButton(
-                            tooltip: tr('Remove device', 'حذف الجهاز'),
-                            onPressed: () => controller.removeDevice(device.id),
-                            icon: const Icon(Icons.delete_outline_rounded),
-                          ),
-                        ],
-                      )
-                    : FilledButton(
-                        onPressed: busy
-                            ? null
-                            : () => controller.connect(device),
-                        child: Text(tr('Connect', 'اتصال')),
-                      ),
-              ),
-          ],
-          const SizedBox(height: PremiumDesignTokens.spaceSm),
-          FilledButton.icon(
-            key: const Key('scan-medical-devices-button'),
-            onPressed: !snapshot.supported || busy ? null : controller.scan,
-            icon: busy
-                ? const SizedBox.square(
-                    dimension: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.bluetooth_searching_rounded),
-            label: Text(
-              !snapshot.supported
-                  ? tr('Requires Android or iPhone', 'يتطلب Android أو iPhone')
-                  : tr('Scan for medical devices', 'البحث عن أجهزة طبية'),
-            ),
-          ),
-          const SizedBox(height: PremiumDesignTokens.spaceXs),
-          Text(
-            tr(
-              'BIL imports measurements only after your permission. It supports standard BLE health profiles and is not a diagnostic medical device.',
-              'لا يستورد BIL القياسات إلا بعد موافقتك. يدعم ملفات BLE الصحية القياسية ولا يُعد جهازًا طبيًا للتشخيص.',
-            ),
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MedicalStatusText extends StatelessWidget {
-  const _MedicalStatusText({
-    required this.snapshot,
-    required this.languageCode,
-  });
-
-  final MedicalDeviceSnapshot snapshot;
-  final String languageCode;
-
-  @override
-  Widget build(BuildContext context) {
-    String tr(String en, String ar) => connectedHealthText(context, en, ar);
-    final text = switch (snapshot.status) {
-      MedicalDeviceConnectionStatus.unavailable => tr(
-        'Bluetooth medical linking is unavailable here.',
-        'الربط الطبي غير متاح على هذه المنصة.',
-      ),
-      MedicalDeviceConnectionStatus.idle =>
-        snapshot.devices.isEmpty
-            ? tr('Ready to search nearby.', 'جاهز للبحث عن الأجهزة القريبة.')
-            : tr(
-                '${snapshot.devices.length} device(s) found.',
-                'تم العثور على ${snapshot.devices.length} جهاز.',
-              ),
-      MedicalDeviceConnectionStatus.requestingPermission => tr(
-        'Waiting for Bluetooth permission…',
-        'بانتظار إذن البلوتوث…',
-      ),
-      MedicalDeviceConnectionStatus.scanning => tr(
-        'Searching nearby…',
-        'جارٍ البحث عن الأجهزة القريبة…',
-      ),
-      MedicalDeviceConnectionStatus.connecting => tr(
-        'Connecting securely…',
-        'جارٍ الاتصال الآمن…',
-      ),
-      MedicalDeviceConnectionStatus.connected => tr(
-        snapshot.batteryPercent == null
-            ? 'Medical device connected. Battery was not reported. Last sync: ${_time(context)}.'
-            : 'Medical device connected. Battery ${snapshot.batteryPercent}%. Last sync: ${_time(context)}.',
-        snapshot.batteryPercent == null
-            ? 'الجهاز الطبي متصل. لم يرسل الجهاز حالة البطارية. آخر مزامنة: ${_time(context)}.'
-            : 'الجهاز الطبي متصل. البطارية ${snapshot.batteryPercent}٪. آخر مزامنة: ${_time(context)}.',
-      ),
-      MedicalDeviceConnectionStatus.failed => tr(
-        'Connection needs attention. Try again.',
-        'تعذر الاتصال. حاول مرة أخرى.',
-      ),
-    };
-    return Text(
-      text,
-      key: const Key('medical-device-status'),
-      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-        color: snapshot.status == MedicalDeviceConnectionStatus.failed
-            ? Theme.of(context).colorScheme.error
-            : Theme.of(context).colorScheme.primary,
-        fontWeight: FontWeight.w700,
-      ),
-    );
-  }
-
-  String _time(BuildContext context) => snapshot.lastMeasurementAt == null
-      ? connectedHealthTextForLanguage(
-          languageCode,
-          'no measurement',
-          'لا يوجد قياس',
-        )
-      : TimeOfDay.fromDateTime(
-          snapshot.lastMeasurementAt!.toLocal(),
-        ).format(context);
 }

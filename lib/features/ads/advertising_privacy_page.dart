@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../app/environment/app_environment.dart';
 import '../../app/localization/runtime_copy.dart';
 import 'domain/ad_policy.dart';
 import 'providers/ad_providers.dart';
-import 'repositories/ad_consent_repository.dart';
+import 'services/admob_ump_consent_gate.dart';
 
 String advertisingPrivacyEntryTitle(String locale) =>
     _AdPrivacyCopy.forLocale(locale).title;
+
+String _advertisingLocaleTag(String locale) {
+  final normalized = locale.replaceAll('_', '-').toLowerCase();
+  if (normalized == 'pt-br') return 'pt-BR';
+  if (normalized == 'pt-pt') return 'pt-PT';
+  if (normalized == 'zh-hans') return 'zh-Hans';
+  if (normalized == 'zh-hant') return 'zh-Hant';
+  return normalized.split('-').first;
+}
 
 String advertisingPrivacyEntryStatus(
   String locale, {
@@ -21,23 +29,18 @@ String advertisingPrivacyEntryStatus(
 @visibleForTesting
 List<String> advertisingPrivacySurfaceCopy(String locale) {
   final copy = _AdPrivacyCopy.forLocale(locale);
+  final ump = _UmpPrivacyCopy.forLocale(locale);
   final eligibility = _eligibilityCopyFor(locale);
   final detail = _eligibilityDetailCopyFor(locale);
   return <String>[
     copy.title,
-    copy.intro,
     copy.boundary,
     copy.unavailableTitle,
     copy.unavailableBody,
-    copy.declineTitle,
-    copy.declineBody,
     copy.contextualTitle,
     copy.contextualBody,
-    copy.error,
     copy.entryAllowed,
     copy.entryBlocked,
-    copy.loadError,
-    copy.loadErrorBody,
     copy.retry,
     eligibility.$1,
     eligibility.$2,
@@ -46,8 +49,9 @@ List<String> advertisingPrivacySurfaceCopy(String locale) {
     detail.$3,
     detail.$4,
     detail.$5,
-    _adultTitle(locale),
-    _adultBody(locale),
+    ump.title,
+    ump.body,
+    ump.blocked,
   ];
 }
 
@@ -56,16 +60,10 @@ String _eligibilityText(String locale, bool eligible) {
   return eligible ? copy.$1 : copy.$2;
 }
 
-String _eligibilityDetail(
-  String locale,
-  AdAgeEligibility age,
-  AdRegionEligibility region,
-) {
+String _eligibilityDetail(String locale, AdAgeEligibility age) {
   final copy = _eligibilityDetailCopyFor(locale);
   if (age == AdAgeEligibility.unknown) return copy.$1;
   if (age == AdAgeEligibility.under18) return copy.$2;
-  if (region == AdRegionEligibility.unknown) return copy.$3;
-  if (region == AdRegionEligibility.restricted) return copy.$4;
   return copy.$5;
 }
 
@@ -95,14 +93,6 @@ String _adDirect(String locale, String english) =>
   );
 }
 
-String _adultTitle(String locale) =>
-    _adultConfirmationTitle[locale] ??
-    _adDirect(locale, _adultConfirmationTitle['en']!);
-
-String _adultBody(String locale) =>
-    _adultConfirmationBody[locale] ??
-    _adDirect(locale, _adultConfirmationBody['en']!);
-
 const _eligibilityCopy = <String, (String, String)>{
   'en': ('Eligible for contextual ads', 'Advertising remains blocked'),
   'ar': ('مؤهل للإعلانات السياقية', 'ستظل الإعلانات محظورة'),
@@ -111,19 +101,184 @@ const _eligibilityCopy = <String, (String, String)>{
   'tr': ('Bağlamsal reklamlar için uygun', 'Reklamlar engelli kalır'),
 };
 
-const _adultConfirmationTitle = <String, String>{
-  'en': 'I confirm that I am 18 or older',
-  'ar': 'أؤكد أن عمري 18 عامًا أو أكثر',
-  'fr': 'Je confirme avoir 18 ans ou plus',
-  'es': 'Confirmo que tengo 18 años o más',
-  'tr': '18 yaşında veya daha büyük olduğumu onaylıyorum',
-};
-const _adultConfirmationBody = <String, String>{
-  'en': 'Without adult confirmation, BIL never requests an ad.',
-  'ar': 'دون تأكيد سن الرشد، لا يطلب BIL أي إعلان مطلقًا.',
-  'fr': 'Sans confirmation de majorité, BIL ne demande aucune publicité.',
-  'es': 'Sin confirmar la mayoría de edad, BIL no solicita anuncios.',
-  'tr': 'Yetişkin onayı olmadan BIL hiçbir reklam istemez.',
+final class _UmpPrivacyCopy {
+  const _UmpPrivacyCopy({
+    required this.title,
+    required this.body,
+    required this.blocked,
+  });
+
+  final String title;
+  final String body;
+  final String blocked;
+
+  static _UmpPrivacyCopy forLocale(String locale) {
+    final normalized = locale.replaceAll('_', '-').toLowerCase();
+    for (final entry in _umpPrivacyCopy.entries) {
+      if (entry.key.toLowerCase() == normalized) return entry.value;
+    }
+    final language = normalized.split('-').first;
+    if (language == 'pt') return _umpPrivacyCopy['pt-PT']!;
+    if (language == 'zh') return _umpPrivacyCopy['zh-Hans']!;
+    return _umpPrivacyCopy[language] ?? _umpPrivacyCopy['en']!;
+  }
+}
+
+const _umpPrivacyCopy = <String, _UmpPrivacyCopy>{
+  'en': _UmpPrivacyCopy(
+    title: 'Google advertising privacy',
+    body:
+        'Review or change the consent choices managed by Google’s consent platform.',
+    blocked: 'Google consent could not be confirmed. Ads remain blocked.',
+  ),
+  'ar': _UmpPrivacyCopy(
+    title: 'خصوصية إعلانات Google',
+    body: 'راجع أو غيّر خيارات الموافقة التي تديرها منصة موافقة Google.',
+    blocked: 'تعذر تأكيد موافقة Google. ستظل الإعلانات محظورة.',
+  ),
+  'fr': _UmpPrivacyCopy(
+    title: 'Confidentialité publicitaire Google',
+    body:
+        'Consultez ou modifiez les choix gérés par la plate-forme de consentement Google.',
+    blocked:
+        'Le consentement Google n’a pas pu être confirmé. Les publicités restent bloquées.',
+  ),
+  'es': _UmpPrivacyCopy(
+    title: 'Privacidad publicitaria de Google',
+    body:
+        'Revisa o cambia las opciones gestionadas por la plataforma de consentimiento de Google.',
+    blocked:
+        'No se pudo confirmar el consentimiento de Google. Los anuncios siguen bloqueados.',
+  ),
+  'tr': _UmpPrivacyCopy(
+    title: 'Google reklam gizliliği',
+    body:
+        'Google’ın izin platformunun yönettiği seçimleri inceleyin veya değiştirin.',
+    blocked: 'Google izni doğrulanamadı. Reklamlar engelli kalır.',
+  ),
+  'de': _UmpPrivacyCopy(
+    title: 'Google-Werbedatenschutz',
+    body:
+        'Prüfen oder ändern Sie die von Googles Einwilligungsplattform verwalteten Optionen.',
+    blocked:
+        'Die Google-Einwilligung konnte nicht bestätigt werden. Werbung bleibt gesperrt.',
+  ),
+  'it': _UmpPrivacyCopy(
+    title: 'Privacy pubblicitaria di Google',
+    body:
+        'Rivedi o modifica le scelte gestite dalla piattaforma di consenso di Google.',
+    blocked:
+        'Impossibile confermare il consenso Google. Gli annunci restano bloccati.',
+  ),
+  'pt-BR': _UmpPrivacyCopy(
+    title: 'Privacidade de anúncios do Google',
+    body:
+        'Revise ou altere as escolhas gerenciadas pela plataforma de consentimento do Google.',
+    blocked:
+        'Não foi possível confirmar o consentimento do Google. Os anúncios continuam bloqueados.',
+  ),
+  'pt-PT': _UmpPrivacyCopy(
+    title: 'Privacidade de publicidade da Google',
+    body:
+        'Reveja ou altere as escolhas geridas pela plataforma de consentimento da Google.',
+    blocked:
+        'Não foi possível confirmar o consentimento da Google. Os anúncios continuam bloqueados.',
+  ),
+  'ur': _UmpPrivacyCopy(
+    title: 'Google اشتہاری رازداری',
+    body:
+        'Google کے رضامندی پلیٹ فارم کے زیر انتظام انتخابات کا جائزہ لیں یا انہیں تبدیل کریں۔',
+    blocked: 'Google رضامندی کی تصدیق نہیں ہو سکی۔ اشتہارات مسدود رہیں گے۔',
+  ),
+  'fa': _UmpPrivacyCopy(
+    title: 'حریم خصوصی تبلیغات Google',
+    body:
+        'گزینه‌های مدیریت‌شده توسط سامانه رضایت Google را مرور یا تغییر دهید.',
+    blocked: 'رضایت Google تأیید نشد. تبلیغات همچنان مسدود می‌مانند.',
+  ),
+  'hi': _UmpPrivacyCopy(
+    title: 'Google विज्ञापन गोपनीयता',
+    body:
+        'Google के सहमति प्लेटफ़ॉर्म द्वारा प्रबंधित विकल्पों को देखें या बदलें।',
+    blocked: 'Google सहमति की पुष्टि नहीं हो सकी। विज्ञापन अवरुद्ध रहेंगे।',
+  ),
+  'id': _UmpPrivacyCopy(
+    title: 'Privasi iklan Google',
+    body:
+        'Tinjau atau ubah pilihan yang dikelola oleh platform persetujuan Google.',
+    blocked:
+        'Persetujuan Google tidak dapat dikonfirmasi. Iklan tetap diblokir.',
+  ),
+  'ms': _UmpPrivacyCopy(
+    title: 'Privasi pengiklanan Google',
+    body:
+        'Semak atau ubah pilihan yang diurus oleh platform persetujuan Google.',
+    blocked: 'Persetujuan Google tidak dapat disahkan. Iklan kekal disekat.',
+  ),
+  'ja': _UmpPrivacyCopy(
+    title: 'Google 広告のプライバシー',
+    body: 'Google の同意プラットフォームで管理される選択内容を確認または変更します。',
+    blocked: 'Google の同意を確認できませんでした。広告は引き続きブロックされます。',
+  ),
+  'ko': _UmpPrivacyCopy(
+    title: 'Google 광고 개인정보 보호',
+    body: 'Google 동의 플랫폼에서 관리하는 선택 사항을 검토하거나 변경합니다.',
+    blocked: 'Google 동의를 확인할 수 없습니다. 광고는 계속 차단됩니다.',
+  ),
+  'zh-Hans': _UmpPrivacyCopy(
+    title: 'Google 广告隐私',
+    body: '查看或更改由 Google 同意平台管理的选择。',
+    blocked: '无法确认 Google 同意状态。广告将继续被屏蔽。',
+  ),
+  'zh-Hant': _UmpPrivacyCopy(
+    title: 'Google 廣告隱私權',
+    body: '查看或變更由 Google 同意平台管理的選擇。',
+    blocked: '無法確認 Google 同意狀態。廣告將繼續遭到封鎖。',
+  ),
+  'ru': _UmpPrivacyCopy(
+    title: 'Конфиденциальность рекламы Google',
+    body:
+        'Просмотрите или измените варианты, управляемые платформой согласия Google.',
+    blocked:
+        'Не удалось подтвердить согласие Google. Реклама остаётся заблокированной.',
+  ),
+  'bn': _UmpPrivacyCopy(
+    title: 'Google বিজ্ঞাপনের গোপনীয়তা',
+    body:
+        'Google-এর সম্মতি প্ল্যাটফর্মে পরিচালিত পছন্দগুলো পর্যালোচনা বা পরিবর্তন করুন।',
+    blocked: 'Google সম্মতি নিশ্চিত করা যায়নি। বিজ্ঞাপন বন্ধ থাকবে।',
+  ),
+  'vi': _UmpPrivacyCopy(
+    title: 'Quyền riêng tư quảng cáo Google',
+    body:
+        'Xem lại hoặc thay đổi các lựa chọn do nền tảng đồng ý của Google quản lý.',
+    blocked: 'Không thể xác nhận sự đồng ý của Google. Quảng cáo vẫn bị chặn.',
+  ),
+  'th': _UmpPrivacyCopy(
+    title: 'ความเป็นส่วนตัวของโฆษณา Google',
+    body: 'ตรวจสอบหรือเปลี่ยนตัวเลือกที่จัดการโดยแพลตฟอร์มความยินยอมของ Google',
+    blocked: 'ยืนยันความยินยอมของ Google ไม่ได้ โฆษณาจะยังคงถูกบล็อก',
+  ),
+  'pl': _UmpPrivacyCopy(
+    title: 'Prywatność reklam Google',
+    body: 'Przejrzyj lub zmień opcje zarządzane przez platformę zgód Google.',
+    blocked:
+        'Nie udało się potwierdzić zgody Google. Reklamy pozostają zablokowane.',
+  ),
+  'nl': _UmpPrivacyCopy(
+    title: 'Privacy voor Google-advertenties',
+    body:
+        'Bekijk of wijzig de keuzes die door het toestemmingsplatform van Google worden beheerd.',
+    blocked:
+        'Google-toestemming kon niet worden bevestigd. Advertenties blijven geblokkeerd.',
+  ),
+  'uk': _UmpPrivacyCopy(
+    title: 'Конфіденційність реклами Google',
+    body:
+        'Перегляньте або змініть параметри, якими керує платформа згоди Google.',
+    blocked:
+        'Не вдалося підтвердити згоду Google. Реклама залишається заблокованою.',
+  ),
 };
 
 const _eligibilityDetailCopy =
@@ -166,7 +321,10 @@ const _eligibilityDetailCopy =
     };
 
 class AdvertisingPrivacyPage extends ConsumerStatefulWidget {
-  const AdvertisingPrivacyPage({super.key});
+  const AdvertisingPrivacyPage({super.key, this.umpConsentCoordinator});
+
+  @visibleForTesting
+  final UmpConsentCoordinator? umpConsentCoordinator;
 
   @override
   ConsumerState<AdvertisingPrivacyPage> createState() =>
@@ -175,220 +333,150 @@ class AdvertisingPrivacyPage extends ConsumerStatefulWidget {
 
 class _AdvertisingPrivacyPageState
     extends ConsumerState<AdvertisingPrivacyPage> {
-  final AdConsentRepository _repository = const LocalAdConsentRepository();
-  final LocalAdAudienceRepository _audienceRepository =
-      const LocalAdAudienceRepository();
-  AdConsentStatus? _status;
-  bool _saving = false;
-  Object? _error;
-  bool _adultConfirmed = false;
+  late final UmpConsentCoordinator _umpConsent;
+  UmpConsentSnapshot _umpSnapshot = const UmpConsentSnapshot.uninitialized();
+  bool _umpBusy = false;
+  bool _refreshScheduled = false;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _umpConsent = widget.umpConsentCoordinator ?? AdMobUmpConsentGate.instance;
+    _umpSnapshot = _umpConsent.snapshot;
   }
 
-  Future<void> _load() async {
-    try {
-      final status = await _repository.read();
-      final adultConfirmed = await _audienceRepository.readAdultConfirmation();
-      final countryCode =
-          WidgetsBinding.instance.platformDispatcher.locale.countryCode;
-      if (!mounted) return;
-      ref.read(adConsentProvider.notifier).state = status;
-      ref.read(adAgeEligibilityProvider.notifier).state = adultConfirmed
-          ? AdAgeEligibility.adult
-          : AdAgeEligibility.unknown;
-      ref.read(adRegionProvider.notifier).state = countryCode == null
-          ? AdRegionEligibility.unknown
-          : AppEnvironment.adRegionAllowed(countryCode)
-          ? AdRegionEligibility.eligible
-          : AdRegionEligibility.restricted;
-      setState(() {
-        _status = status;
-        _adultConfirmed = adultConfirmed;
-        _error = null;
-      });
-    } on Object catch (error) {
-      if (mounted) setState(() => _error = error);
+  bool get _umpEnabled =>
+      widget.umpConsentCoordinator != null ||
+      (_umpConsent.isApplicable &&
+          ref.read(contextualAdGatewayProvider).isConfigured);
+
+  void _scheduleAutomaticUmpRefresh(bool audienceEligible) {
+    if (_refreshScheduled ||
+        !audienceEligible ||
+        !_umpEnabled ||
+        _umpSnapshot.phase != UmpConsentPhase.uninitialized) {
+      return;
     }
-  }
-
-  Future<void> _update(AdConsentStatus status) async {
-    if (_saving) return;
-    setState(() {
-      _saving = true;
-      _error = null;
+    _refreshScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshScheduled = false;
+      if (mounted) _refreshUmp();
     });
-    try {
-      await _repository.write(status);
-      ref.read(adConsentProvider.notifier).state = status;
-      if (mounted) {
-        setState(() {
-          _status = status;
-          _error = null;
-        });
-      }
-    } on Object catch (error) {
-      if (mounted) setState(() => _error = error);
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
   }
 
-  Future<void> _updateAdultConfirmation(bool value) async {
-    if (_saving) return;
-    final previous = _adultConfirmed;
-    setState(() {
-      _saving = true;
-      _error = null;
-    });
-    try {
-      await _audienceRepository.writeAdultConfirmation(value);
-      ref.read(adAgeEligibilityProvider.notifier).state = value
-          ? AdAgeEligibility.adult
-          : AdAgeEligibility.unknown;
-      if (mounted) setState(() => _adultConfirmed = value);
-    } on Object catch (error) {
-      if (mounted) {
-        setState(() {
-          _adultConfirmed = previous;
-          _error = error;
-        });
-      }
-    } finally {
-      if (mounted) setState(() => _saving = false);
+  Future<void> _showUmpPrivacyOptions() async {
+    if (_umpBusy || !_umpSnapshot.privacyOptionsRequired) {
+      return;
     }
+    setState(() => _umpBusy = true);
+    final snapshot = await _umpConsent.showPrivacyOptions();
+    if (!mounted) return;
+    setState(() {
+      _umpSnapshot = snapshot;
+      _umpBusy = false;
+    });
+  }
+
+  Future<void> _refreshUmp({bool force = false}) async {
+    if (_umpBusy || !_umpEnabled) return;
+    setState(() => _umpBusy = true);
+    final snapshot = await _umpConsent.refresh(force: force);
+    if (!mounted) return;
+    setState(() {
+      _umpSnapshot = snapshot;
+      _umpBusy = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final copy = _AdPrivacyCopy.forLocale(
-      Localizations.localeOf(context).languageCode,
+    final locale = _advertisingLocaleTag(
+      Localizations.localeOf(context).toLanguageTag(),
     );
+    final copy = _AdPrivacyCopy.forLocale(locale);
+    final umpCopy = _UmpPrivacyCopy.forLocale(locale);
     final ageEligibility = ref.watch(adAgeEligibilityProvider);
-    final regionEligibility = ref.watch(adRegionProvider);
-    final audienceEligible =
-        ageEligibility == AdAgeEligibility.adult &&
-        regionEligibility == AdRegionEligibility.eligible;
-    final canAllowContextual = audienceEligible && AppEnvironment.adsConfigured;
-    return PopScope(
-      canPop: !_saving,
-      child: Scaffold(
-        appBar: AppBar(title: Text(copy.title)),
-        body: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            Text(copy.intro, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 12),
-            Text(copy.boundary),
-            const SizedBox(height: 12),
+    final audienceEligible = ref.watch(registeredAdultFreeAdAudienceProvider);
+    final providerConfigured = ref
+        .watch(contextualAdGatewayProvider)
+        .isConfigured;
+    _scheduleAutomaticUmpRefresh(audienceEligible);
+    return Scaffold(
+      appBar: AppBar(title: Text(copy.title)),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          Text(copy.boundary, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              key: const Key('advertising-audience-eligibility'),
+              leading: Icon(
+                audienceEligible
+                    ? Icons.verified_user_outlined
+                    : Icons.shield_outlined,
+              ),
+              title: Text(_eligibilityText(locale, audienceEligible)),
+              subtitle: Text(_eligibilityDetail(locale, ageEligibility)),
+            ),
+          ),
+          Card(
+            child: ListTile(
+              key: const Key('advertising-contextual-policy'),
+              leading: const Icon(Icons.ads_click_outlined),
+              title: Text(copy.contextualTitle),
+              subtitle: Text(copy.contextualBody),
+            ),
+          ),
+          if (_umpEnabled && _umpSnapshot.privacyOptionsRequired)
             Card(
               child: ListTile(
-                key: const Key('advertising-audience-eligibility'),
+                key: const Key('advertising-google-privacy-options'),
+                leading: const Icon(Icons.privacy_tip_outlined),
+                title: Text(umpCopy.title),
+                subtitle: Text(umpCopy.body),
+                trailing: _umpBusy
+                    ? const SizedBox.square(
+                        dimension: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.chevron_right_rounded),
+                onTap: _umpBusy ? null : _showUmpPrivacyOptions,
+              ),
+            ),
+          if (_umpEnabled && _umpSnapshot.phase == UmpConsentPhase.blocked)
+            Card(
+              child: ListTile(
+                key: const Key('advertising-google-consent-blocked'),
                 leading: Icon(
-                  audienceEligible
-                      ? Icons.verified_user_outlined
-                      : Icons.shield_outlined,
+                  Icons.gpp_maybe_outlined,
+                  color: Theme.of(context).colorScheme.error,
                 ),
-                title: Text(
-                  _eligibilityText(
-                    Localizations.localeOf(context).languageCode,
-                    audienceEligible,
-                  ),
-                ),
-                subtitle: Text(
-                  _eligibilityDetail(
-                    Localizations.localeOf(context).languageCode,
-                    ageEligibility,
-                    regionEligibility,
-                  ),
+                title: Text(umpCopy.title),
+                subtitle: Text(umpCopy.blocked),
+                trailing: TextButton(
+                  onPressed: _umpBusy || !audienceEligible
+                      ? null
+                      : () => _refreshUmp(force: true),
+                  child: Text(copy.retry),
                 ),
               ),
             ),
-            SwitchListTile.adaptive(
-              key: const Key('advertising-adult-confirmation'),
-              value: _adultConfirmed,
-              title: Text(
-                _adultTitle(Localizations.localeOf(context).languageCode),
-              ),
-              subtitle: Text(
-                _adultBody(Localizations.localeOf(context).languageCode),
-              ),
-              onChanged: _saving ? null : _updateAdultConfirmation,
+          if (_umpBusy)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: LinearProgressIndicator(),
             ),
-            const SizedBox(height: 20),
-            if (!AppEnvironment.adsConfigured)
-              Card(
-                child: ListTile(
-                  key: const Key('advertising-provider-unavailable'),
-                  leading: const Icon(Icons.visibility_off_outlined),
-                  title: Text(copy.unavailableTitle),
-                  subtitle: Text(copy.unavailableBody),
-                ),
+          if (!providerConfigured)
+            Card(
+              child: ListTile(
+                key: const Key('advertising-provider-unavailable'),
+                leading: const Icon(Icons.visibility_off_outlined),
+                title: Text(copy.unavailableTitle),
+                subtitle: Text(copy.unavailableBody),
               ),
-            if (_status == null && _error == null)
-              const Center(child: CircularProgressIndicator())
-            else if (_status == null)
-              Card(
-                child: ListTile(
-                  key: const Key('advertising-load-error'),
-                  leading: Icon(
-                    Icons.error_outline,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                  title: Text(copy.loadError),
-                  subtitle: Text(copy.loadErrorBody),
-                  trailing: TextButton(
-                    onPressed: _saving
-                        ? null
-                        : () {
-                            setState(() => _error = null);
-                            _load();
-                          },
-                    child: Text(copy.retry),
-                  ),
-                ),
-              )
-            else ...[
-              RadioGroup<AdConsentStatus>(
-                groupValue: _status ?? AdConsentStatus.unknown,
-                onChanged: (value) {
-                  if (!_saving && value != null) _update(value);
-                },
-                child: Column(
-                  children: [
-                    RadioListTile<AdConsentStatus>(
-                      key: const Key('advertising-consent-declined'),
-                      enabled: !_saving,
-                      value: AdConsentStatus.declined,
-                      title: Text(copy.declineTitle),
-                      subtitle: Text(copy.declineBody),
-                    ),
-                    RadioListTile<AdConsentStatus>(
-                      key: const Key('advertising-consent-contextual'),
-                      enabled: !_saving && canAllowContextual,
-                      value: AdConsentStatus.contextualOnly,
-                      title: Text(copy.contextualTitle),
-                      subtitle: Text(copy.contextualBody),
-                    ),
-                  ],
-                ),
-              ),
-              if (_error != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 12),
-                  child: Text(
-                    copy.error,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                ),
-            ],
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
@@ -459,7 +547,7 @@ const _copy = <String, _AdPrivacyCopy>{
     title: 'Advertising privacy',
     intro: 'You control whether the Free plan may show contextual ads.',
     boundary:
-        'BIL never uses health, nutrition, weight, location, profile, or private community data for advertising. Pro is always ad-free.',
+        'BIL never uses health, nutrition, weight, location, profile, or private community data for advertising. Premium is always ad-free.',
     unavailableTitle: 'Advertising is not active',
     unavailableBody:
         'No ad request is made until a reviewed production provider is configured.',
@@ -479,7 +567,7 @@ const _copy = <String, _AdPrivacyCopy>{
     title: 'خصوصية الإعلانات',
     intro: 'أنت تتحكم في السماح للخطة المجانية بعرض إعلانات سياقية.',
     boundary:
-        'لا يستخدم BIL بيانات الصحة أو الغذاء أو الوزن أو الموقع أو الملف أو المجتمع الخاص للإعلانات. خطة Pro بلا إعلانات دائمًا.',
+        'لا يستخدم BIL بيانات الصحة أو الغذاء أو الوزن أو الموقع أو الملف أو المجتمع الخاص للإعلانات. عضوية بريميوم بلا إعلانات دائمًا.',
     unavailableTitle: 'الإعلانات غير مفعلة',
     unavailableBody: 'لن يُرسل أي طلب إعلان حتى تهيئة مزود إنتاج تمت مراجعته.',
     declineTitle: 'عدم عرض الإعلانات',
@@ -498,7 +586,7 @@ const _copy = <String, _AdPrivacyCopy>{
     title: 'Confidentialité publicitaire',
     intro: 'Vous contrôlez les publicités contextuelles du forfait Gratuit.',
     boundary:
-        'BIL n’utilise jamais les données de santé, nutrition, poids, localisation, profil ou communauté privée pour la publicité. Pro reste sans publicité.',
+        'BIL n’utilise jamais les données de santé, nutrition, poids, localisation, profil ou communauté privée pour la publicité. Premium reste sans publicité.',
     unavailableTitle: 'Publicité inactive',
     unavailableBody:
         'Aucune requête n’est envoyée avant la configuration d’un fournisseur de production approuvé.',
@@ -519,7 +607,7 @@ const _copy = <String, _AdPrivacyCopy>{
     title: 'Privacidad publicitaria',
     intro: 'Tú controlas los anuncios contextuales del plan Gratis.',
     boundary:
-        'BIL nunca usa datos de salud, nutrición, peso, ubicación, perfil o comunidad privada para publicidad. Pro no muestra anuncios.',
+        'BIL nunca usa datos de salud, nutrición, peso, ubicación, perfil o comunidad privada para publicidad. Premium no muestra anuncios.',
     unavailableTitle: 'La publicidad no está activa',
     unavailableBody:
         'No se solicita ningún anuncio hasta configurar un proveedor de producción revisado.',
@@ -539,7 +627,7 @@ const _copy = <String, _AdPrivacyCopy>{
     title: 'Reklam gizliliği',
     intro: 'Ücretsiz plandaki bağlamsal reklamları siz kontrol edersiniz.',
     boundary:
-        'BIL sağlık, beslenme, kilo, konum, profil veya özel topluluk verilerini reklam için kullanmaz. Pro her zaman reklamsızdır.',
+        'BIL sağlık, beslenme, kilo, konum, profil veya özel topluluk verilerini reklam için kullanmaz. Premium her zaman reklamsızdır.',
     unavailableTitle: 'Reklamlar etkin değil',
     unavailableBody:
         'İncelenmiş üretim sağlayıcısı yapılandırılmadan reklam isteği gönderilmez.',

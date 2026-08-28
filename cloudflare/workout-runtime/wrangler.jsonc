@@ -1,0 +1,60 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "bil-workout-runtime",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-24",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [
+    {
+      "pattern": "workouts.bilhealth.com",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "ALLOWED_ORIGIN": "https://www.bilhealth.com",
+    "PUBLIC_MANIFEST_KEY": "workouts/v2/catalog/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_eMoUVfgwfU0RpQOwPJr-yw_ZgtStgld",
+    "SUPABASE_URL": "https://tgmanzhqulksykhslrzb.supabase.co"
+  },
+  "r2_buckets": [
+    {
+      "binding": "WORKOUTS",
+      "bucket_name": "bil-premium-workouts-2026-v1"
+    },
+    {
+      "binding": "RECIPES",
+      "bucket_name": "bil-recipes-2026-v1"
+    }
+  ],
+  "env": {
+    "staging": {
+      "name": "bil-workout-runtime-staging",
+      "workers_dev": true,
+      "preview_urls": false,
+      "routes": [],
+      "vars": {
+        "ALLOWED_ORIGIN": "https://www.bilhealth.com",
+        "PUBLIC_MANIFEST_KEY": "workouts/v2/catalog/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json",
+        "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_eMoUVfgwfU0RpQOwPJr-yw_ZgtStgld",
+        "SUPABASE_URL": "https://tgmanzhqulksykhslrzb.supabase.co"
+      },
+      "r2_buckets": [
+        {
+          "binding": "WORKOUTS",
+          "bucket_name": "bil-premium-workouts-2026-v1"
+        },
+        {
+          "binding": "RECIPES",
+          "bucket_name": "bil-recipes-2026-v1"
+        }
+      ]
+    }
+  },
+  "observability": {
+    "enabled": true,
+    "logs": { "head_sampling_rate": 1 },
+    "traces": { "enabled": true, "head_sampling_rate": 0.05 }
+  }
+}

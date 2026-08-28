@@ -1,6 +1,12 @@
 import '../core/global_platform_core.dart';
 import '../platform/native_platform_bridges.dart';
 
+const Set<String> fitnessDeviceMeasurementKinds = <String>{
+  'weight',
+  'body_fat',
+  'heart_rate',
+};
+
 final class MedicalDeviceIdentity {
   const MedicalDeviceIdentity({
     required this.id,
@@ -99,14 +105,13 @@ final class MedicalDeviceRuntime {
           deviceId: device.id,
           asOf: asOf,
         )) {
+          if (!fitnessDeviceMeasurementKinds.contains(measurement.kind)) {
+            continue;
+          }
           if (measurement.observedAt.isAfter(asOf.toUtc())) continue;
           if (measurement.provenance.isEmpty ||
               measurement.confidence < .4 ||
               !_possible(measurement)) {
-            continue;
-          }
-          if (!measurement.calibrated &&
-              _requiresCalibration(measurement.kind)) {
             continue;
           }
           final identity = '${provider.id}:${measurement.sampleId}';
@@ -132,17 +137,10 @@ final class MedicalDeviceRuntime {
     return List<MedicalMeasurement>.unmodifiable(out);
   }
 
-  bool _requiresCalibration(String kind) => <String>{
-    'glucose',
-    'blood_pressure_systolic',
-    'blood_pressure_diastolic',
-  }.contains(kind);
   bool _possible(MedicalMeasurement m) => switch (m.kind) {
-    'glucose' => m.value > 10 && m.value < 700,
-    'blood_pressure_systolic' => m.value > 40 && m.value < 300,
-    'blood_pressure_diastolic' => m.value > 20 && m.value < 200,
-    'oxygen' => m.value >= 50 && m.value <= 100,
-    'temperature' => m.value >= 30 && m.value <= 45,
-    _ => m.value.isFinite,
+    'weight' => m.value >= 2 && m.value <= 500,
+    'body_fat' => m.value >= 1 && m.value <= 75,
+    'heart_rate' => m.value >= 20 && m.value <= 260,
+    _ => false,
   };
 }

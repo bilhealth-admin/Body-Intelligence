@@ -41,10 +41,16 @@ void main() {
     // engine must remain provider-neutral.
     const providerBoundaryFiles = <String>{
       'lib/features/cloud_platform/providers/cloud_sync_providers.dart',
+      'lib/features/cloud_platform/providers/cloud_manual_sync_status_provider.dart',
       'lib/features/cloud_platform/services/cloud_platform_composition_root.dart',
+      'lib/features/cloud_platform/services/cloud_account_key_repository.dart',
+      'lib/features/cloud_platform/services/cloud_manual_sync_service.dart',
+      'lib/features/cloud_platform/services/cloud_runtime_access_gate.dart',
+      'lib/features/cloud_platform/services/cloud_sync_consent_repository.dart',
       'lib/features/cloud_platform/services/cloud_session_sync_coordinator.dart',
       'lib/features/cloud_platform/services/supabase_cloud_authentication_provider.dart',
       'lib/features/cloud_platform/services/supabase_cloud_transport.dart',
+      'lib/features/cloud_platform/services/supabase_startup_cloud_profile_reader.dart',
     };
     for (final file in productionFiles) {
       final normalizedPath = file.path.replaceAll('\\', '/');

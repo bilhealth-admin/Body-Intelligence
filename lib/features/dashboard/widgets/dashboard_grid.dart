@@ -2,21 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../app/localization/bil_locale_policy.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/units/measurement_units.dart';
 import '../../../data/database/nutrient_evidence.dart';
+import '../../../data/repositories/nutrition_goal_schedule_repository.dart';
 import '../../../engine/body_composition_engine.dart';
 import '../../../engine/data_honesty_engine.dart';
 import '../../../engine/one_best_action_engine.dart';
 import '../../connected_health/widgets/connected_health_card.dart';
 import '../../connected_health/providers/connected_health_provider.dart';
+import '../../commerce/domain/commerce_plan.dart';
+import '../../commerce/providers/commerce_providers.dart';
 import '../../exercise_calorie_controls/domain/exercise_calorie_policy.dart';
 import '../../exercise_calorie_controls/providers/exercise_calorie_providers.dart';
 import '../../ai_platform/providers/product_intelligence_provider.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
 import '../../life_context/providers/life_context_provider.dart';
+import '../../nutrition/domain/macro_gram_goals.dart';
+import '../../nutrition/domain/percentage_nutrition_goals.dart';
 import '../dashboard_five_locale_copy.dart';
 import '../../weight/providers/weight_provider.dart';
 import '../composition/dashboard_command_coordinator.dart';
@@ -41,73 +47,9 @@ import 'daily_return_card.dart';
 import 'premium_dashboard_benchmark.dart';
 import 'personal_health_ai_panel.dart';
 
-class _UnprofiledReferenceDashboard extends StatelessWidget {
-  const _UnprofiledReferenceDashboard({
-    required this.message,
-    required this.actionLabel,
-    required this.onAction,
-    this.hero,
-  });
+part 'dashboard_unprofiled_reference.dart';
 
-  final String message;
-  final String actionLabel;
-  final VoidCallback onAction;
-  final Widget? hero;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      PremiumDashboardBenchmark(
-        arabic: Localizations.localeOf(context).languageCode == 'ar',
-        actionTitle: actionLabel,
-        actionReason: message,
-        actionEvidence: '',
-        confidence: '',
-        onAction: onAction,
-        dailyIntelligence: const SizedBox.shrink(),
-        hero: hero,
-        bodyTwinSummary: dashboardFiveLocaleText(
-          'No body trend data recorded yet.',
-          'لم تُسجل بيانات اتجاهات الجسم بعد.',
-        ),
-        bodyTwinEvidence: '',
-        nutritionSummary: dashboardFiveLocaleText(
-          'No nutrition data recorded yet.',
-          'لم تُسجل بيانات تغذية بعد.',
-        ),
-        nutritionEvidence: '',
-        trendSummary: dashboardFiveLocaleText(
-          'No trend data recorded yet.',
-          'لم تُسجل بيانات اتجاهات بعد.',
-        ),
-        trendEvidence: '',
-        loggingItems: [
-          DashboardLoggingItem(
-            label: dashboardFiveLocaleText('Weight', 'الوزن'),
-            recorded: false,
-          ),
-          DashboardLoggingItem(
-            label: dashboardFiveLocaleText('Meals', 'الوجبات'),
-            recorded: false,
-          ),
-          DashboardLoggingItem(
-            label: dashboardFiveLocaleText('Water', 'الماء'),
-            recorded: false,
-          ),
-        ],
-        caloriesConsumed: 0,
-        caloriesGoal: 0,
-        stepTrendValues: const [],
-      ),
-      DashboardProfileRequiredCard(
-        message: message,
-        actionLabel: actionLabel,
-        onAction: onAction,
-      ),
-    ],
-  );
-}
+part 'dashboard_nutrient_goal_cards.dart';
 
 class DashboardGrid extends ConsumerWidget {
   const DashboardGrid({super.key, this.hero});
@@ -123,6 +65,10 @@ class DashboardGrid extends ConsumerWidget {
         values.map(localized).join(' · ');
     final profileAsync = ref.watch(userProfileProvider);
     final weightsAsync = ref.watch(weightHistoryProvider);
+    final latestBodyMeasurement = ref
+        .watch(bodyMeasurementHistoryProvider)
+        .value
+        ?.firstOrNull;
     final mealsAsync = ref.watch(todayMealsProvider);
     final waterAsync = ref.watch(todayWaterProvider);
     final allMealsAsync = ref.watch(allMealsProvider);
@@ -133,6 +79,10 @@ class DashboardGrid extends ConsumerWidget {
     final allContextsAsync = ref.watch(insightLifeContextProvider);
     final memoriesAsync = ref.watch(decisionMemoriesProvider);
     final clock = ref.watch(dashboardClockProvider);
+    final verifiedPlan =
+        ref.watch(verifiedSubscriptionStateProvider).value?.plan ??
+        CommercePlan.free;
+    final premiumUnlocked = verifiedPlan != CommercePlan.free;
     final visibleSections = DashboardSectionIds.all
         .where(
           (section) =>
@@ -202,6 +152,12 @@ class DashboardGrid extends ConsumerWidget {
       );
     }
     final nutrientGoalCards = nutrientGoalCardsAsync.requireValue;
+    // Protein and carbohydrate progress already live in the primary daily
+    // nutrition summary. Do not repeat them as standalone dashboard cards.
+    final visibleNutrientGoalCards = nutrientGoalCards.difference(const {
+      DashboardNutrientGoalIds.protein,
+      DashboardNutrientGoalIds.carbohydrates,
+    });
     final nutrientGoals = nutrientGoalStates.map(
       (id, state) => MapEntry(id, state.requireValue),
     );
@@ -269,6 +225,10 @@ class DashboardGrid extends ConsumerWidget {
     final allContexts = allContextsAsync.value ?? const [];
     final now = clock();
     final canonicalIntelligence = ref.watch(productIntelligenceOutputProvider);
+    final goalSchedule =
+        ref.watch(nutritionGoalScheduleProvider).value ??
+        const NutritionGoalSchedule();
+    final scheduledTarget = goalSchedule.targetFor(now);
     final dashboardSnapshot = const DashboardIntelligenceComposer().compose(
       const DashboardIntelligenceInputAdapter().adapt(
         now: now,
@@ -278,11 +238,14 @@ class DashboardGrid extends ConsumerWidget {
         todayWater: waterRows,
         allMeals: allMeals,
         allWater: allWater,
+        dailyLogs: dailyLogs,
         todayContexts: contextAsync.value ?? const [],
         allContexts: allContexts,
         memories: memoriesAsync.value ?? const [],
         skippedWeightToday: skippedWeightAsync.value ?? false,
         planSetting: planAsync.value,
+        latestBodyMeasurement: latestBodyMeasurement,
+        dailyNutritionTarget: scheduledTarget,
       ),
     );
     final calories = dashboardSnapshot.calories;
@@ -293,10 +256,21 @@ class DashboardGrid extends ConsumerWidget {
     final bil = dashboardSnapshot.bil;
     final bodyComposition = dashboardSnapshot.bodyComposition;
     final effectiveTargets = dashboardSnapshot.effectiveTargets;
-    final macroGramGoals = ref.watch(dashboardMacroGramGoalsProvider);
-    final percentageGoals = ref.watch(
+    final savedMacroGramGoals = ref.watch(dashboardMacroGramGoalsProvider);
+    final macroGramGoals = scheduledTarget == null
+        ? savedMacroGramGoals
+        : const MacroGramGoals();
+    final savedPercentageGoals = ref.watch(
       dashboardPercentageNutritionGoalsProvider,
     );
+    final percentageGoals = scheduledTarget == null
+        ? savedPercentageGoals
+        : PercentageNutritionGoals.resolve(
+            calories: scheduledTarget.calories,
+            carbohydratesPercent: scheduledTarget.carbsPercent,
+            proteinPercent: scheduledTarget.proteinPercent,
+            fatPercent: scheduledTarget.fatPercent,
+          );
     final cardNutrientGoals = <String, double?>{
       ...nutrientGoals,
       DashboardNutrientGoalIds.protein:
@@ -366,7 +340,9 @@ class DashboardGrid extends ConsumerWidget {
                 : canonicalBody.integrityIssues,
           );
     final chronologicalWeights = weights.reversed.toList();
-    final localizer = DashboardIntelligenceLocalizer(arabic: arabic);
+    final localizer = DashboardIntelligenceLocalizer(
+      arabic: arabic,
+    ).forLocale(BilLocalePolicy.canonicalTag(Localizations.localeOf(context)));
     final firstBodyTwinReading =
         trustedTwin.canExposeBodyTwin && chronologicalWeights.length == 1;
     String compositionValue(
@@ -459,7 +435,7 @@ class DashboardGrid extends ConsumerWidget {
     void openCanonicalAction() {
       switch (canonicalAction?.id) {
         case 'continue-plan':
-          context.push('/plan');
+          context.push('/plan?origin=dashboard');
         case 'increase-protein':
         case 'rebalance-electrolytes':
           context.go('/daily-log?meal=breakfast&focus=meal&from=%2Fdashboard');
@@ -498,10 +474,12 @@ class DashboardGrid extends ConsumerWidget {
         system,
       ).toStringAsFixed(1),
       weightUnit: UnitConverter.weightUnit(system),
-      bodyMassIndex: compositionValue(bodyComposition.bodyMassIndex, unit: ''),
-      bodyMassIndexUnit: bodyComposition.bodyMassIndex.isAvailable ? 'BMI' : '',
       bodyFat: compositionValue(bodyComposition.bodyFatPercentage, unit: ''),
       bodyFatUnit: bodyComposition.bodyFatPercentage.isAvailable ? '%' : '',
+      fatFreeMass: bodyComposition.fatFreeMassKg.isAvailable
+          ? '${UnitConverter.weightFromKg(bodyComposition.fatFreeMassKg.value!, system).toStringAsFixed(1)} '
+                '${UnitConverter.weightUnit(system)}'
+          : '—',
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -576,6 +554,7 @@ class DashboardGrid extends ConsumerWidget {
             connectedHealth: ConnectedHealthCard(
               languageCode: Localizations.localeOf(context).languageCode,
               compact: MediaQuery.sizeOf(context).width < 600,
+              dashboardCompact: MediaQuery.sizeOf(context).width < 600,
             ),
             bodyTwinSummary: twinCopy.summary,
             bodyTwinEvidence: twinCopy.evidence,
@@ -636,6 +615,14 @@ class DashboardGrid extends ConsumerWidget {
                 : '${primaryInsight.explanation} ${primaryInsight.suggestedAction}',
             caloriesConsumed: calories.round(),
             caloriesGoal: exerciseAdjustedTargets.effectiveCalorieGoal.round(),
+            baseCaloriesGoal: exerciseAdjustedTargets.baseCalorieGoal.round(),
+            caloriesBurned: exerciseEnergy?.kcal.round() ?? 0,
+            netCalories: (calories - (exerciseEnergy?.kcal ?? 0)).round(),
+            remainingCalories: exerciseAdjustedTargets.remainingCalories
+                .round(),
+            burnedCaloriesApplied:
+                exerciseAdjustedTargets.availability ==
+                ExerciseCalorieAvailability.applied,
             proteinConsumed: protein.round(),
             proteinGoal: exerciseAdjustedTargets.proteinGoal.round(),
             carbohydratesConsumed: carbohydrates.round(),
@@ -672,13 +659,14 @@ class DashboardGrid extends ConsumerWidget {
                 .toList(growable: false),
             weightUnit: UnitConverter.weightUnit(system),
             visibleSections: visibleSections,
+            premiumUnlocked: premiumUnlocked,
           ),
         ),
-        if (nutrientGoalCards.isNotEmpty)
+        if (visibleNutrientGoalCards.isNotEmpty)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
             child: _DashboardNutrientGoalCards(
-              selected: nutrientGoalCards,
+              selected: visibleNutrientGoalCards,
               values: {
                 DashboardNutrientGoalIds.protein: evidenced(
                   TrackedNutrient.protein,
@@ -700,152 +688,6 @@ class DashboardGrid extends ConsumerWidget {
               goals: cardNutrientGoals,
             ),
           ),
-      ],
-    );
-  }
-}
-
-class _DashboardNutrientGoalCards extends StatelessWidget {
-  const _DashboardNutrientGoalCards({
-    required this.selected,
-    required this.values,
-    required this.goals,
-  });
-
-  final Set<String> selected;
-  final Map<String, double?> values;
-  final Map<String, double?> goals;
-
-  @override
-  Widget build(BuildContext context) {
-    final language = Localizations.localeOf(context).languageCode;
-    String label(String id) => switch ((language, id)) {
-      ('ar', DashboardNutrientGoalIds.protein) => 'البروتين',
-      ('ar', DashboardNutrientGoalIds.carbohydrates) => 'الكربوهيدرات',
-      ('ar', DashboardNutrientGoalIds.fat) => 'الدهون',
-      ('ar', DashboardNutrientGoalIds.fiber) => 'الألياف',
-      ('ar', DashboardNutrientGoalIds.sodium) => 'الصوديوم',
-      ('ar', DashboardNutrientGoalIds.potassium) => 'البوتاسيوم',
-      ('fr', DashboardNutrientGoalIds.protein) => 'Protéines',
-      ('fr', DashboardNutrientGoalIds.carbohydrates) => 'Glucides',
-      ('fr', DashboardNutrientGoalIds.fat) => 'Lipides',
-      ('fr', DashboardNutrientGoalIds.fiber) => 'Fibres',
-      ('fr', DashboardNutrientGoalIds.sodium) => 'Sodium',
-      ('fr', DashboardNutrientGoalIds.potassium) => 'Potassium',
-      ('es', DashboardNutrientGoalIds.protein) => 'Proteína',
-      ('es', DashboardNutrientGoalIds.carbohydrates) => 'Carbohidratos',
-      ('es', DashboardNutrientGoalIds.fat) => 'Grasas',
-      ('es', DashboardNutrientGoalIds.fiber) => 'Fibra',
-      ('es', DashboardNutrientGoalIds.sodium) => 'Sodio',
-      ('es', DashboardNutrientGoalIds.potassium) => 'Potasio',
-      ('tr', DashboardNutrientGoalIds.protein) => 'Protein',
-      ('tr', DashboardNutrientGoalIds.carbohydrates) => 'Karbonhidratlar',
-      ('tr', DashboardNutrientGoalIds.fat) => 'Yağ',
-      ('tr', DashboardNutrientGoalIds.fiber) => 'Lif',
-      ('tr', DashboardNutrientGoalIds.sodium) => 'Sodyum',
-      ('tr', DashboardNutrientGoalIds.potassium) => 'Potasyum',
-      (_, DashboardNutrientGoalIds.carbohydrates) => context.strings.text(
-        'Carbohydrates',
-      ),
-      (_, DashboardNutrientGoalIds.fat) => context.strings.text('Fat'),
-      (_, DashboardNutrientGoalIds.fiber) => context.strings.text('Fiber'),
-      (_, DashboardNutrientGoalIds.sodium) => context.strings.text('Sodium'),
-      (_, DashboardNutrientGoalIds.potassium) => context.strings.text(
-        'Potassium',
-      ),
-      _ => context.strings.text('Protein'),
-    };
-    final ids = DashboardNutrientGoalIds.all.where(selected.contains).toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          switch (language) {
-            'ar' => 'أهداف المغذيات',
-            'fr' => 'Objectifs nutritionnels',
-            'es' => 'Objetivos nutricionales',
-            'tr' => 'Besin hedefleri',
-            _ => context.strings.text('Nutrient goals'),
-          },
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 10),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            childAspectRatio: 1.45,
-          ),
-          itemCount: ids.length,
-          itemBuilder: (context, index) {
-            final id = ids[index];
-            final value = values[id];
-            final goal = goals[id];
-            final progress = value == null || goal == null || goal <= 0
-                ? null
-                : (value / goal).clamp(0.0, 1.0);
-            final milligrams =
-                id == DashboardNutrientGoalIds.sodium ||
-                id == DashboardNutrientGoalIds.potassium;
-            final unit = milligrams ? 'mg' : 'g';
-            final summary = value == null || goal == null
-                ? context.strings.text(
-                    'Goal or nutrition evidence is unavailable',
-                  )
-                : '${value.toStringAsFixed(0)} / ${goal.toStringAsFixed(0)} $unit';
-            return Semantics(
-              key: Key('dashboard-nutrient-card-$id'),
-              button: true,
-              label:
-                  '${label(id)}. $summary. ${context.strings.text('Edit goal')}',
-              child: ExcludeSemantics(
-                child: Card(
-                  child: InkWell(
-                    onTap: () => context.push('/settings/nutrition-goals'),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(14),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            label(id),
-                            style: const TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                          Directionality(
-                            textDirection: TextDirection.ltr,
-                            child: Text(
-                              value == null || goal == null ? '—' : summary,
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ),
-                          LinearProgressIndicator(
-                            value: progress ?? 0,
-                            minHeight: 8,
-                            borderRadius: BorderRadius.circular(999),
-                            color: progress == null
-                                ? Theme.of(context).colorScheme.outlineVariant
-                                : progress >= .8
-                                ? const Color(0xFF2E9D62)
-                                : progress >= .4
-                                ? const Color(0xFFF2A23A)
-                                : const Color(0xFFE57B25),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
       ],
     );
   }

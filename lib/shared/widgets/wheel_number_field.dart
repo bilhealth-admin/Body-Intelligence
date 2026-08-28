@@ -2,6 +2,157 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+/// A fast horizontal scale for measurements with a wide range.
+///
+/// Unlike the precise vertical wheel, this control lets a high-weight user
+/// jump across the full range in one drag while retaining one-step arrow and
+/// screen-reader adjustments. The selected value stays visible above the
+/// moving indicator like a digital scale readout.
+class SmartWeightScaleField extends StatelessWidget {
+  const SmartWeightScaleField({
+    super.key,
+    required this.value,
+    required this.minimum,
+    required this.maximum,
+    required this.step,
+    required this.decimalPlaces,
+    required this.unit,
+    required this.label,
+    required this.onChanged,
+  });
+
+  final double value;
+  final double minimum;
+  final double maximum;
+  final double step;
+  final int decimalPlaces;
+  final String unit;
+  final String label;
+  final ValueChanged<double> onChanged;
+
+  int get _divisions => ((maximum - minimum) / step).round();
+
+  double _stepped(double next) {
+    final index = ((next - minimum) / step).round().clamp(0, _divisions);
+    return minimum + index * step;
+  }
+
+  void _adjust(int direction) => onChanged(_stepped(value + step * direction));
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final formatted = value.toStringAsFixed(decimalPlaces);
+    return Semantics(
+      key: const Key('smart-weight-scale-field'),
+      label: '$label, $formatted $unit',
+      value: formatted,
+      increasedValue: _stepped(value + step).toStringAsFixed(decimalPlaces),
+      decreasedValue: _stepped(value - step).toStringAsFixed(decimalPlaces),
+      onIncrease: () => _adjust(1),
+      onDecrease: () => _adjust(-1),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 10),
+          Container(
+            key: const Key('smart-weight-scale-readout'),
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+            decoration: BoxDecoration(
+              color: scheme.primaryContainer.withValues(alpha: .58),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: scheme.primary.withValues(alpha: .38)),
+            ),
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: formatted,
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      color: scheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w900,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                  TextSpan(
+                    text: '  $unit',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: scheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+              textAlign: TextAlign.center,
+              textDirection: TextDirection.ltr,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              IconButton.outlined(
+                key: const Key('smart-weight-scale-decrease'),
+                tooltip: '-${step.toStringAsFixed(decimalPlaces)} $unit',
+                onPressed: value <= minimum ? null : () => _adjust(-1),
+                icon: const Icon(Icons.remove_rounded),
+              ),
+              Expanded(
+                child: SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    trackHeight: 8,
+                    activeTrackColor: scheme.primary,
+                    inactiveTrackColor: scheme.surfaceContainerHighest,
+                    thumbColor: scheme.primary,
+                    overlayColor: scheme.primary.withValues(alpha: .14),
+                    valueIndicatorColor: scheme.primary,
+                    showValueIndicator: ShowValueIndicator.onlyForDiscrete,
+                  ),
+                  child: Slider(
+                    key: const Key('smart-weight-scale-slider'),
+                    value: value.clamp(minimum, maximum),
+                    min: minimum,
+                    max: maximum,
+                    divisions: _divisions,
+                    label: '$formatted $unit',
+                    onChanged: (next) => onChanged(_stepped(next)),
+                  ),
+                ),
+              ),
+              IconButton.outlined(
+                key: const Key('smart-weight-scale-increase'),
+                tooltip: '+${step.toStringAsFixed(decimalPlaces)} $unit',
+                onPressed: value >= maximum ? null : () => _adjust(1),
+                icon: const Icon(Icons.add_rounded),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 52),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${minimum.toStringAsFixed(0)} $unit',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+                Text(
+                  '${maximum.toStringAsFixed(0)} $unit',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class WheelNumberField extends StatefulWidget {
   const WheelNumberField({
     super.key,

@@ -1,11 +1,18 @@
+import 'package:flutter/widgets.dart' show Locale;
+
 import '../../app/localization/app_localizations.dart';
 
-String dashboardFiveLocaleText(String english, String arabic) {
-  final locale = AppLocalizations.activeLocale;
-  final authored = _dashboardAuthoredCopy[english]?[locale.languageCode];
+String dashboardFiveLocaleText(
+  String english,
+  String arabic, {
+  Locale? locale,
+}) {
+  final resolvedLocale = locale ?? AppLocalizations.activeLocale;
+  final authored =
+      _dashboardAuthoredCopy[english]?[resolvedLocale.languageCode];
   if (authored != null) return authored;
-  final localized = AppLocalizations(locale).text(english);
-  if (locale.languageCode == 'ar' && localized == english) return arabic;
+  if (resolvedLocale.languageCode == 'ar') return arabic;
+  final localized = AppLocalizations(resolvedLocale).text(english);
   return localized;
 }
 

@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/app_localizations.dart';
+import '../../../shared/widgets/bil_account_avatar.dart';
+import '../../commerce/domain/commerce_entitlement.dart';
+import '../../commerce/domain/subscription_state.dart';
+import '../../commerce/providers/commerce_providers.dart';
 import '../data/community_repository.dart';
 
 SupabaseClient? _initializedConnectionsClient() {
@@ -18,17 +23,18 @@ SupabaseClient? _initializedConnectionsClient() {
   }
 }
 
-class CommunityConnectionsPage extends StatefulWidget {
+class CommunityConnectionsPage extends ConsumerStatefulWidget {
   const CommunityConnectionsPage({this.repository, super.key});
 
   final CommunityRepository? repository;
 
   @override
-  State<CommunityConnectionsPage> createState() =>
+  ConsumerState<CommunityConnectionsPage> createState() =>
       _CommunityConnectionsPageState();
 }
 
-class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
+class _CommunityConnectionsPageState
+    extends ConsumerState<CommunityConnectionsPage> {
   CommunityRepository? _repository;
   Future<List<Map<String, dynamic>>> _connections = Future.value(const []);
   int _tab = 0;
@@ -91,6 +97,28 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
     }
   }
 
+  Future<void> _reportUser(String operationId, String userId) async {
+    if (!_busyConnections.add(operationId)) return;
+    setState(() {});
+    try {
+      await _repository!.report(
+        targetKind: 'profile',
+        targetId: userId,
+        reason: 'user_reported_from_connections',
+      );
+      if (mounted) {
+        final copy = _ConnectionsCopy.of(context);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(copy.reportSubmitted)));
+      }
+    } catch (_) {
+      if (mounted) _showFailure();
+    } finally {
+      if (mounted) setState(() => _busyConnections.remove(operationId));
+    }
+  }
+
   void _showFailure() {
     final copy = _ConnectionsCopy.of(context);
     ScaffoldMessenger.of(
@@ -101,6 +129,10 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
   @override
   Widget build(BuildContext context) {
     final copy = _ConnectionsCopy.of(context);
+    final subscription = ref.watch(verifiedSubscriptionStateProvider).value;
+    final friendsUnlocked =
+        subscription?.authority == EntitlementAuthority.verifiedServer &&
+        (subscription?.grants(CommerceEntitlement.communityFriends) ?? false);
     return Scaffold(
       appBar: AppBar(
         title: Text(copy.title),
@@ -143,7 +175,9 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
               future: _connections,
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
-                  return const Center(child: CircularProgressIndicator());
+                  return _ConnectionsLoading(
+                    label: context.strings.text('Loading...'),
+                  );
                 }
                 if (snapshot.hasError) {
                   return _ConnectionsLoadError(
@@ -189,13 +223,9 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
                       final busy = _busyConnections.contains(row.id);
                       return Card(
                         child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundImage: avatar == null
-                                ? null
-                                : NetworkImage(avatar),
-                            child: avatar == null
-                                ? const Icon(Icons.person_rounded)
-                                : null,
+                          leading: BilAccountAvatar(
+                            radius: 20,
+                            networkUrl: avatar,
                           ),
                           title: Text(name),
                           subtitle: Text(
@@ -213,19 +243,38 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
                                                 _respond(row.id, accept: false),
                                       icon: const Icon(Icons.close_rounded),
                                     ),
-                                    IconButton.filled(
-                                      tooltip: copy.accept,
-                                      onPressed: busy
-                                          ? null
-                                          : () =>
-                                                _respond(row.id, accept: true),
-                                      icon: Icon(
-                                        Icons.check_rounded,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onPrimary,
+                                    if (friendsUnlocked)
+                                      IconButton.filled(
+                                        tooltip: copy.accept,
+                                        onPressed: busy
+                                            ? null
+                                            : () => _respond(
+                                                row.id,
+                                                accept: true,
+                                              ),
+                                        icon: Icon(
+                                          Icons.check_rounded,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimary,
+                                        ),
+                                      )
+                                    else
+                                      FilledButton.tonal(
+                                        key: ValueKey(
+                                          'community-premium-accept-${row.id}',
+                                        ),
+                                        onPressed: () => context.push(
+                                          '/plans?focus=subscription',
+                                        ),
+                                        child: Text(
+                                          context.strings.text('Premium'),
+                                          style: const TextStyle(
+                                            color: Color(0xFFC28A16),
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                        ),
                                       ),
-                                    ),
                                   ],
                                 )
                               : status == 'accepted'
@@ -254,11 +303,18 @@ class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
                                         if (value == 'block') {
                                           _block(row.id, otherId);
                                         }
+                                        if (value == 'report') {
+                                          _reportUser(row.id, otherId);
+                                        }
                                       },
                                       itemBuilder: (_) => [
                                         PopupMenuItem(
                                           value: 'remove',
                                           child: Text(copy.remove),
+                                        ),
+                                        PopupMenuItem(
+                                          value: 'report',
+                                          child: Text(copy.report),
                                         ),
                                         PopupMenuItem(
                                           value: 'block',
@@ -451,6 +507,28 @@ class _ConnectionsLoadError extends StatelessWidget {
   );
 }
 
+class _ConnectionsLoading extends StatelessWidget {
+  const _ConnectionsLoading({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Semantics(
+      liveRegion: true,
+      label: label,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: 14),
+          Text(label, textAlign: TextAlign.center),
+        ],
+      ),
+    ),
+  );
+}
+
 class _EmptyConnections extends StatelessWidget {
   const _EmptyConnections({required this.copy});
   final _ConnectionsCopy copy;
@@ -494,6 +572,8 @@ class _ConnectionsCopy {
     required this.manage,
     required this.remove,
     required this.block,
+    required this.report,
+    required this.reportSubmitted,
     required this.actionFailed,
     required this.signInRequired,
     required this.signIn,
@@ -523,6 +603,8 @@ class _ConnectionsCopy {
       manage: 'إدارة العلاقة',
       remove: 'إزالة الصداقة',
       block: 'حظر العضو',
+      report: 'الإبلاغ عن العضو',
+      reportSubmitted: 'تم إرسال البلاغ إلى فريق الإشراف.',
       actionFailed: 'تعذر تنفيذ الإجراء بأمان. حاول مجددًا.',
       signInRequired: 'سجّل الدخول لعرض الأصدقاء والطلبات.',
       signIn: 'تسجيل الدخول',
@@ -548,6 +630,8 @@ class _ConnectionsCopy {
       manage: 'Gérer',
       remove: 'Retirer l’amitié',
       block: 'Bloquer',
+      report: 'Signaler le membre',
+      reportSubmitted: 'Signalement envoyé à la modération.',
       actionFailed: 'Action impossible. Réessayez.',
       signInRequired: 'Connectez-vous pour voir les amis et les demandes.',
       signIn: 'Se connecter',
@@ -574,6 +658,8 @@ class _ConnectionsCopy {
       manage: 'Gestionar',
       remove: 'Eliminar amistad',
       block: 'Bloquear',
+      report: 'Denunciar miembro',
+      reportSubmitted: 'Denuncia enviada a moderación.',
       actionFailed: 'No se pudo completar la acción.',
       signInRequired: 'Inicia sesión para ver amigos y solicitudes.',
       signIn: 'Iniciar sesión',
@@ -600,6 +686,8 @@ class _ConnectionsCopy {
       manage: 'Yönet',
       remove: 'Arkadaşlığı kaldır',
       block: 'Engelle',
+      report: 'Üyeyi bildir',
+      reportSubmitted: 'Bildirim moderasyona gönderildi.',
       actionFailed: 'İşlem tamamlanamadı. Tekrar deneyin.',
       signInRequired: 'Arkadaşları ve istekleri görmek için oturum açın.',
       signIn: 'Oturum aç',
@@ -631,6 +719,8 @@ class _ConnectionsCopy {
       manage: t('Manage connection'),
       remove: t('Remove friend'),
       block: t('Block member'),
+      report: t('Report member'),
+      reportSubmitted: t('Report sent to moderation.'),
       actionFailed: t('Could not complete that action safely. Try again.'),
       signInRequired: t('Sign in to view friends and requests.'),
       signIn: t('Sign in'),
@@ -647,7 +737,8 @@ class _ConnectionsCopy {
   final String title, findPeople, loadFailed, empty, member;
   final String accept, decline, message;
   final String pendingIncoming, pendingOutgoing, accepted, declined;
-  final String manage, remove, block, actionFailed, signInRequired;
+  final String manage, remove, block, report, reportSubmitted;
+  final String actionFailed, signInRequired;
   final String signIn, retry;
   final String all, requests, educationTitle, educationBody;
 

@@ -16,6 +16,47 @@ class ProductClassifier {
     bool containsAny(Iterable<String> terms) =>
         terms.any((term) => searchable.contains(term));
 
+    // The universal Open Facts endpoint routes records to a product family.
+    // These are stronger signals than ambiguous words in a brand/name (for
+    // example, food "ice cream" must never become personal care because it
+    // contains the word "cream"). Food subtypes remain refined below.
+    if (productType == 'beauty') return ProductKind.personalCare;
+    if (productType == 'petfood') return ProductKind.petFood;
+    if (productType == 'food') {
+      if (containsAny(const [
+        'alcohol',
+        'beer',
+        'wine',
+        'spirits',
+        'liquor',
+        'كحول',
+        'بيرة',
+        'نبيذ',
+      ])) {
+        return ProductKind.alcohol;
+      }
+      if (containsAny(const [
+        'supplement',
+        'vitamin supplement',
+        'dietary supplement',
+        'مكمل',
+      ])) {
+        return ProductKind.supplement;
+      }
+      if (containsAny(const [
+        'beverage',
+        'drink',
+        'water',
+        'juice',
+        'مشروب',
+        'ماء',
+        'عصير',
+      ])) {
+        return ProductKind.beverage;
+      }
+      return ProductKind.food;
+    }
+
     // Unicode escapes make the Arabic vocabulary immune to console/code-page
     // corruption on Windows while keeping classification fully offline.
     if (containsAny(const [
@@ -109,22 +150,20 @@ class ProductClassifier {
     ])) {
       return ProductKind.supplement;
     }
-    if (productType == 'beauty' ||
-        containsAny(const [
-          'cosmetic',
-          'beauty',
-          'personal care',
-          'shampoo',
-          'soap',
-          'مستحضرات تجميل',
-          'عناية شخصية',
-          'شامبو',
-          'صابون',
-          'كريم',
-        ])) {
+    if (containsAny(const [
+      'cosmetic',
+      'beauty',
+      'personal care',
+      'shampoo',
+      'soap',
+      'مستحضرات تجميل',
+      'عناية شخصية',
+      'شامبو',
+      'صابون',
+      'كريم',
+    ])) {
       return ProductKind.personalCare;
     }
-    if (productType == 'petfood') return ProductKind.petFood;
     if (containsAny(const [
       'alcohol',
       'beer',

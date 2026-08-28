@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/runtime_copy.dart';
 import '../domain/community_push_preferences.dart';
 import '../domain/daily_reminder.dart';
@@ -13,8 +14,20 @@ import '../services/community_push_service.dart';
 import '../services/daily_reminder_store.dart';
 import 'notification_settings_copy.dart';
 
+part 'notification_settings_components.dart';
+part 'notification_settings_actions.dart';
+
 class NotificationSettingsPage extends ConsumerStatefulWidget {
-  const NotificationSettingsPage({super.key});
+  const NotificationSettingsPage({
+    super.key,
+    this.reminderStore,
+    this.deliveryStore,
+    this.notificationService,
+  });
+
+  final DailyReminderStore? reminderStore;
+  final NotificationDeliveryPreferencesStore? deliveryStore;
+  final BilNotificationService? notificationService;
 
   @override
   ConsumerState<NotificationSettingsPage> createState() =>
@@ -23,16 +36,23 @@ class NotificationSettingsPage extends ConsumerStatefulWidget {
 
 class _NotificationSettingsPageState
     extends ConsumerState<NotificationSettingsPage> {
-  final _store = DailyReminderStore();
-  final _deliveryStore = NotificationDeliveryPreferencesStore();
-  final _service = BilNotificationService(FlutterLocalNotificationsPlugin());
+  late final DailyReminderStore _store;
+  late final NotificationDeliveryPreferencesStore _deliveryStore;
+  late final BilNotificationService _service;
   List<DailyReminder>? _reminders;
   NotificationDeliveryPreferences? _deliveryPreferences;
   CommunityPushService? _pushService;
   CommunityPushPreferences? _pushPreferences;
+  bool? _phoneNotificationsEnabled;
+  BilNotificationPermissionState _permissionState =
+      BilNotificationPermissionState.unknown;
+  Set<int> _pendingNotificationIds = const {};
+  bool _permissionProbeFailed = false;
   bool _saving = false;
   bool _pushSaving = false;
   bool _pushLoadError = false;
+
+  void _updateState(VoidCallback update) => setState(update);
   Object? _loadError;
 
   String get _languageCode => Localizations.localeOf(context).languageCode;
@@ -48,6 +68,76 @@ class _NotificationSettingsPageState
           .every((reminder) => reminder.enabled) ??
       false;
 
+  bool get _requiresSystemSettings =>
+      _permissionProbeFailed ||
+      _permissionState == BilNotificationPermissionState.permanentlyDenied ||
+      _permissionState == BilNotificationPermissionState.restricted;
+
+  String get _permissionStatusText {
+    if (_permissionProbeFailed) {
+      return _phoneText(
+        'Permission status is unavailable. Check phone settings.',
+        ar: 'تعذّر التحقق من الإذن. راجعه في إعدادات الهاتف.',
+        fr: 'État de l’autorisation indisponible. Vérifiez les réglages.',
+        es: 'No se pudo comprobar el permiso. Revisa los ajustes.',
+        tr: 'İzin durumu alınamadı. Telefon ayarlarını kontrol edin.',
+      );
+    }
+    if (_phoneNotificationsEnabled == true) {
+      return _phoneText(
+        'This phone is ready for BIL reminders.',
+        ar: 'هذا الهاتف جاهز لاستقبال تذكيرات BIL.',
+        fr: 'Ce téléphone est prêt pour les rappels BIL.',
+        es: 'Este teléfono está listo para los recordatorios de BIL.',
+        tr: 'Bu telefon BIL hatırlatıcıları için hazır.',
+      );
+    }
+    if (_requiresSystemSettings) {
+      return _phoneText(
+        'Notifications are blocked in phone settings.',
+        ar: 'الإشعارات محظورة في إعدادات الهاتف.',
+        fr: 'Les notifications sont bloquées dans les réglages.',
+        es: 'Las notificaciones están bloqueadas en los ajustes.',
+        tr: 'Bildirimler telefon ayarlarında engellenmiş.',
+      );
+    }
+    return _phoneText(
+      'Allow notifications to receive the reminders you enable.',
+      ar: 'اسمح بالإشعارات لتصلك التذكيرات التي تفعّلها.',
+      fr: 'Autorisez les notifications pour recevoir vos rappels.',
+      es: 'Permite las notificaciones para recibir tus recordatorios.',
+      tr: 'Etkinleştirdiğiniz hatırlatıcıları almak için izin verin.',
+    );
+  }
+
+  String _scheduleStatus(DailyReminder reminder) {
+    if (!reminder.enabled) {
+      return _phoneText(
+        'Off',
+        ar: 'متوقف',
+        fr: 'Désactivé',
+        es: 'Desactivado',
+        tr: 'Kapalı',
+      );
+    }
+    if (_pendingNotificationIds.contains(reminder.notificationId)) {
+      return _phoneText(
+        'Scheduled on this phone',
+        ar: 'مجدول على هذا الهاتف',
+        fr: 'Programmé sur ce téléphone',
+        es: 'Programado en este teléfono',
+        tr: 'Bu telefonda planlandı',
+      );
+    }
+    return _phoneText(
+      'Not scheduled on this phone',
+      ar: 'غير مجدول على هذا الهاتف',
+      fr: 'Non programmé sur ce téléphone',
+      es: 'No programado en este teléfono',
+      tr: 'Bu telefonda planlanmadı',
+    );
+  }
+
   String _ui(String en, String ar, String fr, String es, String tr) =>
       switch (_languageCode) {
         'ar' => ar,
@@ -60,270 +150,19 @@ class _NotificationSettingsPageState
   @override
   void initState() {
     super.initState();
+    _store = widget.reminderStore ?? DailyReminderStore();
+    _deliveryStore =
+        widget.deliveryStore ?? NotificationDeliveryPreferencesStore();
+    _service =
+        widget.notificationService ??
+        BilNotificationService(FlutterLocalNotificationsPlugin());
     _load();
     if (CommunityPushService.isAvailable &&
-        Supabase.instance.isInitialized &&
+        AppEnvironment.supabaseRuntimeReady &&
         Supabase.instance.client.auth.currentUser != null) {
       _pushService = CommunityPushService(Supabase.instance.client);
       _loadPushPreferences();
     }
-  }
-
-  Future<void> _loadPushPreferences() async {
-    if (mounted) setState(() => _pushLoadError = false);
-    try {
-      final preferences = await _pushService!.loadPreferences();
-      if (mounted) setState(() => _pushPreferences = preferences);
-    } on Object {
-      if (mounted) setState(() => _pushLoadError = true);
-    }
-  }
-
-  Future<void> _setPushEnabled(bool enabled) async {
-    if (_pushService == null || _pushSaving) return;
-    setState(() => _pushSaving = true);
-    try {
-      await _pushService!.setEnabled(enabled);
-      await _loadPushPreferences();
-    } on Object {
-      if (mounted) _showPushError();
-    } finally {
-      if (mounted) setState(() => _pushSaving = false);
-    }
-  }
-
-  Future<void> _setSensitivePreview(bool allowed) async {
-    if (_pushService == null || _pushSaving) return;
-    setState(() => _pushSaving = true);
-    try {
-      await _pushService!.setSensitivePreviewAllowed(allowed);
-      await _loadPushPreferences();
-    } on Object {
-      if (mounted) _showPushError();
-    } finally {
-      if (mounted) setState(() => _pushSaving = false);
-    }
-  }
-
-  void _showPushError() => ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(
-        _ui(
-          'Community notifications could not be updated safely. Try again.',
-          'تعذر تحديث إشعارات المجتمع بأمان. حاول مجددًا.',
-          'Impossible de mettre à jour les notifications de la communauté.',
-          'No se pudieron actualizar las notificaciones de la comunidad.',
-          'Topluluk bildirimleri güvenle güncellenemedi.',
-        ),
-      ),
-    ),
-  );
-
-  Future<void> _load() async {
-    if (mounted) setState(() => _loadError = null);
-    try {
-      final values = await Future.wait([_store.load(), _deliveryStore.load()]);
-      if (mounted) {
-        setState(() {
-          _reminders = values[0] as List<DailyReminder>;
-          _deliveryPreferences = values[1] as NotificationDeliveryPreferences;
-          _loadError = null;
-        });
-      }
-    } on Object catch (error) {
-      if (mounted) setState(() => _loadError = error);
-    }
-  }
-
-  Future<void> _saveDelivery(NotificationDeliveryPreferences value) async {
-    if (_saving) return;
-    final previous = _deliveryPreferences!;
-    final reminders = _reminders!;
-    setState(() {
-      _deliveryPreferences = value;
-      _saving = true;
-    });
-    try {
-      await _deliveryStore.save(value);
-      await _reconcile(reminders, value);
-    } on Object {
-      if (mounted) setState(() => _deliveryPreferences = previous);
-      try {
-        await _deliveryStore.save(previous);
-        await _reconcile(reminders, previous);
-      } on Object {
-        // Best-effort reconciliation; the visible state remains the last
-        // durable preference snapshot and the next edit retries scheduling.
-      }
-      if (mounted) _showLocalError();
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  Future<void> _reconcile(
-    List<DailyReminder> reminders,
-    NotificationDeliveryPreferences delivery,
-  ) async {
-    for (final reminder in reminders) {
-      await _service.schedule(
-        reminder,
-        languageCode: _languageCode,
-        preferences: delivery,
-      );
-    }
-  }
-
-  void _showLocalError() => ScaffoldMessenger.of(
-    context,
-  ).showSnackBar(SnackBar(content: Text(_copy.permissionError)));
-
-  Future<void> _toggleCategory(NotificationCategory category, bool enabled) {
-    final current = _deliveryPreferences!;
-    final categories = {...current.enabledCategories};
-    enabled ? categories.add(category) : categories.remove(category);
-    return _saveDelivery(current.copyWith(enabledCategories: categories));
-  }
-
-  Future<void> _update(DailyReminder updated) async {
-    final current = _reminders;
-    if (current == null || _saving) return;
-    final next = [
-      for (final reminder in current)
-        if (reminder.kind == updated.kind) updated else reminder,
-    ];
-    setState(() {
-      _reminders = next;
-      _saving = true;
-    });
-    try {
-      if (updated.enabled) {
-        final allowed = await _service.requestPermission();
-        if (!allowed) {
-          throw StateError('notification permission denied');
-        }
-      }
-      await _service.schedule(
-        updated,
-        languageCode: _languageCode,
-        preferences:
-            _deliveryPreferences ?? const NotificationDeliveryPreferences(),
-      );
-      await _store.save(next);
-    } on Object {
-      if (!mounted) return;
-      setState(() => _reminders = current);
-      try {
-        await _store.save(current);
-        await _reconcile(
-          current,
-          _deliveryPreferences ?? const NotificationDeliveryPreferences(),
-        );
-      } on Object {
-        // Best-effort reconciliation after restoring the durable list.
-      }
-      _showLocalError();
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  Future<void> _setAllDaily(bool enabled) async {
-    final current = _reminders;
-    if (current == null || _saving) return;
-    final previous = current;
-    final next = [
-      for (final reminder in current)
-        if (reminder.kind == DailyReminderKind.returnAfter24Hours)
-          reminder
-        else
-          DailyReminder(
-            kind: reminder.kind,
-            hour: reminder.hour,
-            minute: reminder.minute,
-            enabled: enabled,
-          ),
-    ];
-    setState(() {
-      _reminders = next;
-      _saving = true;
-    });
-    try {
-      if (enabled && !await _service.requestPermission()) {
-        throw StateError('notification permission denied');
-      }
-      await _reconcile(
-        next,
-        _deliveryPreferences ?? const NotificationDeliveryPreferences(),
-      );
-      await _store.save(next);
-    } on Object {
-      if (!mounted) return;
-      setState(() => _reminders = previous);
-      try {
-        await _store.save(previous);
-        await _reconcile(
-          previous,
-          _deliveryPreferences ?? const NotificationDeliveryPreferences(),
-        );
-      } on Object {
-        // Best-effort reconciliation after restoring the durable list.
-      }
-      _showLocalError();
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  Future<void> _chooseTime(DailyReminder reminder) async {
-    final selected = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay(hour: reminder.hour, minute: reminder.minute),
-    );
-    if (selected == null) return;
-    await _update(
-      DailyReminder(
-        kind: reminder.kind,
-        hour: selected.hour,
-        minute: selected.minute,
-        enabled: reminder.enabled,
-      ),
-    );
-  }
-
-  Future<void> _addReminder() async {
-    final reminders = _reminders;
-    if (reminders == null) return;
-    final kind = await showModalBottomSheet<DailyReminderKind>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final reminder in reminders)
-              ListTile(
-                leading: Icon(_icon(reminder.kind)),
-                title: Text(_copy.label(reminder.kind)),
-                trailing: reminder.enabled
-                    ? const Icon(Icons.check_rounded)
-                    : null,
-                onTap: () => Navigator.pop(sheetContext, reminder.kind),
-              ),
-          ],
-        ),
-      ),
-    );
-    if (kind == null || !mounted) return;
-    final reminder = reminders.firstWhere((item) => item.kind == kind);
-    await _update(
-      DailyReminder(
-        kind: reminder.kind,
-        hour: reminder.hour,
-        minute: reminder.minute,
-        enabled: true,
-      ),
-    );
   }
 
   @override
@@ -407,6 +246,87 @@ class _NotificationSettingsPageState
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   const SizedBox(height: 16),
+                  Card.filled(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer.withValues(alpha: 0.7),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surface,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              _phoneNotificationsEnabled == true
+                                  ? Icons.notifications_active_rounded
+                                  : Icons.notifications_none_rounded,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _copy.title,
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.w700),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _permissionStatusText,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          FilledButton.tonal(
+                            key: const Key('notification-phone-check'),
+                            onPressed: _saving
+                                ? null
+                                : _requiresSystemSettings
+                                ? _openSystemNotificationSettings
+                                : _phoneNotificationsEnabled == true
+                                ? _sendNotificationCheck
+                                : () => _setAllDaily(true),
+                            child: Text(
+                              _requiresSystemSettings
+                                  ? _phoneText(
+                                      'Open settings',
+                                      ar: 'فتح الإعدادات',
+                                      fr: 'Ouvrir les réglages',
+                                      es: 'Abrir ajustes',
+                                      tr: 'Ayarları aç',
+                                    )
+                                  : _phoneNotificationsEnabled == true
+                                  ? (RuntimeCopy.resolve(
+                                          'Try now',
+                                          Localizations.localeOf(
+                                            context,
+                                          ).toLanguageTag(),
+                                        ) ??
+                                        'Try now')
+                                  : _phoneText(
+                                      'Turn on',
+                                      ar: 'تشغيل',
+                                      fr: 'Activer',
+                                      es: 'Activar',
+                                      tr: 'Aç',
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   Card(
                     child: SwitchListTile.adaptive(
                       key: const Key('all-daily-reminders'),
@@ -692,20 +612,40 @@ class _NotificationSettingsPageState
                                     'Yalnızca uygulama tam bir gün açılmadığında.',
                                   ),
                                 )
-                              : TextButton.icon(
-                                  onPressed: _saving
-                                      ? null
-                                      : () => _chooseTime(reminder),
-                                  icon: const Icon(
-                                    Icons.schedule_rounded,
-                                    size: 18,
-                                  ),
-                                  label: Text(
-                                    TimeOfDay(
-                                      hour: reminder.hour,
-                                      minute: reminder.minute,
-                                    ).format(context),
-                                  ),
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    TextButton.icon(
+                                      onPressed: _saving
+                                          ? null
+                                          : () => _chooseTime(reminder),
+                                      icon: const Icon(
+                                        Icons.schedule_rounded,
+                                        size: 18,
+                                      ),
+                                      label: Text(
+                                        TimeOfDay(
+                                          hour: reminder.hour,
+                                          minute: reminder.minute,
+                                        ).format(context),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsetsDirectional.only(
+                                        start: 12,
+                                        bottom: 8,
+                                      ),
+                                      child: Text(
+                                        _scheduleStatus(reminder),
+                                        key: Key(
+                                          'daily-reminder-status-${reminder.kind.name}',
+                                        ),
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodySmall,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                         ),
                       ),
@@ -788,6 +728,25 @@ class _NotificationSettingsPageState
         english;
   }
 
+  String _phoneText(
+    String english, {
+    required String ar,
+    required String fr,
+    required String es,
+    required String tr,
+  }) => switch (_languageCode) {
+    'ar' => ar,
+    'fr' => fr,
+    'es' => es,
+    'tr' => tr,
+    _ =>
+      RuntimeCopy.resolve(
+            english,
+            Localizations.localeOf(context).toLanguageTag(),
+          ) ??
+          english,
+  };
+
   String _formatMinutes(int minutes) =>
       TimeOfDay(hour: minutes ~/ 60, minute: minutes % 60).format(context);
 
@@ -817,114 +776,3 @@ class _NotificationSettingsPageState
     DailyReminderKind.returnAfter24Hours => Icons.waving_hand_outlined,
   };
 }
-
-class _ReferencePushToggle extends StatelessWidget {
-  const _ReferencePushToggle({
-    required this.value,
-    required this.label,
-    required this.onChanged,
-    required this.enabled,
-  });
-  final bool value;
-  final String label;
-  final ValueChanged<bool> onChanged;
-  final bool enabled;
-
-  @override
-  Widget build(BuildContext context) => CheckboxListTile(
-    value: value,
-    controlAffinity: ListTileControlAffinity.leading,
-    title: Text(label),
-    enabled: enabled,
-    onChanged: enabled ? (value) => onChanged(value ?? false) : null,
-  );
-}
-
-/* LEGACY_COPY_REMOVED
-class _NotificationSettingsCopy {
-  const _NotificationSettingsCopy({
-    required this.title,
-    required this.intro,
-    required this.permissionError,
-    required this.labels,
-  });
-
-  factory _NotificationSettingsCopy.forLanguage(String languageCode) =>
-      _copies[languageCode] ?? _copies['en']!;
-
-  final String title;
-  final String intro;
-  final String permissionError;
-  final Map<DailyReminderKind, String> labels;
-
-  String label(DailyReminderKind kind) => labels[kind]!;
-}
-
-const _copies = <String, _NotificationSettingsCopy>{
-  'ar': _NotificationSettingsCopy(
-    title: 'التنبيهات اليومية',
-    intro:
-        'أنت تختار ما يصلك ومتى. نص التنبيه خاص ولا يعرض قياسات صحية على شاشة القفل.',
-    permissionError:
-        'تعذر تفعيل التنبيه. تحقق من إذن الإشعارات في إعدادات الجهاز.',
-    labels: {
-      DailyReminderKind.weight: 'قياس الوزن',
-      DailyReminderKind.meals: 'تسجيل الوجبات',
-      DailyReminderKind.water: 'تسجيل الماء',
-      DailyReminderKind.weeklyReview: 'المراجعة الأسبوعية',
-    },
-  ),
-  'en': _NotificationSettingsCopy(
-    title: 'Daily reminders',
-    intro:
-        'You choose what arrives and when. Reminder copy is private and never exposes health measurements on the lock screen.',
-    permissionError:
-        'The reminder could not be enabled. Check notification permission in device settings.',
-    labels: {
-      DailyReminderKind.weight: 'Weight check-in',
-      DailyReminderKind.meals: 'Meal logging',
-      DailyReminderKind.water: 'Water logging',
-      DailyReminderKind.weeklyReview: 'Weekly review',
-    },
-  ),
-  'fr': _NotificationSettingsCopy(
-    title: 'Rappels quotidiens',
-    intro:
-        'Vous choisissez les rappels et leur heure. Aucun indicateur de santé ne s’affiche sur l’écran verrouillé.',
-    permissionError:
-        'Impossible d’activer le rappel. Vérifiez l’autorisation des notifications.',
-    labels: {
-      DailyReminderKind.weight: 'Mesure du poids',
-      DailyReminderKind.meals: 'Journal des repas',
-      DailyReminderKind.water: 'Journal de l’eau',
-      DailyReminderKind.weeklyReview: 'Bilan hebdomadaire',
-    },
-  ),
-  'es': _NotificationSettingsCopy(
-    title: 'Recordatorios diarios',
-    intro:
-        'Tú eliges qué recibir y cuándo. La pantalla bloqueada no muestra mediciones de salud.',
-    permissionError:
-        'No se pudo activar el recordatorio. Revisa el permiso de notificaciones.',
-    labels: {
-      DailyReminderKind.weight: 'Control de peso',
-      DailyReminderKind.meals: 'Registro de comidas',
-      DailyReminderKind.water: 'Registro de agua',
-      DailyReminderKind.weeklyReview: 'Revisión semanal',
-    },
-  ),
-  'tr': _NotificationSettingsCopy(
-    title: 'Günlük hatırlatıcılar',
-    intro:
-        'Neyin ne zaman geleceğini siz seçersiniz. Kilit ekranında sağlık ölçümü gösterilmez.',
-    permissionError:
-        'Hatırlatıcı etkinleştirilemedi. Bildirim iznini kontrol edin.',
-    labels: {
-      DailyReminderKind.weight: 'Kilo kontrolü',
-      DailyReminderKind.meals: 'Öğün kaydı',
-      DailyReminderKind.water: 'Su kaydı',
-      DailyReminderKind.weeklyReview: 'Haftalık değerlendirme',
-    },
-  ),
-};
-*/

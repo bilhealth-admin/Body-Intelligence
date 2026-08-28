@@ -1,389 +1,459 @@
-import 'dart:math' as math;
+import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 
-import '../auth/auth_five_locale_copy.dart';
+const _bilSplashIdentityAsset = 'assets/branding/bil_splash_identity.png';
+const bilSplashMotionAsset = 'assets/branding/bil_splash_motion.mp4';
 
-/// Presentation-only flagship splash. Startup state and routing remain owned by
-/// [StartupPage].
+/// The immutable MP4 contract: 60 frames at 30 fps.
+const bilSplashMotionDuration = Duration(seconds: 2);
+
+/// The deliberate Flutter identity window. Native Android is never delayed;
+/// this begins only after Flutter has already painted its matching first frame.
+const bilSplashMinimumDisplayDuration = Duration(milliseconds: 2300);
+
+/// Bounds decoder/controller lifetime without participating in app routing.
+/// StartupPage owns readiness and can therefore never wait on video playback.
+const bilSplashPlaybackSafetyTimeout = bilSplashMinimumDisplayDuration;
+
+/// Decoded before `runApp`, while Android is already showing the exact same
+/// raster. RawImage can therefore paint Flutter's first frame without a flash.
+ui.Image? bilPredecodedLaunchWordmark;
+
+/// The exact BIL action blue shared by native Android and Flutter startup.
+const bilLaunchBlue = Color(0xFF0877F9);
+
+/// Presentation-only backdrop. Startup state and routing remain in StartupPage.
 class PremiumSplashBackdrop extends StatelessWidget {
   const PremiumSplashBackdrop({this.animate = true, super.key});
 
-  /// Keeps the ambient background alive only while startup is actively
-  /// loading. Error states are deliberately static so they remain calm,
-  /// accessible, and do not schedule frames forever.
+  // Retained for compatibility with existing reduced-motion/golden harnesses.
+  // The launch surface itself is deliberately motionless.
   final bool animate;
 
   @override
   Widget build(BuildContext context) {
-    final highContrast = MediaQuery.highContrastOf(context);
-    return RepaintBoundary(
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          _LivingSplashImage(animate: animate),
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0x26000512),
-                  Color(0x38000512),
-                  Color(0xB8000612),
-                ],
-                stops: [0, .55, 1],
-              ),
-            ),
-          ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: const Alignment(0, -.12),
-                radius: .82,
-                colors: [
-                  Color(highContrast ? 0x52087CA4 : 0x2E196E9C),
-                  const Color(0x1409213C),
-                  const Color(0xBA01050D),
-                ],
-                stops: const [0, .48, 1],
-              ),
-            ),
-          ),
-          const CustomPaint(painter: _DepthStarsPainter()),
-        ],
+    return const RepaintBoundary(
+      child: ColoredBox(
+        key: ValueKey('premium-splash-backdrop'),
+        color: bilLaunchBlue,
       ),
     );
   }
 }
 
-class _LivingSplashImage extends StatefulWidget {
-  const _LivingSplashImage({required this.animate});
+/// The Flutter bootstrap frame. It uses one restrained capsule progress cue,
+/// with no status copy, download state, or legacy spinner chrome.
+class BilStartupLoadingSurface extends StatefulWidget {
+  const BilStartupLoadingSurface({
+    this.showSpinner = false,
+    this.showLoadingLabel = false,
+    super.key,
+  });
 
-  final bool animate;
+  // Retained so existing call sites remain source-compatible. Both controls
+  // are intentionally ignored by the 2026 seamless splash contract.
+  final bool showSpinner;
+  final bool showLoadingLabel;
 
   @override
-  State<_LivingSplashImage> createState() => _LivingSplashImageState();
+  State<BilStartupLoadingSurface> createState() =>
+      _BilStartupLoadingSurfaceState();
 }
 
-class _LivingSplashImageState extends State<_LivingSplashImage>
+class _BilStartupLoadingSurfaceState extends State<BilStartupLoadingSurface>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+  late final AnimationController _progressController;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    _progressController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3600),
-    );
+      duration: bilSplashMinimumDisplayDuration,
+    )..forward();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _syncAnimation();
-  }
-
-  @override
-  void didUpdateWidget(covariant _LivingSplashImage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.animate != widget.animate) _syncAnimation();
-  }
-
-  void _syncAnimation() {
-    final shouldAnimate =
-        widget.animate &&
-        !MediaQuery.disableAnimationsOf(context) &&
-        TickerMode.valuesOf(context).enabled;
-    if (shouldAnimate) {
-      if (!_controller.isAnimating) _controller.repeat(reverse: true);
-    } else {
-      _controller.stop(canceled: false);
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _progressController.stop(canceled: false);
+      _progressController.value = 1;
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _progressController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        const PremiumSplashBackdrop(),
+        const _SplashIdentity(),
+        _PremiumSplashProgress(controller: _progressController),
+      ],
+    );
+  }
+}
+
+class PremiumSplashExperience extends StatefulWidget {
+  const PremiumSplashExperience({
+    required this.controller,
+    this.showSpinner = false,
+    this.showLoadingLabel = false,
+    this.showIdentity = true,
+    super.key,
+  });
+
+  // Retained for source compatibility. StartupPage remains the sole owner of
+  // readiness, routing, and minimum-display policy.
+  final AnimationController controller;
+  final bool showSpinner;
+  final bool showLoadingLabel;
+  final bool showIdentity;
+
+  @override
+  State<PremiumSplashExperience> createState() =>
+      _PremiumSplashExperienceState();
+}
+
+class _PremiumSplashExperienceState extends State<PremiumSplashExperience> {
+  VideoPlayerController? _videoController;
+  Timer? _playbackSafetyTimer;
+  bool _initializationScheduled = false;
+  bool _videoInitialized = false;
+  bool _videoHasDecodedFrame = false;
+
+  bool get _shouldPlayVideo =>
+      widget.showIdentity &&
+      !MediaQuery.disableAnimationsOf(context) &&
+      TickerMode.valuesOf(context).enabled;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncVideoLifecycle();
+  }
+
+  @override
+  void didUpdateWidget(covariant PremiumSplashExperience oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.showIdentity != widget.showIdentity) {
+      _syncVideoLifecycle();
+    }
+  }
+
+  void _syncVideoLifecycle() {
+    if (_shouldPlayVideo) {
+      _scheduleVideoInitialization();
+    } else {
+      _releaseVideo();
+    }
+  }
+
+  void _scheduleVideoInitialization() {
+    if (_initializationScheduled || _videoController != null) return;
+    _initializationScheduled = true;
+    _playbackSafetyTimer?.cancel();
+    _playbackSafetyTimer = Timer(
+      bilSplashPlaybackSafetyTimeout,
+      _handlePlaybackSafetyTimeout,
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializationScheduled = false;
+      if (!mounted || !_shouldPlayVideo || _videoController != null) return;
+      unawaited(_initializeVideo());
+    });
+  }
+
+  Future<void> _initializeVideo() async {
+    final controller = VideoPlayerController.asset(
+      bilSplashMotionAsset,
+      videoPlayerOptions: VideoPlayerOptions(
+        mixWithOthers: false,
+        allowBackgroundPlayback: false,
+      ),
+      viewType: VideoViewType.textureView,
+    );
+    _videoController = controller;
+    controller.addListener(_handleVideoValue);
+
+    try {
+      await controller.initialize();
+      if (_videoController != controller) return;
+      if (!mounted || !_shouldPlayVideo) {
+        _videoController = null;
+        _releaseController(controller);
+        return;
+      }
+      await controller.setLooping(false);
+      await controller.setVolume(0);
+      if (_videoController != controller) return;
+      if (!mounted) {
+        _videoController = null;
+        _releaseController(controller);
+        return;
+      }
+      setState(() => _videoInitialized = true);
+      await controller.play();
+    } on Object {
+      if (_videoController != controller) return;
+      _videoController = null;
+      _playbackSafetyTimer?.cancel();
+      _playbackSafetyTimer = null;
+      if (mounted) {
+        setState(() {
+          _videoInitialized = false;
+          _videoHasDecodedFrame = false;
+        });
+      }
+      _releaseController(controller);
+    }
+  }
+
+  void _handleVideoValue() {
+    final controller = _videoController;
+    if (controller == null ||
+        _videoHasDecodedFrame ||
+        !controller.value.isInitialized ||
+        controller.value.position <= Duration.zero ||
+        !mounted) {
+      return;
+    }
+    // Keep the synchronous raster above the texture until playback position
+    // proves that Android decoded a real frame. This masks texture black-up.
+    setState(() => _videoHasDecodedFrame = true);
+  }
+
+  void _releaseController(VideoPlayerController controller) {
+    controller.removeListener(_handleVideoValue);
+    unawaited(controller.dispose());
+  }
+
+  void _handlePlaybackSafetyTimeout() {
+    _playbackSafetyTimer = null;
+    final controller = _videoController;
+    if (controller == null) return;
+    _videoController = null;
+    if (mounted) {
+      setState(() {
+        _videoInitialized = false;
+        _videoHasDecodedFrame = false;
+      });
+    } else {
+      _videoInitialized = false;
+      _videoHasDecodedFrame = false;
+    }
+    _releaseController(controller);
+  }
+
+  void _releaseVideo() {
+    _playbackSafetyTimer?.cancel();
+    _playbackSafetyTimer = null;
+    final controller = _videoController;
+    if (controller == null) return;
+    _videoController = null;
+    _videoInitialized = false;
+    _videoHasDecodedFrame = false;
+    _releaseController(controller);
+  }
+
+  @override
+  void dispose() {
+    _playbackSafetyTimer?.cancel();
+    final controller = _videoController;
+    _videoController = null;
+    if (controller != null) _releaseController(controller);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final videoController = _videoController;
     final reducedMotion = MediaQuery.disableAnimationsOf(context);
-    final image = Image.asset(
-      'assets/images/brand/generated/bil_body_twin_splash_v1.png',
-      fit: BoxFit.cover,
-      alignment: Alignment.center,
-      filterQuality: FilterQuality.high,
-      errorBuilder: (_, _, _) => Image.asset(
-        'assets/images/v10_master/bil_hdr_starfield_master.png',
-        fit: BoxFit.cover,
-        filterQuality: FilterQuality.medium,
-        errorBuilder: (_, _, _) => const ColoredBox(color: Color(0xFF01050D)),
+    return Semantics(
+      label: 'BODY INTELLIGENCE LOG',
+      image: true,
+      child: ExcludeSemantics(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            const PremiumSplashBackdrop(),
+            if (widget.showIdentity &&
+                _videoInitialized &&
+                videoController != null)
+              RepaintBoundary(
+                key: const ValueKey('premium-splash-video'),
+                child: _CoverSplashVideo(controller: videoController),
+              ),
+            if (widget.showIdentity)
+              AnimatedOpacity(
+                key: const ValueKey('premium-splash-first-frame-fallback'),
+                opacity: _videoHasDecodedFrame ? 0 : 1,
+                duration: reducedMotion
+                    ? Duration.zero
+                    : const Duration(milliseconds: 80),
+                curve: Curves.easeOut,
+                child: const _SplashIdentity(),
+              ),
+            if (widget.showIdentity)
+              _PremiumSplashProgress(controller: widget.controller),
+          ],
+        ),
       ),
     );
-    if (reducedMotion || !widget.animate) return image;
-    return AnimatedBuilder(
-      animation: _controller,
-      child: image,
-      builder: (context, child) {
-        final pulse = Curves.easeInOut.transform(_controller.value);
-        return Transform.translate(
-          offset: Offset(0, -3 + pulse * 6),
-          child: Transform.scale(scale: 1.018 + pulse * .012, child: child),
+  }
+}
+
+class _PremiumSplashProgress extends StatelessWidget {
+  const _PremiumSplashProgress({required this.controller});
+
+  final Animation<double> controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final reducedMotion = MediaQuery.disableAnimationsOf(context);
+    return ExcludeSemantics(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = (constraints.maxWidth * 0.34)
+              .clamp(112.0, 176.0)
+              .toDouble();
+          return Align(
+            alignment: const Alignment(0, 0.24),
+            child: RepaintBoundary(
+              key: const ValueKey('premium-splash-progress'),
+              child: AnimatedBuilder(
+                animation: controller,
+                builder: (context, child) {
+                  final timelineValue = reducedMotion
+                      ? 0.72
+                      : controller.value.clamp(0.0, 1.0);
+                  final eased = Curves.easeInOutCubicEmphasized.transform(
+                    timelineValue,
+                  );
+                  final fill = 0.12 + (0.88 * eased);
+                  final highlightX = ((width + 38) * eased) - 38;
+                  return SizedBox(
+                    width: width,
+                    height: 7,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(99),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          const ColoredBox(color: Color(0x38FFFFFF)),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: FractionallySizedBox(
+                              widthFactor: fill,
+                              heightFactor: 1,
+                              child: const DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Color(0xA8FFFFFF),
+                                      Color(0xD6FFFFFF),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (!reducedMotion)
+                            Transform.translate(
+                              offset: Offset(highlightX, 0),
+                              child: const Align(
+                                alignment: Alignment.centerLeft,
+                                child: SizedBox(
+                                  width: 38,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Color(0x00FFFFFF),
+                                          Color(0xB8FFFFFF),
+                                          Color(0x00FFFFFF),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _CoverSplashVideo extends StatelessWidget {
+  const _CoverSplashVideo({required this.controller});
+
+  final VideoPlayerController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = controller.value.size;
+    if (size.isEmpty) return const SizedBox.expand();
+    return ClipRect(
+      child: FittedBox(
+        fit: BoxFit.cover,
+        clipBehavior: Clip.hardEdge,
+        child: SizedBox.fromSize(size: size, child: VideoPlayer(controller)),
+      ),
+    );
+  }
+}
+
+class _SplashIdentity extends StatelessWidget {
+  const _SplashIdentity();
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final frameWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : constraints.biggest.shortestSide;
+        final identity = bilPredecodedLaunchWordmark == null
+            ? Image.asset(
+                _bilSplashIdentityAsset,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.high,
+                gaplessPlayback: true,
+              )
+            : RawImage(
+                image: bilPredecodedLaunchWordmark,
+                fit: BoxFit.contain,
+                filterQuality: FilterQuality.high,
+              );
+        return ClipRect(
+          child: Center(
+            child: SizedBox.square(
+              key: const ValueKey('premium-splash-wordmark'),
+              dimension: frameWidth,
+              child: Transform.scale(scale: 1.4, child: identity),
+            ),
+          ),
         );
       },
     );
   }
-}
-
-class PremiumSplashExperience extends StatelessWidget {
-  const PremiumSplashExperience({
-    required this.controller,
-    required this.arabic,
-    super.key,
-  });
-
-  final AnimationController controller;
-  final bool arabic;
-
-  @override
-  Widget build(BuildContext context) {
-    final reducedMotion = MediaQuery.disableAnimationsOf(context);
-    return Semantics(
-      liveRegion: true,
-      label: authFiveLocaleTextFor(
-        arabicLocaleCode(context, arabic),
-        'BIL is preparing your local data safely',
-        'يُجهّز BIL بياناتك المحلية بأمان',
-      ),
-      child: ExcludeSemantics(
-        child: AnimatedBuilder(
-          animation: controller,
-          builder: (context, _) => _Composition(
-            progress: reducedMotion ? 1 : controller.value,
-            indicatorValue: reducedMotion ? .5 : controller.value,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Composition extends StatelessWidget {
-  const _Composition({required this.progress, required this.indicatorValue});
-
-  final double progress;
-  final double indicatorValue;
-
-  double stage(double begin, double end) => Curves.easeInOutCubic.transform(
-    ((progress - begin) / (end - begin)).clamp(0, 1),
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    final approach = stage(.08, .56);
-    final reveal = stage(.44, .76);
-    final nameReveal = stage(.68, .94);
-    final starOpacity = 1 - stage(.42, .66);
-    final media = MediaQuery.of(context);
-    final highContrast = media.highContrast;
-    final markSize = math.min(media.size.shortestSide * .36, 152.0);
-
-    return SafeArea(
-      minimum: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-      child: Column(
-        children: [
-          const Spacer(flex: 3),
-          SizedBox(
-            width: markSize * 1.9,
-            height: markSize * 1.5,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Opacity(
-                  opacity: starOpacity,
-                  child: Transform.scale(
-                    scale: .42 + approach * .8,
-                    child: CustomPaint(
-                      size: Size.square(markSize),
-                      painter: _HeroStarPainter(
-                        pulse: .5 + math.sin(progress * math.pi * 5).abs() * .5,
-                        highContrast: highContrast,
-                      ),
-                    ),
-                  ),
-                ),
-                Opacity(
-                  opacity: reveal,
-                  child: Transform.scale(
-                    scale: .88 + reveal * .12,
-                    child: _BilMark(size: markSize),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Opacity(
-            opacity: nameReveal,
-            child: Transform.translate(
-              offset: Offset(0, 8 * (1 - nameReveal)),
-              child: const _BilName(),
-            ),
-          ),
-          const Spacer(flex: 6),
-          SizedBox(
-            width: math.min(media.size.width * .38, 164),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: LinearProgressIndicator(
-                minHeight: 2,
-                value: indicatorValue,
-                backgroundColor: const Color(0x1FFFFFFF),
-                color: highContrast ? Colors.white : const Color(0xFF62DDF4),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BilMark extends StatelessWidget {
-  const _BilMark({required this.size});
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    final highContrast = MediaQuery.highContrastOf(context);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Color(highContrast ? 0x665FE6FF : 0x405BD8FF),
-            blurRadius: 42,
-            spreadRadius: 8,
-          ),
-          const BoxShadow(color: Color(0x246F61FF), blurRadius: 70),
-        ],
-      ),
-      child: SizedBox.square(dimension: size),
-    );
-  }
-}
-
-class _BilName extends StatelessWidget {
-  const _BilName();
-
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 360),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Text(
-          'BODY INTELLIGENCE LOG™',
-          maxLines: 1,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: MediaQuery.highContrastOf(context)
-                ? Colors.white
-                : const Color(0xFFDCE7EF),
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 4,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DepthStarsPainter extends CustomPainter {
-  const _DepthStarsPainter();
-  static const stars = <Offset>[
-    Offset(.08, .16),
-    Offset(.17, .71),
-    Offset(.25, .29),
-    Offset(.34, .82),
-    Offset(.43, .12),
-    Offset(.54, .73),
-    Offset(.62, .24),
-    Offset(.71, .88),
-    Offset(.79, .18),
-    Offset(.87, .62),
-    Offset(.94, .34),
-    Offset(.13, .46),
-    Offset(.38, .56),
-    Offset(.66, .52),
-    Offset(.91, .79),
-  ];
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    for (var index = 0; index < stars.length; index++) {
-      final star = stars[index];
-      canvas.drawCircle(
-        Offset(star.dx * size.width, star.dy * size.height),
-        index % 3 == 0 ? 1.15 : .65,
-        Paint()
-          ..color = Colors.white.withValues(alpha: index % 4 == 0 ? .68 : .34),
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DepthStarsPainter oldDelegate) => false;
-}
-
-class _HeroStarPainter extends CustomPainter {
-  const _HeroStarPainter({required this.pulse, required this.highContrast});
-  final double pulse;
-  final bool highContrast;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = size.center(Offset.zero);
-    final radius = size.shortestSide * (.055 + pulse * .012);
-    canvas.drawCircle(
-      center,
-      radius * 6,
-      Paint()
-        ..shader = RadialGradient(
-          colors: [
-            Colors.white.withValues(alpha: highContrast ? 1 : .94),
-            const Color(0xFF69E6FF).withValues(alpha: .58),
-            const Color(0x0069E6FF),
-          ],
-          stops: const [0, .2, 1],
-        ).createShader(Rect.fromCircle(center: center, radius: radius * 6)),
-    );
-    canvas.drawCircle(
-      center,
-      radius,
-      Paint()..color = highContrast ? Colors.white : const Color(0xFFE8FBFF),
-    );
-    final ray = Paint()
-      ..color = const Color(0xFFB9F5FF).withValues(alpha: .45)
-      ..strokeWidth = .8;
-    canvas.drawLine(
-      center.translate(-radius * 4.6, 0),
-      center.translate(radius * 4.6, 0),
-      ray,
-    );
-    canvas.drawLine(
-      center.translate(0, -radius * 4.6),
-      center.translate(0, radius * 4.6),
-      ray,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _HeroStarPainter oldDelegate) =>
-      pulse != oldDelegate.pulse || highContrast != oldDelegate.highContrast;
 }

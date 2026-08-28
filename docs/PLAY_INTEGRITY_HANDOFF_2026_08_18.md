@@ -66,7 +66,7 @@ Files introduced/changed:
 - `lib/app/security/bil_play_integrity_service.dart`
 - `lib/main.dart`
 - `supabase/functions/play-integrity/index.ts`
-- `supabase/migrations/202608180001_bil_play_integrity_observe.sql`
+- `docs/db/checkpoints/202608180001_bil_play_integrity_observe_consolidated.sql`
 
 Dependency:
 - `com.google.android.play:integrity:1.6.0`

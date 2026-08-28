@@ -15,9 +15,14 @@ class CoachLanguageResolver {
   CoachLanguageResolution resolve({
     required String input,
     required String uiLocale,
+    String? detectedLanguageTag,
   }) {
     final value = input.trim();
     final uiTag = _canonicalTag(uiLocale);
+    final spokenTag = _supportedLanguageHint(detectedLanguageTag);
+    if (spokenTag != null) {
+      return CoachLanguageResolution(languageTag: spokenTag, detected: true);
+    }
     if (RegExp(r'[\u0600-\u06ff]').hasMatch(value)) {
       if (RegExp(
         r'[\u0679\u0688\u0691\u06BA\u06BE\u06C1\u06D2]',
@@ -67,6 +72,24 @@ class CoachLanguageResolver {
     if (RegExp(r'[\u0e00-\u0e7f]').hasMatch(value)) {
       return const CoachLanguageResolution(languageTag: 'th', detected: true);
     }
+    const globalScripts = <String, String>{
+      r'[\u0370-\u03ff]': 'el',
+      r'[\u0590-\u05ff]': 'he',
+      r'[\u0530-\u058f]': 'hy',
+      r'[\u10a0-\u10ff]': 'ka',
+      r'[\u0b80-\u0bff]': 'ta',
+      r'[\u0c00-\u0c7f]': 'te',
+      r'[\u0c80-\u0cff]': 'kn',
+      r'[\u0d00-\u0d7f]': 'ml',
+    };
+    for (final entry in globalScripts.entries) {
+      if (RegExp(entry.key).hasMatch(value)) {
+        return CoachLanguageResolution(
+          languageTag: entry.value,
+          detected: true,
+        );
+      }
+    }
     final latin = _resolveLatin(value);
     if (latin != null) {
       final resolved = latin == 'pt' && const {'pt-BR', 'pt-PT'}.contains(uiTag)
@@ -93,7 +116,23 @@ class CoachLanguageResolver {
     return language;
   }
 
+  String? _supportedLanguageHint(String? raw) {
+    if (raw == null || raw.trim().isEmpty) return null;
+    final canonical = _canonicalTag(raw);
+    return RegExp(
+          r'^[a-z]{2,3}(?:-[A-Z][a-z]{3}|-[A-Z]{2})?$',
+        ).hasMatch(canonical)
+        ? canonical
+        : null;
+  }
+
   String? _resolveLatin(String input) {
+    final compact = input.toLowerCase().replaceAll(RegExp(r'[^a-z]'), '');
+    if (RegExp(
+      r'^(?:ass?alamu?a?la[yi]kum|sala?muala[yi]kum|waala[yi]kumu?s?s?ala?m)$',
+    ).hasMatch(compact)) {
+      return 'ar';
+    }
     final words = input
         .toLowerCase()
         .split(RegExp(r'[^\p{L}]+', unicode: true))

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BIL - باڈی انٹیلی جنس لاگ</string>
+    <string name="health_permissions_rationale_title">صحت کے ڈیٹا کی رازداری</string>
+    <string name="health_permissions_rationale_body">BIL صرف Health Connect ڈیٹا کی اقسام کی درخواست کرتا ہے جن کو آپ استعمال کرنے کے لیے منتخب کردہ خصوصیات کے لیے درکار ہیں۔ آپ کے صحت کے ڈیٹا پر مقامی طور پر بطور ڈیفالٹ کارروائی کی جاتی ہے۔ آپ Health Connect ترتیبات سے کسی بھی وقت انفرادی اجازتیں دے سکتے ہیں، انکار کر سکتے ہیں یا منسوخ کر سکتے ہیں۔ BIL صحت کا ڈیٹا فروخت نہیں کرتا اور نہ ہی اسے اشتہارات کے لیے استعمال کرتا ہے۔</string>
+    <string name="health_permissions_privacy_policy_action">BIL کی مکمل رازداری کی پالیسی پڑھیں</string>
+</resources>

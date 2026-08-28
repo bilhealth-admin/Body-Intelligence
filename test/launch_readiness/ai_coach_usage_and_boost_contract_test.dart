@@ -3,53 +3,86 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('AI Coach quota and verified Boost remain separated and fail closed', () {
-    final sql = File(
-      'supabase/migrations/202608110004_bil_ai_coach_weekly_usage_and_boost.sql',
+  test('AI Coach uses one cost-normalized token balance and fails closed', () {
+    final baseSql = File(
+      'supabase/migrations/20260821080542_ai_coach_unified_weekly_tokens.sql',
+    ).readAsStringSync();
+    final policySql = File(
+      'supabase/migrations/20260821102504_commerce_country_policy_and_ai_allowances.sql',
+    ).readAsStringSync();
+    final allowanceSql = File(
+      'supabase/migrations/20260821123043_ai_coach_monthly_allowance_status_and_fallback.sql',
+    ).readAsStringSync();
+    final backfillSql = File(
+      'supabase/migrations/20260821123129_ai_coach_monthly_usage_backfill.sql',
+    ).readAsStringSync();
+    final trialSql = File(
+      'supabase/migrations/20260821124334_ai_trial_universal_1000_tokens.sql',
+    ).readAsStringSync();
+    final trialPeriodSql = File(
+      'supabase/migrations/20260821124632_ai_trial_fixed_period_metering.sql',
     ).readAsStringSync();
     final store = File(
       'supabase/functions/verify-store-purchase/store_backend.ts',
     ).readAsStringSync();
 
-    expect(sql, contains("('ai_coach','vision',25,'requests')"));
-    expect(sql, contains("('ai_coach','text',125,'requests')"));
-    expect(sql, contains("('ai_coach','voice',15,'minutes')"));
-    expect(sql, contains('public.bil_ai_coach_subscriptions'));
-    expect(sql, isNot(contains("s.plan_id='pro'")));
-    expect(sql, contains('used + reserved <= granted'));
-    expect(sql, contains("state='refunded'"));
-    expect(sql, contains("now()+interval '15 minutes'"));
-    expect(sql, contains("auth.role()<>'service_role'"));
-    expect(sql, contains('bil_reserve_ai_usage(uuid,text,text,numeric)'));
+    expect(policySql, contains("when plan_id = 'ai_coach' then 2500"));
+    expect(policySql, contains("when plan_id = 'ai_coach' then 10000"));
+    expect(policySql, contains('public.bil_ai_credit_monthly_usage'));
+    expect(allowanceSql, contains('v_included_debit := least('));
+    expect(allowanceSql, contains('v_month_limit - v_month_used'));
+    expect(allowanceSql, contains("'monthly_limit',v_month_limit"));
+    expect(allowanceSql, contains("'included_remaining',v_included_remaining"));
+    expect(backfillSql, contains('sum(used)::bigint'));
+    expect(trialSql, contains("values ('trial', 1000, 1000)"));
+    expect(trialSql, contains("s.lifecycle = 'trial'"));
+    expect(trialSql, contains('bil_resolve_ai_allowance_plan'));
+    expect(trialPeriodSql, contains("if v_plan = 'trial'"));
+    expect(trialPeriodSql, contains('coalesce(s.started_at, s.verified_at)'));
+    expect(trialPeriodSql, contains("then (v_week + 7)::date"));
+    expect(baseSql, contains('public.bil_ai_credit_weekly_usage'));
+    expect(baseSql, contains('public.bil_ai_credit_balances'));
+    expect(baseSql, contains("'unit','BIL AI Token'"));
+    expect(baseSql, contains('ceil(p_cost_usd * 10000)::bigint'));
+    expect(baseSql, contains("when 'text' then 100"));
+    expect(baseSql, contains("when 'vision' then 100"));
+    expect(baseSql, contains('ceil(p_units * 500)::bigint + 50'));
+    expect(baseSql, contains('public.bil_ai_coach_subscriptions'));
+    expect(baseSql, isNot(contains("s.plan_id='pro'")));
+    expect(baseSql, contains('used + reserved <= granted'));
+    expect(baseSql, contains("state = 'refunded'"));
+    expect(baseSql, contains("now() + interval '15 minutes'"));
+    expect(baseSql, contains("auth.jwt()->>'role'"));
+    expect(baseSql, contains('bil_reserve_ai_usage(uuid,text,text,numeric)'));
     expect(
-      sql,
+      baseSql,
       contains(
         'bil_settle_ai_usage(uuid,text,text,boolean,text,text,integer,integer,integer,numeric)',
       ),
     );
-    expect(sql, contains("product_id='bil_ai_boost'"));
+    expect(policySql, contains("p_product_id <> 'bil_ai_boost'"));
     // Boost is available to every authenticated tier, including Free. The
     // credit RPC deliberately has no subscription/plan predicate.
-    final creditStart = sql.indexOf(
+    final creditStart = policySql.indexOf(
       'create or replace function public.bil_credit_ai_boost_verified',
     );
-    final reserveStart = sql.indexOf(
-      'create or replace function public.bil_reserve_ai_usage',
+    final grantStart = policySql.indexOf(
+      '\nrevoke all on function',
+      creditStart,
     );
-    final creditFunction = sql.substring(creditStart, reserveStart);
+    final creditFunction = policySql.substring(creditStart, grantStart);
     expect(creditFunction, isNot(contains('bil_ai_coach_subscriptions')));
     expect(creditFunction, isNot(contains('bil_subscriptions')));
     expect(creditFunction, isNot(contains('bil_entitlements')));
+    expect(creditFunction, contains('v_boost_tokens constant bigint := 2500'));
     expect(
       creditFunction,
-      contains("(p_owner_id,'vision',25),(p_owner_id,'text',125)"),
+      contains(
+        'granted = public.bil_ai_credit_balances.granted + excluded.granted',
+      ),
     );
     expect(
-      creditFunction,
-      contains("granted=public.bil_ai_paid_balances.granted+excluded.granted"),
-    );
-    expect(
-      sql,
+      policySql,
       isNot(
         contains(
           'bil_credit_ai_boost_verified(uuid,text,text,text,timestamptz,text)\n  to authenticated',
@@ -57,7 +90,7 @@ void main() {
       ),
     );
     // The only execute grant for credit must be the service role.
-    expect(sql, contains('to service_role;'));
+    expect(policySql, contains('to service_role;'));
 
     expect(store, contains("body.action === 'verify_ai_boost'"));
     expect(store, contains("productId !== 'bil_ai_boost'"));
@@ -67,14 +100,16 @@ void main() {
     expect(store, contains('consumeGoogleConsumable'));
     expect(store, isNot(contains('BIL_GEMINI_API_KEY')));
 
-    // Reservations debit the weekly allowance first and only then paid Boost.
+    // Reservations debit the shared weekly tokens first and only then Boost.
+    expect(baseSql, contains('v_week_debit := least('));
     expect(
-      sql,
-      contains(
-        'v_week_debit:=least(p_units,greatest(v_limit-v_week_used-v_week_reserved,0))',
-      ),
+      baseSql,
+      contains('v_paid_debit := v_credit_reserve - v_week_debit'),
     );
-    expect(sql, contains('v_paid_debit:=p_units-v_week_debit'));
+    expect(
+      baseSql,
+      contains("'text',v_shared,'vision',v_shared,'voice',v_shared"),
+    );
   });
 
   test('Boost does not grant a subscription tier or Barcode access', () {

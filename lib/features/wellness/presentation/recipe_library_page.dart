@@ -2,25 +2,61 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/localization/app_localizations.dart';
+import '../../../app/localization/bil_locale_policy.dart';
+import '../../commerce/domain/commerce_plan.dart';
+import '../../commerce/presentation/premium_collection_item_gate.dart';
+import '../../commerce/providers/commerce_providers.dart';
 import '../../profile/providers/user_profile_provider.dart';
+import '../../nutrition/domain/dietary_preferences.dart';
 import '../../recipe_import/domain/trusted_recipe.dart';
 import '../../recipe_import/presentation/trusted_recipe_import_page.dart';
 import '../repositories/recipe_favorites_repository.dart';
 import '../repositories/recipe_release_repository.dart';
+import '../services/recipe_image_delivery_client.dart';
+import '../services/wellness_media_cache.dart';
+import 'recipe_artwork_registry.dart';
+import 'recipe_cuisine.dart';
 import 'wellness_copy.dart';
 
+part 'recipe_library_helpers.dart';
+part 'recipe_library_card.dart';
+
 class RecipeLibraryPage extends ConsumerStatefulWidget {
-  const RecipeLibraryPage({super.key, this.initialCatalog, this.repository});
+  const RecipeLibraryPage({
+    super.key,
+    this.initialCatalog,
+    this.initialCardFacts = const {},
+    this.repository,
+    this.imageClient,
+    this.remoteImageDeliveryEnabled = const bool.fromEnvironment(
+      'BIL_RECIPE_IMAGE_DELIVERY_ENABLED',
+      // The digest-pinned Cloudflare route passed staging and production
+      // smoke tests on 2026-08-24. Keep an explicit build-time kill switch,
+      // while shipping the verified delivery path in normal release builds.
+      defaultValue: true,
+    ),
+    this.initialRecipeId,
+  });
 
   final List<RecipeCatalogSummary>? initialCatalog;
+  final Map<String, RecipeCatalogCardFacts> initialCardFacts;
   final RecipeReleaseRepository? repository;
+  final RecipeImageResolver? imageClient;
+  final bool remoteImageDeliveryEnabled;
+  final String? initialRecipeId;
 
   @override
   ConsumerState<RecipeLibraryPage> createState() => _RecipeLibraryPageState();
 }
 
 class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
+  static const _sectionPreviewCount = 4;
+  static const _filteredPageSize = 24;
+
   late final RecipeReleaseRepository _repository;
+  RecipeImageResolver? _imageClient;
+  RecipeImageDeliveryClient? _ownedImageClient;
   final _search = TextEditingController();
   late Future<List<RecipeCatalogSummary>> _catalog;
   Set<String> _favorites = const {};
@@ -28,11 +64,23 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
   bool _favoritesLoading = true;
   Object? _favoritesError;
   String _category = 'all';
+  String _cuisine = 'all';
+  int _visibleLimit = _filteredPageSize;
+  final Map<String, Future<RecipeCatalogCardFacts>> _cardFacts = {};
+  final Map<String, Future<WellnessMediaCacheResult>> _recipeImages = {};
+  bool _initialRecipeHandled = false;
 
   @override
   void initState() {
     super.initState();
     _repository = widget.repository ?? RecipeReleaseRepository();
+    if (widget.remoteImageDeliveryEnabled) {
+      _imageClient = widget.imageClient;
+      if (_imageClient == null) {
+        _ownedImageClient = RecipeImageDeliveryClient(repository: _repository);
+        _imageClient = _ownedImageClient;
+      }
+    }
     _catalog = widget.initialCatalog == null
         ? _repository.loadIndex()
         : Future.value(widget.initialCatalog);
@@ -42,6 +90,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
   @override
   void dispose() {
     _search.dispose();
+    _ownedImageClient?.dispose();
     super.dispose();
   }
 
@@ -100,6 +149,8 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: false,
+        scrolledUnderElevation: 0,
         leading: IconButton(
           onPressed: () =>
               context.canPop() ? context.pop() : context.go('/dashboard'),
@@ -109,8 +160,17 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
         actions: [
           IconButton(
             tooltip: wellnessCopy(context, 'Saved recipes', 'الوصفات المحفوظة'),
-            onPressed: () => setState(() => _category = 'saved'),
-            icon: const Icon(Icons.bookmark_outline_rounded),
+            onPressed: () => setState(() {
+              _search.clear();
+              _category = 'saved';
+              _cuisine = 'all';
+              _visibleLimit = _filteredPageSize;
+            }),
+            icon: Icon(
+              _category == 'saved'
+                  ? Icons.bookmark_rounded
+                  : Icons.bookmark_outline_rounded,
+            ),
           ),
         ],
       ),
@@ -123,6 +183,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
           if (snapshot.hasError || !snapshot.hasData) {
             return _CatalogUnavailable(onRetry: _retry);
           }
+          _scheduleInitialRecipe(snapshot.requireData);
           return _buildCatalog(snapshot.requireData);
         },
       ),
@@ -137,9 +198,38 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
       return _CatalogUnavailable(onRetry: _loadFavorites);
     }
     final query = _search.text.trim().toLowerCase();
-    final locale = Localizations.localeOf(context).languageCode;
+    final dietaryPreferences =
+        ref.watch(dietaryPreferencesProvider).value ??
+        const DietaryPreferences();
+    final compatibleSource = source
+        .where((recipe) => recipe.isCompatibleWith(dietaryPreferences))
+        .toList(growable: false);
+    final locale = BilLocalePolicy.canonicalTag(
+      Localizations.localeOf(context),
+    );
+    final subscription = ref.watch(verifiedSubscriptionStateProvider).value;
+    final premiumUnlocked =
+        subscription != null && subscription.plan != CommercePlan.free;
+    final storefrontPlan = ref.watch(storefrontTargetPlanProvider).value;
+    final premiumTier = storefrontPlan == CommercePlan.premiumAiCoach
+        ? 'BIL PREMIUM AI COACH'
+        : 'BIL PREMIUM';
+    void openPremium() => context.push(
+      storefrontPlan == CommercePlan.premiumAiCoach
+          ? '/plans?focus=boost'
+          : '/plans?focus=subscription',
+    );
+    final availableCuisines = recipeCuisineOrder
+        .where(
+          (key) =>
+              compatibleSource.any((recipe) => recipeCuisineKey(recipe) == key),
+        )
+        .toList(growable: false);
     final visible =
-        source.where((recipe) {
+        compatibleSource.where((recipe) {
+          if (_cuisine != 'all' && recipeCuisineKey(recipe) != _cuisine) {
+            return false;
+          }
           final categoryMatches = switch (_category) {
             'all' => true,
             'saved' => _favorites.contains(recipe.id),
@@ -163,111 +253,275 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
           final byAvailability = aFallback.compareTo(bFallback);
           return byAvailability != 0 ? byAvailability : a.id.compareTo(b.id);
         });
+    final groupedHome =
+        query.isEmpty && _category == 'all' && _cuisine == 'all';
+    final sections = groupedHome
+        ? [
+                for (final key in availableCuisines)
+                  (
+                    key: key,
+                    recipes: visible
+                        .where((recipe) => recipeCuisineKey(recipe) == key)
+                        .take(_sectionPreviewCount)
+                        .toList(growable: false),
+                  ),
+              ]
+              .where((section) => section.recipes.isNotEmpty)
+              .toList(growable: false)
+        : const <({String key, List<RecipeCatalogSummary> recipes})>[];
+    final homeDisplayOrder = [
+      for (final section in sections) ...section.recipes,
+    ];
+    final homeDisplayIndex = {
+      for (var index = 0; index < homeDisplayOrder.length; index++)
+        homeDisplayOrder[index].id: index,
+    };
+    final pagedVisible = visible.take(_visibleLimit).toList(growable: false);
+
+    Widget recipeCard(RecipeCatalogSummary recipe, int displayIndex) {
+      final resolvedTitle = recipe.resolveTitle(locale);
+      final initialFacts = widget.initialCardFacts[recipe.id];
+      final facts =
+          initialFacts == null &&
+              (widget.initialCatalog == null || widget.repository != null)
+          ? _cardFacts.putIfAbsent(
+              recipe.id,
+              () => _repository.loadCardFacts(recipe.id),
+            )
+          : null;
+      final imageResult = _imageResultFor(recipe);
+      // The first two cards remain a real, playable sample. Every following
+      // recipe stays visible behind verified-plan glass.
+      final locked = !premiumUnlocked && displayIndex >= 2;
+      return PremiumCollectionItemGate(
+        key: ValueKey('recipe-premium-gate-${recipe.id}'),
+        locked: locked,
+        tier: premiumTier,
+        onUpgrade: openPremium,
+        child: _RecipeCard(
+          recipe: recipe,
+          title: resolvedTitle.text,
+          titleLocale: resolvedTitle.locale,
+          isFallback: resolvedTitle.isFallback,
+          initialFacts: initialFacts,
+          facts: facts,
+          imageResult: imageResult,
+          favorite: _favorites.contains(recipe.id),
+          onFavorite: _favoriteBusy.contains(recipe.id)
+              ? null
+              : () => _toggleFavorite(recipe.id),
+          onOpen: () => _open(recipe),
+        ),
+      );
+    }
+
     return CustomScrollView(
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 18),
           sliver: SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextField(
-                  controller: _search,
-                  onChanged: (_) => setState(() {}),
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search_rounded),
-                    hintText: wellnessCopy(
-                      context,
-                      'Search recipes or tags',
-                      'ابحث عن وصفة أو وسم',
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _chip('all', wellnessCopy(context, 'All', 'الكل')),
-                      _chip(
-                        'regional',
-                        wellnessCopy(context, 'Regional', 'إقليمية'),
-                      ),
-                      _chip('quick', wellnessCopy(context, 'Quick', 'سريعة')),
-                      _chip(
-                        'plant',
-                        wellnessCopy(context, 'Plant-forward', 'نباتية'),
-                      ),
-                      _chip('saved', wellnessCopy(context, 'Saved', 'محفوظة')),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  wellnessCopy(
-                    context,
-                    '${visible.length} of ${source.length} recipes',
-                    '${visible.length} من ${source.length} وصفة',
-                  ),
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
+            child: _RecipeDiscoveryHeader(
+              searchController: _search,
+              category: _category,
+              cuisine: _cuisine,
+              visibleCount: visible.length,
+              totalCount: compatibleSource.length,
+              onSearchChanged: (_) =>
+                  setState(() => _visibleLimit = _filteredPageSize),
+              onClearSearch: () => setState(() {
+                _search.clear();
+                _visibleLimit = _filteredPageSize;
+              }),
+              onChooseCuisine: () => _chooseCuisine(availableCuisines),
+              onCategorySelected: (value) => setState(() {
+                _category = value;
+                _visibleLimit = _filteredPageSize;
+              }),
             ),
           ),
         ),
         if (visible.isEmpty)
           SliverFillRemaining(
             hasScrollBody: false,
-            child: Center(
-              child: Text(
-                wellnessCopy(
-                  context,
-                  'No matching recipes.',
-                  'لا توجد وصفات مطابقة.',
-                ),
-              ),
+            child: _RecipeEmptyState(
+              onReset: () => setState(() {
+                _search.clear();
+                _category = 'all';
+                _cuisine = 'all';
+                _visibleLimit = _filteredPageSize;
+              }),
             ),
           )
-        else
+        else if (groupedHome)
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-            sliver: SliverGrid.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: .78,
-              ),
-              itemCount: visible.length,
-              itemBuilder: (context, index) {
-                final recipe = visible[index];
-                final resolvedTitle = recipe.resolveTitle(locale);
-                return _RecipeCard(
-                  recipe: recipe,
-                  title: resolvedTitle.text,
-                  titleLocale: resolvedTitle.locale,
-                  isFallback: resolvedTitle.isFallback,
-                  favorite: _favorites.contains(recipe.id),
-                  onFavorite: _favoriteBusy.contains(recipe.id)
-                      ? null
-                      : () => _toggleFavorite(recipe.id),
-                  onOpen: () => _open(recipe),
+            sliver: SliverList.builder(
+              key: const Key('recipe-cuisine-sections'),
+              itemCount: sections.length,
+              itemBuilder: (context, sectionIndex) {
+                final section = sections[sectionIndex];
+                return Padding(
+                  key: ValueKey('recipe-cuisine-section-${section.key}'),
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              recipeCuisineLabel(context, section.key),
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                          IconButton(
+                            key: ValueKey(
+                              'recipe-cuisine-section-open-${section.key}',
+                            ),
+                            tooltip: recipeCuisineLabel(context, section.key),
+                            onPressed: () => setState(() {
+                              _cuisine = section.key;
+                              _visibleLimit = _filteredPageSize;
+                            }),
+                            icon: const Icon(Icons.arrow_forward_rounded),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: _recipeCardExtent(context),
+                        child: ListView.separated(
+                          key: ValueKey(
+                            'recipe-cuisine-section-list-${section.key}',
+                          ),
+                          scrollDirection: Axis.horizontal,
+                          itemCount: section.recipes.length,
+                          separatorBuilder: (_, _) => const SizedBox(width: 12),
+                          itemBuilder: (context, index) {
+                            final recipe = section.recipes[index];
+                            return SizedBox(
+                              width: _recipePreviewWidth(context),
+                              child: recipeCard(
+                                recipe,
+                                homeDisplayIndex[recipe.id]!,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          )
+        else ...[
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            sliver: SliverLayoutBuilder(
+              builder: (context, constraints) {
+                return SliverGrid.builder(
+                  key: const Key('recipe-results-grid'),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: _recipeColumnCount(
+                      constraints.crossAxisExtent,
+                    ),
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    mainAxisExtent: _recipeCardExtent(context),
+                  ),
+                  itemCount: pagedVisible.length,
+                  itemBuilder: (context, index) {
+                    final recipe = pagedVisible[index];
+                    return recipeCard(recipe, index);
+                  },
                 );
               },
             ),
           ),
+          if (pagedVisible.length < visible.length)
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
+              sliver: SliverToBoxAdapter(
+                child: OutlinedButton.icon(
+                  key: const Key('recipe-show-more'),
+                  onPressed: () =>
+                      setState(() => _visibleLimit += _filteredPageSize),
+                  icon: const Icon(Icons.expand_more_rounded),
+                  label: Text(wellnessCopy(context, 'More', 'المزيد')),
+                ),
+              ),
+            ),
+        ],
       ],
     );
   }
 
-  Widget _chip(String value, String label) => Padding(
-    padding: const EdgeInsetsDirectional.only(end: 8),
-    child: ChoiceChip(
-      label: Text(label),
-      selected: _category == value,
-      onSelected: (_) => setState(() => _category = value),
-    ),
-  );
+  Future<void> _chooseCuisine(List<String> cuisines) async {
+    final selected = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(sheetContext).height * .72,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    wellnessCopy(sheetContext, 'Choose cuisine', 'اختر المطبخ'),
+                    style: Theme.of(sheetContext).textTheme.titleLarge
+                        ?.copyWith(fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ),
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    for (final key in ['all', ...cuisines])
+                      ListTile(
+                        selected: key == _cuisine,
+                        title: Text(recipeCuisineLabel(sheetContext, key)),
+                        trailing: key == _cuisine
+                            ? const Icon(Icons.check_circle_rounded)
+                            : null,
+                        onTap: () => Navigator.pop(sheetContext, key),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (selected != null && selected != _cuisine && mounted) {
+      setState(() {
+        _cuisine = selected;
+        _visibleLimit = _filteredPageSize;
+      });
+    }
+  }
+
+  Future<WellnessMediaCacheResult>? _imageResultFor(
+    RecipeCatalogSummary recipe,
+  ) {
+    if (!widget.remoteImageDeliveryEnabled ||
+        bundledRecipeImageAssets.containsKey(recipe.id)) {
+      return null;
+    }
+    return _recipeImages.putIfAbsent(
+      recipe.id,
+      () => _imageClient!.resolve(recipe.id, online: true),
+    );
+  }
 
   Future<void> _open(RecipeCatalogSummary summary) async {
     showModalBottomSheet<void>(
@@ -298,124 +552,59 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
               ),
             );
           }
-          return _RecipeDetails(detail: snapshot.requireData);
+          return _RecipeDetails(
+            detail: snapshot.requireData,
+            imageResult: _imageResultFor(summary),
+          );
         },
       ),
     );
   }
-}
 
-class _RecipeCard extends StatelessWidget {
-  const _RecipeCard({
-    required this.recipe,
-    required this.title,
-    required this.titleLocale,
-    required this.isFallback,
-    required this.favorite,
-    required this.onFavorite,
-    required this.onOpen,
-  });
-
-  final RecipeCatalogSummary recipe;
-  final String title;
-  final String titleLocale;
-  final bool isFallback;
-  final bool favorite;
-  final VoidCallback? onFavorite;
-  final VoidCallback onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onOpen,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  _RecipePlaceholder(seed: recipe.id),
-                  PositionedDirectional(
-                    top: 4,
-                    end: 4,
-                    child: IconButton.filledTonal(
-                      tooltip: wellnessCopy(
-                        context,
-                        favorite ? 'Remove saved recipe' : 'Save recipe',
-                        favorite ? 'إزالة الوصفة المحفوظة' : 'حفظ الوصفة',
-                      ),
-                      onPressed: onFavorite,
-                      icon: Icon(
-                        favorite
-                            ? Icons.bookmark_rounded
-                            : Icons.bookmark_outline_rounded,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 2),
-              child: Text(
-                title,
-                locale: Locale(titleLocale),
-                textDirection: _directionForLocale(titleLocale),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontFamily:
-                      _directionForLocale(titleLocale) == TextDirection.rtl
-                      ? 'BILArabic'
-                      : null,
-                ),
-              ),
-            ),
-            if (isFallback)
-              Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 12, 2),
-                child: Text(
-                  wellnessCopy(
-                    context,
-                    'Original · ${titleLocale.toUpperCase()}',
-                    'الأصلية · ${titleLocale.toUpperCase()}',
-                  ),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-              child: Text(
-                wellnessCopy(
-                  context,
-                  '${recipe.totalMinutes} min',
-                  '${recipe.totalMinutes} دقيقة',
-                ),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  void _scheduleInitialRecipe(List<RecipeCatalogSummary> recipes) {
+    if (_initialRecipeHandled) return;
+    final requested = widget.initialRecipeId?.trim();
+    if (requested == null || requested.isEmpty) {
+      _initialRecipeHandled = true;
+      return;
+    }
+    final matches = recipes.where((recipe) => recipe.id == requested);
+    if (matches.isEmpty) {
+      _initialRecipeHandled = true;
+      return;
+    }
+    _initialRecipeHandled = true;
+    final recipe = matches.first;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final subscription = ref.read(verifiedSubscriptionStateProvider).value;
+      if (subscription == null || subscription.plan == CommercePlan.free) {
+        final storefrontPlan = ref.read(storefrontTargetPlanProvider).value;
+        context.push(
+          storefrontPlan == CommercePlan.premiumAiCoach
+              ? '/plans?focus=boost'
+              : '/plans?focus=subscription',
+        );
+        return;
+      }
+      _open(recipe);
+    });
   }
 }
 
 class _RecipeDetails extends StatelessWidget {
-  const _RecipeDetails({required this.detail});
+  const _RecipeDetails({required this.detail, required this.imageResult});
 
   final RecipeCatalogDetail detail;
+  final Future<WellnessMediaCacheResult>? imageResult;
 
   @override
   Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context).languageCode;
+    final locale = BilLocalePolicy.canonicalTag(
+      Localizations.localeOf(context),
+    );
     final resolved = detail.resolveLocalization(locale);
+    final displayTitle = detail.summary.resolveTitle(locale);
     final localization = resolved.value;
     final record = detail.record;
     final ingredients = (localization['ingredients'] as List).cast<String>();
@@ -434,6 +623,7 @@ class _RecipeDetails extends StatelessWidget {
       return recordId is String && refs is List && refs.contains(recordId);
     });
     final perServing = nutrition['perServing'] as Map<String, dynamic>;
+    final cardFacts = RecipeCatalogCardFacts.fromDetail(detail);
     return DraggableScrollableSheet(
       expand: false,
       initialChildSize: .9,
@@ -447,14 +637,18 @@ class _RecipeDetails extends StatelessWidget {
             aspectRatio: 16 / 9,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: _RecipePlaceholder(seed: detail.summary.id),
+              child: _RecipeArtwork(
+                recipe: detail.summary,
+                title: displayTitle.text,
+                imageResult: imageResult,
+              ),
             ),
           ),
           const SizedBox(height: 18),
           Text(
-            localization['title'] as String,
-            locale: Locale(resolved.locale),
-            textDirection: _directionForLocale(resolved.locale),
+            displayTitle.text,
+            locale: BilLocalePolicy.localeFromTag(displayTitle.locale),
+            textDirection: _directionForLocale(displayTitle.locale),
             style: Theme.of(
               context,
             ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
@@ -477,6 +671,11 @@ class _RecipeDetails extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 14),
+          _RecipeDetailFacts(
+            minutes: detail.summary.totalMinutes,
+            facts: cardFacts,
+          ),
+          const SizedBox(height: 14),
           Text(
             wellnessCopy(context, 'Ingredients', 'المكوّنات'),
             style: const TextStyle(fontWeight: FontWeight.w800),
@@ -488,7 +687,9 @@ class _RecipeDetails extends StatelessWidget {
                 textDirection: _directionForText(ingredient),
                 child: Text(
                   '• $ingredient',
-                  locale: Locale(_localeForText(ingredient, resolved.locale)),
+                  locale: BilLocalePolicy.localeFromTag(
+                    _localeForText(ingredient, resolved.locale),
+                  ),
                 ),
               ),
             ),
@@ -504,7 +705,9 @@ class _RecipeDetails extends StatelessWidget {
                 textDirection: _directionForText(steps[index]),
                 child: Text(
                   '${index + 1}. ${steps[index]}',
-                  locale: Locale(_localeForText(steps[index], resolved.locale)),
+                  locale: BilLocalePolicy.localeFromTag(
+                    _localeForText(steps[index], resolved.locale),
+                  ),
                 ),
               ),
             ),
@@ -585,102 +788,6 @@ class _RecipeDetails extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _RecipePlaceholder extends StatelessWidget {
-  const _RecipePlaceholder({required this.seed});
-
-  final String seed;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = [
-      const Color(0xffdcefe4),
-      const Color(0xffffe5cc),
-      const Color(0xffdce9fa),
-      const Color(0xfff4dfeb),
-    ];
-    final color =
-        colors[seed.codeUnits.fold<int>(0, (a, b) => a + b) % colors.length];
-    return ColoredBox(
-      color: color,
-      child: Center(
-        child: Icon(
-          Icons.restaurant_rounded,
-          size: 44,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-      ),
-    );
-  }
-}
-
-TextDirection _directionForLocale(String locale) {
-  final language = locale.split(RegExp('[-_]')).first.toLowerCase();
-  return const {'ar', 'fa', 'ur'}.contains(language)
-      ? TextDirection.rtl
-      : TextDirection.ltr;
-}
-
-TextDirection _directionForText(String value) =>
-    RegExp(r'[\u0600-\u06ff]').hasMatch(value)
-    ? TextDirection.rtl
-    : TextDirection.ltr;
-
-String _localeForText(String value, String declaredLocale) {
-  final declaredDirection = _directionForLocale(declaredLocale);
-  return _directionForText(value) == declaredDirection ? declaredLocale : 'en';
-}
-
-String _nutritionLine(Map<String, Object?> nutrients) {
-  String value(String key, {String? fallbackKey}) {
-    final raw =
-        nutrients[key] ?? (fallbackKey == null ? null : nutrients[fallbackKey]);
-    if (raw is! num || !raw.isFinite) return '—';
-    return raw == raw.roundToDouble()
-        ? raw.toInt().toString()
-        : raw.toStringAsFixed(1);
-  }
-
-  return '${value('kcal')} kcal · '
-      '${value('proteinG')} g protein · '
-      '${value('carbsG', fallbackKey: 'carbohydrateG')} g carbs · '
-      '${value('fatG')} g fat';
-}
-
-class _CatalogUnavailable extends StatelessWidget {
-  const _CatalogUnavailable({required this.onRetry});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.cloud_off_rounded, size: 42),
-            const SizedBox(height: 12),
-            Text(
-              wellnessCopy(
-                context,
-                'The recipe catalog is unavailable.',
-                'دليل الوصفات غير متاح.',
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton(
-              onPressed: onRetry,
-              child: Text(wellnessCopy(context, 'Retry', 'إعادة المحاولة')),
-            ),
-          ],
-        ),
       ),
     );
   }

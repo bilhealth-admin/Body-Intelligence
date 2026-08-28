@@ -11,7 +11,7 @@
 
 The accepted baseline currently establishes these release-relevant facts:
 
-- Flutter version identity is `1.0.0+1`.
+- Flutter version identity is `1.0.0+3`.
 - Android namespace and application ID are `com.bilhealth.bodyintelligencelog`.
 - Android uses minimum API 26 and target API 36.
 - Android release signing reads an optional private `key.properties`; it does

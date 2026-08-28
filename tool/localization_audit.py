@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 LANGUAGES = ("ar", "en", "fr", "es", "tr")
-MAP_START = re.compile(r"static const Map<String, String> _(?P<lang>ar|en|fr|es|tr) = \{")
+MAP_START = re.compile(r"const _appLocale(?P<lang>Ar|En|Fr|Es|Tr) = \{")
 KEY = re.compile(r"^\s*'(?P<key>[^']+)'\s*:")
 TEXT_WIDGET = re.compile(r"\b(?:Text|Tooltip|SnackBar)\(\s*(?:const\s+)?(['\"])(.+?)\1")
 
@@ -22,7 +22,7 @@ def app_keys(path: Path) -> dict[str, set[str]]:
         if active is None:
             match = MAP_START.search(line)
             if match:
-                active = match.group("lang")
+                active = match.group("lang").lower()
                 depth = line.count("{") - line.count("}")
             continue
         depth += line.count("{") - line.count("}")
@@ -64,7 +64,7 @@ def hard_coded_copy(lib: Path) -> list[dict[str, object]]:
 
 def audit(project: Path) -> dict[str, object]:
     localization = project / "lib/app/localization"
-    keys = app_keys(localization / "app_localizations.dart")
+    keys = app_keys(localization / "app_localizations_base_catalog.dart")
     reference = keys["en"]
     parity = {
         language: {

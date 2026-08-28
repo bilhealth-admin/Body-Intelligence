@@ -29,10 +29,9 @@ final class CloudInboxApplyReport {
 /// read from or overwritten by cloud data.
 final class AppDatabaseCloudInboxApplier {
   AppDatabaseCloudInboxApplier({
-    required AppDatabase database,
-    required LocalDataAccountBoundary accountBoundary,
-  }) : _database = database,
-       _accountBoundary = accountBoundary;
+    required this._database,
+    required this._accountBoundary,
+  });
 
   final AppDatabase _database;
   final LocalDataAccountBoundary _accountBoundary;

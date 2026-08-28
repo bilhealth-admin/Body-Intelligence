@@ -111,7 +111,9 @@ void main() {
   ].map((path) => File(path).readAsStringSync()).join('\n');
   if (RegExp(
     r'\b(?:TODO|TBD|CHANGEME)\b',
-    caseSensitive: false,
+    // Store copy legitimately uses Spanish "Todo". Release placeholders are
+    // required to be uppercase, so a case-insensitive scan is a false alarm.
+    caseSensitive: true,
   ).hasMatch(releaseSources)) {
     _fail(
       'Unknown placeholder found; use a precise OWNER_INPUT_REQUIRED marker',
@@ -176,25 +178,16 @@ void main() {
     _fail('Android adaptive/monochrome launcher wiring is incomplete');
   }
   _expectPng(
-    'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png',
-    430,
-    932,
+    'ios/Runner/Assets.xcassets/BILLaunchWordmark.imageset/'
+    'BILLaunchWordmark.png',
+    864,
+    864,
   );
   _expectPng(
-    'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png',
-    860,
-    1864,
-  );
-  _expectPng(
-    'ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png',
-    1290,
-    2796,
-  );
-  _expectPng(
-    'android/app/src/main/res/drawable-nodpi/bil_splash.png',
-    1080,
-    1920,
-    requireOpaque: true,
+    'android/app/src/main/res/drawable-nodpi/'
+    'bil_splash_identity.png',
+    864,
+    864,
   );
 
   final apple = Directory('store_assets/screenshots/apple')

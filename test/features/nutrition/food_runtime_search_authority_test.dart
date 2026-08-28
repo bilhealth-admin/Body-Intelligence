@@ -100,4 +100,35 @@ void main() {
     );
     expect(throughAuthority.first.id, firstId);
   });
+
+  test('strict local scan recovers when the search index misses', () async {
+    await repository.addFood(
+      name: 'Chicken Breast',
+      arabicName: 'صدر دجاج',
+      category: 'protein',
+      calories: 165,
+      protein: 31,
+      carbs: 0,
+      fats: 3.6,
+      source: 'foundation',
+      isCustom: false,
+      verified: true,
+    );
+    final resilientAuthority = FoodRuntimeSearchAuthority(
+      _ForcedSearchMissRepository(database),
+      catalogResolver: () async => null,
+    );
+
+    final results = await resilientAuthority.search('chicken');
+
+    expect(results.map((food) => food.name), ['Chicken Breast']);
+  });
+}
+
+class _ForcedSearchMissRepository extends FoodRepository {
+  _ForcedSearchMissRepository(super.database);
+
+  @override
+  Future<List<Food>> search(String query, {int limit = 50}) async =>
+      const <Food>[];
 }

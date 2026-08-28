@@ -30,15 +30,15 @@ void main() {
 
   test('barcode journeys expose the moderated review path', () {
     final foodPage = source('lib/features/nutrition/food_page.dart');
-    final dailyActions = source(
-      'lib/features/daily_log/daily_log_page_actions.dart',
+    final dailyCaptureActions = source(
+      'lib/features/daily_log/daily_log_capture_actions.dart',
     );
     final submission = source(
       'lib/features/community/presentation/product_review_submission_dialog.dart',
     );
 
     expect(foodPage, contains('showProductReviewSubmissionDialog'));
-    expect(dailyActions, contains('showProductReviewSubmissionDialog'));
+    expect(dailyCaptureActions, contains('showProductReviewSubmissionDialog'));
     expect(submission, contains('submitProductReview'));
     expect(submission, contains('will not become verified or searchable'));
     expect(submission, isNot(contains('calories_kcal')));

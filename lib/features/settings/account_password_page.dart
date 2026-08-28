@@ -76,7 +76,7 @@ class _AccountPasswordPageState extends State<AccountPasswordPage> {
     }
     if (widget.passwordUpdater == null &&
         (!AppEnvironment.cloudConfigured ||
-            !Supabase.instance.isInitialized ||
+            !AppEnvironment.supabaseRuntimeReady ||
             Supabase.instance.client.auth.currentUser == null)) {
       _message(
         _t(

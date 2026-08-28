@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+2
+version: 1.0.0+3
 
 environment:
   sdk: ^3.12.2
@@ -66,9 +66,11 @@ dependencies:
   camera: ^0.12.0+2
   camera_windows: ^0.2.6+4
   flutter_local_notifications: ^22.2.0
+  permission_handler: ^12.0.3
   timezone: ^0.11.1
   in_app_purchase: ^3.3.0
   in_app_purchase_android: ^0.5.2
+  in_app_review: ^2.0.12
   app_links: ^7.0.0
   video_player: ^2.13.0
   google_mobile_ads: ^9.1.0
@@ -109,6 +111,9 @@ flutter:
   assets:
     - assets/branding/bil_wordmark_registered_blue.svg
     - assets/branding/bil_wordmark_registered_white.svg
+    - assets/branding/bil_splash_identity.png
+    - assets/branding/bil_splash_motion.mp4
+    - assets/branding/google_g.svg
     # Ship only recipe art consumed by the app. The generated source-image
     # archive remains in the repository but must not inflate the APK/AAB.
     - assets/images/professional/mediterranean_protein_bowl.png
@@ -137,7 +142,10 @@ flutter:
     - assets/images/nutrition_plans/
     - assets/images/dashboard/
     - assets/images/daily_context/
+    # Spring lifestyle art for the half-height Quick Add glass surface.
+    - assets/images/quick_add/
     - assets/images/commerce/
+    - assets/images/ai_coach/
     - assets/catalogs/bil_food_core.sqlite
     # Release catalogs are metadata-only runtime assets. Workout media remains
     # blocked until an independently reviewed, hash-verified content pack is
@@ -146,14 +154,19 @@ flutter:
     # deliberately not bundled here.
     - assets/catalogs/recipes/v1/
     - assets/catalogs/recipes/v1/shards/
-    - artifacts/workout_media/workout_release_manifest_v2.json
+    - artifacts/workout_media/workout_release_bundle_registry_v1.json
+    - artifacts/workout_media/workout_release_bundle_home_v1.json
+    - artifacts/workout_media/workout_release_bundle_gym_six_month_v1.json
+    - artifacts/workout_media/workout_owner_approval_home_200.json
+    - artifacts/workout_media/workout_owner_approval_gym_102.json
     - assets/images/v10_master/bil_hologram_master.png
     - assets/images/v10_master/bil_hdr_starfield_master.png
     - assets/images/dashboard/bil_body_profile.svg
     - assets/images/connected_health/bil_medical_hub.png
     - assets/images/flagship/bil_body_intelligence_journey_v1.png
     - assets/images/flagship/bil_meal_discovery_v1.png
-    - assets/images/flagship/bil_sleep_insights_v1.png
+    - assets/images/flagship/bil_meal_discovery_v2.png
+    - assets/images/flagship/bil_sleep_insights_v2.png
     - assets/images/flagship/bil_movement_v1.png
     - assets/images/flagship/bil_fasting_rhythm_v1.png
     - assets/fonts/NotoNaskhArabic-Regular.ttf

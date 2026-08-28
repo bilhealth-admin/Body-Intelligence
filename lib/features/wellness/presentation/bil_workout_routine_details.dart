@@ -173,12 +173,25 @@ class _BilWorkoutRoutineDetailsPageState
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(20, 10, 20, 14),
         child: locked
-            ? FilledButton.icon(
+            ? FilledButton(
                 key: const ValueKey('unlock-workout-cta'),
                 onPressed: _openPlans,
-                icon: const Icon(Icons.workspace_premium_rounded),
-                label: Text(
-                  _copy(context, 'View membership plans', 'عرض خطط العضوية'),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    PremiumLabelBadge(semanticLabel: item.minimumAccess.name),
+                    const SizedBox(width: 10),
+                    Flexible(
+                      child: Text(
+                        _copy(
+                          context,
+                          'View membership plans',
+                          'عرض خطط العضوية',
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               )
             : FilledButton.icon(
@@ -225,11 +238,7 @@ class _LockedWorkoutHero extends StatelessWidget {
               'Premium workout. Instructions stay locked until server-verified access is active.',
               'تمرين مميز. تبقى التعليمات مقفلة حتى تفعيل الوصول الموثق من الخادم.',
             ),
-            child: const CircleAvatar(
-              radius: 34,
-              backgroundColor: Color(0xD9112A45),
-              child: Icon(Icons.lock_rounded, color: Colors.white, size: 34),
-            ),
+            child: PremiumLabelBadge(semanticLabel: item.minimumAccess.name),
           ),
         ),
       ],
@@ -255,41 +264,12 @@ class _LockedWorkoutPanel extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            ExcludeSemantics(
-              child: ImageFiltered(
-                imageFilter: ui.ImageFilter.blur(sigmaX: 9, sigmaY: 9),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      for (final width in <double>[1, .82, .94, .7]) ...[
-                        FractionallySizedBox(
-                          widthFactor: width,
-                          child: Container(
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: colors.onSurface.withValues(alpha: .2),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
             Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.workspace_premium_rounded,
-                    color: colors.primary,
-                    size: 42,
-                  ),
+                  PremiumLabelBadge(semanticLabel: minimumAccess.name),
                   const SizedBox(height: 10),
                   Text(
                     _copy(

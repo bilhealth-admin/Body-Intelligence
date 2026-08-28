@@ -11,6 +11,7 @@ void main() {
 
     expect(router, contains("path: '/location-settings'"));
     expect(router, contains('const LocationSettingsPage()'));
-    expect(settings, contains("context.push('/location-settings')"));
+    expect(settings, contains("'/location-settings'"));
+    expect(settings, contains("Key('more-location-settings-entry')"));
   });
 }

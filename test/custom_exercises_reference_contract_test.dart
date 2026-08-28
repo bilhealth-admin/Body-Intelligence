@@ -7,9 +7,18 @@ void main() {
   test(
     'My Exercises supports persistent create, delete, and daily logging',
     () {
-      final source = File(
-        'lib/features/wellness/presentation/workout_library_page.dart',
-      ).readAsStringSync();
+      final source =
+          [
+                'workout_library_page.dart',
+                'workout_library_actions.dart',
+                'workout_library_selection.dart',
+              ]
+              .map(
+                (name) => File(
+                  'lib/features/wellness/presentation/$name',
+                ).readAsStringSync(),
+              )
+              .join('\n');
 
       expect(source, contains('wellness.custom_exercises.v1'));
       expect(source, contains("key: const Key('custom-exercise-name')"));

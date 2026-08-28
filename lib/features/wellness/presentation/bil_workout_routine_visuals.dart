@@ -60,18 +60,12 @@ enum _WorkoutVisualCategory {
 
 String? _categoryCoverAsset(String? category) =>
     switch (_workoutVisualCategory(category)) {
-      _WorkoutVisualCategory.strength =>
-        'assets/images/workouts/workout_strength_cover_v1.png',
-      _WorkoutVisualCategory.cardio =>
-        'assets/images/workouts/workout_cardio_cover_v1.png',
-      _WorkoutVisualCategory.mobility =>
-        'assets/images/workouts/workout_mobility_cover_v1.png',
-      _WorkoutVisualCategory.hiit =>
-        'assets/images/workouts/workout_hiit_cover_v1.png',
-      _WorkoutVisualCategory.kettlebell =>
-        'assets/images/workouts/workout_kettlebell_cover_v1.png',
-      _WorkoutVisualCategory.recovery =>
-        'assets/images/workouts/workout_recovery_cover_v1.png',
+      _WorkoutVisualCategory.strength => StaticWorkoutArtwork.strength,
+      _WorkoutVisualCategory.cardio => StaticWorkoutArtwork.cardio,
+      _WorkoutVisualCategory.mobility => StaticWorkoutArtwork.mobility,
+      _WorkoutVisualCategory.hiit => StaticWorkoutArtwork.hiit,
+      _WorkoutVisualCategory.kettlebell => StaticWorkoutArtwork.kettlebell,
+      _WorkoutVisualCategory.recovery => StaticWorkoutArtwork.recovery,
       _WorkoutVisualCategory.other => null,
     };
 
@@ -100,6 +94,19 @@ IconData _categoryIcon(String? category) {
 
 _WorkoutVisualCategory _workoutVisualCategory(String? category) {
   final value = _normalizeWorkoutCategory(category);
+  final releaseGroup = switch (value) {
+    'home-balance-coordination' => _WorkoutVisualCategory.mobility,
+    'home-core-stability' ||
+    'home-home-bodyweight' ||
+    'gym-exercise-technique' ||
+    'gym-full-body' ||
+    'gym-legs' ||
+    'gym-pull' ||
+    'gym-push' => _WorkoutVisualCategory.strength,
+    'gym-warm-up-mobility' => _WorkoutVisualCategory.mobility,
+    _ => null,
+  };
+  if (releaseGroup != null) return releaseGroup;
   if (_containsAny(value, const [
     'kettlebell',
     'kettle bell',

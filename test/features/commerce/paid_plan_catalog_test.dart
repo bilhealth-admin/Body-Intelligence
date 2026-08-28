@@ -33,7 +33,13 @@ void main() {
 
       expect(premium, contains(CommerceEntitlement.cloudSync));
       expect(premium, contains(CommerceEntitlement.advancedIntelligence));
+      expect(premium, contains(CommerceEntitlement.communityFriends));
       expect(premiumAiCoach, containsAll(premium));
+      expect(
+        premiumAiCoach,
+        contains(CommerceEntitlement.communityFriends),
+        reason: 'Premium AI Coach must inherit every Premium community right.',
+      );
       expect(elite, containsAll(premium));
     });
 

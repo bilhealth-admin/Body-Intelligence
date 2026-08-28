@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/localization/bil_locale_policy.dart';
+import 'community_taxonomy_locale_copy.dart';
+
 class CommunityTaxonomySheet extends StatelessWidget {
   const CommunityTaxonomySheet({required this.onSelectTag, super.key});
 
@@ -125,8 +128,10 @@ class CommunityTaxonomySheet extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
           children: [
             Text(copy.title, style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 6),
-            Text(copy.subtitle),
+            if (copy.detailed) ...[
+              const SizedBox(height: 6),
+              Text(copy.subtitle),
+            ],
             const SizedBox(height: 16),
             for (final category in categories)
               Card(
@@ -134,7 +139,7 @@ class CommunityTaxonomySheet extends StatelessWidget {
                 child: ListTile(
                   leading: Icon(category.$1),
                   title: Text(category.$2),
-                  subtitle: Text(category.$3),
+                  subtitle: copy.detailed ? Text(category.$3) : null,
                   trailing: const Icon(Icons.tag_rounded),
                   onTap: () {
                     Navigator.of(context).pop();
@@ -142,72 +147,74 @@ class CommunityTaxonomySheet extends StatelessWidget {
                   },
                 ),
               ),
-            const SizedBox(height: 12),
-            Text(
-              copy.quickLinks,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _Link(
-                  copy.posts,
-                  Icons.forum_outlined,
-                  () => Navigator.of(context).pop(),
-                ),
-                _Link(
-                  copy.friends,
-                  Icons.group_outlined,
-                  () => context.push('/community/connections'),
-                ),
-                _Link(
-                  copy.messages,
-                  Icons.mail_outline,
-                  () => context.push('/community/messages'),
-                ),
-                _Link(
-                  copy.guidelines,
-                  Icons.shield_outlined,
-                  () => context.push('/community/safety'),
-                ),
-                _Link(
-                  copy.help,
-                  Icons.help_outline,
-                  () => context.push('/help'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-            Text(
-              copy.popularTags,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children:
-                  const [
-                        'nutrition',
-                        'fitness',
-                        'recipes',
-                        'wellness',
-                        'weight-loss',
-                      ]
-                      .map(
-                        (tag) => ActionChip(
-                          label: Text('#$tag'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            onSelectTag(tag);
-                          },
-                        ),
-                      )
-                      .toList(growable: false),
-            ),
-            const SizedBox(height: 14),
-            Text(copy.noCounts, style: Theme.of(context).textTheme.bodySmall),
+            if (copy.detailed) ...[
+              const SizedBox(height: 12),
+              Text(
+                copy.quickLinks,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _Link(
+                    copy.posts,
+                    Icons.forum_outlined,
+                    () => Navigator.of(context).pop(),
+                  ),
+                  _Link(
+                    copy.friends,
+                    Icons.group_outlined,
+                    () => context.push('/community/connections'),
+                  ),
+                  _Link(
+                    copy.messages,
+                    Icons.mail_outline,
+                    () => context.push('/community/messages'),
+                  ),
+                  _Link(
+                    copy.guidelines,
+                    Icons.shield_outlined,
+                    () => context.push('/community/safety'),
+                  ),
+                  _Link(
+                    copy.help,
+                    Icons.help_outline,
+                    () => context.push('/help'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              Text(
+                copy.popularTags,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children:
+                    const [
+                          'nutrition',
+                          'fitness',
+                          'recipes',
+                          'wellness',
+                          'weight-loss',
+                        ]
+                        .map(
+                          (tag) => ActionChip(
+                            label: Text('#$tag'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              onSelectTag(tag);
+                            },
+                          ),
+                        )
+                        .toList(growable: false),
+              ),
+              const SizedBox(height: 14),
+              Text(copy.noCounts, style: Theme.of(context).textTheme.bodySmall),
+            ],
           ],
         ),
       ),
@@ -230,53 +237,55 @@ class _Link extends StatelessWidget {
 }
 
 class _CommunityTaxonomyCopy {
-  const _CommunityTaxonomyCopy(this.values);
+  const _CommunityTaxonomyCopy(this.values, {this.detailed = true});
   final Map<String, String> values;
+  final bool detailed;
   String _v(String key) => values[key]!;
+  String _optional(String key) => values[key] ?? '';
   String get title => _v('title');
   String get browse => _v('browse');
-  String get subtitle => _v('subtitle');
-  String get quickLinks => _v('quickLinks');
-  String get popularTags => _v('popularTags');
-  String get noCounts => _v('noCounts');
+  String get subtitle => _optional('subtitle');
+  String get quickLinks => _optional('quickLinks');
+  String get popularTags => _optional('popularTags');
+  String get noCounts => _optional('noCounts');
   String get gettingStarted => _v('gettingStarted');
-  String get gettingStartedBody => _v('gettingStartedBody');
+  String get gettingStartedBody => _optional('gettingStartedBody');
   String get healthWeightLoss => _v('healthWeightLoss');
-  String get healthWeightLossBody => _v('healthWeightLossBody');
+  String get healthWeightLossBody => _optional('healthWeightLossBody');
   String get foodNutrition => _v('foodNutrition');
-  String get foodNutritionBody => _v('foodNutritionBody');
+  String get foodNutritionBody => _optional('foodNutritionBody');
   String get recipes => _v('recipes');
-  String get recipesBody => _v('recipesBody');
+  String get recipesBody => _optional('recipesBody');
   String get fitnessExercise => _v('fitnessExercise');
-  String get fitnessExerciseBody => _v('fitnessExerciseBody');
+  String get fitnessExerciseBody => _optional('fitnessExerciseBody');
   String get wellness => _v('wellness');
-  String get wellnessBody => _v('wellnessBody');
+  String get wellnessBody => _optional('wellnessBody');
   String get maintainingWeight => _v('maintainingWeight');
-  String get maintainingWeightBody => _v('maintainingWeightBody');
+  String get maintainingWeightBody => _optional('maintainingWeightBody');
   String get gainingWeight => _v('gainingWeight');
-  String get gainingWeightBody => _v('gainingWeightBody');
+  String get gainingWeightBody => _optional('gainingWeightBody');
   String get successStories => _v('successStories');
-  String get successStoriesBody => _v('successStoriesBody');
+  String get successStoriesBody => _optional('successStoriesBody');
   String get motivation => _v('motivation');
-  String get motivationBody => _v('motivationBody');
+  String get motivationBody => _optional('motivationBody');
   String get challenges => _v('challenges');
-  String get challengesBody => _v('challengesBody');
+  String get challengesBody => _optional('challengesBody');
   String get debate => _v('debate');
-  String get debateBody => _v('debateBody');
+  String get debateBody => _optional('debateBody');
   String get socialCorner => _v('socialCorner');
-  String get socialCornerBody => _v('socialCornerBody');
+  String get socialCornerBody => _optional('socialCornerBody');
   String get chitChat => _v('chitChat');
-  String get chitChatBody => _v('chitChatBody');
+  String get chitChatBody => _optional('chitChatBody');
   String get funGames => _v('funGames');
-  String get funGamesBody => _v('funGamesBody');
+  String get funGamesBody => _optional('funGamesBody');
   String get bilInformation => _v('bilInformation');
-  String get bilInformationBody => _v('bilInformationBody');
+  String get bilInformationBody => _optional('bilInformationBody');
   String get academy => _v('academy');
-  String get academyBody => _v('academyBody');
+  String get academyBody => _optional('academyBody');
   String get featureSuggestions => _v('featureSuggestions');
-  String get featureSuggestionsBody => _v('featureSuggestionsBody');
+  String get featureSuggestionsBody => _optional('featureSuggestionsBody');
   String get techSupport => _v('techSupport');
-  String get techSupportBody => _v('techSupportBody');
+  String get techSupportBody => _optional('techSupportBody');
   String get posts => _v('posts');
   String get friends => _v('friends');
   String get messages => _v('messages');
@@ -284,8 +293,20 @@ class _CommunityTaxonomyCopy {
   String get help => _v('help');
 
   static _CommunityTaxonomyCopy of(BuildContext context) {
-    final code = Localizations.localeOf(context).languageCode;
-    return _CommunityTaxonomyCopy(_copy[code] ?? _copy['en']!);
+    final locale = Localizations.localeOf(context);
+    final base = locale.languageCode;
+    final launchCopy = _copy[base];
+    if (launchCopy != null) return _CommunityTaxonomyCopy(launchCopy);
+
+    final tag = BilLocalePolicy.canonicalTag(locale);
+    final compact = communityTaxonomyLocaleCopy[tag];
+    if (compact == null) {
+      throw StateError('Missing Community taxonomy copy for $tag');
+    }
+    return _CommunityTaxonomyCopy({
+      ...compact,
+      'title': compact['browse']!,
+    }, detailed: false);
   }
 }
 

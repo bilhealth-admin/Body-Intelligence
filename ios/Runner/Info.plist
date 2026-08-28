@@ -25,6 +25,26 @@
 		<string>fr</string>
 		<string>es</string>
 		<string>tr</string>
+		<string>de</string>
+		<string>it</string>
+		<string>pt-BR</string>
+		<string>pt-PT</string>
+		<string>ur</string>
+		<string>fa</string>
+		<string>hi</string>
+		<string>id</string>
+		<string>ms</string>
+		<string>ja</string>
+		<string>ko</string>
+		<string>zh-Hans</string>
+		<string>zh-Hant</string>
+		<string>ru</string>
+		<string>bn</string>
+		<string>vi</string>
+		<string>th</string>
+		<string>pl</string>
+		<string>nl</string>
+		<string>uk</string>
 	</array>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
@@ -43,17 +63,17 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>BIL connects only to health devices you explicitly pair so measurements can be imported locally.</string>
+	<string>BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>BIL connects only to health devices you explicitly pair so measurements can be imported locally.</string>
+	<string>BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>BIL reads only the Health categories you choose—activity, sleep, body measurements, heart and respiratory metrics, blood pressure, oxygen, glucose, hydration, and nutrition—to show a private on-device health timeline and insights.</string>
+	<string>BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>BIL writes selected health records only after separate explicit write consent.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>BIL uses the microphone only when you choose voice input for a meal.</string>
+	<string>BIL uses the microphone only when you choose voice input for a meal or speak directly with BIL AI Coach.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>BIL converts the food phrase you speak into text so you can review it before saving.</string>
+	<string>BIL converts speech you initiate for meal logging or BIL AI Coach into text so you can review or send it.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

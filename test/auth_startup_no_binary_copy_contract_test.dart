@@ -18,13 +18,13 @@ void main() {
     }
   });
 
-  test('auth copy contract includes all production languages', () {
+  test('redesigned auth copy uses exact authored locale lookup', () {
     final source = File(
-      'lib/features/auth/auth_five_locale_copy.dart',
+      'lib/features/auth/auth_entry_locale_copy.dart',
     ).readAsStringSync();
-    for (final locale in const ['fr', 'es', 'tr']) {
-      expect(source, contains("'$locale':"), reason: locale);
-    }
-    expect(source, contains('authFiveLocaleTextFor'));
+    expect(source, contains('authEntryHasExactLocale'));
+    expect(source, contains('authEntryHasExactCopy'));
+    expect(source, contains("'email': email"));
+    expect(source, contains("'time': clock"));
   });
 }

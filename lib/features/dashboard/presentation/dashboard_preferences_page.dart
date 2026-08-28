@@ -10,6 +10,8 @@ import '../../commerce/domain/commerce_entitlement.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../providers/dashboard_preferences_provider.dart';
+part 'dashboard_preferences_actions.dart';
+part 'dashboard_preferences_catalog.dart';
 
 @visibleForTesting
 String dashboardPremiumFeatureDestination(bool paid, String featureRoute) =>
@@ -28,422 +30,7 @@ class _DashboardPreferencesPageState
   bool _saving = false;
   int _streamRevision = 0;
 
-  Future<bool> _guardedSave(Future<void> Function() operation) async {
-    if (_saving) return false;
-    setState(() => _saving = true);
-    try {
-      await operation();
-      return true;
-    } catch (_) {
-      if (mounted) _showSaveFailure(context);
-      return false;
-    } finally {
-      if (mounted) setState(() => _saving = false);
-    }
-  }
-
-  String _copy(
-    BuildContext context, {
-    required String en,
-    required String ar,
-    required String fr,
-    required String es,
-    required String tr,
-  }) {
-    final locale = Localizations.localeOf(context);
-    final resolved = RuntimeCopy.resolve(
-      en,
-      BilLocalePolicy.canonicalTag(locale),
-    );
-    if (resolved != null) return resolved;
-    return switch (locale.languageCode) {
-      'ar' => ar,
-      'fr' => fr,
-      'es' => es,
-      'tr' => tr,
-      _ => en,
-    };
-  }
-
-  String _sectionCopy(BuildContext context, String english, String arabic) {
-    const translations = <String, (String, String, String)>{
-      'AI Coach': ('Coach IA', 'Coach de IA', 'Yapay zekâ koçu'),
-      'A private conversation with your health intelligence': (
-        'Une conversation privée avec votre intelligence santé',
-        'Una conversación privada con tu inteligencia de salud',
-        'Sağlık zekânızla özel bir görüşme',
-      ),
-      'Calories': ('Calories', 'Calorías', 'Kalori'),
-      'Goal, food, exercise, and remaining energy': (
-        'Objectif, alimentation, exercice et énergie restante',
-        'Objetivo, comida, ejercicio y energía restante',
-        'Hedef, yemek, egzersiz ve kalan enerji',
-      ),
-      'Macros': ('Macronutriments', 'Macronutrientes', 'Makrolar'),
-      'Protein and fat progress': (
-        'Progression des protéines et lipides',
-        'Progreso de proteínas y grasas',
-        'Protein ve yağ ilerlemesi',
-      ),
-      'Activity': ('Activité', 'Actividad', 'Aktivite'),
-      'Steps and exercise status': (
-        'Pas et état des exercices',
-        'Pasos y estado del ejercicio',
-        'Adımlar ve egzersiz durumu',
-      ),
-      'Quick log': ('Saisie rapide', 'Registro rápido', 'Hızlı kayıt'),
-      'Food, water, and weight shortcuts': (
-        'Raccourcis alimentation, eau et poids',
-        'Accesos de comida, agua y peso',
-        'Yemek, su ve kilo kısayolları',
-      ),
-      'Discover': ('Découvrir', 'Descubrir', 'Keşfet'),
-      'Sleep, recipes, workouts, and community': (
-        'Sommeil, recettes, entraînements et communauté',
-        'Sueño, recetas, entrenamientos y comunidad',
-        'Uyku, tarifler, egzersizler ve topluluk',
-      ),
-      'Personal intelligence': (
-        'Intelligence personnelle',
-        'Inteligencia personal',
-        'Kişisel zekâ',
-      ),
-      'One Best Action, evidence, and Body Twin': (
-        'Meilleure action, preuves et jumeau corporel',
-        'Mejor acción, evidencia y gemelo corporal',
-        'En iyi eylem, kanıt ve beden ikizi',
-      ),
-      'Daily intelligence': (
-        'Intelligence quotidienne',
-        'Inteligencia diaria',
-        'Günlük zekâ',
-      ),
-      'Explanations, confidence, and evidence': (
-        'Explications, confiance et preuves',
-        'Explicaciones, confianza y evidencia',
-        'Açıklamalar, güven ve kanıt',
-      ),
-      'Progress': ('Progrès', 'Progreso', 'İlerleme'),
-      'Measured trends from your saved records': (
-        'Tendances mesurées depuis vos données',
-        'Tendencias medidas de tus registros',
-        'Kayıtlarınızdan ölçülen eğilimler',
-      ),
-      'Connected health': (
-        'Santé connectée',
-        'Salud conectada',
-        'Bağlı sağlık',
-      ),
-      'Health sources and synchronization status': (
-        'Sources de santé et état de synchronisation',
-        'Fuentes de salud y estado de sincronización',
-        'Sağlık kaynakları ve eşitleme durumu',
-      ),
-      'Body Twin': ('Jumeau corporel', 'Gemelo corporal', 'Beden ikizi'),
-      'Your explainable body model and its evidence': (
-        'Votre modèle corporel explicable et ses preuves',
-        'Tu modelo corporal explicable y su evidencia',
-        'Açıklanabilir beden modeliniz ve kanıtları',
-      ),
-    };
-    final translated = translations[english];
-    final locale = Localizations.localeOf(context);
-    final resolved = RuntimeCopy.resolve(
-      english,
-      BilLocalePolicy.canonicalTag(locale),
-    );
-    if (resolved != null) return resolved;
-    return switch (locale.languageCode) {
-      'ar' => arabic,
-      'fr' => translated?.$1 ?? english,
-      'es' => translated?.$2 ?? english,
-      'tr' => translated?.$3 ?? english,
-      _ => english,
-    };
-  }
-
-  Future<void> _applyPreset(
-    BuildContext context,
-    WidgetRef ref,
-    String preset,
-    Set<String> visible,
-  ) async {
-    await _guardedSave(() async {
-      final repository = ref.read(preferencesRepositoryProvider);
-      await repository.setMany({
-        'dashboard.preset': preset,
-        for (final section in DashboardSectionIds.all)
-          'dashboard.section.$section': '${visible.contains(section)}',
-      });
-    });
-  }
-
-  Future<void> _setSectionVisibility(
-    BuildContext context,
-    WidgetRef ref,
-    String section,
-    bool visible,
-  ) async {
-    await _guardedSave(() async {
-      await ref.read(preferencesRepositoryProvider).setMany({
-        'dashboard.section.$section': '$visible',
-        'dashboard.preset': 'custom',
-      });
-    });
-  }
-
-  Future<void> _restoreDefaults(BuildContext context, WidgetRef ref) async {
-    await _guardedSave(() async {
-      final repository = ref.read(preferencesRepositoryProvider);
-      await repository.removeMany([
-        'dashboard.preset',
-        for (final section in DashboardSectionIds.all)
-          'dashboard.section.$section',
-        'dashboard.nutrientGoalCards',
-      ]);
-    });
-  }
-
-  void _showSaveFailure(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          _sectionCopy(
-            context,
-            'Today preferences could not be saved. Please try again.',
-            'تعذّر حفظ تفضيلات شاشة اليوم. حاول مرة أخرى.',
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _chooseNutrientCards(
-    BuildContext context,
-    WidgetRef ref,
-    Set<String> current,
-  ) async {
-    final repository = ref.read(preferencesRepositoryProvider);
-    final selected = current.toSet();
-    var savingCards = false;
-    final labels = <String, (String, String, String, String, String)>{
-      DashboardNutrientGoalIds.protein: (
-        'Protein',
-        'البروتين',
-        'Protéines',
-        'Proteína',
-        'Protein',
-      ),
-      DashboardNutrientGoalIds.carbohydrates: (
-        'Carbohydrates',
-        'الكربوهيدرات',
-        'Glucides',
-        'Carbohidratos',
-        'Karbonhidratlar',
-      ),
-      DashboardNutrientGoalIds.fat: (
-        'Fat',
-        'الدهون',
-        'Lipides',
-        'Grasas',
-        'Yağ',
-      ),
-      DashboardNutrientGoalIds.fiber: (
-        'Fiber',
-        'الألياف',
-        'Fibres',
-        'Fibra',
-        'Lif',
-      ),
-      DashboardNutrientGoalIds.sodium: (
-        'Sodium',
-        'الصوديوم',
-        'Sodium',
-        'Sodio',
-        'Sodyum',
-      ),
-      DashboardNutrientGoalIds.potassium: (
-        'Potassium',
-        'البوتاسيوم',
-        'Potassium',
-        'Potasio',
-        'Potasyum',
-      ),
-    };
-    if (!context.mounted) return;
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      isDismissible: false,
-      enableDrag: false,
-      showDragHandle: true,
-      builder: (sheetContext) => StatefulBuilder(
-        builder: (context, setSheetState) => PopScope(
-          canPop: !savingCards,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _copy(
-                      context,
-                      en: 'Add nutrient goal cards',
-                      ar: 'إضافة بطاقات أهداف المغذيات',
-                      fr: 'Ajouter des cartes de nutriments',
-                      es: 'Añadir tarjetas de nutrientes',
-                      tr: 'Besin hedefi kartları ekle',
-                    ),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Flexible(
-                    child: ListView(
-                      shrinkWrap: true,
-                      children: [
-                        for (final id in DashboardNutrientGoalIds.all)
-                          CheckboxListTile(
-                            key: Key('dashboard-nutrient-goal-$id'),
-                            value: selected.contains(id),
-                            title: Text(
-                              _copy(
-                                context,
-                                en: labels[id]!.$1,
-                                ar: labels[id]!.$2,
-                                fr: labels[id]!.$3,
-                                es: labels[id]!.$4,
-                                tr: labels[id]!.$5,
-                              ),
-                            ),
-                            onChanged: savingCards
-                                ? null
-                                : (enabled) => setSheetState(() {
-                                    enabled == true
-                                        ? selected.add(id)
-                                        : selected.remove(id);
-                                  }),
-                          ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: savingCards
-                          ? null
-                          : () async {
-                              setSheetState(() => savingCards = true);
-                              try {
-                                await repository.setMany({
-                                  'dashboard.nutrientGoalCards':
-                                      DashboardNutrientGoalIds.all
-                                          .where(selected.contains)
-                                          .join(','),
-                                  'dashboard.preset': 'custom',
-                                });
-                                if (sheetContext.mounted) {
-                                  setSheetState(() => savingCards = false);
-                                  final route = ModalRoute.of(sheetContext);
-                                  if (route != null) {
-                                    Navigator.of(
-                                      sheetContext,
-                                    ).removeRoute(route);
-                                  }
-                                }
-                              } catch (_) {
-                                if (sheetContext.mounted) {
-                                  setSheetState(() => savingCards = false);
-                                  _showSaveFailure(sheetContext);
-                                }
-                              }
-                            },
-                      child: Text(
-                        _copy(
-                          context,
-                          en: 'Save cards',
-                          ar: 'حفظ البطاقات',
-                          fr: 'Enregistrer',
-                          es: 'Guardar',
-                          tr: 'Kartları kaydet',
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showLockedNutrientPreview(BuildContext context) async {
-    final upgrade = await showModalBottomSheet<bool>(
-      context: context,
-      useSafeArea: true,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (sheetContext) => Padding(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              _sectionCopy(
-                sheetContext,
-                'Add nutrient goal cards',
-                'إضافة بطاقات أهداف المغذيات',
-              ),
-              style: Theme.of(
-                sheetContext,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _sectionCopy(
-                sheetContext,
-                'Choose the nutrients you want to track as dashboard cards. This is an independent Premium feature.',
-                'اختر المغذيات التي تريد متابعتها كبطاقات في الداشبورد. هذه ميزة Premium مستقلة.',
-              ),
-            ),
-            const SizedBox(height: 12),
-            for (final label in const [
-              'Protein',
-              'Carbohydrates',
-              'Fat',
-              'Fiber',
-              'Sodium',
-              'Potassium',
-            ])
-              ListTile(
-                dense: true,
-                leading: const Icon(Icons.lock_outline_rounded),
-                title: Text(context.strings.text(label)),
-              ),
-            const SizedBox(height: 8),
-            FilledButton.icon(
-              onPressed: () => Navigator.pop(sheetContext, true),
-              icon: const Icon(Icons.workspace_premium_rounded),
-              label: Text(
-                _sectionCopy(
-                  sheetContext,
-                  'View Premium plans',
-                  'عرض خطط Premium',
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (upgrade == true && context.mounted) context.push('/plans');
-  }
+  void _updateState(VoidCallback update) => setState(update);
 
   @override
   Widget build(BuildContext context) {
@@ -454,205 +41,6 @@ class _DashboardPreferencesPageState
           CommerceEntitlement.advancedIntelligence,
         ) ??
         false;
-    final presets =
-        <
-          ({
-            String id,
-            IconData icon,
-            String titleEn,
-            String titleAr,
-            String titleFr,
-            String titleEs,
-            String titleTr,
-            String bodyEn,
-            String bodyAr,
-            String bodyFr,
-            String bodyEs,
-            String bodyTr,
-            Set<String> sections,
-            bool premium,
-          })
-        >[
-          (
-            id: 'calorie',
-            icon: Icons.local_fire_department_outlined,
-            titleEn: 'Calorie focused',
-            titleAr: 'تركيز السعرات',
-            titleFr: 'Centré sur les calories',
-            titleEs: 'Enfoque en calorías',
-            titleTr: 'Kalori odaklı',
-            bodyEn: 'Calories consumed, activity, and remaining energy.',
-            bodyAr: 'السعرات المستهلكة والنشاط والطاقة المتبقية.',
-            bodyFr: 'Calories consommées, activité et énergie restante.',
-            bodyEs: 'Calorías consumidas, actividad y energía restante.',
-            bodyTr: 'Tüketilen kalori, aktivite ve kalan enerji.',
-            sections: {
-              DashboardSectionIds.calories,
-              DashboardSectionIds.activity,
-              DashboardSectionIds.quickLog,
-              DashboardSectionIds.aiCoach,
-              DashboardSectionIds.discover,
-            },
-            premium: false,
-          ),
-          (
-            id: 'macros',
-            icon: Icons.donut_large_rounded,
-            titleEn: 'Macronutrients focused',
-            titleAr: 'تركيز المغذيات الكبرى',
-            titleFr: 'Centré sur les macronutriments',
-            titleEs: 'Enfoque en macronutrientes',
-            titleTr: 'Makro besin odaklı',
-            bodyEn: 'Carbs, protein, fat, and remaining calories.',
-            bodyAr: 'الكربوهيدرات والبروتين والدهون والسعرات المتبقية.',
-            bodyFr: 'Glucides, protéines, lipides et calories restantes.',
-            bodyEs: 'Carbohidratos, proteína, grasa y calorías restantes.',
-            bodyTr: 'Karbonhidrat, protein, yağ ve kalan kalori.',
-            sections: {
-              DashboardSectionIds.calories,
-              DashboardSectionIds.macros,
-              DashboardSectionIds.quickLog,
-              DashboardSectionIds.aiCoach,
-              DashboardSectionIds.discover,
-            },
-            premium: true,
-          ),
-          (
-            id: 'heart',
-            icon: Icons.monitor_heart_outlined,
-            titleEn: 'Heart and activity view',
-            titleAr: 'عرض القلب والنشاط',
-            titleFr: 'Vue cœur et activité',
-            titleEs: 'Vista de corazón y actividad',
-            titleTr: 'Kalp ve aktivite görünümü',
-            bodyEn: 'Nutrition, activity, and connected health together.',
-            bodyAr: 'التغذية والنشاط والصحة المتصلة في عرض واحد.',
-            bodyFr: 'Nutrition, activité et santé connectée réunies.',
-            bodyEs: 'Nutrición, actividad y salud conectada juntas.',
-            bodyTr: 'Beslenme, aktivite ve bağlı sağlık bir arada.',
-            sections: {
-              DashboardSectionIds.calories,
-              DashboardSectionIds.macros,
-              DashboardSectionIds.activity,
-              DashboardSectionIds.connectedHealth,
-              DashboardSectionIds.progress,
-              DashboardSectionIds.aiCoach,
-            },
-            premium: true,
-          ),
-          (
-            id: 'low_carb',
-            icon: Icons.eco_outlined,
-            titleEn: 'Low carb',
-            titleAr: 'كربوهيدرات منخفضة',
-            titleFr: 'Faible en glucides',
-            titleEs: 'Bajo en carbohidratos',
-            titleTr: 'Düşük karbonhidrat',
-            bodyEn: 'Macros, calories, quick logging, and evidence.',
-            bodyAr: 'المغذيات والسعرات والتسجيل السريع والأدلة.',
-            bodyFr: 'Macros, calories, saisie rapide et preuves.',
-            bodyEs: 'Macros, calorías, registro rápido y evidencia.',
-            bodyTr: 'Makrolar, kalori, hızlı kayıt ve kanıt.',
-            sections: {
-              DashboardSectionIds.calories,
-              DashboardSectionIds.macros,
-              DashboardSectionIds.quickLog,
-              DashboardSectionIds.dailyIntelligence,
-              DashboardSectionIds.aiCoach,
-            },
-            premium: true,
-          ),
-        ];
-    final items = <(String, IconData, String, String, String, String)>[
-      (
-        DashboardSectionIds.aiCoach,
-        Icons.auto_awesome_rounded,
-        'AI Coach',
-        'مدرب BIL الذكي',
-        'A private conversation with your health intelligence',
-        'محادثة خاصة مع ذكائك الصحي الشخصي',
-      ),
-      (
-        DashboardSectionIds.calories,
-        Icons.local_fire_department_outlined,
-        'Calories',
-        'السعرات',
-        'Goal, food, exercise, and remaining energy',
-        'الهدف والطعام والتمرين والطاقة المتبقية',
-      ),
-      (
-        DashboardSectionIds.macros,
-        Icons.donut_large_rounded,
-        'Macros',
-        'العناصر الكبرى',
-        'Protein and fat progress',
-        'تقدم البروتين والدهون',
-      ),
-      (
-        DashboardSectionIds.activity,
-        Icons.directions_walk_rounded,
-        'Activity',
-        'النشاط',
-        'Steps and exercise status',
-        'حالة الخطوات والتمارين',
-      ),
-      (
-        DashboardSectionIds.quickLog,
-        Icons.add_circle_outline_rounded,
-        'Quick log',
-        'التسجيل السريع',
-        'Food, water, and weight shortcuts',
-        'اختصارات الطعام والماء والوزن',
-      ),
-      (
-        DashboardSectionIds.discover,
-        Icons.explore_outlined,
-        'Discover',
-        'اكتشف',
-        'Sleep, recipes, workouts, and community',
-        'النوم والوصفات والتمارين والمجتمع',
-      ),
-      (
-        DashboardSectionIds.bestAction,
-        Icons.auto_awesome_outlined,
-        'Personal intelligence',
-        'الذكاء الشخصي',
-        'One Best Action, evidence, and Body Twin',
-        'أفضل إجراء والأدلة والتوأم الجسدي',
-      ),
-      (
-        DashboardSectionIds.dailyIntelligence,
-        Icons.psychology_alt_outlined,
-        'Daily intelligence',
-        'ذكاء اليوم',
-        'Explanations, confidence, and evidence',
-        'التفسير والثقة والأدلة',
-      ),
-      (
-        DashboardSectionIds.progress,
-        Icons.show_chart_rounded,
-        'Progress',
-        'التقدم',
-        'Measured trends from your saved records',
-        'الاتجاهات المقاسة من سجلاتك المحفوظة',
-      ),
-      (
-        DashboardSectionIds.connectedHealth,
-        Icons.health_and_safety_outlined,
-        'Connected health',
-        'الصحة المتصلة',
-        'Health sources and synchronization status',
-        'مصادر الصحة وحالة المزامنة',
-      ),
-      (
-        DashboardSectionIds.bodyTwin,
-        Icons.accessibility_new_rounded,
-        'Body Twin',
-        'التوأم الجسدي',
-        'Your explainable body model and its evidence',
-        'نموذج جسمك القابل للتفسير وأدلته',
-      ),
-    ];
 
     return PopScope(
       canPop: !_saving,
@@ -743,7 +131,7 @@ class _DashboardPreferencesPageState
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsetsDirectional.only(end: 12),
                     children: [
-                      for (final preset in presets)
+                      for (final preset in _dashboardPresets)
                         SizedBox(
                           width: 310,
                           child: Card(
@@ -898,9 +286,9 @@ class _DashboardPreferencesPageState
                 mainAxisSpacing: 8,
                 mainAxisExtent: 84,
               ),
-              itemCount: items.length,
+              itemCount: _dashboardPreferenceItems.length,
               itemBuilder: (context, index) {
-                final item = items[index];
+                final item = _dashboardPreferenceItems[index];
                 return Card(
                   margin: EdgeInsets.zero,
                   clipBehavior: Clip.antiAlias,
@@ -999,35 +387,6 @@ class _DashboardPreferencesPageState
               child: Column(
                 children: [
                   ListTile(
-                    key: const Key('dashboard-edit-step-goal'),
-                    leading: const Icon(Icons.directions_walk_rounded),
-                    title: Text(
-                      _copy(
-                        context,
-                        en: 'Daily step goal',
-                        ar: 'هدف الخطوات اليومي',
-                        fr: 'Objectif quotidien de pas',
-                        es: 'Objetivo diario de pasos',
-                        tr: 'Günlük adım hedefi',
-                      ),
-                    ),
-                    subtitle: Text(
-                      _copy(
-                        context,
-                        en: 'Edit goal',
-                        ar: 'تعديل الهدف',
-                        fr: 'Modifier l’objectif',
-                        es: 'Editar objetivo',
-                        tr: 'Hedefi düzenle',
-                      ),
-                    ),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: _saving
-                        ? null
-                        : () => context.push('/connected-health/steps'),
-                  ),
-                  const Divider(height: 1),
-                  ListTile(
                     key: const Key('dashboard-edit-nutrition-goals'),
                     leading: const Icon(Icons.track_changes_rounded),
                     title: Text(
@@ -1054,25 +413,6 @@ class _DashboardPreferencesPageState
                     onTap: _saving
                         ? null
                         : () => context.push('/settings/nutrition-goals'),
-                  ),
-                  const Divider(height: 1),
-                  ListTile(
-                    key: const Key('dashboard-edit-exercise-settings'),
-                    leading: const Icon(Icons.fitness_center_rounded),
-                    title: Text(
-                      _copy(
-                        context,
-                        en: 'Exercise settings',
-                        ar: 'إعدادات التمارين',
-                        fr: 'Paramètres d’exercice',
-                        es: 'Ajustes de ejercicio',
-                        tr: 'Egzersiz ayarları',
-                      ),
-                    ),
-                    trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: _saving
-                        ? null
-                        : () => context.push('/settings/exercise-calories'),
                   ),
                 ],
               ),
@@ -1105,22 +445,42 @@ class _DashboardPreferencesPageState
                           child: CircularProgressIndicator(strokeWidth: 2),
                         );
                       }
+                      if (state.hasError) {
+                        return const Icon(Icons.error_outline_rounded);
+                      }
                       return Icon(
-                        state.hasError
-                            ? Icons.error_outline_rounded
-                            : Icons.add_chart_rounded,
+                        state.value!.isEmpty
+                            ? Icons.add_chart_rounded
+                            : Icons.dashboard_customize_rounded,
                       );
                     },
                   ),
-                  title: Text(
-                    _copy(
-                      context,
-                      en: 'Add nutrient goal cards',
-                      ar: 'إضافة بطاقات أهداف المغذيات',
-                      fr: 'Ajouter des cartes de nutriments',
-                      es: 'Añadir tarjetas de nutrientes',
-                      tr: 'Besin hedefi kartları ekle',
-                    ),
+                  title: Consumer(
+                    builder: (context, ref, _) {
+                      final cards = ref.watch(
+                        dashboardNutrientGoalCardsProvider,
+                      );
+                      final editing = cards.value?.isNotEmpty ?? false;
+                      return Text(
+                        editing
+                            ? _copy(
+                                context,
+                                en: 'Edit nutrient goal cards',
+                                ar: 'تعديل بطاقات أهداف المغذيات',
+                                fr: 'Modifier les cartes de nutriments',
+                                es: 'Editar tarjetas de nutrientes',
+                                tr: 'Besin hedefi kartlarını düzenle',
+                              )
+                            : _copy(
+                                context,
+                                en: 'Add nutrient goal cards',
+                                ar: 'إضافة بطاقات أهداف المغذيات',
+                                fr: 'Ajouter des cartes de nutriments',
+                                es: 'Añadir tarjetas de nutrientes',
+                                tr: 'Besin hedefi kartları ekle',
+                              ),
+                      );
+                    },
                   ),
                   subtitle: Consumer(
                     builder: (context, ref, _) {

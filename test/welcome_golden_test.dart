@@ -21,6 +21,7 @@ void main() {
 
       await tester.pumpWidget(_welcome(locale));
       await tester.pumpAndSettle();
+      await settleVisualAssetImages(tester);
 
       expect(tester.takeException(), isNull);
 
@@ -50,6 +51,12 @@ Widget _welcome(Locale locale) => ProviderScope(
     ],
     theme: visualEvidenceTheme(
       BilFlagshipTheme.light(isArabic: locale.languageCode == 'ar'),
+      fontFamily: locale.languageCode == 'ar'
+          ? 'NotoArabicEvidence'
+          : 'RobotoEvidence',
+    ),
+    builder: (context, child) => visualEvidenceTextSurface(
+      child,
       fontFamily: locale.languageCode == 'ar'
           ? 'NotoArabicEvidence'
           : 'RobotoEvidence',

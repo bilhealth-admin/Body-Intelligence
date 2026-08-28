@@ -26,12 +26,10 @@ final class CloudOutboxProductionReport {
 /// remains dirty and will be produced again on a later pass.
 final class AppDatabaseCloudOutboxProducer {
   AppDatabaseCloudOutboxProducer({
-    required AppDatabase database,
-    required LocalDataAccountBoundary accountBoundary,
-    required CloudRecordOutboxSink sink,
-  }) : _database = database,
-       _accountBoundary = accountBoundary,
-       _sink = sink;
+    required this._database,
+    required this._accountBoundary,
+    required this._sink,
+  });
 
   final AppDatabase _database;
   final LocalDataAccountBoundary _accountBoundary;
@@ -72,10 +70,7 @@ final class AppDatabaseCloudOutboxProducer {
             .get();
     for (final row in profileRows) {
       if (remaining <= 0) break;
-      await handle(
-        _profileEnvelope(row),
-        () => _markProfileQueued(row),
-      );
+      await handle(_profileEnvelope(row), () => _markProfileQueued(row));
     }
 
     final weightRows =
@@ -127,14 +122,18 @@ final class AppDatabaseCloudOutboxProducer {
             .get();
     for (final row in itemRows) {
       if (remaining <= 0) break;
-      final meal = await (_database.select(
-        _database.meals,
-      )..where((candidate) => candidate.id.equals(row.mealId))).getSingleOrNull();
-      final food = await (_database.select(
-        _database.foods,
-      )..where((candidate) => candidate.id.equals(row.foodId))).getSingleOrNull();
+      final meal =
+          await (_database.select(_database.meals)
+                ..where((candidate) => candidate.id.equals(row.mealId)))
+              .getSingleOrNull();
+      final food =
+          await (_database.select(_database.foods)
+                ..where((candidate) => candidate.id.equals(row.foodId)))
+              .getSingleOrNull();
       if (meal == null || food == null) {
-        throw StateError('Meal item ${row.uuid} has an invalid local reference.');
+        throw StateError(
+          'Meal item ${row.uuid} has an invalid local reference.',
+        );
       }
       await handle(
         _mealItemEnvelope(row, meal: meal, food: food),
@@ -151,10 +150,12 @@ final class AppDatabaseCloudOutboxProducer {
 
   Future<int> countDirtyRows() async {
     Future<int> count(String table) async {
-      final row = await _database.customSelect(
-        "SELECT COUNT(*) AS c FROM $table WHERE sync_status IN ('local','pending','pendingDelete')",
-      ).getSingle();
-      return row.read<int>('c') ?? 0;
+      final row = await _database
+          .customSelect(
+            "SELECT COUNT(*) AS c FROM $table WHERE sync_status IN ('local','pending','pendingDelete')",
+          )
+          .getSingle();
+      return row.read<int>('c');
     }
 
     return await count('user_profile') +
@@ -204,10 +205,7 @@ final class AppDatabaseCloudOutboxProducer {
     entityKind: CloudEntityKind.weight,
     recordId: row.uuid,
     ownerId: _sink.ownerId,
-    revision: CloudRevision(
-      deviceId: _sink.deviceId,
-      sequence: row.revision,
-    ),
+    revision: CloudRevision(deviceId: _sink.deviceId, sequence: row.revision),
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
     payload: row.deletedAt != null
@@ -226,10 +224,7 @@ final class AppDatabaseCloudOutboxProducer {
     entityKind: CloudEntityKind.hydration,
     recordId: row.uuid,
     ownerId: _sink.ownerId,
-    revision: CloudRevision(
-      deviceId: _sink.deviceId,
-      sequence: row.revision,
-    ),
+    revision: CloudRevision(deviceId: _sink.deviceId, sequence: row.revision),
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
     payload: row.deletedAt != null
@@ -246,10 +241,7 @@ final class AppDatabaseCloudOutboxProducer {
     entityKind: CloudEntityKind.nutrition,
     recordId: 'meal:${row.uuid}',
     ownerId: _sink.ownerId,
-    revision: CloudRevision(
-      deviceId: _sink.deviceId,
-      sequence: row.revision,
-    ),
+    revision: CloudRevision(deviceId: _sink.deviceId, sequence: row.revision),
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
     payload: row.deletedAt != null
@@ -273,10 +265,7 @@ final class AppDatabaseCloudOutboxProducer {
     entityKind: CloudEntityKind.nutrition,
     recordId: 'meal_item:${row.uuid}',
     ownerId: _sink.ownerId,
-    revision: CloudRevision(
-      deviceId: _sink.deviceId,
-      sequence: row.revision,
-    ),
+    revision: CloudRevision(deviceId: _sink.deviceId, sequence: row.revision),
     updatedAt: row.updatedAt,
     deletedAt: row.deletedAt,
     payload: row.deletedAt != null
@@ -312,31 +301,45 @@ final class AppDatabaseCloudOutboxProducer {
   Future<void> _markProfileQueued(UserProfileData row) async {
     await (_database.update(_database.userProfile)..where(
           (candidate) =>
-              candidate.id.equals(row.id) & candidate.revision.equals(row.revision),
+              candidate.id.equals(row.id) &
+              candidate.revision.equals(row.revision),
         ))
-        .write(UserProfileCompanion(syncStatus: Value(_queuedStatus(row.deletedAt))));
+        .write(
+          UserProfileCompanion(syncStatus: Value(_queuedStatus(row.deletedAt))),
+        );
   }
 
   Future<void> _markWeightQueued(WeightEntry row) async {
     await (_database.update(_database.weightEntries)..where(
           (candidate) =>
-              candidate.id.equals(row.id) & candidate.revision.equals(row.revision),
+              candidate.id.equals(row.id) &
+              candidate.revision.equals(row.revision),
         ))
-        .write(WeightEntriesCompanion(syncStatus: Value(_queuedStatus(row.deletedAt))));
+        .write(
+          WeightEntriesCompanion(
+            syncStatus: Value(_queuedStatus(row.deletedAt)),
+          ),
+        );
   }
 
   Future<void> _markWaterQueued(WaterEntry row) async {
     await (_database.update(_database.waterEntries)..where(
           (candidate) =>
-              candidate.id.equals(row.id) & candidate.revision.equals(row.revision),
+              candidate.id.equals(row.id) &
+              candidate.revision.equals(row.revision),
         ))
-        .write(WaterEntriesCompanion(syncStatus: Value(_queuedStatus(row.deletedAt))));
+        .write(
+          WaterEntriesCompanion(
+            syncStatus: Value(_queuedStatus(row.deletedAt)),
+          ),
+        );
   }
 
   Future<void> _markMealQueued(Meal row) async {
     await (_database.update(_database.meals)..where(
           (candidate) =>
-              candidate.id.equals(row.id) & candidate.revision.equals(row.revision),
+              candidate.id.equals(row.id) &
+              candidate.revision.equals(row.revision),
         ))
         .write(MealsCompanion(syncStatus: Value(_queuedStatus(row.deletedAt))));
   }
@@ -344,9 +347,12 @@ final class AppDatabaseCloudOutboxProducer {
   Future<void> _markMealItemQueued(MealItem row) async {
     await (_database.update(_database.mealItems)..where(
           (candidate) =>
-              candidate.id.equals(row.id) & candidate.revision.equals(row.revision),
+              candidate.id.equals(row.id) &
+              candidate.revision.equals(row.revision),
         ))
-        .write(MealItemsCompanion(syncStatus: Value(_queuedStatus(row.deletedAt))));
+        .write(
+          MealItemsCompanion(syncStatus: Value(_queuedStatus(row.deletedAt))),
+        );
   }
 
   String _queuedStatus(DateTime? deletedAt) =>

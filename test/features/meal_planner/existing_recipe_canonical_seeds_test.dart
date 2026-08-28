@@ -14,7 +14,7 @@ void main() {
           as Map<String, Object?>;
   final records = (catalog['records'] as List).cast<Map<String, Object?>>();
 
-  test('18 existing recipes are canonical and remain 482 short of target', () {
+  test('18 existing recipes remain explicit seeds for the release target', () {
     final target =
         jsonDecode(
               File(
@@ -24,8 +24,9 @@ void main() {
             as Map<String, Object?>;
     final releaseTarget = target['bilReleaseTarget'] as Map<String, Object?>;
     expect(records, hasLength(18));
-    expect(releaseTarget['canonicalRecipeCount'], 500);
-    expect(500 - records.length, 482);
+    final targetCount = releaseTarget['canonicalRecipeCount'] as int;
+    expect(targetCount, 1500);
+    expect(targetCount - records.length, 1482);
     expect((catalog['claims'] as Map)['marketedRecipeCount'], 0);
   });
 

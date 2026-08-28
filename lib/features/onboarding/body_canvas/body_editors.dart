@@ -101,7 +101,7 @@ class _CanvasNumberEditorState extends State<_CanvasNumberEditor> {
                   width: 52,
                   height: 5,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: .45),
+                    color: _BilColors.textDim.withValues(alpha: .65),
                     borderRadius: BorderRadius.circular(99),
                   ),
                 ),
@@ -114,7 +114,7 @@ class _CanvasNumberEditorState extends State<_CanvasNumberEditor> {
                         widget.config.title,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: _BilColors.textStrong,
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
                           letterSpacing: -.4,
@@ -127,7 +127,10 @@ class _CanvasNumberEditorState extends State<_CanvasNumberEditor> {
                         context,
                         _EditorResult.value(selectedValue),
                       ),
-                      icon: const Icon(Icons.check_rounded),
+                      icon: const Icon(
+                        Icons.check_rounded,
+                        color: _BilColors.emerald,
+                      ),
                     ),
                   ],
                 ),
@@ -322,7 +325,9 @@ class _BirthDateEditorState extends State<_BirthDateEditor> {
     day = initial.day;
     month = initial.month;
     year = initial.year;
-    years = List<int>.generate(85, (index) => now.year - 16 - index);
+    // Collect a neutral date of birth first; eligibility is decided from the
+    // complete date by the host instead of presenting a child-oriented flow.
+    years = List<int>.generate(121, (index) => now.year - index);
     dayController = FixedExtentScrollController(initialItem: day - 1);
     monthController = FixedExtentScrollController(initialItem: month - 1);
     yearController = FixedExtentScrollController(
@@ -371,7 +376,7 @@ class _BirthDateEditorState extends State<_BirthDateEditor> {
                   width: 52,
                   height: 5,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: .45),
+                    color: _BilColors.textDim.withValues(alpha: .65),
                     borderRadius: BorderRadius.circular(99),
                   ),
                 ),
@@ -388,7 +393,7 @@ class _BirthDateEditorState extends State<_BirthDateEditor> {
                         ),
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: _BilColors.textStrong,
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
                         ),
@@ -397,7 +402,10 @@ class _BirthDateEditorState extends State<_BirthDateEditor> {
                     IconButton(
                       tooltip: _bodyCanvasText(context, 'Save', 'حفظ'),
                       onPressed: () => Navigator.pop(context, selectedDate),
-                      icon: const Icon(Icons.check_rounded),
+                      icon: const Icon(
+                        Icons.check_rounded,
+                        color: _BilColors.emerald,
+                      ),
                     ),
                   ],
                 ),
@@ -566,7 +574,7 @@ class _CanvasChoiceSheet<T> extends StatelessWidget {
                   width: 52,
                   height: 5,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: .42),
+                    color: _BilColors.textDim.withValues(alpha: .65),
                     borderRadius: BorderRadius.circular(99),
                   ),
                 ),
@@ -579,7 +587,7 @@ class _CanvasChoiceSheet<T> extends StatelessWidget {
                         title,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: _BilColors.textStrong,
                           fontSize: 22,
                           fontWeight: FontWeight.w700,
                         ),
@@ -587,7 +595,10 @@ class _CanvasChoiceSheet<T> extends StatelessWidget {
                     ),
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close_rounded),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: _BilColors.textStrong,
+                      ),
                     ),
                   ],
                 ),

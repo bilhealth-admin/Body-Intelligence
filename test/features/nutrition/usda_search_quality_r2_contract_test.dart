@@ -9,9 +9,9 @@ void main() {
     final repository = File(
       'lib/features/nutrition/repositories/usda_core_catalog_repository.dart',
     ).readAsStringSync();
-    final materializer = File(
+    final materializer = readDartLibrarySource(
       'lib/data/repositories/food_repository.dart',
-    ).readAsStringSync();
+    );
     final authority = File(
       'lib/features/nutrition/services/food_runtime_search_authority.dart',
     ).readAsStringSync();
@@ -23,18 +23,21 @@ void main() {
     expect(repository, contains('FoodNutrient.sodium'));
     expect(repository, contains('FoodNutrient.potassium'));
     expect(repository, contains('FoodNutrient.fiber'));
-    expect(materializer, contains('storedCoreIsZero'));
-    expect(materializer, contains('incomingHasCoreEvidence'));
+    expect(materializer, contains('incomingEvidenceMask'));
+    expect(materializer, contains('hasNewEvidence'));
+    expect(materializer, contains('incomingCalories ?? byUuid.calories'));
+    expect(materializer, contains('incomingProtein ?? byUuid.protein'));
     expect(authority, contains('byIdentity'));
     expect(
       foodPage,
       contains("final arabic = Localizations.localeOf(context)"),
     );
-    expect(foodPage, contains('food.fiber.toStringAsFixed(1)'));
-    expect(foodPage, contains('food.sodium.toStringAsFixed(0)'));
-    expect(foodPage, contains('food.potassium.toStringAsFixed(0)'));
-    expect(foodPage, contains("nutritionText(context, 'fiber'"));
-    expect(foodPage, contains("nutritionText(context, 'sodium'"));
-    expect(foodPage, contains("nutritionText(context, 'potassium'"));
+    expect(foodPage, contains('value: food.fiber'));
+    expect(foodPage, contains('value: food.sodium'));
+    expect(foodPage, contains('value: food.potassium'));
+    expect(foodPage, contains('_localizedNutrientNumber'));
+    expect(foodPage, contains("FoodNutrient.fiber => 'Fiber'"));
+    expect(foodPage, contains("FoodNutrient.sodium => 'Sodium'"));
+    expect(foodPage, contains("FoodNutrient.potassium => 'Potassium'"));
   });
 }

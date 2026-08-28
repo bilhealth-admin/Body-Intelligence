@@ -1,8 +1,8 @@
-"NSHealthShareUsageDescription" = "BIL chỉ đọc các danh mục Sức khỏe bạn chọn—hoạt động, giấc ngủ, số đo cơ thể, chỉ số tim và hô hấp, huyết áp, oxy, glucose, nước và dinh dưỡng—để hiển thị dòng thời gian và phân tích riêng tư trên thiết bị này.";
+"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
 "NSHealthUpdateUsageDescription" = "BIL chỉ ghi hồ sơ sức khỏe mà bạn chọn rõ ràng, sau khi có sự đồng ý bằng văn bản riêng.";
-"NSBluetoothAlwaysUsageDescription" = "BIL chỉ kết nối với các thiết bị y tế mà bạn ghép nối rõ ràng để có thể nhập các phép đo cục bộ.";
-"NSBluetoothPeripheralUsageDescription" = "BIL chỉ kết nối với các thiết bị y tế mà bạn ghép nối rõ ràng để có thể nhập các phép đo cục bộ.";
+"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Chỉ sử dụng máy ảnh khi bạn chọn quét mã vạch, xem lại ảnh bữa ăn hoặc thêm hồ sơ riêng tư hoặc ảnh tiến trình.";
 "NSPhotoLibraryUsageDescription" = "Chọn một bữa ăn, hồ sơ hoặc ảnh tiến trình để xem xét trước khi lưu hoặc tải lên.";
-"NSMicrophoneUsageDescription" = "BIL chỉ sử dụng micrô khi bạn chọn đầu vào bằng giọng nói cho bữa ăn.";
-"NSSpeechRecognitionUsageDescription" = "BIL chuyển đổi cụm từ ẩm thực bạn nói thành văn bản để bạn có thể xem lại trước khi lưu.";
+"NSMicrophoneUsageDescription" = "BIL chỉ sử dụng micrô khi bạn chọn ghi bữa ăn bằng giọng nói hoặc trò chuyện trực tiếp với BIL AI Coach.";
+"NSSpeechRecognitionUsageDescription" = "BIL chuyển lời nói bạn bắt đầu để ghi bữa ăn hoặc dùng BIL AI Coach thành văn bản để bạn xem lại hoặc gửi.";

@@ -4,6 +4,7 @@ import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
 import 'package:body_intelligence_log/features/wellness/presentation/wellness_tools_pages.dart';
 import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
+import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -29,6 +30,10 @@ void main() {
   }) => ProviderScope(
     overrides: [
       databaseProvider.overrideWithValue(database),
+      // These persistence tests do not exercise the profile stream. Keeping
+      // its Drift query alive until framework teardown leaves a zero-duration
+      // StreamQueryStore cleanup timer after the widget tree is disposed.
+      userProfileProvider.overrideWith((ref) => const Stream.empty()),
       if (repository != null)
         dailyLogRepositoryProvider.overrideWithValue(repository),
     ],

@@ -31,6 +31,7 @@ class DashboardProfileInput {
     required this.exercises,
     this.neckCm,
     this.waistCm,
+    this.hipsCm,
   });
 
   final int age;
@@ -42,6 +43,7 @@ class DashboardProfileInput {
   final bool exercises;
   final double? neckCm;
   final double? waistCm;
+  final double? hipsCm;
 }
 
 class DashboardWeightInput {
@@ -250,6 +252,9 @@ class DashboardIntelligenceComposer {
       activityLevel: input.profile.activityLevel,
       exercises: input.profile.exercises,
       goalType: goalType,
+      waistCm: input.profile.waistCm,
+      neckCm: input.profile.neckCm,
+      hipCm: input.profile.hipsCm,
     );
     final bil = BILEngine.calculate(
       profile: body,
@@ -257,14 +262,7 @@ class DashboardIntelligenceComposer {
       eatenProtein: protein.round(),
       drankWater: waterMl,
     );
-    final bodyComposition = BodyCompositionEngine.calculate(
-      gender: input.profile.gender,
-      age: input.profile.age,
-      heightCm: input.profile.heightCm,
-      currentWeightKg: currentWeightKg,
-      neckCm: input.profile.neckCm,
-      waistCm: input.profile.waistCm,
-    );
+    final bodyComposition = bil.bodyModel.composition;
     final effectiveTargets = PlanEngine.effective(
       bil.targets,
       input.planOverrides,

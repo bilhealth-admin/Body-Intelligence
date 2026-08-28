@@ -1,0 +1,29 @@
+{
+  "name": "bil-workout-runtime",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "npm run types:check && tsc --noEmit",
+    "deploy": "wrangler deploy --env=\"\"",
+    "deploy:staging": "wrangler deploy --env staging",
+    "dry-run": "wrangler deploy --env=\"\" --dry-run --outdir dist/dry-run",
+    "dry-run:staging": "wrangler deploy --env staging --dry-run --outdir dist/dry-run-staging",
+    "test": "vitest run",
+    "types": "wrangler types",
+    "types:check": "wrangler types --check"
+  },
+  "dependencies": {
+    "jose": "6.2.10"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.0.0",
+    "@cloudflare/workers-types": "5.20260823.1",
+    "@msw/cloudflare": "0.0.1",
+    "@types/node": "26.2.0",
+    "msw": "2.15.0",
+    "typescript": "5.9.2",
+    "vitest": "4.1.11",
+    "wrangler": "4.125.0"
+  }
+}

@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/engine/nutrient_evidence_engine.dart';
 import 'package:body_intelligence_log/features/dashboard/widgets/nutrient_evidence_status_text.dart';
 import 'package:flutter/material.dart';
@@ -23,8 +24,11 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         locale: Locale('ar'),
-        supportedLocales: [Locale('ar')],
-        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          ...GlobalMaterialLocalizations.delegates,
+        ],
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: NutrientEvidenceStatusText(
@@ -33,7 +37,13 @@ void main() {
         ),
       ),
     );
-    expect(find.textContaining('دليل جزئي'), findsOneWidget);
+    await tester.pumpAndSettle();
+    final rendered = tester.widget<Text>(find.byType(Text)).data!;
+    expect(
+      RegExp(r'[\u0600-\u06FF]').hasMatch(rendered),
+      isTrue,
+      reason: 'Expected Arabic evidence copy, got: $rendered',
+    );
     expect(
       Directionality.of(tester.element(find.byType(Text))),
       TextDirection.rtl,

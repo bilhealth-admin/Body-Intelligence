@@ -5,9 +5,9 @@ import '../../../data/database/app_database.dart';
 /// Result of binding the single local SQLite data set to an authenticated BIL
 /// account.
 ///
-/// BIL keeps one local database on a device. Until the database is explicitly
-/// reset or replaced, health records from two authenticated accounts must never
-/// be silently merged into that same local store.
+/// Each authenticated BIL account now receives its own device-local database
+/// namespace. This boundary remains as a fail-closed integrity check inside one
+/// namespace so records can never be silently rebound to another account.
 enum LocalDataAccountBindingDisposition {
   adoptedGuestData,
   matchedExistingOwner,
@@ -33,8 +33,8 @@ final class LocalDataAccountBinding {
 /// - Guest data may be adopted by the first authenticated account.
 /// - The same account may reopen the store normally.
 /// - An empty store may be rebound to another account safely.
-/// - A different account may not enter a store that already contains
-///   substantive data owned by another account.
+/// - A different account may not enter a scoped store that already contains
+///   substantive data owned by another account (legacy/corruption fail-safe).
 ///
 /// This service does not upload, delete, or merge health data.
 final class LocalDataAccountBoundary {
@@ -65,8 +65,7 @@ final class LocalDataAccountBoundary {
 
       if (existingOwner == normalizedOwner) {
         return LocalDataAccountBinding(
-          disposition:
-              LocalDataAccountBindingDisposition.matchedExistingOwner,
+          disposition: LocalDataAccountBindingDisposition.matchedExistingOwner,
           hasSubstantiveLocalData: hasLocalData,
         );
       }

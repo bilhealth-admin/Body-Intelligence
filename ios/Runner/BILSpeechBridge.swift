@@ -105,6 +105,7 @@ final class BILSpeechBridge: NSObject, FlutterStreamHandler {
           "type": "result",
           "words": response.bestTranscription.formattedString,
           "final": response.isFinal,
+          "localeId": locale.identifier,
         ])
         if response.isFinal { self?.stop(cancel: false) }
       }

@@ -87,10 +87,26 @@ void main() {
     expect(platform['google_play']['data_safety'], isA<Map>());
     expect(platform['apple_app_store']['app_privacy'], isA<Map>());
     expect(platform['subscription_copy']['trial'], contains('NOT_CLAIMED'));
+    final plans =
+        platform['subscription_copy']['plans'] as Map<String, dynamic>;
     expect(
-      platform['subscription_copy']['localized_descriptions'],
-      hasLength(5),
+      plans.keys,
+      containsAll(<String>['free', 'premium', 'premium_ai_coach']),
     );
+    expect(plans.keys, isNot(contains('plus')));
+    expect(plans.keys, isNot(contains('pro')));
+    final descriptions =
+        platform['subscription_copy']['localized_descriptions']
+            as Map<String, dynamic>;
+    expect(descriptions, hasLength(5));
+    for (final localized in descriptions.values.cast<Map<String, dynamic>>()) {
+      expect(
+        localized.keys,
+        containsAll(<String>['free', 'premium', 'premium_ai_coach']),
+      );
+    }
+    expect(descriptions['en']['premium'], contains('community'));
+    expect(descriptions['en']['premium_ai_coach'], contains('Everything'));
     for (final route in [
       '/privacy',
       '/terms',

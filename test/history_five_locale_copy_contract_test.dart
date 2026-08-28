@@ -26,13 +26,16 @@ void main() {
     final sheet = File(
       'lib/app/router/bil_quick_add_sheet.dart',
     ).readAsStringSync();
+    final copy = File(
+      'lib/app/router/bil_quick_add_locale_copy.dart',
+    ).readAsStringSync();
     final shell = File(
       'lib/app/router/responsive_app_shell.dart',
     ).readAsStringSync();
 
     expect(sheet, isNot(contains('final bool arabic')));
-    expect(sheet, contains("'Daily notes': {"));
-    expect(sheet, contains("'Search or create food': {"));
+    expect(copy, contains("'Daily notes': {"));
+    expect(copy, contains("'Search or create food': {"));
     expect(shell, isNot(contains('arabic: arabic')));
   });
 }

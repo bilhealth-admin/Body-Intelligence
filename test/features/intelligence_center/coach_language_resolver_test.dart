@@ -1,4 +1,5 @@
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_language_resolver.dart';
+import 'package:body_intelligence_log/features/intelligence_center/services/intelligence_center_engine.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -53,6 +54,50 @@ void main() {
     final result = resolver.resolve(input: 'protein 30 g', uiLocale: 'tr');
     expect(result.languageTag, 'tr');
     expect(result.detected, isFalse);
+  });
+
+  test(
+    'romanized speech and native speech hints override interface locale',
+    () {
+      final greeting = resolver.resolve(
+        input: 'assalamualaikum',
+        uiLocale: 'en',
+      );
+      expect(greeting.languageTag, 'ar');
+      expect(greeting.detected, isTrue);
+
+      final spokenGreek = resolver.resolve(
+        input: 'protein 30 g',
+        uiLocale: 'en',
+        detectedLanguageTag: 'el-GR',
+      );
+      expect(spokenGreek.languageTag, 'el-GR');
+      expect(spokenGreek.detected, isTrue);
+    },
+  );
+
+  test('global scripts are detected outside the 25 interface locales', () {
+    const cases = <String, String>{
+      'Πόση πρωτεΐνη χρειάζομαι;': 'el',
+      'כמה חלבון אני צריך?': 'he',
+      'எனக்கு எவ்வளவு புரதம் தேவை?': 'ta',
+      'എനിക്ക് എത്ര പ്രോട്ടീൻ വേണം?': 'ml',
+    };
+    for (final entry in cases.entries) {
+      final result = resolver.resolve(input: entry.key, uiLocale: 'en');
+      expect(result.languageTag, entry.value, reason: entry.key);
+      expect(result.detected, isTrue, reason: entry.key);
+    }
+  });
+
+  test('romanized Arabic greeting replies immediately in Arabic', () async {
+    final reply = await const IntelligenceCenterEngine().answer(
+      question: 'assalamualaikum',
+      arabic: false,
+      localeCode: 'en',
+      detectedLanguageTag: 'ar-SA',
+    );
+    expect(reply.message.text, contains('أنا جاهز'));
   });
 
   test('preserves Chinese script and distinguishes Arabic-script locales', () {

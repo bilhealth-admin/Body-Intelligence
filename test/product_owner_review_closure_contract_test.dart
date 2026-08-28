@@ -8,6 +8,9 @@ void main() {
       'lib/features/daily_log/daily_log_page.dart',
       'lib/features/daily_log/daily_log_page_actions.dart',
       'lib/features/daily_log/daily_log_meal_entry.dart',
+      'lib/features/daily_log/daily_log_meal_search.dart',
+      'lib/features/daily_log/daily_log_capture_actions.dart',
+      'lib/features/daily_log/daily_log_copy.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
     final foodPage = File(
       'lib/features/nutrition/food_page.dart',
@@ -16,10 +19,10 @@ void main() {
       'lib/features/nutrition/presentation/food_barcode_scanner_page.dart',
     ).readAsStringSync();
 
-    expect(dailyLog, contains('Scan with camera'));
-    expect(dailyLog, contains('Enter barcode manually'));
+    expect(dailyLog, contains('FoodBarcodeScannerPage'));
+    expect(dailyLog, contains('Manual barcode lookup'));
     expect(dailyLog, contains('lookupBarcodeJourney'));
-    expect(dailyLog, contains("context.strings.text('Source')"));
+    expect(dailyLog, contains('FoodPresentationLocalizer'));
     expect(foodPage, contains('_cameraBarcodeLookup'));
     expect(scanner, contains('MobileScanner('));
     expect(scanner, contains('toggleTorch'));
@@ -60,17 +63,22 @@ void main() {
       isNot(contains('EdgeInsets.only(bottom: 82)')),
       reason: 'The old black content spacer must not return.',
     );
+    expect(shell, contains("Key('shell-quick-add')"));
     expect(
       shell,
-      contains('FloatingActionButtonLocation.centerDocked'),
-      reason: 'The plus button must remain docked at the bar edge.',
+      contains(
+        'floatingActionButton: immersiveCoach || isDailyLog ? null : quickButton',
+      ),
     );
     expect(
       shell,
-      contains('extendBody: true'),
-      reason:
-          'Page content must continue behind the glass bar so no black shelf is reserved above it.',
+      contains('reserveQuickAddSlot: !immersiveCoach && !isDailyLog'),
     );
+    expect(
+      shell,
+      contains('floatingActionButton: isDashboard ? quickButton : null'),
+    );
+    expect(shell, contains('extendBody: false'));
     expect(
       shell,
       contains('height: 76'),
@@ -81,9 +89,16 @@ void main() {
   });
 
   test('Arabic localization includes review findings', () {
-    final localization = File(
-      'lib/app/localization/app_localizations.dart',
-    ).readAsStringSync();
+    final localization =
+        [
+              'app_localizations.dart',
+              'app_localizations_base_catalog.dart',
+              'app_localizations_arabic_runtime.dart',
+            ]
+            .map(
+              (name) => File('lib/app/localization/$name').readAsStringSync(),
+            )
+            .join('\n');
 
     expect(
       localization,

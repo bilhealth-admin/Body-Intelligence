@@ -4,7 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../shared/widgets/premium_surface.dart';
+import '../../commerce/domain/commerce_plan.dart';
+import '../../commerce/presentation/premium_nutrition_glass.dart';
+import '../../commerce/providers/commerce_providers.dart';
 import '../../dashboard/widgets/dashboard_carousel.dart';
+import '../../dashboard/widgets/premium_dashboard_card_lock.dart';
+import '../../global_platform/health_data/unified_health_data_integration.dart';
 import '../connected_health_model.dart';
 import '../connected_health_copy.dart';
 import '../providers/connected_health_provider.dart';
@@ -12,16 +17,19 @@ import '../providers/medical_device_provider.dart';
 import 'connected_health_primitives.dart';
 import 'health_device_pager.dart';
 import 'health_hub_empty_state.dart';
+import 'live_health_watch.dart';
 
 class ConnectedHealthCard extends ConsumerWidget {
   const ConnectedHealthCard({
     super.key,
     required this.languageCode,
     this.compact = false,
+    this.dashboardCompact = false,
   });
 
   final String languageCode;
   final bool compact;
+  final bool dashboardCompact;
 
   String tr(String en, String ar) =>
       connectedHealthTextForLanguage(languageCode, en, ar);
@@ -30,6 +38,12 @@ class ConnectedHealthCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(connectedHealthProvider);
     final medical = ref.watch(medicalDeviceProvider);
+    final verifiedPlan = ref
+        .watch(verifiedSubscriptionStateProvider)
+        .value
+        ?.plan;
+    final medicalDevicesUnlocked =
+        verifiedPlan != null && verifiedPlan != CommercePlan.free;
     return Semantics(
       container: true,
       label: tr('Health Hub', 'المركز الصحي'),
@@ -48,9 +62,11 @@ class ConnectedHealthCard extends ConsumerWidget {
           data: (snapshot) => _ConnectedHealthContent(
             snapshot: snapshot,
             medical: medical,
+            medicalDevicesUnlocked: medicalDevicesUnlocked,
             languageCode: languageCode,
             compact: compact,
-            onManage: () => context.go('/connected-health'),
+            dashboardCompact: dashboardCompact,
+            onManage: () => context.push('/connected-health'),
             onSync: snapshot.status == ConnectedHealthStatus.syncing
                 ? null
                 : () =>
@@ -62,20 +78,49 @@ class ConnectedHealthCard extends ConsumerWidget {
   }
 }
 
+/// A compact, readable Today-only window onto the device artwork.
+class _DashboardDevicePreview extends StatelessWidget {
+  const _DashboardDevicePreview({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final inherited = MediaQuery.of(context);
+    final scale = inherited.textScaler.scale(1).clamp(1.0, 1.15).toDouble();
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 188, maxHeight: 188),
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: MediaQuery(
+            data: inherited.copyWith(textScaler: TextScaler.linear(scale)),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ConnectedHealthContent extends StatelessWidget {
   const _ConnectedHealthContent({
     required this.snapshot,
     required this.medical,
+    required this.medicalDevicesUnlocked,
     required this.languageCode,
     required this.compact,
+    required this.dashboardCompact,
     required this.onManage,
     required this.onSync,
   });
 
   final ConnectedHealthSnapshot snapshot;
   final MedicalDeviceSnapshot medical;
+  final bool medicalDevicesUnlocked;
   final String languageCode;
   final bool compact;
+  final bool dashboardCompact;
   final VoidCallback onManage;
   final VoidCallback? onSync;
 
@@ -92,6 +137,30 @@ class _ConnectedHealthContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (dashboardCompact) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: const Key('dashboard-compact-health-hub'),
+          onTap: onManage,
+          borderRadius: BorderRadius.circular(28),
+          child: _DashboardHealthDeviceSection(
+            snapshot: snapshot,
+            medical: medical,
+            medicalDevicesUnlocked: medicalDevicesUnlocked,
+            languageCode: languageCode,
+            onOpenPlans: () => context.push('/plans?focus=subscription'),
+            onManage: onManage,
+            watchStatus: _hasConnectedSource
+                ? _statusLabel(snapshot.status)
+                : tr(
+                    'Live time · connect health to add measured data',
+                    'الوقت مباشر · اربط الصحة لإضافة القياسات',
+                  ),
+          ),
+        ),
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -128,14 +197,13 @@ class _ConnectedHealthContent extends StatelessWidget {
         if (!_hasConnectedSource)
           HealthHubEmptyState(
             snapshot: snapshot,
-            medical: medical,
             languageCode: languageCode,
             compact: compact,
             onConnect: onManage,
           )
         else ...[
           DashboardCarousel(
-            key: const Key('connected-health-carousel'),
+            key: const Key('health-hub-device-carousel'),
             height: MediaQuery.textScalerOf(context)
                 .scale(compact ? 280 : 218)
                 .clamp(compact ? 280.0 : 218.0, compact ? 300.0 : 280.0),
@@ -178,7 +246,6 @@ class _ConnectedHealthContent extends StatelessWidget {
       footer: _displaySource(snapshot.platformSource),
       icon: Icons.watch_outlined,
     ),
-    BilMedicalMonitor(snapshot: medical, languageCode: languageCode),
     HealthSlide(
       title: tr('Latest synchronization', 'آخر مزامنة'),
       result: snapshot.lastSyncAt == null
@@ -193,18 +260,30 @@ class _ConnectedHealthContent extends StatelessWidget {
           : snapshot.availableSources.map(_displaySource).join(' • '),
       icon: Icons.sync_rounded,
     ),
-    for (final signal in snapshot.signals.take(4))
-      HealthSlide(
-        title: _signalTitle(signal.key),
-        result: '${_formatValue(signal.value)} ${signal.unit}',
-        explanation: tr(
-          'Measured health signal with ${(signal.confidence * 100).round()}% source confidence.',
-          'إشارة صحية مقاسة بثقة مصدر ${(signal.confidence * 100).round()}٪.',
-        ),
-        footer: _displaySource(signal.source),
-        icon: _signalIcon(signal.key),
-      ),
+    for (final signal
+        in snapshot.signals
+            .where((signal) => !BilHealthScope.excludesKey(signal.key))
+            .take(4))
+      _connectedSignalSlide(signal),
   ];
+
+  Widget _connectedSignalSlide(ConnectedHealthSignalView signal) {
+    final slide = HealthSlide(
+      title: _signalTitle(signal.key),
+      result: '${_formatValue(signal.value)} ${signal.unit}',
+      explanation: tr(
+        'Measured health signal with ${(signal.confidence * 100).round()}% source confidence.',
+        'إشارة صحية مقاسة بثقة مصدر ${(signal.confidence * 100).round()}٪.',
+      ),
+      footer: _displaySource(signal.source),
+      icon: _signalIcon(signal.key),
+    );
+    if (!signal.key.startsWith('nutrition')) return slide;
+    return PremiumNutritionGlass(
+      key: Key('connected-health-${signal.key}-premium-glass'),
+      child: slide,
+    );
+  }
 
   String _displaySource(String? source) {
     if (source == null || source.trim().isEmpty) {
@@ -232,7 +311,10 @@ class _ConnectedHealthContent extends StatelessWidget {
     ),
     ConnectedHealthStatus.ready => tr('Ready', 'جاهز'),
     ConnectedHealthStatus.syncing => tr('Synchronizing', 'تتم المزامنة'),
-    ConnectedHealthStatus.synchronized => tr('Connected', 'متصل'),
+    ConnectedHealthStatus.synchronized => tr(
+      'Health source connected',
+      'مصدر الصحة متصل',
+    ),
     ConnectedHealthStatus.degraded => tr('Needs attention', 'يحتاج مراجعة'),
   };
 
@@ -282,18 +364,10 @@ class _ConnectedHealthContent extends StatelessWidget {
     'heartRate' => tr('Heart rate', 'معدل القلب'),
     'restingHeartRate' => tr('Resting heart rate', 'نبض الراحة'),
     'activeEnergy' => tr('Active energy', 'الطاقة النشطة'),
-    'oxygen' => tr('Blood oxygen', 'أكسجين الدم'),
     'weight' => tr('Weight', 'الوزن'),
-    'glucose' => tr('Glucose', 'السكر'),
-    'bloodPressureSystolic' => tr('Blood pressure', 'ضغط الدم'),
-    'bloodPressureDiastolic' => tr(
-      'Diastolic blood pressure',
-      'ضغط الدم الانبساطي',
-    ),
     'bodyFat' => tr('Body fat', 'دهون الجسم'),
     'leanMass' => tr('Lean mass', 'الكتلة الخالية من الدهون'),
     'hrv' => tr('Heart-rate variability', 'تباين معدل القلب'),
-    'respiratoryRate' => tr('Respiratory rate', 'معدل التنفس'),
     'water' => tr('Water', 'الماء'),
     'nutrition' => tr('Dietary energy', 'الطاقة الغذائية'),
     'nutritionProtein' => tr('Protein', 'البروتين'),
@@ -312,12 +386,9 @@ class _ConnectedHealthContent extends StatelessWidget {
     'sleep' => Icons.bedtime_outlined,
     'heartRate' || 'restingHeartRate' => Icons.favorite_outline_rounded,
     'activeEnergy' => Icons.local_fire_department_outlined,
-    'oxygen' => Icons.air_rounded,
     'weight' => Icons.monitor_weight_outlined,
-    'glucose' => Icons.bloodtype_outlined,
-    'bloodPressureSystolic' || 'bloodPressureDiastolic' => Icons.speed_rounded,
     'bodyFat' || 'leanMass' => Icons.accessibility_new_rounded,
-    'hrv' || 'respiratoryRate' => Icons.monitor_heart_outlined,
+    'hrv' => Icons.monitor_heart_outlined,
     'water' => Icons.water_drop_outlined,
     'nutrition' ||
     'nutritionProtein' ||
@@ -333,4 +404,163 @@ class _ConnectedHealthContent extends StatelessWidget {
   String _formatValue(double value) => value.abs() >= 100
       ? value.round().toString()
       : value.toStringAsFixed(value == value.roundToDouble() ? 0 : 1);
+}
+
+class _DashboardHealthDeviceSection extends StatefulWidget {
+  const _DashboardHealthDeviceSection({
+    required this.snapshot,
+    required this.medical,
+    required this.medicalDevicesUnlocked,
+    required this.languageCode,
+    required this.onOpenPlans,
+    required this.onManage,
+    required this.watchStatus,
+  });
+
+  final ConnectedHealthSnapshot snapshot;
+  final MedicalDeviceSnapshot medical;
+  final bool medicalDevicesUnlocked;
+  final String languageCode;
+  final VoidCallback onOpenPlans;
+  final VoidCallback onManage;
+  final String watchStatus;
+
+  @override
+  State<_DashboardHealthDeviceSection> createState() =>
+      _DashboardHealthDeviceSectionState();
+}
+
+class _DashboardHealthDeviceSectionState
+    extends State<_DashboardHealthDeviceSection> {
+  int _page = 0;
+
+  String tr(String en, String ar) =>
+      connectedHealthTextForLanguage(widget.languageCode, en, ar);
+
+  String get _medicalStatus => switch (widget.medical.status) {
+    MedicalDeviceConnectionStatus.connected => tr('Connected', 'متصل'),
+    MedicalDeviceConnectionStatus.requestingPermission => tr(
+      'Waiting for Bluetooth permission…',
+      'بانتظار إذن البلوتوث…',
+    ),
+    MedicalDeviceConnectionStatus.scanning => tr(
+      'Searching nearby…',
+      'جارٍ البحث عن الأجهزة القريبة…',
+    ),
+    MedicalDeviceConnectionStatus.connecting => tr(
+      'Connecting securely…',
+      'جارٍ الاتصال الآمن…',
+    ),
+    MedicalDeviceConnectionStatus.failed => tr(
+      'Needs attention',
+      'يحتاج مراجعة',
+    ),
+    MedicalDeviceConnectionStatus.unavailable ||
+    MedicalDeviceConnectionStatus.idle => tr('Not connected', 'غير متصل'),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final showingMedical = _page == 1;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                showingMedical
+                    ? tr(
+                        'Compatible fitness devices',
+                        'أجهزة اللياقة المتوافقة',
+                      )
+                    : tr('Smart-watch reading', 'قراءة الساعة الذكية'),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+              ),
+            ),
+            if (showingMedical)
+              Container(
+                key: const Key('dashboard-medical-status-dot'),
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color:
+                      widget.medical.status ==
+                          MedicalDeviceConnectionStatus.connected
+                      ? const Color(0xFF22C55E)
+                      : const Color(0xFF9CA3AF),
+                ),
+              )
+            else
+              ConnectedHealthStatusDot(status: widget.snapshot.status),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_forward_rounded, size: 21),
+          ],
+        ),
+        const SizedBox(height: 8),
+        HealthDevicePager(
+          key: const Key('dashboard-health-device-pager'),
+          height: 188,
+          onPageChanged: (value) => setState(() => _page = value),
+          pages: [
+            _DashboardDevicePreview(
+              key: const Key('dashboard-live-health-watch-slot'),
+              child: LiveHealthWatch(
+                snapshot: widget.snapshot,
+                languageCode: widget.languageCode,
+                compact: true,
+                onConnectTap: widget.onManage,
+                onStepsTap: () => context.push('/connected-health/steps'),
+                onHeartTap: () => context.push('/connected-health/heart'),
+                onActiveEnergyTap: () =>
+                    context.push('/settings/exercise-calories'),
+                onSleepTap: () => context.push('/wellness/sleep'),
+              ),
+            ),
+            _DashboardDevicePreview(
+              key: const Key('dashboard-medical-device-slot'),
+              child: PremiumDashboardCardLock(
+                key: const Key('dashboard-medical-device-preview'),
+                locked: !widget.medicalDevicesUnlocked,
+                title: tr(
+                  'Premium fitness device connections',
+                  'اتصال أجهزة اللياقة ضمن Premium',
+                ),
+                detail: tr(
+                  'Weight, body composition, and heart rate',
+                  'الوزن وتركيب الجسم ومعدل ضربات القلب',
+                ),
+                onTap: widget.onOpenPlans,
+                revealPreview: true,
+                child: BilMedicalMonitor(
+                  snapshot: widget.medical,
+                  languageCode: widget.languageCode,
+                  compact: true,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 5),
+        Text(
+          showingMedical ? _medicalStatus : widget.watchStatus,
+          key: ValueKey(
+            showingMedical
+                ? 'dashboard-medical-status-label'
+                : 'dashboard-watch-status-label',
+          ),
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
 }

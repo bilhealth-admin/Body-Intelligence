@@ -1,4 +1,35 @@
 abstract final class BilLocaleNames {
+  /// Store-independent ordering shared by onboarding and Settings.
+  /// English is intentionally first; the remaining names are alphabetical
+  /// by their English display name, not by their native script.
+  static const englishFirstAlphabeticalTags = <String>[
+    'en',
+    'ar',
+    'bn',
+    'zh-Hans',
+    'zh-Hant',
+    'nl',
+    'fr',
+    'de',
+    'hi',
+    'id',
+    'it',
+    'ja',
+    'ko',
+    'ms',
+    'fa',
+    'pl',
+    'pt-BR',
+    'pt-PT',
+    'ru',
+    'es',
+    'th',
+    'tr',
+    'uk',
+    'ur',
+    'vi',
+  ];
+
   static const native = <String, String>{
     'ar': 'العربية',
     'en': 'English',

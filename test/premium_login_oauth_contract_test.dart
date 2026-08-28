@@ -3,15 +3,12 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('premium login exposes guarded Supabase OAuth and privacy', () {
+  test('premium login exposes guarded OAuth and required privacy access', () {
     final page = File(
       'lib/features/auth/premium_login_page.dart',
     ).readAsStringSync();
     final service = File(
       'lib/features/auth/supabase_auth_service.dart',
-    ).readAsStringSync();
-    final copy = File(
-      'lib/features/auth/auth_five_locale_copy.dart',
     ).readAsStringSync();
 
     for (final provider in ['google', 'apple', 'facebook']) {
@@ -20,24 +17,38 @@ void main() {
     }
     expect(page, contains('AppEnvironment.cloudConfigured'));
     expect(page, contains("context.push('/legal/privacy')"));
+    expect(page, contains('AuthEntryCopyKey.privacyPolicy'));
     expect(service, contains('client.auth.signInWithOAuth'));
     expect(service, contains("'bil://auth-callback'"));
     expect(service, contains('redirectTo: oauthRedirectUri'));
 
-    for (final key in [
-      'Continue with Google',
-      'Continue with Apple',
-      'Continue with Facebook',
-      'We will never post anything without your permission.',
-      'Read the Privacy Policy',
-      'This sign-in provider is unavailable or not configured.',
-      'Could not open secure sign-in. Try again.',
+    for (final removed in [
+      'Welcome back',
+      'Your private health intelligence is ready',
+      'We will never post anything without your permission',
+      'Continue privately on this device',
+      'Create a BIL account',
     ]) {
-      expect(copy, contains("'$key':"), reason: key);
+      expect(page, isNot(contains(removed)), reason: removed);
     }
   });
 
-  test('new premium login copy is clean UTF-8', () {
+  test('ordinary emulator builds cannot silently disable production auth', () {
+    final environment = File(
+      'lib/app/environment/app_environment.dart',
+    ).readAsStringSync();
+    expect(
+      environment,
+      contains("defaultValue: 'https://tgmanzhqulksykhslrzb.supabase.co'"),
+    );
+    expect(environment, contains("defaultValue: 'sb_publishable_"));
+    expect(
+      environment,
+      contains("'BIL_USE_SUPABASE',\n    defaultValue: true"),
+    );
+  });
+
+  test('new premium login source is clean UTF-8', () {
     final page = File(
       'lib/features/auth/premium_login_page.dart',
     ).readAsStringSync();

@@ -14,7 +14,12 @@ class _OverviewCardsCarouselState extends State<_OverviewCardsCarousel> {
   late var _page = widget.cards.isEmpty
       ? 0
       : widget.initialPage.clamp(0, widget.cards.length - 1);
-  late final PageController _controller = PageController(initialPage: _page);
+  late final PageController _controller = PageController(
+    initialPage: _page,
+    // Text-rich cards must never expose a clipped strip of the following
+    // card. The dots below already communicate that more pages are available.
+    viewportFraction: 1,
+  );
 
   @override
   void didUpdateWidget(covariant _OverviewCardsCarousel oldWidget) {
@@ -44,7 +49,15 @@ class _OverviewCardsCarouselState extends State<_OverviewCardsCarousel> {
       : Column(
           children: [
             SizedBox(
-              height: 250,
+              height:
+                  (224 +
+                          (MediaQuery.textScalerOf(context).scale(1) - 1).clamp(
+                                0.0,
+                                1.5,
+                              ) *
+                              120)
+                      .clamp(224.0, 330.0)
+                      .toDouble(),
               child: PageView.builder(
                 key: const Key('dashboard-calories-macros-horizontal'),
                 physics: const PageScrollPhysics(),
@@ -80,146 +93,6 @@ class _OverviewCardsCarouselState extends State<_OverviewCardsCarousel> {
         );
 }
 
-class _NutrientPlanRow {
-  const _NutrientPlanRow({
-    required this.label,
-    required this.value,
-    required this.goal,
-    this.unit = 'g',
-    this.minimumGoal = false,
-  });
-
-  final String label;
-  final int? value;
-  final int? goal;
-  final String unit;
-  final bool minimumGoal;
-}
-
-class _NutrientPlanCard extends StatelessWidget {
-  const _NutrientPlanCard({
-    required this.title,
-    required this.accent,
-    required this.rows,
-    required this.onTap,
-  });
-
-  final String title;
-  final Color accent;
-  final List<_NutrientPlanRow> rows;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Material(
-    color: Theme.of(context).colorScheme.surface,
-    elevation: Theme.of(context).brightness == Brightness.light ? 1 : 0,
-    shadowColor: const Color(0x22000000),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-      side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-    ),
-    clipBehavior: Clip.antiAlias,
-    child: InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: const Color(0xFF101923),
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                Icon(Icons.arrow_forward_rounded, color: accent),
-              ],
-            ),
-            const Spacer(),
-            for (final row in rows) ...[
-              _NutrientPlanProgress(row: row, accent: accent),
-              if (row != rows.last) const SizedBox(height: 12),
-            ],
-            const Spacer(),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-class _NutrientPlanProgress extends StatelessWidget {
-  const _NutrientPlanProgress({required this.row, required this.accent});
-
-  final _NutrientPlanRow row;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final progress = row.goal == null || row.goal! <= 0 || row.value == null
-        ? 0.0
-        : (row.value! / row.goal!).clamp(0.0, 1.0);
-    final state = NutrientProgressPolicy.evaluate(
-      value: row.value?.toDouble(),
-      goal: row.goal?.toDouble() ?? 0,
-      minimumGoal: row.minimumGoal,
-    );
-    final progressColor = switch (state) {
-      NutrientProgressState.unknown => Theme.of(context).colorScheme.outline,
-      NutrientProgressState.below => const Color(0xFFEF9A23),
-      NutrientProgressState.near => const Color(0xFFF2C94C),
-      NutrientProgressState.reached => const Color(0xFF269E68),
-      NutrientProgressState.exceeded => const Color(0xFFD64B4B),
-    };
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                row.label,
-                style: const TextStyle(
-                  color: Color(0xFF101923),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            Text(
-              row.value == null
-                  ? '—'
-                  : row.goal == null
-                  ? '${row.value} ${row.unit}'
-                  : '${row.value} / ${row.goal} ${row.unit}',
-              textDirection: TextDirection.ltr,
-              style: const TextStyle(
-                color: Color(0xFF101923),
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(99),
-          child: LinearProgressIndicator(
-            minHeight: 8,
-            value: progress,
-            color: progressColor,
-            backgroundColor: Theme.of(
-              context,
-            ).colorScheme.surfaceContainerHighest,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _ReferenceTrendRail extends StatelessWidget {
   const _ReferenceTrendRail({
     required this.weightValues,
@@ -238,15 +111,15 @@ class _ReferenceTrendRail extends StatelessWidget {
       key: const Key('dashboard-reference-trend-rail'),
       height: 224,
       child: PageView(
-        controller: PageController(viewportFraction: .94),
-        padEnds: false,
+        controller: PageController(viewportFraction: 1),
+        padEnds: true,
         children: [
           _ReferenceTrendCard(
             title: tr('Weight', 'الوزن'),
             period: tr('Last 90 days', 'آخر 90 يومًا'),
             values: weightValues,
             unit: weightUnit,
-            accent: const Color(0xFF2F8F68),
+            colors: const [AppColors.protein, AppColors.carbs, AppColors.fats],
             emptyLabel: tr(
               'Add weight to see your trend',
               'أضف وزنك لعرض الاتجاه',
@@ -258,7 +131,7 @@ class _ReferenceTrendRail extends StatelessWidget {
             period: tr('Last 30 days', 'آخر 30 يومًا'),
             values: stepValues,
             unit: tr('steps', 'خطوة'),
-            accent: const Color(0xFFE83E6B),
+            colors: const [AppColors.protein, AppColors.carbs, AppColors.fats],
             emptyLabel: tr(
               'Connect or log steps to see your trend',
               'اربط مصدرًا أو سجل خطواتك لعرض الاتجاه',
@@ -277,7 +150,7 @@ class _ReferenceTrendCard extends StatelessWidget {
     required this.period,
     required this.values,
     required this.unit,
-    required this.accent,
+    required this.colors,
     required this.emptyLabel,
     required this.onTap,
   });
@@ -286,7 +159,7 @@ class _ReferenceTrendCard extends StatelessWidget {
   final String period;
   final List<double> values;
   final String unit;
-  final Color accent;
+  final List<Color> colors;
   final String emptyLabel;
   final VoidCallback onTap;
 
@@ -350,7 +223,7 @@ class _ReferenceTrendCard extends StatelessWidget {
                       : CustomPaint(
                           painter: _ReferenceTrendPainter(
                             values: values,
-                            color: accent,
+                            colors: colors,
                             gridColor: theme.colorScheme.outlineVariant,
                           ),
                         ),
@@ -361,7 +234,7 @@ class _ReferenceTrendCard extends StatelessWidget {
                     '${values.last.toStringAsFixed(unit == 'kg' || unit == 'lb' ? 1 : 0)} $unit',
                     textDirection: TextDirection.ltr,
                     style: theme.textTheme.labelLarge?.copyWith(
-                      color: accent,
+                      color: colors.last,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -378,54 +251,73 @@ class _ReferenceTrendCard extends StatelessWidget {
 class _ReferenceTrendPainter extends CustomPainter {
   const _ReferenceTrendPainter({
     required this.values,
-    required this.color,
+    required this.colors,
     required this.gridColor,
   });
 
   final List<double> values;
-  final Color color;
+  final List<Color> colors;
   final Color gridColor;
 
   @override
   void paint(Canvas canvas, Size size) {
     final grid = Paint()
-      ..color = gridColor
+      ..color = gridColor.withValues(alpha: .72)
       ..strokeWidth = 1;
     for (var row = 0; row < 4; row++) {
-      final y = size.height * row / 3;
+      final y = size.height * row / 4;
       canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
     }
+    final axis = Paint()
+      ..color = gridColor
+      ..strokeWidth = 1.25;
+    final chartBottom = size.height - 2;
+    canvas.drawLine(
+      Offset(0, chartBottom),
+      Offset(size.width, chartBottom),
+      axis,
+    );
+    canvas.drawLine(const Offset(0, 0), Offset(0, chartBottom), axis);
+
     final minValue = values.reduce((a, b) => a < b ? a : b);
     final maxValue = values.reduce((a, b) => a > b ? a : b);
     final spread = (maxValue - minValue).abs();
-    final path = Path();
+    final slotWidth = size.width / values.length;
+    final barWidth = (slotWidth * .62).clamp(3.0, 14.0);
     for (var index = 0; index < values.length; index++) {
-      final x = values.length == 1
-          ? size.width / 2
-          : size.width * index / (values.length - 1);
-      final normalized = spread == 0 ? .5 : (values[index] - minValue) / spread;
-      final y =
-          size.height - (normalized * size.height * .8 + size.height * .1);
-      if (index == 0) {
-        path.moveTo(x, y);
-      } else {
-        path.lineTo(x, y);
-      }
-    }
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = color
-        ..strokeWidth = 3
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round
-        ..style = PaintingStyle.stroke,
-    );
-    if (values.length == 1) {
-      canvas.drawCircle(
-        Offset(size.width / 2, size.height / 2),
-        5,
-        Paint()..color = color,
+      final normalized = spread == 0
+          ? .52
+          : (values[index] - minValue) / spread;
+      final height = size.height * (.16 + normalized * .76);
+      final left = index * slotWidth + (slotWidth - barWidth) / 2;
+      final rect = Rect.fromLTWH(left, chartBottom - height, barWidth, height);
+      final third = ((index * 3) ~/ values.length).clamp(0, 2);
+      final color = colors[third];
+      final rounded = RRect.fromRectAndRadius(
+        rect,
+        Radius.circular((barWidth / 2).clamp(2.0, 7.0)),
+      );
+      canvas.drawRRect(
+        rounded,
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color.lerp(color, Colors.white, .42)!,
+              color,
+              Color.lerp(color, Colors.black, .20)!,
+            ],
+            stops: const [0, .42, 1],
+          ).createShader(rect)
+          ..style = PaintingStyle.fill,
+      );
+      canvas.drawRRect(
+        rounded,
+        Paint()
+          ..color = Colors.white.withValues(alpha: .32)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = .7,
       );
     }
   }
@@ -433,7 +325,7 @@ class _ReferenceTrendPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _ReferenceTrendPainter oldDelegate) =>
       oldDelegate.values != values ||
-      oldDelegate.color != color ||
+      oldDelegate.colors != colors ||
       oldDelegate.gridColor != gridColor;
 }
 
@@ -525,332 +417,3 @@ class _BodyTwinImageCard extends StatelessWidget {
 }
 
 /// Daily calorie progress strip displayed below the calorie equation.
-class _DailyGoalStrip extends StatelessWidget {
-  const _DailyGoalStrip({
-    required this.arabic,
-    required this.consumed,
-    required this.goal,
-    required this.onTap,
-  });
-
-  final bool arabic;
-  final int consumed;
-  final int goal;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final progress = goal <= 0 ? 0.0 : (consumed / goal).clamp(0.0, 1.0);
-    final remaining = (goal - consumed).clamp(0, goal);
-    return Material(
-      color: const Color(0xFFE6F7D6),
-      borderRadius: BorderRadius.circular(8),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.flag_circle_rounded,
-                size: 21,
-                color: Color(0xFF4D8F15),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(99),
-                  child: LinearProgressIndicator(
-                    minHeight: 8,
-                    value: progress,
-                    color: const Color(0xFF78C82F),
-                    backgroundColor: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                '$remaining ${_referenceText(context, 'left', 'متبقية')}',
-                style: const TextStyle(
-                  color: Color(0xFF356B0F),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MissingDailyGoalCard extends StatelessWidget {
-  const _MissingDailyGoalCard({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Material(
-    color: Theme.of(context).colorScheme.surfaceContainerLow,
-    borderRadius: BorderRadius.circular(8),
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-        child: Row(
-          children: [
-            Icon(
-              Icons.flag_outlined,
-              size: 21,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                _referenceText(
-                  context,
-                  'Set your calorie goal to track daily progress',
-                  'حدد هدف السعرات لتتبع تقدمك اليومي',
-                ),
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Icon(Icons.chevron_right_rounded),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-/// Shared visual container for the reference-dashboard cards.
-class _ReferenceCard extends StatelessWidget {
-  const _ReferenceCard({required this.child});
-  final Widget child;
-  @override
-  Widget build(BuildContext context) => Material(
-    color: Theme.of(context).colorScheme.surface,
-    elevation: Theme.of(context).brightness == Brightness.light ? 1 : 0,
-    shadowColor: const Color(0x22000000),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-      side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-    ),
-    clipBehavior: Clip.antiAlias,
-    child: Padding(padding: const EdgeInsets.all(16), child: child),
-  );
-}
-
-class _ReferenceEquationRow extends StatelessWidget {
-  const _ReferenceEquationRow({
-    required this.label,
-    required this.value,
-    required this.icon,
-    this.honestEmpty = false,
-  });
-  final String label;
-  final int value;
-  final IconData icon;
-  final bool honestEmpty;
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: 5),
-    child: Row(
-      children: [
-        Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
-        const SizedBox(width: 8),
-        Expanded(child: Text(label)),
-        Text(
-          honestEmpty ? '—' : '$value',
-          style: const TextStyle(fontWeight: FontWeight.w700),
-        ),
-      ],
-    ),
-  );
-}
-
-class _MacroProgress extends StatelessWidget {
-  const _MacroProgress({
-    required this.label,
-    required this.value,
-    required this.goal,
-    required this.color,
-  });
-  final String label;
-  final int value;
-  final int goal;
-  final Color color;
-  @override
-  Widget build(BuildContext context) {
-    final progress = goal <= 0 ? 0.0 : (value / goal).clamp(0.0, 1.0);
-    final scheme = Theme.of(context).colorScheme;
-    final remaining = (goal - value).clamp(0, goal);
-    return Semantics(
-      label: '$label, $value of $goal grams',
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox.square(
-            dimension: 78,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                SizedBox.square(
-                  dimension: 70,
-                  child: CircularProgressIndicator(
-                    value: progress,
-                    strokeWidth: 7,
-                    strokeCap: StrokeCap.round,
-                    color: color,
-                    backgroundColor: scheme.surfaceContainerHighest,
-                  ),
-                ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '$remaining',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: const Color(0xFF101923),
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    Text(
-                      'g',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: const Color(0xFF101923),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 7),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: const Color(0xFF101923),
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ReferenceStatusCard extends StatelessWidget {
-  const _ReferenceStatusCard({
-    required this.icon,
-    required this.title,
-    required this.value,
-    required this.detail,
-    required this.onTap,
-  });
-  final IconData icon;
-  final String title;
-  final String value;
-  final String detail;
-  final VoidCallback onTap;
-  @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(12),
-    child: _ReferenceCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                icon,
-                size: 20,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: Theme.of(
-              context,
-            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          Text(
-            detail,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-class _LogShortcut extends StatelessWidget {
-  const _LogShortcut({
-    required this.icon,
-    required this.label,
-    required this.recorded,
-    required this.onTap,
-  });
-  final IconData icon;
-  final String label;
-  final bool recorded;
-  final VoidCallback onTap;
-  @override
-  Widget build(BuildContext context) => InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(10),
-    child: Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
-      decoration: BoxDecoration(
-        color: Theme.of(
-          context,
-        ).colorScheme.surfaceContainerHighest.withValues(alpha: .55),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(height: 7),
-          Text(
-            label,
-            maxLines: 1,
-            style: Theme.of(context).textTheme.labelMedium,
-          ),
-          const SizedBox(height: 4),
-          Icon(
-            recorded
-                ? Icons.check_circle_rounded
-                : Icons.add_circle_outline_rounded,
-            size: 17,
-            color: recorded
-                ? const Color(0xFF38A169)
-                : Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ],
-      ),
-    ),
-  );
-}

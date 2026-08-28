@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../analytics/bil_launch_deep_link.dart';
@@ -17,6 +16,7 @@ import '../../features/auth/auth_callback_page.dart';
 import '../../features/auth/reset_password_page.dart';
 import '../../features/daily_log/daily_log_page.dart';
 import '../../features/daily_log/daily_body_context_page.dart';
+import '../../features/daily_log/daily_water_page.dart';
 import '../../features/daily_check_in/daily_check_in_page.dart';
 import '../../features/dashboard/dashboard_page.dart';
 import '../../features/dashboard/domain/dashboard_decision_explanation.dart';
@@ -31,8 +31,10 @@ import '../../features/challenges/challenges_page.dart';
 import '../../features/connected_health/connected_health_page.dart';
 import '../../features/connected_health/partner_capabilities_page.dart';
 import '../../features/connected_health/steps_settings_page.dart';
+import '../../features/connected_health/connected_health_signal_detail_page.dart';
 import '../../features/exercise_calorie_controls/presentation/exercise_calorie_settings_page.dart';
 import '../../features/commerce/presentation/bil_store_plans_page.dart';
+import '../../features/commerce/presentation/premium_route_glass_gate.dart';
 import '../../features/commerce/presentation/premium_logging_intro_page.dart';
 import '../../features/community/presentation/community_hub_page.dart';
 import '../../features/community/presentation/community_people_page.dart';
@@ -50,6 +52,8 @@ import '../../features/nutrition/presentation/meal_image_guide_page.dart';
 import '../../features/nutrition/presentation/meals_recipes_foods_page.dart';
 import '../../features/recipe_import/presentation/trusted_recipe_import_page.dart';
 import '../../features/nutrition_plans/presentation/nutrition_pathways_page.dart';
+import '../../features/nutrition_plans/presentation/diet_plan_editor_page.dart';
+import '../../features/nutrition_plans/presentation/nutrition_pathway_access_gate.dart';
 import '../../features/meal_planner/presentation/meal_planner_page.dart';
 import '../../features/notifications/presentation/notification_settings_page.dart';
 import '../../features/notifications/domain/community_deep_link.dart';
@@ -57,7 +61,6 @@ import '../../features/wellness/presentation/wellness_library_page.dart';
 import '../../features/wellness/presentation/wellness_learn_page.dart';
 import '../../features/wellness/presentation/wellness_content_packs_page.dart';
 import '../../features/wellness/presentation/bil_workout_routines_page.dart';
-import '../../features/wellness/presentation/workout_entry_chooser_page.dart';
 import '../../features/wellness/presentation/wellness_tools_pages.dart';
 import '../../features/wellness/presentation/recipe_library_page.dart';
 import '../../features/onboarding/onboarding_page.dart';
@@ -79,6 +82,7 @@ import '../../features/settings/sharing_privacy_settings_page.dart';
 import '../../features/settings/local_export_range_page.dart';
 import '../../features/share_studio/share_studio_page.dart';
 import '../../features/profile/plan_page.dart';
+import '../../features/profile/plan_navigation_contract.dart';
 import '../../features/profile/premium_profile_page.dart';
 import '../../features/profile/profile_settings_page.dart';
 import '../../features/profile/profile_summary_page.dart';
@@ -115,8 +119,14 @@ class AppRouter {
       GoRoute(path: '/startup', builder: (_, _) => const StartupPage()),
       GoRoute(path: '/login', builder: (_, _) => const LoginPage()),
       GoRoute(
+        path: '/reviewer-login',
+        builder: (_, _) => const StoreReviewerLoginPage(),
+      ),
+      GoRoute(
         path: '/auth-callback',
-        builder: (_, _) => const AuthCallbackPage(),
+        builder: (_, state) => AuthCallbackPage(
+          initiallyFailed: state.uri.queryParameters['failed'] == '1',
+        ),
       ),
       GoRoute(
         path: '/reset-password',
@@ -145,14 +155,30 @@ class AppRouter {
       GoRoute(path: '/context', builder: (_, _) => const LifeContextPage()),
       GoRoute(
         path: '/decision-memory',
-        builder: (_, _) => const DecisionMemoryPage(),
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.decisionMemory,
+          child: DecisionMemoryPage(),
+        ),
       ),
       GoRoute(
         path: '/plan',
-        builder: (_, state) =>
-            PlanPage(pathwayId: state.uri.queryParameters['pathway']),
+        builder: (_, state) => PremiumRouteGlassGate(
+          feature: PremiumGateFeature.personalPlan,
+          child: PlanPage(
+            pathwayId: state.uri.queryParameters['pathway'],
+            origin: PlanPageOrigin.fromQuery(
+              state.uri.queryParameters['origin'],
+            ),
+          ),
+        ),
       ),
-      GoRoute(path: '/experiments', builder: (_, _) => const ExperimentsPage()),
+      GoRoute(
+        path: '/experiments',
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.experiments,
+          child: ExperimentsPage(),
+        ),
+      ),
       GoRoute(
         path: '/share-studio',
         builder: (_, _) => const ShareStudioPage(),
@@ -168,7 +194,10 @@ class AppRouter {
       ),
       GoRoute(
         path: '/advanced-body-measurements',
-        builder: (_, _) => const ProfileSettingsPage(),
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.bodyMeasurements,
+          child: ProfileSettingsPage(),
+        ),
       ),
       GoRoute(
         path: '/connected-health',
@@ -179,10 +208,22 @@ class AppRouter {
         builder: (_, _) => const StepsSettingsPage(),
       ),
       GoRoute(
+        path: '/connected-health/heart',
+        builder: (_, _) => const ConnectedHealthSignalDetailPage(
+          keys: ['heartRate', 'restingHeartRate'],
+          title: 'Heart rate',
+          unitFallback: 'bpm',
+        ),
+      ),
+      GoRoute(
         path: '/connected-health/capabilities',
         builder: (_, _) => const PartnerCapabilitiesPage(),
       ),
-      GoRoute(path: '/plans', builder: (_, _) => const BilStorePlansPage()),
+      GoRoute(
+        path: '/plans',
+        builder: (_, state) =>
+            BilStorePlansPage(initialFocus: state.uri.queryParameters['focus']),
+      ),
       GoRoute(
         path: '/premium-logging-intro',
         builder: (_, _) => const PremiumLoggingIntroPage(),
@@ -192,60 +233,109 @@ class AppRouter {
         builder: (_, _) => const NutritionPathwaysPage(),
       ),
       GoRoute(
+        path: '/nutrition-plans/:pathwayId',
+        builder: (_, state) {
+          final pathwayId = state.pathParameters['pathwayId']!;
+          return NutritionPathwayAccessGate(
+            pathwayId: pathwayId,
+            child: DietPlanEditorPage(pathwayId: pathwayId),
+          );
+        },
+      ),
+      GoRoute(
         path: '/weekly-report',
-        builder: (_, _) => const WeeklyReportPage(),
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.weeklyReport,
+          child: WeeklyReportPage(),
+        ),
       ),
       GoRoute(
         path: '/analytics/nutrition',
-        builder: (_, state) => NutritionAnalyticsPage(
-          initialTab: switch (state.uri.queryParameters['tab']) {
-            'nutrients' => 1,
-            'macros' => 2,
-            _ => 0,
-          },
+        builder: (_, state) => PremiumRouteGlassGate(
+          feature: PremiumGateFeature.nutritionAnalytics,
+          child: NutritionAnalyticsPage(
+            initialTab: switch (state.uri.queryParameters['tab']) {
+              'nutrients' => 1,
+              'macros' => 2,
+              _ => 0,
+            },
+          ),
         ),
       ),
-      GoRoute(path: '/community', builder: (_, _) => const CommunityHubPage()),
+      GoRoute(
+        path: '/community',
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunityHubPage(),
+        ),
+      ),
       GoRoute(
         path: '/community/people',
-        builder: (_, _) => const CommunityPeoplePage(),
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunityPeoplePage(),
+        ),
       ),
       GoRoute(
         path: '/community/notifications',
-        builder: (_, _) => const CommunityNotificationsPage(),
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunityNotificationsPage(),
+        ),
       ),
       GoRoute(
         path: '/community/connections',
-        builder: (_, _) => const CommunityConnectionsPage(),
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunityConnectionsPage(),
+        ),
       ),
       GoRoute(
         path: '/community/food-review',
-        builder: (_, _) => const CommunityFoodReviewPage(),
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunityFoodReviewPage(),
+        ),
       ),
       GoRoute(
         path: '/community/profile',
-        builder: (_, _) => const CommunityProfilePage(),
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunityProfilePage(),
+        ),
       ),
       GoRoute(
         path: '/community/safety',
-        builder: (_, _) => const CommunitySafetyPage(),
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunitySafetyPage(),
+        ),
       ),
       GoRoute(
         path: '/community/chat/:userId',
-        builder: (_, state) => CommunityChatPage(
-          userId: state.pathParameters['userId']!,
-          displayName: state.extra is String
-              ? state.extra! as String
-              : state.uri.queryParameters['name'] ?? 'BIL',
+        builder: (_, state) => PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunityChatPage(
+            userId: state.pathParameters['userId']!,
+            displayName: state.extra is String
+                ? state.extra! as String
+                : state.uri.queryParameters['name'] ?? 'BIL',
+          ),
         ),
       ),
       GoRoute(
         path: '/community/messages',
-        builder: (_, _) => const CommunityMessagesPage(),
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: CommunityMessagesPage(),
+        ),
       ),
       GoRoute(
         path: '/community/messages/new',
-        builder: (_, _) => const NewCommunityMessagePage(),
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.community,
+          child: NewCommunityMessagePage(),
+        ),
       ),
       GoRoute(
         path: '/food-libraries',
@@ -292,33 +382,22 @@ class AppRouter {
       ),
       GoRoute(
         path: '/wellness/sleep',
-        builder: (_, _) => const SleepTrackerPage(),
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.sleep,
+          child: SleepTrackerPage(),
+        ),
       ),
       GoRoute(
         path: '/wellness/workouts',
-        pageBuilder: (_, state) => CustomTransitionPage<void>(
-          key: state.pageKey,
-          opaque: false,
-          barrierDismissible: true,
-          barrierColor: Colors.transparent,
-          child: const WorkoutEntryChooserPage(),
-          transitionsBuilder: (_, animation, _, child) => FadeTransition(
-            opacity: CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutCubic,
-            ),
-            child: ScaleTransition(
-              scale: Tween<double>(begin: .96, end: 1).animate(
-                CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-              ),
-              child: child,
-            ),
-          ),
+        builder: (_, state) => BilWorkoutRoutinesPage(
+          initialItemId: state.uri.queryParameters['item'],
         ),
       ),
       GoRoute(
         path: '/wellness/workouts/routines',
-        builder: (_, _) => const BilWorkoutRoutinesPage(),
+        builder: (_, state) => BilWorkoutRoutinesPage(
+          initialItemId: state.uri.queryParameters['item'],
+        ),
       ),
       GoRoute(
         path: '/wellness/workouts/log',
@@ -328,25 +407,39 @@ class AppRouter {
       ),
       GoRoute(
         path: '/wellness/fasting',
-        builder: (_, _) => const FastingTimerPage(),
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.fasting,
+          child: FastingTimerPage(),
+        ),
       ),
       GoRoute(
         path: '/wellness/recipes',
-        builder: (_, _) => const RecipeLibraryPage(),
+        builder: (_, state) => RecipeLibraryPage(
+          initialRecipeId: state.uri.queryParameters['recipe'],
+        ),
       ),
       GoRoute(
         path: '/nutrition/recipes/import',
-        builder: (_, state) => TrustedRecipeImportPage(
-          recipeId: state.uri.queryParameters['recipeId'],
+        builder: (_, state) => PremiumRouteGlassGate(
+          feature: PremiumGateFeature.recipeImport,
+          child: TrustedRecipeImportPage(
+            recipeId: state.uri.queryParameters['recipeId'],
+          ),
         ),
       ),
       GoRoute(
         path: '/meal-planner',
-        builder: (_, _) => const MealPlannerPage(),
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.mealPlanner,
+          child: MealPlannerPage(),
+        ),
       ),
       GoRoute(
         path: '/wellness/content-packs',
-        builder: (_, _) => const WellnessContentPacksPage(),
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.contentPacks,
+          child: WellnessContentPacksPage(),
+        ),
       ),
       GoRoute(
         path: '/location-settings',
@@ -394,12 +487,13 @@ class AppRouter {
         path: '/settings/account-password',
         builder: (_, _) => const AccountPasswordPage(),
       ),
-      GoRoute(
-        path: '/settings/account-connections/facebook',
-        builder: (_, _) => const AccountConnectionSettingsPage(
-          provider: AccountConnectionProvider.facebook,
+      if (AppEnvironment.facebookLoginEnabled)
+        GoRoute(
+          path: '/settings/account-connections/facebook',
+          builder: (_, _) => const AccountConnectionSettingsPage(
+            provider: AccountConnectionProvider.facebook,
+          ),
         ),
-      ),
       GoRoute(
         path: '/settings/account-connections/google',
         builder: (_, _) => const AccountConnectionSettingsPage(
@@ -417,7 +511,10 @@ class AppRouter {
       GoRoute(path: '/goals', builder: (_, _) => const ReferenceGoalsPage()),
       GoRoute(
         path: '/settings/nutrition-goals',
-        builder: (_, _) => const ReferenceNutritionGoalsPage(),
+        builder: (_, _) => const PremiumRouteGlassGate(
+          feature: PremiumGateFeature.personalPlan,
+          child: ReferenceNutritionGoalsPage(),
+        ),
       ),
       GoRoute(
         path: '/settings/nutrition-goal-schedule',
@@ -493,11 +590,22 @@ class AppRouter {
             ),
           ),
           GoRoute(
+            path: '/daily-log/water',
+            builder: (_, state) => DailyWaterPage(
+              returnPath: _safeDailyReturnPath(
+                state.uri.queryParameters['from'],
+              ),
+            ),
+          ),
+          GoRoute(
             path: '/intelligence-center',
-            builder: (_, state) => IntelligenceCenterPage(
-              startWithVisionCapture:
-                  state.uri.queryParameters['vision'] == 'capture',
-              initialBarcode: state.uri.queryParameters['barcode'],
+            builder: (_, state) => PremiumRouteGlassGate(
+              feature: PremiumGateFeature.aiCoach,
+              child: IntelligenceCenterPage(
+                startWithVisionCapture:
+                    state.uri.queryParameters['vision'] == 'capture',
+                initialBarcode: state.uri.queryParameters['barcode'],
+              ),
             ),
           ),
           GoRoute(

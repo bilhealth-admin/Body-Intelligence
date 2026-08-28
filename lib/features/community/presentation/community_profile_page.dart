@@ -1,23 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/bil_locale_policy.dart';
+import '../../../shared/widgets/bil_account_avatar.dart';
+import '../../profile/providers/user_profile_provider.dart';
+import '../../profile/services/profile_photo_service.dart';
 import '../data/community_repository.dart';
+import '../domain/community_identity_projection.dart';
 import '../domain/community_models.dart';
+import '../domain/community_text_policy.dart';
 import 'community_copy.dart';
 
-class CommunityProfilePage extends StatefulWidget {
+class CommunityProfilePage extends ConsumerStatefulWidget {
   const CommunityProfilePage({this.repository, super.key});
 
   final CommunityRepository? repository;
 
   @override
-  State<CommunityProfilePage> createState() => _CommunityProfilePageState();
+  ConsumerState<CommunityProfilePage> createState() =>
+      _CommunityProfilePageState();
 }
 
-class _CommunityProfilePageState extends State<CommunityProfilePage> {
+class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
   CommunityRepository? _repository;
   final _name = TextEditingController();
   final _bio = TextEditingController();
@@ -28,6 +35,8 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> {
   bool _allowFriendRequests = true;
   bool _allowFollows = false;
   bool _saving = false;
+  bool _photoBusy = false;
+  String? _avatarUrl;
 
   @override
   void initState() {
@@ -52,9 +61,27 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> {
 
   Future<void> _load() async {
     final profile = await _repository!.loadMyProfile();
-    if (profile == null) return;
-    _name.text = profile.displayName;
+    String? myProfileDisplayName;
+    if (widget.repository == null &&
+        (profile == null || profile.displayName.trim().isEmpty)) {
+      try {
+        myProfileDisplayName = await ref
+            .read(preferencesRepositoryProvider)
+            .get('displayName');
+      } on Object {
+        // Community remains usable with the privacy-safe BIL alias when the
+        // device-local profile store is temporarily unavailable.
+      }
+    }
+    _name.text = CommunityIdentityProjection.resolveDisplayName(
+      communityDisplayName: profile?.displayName,
+      myProfileDisplayName: myProfileDisplayName,
+    );
+    if (profile == null) {
+      return;
+    }
     _bio.text = profile.bio ?? '';
+    _avatarUrl = profile.avatarUrl;
     _discoverable = profile.discoverable;
     _visibility = profile.visibility;
     _messages = profile.allowMessagesFrom;
@@ -93,10 +120,32 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> {
         allowFollows: _allowFollows,
         allowMessagesFrom: _messages,
       );
+      if (widget.repository == null) {
+        await ref
+            .read(preferencesRepositoryProvider)
+            .mutate(set: {'displayName': _name.text.trim()});
+        final photoResult = await ref
+            .read(profilePhotoServiceProvider)
+            .syncStoredPhotoToCommunity();
+        if (photoResult?.publicUrl != null) {
+          _avatarUrl = photoResult!.publicUrl;
+        }
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(copy.saved)));
+    } on CommunityTextPolicyException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error.localizedMessage(
+              Localizations.localeOf(context).toLanguageTag(),
+            ),
+          ),
+        ),
+      );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -104,6 +153,42 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> {
       ).showSnackBar(SnackBar(content: Text(copy.saveFailed)));
     } finally {
       if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _pickPhoto() async {
+    if (_photoBusy || _saving) return;
+    setState(() => _photoBusy = true);
+    try {
+      final result = await ref
+          .read(profilePhotoServiceProvider)
+          .chooseAndSave();
+      if (!mounted || result == null) return;
+      setState(() {
+        if (result.publicUrl != null) _avatarUrl = result.publicUrl;
+      });
+      if (!result.cloudSynced && AppEnvironment.supabaseRuntimeReady) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.strings.text(
+                'Your photo is saved on this device. Community sync will retry when the cloud is available.',
+              ),
+            ),
+          ),
+        );
+      }
+    } on ProfilePhotoTooLargeException {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.strings.text('Choose an image smaller than 5 MB.'),
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _photoBusy = false);
     }
   }
 
@@ -117,6 +202,9 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> {
   @override
   Widget build(BuildContext context) {
     final copy = _CommunityProfileCopy.of(context);
+    final localPhoto = widget.repository == null
+        ? ref.watch(profilePhotoProvider).value
+        : null;
     return PopScope(
       canPop: !_saving,
       child: Scaffold(
@@ -151,11 +239,52 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> {
                   return ListView(
                     padding: const EdgeInsets.all(20),
                     children: [
-                      const Align(
+                      Align(
                         alignment: AlignmentDirectional.center,
-                        child: CircleAvatar(
-                          radius: 42,
-                          child: Icon(Icons.person_rounded, size: 42),
+                        child: Semantics(
+                          button: true,
+                          label: context.strings.text('Profile photo'),
+                          child: InkWell(
+                            key: const Key('community-profile-photo'),
+                            onTap: _photoBusy ? null : _pickPhoto,
+                            customBorder: const CircleBorder(),
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                BilAccountAvatar(
+                                  radius: 42,
+                                  photoBytes: localPhoto,
+                                  networkUrl: _avatarUrl,
+                                  borderColor: Theme.of(
+                                    context,
+                                  ).colorScheme.primary,
+                                ),
+                                PositionedDirectional(
+                                  end: -4,
+                                  bottom: -4,
+                                  child: CircleAvatar(
+                                    radius: 16,
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    child: _photoBusy
+                                        ? const SizedBox.square(
+                                            dimension: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.photo_camera_rounded,
+                                            size: 17,
+                                            color: Colors.white,
+                                          ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),

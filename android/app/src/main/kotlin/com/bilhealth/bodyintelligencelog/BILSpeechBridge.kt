@@ -26,6 +26,8 @@ class BILSpeechBridge(
     private var eventSink: EventChannel.EventSink? = null
     private var recognizer: SpeechRecognizer? = null
     private var pendingListen: Pair<MethodCall, MethodChannel.Result>? = null
+    private var detectedLanguageTag: String? = null
+    private var sessionActive = false
 
     init {
         methods.setMethodCallHandler(this)
@@ -43,12 +45,13 @@ class BILSpeechBridge(
             )
             "listen" -> startOrRequestPermission(call, result)
             "stop" -> {
-                recognizer?.stopListening()
+                if (sessionActive) recognizer?.stopListening()
                 emitStatus(false)
                 result.success(null)
             }
             "cancel" -> {
-                recognizer?.cancel()
+                if (sessionActive) recognizer?.cancel()
+                sessionActive = false
                 emitStatus(false)
                 result.success(null)
             }
@@ -85,13 +88,29 @@ class BILSpeechBridge(
     }
 
     private fun startListening(call: MethodCall, result: MethodChannel.Result) {
-        recognizer?.destroy()
-        recognizer = SpeechRecognizer.createSpeechRecognizer(activity).also {
-            it.setRecognitionListener(this)
+        if (sessionActive) {
+            result.error("speech_recognizer_busy", null, null)
+            return
+        }
+        detectedLanguageTag = null
+        if (recognizer == null) {
+            recognizer = SpeechRecognizer.createSpeechRecognizer(activity).also {
+                it.setRecognitionListener(this)
+            }
         }
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, call.argument<Boolean>("partialResults") ?: true)
+            val pauseForMs = (call.argument<Number>("pauseForMs")?.toInt() ?: 2_000)
+                .coerceIn(500, 10_000)
+            putExtra(
+                RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS,
+                pauseForMs,
+            )
+            putExtra(
+                RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS,
+                pauseForMs,
+            )
             val autoDetectLanguage = call.argument<Boolean>("autoDetectLanguage") ?: false
             val allowedLocaleIds = call.argument<List<String>>("allowedLocaleIds")
                 ?.map { it.trim() }
@@ -103,16 +122,17 @@ class BILSpeechBridge(
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, it)
             }
             if (autoDetectLanguage && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                putExtra(RecognizerIntent.EXTRA_ENABLE_LANGUAGE_DETECTION, true)
+                // Language detection only reports a label. Language switching
+                // changes the active recognition model and is what makes an
+                // English sentence work while the BIL interface is Arabic.
                 putExtra(
                     RecognizerIntent.EXTRA_ENABLE_LANGUAGE_SWITCH,
                     RecognizerIntent.LANGUAGE_SWITCH_QUICK_RESPONSE,
                 )
+                // Do not force offline recognition. Many global language
+                // packs are available only through the installed recognition
+                // service; forcing offline silently fell back to one language.
                 if (allowedLocaleIds.isNotEmpty()) {
-                    putStringArrayListExtra(
-                        RecognizerIntent.EXTRA_LANGUAGE_DETECTION_ALLOWED_LANGUAGES,
-                        ArrayList(allowedLocaleIds),
-                    )
                     putStringArrayListExtra(
                         RecognizerIntent.EXTRA_LANGUAGE_SWITCH_ALLOWED_LANGUAGES,
                         ArrayList(allowedLocaleIds),
@@ -120,6 +140,7 @@ class BILSpeechBridge(
                 }
             }
         }
+        sessionActive = true
         recognizer?.startListening(intent)
         emitStatus(true)
         result.success(null)
@@ -140,7 +161,16 @@ class BILSpeechBridge(
     override fun onEndOfSpeech() = Unit
     override fun onEvent(eventType: Int, params: Bundle?) = Unit
 
+    override fun onLanguageDetection(results: Bundle) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return
+        detectedLanguageTag = results
+            .getString(SpeechRecognizer.DETECTED_LANGUAGE)
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+    }
+
     override fun onError(error: Int) {
+        sessionActive = false
         emitStatus(false)
         val code = when (error) {
             SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "speech_timeout"
@@ -148,6 +178,8 @@ class BILSpeechBridge(
             SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "microphone_permission_denied"
             SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "speech_recognizer_busy"
             SpeechRecognizer.ERROR_NETWORK, SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "speech_offline_service_unavailable"
+            SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED -> "speech_language_not_supported"
+            SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE -> "speech_language_unavailable"
             else -> "recognizer_error_$error"
         }
         emitError(code)
@@ -161,8 +193,18 @@ class BILSpeechBridge(
             ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
             ?.firstOrNull()
             .orEmpty()
-        eventSink?.success(mapOf("type" to "result", "words" to words, "final" to isFinal))
-        if (isFinal) emitStatus(false)
+        eventSink?.success(
+            mapOf(
+                "type" to "result",
+                "words" to words,
+                "final" to isFinal,
+                "localeId" to detectedLanguageTag,
+            ),
+        )
+        if (isFinal) {
+            sessionActive = false
+            emitStatus(false)
+        }
     }
 
     private fun emitStatus(listening: Boolean) {
@@ -178,6 +220,7 @@ class BILSpeechBridge(
         pendingListen = null
         recognizer?.destroy()
         recognizer = null
+        sessionActive = false
         methods.setMethodCallHandler(null)
         events.setStreamHandler(null)
     }

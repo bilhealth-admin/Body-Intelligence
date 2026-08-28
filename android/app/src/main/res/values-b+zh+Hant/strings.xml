@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BIL - 身體智慧日誌</string>
+    <string name="health_permissions_rationale_title">健康資料隱私</string>
+    <string name="health_permissions_rationale_body">BIL 僅請求您選擇使用的功能所需的 Health Connect 資料類型。預設情況下，您的健康資料在本地處理。您可以隨時從 Health Connect 設定授予、拒絕或撤銷個人權限。 BIL 不出售健康數據或將其用於廣告。</string>
+    <string name="health_permissions_privacy_policy_action">閱讀完整的 BIL 隱私權政策</string>
+</resources>

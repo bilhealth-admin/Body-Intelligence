@@ -87,7 +87,7 @@ abstract class BaseDatabaseFoodAdapter implements DatabaseFoodAdapter {
   NutrientAmount _core(Food food, FoodNutrient nutrient, double value) {
     // Quick Add records carry an explicit per-field evidence mask so an empty
     // field remains unknown while a user-entered zero remains known.
-    if (food.source == 'quick_add') {
+    if (food.source == 'quick_add' || food.source.startsWith('BIL community')) {
       return UnifiedFood.evidenceFromMask(food.nutrientEvidenceMask, nutrient)
           ? NutrientAmount.known(value)
           : const NutrientAmount.missing();

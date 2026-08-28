@@ -25,29 +25,43 @@ class DailyExerciseSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final largeText = MediaQuery.textScalerOf(context).scale(1) >= 1.35;
+    final exerciseTitle = Row(
+      children: [
+        const Icon(Icons.fitness_center_rounded),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            tr('Exercise', 'التمرين'),
+            style: PremiumDesignTokens.cardHeading(context),
+          ),
+        ),
+      ],
+    );
+    final browseButton = TextButton.icon(
+      onPressed: onBrowseWorkouts,
+      icon: const Icon(Icons.explore_outlined),
+      label: Text(tr('Browse workouts', 'استكشف التمارين')),
+    );
     return PremiumSurface(
       key: const Key('daily-log-exercise-section'),
       padding: PremiumDesignTokens.cardPaddingLarge,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              const Icon(Icons.fitness_center_rounded),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  tr('Exercise', 'التمرين'),
-                  style: PremiumDesignTokens.cardHeading(context),
-                ),
-              ),
-              TextButton.icon(
-                onPressed: onBrowseWorkouts,
-                icon: const Icon(Icons.explore_outlined),
-                label: Text(tr('Browse workouts', 'استكشف التمارين')),
-              ),
-            ],
-          ),
+          if (largeText) ...[
+            exerciseTitle,
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: browseButton,
+            ),
+          ] else
+            Row(
+              children: [
+                Expanded(child: exerciseTitle),
+                browseButton,
+              ],
+            ),
           const SizedBox(height: PremiumDesignTokens.spaceSm),
           TextField(
             key: const Key('daily-log-exercise-notes'),
@@ -103,6 +117,30 @@ class DailyWaterSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final unit = _inputText('ml', 'مل');
+    final largeText = MediaQuery.textScalerOf(context).scale(1) >= 1.35;
+    final amountField = Padding(
+      padding: EdgeInsets.only(bottom: largeText ? 0 : 14),
+      child: TextField(
+        controller: controller,
+        enabled: !saving,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          labelText: tr('Water amount (ml)', 'كمية الماء (مل)'),
+          border: const OutlineInputBorder(),
+        ),
+      ),
+    );
+    final addButton = FilledButton.tonalIcon(
+      key: const Key('daily_log_add_water_action'),
+      onPressed: saving ? null : () => onAdd(),
+      icon: saving
+          ? const SizedBox.square(
+              dimension: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.water_drop_outlined),
+      label: Text(tr('Add water', 'إضافة ماء')),
+    );
     return PremiumSurface(
       key: const Key('daily-log-water-section'),
       padding: PremiumDesignTokens.cardPaddingLarge,
@@ -114,42 +152,29 @@ class DailyWaterSection extends StatelessWidget {
             style: PremiumDesignTokens.cardHeading(context),
           ),
           const SizedBox(height: PremiumDesignTokens.spaceSm),
-          Row(
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: TextField(
-                    controller: controller,
-                    enabled: !saving,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: tr('Water amount (ml)', 'كمية الماء (مل)'),
-                      border: const OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              FilledButton.tonalIcon(
-                key: const Key('daily_log_add_water_action'),
-                onPressed: saving ? null : () => onAdd(),
-                icon: saving
-                    ? const SizedBox.square(
-                        dimension: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.water_drop_outlined),
-                label: Text(tr('Add water', 'إضافة ماء')),
-              ),
-            ],
-          ),
+          if (largeText) ...[
+            amountField,
+            const SizedBox(height: 10),
+            addButton,
+            const SizedBox(height: 12),
+          ] else
+            Row(
+              children: [
+                Expanded(child: amountField),
+                const SizedBox(width: 8),
+                addButton,
+              ],
+            ),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
               for (final amount in const [250, 350, 500])
                 ActionChip(
+                  backgroundColor: Theme.of(context).colorScheme.surface,
+                  side: BorderSide(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                  ),
                   avatar: const Icon(Icons.water_drop_outlined, size: 18),
                   label: Text('+$amount $unit'),
                   onPressed: saving ? null : () => onAdd(amount),
@@ -188,6 +213,56 @@ class DailyWaterSection extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class DailyWaterShortcut extends StatelessWidget {
+  const DailyWaterShortcut({
+    super.key,
+    required this.entries,
+    required this.onTap,
+  });
+
+  final AsyncValue<List<WaterEntry>> entries;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final unit = _inputText('ml', 'مل');
+    final subtitle = entries.when(
+      data: (rows) {
+        final total = rows.fold<int>(0, (sum, row) => sum + row.amountMl);
+        return total == 0
+            ? _inputText('No water logged yet', 'لم يُسجّل ماء بعد')
+            : '${_inputText('Today', 'اليوم')}: $total $unit';
+      },
+      loading: () => _inputText('Loading water…', 'جارٍ تحميل الماء…'),
+      error: (_, _) =>
+          _inputText('Water data unavailable', 'بيانات الماء غير متاحة'),
+    );
+    return PremiumSurface(
+      key: const Key('daily-log-water-shortcut'),
+      padding: EdgeInsets.zero,
+      child: ListTile(
+        minTileHeight: 82,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        leading: const Icon(Icons.water_drop_outlined),
+        title: Text(
+          _inputText('Water', 'الماء'),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        subtitle: Text(
+          subtitle,
+          key: const Key('daily-log-water-shortcut-status'),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: const Icon(Icons.chevron_right_rounded),
+        onTap: onTap,
       ),
     );
   }
@@ -331,7 +406,10 @@ String _inputText(String en, String ar) {
       'fr' => '$count sélectionnés',
       'es' => '$count seleccionados',
       'tr' => '$count seçildi',
-      _ => en,
+      _ => (RuntimeCopy.resolve('{count} selected', tag) ?? en).replaceFirst(
+        '{count}',
+        count,
+      ),
     };
   }
   return _dailyInputCopy[en]?[locale] ?? RuntimeCopy.resolve(en, tag) ?? en;

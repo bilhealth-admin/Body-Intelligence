@@ -42,14 +42,17 @@ void main() {
     expect(profile, contains('mainAxisAlignment: MainAxisAlignment.center'));
     expect(profile, contains('textAlign: TextAlign.center'));
 
-    expect(analytics, contains("arabic ? 'البداية' : 'Start'"));
-    expect(analytics, contains("arabic ? 'الحالي' : 'Current'"));
-    expect(analytics, contains("arabic ? 'تغير النطاق' : 'Range change'"));
+    expect(analytics, contains("analyticsText(context, 'Start', 'البداية')"));
+    expect(analytics, contains("analyticsText(context, 'Current', 'الحالي')"));
+    expect(analytics, contains("analyticsText(context, 'Change', 'التغيّر')"));
     expect(
       analytics,
       contains('for (var index = 0; index < values.length; index++)'),
     );
-    expect(analytics, contains('index == values.length - 1 ? 12 : 9'));
+    expect(
+      analytics,
+      contains('for (var index = 1; index < points.length; index++)'),
+    );
 
     expect(header, contains('Color(0xFFCEE2E8)'));
     expect(header, contains('Color(0xFFD8E9ED)'));

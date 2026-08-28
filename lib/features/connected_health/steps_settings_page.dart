@@ -348,6 +348,13 @@ class _StepsSettingsPageState extends ConsumerState<StepsSettingsPage> {
                   ),
                   _Section(t('Step goal')),
                   ListTile(
+                    key: const Key('steps-history-link'),
+                    leading: const Icon(Icons.insights_rounded),
+                    title: Text(t('View step history')),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: saving ? null : () => context.push('/history'),
+                  ),
+                  ListTile(
                     key: const Key('daily-step-goal'),
                     enabled: !saving,
                     title: Text(t('Daily step goal')),
@@ -400,6 +407,7 @@ const _stepsCopy = <String, Map<String, String>>{
         'افتح مصادر الصحة المتصلة وأذوناتها.',
     'Do not track steps': 'عدم تتبع الخطوات',
     'Step goal': 'هدف الخطوات',
+    'View step history': 'عرض سجل الخطوات',
     'Daily step goal': 'هدف الخطوات اليومي',
     'Not set': 'غير محدد',
     'Cancel': 'إلغاء',

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/localization/bil_locale_policy.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../domain/nutrition_pathway.dart';
-import '../domain/nutrition_pathway_translations.dart';
+import '../domain/nutrition_pathway_catalog.dart';
+import '../domain/nutrition_pathway_localizer.dart';
 import '../../nutrition/presentation/nutrition_copy.dart';
 
 class NutritionPathwaysPage extends ConsumerWidget {
@@ -12,16 +14,12 @@ class NutritionPathwaysPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final languageCode = Localizations.localeOf(context).languageCode;
+    final localeTag = BilLocalePolicy.canonicalTag(
+      Localizations.localeOf(context),
+    );
     final activeId = ref.watch(activeNutritionPathwayProvider).value;
-    Future<void> select(NutritionPathway plan) async {
-      await ref
-          .read(preferencesRepositoryProvider)
-          .set('activeNutritionPathway', plan.id);
-      if (!context.mounted) return;
-      Navigator.of(context).pop();
-      context.push('/plan?pathway=${Uri.encodeComponent(plan.id)}');
-    }
+    void open(NutritionPathway plan) =>
+        context.push('/nutrition-plans/${Uri.encodeComponent(plan.id)}');
 
     return Scaffold(
       appBar: AppBar(
@@ -63,17 +61,17 @@ class NutritionPathwaysPage extends ConsumerWidget {
           ),
           const SizedBox(height: 20),
           SizedBox(
-            height: 320,
+            height: 334,
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               scrollDirection: Axis.horizontal,
-              itemCount: 6,
+              itemCount: nutritionPathways.length,
               separatorBuilder: (_, _) => const SizedBox(width: 14),
               itemBuilder: (context, index) => _HeroCard(
                 plan: nutritionPathways[index],
-                languageCode: languageCode,
+                localeTag: localeTag,
                 selected: activeId == nutritionPathways[index].id,
-                onSelect: select,
+                onOpen: open,
               ),
             ),
           ),
@@ -89,9 +87,9 @@ class NutritionPathwaysPage extends ConsumerWidget {
           ...nutritionPathways.map(
             (plan) => _PlanRow(
               plan: plan,
-              languageCode: languageCode,
+              localeTag: localeTag,
               selected: activeId == plan.id,
-              onSelect: select,
+              onOpen: open,
             ),
           ),
         ],
@@ -103,14 +101,14 @@ class NutritionPathwaysPage extends ConsumerWidget {
 class _HeroCard extends StatelessWidget {
   const _HeroCard({
     required this.plan,
-    required this.languageCode,
+    required this.localeTag,
     required this.selected,
-    required this.onSelect,
+    required this.onOpen,
   });
   final NutritionPathway plan;
-  final String languageCode;
+  final String localeTag;
   final bool selected;
-  final Future<void> Function(NutritionPathway) onSelect;
+  final ValueChanged<NutritionPathway> onOpen;
 
   @override
   Widget build(BuildContext context) => SizedBox(
@@ -120,20 +118,33 @@ class _HeroCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(14),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => _showPlan(context, plan, languageCode, onSelect),
+        onTap: () => onOpen(plan),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.asset(
-              plan.asset,
-              height: 175,
-              width: double.infinity,
-              fit: BoxFit.cover,
+            Stack(
+              children: [
+                Image.asset(
+                  plan.asset,
+                  height: 175,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+                PositionedDirectional(
+                  top: 12,
+                  end: 12,
+                  child: _PathwayAccessBadge(
+                    plan: plan,
+                    localeTag: localeTag,
+                    surface: 'hero',
+                  ),
+                ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(18, 16, 18, 6),
               child: Text(
-                _planTitle(plan, languageCode),
+                nutritionPathwayTitle(plan, localeTag),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(
@@ -148,7 +159,7 @@ class _HeroCard extends StatelessWidget {
                   avatar: const Icon(Icons.check_circle_rounded, size: 18),
                   label: Text(
                     nutritionTextForLanguage(
-                      languageCode,
+                      localeTag,
                       'Current pathway',
                       'المسار الحالي',
                     ),
@@ -158,7 +169,7 @@ class _HeroCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 18),
               child: Text(
-                _planSubtitle(plan, languageCode),
+                nutritionPathwaySubtitle(plan, localeTag),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(color: Color(0xFF667085), height: 1.35),
@@ -174,14 +185,14 @@ class _HeroCard extends StatelessWidget {
 class _PlanRow extends StatelessWidget {
   const _PlanRow({
     required this.plan,
-    required this.languageCode,
+    required this.localeTag,
     required this.selected,
-    required this.onSelect,
+    required this.onOpen,
   });
   final NutritionPathway plan;
-  final String languageCode;
+  final String localeTag;
   final bool selected;
-  final Future<void> Function(NutritionPathway) onSelect;
+  final ValueChanged<NutritionPathway> onOpen;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -194,189 +205,110 @@ class _PlanRow extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: ListTile(
+        key: Key('nutrition-pathway-row-${plan.id}'),
         minTileHeight: 78,
-        onTap: () => _showPlan(context, plan, languageCode, onSelect),
+        onTap: () => onOpen(plan),
         title: Text(
-          _planTitle(plan, languageCode),
+          nutritionPathwayTitle(plan, localeTag),
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
         subtitle: Text(
-          _planSubtitle(plan, languageCode),
+          nutritionPathwaySubtitle(plan, localeTag),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        trailing: Icon(
-          selected ? Icons.check_circle_rounded : Icons.chevron_right_rounded,
-        ),
-      ),
-    ),
-  );
-}
-
-void _showPlan(
-  BuildContext context,
-  NutritionPathway plan,
-  String languageCode,
-  Future<void> Function(NutritionPathway) onSelect,
-) {
-  final restricted = plan.safety != NutritionPathwaySafety.standard;
-  showModalBottomSheet<void>(
-    context: context,
-    showDragHandle: true,
-    isScrollControlled: true,
-    builder: (context) => SafeArea(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                _planTitle(plan, languageCode),
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                _planSubtitle(plan, languageCode),
-                style: const TextStyle(color: Color(0xFF667085), height: 1.45),
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _planTags(
-                  plan,
-                  languageCode,
-                ).map((tag) => Chip(label: Text(tag))).toList(),
-              ),
-              const SizedBox(height: 18),
-              _PlanDetail(
-                icon: Icons.route_outlined,
-                title: nutritionTextForLanguage(
-                  languageCode,
-                  'Approach',
-                  'المنهج',
-                ),
-                value: _planApproach(plan, languageCode).join('\n'),
-              ),
-              const SizedBox(height: 12),
-              _PlanDetail(
-                icon: Icons.monitor_heart_outlined,
-                title: nutritionTextForLanguage(
-                  languageCode,
-                  'Monitoring',
-                  'المتابعة',
-                ),
-                value: _planTracking(plan, languageCode).join('\n'),
-              ),
-              if (restricted) ...[
-                const SizedBox(height: 14),
-                Text(
-                  nutritionTextForLanguage(
-                    languageCode,
-                    'This pathway requires clinician review before activation.',
-                    'هذا المسار يتطلب مراجعة مختص قبل تفعيله.',
-                  ),
-                  style: const TextStyle(
-                    color: Color(0xFF9A6700),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-              const SizedBox(height: 22),
-              FilledButton(
-                onPressed:
-                    plan.safety == NutritionPathwaySafety.medicalSupervision
-                    ? null
-                    : () => onSelect(plan),
-                child: Text(
-                  plan.safety == NutritionPathwaySafety.medicalSupervision
-                      ? nutritionTextForLanguage(
-                          languageCode,
-                          'Medical supervision required',
-                          'يتطلب إشرافًا طبيًا',
-                        )
-                      : nutritionTextForLanguage(
-                          languageCode,
-                          'Review in My Plan',
-                          'مراجعة المسار ضمن خطتي',
-                        ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-String _planTitle(NutritionPathway plan, String languageCode) =>
-    switch (languageCode) {
-      'ar' => plan.arTitle,
-      'en' => plan.enTitle,
-      _ => nutritionPathwayTranslations[languageCode]![plan.id]!.title,
-    };
-String _planSubtitle(NutritionPathway plan, String languageCode) =>
-    switch (languageCode) {
-      'ar' => plan.arSubtitle,
-      'en' => plan.enSubtitle,
-      _ => nutritionPathwayTranslations[languageCode]![plan.id]!.subtitle,
-    };
-List<String> _planTags(NutritionPathway plan, String code) => switch (code) {
-  'ar' => plan.arTags,
-  'en' => plan.enTags,
-  _ => nutritionPathwayTranslations[code]![plan.id]!.tags,
-};
-List<String> _planApproach(NutritionPathway plan, String code) =>
-    switch (code) {
-      'ar' => plan.arApproach,
-      'en' => plan.enApproach,
-      _ => nutritionPathwayTranslations[code]![plan.id]!.approach,
-    };
-List<String> _planTracking(NutritionPathway plan, String code) =>
-    switch (code) {
-      'ar' => plan.arTracking,
-      'en' => plan.enTracking,
-      _ => nutritionPathwayTranslations[code]![plan.id]!.tracking,
-    };
-
-class _PlanDetail extends StatelessWidget {
-  const _PlanDetail({
-    required this.icon,
-    required this.title,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String title;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Icon(icon, size: 22, color: const Color(0xFF087F8C)),
-      const SizedBox(width: 12),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(title, style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 3),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF667085),
-                height: 1.4,
-              ),
+            _PathwayAccessBadge(
+              plan: plan,
+              localeTag: localeTag,
+              surface: 'row',
+              compact: true,
+            ),
+            const SizedBox(width: 7),
+            Icon(
+              selected
+                  ? Icons.check_circle_rounded
+                  : Icons.chevron_right_rounded,
             ),
           ],
         ),
       ),
-    ],
+    ),
   );
+}
+
+class _PathwayAccessBadge extends StatelessWidget {
+  const _PathwayAccessBadge({
+    required this.plan,
+    required this.localeTag,
+    required this.surface,
+    this.compact = false,
+  });
+
+  final NutritionPathway plan;
+  final String localeTag;
+  final String surface;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final premium = plan.access == NutritionPathwayAccess.premium;
+    final label = nutritionTextForLanguage(
+      localeTag,
+      premium ? 'Premium' : 'Free',
+      premium ? 'Premium' : 'مجاني',
+    );
+    return Container(
+      key: Key('nutrition-pathway-access-$surface-${plan.id}'),
+      constraints: BoxConstraints(maxWidth: compact ? 86 : 116),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 8 : 11,
+        vertical: compact ? 5 : 7,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(99),
+        gradient: LinearGradient(
+          colors: premium
+              ? const [Color(0xFFFFF0B7), Color(0xFFE4AD35)]
+              : const [Color(0xFFE2FAF5), Color(0xFFAFE8DC)],
+        ),
+        border: Border.all(
+          color: premium ? const Color(0xFFD99B26) : const Color(0xFF58B9A7),
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x24000000),
+            blurRadius: 12,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            premium ? Icons.lock_rounded : Icons.lock_open_rounded,
+            size: compact ? 14 : 16,
+            color: premium ? const Color(0xFF4C3300) : const Color(0xFF006D60),
+          ),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: premium
+                    ? const Color(0xFF4C3300)
+                    : const Color(0xFF006D60),
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

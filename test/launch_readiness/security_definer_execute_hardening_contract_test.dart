@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('SECURITY DEFINER functions cannot inherit anonymous execution', () {
     final sql = File(
-      'supabase/migrations/202608160002_bil_security_definer_execute_hardening.sql',
+      'supabase/migrations/20260815225751_bil_security_definer_execute_hardening.sql',
     ).readAsStringSync();
 
     expect(

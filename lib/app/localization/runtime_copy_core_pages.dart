@@ -1,0 +1,253 @@
+// GENERATED FILE. Regenerate with:
+// dart run tool/localization/generate_extended_runtime_copy.dart --core-pages-base
+abstract final class CorePagesRuntimeCopy {
+  static const values = <String, Map<String, String>>{
+    "AI Coach": {
+      'en': "AI Coach",
+      "ar": "AI Coach",
+      "fr": "AI Coach",
+      "es": "AI Coach",
+      "tr": "AI Coach",
+    },
+    "AI Coach settings": {
+      'en': "AI Coach settings",
+      "ar": "إعدادات AI Coach",
+      "fr": "Paramètres AI Coach",
+      "es": "Configuración de AI Coach",
+      "tr": "AI Coach ayarları",
+    },
+    "Advertising privacy": {
+      'en': "Advertising privacy",
+      "ar": "خصوصية الإعلان",
+      "fr": "Confidentialité de la publicité",
+      "es": "Privacidad publicitaria",
+      "tr": "Reklam gizliliği",
+    },
+    "BIL Coach": {
+      'en': "BIL Coach",
+      "ar": "مدرب BIL",
+      "fr": "Coach BIL",
+      "es": "Coach BIL",
+      "tr": "BIL Koçu",
+    },
+    "BIL Premium": {
+      'en': "BIL Premium",
+      "ar": "BIL بريميوم",
+      "fr": "BIL Premium",
+      "es": "BIL Premium",
+      "tr": "BIL Premium",
+    },
+    "Calories": {
+      'en': "Calories",
+      "ar": "السعرات الحرارية",
+      "fr": "Calories",
+      "es": "calorías",
+      "tr": "Kalori",
+    },
+    "Checking subscription": {
+      'en': "Checking subscription",
+      "ar": "التحقق من الاشتراك",
+      "fr": "Vérification de l'abonnement",
+      "es": "Comprobando suscripción",
+      "tr": "Abonelik kontrol ediliyor",
+    },
+    "Coach controls": {
+      'en': "Coach controls",
+      "ar": "أدوات تحكم المدرب",
+      "fr": "Commandes du coach",
+      "es": "Controles del coach",
+      "tr": "Koç kontrolleri",
+    },
+    "Complete diary": {
+      'en': "Complete diary",
+      "ar": "إكمال اليوميات",
+      "fr": "Terminer le journal",
+      "es": "Completar el diario",
+      "tr": "Günlüğü tamamla",
+    },
+    "Complete profile": {
+      'en': "Complete profile",
+      "ar": "إكمال الملف الشخصي",
+      "fr": "Compléter le profil",
+      "es": "Completar perfil",
+      "tr": "Profili tamamla",
+    },
+    "Complete your profile to calculate personalized targets.": {
+      'en': "Complete your profile to calculate personalized targets.",
+      "ar": "أكمل ملفك الشخصي لحساب الأهداف المخصصة.",
+      "fr": "Complétez votre profil pour calculer des objectifs personnalisés.",
+      "es": "Complete su perfil para calcular objetivos personalizados.",
+      "tr":
+          "Kişiselleştirilmiş hedefleri hesaplamak için profilinizi tamamlayın.",
+    },
+    "Copy from": {
+      'en': "Copy from",
+      "ar": "نسخ من",
+      "fr": "Copier depuis",
+      "es": "Copiar de",
+      "tr": "Şuradan kopyala",
+    },
+    "Delete account": {
+      'en': "Delete account",
+      "ar": "حذف الحساب",
+      "fr": "Supprimer le compte",
+      "es": "Eliminar cuenta",
+      "tr": "Hesabı sil",
+    },
+    "FOR TODAY": {
+      'en': "FOR TODAY",
+      "ar": "لهذا اليوم",
+      "fr": "POUR AUJOURD'HUI",
+      "es": "PARA HOY",
+      "tr": "BUGÜN İÇİN",
+    },
+    "Good evening": {
+      'en': "Good evening",
+      "ar": "مساء الخير",
+      "fr": "Bonsoir",
+      "es": "Buenas noches",
+      "tr": "İyi akşamlar",
+    },
+    "Good morning": {
+      'en': "Good morning",
+      "ar": "صباح الخير",
+      "fr": "Bonjour",
+      "es": "Buenos días",
+      "tr": "Günaydın",
+    },
+    "Good afternoon": {
+      'en': "Good afternoon",
+      "ar": "مساء الخير",
+      "fr": "Bon après-midi",
+      "es": "Buenas tardes",
+      "tr": "İyi günler",
+    },
+    "Close": {
+      'en': "Close",
+      "ar": "إغلاق",
+      "fr": "Fermer",
+      "es": "Cerrar",
+      "tr": "Kapat",
+    },
+    "Serving unit": {
+      'en': "Serving unit",
+      "ar": "وحدة الحصة",
+      "fr": "Unité de portion",
+      "es": "Unidad de porción",
+      "tr": "Porsiyon birimi",
+    },
+    "Fiber": {
+      'en': "Fiber",
+      "ar": "الألياف",
+      "fr": "Fibres",
+      "es": "Fibra",
+      "tr": "Lif",
+    },
+    "Sodium": {
+      'en': "Sodium",
+      "ar": "الصوديوم",
+      "fr": "Sodium",
+      "es": "Sodio",
+      "tr": "Sodyum",
+    },
+    "I speak every language and turn your body data into the next clear decision.": {
+      'en':
+          "I speak every language and turn your body data into the next clear decision.",
+      "ar": "أنا أتحدث كل لغة وأحول بيانات جسدك إلى القرار الواضح التالي.",
+      "fr":
+          "Je parle toutes les langues et je transforme vos données corporelles en la prochaine décision claire.",
+      "es":
+          "Hablo todos los idiomas y convierto los datos de tu cuerpo en la siguiente decisión clara.",
+      "tr":
+          "Her dili konuşuyorum ve vücut verilerinizi bir sonraki net karara dönüştürüyorum.",
+    },
+    "I’m ready for your next useful decision.": {
+      'en': "I’m ready for your next useful decision.",
+      "ar": "أنا مستعد لقرارك المفيد التالي.",
+      "fr": "Je suis prêt pour votre prochaine décision utile.",
+      "es": "Estoy listo para su próxima decisión útil.",
+      "tr": "Bir sonraki faydalı kararınıza hazırım.",
+    },
+    "Loading Today dashboard": {
+      'en': "Loading Today dashboard",
+      "ar": "جارٍ تحميل لوحة اليوم",
+      "fr": "Chargement du tableau de bord Aujourd’hui",
+      "es": "Cargando el panel de hoy",
+      "tr": "Bugün kontrol paneli yükleniyor",
+    },
+    "Manual barcode · Premium": {
+      'en': "Manual barcode · Premium",
+      "ar": "الباركود اليدوي · بريميوم",
+      "fr": "Code-barres manuel · Premium",
+      "es": "Código de barras manual · Premium",
+      "tr": "Manuel barkod · Premium",
+    },
+    "Meals": {
+      'en': "Meals",
+      "ar": "وجبات",
+      "fr": "Repas",
+      "es": "Comidas",
+      "tr": "Yemekler",
+    },
+    "No body trend data recorded yet.": {
+      'en': "No body trend data recorded yet.",
+      "ar": "لم يتم تسجيل بيانات اتجاه الجسم حتى الآن.",
+      "fr": "Aucune donnée de tendance corporelle enregistrée pour le moment.",
+      "es": "Aún no se han registrado datos de tendencias corporales.",
+      "tr": "Henüz vücut trendi verisi kaydedilmedi.",
+    },
+    "No nutrition data recorded yet.": {
+      'en': "No nutrition data recorded yet.",
+      "ar": "لم يتم تسجيل أي بيانات غذائية حتى الآن.",
+      "fr": "Aucune donnée nutritionnelle enregistrée pour l’instant.",
+      "es": "Aún no se han registrado datos nutricionales.",
+      "tr": "Henüz beslenme verileri kaydedilmedi.",
+    },
+    "No trend data recorded yet.": {
+      'en': "No trend data recorded yet.",
+      "ar": "لم يتم تسجيل بيانات الاتجاه حتى الآن.",
+      "fr": "Aucune donnée de tendance enregistrée pour l'instant.",
+      "es": "Aún no se han registrado datos de tendencias.",
+      "tr": "Henüz kayıtlı bir trend verisi yok.",
+    },
+    "Review today’s entries, then complete the diary to preserve an authoritative snapshot.": {
+      'en':
+          "Review today’s entries, then complete the diary to preserve an authoritative snapshot.",
+      "ar": "قم بمراجعة إدخالات اليوم، ثم أكمل اليوميات للاحتفاظ بلقطة موثوقة.",
+      "fr":
+          "Passez en revue les entrées du jour, puis terminez le journal pour conserver un instantané de référence.",
+      "es":
+          "Revisa las entradas de hoy y completa el diario para conservar una instantánea fiable.",
+      "tr":
+          "Bugünün girişlerini gözden geçirip güvenilir bir kayıt oluşturmak için günlüğü tamamlayın.",
+    },
+    "Save log": {
+      'en': "Save log",
+      "ar": "حفظ السجل",
+      "fr": "Enregistrer le journal",
+      "es": "Guardar registro",
+      "tr": "Günlüğü kaydet",
+    },
+    "Steps": {
+      'en': "Steps",
+      "ar": "خطوات",
+      "fr": "Pas",
+      "es": "Pasos",
+      "tr": "Adımlar",
+    },
+    "Talk now": {
+      'en': "Talk now",
+      "ar": "تحدث الآن",
+      "fr": "Parlez maintenant",
+      "es": "hablar ahora",
+      "tr": "Şimdi konuş",
+    },
+    "Your BIL Coach": {
+      'en': "Your BIL Coach",
+      "ar": "مدرب BIL الخاص بك",
+      "fr": "Votre coach BIL",
+      "es": "Tu coach BIL",
+      "tr": "BIL Koçunuz",
+    },
+  };
+}

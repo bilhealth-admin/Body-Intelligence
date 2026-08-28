@@ -25,26 +25,73 @@ class DashboardDataGate extends StatelessWidget {
       state.hasFailure,
       'DashboardDataGate only handles non-ready states.',
     );
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
+    final theme = Theme.of(context);
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: Container(
+        key: const Key('dashboard-premium-error-state'),
+        padding: const EdgeInsets.all(22),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: theme.colorScheme.outlineVariant),
+          boxShadow: theme.brightness == Brightness.light
+              ? const [
+                  BoxShadow(
+                    color: Color(0x14071822),
+                    blurRadius: 28,
+                    offset: Offset(0, 12),
+                  ),
+                ]
+              : null,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  Icons.cloud_off_rounded,
+                  color: theme.colorScheme.onErrorContainer,
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
             Text(
               context.strings.text('Today could not read all local data'),
-              style: Theme.of(context).textTheme.titleLarge,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+                letterSpacing: -.25,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               context.strings.text(
                 'No current insight is shown because it may be stale. Existing records remain in local storage; retry when storage is available.',
               ),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                height: 1.45,
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             FilledButton.icon(
               onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              icon: const Icon(Icons.refresh_rounded),
               label: Text(context.strings.text('Try again')),
             ),
           ],

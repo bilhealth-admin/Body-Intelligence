@@ -3,9 +3,13 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final source = File(
-    'lib/features/meal_planner/presentation/meal_planner_page.dart',
-  ).readAsStringSync();
+  final source = ['meal_planner_page.dart', 'meal_planner_copy.dart']
+      .map(
+        (name) => File(
+          'lib/features/meal_planner/presentation/$name',
+        ).readAsStringSync(),
+      )
+      .join('\n');
 
   test('planner has one durable producer-storage-consumer path', () {
     expect(source, contains("'mealPlanner.preferences.v1'"));

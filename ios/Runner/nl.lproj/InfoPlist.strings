@@ -1,8 +1,8 @@
-"NSHealthShareUsageDescription" = "BIL leest alleen de door u gekozen Gezondheid-categorieën—activiteit, slaap, lichaamsmetingen, hart- en ademhalingswaarden, bloeddruk, zuurstof, glucose, hydratatie en voeding—voor een privégezondheidstijdlijn en inzichten op dit apparaat.";
+"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
 "NSHealthUpdateUsageDescription" = "BIL schrijft alleen de medische dossiers die u expliciet kiest, na afzonderlijke schriftelijke toestemming.";
-"NSBluetoothAlwaysUsageDescription" = "BIL maakt alleen verbinding met gezondheidsapparaten die u expliciet koppelt, zodat metingen lokaal kunnen worden geïmporteerd.";
-"NSBluetoothPeripheralUsageDescription" = "BIL maakt alleen verbinding met gezondheidsapparaten die u expliciet koppelt, zodat metingen lokaal kunnen worden geïmporteerd.";
+"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Gebruik de camera alleen als u ervoor kiest een streepjescode te scannen, een maaltijdfoto te bekijken of een privéprofiel of voortgangsfoto toe te voegen.";
 "NSPhotoLibraryUsageDescription" = "Selecteer een maaltijd-, profiel- of voortgangsfoto om te beoordelen voordat deze wordt opgeslagen of geüpload.";
-"NSMicrophoneUsageDescription" = "BIL gebruikt de microfoon alleen als je kiest voor spraakinvoer voor een maaltijd.";
-"NSSpeechRecognitionUsageDescription" = "BIL converteert de voedselzin die u uitspreekt naar tekst, zodat u deze kunt bekijken voordat u deze opslaat.";
+"NSMicrophoneUsageDescription" = "BIL gebruikt de microfoon alleen wanneer je een maaltijd met je stem registreert of rechtstreeks met BIL AI Coach praat.";
+"NSSpeechRecognitionUsageDescription" = "BIL zet spraak die je start voor maaltijdregistratie of BIL AI Coach om in tekst, zodat je die kunt controleren of verzenden.";

@@ -20,6 +20,7 @@ import 'user_profile.dart';
 import 'water_entries.dart';
 import 'weight_entries.dart';
 import 'connection/database_connection.dart';
+import 'database_scope.dart';
 
 part 'app_database.g.dart';
 
@@ -46,12 +47,25 @@ part 'app_database.g.dart';
   ],
 )
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(openDatabaseConnection());
+  AppDatabase({String? localOwnerId})
+    : localOwnerId = _normalizeOwnerId(localOwnerId),
+      localStorageScope = LocalDatabaseScope.keyForOwner(localOwnerId),
+      super(openDatabaseConnection(localOwnerId: localOwnerId));
 
-  AppDatabase.forTesting(super.executor);
+  AppDatabase.forTesting(super.executor)
+    : localOwnerId = null,
+      localStorageScope = 'test';
+
+  final String? localOwnerId;
+  final String localStorageScope;
+
+  static String? _normalizeOwnerId(String? value) {
+    final normalized = value?.trim() ?? '';
+    return normalized.isEmpty ? null : normalized;
+  }
 
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 21;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -65,6 +79,7 @@ class AppDatabase extends _$AppDatabase {
       await _createV7Indexes();
       await _createV12Indexes();
       await _createV17Indexes();
+      await _createCommunityFoodOutbox();
     },
     onUpgrade: (migrator, from, to) async {
       if (from < 2) {
@@ -204,6 +219,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 20) {
         await migrator.createTable(bodyMeasurementEntries);
       }
+      if (from < 21) {
+        await _createCommunityFoodOutbox();
+      }
     },
   );
 
@@ -211,6 +229,24 @@ class AppDatabase extends _$AppDatabase {
     await customStatement('''
       CREATE INDEX IF NOT EXISTS decision_outcome_transitions_memory_time_idx
       ON decision_outcome_transitions(decision_memory_id, occurred_at, id)
+    ''');
+  }
+
+  Future<void> _createCommunityFoodOutbox() async {
+    await customStatement('''
+      CREATE TABLE IF NOT EXISTS community_food_outbox (
+        local_food_uuid TEXT PRIMARY KEY NOT NULL,
+        operation TEXT NOT NULL CHECK (operation IN ('upsert', 'delete')),
+        payload_json TEXT NOT NULL,
+        attempt_count INTEGER NOT NULL DEFAULT 0,
+        next_attempt_at INTEGER,
+        last_error TEXT,
+        updated_at INTEGER NOT NULL
+      )
+    ''');
+    await customStatement('''
+      CREATE INDEX IF NOT EXISTS community_food_outbox_due_idx
+      ON community_food_outbox(next_attempt_at, updated_at)
     ''');
   }
 

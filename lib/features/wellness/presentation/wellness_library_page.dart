@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/bil_flagship_tokens.dart';
-import '../../ads/domain/ad_policy.dart';
-import '../../ads/presentation/safe_contextual_banner_slot.dart';
+import '../../ads/presentation/safe_free_ad_anchor.dart';
 import 'wellness_copy.dart';
 
 class WellnessLibraryPage extends StatefulWidget {
@@ -76,11 +75,8 @@ class _WellnessLibraryPageState extends State<WellnessLibraryPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 14),
-            const SafeContextualBannerSlot(
-              placement: AdPlacement.wellnessLibrary,
-            ),
             Row(
+              key: const Key('wellness-discovery-page-indicator'),
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
                 items.length,
@@ -97,6 +93,11 @@ class _WellnessLibraryPageState extends State<WellnessLibraryPage> {
                   ),
                 ),
               ),
+            ),
+            const SizedBox(height: 14),
+            const SafeFreeAdAnchor(
+              key: Key('wellness-discovery-free-ad-slot'),
+              surface: SafeFreeAdSurface.wellnessDiscovery,
             ),
             const SizedBox(height: 18),
           ],
@@ -124,7 +125,7 @@ class _WellnessLibraryPageState extends State<WellnessLibraryPage> {
       route: '/wellness/recipes',
     ),
     _WellnessItem(
-      asset: 'assets/images/flagship/bil_sleep_insights_v1.png',
+      asset: 'assets/images/flagship/bil_sleep_insights_v2.png',
       icon: Icons.bedtime_outlined,
       title: wellnessCopy(context, 'Sleep intelligence', 'ذكاء النوم'),
       subtitle: wellnessCopy(
@@ -155,7 +156,7 @@ class _WellnessLibraryPageState extends State<WellnessLibraryPage> {
         'لا يحسب BIL تمرينًا أو حرقًا دون سجل أو مصدر موثوق.',
       ),
       action: wellnessCopy(context, 'Add today’s workout', 'أضف تمرين اليوم'),
-      route: '/wellness/workouts',
+      route: '/wellness/workouts/routines',
     ),
     _WellnessItem(
       asset:

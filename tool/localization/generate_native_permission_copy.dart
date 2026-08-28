@@ -26,8 +26,13 @@ const _targets = <String, String>{
 
 const _delimiter = 'ZXQPNATIVEPERMISSION9X7ZXQP';
 const _brand = 'ZXQPBILBRAND9X7ZXQP';
+const _healthConnect = 'ZXQPHEALTHCONNECTBRAND9X7ZXQP';
 
-Future<void> main() async {
+Future<void> main(List<String> args) async {
+  if (args.contains('--android-only')) {
+    await _generateAndroidResources();
+    return;
+  }
   final source = File('ios/Runner/en.lproj/InfoPlist.strings');
   final rows = _parse(source.readAsStringSync());
   if (rows.length != 8) {
@@ -75,7 +80,85 @@ Future<void> main() async {
     file.writeAsStringSync(output.toString());
     stdout.writeln('WROTE ${target.key} (${rows.length})');
   }
+  await _generateAndroidResources();
 }
+
+Future<void> _generateAndroidResources() async {
+  const rows = <String, String>{
+    'app_name': 'BIL - Body Intelligence Log',
+    'health_permissions_rationale_title': 'Health data privacy',
+    'health_permissions_rationale_body':
+        'BIL requests only the Health Connect data types needed for features you choose to use. Your health data is processed locally by default. You can grant, deny, or revoke individual permissions at any time from Health Connect settings. BIL does not sell health data or use it for advertising.',
+  };
+  for (final target in _targets.entries) {
+    final protected = rows.values
+        .map(
+          (value) => value
+              .replaceAll('Health Connect', _healthConnect)
+              .replaceAll('BIL', _brand),
+        )
+        .join('\n$_delimiter\n');
+    final translated = await _translate(protected, target.value);
+    var values = translated
+        .split(_delimiter)
+        .map((value) => _restoreAndroidBrands(value.trim()))
+        .toList(growable: false);
+    if (values.length != rows.length || values.any((value) => value.isEmpty)) {
+      values = <String>[];
+      for (final source in rows.values) {
+        final translatedSource = await _translate(
+          source
+              .replaceAll('Health Connect', _healthConnect)
+              .replaceAll('BIL', _brand),
+          target.value,
+        );
+        values.add(_restoreAndroidBrands(translatedSource.trim()));
+      }
+    }
+    if (values.any((value) => value.contains('ZXQP'))) {
+      throw StateError('Android brand token survived for ${target.key}');
+    }
+    final output = StringBuffer()
+      ..writeln('<?xml version="1.0" encoding="utf-8"?>')
+      ..writeln('<resources>');
+    for (var index = 0; index < rows.length; index++) {
+      output.writeln(
+        '    <string name="${rows.keys.elementAt(index)}">'
+        '${_escapeXml(values[index])}</string>',
+      );
+    }
+    output.writeln('</resources>');
+    final directory = Directory(
+      'android/app/src/main/res/${_androidQualifier(target.key)}',
+    )..createSync(recursive: true);
+    File('${directory.path}/strings.xml').writeAsStringSync(output.toString());
+    stdout.writeln('WROTE Android ${target.key} (${rows.length})');
+  }
+}
+
+String _androidQualifier(String locale) => switch (locale) {
+  'pt-BR' => 'values-pt-rBR',
+  'pt-PT' => 'values-pt-rPT',
+  'zh-Hans' => 'values-b+zh+Hans',
+  'zh-Hant' => 'values-b+zh+Hant',
+  _ => 'values-$locale',
+};
+
+String _restoreAndroidBrands(String value) => value
+    .replaceAll(_healthConnect, 'Health Connect')
+    .replaceAllMapped(
+      RegExp(r'ZXQP[^\s<>]*HEALTHCONNECTBRAND9X7ZXQP'),
+      (_) => 'Health Connect',
+    )
+    .replaceAll(_brand, 'BIL')
+    .replaceAllMapped(RegExp(r'ZXQP[^\s<>]*BILBRAND9X7ZXQP'), (_) => 'BIL');
+
+String _escapeXml(String value) => value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", r"\'");
 
 String _polish(String value, String locale) => switch (locale) {
   'zh-Hans' => value.replaceAll('健康时间表', '健康时间线'),

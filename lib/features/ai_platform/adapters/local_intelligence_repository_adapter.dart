@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../../../data/database/app_database.dart';
+import '../../daily_log/domain/daily_body_context_codec.dart';
 import '../domain/local_intelligence_runtime.dart';
 import '../domain/decision_memory_history.dart';
 import '../domain/decision_memory_record.dart' as ai;
@@ -102,6 +103,11 @@ final class LocalIntelligenceRepositoryAdapter {
           .putIfAbsent(_key(row.occurredAt), () => <String>[])
           .add(row.type);
     }
+    for (final row in logs) {
+      contextsByDay
+          .putIfAbsent(row.dayKey, () => <String>[])
+          .addAll(DailyBodyContextCodec.engineTypes(row.notes));
+    }
 
     final memoryRows =
         await (database.select(database.decisionMemories)..where(
@@ -145,6 +151,8 @@ final class LocalIntelligenceRepositoryAdapter {
       final key = _key(day);
       final nutrient = nutrients[key] ?? _Nutrients();
       final log = logsByDay[key];
+      final contextTypes = contextsByDay[key]?.toSet().toList() ?? <String>[];
+      contextTypes.sort();
       days.add(
         LocalDailyPhysiology(
           day: day,
@@ -158,7 +166,7 @@ final class LocalIntelligenceRepositoryAdapter {
           waterMl: waterByDay[key] ?? 0,
           sleepHours: log?.sleepHours,
           steps: log?.steps,
-          contextTypes: contextsByDay[key] ?? const <String>[],
+          contextTypes: contextTypes,
         ),
       );
     }

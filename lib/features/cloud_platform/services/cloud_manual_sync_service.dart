@@ -3,7 +3,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../data/database/app_database.dart';
-import '../domain/cloud_identity_models.dart';
 import '../domain/cloud_platform_policy.dart';
 import '../domain/cloud_sync_models.dart';
 import 'aes_gcm_cloud_payload_cipher.dart';
@@ -30,6 +29,7 @@ enum CloudManualSyncDisposition {
 final class CloudManualSyncResult {
   const CloudManualSyncResult({
     required this.disposition,
+    this.completedAt,
     this.ownerId,
     this.enqueued = 0,
     this.pushed = 0,
@@ -37,9 +37,18 @@ final class CloudManualSyncResult {
     this.applied = 0,
     this.conflicts = 0,
     this.pending = 0,
-  });
+  }) : assert(
+         disposition == CloudManualSyncDisposition.completed
+             ? completedAt != null
+             : completedAt == null,
+         'Only a completed sync may expose its authoritative completion time.',
+       );
 
   final CloudManualSyncDisposition disposition;
+
+  /// Authoritative completion instant from [CloudSyncReport]. It is null for
+  /// every failed, blocked, offline, or unavailable attempt.
+  final DateTime? completedAt;
   final String? ownerId;
   final int enqueued;
   final int pushed;
@@ -54,18 +63,16 @@ final class CloudManualSyncResult {
 /// Explicit one-shot encrypted cloud synchronization.
 ///
 /// This service is intentionally not used by startup. It can run only after
-/// the server entitlement, explicit cloud-sync consent, local-owner boundary,
+/// the account capability, explicit cloud-sync consent, local-owner boundary,
 /// account key, authenticated Supabase session and real connectivity all pass.
 /// Nutrition remains excluded from the selective policy until its relational
 /// merge is closed separately.
 final class CloudManualSyncService {
   CloudManualSyncService({
-    required SupabaseClient client,
-    required AppDatabase database,
-    required LocalDataAccountBoundary accountBoundary,
-  }) : _client = client,
-       _database = database,
-       _accountBoundary = accountBoundary;
+    required this._client,
+    required this._database,
+    required this._accountBoundary,
+  });
 
   final SupabaseClient _client;
   final AppDatabase _database;
@@ -176,6 +183,7 @@ final class CloudManualSyncService {
 
       return CloudManualSyncResult(
         disposition: CloudManualSyncDisposition.completed,
+        completedAt: sync.completedAt.toUtc(),
         ownerId: ownerId,
         enqueued: produce.enqueued,
         pushed: sync.pushed,

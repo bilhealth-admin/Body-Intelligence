@@ -31,16 +31,14 @@ final class CloudRuntimeAccessDecision {
 ///
 /// No caller is allowed to create or run a network sync runtime until all four
 /// independent authorities agree: authenticated owner, local-data owner,
-/// server-verified Premium entitlement, and explicit cloud-sync consent.
+/// cloud-sync capability, and explicit cloud-sync consent. The basic
+/// capability is part of Free so account continuity is never paywalled.
 final class CloudRuntimeAccessGate {
   CloudRuntimeAccessGate({
-    required SupabaseClient client,
-    required LocalDataAccountBoundary accountBoundary,
-    ServerEntitlementRepository entitlementRepository =
-        const ServerEntitlementRepository(),
-  }) : _client = client,
-       _accountBoundary = accountBoundary,
-       _entitlementRepository = entitlementRepository;
+    required this._client,
+    required this._accountBoundary,
+    this._entitlementRepository = const ServerEntitlementRepository(),
+  });
 
   static const consentPurpose = 'cloud_sync';
   static const consentPolicyVersion = '1';

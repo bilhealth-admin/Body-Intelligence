@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/feature_strings.dart';
 import '../domain/wellness_content_pack.dart';
 import '../services/wellness_content_pack_manager.dart';
@@ -526,8 +527,9 @@ String _localized(
   String tr,
 ) => switch (Localizations.localeOf(context).languageCode) {
   'ar' => ar,
+  'en' => en,
   'fr' => fr,
   'es' => es,
   'tr' => tr,
-  _ => en,
+  _ => context.strings.text(en),
 };

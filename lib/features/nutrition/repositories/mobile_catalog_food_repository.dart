@@ -11,6 +11,7 @@ import '../services/food_foundation_integrity_engine.dart';
 import '../services/food_migration_engine.dart';
 import '../services/food_quality_engine.dart';
 import '../services/food_search_normalizer.dart';
+import '../services/food_search_assistance.dart';
 import '../services/offline_barcode_resolver.dart';
 import '../services/offline_food_search_pipeline.dart';
 
@@ -19,6 +20,7 @@ import '../services/offline_food_search_pipeline.dart';
 /// The repository understands only the compact BIL delivery schema. It never
 /// reads USDA tables or source-specific identifiers.
 class MobileCatalogFoodRepository implements UnifiedFoodRepository {
+  static const FoodSearchAssistance _searchAssistance = FoodSearchAssistance();
   final Database _database;
   final bool _ownsDatabase;
   List<UnifiedFood>? _cache;
@@ -112,14 +114,19 @@ class MobileCatalogFoodRepository implements UnifiedFoodRepository {
         ),
       );
     }
-    final ftsQuery = normalized
-        .split(RegExp(r'\s+'))
-        .where((token) => token.isNotEmpty)
-        .map((token) {
-          final escaped = token.replaceAll('"', '""');
-          return '"$escaped"*';
-        })
-        .join(' AND ');
+    final ftsQuery = _searchAssistance
+        .expand(query)
+        .map(
+          (term) => term
+              .split(RegExp(r'\s+'))
+              .where((token) => token.isNotEmpty)
+              .map((token) => '"${token.replaceAll('"', '""')}"*')
+              .join(' AND '),
+        )
+        .where((term) => term.isNotEmpty)
+        .map((term) => '($term)')
+        .join(' OR ');
+    if (ftsQuery.isEmpty) return const <FoodSearchHit>[];
     final ids = _database.select(
       'SELECT f.bil_food_id, bm25(food_fts) AS rank '
       'FROM food_fts JOIN food f ON f.bil_food_id = food_fts.bil_food_id '

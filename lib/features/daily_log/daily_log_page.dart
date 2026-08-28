@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,27 +11,33 @@ import '../../data/database/app_database.dart';
 import '../../data/database/nutrient_evidence.dart';
 import '../../data/repositories/meal_repository.dart';
 import '../../data/repositories/daily_log_repository.dart';
+import '../../data/repositories/food_repository.dart';
 import '../../data/repositories/nutrition_goal_schedule_repository.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/localization/bil_locale_policy.dart';
 import '../../app/localization/runtime_copy.dart';
 import '../../app/theme/premium_design_tokens.dart';
+import '../../app/services/runtime_permission_policy.dart';
+import '../../app/services/store_review_prompt_service.dart';
 import '../../shared/widgets/actionable_error_state.dart';
 import '../../shared/widgets/premium_surface.dart';
 import '../foods/providers/food_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../commerce/domain/commerce_entitlement.dart';
 import '../commerce/providers/commerce_providers.dart';
+import '../commerce/presentation/premium_barcode_access.dart';
+import '../commerce/presentation/premium_nutrition_glass.dart';
+import '../ads/presentation/safe_free_ad_anchor.dart';
 import '../settings/premium_meal_features_page.dart';
 import '../community/presentation/product_review_submission_dialog.dart';
 import '../nutrition/presentation/food_barcode_scanner_page.dart';
-import '../nutrition/presentation/meal_image_guide_launcher.dart';
 import '../nutrition/presentation/product_identity_copy.dart';
 import '../nutrition/presentation/barcode_food_review_dialog.dart';
 import '../nutrition/presentation/barcode_runtime_copy.dart';
 import '../nutrition/presentation/meal_vision_ui_copy.dart';
 import '../nutrition/presentation/meal_image_review_dialog.dart';
 import '../nutrition/services/food_search_assistance.dart';
+import '../nutrition/services/food_presentation_localizer.dart';
 import '../nutrition/services/meal_image_analysis_service.dart';
 import '../nutrition/services/meal_voice_input_service.dart';
 import '../nutrition/services/bil_speech_to_text.dart';
@@ -42,10 +49,14 @@ import 'presentation/daily_log_summary_widgets.dart';
 import 'presentation/daily_log_input_sections.dart';
 import 'presentation/daily_log_meals_list.dart';
 import 'presentation/quick_macro_entry_dialog.dart';
-import 'water_mutation_coordinator.dart';
 
 part 'daily_log_page_actions.dart';
 part 'daily_log_meal_entry.dart';
+part 'daily_log_meal_search.dart';
+part 'daily_log_mutation_actions.dart';
+part 'daily_log_capture_actions.dart';
+part 'daily_log_copy.dart';
+part 'daily_log_meal_entry_components.dart';
 
 class DailyLogPage extends ConsumerStatefulWidget {
   const DailyLogPage({
@@ -68,34 +79,41 @@ class DailyLogPage extends ConsumerStatefulWidget {
 class _DailyLogPageState extends ConsumerState<DailyLogPage> {
   final notes = TextEditingController();
   final exerciseNotes = TextEditingController();
-  final water = TextEditingController(text: '250');
   final quantity = TextEditingController(text: '100');
   final foodSearch = SearchController();
   static const FoodSearchAssistance _searchAssistance = FoodSearchAssistance();
   final scrollController = ScrollController();
   final mealEntryKey = GlobalKey();
-  final waterSectionKey = GlobalKey();
   final exerciseSectionKey = GlobalKey();
   bool mealFocusApplied = false;
   bool initialActionApplied = false;
   String? initialActionInFlight;
-  late final WaterMutationCoordinator waterMutations;
-  bool get waterSaving => waterMutations.busy;
   bool mealSaving = false;
   bool mealImageBusy = false;
+  bool mealSearchActive = false;
   Food? selectedFood;
+  int? expandedNutritionFactsFoodId;
   String mealType = 'breakfast';
+  String mealQuantityUnit = 'g';
 
   void _updateState(VoidCallback update) => setState(update);
+
+  void _openFoodSearchAfterBuild([int attempt = 0]) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (foodSearch.isAttached) {
+        foodSearch.openView();
+        return;
+      }
+      // SearchAnchor is inserted by the same state change that exposes the
+      // meal-entry surface. On slower devices it may attach one frame later.
+      if (attempt < 3) _openFoodSearchAfterBuild(attempt + 1);
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    waterMutations = WaterMutationCoordinator(
-      onBusyChanged: (_) {
-        if (mounted) setState(() {});
-      },
-    );
     if (const {
       'breakfast',
       'lunch',
@@ -105,7 +123,11 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       mealType = widget.initialMealType!;
     }
     if (widget.focusMealEntry) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _focusMealEntry());
+      mealSearchActive = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _focusMealEntry();
+        _openFoodSearchAfterBuild();
+      });
     }
     if (widget.initialAction != null) {
       WidgetsBinding.instance.addPostFrameCallback(
@@ -120,7 +142,11 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     final actionChanged = oldWidget.initialAction != widget.initialAction;
     if (!oldWidget.focusMealEntry && widget.focusMealEntry) {
       mealFocusApplied = false;
-      WidgetsBinding.instance.addPostFrameCallback((_) => _focusMealEntry());
+      mealSearchActive = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _focusMealEntry();
+        _openFoodSearchAfterBuild();
+      });
     }
     if (widget.initialAction != null && actionChanged) {
       initialActionApplied = false;
@@ -145,7 +171,8 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
         case 'photo':
           await _analyzeMealImage();
         case 'water':
-          await _reveal(waterSectionKey);
+          final origin = Uri.encodeComponent(widget.returnPath ?? '/daily-log');
+          context.go('/daily-log/water?from=$origin');
         case 'notes':
           final location = Uri(
             path: '/daily-log/body-context',
@@ -195,11 +222,21 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     );
   }
 
+  void _leaveMealDetail() {
+    if (widget.focusMealEntry) {
+      context.go(widget.returnPath ?? '/daily-log');
+      return;
+    }
+    _updateState(() {
+      selectedFood = null;
+      mealSearchActive = false;
+    });
+  }
+
   @override
   void dispose() {
     notes.dispose();
     exerciseNotes.dispose();
-    water.dispose();
     quantity.dispose();
     foodSearch.dispose();
     scrollController.dispose();
@@ -215,15 +252,43 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     return _dailyLogCopy[en]?[locale] ?? context.strings.text(en);
   }
 
-  String _unit(String value) {
-    if (!_arabic) return value;
-    return switch (value.toLowerCase()) {
-      'g' => 'جم',
-      'mg' => 'مجم',
-      'ml' => 'مل',
-      'kcal' => 'سعرة',
-      _ => value,
-    };
+  Future<void> _showDiaryCopyOptions() async {
+    final selection = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.history_rounded),
+              title: Text(_tr('Previous day', 'اليوم السابق')),
+              subtitle: Text(
+                _tr('Copy all meals from yesterday.', 'انسخ جميع وجبات الأمس.'),
+              ),
+              onTap: () => Navigator.pop(sheetContext, 'previous'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.date_range_rounded),
+              title: Text(_tr('Choose days', 'اختيار أيام')),
+              subtitle: Text(
+                _tr(
+                  'Copy this diary to one or more dates.',
+                  'انسخ هذه اليوميات إلى تاريخ واحد أو أكثر.',
+                ),
+              ),
+              onTap: () => Navigator.pop(sheetContext, 'multiple'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted) return;
+    if (selection == 'previous') {
+      await _copyPreviousDayMeals();
+    } else if (selection == 'multiple') {
+      await _copyToMultipleDays();
+    }
   }
 
   @override
@@ -267,7 +332,6 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     final alwaysShowWater =
         ref.watch(dailyLogPreferenceProvider('diary.alwaysShowWater')).value ??
         true;
-    final usualMeals = ref.watch(usualMealsProvider(mealType));
     ref.listen(selectedDailyLogProvider, (_, next) {
       next.whenData((log) {
         final value = log?.notes ?? '';
@@ -278,281 +342,451 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
         }
       });
     });
-    final mutationBusy = mealSaving || waterSaving;
+    final mutationBusy = mealSaving;
+    final today = DateUtils.dateOnly(DateTime.now());
+    final latestPlannableDate = DateTime(
+      today.year + 1,
+      today.month,
+      today.day,
+    );
+    final mealRows = meals.value ?? const <MealWithItems>[];
+    MealWithItems? focusedMeal;
+    for (final row in mealRows) {
+      if (row.meal.type == mealType) {
+        focusedMeal = row;
+        break;
+      }
+    }
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop || mutationBusy) return;
+        if (selectedFood != null) {
+          _updateState(() {
+            selectedFood = null;
+          });
+          return;
+        }
+        if (mealSearchActive || widget.focusMealEntry) {
+          _leaveMealDetail();
+          return;
+        }
         context.go(widget.returnPath ?? '/dashboard');
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(context.strings.text('Diary')),
-          actions: [
-            IconButton(
-              key: const Key('daily-log-copy-multiple-days'),
-              tooltip: _tr('Copy to multiple days', 'نسخ إلى عدة أيام'),
-              onPressed: mutationBusy ? null : _copyToMultipleDays,
-              icon: const Icon(Icons.date_range_rounded),
-            ),
-            IconButton(
-              key: const Key('daily-log-copy-previous-day'),
-              tooltip: _tr('Copy previous day meals', 'نسخ وجبات اليوم السابق'),
-              onPressed: mutationBusy ? null : _copyPreviousDayMeals,
-              icon: const Icon(Icons.content_copy_rounded),
-            ),
-          ],
-          leading: BackButton(
-            onPressed: mutationBusy
-                ? null
-                : () {
-                    if (context.canPop()) {
-                      context.pop();
-                    } else {
-                      context.go(widget.returnPath ?? '/dashboard');
-                    }
-                  },
-          ),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark.copyWith(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.light,
         ),
-        body: Semantics(
-          container: true,
-          child: foods.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, _) => ActionableErrorState(
-              title: context.strings.text('Could not load the food catalog.'),
-              onRetry: () => ref.invalidate(foodsProvider),
-            ),
-            data: (items) {
-              if (mealCalorieState.isLoading || mealMacroState.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (mealCalorieState.hasError || mealMacroState.hasError) {
-                return ActionableErrorState(
+        child: Scaffold(
+          backgroundColor: const Color(0xFFF5F5F8),
+          body: SafeArea(
+            bottom: false,
+            child: Semantics(
+              container: true,
+              child: foods.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, _) => ActionableErrorState(
                   title: context.strings.text(
-                    'Meal display settings could not be loaded.',
+                    'Could not load the food catalog.',
                   ),
-                  onRetry: () {
-                    ref.invalidate(mealCalorieGoalsProvider);
-                    ref.invalidate(mealMacroDisplayProvider);
-                  },
-                );
-              }
-              if (widget.focusMealEntry && !mealFocusApplied) {
-                WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => _focusMealEntry(),
-                );
-              }
-              return ListView(
-                controller: scrollController,
-                padding: PremiumDesignTokens.screenPadding.add(
-                  const EdgeInsets.only(bottom: 116),
+                  onRetry: () => ref.invalidate(foodsProvider),
                 ),
-                children: [
-                  if (!widget.focusMealEntry) ...[
-                    Semantics(
-                      header: true,
-                      child: Text(
-                        _tr('Record your day', 'سجّل يومك'),
-                        style: PremiumDesignTokens.screenHeading(context),
+                data: (items) {
+                  if (mealCalorieState.isLoading || mealMacroState.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (mealCalorieState.hasError || mealMacroState.hasError) {
+                    return ActionableErrorState(
+                      title: context.strings.text(
+                        'Meal display settings could not be loaded.',
                       ),
-                    ),
-                    const SizedBox(height: PremiumDesignTokens.spaceSm),
-                    DiaryDateNavigator(
-                      date: date,
-                      arabic: _arabic,
-                      onPrevious: mutationBusy
-                          ? null
-                          : () =>
-                                ref
-                                    .read(selectedLogDateProvider.notifier)
-                                    .state = date.subtract(
-                                  const Duration(days: 1),
-                                ),
-                      onNext:
-                          date.isBefore(
-                            DateTime(
-                              DateTime.now().year,
-                              DateTime.now().month,
-                              DateTime.now().day,
+                      onRetry: () {
+                        ref.invalidate(mealCalorieGoalsProvider);
+                        ref.invalidate(mealMacroDisplayProvider);
+                      },
+                    );
+                  }
+                  if (widget.focusMealEntry && !mealFocusApplied) {
+                    WidgetsBinding.instance.addPostFrameCallback(
+                      (_) => _focusMealEntry(),
+                    );
+                  }
+                  if (selectedFood != null) {
+                    return ListView(
+                      key: const Key('daily-log-focused-food-detail'),
+                      controller: scrollController,
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                        16,
+                        0,
+                        16,
+                        48,
+                      ),
+                      children: [
+                        SizedBox(
+                          height: 56,
+                          child: Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: BackButton(
+                              onPressed: mutationBusy
+                                  ? null
+                                  : () {
+                                      _updateState(() => selectedFood = null);
+                                      _openFoodSearchAfterBuild();
+                                    },
                             ),
-                          )
-                          ? mutationBusy
-                                ? null
-                                : () =>
-                                      ref
-                                          .read(
-                                            selectedLogDateProvider.notifier,
-                                          )
-                                          .state = date.add(
-                                        const Duration(days: 1),
-                                      )
-                          : null,
-                      onPick: mutationBusy
-                          ? null
-                          : () async {
-                              final picked = await showDatePicker(
-                                context: context,
-                                initialDate: date,
-                                firstDate: DateTime(2000),
-                                lastDate: DateTime.now().add(
-                                  const Duration(days: 1),
+                          ),
+                        ),
+                        _buildMealEntry(),
+                      ],
+                    );
+                  }
+                  if (mealSearchActive || widget.focusMealEntry) {
+                    return ListView(
+                      key: const Key('daily-log-focused-meal-page'),
+                      controller: scrollController,
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                        16,
+                        0,
+                        16,
+                        48,
+                      ),
+                      children: [
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(minHeight: 64),
+                          child: Row(
+                            children: [
+                              BackButton(
+                                key: const Key('daily-meal-detail-back'),
+                                onPressed: mutationBusy
+                                    ? null
+                                    : _leaveMealDetail,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      key: const Key('daily-meal-detail-title'),
+                                      context.strings.text(
+                                        '${mealType[0].toUpperCase()}${mealType.substring(1)}',
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w900,
+                                            letterSpacing: -0.5,
+                                          ),
+                                    ),
+                                    Text(
+                                      intl.DateFormat.yMMMd(
+                                        _mealLocale,
+                                      ).format(date),
+                                      maxLines: 1,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onSurfaceVariant,
+                                          ),
+                                    ),
+                                  ],
                                 ),
-                              );
-                              if (picked != null) {
-                                ref
+                              ),
+                            ],
+                          ),
+                        ),
+                        _buildMealEntry(),
+                        const SizedBox(height: 12),
+                        DailyMealDetailSummary(
+                          meal: focusedMeal,
+                          calorieGoal: mealCalorieGoals[mealType],
+                        ),
+                        const SizedBox(height: 12),
+                        DailyMealDetailItems(
+                          meal: focusedMeal,
+                          onEdit: _editMealItem,
+                          onActions: _showItemActions,
+                        ),
+                      ],
+                    );
+                  }
+                  return ListView(
+                    controller: scrollController,
+                    padding: const EdgeInsetsDirectional.fromSTEB(
+                      16,
+                      0,
+                      16,
+                      196,
+                    ),
+                    children: [
+                      if (!widget.focusMealEntry) ...[
+                        DiaryDateNavigator(
+                          date: date,
+                          arabic: _arabic,
+                          onBack: mutationBusy
+                              ? null
+                              : () {
+                                  if (context.canPop()) {
+                                    context.pop();
+                                  } else {
+                                    context.go(
+                                      widget.returnPath ?? '/dashboard',
+                                    );
+                                  }
+                                },
+                          onPrevious: mutationBusy
+                              ? null
+                              : () =>
+                                    ref
                                         .read(selectedLogDateProvider.notifier)
-                                        .state =
-                                    picked;
-                              }
-                            },
-                    ),
-                    const SizedBox(height: PremiumDesignTokens.spaceSm),
-                  ],
-                  DailyLogSnapshot(
-                    arabic: _arabic,
-                    meals: meals.value ?? const [],
-                    water: waterEntries.value ?? const [],
-                  ),
-                  const SizedBox(height: PremiumDesignTokens.spaceSm),
-                  _buildMealEntry(usualMeals: usualMeals, date: date),
-                  const SizedBox(height: PremiumDesignTokens.spaceSm),
-                  DailyMealsList(
-                    arabic: _arabic,
-                    meals: meals,
-                    showEmptyMealSlots: showAllMeals,
-                    showFoodInsights: showFoodInsights,
-                    showFoodTimestamps: showFoodTimestamps,
-                    useNetCarbs: useNetCarbs,
-                    dailyGoal: goalSchedule.targetFor(date),
-                    mealGoals: goalSchedule.mealTargets,
-                    mealCalorieGoals: mealCalorieGoals,
-                    mealMacroDisplay: mealMacroDisplay,
-                    onAdd: (type) {
-                      _updateState(() {
-                        mealType = type;
-                        selectedFood = null;
-                      });
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) foodSearch.openView();
-                      });
-                    },
-                    onEdit: _editMealItem,
-                    onActions: _showItemActions,
-                  ),
-                  const SizedBox(height: PremiumDesignTokens.spaceLg),
-                  if (alwaysShowWater ||
-                      (waterEntries.value?.isNotEmpty ?? false)) ...[
-                    DailyWaterSection(
-                      key: waterSectionKey,
-                      arabic: _arabic,
-                      controller: water,
-                      entries: waterEntries,
-                      saving: waterSaving,
-                      onAdd: _addWater,
-                      onDelete: _deleteWater,
-                      onRetry: () => ref.invalidate(dailyWaterProvider),
-                    ),
-                    const SizedBox(height: PremiumDesignTokens.spaceLg),
-                  ],
-                  DailyExerciseSection(
-                    key: exerciseSectionKey,
-                    arabic: _arabic,
-                    controller: exerciseNotes,
-                    onBrowseWorkouts: () => context.push('/wellness/workouts'),
-                  ),
-                  const SizedBox(height: PremiumDesignTokens.spaceLg),
-                  PremiumSurface(
-                    key: const Key('daily-log-body-context-link'),
-                    padding: EdgeInsets.zero,
-                    child: ListTile(
-                      contentPadding: PremiumDesignTokens.cardPaddingLarge,
-                      leading: const Icon(Icons.accessibility_new_rounded),
-                      title: Text(_tr('Body context', 'سياق الجسم')),
-                      subtitle: Text(
-                        _tr(
-                          'Add sleep, travel, stress, hydration, and other context on a focused page.',
-                          'أضف النوم والسفر والإجهاد والترطيب والسياقات الأخرى في صفحة مخصصة.',
+                                        .state = date.subtract(
+                                      const Duration(days: 1),
+                                    ),
+                          onNext: date.isBefore(latestPlannableDate)
+                              ? mutationBusy
+                                    ? null
+                                    : () =>
+                                          ref
+                                              .read(
+                                                selectedLogDateProvider
+                                                    .notifier,
+                                              )
+                                              .state = date.add(
+                                            const Duration(days: 1),
+                                          )
+                              : null,
+                          onPick: mutationBusy
+                              ? null
+                              : () async {
+                                  final picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: date,
+                                    firstDate: DateTime(2000),
+                                    lastDate: latestPlannableDate,
+                                  );
+                                  if (picked != null) {
+                                    ref
+                                            .read(
+                                              selectedLogDateProvider.notifier,
+                                            )
+                                            .state =
+                                        picked;
+                                  }
+                                },
                         ),
-                      ),
-                      trailing: const Icon(Icons.chevron_right_rounded),
-                      onTap: () => context.push('/daily-log/body-context'),
-                    ),
-                  ),
-                  const SizedBox(height: PremiumDesignTokens.spaceLg),
-                  PremiumSurface(
-                    key: const Key('daily-log-lifecycle-card'),
-                    child: ledger.when(
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                      error: (_, _) => ActionableErrorState(
-                        title: _tr(
-                          'Diary status could not be loaded.',
-                          'تعذر تحميل حالة اليوميات.',
+                        const SizedBox(height: 8),
+                        DailyLogSnapshot(
+                          key: const Key('daily-log-today-summary'),
+                          arabic: _arabic,
+                          meals: meals.value ?? const [],
+                          water: waterEntries.value ?? const [],
+                          calorieGoal: goalSchedule.targetFor(date)?.calories,
                         ),
-                        onRetry: () =>
-                            ref.invalidate(selectedDailyLedgerProvider),
-                      ),
-                      data: (snapshot) => Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            snapshot.state == DayLifecycleState.closed
-                                ? _tr('Diary completed', 'اكتملت اليوميات')
-                                : _tr('Complete diary', 'إكمال اليوميات'),
-                            style: PremiumDesignTokens.cardHeading(context),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            snapshot.state == DayLifecycleState.closed
-                                ? _tr(
-                                    'This day is frozen as a reviewed nutrition snapshot. Reopen it before making changes.',
-                                    'تم تثبيت هذا اليوم كلقطة تغذية تمت مراجعتها. أعد فتحه قبل إجراء تغييرات.',
-                                  )
-                                : _tr(
-                                    'Review today’s entries, then complete the diary to preserve an authoritative snapshot.',
-                                    'راجع مدخلات اليوم، ثم أكمل اليوميات لحفظ لقطة موثوقة.',
-                                  ),
-                          ),
-                          const SizedBox(height: 12),
-                          FilledButton.tonalIcon(
-                            key: Key(
-                              snapshot.state == DayLifecycleState.closed
-                                  ? 'daily-log-reopen-day'
-                                  : 'daily-log-complete-day',
+                        const SizedBox(height: 12),
+                        Row(
+                          key: const Key('daily-log-action-row'),
+                          children: [
+                            Expanded(
+                              child: KeyedSubtree(
+                                key: const Key('daily-log-copy-previous-day'),
+                                child: _DiaryActionButton(
+                                  key: const Key('daily-log-action-copy'),
+                                  icon: Icons.copy_all_rounded,
+                                  label: _tr('Copy from', 'نسخ من'),
+                                  onPressed: mutationBusy
+                                      ? null
+                                      : _showDiaryCopyOptions,
+                                ),
+                              ),
                             ),
-                            onPressed:
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: KeyedSubtree(
+                                key: const Key('daily-log-edit-settings'),
+                                child: _DiaryActionButton(
+                                  key: const Key('daily-log-action-edit'),
+                                  icon: Icons.edit_outlined,
+                                  label: _tr('Edit', 'تعديل'),
+                                  onPressed: mutationBusy
+                                      ? null
+                                      : () => context.push('/settings/diary'),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SafeFreeAdAnchor(
+                          key: Key('daily-log-free-ad-slot'),
+                          surface: SafeFreeAdSurface.dailyLog,
+                        ),
+                        const SizedBox(height: 12),
+                      ] else
+                        SizedBox(
+                          height: 56,
+                          child: Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: BackButton(
+                              onPressed: mutationBusy
+                                  ? null
+                                  : () {
+                                      if (context.canPop()) {
+                                        context.pop();
+                                      } else {
+                                        context.go(
+                                          widget.returnPath ?? '/dashboard',
+                                        );
+                                      }
+                                    },
+                            ),
+                          ),
+                        ),
+                      DailyMealsList(
+                        arabic: _arabic,
+                        meals: meals,
+                        showEmptyMealSlots: showAllMeals,
+                        showFoodInsights: showFoodInsights,
+                        showFoodTimestamps: showFoodTimestamps,
+                        useNetCarbs: useNetCarbs,
+                        dailyGoal: goalSchedule.targetFor(date),
+                        mealGoals: goalSchedule.mealTargets,
+                        mealCalorieGoals: mealCalorieGoals,
+                        mealMacroDisplay: mealMacroDisplay,
+                        onAdd: (type) {
+                          _updateState(() {
+                            mealType = type;
+                            selectedFood = null;
+                            mealSearchActive = true;
+                          });
+                          _openFoodSearchAfterBuild();
+                        },
+                        onEdit: _editMealItem,
+                        onActions: _showItemActions,
+                      ),
+                      const SizedBox(height: PremiumDesignTokens.spaceSm),
+                      if (alwaysShowWater ||
+                          (waterEntries.value?.isNotEmpty ?? false)) ...[
+                        DailyWaterShortcut(
+                          entries: waterEntries,
+                          onTap: () => context.push(
+                            '/daily-log/water?from=${Uri.encodeComponent('/daily-log')}',
+                          ),
+                        ),
+                        const SizedBox(height: PremiumDesignTokens.spaceSm),
+                      ],
+                      DailyExerciseSection(
+                        key: exerciseSectionKey,
+                        arabic: _arabic,
+                        controller: exerciseNotes,
+                        onBrowseWorkouts: () =>
+                            context.push('/wellness/workouts'),
+                      ),
+                      const SizedBox(height: PremiumDesignTokens.spaceLg),
+                      PremiumSurface(
+                        key: const Key('daily-log-body-context-link'),
+                        padding: EdgeInsets.zero,
+                        child: ListTile(
+                          contentPadding: PremiumDesignTokens.cardPaddingLarge,
+                          leading: const Icon(Icons.accessibility_new_rounded),
+                          title: Text(_tr('Body context', 'سياق الجسم')),
+                          subtitle: Text(
+                            _tr(
+                              'Add sleep, travel, stress, hydration, and other context on a focused page.',
+                              'أضف النوم والسفر والإجهاد والترطيب والسياقات الأخرى في صفحة مخصصة.',
+                            ),
+                          ),
+                          trailing: const Icon(Icons.chevron_right_rounded),
+                          onTap: () => context.push('/daily-log/body-context'),
+                        ),
+                      ),
+                      const SizedBox(height: PremiumDesignTokens.spaceLg),
+                      PremiumSurface(
+                        key: const Key('daily-log-lifecycle-card'),
+                        child: ledger.when(
+                          loading: () =>
+                              const Center(child: CircularProgressIndicator()),
+                          error: (_, _) => ActionableErrorState(
+                            title: _tr(
+                              'Diary status could not be loaded.',
+                              'تعذر تحميل حالة اليوميات.',
+                            ),
+                            onRetry: () =>
+                                ref.invalidate(selectedDailyLedgerProvider),
+                          ),
+                          data: (snapshot) => Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
                                 snapshot.state == DayLifecycleState.closed
-                                ? _reopenDiary
-                                : _completeDiary,
-                            icon: Icon(
-                              snapshot.state == DayLifecycleState.closed
-                                  ? Icons.lock_open_rounded
-                                  : Icons.task_alt_rounded,
-                            ),
-                            label: Text(
-                              snapshot.state == DayLifecycleState.closed
-                                  ? _tr('Reopen diary', 'إعادة فتح اليوميات')
-                                  : _tr('Complete diary', 'إكمال اليوميات'),
-                            ),
+                                    ? _tr('Diary completed', 'اكتملت اليوميات')
+                                    : _tr('Complete diary', 'إكمال اليوميات'),
+                                style: PremiumDesignTokens.cardHeading(context),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                snapshot.state == DayLifecycleState.closed
+                                    ? _tr(
+                                        'This day is frozen as a reviewed nutrition snapshot. Reopen it before making changes.',
+                                        'تم تثبيت هذا اليوم كلقطة تغذية تمت مراجعتها. أعد فتحه قبل إجراء تغييرات.',
+                                      )
+                                    : _tr(
+                                        'Review today’s entries, then complete the diary to preserve an authoritative snapshot.',
+                                        'راجع مدخلات اليوم، ثم أكمل اليوميات لحفظ لقطة موثوقة.',
+                                      ),
+                              ),
+                              const SizedBox(height: 12),
+                              FilledButton.tonalIcon(
+                                key: Key(
+                                  snapshot.state == DayLifecycleState.closed
+                                      ? 'daily-log-reopen-day'
+                                      : 'daily-log-complete-day',
+                                ),
+                                onPressed:
+                                    snapshot.state == DayLifecycleState.closed
+                                    ? _reopenDiary
+                                    : _completeDiary,
+                                icon: Icon(
+                                  snapshot.state == DayLifecycleState.closed
+                                      ? Icons.lock_open_rounded
+                                      : Icons.task_alt_rounded,
+                                ),
+                                label: Text(
+                                  snapshot.state == DayLifecycleState.closed
+                                      ? _tr(
+                                          'Reopen diary',
+                                          'إعادة فتح اليوميات',
+                                        )
+                                      : _tr('Complete diary', 'إكمال اليوميات'),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: PremiumDesignTokens.spaceLg),
-                  Semantics(
-                    button: true,
-                    label: context.strings.text('Save log'),
-                    child: FilledButton(
-                      key: const Key('daily_log_save_primary_action'),
-                      onPressed: _save,
-                      child: Text(context.strings.text('Save log')),
-                    ),
-                  ),
-                ],
-              );
-            },
+                      const SizedBox(height: PremiumDesignTokens.spaceLg),
+                      Semantics(
+                        button: true,
+                        label: context.strings.text('Save log'),
+                        child: FilledButton(
+                          key: const Key('daily_log_save_primary_action'),
+                          onPressed: _save,
+                          child: Text(context.strings.text('Save log')),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
           ),
         ),
       ),
@@ -566,157 +800,4 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     }
     return value;
   }
-}
-
-const _dailyLogCopy = <String, Map<String, String>>{
-  'Quick Add macros': {
-    'fr': 'Ajout rapide des macros',
-    'es': 'Añadir macros rápidamente',
-    'tr': 'Makroları hızlı ekle',
-  },
-  'Calories': {'fr': 'Calories', 'es': 'Calorías', 'tr': 'Kalori'},
-  'Protein (g)': {
-    'fr': 'Protéines (g)',
-    'es': 'Proteínas (g)',
-    'tr': 'Protein (g)',
-  },
-  'Carbohydrates (g)': {
-    'fr': 'Glucides (g)',
-    'es': 'Carbohidratos (g)',
-    'tr': 'Karbonhidrat (g)',
-  },
-  'Fat (g)': {'fr': 'Lipides (g)', 'es': 'Grasas (g)', 'tr': 'Yağ (g)'},
-  'Time': {'fr': 'Heure', 'es': 'Hora', 'tr': 'Saat'},
-  'Add': {'fr': 'Ajouter', 'es': 'Añadir', 'tr': 'Ekle'},
-  'Enter at least one valid calorie or macro value.': {
-    'fr': 'Saisissez au moins une valeur valide de calories ou de macros.',
-    'es': 'Introduce al menos un valor válido de calorías o macros.',
-    'tr': 'En az bir geçerli kalori veya makro değeri girin.',
-  },
-  'Quick Add saved locally.': {
-    'fr': 'Ajout rapide enregistré localement.',
-    'es': 'La adición rápida se guardó localmente.',
-    'tr': 'Hızlı ekleme yerel olarak kaydedildi.',
-  },
-  'Copy to multiple days': {
-    'fr': 'Copier vers plusieurs jours',
-    'es': 'Copiar a varios días',
-    'tr': 'Birden fazla güne kopyala',
-  },
-  'Choose how many upcoming empty days receive this diary. Existing days are never replaced.': {
-    'fr':
-        'Choisissez le nombre de jours vides à venir qui recevront ce journal. Les jours existants ne sont jamais remplacés.',
-    'es':
-        'Elige cuántos días vacíos próximos recibirán este diario. Los días existentes nunca se reemplazan.',
-    'tr':
-        'Bu günlüğün kopyalanacağı boş gelecek gün sayısını seçin. Mevcut günler asla değiştirilmez.',
-  },
-  'One of the selected days already has meals. Nothing was copied.': {
-    'fr':
-        'Un des jours sélectionnés contient déjà des repas. Rien n’a été copié.',
-    'es':
-        'Uno de los días seleccionados ya contiene comidas. No se copió nada.',
-    'tr': 'Seçilen günlerden birinde zaten öğün var. Hiçbir şey kopyalanmadı.',
-  },
-  'Diary copied to {count} days.': {
-    'fr': 'Journal copié vers {count} jours.',
-    'es': 'Diario copiado a {count} días.',
-    'tr': 'Günlük {count} güne kopyalandı.',
-  },
-  'Copy previous day meals': {
-    'fr': 'Copier les repas de la veille',
-    'es': 'Copiar las comidas del día anterior',
-    'tr': 'Önceki günün öğünlerini kopyala',
-  },
-  'Record your day': {
-    'fr': 'Consignez votre journée',
-    'es': 'Registra tu día',
-    'tr': 'Gününüzü kaydedin',
-  },
-  'Body context': {
-    'fr': 'Contexte du corps',
-    'es': 'Contexto corporal',
-    'tr': 'Beden bağlamı',
-  },
-  'Add sleep, travel, stress, hydration, and other context on a focused page.': {
-    'fr':
-        'Ajoutez le sommeil, les voyages, le stress, l’hydratation et d’autres éléments sur une page dédiée.',
-    'es':
-        'Añade sueño, viajes, estrés, hidratación y otros datos en una página específica.',
-    'tr':
-        'Uyku, seyahat, stres, sıvı alımı ve diğer bağlamları özel bir sayfada ekleyin.',
-  },
-  'Copy yesterday’s meals?': {
-    'fr': 'Copier les repas d’hier ?',
-    'es': '¿Copiar las comidas de ayer?',
-    'tr': 'Dünün öğünleri kopyalansın mı?',
-  },
-  'Cancel': {'fr': 'Annuler', 'es': 'Cancelar', 'tr': 'İptal'},
-  'Copy': {'fr': 'Copier', 'es': 'Copiar', 'tr': 'Kopyala'},
-  'Edit quantity': {
-    'fr': 'Modifier la quantité',
-    'es': 'Editar cantidad',
-    'tr': 'Miktarı düzenle',
-  },
-  'Duplicate item': {
-    'fr': 'Dupliquer l’élément',
-    'es': 'Duplicar elemento',
-    'tr': 'Öğeyi çoğalt',
-  },
-  'Copies the same quantity and saved nutrition snapshot.': {
-    'fr': 'Copie la même quantité et l’instantané nutritionnel enregistré.',
-    'es': 'Copia la misma cantidad y la instantánea nutricional guardada.',
-    'tr': 'Aynı miktarı ve kaydedilmiş besin anlık görüntüsünü kopyalar.',
-  },
-  'Remove favorite': {
-    'fr': 'Retirer des favoris',
-    'es': 'Quitar de favoritos',
-    'tr': 'Favorilerden kaldır',
-  },
-  'Add favorite': {
-    'fr': 'Ajouter aux favoris',
-    'es': 'Añadir a favoritos',
-    'tr': 'Favorilere ekle',
-  },
-  'Delete from meal': {
-    'fr': 'Supprimer du repas',
-    'es': 'Eliminar de la comida',
-    'tr': 'Öğünden sil',
-  },
-  'Submit for review': {
-    'fr': 'Envoyer pour vérification',
-    'es': 'Enviar para revisión',
-    'tr': 'İncelemeye gönder',
-  },
-  'Image analysis unavailable': {
-    'fr': 'Analyse d’image indisponible',
-    'es': 'El análisis de imágenes no está disponible',
-    'tr': 'Görüntü analizi kullanılamıyor',
-  },
-  'OK': {'fr': 'OK', 'es': 'Aceptar', 'tr': 'Tamam'},
-  'Take a photo': {
-    'fr': 'Prendre une photo',
-    'es': 'Hacer una foto',
-    'tr': 'Fotoğraf çek',
-  },
-  'Choose from device': {
-    'fr': 'Choisir sur l’appareil',
-    'es': 'Elegir del dispositivo',
-    'tr': 'Cihazdan seç',
-  },
-  'Review image suggestions': {
-    'fr': 'Vérifier les suggestions de l’image',
-    'es': 'Revisar las sugerencias de la imagen',
-    'tr': 'Görüntü önerilerini incele',
-  },
-};
-double? dailyLogAmountInGrams({required double amount, required String unit}) {
-  if (!amount.isFinite || amount <= 0) return null;
-  return switch (unit.trim().toLowerCase()) {
-    'kg' || 'kgs' || 'kilogram' || 'kilograms' => amount * 1000,
-    'oz' || 'ozs' || 'ounce' || 'ounces' => amount * 28.349523125,
-    'lb' || 'lbs' || 'pound' || 'pounds' => amount * 453.59237,
-    'mg' || 'mgs' || 'milligram' || 'milligrams' => amount / 1000,
-    _ => amount,
-  };
 }

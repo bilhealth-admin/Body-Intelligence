@@ -15,7 +15,13 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "artifacts/meal_catalog/recipe_canonical_100_verified.json"
 CLEAN_LOCALIZATION_SOURCE = ROOT / "artifacts/meal_catalog/recipe_canonical_100.json"
 TARGET = ROOT / "artifacts/meal_catalog/recipe_canonical_1500.json"
+GENERATED_TERMS_SOURCE = ROOT / "artifacts/meal_catalog/recipe_generated_locale_terms_25.json"
 LOCALES = ("ar", "en", "fr", "es", "tr")
+ALL_LOCALES = (
+    "ar", "en", "fr", "es", "tr", "de", "it", "pt-BR", "pt-PT", "ur",
+    "fa", "hi", "id", "ms", "ja", "ko", "zh-Hans", "zh-Hant", "ru",
+    "bn", "vi", "th", "pl", "nl", "uk",
+)
 
 # name, FDC id, kcal, protein, carbohydrate, fat, fibre, sugar, sodium, potassium / 100 g
 FOODS = {
@@ -67,6 +73,18 @@ REGIONS = {
     "es": ("spain", "mexico", "central-america", "south-america", "caribbean"),
     "tr": ("marmara", "aegean", "mediterranean", "central-anatolia", "black-sea", "eastern-anatolia", "southeastern-anatolia"),
 }
+
+# Country claims are added only when the reviewed dish identity itself is
+# explicit. Broad regional dishes remain regional rather than being guessed.
+CUISINE_OVERRIDES = {
+    "palestinian-musakhan": "palestine",
+    "moroccan-harira": "morocco",
+    "tunisian-couscous-vegetables": "tunisia",
+    "algerian-chakhchoukha-chicken": "algeria",
+    "moroccan-tagine-fish": "morocco",
+    "sopa-negra-costarricense": "costa-rica",
+    "casamiento-hondureno": "honduras",
+}
 TECHNIQUES = {
     "ar": (("وعاء", "يُطهى على نار هادئة"), ("صينية", "يُخبز حتى ينضج"), ("طبق حبوب", "تُجمع المكونات بعناية")),
     "en": (("bowl", "simmer gently until cooked"), ("tray bake", "bake until safely cooked"), ("grain plate", "assemble just before serving")),
@@ -109,43 +127,105 @@ def nutrition(items: list[tuple[str, float]], servings: int) -> tuple[dict, list
     return ({key: round(value / servings, 2) for key, value in zip(keys, totals)}, sorted(set(refs)))
 
 
-def make_record(locale: str, index: int) -> dict:
-    # The first 280 points of this Cartesian traversal are all distinct.
+def initial_cap(value: str) -> str:
+    return value[:1].upper() + value[1:] if value else value
+
+
+def make_record(
+    locale: str,
+    index: int,
+    generated_terms: dict,
+    cuisine_prefixes: dict,
+) -> dict:
+    # The generated set is made of explicitly labelled BIL originals inspired
+    # by a declared culinary profile. It is not presented as 1,400 invented
+    # traditional dishes, and the original stable IDs remain image-compatible.
     protein = PROTEINS[index % len(PROTEINS)]
     base = BASES[(index // len(PROTEINS)) % len(BASES)]
-    vegetable = VEGETABLES[(index // (len(PROTEINS) * len(BASES))) % len(VEGETABLES)]
+    vegetable = VEGETABLES[
+        (index // (len(PROTEINS) * len(BASES))) % len(VEGETABLES)
+    ]
     second_vegetable = VEGETABLES[(index * 3 + 4) % len(VEGETABLES)]
     if second_vegetable == vegetable:
-        second_vegetable = VEGETABLES[(VEGETABLES.index(vegetable) + 1) % len(VEGETABLES)]
+        second_vegetable = VEGETABLES[
+            (VEGETABLES.index(vegetable) + 1) % len(VEGETABLES)
+        ]
     finish = FINISHES[(index * 7 + 2) % len(FINISHES)]
-    style, cook_phrase = TECHNIQUES[locale][index % 3]
     region = REGIONS[locale][index % len(REGIONS[locale])]
+    # Arabic- and French-authored Maghrebi sets overlap on 14 Cartesian
+    # points. Give the Francophone originals a distinct preparation family
+    # and ID so they are genuinely separate recipes and require their own
+    # matching images rather than silently reusing the old duplicate asset.
+    francophone_maghreb = locale == "fr" and region == "maghreb"
+    style_index = (index + (1 if francophone_maghreb else 0)) % 3
+    id_region = "maghreb-francophone" if francophone_maghreb else region
     q = quantities(index)
     items = list(zip((protein, base, vegetable, second_vegetable, finish), q))
     servings = 2 + index % 5
     prep = 10 + index % 5 * 5
     cook = (0 if index % 3 == 2 else 20 + index % 7 * 5)
-    words = DISPLAY[locale]
-    names = FOOD_NAMES[locale]
-    title = f"{names[protein].title()} {style} {words['with']} {names[base]} {words['and']} {names[vegetable]}"
-    cid = f"bil-{locale}-{region}-{protein}-{base}-{vegetable}-{index + 1:03d}"
+    cid = f"bil-{locale}-{id_region}-{protein}-{base}-{vegetable}-{index + 1:03d}"
     ingredients = []
     for item, grams in items:
         fdc = FOODS[item][0]
         ingredients.append({"itemId": item, "quantity": grams, "unit": "g", "grams": grams,
                             "recordId": f"usda:{fdc}", "sourceRefs": [f"usda:{fdc}"]})
     per_serving, refs = nutrition(items, servings)
-    if locale == "ar":
-        steps = ["زِن المكونات وجهزها قبل الطهي.", cook_phrase + ".", "قسّم الوصفة إلى الحصص المحددة وقدّمها."]
-    elif locale == "fr":
-        steps = ["Peser et préparer tous les ingrédients.", cook_phrase + ".", "Répartir selon le nombre de portions indiqué et servir."]
-    elif locale == "es":
-        steps = ["Pesar y preparar todos los ingredientes.", cook_phrase + ".", "Dividir en las porciones indicadas y servir."]
-    elif locale == "tr":
-        steps = ["Tüm malzemeleri tartın ve hazırlayın.", cook_phrase + ".", "Belirtilen porsiyonlara ayırıp servis edin."]
-    else:
-        steps = ["Weigh and prepare every ingredient.", cook_phrase.capitalize() + ".", "Divide into the stated servings and serve."]
-    fingerprint_payload = {"locale": locale, "title": title, "items": items, "steps": steps, "servings": servings}
+    localizations = {}
+    for target_locale in LOCALES:
+        names = FOOD_NAMES[target_locale]
+        style, cook_phrase = TECHNIQUES[target_locale][style_index]
+        words = DISPLAY[target_locale]
+        localized_title = (
+            f"{cuisine_prefixes[target_locale][region]} — "
+            f"{names[protein].title()} {style} {words['with']} {names[base]}, "
+            f"{names[vegetable]} {words['and']} {names[second_vegetable]}"
+        )
+        if target_locale == "ar":
+            steps = ["زِن المكونات وجهزها قبل الطهي.", cook_phrase + ".", "قسّم الوصفة إلى الحصص المحددة وقدّمها."]
+        elif target_locale == "fr":
+            steps = ["Peser et préparer tous les ingrédients.", cook_phrase + ".", "Répartir selon le nombre de portions indiqué et servir."]
+        elif target_locale == "es":
+            steps = ["Pesar y preparar todos los ingredientes.", cook_phrase + ".", "Dividir en las porciones indicadas y servir."]
+        elif target_locale == "tr":
+            steps = ["Tüm malzemeleri tartın ve hazırlayın.", cook_phrase + ".", "Belirtilen porsiyonlara ayırıp servis edin."]
+        else:
+            steps = ["Weigh and prepare every ingredient.", cook_phrase.capitalize() + ".", "Divide into the stated servings and serve."]
+        localizations[target_locale] = {
+            "title": localized_title,
+            "ingredients": [f"{grams:g} g {names[item]}" for item, grams in items],
+            "steps": steps,
+            "translationStatus": "native-reviewed" if target_locale == locale else "deterministic-localized",
+        }
+    for target_locale, copy in generated_terms.items():
+        names = copy["foods"]
+        recipe_title = copy["titleTemplate"].format(
+            protein=initial_cap(names[protein]),
+            style=copy["styles"][style_index],
+            base=names[base],
+            vegetable=names[vegetable],
+            secondVegetable=names[second_vegetable],
+        )
+        localized_title = (
+            f"{cuisine_prefixes[target_locale][region]} — {recipe_title}"
+        )
+        localizations[target_locale] = {
+            "title": localized_title,
+            "ingredients": [
+                copy["ingredientTemplate"].format(
+                    grams=f"{grams:g}", food=names[item]
+                )
+                for item, grams in items
+            ],
+            "steps": [
+                copy["stepPrepare"],
+                copy["cookPhrases"][style_index],
+                copy["stepServe"],
+            ],
+            "translationStatus": "machine-translated",
+        }
+    title = localizations[locale]["title"]
+    fingerprint_payload = {"locale": locale, "title": title, "items": items, "steps": localizations[locale]["steps"], "servings": servings}
     fingerprint = hashlib.sha256(json.dumps(fingerprint_payload, ensure_ascii=False, sort_keys=True,
                                             separators=(",", ":")).encode("utf-8")).hexdigest()
     allergens = (["milk"] if finish == "yogurt" else []) + (["sesame"] if finish == "tahini" else []) + (["egg"] if protein == "egg" else [])
@@ -160,9 +240,7 @@ def make_record(locale: str, index: int) -> dict:
         "timing": {"prepMinutes": prep, "cookMinutes": cook, "totalMinutes": prep + cook},
         "ingredients": ingredients,
         "method": [{"order": n + 1, "instructionKey": f"{cid}.step{n + 1}"} for n in range(3)],
-        "localizations": {locale: {"title": title,
-            "ingredients": [f"{grams:g} g {names[item]}" for item, grams in items],
-            "steps": steps, "translationStatus": "native-reviewed"}},
+        "localizations": localizations,
         "nutrition": {"status": "calculated", "servings": servings, "sourceRefs": refs,
             "reviewedAt": None, "perServing": per_serving},
         "image": {"status": "planned", "assetPath": None, "sha256": None, "width": None,
@@ -182,7 +260,28 @@ def validate(records: list[dict]) -> None:
         values = [r[field] for r in records]
         if len(values) != len(set(values)):
             raise RuntimeError(f"duplicate {field}")
+    generated = [record for record in records if record["canonicalId"].startswith("bil-")]
+    for locale in LOCALES:
+        locale_records = [r for r in generated if r["primaryLocale"] == locale]
+        ingredient_identities = [
+            tuple(ingredient["itemId"] for ingredient in record["ingredients"])
+            for record in locale_records
+        ]
+        if len(ingredient_identities) != len(set(ingredient_identities)):
+            raise RuntimeError(f"duplicate generated ingredient identity in {locale}")
+        if any(
+            record["region"] not in REGIONS[locale]
+            or record["countryTags"] != [record["region"]]
+            for record in locale_records
+        ):
+            raise RuntimeError(f"generated BIL recipe has invalid cuisine profile: {locale}")
+    for locale in ALL_LOCALES:
+        titles = [record["localizations"][locale]["title"].casefold() for record in generated]
+        if len(titles) != len(set(titles)):
+            raise RuntimeError(f"duplicate generated title in {locale}")
     for record in records:
+        if set(record["localizations"]) != set(ALL_LOCALES):
+            raise RuntimeError(f"incomplete 25-language recipe: {record['canonicalId']}")
         if record["timing"]["totalMinutes"] != record["timing"]["prepMinutes"] + record["timing"]["cookMinutes"]:
             raise RuntimeError(f"invalid timing: {record['canonicalId']}")
         if [s["order"] for s in record["method"]] != list(range(1, len(record["method"]) + 1)):
@@ -200,6 +299,18 @@ def main() -> None:
     if len(existing) != 100:
         raise RuntimeError("reviewed source catalog no longer contains exactly 100 records")
     clean = json.loads(CLEAN_LOCALIZATION_SOURCE.read_text(encoding="utf-8-sig"))
+    terms_payload = json.loads(GENERATED_TERMS_SOURCE.read_text(encoding="utf-8-sig"))
+    if terms_payload.get("schemaVersion") != 1:
+        raise RuntimeError("unsupported generated recipe term schema")
+    generated_terms = terms_payload.get("locales", {})
+    if set(generated_terms) != set(ALL_LOCALES).difference(LOCALES):
+        raise RuntimeError("generated recipe terms do not cover the 20 extended locales")
+    cuisine_prefixes = terms_payload.get("cuisinePrefixes", {})
+    expected_regions = {region for values in REGIONS.values() for region in values}
+    if set(cuisine_prefixes) != set(ALL_LOCALES) or any(
+        set(values) != expected_regions for values in cuisine_prefixes.values()
+    ):
+        raise RuntimeError("cuisine prefixes do not cover every locale and region")
     clean_by_id = {row["canonicalId"]: row for row in clean["records"]}
     if set(clean_by_id) != {row["canonicalId"] for row in existing}:
         raise RuntimeError("clean localization source canonical IDs do not match verified source")
@@ -208,7 +319,13 @@ def main() -> None:
         if authoritative["contentFingerprint"] != record["contentFingerprint"]:
             raise RuntimeError(f"clean localization fingerprint mismatch: {record['canonicalId']}")
         record["localizations"] = authoritative["localizations"]
-    additions = [make_record(locale, index) for locale in LOCALES for index in range(280)]
+        if record["canonicalId"] in CUISINE_OVERRIDES:
+            record["countryTags"] = [CUISINE_OVERRIDES[record["canonicalId"]]]
+    additions = [
+        make_record(locale, index, generated_terms, cuisine_prefixes)
+        for locale in LOCALES
+        for index in range(280)
+    ]
     records = [*existing, *additions]
     validate(records)
     payload = {"schemaVersion": 1, "claims": {"marketedRecipeCount": 1500,

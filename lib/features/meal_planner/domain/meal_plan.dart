@@ -50,6 +50,8 @@ class PlannerRecipe {
     required this.vegetarian,
     required this.highProtein,
     required this.ingredients,
+    this.dietTags = const <String>{},
+    this.allergens = const <String>{},
   });
 
   final String id;
@@ -60,6 +62,8 @@ class PlannerRecipe {
   final bool vegetarian;
   final bool highProtein;
   final Map<String, double> ingredients;
+  final Set<String> dietTags;
+  final Set<String> allergens;
 }
 
 class PlannedMeal {

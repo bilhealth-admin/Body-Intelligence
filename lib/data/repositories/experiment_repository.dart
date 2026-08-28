@@ -12,6 +12,15 @@ class ExperimentRepository {
             ..orderBy([(row) => OrderingTerm.desc(row.startedAt)]))
           .watch();
 
+  Future<PersonalExperiment?> active() =>
+      (database.select(database.personalExperiments)
+            ..where(
+              (row) => row.deletedAt.isNull() & row.status.equals('active'),
+            )
+            ..orderBy([(row) => OrderingTerm.desc(row.startedAt)])
+            ..limit(1))
+          .getSingleOrNull();
+
   Future<int> create({
     required String hypothesis,
     required String changedVariable,
@@ -19,12 +28,17 @@ class ExperimentRepository {
     required String requiredData,
     required DateTime startedAt,
     required int durationDays,
-  }) {
+  }) async {
     if (hypothesis.trim().isEmpty || changedVariable.trim().isEmpty) {
       throw ArgumentError('Hypothesis and changed variable are required');
     }
     if (durationDays < 3 || durationDays > 90) {
       throw ArgumentError('Duration must be between 3 and 90 days');
+    }
+    if (await active() != null) {
+      throw StateError(
+        'Complete the active experiment before starting another',
+      );
     }
     return database
         .into(database.personalExperiments)
@@ -35,7 +49,7 @@ class ExperimentRepository {
             controlledFactors: Value(controlledFactors.trim()),
             requiredData: Value(requiredData.trim()),
             startedAt: startedAt,
-            endsAt: startedAt.add(Duration(days: durationDays)),
+            endsAt: startedAt.add(Duration(days: durationDays - 1)),
           ),
         );
   }

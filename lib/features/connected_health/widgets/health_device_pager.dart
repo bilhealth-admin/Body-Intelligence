@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../global_platform/medical_devices/ble_medical_device_platform.dart';
 import '../providers/medical_device_provider.dart';
 import '../connected_health_copy.dart';
 import '../../../shared/widgets/bil_wordmark.dart';
@@ -10,10 +11,12 @@ class HealthDevicePager extends StatefulWidget {
     super.key,
     required this.height,
     required this.pages,
+    this.onPageChanged,
   });
 
   final double height;
   final List<Widget> pages;
+  final ValueChanged<int>? onPageChanged;
 
   @override
   State<HealthDevicePager> createState() => _HealthDevicePagerState();
@@ -26,7 +29,7 @@ class _HealthDevicePagerState extends State<HealthDevicePager> {
   @override
   void initState() {
     super.initState();
-    _controller = PageController(viewportFraction: .88);
+    _controller = PageController(viewportFraction: .96);
   }
 
   @override
@@ -44,7 +47,10 @@ class _HealthDevicePagerState extends State<HealthDevicePager> {
           child: PageView.builder(
             controller: _controller,
             itemCount: widget.pages.length,
-            onPageChanged: (value) => setState(() => _page = value),
+            onPageChanged: (value) {
+              setState(() => _page = value);
+              widget.onPageChanged?.call(value);
+            },
             itemBuilder: (context, index) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 5),
               child: widget.pages[index],
@@ -80,10 +86,12 @@ class BilMedicalMonitor extends ConsumerWidget {
     super.key,
     required this.snapshot,
     required this.languageCode,
+    this.compact = false,
   });
 
   final MedicalDeviceSnapshot snapshot;
   final String languageCode;
+  final bool compact;
 
   String tr(String en, String ar) =>
       connectedHealthTextForLanguage(languageCode, en, ar);
@@ -92,16 +100,19 @@ class BilMedicalMonitor extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final connected =
         snapshot.status == MedicalDeviceConnectionStatus.connected;
-    final readings = snapshot.measurements.take(3).toList(growable: false);
+    final readings = snapshot.measurements
+        .where((packet) => bleFitnessMeasurementKinds.contains(packet['kind']))
+        .take(3)
+        .toList(growable: false);
     return Semantics(
       label: tr(
-        'BIL medical Bluetooth display. Values appear only when received from a connected device.',
-        'شاشة BIL الطبية عبر البلوتوث. لا تظهر القيم إلا عند استلامها من جهاز متصل.',
+        'BIL Bluetooth fitness-device display. Values appear only when received from a connected fitness device.',
+        'شاشة BIL لأجهزة اللياقة عبر البلوتوث. لا تظهر القيم إلا عند استلامها من جهاز لياقة متصل.',
       ),
       child: Container(
         key: const Key('bil-live-medical-monitor'),
-        margin: const EdgeInsets.all(14),
-        padding: const EdgeInsets.all(13),
+        margin: EdgeInsets.all(compact ? 5 : 8),
+        padding: EdgeInsets.all(compact ? 5 : 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(54),
           gradient: const LinearGradient(
@@ -126,7 +137,9 @@ class BilMedicalMonitor extends ConsumerWidget {
           ],
         ),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 14),
+          padding: compact
+              ? const EdgeInsets.fromLTRB(10, 8, 10, 6)
+              : const EdgeInsets.fromLTRB(18, 14, 18, 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(42),
             gradient: const RadialGradient(
@@ -140,10 +153,10 @@ class BilMedicalMonitor extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Align(
                       alignment: AlignmentDirectional.centerStart,
-                      child: BilWordmark(height: 17),
+                      child: BilWordmark(height: compact ? 11 : 17),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -171,41 +184,47 @@ class BilMedicalMonitor extends ConsumerWidget {
                         ? Icons.bluetooth_connected_rounded
                         : Icons.bluetooth_disabled_rounded,
                     color: connected ? const Color(0xFF5EE5F5) : Colors.white38,
-                    size: 19,
+                    size: compact ? 14 : 19,
                   ),
                 ],
               ),
-              const SizedBox(height: 18),
+              SizedBox(height: compact ? 5 : 12),
               Expanded(
                 child: readings.isEmpty
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text(
+                          Text(
                             '— —',
                             textDirection: TextDirection.ltr,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 42,
+                              fontSize: compact ? 26 : 42,
                               fontWeight: FontWeight.w400,
-                              letterSpacing: 5,
+                              letterSpacing: compact ? 3 : 5,
                             ),
                           ),
-                          const SizedBox(height: 10),
-                          Text(
-                            connected
-                                ? tr(
-                                    'Waiting for a measured value',
-                                    'بانتظار وصول قياس حقيقي',
-                                  )
-                                : tr(
-                                    'Connect a medical device',
-                                    'اربط جهازًا طبيًا',
-                                  ),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Color(0xFFBBD1DE),
-                              fontSize: 13,
+                          SizedBox(height: compact ? 3 : 10),
+                          Flexible(
+                            child: Text(
+                              connected
+                                  ? tr(
+                                      'Waiting for a measured value',
+                                      'بانتظار وصول قياس حقيقي',
+                                    )
+                                  : tr(
+                                      'Connect a fitness device',
+                                      'اربط جهاز لياقة',
+                                    ),
+                              textAlign: TextAlign.center,
+                              maxLines: compact ? 1 : 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: const Color(0xFFBBD1DE),
+                                fontSize: compact ? 10 : 13,
+                              ),
                             ),
                           ),
                         ],
@@ -240,10 +259,10 @@ class BilMedicalMonitor extends ConsumerWidget {
                 children: [
                   Icon(
                     Icons.verified_user_outlined,
-                    size: 14,
+                    size: compact ? 11 : 14,
                     color: Colors.white.withValues(alpha: .55),
                   ),
-                  const SizedBox(width: 6),
+                  SizedBox(width: compact ? 3 : 6),
                   Expanded(
                     child: Text(
                       tr('Received via BLE', 'مستلم عبر BLE'),
@@ -251,7 +270,7 @@ class BilMedicalMonitor extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: .55),
-                        fontSize: 11,
+                        fontSize: compact ? 9 : 11,
                       ),
                     ),
                   ),
@@ -293,21 +312,6 @@ class _MedicalReading extends StatelessWidget {
     final value = (packet['value'] as num).toDouble();
     final unit = packet['unit'] as String? ?? '';
     final label = switch (kind) {
-      'blood_pressure_systolic' => connectedHealthTextForLanguage(
-        languageCode,
-        'Systolic',
-        'الضغط الانقباضي',
-      ),
-      'blood_pressure_diastolic' => connectedHealthTextForLanguage(
-        languageCode,
-        'Diastolic',
-        'الضغط الانبساطي',
-      ),
-      'glucose' => connectedHealthTextForLanguage(
-        languageCode,
-        'Glucose',
-        'سكر الدم',
-      ),
       'weight' => connectedHealthTextForLanguage(
         languageCode,
         'Weight',
@@ -318,20 +322,10 @@ class _MedicalReading extends StatelessWidget {
         'Body fat',
         'دهون الجسم',
       ),
-      'oxygen' => connectedHealthTextForLanguage(
-        languageCode,
-        'Blood oxygen',
-        'أكسجين الدم',
-      ),
       'heart_rate' => connectedHealthTextForLanguage(
         languageCode,
         'Heart rate',
         'نبض القلب',
-      ),
-      'temperature' => connectedHealthTextForLanguage(
-        languageCode,
-        'Temperature',
-        'الحرارة',
       ),
       _ => connectedHealthTextForLanguage(languageCode, 'Measurement', 'قياس'),
     };

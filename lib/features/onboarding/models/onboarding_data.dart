@@ -19,6 +19,8 @@ class OnboardingData {
 
   double? neck;
 
+  double? hips;
+
   double? chest;
 
   double? arm;

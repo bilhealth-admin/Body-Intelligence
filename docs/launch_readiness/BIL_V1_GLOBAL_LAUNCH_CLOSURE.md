@@ -20,7 +20,7 @@ App Store approval, legal approval, or production release authorization.
 
 ## Repository-owned gates
 
-- Application version identity remains `1.0.0+1`.
+- Application version identity is `1.0.0+3`.
 - Flutter formatting and static analysis pass.
 - The complete automated test suite passes.
 - Android release App Bundle production completes.

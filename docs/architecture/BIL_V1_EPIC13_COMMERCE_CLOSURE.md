@@ -45,11 +45,10 @@ control or chat. Supply secrets through Supabase, GitHub, or CI secret stores.
 - Google package: `BIL_GOOGLE_PACKAGE_NAME` / server
   `GOOGLE_PLAY_PACKAGE_NAME`.
 - Apple bundle: `BIL_APPLE_BUNDLE_ID` / server `APPLE_BUNDLE_ID`.
-- Premium monthly and annual product IDs:
-  `BIL_STORE_PREMIUM_MONTHLY`, `BIL_STORE_PREMIUM_ANNUAL`.
-- Premium AI Coach monthly and annual product IDs:
-  `BIL_STORE_PREMIUM_AI_COACH_MONTHLY`,
-  `BIL_STORE_PREMIUM_AI_COACH_ANNUAL`.
+- Premium monthly and annual use the immutable cross-store IDs
+  `bil_premium` and `bil_premium_annual`.
+- Premium AI Coach monthly and annual use the immutable cross-store IDs
+  `bil_premium_ai_coach` and `bil_premium_ai_coach_annual`.
 - AI Boost uses the price-neutral immutable ID `bil_ai_boost`. It is available
   to every authenticated tier, does not change tier, and does not unlock
   Barcode for Free.

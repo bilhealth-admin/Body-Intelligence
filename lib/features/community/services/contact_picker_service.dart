@@ -17,7 +17,10 @@ class ContactPickerService {
     if (value == null) return null;
     final name = (value['name'] as String? ?? '').trim();
     final phone = (value['phone'] as String? ?? '').trim();
-    if (name.isEmpty && phone.isEmpty) return null;
+    // The native picker can return a contact card without a phone number on
+    // iOS. Such a result cannot open the SMS invitation composer and must be
+    // treated like a cancelled selection rather than creating an invalid URI.
+    if (phone.isEmpty) return null;
     return PickedBilContact(name: name, phone: phone);
   }
 }

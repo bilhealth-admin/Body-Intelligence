@@ -6,6 +6,12 @@ import 'package:body_intelligence_log/features/notifications/presentation/notifi
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  String notificationSettingsSource() => [
+    'lib/features/notifications/presentation/notification_settings_page.dart',
+    'lib/features/notifications/presentation/notification_settings_actions.dart',
+    'lib/features/notifications/presentation/notification_settings_components.dart',
+  ].map((path) => File(path).readAsStringSync()).join('\n');
+
   test('notification core copy resolves across all 25 production locales', () {
     expect(RuntimeCopy.supported, hasLength(25));
     final english = NotificationSettingsCopy.forLanguage('en');
@@ -29,9 +35,7 @@ void main() {
   });
 
   test('every extended _ui surface has direct generated copy', () {
-    final source = File(
-      'lib/features/notifications/presentation/notification_settings_page.dart',
-    ).readAsStringSync();
+    final source = notificationSettingsSource();
     final keys = RegExp(
       r"_ui\(\s*'([^']+)'",
       multiLine: true,
@@ -48,10 +52,8 @@ void main() {
   });
 
   test('loading, mutation and Supabase boundaries fail closed', () {
-    final source = File(
-      'lib/features/notifications/presentation/notification_settings_page.dart',
-    ).readAsStringSync();
-    expect(source, contains('Supabase.instance.isInitialized'));
+    final source = notificationSettingsSource();
+    expect(source, contains('AppEnvironment.supabaseRuntimeReady'));
     expect(source, contains('canPop: !busy'));
     expect(source, contains("key: const Key('add-reminder')"));
     expect(source, contains('reminders == null || busy ? null'));

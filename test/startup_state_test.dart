@@ -37,7 +37,6 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-
     expect(find.text('تعذّر فتح بياناتك المحلية'), findsOneWidget);
     expect(find.text('حاول مرة أخرى'), findsOneWidget);
     expect(find.textContaining('private database detail'), findsNothing);
@@ -49,19 +48,16 @@ void main() {
 
     // Verify error message is replaced by loading screen
     expect(find.text('تعذّر فتح بياناتك المحلية'), findsNothing);
-    expect(
-      find.bySemanticsLabel(RegExp('بودي إنتليجنس لوج.*يجهّز')),
-      findsOneWidget,
-    );
+    expect(find.bySemanticsLabel('BODY INTELLIGENCE LOG'), findsOneWidget);
 
     // Let the second stream load successfully and redirect to the gateway.
-    await tester.pump(const Duration(milliseconds: 2200));
+    await tester.pump(const Duration(milliseconds: 2300));
     await tester.pumpAndSettle();
     expect(profileBuildCount, 2);
     expect(find.text('Account Gateway Page'), findsOneWidget);
   });
 
-  testWidgets('Arabic startup progress has localized semantics', (
+  testWidgets('Arabic startup exposes locale-neutral brand semantics', (
     tester,
   ) async {
     final pending = Completer<bool>();
@@ -77,13 +73,12 @@ void main() {
     );
     await tester.pump();
 
-    expect(
-      find.bySemanticsLabel(RegExp('بودي إنتليجنس لوج.*يجهّز')),
-      findsOneWidget,
-    );
+    expect(find.bySemanticsLabel('BODY INTELLIGENCE LOG'), findsOneWidget);
   });
 
-  testWidgets('reduced motion shows static progress indicator', (tester) async {
+  testWidgets('reduced motion keeps the static identity without a player', (
+    tester,
+  ) async {
     final pending = Completer<bool>();
     await tester.pumpWidget(
       _app(
@@ -98,10 +93,17 @@ void main() {
     );
     await tester.pump();
 
-    final indicator = tester.widget<LinearProgressIndicator>(
-      find.byType(LinearProgressIndicator),
+    expect(
+      find.byKey(const ValueKey('premium-splash-wordmark')),
+      findsOneWidget,
     );
-    expect(indicator.value, 0.5);
+    expect(find.byKey(const ValueKey('premium-splash-video')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('premium-splash-progress')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('premium-splash-spinner')), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
   testWidgets('startup success redirects to dashboard', (tester) async {
@@ -134,12 +136,53 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 2199));
+    // Even when every provider is already ready (and the video plugin is not
+    // registered in this widget test), routing retains the complete 2.3 s
+    // identity window and does not wait for a playback callback.
+    await tester.pump(const Duration(milliseconds: 2299));
     expect(find.text('Dashboard Page'), findsNothing);
     expect(find.byType(StartupPage), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 1));
     await tester.pumpAndSettle();
     expect(find.text('Dashboard Page'), findsOneWidget);
+  });
+
+  testWidgets('legacy profile under 18 returns to date-of-birth onboarding', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        overrides: [
+          userProfileProvider.overrideWith(
+            (ref) => Stream.value(
+              UserProfileData(
+                id: 2,
+                uuid: 'under-18',
+                age: 17,
+                gender: 'female',
+                height: 165,
+                currentWeight: 65,
+                targetWeight: 62,
+                activityLevel: 'moderate',
+                exercises: true,
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+                revision: 1,
+                syncStatus: 'local',
+              ),
+            ),
+          ),
+          dailyCheckInDueProvider.overrideWith((ref) async => false),
+          forceOnboardingProvider.overrideWith((ref) async => false),
+          accountGatewayReviewedProvider.overrideWith((ref) async => true),
+        ],
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 2300));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Onboarding Page'), findsOneWidget);
+    expect(find.text('Dashboard Page'), findsNothing);
   });
 }
 

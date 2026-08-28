@@ -3,7 +3,11 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../../engine/body_composition_engine.dart';
+import '../../engine/body_model_engine.dart';
+import '../../engine/body_profile.dart';
 import '../../shared/widgets/bil_wordmark.dart';
+import 'domain/adult_eligibility.dart';
 import 'onboarding_locale_copy.dart';
 
 part 'welcome/welcome_screen.dart';
@@ -23,6 +27,9 @@ enum BilGoal { loseFat, maintain, buildMuscle }
 enum BilActivity { low, light, moderate, high, veryHigh }
 
 class BilOnboardingDraft {
+  static const poundsPerKilogram = 2.2046226218;
+  static const centimetersPerInch = 2.54;
+
   String name = '';
   DateTime? birthDate;
   BilSex sex = BilSex.male;
@@ -36,6 +43,29 @@ class BilOnboardingDraft {
   double? height;
   double? waist;
   double? neck;
+  double? hips;
+
+  double? get weightKg => weight == null
+      ? null
+      : units == BilUnits.metric
+      ? weight
+      : weight! / poundsPerKilogram;
+
+  double? get heightCm => height == null
+      ? null
+      : units == BilUnits.metric
+      ? height
+      : height! * centimetersPerInch;
+
+  double? get waistCm => _lengthCm(waist);
+  double? get neckCm => _lengthCm(neck);
+  double? get hipsCm => _lengthCm(hips);
+
+  double? _lengthCm(double? value) => value == null
+      ? null
+      : units == BilUnits.metric
+      ? value
+      : value * centimetersPerInch;
 }
 
 class BilInitialPlan {
@@ -104,7 +134,8 @@ class _BilFlagshipOnboardingState extends State<BilFlagshipOnboarding> {
       ..weight = source?.weight
       ..height = source?.height
       ..waist = source?.waist
-      ..neck = source?.neck;
+      ..neck = source?.neck
+      ..hips = source?.hips;
     _pageController = PageController(initialPage: widget.showWelcome ? 0 : 1);
   }
 

@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../domain/recipe_release_manifest.dart';
+import '../domain/wellness_content_pack.dart';
+import '../../nutrition/domain/dietary_preferences.dart';
 
 final class RecipeCatalogSummary {
   const RecipeCatalogSummary({
@@ -20,9 +22,13 @@ final class RecipeCatalogSummary {
     required this.dietTags,
     required this.allergens,
     required this.imageStatus,
+    this.region = 'global',
+    this.cuisine,
   });
 
   final String id, fingerprint, primaryLocale, title, imageStatus;
+  final String region;
+  final String? cuisine;
   final Map<String, String> localizedTitles;
   final int shard, ordinal, totalMinutes;
   final List<String> mealTypes, dietTags, allergens;
@@ -49,6 +55,13 @@ final class RecipeCatalogSummary {
   }
 
   String titleFor(String locale) => resolveTitle(locale).text;
+
+  bool isCompatibleWith(DietaryPreferences preferences) =>
+      DietaryCompatibility.allows(
+        preferences: preferences,
+        dietTags: dietTags,
+        allergens: allergens,
+      );
 }
 
 final class RecipeCatalogDetail {
@@ -64,11 +77,11 @@ final class RecipeCatalogDetail {
     if (localizations[requested] case final Map<String, dynamic> value) {
       return (value: value, locale: requested, isFallback: false);
     }
-    if (localizations[primary] case final Map<String, dynamic> value) {
-      return (value: value, locale: primary, isFallback: true);
-    }
     if (localizations['en'] case final Map<String, dynamic> value) {
       return (value: value, locale: 'en', isFallback: true);
+    }
+    if (localizations[primary] case final Map<String, dynamic> value) {
+      return (value: value, locale: primary, isFallback: true);
     }
     final entry = localizations.entries.first;
     return (
@@ -82,6 +95,81 @@ final class RecipeCatalogDetail {
       resolveLocalization(requested).value;
 }
 
+/// Content-addressed public preview delivered through BIL's private-R2 proxy.
+///
+/// The client receives only the canonical id and SHA-pinned delivery URL. The
+/// R2 bucket and object key remain an implementation detail of the Worker.
+final class RecipeCatalogImageAsset {
+  const RecipeCatalogImageAsset({
+    required this.canonicalId,
+    required this.url,
+    required this.mimeType,
+    required this.sha256,
+    required this.sizeBytes,
+    required this.width,
+    required this.height,
+  });
+
+  final String canonicalId, mimeType, sha256;
+  final Uri url;
+  final int sizeBytes, width, height;
+
+  WellnessMediaAsset get mediaAsset => WellnessMediaAsset(
+    url: url,
+    mimeType: mimeType,
+    sha256: sha256,
+    sizeBytes: sizeBytes,
+    mediaRole: WellnessMediaRole.preview,
+  );
+}
+
+/// Small, card-safe projection of the verified recipe detail record.
+///
+/// Nutrition and serving values intentionally stay out of the 1,500-item
+/// discovery index. They are read from the hash-verified shard only when a
+/// visible card needs them, then cached by [RecipeReleaseRepository].
+final class RecipeCatalogCardFacts {
+  const RecipeCatalogCardFacts({
+    required this.kcalPerServing,
+    required this.proteinGramsPerServing,
+    required this.servings,
+  });
+
+  final double kcalPerServing;
+  final double proteinGramsPerServing;
+  final int servings;
+
+  factory RecipeCatalogCardFacts.fromDetail(RecipeCatalogDetail detail) {
+    final record = detail.record;
+    final nutrition = record['nutrition'];
+    final serving = record['serving'];
+    if (nutrition is! Map<String, dynamic> ||
+        serving is! Map<String, dynamic> ||
+        nutrition['perServing'] is! Map<String, dynamic>) {
+      throw const FormatException('Recipe card facts are unavailable.');
+    }
+    final perServing = nutrition['perServing'] as Map<String, dynamic>;
+    final kcal = perServing['kcal'];
+    final protein = perServing['proteinG'];
+    final count = serving['count'];
+    if (kcal is! num ||
+        !kcal.isFinite ||
+        kcal < 0 ||
+        protein is! num ||
+        !protein.isFinite ||
+        protein < 0 ||
+        count is! int ||
+        count <= 0) {
+      throw const FormatException('Recipe card facts are invalid.');
+    }
+    return RecipeCatalogCardFacts(
+      kcalPerServing: kcal.toDouble(),
+      proteinGramsPerServing: protein.toDouble(),
+      servings: count,
+    );
+  }
+}
+
 final class RecipeReleaseRepository {
   RecipeReleaseRepository({AssetBundle? bundle})
     : _bundle = bundle ?? rootBundle;
@@ -92,7 +180,9 @@ final class RecipeReleaseRepository {
   Future<List<RecipeCatalogSummary>>? _indexFuture;
   RecipeReleaseManifest? _manifest;
   Map<String, RecipeCatalogSummary> _byId = const {};
+  Map<String, RecipeCatalogImageAsset> _imageAssets = const {};
   final Map<int, Future<List<Map<String, dynamic>>>> _shards = {};
+  final Map<String, Future<RecipeCatalogCardFacts>> _cardFacts = {};
 
   Future<List<RecipeCatalogSummary>> loadIndex() {
     return _indexFuture ??= _loadIndex().catchError((Object error) {
@@ -116,7 +206,7 @@ final class RecipeReleaseRepository {
       expectedSha256: manifest.imageManifestSha256,
     );
     final images = await compute(_decodeObject, imageBytes);
-    final imageStates = _validateImageManifest(images);
+    final imageManifest = _validateImageManifest(images);
     final provenanceBytes = await _readBounded(
       manifest.provenancePath,
       manifest.provenanceSizeBytes,
@@ -129,7 +219,7 @@ final class RecipeReleaseRepository {
     final provenance = await compute(_decodeObject, provenanceBytes);
     final provenanceImageCount = _validateProvenance(provenance);
     if (provenanceImageCount !=
-        imageStates.values
+        imageManifest.states.values
             .where((value) => value == 'external_candidate')
             .length) {
       throw const FormatException('Recipe image provenance count mismatch.');
@@ -173,6 +263,8 @@ final class RecipeReleaseRepository {
         'diet_tags',
         'allergens',
         'image_status',
+        'region',
+        'cuisine_key',
       });
       final id = _text(raw['canonical_id'], 'canonical_id');
       final fingerprint = _digest(raw['content_fingerprint']);
@@ -201,16 +293,47 @@ final class RecipeReleaseRepository {
           dietTags: _strings(raw['diet_tags'], 'diet_tags'),
           allergens: _strings(raw['allergens'], 'allergens'),
           imageStatus: _text(raw['image_status'], 'image_status'),
+          region: _text(raw['region'], 'region'),
+          cuisine: _text(raw['cuisine_key'], 'cuisine_key'),
         ),
       );
     }
     for (final recipe in result) {
-      if (imageStates[recipe.id] != recipe.imageStatus) {
+      if (imageManifest.states[recipe.id] != recipe.imageStatus) {
         throw const FormatException('Recipe index/image state mismatch.');
       }
     }
     _byId = Map.unmodifiable({for (final recipe in result) recipe.id: recipe});
+    _imageAssets = imageManifest.assets;
     return List.unmodifiable(result);
+  }
+
+  /// Returns the SHA/size/MIME-pinned public preview for one catalog-owned id.
+  Future<RecipeCatalogImageAsset> loadImageAsset(String canonicalId) async {
+    await loadIndex();
+    final asset = _imageAssets[canonicalId];
+    if (asset == null || !_byId.containsKey(canonicalId)) {
+      throw const FormatException(
+        'Recipe image identity is not catalog-owned.',
+      );
+    }
+    return asset;
+  }
+
+  /// Exposes the immutable delivery contract in canonical catalog order.
+  Future<List<RecipeCatalogImageAsset>> loadImageAssets() async {
+    final index = await loadIndex();
+    final assets = <RecipeCatalogImageAsset>[];
+    for (final recipe in index) {
+      final asset = _imageAssets[recipe.id];
+      if (asset == null) {
+        throw const FormatException(
+          'Recipe image delivery contract is incomplete.',
+        );
+      }
+      assets.add(asset);
+    }
+    return List.unmodifiable(assets);
   }
 
   Future<RecipeCatalogDetail> loadDetail(RecipeCatalogSummary summary) async {
@@ -235,6 +358,23 @@ final class RecipeReleaseRepository {
       throw const FormatException('Recipe index/shard identity mismatch.');
     }
     return RecipeCatalogDetail(summary: summary, record: record);
+  }
+
+  /// Loads the compact facts needed by a visible discovery card.
+  ///
+  /// Identity is resolved from this repository's authoritative index so a
+  /// caller can safely pass only a canonical id. The underlying shard and the
+  /// projection future are both cached, avoiding one decode per card.
+  Future<RecipeCatalogCardFacts> loadCardFacts(String canonicalId) {
+    return _cardFacts.putIfAbsent(canonicalId, () async {
+      await loadIndex();
+      final summary = _byId[canonicalId];
+      if (summary == null) {
+        throw const FormatException('Recipe identity is not catalog-owned.');
+      }
+      final detail = await loadDetail(summary);
+      return RecipeCatalogCardFacts.fromDetail(detail);
+    });
   }
 
   Future<List<Map<String, dynamic>>> _loadShard(int ordinal) async {
@@ -393,7 +533,14 @@ void _validateRecipeRecord(Map<String, dynamic> value) {
   }
 }
 
-Map<String, String> _validateImageManifest(Map<String, dynamic> value) {
+final class _ValidatedRecipeImages {
+  const _ValidatedRecipeImages({required this.states, required this.assets});
+
+  final Map<String, String> states;
+  final Map<String, RecipeCatalogImageAsset> assets;
+}
+
+_ValidatedRecipeImages _validateImageManifest(Map<String, dynamic> value) {
   _exactKeys(value, const {
     'schema_version',
     'record_count',
@@ -415,14 +562,17 @@ Map<String, String> _validateImageManifest(Map<String, dynamic> value) {
     throw const FormatException('Recipe image manifest is invalid.');
   }
   final ids = <String>{};
+  final objectPaths = <String>{};
+  final digests = <String>{};
   final states = <String, String>{};
+  final assets = <String, RecipeCatalogImageAsset>{};
   var externalRows = 0;
   for (final entry in entries) {
     if (entry is! Map<String, dynamic>) {
       throw const FormatException('Recipe image entry must be an object.');
     }
     final id = _text(entry['canonical_id'], 'canonical_id');
-    if (!ids.add(id)) {
+    if (!RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$').hasMatch(id) || !ids.add(id)) {
       throw const FormatException('Duplicate recipe image identity.');
     }
     final status = entry['status'];
@@ -440,22 +590,21 @@ Map<String, String> _validateImageManifest(Map<String, dynamic> value) {
         'review_status',
       });
       externalRows++;
-      _digest(entry['sha256']);
-      _positiveInteger(entry['size_bytes'], 'size_bytes');
-      _positiveInteger(entry['width'], 'width');
-      _positiveInteger(entry['height'], 'height');
+      final digest = _digest(entry['sha256']);
+      final sizeBytes = _positiveInteger(entry['size_bytes'], 'size_bytes');
+      final width = _positiveInteger(entry['width'], 'width');
+      final height = _positiveInteger(entry['height'], 'height');
       final path = _text(entry['object_path'], 'object_path');
-      if (path !=
-              'recipes/v1/images/$id${path.endsWith('.png')
-                  ? '.png'
-                  : path.endsWith('.jpg')
-                  ? '.jpg'
-                  : path.endsWith('.jpeg')
-                  ? '.jpeg'
-                  : ''}' ||
+      final expectedExtension = entry['mime_type'] == 'image/png'
+          ? '.png'
+          : '.jpg';
+      if (path != 'recipes/v1/images/$id$expectedExtension' ||
           path.contains('..') ||
           path.contains('\\') ||
-          path.contains('://')) {
+          path.contains('://') ||
+          !objectPaths.add(path) ||
+          !digests.add(digest) ||
+          sizeBytes > 8 * 1024 * 1024) {
         throw const FormatException('Unsafe recipe image object path.');
       }
       if (!const {'image/png', 'image/jpeg'}.contains(entry['mime_type']) ||
@@ -463,10 +612,21 @@ Map<String, String> _validateImageManifest(Map<String, dynamic> value) {
         throw const FormatException('Recipe image evidence is invalid.');
       }
       if ((path.endsWith('.png') && entry['mime_type'] != 'image/png') ||
-          ((path.endsWith('.jpg') || path.endsWith('.jpeg')) &&
-              entry['mime_type'] != 'image/jpeg')) {
+          (path.endsWith('.jpg') && entry['mime_type'] != 'image/jpeg')) {
         throw const FormatException('Recipe image extension/MIME mismatch.');
       }
+      assets[id] = RecipeCatalogImageAsset(
+        canonicalId: id,
+        url: Uri.https(
+          'workouts.bilhealth.com',
+          '/v3/recipes/images/$id/$digest',
+        ),
+        mimeType: entry['mime_type'] as String,
+        sha256: digest,
+        sizeBytes: sizeBytes,
+        width: width,
+        height: height,
+      );
     } else if (status == 'placeholder') {
       _exactKeys(entry, const {'canonical_id', 'status', 'seed'});
       final seed = _text(entry['seed'], 'seed');
@@ -477,10 +637,13 @@ Map<String, String> _validateImageManifest(Map<String, dynamic> value) {
       throw const FormatException('Unknown recipe image status.');
     }
   }
-  if (externalRows != external) {
+  if (externalRows != external || assets.length != external) {
     throw const FormatException('Recipe image counts are inconsistent.');
   }
-  return Map.unmodifiable(states);
+  return _ValidatedRecipeImages(
+    states: Map.unmodifiable(states),
+    assets: Map.unmodifiable(assets),
+  );
 }
 
 Map<String, dynamic> _decodeObject(Uint8List bytes) {

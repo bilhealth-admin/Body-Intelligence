@@ -38,9 +38,6 @@ void main() {
     'lib/features/ads/services/admob_contextual_ad_gateway.dart',
   );
   final adProviders = _read('lib/features/ads/providers/ad_providers.dart');
-  final adConsent = _read(
-    'lib/features/ads/repositories/ad_consent_repository.dart',
-  );
   final adPrivacyPage = _read('lib/features/ads/advertising_privacy_page.dart');
   final router = _read('lib/app/router/app_router.dart');
   final settings = [
@@ -138,12 +135,6 @@ void main() {
         adProviders.contains('value ?? false'),
     'Advertising connectivity must fail closed until asserted',
   );
-  _require(
-    adConsent.contains('contextual_consent.v1') &&
-        adConsent.contains('declined') &&
-        adConsent.contains('clear()'),
-    'Advertising consent persistence or revocation is incomplete',
-  );
   for (final locale in const ["'ar'", "'en'", "'fr'", "'es'", "'tr'"]) {
     _require(
       adPrivacyPage.contains(locale),
@@ -152,8 +143,17 @@ void main() {
   }
   _require(
     adPrivacyPage.contains('advertising-provider-unavailable') &&
-        adPrivacyPage.contains('LocalAdConsentRepository'),
-    'Advertising consent is not a truthful user-facing persisted flow',
+        adPrivacyPage.contains('advertising-google-privacy-options') &&
+        adPrivacyPage.contains('advertising-contextual-policy') &&
+        !adPrivacyPage.contains('advertising-consent-declined') &&
+        !adPrivacyPage.contains('advertising-adult-confirmation') &&
+        !adPrivacyPage.contains('LocalAdConsentRepository'),
+    'Advertising Privacy must use UMP without a local ad-free or age switch',
+  );
+  _require(
+    adMobGateway.contains('verifyCanRequestAds()') &&
+        adMobGateway.contains('nonPersonalizedAds: true'),
+    'Every ad request must re-check UMP and remain non-personalized',
   );
   _require(
     router.contains("path: '/advertising-privacy'") &&

@@ -11,9 +11,17 @@ void main() {
       'lib/features/nutrition/food_page.dart',
     ).readAsStringSync();
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
-    final coach = File(
-      'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
-    ).readAsStringSync();
+    final coach =
+        [
+              'intelligence_center_page.dart',
+              'intelligence_conversation_voice.dart',
+            ]
+            .map(
+              (name) => File(
+                'lib/features/intelligence_center/presentation/$name',
+              ).readAsStringSync(),
+            )
+            .join('\n');
     final vision = File(
       'lib/features/nutrition/services/meal_image_analysis_service.dart',
     ).readAsStringSync();
@@ -33,7 +41,10 @@ void main() {
     expect(foodPage, contains('const MealImageGuidePage()'));
     expect(foodPage, contains('if (accepted == true && mounted)'));
     expect(foodPage, contains("'/intelligence-center?vision=capture&barcode="));
-    expect(router, contains("state.uri.queryParameters['vision'] == 'capture'"));
+    expect(
+      router,
+      contains("state.uri.queryParameters['vision'] == 'capture'"),
+    );
     expect(router, contains("state.uri.queryParameters['barcode']"));
 
     // Existing Vision performs the provider call, preserves server quota/

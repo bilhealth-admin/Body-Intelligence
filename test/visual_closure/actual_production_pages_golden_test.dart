@@ -435,10 +435,20 @@ void main() {
       interact: (tester) async {
         await tester.tap(find.textContaining(r'$4.79').first);
         await tester.pumpAndSettle();
-        expect(catalog.purchaseCalls, 1);
-        await tester.drag(find.byType(ListView).first, const Offset(0, -520));
+        final purchaseCta = find.byKey(const ValueKey('store-purchase-cta'));
+        expect(purchaseCta, findsOneWidget);
+        await tester.tap(purchaseCta);
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Restore purchases'));
+        expect(catalog.purchaseCalls, 1);
+        final restore = find.text('Restore purchases');
+        await Scrollable.ensureVisible(
+          tester.element(restore),
+          alignment: .35,
+          duration: Duration.zero,
+        );
+        await tester.pumpAndSettle();
+        await tester.tap(restore);
+        await tester.pumpAndSettle();
         await tester.tap(find.text('Manage subscription'));
         await tester.pumpAndSettle();
         expect(catalog.restoreCalls, 1);
@@ -943,7 +953,18 @@ void main() {
       name: 'recipe_detail_phone',
       captureOverlay: true,
       interact: (tester) async {
-        await tester.tap(find.text('Bean & corn salad'));
+        await tester.enterText(
+          find.byType(TextField).first,
+          'Bean & corn salad',
+        );
+        await tester.pumpAndSettle();
+        final target = find.descendant(
+          of: find.byKey(const Key('recipe-results-grid')),
+          matching: find.text('Bean & corn salad'),
+        );
+        expect(target, findsOneWidget);
+        await tester.ensureVisible(target);
+        await tester.tap(target);
         for (
           var attempt = 0;
           attempt < 30 && find.text('Ingredients').evaluate().isEmpty;
@@ -1030,17 +1051,28 @@ void main() {
         name: 'recipe_detail_${detail.$1}_phone',
         captureOverlay: true,
         interact: (tester) async {
-          final target = find.text(detail.$2);
-          await tester.scrollUntilVisible(
-            target,
-            420,
-            scrollable: find.byType(Scrollable).first,
+          await tester.enterText(find.byType(TextField).first, detail.$2);
+          await tester.pumpAndSettle();
+          final target = find.descendant(
+            of: find.byKey(const Key('recipe-results-grid')),
+            matching: find.text(detail.$2),
           );
+          expect(target, findsOneWidget);
           await tester.ensureVisible(target);
           await tester.pumpAndSettle();
           await tester.tap(target);
-          await tester.pumpAndSettle();
+          for (
+            var attempt = 0;
+            attempt < 30 && find.text('Ingredients').evaluate().isEmpty;
+            attempt++
+          ) {
+            await tester.runAsync(
+              () => Future<void>.delayed(const Duration(milliseconds: 100)),
+            );
+            await tester.pump(const Duration(milliseconds: 100));
+          }
           expect(find.byType(BottomSheet), findsOneWidget);
+          expect(find.text('Ingredients'), findsOneWidget);
         },
       );
     });
@@ -1230,7 +1262,7 @@ void main() {
       ),
       name: 'workout_routines_saved_phone',
       interact: (tester) async {
-        await tester.tap(find.text('My Routines'));
+        await tester.tap(find.text('My plans'));
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const ValueKey('build-custom-routine')));
         await tester.pumpAndSettle();
@@ -1278,7 +1310,7 @@ void main() {
       name: 'workout_routine_builder_phone',
       captureOverlay: true,
       interact: (tester) async {
-        await tester.tap(find.text('My Routines'));
+        await tester.tap(find.text('My plans'));
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const ValueKey('build-custom-routine')));
         await tester.pumpAndSettle();
@@ -1365,7 +1397,9 @@ void main() {
     );
   });
 
-  testWidgets('dashboard goal editing destinations capture', (tester) async {
+  testWidgets('dashboard current goal editing destination capture', (
+    tester,
+  ) async {
     await capture(
       tester,
       page: const DashboardPreferencesPage(),
@@ -1378,9 +1412,7 @@ void main() {
         });
       },
       interact: (tester) async {
-        final target = find.byKey(
-          const Key('dashboard-edit-exercise-settings'),
-        );
+        final target = find.byKey(const Key('dashboard-edit-nutrition-goals'));
         await tester.scrollUntilVisible(
           target,
           500,
@@ -1389,12 +1421,13 @@ void main() {
         await tester.ensureVisible(target);
         await tester.pumpAndSettle();
         expect(
-          find.byKey(const Key('dashboard-edit-step-goal')),
-          findsOneWidget,
-        );
-        expect(
           find.byKey(const Key('dashboard-edit-nutrition-goals')),
           findsOneWidget,
+        );
+        expect(find.byKey(const Key('dashboard-edit-step-goal')), findsNothing);
+        expect(
+          find.byKey(const Key('dashboard-edit-exercise-settings')),
+          findsNothing,
         );
       },
     );
@@ -1534,7 +1567,6 @@ void main() {
     ('quick_log', 'Quick log'),
     ('discover', 'Discover'),
     ('best_action', 'Personal intelligence'),
-    ('daily_intelligence', 'Daily intelligence'),
     ('progress', 'Progress'),
     ('connected_health', 'Connected health'),
     ('body_twin', 'Body Twin'),

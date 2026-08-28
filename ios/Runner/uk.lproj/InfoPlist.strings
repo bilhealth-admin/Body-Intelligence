@@ -1,8 +1,8 @@
-"NSHealthShareUsageDescription" = "BIL читає лише вибрані вами категорії Здоров’я—активність, сон, показники тіла, серця й дихання, тиск, кисень, глюкозу, воду та харчування—для приватної хронології й аналітики на цьому пристрої.";
+"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
 "NSHealthUpdateUsageDescription" = "BIL записує лише ті медичні записи, які ви явно вибрали, після окремої згоди на запис.";
-"NSBluetoothAlwaysUsageDescription" = "BIL підключається лише до пристроїв охорони здоров’я, які ви явно підключили, щоб вимірювання можна було імпортувати локально.";
-"NSBluetoothPeripheralUsageDescription" = "BIL підключається лише до пристроїв охорони здоров’я, які ви явно підключили, щоб вимірювання можна було імпортувати локально.";
+"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Використовуйте камеру, лише коли ви вирішуєте сканувати штрих-код, переглядати фотографію їжі або додавати особистий профіль або фотографію прогресу.";
 "NSPhotoLibraryUsageDescription" = "Виберіть страву, профіль або фотографію прогресу для перегляду перед збереженням або завантаженням.";
-"NSMicrophoneUsageDescription" = "BIL використовує мікрофон лише тоді, коли ви вибираєте голосове введення для їжі.";
-"NSSpeechRecognitionUsageDescription" = "BIL перетворює фразу їжі, яку ви говорите, на текст, щоб ви могли переглянути її перед збереженням.";
+"NSMicrophoneUsageDescription" = "BIL використовує мікрофон лише коли ви вибираєте голосовий запис їжі або пряму розмову з BIL AI Coach.";
+"NSSpeechRecognitionUsageDescription" = "BIL перетворює мовлення, розпочате для запису їжі або BIL AI Coach, на текст, який можна перевірити або надіслати.";

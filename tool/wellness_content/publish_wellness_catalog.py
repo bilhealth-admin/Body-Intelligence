@@ -15,11 +15,18 @@ VIDEO_MIME_TYPES = {"video/mp4", "video/webm"}
 WORKOUT_AUDIENCES = {"all", "men", "women"}
 WORKOUT_PRESENTERS = {"adult_male", "adult_female", "neutral"}
 MEDIA_ROLES = {"preview", "instruction"}
-RELEASE_CATEGORY_COUNT = 10
-RELEASE_WORKOUTS_PER_CATEGORY = 20
-RELEASE_WORKOUT_COUNT = RELEASE_CATEGORY_COUNT * RELEASE_WORKOUTS_PER_CATEGORY
-RELEASE_VIDEO_DURATION_SECONDS = 7
+RELEASE_RECORD_COUNT = 302
+RELEASE_APPROVED_VIDEO_COUNT = 302
+RELEASE_UNIQUE_PAYLOAD_COUNT = 301
+RELEASE_VIDEO_DURATION_SECONDS = {7, 10}
 SAFE_IDENTIFIER = re.compile(r"^[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?$")
+REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_WORKOUT_RELEASE_MANIFEST = (
+    REPOSITORY_ROOT
+    / "artifacts"
+    / "workout_media"
+    / "workout_release_bundle_registry_v1.json"
+)
 
 
 def text(value, field):
@@ -92,12 +99,132 @@ def media_asset(value, field, kind, expected_role):
     }
 
 
-def validate_v2_workouts(data, items):
+def _canonical(value):
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    )
+
+
+def load_approved_workout_release(path=DEFAULT_WORKOUT_RELEASE_MANIFEST):
+    registry_path = Path(path)
+    registry = json.loads(registry_path.read_text(encoding="utf-8-sig"))
+    if (
+        registry.get("schema") != "bil.workout-media.bundle-registry.v1"
+        or registry.get("bundleCount") != 2
+        or registry.get("totalRecordCount") != RELEASE_RECORD_COUNT
+        or registry.get("playableCount") != RELEASE_APPROVED_VIDEO_COUNT
+        or registry.get("uniquePayloadCount") != RELEASE_UNIQUE_PAYLOAD_COUNT
+        or not isinstance(registry.get("bundles"), list)
+    ):
+        raise ValueError("Workout bundle registry is invalid")
+
+    approved_by_pack = {}
+    payload_digests = set()
+    release_keys = set()
+    for descriptor in registry["bundles"]:
+        manifest_path = REPOSITORY_ROOT / text(
+            descriptor.get("manifestAsset"), "manifestAsset"
+        )
+        approval_path = REPOSITORY_ROOT / text(
+            descriptor.get("ownerApprovalAsset"), "ownerApprovalAsset"
+        )
+        if (
+            hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+            != descriptor.get("manifestSha256")
+            or hashlib.sha256(approval_path.read_bytes()).hexdigest()
+            != descriptor.get("ownerApprovalSha256")
+        ):
+            raise ValueError("Workout bundle metadata hash mismatch")
+        bundle = json.loads(manifest_path.read_text(encoding="utf-8"))
+        owner = json.loads(approval_path.read_text(encoding="utf-8"))
+        records = bundle.get("records")
+        bundle_id = text(descriptor.get("bundleId"), "bundleId")
+        pack_id = safe_identifier(descriptor.get("contentPackId"), "contentPackId")
+        count = descriptor.get("playableCount")
+        if (
+            bundle.get("schema") != "bil.workout-media.bundle-release-manifest.v1"
+            or bundle.get("bundleId") != bundle_id
+            or bundle.get("contentPackId") != pack_id
+            or bundle.get("recordCount") != count
+            or not isinstance(records, list)
+            or len(records) != count
+            or bundle.get("recordsSha256")
+            != hashlib.sha256(_canonical(records).encode("utf-8")).hexdigest()
+            or owner.get("bundleId") != bundle_id
+            or owner.get("decision") != "accept_all_without_exception"
+            or owner.get("ownerApprovedCount") != count
+        ):
+            raise ValueError("Workout bundle approval is invalid")
+        expected_keys = [record.get("releaseKey") for record in records]
+        if owner.get("approvedReleaseKeysSha256") != hashlib.sha256(
+            _canonical(expected_keys).encode("utf-8")
+        ).hexdigest():
+            raise ValueError("Workout owner approval digest is invalid")
+        approved = {}
+        for index, record in enumerate(records):
+            prefix = f"{bundle_id}.records[{index}]"
+            item_id = safe_identifier(record.get("assetId"), f"{prefix}.assetId")
+            duration_ms = record.get("durationMilliseconds")
+            frames = record.get("frameCount")
+            technical = (
+                record.get("bundleId") == bundle_id
+                and record.get("releaseKey") == f"{bundle_id}:{item_id}"
+                and record.get("candidateAvailable") is True
+                and record.get("playable") is True
+                and record.get("reviewStatus") == "human_approved"
+                and record.get("mimeType") == "video/mp4"
+                and record.get("codecName") == "h264"
+                and record.get("fpsNumerator") == 30
+                and record.get("fpsDenominator") == 1
+                and record.get("width") == 720
+                and record.get("height") == 1280
+                and (duration_ms, frames) in {(7000, 210), (10000, 300)}
+                and re.fullmatch(r"[0-9a-f]{64}", str(record.get("sha256", "")))
+                and isinstance(record.get("byteLength"), int)
+                and not isinstance(record.get("byteLength"), bool)
+                and record["byteLength"] > 0
+            )
+            if not technical or item_id in approved:
+                raise ValueError(f"{prefix} has invalid technical/owner evidence")
+            approved[item_id] = {
+                "bundle_id": bundle_id,
+                "release_key": record["releaseKey"],
+                "category": record["primaryGroupId"],
+                "plan_group_ids": record["planGroupIds"],
+                "duration_seconds": duration_ms // 1000,
+                "object_path": record["objectPath"],
+                "sha256": record["sha256"],
+                "size_bytes": record["byteLength"],
+            }
+            if record["releaseKey"] in release_keys:
+                raise ValueError("Workout release key is duplicated")
+            release_keys.add(record["releaseKey"])
+            payload_digests.add(record["sha256"])
+        approved_by_pack[pack_id] = approved
+    if (
+        sum(map(len, approved_by_pack.values())) != RELEASE_RECORD_COUNT
+        or len(release_keys) != RELEASE_RECORD_COUNT
+        or len(payload_digests) != RELEASE_UNIQUE_PAYLOAD_COUNT
+        or len(approved_by_pack.get("bil-workouts-home-v1", {})) != 200
+        or len(approved_by_pack.get("bil-workouts-gym-six-month-v1", {})) != 102
+    ):
+        raise ValueError("Combined workout bundle inventory is invalid")
+    return approved_by_pack
+
+
+def validate_v2_workouts(data, items, approved_release):
     categories = text_list(data.get("categories"), "categories")
-    if len(categories) != RELEASE_CATEGORY_COUNT:
-        raise ValueError("Release workout packs require exactly 10 categories")
-    if len(items) != RELEASE_WORKOUT_COUNT:
-        raise ValueError("Release workout packs require exactly 200 videos")
+    expected_categories = {
+        entry["category"] for entry in approved_release.values()
+    }
+    if set(categories) != expected_categories or len(categories) != len(expected_categories):
+        raise ValueError("Workout pack categories must match the approved release")
+    if len(items) != len(approved_release):
+        raise ValueError("Workout pack must contain its complete approved bundle")
     declared = set(categories)
     counts = {category: 0 for category in categories}
     category_descriptions = {}
@@ -107,6 +234,9 @@ def validate_v2_workouts(data, items):
     for index, item in enumerate(items):
         prefix = f"items[{index}]"
         item_id = safe_identifier(item.get("id"), f"{prefix}.id")
+        approval = approved_release.get(item_id)
+        if approval is None:
+            raise ValueError(f"Workout {item_id} is not owner-approved")
         category = text(item.get("category"), f"{prefix}.category")
         if category not in declared:
             raise ValueError(f"Workout {item_id} uses undeclared category: {category}")
@@ -179,8 +309,10 @@ def validate_v2_workouts(data, items):
         if item.get("verified") is not True:
             raise ValueError(f"{prefix}.verified must be true")
         duration = item.get("duration_seconds")
-        if duration != RELEASE_VIDEO_DURATION_SECONDS or isinstance(duration, bool):
-            raise ValueError(f"{prefix}.duration_seconds must be exactly 7")
+        if duration != approval["duration_seconds"] or isinstance(duration, bool):
+            raise ValueError(
+                f"{prefix}.duration_seconds does not match approved evidence"
+            )
         rights = item.get("rights")
         if not isinstance(rights, dict):
             raise ValueError(f"{prefix}.rights is required")
@@ -204,10 +336,15 @@ def validate_v2_workouts(data, items):
             "video",
             "preview",
         )
-        expected_video_path = f"/workouts/v1/movements/{item_id}.mp4"
-        if not urlsplit(video["url"]).path.endswith(expected_video_path):
+        expected_video_path = f"/{approval['object_path']}"
+        if (
+            category != approval["category"]
+            or not urlsplit(video["url"]).path.endswith(expected_video_path)
+            or video["sha256"] != approval["sha256"]
+            or video["size_bytes"] != approval["size_bytes"]
+        ):
             raise ValueError(
-                f"{prefix}.media.video.url must end with {expected_video_path}"
+                f"{prefix}.media.video does not match approved path/SHA/size evidence"
             )
         if video["url"] in video_urls or video["sha256"] in video_digests:
             raise ValueError(f"Duplicate workout video media: {item_id}")
@@ -216,6 +353,10 @@ def validate_v2_workouts(data, items):
         segments = item.get("segments", [])
         if not isinstance(segments, list):
             raise ValueError(f"{prefix}.segments must be a list")
+        if segments:
+            raise ValueError(
+                f"{prefix}.segments must be empty in a movement-video bundle"
+            )
         segment_ids = set()
         segment_urls = {cover["url"], video["url"]}
         segment_digests = {cover["sha256"], video["sha256"]}
@@ -276,19 +417,24 @@ def validate_v2_workouts(data, items):
                     raise ValueError(f"Duplicate workout segment media: {segment_id}")
                 segment_urls.add(asset["url"])
                 segment_digests.add(asset["sha256"])
+    expected_counts = {category: 0 for category in expected_categories}
+    for approval in approved_release.values():
+        expected_counts[approval["category"]] += 1
     incorrectly_sized = [
         category for category, count in counts.items()
-        if count != RELEASE_WORKOUTS_PER_CATEGORY
+        if count != expected_counts[category]
     ]
     if incorrectly_sized:
         raise ValueError(
-            "Every release workout category requires exactly "
-            f"{RELEASE_WORKOUTS_PER_CATEGORY} videos: "
+            "Workout category counts must match the approved release: "
             f"{', '.join(incorrectly_sized)}"
         )
 
 
-def validate_payload(path):
+def validate_payload(
+    path,
+    workout_release_manifest=DEFAULT_WORKOUT_RELEASE_MANIFEST,
+):
     data = json.loads(Path(path).read_text(encoding="utf-8-sig"))
     schema_version = data.get("schema_version")
     if schema_version not in {1, 2} or data.get("type") not in TYPES:
@@ -321,7 +467,14 @@ def validate_payload(path):
         if data["type"] == "recipes" and not item.get("ingredients"):
             raise ValueError(f"items[{index}].ingredients required")
     if schema_version == 2:
-        validate_v2_workouts(data, items)
+        validate_v2_workouts(
+            data,
+            items,
+            load_approved_workout_release(workout_release_manifest).get(
+                data["pack_id"],
+                {},
+            ),
+        )
     return data
 
 

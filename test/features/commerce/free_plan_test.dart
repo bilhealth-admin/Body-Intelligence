@@ -21,6 +21,7 @@ void main() {
           CommerceEntitlement.explainableNutrition,
           CommerceEntitlement.localAnalytics,
           CommerceEntitlement.dataExport,
+          CommerceEntitlement.cloudSync,
         }),
       );
     });
@@ -29,7 +30,7 @@ void main() {
       final state = FreePlan.createState();
 
       expect(state.grants(CommerceEntitlement.advancedIntelligence), isFalse);
-      expect(state.grants(CommerceEntitlement.cloudSync), isFalse);
+      expect(state.grants(CommerceEntitlement.cloudSync), isTrue);
       expect(state.grants(CommerceEntitlement.coachWorkspace), isFalse);
       expect(state.grants(CommerceEntitlement.clinicWorkspace), isFalse);
       expect(

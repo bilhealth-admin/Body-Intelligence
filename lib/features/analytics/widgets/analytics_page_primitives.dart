@@ -176,6 +176,7 @@ class AnalyticsWeightJourneyCard extends StatelessWidget {
     required this.rangeDays,
     required this.weeklyRateKg,
     required this.progress,
+    this.targetWeightKg,
   });
 
   final List<WeightEntry> weights;
@@ -184,6 +185,7 @@ class AnalyticsWeightJourneyCard extends StatelessWidget {
   final int? rangeDays;
   final double? weeklyRateKg;
   final ProgressAnalysis progress;
+  final double? targetWeightKg;
 
   @override
   Widget build(BuildContext context) {
@@ -217,6 +219,7 @@ class AnalyticsWeightJourneyCard extends StatelessWidget {
         weights: weights,
         system: system,
         rangeLabel: rangeLabel,
+        targetWeightKg: targetWeightKg,
       ),
       explanation: [
         tr(

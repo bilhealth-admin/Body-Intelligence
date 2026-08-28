@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('cloud key custody migration uses Vault and authenticated-only RPC', () {
     final source = File(
-      'supabase/migrations/202608170001_bil_cloud_key_custody.sql',
+      'supabase/migrations/20260817103823_bil_cloud_key_custody.sql',
     ).readAsStringSync();
 
     expect(source, contains('vault.create_secret'));

@@ -43,10 +43,13 @@ class DashboardBodyProfileSnapshot extends StatelessWidget {
   final VoidCallback onEditProfile;
   final VoidCallback onEditPlan;
 
-  String tr(String en, String ar) => dashboardFiveLocaleText(en, ar);
-
   @override
   Widget build(BuildContext context) {
+    String tr(String en, String ar) => dashboardFiveLocaleText(
+      en,
+      ar,
+      locale: _dashboardProfileLocale(context, arabic),
+    );
     final scheme = Theme.of(context).colorScheme;
     final values = [
       (tr('Current weight', 'الوزن الحالي'), weight),
@@ -185,6 +188,11 @@ class DashboardBodyProfileSnapshot extends StatelessWidget {
       ),
     );
   }
+}
+
+Locale _dashboardProfileLocale(BuildContext context, bool useArabicCopy) {
+  if (useArabicCopy) return const Locale('ar');
+  return Localizations.localeOf(context);
 }
 
 class _BodyProfileValue extends StatelessWidget {

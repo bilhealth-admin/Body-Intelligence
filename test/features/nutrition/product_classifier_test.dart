@@ -41,6 +41,16 @@ void main() {
     );
   });
 
+  test('trusted food product type defeats ambiguous cosmetic words', () {
+    expect(
+      classifier.classify(const <String, dynamic>{
+        'product_type': 'food',
+        'categories_tags': <String>['en:ice-creams'],
+      }, 'Vanilla ice cream'),
+      ProductKind.food,
+    );
+  });
+
   test('blocks Arabic cleaners and cosmetics from nutrition use', () {
     final household = classifier.classify(
       const {},

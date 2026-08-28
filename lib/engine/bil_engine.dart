@@ -1,9 +1,6 @@
 import 'body_profile.dart';
 import 'daily_targets.dart';
-import 'bmr_engine.dart';
-import 'tdee_engine.dart';
-import 'nutrition_engine.dart';
-import 'hydration_engine.dart';
+import 'body_model_engine.dart';
 import 'recommendation_engine.dart';
 import 'score.dart';
 import 'score_engine.dart';
@@ -14,6 +11,7 @@ class BILResult {
   final DailyTargets targets;
   final DailyScore score;
   final List<String> recommendations;
+  final BodyModelResult bodyModel;
 
   const BILResult({
     required this.bmr,
@@ -21,6 +19,7 @@ class BILResult {
     required this.targets,
     required this.score,
     required this.recommendations,
+    required this.bodyModel,
   });
 }
 
@@ -31,16 +30,9 @@ class BILEngine {
     required int eatenProtein,
     required int drankWater,
   }) {
-    final bmr = BMREngine.calculate(profile);
-
-    final tdee = TDEEEngine.calculate(
-      bmr: bmr,
-      activityLevel: profile.activityLevel,
-    );
-
-    final targets = NutritionEngine.calculate(profile: profile, tdee: tdee);
-
-    final waterTarget = HydrationEngine.calculate(profile);
+    final model = BodyModelEngine.calculate(profile);
+    final targets = model.targets;
+    final waterTarget = targets.water;
 
     final score = ScoreEngine.calculate(
       targetCalories: targets.calories,
@@ -58,11 +50,12 @@ class BILEngine {
     );
 
     return BILResult(
-      bmr: bmr,
-      tdee: tdee,
+      bmr: model.bmrKcal,
+      tdee: model.tdeeKcal,
       targets: targets,
       score: score,
       recommendations: recommendations,
+      bodyModel: model,
     );
   }
 }

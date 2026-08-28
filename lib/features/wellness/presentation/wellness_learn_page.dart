@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../../../app/localization/app_localizations.dart';
 import 'wellness_copy.dart';
 
 class WellnessLearnPage extends StatefulWidget {
@@ -344,10 +345,11 @@ String _learnText(
   String tr,
 ) => switch (Localizations.localeOf(context).languageCode) {
   'ar' => ar,
+  'en' => en,
   'fr' => fr,
   'es' => es,
   'tr' => tr,
-  _ => en,
+  _ => context.strings.text(en),
 };
 
 class _LearnDestination extends StatelessWidget {
@@ -619,7 +621,7 @@ List<_LearnArticle> _articles(BuildContext context) => [
   ),
   _LearnArticle(
     topic: 'Sleep',
-    asset: 'assets/images/flagship/bil_sleep_insights_v1.png',
+    asset: 'assets/images/flagship/bil_sleep_insights_v2.png',
     title: wellnessCopy(
       context,
       'Why one night cannot explain your sleep',

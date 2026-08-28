@@ -9,33 +9,7 @@ import '../../app/services/app_settings_provider.dart';
 class LanguageSettingsPage extends ConsumerWidget {
   const LanguageSettingsPage({super.key});
 
-  static const orderedTags = <String>[
-    'ar',
-    'en',
-    'fr',
-    'es',
-    'tr',
-    'de',
-    'it',
-    'pt-BR',
-    'pt-PT',
-    'ur',
-    'fa',
-    'hi',
-    'id',
-    'ms',
-    'ja',
-    'ko',
-    'zh-Hans',
-    'zh-Hant',
-    'ru',
-    'bn',
-    'vi',
-    'th',
-    'pl',
-    'nl',
-    'uk',
-  ];
+  static const orderedTags = BilLocaleNames.englishFirstAlphabeticalTags;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,19 +20,29 @@ class LanguageSettingsPage extends ConsumerWidget {
         itemCount: orderedTags.length,
         itemBuilder: (context, index) {
           final tag = orderedTags[index];
+          final optionDirection = BilLocalePolicy.isRtlTag(tag)
+              ? TextDirection.rtl
+              : TextDirection.ltr;
           return Directionality(
-            textDirection: BilLocalePolicy.isRtlTag(tag)
-                ? TextDirection.rtl
-                : TextDirection.ltr,
+            textDirection: TextDirection.ltr,
             child: ListTile(
               key: Key('language-option-$tag'),
               minTileHeight: 58,
-              title: Text(BilLocaleNames.native[tag]!),
+              title: Text(
+                BilLocaleNames.native[tag]!,
+                locale: BilLocalePolicy.localeFromTag(tag),
+                textDirection: optionDirection,
+                textAlign: TextAlign.left,
+              ),
               trailing: selected == tag
                   ? const Icon(Icons.check_rounded)
                   : null,
-              onTap: () =>
-                  ref.read(appSettingsProvider.notifier).setLocale(tag),
+              onTap: () async {
+                await ref.read(appSettingsProvider.notifier).setLocale(tag);
+                if (context.mounted && Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop();
+                }
+              },
             ),
           );
         },

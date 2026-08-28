@@ -1,8 +1,8 @@
-"NSHealthShareUsageDescription" = "BIL hanya membaca kategori Kesehatan yang Anda pilih—aktivitas, tidur, pengukuran tubuh, metrik jantung dan pernapasan, tekanan darah, oksigen, glukosa, hidrasi, dan nutrisi—untuk menampilkan linimasa dan wawasan pribadi di perangkat ini.";
+"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
 "NSHealthUpdateUsageDescription" = "BIL hanya menulis catatan kesehatan yang Anda pilih secara eksplisit, setelah persetujuan tulis terpisah.";
-"NSBluetoothAlwaysUsageDescription" = "BIL hanya terhubung ke perangkat kesehatan yang Anda pasangkan secara eksplisit sehingga pengukuran dapat diimpor secara lokal.";
-"NSBluetoothPeripheralUsageDescription" = "BIL hanya terhubung ke perangkat kesehatan yang Anda pasangkan secara eksplisit sehingga pengukuran dapat diimpor secara lokal.";
+"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Gunakan kamera hanya ketika Anda memilih untuk memindai kode batang, meninjau foto makanan, atau menambahkan profil pribadi atau foto kemajuan.";
 "NSPhotoLibraryUsageDescription" = "Pilih foto makanan, profil, atau kemajuan untuk ditinjau sebelum disimpan atau diunggah.";
-"NSMicrophoneUsageDescription" = "BIL menggunakan mikrofon hanya saat Anda memilih input suara untuk makan.";
-"NSSpeechRecognitionUsageDescription" = "BIL mengubah frasa makanan yang Anda ucapkan menjadi teks sehingga Anda dapat meninjaunya sebelum menyimpannya.";
+"NSMicrophoneUsageDescription" = "BIL menggunakan mikrofon hanya saat Anda memilih pencatatan makanan dengan suara atau berbicara langsung dengan BIL AI Coach.";
+"NSSpeechRecognitionUsageDescription" = "BIL mengubah ucapan yang Anda mulai untuk pencatatan makanan atau BIL AI Coach menjadi teks agar dapat Anda tinjau atau kirim.";

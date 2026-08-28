@@ -61,6 +61,7 @@ twin_cards_layout.patch
 
 # Platform-generated caches
 .gradle/
+.gradle-user-home/
 
 # BIL package backups
 .bil-package-backups/
@@ -98,6 +99,8 @@ artifacts/workout_media/output/fal_longcat_remaining_998/
 
 # Local Codex/runtime secrets and disposable tool state.
 .codex_runtime_keys.json
+.tmp/
+.wrangler/
 supabase/.temp/
 android/.kotlin/
 tmp/
@@ -121,3 +124,11 @@ artifacts/*
 # Generated workout-provider runs are local inputs/diagnostics. Runtime media
 # is accepted only through reviewed assets and release manifests.
 tool/workout_media/
+
+# Local Cloudflare Worker dependencies and dry-run bundles.
+cloudflare/workout-runtime/node_modules/
+cloudflare/workout-runtime/dist/
+
+# Local Codex upload staging and emulator credential captures.
+.codex_upload_tmp/
+test/emulator_qa/*credentials*.png

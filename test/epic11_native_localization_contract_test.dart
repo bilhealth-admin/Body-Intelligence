@@ -59,6 +59,27 @@ void main() {
       for (final key in iosKeys) {
         expect(copy, contains('"$key"'), reason: '$locale:$key');
       }
+      final coachName = switch (locale) {
+        'ar' => 'مدرب BIL الذكي',
+        'fa' => 'مربی هوشمند BIL',
+        _ => 'AI Coach',
+      };
+      expect(
+        RegExp(
+          '^"NSMicrophoneUsageDescription" = ".*${RegExp.escape(coachName)}.*";\r?\$',
+          multiLine: true,
+        ).hasMatch(copy),
+        isTrue,
+        reason: '$locale microphone copy must disclose AI Coach voice use',
+      );
+      expect(
+        RegExp(
+          '^"NSSpeechRecognitionUsageDescription" = ".*${RegExp.escape(coachName)}.*";\r?\$',
+          multiLine: true,
+        ).hasMatch(copy),
+        isTrue,
+        reason: '$locale speech copy must disclose AI Coach transcription',
+      );
       expect(
         RegExp(r'^"NS', multiLine: true).allMatches(copy),
         hasLength(iosKeys.length),
@@ -82,8 +103,35 @@ void main() {
   });
 
   test('Android rationale and app name exist in all production languages', () {
-    for (final locale in authoredLocales) {
-      final qualifier = locale == 'en' ? 'values' : 'values-$locale';
+    const androidQualifiers = <String, String>{
+      'en': 'values',
+      'ar': 'values-ar',
+      'fr': 'values-fr',
+      'es': 'values-es',
+      'tr': 'values-tr',
+      'de': 'values-de',
+      'it': 'values-it',
+      'pt-BR': 'values-pt-rBR',
+      'pt-PT': 'values-pt-rPT',
+      'ur': 'values-ur',
+      'fa': 'values-fa',
+      'hi': 'values-hi',
+      'id': 'values-id',
+      'ms': 'values-ms',
+      'ja': 'values-ja',
+      'ko': 'values-ko',
+      'zh-Hans': 'values-b+zh+Hans',
+      'zh-Hant': 'values-b+zh+Hant',
+      'ru': 'values-ru',
+      'bn': 'values-bn',
+      'vi': 'values-vi',
+      'th': 'values-th',
+      'pl': 'values-pl',
+      'nl': 'values-nl',
+      'uk': 'values-uk',
+    };
+    for (final locale in iosLocales) {
+      final qualifier = androidQualifiers[locale]!;
       final copy = File(
         'android/app/src/main/res/$qualifier/strings.xml',
       ).readAsStringSync();
@@ -98,6 +146,23 @@ void main() {
         contains('name="health_permissions_rationale_body"'),
         reason: locale,
       );
+      if (extendedLocales.contains(locale)) {
+        expect(
+          copy,
+          isNot(
+            File(
+              'android/app/src/main/res/values/strings.xml',
+            ).readAsStringSync(),
+          ),
+          reason: '$locale must not use English Android resources',
+        );
+      }
+    }
+    final localeConfig = File(
+      'android/app/src/main/res/xml/locales_config.xml',
+    ).readAsStringSync();
+    for (final locale in iosLocales) {
+      expect(localeConfig, contains('android:name="$locale"'), reason: locale);
     }
     expect(
       File('android/app/src/main/AndroidManifest.xml').readAsStringSync(),

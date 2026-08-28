@@ -1,4 +1,5 @@
 import '../core/global_platform_core.dart';
+import '../health_data/unified_health_data_integration.dart';
 import 'wearables_platform.dart';
 
 enum WearableVendor { appleWatch, wearOs, samsung, garmin, fitbit }
@@ -70,7 +71,7 @@ final class WearableProviderPolicy {
           priority: 85,
           maxAttempts: 3,
           minimumRateLimitRemaining: 2,
-          mapping: <String, String>{'blood_oxygen': 'oxygen'},
+          mapping: <String, String>{},
         ),
         WearableVendor.garmin => const WearableProviderPolicy(
           vendor: WearableVendor.garmin,
@@ -118,7 +119,6 @@ final class ProviderWearableAdapter implements WearableProvider {
       'sleep',
       'heart_rate',
       'hrv',
-      'oxygen',
     },
     WearableVendor.wearOs => <String>{
       'steps',
@@ -133,7 +133,6 @@ final class ProviderWearableAdapter implements WearableProvider {
       'workout',
       'sleep',
       'heart_rate',
-      'oxygen',
     },
     WearableVendor.garmin => <String>{
       'steps',
@@ -142,8 +141,6 @@ final class ProviderWearableAdapter implements WearableProvider {
       'sleep',
       'heart_rate',
       'hrv',
-      'oxygen',
-      'respiratory_rate',
       'recovery_score',
     },
     WearableVendor.fitbit => <String>{
@@ -153,7 +150,6 @@ final class ProviderWearableAdapter implements WearableProvider {
       'sleep',
       'heart_rate',
       'hrv',
-      'oxygen',
       'active_minutes',
     },
   };
@@ -191,12 +187,15 @@ final class ProviderWearableAdapter implements WearableProvider {
         for (final item
             in raw['records'] as List<Object?>? ?? const <Object?>[]) {
           final row = Map<String, Object?>.from(item! as Map);
+          final rawKind = (row['kind'] ?? row['type'])?.toString();
+          if (BilHealthScope.excludesKey(rawKind)) continue;
           final recordId = (row['recordId'] ?? row['id']) as String;
           final dedupKey = '$id:$recordId';
           if (await store.get('wearable_record_seen', dedupKey) != null) {
             continue;
           }
           final normalized = _normalize(row);
+          if (BilHealthScope.excludesKey(normalized['key'])) continue;
           final signal = GlobalHealthSignal.fromMap(<String, Object?>{
             ...normalized,
             'providerId': id,

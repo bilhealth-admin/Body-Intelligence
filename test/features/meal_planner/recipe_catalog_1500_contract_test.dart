@@ -32,9 +32,49 @@ void main() {
         .toList(growable: false);
   });
 
-  test('preserves 100 records and allocates exactly 300 per locale', () {
+  test('preserves reviewed records and ships 25 direct localizations', () {
     expect(records, hasLength(1500));
-    expect(records.take(100).toList(), original);
+    const supportedLocales = {
+      'ar',
+      'en',
+      'fr',
+      'es',
+      'tr',
+      'de',
+      'it',
+      'pt-BR',
+      'pt-PT',
+      'ur',
+      'fa',
+      'hi',
+      'id',
+      'ms',
+      'ja',
+      'ko',
+      'zh-Hans',
+      'zh-Hant',
+      'ru',
+      'bn',
+      'vi',
+      'th',
+      'pl',
+      'nl',
+      'uk',
+    };
+    for (var index = 0; index < original.length; index++) {
+      final expanded = Map<String, dynamic>.from(records[index])
+        ..remove('localizations');
+      final reviewed = Map<String, dynamic>.from(original[index])
+        ..remove('localizations');
+      expect(expanded, reviewed, reason: 'reviewed record $index changed');
+
+      final expandedCopy = records[index]['localizations'] as Map;
+      final reviewedCopy = original[index]['localizations'] as Map;
+      expect(expandedCopy.keys.toSet(), supportedLocales);
+      for (final locale in reviewedCopy.keys) {
+        expect(expandedCopy[locale], reviewedCopy[locale]);
+      }
+    }
     for (final locale in const ['ar', 'en', 'fr', 'es', 'tr']) {
       expect(
         records.where((record) => record['primaryLocale'] == locale),

@@ -17,7 +17,7 @@ class PartnerCapabilitiesPage extends ConsumerWidget {
           Text(
             _text(
               context,
-              'Only registered and reachable integrations can connect.',
+              'Choose a supported health source. Availability depends on your device and permissions.',
             ),
           ),
           const SizedBox(height: 12),
@@ -86,8 +86,7 @@ class _CapabilityTile extends StatelessWidget {
           ),
           title: Text(_text(context, entry.id)),
           subtitle: Text(
-            '${_text(context, entry.category)}\n${_text(context, _stateKey(entry.state))}'
-            '${entry.dataTypes.isEmpty ? '' : '\n${entry.dataTypes.join(' · ')}'}',
+            '${_text(context, entry.category)}\n${_text(context, _stateKey(entry.state))}',
           ),
           isThreeLine: true,
           titleTextStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -113,13 +112,11 @@ class _CapabilityTile extends StatelessWidget {
 
 String _stateKey(PartnerIntegrationState state) => switch (state) {
   PartnerIntegrationState.nativeBridge =>
-    'Native bridge available; device permission required.',
+    'Available on supported devices after permission',
   PartnerIntegrationState.deviceBridge =>
-    'Device bridge available; each device requires verification.',
-  PartnerIntegrationState.configurationRequired =>
-    'Not connectable: provider OAuth and runtime registration are not configured.',
-  PartnerIntegrationState.noAdapter =>
-    'Not connectable: no registered adapter.',
+    'Available after Bluetooth permission',
+  PartnerIntegrationState.configurationRequired => 'Not available yet',
+  PartnerIntegrationState.noAdapter => 'Not available yet',
 };
 
 String _text(BuildContext context, String key) {
@@ -130,112 +127,96 @@ String _text(BuildContext context, String key) {
 const _copy = <String, Map<String, String>>{
   'en': {
     'Connection capabilities': 'Connection capabilities',
-    'Only registered and reachable integrations can connect.':
-        'Only registered and reachable integrations can connect.',
+    'Choose a supported health source. Availability depends on your device and permissions.':
+        'Choose a supported health source. Availability depends on your device and permissions.',
     'health-connect': 'Health Connect',
     'healthkit': 'Apple Health',
-    'medical-ble': 'Bluetooth medical devices',
+    'medical-ble': 'Bluetooth fitness devices',
     'garmin': 'Garmin',
     'fitbit': 'Fitbit',
     'samsung-health': 'Samsung Health',
     'Health platform': 'Health platform',
-    'Medical device': 'Medical device',
+    'Medical device': 'Fitness device',
     'Partner account': 'Partner account',
-    'Native bridge available; device permission required.':
-        'Native bridge available; device permission required.',
-    'Device bridge available; each device requires verification.':
-        'Device bridge available; each device requires verification.',
-    'Not connectable: provider OAuth and runtime registration are not configured.':
-        'Not connectable: provider OAuth and runtime registration are not configured.',
-    'Not connectable: no registered adapter.':
-        'Not connectable: no registered adapter.',
+    'Available on supported devices after permission':
+        'Available on supported devices after permission',
+    'Available after Bluetooth permission':
+        'Available after Bluetooth permission',
+    'Not available yet': 'Not available yet',
   },
   'ar': {
     'Connection capabilities': 'قدرات الاتصال',
-    'Only registered and reachable integrations can connect.':
-        'يمكن الاتصال فقط بالتكاملات المسجلة والقابلة للوصول.',
+    'Choose a supported health source. Availability depends on your device and permissions.':
+        'اختر مصدرًا صحيًا مدعومًا. يعتمد التوفر على جهازك والأذونات.',
     'health-connect': 'Health Connect',
     'healthkit': 'Apple Health',
-    'medical-ble': 'أجهزة طبية عبر البلوتوث',
+    'medical-ble': 'أجهزة لياقة عبر البلوتوث',
     'garmin': 'Garmin',
     'fitbit': 'Fitbit',
     'samsung-health': 'Samsung Health',
     'Health platform': 'منصة صحة',
-    'Medical device': 'جهاز طبي',
+    'Medical device': 'جهاز لياقة',
     'Partner account': 'حساب شريك',
-    'Native bridge available; device permission required.':
-        'الجسر الأصلي متاح ويتطلب إذن الجهاز.',
-    'Device bridge available; each device requires verification.':
-        'جسر الجهاز متاح ويتطلب التحقق من كل جهاز.',
-    'Not connectable: provider OAuth and runtime registration are not configured.':
-        'غير قابل للاتصال: OAuth وتسجيل التشغيل غير مهيأين.',
-    'Not connectable: no registered adapter.':
-        'غير قابل للاتصال: لا يوجد موصل مسجل.',
+    'Available on supported devices after permission':
+        'متاح على الأجهزة المدعومة بعد منح الإذن',
+    'Available after Bluetooth permission': 'متاح بعد منح إذن البلوتوث',
+    'Not available yet': 'غير متاح حاليًا',
   },
   'fr': {
     'Connection capabilities': 'Capacités de connexion',
-    'Only registered and reachable integrations can connect.':
-        'Seules les intégrations enregistrées et accessibles peuvent se connecter.',
+    'Choose a supported health source. Availability depends on your device and permissions.':
+        'Choisissez une source de santé compatible. La disponibilité dépend de votre appareil et des autorisations.',
     'health-connect': 'Health Connect',
     'healthkit': 'Apple Health',
-    'medical-ble': 'Appareils médicaux Bluetooth',
+    'medical-ble': 'Appareils de fitness Bluetooth',
     'garmin': 'Garmin',
     'fitbit': 'Fitbit',
     'samsung-health': 'Samsung Health',
     'Health platform': 'Plateforme santé',
-    'Medical device': 'Appareil médical',
+    'Medical device': 'Appareil de fitness',
     'Partner account': 'Compte partenaire',
-    'Native bridge available; device permission required.':
-        'Pont natif disponible ; autorisation requise.',
-    'Device bridge available; each device requires verification.':
-        'Pont appareil disponible ; chaque appareil doit être vérifié.',
-    'Not connectable: provider OAuth and runtime registration are not configured.':
-        'Non connectable : OAuth et l’enregistrement ne sont pas configurés.',
-    'Not connectable: no registered adapter.':
-        'Non connectable : aucun adaptateur enregistré.',
+    'Available on supported devices after permission':
+        'Disponible sur les appareils compatibles après autorisation',
+    'Available after Bluetooth permission':
+        'Disponible après autorisation Bluetooth',
+    'Not available yet': 'Pas encore disponible',
   },
   'es': {
     'Connection capabilities': 'Capacidades de conexión',
-    'Only registered and reachable integrations can connect.':
-        'Solo pueden conectarse integraciones registradas y accesibles.',
+    'Choose a supported health source. Availability depends on your device and permissions.':
+        'Elige una fuente de salud compatible. La disponibilidad depende del dispositivo y los permisos.',
     'health-connect': 'Health Connect',
     'healthkit': 'Apple Health',
-    'medical-ble': 'Dispositivos médicos Bluetooth',
+    'medical-ble': 'Dispositivos de fitness Bluetooth',
     'garmin': 'Garmin',
     'fitbit': 'Fitbit',
     'samsung-health': 'Samsung Health',
     'Health platform': 'Plataforma de salud',
-    'Medical device': 'Dispositivo médico',
+    'Medical device': 'Dispositivo de fitness',
     'Partner account': 'Cuenta asociada',
-    'Native bridge available; device permission required.':
-        'Puente nativo disponible; requiere permiso.',
-    'Device bridge available; each device requires verification.':
-        'Puente de dispositivo disponible; cada dispositivo requiere verificación.',
-    'Not connectable: provider OAuth and runtime registration are not configured.':
-        'No conectable: OAuth y el registro de ejecución no están configurados.',
-    'Not connectable: no registered adapter.':
-        'No conectable: no hay adaptador registrado.',
+    'Available on supported devices after permission':
+        'Disponible en dispositivos compatibles después del permiso',
+    'Available after Bluetooth permission':
+        'Disponible después del permiso de Bluetooth',
+    'Not available yet': 'Aún no disponible',
   },
   'tr': {
     'Connection capabilities': 'Bağlantı yetenekleri',
-    'Only registered and reachable integrations can connect.':
-        'Yalnızca kayıtlı ve erişilebilir entegrasyonlar bağlanabilir.',
+    'Choose a supported health source. Availability depends on your device and permissions.':
+        'Desteklenen bir sağlık kaynağı seçin. Kullanılabilirlik cihazınıza ve izinlere bağlıdır.',
     'health-connect': 'Health Connect',
     'healthkit': 'Apple Health',
-    'medical-ble': 'Bluetooth tıbbi cihazlar',
+    'medical-ble': 'Bluetooth fitness cihazları',
     'garmin': 'Garmin',
     'fitbit': 'Fitbit',
     'samsung-health': 'Samsung Health',
     'Health platform': 'Sağlık platformu',
-    'Medical device': 'Tıbbi cihaz',
+    'Medical device': 'Fitness cihazı',
     'Partner account': 'İş ortağı hesabı',
-    'Native bridge available; device permission required.':
-        'Yerel köprü hazır; cihaz izni gerekir.',
-    'Device bridge available; each device requires verification.':
-        'Cihaz köprüsü hazır; her cihaz doğrulanmalıdır.',
-    'Not connectable: provider OAuth and runtime registration are not configured.':
-        'Bağlanamaz: OAuth ve çalışma kaydı yapılandırılmadı.',
-    'Not connectable: no registered adapter.':
-        'Bağlanamaz: kayıtlı adaptör yok.',
+    'Available on supported devices after permission':
+        'İzin verildikten sonra desteklenen cihazlarda kullanılabilir',
+    'Available after Bluetooth permission':
+        'Bluetooth izninden sonra kullanılabilir',
+    'Not available yet': 'Henüz kullanılamıyor',
   },
 };

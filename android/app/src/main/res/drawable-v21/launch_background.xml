@@ -1,9 +1,6 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Android 11 and earlier: a single opaque hand-off color. Flutter owns
+         the first branded frame so launch never flashes a second wordmark. -->
     <item android:drawable="@color/bil_launch_background" />
-    <item>
-        <bitmap
-            android:gravity="fill"
-            android:src="@drawable/bil_splash" />
-    </item>
 </layer-list>

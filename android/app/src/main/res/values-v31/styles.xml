@@ -1,9 +1,14 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <!-- Android 12+ requires an animated-icon drawable when the system
+             splash is customized. A fully transparent vector satisfies that
+             contract while leaving a pure-blue, mask-free visible surface. -->
+        <item name="android:windowDisablePreview">false</item>
+        <item name="android:windowBackground">@color/bil_launch_background</item>
         <item name="android:windowSplashScreenBackground">@color/bil_launch_background</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/bil_splash_wordmark_safe_v2</item>
-        <item name="android:windowSplashScreenIconBackgroundColor">@color/bil_launch_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/bil_splash_transparent_icon</item>
+        <item name="android:windowSplashScreenAnimationDuration">0</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
     </style>

@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../../../app/localization/bil_locale_policy.dart';
 import '../data/community_repository.dart';
 import 'community_copy.dart';
 
 class CommunitySafetyPage extends StatefulWidget {
-  const CommunitySafetyPage({super.key});
+  const CommunitySafetyPage({this.repository, super.key});
+
+  final CommunityRepository? repository;
 
   @override
   State<CommunitySafetyPage> createState() => _CommunitySafetyPageState();
@@ -18,20 +21,25 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
   bool _accepted = false;
   bool _saving = false;
 
-  String get _languageCode => Localizations.localeOf(context).languageCode;
+  String get _languageCode =>
+      BilLocalePolicy.canonicalTag(Localizations.localeOf(context));
   String _t(String en, String ar) =>
       communityTextForLanguage(_languageCode, en, ar);
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_policy != null || !AppEnvironment.communityConfigured) return;
+    if (_policy != null) return;
+    if (widget.repository case final repository?) {
+      _repository = repository;
+      _policy = repository.loadActiveContentPolicy(localeCode: _languageCode);
+      return;
+    }
+    if (!AppEnvironment.communityConfigured) return;
     final client = Supabase.instance.client;
     if (client.auth.currentUser == null) return;
     _repository = CommunityRepository(client);
-    _policy = _repository!.loadActiveContentPolicy(
-      localeCode: Localizations.localeOf(context).languageCode,
-    );
+    _policy = _repository!.loadActiveContentPolicy(localeCode: _languageCode);
   }
 
   Future<void> _accept(Map<String, dynamic> policy) async {
@@ -195,13 +203,30 @@ class _Unavailable extends StatelessWidget {
   Widget build(BuildContext context) => Center(
     child: Padding(
       padding: const EdgeInsets.all(28),
-      child: Text(
-        communityTextForLanguage(
-          languageCode,
-          'Community is unavailable in this build and remains hidden until secure cloud configuration is complete.',
-          'المجتمع غير مفعّل في هذا الإصدار. يبقى مغلقًا حتى تكتمل إعدادات السحابة الآمنة.',
-        ),
-        textAlign: TextAlign.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.health_and_safety_outlined, size: 52),
+          const SizedBox(height: 14),
+          Text(
+            communityTextForLanguage(
+              languageCode,
+              'Health logs stay private',
+              'سجلاتك الصحية خاصة',
+            ),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            communityTextForLanguage(
+              languageCode,
+              'BIL never posts weight, meals, or measurements without an explicit share action.',
+              'لا ينشر BIL وزنًا أو وجبة أو قياسًا دون إجراء مشاركة واضح منك.',
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     ),
   );

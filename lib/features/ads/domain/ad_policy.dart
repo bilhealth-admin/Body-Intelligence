@@ -1,11 +1,7 @@
 import '../../commerce/domain/commerce_plan.dart';
 import '../../commerce/domain/subscription_state.dart';
 
-enum AdConsentStatus { unknown, declined, contextualOnly }
-
 enum AdAgeEligibility { unknown, under18, adult }
-
-enum AdRegionEligibility { unknown, restricted, eligible }
 
 enum AdPlacement {
   wellnessLibrary,
@@ -25,14 +21,11 @@ enum AdSuppressionReason {
   allowed,
   paidSubscription,
   entitlementUnverified,
-  consentMissing,
   sensitiveContext,
   providerUnavailable,
   offline,
   ageUnknown,
   underage,
-  regionUnknown,
-  regionRestricted,
 }
 
 final class AdPolicyDecision {
@@ -48,25 +41,27 @@ final class AdPolicyDecision {
 /// Privacy-first advertising policy.
 ///
 /// It accepts no health, nutrition, weight, location, profile, search, or
-/// diagnosis data. The only inputs are entitlement, explicit consent,
-/// placement classification, connectivity, and provider readiness.
+/// diagnosis data. The only inputs are server-verified entitlement, the
+/// existing product-wide adult gate, placement classification, connectivity,
+/// and provider readiness. Google UMP remains the final consent authority at
+/// the provider boundary immediately before every ad request.
 final class AdPolicy {
   const AdPolicy();
 
   static const _nonSensitivePlacements = <AdPlacement>{
-    AdPlacement.wellnessLibrary,
     AdPlacement.generalDiscovery,
   };
 
   AdPolicyDecision evaluate({
     required SubscriptionState subscription,
-    required AdConsentStatus consent,
     required AdPlacement placement,
     required bool providerConfigured,
     required bool isOnline,
-    AdAgeEligibility ageEligibility = AdAgeEligibility.adult,
-    AdRegionEligibility regionEligibility = AdRegionEligibility.eligible,
+    AdAgeEligibility ageEligibility = AdAgeEligibility.unknown,
   }) {
+    if (subscription.authority != EntitlementAuthority.verifiedServer) {
+      return const AdPolicyDecision.entitlementUnverified();
+    }
     if (subscription.plan != CommercePlan.free) {
       return const AdPolicyDecision._(AdSuppressionReason.paidSubscription);
     }
@@ -75,15 +70,6 @@ final class AdPolicy {
     }
     if (ageEligibility == AdAgeEligibility.under18) {
       return const AdPolicyDecision._(AdSuppressionReason.underage);
-    }
-    if (regionEligibility == AdRegionEligibility.unknown) {
-      return const AdPolicyDecision._(AdSuppressionReason.regionUnknown);
-    }
-    if (regionEligibility == AdRegionEligibility.restricted) {
-      return const AdPolicyDecision._(AdSuppressionReason.regionRestricted);
-    }
-    if (consent != AdConsentStatus.contextualOnly) {
-      return const AdPolicyDecision._(AdSuppressionReason.consentMissing);
     }
     if (!_nonSensitivePlacements.contains(placement)) {
       return const AdPolicyDecision._(AdSuppressionReason.sensitiveContext);

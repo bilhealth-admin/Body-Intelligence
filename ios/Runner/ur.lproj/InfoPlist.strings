@@ -1,8 +1,8 @@
-"NSHealthShareUsageDescription" = "BIL صرف آپ کی منتخب کردہ صحت کی اقسام—سرگرمی، نیند، جسمانی پیمائش، دل و تنفس کے اشاریے، بلڈ پریشر، آکسیجن، گلوکوز، پانی اور غذائیت—پڑھتا ہے تاکہ اس ڈیوائس پر نجی صحت ٹائم لائن اور تجزیہ دکھایا جا سکے۔";
+"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
 "NSHealthUpdateUsageDescription" = "BIL علیحدہ تحریری رضامندی کے بعد صرف وہی ہیلتھ ریکارڈ لکھتا ہے جو آپ واضح طور پر منتخب کرتے ہیں۔";
-"NSBluetoothAlwaysUsageDescription" = "BIL صرف صحت کے آلات سے جوڑتا ہے جو آپ واضح طور پر جوڑتے ہیں تاکہ پیمائش مقامی طور پر درآمد کی جا سکے۔";
-"NSBluetoothPeripheralUsageDescription" = "BIL صرف صحت کے آلات سے جوڑتا ہے جو آپ واضح طور پر جوڑتے ہیں تاکہ پیمائش مقامی طور پر درآمد کی جا سکے۔";
+"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "کیمرہ صرف اس وقت استعمال کریں جب آپ بار کوڈ اسکین کرنے، کھانے کی تصویر کا جائزہ لینے، یا نجی پروفائل یا پروگریس فوٹو شامل کرنے کا انتخاب کریں۔";
 "NSPhotoLibraryUsageDescription" = "کھانے، پروفائل، یا پروگریس تصویر کو محفوظ کرنے یا اپ لوڈ کرنے سے پہلے جائزہ لینے کے لیے منتخب کریں۔";
-"NSMicrophoneUsageDescription" = "BIL مائیکروفون صرف اس وقت استعمال کرتا ہے جب آپ کھانے کے لیے صوتی ان پٹ کا انتخاب کرتے ہیں۔";
-"NSSpeechRecognitionUsageDescription" = "BIL آپ کے کہنے والے کھانے کے جملے کو متن میں بدل دیتا ہے تاکہ آپ محفوظ کرنے سے پہلے اس کا جائزہ لے سکیں۔";
+"NSMicrophoneUsageDescription" = "BIL مائیکروفون صرف اس وقت استعمال کرتا ہے جب آپ آواز سے کھانا درج کرنے یا BIL AI Coach سے براہ راست بات کرنے کا انتخاب کرتے ہیں۔";
+"NSSpeechRecognitionUsageDescription" = "BIL کھانا درج کرنے یا BIL AI Coach کے لیے شروع کی گئی گفتگو کو متن میں بدلتا ہے تاکہ آپ اسے دیکھ یا بھیج سکیں۔";

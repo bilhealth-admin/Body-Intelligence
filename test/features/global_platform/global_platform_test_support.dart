@@ -101,8 +101,8 @@ final class TestMedical implements MedicalDeviceProvider {
   @override
   Future<List<MedicalDeviceIdentity>> discover() async => const [
     MedicalDeviceIdentity(
-      id: 'bp1',
-      kind: 'blood_pressure',
+      id: 'scale1',
+      kind: 'weight_scale',
       manufacturer: 'BIL',
       calibrationState: 'calibrated',
     ),
@@ -114,9 +114,9 @@ final class TestMedical implements MedicalDeviceProvider {
   }) async => [
     MedicalMeasurement(
       deviceId: deviceId,
-      kind: 'blood_pressure_systolic',
-      value: 120,
-      unit: 'mmHg',
+      kind: 'weight',
+      value: 80,
+      unit: 'kg',
       observedAt: asOf.subtract(const Duration(minutes: 1)),
       confidence: .95,
       calibrated: true,

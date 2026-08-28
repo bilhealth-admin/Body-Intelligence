@@ -3,24 +3,30 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('email signup and resend use the allow-listed BIL auth callback', () {
+  test('OAuth keeps BIL callback while email OTP auto-creates safely', () {
     final service = File(
       'lib/features/auth/supabase_auth_service.dart',
     ).readAsStringSync();
 
-    expect(service, contains("static const oauthRedirectUri = 'bil://auth-callback';"));
-    expect(service, contains('static const emailRedirectUri = oauthRedirectUri;'));
-    expect(service, contains('emailRedirectTo: emailRedirectUri'));
     expect(
-      RegExp(r'client\.auth\.resend\([\s\S]*emailRedirectTo: emailRedirectUri').hasMatch(service),
-      isTrue,
+      service,
+      contains("static const oauthRedirectUri = 'bil://auth-callback';"),
+    );
+    expect(
+      service,
+      contains('static const emailRedirectUri = oauthRedirectUri;'),
+    );
+    expect(service, contains('client.auth.signInWithOtp'));
+    expect(service, contains('emailRedirectTo: emailRedirectUri'));
+    expect(service, contains('shouldCreateUser: true'));
+    expect(service, contains('type: OtpType.email'));
+    expect(
+      service,
+      contains("'https://www.bilhealth.com/auth/reset-password'"),
     );
   });
 
-  test('all successful email auth paths return through startup policy', () {
-    final register = File(
-      'lib/features/auth/register_page.dart',
-    ).readAsStringSync();
+  test('successful email OTP verification returns through startup policy', () {
     final verify = File(
       'lib/features/auth/verify_email_page.dart',
     ).readAsStringSync();
@@ -28,18 +34,8 @@ void main() {
       'lib/features/auth/premium_login_page.dart',
     ).readAsStringSync();
 
-    expect(register, contains("context.go('/startup')"));
+    expect(login, contains("context.push('/verify-email', extra: normalized)"));
+    expect(verify, contains('verifyEmailOtp('));
     expect(verify, contains("context.go('/startup')"));
-    expect(login, contains("context.go('/startup')"));
-  });
-
-  test('verification copy does not promise an email for repeated signup', () {
-    final verify = File(
-      'lib/features/auth/verify_email_page.dart',
-    ).readAsStringSync();
-
-    expect(verify, contains('If this is a new account'));
-    expect(verify, contains('If this email is awaiting verification'));
-    expect(verify, isNot(contains("status = tr('A new code was sent.'")));
   });
 }

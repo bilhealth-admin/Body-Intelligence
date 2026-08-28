@@ -8,16 +8,11 @@ void main() {
       'lib/app/router/responsive_app_shell.dart',
     ).readAsStringSync();
 
-    expect(
-      shell,
-      contains('extendBody: true'),
-      reason:
-          'The body must render behind the translucent bottom bar instead of ending at its reserved top edge.',
-    );
-    expect(shell, contains('FloatingActionButtonLocation.centerDocked'));
-    expect(shell, contains('height: 76'));
+    expect(shell, contains('extendBody: false'));
+    expect(shell, contains('height: 72'));
+    expect(shell, contains("key: const Key('shell-quick-add')"));
     expect(shell, contains('Color(0xB807111D)'));
     expect(shell, contains('Color(0xB8F4F8FC)'));
-    expect(shell, isNot(contains('EdgeInsets.only(bottom: 82)')));
+    expect(shell, isNot(contains('FloatingActionButtonLocation.centerDocked')));
   });
 }

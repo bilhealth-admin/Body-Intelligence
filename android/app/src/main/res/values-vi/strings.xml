@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BIL - Nhật ký trí tuệ cơ thể</string>
+    <string name="health_permissions_rationale_title">Quyền riêng tư dữ liệu sức khỏe</string>
+    <string name="health_permissions_rationale_body">BIL chỉ yêu cầu các loại dữ liệu Health Connect cần thiết cho các tính năng bạn chọn sử dụng. Dữ liệu sức khỏe của bạn được xử lý cục bộ theo mặc định. Bạn có thể cấp, từ chối hoặc thu hồi các quyền riêng lẻ bất kỳ lúc nào từ cài đặt Health Connect. BIL không bán dữ liệu sức khỏe hoặc sử dụng dữ liệu đó để quảng cáo.</string>
+    <string name="health_permissions_privacy_policy_action">Đọc toàn bộ chính sách quyền riêng tư của BIL</string>
+</resources>

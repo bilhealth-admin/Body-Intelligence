@@ -1,14 +1,22 @@
+import 'dart:async';
+
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
+import 'package:body_intelligence_log/features/community/domain/community_text_policy.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_connections_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_messages_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_people_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_notifications_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_profile_page.dart';
+import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/paid_plan_catalog.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -21,7 +29,11 @@ final class _CommunityInteractionRepository extends CommunityRepository {
           'interaction-anon-key',
           authOptions: const AuthClientOptions(autoRefreshToken: false),
         ),
-      );
+      ) {
+    conversationChanges = StreamController<void>.broadcast(
+      onCancel: () => conversationSubscriptionCancelled = true,
+    );
+  }
 
   static const currentId = '11111111-1111-4111-8111-111111111111';
   static const otherId = '22222222-2222-4222-8222-222222222222';
@@ -38,10 +50,23 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   int searchFailuresRemaining = 0;
   int updatesFailuresRemaining = 0;
   bool inboxRead = false;
+  bool hasInbox = true;
+  int inboxLoadCalls = 0;
+  final StreamController<void> inboxChanges =
+      StreamController<void>.broadcast();
+  int conversationVersion = 0;
+  int conversationLoadCalls = 0;
+  int conversationReadCalls = 0;
+  bool conversationSubscriptionCancelled = false;
+  late final StreamController<void> conversationChanges;
   bool failPublish = false;
+  bool policyRejectPublish = false;
   bool ownFeedPost = false;
   int publishCalls = 0;
   int deletePostCalls = 0;
+  int reportCalls = 0;
+  String? reportedTargetKind;
+  String? reportedTargetId;
 
   @override
   String get currentUserId => currentId;
@@ -146,12 +171,29 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   @override
   Future<void> publishPost(String body) async {
     publishCalls++;
+    if (policyRejectPublish) {
+      throw const CommunityTextPolicyException(
+        surface: CommunityTextSurface.post,
+        kind: CommunityTextViolationKind.email,
+      );
+    }
     if (failPublish) throw StateError('injected publish failure');
   }
 
   @override
   Future<void> deletePost(String postId) async {
     deletePostCalls++;
+  }
+
+  @override
+  Future<void> report({
+    required String targetKind,
+    required String targetId,
+    required String reason,
+  }) async {
+    reportCalls++;
+    reportedTargetKind = targetKind;
+    reportedTargetId = targetId;
   }
 
   Map<String, dynamic> _message(bool incoming) => {
@@ -171,9 +213,57 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   };
 
   @override
-  Future<List<Map<String, dynamic>>> loadInboxMessages() async => [
-    _message(true),
-  ];
+  Future<List<Map<String, dynamic>>> loadInboxMessages() async {
+    inboxLoadCalls++;
+    return hasInbox ? [_message(true)] : const [];
+  }
+
+  @override
+  Stream<void> watchInboxChanges() => inboxChanges.stream;
+
+  @override
+  Future<List<CommunityMessage>> loadMessages(String otherUserId) async {
+    expect(otherUserId, otherId);
+    conversationLoadCalls++;
+    return [
+      CommunityMessage(
+        id: '77777777-7777-4777-8777-777777777777',
+        senderId: currentId,
+        recipientId: otherId,
+        body: 'Initial chat message',
+        createdAt: DateTime.utc(2026, 8, 15, 10),
+      ),
+      if (conversationVersion >= 1)
+        CommunityMessage(
+          id: '88888888-8888-4888-8888-888888888888',
+          senderId: otherId,
+          recipientId: currentId,
+          body: 'Incoming realtime message',
+          createdAt: DateTime.utc(2026, 8, 15, 10, 1),
+        ),
+      if (conversationVersion >= 2)
+        CommunityMessage(
+          id: '99999999-9999-4999-8999-999999999999',
+          senderId: currentId,
+          recipientId: otherId,
+          body: 'Outgoing realtime message',
+          createdAt: DateTime.utc(2026, 8, 15, 10, 2),
+          readAt: DateTime.utc(2026, 8, 15, 10, 3),
+        ),
+    ];
+  }
+
+  @override
+  Future<void> markConversationRead(String otherUserId) async {
+    expect(otherUserId, otherId);
+    conversationReadCalls++;
+  }
+
+  @override
+  Stream<void> watchConversationChanges(String otherUserId) {
+    expect(otherUserId, otherId);
+    return conversationChanges.stream;
+  }
 
   @override
   Future<List<Map<String, dynamic>>> loadSentMessages() async => [
@@ -181,16 +271,31 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   ];
 }
 
-Widget _app(Widget home) => MaterialApp(
-  locale: const Locale('en'),
-  supportedLocales: AppLocalizations.supportedLocales,
-  localizationsDelegates: const [
-    AppLocalizations.delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
+final _verifiedPremium = SubscriptionState(
+  plan: CommercePlan.premium,
+  entitlements: PaidPlanCatalog.composedEntitlementsFor(CommercePlan.premium),
+  authority: EntitlementAuthority.verifiedServer,
+  isPurchasable: true,
+  canRestorePurchases: true,
+);
+
+Widget _app(Widget home) => ProviderScope(
+  overrides: [
+    verifiedSubscriptionStateProvider.overrideWithValue(
+      AsyncData(_verifiedPremium),
+    ),
   ],
-  home: home,
+  child: MaterialApp(
+    locale: const Locale('en'),
+    supportedLocales: AppLocalizations.supportedLocales,
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    home: home,
+  ),
 );
 
 void main() {
@@ -211,6 +316,28 @@ void main() {
     await tester.tap(find.text('All'));
     await tester.pumpAndSettle();
     expect(find.text('Friend'), findsOneWidget);
+  });
+
+  testWidgets('accepted connection exposes a working report-user action', (
+    tester,
+  ) async {
+    final repository = _CommunityInteractionRepository()
+      ..friendshipStatus = 'accepted';
+    await tester.pumpWidget(
+      _app(CommunityConnectionsPage(repository: repository)),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(PopupMenuButton<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Report member'));
+    await tester.pumpAndSettle();
+    expect(repository.reportCalls, 1);
+    expect(repository.reportedTargetKind, 'profile');
+    expect(
+      repository.reportedTargetId,
+      _CommunityInteractionRepository.otherId,
+    );
+    expect(find.text('Report sent to moderation.'), findsOneWidget);
   });
 
   testWidgets('profile save is dispatched once from the authenticated editor', (
@@ -281,6 +408,71 @@ void main() {
     },
   );
 
+  testWidgets('empty inbox supports pull to refresh', (tester) async {
+    final repository = _CommunityInteractionRepository()..hasInbox = false;
+    await tester.pumpWidget(
+      _app(CommunityMessagesPage(repository: repository)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('No messages'), findsOneWidget);
+    expect(repository.inboxLoadCalls, 1);
+
+    await tester.drag(find.text('No messages'), const Offset(0, 320));
+    await tester.pumpAndSettle();
+
+    expect(repository.inboxLoadCalls, 2);
+  });
+
+  testWidgets('inbox reloads when a realtime change arrives', (tester) async {
+    final repository = _CommunityInteractionRepository()..hasInbox = false;
+    await tester.pumpWidget(
+      _app(CommunityMessagesPage(repository: repository)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('No messages'), findsOneWidget);
+
+    repository.hasInbox = true;
+    repository.inboxChanges.add(null);
+    await tester.pumpAndSettle();
+
+    expect(repository.inboxLoadCalls, 2);
+    expect(find.text('Inbox subject'), findsOneWidget);
+  });
+
+  testWidgets('open chat reloads for realtime changes in both directions', (
+    tester,
+  ) async {
+    final repository = _CommunityInteractionRepository();
+    await tester.pumpWidget(
+      _app(
+        CommunityChatPage(
+          userId: _CommunityInteractionRepository.otherId,
+          displayName: 'BIL QA Partner',
+          repository: repository,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Initial chat message'), findsOneWidget);
+    expect(repository.conversationLoadCalls, 1);
+
+    repository.conversationVersion = 1;
+    repository.conversationChanges.add(null);
+    await tester.pumpAndSettle();
+    expect(find.text('Incoming realtime message'), findsOneWidget);
+
+    repository.conversationVersion = 2;
+    repository.conversationChanges.add(null);
+    await tester.pumpAndSettle();
+    expect(find.text('Outgoing realtime message'), findsOneWidget);
+    expect(repository.conversationLoadCalls, 3);
+    expect(repository.conversationReadCalls, 3);
+
+    await tester.pumpWidget(_app(const SizedBox()));
+    await tester.pump();
+    expect(repository.conversationSubscriptionCancelled, isTrue);
+  });
+
   testWidgets('people search dispatches one friend request', (tester) async {
     final repository = _CommunityInteractionRepository();
     await tester.pumpWidget(_app(CommunityPeoplePage(repository: repository)));
@@ -294,6 +486,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(repository.friendRequests, 1);
     expect(find.text('Request sent.'), findsOneWidget);
+    expect(find.byTooltip('Pending'), findsOneWidget);
+    expect(find.byTooltip('Send request'), findsNothing);
   });
 
   testWidgets('people search failure retries the same query', (tester) async {
@@ -412,6 +606,28 @@ void main() {
     expect(find.text('Draft kept for retry'), findsOneWidget);
     expect(
       find.text('Could not publish now. Your text is kept so you can retry.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('feed policy rejection is localized and retains the draft', (
+    tester,
+  ) async {
+    final repository = _CommunityInteractionRepository()
+      ..policyRejectPublish = true;
+    await tester.pumpWidget(_app(CommunityHubPage(repository: repository)));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byType(TextField),
+      'Contact me at person@example.com',
+    );
+    await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pumpAndSettle();
+
+    expect(repository.publishCalls, 1);
+    expect(find.text('Contact me at person@example.com'), findsOneWidget);
+    expect(
+      find.text(CommunityTextPolicy.localizedMessages['en']!),
       findsOneWidget,
     );
   });

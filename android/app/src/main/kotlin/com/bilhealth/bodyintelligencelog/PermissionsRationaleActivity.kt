@@ -1,12 +1,15 @@
 package com.bilhealth.bodyintelligencelog
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ScrollView
+import android.widget.Button
 import android.widget.TextView
 
 /**
@@ -38,6 +41,19 @@ class PermissionsRationaleActivity : Activity() {
             textSize = 16f
             setPadding(0, padding, 0, 0)
             movementMethod = LinkMovementMethod.getInstance()
+        }, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+        content.addView(Button(this).apply {
+            text = getString(R.string.health_permissions_privacy_policy_action)
+            setPadding(padding, padding / 2, padding, padding / 2)
+            setOnClickListener {
+                val privacyPolicy = Uri.parse(
+                    getString(R.string.health_privacy_policy_url),
+                )
+                runCatching {
+                    startActivity(Intent(Intent.ACTION_VIEW, privacyPolicy))
+                }
+            }
         }, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         setContentView(ScrollView(this).apply { addView(content) })

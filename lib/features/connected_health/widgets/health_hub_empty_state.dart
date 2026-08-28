@@ -3,22 +3,18 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../connected_health_model.dart';
 import '../connected_health_copy.dart';
-import '../providers/medical_device_provider.dart';
-import 'health_device_pager.dart';
 import 'live_health_watch.dart';
 
 class HealthHubEmptyState extends StatelessWidget {
   const HealthHubEmptyState({
     super.key,
     required this.snapshot,
-    required this.medical,
     required this.languageCode,
     required this.compact,
     required this.onConnect,
   });
 
   final ConnectedHealthSnapshot snapshot;
-  final MedicalDeviceSnapshot medical;
   final String languageCode;
   final bool compact;
   final VoidCallback onConnect;
@@ -29,7 +25,7 @@ class HealthHubEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final watchSize = compact ? 276.0 : 304.0;
-    final carouselHeight = watchSize + 22;
+    final carouselHeight = watchSize;
     final shellHeight = compact ? 438.0 : 404.0;
     return SizedBox(
       key: const Key('health-hub-empty-state'),
@@ -66,30 +62,15 @@ class HealthHubEmptyState extends StatelessWidget {
             final horizontal = !compact && constraints.maxWidth >= 760;
             final illustration = SizedBox(
               height: carouselHeight,
-              child: HealthDevicePager(
-                key: const Key('health-hub-device-carousel'),
-                height: watchSize,
-                pages: [
-                  Center(
-                    child: SizedBox.square(
-                      key: const Key('health-hub-fixed-square-watch'),
-                      dimension: watchSize,
-                      child: LiveHealthWatch(
-                        snapshot: snapshot,
-                        languageCode: languageCode,
-                      ),
-                    ),
+              child: Center(
+                child: SizedBox.square(
+                  key: const Key('health-hub-fixed-square-watch'),
+                  dimension: watchSize,
+                  child: LiveHealthWatch(
+                    snapshot: snapshot,
+                    languageCode: languageCode,
                   ),
-                  Center(
-                    child: SizedBox.square(
-                      dimension: watchSize,
-                      child: BilMedicalMonitor(
-                        snapshot: medical,
-                        languageCode: languageCode,
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             );
             final connectButton = FilledButton.icon(

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BIL - बॉडी इंटेलिजेंस लॉग</string>
+    <string name="health_permissions_rationale_title">स्वास्थ्य डेटा गोपनीयता</string>
+    <string name="health_permissions_rationale_body">BIL केवल आपके द्वारा उपयोग की जाने वाली सुविधाओं के लिए आवश्यक Health Connect डेटा प्रकारों का अनुरोध करता है। आपका स्वास्थ्य डेटा डिफ़ॉल्ट रूप से स्थानीय रूप से संसाधित किया जाता है। आप Health Connect सेटिंग्स से किसी भी समय व्यक्तिगत अनुमतियाँ दे सकते हैं, अस्वीकार कर सकते हैं या रद्द कर सकते हैं। BIL स्वास्थ्य डेटा नहीं बेचता है या विज्ञापन के लिए इसका उपयोग नहीं करता है।</string>
+    <string name="health_permissions_privacy_policy_action">BIL की पूरी गोपनीयता नीति पढ़ें</string>
+</resources>

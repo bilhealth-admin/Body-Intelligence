@@ -8,6 +8,9 @@ import 'package:share_plus/share_plus.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../domain/meal_plan.dart';
 import '../services/meal_plan_engine.dart';
+import '../../nutrition/domain/dietary_preferences.dart';
+
+part 'meal_planner_copy.dart';
 
 class MealPlannerPage extends ConsumerStatefulWidget {
   const MealPlannerPage({super.key});
@@ -22,6 +25,7 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
   static const _groceryChecksKey = 'mealPlanner.groceryChecks.v1';
   final _engine = const MealPlanEngine();
   MealPlanPreferences _preferences = const MealPlanPreferences();
+  DietaryPreferences _dietaryPreferences = const DietaryPreferences();
   WeeklyMealPlan? _plan;
   var _loading = true;
   var _saving = false;
@@ -41,9 +45,13 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
         repository.get(_planKey),
         repository.get(_groceryChecksKey),
       ]);
+      final dietary = await ref
+          .read(dietaryPreferencesRepositoryProvider)
+          .read();
       if (!mounted) return;
       setState(() {
         final preferences = values[0];
+        _dietaryPreferences = dietary;
         final plan = values[1];
         if (preferences != null) {
           _preferences = MealPlanPreferences.fromJson(
@@ -66,7 +74,10 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
 
   Future<void> _generate() async {
     setState(() => _saving = true);
-    final plan = _engine.generate(_preferences);
+    final plan = _engine.generate(
+      _preferences,
+      dietaryPreferences: _dietaryPreferences,
+    );
     try {
       final repository = ref.read(preferencesRepositoryProvider);
       await repository.set(_preferencesKey, jsonEncode(_preferences.toJson()));
@@ -142,6 +153,15 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
           ),
           const SizedBox(height: 12),
           Text(copy.text('empty'), textAlign: TextAlign.center),
+        ] else if (plan.meals.isEmpty) ...[
+          const SizedBox(height: 28),
+          Icon(
+            Icons.no_meals_outlined,
+            size: 52,
+            color: Theme.of(context).colorScheme.error,
+          ),
+          const SizedBox(height: 12),
+          Text(copy.text('noDietaryMatch'), textAlign: TextAlign.center),
         ] else ...[
           const SizedBox(height: 20),
           ...plan.meals.map((meal) {
@@ -454,292 +474,3 @@ class _MealPlannerPageState extends ConsumerState<MealPlannerPage> {
       ? '${value.toInt()}'
       : value.toStringAsFixed(1);
 }
-
-class _PlannerCopy {
-  _PlannerCopy(this.language);
-  final String language;
-  String text(String key) =>
-      (_copy[language] ?? _copy['en']!)[key] ?? _copy['en']![key] ?? key;
-  String day(int index) => text('day$index');
-  String diet(MealPlanDiet value) => text('diet_${value.name}');
-  String budget(MealPlanBudget value) => text('budget_${value.name}');
-}
-
-const _copy = <String, Map<String, String>>{
-  'en': {
-    'title': 'Meal Planner',
-    'week': 'Week',
-    'grocery': 'Grocery list',
-    'prepMode': 'Meal prep',
-    'preferences': 'Preferences',
-    'hero': 'A week built around you',
-    'heroBody':
-        'Choose your time, budget and eating style. BIL creates a practical seven-day plan you can review before logging.',
-    'generate': 'Build my week',
-    'saving': 'Saving…',
-    'empty': 'Set your preferences, then build your first week.',
-    'minutes': 'min',
-    'generateFirst': 'Build a weekly plan first.',
-    'groceryTitle': 'Your grocery list',
-    'groceryBody':
-        'Quantities are combined for your selected servings. Check package sizes before buying.',
-    'shareGrocery': 'Share grocery list',
-    'shareNotice':
-        'Created in BIL. Check quantities, allergies and package sizes before shopping.',
-    'saveFailed': 'The grocery list could not be saved. Try again.',
-    'shareFailed': 'The grocery list could not be shared.',
-    'preferencesTitle': 'Plan preferences',
-    'diet': 'Eating style',
-    'budget': 'Budget',
-    'maxTime': 'Maximum cooking time',
-    'servings': 'Servings',
-    'safety':
-        'Allergies and medical restrictions must be checked by you before using a recipe. Nutrition is never logged without your confirmation.',
-    'reviewLog': 'Review and log',
-    'logNotice':
-        'BIL opens the diary so you can match verified foods and portions before saving.',
-    'diet_balanced': 'Balanced',
-    'diet_vegetarian': 'Vegetarian',
-    'diet_highProtein': 'High protein',
-    'budget_value': 'Value',
-    'budget_standard': 'Standard',
-    'day0': 'Monday',
-    'day1': 'Tuesday',
-    'day2': 'Wednesday',
-    'day3': 'Thursday',
-    'day4': 'Friday',
-    'day5': 'Saturday',
-    'day6': 'Sunday',
-    'prep': 'Prep',
-    'cook': 'Cook',
-    'fiber': 'Fiber',
-    'sugar': 'Sugar',
-    'sodium': 'Sodium',
-    'potassium': 'Potassium',
-    'prepTitle': 'Prep your week',
-    'prepBody':
-        'Open each day to see the ordered method and time. Batch compatible ingredients only when food-safety rules allow.',
-    'estimateNotice':
-        'Planning estimate only. Match verified foods and portions before saving nutrition.',
-  },
-  'ar': {
-    'title': 'مخطط الوجبات',
-    'week': 'الأسبوع',
-    'grocery': 'قائمة التسوق',
-    'prepMode': 'تحضير الوجبات',
-    'preferences': 'التفضيلات',
-    'hero': 'أسبوع مصمم لك',
-    'heroBody':
-        'اختر الوقت والميزانية ونمط الطعام، وسيبني BIL خطة عملية لسبعة أيام تراجعها قبل التسجيل.',
-    'generate': 'أنشئ أسبوعي',
-    'saving': 'جارٍ الحفظ…',
-    'empty': 'اضبط تفضيلاتك ثم أنشئ أسبوعك الأول.',
-    'minutes': 'د',
-    'generateFirst': 'أنشئ خطة أسبوعية أولًا.',
-    'groceryTitle': 'قائمة التسوق',
-    'groceryBody':
-        'جُمعت الكميات حسب عدد الحصص. تحقق من أحجام العبوات قبل الشراء.',
-    'shareGrocery': 'مشاركة قائمة التسوق',
-    'shareNotice':
-        'أُنشئت في BIL. تحقق من الكميات والحساسية وأحجام العبوات قبل الشراء.',
-    'saveFailed': 'تعذر حفظ قائمة التسوق. حاول مرة أخرى.',
-    'shareFailed': 'تعذرت مشاركة قائمة التسوق.',
-    'preferencesTitle': 'تفضيلات الخطة',
-    'diet': 'نمط الطعام',
-    'budget': 'الميزانية',
-    'maxTime': 'أقصى وقت للطهي',
-    'servings': 'الحصص',
-    'safety':
-        'يجب أن تتحقق بنفسك من الحساسية والقيود الطبية. لا تُسجل التغذية دون تأكيدك.',
-    'reviewLog': 'راجع وسجّل',
-    'logNotice': 'يفتح BIL اليوميات لمطابقة الطعام والحصة الموثقين قبل الحفظ.',
-    'diet_balanced': 'متوازن',
-    'diet_vegetarian': 'نباتي',
-    'diet_highProtein': 'عالي البروتين',
-    'budget_value': 'اقتصادي',
-    'budget_standard': 'قياسي',
-    'day0': 'الاثنين',
-    'day1': 'الثلاثاء',
-    'day2': 'الأربعاء',
-    'day3': 'الخميس',
-    'day4': 'الجمعة',
-    'day5': 'السبت',
-    'day6': 'الأحد',
-    'prep': 'تحضير',
-    'cook': 'طهي',
-    'fiber': 'ألياف',
-    'sugar': 'سكر',
-    'sodium': 'صوديوم',
-    'potassium': 'بوتاسيوم',
-    'prepTitle': 'حضّر أسبوعك',
-    'prepBody':
-        'افتح كل يوم لرؤية الطريقة المرتبة والوقت. حضّر المكونات المشتركة فقط مع الالتزام بقواعد سلامة الغذاء.',
-    'estimateNotice':
-        'قيم تقديرية للتخطيط فقط. طابق الأطعمة والحصص الموثقة قبل حفظ التغذية.',
-  },
-  'fr': {
-    'title': 'Planificateur de repas',
-    'week': 'Semaine',
-    'grocery': 'Courses',
-    'prepMode': 'Préparation',
-    'preferences': 'Préférences',
-    'hero': 'Une semaine faite pour vous',
-    'heroBody':
-        'Choisissez temps, budget et alimentation. BIL crée un plan de sept jours à vérifier avant journalisation.',
-    'generate': 'Créer ma semaine',
-    'saving': 'Enregistrement…',
-    'empty': 'Réglez vos préférences puis créez votre semaine.',
-    'minutes': 'min',
-    'generateFirst': 'Créez d’abord un plan hebdomadaire.',
-    'groceryTitle': 'Votre liste de courses',
-    'groceryBody': 'Les quantités sont regroupées selon les portions choisies.',
-    'shareGrocery': 'Partager la liste',
-    'shareNotice':
-        'Créée dans BIL. Vérifiez quantités, allergies et formats avant les achats.',
-    'saveFailed': 'La liste n’a pas pu être enregistrée. Réessayez.',
-    'shareFailed': 'La liste n’a pas pu être partagée.',
-    'preferencesTitle': 'Préférences du plan',
-    'diet': 'Alimentation',
-    'budget': 'Budget',
-    'maxTime': 'Temps de cuisson maximal',
-    'servings': 'Portions',
-    'safety':
-        'Vérifiez vous-même allergies et restrictions médicales. Rien n’est journalisé sans confirmation.',
-    'reviewLog': 'Vérifier et journaliser',
-    'logNotice':
-        'BIL ouvre le journal pour choisir aliments et portions vérifiés.',
-    'diet_balanced': 'Équilibré',
-    'diet_vegetarian': 'Végétarien',
-    'diet_highProtein': 'Riche en protéines',
-    'budget_value': 'Économique',
-    'budget_standard': 'Standard',
-    'day0': 'Lundi',
-    'day1': 'Mardi',
-    'day2': 'Mercredi',
-    'day3': 'Jeudi',
-    'day4': 'Vendredi',
-    'day5': 'Samedi',
-    'day6': 'Dimanche',
-    'prep': 'Préparation',
-    'cook': 'Cuisson',
-    'fiber': 'Fibres',
-    'sugar': 'Sucres',
-    'sodium': 'Sodium',
-    'potassium': 'Potassium',
-    'prepTitle': 'Préparez votre semaine',
-    'prepBody':
-        'Ouvrez chaque jour pour voir la méthode et le temps. Regroupez les ingrédients seulement dans le respect de la sécurité alimentaire.',
-    'estimateNotice':
-        'Estimation de planification uniquement. Vérifiez aliments et portions avant l’enregistrement.',
-  },
-  'es': {
-    'title': 'Planificador de comidas',
-    'week': 'Semana',
-    'grocery': 'Compra',
-    'prepMode': 'Preparación',
-    'preferences': 'Preferencias',
-    'hero': 'Una semana hecha para ti',
-    'heroBody':
-        'Elige tiempo, presupuesto y estilo. BIL crea un plan de siete días para revisar antes de registrar.',
-    'generate': 'Crear mi semana',
-    'saving': 'Guardando…',
-    'empty': 'Configura tus preferencias y crea tu semana.',
-    'minutes': 'min',
-    'generateFirst': 'Crea primero un plan semanal.',
-    'groceryTitle': 'Tu lista de compra',
-    'groceryBody': 'Las cantidades se combinan según las porciones elegidas.',
-    'shareGrocery': 'Compartir la lista',
-    'shareNotice':
-        'Creada en BIL. Revisa cantidades, alergias y tamaños antes de comprar.',
-    'saveFailed': 'No se pudo guardar la lista. Inténtalo de nuevo.',
-    'shareFailed': 'No se pudo compartir la lista.',
-    'preferencesTitle': 'Preferencias del plan',
-    'diet': 'Estilo de alimentación',
-    'budget': 'Presupuesto',
-    'maxTime': 'Tiempo máximo de cocina',
-    'servings': 'Porciones',
-    'safety':
-        'Comprueba alergias y restricciones médicas. Nada se registra sin tu confirmación.',
-    'reviewLog': 'Revisar y registrar',
-    'logNotice':
-        'BIL abre el diario para elegir alimentos y porciones verificados.',
-    'diet_balanced': 'Equilibrado',
-    'diet_vegetarian': 'Vegetariano',
-    'diet_highProtein': 'Alto en proteína',
-    'budget_value': 'Económico',
-    'budget_standard': 'Estándar',
-    'day0': 'Lunes',
-    'day1': 'Martes',
-    'day2': 'Miércoles',
-    'day3': 'Jueves',
-    'day4': 'Viernes',
-    'day5': 'Sábado',
-    'day6': 'Domingo',
-    'prep': 'Preparación',
-    'cook': 'Cocción',
-    'fiber': 'Fibra',
-    'sugar': 'Azúcar',
-    'sodium': 'Sodio',
-    'potassium': 'Potasio',
-    'prepTitle': 'Prepara tu semana',
-    'prepBody':
-        'Abre cada día para ver el método y el tiempo. Agrupa ingredientes solo cuando lo permitan las normas de seguridad alimentaria.',
-    'estimateNotice':
-        'Estimación solo para planificar. Verifica alimentos y porciones antes de guardar.',
-  },
-  'tr': {
-    'title': 'Öğün Planlayıcı',
-    'week': 'Hafta',
-    'grocery': 'Alışveriş',
-    'prepMode': 'Öğün hazırlığı',
-    'preferences': 'Tercihler',
-    'hero': 'Size göre hazırlanmış bir hafta',
-    'heroBody':
-        'Süreyi, bütçeyi ve beslenme biçimini seçin. BIL kayıttan önce gözden geçireceğiniz yedi günlük plan oluşturur.',
-    'generate': 'Haftamı oluştur',
-    'saving': 'Kaydediliyor…',
-    'empty': 'Tercihlerinizi ayarlayıp ilk haftanızı oluşturun.',
-    'minutes': 'dk',
-    'generateFirst': 'Önce haftalık plan oluşturun.',
-    'groceryTitle': 'Alışveriş listeniz',
-    'groceryBody': 'Miktarlar seçilen porsiyonlara göre birleştirilir.',
-    'shareGrocery': 'Listeyi paylaş',
-    'shareNotice':
-        'BIL içinde oluşturuldu. Alışverişten önce miktarları, alerjileri ve paketleri kontrol edin.',
-    'saveFailed': 'Alışveriş listesi kaydedilemedi. Tekrar deneyin.',
-    'shareFailed': 'Alışveriş listesi paylaşılamadı.',
-    'preferencesTitle': 'Plan tercihleri',
-    'diet': 'Beslenme biçimi',
-    'budget': 'Bütçe',
-    'maxTime': 'En uzun pişirme süresi',
-    'servings': 'Porsiyon',
-    'safety':
-        'Alerjileri ve tıbbi kısıtlamaları kendiniz kontrol edin. Onayınız olmadan besin kaydı yapılmaz.',
-    'reviewLog': 'İncele ve kaydet',
-    'logNotice':
-        'BIL doğrulanmış yiyecek ve porsiyon seçmeniz için günlüğü açar.',
-    'diet_balanced': 'Dengeli',
-    'diet_vegetarian': 'Vejetaryen',
-    'diet_highProtein': 'Yüksek protein',
-    'budget_value': 'Ekonomik',
-    'budget_standard': 'Standart',
-    'day0': 'Pazartesi',
-    'day1': 'Salı',
-    'day2': 'Çarşamba',
-    'day3': 'Perşembe',
-    'day4': 'Cuma',
-    'day5': 'Cumartesi',
-    'day6': 'Pazar',
-    'prep': 'Hazırlık',
-    'cook': 'Pişirme',
-    'fiber': 'Lif',
-    'sugar': 'Şeker',
-    'sodium': 'Sodyum',
-    'potassium': 'Potasyum',
-    'prepTitle': 'Haftanızı hazırlayın',
-    'prepBody':
-        'Sıralı yöntemi ve süreyi görmek için her günü açın. Ortak malzemeleri yalnızca gıda güvenliği uygunsa birlikte hazırlayın.',
-    'estimateNotice':
-        'Yalnızca planlama tahminidir. Kaydetmeden önce doğrulanmış yiyecek ve porsiyonları eşleştirin.',
-  },
-};

@@ -85,6 +85,73 @@ void main() {
     expect(client.requests, 1);
   });
 
+  test(
+    'download sends the current Supabase bearer before verification',
+    () async {
+      final bytes = utf8.encode('authorized licensed workout bytes');
+      final asset = assetFor(
+        bytes,
+        url: Uri.parse(
+          'https://workouts.bilhealth.com/v2/objects/workouts/v1/home/movements/test.mp4',
+        ),
+      );
+      final client = _FakeHttpClient(bytes);
+      final cache = WellnessMediaCache(
+        client: client,
+        directory: directory,
+        accessTokenLoader: () => '  signed-session-token  ',
+      );
+
+      final result = await cache.resolve(asset, online: true);
+
+      expect(result.isReady, isTrue);
+      expect(client.authorization, 'Bearer signed-session-token');
+      expect(client.followRedirects, isFalse);
+      expect(await result.file!.readAsBytes(), bytes);
+    },
+  );
+
+  test('download never sends the session bearer to another origin', () async {
+    final bytes = utf8.encode('externally hosted verified bytes');
+    final asset = assetFor(bytes);
+    final client = _FakeHttpClient(bytes);
+    final cache = WellnessMediaCache(
+      client: client,
+      directory: directory,
+      accessTokenLoader: () => 'signed-session-token',
+    );
+
+    final result = await cache.resolve(asset, online: true);
+
+    expect(result.isReady, isTrue);
+    expect(client.authorization, isNull);
+    expect(client.followRedirects, isFalse);
+  });
+
+  test('public recipe previews never receive the Supabase bearer', () async {
+    final bytes = utf8.encode('verified public recipe preview');
+    final digest = sha256.convert(bytes).toString();
+    final asset = assetFor(
+      bytes,
+      url: Uri.parse(
+        'https://workouts.bilhealth.com/v3/recipes/images/recipe-id/$digest',
+      ),
+      mimeType: 'image/jpeg',
+    );
+    final client = _FakeHttpClient(bytes);
+    final cache = WellnessMediaCache(
+      client: client,
+      directory: directory,
+      accessTokenLoader: () => 'signed-session-token',
+    );
+
+    final result = await cache.resolve(asset, online: true);
+
+    expect(result.isReady, isTrue);
+    expect(client.authorization, isNull);
+    expect(client.followRedirects, isFalse);
+  });
+
   test('wrong size or digest never becomes playable cache', () async {
     final bytes = utf8.encode('licensed workout video bytes');
     final invalidAssets = <WellnessMediaAsset>[
@@ -229,13 +296,24 @@ class _FakeHttpClient implements HttpClient {
   final List<int> bytes;
   final int statusCode, chunks;
   int requests = 0;
+  _RecordingHttpHeaders? lastRequestHeaders;
+  _FakeHttpClientRequest? lastRequest;
+
+  String? get authorization =>
+      lastRequestHeaders?.value(HttpHeaders.authorizationHeader);
+  bool? get followRedirects => lastRequest?.followRedirects;
 
   @override
   Future<HttpClientRequest> getUrl(Uri url) async {
     requests += 1;
-    return _FakeHttpClientRequest(
+    final headers = _RecordingHttpHeaders();
+    lastRequestHeaders = headers;
+    final request = _FakeHttpClientRequest(
       _FakeHttpClientResponse(bytes, statusCode: statusCode, chunks: chunks),
+      headers,
     );
+    lastRequest = request;
+    return request;
   }
 
   @override
@@ -246,12 +324,33 @@ class _FakeHttpClient implements HttpClient {
 }
 
 class _FakeHttpClientRequest implements HttpClientRequest {
-  _FakeHttpClientRequest(this.response);
+  _FakeHttpClientRequest(this.response, this.headers);
 
   final HttpClientResponse response;
 
   @override
+  final HttpHeaders headers;
+
+  @override
+  bool followRedirects = true;
+
+  @override
   Future<HttpClientResponse> close() async => response;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _RecordingHttpHeaders implements HttpHeaders {
+  final Map<String, String> _values = {};
+
+  @override
+  void set(String name, Object value, {bool preserveHeaderCase = false}) {
+    _values[name.toLowerCase()] = value.toString();
+  }
+
+  @override
+  String? value(String name) => _values[name.toLowerCase()];
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

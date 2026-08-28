@@ -16,7 +16,11 @@ class SpeechListenOptions {
     this.allowedLocaleIds = const <String>[],
   });
 
-  final String localeId;
+  /// Optional fallback language for recognizers that cannot switch languages.
+  ///
+  /// Leave this null for multilingual capture so the operating-system default
+  /// is not replaced by the app interface language.
+  final String? localeId;
   final Duration listenFor;
   final Duration pauseFor;
   final ListenMode listenMode;
@@ -33,10 +37,15 @@ class LocaleName {
 }
 
 class SpeechRecognitionResult {
-  const SpeechRecognitionResult(this.recognizedWords, {this.isFinal = false});
+  const SpeechRecognitionResult(
+    this.recognizedWords, {
+    this.isFinal = false,
+    this.localeId,
+  });
 
   final String recognizedWords;
   final bool isFinal;
+  final String? localeId;
 }
 
 class SpeechRecognitionError {
@@ -48,8 +57,8 @@ class SpeechRecognitionError {
 /// Thin, first-party bridge to the operating-system speech recognizer.
 ///
 /// BIL owns this boundary so Android can use AGP 9 built-in Kotlin without a
-/// legacy Kotlin Gradle Plugin. Audio never leaves the OS recognizer through
-/// this class and BIL persists only text explicitly accepted by the user.
+/// legacy Kotlin Gradle Plugin. This class exposes partial text only; the
+/// owning screen decides when an intentional voice capture is submitted.
 class SpeechToText {
   SpeechToText({MethodChannel? methods, EventChannel? events})
     : _methods = methods ?? const MethodChannel('bil/speech'),
@@ -92,7 +101,7 @@ class SpeechToText {
     required SpeechListenOptions listenOptions,
   }) async {
     _onResult = onResult;
-    await _methods.invokeMethod<void>('listen', <String, Object>{
+    await _methods.invokeMethod<void>('listen', <String, Object?>{
       'localeId': listenOptions.localeId,
       'listenForMs': listenOptions.listenFor.inMilliseconds,
       'pauseForMs': listenOptions.pauseFor.inMilliseconds,
@@ -114,6 +123,18 @@ class SpeechToText {
     _isListening = false;
   }
 
+  Future<void> dispose() async {
+    try {
+      await cancel();
+    } on Object {
+      // Native speech may already be unavailable while the owning page closes.
+    }
+    await _subscription?.cancel();
+    _subscription = null;
+    _onError = null;
+    _onResult = null;
+  }
+
   void _handleEvent(Object? raw) {
     if (raw is! Map) return;
     final event = Map<String, Object?>.from(raw);
@@ -123,6 +144,7 @@ class SpeechToText {
           SpeechRecognitionResult(
             event['words']?.toString() ?? '',
             isFinal: event['final'] == true,
+            localeId: event['localeId']?.toString(),
           ),
         );
         if (event['final'] == true) _isListening = false;

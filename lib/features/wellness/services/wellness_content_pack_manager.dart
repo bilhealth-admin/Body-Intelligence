@@ -5,11 +5,16 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import '../../commerce/domain/subscription_state.dart';
 import '../../commerce/repositories/server_entitlement_repository.dart';
+import '../domain/workout_release_catalog_item.dart';
 import '../domain/wellness_content_access_policy.dart';
 import '../domain/wellness_content_pack.dart';
+import '../repositories/workout_release_catalog_repository.dart';
+import 'wellness_access_token.dart';
 import 'wellness_media_cache.dart';
 
 typedef WellnessEntitlementLoader = Future<SubscriptionState> Function();
+typedef WorkoutReleaseCatalogLoader =
+    Future<List<WorkoutReleaseCatalogItem>> Function();
 
 class WellnessContentPackManager {
   WellnessContentPackManager({
@@ -17,11 +22,16 @@ class WellnessContentPackManager {
     WellnessMediaCache? mediaCache,
     Directory? packsDirectory,
     WellnessEntitlementLoader? entitlementLoader,
+    WorkoutReleaseCatalogLoader? workoutReleaseLoader,
+    WellnessAccessTokenLoader? accessTokenLoader,
   }) : _client = client ?? HttpClient(),
        _mediaCache = mediaCache ?? WellnessMediaCache(),
        _injectedPacksDirectory = packsDirectory,
        _entitlementLoader =
-           entitlementLoader ?? const ServerEntitlementRepository().current;
+           entitlementLoader ?? const ServerEntitlementRepository().current,
+       _workoutReleaseLoader =
+           workoutReleaseLoader ?? const WorkoutReleaseCatalogRepository().load,
+       _accessTokenLoader = accessTokenLoader ?? loadCurrentWellnessAccessToken;
   static const manifestUrl = String.fromEnvironment(
     'BIL_WELLNESS_MANIFEST_URL',
   );
@@ -30,6 +40,8 @@ class WellnessContentPackManager {
   final WellnessMediaCache _mediaCache;
   final Directory? _injectedPacksDirectory;
   final WellnessEntitlementLoader _entitlementLoader;
+  final WorkoutReleaseCatalogLoader _workoutReleaseLoader;
+  final WellnessAccessTokenLoader _accessTokenLoader;
 
   Future<List<WellnessContentPack>> fetchCatalog() async {
     if (manifestUrl.trim().isEmpty) return const [];
@@ -83,7 +95,10 @@ class WellnessContentPackManager {
     );
     final temporary = File('${target.path}.download');
     if (await temporary.exists()) await temporary.delete();
-    final response = await (await _client.getUrl(pack.downloadUrl)).close();
+    final request = await _client.getUrl(pack.downloadUrl);
+    request.followRedirects = false;
+    applyWellnessBearer(request, _accessTokenLoader, pack.downloadUrl);
+    final response = await request.close();
     _requireHttpsRedirects(response);
     if (response.statusCode != HttpStatus.ok) {
       throw HttpException('Pack returned ${response.statusCode}.');
@@ -236,6 +251,9 @@ class WellnessContentPackManager {
     String? locale,
   }) async {
     final result = <Map<String, dynamic>>[];
+    final approvedWorkoutBundles = type == WellnessContentType.workouts
+        ? await _approvedWorkoutRelease()
+        : null;
     final packsDirectory = await _packsDirectory();
     for (final installed in await installedPacks()) {
       final file = _safeInstalledPackFile(packsDirectory, installed);
@@ -254,8 +272,16 @@ class WellnessContentPackManager {
         continue;
       }
       final schemaVersion = (decoded['schema_version'] as num?)?.toInt() ?? 1;
+      final approvedWorkouts = approvedWorkoutBundles?[installed.id];
       for (final raw in decoded['items'] as List) {
         if (raw is! Map<String, dynamic>) continue;
+        if (type == WellnessContentType.workouts) {
+          if (schemaVersion != 2) continue;
+          final approval = approvedWorkouts?[raw['id']];
+          if (approval == null || !_rawWorkoutMatchesApproval(raw, approval)) {
+            continue;
+          }
+        }
         final itemLocale = raw['locale'] as String? ?? 'en';
         if (locale != null && itemLocale != locale && itemLocale != 'all') {
           continue;
@@ -268,6 +294,13 @@ class WellnessContentPackManager {
           ...raw,
           '_pack_schema_version': schemaVersion,
           '_pack_minimum_access': installed.minimumAccess.name,
+          if (type == WellnessContentType.workouts) ...{
+            '_release_bundle_id': approvedWorkouts![raw['id']]!.bundleId,
+            '_release_key': approvedWorkouts[raw['id']]!.releaseKey,
+            '_primary_plan_group_id':
+                approvedWorkouts[raw['id']]!.primaryGroupId,
+            '_plan_group_ids': approvedWorkouts[raw['id']]!.planGroupIds,
+          },
         });
       }
     }
@@ -316,7 +349,14 @@ class WellnessContentPackManager {
       throw const FormatException('Wellness pack item count mismatch.');
     }
     final declaredCategories = <String>{};
+    Map<String, WorkoutReleaseCatalogItem>? approvedWorkouts;
     if (schemaVersion == 2 && pack.type == WellnessContentType.workouts) {
+      approvedWorkouts = (await _approvedWorkoutRelease())[pack.id];
+      if (approvedWorkouts == null) {
+        throw const FormatException(
+          'Workout pack is not registered in the approved bundle registry.',
+        );
+      }
       final rawCategories = data['categories'];
       if (rawCategories is! List) {
         throw const FormatException('Workout categories must be declared.');
@@ -331,15 +371,18 @@ class WellnessContentPackManager {
           declaredCategories.length != rawCategories.length) {
         throw const FormatException('Workout categories are invalid.');
       }
-      if (declaredCategories.length !=
-          WorkoutReleaseMediaContract.categoryCount) {
+      final approvedCategories = approvedWorkouts.values
+          .map((item) => item.primaryGroupId)
+          .toSet();
+      if (declaredCategories.length != approvedCategories.length ||
+          !declaredCategories.containsAll(approvedCategories)) {
         throw const FormatException(
-          'The release workout pack must declare exactly 10 categories.',
+          'Workout categories do not match the approved release.',
         );
       }
-      if (items.length != WorkoutReleaseMediaContract.movementVideoCount) {
+      if (items.length != approvedWorkouts.length) {
         throw const FormatException(
-          'The release workout pack must contain exactly 200 movement videos.',
+          'The workout pack must contain its complete approved bundle.',
         );
       }
     }
@@ -359,18 +402,18 @@ class WellnessContentPackManager {
         schemaVersion: schemaVersion!,
       );
       if (schemaVersion == 2 && pack.type == WellnessContentType.workouts) {
+        final approval = approvedWorkouts![item.id];
+        if (approval == null || !_workoutMatchesApproval(item, approval)) {
+          throw const FormatException(
+            'Workout media is not in the owner-approved release.',
+          );
+        }
         if (!itemIds.add(item.id)) {
           throw const FormatException('Duplicate workout movement id.');
         }
         if (!WorkoutReleaseMediaContract.canonicalMovementId.hasMatch(
-              item.id,
-            ) ||
-            item.durationSeconds !=
-                WorkoutReleaseMediaContract.movementDurationSeconds ||
-            !WorkoutReleaseMediaContract.hasCanonicalVideoPath(
-              item.videoMedia!.url,
-              item.id,
-            )) {
+          item.id,
+        )) {
           throw const FormatException(
             'Workout movement id, duration, or video filename violates the release contract.',
           );
@@ -415,15 +458,98 @@ class WellnessContentPackManager {
         }
       }
     }
-    if (declaredCategories.any(
-      (category) =>
-          (categoryCounts[category] ?? 0) !=
-          WorkoutReleaseMediaContract.movementsPerCategory,
-    )) {
+    if (approvedWorkouts != null) {
+      final approvedCategoryCounts = <String, int>{};
+      for (final approval in approvedWorkouts.values) {
+        approvedCategoryCounts.update(
+          approval.primaryGroupId,
+          (value) => value + 1,
+          ifAbsent: () => 1,
+        );
+      }
+      if (itemIds.length != approvedWorkouts.length ||
+          !itemIds.containsAll(approvedWorkouts.keys) ||
+          declaredCategories.any(
+            (category) =>
+                categoryCounts[category] != approvedCategoryCounts[category],
+          )) {
+        throw const FormatException(
+          'Workout release identities or category counts are incomplete.',
+        );
+      }
+    }
+  }
+
+  Future<Map<String, Map<String, WorkoutReleaseCatalogItem>>>
+  _approvedWorkoutRelease() async {
+    List<WorkoutReleaseCatalogItem> release;
+    try {
+      release = await _workoutReleaseLoader();
+    } on Object {
       throw const FormatException(
-        'Every release workout category requires exactly 20 movement videos.',
+        'The bundled workout approval manifest is unavailable.',
       );
     }
+    final approved = <String, Map<String, WorkoutReleaseCatalogItem>>{};
+    for (final item in release.where((item) => item.canPlay)) {
+      final bundle = approved.putIfAbsent(item.contentPackId, () => {});
+      if (item.objectPath == null || bundle[item.assetId] != null) {
+        throw const FormatException(
+          'The bundled workout approval manifest is invalid.',
+        );
+      }
+      bundle[item.assetId] = item;
+    }
+    if (approved.length != 2 ||
+        approved.values.fold<int>(0, (sum, bundle) => sum + bundle.length) !=
+            WorkoutReleaseCatalogRepository.approvedPlaybackCount ||
+        approved['bil-workouts-home-v1']?.length !=
+            WorkoutReleaseCatalogRepository.homeRecordCount ||
+        approved['bil-workouts-gym-six-month-v1']?.length !=
+            WorkoutReleaseCatalogRepository.gymRecordCount) {
+      throw const FormatException(
+        'The bundled workout approval count is invalid.',
+      );
+    }
+    return {
+      for (final entry in approved.entries)
+        entry.key: Map.unmodifiable(entry.value),
+    };
+  }
+
+  static bool _rawWorkoutMatchesApproval(
+    Map<String, dynamic> raw,
+    WorkoutReleaseCatalogItem approval,
+  ) {
+    final media = raw['media'];
+    final video = media is Map<String, dynamic> ? media['video'] : null;
+    final segments = raw['segments'];
+    if (video is! Map<String, dynamic> ||
+        (segments != null && (segments is! List || segments.isNotEmpty))) {
+      return false;
+    }
+    final url = Uri.tryParse(video['url']?.toString() ?? '');
+    return raw['duration_seconds'] == approval.durationMilliseconds! ~/ 1000 &&
+        video['mime_type'] == 'video/mp4' &&
+        video['sha256'] == approval.expectedSha256 &&
+        video['size_bytes'] == approval.expectedBytes &&
+        url != null &&
+        url.scheme == 'https' &&
+        url.path.endsWith('/${approval.objectPath}');
+  }
+
+  static bool _workoutMatchesApproval(
+    WellnessContentItem item,
+    WorkoutReleaseCatalogItem approval,
+  ) {
+    final video = item.videoMedia;
+    return video != null &&
+        item.durationSeconds == approval.durationMilliseconds! ~/ 1000 &&
+        item.segments.isEmpty &&
+        video.mimeType == 'video/mp4' &&
+        video.sha256 == approval.expectedSha256 &&
+        video.sizeBytes == approval.expectedBytes &&
+        video.url.path.endsWith('/${approval.objectPath}');
   }
 
   Future<Directory> _packsDirectory() async {

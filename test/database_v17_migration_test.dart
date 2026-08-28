@@ -69,7 +69,7 @@ void main() {
       );
       addTearDown(database.close);
 
-      expect(database.schemaVersion, 19);
+      expect(database.schemaVersion, 21);
       final decision = await database
           .select(database.decisionMemories)
           .getSingle();

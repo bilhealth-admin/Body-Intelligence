@@ -1,4 +1,5 @@
 import '../../features/commerce/domain/store_catalog_configuration.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 enum EnvironmentProfile { development, testing, staging, production }
 
@@ -7,11 +8,15 @@ class AppEnvironment {
 
   static const bool useSupabase = bool.fromEnvironment(
     'BIL_USE_SUPABASE',
-    defaultValue: false,
+    defaultValue: true,
   );
-  static const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+  static const String supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: 'https://tgmanzhqulksykhslrzb.supabase.co',
+  );
   static const String supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
+    defaultValue: 'sb_publishable_eMoUVfgwfU0RpQOwPJr-yw_ZgtStgld',
   );
   static const String serverUrl = String.fromEnvironment('BIL_SERVER_URL');
 
@@ -28,6 +33,20 @@ class AppEnvironment {
     'BIL_EMAIL_OTP_ENABLED',
     defaultValue: false,
   );
+  static const bool facebookLoginEnabled = bool.fromEnvironment(
+    'BIL_FACEBOOK_LOGIN_ENABLED',
+    defaultValue: false,
+  );
+
+  /// Keeps the Facebook entry point visible while Meta approval is pending,
+  /// without allowing a public user to start an OAuth flow that cannot finish.
+  ///
+  /// Meta-review builds set this to true. Store builds leave it false until
+  /// Business Verification and public access are approved.
+  static const bool facebookLoginReady = bool.fromEnvironment(
+    'BIL_FACEBOOK_LOGIN_READY',
+    defaultValue: false,
+  );
   static const bool pushEnabled = bool.fromEnvironment(
     'BIL_PUSH_ENABLED',
     defaultValue: false,
@@ -38,7 +57,7 @@ class AppEnvironment {
   );
   static const bool communityEnabled = bool.fromEnvironment(
     'BIL_COMMUNITY_ENABLED',
-    defaultValue: false,
+    defaultValue: true,
   );
 
   /// Advertising is opt-in at build configuration level and fails closed.
@@ -69,20 +88,6 @@ class AppEnvironment {
   static const String adMobPublisherId = String.fromEnvironment(
     'BIL_ADMOB_PUBLISHER_ID',
   );
-  static const String adAllowedCountryCodes = String.fromEnvironment(
-    'BIL_AD_ALLOWED_COUNTRY_CODES',
-  );
-
-  static bool adRegionAllowed(String? countryCode) {
-    if (countryCode == null || countryCode.trim().isEmpty) return false;
-    final allowed = adAllowedCountryCodes
-        .split(',')
-        .map((value) => value.trim().toUpperCase())
-        .where((value) => value.isNotEmpty)
-        .toSet();
-    return allowed.contains(countryCode.trim().toUpperCase());
-  }
-
   static const String _profileName = String.fromEnvironment(
     'BIL_ENVIRONMENT',
     defaultValue: 'production',
@@ -100,10 +105,21 @@ class AppEnvironment {
   static bool get cloudConfigured =>
       useSupabase && supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 
+  static bool get supabaseRuntimeReady {
+    if (!cloudConfigured) return false;
+    try {
+      return Supabase.instance.isInitialized;
+    } on AssertionError {
+      return false;
+    }
+  }
+
   static bool get serverConfigured => serverUrl.startsWith('https://');
   static bool get mealVisionConfigured =>
       cloudConfigured && mealVisionEndpoint.startsWith('https://');
-  static bool get aiConfigured => serverConfigured;
+  // AI Coach is served by the authenticated Supabase Edge Function. A legacy
+  // standalone BIL_SERVER_URL is optional and must not disable the coach.
+  static bool get aiConfigured => cloudConfigured;
   static bool get commerceConfigured =>
       cloudConfigured &&
       paymentsEnabled &&

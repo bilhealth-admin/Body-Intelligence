@@ -8,9 +8,13 @@ import 'package:share_plus/share_plus.dart';
 import '../../app/localization/runtime_copy.dart';
 import '../../data/database/app_database.dart';
 import '../../core/units/measurement_units.dart';
+import '../ads/presentation/safe_free_ad_anchor.dart';
 import '../daily_log/providers/daily_log_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
+
+part 'progress_page_components.dart';
+part 'progress_page_copy.dart';
 
 enum ProgressMetric { steps, weight, neck, waist, hips, chest, arm, thigh }
 
@@ -104,16 +108,21 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
     final shareData = _shareData(logs, weights, measurements, systemState);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
       appBar: AppBar(
+        centerTitle: true,
         title: Text(copy.progress),
         actions: [
-          IconButton(
-            key: const Key('progress-share'),
-            tooltip: copy.shareProgress,
-            onPressed: shareData == null
-                ? null
-                : () => _shareProgress(copy, shareData),
-            icon: const Icon(Icons.ios_share_rounded),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: 8),
+            child: IconButton.filledTonal(
+              key: const Key('progress-share'),
+              tooltip: copy.shareProgress,
+              onPressed: shareData == null
+                  ? null
+                  : () => _shareProgress(copy, shareData),
+              icon: const Icon(Icons.ios_share_rounded),
+            ),
           ),
           if (metric == ProgressMetric.weight)
             IconButton(
@@ -139,26 +148,32 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 32),
         children: [
-          ListTile(
-            key: const Key('progress-metric-selector'),
-            leading: Icon(_metricIcon(metric)),
-            title: Text(copy.metric),
-            subtitle: Text(copy.metricLabel(metric)),
-            trailing: const Icon(Icons.expand_more_rounded),
-            onTap: _pickMetric,
+          Row(
+            children: [
+              Expanded(
+                child: _ProgressSelector(
+                  key: const Key('progress-metric-selector'),
+                  icon: _metricIcon(metric),
+                  eyebrow: copy.metric,
+                  value: copy.metricLabel(metric),
+                  onTap: _pickMetric,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _ProgressSelector(
+                  key: const Key('progress-range-selector'),
+                  icon: Icons.calendar_today_rounded,
+                  eyebrow: copy.range,
+                  value: copy.rangeLabel(range),
+                  onTap: _pickRange,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          ListTile(
-            key: const Key('progress-range-selector'),
-            leading: const Icon(Icons.date_range_rounded),
-            title: Text(copy.range),
-            subtitle: Text(copy.rangeLabel(range)),
-            trailing: const Icon(Icons.expand_more_rounded),
-            onTap: _pickRange,
-          ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
           if (metric == ProgressMetric.steps)
             logs.when(
               loading: _loading,
@@ -242,6 +257,10 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
                 },
               ),
             },
+          const SafeFreeAdAnchor(
+            key: Key('progress-free-ad-slot'),
+            surface: SafeFreeAdSurface.progress,
+          ),
         ],
       ),
     );
@@ -405,34 +424,20 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
   Widget _series(_ProgressCopy copy, List<_Point> points, String unit) {
     if (points.isEmpty) {
       final canAdd = metric != ProgressMetric.steps;
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              const Icon(Icons.show_chart_rounded, size: 44),
-              const SizedBox(height: 12),
-              Text(copy.noRecords, textAlign: TextAlign.center),
-              if (canAdd) ...[
-                const SizedBox(height: 12),
-                FilledButton.icon(
-                  key: const Key('progress-empty-add'),
-                  onPressed: () => context.push(
-                    metric == ProgressMetric.weight
-                        ? '/weight-history'
-                        : '/profile-settings',
-                  ),
-                  icon: const Icon(Icons.add_rounded),
-                  label: Text(
-                    metric == ProgressMetric.weight
-                        ? copy.addEditWeight
-                        : copy.editMeasurements,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
+      return _ProgressEmptyState(
+        message: copy.noRecords,
+        actionLabel: canAdd
+            ? metric == ProgressMetric.weight
+                  ? copy.addEditWeight
+                  : copy.editMeasurements
+            : null,
+        onAction: canAdd
+            ? () => context.push(
+                metric == ProgressMetric.weight
+                    ? '/weight-history'
+                    : '/profile-settings',
+              )
+            : null,
       );
     }
     points.sort((a, b) => a.date.compareTo(b.date));
@@ -440,119 +445,113 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
     final stats = ProgressSeriesStats.fromChronologicalValues(
       points.map((point) => point.value).toList(growable: false),
     )!;
+    final decimals = metric == ProgressMetric.steps ? 0 : 1;
+    final currentValue = stats.current.toStringAsFixed(decimals);
+    final changeValue = metric == ProgressMetric.steps
+        ? stats.total.toStringAsFixed(0)
+        : '${stats.change >= 0 ? '+' : ''}${stats.change.toStringAsFixed(1)}';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: _SummaryValue(
-                label: metric == ProgressMetric.steps
-                    ? copy.average
-                    : copy.start,
-                value:
-                    (metric == ProgressMetric.steps
-                            ? stats.average
-                            : stats.start)
-                        .toStringAsFixed(
-                          metric == ProgressMetric.steps ? 0 : 1,
-                        ),
-                unit: unit,
-              ),
+        _ProgressChartCard(
+          title: copy.metricLabel(metric),
+          latestLabel: copy.latest,
+          latestValue: currentValue,
+          unit: unit,
+          dateLabel: MaterialLocalizations.of(
+            context,
+          ).formatMediumDate(latest.date),
+          semanticsLabel: copy.chartSummary(
+            copy.metricLabel(metric),
+            copy.rangeLabel(range),
+            points.length,
+            points.map((point) => point.value).reduce(math.min),
+            points.map((point) => point.value).reduce(math.max),
+            latest.value,
+            unit,
+          ),
+          points: points,
+          summaries: [
+            _ProgressSummaryData(
+              metric == ProgressMetric.steps ? copy.average : copy.start,
+              (metric == ProgressMetric.steps ? stats.average : stats.start)
+                  .toStringAsFixed(decimals),
             ),
-            Expanded(
-              child: _SummaryValue(
-                label: metric == ProgressMetric.steps
-                    ? copy.best
-                    : copy.current,
-                value:
-                    (metric == ProgressMetric.steps
-                            ? stats.best
-                            : stats.current)
-                        .toStringAsFixed(
-                          metric == ProgressMetric.steps ? 0 : 1,
-                        ),
-                unit: unit,
-              ),
+            _ProgressSummaryData(
+              metric == ProgressMetric.steps ? copy.best : copy.current,
+              (metric == ProgressMetric.steps ? stats.best : stats.current)
+                  .toStringAsFixed(decimals),
             ),
-            Expanded(
-              child: _SummaryValue(
-                label: metric == ProgressMetric.steps
-                    ? copy.total
-                    : copy.change,
-                value: metric == ProgressMetric.steps
-                    ? stats.total.toStringAsFixed(0)
-                    : '${stats.change >= 0 ? '+' : ''}${stats.change.toStringAsFixed(1)}',
-                unit: unit,
-              ),
+            _ProgressSummaryData(
+              metric == ProgressMetric.steps ? copy.total : copy.change,
+              changeValue,
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Card(
-          child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  copy.latest,
-                  style: Theme.of(context).textTheme.labelLarge,
+          margin: EdgeInsets.zero,
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 17, 18, 11),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        copy.entries,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                    Text(
+                      copy.recordCount(points.length),
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  '${latest.value.toStringAsFixed(metric == ProgressMetric.steps ? 0 : 1)} $unit',
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                Text(
-                  MaterialLocalizations.of(
-                    context,
-                  ).formatMediumDate(latest.date),
+              ),
+              for (var index = points.length - 1; index >= 0; index--) ...[
+                if (index != points.length - 1) const Divider(height: 1),
+                ListTile(
+                  minTileHeight: 58,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 18),
+                  leading: Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer.withValues(alpha: .58),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      _metricIcon(metric),
+                      size: 18,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  title: Text(
+                    MaterialLocalizations.of(
+                      context,
+                    ).formatMediumDate(points[index].date),
+                  ),
+                  trailing: Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Text(
+                      '${points[index].value.toStringAsFixed(decimals)} $unit',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
                 ),
               ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Card(
-          child: SizedBox(
-            height: 240,
-            child: Semantics(
-              label: copy.chartSummary(
-                copy.metricLabel(metric),
-                copy.rangeLabel(range),
-                points.length,
-                points.map((point) => point.value).reduce(math.min),
-                points.map((point) => point.value).reduce(math.max),
-                latest.value,
-                unit,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: CustomPaint(
-                  key: const Key('progress-real-series-chart'),
-                  painter: _ProgressPainter(points),
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(copy.recordCount(points.length), textAlign: TextAlign.center),
-        const SizedBox(height: 12),
-        Text(copy.entries, style: Theme.of(context).textTheme.titleLarge),
-        const Divider(),
-        ...points.reversed.map(
-          (point) => ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              MaterialLocalizations.of(context).formatMediumDate(point.date),
-            ),
-            trailing: Directionality(
-              textDirection: TextDirection.ltr,
-              child: Text(
-                '${point.value.toStringAsFixed(metric == ProgressMetric.steps ? 0 : 1)} $unit',
-              ),
-            ),
+            ],
           ),
         ),
       ],
@@ -566,14 +565,33 @@ class _ProgressPageState extends ConsumerState<ProgressPage> {
         .toList();
   }
 
-  Widget _loading() => const Center(child: CircularProgressIndicator());
+  Widget _loading() => const _ProgressLoadingState();
   Widget _error(_ProgressCopy copy, VoidCallback onRetry) => Card(
+    margin: EdgeInsets.zero,
     child: Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.fromLTRB(24, 30, 24, 24),
       child: Column(
         children: [
-          Text(copy.unavailable, textAlign: TextAlign.center),
-          TextButton.icon(
+          Container(
+            width: 62,
+            height: 62,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.errorContainer,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.cloud_off_rounded,
+              color: Theme.of(context).colorScheme.onErrorContainer,
+            ),
+          ),
+          const SizedBox(height: 15),
+          Text(
+            copy.unavailable,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 14),
+          FilledButton.tonalIcon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh_rounded),
             label: Text(copy.retry),
@@ -593,388 +611,4 @@ IconData _metricIcon(ProgressMetric metric) => switch (metric) {
   ProgressMetric.chest => Icons.favorite_border_rounded,
   ProgressMetric.arm => Icons.fitness_center_rounded,
   ProgressMetric.thigh => Icons.directions_run_rounded,
-};
-
-class _Point {
-  const _Point(this.date, this.value);
-  final DateTime date;
-  final double value;
-}
-
-class _SummaryValue extends StatelessWidget {
-  const _SummaryValue({
-    required this.label,
-    required this.value,
-    required this.unit,
-  });
-  final String label;
-  final String value;
-  final String unit;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    label: '$label, $value $unit',
-    child: Column(
-      children: [
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Text(value, style: Theme.of(context).textTheme.titleLarge),
-        ),
-        Text(label, textAlign: TextAlign.center),
-      ],
-    ),
-  );
-}
-
-class _ProgressPainter extends CustomPainter {
-  const _ProgressPainter(this.points);
-  final List<_Point> points;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFF0878F9)
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-    final values = points.map((point) => point.value);
-    final low = values.reduce(math.min);
-    final high = values.reduce(math.max);
-    final spread = math.max(high - low, 1);
-    final path = Path();
-    for (var index = 0; index < points.length; index++) {
-      final x = points.length == 1
-          ? size.width / 2
-          : size.width * index / (points.length - 1);
-      final y =
-          size.height - ((points[index].value - low) / spread * size.height);
-      if (index == 0) {
-        path.moveTo(x, y);
-      } else {
-        path.lineTo(x, y);
-      }
-    }
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _ProgressPainter oldDelegate) =>
-      oldDelegate.points != points;
-}
-
-class _ProgressCopy {
-  const _ProgressCopy(this.v);
-  final Map<String, String> v;
-  String t(String key) => v[key]!;
-  String get progress => t('progress');
-  String get metric => t('metric');
-  String get range => t('range');
-  String get selectMetric => t('selectMetric');
-  String get selectRange => t('selectRange');
-  String get stepsUnit => t('stepsUnit');
-  String get latest => t('latest');
-  String get noRecords => t('noRecords');
-  String get unavailable => t('unavailable');
-  String get currentOnly => t('currentOnly');
-  String get noCurrentMeasurement => t('noCurrentMeasurement');
-  String get hipsUnavailable => t('hipsUnavailable');
-  String get addEditWeight => t('addEditWeight');
-  String get editMeasurements => t('editMeasurements');
-  String get shareProgress => t('shareProgress');
-  String get average => t('average');
-  String get best => t('best');
-  String get total => t('total');
-  String get start => t('start');
-  String get current => t('current');
-  String get change => t('change');
-  String get entries => t('entries');
-  String get retry => t('retry');
-  String get shareUnavailable => t('shareUnavailable');
-  String get neck => t('neck');
-  String get waist => t('waist');
-  String metricLabel(ProgressMetric value) => t(value.name);
-  String rangeLabel(ProgressRange value) => t(value.name);
-  String recordCount(int count) => '${t('records')}: $count';
-  String chartSummary(
-    String metric,
-    String range,
-    int count,
-    double minimum,
-    double maximum,
-    double latest,
-    String unit,
-  ) =>
-      '$metric, $range. $count ${t('records')}. '
-      '${t('minimum')}: ${minimum.toStringAsFixed(1)} $unit. '
-      '${t('maximum')}: ${maximum.toStringAsFixed(1)} $unit. '
-      '${t('latest')}: ${latest.toStringAsFixed(1)} $unit.';
-  String shareText(
-    String metric,
-    String range,
-    int count,
-    double start,
-    double current,
-    double change,
-    String unit, {
-    bool wholeNumbers = false,
-  }) {
-    String format(double value) =>
-        wholeNumbers ? value.round().toString() : value.toStringAsFixed(1);
-    return '$metric · $range\n'
-        '${t('records')}: $count\n'
-        '${t('start')}: ${format(start)} $unit\n'
-        '${t('current')}: ${format(current)} $unit\n'
-        '${t('change')}: ${change >= 0 ? '+' : ''}${format(change)} $unit';
-  }
-
-  static _ProgressCopy of(BuildContext context) {
-    final locale = Localizations.localeOf(context);
-    return _ProgressCopy(progressCopyForLocale(locale.toLanguageTag()));
-  }
-}
-
-Map<String, String> progressCopyForLocale(String localeTag) {
-  final language = localeTag.replaceAll('_', '-').split('-').first;
-  final authored = _progressCopy[language];
-  if (authored != null) return authored;
-  return {
-    for (final entry in _progressCopy['en']!.entries)
-      entry.key: RuntimeCopy.resolve(entry.value, localeTag) ?? entry.value,
-  };
-}
-
-const _progressCopy = <String, Map<String, String>>{
-  'en': {
-    'progress': 'Progress',
-    'metric': 'Metric',
-    'range': 'Date range',
-    'selectMetric': 'Select a measurement',
-    'selectRange': 'Select a date range',
-    'steps': 'Steps',
-    'weight': 'Weight',
-    'neck': 'Neck',
-    'waist': 'Waist',
-    'hips': 'Hips',
-    'chest': 'Chest',
-    'arm': 'Arm',
-    'thigh': 'Thigh',
-    'week': '1w',
-    'month': '1m',
-    'twoMonths': '2m',
-    'threeMonths': '3m',
-    'sixMonths': '6m',
-    'year': '1y',
-    'all': 'All',
-    'stepsUnit': 'steps',
-    'latest': 'Latest',
-    'records': 'Recorded days',
-    'noRecords': 'No real records are available for this metric and range.',
-    'unavailable': 'Local progress data is temporarily unavailable.',
-    'currentOnly':
-        'This is the current profile measurement. Measurement history is not stored yet.',
-    'noCurrentMeasurement':
-        'No current measurement is saved. Add or edit it in your profile.',
-    'hipsUnavailable':
-        'Hip measurement is unavailable because the current profile schema does not store it.',
-    'addEditWeight': 'Add or edit weight',
-    'editMeasurements': 'Edit measurements',
-    'shareProgress': 'Share progress',
-    'average': 'Average',
-    'best': 'Best',
-    'total': 'Total',
-    'start': 'Start',
-    'current': 'Current',
-    'change': 'Change',
-    'entries': 'Entries',
-    'retry': 'Retry',
-    'minimum': 'Minimum',
-    'maximum': 'Maximum',
-    'shareUnavailable': 'Sharing is unavailable on this device.',
-  },
-  'ar': {
-    'progress': 'التقدم',
-    'metric': 'المقياس',
-    'range': 'الفترة الزمنية',
-    'selectMetric': 'اختر قياسًا',
-    'selectRange': 'اختر فترة زمنية',
-    'steps': 'الخطوات',
-    'weight': 'الوزن',
-    'neck': 'الرقبة',
-    'waist': 'الخصر',
-    'hips': 'الورك',
-    'chest': 'الصدر',
-    'arm': 'الذراع',
-    'thigh': 'الفخذ',
-    'week': 'أسبوع',
-    'month': 'شهر',
-    'twoMonths': 'شهران',
-    'threeMonths': '3 أشهر',
-    'sixMonths': '6 أشهر',
-    'year': 'سنة',
-    'all': 'الكل',
-    'stepsUnit': 'خطوة',
-    'latest': 'الأحدث',
-    'records': 'أيام مسجلة',
-    'noRecords': 'لا توجد سجلات حقيقية لهذا المقياس وهذه المدة.',
-    'unavailable': 'بيانات التقدم المحلية غير متاحة مؤقتًا.',
-    'currentOnly':
-        'هذه قياسة الملف الشخصي الحالية. لا يُحفظ تاريخ القياسات بعد.',
-    'noCurrentMeasurement':
-        'لا توجد قياسة حالية محفوظة. أضفها أو عدّلها في ملفك.',
-    'hipsUnavailable': 'قياس الورك غير متاح لأن مخطط الملف الحالي لا يخزنه.',
-    'addEditWeight': 'إضافة أو تعديل الوزن',
-    'editMeasurements': 'تعديل القياسات',
-    'shareProgress': 'مشاركة التقدم',
-    'average': 'المتوسط',
-    'best': 'الأفضل',
-    'total': 'الإجمالي',
-    'start': 'البداية',
-    'current': 'الحالي',
-    'change': 'التغير',
-    'entries': 'الإدخالات',
-    'retry': 'إعادة المحاولة',
-    'minimum': 'الأدنى',
-    'maximum': 'الأعلى',
-    'shareUnavailable': 'المشاركة غير متاحة على هذا الجهاز.',
-  },
-  'fr': {
-    'progress': 'Progression',
-    'metric': 'Mesure',
-    'range': 'Période',
-    'selectMetric': 'Choisir une mesure',
-    'selectRange': 'Choisir une période',
-    'steps': 'Pas',
-    'weight': 'Poids',
-    'neck': 'Cou',
-    'waist': 'Tour de taille',
-    'hips': 'Hanches',
-    'chest': 'Poitrine',
-    'arm': 'Bras',
-    'thigh': 'Cuisse',
-    'week': '1 sem.',
-    'month': '1 mois',
-    'twoMonths': '2 mois',
-    'threeMonths': '3 mois',
-    'sixMonths': '6 mois',
-    'year': '1 an',
-    'all': 'Tout',
-    'stepsUnit': 'pas',
-    'latest': 'Dernière valeur',
-    'records': 'Jours enregistrés',
-    'noRecords': 'Aucune donnée réelle pour cette mesure et cette période.',
-    'unavailable': 'Les données locales sont temporairement indisponibles.',
-    'currentOnly':
-        'Il s’agit de la mesure actuelle du profil. L’historique n’est pas encore stocké.',
-    'noCurrentMeasurement':
-        'Aucune mesure actuelle enregistrée. Ajoutez-la dans votre profil.',
-    'hipsUnavailable':
-        'La mesure des hanches est indisponible car le schéma actuel ne la stocke pas.',
-    'addEditWeight': 'Ajouter ou modifier le poids',
-    'editMeasurements': 'Modifier les mesures',
-    'shareProgress': 'Partager la progression',
-    'average': 'Moyenne',
-    'best': 'Meilleur',
-    'total': 'Total',
-    'start': 'Début',
-    'current': 'Actuel',
-    'change': 'Variation',
-    'entries': 'Entrées',
-    'retry': 'Réessayer',
-    'minimum': 'Minimum',
-    'maximum': 'Maximum',
-    'shareUnavailable': 'Le partage est indisponible sur cet appareil.',
-  },
-  'es': {
-    'progress': 'Progreso',
-    'metric': 'Métrica',
-    'range': 'Periodo',
-    'selectMetric': 'Seleccionar medida',
-    'selectRange': 'Seleccionar periodo',
-    'steps': 'Pasos',
-    'weight': 'Peso',
-    'neck': 'Cuello',
-    'waist': 'Cintura',
-    'hips': 'Caderas',
-    'chest': 'Pecho',
-    'arm': 'Brazo',
-    'thigh': 'Muslo',
-    'week': '1 sem.',
-    'month': '1 mes',
-    'twoMonths': '2 meses',
-    'threeMonths': '3 meses',
-    'sixMonths': '6 meses',
-    'year': '1 año',
-    'all': 'Todo',
-    'stepsUnit': 'pasos',
-    'latest': 'Último',
-    'records': 'Días registrados',
-    'noRecords': 'No hay registros reales para esta métrica y periodo.',
-    'unavailable': 'Los datos locales no están disponibles temporalmente.',
-    'currentOnly':
-        'Esta es la medida actual del perfil. Aún no se guarda historial.',
-    'noCurrentMeasurement':
-        'No hay una medida actual guardada. Añádela en tu perfil.',
-    'hipsUnavailable':
-        'La medida de caderas no está disponible porque el esquema actual no la almacena.',
-    'addEditWeight': 'Añadir o editar peso',
-    'editMeasurements': 'Editar medidas',
-    'shareProgress': 'Compartir progreso',
-    'average': 'Promedio',
-    'best': 'Mejor',
-    'total': 'Total',
-    'start': 'Inicio',
-    'current': 'Actual',
-    'change': 'Cambio',
-    'entries': 'Entradas',
-    'retry': 'Reintentar',
-    'minimum': 'Mínimo',
-    'maximum': 'Máximo',
-    'shareUnavailable': 'Compartir no está disponible en este dispositivo.',
-  },
-  'tr': {
-    'progress': 'İlerleme',
-    'metric': 'Ölçüm',
-    'range': 'Tarih aralığı',
-    'selectMetric': 'Ölçüm seç',
-    'selectRange': 'Tarih aralığı seç',
-    'steps': 'Adımlar',
-    'weight': 'Kilo',
-    'neck': 'Boyun',
-    'waist': 'Bel',
-    'hips': 'Kalça',
-    'chest': 'Göğüs',
-    'arm': 'Kol',
-    'thigh': 'Uyluk',
-    'week': '1 hf.',
-    'month': '1 ay',
-    'twoMonths': '2 ay',
-    'threeMonths': '3 ay',
-    'sixMonths': '6 ay',
-    'year': '1 yıl',
-    'all': 'Tümü',
-    'stepsUnit': 'adım',
-    'latest': 'En son',
-    'records': 'Kayıtlı gün',
-    'noRecords': 'Bu ölçüm ve aralık için gerçek kayıt yok.',
-    'unavailable': 'Yerel ilerleme verileri geçici olarak kullanılamıyor.',
-    'currentOnly':
-        'Bu, mevcut profil ölçümüdür. Ölçüm geçmişi henüz saklanmıyor.',
-    'noCurrentMeasurement': 'Kayıtlı güncel ölçüm yok. Profilinizden ekleyin.',
-    'hipsUnavailable':
-        'Kalça ölçümü mevcut profil şemasında saklanmadığı için kullanılamıyor.',
-    'addEditWeight': 'Kilo ekle veya düzenle',
-    'editMeasurements': 'Ölçümleri düzenle',
-    'shareProgress': 'İlerlemeyi paylaş',
-    'average': 'Ortalama',
-    'best': 'En iyi',
-    'total': 'Toplam',
-    'start': 'Başlangıç',
-    'current': 'Güncel',
-    'change': 'Değişim',
-    'entries': 'Kayıtlar',
-    'retry': 'Yeniden dene',
-    'minimum': 'En düşük',
-    'maximum': 'En yüksek',
-    'shareUnavailable': 'Paylaşım bu cihazda kullanılamıyor.',
-  },
 };

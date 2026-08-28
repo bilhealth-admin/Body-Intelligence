@@ -14,26 +14,12 @@ void main() {
       routes: [
         GoRoute(
           path: '/dashboard',
-          builder: (_, _) => Scaffold(
-            body: DashboardTopBar(
-              arabic: false,
-              now: DateTime(2026, 8, 6),
-              displayName: 'Kazem',
-              onProfile: () {},
-            ),
-          ),
-        ),
-        GoRoute(
-          path: '/notification-settings',
-          builder: (_, _) => const Scaffold(
-            body: Text('notification-settings-destination'),
-          ),
+          builder: (_, _) => Scaffold(body: DashboardTopBar(onProfile: () {})),
         ),
         GoRoute(
           path: '/dashboard/preferences',
-          builder: (_, _) => const Scaffold(
-            body: Text('dashboard-preferences-destination'),
-          ),
+          builder: (_, _) =>
+              const Scaffold(body: Text('dashboard-preferences-destination')),
         ),
       ],
     );
@@ -42,19 +28,34 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('notification control opens notification settings', (
+  testWidgets('header keeps full controls while omitting Today and date', (
     tester,
   ) async {
     await pumpDashboard(tester);
 
-    await tester.tap(find.byTooltip('Notifications'));
-    await tester.pumpAndSettle();
+    expect(find.byTooltip('Notifications'), findsOneWidget);
+    expect(find.text('Today'), findsNothing);
+    expect(find.text('Aug 6, 2026'), findsNothing);
+    expect(find.text('Welcome'), findsNothing);
+    expect(find.text('Edit'), findsNothing);
+  });
 
-    expect(find.text('notification-settings-destination'), findsOneWidget);
+  testWidgets('profile uses a neutral account avatar by default', (
+    tester,
+  ) async {
+    await pumpDashboard(tester);
+
+    expect(find.byTooltip('Profile'), findsOneWidget);
+    expect(
+      find.byKey(const Key('dashboard-default-profile-avatar')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Edit opens dashboard customization', (tester) async {
     await pumpDashboard(tester);
+
+    expect(find.byIcon(Icons.dashboard_customize_rounded), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('dashboard-edit-today')));
     await tester.pumpAndSettle();

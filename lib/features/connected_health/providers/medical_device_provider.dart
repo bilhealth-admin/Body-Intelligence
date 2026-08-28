@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
@@ -89,17 +90,19 @@ final class MedicalDeviceController
     for (final row in rows) {
       final id = row['id'] as String?;
       if (id == null) continue;
+      final profiles = <BleMedicalProfile>{
+        for (final name in row['profiles'] as List<Object?>? ?? const [])
+          if (BleMedicalProfile.values.asNameMap().containsKey('$name'))
+            BleMedicalProfile.values.byName('$name'),
+      }.intersection(bleFitnessProfiles);
+      if (profiles.isEmpty) continue;
       devices.add(
         BlePeripheral(
           id: id,
-          name: row['name'] as String? ?? 'Medical device',
+          name: row['name'] as String? ?? 'Fitness device',
           firmwareVersion: row['firmwareVersion'] as String? ?? 'unknown',
           manufacturer: row['manufacturer'] as String? ?? 'unknown',
-          profiles: {
-            for (final name in row['profiles'] as List<Object?>? ?? const [])
-              if (BleMedicalProfile.values.asNameMap().containsKey('$name'))
-                BleMedicalProfile.values.byName('$name'),
-          },
+          profiles: profiles,
         ),
       );
     }
@@ -123,7 +126,17 @@ final class MedicalDeviceController
         status: MedicalDeviceConnectionStatus.scanning,
         devices: state.devices,
       );
-      final devices = await _bridge.discover(const Duration(seconds: 6));
+      final devices = <BlePeripheral>[
+        for (final device in await _bridge.discover(const Duration(seconds: 6)))
+          if (device.profiles.intersection(bleFitnessProfiles).isNotEmpty)
+            BlePeripheral(
+              id: device.id,
+              name: device.name,
+              profiles: device.profiles.intersection(bleFitnessProfiles),
+              firmwareVersion: device.firmwareVersion,
+              manufacturer: device.manufacturer,
+            ),
+      ];
       final store = _store;
       if (store != null) {
         for (final device in devices) {
@@ -148,12 +161,28 @@ final class MedicalDeviceController
       state = MedicalDeviceSnapshot(
         status: MedicalDeviceConnectionStatus.failed,
         devices: state.devices,
-        failureCode: error.runtimeType.toString(),
+        failureCode: _bleFailureCode(error),
       );
     }
   }
 
   Future<void> connect(BlePeripheral peripheral) async {
+    final profiles = peripheral.profiles.intersection(bleFitnessProfiles);
+    if (profiles.isEmpty) {
+      state = MedicalDeviceSnapshot(
+        status: MedicalDeviceConnectionStatus.failed,
+        devices: state.devices,
+        failureCode: 'unsupported_fitness_device',
+      );
+      return;
+    }
+    final fitnessPeripheral = BlePeripheral(
+      id: peripheral.id,
+      name: peripheral.name,
+      profiles: profiles,
+      firmwareVersion: peripheral.firmwareVersion,
+      manufacturer: peripheral.manufacturer,
+    );
     state = MedicalDeviceSnapshot(
       status: MedicalDeviceConnectionStatus.connecting,
       devices: state.devices,
@@ -180,12 +209,12 @@ final class MedicalDeviceController
           'connectedAt': DateTime.now().toUtc().toIso8601String(),
         },
       );
-      await refreshMeasurements(peripheral);
+      await refreshMeasurements(fitnessPeripheral);
     } catch (error) {
       state = MedicalDeviceSnapshot(
         status: MedicalDeviceConnectionStatus.failed,
         devices: state.devices,
-        failureCode: error.runtimeType.toString(),
+        failureCode: _bleFailureCode(error),
       );
     }
   }
@@ -234,7 +263,7 @@ final class MedicalDeviceController
         measurements: state.measurements,
         lastMeasurementAt: state.lastMeasurementAt,
         batteryPercent: state.batteryPercent,
-        failureCode: error.runtimeType.toString(),
+        failureCode: _bleFailureCode(error),
       );
     }
   }
@@ -268,10 +297,6 @@ final class MedicalDeviceController
     var numeric = value.toDouble();
     if (kind == 'weight' && unit == 'lb') {
       numeric /= 2.2046226218;
-    } else if (kind == 'temperature' && unit == 'fahrenheit') {
-      numeric = (numeric - 32) * 5 / 9;
-    } else if (kind == 'glucose' && unit == 'mmol/L') {
-      numeric *= 18;
     } else if (unit != policy.canonicalUnit) {
       return null;
     }
@@ -321,3 +346,9 @@ final class MedicalDeviceController
     );
   }
 }
+
+String _bleFailureCode(Object error) => switch (error) {
+  PlatformException(code: final code) => code,
+  StateError(message: final message) => message,
+  _ => error.runtimeType.toString(),
+};

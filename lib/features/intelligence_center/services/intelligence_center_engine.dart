@@ -7,7 +7,9 @@ import 'external_knowledge_provider.dart';
 import 'intelligence_health_context_provider.dart';
 import 'coach_intent_normalizer.dart';
 import 'coach_language_resolver.dart';
+import 'coach_speech_policy.dart';
 import 'local_coach_api.dart';
+import 'local_model_gateway.dart';
 
 class IntelligenceCenterReply {
   const IntelligenceCenterReply({
@@ -15,11 +17,15 @@ class IntelligenceCenterReply {
     required this.actions,
     required this.usedExternalKnowledge,
     this.spokenText,
+    this.serviceStatus = CoachServiceStatus.ready,
+    this.runtime = CoachAnswerRuntime.onDevice,
   });
   final IntelligenceMessage message;
   final List<IntelligenceAction> actions;
   final bool usedExternalKnowledge;
   final String? spokenText;
+  final CoachServiceStatus serviceStatus;
+  final CoachAnswerRuntime runtime;
 }
 
 /// Safety-first, presentation-neutral orchestration for AI Coach.
@@ -30,6 +36,19 @@ class IntelligenceCenterEngine {
   });
   final ExternalKnowledgeProvider externalProvider;
   final LocalCoachApi localApi;
+
+  bool canAnswerWithoutPersonalContext(String question) {
+    final normalized = question.trim().toLowerCase();
+    return normalized.isEmpty ||
+        _isGreeting(normalized) ||
+        _looksUrgent(normalized) ||
+        _looksLikeDiagnosis(normalized) ||
+        question.length > 500 ||
+        const CoachSpeechPolicy().isSleepQuestion(question);
+  }
+
+  bool isGreetingQuestion(String question) =>
+      _isGreeting(question.trim().toLowerCase());
 
   IntelligenceCenterReply fromCoach(
     AiCoachResponse response, {
@@ -71,14 +90,17 @@ class IntelligenceCenterEngine {
     required String question,
     required bool arabic,
     String? localeCode,
+    String? detectedLanguageTag,
     IntelligenceHealthContext? healthContext,
     CoachContextSnapshot? coachContext,
     CoachInputChannel inputChannel = CoachInputChannel.text,
+    List<CoachConversationTurn> conversation = const [],
   }) async {
     final locale = localeCode ?? _legacyLocale(arabic);
     final coachLanguage = const CoachLanguageResolver().resolve(
       input: question,
       uiLocale: locale,
+      detectedLanguageTag: detectedLanguageTag,
     );
     // Conversation copy follows the language of the user's message, not the
     // interface locale. This keeps (for example) Arabic questions and safety
@@ -88,14 +110,6 @@ class IntelligenceCenterEngine {
     final normalized = question.trim().toLowerCase();
     if (normalized.isEmpty) {
       return _plain(tr('Enter your question first.', 'اكتب سؤالك أولًا.'));
-    }
-    if (_isGreeting(normalized)) {
-      return _plain(
-        tr(
-          'I am ready. Ask about your weight, food, progress, or request a plan and I will explain what is needed before building it.',
-          'أنا جاهز معك. اسألني عن وزنك أو أكلك أو تقدمك، أو اطلب خطة وسأوضح ما أحتاجه قبل بنائها.',
-        ),
-      );
     }
     if (_looksUrgent(normalized)) {
       return _plain(
@@ -129,13 +143,19 @@ class IntelligenceCenterEngine {
       );
     }
 
+    final sleep = _answerSleepDuration(question, replyLocale);
+    if (sleep != null) return sleep;
+    final weight = _answerRecordedWeight(question, replyLocale, coachContext);
+    if (weight != null) return weight;
     final target = _answerDailyTarget(normalized, replyLocale, coachContext);
     if (target != null) return target;
     final local = await localApi.understand(
       LocalCoachRequest(
         text: question,
         locale: coachLanguage.languageTag,
+        languageDetected: coachLanguage.detected,
         channel: inputChannel,
+        conversation: conversation,
       ),
     );
     if (local.actions.isNotEmpty) {
@@ -153,9 +173,37 @@ class IntelligenceCenterEngine {
     if (local.answer?.trim().isNotEmpty == true) {
       return _reply(
         local.answer!.trim(),
-        evidence: const ['local-model', 'BIL user context'],
-        confidence: .75,
+        evidence: local.evidence.isEmpty
+            ? const ['BIL user context']
+            : local.evidence,
+        confidence: local.confidence ?? .75,
+        reason: local.reason,
+        missingData: local.missingData,
         spokenText: local.spokenAnswer,
+        serviceStatus: local.serviceStatus,
+        runtime: local.runtime,
+        responseId: local.responseId,
+      );
+    }
+    if (local.serviceStatus != CoachServiceStatus.ready) {
+      if (_isGreeting(normalized)) {
+        return _reply(
+          tr(
+            'I am ready. Ask about your weight, food, progress, or request a plan and I will explain what is needed before building it.',
+            'أنا جاهز معك. اسألني عن وزنك أو أكلك أو تقدمك، أو اطلب خطة وسأوضح ما أحتاجه قبل بنائها.',
+          ),
+          serviceStatus: local.serviceStatus,
+          runtime: CoachAnswerRuntime.localFallback,
+        );
+      }
+      return _serviceStatusReply(replyLocale, local.serviceStatus);
+    }
+    if (_isGreeting(normalized)) {
+      return _plain(
+        tr(
+          'I am ready. Ask about your weight, food, progress, or request a plan and I will explain what is needed before building it.',
+          'أنا جاهز معك. اسألني عن وزنك أو أكلك أو تقدمك، أو اطلب خطة وسأوضح ما أحتاجه قبل بنائها.',
+        ),
       );
     }
     if (!_isAllowedScope(normalized)) {
@@ -207,9 +255,9 @@ class IntelligenceCenterEngine {
       return _reply(
         hasAction
             ? tr(
-                'Best reading available now: ${healthContext.actionTitle}. I will not apply it until you approve.',
-                'أفضل قراءة متاحة الآن: ${healthContext.actionTitle}. لن أعتمدها كإجراء إلا بعد موافقتك.',
-              )
+                'Best reading available now: {action}. I will not apply it until you approve.',
+                'أفضل قراءة متاحة الآن: {action}. لن أعتمدها كإجراء إلا بعد موافقتك.',
+              ).replaceAll('{action}', healthContext.actionTitle!)
             : healthContext.primaryMessage,
         evidence: const ['Body Twin', 'Truth Engine'],
         confidence: healthContext.confidence,
@@ -241,8 +289,8 @@ class IntelligenceCenterEngine {
     }
     return _plain(
       tr(
-        'I understand the question, but general conversation and full body-context integration are not enabled yet. I will not invent an answer.',
-        'أفهم سؤالك، لكن المحادثة العامة وربط سياق جسمك الكامل غير مفعّلين بعد. لن أختلق جوابًا.',
+        'The personalized AI Coach is temporarily unavailable. No message was charged; try again shortly.',
+        'المدرب الذكي المخصص غير متاح مؤقتًا. لم يتم احتساب أي رسالة؛ أعد المحاولة بعد قليل.',
       ),
     );
   }
@@ -256,9 +304,14 @@ class IntelligenceCenterEngine {
     return _reply(
       ready
           ? tr(
-              'Reviewable plan draft: ${context.actionTitle ?? context.primaryMessage}. ${context.actionReason ?? ''} I will not change your plan before your approval.',
-              'مسودة خطة قابلة للمراجعة: ${context.actionTitle ?? context.primaryMessage}. ${context.actionReason ?? ''} لن أغيّر خطتك قبل اعتمادك.',
-            )
+                  'Reviewable plan draft: {action}. {reason} I will not change your plan before your approval.',
+                  'مسودة خطة قابلة للمراجعة: {action}. {reason} لن أغيّر خطتك قبل اعتمادك.',
+                )
+                .replaceAll(
+                  '{action}',
+                  context.actionTitle ?? context.primaryMessage,
+                )
+                .replaceAll('{reason}', context.actionReason ?? '')
           : tr(
               'There is not enough local context to build a personal plan now. I will not present a generic plan as personal.',
               'لا توجد بيانات محلية كافية لبناء خطة شخصية الآن. لن أقدم خطة عامة وأدّعي أنها شخصية.',
@@ -289,15 +342,52 @@ class IntelligenceCenterEngine {
     final raw = context?.computedHealth['dailyTargets'];
     if (raw is! Map) return null;
     final targets = Map<String, Object?>.from(raw);
+    final rawSources = context?.computedHealth['dailyTargetSources'];
+    final sources = rawSources is Map
+        ? Map<String, Object?>.from(rawSources)
+        : const <String, Object?>{};
     String tr(String en, String ar) => intelligenceTextFor(locale, en, ar);
     if ((question.contains('protein') || question.contains('بروتين')) &&
         targets['proteinG'] is num) {
-      final value = (targets['proteinG']! as num).round();
-      return _plain(
-        tr(
-          'Your current daily protein target is $value g. This is the target saved in your BIL plan.',
-          'هدفك اليومي الحالي هو $value غرامًا من البروتين. هذا هو الهدف المحفوظ في خطتك داخل BIL.',
+      final target = (targets['proteinG']! as num).toDouble();
+      if (!target.isFinite || target <= 0) return null;
+      final value = target.round();
+      final source = sources['proteinG']?.toString();
+      final sourceCopy = switch (source) {
+        'saved_gram_goal' => tr(
+          'It comes from the explicit protein goal saved in Nutrition Goals.',
+          'مصدره هدف البروتين الصريح المحفوظ في أهداف التغذية.',
         ),
+        'scheduled_percentage_goal' => tr(
+          "It is derived from today's scheduled calories and protein percentage.",
+          'وهو مشتق من سعرات اليوم المجدولة ونسبة البروتين المحددة لها.',
+        ),
+        'saved_percentage_goal' => tr(
+          'It is derived from your saved calorie and protein-percentage goals.',
+          'وهو مشتق من هدفي السعرات ونسبة البروتين المحفوظين.',
+        ),
+        'saved_plan_override' || 'saved_plan_recommendation' => tr(
+          'It comes from the target saved in your BIL plan.',
+          'مصدره الهدف المحفوظ في خطتك داخل BIL.',
+        ),
+        'body_profile_calculation' => tr(
+          'It comes from the current BIL body-profile calculation.',
+          'مصدره حساب BIL الحالي المبني على ملف جسمك.',
+        ),
+        _ => tr(
+          'It comes from your current BIL nutrition-target context.',
+          'مصدره سياق أهداف التغذية الحالي داخل BIL.',
+        ),
+      };
+      return _reply(
+        tr(
+              'Your current daily protein target is {value} g. {source}',
+              'هدفك اليومي الحالي هو {value} غرامًا من البروتين. {source}',
+            )
+            .replaceAll('{value}', value.toString())
+            .replaceAll('{source}', sourceCopy),
+        evidence: ['dailyTargets.proteinG', ?source],
+        confidence: 1,
       );
     }
     if ((question.contains('calorie') ||
@@ -307,12 +397,68 @@ class IntelligenceCenterEngine {
       final value = (targets['caloriesKcal']! as num).round();
       return _plain(
         tr(
-          'Your current daily target is $value kcal. This is the target saved in your BIL plan, not a generic estimate.',
-          'هدفك اليومي الحالي هو $value سعرة حرارية. هذا هو الهدف المحفوظ في خطتك وليس تقديرًا عامًا.',
-        ),
+          'Your current daily target is {value} kcal. This is the target saved in your BIL plan, not a generic estimate.',
+          'هدفك اليومي الحالي هو {value} سعرة حرارية. هذا هو الهدف المحفوظ في خطتك وليس تقديرًا عامًا.',
+        ).replaceAll('{value}', value.toString()),
       );
     }
     return null;
+  }
+
+  IntelligenceCenterReply? _answerRecordedWeight(
+    String question,
+    String locale,
+    CoachContextSnapshot? context,
+  ) {
+    if (!const CoachSpeechPolicy().isWeightLookup(question)) return null;
+    String tr(String en, String ar) => intelligenceTextFor(locale, en, ar);
+    final latest = context?.weights.isNotEmpty == true
+        ? context!.weights.first.kg
+        : (context?.profile['currentWeightKg'] as num?)?.toDouble();
+    if (latest == null || !latest.isFinite || latest <= 0) {
+      return _reply(
+        tr(
+          'I do not have a recorded weight yet. Add a weight check-in and I can use it in future answers.',
+          'لا يوجد لدي وزن مسجل بعد. أضف قياس وزن وسأستخدمه في الإجابات القادمة.',
+        ),
+        evidence: const ['local weight record'],
+        confidence: 1,
+        missingData: const ['currentWeightKg'],
+      );
+    }
+    final value = latest.toStringAsFixed(
+      latest == latest.roundToDouble() ? 0 : 1,
+    );
+    return _reply(
+      tr(
+        'Your latest recorded weight is {weight} kg.',
+        'آخر وزن مسجل لديك هو {weight} كغ.',
+      ).replaceAll('{weight}', value),
+      evidence: const ['local latest weight'],
+      confidence: 1,
+      reason: tr(
+        'This value comes from your latest verified local weight record.',
+        'هذه القيمة مأخوذة من أحدث سجل وزن محلي موثّق لديك.',
+      ),
+    );
+  }
+
+  IntelligenceCenterReply? _answerSleepDuration(
+    String question,
+    String locale,
+  ) {
+    if (!const CoachSpeechPolicy().isSleepQuestion(question)) return null;
+    final text = intelligenceTextFor(
+      locale,
+      'Most adults need 7–9 hours of sleep each night.',
+      'يحتاج معظم البالغين إلى 7–9 ساعات من النوم كل ليلة.',
+    );
+    return _reply(
+      text,
+      evidence: const ['general adult sleep-duration guidance'],
+      confidence: .85,
+      spokenText: text,
+    );
   }
 
   IntelligenceCenterReply _plain(String text) => _reply(text);
@@ -327,9 +473,12 @@ class IntelligenceCenterEngine {
     List<IntelligenceAction> actions = const [],
     bool usedExternalKnowledge = false,
     String? spokenText,
+    CoachServiceStatus serviceStatus = CoachServiceStatus.ready,
+    CoachAnswerRuntime runtime = CoachAnswerRuntime.onDevice,
+    String? responseId,
   }) => IntelligenceCenterReply(
     message: IntelligenceMessage(
-      id: 'reply-${DateTime.now().microsecondsSinceEpoch}',
+      id: responseId ?? 'reply-${DateTime.now().microsecondsSinceEpoch}',
       role: IntelligenceMessageRole.bil,
       kind: kind,
       text: text,
@@ -343,7 +492,43 @@ class IntelligenceCenterEngine {
     actions: actions,
     usedExternalKnowledge: usedExternalKnowledge,
     spokenText: spokenText,
+    serviceStatus: serviceStatus,
+    runtime: runtime,
   );
+
+  IntelligenceCenterReply _serviceStatusReply(
+    String locale,
+    CoachServiceStatus status,
+  ) {
+    String tr(String en, String ar) => intelligenceTextFor(locale, en, ar);
+    final text = switch (status) {
+      CoachServiceStatus.signedOut => tr(
+        'Sign in to use the personalized AI Coach. I did not send any health data.',
+        'سجّل الدخول لاستخدام المدرب الذكي المخصص. لم أرسل أي بيانات صحية.',
+      ),
+      CoachServiceStatus.consentRequired => tr(
+        'Personalized AI is off. Enable Remote AI consent in AI Coach settings before sending this question.',
+        'الذكاء الاصطناعي المخصص متوقف. فعّل موافقة الذكاء الاصطناعي البعيد من إعدادات المدرب قبل إرسال هذا السؤال.',
+      ),
+      CoachServiceStatus.quotaExhausted => tr(
+        'Your AI Coach allowance is exhausted for this period. No message was charged and I will not pretend this is a Gemini answer.',
+        'استهلكت حصة المدرب الذكي لهذه الفترة. لم تُحتسب هذه الرسالة، ولن أدّعي أن الرد صادر من Gemini.',
+      ),
+      CoachServiceStatus.temporarilyUnavailable => tr(
+        'The personalized AI Coach is temporarily unavailable. No message was charged; try again shortly.',
+        'المدرب الذكي المخصص غير متاح مؤقتًا. لم تُحتسب الرسالة؛ حاول مجددًا بعد قليل.',
+      ),
+      CoachServiceStatus.ready => '',
+    };
+    return _reply(
+      text,
+      kind: IntelligenceMessageKind.safety,
+      confidence: 1,
+      evidence: const ['AI Coach service status'],
+      serviceStatus: status,
+      runtime: CoachAnswerRuntime.localFallback,
+    );
+  }
 
   bool _has(String value, List<String> markers) => markers.any(value.contains);
   bool _isGreeting(String v) => _has(v, const [
@@ -358,6 +543,11 @@ class IntelligenceCenterEngine {
     'hello',
     'hey',
     'how are you',
+    'assalamualaikum',
+    'assalamu alaikum',
+    'as-salamu alaykum',
+    'salamualaikum',
+    'salaam alaikum',
   ]);
   bool _isPlanRequest(String v) => _has(v, const [
     'خطة',

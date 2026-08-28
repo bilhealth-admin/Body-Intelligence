@@ -10,6 +10,106 @@ import '../../global_platform/product/global_product_coordinators.dart';
 import '../../global_platform/runtime/global_product_composition_root.dart';
 import '../connected_health_model.dart';
 
+/// Converts HealthKit's overlapping in-bed/awake/stage samples into one
+/// measured asleep duration per source/night. Android SleepSessionRecord rows
+/// already carry a session total with nested stages and pass through unchanged.
+/// No stage percentages or missing edges are fabricated.
+@visibleForTesting
+List<GlobalHealthSignal> aggregateConnectedSleepSignals(
+  List<GlobalHealthSignal> records,
+) {
+  final output = <GlobalHealthSignal>[];
+  final stagedByNight = <String, List<GlobalHealthSignal>>{};
+  for (final signal in records) {
+    if (signal.key != 'sleep') {
+      output.add(signal);
+      continue;
+    }
+    final stage = signal.attributes['sleepStage']?.toString();
+    if (stage == null || signal.attributes['stages'] is List) {
+      output.add(signal);
+      continue;
+    }
+    if (stage == 'inBed' || stage == 'awake' || stage == 'unknown') {
+      // These records describe the bed window or wake time, not sleep.
+      continue;
+    }
+    final endedAt = DateTime.tryParse(
+      signal.attributes['endedAt']?.toString() ?? '',
+    );
+    if (endedAt == null || !endedAt.isAfter(signal.provenance.observedAt)) {
+      continue;
+    }
+    final localEnd = endedAt.toLocal();
+    final night =
+        '${localEnd.year.toString().padLeft(4, '0')}-'
+        '${localEnd.month.toString().padLeft(2, '0')}-'
+        '${localEnd.day.toString().padLeft(2, '0')}';
+    final key =
+        '${signal.provenance.providerId}|${signal.provenance.sourceId}|$night';
+    stagedByNight.putIfAbsent(key, () => <GlobalHealthSignal>[]).add(signal);
+  }
+
+  for (final entry in stagedByNight.entries) {
+    final rows = entry.value
+      ..sort(
+        (a, b) => a.provenance.observedAt.compareTo(b.provenance.observedAt),
+      );
+    final intervals = <({DateTime start, DateTime end})>[];
+    for (final row in rows) {
+      final end = DateTime.parse(row.attributes['endedAt']!.toString()).toUtc();
+      final start = row.provenance.observedAt.toUtc();
+      if (intervals.isEmpty || start.isAfter(intervals.last.end)) {
+        intervals.add((start: start, end: end));
+      } else if (end.isAfter(intervals.last.end)) {
+        intervals[intervals.length - 1] = (
+          start: intervals.last.start,
+          end: end,
+        );
+      }
+    }
+    final hours = intervals.fold<double>(
+      0,
+      (sum, interval) =>
+          sum + interval.end.difference(interval.start).inSeconds / 3600,
+    );
+    if (!hours.isFinite || hours <= 0 || hours > 24) continue;
+    final template = rows.reduce(
+      (a, b) =>
+          a.provenance.observedAt.isAfter(b.provenance.observedAt) ? a : b,
+    );
+    final first = intervals.first.start;
+    final last = intervals.last.end;
+    output.add(
+      GlobalHealthSignal(
+        key: 'sleep',
+        canonicalValue: hours,
+        canonicalUnit: 'h',
+        provenance: GlobalProvenance(
+          providerId: template.provenance.providerId,
+          sourceId: template.provenance.sourceId,
+          recordId:
+              'sleep-night:${entry.key}:${first.microsecondsSinceEpoch}:${last.microsecondsSinceEpoch}',
+          observedAt: first,
+          confidence: rows
+              .map((row) => row.provenance.confidence)
+              .reduce((a, b) => a < b ? a : b),
+          deviceId: template.provenance.deviceId,
+          timeZoneId: template.provenance.timeZoneId,
+        ),
+        attributes: <String, Object?>{
+          'endedAt': last.toIso8601String(),
+          'sourceSessionIds': [for (final row in rows) row.provenance.recordId],
+          'measuredStages': [
+            for (final row in rows) row.attributes['sleepStage'],
+          ],
+        },
+      ),
+    );
+  }
+  return List<GlobalHealthSignal>.unmodifiable(output);
+}
+
 abstract interface class ConnectedHealthGateway {
   Future<ConnectedHealthSnapshot> load();
   Future<ConnectedHealthSnapshot> synchronize();
@@ -196,12 +296,28 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
         source,
       );
       final stored = await _flows.store.get('connected_health_ui', 'snapshot');
-      final signals = <ConnectedHealthSignalView>[
-        for (final raw in stored?['signals'] as List<Object?>? ?? const [])
-          ConnectedHealthSignalView.fromSignal(
-            GlobalHealthSignal.fromMap(Map<String, Object?>.from(raw! as Map)),
-          ),
-      ];
+      final signals = <ConnectedHealthSignalView>[];
+      final retainedSignalMaps = <Map<String, Object?>>[];
+      var removedLegacyClinicalSignal = false;
+      for (final raw in stored?['signals'] as List<Object?>? ?? const []) {
+        final signal = GlobalHealthSignal.fromMap(
+          Map<String, Object?>.from(raw! as Map),
+        );
+        if (BilHealthScope.excludesKey(signal.key)) {
+          removedLegacyClinicalSignal = true;
+          continue;
+        }
+        retainedSignalMaps.add(signal.toMap());
+        signals.add(ConnectedHealthSignalView.fromSignal(signal));
+      }
+      if (removedLegacyClinicalSignal && stored != null) {
+        await _flows.store
+            .put('connected_health_ui', 'snapshot', <String, Object?>{
+              ...stored,
+              'signals': retainedSignalMaps,
+              'importedCount': retainedSignalMaps.length,
+            });
+      }
       final explicitlyRequested = consentState?['readRequested'] == true;
       // HealthKit deliberately does not reveal whether read access was
       // granted or denied. authorizationStatus(for:) reports sharing/write
@@ -400,14 +516,20 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
       final persisted = <GlobalHealthSignal>[];
       for (final row in persistedRows) {
         try {
-          persisted.add(GlobalHealthSignal.fromMap(row));
+          final signal = GlobalHealthSignal.fromMap(row);
+          if (BilHealthScope.excludesKey(signal.key)) {
+            await _flows.store.remove('health_signals', signal.identity);
+            continue;
+          }
+          persisted.add(signal);
         } on Object {
           // A corrupt local row is ignored; valid evidence remains available.
         }
       }
+      final normalizedPersisted = aggregateConnectedSleepSignals(persisted);
       final graph = await BilGlobalHealthEvidenceGraphEngine(
         memory: SourceReliabilityMemory(store: _flows.store),
-      ).build(persisted);
+      ).build(normalizedPersisted);
       final ordered = graph.selectedSignals.toList()
         ..sort(
           (a, b) => b.provenance.observedAt.compareTo(a.provenance.observedAt),
@@ -468,13 +590,11 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
       'heartRate',
       'restingHeartRate',
       'activeEnergy',
-      'oxygen',
       'weight',
-      'glucose',
-      'bloodPressureSystolic',
     ];
     final byKey = <String, GlobalHealthSignal>{};
     for (final signal in records) {
+      if (BilHealthScope.excludesKey(signal.key)) continue;
       byKey.update(
         signal.key,
         (current) => HealthSignalConflictResolver.prefer(current, signal),

@@ -7,9 +7,14 @@ class _UnavailableGateway implements LocalModelGateway {
   const _UnavailableGateway();
 
   @override
-  Future<LocalModelAnswer?> answer({
+  Future<LocalModelResult> answer({
     required String question,
     required String locale,
     required CoachContextSnapshot context,
-  }) async => null;
+    bool languageDetected = false,
+    List<CoachConversationTurn> conversation = const [],
+  }) async => const LocalModelResult(
+    status: CoachServiceStatus.temporarilyUnavailable,
+    diagnosticCode: 'model_unavailable_on_platform',
+  );
 }

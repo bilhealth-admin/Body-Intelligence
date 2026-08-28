@@ -3,12 +3,14 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart' show NumberFormat;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../app/environment/app_environment.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/localization/bil_locale_policy.dart';
 import '../../app/localization/runtime_copy.dart';
+import '../../core/units/measurement_units.dart';
 import '../commerce/domain/commerce_plan.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../community/data/community_repository.dart';
@@ -16,6 +18,7 @@ import '../settings/reference_settings_copy.dart';
 import '../weight/providers/weight_provider.dart';
 import 'providers/user_profile_provider.dart';
 import 'profile_summary_locale_copy.dart';
+import '../../shared/widgets/bil_account_avatar.dart';
 
 final profileFriendsCountProvider = FutureProvider<int?>((ref) async {
   if (!AppEnvironment.cloudConfigured) return null;
@@ -31,24 +34,38 @@ final profileMemberSinceProvider = Provider<DateTime?>((ref) {
   return value == null ? null : DateTime.tryParse(value);
 });
 
-double? profileWeightProgress({
-  required String goalType,
-  required DateTime? goalCreatedAt,
-  required List<({DateTime date, double weight})> weightsNewestFirst,
+/// Signed all-time scale-weight change in kilograms.
+///
+/// The baseline is the earliest recorded weight observation and the current
+/// value is the latest recorded observation. This intentionally does not use
+/// the editable profile weight or the active goal date: neither is a stable
+/// measurement baseline. A negative result means loss and a positive result
+/// means gain. At least two recorded observations are required.
+double? profileWeightChangeKg({
+  required List<({DateTime date, double weight})> weights,
 }) {
-  final relevant = goalCreatedAt == null
-      ? weightsNewestFirst
-      : weightsNewestFirst
-            .where((entry) => !entry.date.isBefore(goalCreatedAt))
-            .toList(growable: false);
-  if (relevant.length < 2) return null;
-  final newest = relevant.first.weight;
-  final baseline = relevant.last.weight;
-  return switch (goalType) {
-    'lose' => (baseline - newest).clamp(0, double.infinity).toDouble(),
-    'gain' => (newest - baseline).clamp(0, double.infinity).toDouble(),
-    _ => (newest - baseline).abs(),
-  };
+  final chronological =
+      weights
+          .where((entry) => entry.weight.isFinite && entry.weight > 0)
+          .toList(growable: false)
+        ..sort((a, b) => a.date.compareTo(b.date));
+  if (chronological.length < 2) return null;
+  return chronological.last.weight - chronological.first.weight;
+}
+
+/// Localized, signed display value for a canonical kilogram difference.
+String formatProfileWeightChange({
+  required double changeKg,
+  required MeasurementSystem system,
+  required String localeTag,
+}) {
+  final converted = UnitConverter.weightFromKg(changeKg, system);
+  final rounded = double.parse(converted.toStringAsFixed(1));
+  final normalized = rounded == 0 ? 0.0 : rounded;
+  final magnitude = NumberFormat('0.0', localeTag).format(normalized.abs());
+  if (normalized > 0) return '+$magnitude';
+  if (normalized < 0) return '-$magnitude';
+  return magnitude;
 }
 
 class ProfileSummaryPage extends ConsumerWidget {
@@ -72,6 +89,7 @@ class ProfileSummaryPage extends ConsumerWidget {
         'Edit Profile':
             '\u062a\u0639\u062f\u064a\u0644 \u0627\u0644\u0645\u0644\u0641 \u0627\u0644\u0634\u062e\u0635\u064a',
         'kg': '\u0643\u062c\u0645',
+        'lb': '\u0631\u0637\u0644',
       },
     };
     final authored = clean[code]?[key];
@@ -92,13 +110,13 @@ class ProfileSummaryPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileState = ref.watch(userProfileProvider);
-    final goalState = ref.watch(activeGoalProvider);
     final weightsState = ref.watch(weightHistoryProvider);
+    final systemState = ref.watch(measurementSystemProvider);
     final friendsState = ref.watch(profileFriendsCountProvider);
     final nameState = ref.watch(displayNameProvider);
     final photoState = ref.watch(profilePhotoProvider);
+    final photoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
     final profile = profileState.value;
-    final goal = goalState.value;
     final weights = weightsState.value;
     final storedName = nameState.value;
     final photo = photoState.value;
@@ -108,35 +126,29 @@ class ProfileSummaryPage extends ConsumerWidget {
     final name = storedName?.trim().isNotEmpty == true
         ? storedName!.trim()
         : _copy(context, 'BIL member');
-    final current = profile?.currentWeight;
-    final target = profile?.targetWeight;
-    final goalType =
-        goal?.type ??
-        (current == null || target == null
-            ? 'maintain'
-            : target < current
-            ? 'lose'
-            : target > current
-            ? 'gain'
-            : 'maintain');
-    final progressLabel = goalType == 'lose'
-        ? 'Weight lost'
-        : goalType == 'gain'
-        ? 'Weight gained'
-        : 'Weight change';
-    final progress = profileWeightProgress(
-      goalType: goalType,
-      goalCreatedAt: goal?.createdAt,
-      weightsNewestFirst: [
+    final weightChangeKg = profileWeightChangeKg(
+      weights: [
         for (final entry in weights ?? const [])
           (date: entry.date, weight: entry.weight),
       ],
     );
+    final system = systemState.value ?? MeasurementSystem.metric;
+    final localeTag = BilLocalePolicy.canonicalTag(
+      Localizations.localeOf(context),
+    );
+    final weightChangeValue = weightChangeKg == null
+        ? null
+        : formatProfileWeightChange(
+            changeKg: weightChangeKg,
+            system: system,
+            localeTag: localeTag,
+          );
+    final weightUnit = _copy(context, UnitConverter.weightUnit(system));
     final colors = Theme.of(context).colorScheme;
 
     if (profileState.hasError ||
-        goalState.hasError ||
         weightsState.hasError ||
+        systemState.hasError ||
         friendsState.hasError ||
         nameState.hasError ||
         photoState.hasError) {
@@ -158,8 +170,8 @@ class ProfileSummaryPage extends ConsumerWidget {
                 FilledButton.icon(
                   onPressed: () {
                     ref.invalidate(userProfileProvider);
-                    ref.invalidate(activeGoalProvider);
                     ref.invalidate(weightHistoryProvider);
+                    ref.invalidate(measurementSystemProvider);
                     ref.invalidate(profileFriendsCountProvider);
                     ref.invalidate(displayNameProvider);
                     ref.invalidate(profilePhotoProvider);
@@ -174,8 +186,8 @@ class ProfileSummaryPage extends ConsumerWidget {
       );
     }
     if (profileState.isLoading ||
-        goalState.isLoading ||
         weightsState.isLoading ||
+        systemState.isLoading ||
         friendsState.isLoading ||
         nameState.isLoading ||
         photoState.isLoading) {
@@ -196,7 +208,7 @@ class ProfileSummaryPage extends ConsumerWidget {
             padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                _Avatar(photo: photo),
+                _Avatar(photo: photo, networkUrl: photoUrl),
                 const SizedBox(width: 20),
                 Expanded(
                   child: Column(
@@ -235,11 +247,12 @@ class ProfileSummaryPage extends ConsumerWidget {
             child: Row(
               children: [
                 _Metric(
-                  value: weightsState.isLoading
-                      ? '…'
-                      : progress?.toStringAsFixed(1) ?? '\u2014',
-                  unit: _copy(context, 'kg'),
-                  label: _copy(context, progressLabel),
+                  value: weightChangeValue ?? '\u2014',
+                  unit: weightUnit,
+                  label: _copy(context, 'Weight change'),
+                  semanticValue: weightChangeValue == null
+                      ? _copy(context, 'Insufficient data')
+                      : '$weightChangeValue $weightUnit',
                   accent: true,
                 ),
                 Container(
@@ -323,22 +336,13 @@ class ProfileSummaryPage extends ConsumerWidget {
 }
 
 class _Avatar extends StatelessWidget {
-  const _Avatar({required this.photo});
+  const _Avatar({required this.photo, required this.networkUrl});
   final Uint8List? photo;
+  final String? networkUrl;
 
   @override
-  Widget build(BuildContext context) => CircleAvatar(
-    radius: 42,
-    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-    backgroundImage: photo == null ? null : MemoryImage(photo!),
-    child: photo == null
-        ? Icon(
-            Icons.person_rounded,
-            size: 52,
-            color: Theme.of(context).colorScheme.primary,
-          )
-        : null,
-  );
+  Widget build(BuildContext context) =>
+      BilAccountAvatar(radius: 42, photoBytes: photo, networkUrl: networkUrl);
 }
 
 class _Metric extends StatelessWidget {
@@ -346,39 +350,50 @@ class _Metric extends StatelessWidget {
     required this.value,
     required this.label,
     this.unit,
+    this.semanticValue,
     this.accent = false,
   });
   final String value;
   final String label;
   final String? unit;
+  final String? semanticValue;
   final bool accent;
 
   @override
-  Widget build(BuildContext context) => Expanded(
-    child: Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Directionality(
-            textDirection: TextDirection.ltr,
-            child: Text(
-              unit == null ? value : '$value $unit',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: accent ? const Color(0xFF35C98A) : null,
-                fontWeight: FontWeight.w700,
-              ),
+  Widget build(BuildContext context) {
+    final displayedValue = unit == null ? value : '$value $unit';
+    return Expanded(
+      child: Semantics(
+        container: true,
+        label: '$label, ${semanticValue ?? displayedValue}',
+        child: ExcludeSemantics(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Text(
+                    displayedValue,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: accent ? const Color(0xFF35C98A) : null,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }

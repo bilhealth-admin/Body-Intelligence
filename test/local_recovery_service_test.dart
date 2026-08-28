@@ -80,7 +80,7 @@ void main() {
       '${recoveryDirectory.path}${Platform.pathSeparator}recovery',
     )..createSync();
     File(
-      '${recovery.path}${Platform.pathSeparator}bil_local_recovery_v1.sqlite',
+      '${recovery.path}${Platform.pathSeparator}bil_local_recovery_v1_test.sqlite',
     ).writeAsStringSync('not a database');
     final service = LocalRecoveryService(
       database,

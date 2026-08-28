@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
+import '../../../app/services/runtime_permission_policy.dart';
 import 'bil_speech_to_text.dart';
 import 'meal_voice_candidate.dart';
 
@@ -17,6 +19,9 @@ class MealVoiceInputService {
     required String localeId,
     required bool arabic,
   }) async {
+    if (!await _ensureMicrophonePermission(context) || !context.mounted) {
+      return null;
+    }
     try {
       return await _capture(context: context, localeId: localeId);
     } on Object catch (error) {
@@ -30,6 +35,70 @@ class MealVoiceInputService {
       }
       return null;
     }
+  }
+
+  Future<bool> _ensureMicrophonePermission(BuildContext context) async {
+    const policy = BilRuntimePermissionPolicy();
+    var capability = BilRuntimeCapability.microphone;
+    var current = await policy.status(capability);
+    if (current == BilRuntimePermissionState.granted &&
+        defaultTargetPlatform == TargetPlatform.iOS) {
+      capability = BilRuntimeCapability.speechRecognition;
+      current = await policy.status(capability);
+    }
+    if (current == BilRuntimePermissionState.granted) return true;
+    if (!context.mounted) return false;
+    final copy = _VoiceCopy.forLanguage(
+      Localizations.localeOf(context).languageCode,
+    );
+    if (current == BilRuntimePermissionState.permanentlyDenied ||
+        current == BilRuntimePermissionState.restricted) {
+      final open = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(copy.unavailable),
+          content: Text(copy.settingsRecovery),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(copy.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: Text(copy.openSettings),
+            ),
+          ],
+        ),
+      );
+      if (open == true) await policy.openSettings();
+      return false;
+    }
+    final continueRequest = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(copy.permissionTitle),
+        content: Text(copy.permissionRationale),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(copy.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(copy.continueLabel),
+          ),
+        ],
+      ),
+    );
+    if (continueRequest != true) return false;
+    final granted =
+        await policy.request(capability) == BilRuntimePermissionState.granted;
+    if (!granted || capability != BilRuntimeCapability.microphone) {
+      return granted;
+    }
+    if (defaultTargetPlatform != TargetPlatform.iOS) return true;
+    if (!context.mounted) return false;
+    return await _ensureMicrophonePermission(context);
   }
 
   Future<MealVoiceCandidate?> _capture({
@@ -237,6 +306,17 @@ final class _VoiceCopy {
   String get useForSearch => values['use']!;
   String get unavailable => values['unavailable']!;
   String get ok => values['ok']!;
+  String get permissionTitle =>
+      values['permissionTitle'] ?? _voiceCopies['en']!['permissionTitle']!;
+  String get permissionRationale =>
+      values['permissionRationale'] ??
+      _voiceCopies['en']!['permissionRationale']!;
+  String get settingsRecovery =>
+      values['settingsRecovery'] ?? _voiceCopies['en']!['settingsRecovery']!;
+  String get openSettings =>
+      values['openSettings'] ?? _voiceCopies['en']!['openSettings']!;
+  String get continueLabel =>
+      values['continueLabel'] ?? _voiceCopies['en']!['continueLabel']!;
   String failure(MealVoiceFailure failure) => values[failure.name]!;
 }
 
@@ -251,6 +331,13 @@ const _voiceCopies = <String, Map<String, String>>{
     'unavailable': 'Voice input unavailable',
     'ok': 'OK',
     'permissionDenied': 'Microphone or speech permission was denied.',
+    'permissionTitle': 'Allow voice input for this action?',
+    'permissionRationale':
+        'BIL starts listening only after you choose voice food entry. You can review the recognized text before search, and nothing is logged automatically.',
+    'settingsRecovery':
+        'Microphone access is off. Enable it in system settings to use voice food entry; manual entry remains available.',
+    'openSettings': 'Open system settings',
+    'continueLabel': 'Continue',
     'timeout': 'No speech was detected before the time limit.',
     'noMatch': 'No usable food phrase was recognized.',
     'localeUnavailable':

@@ -23,6 +23,14 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Clean stale macOS and simulator state
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf build "$HOME/Library/Developer/Xcode/DerivedData"/*
+          xcrun simctl shutdown all || true
+          xcrun simctl delete unavailable || true
+
       - name: Resolve dependencies and verify HealthKit contracts
         shell: bash
         run: |
@@ -31,7 +39,13 @@ jobs:
           flutter test \
             test/features/global_platform/apple_health_runtime_test.dart \
             test/connected_health/food_name_health_sync_policy_test.dart \
-            test/launch_readiness/apple_release_boundary_contract_test.dart
+            test/launch_readiness/apple_release_boundary_contract_test.dart \
+            test/features/daily_log/tester_feedback_navigation_contract_test.dart \
+            test/features/daily_log/daily_log_food_add_flow_test.dart \
+            test/features/nutrition/food_runtime_search_authority_test.dart \
+            test/features/weight/weight_voice_input_test.dart \
+            test/features/settings/settings_language_and_sync_status_test.dart \
+            test/localization/core_pages_25_locale_layout_matrix_test.dart
 
       - name: Build debug simulator app with native HealthKit capability
         shell: bash
@@ -63,18 +77,29 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          UDID="$(xcrun simctl list devices available -j | python3 -c '
-          import json,sys
-          data=json.load(sys.stdin)
-          for runtime, devices in data["devices"].items():
-              if "iOS" not in runtime: continue
-              for device in devices:
-                  if device.get("isAvailable") and device["name"].startswith("iPhone"):
-                      print(device["udid"]); raise SystemExit
-          raise SystemExit("No available iPhone simulator")
-          ')"
+          read -r RUNTIME DEVICE_TYPE < <(python3 - <<'PY'
+          import json, subprocess
+          runtimes=json.loads(subprocess.check_output(
+              ["xcrun", "simctl", "list", "runtimes", "available", "-j"]
+          ))["runtimes"]
+          ios=[r for r in runtimes if r.get("isAvailable") and
+               r.get("identifier", "").startswith("com.apple.CoreSimulator.SimRuntime.iOS-")]
+          if not ios:
+              raise SystemExit("No available iOS runtime")
+          runtime=sorted(ios, key=lambda r: tuple(r.get("version", "0").split(".")), reverse=True)[0]
+          types=json.loads(subprocess.check_output(
+              ["xcrun", "simctl", "list", "devicetypes", "-j"]
+          ))["devicetypes"]
+          iphones=[d for d in types if d["name"].startswith("iPhone")]
+          preferred=next((d for d in iphones if d["name"] == "iPhone 16 Pro"), iphones[-1])
+          print(runtime["identifier"], preferred["identifier"])
+          PY
+          )
+          UDID="$(xcrun simctl create "BIL-QA-${GITHUB_RUN_ID}" "$DEVICE_TYPE" "$RUNTIME")"
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
-          xcrun simctl boot "$UDID" || true
+          echo "created=true" >> "$GITHUB_OUTPUT"
+          xcrun simctl erase "$UDID"
+          xcrun simctl boot "$UDID"
           open -a Simulator
           xcrun simctl bootstatus "$UDID" -b
           xcrun simctl uninstall "$UDID" com.bilhealth.bodyintelligencelog || true
@@ -208,3 +233,18 @@ jobs:
           path: artifacts/release/healthkit_native_4988_4991
           if-no-files-found: error
           retention-days: 14
+
+      - name: Remove disposable simulator and build state
+        if: always()
+        shell: bash
+        env:
+          UDID: ${{ steps.simulator.outputs.udid }}
+        run: |
+          set +e
+          if [[ -n "${UDID:-}" ]]; then
+            xcrun simctl terminate "$UDID" com.bilhealth.bodyintelligencelog
+            xcrun simctl uninstall "$UDID" com.bilhealth.bodyintelligencelog
+            xcrun simctl shutdown "$UDID"
+            xcrun simctl delete "$UDID"
+          fi
+          rm -rf build "$HOME/Library/Developer/Xcode/DerivedData"/*

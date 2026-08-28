@@ -1,5 +1,6 @@
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/repositories/meal_repository.dart';
+import 'package:body_intelligence_log/data/repositories/nutrition_goal_schedule_repository.dart';
 import 'package:body_intelligence_log/features/dashboard/composition/dashboard_intelligence_input_adapter.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -15,6 +16,7 @@ void main() {
         todayWater: [_water(at)],
         allMeals: [_meal(at)],
         allWater: [_water(at)],
+        dailyLogs: const [],
         todayContexts: [
           _context(at, id: 1, type: 'sleep', useInInsights: true),
           _context(at, id: 2, type: 'travel', useInInsights: false),
@@ -32,7 +34,7 @@ void main() {
       expect(input.profile.age, 35);
       expect(input.profile.gender, 'male');
       expect(input.profile.heightCm, 178);
-      expect(input.profile.currentWeightKg, 82);
+      expect(input.profile.currentWeightKg, 81.5);
       expect(input.profile.targetWeightKg, 76);
       expect(input.profile.neckCm, 39);
       expect(input.profile.waistCm, 91);
@@ -73,6 +75,7 @@ void main() {
         todayWater: const [],
         allMeals: const [],
         allWater: const [],
+        dailyLogs: const [],
         todayContexts: const [],
         allContexts: const [],
         memories: const [],
@@ -84,6 +87,75 @@ void main() {
       expect(input.weights, isEmpty);
       expect(input.todayMeals, isEmpty);
       expect(input.insightContexts, isEmpty);
+    });
+
+    test('bridges private diary tags without exposing free-text notes', () {
+      final at = DateTime(2026, 7, 31, 8, 30);
+      final input = const DashboardIntelligenceInputAdapter().adapt(
+        now: at,
+        profile: _profile(at),
+        weights: const [],
+        todayMeals: const [],
+        todayWater: const [],
+        allMeals: const [],
+        allWater: const [],
+        dailyLogs: [
+          _dailyLog(
+            at,
+            notes:
+                '[note] private words [travel] [psychologicalStress] [other] private other',
+          ),
+        ],
+        todayContexts: [
+          _context(at, id: 1, type: 'travel', useInInsights: true),
+        ],
+        allContexts: [_context(at, id: 1, type: 'travel', useInInsights: true)],
+        memories: const [],
+        skippedWeightToday: false,
+        planSetting: null,
+      );
+
+      expect(input.insightContexts.map((row) => row.type).toSet(), {
+        'travel',
+        'stress',
+        'other',
+      });
+      expect(input.allContexts, hasLength(3));
+      expect(
+        input.allContexts.map((row) => row.type).join(' '),
+        isNot(contains('private')),
+      );
+    });
+
+    test('active daily diet target overrides dashboard engine macros', () {
+      final at = DateTime(2026, 8, 23);
+      final input = const DashboardIntelligenceInputAdapter().adapt(
+        now: at,
+        profile: _profile(at),
+        weights: const [],
+        todayMeals: const [],
+        todayWater: const [],
+        allMeals: const [],
+        allWater: const [],
+        dailyLogs: const [],
+        todayContexts: const [],
+        allContexts: const [],
+        memories: const [],
+        skippedWeightToday: false,
+        planSetting: null,
+        dailyNutritionTarget: NutritionGoalTarget(
+          calories: 1800,
+          carbsPercent: 40,
+          proteinPercent: 30,
+          fatPercent: 30,
+        ),
+      );
+
+      expect(input.planOverrides, isNotNull);
+      expect(input.planOverrides!.calories, 1800);
+      expect(input.planOverrides!.carbs, 180);
+      expect(input.planOverrides!.protein, 135);
+      expect(input.planOverrides!.fats, 60);
     });
   });
 }
@@ -228,4 +300,14 @@ PlanSetting _plan(DateTime at) => PlanSetting(
   updatedAt: at,
   revision: 1,
   syncStatus: 'synced',
+);
+
+DailyLog _dailyLog(DateTime at, {String? notes}) => DailyLog(
+  id: 1,
+  uuid: 'daily-log-1',
+  date: at,
+  dayKey: '2026-07-31',
+  notes: notes,
+  createdAt: at,
+  updatedAt: at,
 );

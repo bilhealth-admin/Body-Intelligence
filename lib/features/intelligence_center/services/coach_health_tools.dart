@@ -1,6 +1,5 @@
-import '../../../engine/bmr_engine.dart';
+import '../../../engine/body_model_engine.dart';
 import '../../../engine/body_profile.dart';
-import '../../../engine/tdee_engine.dart';
 
 class CoachHealthTools {
   const CoachHealthTools();
@@ -14,6 +13,8 @@ class CoachHealthTools {
     required String activityLevel,
     required bool exercises,
     double? waistCm,
+    double? neckCm,
+    double? hipCm,
   }) {
     final profile = BodyProfile(
       age: age,
@@ -23,31 +24,40 @@ class CoachHealthTools {
       targetWeight: targetWeightKg,
       activityLevel: activityLevel,
       exercises: exercises,
+      waistCm: waistCm,
+      neckCm: neckCm,
+      hipCm: hipCm,
     );
-    final bmr = BMREngine.calculate(profile);
-    final tdee = TDEEEngine.calculate(bmr: bmr, activityLevel: activityLevel);
-    final bmi = currentWeightKg / ((heightCm / 100) * (heightCm / 100));
-    final waistToHeight = waistCm == null ? null : waistCm / heightCm;
+    final model = BodyModelEngine.calculate(profile);
+    final composition = model.composition;
+    final bodyFat = composition.bodyFatPercentage;
+    double? rounded(double? value, int fractionDigits) => value == null
+        ? null
+        : double.parse(value.toStringAsFixed(fractionDigits));
     final goalDelta = targetWeightKg - currentWeightKg;
     return {
+      'bodyModelVersion': model.version,
       'goalDirection': goalDelta < 0
           ? 'lose'
           : goalDelta > 0
           ? 'gain'
           : 'maintain',
       'kilogramsToGoal': double.parse(goalDelta.abs().toStringAsFixed(2)),
-      'bmrKcal': bmr.round(),
-      'tdeeKcal': tdee.round(),
-      'bmiScreeningValue': double.parse(bmi.toStringAsFixed(1)),
-      'waistToHeightRatio': waistToHeight == null
-          ? null
-          : double.parse(waistToHeight.toStringAsFixed(3)),
+      'bmrKcal': model.bmrKcal.round(),
+      'tdeeKcal': model.tdeeKcal.round(),
+      'bmiScreeningValue': rounded(composition.bodyMassIndex.value, 1),
+      'waistToHeightRatio': rounded(composition.waistToHeightRatio.value, 3),
+      'expectedBodyFatPercent': rounded(bodyFat.value, 1),
+      'expectedFatFreeMassKg': rounded(composition.fatFreeMassKg.value, 1),
+      'bodyFatEstimateMethod': bodyFat.method?.name,
+      'bodyFatEstimateUncertainty': bodyFat.uncertainty.name,
+      'bodyFatEstimateIssue': bodyFat.issue?.name,
       'healthyWaistScreeningUpperCm': double.parse(
         (heightCm * .5).toStringAsFixed(1),
       ),
-      'obesityRiskScreening': bmi >= 30
+      'obesityRiskScreening': composition.bodyMassIndex.value! >= 30
           ? 'elevated_bmi_screening_signal'
-          : bmi >= 25
+          : composition.bodyMassIndex.value! >= 25
           ? 'increased_bmi_screening_signal'
           : 'no_elevated_bmi_screening_signal',
       'notice': 'Screening estimates only; not a diagnosis.',

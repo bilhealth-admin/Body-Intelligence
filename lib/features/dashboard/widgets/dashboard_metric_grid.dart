@@ -256,7 +256,9 @@ class DashboardStreakBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context).languageCode.toLowerCase();
+    final locale = arabic
+        ? 'ar'
+        : Localizations.localeOf(context).languageCode.toLowerCase();
     final streak = (_dashboardStreakCopy[locale] ?? _dashboardStreakCopy['en']!)
         .replaceFirst('{days}', '$days');
     return Container(

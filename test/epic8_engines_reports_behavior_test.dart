@@ -1,16 +1,29 @@
 import 'dart:convert';
 
 import 'package:body_intelligence_log/features/analytics/weekly_report_engine.dart';
+import 'package:body_intelligence_log/app/localization/app_localizations.dart';
+import 'package:body_intelligence_log/data/database/app_database.dart';
+import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_page.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_provider.dart';
-import 'package:body_intelligence_log/features/dashboard/providers/dashboard_provider.dart';
+import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/global_platform/reports/scientific_reports_platform.dart';
-import 'package:body_intelligence_log/features/weight/providers/weight_provider.dart';
+import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:drift/native.dart';
 
 void main() {
+  test('weekly report account age is safe before cloud initialization', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+
+    expect(container.read(accountCreatedAtProvider), isNull);
+  });
+
   group('Epic 8 measured weekly report', () {
     const engine = WeeklyReportEngine();
     final asOf = DateTime.utc(2026, 8, 4);
@@ -175,6 +188,8 @@ void main() {
         testWidgets(
           'empty and missing-data state works on phone ${locale.languageCode} ${brightness.name}',
           (tester) async {
+            final database = AppDatabase.forTesting(NativeDatabase.memory());
+            addTearDown(database.close);
             tester.view.physicalSize = const Size(390, 844);
             tester.view.devicePixelRatio = 1;
             addTearDown(tester.view.resetPhysicalSize);
@@ -182,18 +197,33 @@ void main() {
             await tester.pumpWidget(
               ProviderScope(
                 overrides: [
-                  allMealsProvider.overrideWith(
-                    (ref) => Stream.value(const []),
+                  weeklyReportProvider.overrideWith(
+                    (ref) async => const WeeklyReportEngine().build(
+                      asOf: DateTime.utc(2026, 8, 4),
+                      mealCount: 0,
+                      nutrition: const [],
+                      water: const [],
+                      weights: const [],
+                    ),
                   ),
-                  allWaterProvider.overrideWith(
-                    (ref) => Stream.value(const []),
+                  accountCreatedAtProvider.overrideWithValue(null),
+                  userProfileProvider.overrideWith((ref) => Stream.value(null)),
+                  preferencesRepositoryProvider.overrideWithValue(
+                    PreferencesRepository(database),
                   ),
-                  weightHistoryProvider.overrideWith(
-                    (ref) => Stream.value(const []),
+                  verifiedSubscriptionStateProvider.overrideWithValue(
+                    AsyncData(FreePlan.createState()),
                   ),
                 ],
                 child: MaterialApp(
                   locale: locale,
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localizationsDelegates: const [
+                    AppLocalizations.delegate,
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
                   theme: ThemeData(brightness: brightness),
                   home: const WeeklyReportPage(),
                 ),
@@ -201,7 +231,14 @@ void main() {
             );
             await tester.pumpAndSettle();
             expect(find.byType(WeeklyReportPage), findsOneWidget);
-            expect(find.textContaining('0/7'), findsOneWidget);
+            await tester.scrollUntilVisible(
+              find.byKey(const Key('weekly-tracked-days')),
+              300,
+            );
+            final trackedDaysCopy = locale.languageCode == 'ar'
+                ? 'سجلت بيانات في 0 من 7 أيام.'
+                : 'You logged in 0 out of 7 days.';
+            expect(find.text(trackedDaysCopy), findsOneWidget);
             expect(tester.takeException(), isNull);
           },
         );

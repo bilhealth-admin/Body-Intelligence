@@ -1,15 +1,18 @@
 # BIL Supabase activation
 
-The Flutter client receives only the public project URL and publishable key via
-`--dart-define`. Database passwords, secret keys, and service-role keys never
-belong in the application or source repository.
+The Flutter client contains the production project URL and Supabase publishable
+key as safe defaults, so Android Studio and emulator builds cannot silently
+disable sign-in. Either value can still be replaced with `--dart-define` for a
+different environment. Database passwords, secret keys, and service-role keys
+never belong in the application or source repository.
 
 The foundation migration creates an authenticated owner-isolated cloud
 envelope store. Row Level Security requires `auth.uid() = owner_id` for every
 read and write. Anonymous clients receive no table privileges.
 
 Apply migrations in order from `supabase/migrations`, then verify that RLS is
-enabled before activating `BIL_USE_SUPABASE` in a build.
+enabled. Supabase is enabled by default for the production project; an isolated
+offline build can explicitly set `BIL_USE_SUPABASE=false`.
 # Authentication delivery modes
 
 BIL keeps email confirmation honest across development and production:

@@ -2,12 +2,21 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../shared/widgets/secondary_page_app_bar.dart';
 
 import '../../app/localization/app_localizations.dart';
 import '../profile/providers/user_profile_provider.dart';
+import '../intelligence_center/services/coach_memory_repository.dart';
+import '../intelligence_center/services/coach_context_provider.dart';
 import 'providers/life_context_provider.dart';
+
+final explicitCoachMemoriesProvider = FutureProvider((ref) {
+  return CoachMemoryRepository(
+    preferences: ref.watch(preferencesRepositoryProvider),
+  ).readLocal();
+});
 
 class DecisionMemoryPage extends ConsumerWidget {
   const DecisionMemoryPage({super.key});
@@ -17,11 +26,100 @@ class DecisionMemoryPage extends ConsumerWidget {
     final t = context.strings.text;
     final enabled = ref.watch(decisionMemoryEnabledProvider).value ?? true;
     final memories = ref.watch(decisionMemoriesProvider);
+    final explicit = ref.watch(explicitCoachMemoriesProvider);
     return Scaffold(
-      appBar: SecondaryPageAppBar(title: Text(t('Decision Memory'))),
+      appBar: SecondaryPageAppBar(title: Text(t('What BIL knows about me'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Card(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.psychology_alt_outlined),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          t('Your living BIL memory'),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w900),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    t(
+                      'Confirmed facts are yours to review or remove. Inferred patterns stay separate from facts, and experiment results keep their limitations.',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            t('Confirmed by you'),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 6),
+          explicit.when(
+            loading: () => const LinearProgressIndicator(),
+            error: (_, _) => Text(t('Could not load Coach memories.')),
+            data: (rows) => rows.isEmpty
+                ? Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        t(
+                          'Nothing is assumed. Tell BIL “remember…” and confirm before it is saved.',
+                        ),
+                      ),
+                    ),
+                  )
+                : Column(
+                    children: rows
+                        .map(
+                          (row) => Card(
+                            child: ListTile(
+                              leading: Icon(_memoryKindIcon(row['kind'])),
+                              title: Text(row['text']?.toString() ?? ''),
+                              subtitle: Text(
+                                '${t(_memoryKindLabel(row['kind']))} · ${t('Confirmed')}',
+                              ),
+                              trailing: IconButton(
+                                tooltip: t('Forget this'),
+                                onPressed: () async {
+                                  await CoachMemoryRepository(
+                                    preferences: ref.read(
+                                      preferencesRepositoryProvider,
+                                    ),
+                                  ).delete(row['id']?.toString() ?? '');
+                                  ref.invalidate(explicitCoachMemoriesProvider);
+                                  ref.invalidate(coachContextSnapshotProvider);
+                                },
+                                icon: const Icon(Icons.close_rounded),
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(growable: false),
+                  ),
+          ),
+          const SizedBox(height: 14),
+          OutlinedButton.icon(
+            onPressed: () => context.push('/experiments'),
+            icon: const Icon(Icons.science_outlined),
+            label: Text(t('Open personal experiments')),
+          ),
+          const SizedBox(height: 18),
           SwitchListTile(
             value: enabled,
             onChanged: (value) => ref
@@ -35,6 +133,13 @@ class DecisionMemoryPage extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
+          Text(
+            t('Recommendation history'),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 6),
           memories.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (error, _) =>
@@ -132,6 +237,22 @@ class DecisionMemoryPage extends ConsumerWidget {
       ),
     );
   }
+
+  static IconData _memoryKindIcon(Object? raw) => switch (raw?.toString()) {
+    'preference' => Icons.favorite_outline_rounded,
+    'constraint' => Icons.block_outlined,
+    'goal' => Icons.flag_outlined,
+    'routine' => Icons.schedule_outlined,
+    _ => Icons.bookmark_outline_rounded,
+  };
+
+  static String _memoryKindLabel(Object? raw) => switch (raw?.toString()) {
+    'preference' => 'Preference',
+    'constraint' => 'Constraint',
+    'goal' => 'Goal',
+    'routine' => 'Routine',
+    _ => 'Personal fact',
+  };
 
   Future<void> _confirmForgetUnhelpful(
     BuildContext context,

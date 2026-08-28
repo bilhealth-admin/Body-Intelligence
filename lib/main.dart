@@ -1,7 +1,8 @@
 import 'dart:async';
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:country_picker/country_picker.dart';
@@ -18,9 +19,11 @@ import 'app/security/bil_play_integrity_service.dart';
 import 'app/services/app_switcher_privacy_shield.dart';
 import 'app/services/app_observability.dart';
 import 'app/services/app_settings_provider.dart';
+import 'features/ads/presentation/ad_runtime_bootstrap.dart';
+import 'features/auth/bil_auth_callback_controller.dart';
 import 'features/notifications/services/inactivity_reminder_coordinator.dart';
+import 'features/startup/premium_splash_experience.dart';
 import 'app/theme/bil_flagship_theme.dart';
-import 'shared/widgets/bil_wordmark.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,7 +35,7 @@ Future<void> main() async {
     );
   };
 
-  PlatformDispatcher.instance.onError = (error, stack) {
+  ui.PlatformDispatcher.instance.onError = (error, stack) {
     assert(() {
       FlutterError.dumpErrorToConsole(
         FlutterErrorDetails(exception: error, stack: stack),
@@ -43,8 +46,40 @@ Future<void> main() async {
     return true;
   };
 
+  // Submit Flutter's first frame immediately so Android never holds its
+  // native starting window while a branding asset is decoded. The motion
+  // splash owns the deliberate launch duration; this decode is only a
+  // best-effort fallback and therefore belongs after the first frame.
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    unawaited(_predecodeLaunchWordmark());
+  });
   runApp(const ProviderScope(child: _BILBootstrap()));
-  unawaited(BilPlayIntegrityService.instance.prepare());
+}
+
+Future<void> _predecodeLaunchWordmark() async {
+  try {
+    final data = await rootBundle.load(
+      'assets/branding/bil_splash_identity.png',
+    );
+    final bytes = data.buffer.asUint8List(
+      data.offsetInBytes,
+      data.lengthInBytes,
+    );
+    final codec = await ui.instantiateImageCodec(
+      bytes,
+      targetWidth: 864,
+      targetHeight: 864,
+    );
+    try {
+      bilPredecodedLaunchWordmark = (await codec.getNextFrame()).image;
+    } finally {
+      codec.dispose();
+    }
+  } catch (error, stack) {
+    // The Flutter widget retains an AssetImage fallback. A branding decode
+    // issue must never prevent local-first startup.
+    AppObservability.crashes.record(error, stack);
+  }
 }
 
 class _BILBootstrap extends StatefulWidget {
@@ -57,46 +92,82 @@ class _BILBootstrap extends StatefulWidget {
 class _BILBootstrapState extends State<_BILBootstrap> {
   bool ready = !AppEnvironment.cloudConfigured;
   Object? failure;
+  bool nativeLaunchDismissed = false;
 
   @override
   void initState() {
     super.initState();
-    if (!ready) {
-      // Paint the branded startup frame before cloud SDK platform setup.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) unawaited(_initializeCloud());
-      });
-    }
+    // Never initialize platform plugins before Flutter submits its first
+    // frame. On a standalone Android install SharedPreferences/AppLinks setup
+    // can be substantially slower than it is under `flutter run`; invoking it
+    // here synchronously kept Android's plain-blue starting window above an
+    // otherwise-ready Flutter tree. The first post-frame callback is the
+    // authoritative boundary: Android can remove its starting window before
+    // cloud session recovery begins.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _dismissNativeLaunch();
+      if (!ready) unawaited(_initializeCloud());
+    });
   }
 
   Future<void> _initializeCloud() async {
     setState(() => failure = null);
+    // Supabase creates its client synchronously before its first await, while
+    // restoring SharedPreferences/auth can take much longer on a freshly
+    // installed APK. Let the local-first router run as soon as that client
+    // exists; StartupPage listens for the authoritative initialSession while
+    // restoration continues in parallel.
+    final cloudInitialization = Supabase.initialize(
+      url: AppEnvironment.supabaseUrl,
+      publishableKey: AppEnvironment.supabaseAnonKey,
+      // BILLinkBootstrap is the single owner of initial/deferred app links.
+      // A second AppLinks observer inside Supabase delayed Android startup
+      // and could consume the initial auth link before the allow-list router.
+      authOptions: const FlutterAuthClientOptions(detectSessionInUri: false),
+    );
+    if (mounted) setState(() => ready = true);
     try {
-      await Supabase.initialize(
-        url: AppEnvironment.supabaseUrl,
-        publishableKey: AppEnvironment.supabaseAnonKey,
-      );      if (Supabase.instance.client.auth.currentSession != null) {
-        unawaited(
-          BilPlayIntegrityService.instance.observe(
-            action: 'session.bootstrap',
-            payload: const <String, Object?>{
-              'phase': 'closed_testing',
-            },
-          ),
-        );
+      await cloudInitialization;
+      if (Supabase.instance.client.auth.currentSession != null) {
+        // Play Integrity may bind Google Play services on Android's main
+        // thread. Defer that optional observation until BIL has painted its
+        // first real app frame so the native launch screen can disappear.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          unawaited(
+            BilPlayIntegrityService.instance.observe(
+              action: 'session.bootstrap',
+              payload: const <String, Object?>{'phase': 'closed_testing'},
+            ),
+          );
+        });
       }
-      if (!mounted) return;
-      setState(() => ready = true);
     } catch (error, stack) {
       AppObservability.crashes.record(error, stack);
-      if (!mounted) return;
-      setState(() => failure = error);
+      // Local data, onboarding and the dashboard remain usable. Cloud actions
+      // fail closed through their runtime/auth/consent gates rather than
+      // trapping the complete application on its splash screen.
+      if (mounted) setState(() => failure = error);
     }
+  }
+
+  void _dismissNativeLaunch() {
+    if (nativeLaunchDismissed) return;
+    nativeLaunchDismissed = true;
+    unawaited(
+      const MethodChannel(
+        'bil/launch',
+      ).invokeMethod<void>('ready').catchError((_) {}),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (ready) return const _BILLinkBootstrap(child: BILApp());
+    if (ready) {
+      return const BilAndroidUmpBootstrap(
+        child: _BILLinkBootstrap(child: BILApp()),
+      );
+    }
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -106,37 +177,39 @@ class _BILBootstrapState extends State<_BILBootstrap> {
           seedColor: const Color(0xFF087FCE),
           brightness: Brightness.dark,
         ),
-        scaffoldBackgroundColor: const Color(0xFF050505),
+        scaffoldBackgroundColor: bilLaunchBlue,
       ),
       home: Scaffold(
-        body: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const BilWordmark(height: 48, color: Colors.white),
-                  const SizedBox(height: 32),
-                  if (failure == null)
-                    const SizedBox.shrink()
-                  else ...[
-                    const Text(
-                      'تعذر الاتصال الآمن بالخدمة السحابية. لم تتغير بياناتك.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white),
+        backgroundColor: bilLaunchBlue,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            const BilStartupLoadingSurface(),
+            if (failure != null)
+              SafeArea(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          'تعذر الاتصال الآمن بالخدمة السحابية. لم تتغير بياناتك.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton.icon(
+                          onPressed: _initializeCloud,
+                          icon: const Icon(Icons.refresh_rounded),
+                          label: Text(context.strings.text('Try again')),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 16),
-                    FilledButton.icon(
-                      onPressed: _initializeCloud,
-                      icon: const Icon(Icons.refresh_rounded),
-                      label: Text(context.strings.text('Try again')),
-                    ),
-                  ],
-                ],
+                  ),
+                ),
               ),
-            ),
-          ),
+          ],
         ),
       ),
     );
@@ -154,6 +227,8 @@ class _BILLinkBootstrap extends StatefulWidget {
 
 class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
   late final BilIncomingLinkController _controller;
+  late final BilAuthCallbackController _authController;
+  StreamSubscription<Uri>? _linkSubscription;
 
   @override
   void initState() {
@@ -163,18 +238,39 @@ class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
       navigate: AppRouter.router.go,
       clock: DateTime.now,
     );
+    _authController = BilAuthCallbackController(
+      resolve: (uri) async {
+        await Supabase.instance.client.auth.getSessionFromUrl(uri);
+      },
+      navigate: AppRouter.router.go,
+      onError: (error, _) {
+        AppObservability.logger.record(
+          AppLogLevel.warning,
+          'native_auth_callback_failed',
+          attributes: {'errorType': error.runtimeType.toString()},
+        );
+      },
+    );
     unawaited(_bind());
   }
 
   Future<void> _bind() async {
     final appLinks = AppLinks();
     final initial = await appLinks.getInitialLink();
-    if (initial != null) await _controller.handle(initial);
-    _controller.bind(appLinks.uriLinkStream);
+    if (initial != null) await _handleIncomingUri(initial);
+    _linkSubscription = appLinks.uriLinkStream.listen(
+      (uri) => unawaited(_handleIncomingUri(uri)),
+    );
+  }
+
+  Future<void> _handleIncomingUri(Uri uri) async {
+    if (await _authController.handle(uri)) return;
+    await _controller.handle(uri);
   }
 
   @override
   void dispose() {
+    unawaited(_linkSubscription?.cancel());
     unawaited(_controller.dispose());
     super.dispose();
   }

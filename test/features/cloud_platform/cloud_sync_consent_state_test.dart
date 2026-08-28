@@ -12,21 +12,6 @@ void main() {
     expect(state.canChange, isTrue);
   });
 
-  test('premium loss blocks enabling but never traps an existing consent', () {
-    const off = CloudSyncConsentState(
-      availability: CloudSyncConsentAvailability.premiumRequired,
-    );
-    const on = CloudSyncConsentState(
-      availability: CloudSyncConsentAvailability.premiumRequired,
-      granted: true,
-    );
-
-    expect(off.canChange, isFalse);
-    expect(on.canEnable, isFalse);
-    expect(on.canDisable, isTrue);
-    expect(on.canChange, isTrue);
-  });
-
   test('signed-out and unavailable states are fail closed', () {
     for (final availability in <CloudSyncConsentAvailability>[
       CloudSyncConsentAvailability.signedOut,

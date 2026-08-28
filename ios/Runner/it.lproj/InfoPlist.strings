@@ -1,8 +1,8 @@
-"NSHealthShareUsageDescription" = "BIL legge solo le categorie Salute che scegli—attività, sonno, misure corporee, dati cardiaci e respiratori, pressione, ossigeno, glucosio, idratazione e nutrizione—per mostrare una cronologia e analisi private su questo dispositivo.";
+"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
 "NSHealthUpdateUsageDescription" = "BIL scrive solo i dati sanitari da te scelti esplicitamente, previo consenso di scrittura separato.";
-"NSBluetoothAlwaysUsageDescription" = "BIL si connette solo ai dispositivi sanitari accoppiati esplicitamente in modo che le misurazioni possano essere importate localmente.";
-"NSBluetoothPeripheralUsageDescription" = "BIL si connette solo ai dispositivi sanitari accoppiati esplicitamente in modo che le misurazioni possano essere importate localmente.";
+"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Utilizza la fotocamera solo quando scegli di scansionare un codice a barre, rivedere la foto di un pasto o aggiungere un profilo privato o una foto dei progressi.";
 "NSPhotoLibraryUsageDescription" = "Seleziona un pasto, un profilo o una foto dei progressi da rivedere prima che venga salvato o caricato.";
-"NSMicrophoneUsageDescription" = "BIL utilizza il microfono solo quando scegli l'input vocale per un pasto.";
-"NSSpeechRecognitionUsageDescription" = "BIL converte la frase alimentare che pronunci in testo in modo da poterla rivedere prima di salvare.";
+"NSMicrophoneUsageDescription" = "BIL utilizza il microfono solo quando scegli di registrare un pasto con la voce o parlare direttamente con BIL AI Coach.";
+"NSSpeechRecognitionUsageDescription" = "BIL converte in testo la voce che avvii per registrare un pasto o usare BIL AI Coach, così puoi rivederla o inviarla.";

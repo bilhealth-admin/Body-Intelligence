@@ -11,13 +11,17 @@ class LocalCoachRequest {
     required this.text,
     required this.locale,
     this.channel = CoachInputChannel.text,
+    this.languageDetected = false,
     this.userContext = const <String, Object?>{},
+    this.conversation = const [],
   });
 
   final String text;
   final String locale;
   final CoachInputChannel channel;
+  final bool languageDetected;
   final Map<String, Object?> userContext;
+  final List<CoachConversationTurn> conversation;
 }
 
 class LocalCoachResult {
@@ -26,18 +30,36 @@ class LocalCoachResult {
     required this.processedOnDevice,
     this.answer,
     this.spokenAnswer,
+    this.serviceStatus = CoachServiceStatus.ready,
+    this.runtime = CoachAnswerRuntime.onDevice,
+    this.reason,
+    this.confidence,
+    this.evidence = const [],
+    this.missingData = const [],
+    this.responseId,
+    this.transcript,
+    this.diagnosticCode,
   });
 
   final List<IntelligenceAction> actions;
   final bool processedOnDevice;
   final String? answer;
   final String? spokenAnswer;
+  final CoachServiceStatus serviceStatus;
+  final CoachAnswerRuntime runtime;
+  final String? reason;
+  final double? confidence;
+  final List<String> evidence;
+  final List<String> missingData;
+  final String? responseId;
+  final String? transcript;
+  final String? diagnosticCode;
 }
 
 /// In-process API boundary for the BIL coach.
 ///
-/// The release implementation is deterministic and sends no personal data to
-/// a server. A future on-device language model can implement this interface
+/// Deterministic commands stay on-device. Unresolved analysis may continue to
+/// a configured local model and then the consent-gated BIL Gemini service
 /// without changing screens, repositories, confirmations, or safety gates.
 abstract interface class LocalCoachApi {
   Future<LocalCoachResult> understand(LocalCoachRequest request);
@@ -83,27 +105,33 @@ class ModelBackedLocalCoachApi implements LocalCoachApi {
 
   @override
   Future<LocalCoachResult> understand(LocalCoachRequest request) async {
-    final input = normalizer.normalize(
-      text: request.text,
-      locale: request.locale,
-      channel: request.channel,
-    );
-    final deterministic = parser.parse(
-      input.normalized,
-      locale: request.locale,
-    );
+    final normalizedText = normalizer
+        .normalize(
+          text: request.text,
+          locale: request.locale,
+          channel: request.channel,
+        )
+        .normalized;
+    final deterministic = parser.parse(normalizedText, locale: request.locale);
     if (deterministic.isNotEmpty) {
       return LocalCoachResult(actions: deterministic, processedOnDevice: true);
     }
-    final model = await gateway.answer(
-      question: input.normalized,
+    final modelResult = await gateway.answer(
+      question: normalizedText,
       locale: request.locale,
       context: context,
+      languageDetected: request.languageDetected,
+      conversation: request.conversation,
     );
+    final model = modelResult.answer;
     if (model == null) {
-      // Continue through the engine's grounded health, intent, and safety
-      // fallbacks. An optional model endpoint is not a prerequisite for chat.
-      return const LocalCoachResult(actions: [], processedOnDevice: true);
+      return LocalCoachResult(
+        actions: const [],
+        processedOnDevice: true,
+        serviceStatus: modelResult.status,
+        runtime: CoachAnswerRuntime.localFallback,
+        diagnosticCode: modelResult.diagnosticCode,
+      );
     }
     final action = _validatedModelAction(model.action, request.locale);
     return LocalCoachResult(
@@ -111,6 +139,16 @@ class ModelBackedLocalCoachApi implements LocalCoachApi {
       processedOnDevice: model.processedOnDevice,
       answer: model.text,
       spokenAnswer: model.spokenText,
+      serviceStatus: CoachServiceStatus.ready,
+      runtime: model.processedOnDevice
+          ? CoachAnswerRuntime.onDevice
+          : CoachAnswerRuntime.cloudPersonalized,
+      reason: model.reason,
+      confidence: model.confidence,
+      evidence: model.evidence,
+      missingData: model.missingData,
+      responseId: model.responseId,
+      transcript: model.transcript,
     );
   }
 
@@ -249,6 +287,13 @@ class ModelBackedLocalCoachApi implements LocalCoachApi {
         label: tr('Review account deletion', 'مراجعة حذف الحساب'),
         requiresConfirmation: true,
         destructive: true,
+      ),
+      'save_memory' => IntelligenceAction(
+        id: name!,
+        type: IntelligenceActionType.saveMemory,
+        label: tr('Remember this', 'تذكّر هذه المعلومة'),
+        requiresConfirmation: true,
+        payload: arguments,
       ),
       'log_water'
           when arguments['amountMl'] is int &&

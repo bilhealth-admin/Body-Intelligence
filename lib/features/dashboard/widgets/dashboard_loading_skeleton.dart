@@ -12,25 +12,31 @@ class DashboardLoadingSkeleton extends StatelessWidget {
     liveRegion: true,
     child: ExcludeSemantics(
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: MediaQuery.sizeOf(context).width >= 700 ? 4 : 2,
-            crossAxisSpacing: PremiumDesignTokens.spaceSm + 2,
-            mainAxisSpacing: PremiumDesignTokens.spaceSm + 2,
-            childAspectRatio: 1.05,
-            children: const [
-              _SkeletonBlock(),
-              _SkeletonBlock(),
-              _SkeletonBlock(),
-              _SkeletonBlock(),
-            ],
+          const _SkeletonBlock(
+            key: Key('dashboard-loading-coach'),
+            height: 72,
+            dark: true,
+            leadingCircle: true,
           ),
-          const SizedBox(height: PremiumDesignTokens.spaceSm + 2),
-          const _SkeletonBlock(height: PremiumDesignTokens.spaceXl * 5 + 10),
-          const SizedBox(height: PremiumDesignTokens.spaceSm + 2),
-          const _SkeletonBlock(height: PremiumDesignTokens.spaceXl * 3 + 14),
+          const SizedBox(height: 12),
+          const _SkeletonBlock(
+            key: Key('dashboard-loading-watch'),
+            height: 236,
+            leadingCircle: true,
+          ),
+          const SizedBox(height: 12),
+          const _SkeletonBlock(
+            key: Key('dashboard-loading-nutrition'),
+            height: 174,
+            leadingCircle: true,
+          ),
+          const SizedBox(height: 10),
+          const _SkeletonBlock(
+            key: Key('dashboard-loading-goal-strip'),
+            height: 42,
+          ),
         ],
       ),
     ),
@@ -38,46 +44,100 @@ class DashboardLoadingSkeleton extends StatelessWidget {
 }
 
 class _SkeletonBlock extends StatelessWidget {
-  const _SkeletonBlock({this.height});
+  const _SkeletonBlock({
+    super.key,
+    required this.height,
+    this.dark = false,
+    this.leadingCircle = false,
+  });
 
-  final double? height;
+  final double height;
+  final bool dark;
+  final bool leadingCircle;
 
   @override
   Widget build(BuildContext context) => Container(
     height: height,
     decoration: BoxDecoration(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusLg),
+      gradient: dark
+          ? const LinearGradient(colors: [Color(0xFF12394E), Color(0xFF071923)])
+          : LinearGradient(
+              begin: AlignmentDirectional.topStart,
+              end: AlignmentDirectional.bottomEnd,
+              colors: [
+                Theme.of(context).colorScheme.surface,
+                Theme.of(context).colorScheme.surfaceContainerLow,
+              ],
+            ),
+      borderRadius: BorderRadius.circular(dark ? 20 : 14),
+      border: dark
+          ? null
+          : Border.all(color: Theme.of(context).colorScheme.outlineVariant),
     ),
     padding: const EdgeInsets.symmetric(
       horizontal: PremiumDesignTokens.spaceMd,
-      vertical: PremiumDesignTokens.spaceSm,
+      vertical: 14,
     ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    child: Row(
       children: [
-        Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerLow,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const Spacer(),
-        FractionallySizedBox(
-          widthFactor: 0.7,
-          child: Container(
-            height: PremiumDesignTokens.spaceSm,
+        if (leadingCircle) ...[
+          Container(
+            width: dark ? 44 : 58,
+            height: dark ? 44 : 58,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(
-                PremiumDesignTokens.radiusMd - 4,
-              ),
+              color: dark
+                  ? Colors.white.withValues(alpha: .14)
+                  : Theme.of(context).colorScheme.surfaceContainerHighest,
+              shape: BoxShape.circle,
             ),
+          ),
+          const SizedBox(width: 14),
+        ],
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FractionallySizedBox(
+                widthFactor: .54,
+                child: _SkeletonLine(dark: dark, height: 12),
+              ),
+              if (height > 60) ...[
+                const SizedBox(height: 9),
+                FractionallySizedBox(
+                  widthFactor: .82,
+                  child: _SkeletonLine(dark: dark, height: 9),
+                ),
+              ],
+              if (height > 100) ...[
+                const SizedBox(height: 18),
+                FractionallySizedBox(
+                  widthFactor: .95,
+                  child: _SkeletonLine(dark: dark, height: 8),
+                ),
+              ],
+            ],
           ),
         ),
       ],
     ),
+  );
+}
+
+class _SkeletonLine extends StatelessWidget {
+  const _SkeletonLine({required this.dark, required this.height});
+
+  final bool dark;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: dark
+          ? Colors.white.withValues(alpha: .16)
+          : Theme.of(context).colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(999),
+    ),
+    child: SizedBox(height: height),
   );
 }

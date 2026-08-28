@@ -12,11 +12,13 @@ class AnalyticsWeightTrendChart extends StatelessWidget {
     required this.weights,
     required this.system,
     required this.rangeLabel,
+    this.targetWeightKg,
   });
 
   final List<WeightEntry> weights;
   final MeasurementSystem system;
   final String rangeLabel;
+  final double? targetWeightKg;
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +36,17 @@ class AnalyticsWeightTrendChart extends StatelessWidget {
     final converted = weights
         .map((entry) => UnitConverter.weightFromKg(entry.weight, system))
         .toList();
-    final minValue = converted.reduce((a, b) => a < b ? a : b);
-    final maxValue = converted.reduce((a, b) => a > b ? a : b);
+    final convertedTarget = targetWeightKg == null
+        ? null
+        : UnitConverter.weightFromKg(targetWeightKg!, system);
+    final measuredMin = converted.reduce((a, b) => a < b ? a : b);
+    final measuredMax = converted.reduce((a, b) => a > b ? a : b);
+    final minValue = convertedTarget == null
+        ? measuredMin
+        : (convertedTarget < measuredMin ? convertedTarget : measuredMin);
+    final maxValue = convertedTarget == null
+        ? measuredMax
+        : (convertedTarget > measuredMax ? convertedTarget : measuredMax);
     final span = (maxValue - minValue).abs() < 0.01
         ? 1.0
         : (maxValue - minValue);
@@ -43,6 +54,12 @@ class AnalyticsWeightTrendChart extends StatelessWidget {
     final firstValue = converted.first;
     final lastValue = converted.last;
     final delta = lastValue - firstValue;
+    final progressColor = _goalProgressColor(
+      start: firstValue,
+      current: lastValue,
+      target: convertedTarget,
+      fallback: Theme.of(context).colorScheme.primary,
+    );
 
     return SizedBox(
       height: 236,
@@ -86,16 +103,13 @@ class AnalyticsWeightTrendChart extends StatelessWidget {
                       label: analyticsText(context, 'Current', 'الحالي'),
                       value: '${lastValue.toStringAsFixed(1)} $unit',
                       emphasize: true,
+                      accent: progressColor,
                     ),
                   ),
                   const SizedBox(width: PremiumDesignTokens.spaceXs),
                   Expanded(
                     child: _ChartMetricChip(
-                      label: analyticsText(
-                        context,
-                        'Range change',
-                        'تغير النطاق',
-                      ),
+                      label: analyticsText(context, 'Change', 'التغيّر'),
                       value:
                           '${delta >= 0 ? '+' : ''}${delta.toStringAsFixed(1)} $unit',
                     ),
@@ -120,8 +134,8 @@ class AnalyticsWeightTrendChart extends StatelessWidget {
                           values: converted,
                           minValue: minValue,
                           span: span,
-                          lineColor: Theme.of(context).colorScheme.primary,
-                          pointColor: Theme.of(context).colorScheme.tertiary,
+                          neutralColor: Theme.of(context).colorScheme.primary,
+                          targetValue: convertedTarget,
                         ),
                         child: Align(
                           alignment: AlignmentDirectional.bottomEnd,
@@ -180,74 +194,134 @@ class _WeightLinePainter extends CustomPainter {
     required this.values,
     required this.minValue,
     required this.span,
-    required this.lineColor,
-    required this.pointColor,
+    required this.neutralColor,
+    required this.targetValue,
   });
 
   final List<double> values;
   final double minValue;
   final double span;
-  final Color lineColor;
-  final Color pointColor;
+  final Color neutralColor;
+  final double? targetValue;
 
   @override
   void paint(Canvas canvas, Size size) {
     if (values.isEmpty) return;
 
-    final line = Paint()
-      ..color = lineColor
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final path = Path();
+    final points = <Offset>[];
     for (var index = 0; index < values.length; index++) {
       final x = values.length == 1
           ? size.width / 2
           : (index / (values.length - 1)) * size.width;
       final normalized = (values[index] - minValue) / span;
       final y = size.height - (normalized * (size.height - 8)) - 4;
-      if (index == 0) {
-        path.moveTo(x, y);
-      } else {
-        path.lineTo(x, y);
+      points.add(Offset(x, y));
+    }
+
+    final grid = Paint()
+      ..color = neutralColor.withValues(alpha: .10)
+      ..strokeWidth = 1;
+    for (var row = 0; row <= 3; row++) {
+      final y = size.height * row / 3;
+      canvas.drawLine(Offset.zero.translate(0, y), Offset(size.width, y), grid);
+    }
+
+    if (targetValue != null &&
+        targetValue! >= minValue &&
+        targetValue! <= minValue + span) {
+      final normalized = (targetValue! - minValue) / span;
+      final y = size.height - (normalized * (size.height - 8)) - 4;
+      final targetPaint = Paint()
+        ..color = const Color(0xFF12B76A).withValues(alpha: .72)
+        ..strokeWidth = 1.5;
+      for (double x = 0; x < size.width; x += 9) {
+        canvas.drawLine(
+          Offset(x, y),
+          Offset((x + 5).clamp(0, size.width).toDouble(), y),
+          targetPaint,
+        );
       }
     }
-    canvas.drawPath(path, line);
 
-    for (var index = 0; index < values.length; index++) {
-      final x = values.length == 1
-          ? size.width / 2
-          : (index / (values.length - 1)) * size.width;
-      final normalized = (values[index] - minValue) / span;
-      final y = size.height - (normalized * (size.height - 8)) - 4;
-      final point = Offset(x, y);
-
-      canvas.drawCircle(
-        point,
-        6,
+    if (points.length > 1) {
+      final areaPath = Path()..moveTo(points.first.dx, size.height);
+      for (final point in points) {
+        areaPath.lineTo(point.dx, point.dy);
+      }
+      areaPath
+        ..lineTo(points.last.dx, size.height)
+        ..close();
+      canvas.drawPath(
+        areaPath,
         Paint()
-          ..color = pointColor
-          ..style = PaintingStyle.fill,
-      );
-      canvas.drawCircle(
-        point,
-        7.5,
-        Paint()
-          ..color = Colors.white.withValues(alpha: .92)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2,
-      );
-      canvas.drawCircle(
-        point,
-        index == values.length - 1 ? 12 : 9,
-        Paint()
-          ..color = pointColor.withValues(
-            alpha: index == values.length - 1 ? .22 : .10,
-          )
-          ..style = PaintingStyle.fill,
+          ..shader = LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              neutralColor.withValues(alpha: .18),
+              neutralColor.withValues(alpha: .015),
+            ],
+          ).createShader(Offset.zero & size),
       );
     }
+
+    final startDistance = targetValue == null
+        ? null
+        : (values.first - targetValue!).abs();
+    final line = Paint()
+      ..strokeWidth = 4
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    if (points.length == 1) {
+      line.color = _goalProgressColor(
+        start: values.first,
+        current: values.first,
+        target: targetValue,
+        fallback: neutralColor,
+      );
+      canvas.drawCircle(points.first, 4, line..style = PaintingStyle.fill);
+    } else {
+      for (var index = 1; index < points.length; index++) {
+        line.color = _goalProgressColorFromDistance(
+          distance: targetValue == null
+              ? null
+              : (values[index] - targetValue!).abs(),
+          startDistance: startDistance,
+          fallback: neutralColor,
+        );
+        canvas.drawLine(points[index - 1], points[index], line);
+      }
+    }
+
+    final currentColor = _goalProgressColor(
+      start: values.first,
+      current: values.last,
+      target: targetValue,
+      fallback: neutralColor,
+    );
+    canvas.drawCircle(
+      points.first,
+      4,
+      Paint()
+        ..color = neutralColor.withValues(alpha: .78)
+        ..style = PaintingStyle.fill,
+    );
+    canvas.drawCircle(
+      points.last,
+      7,
+      Paint()
+        ..color = currentColor
+        ..style = PaintingStyle.fill,
+    );
+    canvas.drawCircle(
+      points.last,
+      9,
+      Paint()
+        ..color = Colors.white.withValues(alpha: .92)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5,
+    );
   }
 
   @override
@@ -255,8 +329,8 @@ class _WeightLinePainter extends CustomPainter {
     return oldDelegate.values != values ||
         oldDelegate.minValue != minValue ||
         oldDelegate.span != span ||
-        oldDelegate.lineColor != lineColor ||
-        oldDelegate.pointColor != pointColor;
+        oldDelegate.neutralColor != neutralColor ||
+        oldDelegate.targetValue != targetValue;
   }
 }
 
@@ -265,11 +339,13 @@ class _ChartMetricChip extends StatelessWidget {
     required this.label,
     required this.value,
     this.emphasize = false,
+    this.accent,
   });
 
   final String label;
   final String value;
   final bool emphasize;
+  final Color? accent;
 
   @override
   Widget build(BuildContext context) {
@@ -281,8 +357,11 @@ class _ChartMetricChip extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: emphasize
-            ? theme.colorScheme.primaryContainer
+            ? (accent ?? theme.colorScheme.primary).withValues(alpha: .14)
             : theme.colorScheme.surfaceContainerHighest,
+        border: emphasize && accent != null
+            ? Border.all(color: accent!.withValues(alpha: .30))
+            : null,
         borderRadius: BorderRadius.circular(PremiumDesignTokens.radiusMd),
       ),
       child: Column(
@@ -315,6 +394,35 @@ class _ChartMetricChip extends StatelessWidget {
   }
 }
 
+Color _goalProgressColor({
+  required double start,
+  required double current,
+  required double? target,
+  required Color fallback,
+}) => _goalProgressColorFromDistance(
+  distance: target == null ? null : (current - target).abs(),
+  startDistance: target == null ? null : (start - target).abs(),
+  fallback: fallback,
+);
+
+Color _goalProgressColorFromDistance({
+  required double? distance,
+  required double? startDistance,
+  required Color fallback,
+}) {
+  if (distance == null || startDistance == null) return fallback;
+  final progress = startDistance <= .001
+      ? 1.0
+      : (1 - (distance / startDistance)).clamp(0.0, 1.0).toDouble();
+  const red = Color(0xFFE5484D);
+  const amber = Color(0xFFF5A524);
+  const green = Color(0xFF12B76A);
+  if (progress < .5) {
+    return Color.lerp(red, amber, progress * 2)!;
+  }
+  return Color.lerp(amber, green, (progress - .5) * 2)!;
+}
+
 class _ChartAxisLabels extends StatelessWidget {
   const _ChartAxisLabels({
     required this.top,
@@ -341,15 +449,39 @@ class _ChartAxisLabels extends StatelessWidget {
         children: [
           Directionality(
             textDirection: TextDirection.ltr,
-            child: Text('${top.toStringAsFixed(1)} $unit', style: textStyle),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                '${top.toStringAsFixed(1)} $unit',
+                maxLines: 1,
+                style: textStyle,
+              ),
+            ),
           ),
           Directionality(
             textDirection: TextDirection.ltr,
-            child: Text('${middle.toStringAsFixed(1)} $unit', style: textStyle),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                '${middle.toStringAsFixed(1)} $unit',
+                maxLines: 1,
+                style: textStyle,
+              ),
+            ),
           ),
           Directionality(
             textDirection: TextDirection.ltr,
-            child: Text('${bottom.toStringAsFixed(1)} $unit', style: textStyle),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                '${bottom.toStringAsFixed(1)} $unit',
+                maxLines: 1,
+                style: textStyle,
+              ),
+            ),
           ),
         ],
       ),

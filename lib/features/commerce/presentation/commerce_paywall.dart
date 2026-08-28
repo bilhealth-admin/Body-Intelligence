@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/localization/app_localizations.dart';
 import 'paywall_plan_view_model.dart';
 import 'paywall_state.dart';
 
@@ -250,8 +251,9 @@ String _commerceLabel(
   required String tr,
 }) => switch (Localizations.localeOf(context).languageCode) {
   'ar' => ar,
+  'en' => en,
   'fr' => fr,
   'es' => es,
   'tr' => tr,
-  _ => en,
+  _ => context.strings.text(en),
 };

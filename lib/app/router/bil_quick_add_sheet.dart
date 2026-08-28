@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../../shared/widgets/bil_wordmark.dart';
 import '../localization/bil_locale_policy.dart';
 import '../localization/runtime_copy.dart';
 import 'bil_quick_add_locale_copy.dart';
@@ -10,102 +9,39 @@ import 'bil_quick_add_locale_copy.dart';
 class BilQuickAddSheet extends StatelessWidget {
   const BilQuickAddSheet({
     super.key,
-    required this.onWeight,
     required this.onFood,
     required this.onBarcode,
     required this.onVoice,
     required this.onPhoto,
-    required this.onWater,
     required this.onExercise,
     required this.onNotes,
     required this.onSearch,
-    required this.onQuickMacros,
   });
 
-  final VoidCallback onWeight;
   final VoidCallback onFood;
   final VoidCallback onBarcode;
   final VoidCallback onVoice;
   final VoidCallback onPhoto;
-  final VoidCallback onWater;
   final VoidCallback onExercise;
   final VoidCallback onNotes;
   final VoidCallback onSearch;
-  final VoidCallback onQuickMacros;
 
   String _text(BuildContext context, String english) {
-    const copy = <String, Map<String, String>>{
-      'Quick Add': {
-        'ar': 'إضافة سريعة',
-        'fr': 'Ajout rapide',
-        'es': 'Añadir rápido',
-        'tr': 'Hızlı ekle',
-      },
-      'Choose an action and go directly to it.': {
-        'ar': 'اختر إجراءً وانتقل إليه مباشرة.',
-        'fr': 'Choisissez une action pour y accéder directement.',
-        'es': 'Elige una acción para ir directamente.',
-        'tr': 'Doğrudan gitmek için bir işlem seçin.',
-      },
-      'Log food': {
-        'ar': 'تسجيل الطعام',
-        'fr': 'Ajouter un aliment',
-        'es': 'Registrar comida',
-        'tr': 'Yemek ekle',
-      },
-      'Scan barcode': {
-        'ar': 'مسح الباركود',
-        'fr': 'Scanner un code-barres',
-        'es': 'Escanear código',
-        'tr': 'Barkod tara',
-      },
-      'Log food by voice': {
-        'ar': 'تسجيل الطعام بالصوت',
-        'fr': 'Ajouter par la voix',
-        'es': 'Registrar por voz',
-        'tr': 'Sesle yemek ekle',
-      },
-      'Analyze meal photo': {
-        'ar': 'تحليل صورة وجبة',
-        'fr': 'Analyser une photo',
-        'es': 'Analizar una foto',
-        'tr': 'Öğün fotoğrafını analiz et',
-      },
-      'Water': {'ar': 'الماء', 'fr': 'Eau', 'es': 'Agua', 'tr': 'Su'},
-      'Weight': {'ar': 'وزن', 'fr': 'Poids', 'es': 'Peso', 'tr': 'Kilo'},
-      'Exercise library': {
-        'ar': 'مكتبة التمارين',
-        'fr': 'Bibliothèque d’exercices',
-        'es': 'Biblioteca de ejercicios',
-        'tr': 'Egzersiz kütüphanesi',
-      },
-      'Daily notes': {
-        'ar': 'الملاحظات اليومية',
-        'fr': 'Notes quotidiennes',
-        'es': 'Notas diarias',
-        'tr': 'Günlük notlar',
-      },
-      'Search or create food': {
-        'ar': 'البحث عن طعام أو إنشاؤه',
-        'fr': 'Rechercher ou créer un aliment',
-        'es': 'Buscar o crear un alimento',
-        'tr': 'Yemek ara veya oluştur',
-      },
-    };
-    final language = Localizations.localeOf(context).languageCode;
-    return bilQuickAddAuthoredCopy[english]?[language] ??
-        copy[english]?[language] ??
-        RuntimeCopy.resolve(
-          english,
-          BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
-        ) ??
+    final locale = BilLocalePolicy.canonicalTag(
+      Localizations.localeOf(context),
+    );
+    return bilQuickAddAuthoredCopy[english]?[locale] ??
+        bilQuickAddAuthoredCopy[english]?[Localizations.localeOf(
+          context,
+        ).languageCode] ??
+        RuntimeCopy.resolve(english, locale) ??
         english;
   }
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final dark = Theme.of(context).brightness == Brightness.dark;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final sheetHeight = (screenHeight * .56).clamp(390.0, 560.0);
     final primaryActions =
         <({IconData icon, String label, VoidCallback onTap})>[
           (
@@ -114,12 +50,12 @@ class BilQuickAddSheet extends StatelessWidget {
             onTap: onFood,
           ),
           (
-            icon: Icons.qr_code_scanner_rounded,
-            label: _text(context, 'Scan barcode'),
+            icon: Icons.verified_rounded,
+            label: '${_text(context, 'Scan barcode')}\nPremium',
             onTap: onBarcode,
           ),
           (
-            icon: Icons.mic_none_rounded,
+            icon: Icons.mic_rounded,
             label: _text(context, 'Log food by voice'),
             onTap: onVoice,
           ),
@@ -129,115 +65,107 @@ class BilQuickAddSheet extends StatelessWidget {
             onTap: onPhoto,
           ),
         ];
-    final actions = <({IconData icon, String label, VoidCallback onTap})>[
-      (
-        icon: Icons.speed_rounded,
-        label: _text(context, 'Quick Add'),
-        onTap: onQuickMacros,
-      ),
-      (
-        icon: Icons.water_drop_rounded,
-        label: _text(context, 'Water'),
-        onTap: onWater,
-      ),
-      (
-        icon: Icons.monitor_weight_rounded,
-        label: _text(context, 'Weight'),
-        onTap: onWeight,
-      ),
-      (
-        icon: Icons.fitness_center_rounded,
-        label: _text(context, 'Exercise library'),
-        onTap: onExercise,
-      ),
-      (
-        icon: Icons.edit_note_rounded,
-        label: _text(context, 'Daily notes'),
-        onTap: onNotes,
-      ),
-      (
-        icon: Icons.search_rounded,
-        label: _text(context, 'Search or create food'),
-        onTap: onSearch,
-      ),
-    ];
+    final secondaryActions =
+        <({IconData icon, String label, VoidCallback onTap})>[
+          (
+            icon: Icons.fitness_center_rounded,
+            label: _text(context, 'Exercise library'),
+            onTap: onExercise,
+          ),
+          (
+            icon: Icons.edit_note_rounded,
+            label: _text(context, 'Daily notes'),
+            onTap: onNotes,
+          ),
+          (
+            icon: Icons.search_rounded,
+            label: _text(context, 'Search or create food'),
+            onTap: onSearch,
+          ),
+        ];
 
     return Align(
       alignment: Alignment.bottomCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 640),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: dark
-                      ? const [Color(0xFA0A1522), Color(0xFA131B2D)]
-                      : [colors.surface, colors.surfaceContainerLow],
+      child: SizedBox(
+        key: const Key('quick-add-half-sheet'),
+        height: sheetHeight,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 640),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  'assets/images/quick_add/quick_add_spring_glass_v2.png',
+                  key: const Key('quick-add-spring-background'),
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
                 ),
-              ),
-              child: SafeArea(
-                top: false,
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 52,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: colors.outlineVariant,
-                          borderRadius: BorderRadius.circular(99),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      const BilFullWordmark(height: 42),
-                      const SizedBox(height: 6),
-                      Text(
-                        _text(
-                          context,
-                          'Choose an action and go directly to it.',
-                        ),
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 18),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: primaryActions.length,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 10,
-                              crossAxisSpacing: 10,
-                              mainAxisExtent: 86,
-                            ),
-                        itemBuilder: (context, index) {
-                          final action = primaryActions[index];
-                          return _PrimaryQuickAction(
-                            icon: action.icon,
-                            label: action.label,
-                            onTap: action.onTap,
-                          );
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      for (final action in actions)
-                        _QuickActionTile(
-                          icon: action.icon,
-                          label: action.label,
-                          onTap: action.onTap,
-                        ),
-                    ],
+                const DecoratedBox(
+                  key: Key('quick-add-low-visibility-veil'),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0xE9FFFFFF), Color(0xF8FFFFFF)],
+                    ),
                   ),
                 ),
-              ),
+                SafeArea(
+                  top: false,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(18, 12, 18, 20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: const Color(0x66727B80),
+                            borderRadius: BorderRadius.circular(99),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: primaryActions.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 10,
+                                crossAxisSpacing: 10,
+                                mainAxisExtent: 94,
+                              ),
+                          itemBuilder: (context, index) {
+                            final action = primaryActions[index];
+                            return _PrimaryQuickAction(
+                              actionKey: Key('quick-add-primary-$index'),
+                              icon: action.icon,
+                              label: action.label,
+                              onTap: action.onTap,
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 5),
+                        for (
+                          var index = 0;
+                          index < secondaryActions.length;
+                          index++
+                        )
+                          _QuickActionTile(
+                            actionKey: Key('quick-add-secondary-$index'),
+                            icon: secondaryActions[index].icon,
+                            label: secondaryActions[index].label,
+                            onTap: secondaryActions[index].onTap,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -248,91 +176,130 @@ class BilQuickAddSheet extends StatelessWidget {
 
 class _PrimaryQuickAction extends StatelessWidget {
   const _PrimaryQuickAction({
+    required this.actionKey,
     required this.icon,
     required this.label,
     required this.onTap,
   });
 
+  final Key actionKey;
   final IconData icon;
   final String label;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Material(
-      color: colors.surfaceContainerLow,
-      borderRadius: BorderRadius.circular(18),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: colors.primary, size: 28),
-            const SizedBox(height: 8),
-            Text(label, style: const TextStyle(fontWeight: FontWeight.w800)),
-          ],
-        ),
+  Widget build(BuildContext context) => _GlassActionSurface(
+    actionKey: actionKey,
+    radius: 23,
+    onTap: onTap,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: const Color(0xFF087F73), size: 25),
+          const SizedBox(height: 5),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF172321),
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }
 
 class _QuickActionTile extends StatelessWidget {
   const _QuickActionTile({
+    required this.actionKey,
     required this.icon,
     required this.label,
     required this.onTap,
   });
 
+  final Key actionKey;
   final IconData icon;
   final String label;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(top: 9),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: colors.outlineVariant),
-              color: colors.surfaceContainerLow,
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 8),
+    child: _GlassActionSurface(
+      actionKey: actionKey,
+      radius: 21,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 9),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
+                color: Color(0xA8D9F2EA),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: const Color(0xFF087F73), size: 20),
             ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: colors.primaryContainer,
-                  foregroundColor: colors.onPrimaryContainer,
-                  child: Icon(icon),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Color(0xFF172321),
+                  fontWeight: FontWeight.w700,
                 ),
-                const SizedBox(width: 13),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      color: colors.onSurface,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: colors.onSurfaceVariant,
-                ),
-              ],
+              ),
             ),
-          ),
+            Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.chevron_left_rounded
+                  : Icons.chevron_right_rounded,
+              color: const Color(0xFF64716E),
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+class _GlassActionSurface extends StatelessWidget {
+  const _GlassActionSurface({
+    required this.actionKey,
+    required this.radius,
+    required this.onTap,
+    required this.child,
+  });
+
+  final Key actionKey;
+  final double radius;
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => ClipRRect(
+    key: actionKey,
+    borderRadius: BorderRadius.circular(radius),
+    child: BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+      child: Material(
+        color: const Color(0xA8FFFFFF),
+        shadowColor: const Color(0x240B554E),
+        elevation: 1.5,
+        child: InkWell(onTap: onTap, child: child),
+      ),
+    ),
+  );
 }

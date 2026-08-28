@@ -7,7 +7,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/app_localizations.dart';
+import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
+import '../domain/community_text_policy.dart';
 
 SupabaseClient? _initializedCommunityClient() {
   if (!AppEnvironment.cloudConfigured) return null;
@@ -34,6 +36,7 @@ class _CommunityMessagesPageState extends State<CommunityMessagesPage> {
   CommunityRepository? _repository;
   late Future<List<Map<String, dynamic>>> _inbox;
   late Future<List<Map<String, dynamic>>> _sent;
+  StreamSubscription<void>? _inboxChanges;
 
   @override
   void initState() {
@@ -41,6 +44,7 @@ class _CommunityMessagesPageState extends State<CommunityMessagesPage> {
     if (widget.repository != null) {
       _repository = widget.repository;
       _reload();
+      _watchInbox();
       return;
     }
     final client = _initializedCommunityClient();
@@ -48,6 +52,25 @@ class _CommunityMessagesPageState extends State<CommunityMessagesPage> {
       _repository = CommunityRepository(client!);
     }
     _reload();
+    _watchInbox();
+  }
+
+  void _watchInbox() {
+    try {
+      _inboxChanges = _repository?.watchInboxChanges().listen((_) {
+        if (mounted) unawaited(_refreshInbox());
+      }, onError: (_) {});
+    } on AuthException {
+      // The injected repository may outlive its signed-in test/session user.
+      // The already-loaded inbox remains usable without a realtime channel.
+      _inboxChanges = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    unawaited(_inboxChanges?.cancel());
+    super.dispose();
   }
 
   Future<void> _reload() async {
@@ -65,12 +88,16 @@ class _CommunityMessagesPageState extends State<CommunityMessagesPage> {
   }
 
   Future<void> _refreshInbox() async {
-    setState(() => _inbox = _repository!.loadInboxMessages());
+    setState(() {
+      _inbox = _repository!.loadInboxMessages();
+    });
     await _inbox;
   }
 
   Future<void> _refreshSent() async {
-    setState(() => _sent = _repository!.loadSentMessages());
+    setState(() {
+      _sent = _repository!.loadSentMessages();
+    });
     await _sent;
   }
 
@@ -153,48 +180,52 @@ class _MessageList extends StatelessWidget {
         return _MessagesLoadError(copy: copy, onRetry: onRetry);
       }
       final rows = snapshot.data ?? const [];
-      if (rows.isEmpty) {
-        return _EmptyMessages(text: emptyText, button: copy.sendMessage);
-      }
       return RefreshIndicator(
         onRefresh: onRetry,
-        child: ListView.separated(
-          itemCount: rows.length,
-          separatorBuilder: (_, _) => const Divider(height: 1),
-          itemBuilder: (context, index) {
-            final row = rows[index];
-            final profile = row['profile'] as Map<String, dynamic>?;
-            final parsed = MessageBodyContract.parse(row['body'] as String);
-            final otherId =
-                (incoming ? row['sender_id'] : row['recipient_id']) as String;
-            final name =
-                profile?['display_name'] as String? ?? copy.unknownMember;
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundImage: profile?['avatar_url'] == null
-                    ? null
-                    : NetworkImage(profile!['avatar_url'] as String),
-                child: profile?['avatar_url'] == null
-                    ? const Icon(Icons.person_rounded)
-                    : null,
-              ),
-              title: _NaturalMessageText(
-                parsed.subject.isEmpty ? name : parsed.subject,
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: rows.isEmpty
+            ? ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 children: [
-                  _NaturalMessageText(name, maxLines: 1),
-                  _NaturalMessageText(parsed.body, maxLines: 2),
+                  _EmptyMessages(text: emptyText, button: copy.sendMessage),
                 ],
+              )
+            : ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: rows.length,
+                separatorBuilder: (_, _) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final row = rows[index];
+                  final profile = row['profile'] as Map<String, dynamic>?;
+                  final parsed = MessageBodyContract.parse(
+                    row['body'] as String,
+                  );
+                  final otherId =
+                      (incoming ? row['sender_id'] : row['recipient_id'])
+                          as String;
+                  final name =
+                      profile?['display_name'] as String? ?? copy.unknownMember;
+                  return ListTile(
+                    leading: BilAccountAvatar(
+                      radius: 20,
+                      networkUrl: profile?['avatar_url'] as String?,
+                    ),
+                    title: _NaturalMessageText(
+                      parsed.subject.isEmpty ? name : parsed.subject,
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _NaturalMessageText(name, maxLines: 1),
+                        _NaturalMessageText(parsed.body, maxLines: 2),
+                      ],
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => context.push(
+                      '/community/chat/$otherId?name=${Uri.encodeQueryComponent(name)}',
+                    ),
+                  );
+                },
               ),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => context.push(
-                '/community/chat/$otherId?name=${Uri.encodeQueryComponent(name)}',
-              ),
-            );
-          },
-        ),
       );
     },
   );
@@ -298,7 +329,10 @@ class _MessagesLoadError extends StatelessWidget {
 }
 
 class NewCommunityMessagePage extends StatefulWidget {
-  const NewCommunityMessagePage({super.key});
+  const NewCommunityMessagePage({this.repository, super.key});
+
+  final CommunityRepository? repository;
+
   @override
   State<NewCommunityMessagePage> createState() =>
       _NewCommunityMessagePageState();
@@ -318,6 +352,11 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
   @override
   void initState() {
     super.initState();
+    if (widget.repository != null) {
+      _repository = widget.repository;
+      _people = _repository!.searchProfiles('');
+      return;
+    }
     final client = _initializedCommunityClient();
     if (client?.auth.currentUser != null) {
       _repository = CommunityRepository(client!);
@@ -368,6 +407,18 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
         MessageBodyContract.compose(subject: _subject.text, body: _body.text),
       );
       if (mounted) context.pop();
+    } on CommunityTextPolicyException catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              error.localizedMessage(
+                Localizations.localeOf(context).toLanguageTag(),
+              ),
+            ),
+          ),
+        );
+      }
     } on Object {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -409,24 +460,42 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
           children: [
             if (_sending) const LinearProgressIndicator(),
             if (_recipient == null)
-              TextField(
-                controller: _recipientSearch,
-                autofocus: true,
-                enabled: !_sending,
-                onChanged: _search,
-                decoration: InputDecoration(
-                  labelText: copy.to,
-                  contentPadding: const EdgeInsets.all(16),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: TextField(
+                  key: const Key('community-message-recipient-search'),
+                  controller: _recipientSearch,
+                  autofocus: true,
+                  enabled: !_sending,
+                  onChanged: _search,
+                  decoration: InputDecoration(
+                    labelText: copy.to,
+                    prefixIcon: const Icon(Icons.person_search_rounded),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 15,
+                    ),
+                  ),
                 ),
               )
             else
-              ListTile(
-                title: Text(_recipient!['display_name'] as String),
-                trailing: IconButton(
-                  icon: const Icon(Icons.close_rounded),
-                  onPressed: _sending
-                      ? null
-                      : () => setState(() => _recipient = null),
+              Card(
+                margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: ListTile(
+                  leading: BilAccountAvatar(
+                    radius: 20,
+                    networkUrl: _recipient!['avatar_url'] as String?,
+                  ),
+                  title: Text(_recipient!['display_name'] as String),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: _sending
+                        ? null
+                        : () => setState(() => _recipient = null),
+                  ),
                 ),
               ),
             if (_recipient == null)
@@ -449,8 +518,9 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
                         for (final person
                             in snapshot.data ?? const <Map<String, dynamic>>[])
                           ListTile(
-                            leading: const CircleAvatar(
-                              child: Icon(Icons.person_rounded),
+                            leading: BilAccountAvatar(
+                              radius: 20,
+                              networkUrl: person['avatar_url'] as String?,
                             ),
                             title: Text(person['display_name'] as String),
                             onTap: _sending
@@ -462,27 +532,41 @@ class _NewCommunityMessagePageState extends State<NewCommunityMessagePage> {
                   },
                 ),
               ),
-            TextField(
-              controller: _subject,
-              enabled: !_sending,
-              inputFormatters: [LengthLimitingTextInputFormatter(120)],
-              decoration: InputDecoration(
-                labelText: copy.subject,
-                contentPadding: const EdgeInsets.all(16),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+              child: TextField(
+                controller: _subject,
+                enabled: !_sending,
+                inputFormatters: [LengthLimitingTextInputFormatter(120)],
+                decoration: InputDecoration(
+                  labelText: copy.subject,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 15,
+                  ),
+                ),
               ),
             ),
             Expanded(
-              child: TextField(
-                controller: _body,
-                enabled: !_sending,
-                inputFormatters: [LengthLimitingTextInputFormatter(4000)],
-                maxLines: null,
-                expands: true,
-                textAlignVertical: TextAlignVertical.top,
-                decoration: InputDecoration(
-                  hintText: copy.message,
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.all(16),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: TextField(
+                  controller: _body,
+                  enabled: !_sending,
+                  inputFormatters: [LengthLimitingTextInputFormatter(4000)],
+                  maxLines: null,
+                  expands: true,
+                  textAlignVertical: TextAlignVertical.top,
+                  decoration: InputDecoration(
+                    hintText: copy.message,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    contentPadding: const EdgeInsets.all(16),
+                  ),
                 ),
               ),
             ),

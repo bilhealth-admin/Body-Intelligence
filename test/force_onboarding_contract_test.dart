@@ -27,14 +27,20 @@ void main() {
 
     expect(providers, contains('final forceOnboardingProvider'));
     expect(startup, contains('ref.watch(forceOnboardingProvider)'));
-    expect(startup, contains("forceOnboarding.value == true || user == null"));
+    expect(startup, contains('else if (forceOnboarding.value == true)'));
+    expect(startup, contains('else if (user == null'));
   });
 
-  test('successful onboarding clears force-onboarding flag', () {
-    final onboarding = File(
-      'lib/features/onboarding/onboarding_page.dart',
-    ).readAsStringSync();
+  test(
+    'successful onboarding clears the flag and enters dashboard directly',
+    () {
+      final onboarding = File(
+        'lib/features/onboarding/onboarding_page.dart',
+      ).readAsStringSync();
 
-    expect(onboarding, contains("set('forceOnboarding', 'false')"));
-  });
+      expect(onboarding, contains("set('forceOnboarding', 'false')"));
+      expect(onboarding, contains("context.go('/dashboard')"));
+      expect(onboarding, isNot(contains("context.go('/startup')")));
+    },
+  );
 }

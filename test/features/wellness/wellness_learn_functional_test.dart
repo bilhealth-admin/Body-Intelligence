@@ -39,14 +39,14 @@ void main() {
     expect(find.text('No learning topics match this search.'), findsOneWidget);
   });
 
-  testWidgets('production build hides unavailable community destination', (
+  testWidgets('configured production build exposes community destination', (
     tester,
   ) async {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
     await tester.drag(find.byType(ListView), const Offset(0, -1800));
     await tester.pumpAndSettle();
-    expect(find.text('Community discussions'), findsNothing);
+    expect(find.text('Community discussions'), findsOneWidget);
   });
 
   testWidgets('topic controls wrap without clipped horizontal viewport', (

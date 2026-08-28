@@ -63,7 +63,8 @@ void main() {
   });
 
   test('registry is the finite model-visible allow-list', () {
-    expect(BilToolRegistry.tools, hasLength(21));
+    expect(BilToolRegistry.tools, hasLength(22));
+    expect(BilToolRegistry.tools, contains('save_memory'));
     expect(
       BilToolRegistry.tools.values
           .where((tool) => tool.risk == BilToolRisk.destructive)

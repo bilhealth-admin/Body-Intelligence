@@ -3,18 +3,17 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('plan selector uses stable BIL labels and selected product prices', () {
-    final source = File(
+  test('plan selector uses canonical tiers and device-store prices', () {
+    final source = [
       'lib/features/commerce/presentation/bil_store_plans_page.dart',
-    ).readAsStringSync();
+      'lib/features/commerce/presentation/bil_dynamic_store_offers.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
 
-    expect(source, contains("const Text('BIL Plus')"));
-    expect(source, contains("const Text('BIL Pro')"));
-    expect(source, isNot(contains("context.strings.text('Plus')")));
-    expect(source, isNot(contains("context.strings.text('Pro')")));
-    expect(
-      RegExp(r'productFor\(\s*selectedPlan').allMatches(source).length,
-      greaterThanOrEqualTo(3),
-    );
+    expect(source, contains('BilDynamicStoreOffers('));
+    expect(source, contains('StoreCatalogConfiguration.storefrontProductIds'));
+    expect(source, contains('VerifiedStoreCatalogAdapter'));
+    expect(source, contains('selectedOffer.localizedPrice'));
+    expect(source, isNot(contains("const Text('BIL Plus')")));
+    expect(source, isNot(contains("const Text('BIL Pro')")));
   });
 }

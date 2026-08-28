@@ -11,13 +11,24 @@ void main() {
       'READ_STEPS',
       'READ_ACTIVE_CALORIES_BURNED',
       'READ_EXERCISE',
+      'READ_SLEEP',
+      'READ_HEART_RATE',
+      'READ_RESTING_HEART_RATE',
+      'READ_HEART_RATE_VARIABILITY',
       'READ_WEIGHT',
       'WRITE_WEIGHT',
     ]) {
       expect(manifest, contains('android.permission.health.$permission'));
     }
-    expect(manifest, isNot(contains('READ_BLOOD_GLUCOSE')));
-    expect(manifest, isNot(contains('READ_BLOOD_PRESSURE')));
+    for (final excludedPermission in <String>[
+      'READ_BLOOD_GLUCOSE',
+      'READ_BLOOD_PRESSURE',
+      'READ_BODY_TEMPERATURE',
+      'READ_RESPIRATORY_RATE',
+      'READ_OXYGEN_SATURATION',
+    ]) {
+      expect(manifest, isNot(contains(excludedPermission)));
+    }
     expect(
       manifest,
       contains('androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE'),
@@ -40,6 +51,15 @@ void main() {
 
       expect(android, contains('HealthConnectClient.getSdkStatus'));
       expect(android, contains('revokeAllPermissions'));
+      for (final excludedRecord in <String>[
+        'BloodGlucoseRecord',
+        'BloodPressureRecord',
+        'BodyTemperatureRecord',
+        'RespiratoryRateRecord',
+        'OxygenSaturationRecord',
+      ]) {
+        expect(android, isNot(contains(excludedRecord)));
+      }
       expect(ios, contains('HKHealthStore.isHealthDataAvailable'));
       expect(ios, contains('requiresSystemSettings'));
       expect(plist, contains('NSHealthShareUsageDescription'));

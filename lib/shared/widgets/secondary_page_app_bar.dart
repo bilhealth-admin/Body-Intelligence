@@ -14,12 +14,14 @@ class SecondaryPageAppBar extends StatelessWidget
     this.actions,
     this.dashboardPath = '/dashboard',
     this.showDashboardAction = true,
+    this.onBack,
   });
 
   final Widget title;
   final List<Widget>? actions;
   final String dashboardPath;
   final bool showDashboardAction;
+  final VoidCallback? onBack;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -50,7 +52,7 @@ class SecondaryPageAppBar extends StatelessWidget
         child: IconButton.filled(
           key: const Key('secondary-page-back'),
           tooltip: arabic ? 'رجوع' : 'Back',
-          onPressed: leaveSecondaryPage,
+          onPressed: onBack ?? leaveSecondaryPage,
           style: IconButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.surface,
             foregroundColor: Theme.of(context).colorScheme.onSurface,

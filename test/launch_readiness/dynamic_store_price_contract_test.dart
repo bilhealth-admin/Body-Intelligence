@@ -9,7 +9,7 @@ void main() {
       Directory('lib/features/intelligence_center'),
     ];
     final monetary = RegExp(
-      r'\$\s*\d|€\s*\d|£\s*\d|\d+[.,]\d{2}\s*(?:\$|USD|EUR|GBP)',
+      r'(?<!\.)\$\s*\d|€\s*\d|£\s*\d|\d+[.,]\d{2}\s*(?:\$|USD|EUR|GBP)',
       caseSensitive: false,
     );
     final violations = <String>[];

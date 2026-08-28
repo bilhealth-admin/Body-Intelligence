@@ -54,6 +54,15 @@ extension _BodySetupCanvasActions on _BodySetupCanvas {
         decimals: 1,
         optional: true,
       ),
+      _CanvasField.hips => _EditorConfig(
+        title: tr(context, 'Hips', 'الورك'),
+        value: draft.hips,
+        min: draft.units == BilUnits.metric ? 45 : 18,
+        max: draft.units == BilUnits.metric ? 220 : 87,
+        unit: draft.units == BilUnits.metric ? 'cm' : 'in',
+        decimals: 1,
+        optional: true,
+      ),
     };
 
     final result = await showModalBottomSheet<_EditorResult>(
@@ -75,6 +84,8 @@ extension _BodySetupCanvasActions on _BodySetupCanvas {
         draft.waist = value;
       case _CanvasField.neck:
         draft.neck = value;
+      case _CanvasField.hips:
+        draft.hips = value;
     }
     onChanged();
   }
@@ -82,7 +93,7 @@ extension _BodySetupCanvasActions on _BodySetupCanvas {
   Future<void> _editSex(BuildContext context) async {
     final value = await _showChoiceSheet<BilSex>(
       context,
-      title: tr(context, 'Biological sex', 'الجنس البيولوجي'),
+      title: tr(context, 'Sex', 'الجنس'),
       current: draft.sex,
       choices: [
         _SheetChoice(

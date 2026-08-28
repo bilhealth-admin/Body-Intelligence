@@ -1,6 +1,10 @@
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../app/environment/app_environment.dart';
 import '../../data/database/database_provider.dart';
@@ -8,8 +12,12 @@ import '../../shared/widgets/bil_wordmark.dart';
 import '../profile/providers/user_profile_provider.dart';
 import 'account_gateway_page.dart'
     show localRecoveryServiceProvider, validRecoverySnapshotProvider;
+import 'auth_entry_locale_copy.dart';
 import 'auth_language_selector.dart';
-import 'auth_five_locale_copy.dart';
+
+const _gatewayStoryViewportFraction = .87;
+const _gatewayStoryCardAspectRatio = 1.0;
+const _gatewayStoryGap = 12.0;
 
 class AccountGatewayPage extends ConsumerStatefulWidget {
   const AccountGatewayPage({super.key});
@@ -20,14 +28,44 @@ class AccountGatewayPage extends ConsumerStatefulWidget {
 
 class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
   bool restoring = false;
-  final PageController storyController = PageController(viewportFraction: .88);
+  bool redirectingAuthenticatedUser = false;
+  StreamSubscription<AuthState>? authSubscription;
+  final PageController storyController = PageController(
+    viewportFraction: _gatewayStoryViewportFraction,
+  );
   int storyIndex = 0;
 
-  bool get arabic =>
-      Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
+  @override
+  void initState() {
+    super.initState();
+    if (!AppEnvironment.supabaseRuntimeReady) {
+      return;
+    }
+
+    final auth = Supabase.instance.client.auth;
+    authSubscription = auth.onAuthStateChange.listen((state) {
+      if (state.session != null) _redirectAuthenticatedUser();
+    }, onError: (Object _, StackTrace _) {});
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _redirectAuthenticatedUser(),
+    );
+  }
+
+  bool get _hasAuthenticatedSession =>
+      AppEnvironment.supabaseRuntimeReady &&
+      Supabase.instance.client.auth.currentSession != null;
+
+  void _redirectAuthenticatedUser() {
+    if (!mounted || redirectingAuthenticatedUser || !_hasAuthenticatedSession) {
+      return;
+    }
+    setState(() => redirectingAuthenticatedUser = true);
+    context.go('/startup');
+  }
 
   @override
   void dispose() {
+    unawaited(authSubscription?.cancel());
     storyController.dispose();
     super.dispose();
   }
@@ -48,28 +86,21 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
+        backgroundColor: Colors.white,
         title: Text(
-          authFiveLocaleTextOf(
-            context,
-            'Restore previous data?',
-            'استعادة بياناتك السابقة؟',
-          ),
+          authEntryText(context, AuthEntryCopyKey.restorePreviousDataQuestion),
         ),
         content: Text(
-          authFiveLocaleTextOf(
-            context,
-            'BIL will replace the current local data with the validated previous snapshot.',
-            'سيستبدل BIL البيانات المحلية الحالية بالنسخة السابقة بعد التحقق منها.',
-          ),
+          authEntryText(context, AuthEntryCopyKey.restoreDialogBody),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(authFiveLocaleTextOf(context, 'Cancel', 'إلغاء')),
+            child: Text(authEntryText(context, AuthEntryCopyKey.cancel)),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(authFiveLocaleTextOf(context, 'Restore', 'استعادة')),
+            child: Text(authEntryText(context, AuthEntryCopyKey.restore)),
           ),
         ],
       ),
@@ -87,334 +118,356 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_hasAuthenticatedSession || redirectingAuthenticatedUser) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _redirectAuthenticatedUser(),
+      );
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final snapshot = ref.watch(validRecoverySnapshotProvider);
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F8FB),
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          const ColoredBox(color: Color(0xFFF7F8FB)),
-          SafeArea(
-            child: Center(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxHeight < 720;
+            final horizontalPadding = constraints.maxWidth < 390 ? 18.0 : 22.0;
+            return Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(28, 16, 28, 24),
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  compact ? 8 : 13,
+                  horizontalPadding,
+                  compact ? 14 : 20,
+                ),
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 440),
+                  constraints: const BoxConstraints(maxWidth: 470),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      _GatewayBrandHeader(compact: compact),
+                      SizedBox(height: compact ? 11 : 14),
                       const Align(
-                        alignment: AlignmentDirectional.centerStart,
+                        alignment: Alignment.center,
                         child: AuthLanguageSelector(),
                       ),
-                      const SizedBox(height: 14),
-                      const BilWordmark(height: 44),
-                      const SizedBox(height: 8),
-                      Text(
-                        authFiveLocaleTextOf(
-                          context,
-                          'Your body. Your intelligence.',
-                          'ذكاء جسمك، بهويتك أنت.',
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        softWrap: true,
-                        style: TextStyle(
-                          color: const Color(0xFF101828),
-                          fontSize: MediaQuery.sizeOf(context).width < 430
-                              ? 22
-                              : 26,
-                          height: 1.25,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -.5,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        authFiveLocaleTextOf(
-                          context,
-                          'A private health experience built around you. Your data stays yours, and cloud sync is always your choice.',
-                          'تجربة صحية شخصية صُممت حولك. بياناتك ملكك، والمزامنة السحابية دائمًا باختيارك.',
-                        ),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: const Color(0xFF667085),
-                          fontSize: 15,
-                          height: 1.5,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: compact ? 18 : 24),
                       _GatewayStoryPager(
-                        arabic: arabic,
                         controller: storyController,
                         index: storyIndex,
                         onChanged: (value) =>
                             setState(() => storyIndex = value),
                       ),
-                      const SizedBox(height: 18),
+                      SizedBox(height: compact ? 18 : 24),
                       SizedBox(
-                        width: double.infinity,
-                        height: 56,
-                        child: FilledButton.icon(
-                          key: Key(
-                            AppEnvironment.cloudConfigured
-                                ? 'gateway-account-action'
-                                : 'gateway-continue-locally',
-                          ),
+                        height: compact ? 54 : 58,
+                        child: FilledButton(
+                          key: const Key('gateway-account-action'),
                           onPressed: restoring
                               ? null
-                              : AppEnvironment.cloudConfigured
-                              ? () => context.go('/login')
-                              : _continueLocally,
-                          icon: const Icon(Icons.arrow_forward_rounded),
-                          label: Text(
-                            AppEnvironment.cloudConfigured
-                                ? authFiveLocaleTextOf(
-                                    context,
-                                    'Continue with BIL account',
-                                    'ابدأ بحساب BIL',
-                                  )
-                                : authFiveLocaleTextOf(
-                                    context,
-                                    'Continue without an account',
-                                    'المتابعة الآن دون حساب',
-                                  ),
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                              : () => context.go('/login'),
                           style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFF0066EE),
+                            backgroundColor: const Color(0xFF0877F9),
                             foregroundColor: Colors.white,
                             disabledBackgroundColor: const Color(0xFFD0D5DD),
                             disabledForegroundColor: Colors.white,
+                            elevation: 0,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(16),
                             ),
+                            textStyle: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -.15,
+                            ),
+                          ),
+                          child: Text(
+                            authEntryText(context, AuthEntryCopyKey.signIn),
                           ),
                         ),
                       ),
-                      if (AppEnvironment.cloudConfigured)
-                        TextButton(
+                      SizedBox(height: compact ? 3 : 5),
+                      Center(
+                        child: TextButton(
                           key: const Key('gateway-continue-locally'),
                           onPressed: restoring ? null : _continueLocally,
                           style: TextButton.styleFrom(
-                            foregroundColor: const Color(0xFF344054),
+                            foregroundColor: const Color(0xFF0877F9),
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 17,
+                              horizontal: 18,
+                              vertical: 12,
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 14.5,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
                           child: Text(
-                            authFiveLocaleTextOf(
+                            authEntryText(
                               context,
-                              'Continue without an account',
-                              'المتابعة الآن دون حساب',
-                            ),
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
+                              AuthEntryCopyKey.continueWithoutAccount,
                             ),
                           ),
-                        )
-                      else
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: Text(
-                            authFiveLocaleTextOf(
-                              context,
-                              'Cloud account is not enabled on this build.',
-                              'الحساب السحابي غير مفعّل في هذه النسخة.',
-                            ),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Color(0xFF667085),
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      if (snapshot.value == true)
-                        TextButton.icon(
-                          key: const Key('gateway-restore'),
-                          onPressed: restoring ? null : _restore,
-                          icon: restoring
-                              ? const SizedBox.square(
-                                  dimension: 17,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Icon(Icons.restore_rounded),
-                          label: Text(
-                            authFiveLocaleTextOf(
-                              context,
-                              'Restore previous data',
-                              'استعادة بيانات سابقة',
-                            ),
-                          ),
-                        ),
-                      const SizedBox(height: 14),
-                      Text(
-                        authFiveLocaleTextOf(
-                          context,
-                          'Privacy first  •  No medical diagnosis  •  You stay in control',
-                          'خصوصية أولًا  •  لا تشخيص طبي  •  أنت صاحب القرار',
-                        ),
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: const Color(0xFF667085),
-                          fontSize: 12.5,
-                          height: 1.4,
                         ),
                       ),
+                      if (snapshot.value == true)
+                        Center(
+                          child: TextButton.icon(
+                            key: const Key('gateway-restore'),
+                            onPressed: restoring ? null : _restore,
+                            icon: restoring
+                                ? const SizedBox.square(
+                                    dimension: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.restore_rounded, size: 18),
+                            label: Text(
+                              authEntryText(
+                                context,
+                                AuthEntryCopyKey.restorePreviousData,
+                              ),
+                            ),
+                            style: TextButton.styleFrom(
+                              foregroundColor: const Color(0xFF667085),
+                              textStyle: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
               ),
-            ),
-          ),
-        ],
+            );
+          },
+        ),
       ),
     );
   }
 }
 
+class _GatewayBrandHeader extends StatelessWidget {
+  const _GatewayBrandHeader({required this.compact});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      Text(
+        authEntryText(context, AuthEntryCopyKey.welcomeTo),
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: const Color(0xFF8A8F98),
+          fontSize: compact ? 12 : 13,
+          height: 1.1,
+          fontWeight: FontWeight.w600,
+          letterSpacing: .05,
+        ),
+      ),
+      SizedBox(height: compact ? 4 : 5),
+      BilWordmark(height: compact ? 40 : 46),
+    ],
+  );
+}
+
 class _GatewayStoryPager extends StatelessWidget {
   const _GatewayStoryPager({
-    required this.arabic,
     required this.controller,
     required this.index,
     required this.onChanged,
   });
 
-  final bool arabic;
   final PageController controller;
   final int index;
   final ValueChanged<int> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final stories = <({String asset, String title, String body})>[
-      (
-        asset: 'assets/images/flagship/bil_meal_discovery_v1.png',
-        title: authFiveLocaleTextOf(
-          context,
-          'Nutrition without guesswork',
-          'التغذية بلا تخمين',
-        ),
-        body: authFiveLocaleTextOf(
-          context,
-          'Search, scan, and log with a clear line between verified and custom data.',
-          'ابحث وامسح وسجّل مع فصل واضح بين الموثق والمخصص.',
-        ),
-      ),
-      (
-        asset: 'assets/images/flagship/bil_sleep_insights_v1.png',
-        title: authFiveLocaleTextOf(
-          context,
-          'Understand your rhythm',
-          'افهم إيقاعك',
-        ),
-        body: authFiveLocaleTextOf(
-          context,
-          'Connect sleep and recovery using only your real record.',
-          'اربط النوم والتعافي بسجلك الحقيقي فقط.',
-        ),
-      ),
-      (
-        asset: 'assets/images/flagship/bil_movement_v1.png',
-        title: authFiveLocaleTextOf(
-          context,
-          'Progress built around you',
-          'تقدّم يناسب قدرتك',
-        ),
-        body: authFiveLocaleTextOf(
-          context,
-          'Reviewable guidance instead of one generic plan for everyone.',
-          'توصيات قابلة للمراجعة لا خطة عامة للجميع.',
-        ),
-      ),
-    ];
+    final stories =
+        <({String asset, String title, String body, IconData icon})>[
+          (
+            asset:
+                'assets/images/flagship/bil_body_intelligence_journey_v1.png',
+            title: authEntryText(context, AuthEntryCopyKey.progressTitle),
+            body: authEntryText(context, AuthEntryCopyKey.progressBody),
+            icon: Icons.trending_up_rounded,
+          ),
+          (
+            asset: 'assets/images/flagship/bil_sleep_insights_v2.png',
+            title: authEntryText(context, AuthEntryCopyKey.rhythmTitle),
+            body: authEntryText(context, AuthEntryCopyKey.rhythmBody),
+            icon: Icons.nightlight_round,
+          ),
+          (
+            asset: 'assets/images/flagship/bil_meal_discovery_v2.png',
+            title: authEntryText(context, AuthEntryCopyKey.nutritionTitle),
+            body: authEntryText(context, AuthEntryCopyKey.nutritionBody),
+            icon: Icons.restaurant_rounded,
+          ),
+        ];
     return Column(
       children: [
-        SizedBox(
-          height: 172,
-          child: PageView.builder(
-            controller: controller,
-            itemCount: stories.length,
-            onPageChanged: onChanged,
-            itemBuilder: (context, itemIndex) {
-              final story = stories[itemIndex];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Image.asset(story.asset, fit: BoxFit.cover),
-                      const DecoratedBox(
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // PageView sizes each page from the viewport fraction. Deriving
+            // the viewport height from that exact page width keeps every card
+            // and crop geometrically identical while a drag is in progress.
+            final cardWidth =
+                (constraints.maxWidth * controller.viewportFraction) -
+                _gatewayStoryGap;
+            final cardHeight = cardWidth / _gatewayStoryCardAspectRatio;
+            return SizedBox(
+              key: const Key('gateway-story-viewport'),
+              height: cardHeight,
+              child: PageView.builder(
+                controller: controller,
+                itemCount: stories.length,
+                onPageChanged: onChanged,
+                padEnds: false,
+                itemBuilder: (context, itemIndex) {
+                  final story = stories[itemIndex];
+                  return Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      end: _gatewayStoryGap,
+                    ),
+                    child: Semantics(
+                      image: true,
+                      label: '${story.title}. ${story.body}',
+                      child: DecoratedBox(
+                        key: ValueKey('gateway-story-card-$itemIndex'),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Color(0x12030B18), Color(0xF0030B18)],
-                            stops: [.28, 1],
-                          ),
-                        ),
-                      ),
-                      PositionedDirectional(
-                        start: 18,
-                        end: 18,
-                        bottom: 16,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              story.title,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 19,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              story.body,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: .72),
-                                height: 1.4,
-                              ),
+                          borderRadius: BorderRadius.circular(28),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0x16000000),
+                              blurRadius: 28,
+                              offset: Offset(0, 12),
                             ),
                           ],
                         ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(28),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.asset(
+                                story.asset,
+                                key: ValueKey('gateway-story-image-$itemIndex'),
+                                fit: BoxFit.cover,
+                                alignment: Alignment.center,
+                                errorBuilder: (_, _, _) => const DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        Color(0xFFEAF4FF),
+                                        Color(0xFFDDF7EF),
+                                      ],
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Icon(
+                                      Icons.landscape_rounded,
+                                      size: 72,
+                                      color: Color(0xFF0877F9),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const DecoratedBox(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Color(0x00000000),
+                                      Color(0x05000000),
+                                      Color(0x33000000),
+                                    ],
+                                    stops: [.52, .72, 1],
+                                  ),
+                                ),
+                              ),
+                              PositionedDirectional(
+                                start: 16,
+                                bottom: 16,
+                                child: _StoryGlassSignal(icon: story.icon),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 15),
+        IndexedStack(
+          key: const Key('gateway-story-copy-slot'),
+          index: index.clamp(0, stories.length - 1).toInt(),
+          alignment: Alignment.topCenter,
+          sizing: StackFit.loose,
+          children: [
+            for (final story in stories)
+              Column(
+                children: [
+                  Text(
+                    story.title,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Color(0xFF111318),
+                      fontSize: 21.5,
+                      height: 1.16,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -.45,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      story.body,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Color(0xFF666C76),
+                        fontSize: 13.5,
+                        height: 1.35,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: List.generate(
             stories.length,
             (itemIndex) => AnimatedContainer(
               duration: const Duration(milliseconds: 180),
-              width: itemIndex == index ? 22 : 6,
-              height: 6,
-              margin: const EdgeInsets.symmetric(horizontal: 3),
+              width: itemIndex == index ? 8 : 7,
+              height: itemIndex == index ? 8 : 7,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
                 color: itemIndex == index
-                    ? const Color(0xFF22D3EE)
-                    : const Color(0xFFD0D5DD),
-                borderRadius: BorderRadius.circular(99),
+                    ? const Color(0xFF0877F9)
+                    : const Color(0xFFD1D3D8),
+                shape: BoxShape.circle,
               ),
             ),
           ),
@@ -422,4 +475,55 @@ class _GatewayStoryPager extends StatelessWidget {
       ],
     );
   }
+}
+
+class _StoryGlassSignal extends StatelessWidget {
+  const _StoryGlassSignal({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) => ClipRRect(
+    borderRadius: BorderRadius.circular(16),
+    child: BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+      child: Container(
+        width: 104,
+        height: 66,
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: .76),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withValues(alpha: .78)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Icon(icon, color: const Color(0xFF0877F9), size: 19),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: List.generate(5, (index) {
+                  const heights = <double>[13, 22, 18, 29, 35];
+                  return AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    width: 5,
+                    height: heights[index],
+                    decoration: BoxDecoration(
+                      color: const Color(
+                        0xFF0877F9,
+                      ).withValues(alpha: .58 + (index * .08)),
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  );
+                }),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }

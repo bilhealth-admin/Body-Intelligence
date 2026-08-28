@@ -19,4 +19,25 @@ void main() {
       expect(source, isNot(contains('class FirstValueHandoffCard')));
     },
   );
+
+  test('weight and steps use real three-zone crystalline Cartesian bars', () {
+    final source = File(
+      'lib/features/dashboard/widgets/'
+      'dashboard_reference_phone_components.dart',
+    ).readAsStringSync();
+    final grid = File(
+      'lib/features/dashboard/widgets/dashboard_grid.dart',
+    ).readAsStringSync();
+
+    expect(source, contains('final slotWidth = size.width / values.length'));
+    expect(source, contains('canvas.drawRRect'));
+    expect(source, contains('LinearGradient('));
+    expect(source, contains('AppColors.protein'));
+    expect(source, contains('AppColors.carbs'));
+    expect(source, contains('AppColors.fats'));
+    expect(source, contains('((index * 3) ~/ values.length).clamp(0, 2)'));
+    expect(source, isNot(contains('canvas.drawPath(')));
+    expect(grid, contains('weightTrendValues: weights'));
+    expect(grid, contains('stepTrendValues: dailyLogs'));
+  });
 }

@@ -23,6 +23,8 @@ void main() {
         carbs: 8,
         fats: 4,
         sodium: 0,
+        servingSize: 100,
+        servingUnit: 'g',
       );
       final mealId = await meals.createMeal(
         date: DateTime.utc(2026, 7, 23, 8),

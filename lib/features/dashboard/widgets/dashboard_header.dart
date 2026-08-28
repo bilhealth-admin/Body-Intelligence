@@ -76,13 +76,24 @@ class _CoachConversationEntry extends StatelessWidget {
               Container(
                 width: 40,
                 height: 40,
-                decoration: const BoxDecoration(
+                padding: const EdgeInsets.all(1.5),
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFF1A3A4B),
+                  color: const Color(0xFFC8F3FF),
+                  border: Border.all(color: Colors.white70),
                 ),
-                child: const Icon(
-                  Icons.auto_awesome_rounded,
-                  color: Color(0xFFBCEFFC),
+                child: ClipOval(
+                  child: Image.asset(
+                    'assets/images/ai_coach/bil_male_smart_coach_v1.png',
+                    fit: BoxFit.cover,
+                    excludeFromSemantics: true,
+                    errorBuilder: (_, _, _) => Image.asset(
+                      'assets/images/flagship/bil_body_intelligence_journey_v1.png',
+                      fit: BoxFit.cover,
+                      alignment: const Alignment(.18, -.72),
+                      excludeFromSemantics: true,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 14),
@@ -104,6 +115,21 @@ class _CoachConversationEntry extends StatelessWidget {
                       style: const TextStyle(color: Color(0xFFBCD0DA)),
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: .09),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white12),
+                ),
+                child: const Icon(
+                  Icons.auto_awesome_rounded,
+                  size: 19,
+                  color: Color(0xFF7CE8F5),
                 ),
               ),
             ],

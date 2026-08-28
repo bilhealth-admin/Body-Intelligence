@@ -1,25 +1,306 @@
 import 'package:flutter/widgets.dart';
 
 import '../../app/localization/app_localizations.dart';
+import '../../app/localization/bil_locale_policy.dart';
+import '../../app/localization/runtime_copy_profile.dart';
 
 String profileLocaleText(BuildContext context, String english, String arabic) {
-  final code = Localizations.localeOf(context).languageCode;
-  if (code == 'ar') return arabic;
-  return _authored[english]?[code] ??
-      AppLocalizations(Locale(code)).text(english);
+  return profileLocaleTextForLocale(
+    Localizations.localeOf(context),
+    english,
+    arabic,
+  );
+}
+
+String profileLocaleTextForLocale(
+  Locale locale,
+  String english,
+  String arabic,
+) {
+  final language = locale.languageCode;
+  final tag = BilLocalePolicy.canonicalTag(locale);
+  final reviewed = ProfileRuntimeCopy.resolve(english, tag);
+  if (reviewed != null) return reviewed;
+  if (language == 'ar') return arabic;
+  return _authored[english]?[tag] ??
+      _authored[english]?[language] ??
+      AppLocalizations(locale).text(english);
 }
 
 String profileWeeklySessionsText(BuildContext context, int sessions) {
-  return switch (Localizations.localeOf(context).languageCode) {
-    'ar' => '$sessions مرات أسبوعيًا',
-    'fr' => '$sessions fois par semaine',
-    'es' => '$sessions veces por semana',
-    'tr' => 'Haftada $sessions kez',
-    _ => '$sessions per week',
-  };
+  return profileWeeklySessionsTextForLocale(
+    Localizations.localeOf(context),
+    sessions,
+  );
 }
 
+String profileWeeklySessionsTextForLocale(Locale locale, int sessions) {
+  return _fillProfileTemplate(
+    _weeklySessionsTemplates[_profileSupportedTag(locale)]!,
+    {'sessions': '$sessions'},
+  );
+}
+
+String profileGoalTimelineRangeText(
+  Locale locale, {
+  required String minimumWeeks,
+  required String maximumWeeks,
+  required String earliestDate,
+  required String latestDate,
+}) {
+  return _fillProfileTemplate(
+    _goalTimelineRangeTemplates[_profileSupportedTag(locale)]!,
+    {
+      'min': minimumWeeks,
+      'max': maximumWeeks,
+      'earliest': earliestDate,
+      'latest': latestDate,
+    },
+  );
+}
+
+String profileGoalTimelineSupportingText(
+  Locale locale, {
+  required String direction,
+  required String lowRate,
+  required String highRate,
+  required String adherence,
+}) {
+  return _fillProfileTemplate(
+    _goalTimelineSupportingTemplates[_profileSupportedTag(locale)]!,
+    {
+      'direction': direction,
+      'low': lowRate,
+      'high': highRate,
+      'adherence': adherence,
+    },
+  );
+}
+
+bool get profileTimelineCopyBalanced {
+  final supported = ProfileRuntimeCopy.supported;
+  return <Map<String, String>>[
+    _weeklySessionsTemplates,
+    _goalTimelineRangeTemplates,
+    _goalTimelineSupportingTemplates,
+  ].every(
+    (templates) =>
+        templates.length == supported.length &&
+        templates.keys.toSet().containsAll(supported) &&
+        supported.containsAll(templates.keys) &&
+        templates.values.every((value) => value.trim().isNotEmpty),
+  );
+}
+
+String _profileSupportedTag(Locale locale) {
+  return BilLocalePolicy.canonicalSupportedTag(
+        BilLocalePolicy.canonicalTag(locale),
+      ) ??
+      'en';
+}
+
+String _fillProfileTemplate(String template, Map<String, String> replacements) {
+  var value = template;
+  for (final entry in replacements.entries) {
+    value = value.replaceAll('{${entry.key}}', entry.value);
+  }
+  return value;
+}
+
+const _weeklySessionsTemplates = <String, String>{
+  'ar': '{sessions} مرات أسبوعيًا',
+  'en': '{sessions} per week',
+  'fr': '{sessions} fois par semaine',
+  'es': '{sessions} veces por semana',
+  'tr': 'Haftada {sessions} kez',
+  'de': '{sessions}-mal pro Woche',
+  'it': '{sessions} volte a settimana',
+  'pt-BR': '{sessions} vezes por semana',
+  'pt-PT': '{sessions} vezes por semana',
+  'ur': 'فی ہفتہ {sessions} بار',
+  'fa': '{sessions} بار در هفته',
+  'hi': 'प्रति सप्ताह {sessions} बार',
+  'id': '{sessions} kali per minggu',
+  'ms': '{sessions} kali seminggu',
+  'ja': '週{sessions}回',
+  'ko': '주 {sessions}회',
+  'zh-Hans': '每周 {sessions} 次',
+  'zh-Hant': '每週 {sessions} 次',
+  'ru': '{sessions} раз в неделю',
+  'bn': 'সপ্তাহে {sessions} বার',
+  'vi': '{sessions} lần mỗi tuần',
+  'th': '{sessions} ครั้งต่อสัปดาห์',
+  'pl': '{sessions} razy w tygodniu',
+  'nl': '{sessions} keer per week',
+  'uk': '{sessions} разів на тиждень',
+};
+
+const _goalTimelineRangeTemplates = <String, String>{
+  'ar': '{min}–{max} أسبوعًا · {earliest}–{latest}',
+  'en': '{min}–{max} weeks · {earliest}–{latest}',
+  'fr': '{min}–{max} semaines · {earliest}–{latest}',
+  'es': '{min}–{max} semanas · {earliest}–{latest}',
+  'tr': '{min}–{max} hafta · {earliest}–{latest}',
+  'de': '{min}–{max} Wochen · {earliest}–{latest}',
+  'it': '{min}–{max} settimane · {earliest}–{latest}',
+  'pt-BR': '{min}–{max} semanas · {earliest}–{latest}',
+  'pt-PT': '{min}–{max} semanas · {earliest}–{latest}',
+  'ur': '{min}–{max} ہفتے · {earliest}–{latest}',
+  'fa': '{min}–{max} هفته · {earliest}–{latest}',
+  'hi': '{min}–{max} सप्ताह · {earliest}–{latest}',
+  'id': '{min}–{max} minggu · {earliest}–{latest}',
+  'ms': '{min}–{max} minggu · {earliest}–{latest}',
+  'ja': '{min}〜{max}週間 · {earliest}〜{latest}',
+  'ko': '{min}~{max}주 · {earliest}~{latest}',
+  'zh-Hans': '{min}–{max} 周 · {earliest}–{latest}',
+  'zh-Hant': '{min}–{max} 週 · {earliest}–{latest}',
+  'ru': '{min}–{max} недель · {earliest}–{latest}',
+  'bn': '{min}–{max} সপ্তাহ · {earliest}–{latest}',
+  'vi': '{min}–{max} tuần · {earliest}–{latest}',
+  'th': '{min}–{max} สัปดาห์ · {earliest}–{latest}',
+  'pl': '{min}–{max} tyg. · {earliest}–{latest}',
+  'nl': '{min}–{max} weken · {earliest}–{latest}',
+  'uk': '{min}–{max} тижнів · {earliest}–{latest}',
+};
+
+const _goalTimelineSupportingTemplates = <String, String>{
+  'ar':
+      'نطاق {direction} مخطط: {low}–{high} كجم/أسبوع بافتراض التزام {adherence}٪. تقدير وليس ضمانًا.',
+  'en':
+      'Planned {direction} range {low}–{high} kg/week at {adherence}% adherence. Estimate, not a guarantee.',
+  'fr':
+      'Fourchette planifiée de {direction} : {low}–{high} kg/semaine avec {adherence} % d’adhérence. Estimation, sans garantie.',
+  'es':
+      'Rango planificado de {direction}: {low}–{high} kg/semana con {adherence} % de adherencia. Es una estimación, no una garantía.',
+  'tr':
+      '%{adherence} uyum varsayımıyla planlanan {direction} aralığı {low}–{high} kg/hafta. Bu bir tahmindir, garanti değildir.',
+  'de':
+      'Geplanter Bereich für {direction}: {low}–{high} kg/Woche bei {adherence} % Einhaltung. Schätzung, keine Garantie.',
+  'it':
+      'Intervallo pianificato di {direction}: {low}–{high} kg/settimana con un’aderenza del {adherence}%. È una stima, non una garanzia.',
+  'pt-BR':
+      'Faixa planejada de {direction}: {low}–{high} kg/semana com {adherence}% de adesão. É uma estimativa, não uma garantia.',
+  'pt-PT':
+      'Intervalo planeado de {direction}: {low}–{high} kg/semana com {adherence}% de adesão. É uma estimativa, não uma garantia.',
+  'ur':
+      '{direction} کی منصوبہ بند حد {low}–{high} کلوگرام فی ہفتہ ہے، {adherence}٪ پابندی فرض کرتے ہوئے۔ یہ تخمینہ ہے، ضمانت نہیں۔',
+  'fa':
+      'بازه برنامه‌ریزی‌شده {direction}، {low} تا {high} کیلوگرم در هفته با فرض پایبندی {adherence}٪ است. این برآورد است، نه تضمین.',
+  'hi':
+      '{adherence}% पालन मानकर {direction} की नियोजित सीमा {low}–{high} किग्रा/सप्ताह है। यह अनुमान है, गारंटी नहीं।',
+  'id':
+      'Rentang {direction} yang direncanakan {low}–{high} kg/minggu dengan kepatuhan {adherence}%. Ini perkiraan, bukan jaminan.',
+  'ms':
+      'Julat {direction} yang dirancang ialah {low}–{high} kg/minggu dengan pematuhan {adherence}%. Ini anggaran, bukan jaminan.',
+  'ja':
+      '計画上の{direction}幅は、達成率{adherence}%を前提に週{low}〜{high} kgです。これは推定であり、保証ではありません。',
+  'ko':
+      '준수율 {adherence}%를 가정한 계획 {direction} 범위는 주당 {low}~{high}kg입니다. 이는 예상치이며 보장되지 않습니다.',
+  'zh-Hans':
+      '按 {adherence}% 的执行率估算，计划{direction}范围为每周 {low}–{high} 公斤。这只是估算，并非保证。',
+  'zh-Hant':
+      '按 {adherence}% 的執行率估算，計畫{direction}範圍為每週 {low}–{high} 公斤。這只是估算，並非保證。',
+  'ru':
+      'Плановый диапазон «{direction}»: {low}–{high} кг/неделю при соблюдении плана на {adherence}%. Это оценка, а не гарантия.',
+  'bn':
+      '{adherence}% অনুসরণ ধরে পরিকল্পিত {direction} সীমা প্রতি সপ্তাহে {low}–{high} কেজি। এটি আনুমানিক হিসাব, নিশ্চয়তা নয়।',
+  'vi':
+      'Phạm vi {direction} dự kiến là {low}–{high} kg/tuần với mức tuân thủ {adherence}%. Đây là ước tính, không phải cam kết.',
+  'th':
+      'ช่วง{direction}ที่วางแผนไว้คือ {low}–{high} กก./สัปดาห์ โดยสมมติว่าทำตามแผน {adherence}% นี่เป็นเพียงค่าประมาณ ไม่ใช่การรับประกัน',
+  'pl':
+      'Planowany zakres {direction}: {low}–{high} kg/tydzień przy przestrzeganiu planu w {adherence}%. To szacunek, nie gwarancja.',
+  'nl':
+      'Gepland bereik voor {direction}: {low}–{high} kg/week bij {adherence}% naleving. Dit is een schatting, geen garantie.',
+  'uk':
+      'Запланований діапазон «{direction}»: {low}–{high} кг/тиждень за дотримання плану на {adherence}%. Це оцінка, а не гарантія.',
+};
+
 const _authored = <String, Map<String, String>>{
+  'Dietary system': {
+    'fr': 'Système alimentaire',
+    'es': 'Sistema alimentario',
+    'tr': 'Beslenme sistemi',
+  },
+  'Eating pattern': {
+    'fr': 'Mode alimentaire',
+    'es': 'Patrón alimentario',
+    'tr': 'Beslenme düzeni',
+  },
+  'Plan style': {
+    'fr': 'Style du plan',
+    'es': 'Estilo del plan',
+    'tr': 'Plan stili',
+  },
+  'Eating pattern controls compatible foods. Plan style shapes meal suggestions; neither changes allergy safeguards.': {
+    'fr':
+        'Le mode alimentaire détermine les aliments compatibles. Le style du plan oriente les suggestions de repas sans modifier les protections liées aux allergies.',
+    'es':
+        'El patrón alimentario determina los alimentos compatibles. El estilo del plan orienta las sugerencias sin cambiar las protecciones por alergias.',
+    'tr':
+        'Beslenme düzeni uyumlu yiyecekleri belirler. Plan stili öğün önerilerini şekillendirir; alerji korumalarını değiştirmez.',
+  },
+  'Omnivore': {'fr': 'Omnivore', 'es': 'Omnívoro', 'tr': 'Hepçil'},
+  'Pescatarian': {
+    'fr': 'Pescétarien',
+    'es': 'Pescetariano',
+    'tr': 'Pesketaryen',
+  },
+  'Vegetarian': {'fr': 'Végétarien', 'es': 'Vegetariano', 'tr': 'Vejetaryen'},
+  'Vegan': {'fr': 'Végane', 'es': 'Vegano', 'tr': 'Vegan'},
+  'Balanced': {'fr': 'Équilibré', 'es': 'Equilibrado', 'tr': 'Dengeli'},
+  'High protein': {
+    'fr': 'Riche en protéines',
+    'es': 'Alto en proteínas',
+    'tr': 'Yüksek protein',
+  },
+  'Low carb': {
+    'fr': 'Faible en glucides',
+    'es': 'Bajo en carbohidratos',
+    'tr': 'Düşük karbonhidrat',
+  },
+  'Plant-forward': {
+    'fr': 'À dominante végétale',
+    'es': 'Centrado en plantas',
+    'tr': 'Bitki ağırlıklı',
+  },
+  'Goal timeline': {
+    'fr': 'Calendrier de l’objectif',
+    'es': 'Cronograma del objetivo',
+    'tr': 'Hedef zaman çizelgesi',
+  },
+  'Estimated time to goal': {
+    'fr': 'Temps estimé pour atteindre l’objectif',
+    'es': 'Tiempo estimado para el objetivo',
+    'tr': 'Hedefe tahmini süre',
+  },
+  'Already at goal': {
+    'fr': 'Objectif déjà atteint',
+    'es': 'Ya estás en el objetivo',
+    'tr': 'Hedefe zaten ulaşıldı',
+  },
+  'Maintenance plan · no countdown': {
+    'fr': 'Plan de maintien · aucun compte à rebours',
+    'es': 'Plan de mantenimiento · sin cuenta atrás',
+    'tr': 'Koruma planı · geri sayım yok',
+  },
+  'Current weight is within the goal range. This is an estimate, not a guarantee.': {
+    'fr':
+        'Le poids actuel est dans la plage cible. Il s’agit d’une estimation, sans garantie.',
+    'es':
+        'El peso actual está dentro del rango objetivo. Es una estimación, no una garantía.',
+    'tr': 'Mevcut kilo hedef aralığında. Bu bir tahmindir, garanti değildir.',
+  },
+  'Maintenance has no completion date. This is an estimate, not a guarantee.': {
+    'fr':
+        'Le maintien n’a pas de date de fin. Il s’agit d’une estimation, sans garantie.',
+    'es':
+        'El mantenimiento no tiene fecha de finalización. Es una estimación, no una garantía.',
+    'tr':
+        'Korumanın tamamlanma tarihi yoktur. Bu bir tahmindir, garanti değildir.',
+  },
+  'loss': {'fr': 'perte', 'es': 'pérdida', 'tr': 'kayıp'},
+  'gain': {'fr': 'prise', 'es': 'aumento', 'tr': 'artış'},
   'Personal details': {
     'fr': 'Informations personnelles',
     'es': 'Datos personales',

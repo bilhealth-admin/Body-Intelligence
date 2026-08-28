@@ -157,6 +157,7 @@ class WeightRepository {
   void _validateContext(String value) {
     if (!const {
       'morning',
+      'afterFood',
       'afterBathroom',
       'beforeFoodDrink',
       'differentConditions',

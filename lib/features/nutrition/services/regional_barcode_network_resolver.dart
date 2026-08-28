@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../app/localization/app_localizations.dart';
 import '../domain/unified_food.dart';
 import '../domain/product_identity.dart';
 import 'product_classifier.dart';
@@ -36,10 +37,6 @@ class RegionalBarcodeNetworkResolver {
 
   final ProductClassifier productClassifier;
 
-  // Provider credentials are server-side only. This empty legacy constant
-  // keeps the retired parser code inert until its next mechanical cleanup.
-  static const _usdaKey = '';
-
   Future<RegionalBarcodeLookup> resolve(String barcode) async {
     final cached = await _readCache(barcode);
     if (cached != null) {
@@ -67,7 +64,10 @@ class RegionalBarcodeNetworkResolver {
       );
     }
 
-    final trusted = await _bilBackend(barcode);
+    final trusted = await _bilBackend(
+      barcode,
+      AppLocalizations.activeLocale.toLanguageTag(),
+    );
     if (trusted != null) {
       final food = trusted.$1;
       if (food != null) await _writeCache(barcode, food);
@@ -88,218 +88,123 @@ class RegionalBarcodeNetworkResolver {
     );
   }
 
-  Future<(UnifiedFood?, ProductIdentity)?> _bilBackend(String barcode) async {
+  Future<(UnifiedFood?, ProductIdentity)?> _bilBackend(
+    String barcode,
+    String localeTag,
+  ) async {
     try {
       final response = await Supabase.instance.client.functions.invoke(
         'barcode-lookup',
-        body: <String, Object?>{'gtin': barcode},
+        body: <String, Object?>{'gtin': barcode, 'locale': localeTag},
       );
       if (response.status != 200 || response.data is! Map) return null;
       final root = Map<String, dynamic>.from(response.data as Map);
       final payloadRaw = root['payload'];
       if (root['status'] != 'found' || payloadRaw is! Map) return null;
       final payload = Map<String, dynamic>.from(payloadRaw);
-      final name = payload['name']?.toString().trim() ?? '';
+      final languageCode = localeTag.toLowerCase().split(RegExp('[-_]')).first;
+      final names = payload['names'] is Map
+          ? Map<String, dynamic>.from(payload['names'] as Map)
+          : const <String, dynamic>{};
+      final localizedName = names[languageCode]?.toString().trim() ?? '';
+      final name = localizedName.isNotEmpty
+          ? localizedName
+          : payload['name']?.toString().trim() ?? '';
       if (name.isEmpty) return null;
-      final nutrientRows = payload['nutrients'] is List
-          ? payload['nutrients'] as List
-          : const <Object?>[];
-      double? nutrient(String expected) {
-        for (final raw in nutrientRows) {
-          if (raw is! Map) continue;
-          final row = Map<String, dynamic>.from(raw);
-          if ((row['name']?.toString().toLowerCase() ?? '') ==
-              expected.toLowerCase()) {
-            return (row['amount'] as num?)?.toDouble();
-          }
-        }
-        return null;
-      }
 
-      final food = UnifiedFood(
-        id: 'usda:${payload['fdc_id'] ?? barcode}',
-        name: name,
+      final provider =
+          payload['provider']?.toString() ??
+          root['source']?.toString() ??
+          'bil';
+      final kind = provider == 'usda'
+          ? ProductKind.food
+          : productClassifier.classify(payload, name);
+      final identity = ProductIdentity(
         barcode: barcode,
-        category: 'regional branded',
-        serving: const FoodServing(amount: 100, unit: 'g', grams: 100),
-        nutrients: <FoodNutrient, NutrientAmount>{
-          FoodNutrient.calories: _amount(nutrient('Energy')),
-          FoodNutrient.protein: _amount(nutrient('Protein')),
-          FoodNutrient.carbohydrates: _amount(
-            nutrient('Carbohydrate, by difference'),
-          ),
-          FoodNutrient.fat: _amount(nutrient('Total lipid (fat)')),
-          FoodNutrient.fiber: _amount(nutrient('Fiber, total dietary')),
-          FoodNutrient.sodium: _amount(nutrient('Sodium, Na')),
-          FoodNutrient.potassium: _amount(nutrient('Potassium, K')),
-        },
-        source: FoodDataSource.branded,
-        sourceLabel: 'BIL verified barcode gateway — USDA',
-        verified: true,
-        isCustom: false,
-        updatedAt: DateTime.now(),
+        kind: kind,
+        name: name,
+        arabicName:
+            names['ar']?.toString().trim() ??
+            payload['arabic_name']?.toString().trim(),
+        brand: payload['brand']?.toString().trim(),
+        source: provider == 'open_facts'
+            ? 'Open Facts universal catalog'
+            : 'BIL verified barcode gateway — USDA',
+        confidence: payload['product_type'] != null || provider == 'usda'
+            ? ProductIdentityConfidence.high
+            : ProductIdentityConfidence.medium,
       );
-      return (
-        food,
-        ProductIdentity(
-          barcode: barcode,
-          kind: ProductKind.food,
-          name: name,
-          brand: payload['brand']?.toString(),
-          source: 'BIL verified barcode gateway',
-          confidence: ProductIdentityConfidence.high,
-        ),
+      final food = _foodFromGatewayPayload(
+        barcode: barcode,
+        payload: payload,
+        identity: identity,
+        provider: provider,
       );
+      return (food, identity);
     } on Object {
       return null;
     }
   }
 
-  // Retained only for cache-schema migration compatibility; never called by
-  // the production resolver, which is server-gated above.
-  // ignore: unused_element
-  Future<(UnifiedFood?, ProductIdentity)?> _openFacts(String barcode) async {
-    final uri = Uri.https(
-      'world.openfoodfacts.org',
-      '/api/v3/product/$barcode',
-      <String, String>{
-        'product_type': 'all',
-        'fields':
-            'code,product_type,product_name,product_name_ar,brands,categories,categories_tags,labels_tags,nutriments,serving_quantity',
-      },
-    );
-    final json = await _getJson(uri);
-    if (json == null || (json['status'] != 'success' && json['status'] != 1)) {
-      return null;
-    }
-    final product = json['product'];
-    if (product is! Map<String, dynamic>) return null;
-    final name = (product['product_name'] as String?)?.trim();
-    final brand = (product['brands'] as String?)?.trim();
-    final displayName = name?.isNotEmpty == true
-        ? name!
-        : brand?.isNotEmpty == true
-        ? brand!
-        : 'Recognized product';
-    final kind = productClassifier.classify(product, displayName);
-    final identity = ProductIdentity(
-      barcode: barcode,
-      kind: kind,
-      name: displayName,
-      arabicName: (product['product_name_ar'] as String?)?.trim(),
-      brand: brand,
-      source: 'Open Facts',
-      confidence: product['product_type'] != null
-          ? ProductIdentityConfidence.high
-          : ProductIdentityConfidence.medium,
-    );
-    if (!identity.hasNutritionUse || name == null || name.isEmpty) {
-      return (null, identity);
-    }
-    final nutrients = product['nutriments'] is Map<String, dynamic>
-        ? product['nutriments'] as Map<String, dynamic>
-        : const <String, dynamic>{};
-
-    double? value(String key) {
-      final raw = nutrients[key];
-      return raw is num ? raw.toDouble() : double.tryParse('$raw');
-    }
-
-    final hasCoreNutrition = <String>[
-      'energy-kcal_100g',
-      'proteins_100g',
-      'carbohydrates_100g',
-      'fat_100g',
-    ].any((key) => value(key) != null);
-    if (!hasCoreNutrition) return (null, identity);
-
-    final food = UnifiedFood(
-      id: 'off:$barcode',
-      name: name,
-      arabicName: (product['product_name_ar'] as String?)?.trim(),
-      category: 'regional branded',
-      keywords: <String>[
-        if ((product['brands'] as String?)?.trim().isNotEmpty == true)
-          product['brands'] as String,
-      ],
-      barcode: barcode,
-      serving: FoodServing(amount: 100, unit: 'g', grams: 100),
-      nutrients: <FoodNutrient, NutrientAmount>{
-        FoodNutrient.calories: _amount(value('energy-kcal_100g')),
-        FoodNutrient.protein: _amount(value('proteins_100g')),
-        FoodNutrient.carbohydrates: _amount(value('carbohydrates_100g')),
-        FoodNutrient.fat: _amount(value('fat_100g')),
-        FoodNutrient.fiber: _amount(value('fiber_100g')),
-        FoodNutrient.sugar: _amount(value('sugars_100g')),
-        FoodNutrient.sodium: _amount(
-          value('sodium_100g') == null ? null : value('sodium_100g')! * 1000,
-        ),
-        FoodNutrient.potassium: _amount(value('potassium_100g')),
-      },
-      source: FoodDataSource.branded,
-      sourceLabel: 'Open Food Facts',
-      verified: false,
-      isCustom: false,
-      updatedAt: DateTime.now(),
-    );
-    return (food, identity);
-  }
-
-  // ignore: unused_element
-  Future<UnifiedFood?> _usda(String barcode) async {
-    final uri = Uri.https(
-      'api.nal.usda.gov',
-      '/fdc/v1/foods/search',
-      <String, String>{
-        'api_key': _usdaKey,
-        'query': barcode,
-        'dataType': 'Branded',
-        'pageSize': '5',
-      },
-    );
-    final json = await _getJson(uri);
-    final foods = json?['foods'];
-    if (foods is! List || foods.isEmpty) return null;
-    final item = foods.first;
-    if (item is! Map<String, dynamic>) return null;
-    final description = (item['description'] as String?)?.trim();
-    if (description == null || description.isEmpty) return null;
-    final nutrients = item['foodNutrients'] is List
-        ? item['foodNutrients'] as List
+  UnifiedFood? _foodFromGatewayPayload({
+    required String barcode,
+    required Map<String, dynamic> payload,
+    required ProductIdentity identity,
+    required String provider,
+  }) {
+    if (!identity.hasNutritionUse) return null;
+    final nutrientRows = payload['nutrients'] is List
+        ? payload['nutrients'] as List
         : const <Object?>[];
-
-    double? nutrient(String name) {
-      for (final raw in nutrients) {
-        if (raw is! Map<String, dynamic>) continue;
-        if ((raw['nutrientName'] as String?)?.toLowerCase() ==
-            name.toLowerCase()) {
-          final value = raw['value'];
-          return value is num ? value.toDouble() : double.tryParse('$value');
+    double? nutrient(String expected) {
+      for (final raw in nutrientRows) {
+        if (raw is! Map) continue;
+        final row = Map<String, dynamic>.from(raw);
+        if ((row['name']?.toString().toLowerCase() ?? '') ==
+            expected.toLowerCase()) {
+          return (row['amount'] as num?)?.toDouble();
         }
       }
       return null;
     }
 
+    final calories = nutrient('Energy');
+    if (calories == null) return null;
+    final sourceLabel = provider == 'open_facts'
+        ? 'Open Food Facts'
+        : 'BIL verified barcode gateway — USDA';
     return UnifiedFood(
-      id: 'usda:${item['fdcId']}',
-      name: description,
+      id: provider == 'open_facts'
+          ? 'off:$barcode'
+          : 'usda:${payload['fdc_id'] ?? barcode}',
+      name: identity.name,
+      arabicName: identity.arabicName,
       barcode: barcode,
-      category: 'regional branded',
+      category: identity.kind.name,
+      keywords: <String>[
+        if (identity.brand?.isNotEmpty == true) identity.brand!,
+      ],
       serving: const FoodServing(amount: 100, unit: 'g', grams: 100),
       nutrients: <FoodNutrient, NutrientAmount>{
-        FoodNutrient.calories: _amount(nutrient('Energy')),
+        FoodNutrient.calories: _amount(calories),
         FoodNutrient.protein: _amount(nutrient('Protein')),
         FoodNutrient.carbohydrates: _amount(
           nutrient('Carbohydrate, by difference'),
         ),
         FoodNutrient.fat: _amount(nutrient('Total lipid (fat)')),
         FoodNutrient.fiber: _amount(nutrient('Fiber, total dietary')),
+        FoodNutrient.sugar: _amount(nutrient('Sugars, total')),
         FoodNutrient.sodium: _amount(nutrient('Sodium, Na')),
         FoodNutrient.potassium: _amount(nutrient('Potassium, K')),
+        FoodNutrient.calcium: _amount(nutrient('Calcium, Ca')),
+        FoodNutrient.magnesium: _amount(nutrient('Magnesium, Mg')),
+        FoodNutrient.phosphorus: _amount(nutrient('Phosphorus, P')),
+        FoodNutrient.iron: _amount(nutrient('Iron, Fe')),
+        FoodNutrient.vitaminC: _amount(nutrient('Vitamin C')),
       },
       source: FoodDataSource.branded,
-      sourceLabel: 'USDA FoodData Central',
-      verified: true,
+      sourceLabel: sourceLabel,
+      verified: provider == 'usda',
       isCustom: false,
       updatedAt: DateTime.now(),
     );
@@ -308,25 +213,6 @@ class RegionalBarcodeNetworkResolver {
   NutrientAmount _amount(double? value) => value == null
       ? const NutrientAmount.missing()
       : NutrientAmount.known(value);
-
-  Future<Map<String, dynamic>?> _getJson(Uri uri) async {
-    final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
-    try {
-      final request = await client.getUrl(uri);
-      request.headers.set(HttpHeaders.userAgentHeader, 'BIL/1.0');
-      final response = await request.close().timeout(
-        const Duration(seconds: 12),
-      );
-      if (response.statusCode != 200) return null;
-      final body = await utf8.decoder.bind(response).join();
-      final decoded = jsonDecode(body);
-      return decoded is Map<String, dynamic> ? decoded : null;
-    } catch (_) {
-      return null;
-    } finally {
-      client.close(force: true);
-    }
-  }
 
   Future<File> _cacheFile(String barcode) async {
     final root = await getApplicationSupportDirectory();

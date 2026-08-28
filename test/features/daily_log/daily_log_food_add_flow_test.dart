@@ -7,7 +7,12 @@ import 'package:body_intelligence_log/data/repositories/nutrition_goal_schedule_
 import 'package:body_intelligence_log/data/repositories/water_repository.dart';
 import 'package:body_intelligence_log/features/daily_log/daily_log_page.dart';
 import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
+import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
+import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/foods/providers/food_provider.dart';
+import 'package:body_intelligence_log/features/nutrition/services/food_runtime_search_authority.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:body_intelligence_log/core/units/measurement_units.dart';
 import 'package:drift/native.dart';
@@ -37,7 +42,12 @@ void main() {
     'repository food selection saves one reviewed snapshot and survives reload',
     (tester) async {
       final database = AppDatabase.forTesting(NativeDatabase.memory());
-      addTearDown(database.close);
+      addTearDown(
+        () => database.close().timeout(
+          const Duration(seconds: 2),
+          onTimeout: () {},
+        ),
+      );
       final foods = FoodRepository(database);
       final foodId = await foods.addFood(
         name: 'Plain Greek yogurt',
@@ -49,6 +59,8 @@ void main() {
         fats: 0.4,
         servingSize: 100,
         servingUnit: 'g',
+        fiber: 2.4,
+        sodium: 36,
         isCustom: false,
         verified: true,
         source: 'USDA FoodData Central',
@@ -58,15 +70,28 @@ void main() {
         (candidate) => candidate.id == foodId,
       );
       final selectedDate = DateTime(2026, 8, 14);
+      final premium = SubscriptionState(
+        plan: CommercePlan.premium,
+        entitlements: const {CommerceEntitlement.advancedIntelligence},
+        authority: EntitlementAuthority.verifiedServer,
+        isPurchasable: true,
+        canRestorePurchases: true,
+      );
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             databaseProvider.overrideWithValue(database),
+            verifiedSubscriptionStateProvider.overrideWithValue(
+              AsyncData(premium),
+            ),
             seedCatalogProvider.overrideWith((ref) async {}),
             foodsProvider.overrideWithValue(AsyncData([food])),
-            dailyMealsProvider.overrideWithValue(
-              const AsyncData(<MealWithItems>[]),
+            foodRuntimeSearchAuthorityProvider.overrideWithValue(
+              FoodRuntimeSearchAuthority(
+                foods,
+                catalogResolver: () async => null,
+              ),
             ),
             dailyWaterProvider.overrideWithValue(
               const AsyncData(<WaterEntry>[]),
@@ -122,9 +147,37 @@ void main() {
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
 
-      await tester.ensureVisible(find.byType(SearchBar));
+      final breakfastLog = find.byKey(const Key('daily-meal-log-breakfast'));
+      expect(
+        find.byKey(const Key('daily-meal-card-breakfast')),
+        findsOneWidget,
+      );
+      await tester.ensureVisible(breakfastLog);
       await tester.pump();
-      await tester.tap(find.byType(SearchBar));
+      await tester.tap(breakfastLog);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      if (find.byType(SearchBar).evaluate().isNotEmpty) {
+        final searchBar = find.byType(SearchBar).last;
+        await tester.ensureVisible(searchBar);
+        await tester.tap(searchBar);
+        await tester.pumpAndSettle();
+      }
+      expect(find.text('All'), findsNothing);
+      expect(find.text('My meals'), findsNothing);
+      expect(find.text('My recipes'), findsNothing);
+      expect(find.text('My foods'), findsNothing);
+      expect(find.byKey(const Key('daily-search-meal-selector')), findsNothing);
+      expect(find.byKey(const Key('daily-search-barcode')), findsNothing);
+      expect(find.byKey(const Key('daily-search-voice')), findsNothing);
+      expect(find.byKey(const Key('daily-search-meal-scan')), findsNothing);
+      expect(find.byKey(const Key('daily-search-quick-add')), findsNothing);
+      if (find.byType(SearchBar).evaluate().isNotEmpty &&
+          find.text('Plain Greek yogurt').evaluate().isEmpty) {
+        await tester.tap(find.byType(SearchBar).last);
+        await tester.pumpAndSettle();
+      }
+      await tester.enterText(find.byType(SearchBar).last, 'Plain Greek');
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
       expect(find.text('Plain Greek yogurt'), findsOneWidget);
@@ -132,11 +185,47 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
-      expect(find.textContaining('USDA FoodData Central'), findsOneWidget);
+      expect(find.text('Nutrition Facts'), findsOneWidget);
       expect(
-        find.byKey(const Key('daily-log-serving-choices')),
+        find.byKey(const Key('daily-log-nutrition-facts')),
         findsOneWidget,
       );
+      expect(
+        find.byKey(const Key('daily-log-nutrition-facts-expanded')),
+        findsNothing,
+        reason: 'Detailed nutrients stay collapsed until requested.',
+      );
+      await tester.ensureVisible(
+        find.byKey(const Key('daily-log-nutrition-facts')),
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('daily-log-nutrition-facts')));
+      await tester.pump();
+      expect(
+        find.byKey(const Key('daily-log-nutrition-facts-expanded')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('USDA FoodData Central'), findsNothing);
+      expect(
+        find.byKey(const Key('daily-log-meal-type-field')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('daily-log-serving-amount-field')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('daily-log-serving-unit-field')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('daily-log-focused-food-detail')),
+          matching: find.byType(SearchBar),
+        ),
+        findsNothing,
+      );
+      expect(find.byKey(const Key('daily-log-water-shortcut')), findsNothing);
       final save = find.widgetWithText(FilledButton, 'Save meal');
       expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
       await tester.ensureVisible(save);
@@ -147,6 +236,25 @@ void main() {
 
       final loggedMeals = await database.select(database.meals).get();
       final loggedItems = await database.select(database.mealItems).get();
+      await tester.pumpAndSettle();
+      final foodRow = find.byKey(
+        Key('daily-food-row-${loggedItems.single.id}'),
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('daily-log-focused-meal-page')),
+          matching: foodRow,
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: foodRow, matching: find.text('Plain Greek yogurt')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('daily-meal-detail-summary')),
+        findsOneWidget,
+      );
       expect(loggedMeals, hasLength(1));
       expect(loggedItems, hasLength(1));
       expect(loggedItems.single.foodId, foodId);
@@ -160,7 +268,7 @@ void main() {
       expect(loggedItems.single.foodSourceSnapshot, 'USDA FoodData Central');
 
       await tester.pumpWidget(const SizedBox.shrink());
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(milliseconds: 50));
       final reopenedItems = await database.select(database.mealItems).get();
       expect(reopenedItems.single.foodId, foodId);
     },

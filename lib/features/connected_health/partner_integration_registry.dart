@@ -49,18 +49,10 @@ abstract final class PartnerIntegrationRegistry {
     ),
     PartnerIntegrationCapability(
       id: 'medical-ble',
-      category: 'Medical device',
+      category: 'Fitness device',
       state: PartnerIntegrationState.deviceBridge,
-      dataTypes: {
-        'bloodPressure',
-        'glucose',
-        'weight',
-        'bodyComposition',
-        'oxygen',
-        'heartRate',
-        'temperature',
-      },
-      reasonCode: 'sig_gatt_profiles_device_verification_required',
+      dataTypes: {'weight', 'bodyComposition', 'heartRate'},
+      reasonCode: 'fitness_sig_gatt_profiles_device_verification_required',
     ),
     PartnerIntegrationCapability(
       id: 'garmin',

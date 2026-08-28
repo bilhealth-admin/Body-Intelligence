@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../../app/localization/app_localizations.dart';
+
 /// Locale-aware copy for analytics surfaces while their legacy prose is
 /// progressively moved into the central catalog.
 String analyticsText(BuildContext context, String english, String arabic) {
@@ -11,7 +13,7 @@ String analyticsText(BuildContext context, String english, String arabic) {
     'fr' => authored?.fr ?? 'Informations analytiques indisponibles',
     'es' => authored?.es ?? 'Información analítica no disponible',
     'tr' => authored?.tr ?? 'Analiz bilgisi kullanılamıyor',
-    _ => english,
+    _ => context.strings.text(english),
   };
 }
 
@@ -68,6 +70,7 @@ const _copy = <String, ({String fr, String es, String tr})>{
     tr: 'Seçilen aralık',
   ),
   'What changed': (fr: 'Ce qui a changé', es: 'Qué cambió', tr: 'Ne değişti'),
+  'Change': (fr: 'Variation', es: 'Cambio', tr: 'Değişim'),
   'Weight over time': (
     fr: 'Évolution du poids',
     es: 'Peso a lo largo del tiempo',

@@ -1,8 +1,8 @@
-"NSHealthShareUsageDescription" = "BIL فقط دسته‌های سلامتی انتخاب‌شده شما—فعالیت، خواب، اندازه‌گیری‌های بدن، شاخص‌های قلب و تنفس، فشار خون، اکسیژن، گلوکز، آب و تغذیه—را برای نمایش خط زمانی و تحلیل خصوصی در این دستگاه می‌خواند.";
+"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
 "NSHealthUpdateUsageDescription" = "BIL فقط سوابق سلامتی را می نویسد که شما صریحاً انتخاب کرده اید، پس از رضایت نامه جداگانه.";
-"NSBluetoothAlwaysUsageDescription" = "BIL فقط به دستگاه‌های بهداشتی متصل می‌شود که صریحاً آنها را جفت می‌کنید تا اندازه‌گیری‌ها را بتوان به صورت محلی وارد کرد.";
-"NSBluetoothPeripheralUsageDescription" = "BIL فقط به دستگاه‌های بهداشتی متصل می‌شود که صریحاً آنها را جفت می‌کنید تا اندازه‌گیری‌ها را بتوان به صورت محلی وارد کرد.";
+"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "فقط زمانی از دوربین استفاده کنید که اسکن بارکد، مرور عکس غذا، یا افزودن نمایه خصوصی یا عکس پیشرفت را انتخاب کنید.";
 "NSPhotoLibraryUsageDescription" = "قبل از ذخیره یا آپلود یک غذا، نمایه یا عکس پیشرفت را برای بررسی انتخاب کنید.";
-"NSMicrophoneUsageDescription" = "BIL تنها زمانی از میکروفون استفاده می کند که ورودی صوتی را برای غذا انتخاب می کنید.";
-"NSSpeechRecognitionUsageDescription" = "BIL عبارت غذایی را که صحبت می کنید به متن تبدیل می کند تا بتوانید قبل از ذخیره آن را مرور کنید.";
+"NSMicrophoneUsageDescription" = "BIL فقط زمانی از میکروفون استفاده می‌کند که ثبت صوتی غذا یا گفت‌وگوی مستقیم با مربی هوشمند BIL را انتخاب کنید.";
+"NSSpeechRecognitionUsageDescription" = "BIL گفتاری را که برای ثبت غذا یا مربی هوشمند BIL آغاز می‌کنید به متن تبدیل می‌کند تا بتوانید آن را بازبینی یا ارسال کنید.";

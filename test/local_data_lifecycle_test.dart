@@ -50,7 +50,7 @@ void main() {
               )
               as Map<String, dynamic>;
       expect(json['format'], 'BIL local export v3');
-      expect(json['schemaVersion'], 20);
+      expect(json['schemaVersion'], 21);
       expect(json['selectedDisplayUnits'], 'imperial');
       expect(json['profile'], isNotNull);
       for (final key in const [

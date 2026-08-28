@@ -64,6 +64,10 @@ void main() {
       'android.permission.health.READ_STEPS',
       'android.permission.health.READ_ACTIVE_CALORIES_BURNED',
       'android.permission.health.READ_EXERCISE',
+      'android.permission.health.READ_SLEEP',
+      'android.permission.health.READ_HEART_RATE',
+      'android.permission.health.READ_RESTING_HEART_RATE',
+      'android.permission.health.READ_HEART_RATE_VARIABILITY',
       'android.permission.health.READ_WEIGHT',
       'android.permission.health.WRITE_WEIGHT',
       'android.permission.health.READ_NUTRITION',
@@ -72,15 +76,30 @@ void main() {
       expect(manifest, contains(permission), reason: 'Missing: $permission');
     }
 
-    expect(manifest, isNot(contains('READ_SLEEP')));
-    expect(manifest, isNot(contains('READ_HEART_RATE')));
-    expect(manifest, isNot(contains('READ_HYDRATION')));
+    for (final excludedPermission in <String>[
+      'READ_HYDRATION',
+      'READ_OXYGEN_SATURATION',
+      'READ_BLOOD_GLUCOSE',
+      'READ_BLOOD_PRESSURE',
+      'READ_BODY_TEMPERATURE',
+      'READ_RESPIRATORY_RATE',
+    ]) {
+      expect(manifest, isNot(contains(excludedPermission)));
+    }
+    for (final excludedRecord in <String>[
+      'OxygenSaturationRecord',
+      'BloodGlucoseRecord',
+      'BloodPressureRecord',
+      'BodyTemperatureRecord',
+      'RespiratoryRateRecord',
+    ]) {
+      expect(bridge, isNot(contains(excludedRecord)));
+    }
+    expect(bridge, isNot(contains('"oxygen"')));
     expect(bridge, contains('"weight" -> WeightRecord('));
     expect(
       bridge,
-      contains(
-        'supportedNames = listOf("steps", "activeEnergy", "workout", "weight", "nutrition")',
-      ),
+      contains('"steps", "activeEnergy", "workout", "sleep", "weight"'),
     );
     expect(bridge, contains('else -> null'));
   });

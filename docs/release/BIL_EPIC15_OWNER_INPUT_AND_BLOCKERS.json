@@ -4,7 +4,7 @@
     "Legal owner name and copyright year",
     "Final Apple and Google product IDs and localized store pricing",
     "Apple subscription group",
-    "Store review account created outside Git",
+    "Enter the existing play-review@bilhealth.com credentials in Google Play and App Store review notes (never Git)",
     "Final target audience, IARC and Apple age-rating questionnaire answers"
   ],
   "external_blockers": [

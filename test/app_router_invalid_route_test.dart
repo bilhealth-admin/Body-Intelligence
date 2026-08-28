@@ -30,7 +30,7 @@ void main() {
     );
     expect(
       RegExp(r'returnPath:\s*_safeDailyReturnPath\(').allMatches(source).length,
-      2,
+      3,
     );
   });
 

@@ -1,12 +1,15 @@
 part of 'bil_workout_routines_page.dart';
 
-class _WorkoutExploreSections extends StatelessWidget {
+class _WorkoutExploreSections extends StatefulWidget {
   const _WorkoutExploreSections({
     required this.items,
     required this.savedIds,
     required this.mediaCache,
     required this.online,
+    required this.premiumUnlocked,
+    required this.premiumTier,
     required this.isLocked,
+    required this.onUpgrade,
     required this.onOpen,
     required this.onToggleSaved,
   });
@@ -15,45 +18,63 @@ class _WorkoutExploreSections extends StatelessWidget {
   final Set<String> savedIds;
   final WellnessMediaCache mediaCache;
   final bool online;
+  final bool premiumUnlocked;
+  final String premiumTier;
   final bool Function(WellnessContentItem item) isLocked;
+  final VoidCallback onUpgrade;
   final ValueChanged<WellnessContentItem> onOpen, onToggleSaved;
+
+  @override
+  State<_WorkoutExploreSections> createState() =>
+      _WorkoutExploreSectionsState();
+}
+
+class _WorkoutExploreSectionsState extends State<_WorkoutExploreSections> {
+  final Set<String> _expandedGroups = {};
 
   @override
   Widget build(BuildContext context) {
     final groups = <String, List<WellnessContentItem>>{};
-    final descriptions = <String, String?>{};
-    final orderedItems = [...items]
-      ..sort((left, right) {
-        final order = (left.categoryOrder ?? 1 << 30).compareTo(
-          right.categoryOrder ?? 1 << 30,
-        );
-        if (order != 0) return order;
-        final category = (left.category ?? '').compareTo(right.category ?? '');
-        if (category != 0) return category;
-        return left.title.compareTo(right.title);
-      });
+    final orderedItems = [...widget.items]
+      ..sort((left, right) => left.title.compareTo(right.title));
     for (final item in orderedItems) {
-      final category = item.category?.trim();
-      final title = category == null || category.isEmpty
-          ? _copy(context, 'More routines', 'روتينات إضافية')
-          : category;
-      groups.putIfAbsent(title, () => []).add(item);
-      descriptions.putIfAbsent(title, () => item.categoryDescription?.trim());
+      final memberships = item.releaseBundleId == 'gym-six-month'
+          ? item.planGroupIds
+          : <String>[
+              if (item.primaryPlanGroupId?.isNotEmpty == true)
+                item.primaryPlanGroupId!
+              else
+                item.category ?? 'more-routines',
+            ];
+      for (final groupId in memberships) {
+        groups.putIfAbsent(groupId, () => []).add(item);
+      }
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (final entry in groups.entries) ...[
           _WorkoutCategorySection(
-            title: entry.key,
-            description: descriptions[entry.key],
-            items: entry.value,
-            savedIds: savedIds,
-            mediaCache: mediaCache,
-            online: online,
-            isLocked: isLocked,
-            onOpen: onOpen,
-            onToggleSaved: onToggleSaved,
+            title: _workoutPlanGroupTitle(context, entry.key),
+            items: _expandedGroups.contains(entry.key)
+                ? entry.value
+                : entry.value.take(5).toList(growable: false),
+            totalCount: entry.value.length,
+            expanded: _expandedGroups.contains(entry.key),
+            onToggleExpanded: () => setState(() {
+              if (!_expandedGroups.remove(entry.key)) {
+                _expandedGroups.add(entry.key);
+              }
+            }),
+            savedIds: widget.savedIds,
+            mediaCache: widget.mediaCache,
+            online: widget.online,
+            premiumUnlocked: widget.premiumUnlocked,
+            premiumTier: widget.premiumTier,
+            isLocked: widget.isLocked,
+            onUpgrade: widget.onUpgrade,
+            onOpen: widget.onOpen,
+            onToggleSaved: widget.onToggleSaved,
           ),
           const SizedBox(height: 28),
         ],
@@ -65,23 +86,33 @@ class _WorkoutExploreSections extends StatelessWidget {
 class _WorkoutCategorySection extends StatelessWidget {
   const _WorkoutCategorySection({
     required this.title,
-    required this.description,
     required this.items,
+    required this.totalCount,
+    required this.expanded,
+    required this.onToggleExpanded,
     required this.savedIds,
     required this.mediaCache,
     required this.online,
+    required this.premiumUnlocked,
+    required this.premiumTier,
     required this.isLocked,
+    required this.onUpgrade,
     required this.onOpen,
     required this.onToggleSaved,
   });
 
   final String title;
-  final String? description;
   final List<WellnessContentItem> items;
+  final int totalCount;
+  final bool expanded;
+  final VoidCallback onToggleExpanded;
   final Set<String> savedIds;
   final WellnessMediaCache mediaCache;
   final bool online;
+  final bool premiumUnlocked;
+  final String premiumTier;
   final bool Function(WellnessContentItem item) isLocked;
+  final VoidCallback onUpgrade;
   final ValueChanged<WellnessContentItem> onOpen, onToggleSaved;
 
   @override
@@ -100,25 +131,19 @@ class _WorkoutCategorySection extends StatelessWidget {
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
               ),
             ),
-            Text(
-              _routineCount(context, items.length),
-              style: Theme.of(context).textTheme.labelLarge,
+            TextButton(
+              onPressed: totalCount > 5 ? onToggleExpanded : null,
+              child: Text(
+                totalCount > 5
+                    ? expanded
+                          ? _workoutHubCopy(context, 'Show less')
+                          : _workoutHubCopy(context, 'See all')
+                    : _routineCount(context, totalCount),
+              ),
             ),
           ],
         ),
       ),
-      if (description?.isNotEmpty == true) ...[
-        const SizedBox(height: 4),
-        Padding(
-          padding: const EdgeInsetsDirectional.only(end: 20),
-          child: Text(
-            description!,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ),
-      ],
       const SizedBox(height: 12),
       SizedBox(
         height: 352,
@@ -130,16 +155,24 @@ class _WorkoutCategorySection extends StatelessWidget {
           separatorBuilder: (_, _) => const SizedBox(width: 14),
           itemBuilder: (context, index) {
             final item = items[index];
+            final contentLocked = isLocked(item);
+            final collectionLocked = index > 0 && !premiumUnlocked;
             return SizedBox(
               width: 304,
-              child: _WorkoutRoutineCard(
-                item: item,
-                saved: savedIds.contains(item.id),
-                locked: isLocked(item),
-                mediaCache: mediaCache,
-                online: online,
-                onOpen: () => onOpen(item),
-                onToggleSaved: () => onToggleSaved(item),
+              child: PremiumCollectionItemGate(
+                key: ValueKey('workout-premium-gate-${item.stableId}'),
+                locked: collectionLocked,
+                tier: premiumTier,
+                onUpgrade: onUpgrade,
+                child: _WorkoutRoutineCard(
+                  item: item,
+                  saved: savedIds.contains(item.stableId),
+                  locked: contentLocked,
+                  mediaCache: mediaCache,
+                  online: online,
+                  onOpen: () => onOpen(item),
+                  onToggleSaved: () => onToggleSaved(item),
+                ),
               ),
             );
           },
@@ -147,6 +180,178 @@ class _WorkoutCategorySection extends StatelessWidget {
       ),
     ],
   );
+}
+
+String _workoutPlanGroupTitle(BuildContext context, String groupId) =>
+    switch (groupId) {
+      'gym-push' => _copy(context, 'Push', 'الدفع'),
+      'gym-pull' => _copy(context, 'Pull', 'السحب'),
+      'gym-legs' => _copy(context, 'Legs', 'الأرجل'),
+      'gym-warm-up-mobility' => _copy(
+        context,
+        'Warm-up & mobility',
+        'الإحماء والحركة',
+      ),
+      'gym-full-body' => _copy(context, 'Full body', 'كامل الجسم'),
+      'gym-upper-lower' => _copy(context, 'Upper / Lower', 'علوي / سفلي'),
+      'gym-muscle-pair-split' => _copy(
+        context,
+        'Muscle pair split',
+        'تقسيم العضلات المزدوج',
+      ),
+      'gym-arnold-split' => _copy(context, 'Arnold split', 'تقسيم أرنولد'),
+      'gym-powerbuilding' => _copy(
+        context,
+        'Strength + hypertrophy',
+        'القوة والتضخيم',
+      ),
+      'gym-exercise-technique' => _copy(
+        context,
+        'Exercise technique',
+        'تقنية التمرين',
+      ),
+      _ =>
+        groupId
+            .replaceFirst(RegExp(r'^home-'), '')
+            .split('-')
+            .map(
+              (word) => word.isEmpty
+                  ? word
+                  : '${word[0].toUpperCase()}${word.substring(1)}',
+            )
+            .join(' '),
+    };
+
+String _workoutHubCopy(BuildContext context, String key) {
+  const copy = <String, Map<String, String>>{
+    'Gym': {
+      'ar': 'النادي',
+      'en': 'Gym',
+      'fr': 'Salle',
+      'es': 'Gimnasio',
+      'tr': 'Spor salonu',
+      'de': 'Fitnessstudio',
+      'it': 'Palestra',
+      'pt': 'Ginásio',
+      'ur': 'جم',
+      'fa': 'باشگاه',
+      'hi': 'जिम',
+      'id': 'Gym',
+      'ms': 'Gim',
+      'ja': 'ジム',
+      'ko': '헬스장',
+      'zh': '健身房',
+      'ru': 'Зал',
+      'bn': 'জিম',
+      'vi': 'Phòng tập',
+      'th': 'ยิม',
+      'pl': 'Siłownia',
+      'nl': 'Sportschool',
+      'uk': 'Тренажерний зал',
+    },
+    'Home': {
+      'ar': 'المنزل',
+      'en': 'Home',
+      'fr': 'Maison',
+      'es': 'Casa',
+      'tr': 'Ev',
+      'de': 'Zuhause',
+      'it': 'Casa',
+      'pt': 'Casa',
+      'ur': 'گھر',
+      'fa': 'خانه',
+      'hi': 'घर',
+      'id': 'Rumah',
+      'ms': 'Rumah',
+      'ja': '自宅',
+      'ko': '홈',
+      'zh': '居家',
+      'ru': 'Дом',
+      'bn': 'বাড়ি',
+      'vi': 'Tại nhà',
+      'th': 'ที่บ้าน',
+      'pl': 'Dom',
+      'nl': 'Thuis',
+      'uk': 'Дім',
+    },
+    'My plans': {
+      'ar': 'خططي',
+      'en': 'My plans',
+      'fr': 'Mes plans',
+      'es': 'Mis planes',
+      'tr': 'Planlarım',
+      'de': 'Meine Pläne',
+      'it': 'I miei piani',
+      'pt': 'Os meus planos',
+      'ur': 'میرے منصوبے',
+      'fa': 'برنامه‌های من',
+      'hi': 'मेरी योजनाएँ',
+      'id': 'Rencana saya',
+      'ms': 'Pelan saya',
+      'ja': 'マイプラン',
+      'ko': '내 플랜',
+      'zh': '我的计划',
+      'ru': 'Мои планы',
+      'bn': 'আমার পরিকল্পনা',
+      'vi': 'Kế hoạch của tôi',
+      'th': 'แผนของฉัน',
+      'pl': 'Moje plany',
+      'nl': 'Mijn plannen',
+      'uk': 'Мої плани',
+    },
+    'See all': {
+      'ar': 'عرض الكل',
+      'en': 'See all',
+      'fr': 'Tout voir',
+      'es': 'Ver todo',
+      'tr': 'Tümünü gör',
+      'de': 'Alle anzeigen',
+      'it': 'Vedi tutto',
+      'pt': 'Ver tudo',
+      'ur': 'سب دیکھیں',
+      'fa': 'مشاهده همه',
+      'hi': 'सभी देखें',
+      'id': 'Lihat semua',
+      'ms': 'Lihat semua',
+      'ja': 'すべて表示',
+      'ko': '모두 보기',
+      'zh': '查看全部',
+      'ru': 'Все',
+      'bn': 'সব দেখুন',
+      'vi': 'Xem tất cả',
+      'th': 'ดูทั้งหมด',
+      'pl': 'Zobacz wszystko',
+      'nl': 'Alles bekijken',
+      'uk': 'Переглянути все',
+    },
+    'Show less': {
+      'ar': 'عرض أقل',
+      'en': 'Show less',
+      'fr': 'Réduire',
+      'es': 'Ver menos',
+      'tr': 'Daha az göster',
+      'de': 'Weniger anzeigen',
+      'it': 'Mostra meno',
+      'pt': 'Ver menos',
+      'ur': 'کم دکھائیں',
+      'fa': 'نمایش کمتر',
+      'hi': 'कम दिखाएँ',
+      'id': 'Tampilkan lebih sedikit',
+      'ms': 'Tunjuk kurang',
+      'ja': '表示を減らす',
+      'ko': '간단히 보기',
+      'zh': '收起',
+      'ru': 'Свернуть',
+      'bn': 'কম দেখুন',
+      'vi': 'Thu gọn',
+      'th': 'แสดงน้อยลง',
+      'pl': 'Pokaż mniej',
+      'nl': 'Minder tonen',
+      'uk': 'Згорнути',
+    },
+  };
+  final code = Localizations.localeOf(context).languageCode.toLowerCase();
+  return copy[key]?[code] ?? copy[key]?['en'] ?? key;
 }
 
 class _CategoryChip extends StatelessWidget {
@@ -198,7 +403,7 @@ class _WorkoutRoutineCard extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         margin: EdgeInsets.zero,
         child: InkWell(
-          key: ValueKey('workout-card-${item.id}'),
+          key: ValueKey('workout-card-${item.stableId}'),
           onTap: onOpen,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -207,19 +412,13 @@ class _WorkoutRoutineCard extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    ImageFiltered(
-                      imageFilter: ui.ImageFilter.blur(
-                        sigmaX: locked ? 5 : 0,
-                        sigmaY: locked ? 5 : 0,
-                      ),
-                      child: locked
-                          ? _WorkoutCoverFallback(item: item)
-                          : _WorkoutCover(
-                              item: item,
-                              mediaCache: mediaCache,
-                              online: online,
-                            ),
-                    ),
+                    locked
+                        ? _WorkoutCoverFallback(item: item)
+                        : _WorkoutCover(
+                            item: item,
+                            mediaCache: mediaCache,
+                            online: online,
+                          ),
                     const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -239,13 +438,7 @@ class _WorkoutRoutineCard extends StatelessWidget {
                           locked
                               ? _LockedBadge(minimumAccess: item.minimumAccess)
                               : _VerifiedBadge(item: item),
-                          if (locked)
-                            const Icon(
-                              Icons.lock_rounded,
-                              color: Colors.white,
-                              size: 28,
-                            )
-                          else
+                          if (!locked)
                             IconButton.filledTonal(
                               key: ValueKey('save-routine-${item.id}'),
                               tooltip: saved
@@ -382,32 +575,9 @@ class _LockedBadge extends StatelessWidget {
   final WellnessContentAccess minimumAccess;
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => PremiumLabelBadge(
     key: const ValueKey('locked-workout-badge'),
-    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-    decoration: BoxDecoration(
-      color: const Color(0xE1122943),
-      borderRadius: BorderRadius.circular(999),
-      border: Border.all(color: const Color(0xFF9ED8FF)),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Icon(
-          Icons.workspace_premium_rounded,
-          size: 15,
-          color: Colors.white,
-        ),
-        const SizedBox(width: 4),
-        Text(
-          minimumAccess.name.toUpperCase(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ],
-    ),
+    semanticLabel: minimumAccess.name,
   );
 }
 
@@ -494,336 +664,3 @@ class _OfflineInstalledBanner extends StatelessWidget {
     ),
   );
 }
-
-class _WorkoutLibraryLoading extends StatelessWidget {
-  const _WorkoutLibraryLoading();
-
-  @override
-  Widget build(BuildContext context) => ListView(
-    padding: const EdgeInsets.all(20),
-    children: const [
-      LinearProgressIndicator(),
-      SizedBox(height: 20),
-      _LoadingCard(),
-      SizedBox(height: 18),
-      _LoadingCard(),
-    ],
-  );
-}
-
-class _LoadingCard extends StatelessWidget {
-  const _LoadingCard();
-
-  @override
-  Widget build(BuildContext context) => Container(
-    height: 300,
-    decoration: BoxDecoration(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(20),
-    ),
-  );
-}
-
-class _WorkoutLibraryError extends StatelessWidget {
-  const _WorkoutLibraryError({required this.offline, required this.onRetry});
-  final bool offline;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) => _CenteredLibraryState(
-    icon: offline ? Icons.cloud_off_rounded : Icons.error_outline_rounded,
-    title: _copy(
-      context,
-      'The installed workout library could not be opened.',
-      'تعذّر فتح مكتبة التمارين المثبتة.',
-    ),
-    message: _copy(
-      context,
-      'Nothing was changed. Retry when device storage is available.',
-      'لم يتغير شيء. حاول مجددًا عندما يصبح تخزين الجهاز متاحًا.',
-    ),
-    action: FilledButton.icon(
-      onPressed: onRetry,
-      icon: const Icon(Icons.refresh_rounded),
-      label: Text(_copy(context, 'Retry', 'إعادة المحاولة')),
-    ),
-  );
-}
-
-class _WorkoutLibraryEmpty extends StatelessWidget {
-  const _WorkoutLibraryEmpty({
-    required this.myRoutines,
-    required this.offline,
-    required this.hasInstalledItems,
-    required this.onExplore,
-    required this.onManagePacks,
-  });
-
-  final bool myRoutines, offline, hasInstalledItems;
-  final VoidCallback onExplore, onManagePacks;
-
-  @override
-  Widget build(BuildContext context) {
-    final filtered = hasInstalledItems && !myRoutines;
-    return _CenteredLibraryState(
-      icon: myRoutines
-          ? Icons.bookmark_border_rounded
-          : Icons.fitness_center_rounded,
-      title: myRoutines
-          ? _copy(
-              context,
-              'No saved routines yet',
-              'لا توجد روتينات محفوظة بعد',
-            )
-          : filtered
-          ? _copy(context, 'No matching workouts', 'لا توجد تمارين مطابقة')
-          : offline
-          ? _copy(
-              context,
-              'No workouts are installed for offline use',
-              'لا توجد تمارين مثبتة للاستخدام دون اتصال',
-            )
-          : _copy(
-              context,
-              'No verified workout pack is installed',
-              'لا توجد حزمة تمارين موثقة مثبتة',
-            ),
-      message: myRoutines
-          ? _copy(
-              context,
-              'Save a verified workout from Explore to find it here.',
-              'احفظ تمرينًا موثقًا من «استكشف» ليظهر هنا.',
-            )
-          : _copy(
-              context,
-              'BIL does not bundle unlicensed videos. Install a verified pack to browse trusted routines.',
-              'لا يضمّن BIL فيديوهات غير مرخصة. ثبّت حزمة موثقة لتصفح روتينات موثوقة.',
-            ),
-      action: myRoutines
-          ? FilledButton.icon(
-              onPressed: onExplore,
-              icon: const Icon(Icons.explore_outlined),
-              label: Text(
-                _copy(context, 'Explore workouts', 'استكشف التمارين'),
-              ),
-            )
-          : filtered
-          ? null
-          : FilledButton.icon(
-              onPressed: onManagePacks,
-              icon: const Icon(Icons.download_for_offline_outlined),
-              label: Text(_copy(context, 'Manage packs', 'إدارة الحزم')),
-            ),
-    );
-  }
-}
-
-/// Honest, non-playable discovery cards shown when no reviewed content pack is
-/// installed. They reuse BIL-owned cover art and lead only to the manual log;
-/// they never manufacture routine instructions or expose a video control.
-class _WorkoutMetadataPreviews extends StatelessWidget {
-  const _WorkoutMetadataPreviews({
-    required this.offline,
-    required this.onCardio,
-    required this.onStrength,
-    required this.onManagePacks,
-  });
-
-  final bool offline;
-  final VoidCallback onCardio, onStrength, onManagePacks;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Text(
-        _copy(context, 'Explore workout styles', 'استكشف أنماط التمارين'),
-        style: Theme.of(
-          context,
-        ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-      ),
-      const SizedBox(height: 6),
-      Text(
-        _copy(
-          context,
-          'Original BIL previews. Log an activity now, or install a reviewed pack for guided routines. No video is available from a preview.',
-          'معاينات أصلية من BIL. سجّل نشاطًا الآن، أو ثبّت حزمة مراجعة للروتينات الموجّهة. لا يتوفر فيديو من المعاينة.',
-        ),
-      ),
-      const SizedBox(height: 16),
-      _WorkoutMetadataPreviewCard(
-        key: const ValueKey('workout-metadata-preview-cardio'),
-        title: _copy(context, 'Cardio', 'تمارين القلب'),
-        asset: 'assets/images/workouts/workout_cardio_cover_v1.png',
-        onTap: onCardio,
-      ),
-      const SizedBox(height: 14),
-      _WorkoutMetadataPreviewCard(
-        key: const ValueKey('workout-metadata-preview-strength'),
-        title: _copy(context, 'Strength', 'تمارين القوة'),
-        asset: 'assets/images/workouts/workout_strength_cover_v1.png',
-        onTap: onStrength,
-      ),
-      const SizedBox(height: 16),
-      OutlinedButton.icon(
-        key: const ValueKey('workout-preview-manage-packs'),
-        onPressed: onManagePacks,
-        icon: const Icon(Icons.verified_outlined),
-        label: Text(
-          _copy(context, 'Manage reviewed packs', 'إدارة الحزم المراجعة'),
-        ),
-      ),
-      if (offline) ...[
-        const SizedBox(height: 10),
-        Text(
-          _copy(
-            context,
-            'Offline: only previously installed reviewed packs can provide guided routines.',
-            'دون اتصال: لا توفر الروتينات الموجّهة إلا الحزم المراجعة المثبتة مسبقًا.',
-          ),
-        ),
-      ],
-    ],
-  );
-}
-
-class _WorkoutMetadataPreviewCard extends StatelessWidget {
-  const _WorkoutMetadataPreviewCard({
-    super.key,
-    required this.title,
-    required this.asset,
-    required this.onTap,
-  });
-
-  final String title, asset;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    button: true,
-    label:
-        '$title. ${_copy(context, 'Metadata preview; no playable video', 'معاينة بيانات؛ لا يوجد فيديو قابل للتشغيل')}',
-    child: Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: SizedBox(
-          height: 156,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.asset(asset, fit: BoxFit.cover),
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Color(0xCC000000)],
-                  ),
-                ),
-              ),
-              Align(
-                alignment: AlignmentDirectional.bottomStart,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-class _CenteredLibraryState extends StatelessWidget {
-  const _CenteredLibraryState({
-    required this.icon,
-    required this.title,
-    required this.message,
-    this.action,
-  });
-
-  final IconData icon;
-  final String title, message;
-  final Widget? action;
-
-  @override
-  Widget build(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(30),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 58),
-          const SizedBox(height: 15),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 8),
-          Text(message, textAlign: TextAlign.center),
-          if (action != null) ...[const SizedBox(height: 18), action!],
-        ],
-      ),
-    ),
-  );
-}
-
-String _copy(BuildContext context, String english, String arabic) =>
-    wellnessCopy(context, english, arabic);
-
-String _routineCount(BuildContext context, int count) =>
-    switch (Localizations.localeOf(context).languageCode) {
-      'ar' => '$count روتين',
-      'fr' => '$count routines',
-      'es' => '$count rutinas',
-      'tr' => '$count rutin',
-      _ => '$count routines',
-    };
-
-String _workoutMinutes(BuildContext context, int minutes) =>
-    switch (Localizations.localeOf(context).languageCode) {
-      'ar' => '$minutes دقيقة',
-      'fr' => '$minutes min',
-      'es' => '$minutes min',
-      'tr' => '$minutes dk',
-      _ => '$minutes min',
-    };
-
-String _workoutRepetitions(BuildContext context, int repetitions) =>
-    switch (Localizations.localeOf(context).languageCode) {
-      'ar' => '$repetitions تكرار',
-      'fr' => '$repetitions répétitions',
-      'es' => '$repetitions repeticiones',
-      'tr' => '$repetitions tekrar',
-      _ => '$repetitions reps',
-    };
-
-String _workoutSeconds(BuildContext context, int seconds) =>
-    switch (Localizations.localeOf(context).languageCode) {
-      'ar' => '$seconds ثانية',
-      'fr' => '$seconds s',
-      'es' => '$seconds s',
-      'tr' => '$seconds sn',
-      _ => '$seconds sec',
-    };
-
-String _workoutRestSeconds(BuildContext context, int seconds) =>
-    switch (Localizations.localeOf(context).languageCode) {
-      'ar' => 'راحة $seconds ثانية',
-      'fr' => '$seconds s de repos',
-      'es' => '$seconds s de descanso',
-      'tr' => '$seconds sn dinlenme',
-      _ => '$seconds sec rest',
-    };

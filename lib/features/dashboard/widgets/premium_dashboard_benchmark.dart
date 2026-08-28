@@ -4,19 +4,23 @@ import 'package:go_router/go_router.dart';
 import '../../../app/environment/app_environment.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../app/theme/bil_premium_responsive_layout.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../shared/widgets/premium_surface.dart';
+import '../../ads/presentation/safe_free_ad_anchor.dart';
 import '../providers/dashboard_preferences_provider.dart';
-import '../domain/nutrient_dashboard.dart';
 import '../dashboard_five_locale_copy.dart';
 import 'dashboard_primary_carousel.dart';
 import 'dashboard_mobile_body_twin_snapshot.dart';
 import 'dashboard_compact_insight_card.dart';
 import 'dashboard_twin_deck_shell.dart';
+import 'premium_dashboard_card_lock.dart';
 
 part 'premium_dashboard_command_center.dart';
 part 'premium_dashboard_evidence.dart';
 part 'dashboard_reference_phone.dart';
 part 'dashboard_reference_phone_components.dart';
+part 'dashboard_reference_goal_components.dart';
+part 'dashboard_reference_phone_sections.dart';
 
 /// Presentation-only benchmark for the premium dashboard hierarchy.
 ///
@@ -55,6 +59,11 @@ class PremiumDashboardBenchmark extends StatelessWidget {
     this.insightSummary,
     this.caloriesConsumed = 0,
     this.caloriesGoal = 0,
+    this.baseCaloriesGoal = 0,
+    this.caloriesBurned = 0,
+    this.netCalories = 0,
+    this.remainingCalories,
+    this.burnedCaloriesApplied = false,
     this.proteinConsumed = 0,
     this.proteinGoal = 0,
     this.carbohydratesConsumed = 0,
@@ -82,11 +91,11 @@ class PremiumDashboardBenchmark extends StatelessWidget {
       DashboardSectionIds.quickLog,
       DashboardSectionIds.discover,
       DashboardSectionIds.bestAction,
-      DashboardSectionIds.dailyIntelligence,
       DashboardSectionIds.progress,
       DashboardSectionIds.connectedHealth,
       DashboardSectionIds.bodyTwin,
     },
+    this.premiumUnlocked = false,
   });
 
   final bool arabic;
@@ -119,6 +128,11 @@ class PremiumDashboardBenchmark extends StatelessWidget {
   final String? insightSummary;
   final int caloriesConsumed;
   final int caloriesGoal;
+  final int baseCaloriesGoal;
+  final int caloriesBurned;
+  final int netCalories;
+  final int? remainingCalories;
+  final bool burnedCaloriesApplied;
   final int proteinConsumed;
   final int proteinGoal;
   final int carbohydratesConsumed;
@@ -139,6 +153,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
   final List<double> stepTrendValues;
   final String weightUnit;
   final Set<String> visibleSections;
+  final bool premiumUnlocked;
 
   String tr(String en, String ar) => dashboardFiveLocaleText(en, ar);
 
@@ -152,20 +167,20 @@ class PremiumDashboardBenchmark extends StatelessWidget {
         arabic: arabic,
         caloriesConsumed: caloriesConsumed,
         caloriesGoal: caloriesGoal,
+        baseCaloriesGoal: baseCaloriesGoal,
+        caloriesBurned: caloriesBurned,
+        netCalories: netCalories,
+        remainingCalories: remainingCalories,
+        burnedCaloriesApplied: burnedCaloriesApplied,
         proteinConsumed: proteinConsumed,
         proteinGoal: proteinGoal,
         carbohydratesConsumed: carbohydratesConsumed,
         carbohydratesGoal: carbohydratesGoal,
         fatConsumed: fatConsumed,
         fatGoal: fatGoal,
-        fiberConsumed: fiberConsumed,
         fiberGoal: fiberGoal,
-        sugarConsumed: sugarConsumed,
-        sodiumConsumed: sodiumConsumed,
         sodiumGoal: sodiumGoal,
-        carbohydratesEvidenceValue: carbohydratesEvidenceValue,
         fiberEvidenceValue: fiberEvidenceValue,
-        sugarEvidenceValue: sugarEvidenceValue,
         sodiumEvidenceValue: sodiumEvidenceValue,
         nutrientDashboardPreset: nutrientDashboardPreset,
         weightTrendValues: weightTrendValues,
@@ -173,7 +188,8 @@ class PremiumDashboardBenchmark extends StatelessWidget {
         weightUnit: weightUnit,
         loggingItems: loggingItems,
         progressSection: progressSection,
-        personalHealthAi: personalHealthAi,
+        // The phone layout owns placement so the same Health Hub is reused.
+        connectedHealth: connectedHealth,
         bodyTwinSummary: bodyTwinSummary,
         actionTitle: actionTitle,
         actionReason: actionReason,
@@ -181,6 +197,7 @@ class PremiumDashboardBenchmark extends StatelessWidget {
         onAction: onAction,
         onExplain: onExplain,
         visibleSections: visibleSections,
+        premiumUnlocked: premiumUnlocked,
       );
     }
     // Retained as a large-screen fallback while the unified mobile rail ships.
@@ -334,17 +351,24 @@ class PremiumDashboardBenchmark extends StatelessWidget {
                 trendEvidence: trendEvidence,
               )
             : null;
+        final showTabletConnectedHealth =
+            !phone &&
+            visibleSections.contains(DashboardSectionIds.connectedHealth) &&
+            connectedHealth != null;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (phone && hero != null) ...[hero!, SizedBox(height: sectionGap)],
             if (!phone) ...[top, SizedBox(height: sectionGap)],
+            if (showTabletConnectedHealth) ...[
+              KeyedSubtree(
+                key: const Key('dashboard-tablet-connected-health-slot'),
+                child: connectedHealth!,
+              ),
+              SizedBox(height: sectionGap),
+            ],
             dayAndProgress,
             if (aiCoach != null) ...[SizedBox(height: sectionGap), aiCoach!],
-            if (connectedHealth != null) ...[
-              SizedBox(height: sectionGap),
-              connectedHealth!,
-            ],
             if (mobileTwin != null) ...[
               SizedBox(height: sectionGap),
               mobileTwin,

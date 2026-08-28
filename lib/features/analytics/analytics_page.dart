@@ -17,6 +17,8 @@ import '../../shared/widgets/premium_chart_card.dart';
 import '../../shared/widgets/premium_surface.dart';
 
 import '../dashboard/providers/dashboard_provider.dart';
+import '../daily_log/domain/daily_body_context_codec.dart';
+import '../commerce/presentation/premium_nutrition_glass.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../life_context/providers/life_context_provider.dart';
 import '../weight/providers/weight_provider.dart';
@@ -113,13 +115,16 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     final weightsAsync = ref.watch(weightHistoryProvider);
     final mealsAsync = ref.watch(allMealsProvider);
     final waterAsync = ref.watch(allWaterProvider);
+    final dailyLogsAsync = ref.watch(dashboardDailyLogsProvider);
     final contextsAsync = ref.watch(insightLifeContextProvider);
+    final targetWeightKg = ref.watch(userProfileProvider).value?.targetWeight;
     final system =
         ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     final weightUnit = UnitConverter.weightUnit(system);
     if (weightsAsync.isLoading ||
         mealsAsync.isLoading ||
         waterAsync.isLoading ||
+        dailyLogsAsync.isLoading ||
         contextsAsync.isLoading) {
       return Scaffold(
         appBar: _settingsAppBar(context),
@@ -148,6 +153,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     if (weightsAsync.hasError ||
         mealsAsync.hasError ||
         waterAsync.hasError ||
+        dailyLogsAsync.hasError ||
         contextsAsync.hasError) {
       return Scaffold(
         appBar: _settingsAppBar(context),
@@ -164,6 +170,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
             ref.invalidate(weightHistoryProvider);
             ref.invalidate(allMealsProvider);
             ref.invalidate(allWaterProvider);
+            ref.invalidate(dashboardDailyLogsProvider);
             ref.invalidate(insightLifeContextProvider);
           },
         ),
@@ -172,6 +179,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     final allWeights = (weightsAsync.value ?? const []).reversed.toList();
     final allMeals = mealsAsync.value ?? const [];
     final allWater = waterAsync.value ?? const [];
+    final allDailyLogs = dailyLogsAsync.value ?? const <DailyLog>[];
     final allContexts = contextsAsync.value ?? const [];
     final start = range.days == null
         ? null
@@ -184,6 +192,13 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     final contexts = allContexts
         .where((row) => included(row.occurredAt))
         .toList();
+    final bodyContextLogs = allDailyLogs
+        .where(
+          (row) =>
+              included(row.date) &&
+              DailyBodyContextCodec.engineTypes(row.notes).isNotEmpty,
+        )
+        .toList(growable: false);
     final caloriesByDay = <String, double>{};
     final proteinByDay = <String, double>{};
     final sodiumByDay = <String, double>{};
@@ -221,9 +236,6 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
           .toList(),
     );
     final rate = progress.weeklyDirectionKg;
-    final recentWeights = weights.length > 30
-        ? weights.sublist(weights.length - 30)
-        : weights;
     final cutoffKey = dayKeyFor(
       DateTime.now().subtract(const Duration(days: 6)),
     );
@@ -237,10 +249,14 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     final recentWaterDays = waterByDay.keys
         .where((day) => day.compareTo(cutoffKey) >= 0)
         .toSet();
-    final recentContextDays = contexts
-        .where((row) => row.dayKey.compareTo(cutoffKey) >= 0)
-        .map((row) => row.dayKey)
-        .toSet();
+    final recentContextDays = <String>{
+      ...contexts
+          .where((row) => row.dayKey.compareTo(cutoffKey) >= 0)
+          .map((row) => row.dayKey),
+      ...bodyContextLogs
+          .where((row) => row.dayKey.compareTo(cutoffKey) >= 0)
+          .map((row) => row.dayKey),
+    };
     final weekly = WeeklyReviewEngine.evaluate(
       weightDays: recentWeightDays.length,
       nutritionDays: recentMealDays.length,
@@ -253,6 +269,11 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
       ...allMeals.map((row) => row.meal.date),
       ...allWater.map((row) => row.occurredAt),
       ...allContexts.map((row) => row.occurredAt),
+      ...allDailyLogs
+          .where(
+            (row) => DailyBodyContextCodec.engineTypes(row.notes).isNotEmpty,
+          )
+          .map((row) => row.date),
     ]..sort();
     final recovery = RecoveryEngine.evaluate(
       now: DateTime.now(),
@@ -311,12 +332,17 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
             ),
             const SizedBox(height: 12),
             AnalyticsWeightJourneyCard(
-              weights: recentWeights,
+              // The selected range is the source of truth for both the chart
+              // and the evidence calculation.  Capping this at 30 made the
+              // "All" range report the full sample count while displaying a
+              // false start value from only the latest 30 measurements.
+              weights: weights,
               system: system,
               rangeLabel: _rangeLabel(context, range),
               rangeDays: range.days,
               weeklyRateKg: rate,
               progress: progress,
+              targetWeightKg: targetWeightKg,
             ),
             const SizedBox(height: PremiumDesignTokens.spaceSm),
             if (recovery.state != RecoveryState.current)
@@ -343,39 +369,42 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
               ),
             if (recovery.state != RecoveryState.current)
               const SizedBox(height: PremiumDesignTokens.spaceSm),
-            _SummaryCard(
-              title: tr('Your personal baseline', 'خطك الأساسي الشخصي'),
-              lines: baseline.sufficient
-                  ? [
-                      tr(
-                        'Compared with your own earlier records · ${localizedBaselineConfidence(baseline.confidence, arabic: false)} confidence',
-                        'مقارنة بسجلاتك السابقة أنت · ثقة ${localizedBaselineConfidence(baseline.confidence, arabic: true)}',
-                      ),
-                      ...baseline.comparisons.map((item) {
-                        final sign = item.change >= 0 ? '+' : '';
-                        return '${tr(item.metric, switch (item.metric) {
-                          'Calories' => 'السعرات',
-                          'Protein' => 'البروتين',
-                          'Sodium' => 'الصوديوم',
-                          'Water' => 'الماء',
-                          _ => 'الوزن',
-                        })}: ${item.current.toStringAsFixed(1)} ${item.unit} ($sign${item.change.toStringAsFixed(1)} ${tr('vs your baseline', 'مقابل خطك الأساسي')})';
-                      }),
-                      tr(
-                        'Associations describe your records; they do not prove a cause.',
-                        'العلاقات تصف سجلاتك ولا تثبت سببًا.',
-                      ),
-                    ]
-                  : [
-                      tr(
-                        'A personal comparison needs at least 7 earlier and 3 recent days for one metric.',
-                        'تحتاج المقارنة الشخصية إلى 7 أيام سابقة و3 أيام حديثة على الأقل لمؤشر واحد.',
-                      ),
-                      tr(
-                        'No population average is substituted for your missing data.',
-                        'لن نستخدم متوسطات السكان بدلًا من بياناتك الناقصة.',
-                      ),
-                    ],
+            PremiumNutritionGlass(
+              key: const Key('analytics-personal-baseline-premium-glass'),
+              child: _SummaryCard(
+                title: tr('Your personal baseline', 'خطك الأساسي الشخصي'),
+                lines: baseline.sufficient
+                    ? [
+                        tr(
+                          'Compared with your own earlier records · ${localizedBaselineConfidence(baseline.confidence, arabic: false)} confidence',
+                          'مقارنة بسجلاتك السابقة أنت · ثقة ${localizedBaselineConfidence(baseline.confidence, arabic: true)}',
+                        ),
+                        ...baseline.comparisons.map((item) {
+                          final sign = item.change >= 0 ? '+' : '';
+                          return '${tr(item.metric, switch (item.metric) {
+                            'Calories' => 'السعرات',
+                            'Protein' => 'البروتين',
+                            'Sodium' => 'الصوديوم',
+                            'Water' => 'الماء',
+                            _ => 'الوزن',
+                          })}: ${item.current.toStringAsFixed(1)} ${item.unit} ($sign${item.change.toStringAsFixed(1)} ${tr('vs your baseline', 'مقابل خطك الأساسي')})';
+                        }),
+                        tr(
+                          'Associations describe your records; they do not prove a cause.',
+                          'العلاقات تصف سجلاتك ولا تثبت سببًا.',
+                        ),
+                      ]
+                    : [
+                        tr(
+                          'A personal comparison needs at least 7 earlier and 3 recent days for one metric.',
+                          'تحتاج المقارنة الشخصية إلى 7 أيام سابقة و3 أيام حديثة على الأقل لمؤشر واحد.',
+                        ),
+                        tr(
+                          'No population average is substituted for your missing data.',
+                          'لن نستخدم متوسطات السكان بدلًا من بياناتك الناقصة.',
+                        ),
+                      ],
+              ),
             ),
             const SizedBox(height: PremiumDesignTokens.spaceSm),
             AnalyticsWeeklyProgressCard(weekly: weekly, weeklyRateKg: rate),
@@ -556,35 +585,36 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
                 ),
               )
             else
-              ...caloriesByDay.keys
-                  .toList()
-                  .reversed
-                  .take(30)
-                  .map(
-                    (day) => ListTile(
-                      title: Text(day),
-                      subtitle: Text(
-                        '${caloriesByDay[day]!.round()} ${tr('kcal', 'سعرة')} · ${proteinByDay[day]!.toStringAsFixed(1)} ${tr('g protein', 'غ بروتين')}',
-                      ),
-                    ),
-                  ),
+              PremiumNutritionGlass(
+                key: const Key('analytics-daily-nutrition-premium-glass'),
+                child: Column(
+                  children: caloriesByDay.keys
+                      .toList()
+                      .reversed
+                      .map(
+                        (day) => ListTile(
+                          title: Text(day),
+                          subtitle: Text(
+                            '${caloriesByDay[day]!.round()} ${tr('kcal', 'سعرة')} · ${proteinByDay[day]!.toStringAsFixed(1)} ${tr('g protein', 'غ بروتين')}',
+                          ),
+                        ),
+                      )
+                      .toList(growable: false),
+                ),
+              ),
             const SizedBox(height: PremiumDesignTokens.spaceSm),
             Text(
               tr('Water adherence records', 'سجلات الالتزام بالماء'),
               style: PremiumDesignTokens.sectionHeading(context),
             ),
-            ...waterByDay.keys
-                .toList()
-                .reversed
-                .take(30)
-                .map(
-                  (day) => _MetricBar(
-                    label: day,
-                    value: waterByDay[day]!.toDouble(),
-                    maximum: 3000,
-                    suffix: 'ml',
-                  ),
-                ),
+            ...waterByDay.keys.toList().reversed.map(
+              (day) => _MetricBar(
+                label: day,
+                value: waterByDay[day]!.toDouble(),
+                maximum: 3000,
+                suffix: 'ml',
+              ),
+            ),
           ],
         ),
       ),

@@ -49,7 +49,7 @@ void main() {
     expect(RuntimeCopy.supported, hasLength(25));
     for (final key in keys) {
       for (final locale in ExtendedRuntimeCopy.supported) {
-        final value = ExtendedRuntimeCopy.values[key]?[locale]?.trim();
+        final value = RuntimeCopy.resolve(key, locale)?.trim();
         expect(value, isNotNull, reason: 'missing $locale/$key');
         expect(value, isNotEmpty, reason: 'blank $locale/$key');
         if (!key.contains('@') && !key.contains('BIL Health')) {
@@ -61,8 +61,8 @@ void main() {
 
   test('all legal documents share one auditable policy revision', () {
     expect(bilLegalPolicyId, 'BIL-LEGAL');
-    expect(bilLegalPolicyRevision, '2026-08-R1');
-    expect(bilLegalPublicationStatus, 'NOT_PUBLISHED');
+    expect(bilLegalPolicyRevision, '2026-08-27');
+    expect(bilLegalPublicationStatus, 'PUBLISHED');
     expect(BilLegalDocument.values, hasLength(3));
   });
 

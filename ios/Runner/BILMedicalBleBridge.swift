@@ -72,7 +72,8 @@ final class BILMedicalBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
   }
 
   private func peripheral(_ args:[String:Any])->CBPeripheral? { guard let id=args["peripheralId"] as? String, let uuid=UUID(uuidString:id) else{return nil}; return peripherals[uuid] }
-  private var supportedServices:[CBUUID]{["1810","1808","181D","181B","1822","180D","1809"].map(CBUUID.init(string:))}
+  private var supportedServices:[CBUUID]{["181D","181B","180D"].map(CBUUID.init(string:))}
+  private var supportedCharacteristics:Set<String>{["2A9D","2A9C","2A37"]}
   func centralManagerDidUpdateState(_ central:CBCentralManager) {}
   func centralManager(_ central:CBCentralManager,didDiscover peripheral:CBPeripheral,advertisementData:[String:Any],rssi RSSI:NSNumber){
     let supported = Set(supportedServices.map { $0.uuidString })
@@ -101,14 +102,17 @@ final class BILMedicalBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
   func peripheral(_ peripheral:CBPeripheral,didDiscoverCharacteristicsFor service:CBService,error:Error?){
     guard let session=sessions[peripheral.identifier] else{return}
     if let error=error { finish(peripheral.identifier,error:FlutterError(code:"characteristic_discovery_failed",message:error.localizedDescription,details:nil));return }
-    let characteristics=(service.characteristics ?? []).filter { ($0.properties.contains(.read) || $0.properties.contains(.notify)) }
+    let characteristics=(service.characteristics ?? []).filter {
+      supportedCharacteristics.contains($0.uuid.uuidString) &&
+        ($0.properties.contains(.read) || $0.properties.contains(.notify) || $0.properties.contains(.indicate))
+    }
     for characteristic in characteristics { session.expectedCharacteristics.insert("\(service.uuid.uuidString):\(characteristic.uuid.uuidString)") }
     session.pendingServiceDiscoveries=max(0,session.pendingServiceDiscoveries-1)
     if session.pendingServiceDiscoveries == 0 {
-      if session.expectedCharacteristics.isEmpty { finish(peripheral.identifier,error:nil); return }
+      if session.expectedCharacteristics.isEmpty { finish(peripheral.identifier,error:FlutterError(code:"no_supported_characteristic",message:nil,details:nil)); return }
       for discoveredService in peripheral.services ?? [] {
         for characteristic in discoveredService.characteristics ?? [] where session.expectedCharacteristics.contains("\(discoveredService.uuid.uuidString):\(characteristic.uuid.uuidString)") {
-          if characteristic.properties.contains(.notify) { peripheral.setNotifyValue(true,for:characteristic) }
+          if characteristic.properties.contains(.notify) || characteristic.properties.contains(.indicate) { peripheral.setNotifyValue(true,for:characteristic) }
           if characteristic.properties.contains(.read) { peripheral.readValue(for:characteristic) }
         }
       }
@@ -127,5 +131,5 @@ final class BILMedicalBleBridge: NSObject, CBCentralManagerDelegate, CBPeriphera
   }
   private func completeIfReady(_ id:UUID){ guard let session=sessions[id],session.pendingServiceDiscoveries==0,session.completedCharacteristics.isSuperset(of:session.expectedCharacteristics) else{return}; finish(id,error:nil) }
   private func finish(_ id:UUID,error:FlutterError?){ guard let session=sessions.removeValue(forKey:id),!session.completed else{return};session.completed=true;session.timeout?.cancel();if let error=error{session.result(error)}else{session.result(session.packets)} }
-  private func describe(_ p:CBPeripheral)->[String:Any]{["id":p.identifier.uuidString,"name":p.name ?? "Medical device","manufacturer":"unknown","firmwareVersion":"unknown","profiles":Array(advertisedProfiles[p.identifier] ?? [])]}
+  private func describe(_ p:CBPeripheral)->[String:Any]{["id":p.identifier.uuidString,"name":p.name ?? "Fitness device","manufacturer":"unknown","firmwareVersion":"unknown","profiles":Array(advertisedProfiles[p.identifier] ?? [])]}
 }

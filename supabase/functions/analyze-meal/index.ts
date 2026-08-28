@@ -115,6 +115,7 @@ deno.serve(async (request: Request) => {
   );
   if (reserveError) {
     const message = reserveError.message ?? '';
+    if (message.includes('ai_boost_required')) return reply({ error: 'ai_boost_required' }, 402);
     if (message.includes('ai_usage_exhausted')) return reply({ error: 'vision_quota_exhausted' }, 429);
     if (message.includes('duplicate_image')) return reply({ error: 'duplicate_image' }, 409);
     if (message.includes('idempotency_payload_mismatch')) return reply({ error: 'idempotency_payload_mismatch' }, 409);

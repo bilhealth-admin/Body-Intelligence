@@ -5,8 +5,11 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/environment/app_environment.dart';
 import '../../app/localization/app_localizations.dart';
+import '../cloud_platform/providers/cloud_manual_sync_status_provider.dart';
 import '../cloud_platform/providers/cloud_sync_providers.dart';
+import '../cloud_platform/services/cloud_manual_sync_service.dart';
 import '../cloud_platform/services/cloud_sync_consent_repository.dart';
+import 'cloud_sync_status_presentation.dart';
 import 'reference_settings_copy.dart';
 
 String _privacyText(BuildContext context, String key) {
@@ -28,6 +31,10 @@ const _privacyCopy = <String, Map<String, String>>{
     'Manage personalization preferences': 'Manage personalization preferences',
     'Sharing and email settings': 'Sharing and email settings',
     'Contact support': 'Contact support',
+    'Trust & support': 'Trust & support',
+    'Email settings': 'Email settings',
+    'Facebook settings': 'Facebook settings',
+    'Google settings': 'Google settings',
     'Export my data': 'Export my data',
     'Export could not be opened': 'Export could not be opened',
     'Change password': 'Change password',
@@ -51,8 +58,8 @@ const _privacyCopy = <String, Map<String, String>>{
     'Sync now': 'Sync now',
     'Run a one-time encrypted sync now.': 'Run a one-time encrypted sync now.',
     'Encrypted cloud sync completed.': 'Encrypted cloud sync completed.',
-    'Cloud sync could not run. Check Premium, consent, and internet.':
-        'Cloud sync could not run. Check Premium, consent, and internet.',
+    'Cloud sync could not run. Check consent and internet.':
+        'Cloud sync could not run. Check consent and internet.',
   },
   'ar': {
     'Diary sharing': 'مشاركة اليوميات',
@@ -67,6 +74,10 @@ const _privacyCopy = <String, Map<String, String>>{
     'Manage personalization preferences': 'إدارة تفضيلات التخصيص',
     'Sharing and email settings': 'إعدادات المشاركة والبريد',
     'Contact support': 'التواصل مع الدعم',
+    'Trust & support': 'الثقة والمساعدة',
+    'Email settings': 'إعدادات البريد الإلكتروني',
+    'Facebook settings': 'إعدادات Facebook',
+    'Google settings': 'إعدادات Google',
     'Export my data': 'تصدير بياناتي',
     'Export could not be opened': 'تعذر فتح التصدير',
     'Change password': 'تغيير كلمة المرور',
@@ -90,8 +101,8 @@ const _privacyCopy = <String, Map<String, String>>{
     'Sync now': 'مزامنة الآن',
     'Run a one-time encrypted sync now.': 'شغّل مزامنة مشفّرة لمرة واحدة الآن.',
     'Encrypted cloud sync completed.': 'اكتملت المزامنة السحابية المشفّرة.',
-    'Cloud sync could not run. Check Premium, consent, and internet.':
-        'تعذر تشغيل المزامنة. تحقق من Premium والموافقة والإنترنت.',
+    'Cloud sync could not run. Check consent and internet.':
+        'تعذر تشغيل المزامنة. تحقق من الموافقة والاتصال بالإنترنت.',
   },
   'fr': {
     'Diary sharing': 'Partage du journal',
@@ -107,6 +118,10 @@ const _privacyCopy = <String, Map<String, String>>{
         'Gérer les préférences de personnalisation',
     'Sharing and email settings': 'Paramètres de partage et d’e-mail',
     'Contact support': 'Contacter le support',
+    'Trust & support': 'Confiance et assistance',
+    'Email settings': 'Paramètres des e-mails',
+    'Facebook settings': 'Paramètres Facebook',
+    'Google settings': 'Paramètres Google',
     'Export my data': 'Exporter mes données',
     'Export could not be opened': 'Impossible d’ouvrir l’exportation',
     'Change password': 'Modifier le mot de passe',
@@ -135,8 +150,8 @@ const _privacyCopy = <String, Map<String, String>>{
         'Exécuter maintenant une synchronisation chiffrée unique.',
     'Encrypted cloud sync completed.':
         'Synchronisation cloud chiffrée terminée.',
-    'Cloud sync could not run. Check Premium, consent, and internet.':
-        'La synchronisation n’a pas pu démarrer. Vérifiez Premium, le consentement et Internet.',
+    'Cloud sync could not run. Check consent and internet.':
+        'La synchronisation a échoué. Vérifiez le consentement et la connexion Internet.',
   },
   'es': {
     'Diary sharing': 'Compartir diario',
@@ -152,6 +167,10 @@ const _privacyCopy = <String, Map<String, String>>{
         'Gestionar preferencias de personalización',
     'Sharing and email settings': 'Ajustes de uso compartido y correo',
     'Contact support': 'Contactar con soporte',
+    'Trust & support': 'Confianza y asistencia',
+    'Email settings': 'Ajustes de correo',
+    'Facebook settings': 'Ajustes de Facebook',
+    'Google settings': 'Ajustes de Google',
     'Export my data': 'Exportar mis datos',
     'Export could not be opened': 'No se pudo abrir la exportación',
     'Change password': 'Cambiar contraseña',
@@ -179,8 +198,8 @@ const _privacyCopy = <String, Map<String, String>>{
     'Run a one-time encrypted sync now.':
         'Ejecuta ahora una sincronización cifrada única.',
     'Encrypted cloud sync completed.': 'Sincronización cifrada completada.',
-    'Cloud sync could not run. Check Premium, consent, and internet.':
-        'No se pudo sincronizar. Comprueba Premium, el consentimiento e Internet.',
+    'Cloud sync could not run. Check consent and internet.':
+        'No se pudo sincronizar. Comprueba el consentimiento y la conexión a Internet.',
   },
   'tr': {
     'Diary sharing': 'Günlük paylaşımı',
@@ -195,6 +214,10 @@ const _privacyCopy = <String, Map<String, String>>{
     'Manage personalization preferences': 'Kişiselleştirme tercihlerini yönet',
     'Sharing and email settings': 'Paylaşım ve e-posta ayarları',
     'Contact support': 'Destekle iletişime geç',
+    'Trust & support': 'Güven ve destek',
+    'Email settings': 'E-posta ayarları',
+    'Facebook settings': 'Facebook ayarları',
+    'Google settings': 'Google ayarları',
     'Export my data': 'Verilerimi dışa aktar',
     'Export could not be opened': 'Dışa aktarma açılamadı',
     'Change password': 'Parolayı değiştir',
@@ -220,8 +243,8 @@ const _privacyCopy = <String, Map<String, String>>{
     'Run a one-time encrypted sync now.':
         'Şimdi tek seferlik şifreli eşitleme çalıştırın.',
     'Encrypted cloud sync completed.': 'Şifreli bulut eşitleme tamamlandı.',
-    'Cloud sync could not run. Check Premium, consent, and internet.':
-        'Bulut eşitleme çalıştırılamadı. Premium, onay ve interneti kontrol edin.',
+    'Cloud sync could not run. Check consent and internet.':
+        'Bulut eşitleme çalıştırılamadı. Onayı ve internet bağlantısını kontrol edin.',
   },
 };
 
@@ -242,14 +265,19 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
             onTap: () => context.push('/settings/diary/sharing'),
           ),
           const _CloudSyncConsentTile(),
-          _UnavailableCloudPrivacyTile(
-            title: _privacyText(context, 'Profile visibility'),
+          ListTile(
+            leading: const Icon(Icons.manage_accounts_outlined),
+            title: Text(context.strings.text('Community profile')),
+            subtitle: Text(_privacyText(context, 'Profile visibility')),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push('/community/profile'),
           ),
-          _UnavailableCloudPrivacyTile(
-            title: _privacyText(context, 'Allow people to find me'),
-          ),
-          _UnavailableCloudPrivacyTile(
-            title: _privacyText(context, 'Show my activity to friends'),
+          ListTile(
+            leading: const Icon(Icons.group_outlined),
+            title: Text(context.strings.text('Friends and requests')),
+            subtitle: Text(_privacyText(context, 'Allow people to find me')),
+            trailing: const Icon(Icons.chevron_right_rounded),
+            onTap: () => context.push('/community/connections'),
           ),
           const Divider(height: 1),
           ListTile(
@@ -275,19 +303,21 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
             onTap: () => context.push('/advertising-privacy'),
           ),
           ListTile(
-            title: Text(context.strings.text('Email settings')),
+            title: Text(_privacyText(context, 'Email settings')),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/settings/email'),
           ),
-          ListTile(
-            leading: const Icon(Icons.facebook_rounded),
-            title: Text(context.strings.text('Facebook settings')),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/settings/account-connections/facebook'),
-          ),
+          if (AppEnvironment.facebookLoginEnabled)
+            ListTile(
+              leading: const Icon(Icons.facebook_rounded),
+              title: Text(_privacyText(context, 'Facebook settings')),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () =>
+                  context.push('/settings/account-connections/facebook'),
+            ),
           ListTile(
             leading: const Icon(Icons.account_circle_outlined),
-            title: Text(context.strings.text('Google settings')),
+            title: Text(_privacyText(context, 'Google settings')),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/settings/account-connections/google'),
           ),
@@ -327,11 +357,12 @@ class _CloudSyncConsentTile extends ConsumerStatefulWidget {
 
 class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
   bool _saving = false;
-  bool _syncing = false;
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(cloudSyncConsentStateProvider);
+    final syncStatus = ref.watch(cloudManualSyncStatusProvider);
+    final syncing = syncStatus.isSyncing;
     return state.when(
       loading: () => SwitchListTile.adaptive(
         value: false,
@@ -353,10 +384,6 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
             context,
             'Sign in to manage cloud sync.',
           ),
-          CloudSyncConsentAvailability.premiumRequired => _privacyText(
-            context,
-            'Premium is required to turn on cloud sync.',
-          ),
           CloudSyncConsentAvailability.unavailable => _privacyText(
             context,
             'Cloud sync is temporarily unavailable.',
@@ -371,7 +398,7 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
             SwitchListTile.adaptive(
               key: const Key('encrypted-cloud-sync-consent'),
               value: value.granted,
-              onChanged: !_saving && !_syncing && value.canChange
+              onChanged: !_saving && !syncing && value.canChange
                   ? (next) => _setConsent(next, value)
                   : null,
               title: Text(_privacyText(context, 'Encrypted cloud sync')),
@@ -387,18 +414,28 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
                 value.availability == CloudSyncConsentAvailability.available)
               ListTile(
                 key: const Key('encrypted-cloud-sync-now'),
-                leading: _syncing
+                leading: syncing
                     ? const SizedBox.square(
                         dimension: 22,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.sync_rounded),
                 title: Text(_privacyText(context, 'Sync now')),
-                subtitle: Text(
-                  _privacyText(context, 'Run a one-time encrypted sync now.'),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _privacyText(
+                        context,
+                        'Run a one-time encrypted sync now.',
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    CloudSyncStatusLine(status: syncStatus),
+                  ],
                 ),
-                enabled: !_saving && !_syncing,
-                onTap: !_saving && !_syncing ? _runManualSync : null,
+                enabled: !_saving && !syncing,
+                onTap: !_saving && !syncing ? _runManualSync : null,
               ),
           ],
         );
@@ -407,10 +444,11 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
   }
 
   Future<void> _runManualSync() async {
-    if (_saving || _syncing) return;
-    setState(() => _syncing = true);
+    if (_saving || ref.read(cloudManualSyncStatusProvider).isSyncing) return;
     try {
-      final result = await ref.read(cloudManualSyncServiceProvider).runOnce();
+      final result = await ref
+          .read(cloudManualSyncStatusProvider.notifier)
+          .runOnce();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -419,7 +457,7 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
               context,
               result.completed
                   ? 'Encrypted cloud sync completed.'
-                  : 'Cloud sync could not run. Check Premium, consent, and internet.',
+                  : 'Cloud sync could not run. Check consent and internet.',
             ),
           ),
         ),
@@ -432,13 +470,11 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
           content: Text(
             _privacyText(
               context,
-              'Cloud sync could not run. Check Premium, consent, and internet.',
+              'Cloud sync could not run. Check consent and internet.',
             ),
           ),
         ),
       );
-    } finally {
-      if (mounted) setState(() => _syncing = false);
     }
   }
 
@@ -455,11 +491,23 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
               title: Text(
                 _privacyText(context, 'Turn on encrypted cloud sync?'),
               ),
-              content: Text(
-                _privacyText(
-                  context,
-                  'BIL encrypts profile, weight and water before cloud storage. You can turn sync off at any time.',
-                ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _privacyText(
+                      context,
+                      'BIL encrypts profile, weight and water before cloud storage. You can turn sync off at any time.',
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    context.strings.text(
+                      'If you later turn sync off, future uploads stop. An existing cloud copy is retained until you delete your account or request data deletion in Privacy.',
+                    ),
+                  ),
+                ],
               ),
               actions: [
                 TextButton(
@@ -483,11 +531,24 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
       ref.invalidate(cloudSyncConsentStateProvider);
       ref.invalidate(cloudRuntimePreparationProvider);
       await ref.read(cloudSyncConsentStateProvider.future);
+      CloudManualSyncResult? syncResult;
+      if (granted) {
+        syncResult = await ref
+            .read(cloudManualSyncStatusProvider.notifier)
+            .runOnce();
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _privacyText(context, 'Cloud sync preference updated.'),
+            _privacyText(
+              context,
+              !granted
+                  ? 'Cloud sync preference updated.'
+                  : syncResult?.completed == true
+                  ? 'Encrypted cloud sync completed.'
+                  : 'Cloud sync could not run. Check consent and internet.',
+            ),
           ),
         ),
       );
@@ -504,23 +565,4 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
       if (mounted) setState(() => _saving = false);
     }
   }
-}
-
-class _UnavailableCloudPrivacyTile extends StatelessWidget {
-  const _UnavailableCloudPrivacyTile({required this.title});
-  final String title;
-
-  @override
-  Widget build(BuildContext context) => ListTile(
-    enabled: false,
-    title: Text(title),
-    subtitle: Text(
-      context.strings.text(
-        AppEnvironment.communityConfigured
-            ? 'Sign in to manage community privacy.'
-            : 'Community privacy controls are unavailable on this build.',
-      ),
-    ),
-    trailing: const Icon(Icons.lock_outline_rounded),
-  );
 }

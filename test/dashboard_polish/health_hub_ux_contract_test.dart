@@ -38,7 +38,7 @@ void main() {
     ).readAsStringSync();
 
     expect(card, contains('connectedHealthProvider'));
-    expect(card, contains("context.go('/connected-health')"));
+    expect(card, contains("context.push('/connected-health')"));
     expect(card, isNot(contains('TruthEngine')));
     expect(card, isNot(contains('BodyTwin')));
     expect(card, isNot(contains('OneBestAction')));

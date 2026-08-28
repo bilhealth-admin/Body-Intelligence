@@ -37,16 +37,33 @@ final class FlutterSecureCloudSecretStore implements CloudSecretStore {
 /// switching cannot reuse another user's payload key.
 final class CloudAccountKeyRepository {
   CloudAccountKeyRepository({
-    required SupabaseClient client,
+    required this._client,
     CloudSecretStore? secureStore,
-  }) : _client = client,
-       _secureStore = secureStore ?? FlutterSecureCloudSecretStore();
+  }) : _secureStore = secureStore ?? FlutterSecureCloudSecretStore();
 
   static const _storagePrefix = 'bil.cloud.payload-key.v1.';
   static const keyByteLength = 32;
 
   final SupabaseClient _client;
   final CloudSecretStore _secureStore;
+
+  /// Reads only key material already cached for this authenticated account.
+  ///
+  /// Startup recovery deliberately uses this path: it must never invoke the
+  /// create-capable Vault RPC or mutate secure storage while the app is
+  /// deciding its first route.
+  Future<Uint8List?> readCached(String ownerId) async {
+    final owner = ownerId.trim();
+    if (owner.isEmpty) {
+      throw ArgumentError.value(ownerId, 'ownerId', 'Must not be empty');
+    }
+    final currentUser = _client.auth.currentUser;
+    if (currentUser == null || currentUser.id != owner) {
+      throw StateError('Cloud key request does not match the active account.');
+    }
+    final cached = await _secureStore.read('$_storagePrefix$owner');
+    return cached == null ? null : _decodeAndValidate(cached);
+  }
 
   Future<Uint8List> resolve(String ownerId) async {
     final owner = ownerId.trim();

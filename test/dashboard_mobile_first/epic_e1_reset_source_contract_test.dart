@@ -20,11 +20,11 @@ void main() {
     );
     expect(
       source.indexOf('aiCoach!]'),
-      lessThan(source.indexOf('connectedHealth!,')),
+      lessThan(source.indexOf('mobileTwin,')),
     );
     expect(
       source.indexOf('connectedHealth!,'),
-      lessThan(source.indexOf('mobileTwin,')),
+      lessThan(source.indexOf('dayAndProgress,')),
     );
   });
 

@@ -1,45 +1,44 @@
+import 'dart:io';
+
 import 'package:body_intelligence_log/features/ads/domain/ad_policy.dart';
 import 'package:body_intelligence_log/features/ads/advertising_privacy_page.dart';
 import 'package:body_intelligence_log/features/ads/services/contextual_ad_gateway.dart';
 import 'package:body_intelligence_log/features/ads/services/safe_contextual_ad_controller.dart';
-import 'package:body_intelligence_log/features/ads/repositories/ad_consent_repository.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
-import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   const policy = AdPolicy();
 
   test(
-    'free contextual ads require explicit consent and configured provider',
+    'free contextual ads require an adult account and configured provider',
     () {
-      final free = FreePlan.createState();
+      final free = _verifiedFree();
       expect(
         policy
             .evaluate(
               subscription: free,
-              consent: AdConsentStatus.unknown,
-              placement: AdPlacement.wellnessLibrary,
+              placement: AdPlacement.generalDiscovery,
               providerConfigured: true,
               isOnline: true,
+              ageEligibility: AdAgeEligibility.unknown,
             )
             .reason,
-        AdSuppressionReason.consentMissing,
+        AdSuppressionReason.ageUnknown,
       );
       expect(
         policy
             .evaluate(
               subscription: free,
-              consent: AdConsentStatus.contextualOnly,
-              placement: AdPlacement.wellnessLibrary,
+              placement: AdPlacement.generalDiscovery,
               providerConfigured: false,
               isOnline: true,
+              ageEligibility: AdAgeEligibility.adult,
             )
             .reason,
         AdSuppressionReason.providerUnavailable,
@@ -51,11 +50,11 @@ void main() {
     final gateway = _RecordingGateway();
     final controller = SafeContextualAdController(gateway);
     final decision = policy.evaluate(
-      subscription: FreePlan.createState(),
-      consent: AdConsentStatus.declined,
+      subscription: _verifiedFree(),
       placement: AdPlacement.generalDiscovery,
       providerConfigured: true,
       isOnline: true,
+      ageEligibility: AdAgeEligibility.unknown,
     );
     final result = await controller.requestIfAllowed(
       decision: decision,
@@ -66,20 +65,18 @@ void main() {
   });
 
   test('sensitive routes never request advertising', () {
-    final free = FreePlan.createState();
+    final free = _verifiedFree();
     for (final placement in AdPlacement.values.where(
-      (value) =>
-          value != AdPlacement.wellnessLibrary &&
-          value != AdPlacement.generalDiscovery,
+      (value) => value != AdPlacement.generalDiscovery,
     )) {
       expect(
         policy
             .evaluate(
               subscription: free,
-              consent: AdConsentStatus.contextualOnly,
               placement: placement,
               providerConfigured: true,
               isOnline: true,
+              ageEligibility: AdAgeEligibility.adult,
             )
             .reason,
         AdSuppressionReason.sensitiveContext,
@@ -99,8 +96,7 @@ void main() {
       policy
           .evaluate(
             subscription: paid,
-            consent: AdConsentStatus.contextualOnly,
-            placement: AdPlacement.wellnessLibrary,
+            placement: AdPlacement.generalDiscovery,
             providerConfigured: true,
             isOnline: true,
           )
@@ -109,83 +105,70 @@ void main() {
     );
   });
 
-  test(
-    'unknown age, minors, and unknown or restricted regions fail closed',
-    () {
-      final free = FreePlan.createState();
-      AdPolicyDecision decision(
-        AdAgeEligibility age,
-        AdRegionEligibility region,
-      ) => policy.evaluate(
-        subscription: free,
-        consent: AdConsentStatus.contextualOnly,
-        placement: AdPlacement.wellnessLibrary,
-        providerConfigured: true,
-        isOnline: true,
-        ageEligibility: age,
-        regionEligibility: region,
-      );
+  test('unknown age and minors fail closed', () {
+    final free = _verifiedFree();
+    AdPolicyDecision decision(AdAgeEligibility age) => policy.evaluate(
+      subscription: free,
+      placement: AdPlacement.generalDiscovery,
+      providerConfigured: true,
+      isOnline: true,
+      ageEligibility: age,
+    );
 
-      expect(
-        decision(AdAgeEligibility.unknown, AdRegionEligibility.eligible).reason,
-        AdSuppressionReason.ageUnknown,
-      );
-      expect(
-        decision(AdAgeEligibility.under18, AdRegionEligibility.eligible).reason,
-        AdSuppressionReason.underage,
-      );
-      expect(
-        decision(AdAgeEligibility.adult, AdRegionEligibility.unknown).reason,
-        AdSuppressionReason.regionUnknown,
-      );
-      expect(
-        decision(AdAgeEligibility.adult, AdRegionEligibility.restricted).reason,
-        AdSuppressionReason.regionRestricted,
-      );
-    },
-  );
+    expect(
+      decision(AdAgeEligibility.unknown).reason,
+      AdSuppressionReason.ageUnknown,
+    );
+    expect(
+      decision(AdAgeEligibility.under18).reason,
+      AdSuppressionReason.underage,
+    );
+  });
 
   test(
     'offline and disabled gateway fail closed without invented fill',
     () async {
-      final free = FreePlan.createState();
+      final free = _verifiedFree();
       expect(
         policy
             .evaluate(
               subscription: free,
-              consent: AdConsentStatus.contextualOnly,
-              placement: AdPlacement.wellnessLibrary,
+              placement: AdPlacement.generalDiscovery,
               providerConfigured: true,
               isOnline: false,
+              ageEligibility: AdAgeEligibility.adult,
             )
             .reason,
         AdSuppressionReason.offline,
       );
       expect(
         await const DisabledContextualAdGateway().show(
-          AdPlacement.wellnessLibrary,
+          AdPlacement.generalDiscovery,
         ),
         ContextualAdResult.unavailable,
       );
     },
   );
 
-  test('consent persists independently and can be revoked', () async {
-    SharedPreferences.setMockInitialValues(<String, Object>{});
-    const repository = LocalAdConsentRepository();
-    expect(await repository.read(), AdConsentStatus.unknown);
-    await repository.write(AdConsentStatus.contextualOnly);
-    expect(await repository.read(), AdConsentStatus.contextualOnly);
-    await repository.write(AdConsentStatus.declined);
-    expect(await repository.read(), AdConsentStatus.declined);
-    await repository.clear();
-    expect(await repository.read(), AdConsentStatus.unknown);
+  test('publisher-created ad-free and second age switches are removed', () {
+    expect(
+      File(
+        'lib/features/ads/repositories/ad_consent_repository.dart',
+      ).existsSync(),
+      isFalse,
+    );
+    final page = File(
+      'lib/features/ads/advertising_privacy_page.dart',
+    ).readAsStringSync();
+    expect(page, isNot(contains('advertising-consent-declined')));
+    expect(page, isNot(contains('advertising-consent-contextual')));
+    expect(page, isNot(contains('advertising-adult-confirmation')));
   });
 
   test('advertising privacy entry is reviewed in every production locale', () {
     expect(RuntimeCopy.supported, hasLength(25));
     final english = advertisingPrivacySurfaceCopy('en');
-    expect(english, hasLength(24));
+    expect(english, hasLength(19));
     for (final locale in RuntimeCopy.supported) {
       final surface = advertisingPrivacySurfaceCopy(locale);
       expect(surface, hasLength(english.length));
@@ -214,17 +197,28 @@ void main() {
   testWidgets('unconfigured provider is visible and cannot imply ad delivery', (
     tester,
   ) async {
-    SharedPreferences.setMockInitialValues(<String, Object>{});
     await tester.pumpWidget(
       const ProviderScope(child: MaterialApp(home: AdvertisingPrivacyPage())),
     );
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('advertising-provider-unavailable')), findsOne);
-    expect(find.byKey(const Key('advertising-consent-declined')), findsOne);
-    expect(find.byKey(const Key('advertising-consent-contextual')), findsOne);
+    expect(find.byKey(const Key('advertising-contextual-policy')), findsOne);
+    expect(find.byKey(const Key('advertising-consent-declined')), findsNothing);
+    expect(
+      find.byKey(const Key('advertising-adult-confirmation')),
+      findsNothing,
+    );
   });
 }
+
+SubscriptionState _verifiedFree() => SubscriptionState(
+  plan: CommercePlan.free,
+  entitlements: const <CommerceEntitlement>{},
+  authority: EntitlementAuthority.verifiedServer,
+  isPurchasable: false,
+  canRestorePurchases: false,
+);
 
 final class _RecordingGateway implements ContextualAdGateway {
   int calls = 0;

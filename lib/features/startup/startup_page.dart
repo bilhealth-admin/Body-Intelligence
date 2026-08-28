@@ -4,13 +4,46 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/services.dart';
 
 import '../../app/environment/app_environment.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../cloud_platform/providers/cloud_sync_providers.dart';
 import '../weight/providers/weight_provider.dart';
 import '../auth/auth_five_locale_copy.dart';
-import 'light_startup_splash_experience.dart';
+import '../onboarding/domain/adult_eligibility.dart';
+import 'premium_splash_experience.dart';
+
+/// On a fresh installation, recover an already-consented account profile
+/// before deciding that the user needs onboarding again. The attempt is
+/// bounded so cloud availability can never recreate the old startup hang.
+final startupCloudProfileRestoreProvider = FutureProvider.autoDispose
+    .family<bool, String>((ref, ownerId) async {
+      if (!AppEnvironment.supabaseRuntimeReady ||
+          Supabase.instance.client.auth.currentUser?.id != ownerId) {
+        return false;
+      }
+      try {
+        final repository = ref.read(userProfileRepositoryProvider);
+        if (await repository.getProfile() != null) return true;
+
+        final binding = await ref.read(localDataAccountBindingProvider.future);
+        if (binding == null || binding.requiresAccountResolution) return false;
+
+        final restored = await ref
+            .read(startupCloudProfileRestoreServiceProvider)
+            .restore(ownerId);
+        if (!restored || await repository.getProfile() == null) {
+          return false;
+        }
+
+        ref.invalidate(userProfileProvider);
+        await ref.read(userProfileProvider.future);
+        return true;
+      } on Object {
+        return false;
+      }
+    });
 
 class StartupPage extends ConsumerStatefulWidget {
   const StartupPage({super.key});
@@ -21,13 +54,18 @@ class StartupPage extends ConsumerStatefulWidget {
 
 class _StartupPageState extends ConsumerState<StartupPage>
     with SingleTickerProviderStateMixin {
-  // Native Android/iOS already presents the exact same BIL identity while the
-  // engine starts. Keep only a short continuity frame instead of forcing a
-  // second full-length splash after Flutter is ready.
-  static const splashDuration = Duration(milliseconds: 320);
+  // Native Android hands off immediately to Flutter's matching first frame.
+  // Keep Flutter visible for one deliberate 2.3-second identity beat. Routing
+  // still depends only on data readiness plus this bounded timer, never on the
+  // decoder, so a playback failure cannot stall startup.
+  static const splashDuration = bilSplashMinimumDisplayDuration;
 
   late final AnimationController controller;
   Timer? minimumDisplayTimer;
+  Timer? authResolutionTimer;
+  StreamSubscription<AuthState>? authSubscription;
+  Session? authSession;
+  bool authStateResolved = !AppEnvironment.cloudConfigured;
   bool minimumDisplayElapsed = false;
   String? readyLocation;
   bool redirectScheduled = false;
@@ -36,9 +74,60 @@ class _StartupPageState extends ConsumerState<StartupPage>
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(vsync: this, duration: splashDuration)
-      ..forward();
+    controller = AnimationController(vsync: this, duration: splashDuration);
+    unawaited(controller.forward());
     beginMinimumDisplayWindow();
+    _beginAuthResolution();
+  }
+
+  void _beginAuthResolution() {
+    if (!AppEnvironment.supabaseRuntimeReady) {
+      authStateResolved = true;
+      authSession = null;
+      return;
+    }
+
+    final auth = Supabase.instance.client.auth;
+    authSession = auth.currentSession;
+    if (authSession != null) {
+      authStateResolved = true;
+    }
+
+    authSubscription = auth.onAuthStateChange.listen(
+      (state) {
+        if (!mounted) return;
+        final resolved =
+            state.event == AuthChangeEvent.initialSession ||
+            state.event == AuthChangeEvent.signedIn ||
+            state.event == AuthChangeEvent.signedOut ||
+            state.session != null;
+        setState(() {
+          authSession = state.session;
+          if (resolved) authStateResolved = true;
+          readyLocation = null;
+          redirectScheduled = false;
+        });
+      },
+      onError: (Object _, StackTrace _) {
+        if (!mounted) return;
+        setState(() {
+          authSession = auth.currentSession;
+          authStateResolved = true;
+          readyLocation = null;
+          redirectScheduled = false;
+        });
+      },
+    );
+
+    // `initialSession` normally resolves immediately. This finite fallback keeps
+    // startup from hanging if the auth stream is interrupted while offline.
+    authResolutionTimer = Timer(const Duration(seconds: 2), () {
+      if (!mounted || authStateResolved) return;
+      setState(() {
+        authSession = auth.currentSession;
+        authStateResolved = true;
+      });
+    });
   }
 
   void beginMinimumDisplayWindow() {
@@ -53,6 +142,8 @@ class _StartupPageState extends ConsumerState<StartupPage>
   @override
   void dispose() {
     minimumDisplayTimer?.cancel();
+    authResolutionTimer?.cancel();
+    unawaited(authSubscription?.cancel());
     controller.dispose();
     super.dispose();
   }
@@ -74,7 +165,7 @@ class _StartupPageState extends ConsumerState<StartupPage>
   void retry() {
     redirectScheduled = false;
     readyLocation = null;
-    controller.forward(from: 0);
+    controller.value = 1;
     beginMinimumDisplayWindow();
     setState(() => retrying = true);
     ref.invalidate(userProfileProvider);
@@ -105,24 +196,36 @@ class _StartupPageState extends ConsumerState<StartupPage>
     // Optional Premium cloud preparation must never block local-first startup.
     // It remains transport-locked until inbound merge is closed.
     ref.watch(cloudRuntimePreparationProvider);
+    final signedInOwnerId = authSession?.user.id;
+    final shouldRestoreCloudProfile =
+        signedInOwnerId != null &&
+        profile.hasValue &&
+        profile.value == null &&
+        localAccountBinding.hasValue &&
+        localAccountBinding.value?.requiresAccountResolution != true;
+    final cloudProfileRestore = shouldRestoreCloudProfile
+        ? ref.watch(startupCloudProfileRestoreProvider(signedInOwnerId))
+        : const AsyncValue<bool>.data(false);
+    final waitingForAuth = AppEnvironment.cloudConfigured && !authStateResolved;
     final error =
         profile.hasError ||
         checkInDue.hasError ||
         forceOnboarding.hasError ||
         accountGatewayReviewed.hasError ||
-        localAccountBinding.hasError;
+        localAccountBinding.hasError ||
+        cloudProfileRestore.hasError;
     final showError = error && !retrying;
 
-    if (!error &&
+    if (!waitingForAuth &&
+        !error &&
         profile.hasValue &&
         checkInDue.hasValue &&
         forceOnboarding.hasValue &&
         accountGatewayReviewed.hasValue &&
-        localAccountBinding.hasValue) {
+        localAccountBinding.hasValue &&
+        cloudProfileRestore.hasValue) {
       final user = profile.value;
-      final signedIn =
-          AppEnvironment.cloudConfigured &&
-          Supabase.instance.client.auth.currentSession != null;
+      final signedIn = AppEnvironment.cloudConfigured && authSession != null;
       final needsAccountChoice =
           AppEnvironment.cloudConfigured &&
           !signedIn &&
@@ -130,10 +233,22 @@ class _StartupPageState extends ConsumerState<StartupPage>
       final accountConflict =
           localAccountBinding.value?.requiresAccountResolution == true;
       if (accountConflict) {
+        // This is now only a corruption/legacy fail-safe. Normal account
+        // switching uses a separate local SQLite namespace per BIL account.
         readyLocation = '/account-data-conflict';
-      } else if (forceOnboarding.value == true ||
-          user == null ||
-          needsAccountChoice) {
+      } else if (forceOnboarding.value == true) {
+        readyLocation = '/onboarding';
+      } else if (user == null && cloudProfileRestore.value != true) {
+        // A newly signed-in account owns a clean local database and must be
+        // allowed to create its own profile instead of being sent back to the
+        // sign-in gateway. Signed-out guest mode still starts at the gateway.
+        readyLocation = signedIn ? '/onboarding' : '/account-gateway';
+      } else if (user != null && !BilAdultEligibility.isEligibleAge(user.age)) {
+        // The production audience is adults only. Legacy local profiles keep
+        // a calculated age rather than a full birth date, so they return to
+        // the neutral date-of-birth gate instead of entering the product.
+        readyLocation = '/onboarding';
+      } else if (needsAccountChoice) {
         readyLocation = '/account-gateway';
       } else {
         readyLocation = checkInDue.value == true
@@ -145,24 +260,27 @@ class _StartupPageState extends ConsumerState<StartupPage>
       readyLocation = null;
     }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF050505),
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          LightStartupSplashBackdrop(
-            controller: controller,
-            animate: !showError,
-          ),
-          Center(
-            child: showError
-                ? _StartupError(arabic: arabic, onRetry: retry)
-                : LightStartupSplashExperience(
-                    arabic: arabic,
-                    controller: controller,
-                  ),
-          ),
-        ],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+        systemNavigationBarColor: bilLaunchBlue,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: bilLaunchBlue,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            const PremiumSplashBackdrop(),
+            Center(
+              child: showError
+                  ? _StartupError(arabic: arabic, onRetry: retry)
+                  : PremiumSplashExperience(controller: controller),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BIL - บันทึกความฉลาดของร่างกาย</string>
+    <string name="health_permissions_rationale_title">ความเป็นส่วนตัวของข้อมูลด้านสุขภาพ</string>
+    <string name="health_permissions_rationale_body">BIL จะร้องขอเฉพาะชนิดข้อมูล Health Connect ที่จำเป็นสำหรับคุณลักษณะที่คุณเลือกใช้ ข้อมูลสุขภาพของคุณจะถูกประมวลผลภายในเครื่องตามค่าเริ่มต้น คุณสามารถให้ ปฏิเสธ หรือเพิกถอนสิทธิ์ส่วนบุคคลได้ตลอดเวลาจากการตั้งค่า Health Connect BIL ไม่ขายข้อมูลด้านสุขภาพหรือใช้เพื่อการโฆษณา</string>
+    <string name="health_permissions_privacy_policy_action">อ่านนโยบายความเป็นส่วนตัวฉบับเต็มของ BIL</string>
+</resources>

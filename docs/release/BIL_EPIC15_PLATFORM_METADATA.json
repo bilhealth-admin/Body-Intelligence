@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "verified_on": "2026-08-05",
+  "verified_on": "2026-08-22",
   "google_play": {
     "category": "Health & Fitness",
     "tags": ["nutrition", "fitness", "wellness", "weight management", "health tracking"],
@@ -28,7 +28,7 @@
       "bluetooth": "Explicitly initiated supported BIL device discovery and connection.",
       "health": "Explicitly approved connected-health synchronization."
     },
-    "app_access": "Core local logging works without an account. Cloud community, AI gateways, purchases, push, and hardware remain unavailable unless production configuration and permissions exist.",
+    "app_access": "Core local logging works without an account. The authenticated reviewer account play-review@bilhealth.com has a server-owned Premium AI Coach closed-test grant. Enter its existing password only in the private Google Play or App Store review notes; never commit it. Community and friends require a verified Premium entitlement; Premium AI Coach inherits them. Purchases and hardware never show success unless their store or device boundary is configured and verified.",
     "closed_testing": "OWNER_INPUT_REQUIRED_UPLOAD_SIGNED_AAB_INVITE_TESTERS_COMPLETE_14_DAY_OR_CURRENT_POLICY_REQUIREMENT",
     "contact_email": "support@bilhealth.com",
     "website": "https://www.bilhealth.com",
@@ -67,17 +67,17 @@
     "states": ["pending", "active", "grace period", "expired", "cancelled"],
     "plans": {
       "free": {"en": "Free", "ar": "مجاني", "fr": "Gratuit", "es": "Gratis", "tr": "Ücretsiz"},
-      "plus": {"en": "BIL Plus", "ar": "BIL بلس", "fr": "BIL Plus", "es": "BIL Plus", "tr": "BIL Plus"},
-      "pro": {"en": "BIL Pro", "ar": "BIL برو", "fr": "BIL Pro", "es": "BIL Pro", "tr": "BIL Pro"}
+      "premium": {"en": "BIL Premium", "ar": "BIL بريميوم", "fr": "BIL Premium", "es": "BIL Premium", "tr": "BIL Premium"},
+      "premium_ai_coach": {"en": "BIL Premium AI Coach", "ar": "BIL بريميوم AI Coach", "fr": "BIL Premium AI Coach", "es": "BIL Premium AI Coach", "tr": "BIL Premium AI Coach"}
     },
     "billing_periods": ["monthly", "annual"],
     "product_ids": "OWNER_INPUT_REQUIRED_MATCH_STORE_CATALOG_CONFIGURATION",
     "localized_descriptions": {
-      "en": {"free": "Daily local logging and core progress.", "plus": "Trusted catalogs, richer insights and optional content packs.", "pro": "Advanced explainable intelligence and the highest configured feature tier."},
-      "ar": {"free": "تسجيل يومي محلي وتقدم أساسي.", "plus": "كتالوجات موثقة ورؤى أوسع وحزم محتوى اختيارية.", "pro": "ذكاء متقدم قابل للتفسير وأعلى مستوى ميزات مهيأ."},
-      "fr": {"free": "Journal local quotidien et progrès essentiels.", "plus": "Catalogues vérifiés, analyses enrichies et contenus optionnels.", "pro": "Intelligence explicable avancée et niveau configuré le plus complet."},
-      "es": {"free": "Registro diario local y progreso esencial.", "plus": "Catálogos verificados, más información y contenido opcional.", "pro": "Inteligencia explicable avanzada y el nivel configurado más completo."},
-      "tr": {"free": "Günlük yerel kayıt ve temel ilerleme.", "plus": "Doğrulanmış kataloglar, daha zengin içgörüler ve isteğe bağlı içerik.", "pro": "Gelişmiş açıklanabilir zekâ ve yapılandırılmış en üst özellik düzeyi."}
+      "en": {"free": "Daily local logging and core progress.", "premium": "Ad-free advanced insights, meal planning, connected health, premium programs, custom goals, and the Premium community with friends and private messaging.", "premium_ai_coach": "Everything in BIL Premium, plus the server-authorized personalized AI Coach and its verified usage quota."},
+      "ar": {"free": "تسجيل يومي محلي وتقدم أساسي.", "premium": "رؤى متقدمة بلا إعلانات وتخطيط وجبات وربط صحي وبرامج مميزة وأهداف مخصصة ومجتمع بريميوم مع الأصدقاء والرسائل الخاصة.", "premium_ai_coach": "كل ما في BIL بريميوم، إضافة إلى مدرب الذكاء الاصطناعي الشخصي المصرح به من الخادم وحصته الموثقة."},
+      "fr": {"free": "Journal local quotidien et progrès essentiels.", "premium": "Analyses avancées sans publicité, planification des repas, santé connectée, programmes Premium, objectifs personnalisés et communauté Premium avec amis et messagerie privée.", "premium_ai_coach": "Tout BIL Premium, plus le coach IA personnalisé autorisé par le serveur et son quota vérifié."},
+      "es": {"free": "Registro diario local y progreso esencial.", "premium": "Información avanzada sin anuncios, planificación de comidas, salud conectada, programas Premium, objetivos personalizados y comunidad Premium con amigos y mensajes privados.", "premium_ai_coach": "Todo BIL Premium, más el entrenador de IA personalizado autorizado por el servidor y su cuota verificada."},
+      "tr": {"free": "Günlük yerel kayıt ve temel ilerleme.", "premium": "Reklamsız gelişmiş analizler, öğün planlama, bağlı sağlık, Premium programlar, özel hedefler ve arkadaşlar ile özel mesajlaşmayı içeren Premium topluluk.", "premium_ai_coach": "BIL Premium'daki her şeye ek olarak sunucu tarafından yetkilendirilen kişisel AI Coach ve doğrulanmış kullanım kotası."}
     }
   },
   "localized_feature_highlights": {

@@ -16,6 +16,7 @@ void main() {
     expect(benchmark, contains('DashboardSectionIds.aiCoach'));
     expect(grid, contains('_UnprofiledReferenceDashboard'));
     expect(grid, contains('PremiumDashboardBenchmark('));
-    expect(more, contains("'AI Coach',\n            '/intelligence-center'"));
+    expect(more, contains("copy('AI Coach')"));
+    expect(more, contains("'/intelligence-center'"));
   });
 }

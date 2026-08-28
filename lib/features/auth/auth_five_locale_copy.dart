@@ -28,8 +28,18 @@ String authFiveLocaleTextFor(String localeTag, String english, String arabic) =>
       arabic,
     );
 
+bool authHasExactReviewedCopy(String localeTag, String english) {
+  final locale = BilLocalePolicy.localeFromTag(localeTag);
+  if (locale.languageCode == 'ar') return true;
+  final canonical = BilLocalePolicy.canonicalTag(locale);
+  return _authExactReviewedCopy[english]?.containsKey(canonical) ?? false;
+}
+
 String _authLocaleTextFor(Locale locale, String english, String arabic) {
   if (locale.languageCode == 'ar') return _repairLegacyUtf8(arabic);
+  final canonical = BilLocalePolicy.canonicalTag(locale);
+  final reviewed = _authExactReviewedCopy[english]?[canonical];
+  if (reviewed != null) return reviewed;
   final authored = _authAuthoredCopy[english]?[locale.languageCode];
   if (authored != null) return authored;
   final exact = RuntimeCopy.resolve(
@@ -40,6 +50,100 @@ String _authLocaleTextFor(Locale locale, String english, String arabic) {
   final localized = AppLocalizations(locale).text(english);
   return localized;
 }
+
+const _authExactReviewedCopy = <String, Map<String, String>>{
+  'Password': {
+    'en': 'Password',
+    'fr': 'Mot de passe',
+    'es': 'Contraseña',
+    'tr': 'Şifre',
+    'de': 'Passwort',
+    'it': 'Password',
+    'pt-BR': 'Senha',
+    'pt-PT': 'Palavra-passe',
+    'ur': 'پاس ورڈ',
+    'fa': 'گذرواژه',
+    'hi': 'पासवर्ड',
+    'id': 'Kata sandi',
+    'ms': 'Kata laluan',
+    'ja': 'パスワード',
+    'ko': '비밀번호',
+    'zh-Hans': '密码',
+    'zh-Hant': '密碼',
+    'ru': 'Пароль',
+    'bn': 'পাসওয়ার্ড',
+    'vi': 'Mật khẩu',
+    'th': 'รหัสผ่าน',
+    'pl': 'Hasło',
+    'nl': 'Wachtwoord',
+    'uk': 'Пароль',
+  },
+  'Store reviewer access': {
+    'en': 'Store reviewer access',
+    'fr': 'Accès du réviseur du Store',
+    'es': 'Acceso para revisores de la tienda',
+    'tr': 'Mağaza inceleyici erişimi',
+    'de': 'Zugang für Store-Prüfer',
+    'it': 'Accesso revisore dello Store',
+    'pt-BR': 'Acesso do revisor da loja',
+    'pt-PT': 'Acesso do revisor da loja',
+    'ur': 'اسٹور جائزہ کار کی رسائی',
+    'fa': 'دسترسی بازبین فروشگاه',
+    'hi': 'स्टोर समीक्षक पहुँच',
+    'id': 'Akses peninjau toko',
+    'ms': 'Akses penyemak gedung',
+    'ja': 'ストア審査担当者アクセス',
+    'ko': '스토어 검토자 액세스',
+    'zh-Hans': '商店审核员访问',
+    'zh-Hant': '商店審核員存取權',
+    'ru': 'Доступ для проверяющего магазина',
+    'bn': 'স্টোর পর্যালোচকের প্রবেশাধিকার',
+    'vi': 'Quyền truy cập của người đánh giá cửa hàng',
+    'th': 'การเข้าถึงสำหรับผู้ตรวจสอบสโตร์',
+    'pl': 'Dostęp dla recenzenta sklepu',
+    'nl': 'Toegang voor store-reviewer',
+    'uk': 'Доступ для перевіряча магазину',
+  },
+  'Use only the dedicated credentials supplied in the store review notes.': {
+    'en':
+        'Use only the dedicated credentials supplied in the store review notes.',
+    'fr':
+        'Utilisez uniquement les identifiants fournis dans les notes de révision du Store.',
+    'es':
+        'Use solo las credenciales indicadas en las notas de revisión de la tienda.',
+    'tr':
+        'Yalnızca mağaza inceleme notlarında verilen özel bilgileri kullanın.',
+    'de': 'Verwenden Sie nur die Zugangsdaten aus den Store-Prüfhinweisen.',
+    'it':
+        'Usa solo le credenziali indicate nelle note di revisione dello Store.',
+    'pt-BR':
+        'Use apenas as credenciais informadas nas notas de análise da loja.',
+    'pt-PT':
+        'Use apenas as credenciais indicadas nas notas de revisão da loja.',
+    'ur': 'صرف اسٹور کے جائزہ نوٹس میں دی گئی مخصوص اسناد استعمال کریں۔',
+    'fa':
+        'فقط از اطلاعات ورود ارائه‌شده در یادداشت‌های بازبینی فروشگاه استفاده کنید.',
+    'hi':
+        'केवल स्टोर समीक्षा नोट में दिए गए समर्पित क्रेडेंशियल का उपयोग करें।',
+    'id': 'Gunakan hanya kredensial khusus dalam catatan peninjauan toko.',
+    'ms': 'Gunakan hanya kelayakan khusus dalam nota semakan gedung.',
+    'ja': 'ストア審査メモに記載された専用の認証情報のみを使用してください。',
+    'ko': '스토어 검토 메모에 제공된 전용 자격 증명만 사용하세요.',
+    'zh-Hans': '仅使用商店审核说明中提供的专用凭据。',
+    'zh-Hant': '僅使用商店審核說明中提供的專用憑證。',
+    'ru':
+        'Используйте только данные, указанные в примечаниях для проверки магазина.',
+    'bn':
+        'শুধু স্টোর পর্যালোচনা নোটে দেওয়া নির্দিষ্ট পরিচয়পত্র ব্যবহার করুন।',
+    'vi':
+        'Chỉ dùng thông tin đăng nhập được cung cấp trong ghi chú đánh giá cửa hàng.',
+    'th': 'ใช้เฉพาะข้อมูลเข้าสู่ระบบที่ระบุไว้ในหมายเหตุการตรวจสอบสโตร์',
+    'pl': 'Użyj wyłącznie danych podanych w uwagach dla recenzenta sklepu.',
+    'nl':
+        'Gebruik alleen de gegevens uit de beoordelingsnotities van de store.',
+    'uk': 'Використовуйте лише дані з приміток для перевірки магазину.',
+  },
+};
 
 String _repairLegacyUtf8(String value) {
   if (!value.codeUnits.any((unit) => unit == 0xD8 || unit == 0xD9)) {

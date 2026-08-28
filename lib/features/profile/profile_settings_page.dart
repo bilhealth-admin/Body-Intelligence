@@ -6,9 +6,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/database/app_database.dart';
 import '../../core/units/measurement_units.dart';
+import '../../shared/widgets/bil_account_avatar.dart';
 import 'profile_locale_copy.dart';
 import 'providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
+import '../nutrition/domain/dietary_preferences.dart';
 
 class ProfileSettingsPage extends ConsumerStatefulWidget {
   const ProfileSettingsPage({super.key});
@@ -40,8 +42,13 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
   int weeklyExerciseSessions = 3;
   String exerciseType = 'mixed';
   String dietApproach = 'balanced';
+  DietaryPattern dietaryPattern = DietaryPattern.omnivore;
+  Set<DietaryRequirement> dietaryRequirements = <DietaryRequirement>{};
+  Set<DietaryAllergen> dietaryAllergens = <DietaryAllergen>{};
+  Set<String> dietaryExcludedIngredients = <String>{};
   bool experiencePreferencesLoaded = false;
   bool initialized = false;
+  bool formHydrated = false;
   bool saving = false;
   bool dirty = false;
   MeasurementSystem measurementSystem = MeasurementSystem.metric;
@@ -78,8 +85,16 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
     chest.text = _optionalText(profile.chest);
     arm.text = _optionalText(profile.arm);
     thigh.text = _optionalText(profile.thigh);
-    unawaited(_loadLatestMeasurements());
-    unawaited(_loadExperiencePreferences());
+    unawaited(_finishHydration());
+  }
+
+  Future<void> _finishHydration() async {
+    await Future.wait([
+      _loadLatestMeasurements(),
+      _loadExperiencePreferences(),
+    ]);
+    if (!mounted) return;
+    setState(() => formHydrated = true);
   }
 
   String _optionalText(double? centimeters) {
@@ -117,15 +132,19 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
     final values = await Future.wait([
       repository.get('weeklyExerciseSessions'),
       repository.get('exerciseType'),
-      repository.get('dietApproach'),
       repository.get('displayName'),
     ]);
+    final dietary = await ref.read(dietaryPreferencesRepositoryProvider).read();
     if (!mounted) return;
     setState(() {
       weeklyExerciseSessions = int.tryParse(values[0] ?? '') ?? 3;
       exerciseType = values[1] ?? 'mixed';
-      dietApproach = values[2] ?? 'balanced';
-      displayName.text = values[3]?.trim() ?? '';
+      dietApproach = dietary.approach;
+      dietaryPattern = dietary.pattern;
+      dietaryRequirements = dietary.requirements.toSet();
+      dietaryAllergens = dietary.allergens.toSet();
+      dietaryExcludedIngredients = dietary.excludedIngredients.toSet();
+      displayName.text = values[2]?.trim() ?? '';
     });
   }
 
@@ -249,7 +268,17 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
         exercises ? weeklyExerciseSessions.toString() : '0',
       );
       await preferences.set('exerciseType', exerciseType);
-      await preferences.set('dietApproach', dietApproach);
+      await ref
+          .read(dietaryPreferencesRepositoryProvider)
+          .save(
+            DietaryPreferences(
+              pattern: dietaryPattern,
+              approach: dietApproach,
+              requirements: dietaryRequirements,
+              allergens: dietaryAllergens,
+              excludedIngredients: dietaryExcludedIngredients,
+            ),
+          );
       await preferences.set('displayName', displayName.text.trim());
       ref.invalidate(userProfileProvider);
       ref.invalidate(activeGoalProvider);
@@ -305,7 +334,11 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
               return const Center(child: CircularProgressIndicator());
             }
             hydrate(profile, systemAsync.requireValue);
+            if (!formHydrated) {
+              return const Center(child: CircularProgressIndicator());
+            }
             final photo = ref.watch(profilePhotoProvider).value;
+            final photoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
             return Form(
               key: formKey,
               onChanged: () {
@@ -315,14 +348,10 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 116),
                 children: [
                   Center(
-                    child: CircleAvatar(
+                    child: BilAccountAvatar(
                       radius: 42,
-                      foregroundImage: photo == null
-                          ? null
-                          : MemoryImage(photo),
-                      child: photo == null
-                          ? const Icon(Icons.person_rounded, size: 42)
-                          : null,
+                      photoBytes: photo,
+                      networkUrl: photoUrl,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -602,6 +631,126 @@ class _ProfileSettingsPageState extends ConsumerState<ProfileSettingsPage> {
                       dietApproach = value ?? dietApproach;
                       dirty = true;
                     }),
+                  ),
+                  const SizedBox(height: 16),
+                  DropdownButtonFormField<DietaryPattern>(
+                    initialValue: dietaryPattern,
+                    decoration: InputDecoration(
+                      labelText: t('Dietary pattern', 'النمط الغذائي'),
+                      helperText: t(
+                        'Used to filter meal and recipe suggestions.',
+                        'يُستخدم لتصفية اقتراحات الوجبات والوصفات.',
+                      ),
+                    ),
+                    items: [
+                      DropdownMenuItem(
+                        value: DietaryPattern.omnivore,
+                        child: Text(t('Omnivore', 'متنوع')),
+                      ),
+                      DropdownMenuItem(
+                        value: DietaryPattern.pescatarian,
+                        child: Text(t('Pescatarian', 'نباتي مع الأسماك')),
+                      ),
+                      DropdownMenuItem(
+                        value: DietaryPattern.vegetarian,
+                        child: Text(t('Vegetarian', 'نباتي')),
+                      ),
+                      DropdownMenuItem(
+                        value: DietaryPattern.vegan,
+                        child: Text(t('Vegan', 'نباتي صرف')),
+                      ),
+                    ],
+                    onChanged: (value) => setState(() {
+                      dietaryPattern = value ?? dietaryPattern;
+                      dirty = true;
+                    }),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    t('Dietary requirements', 'متطلبات غذائية'),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final requirement in DietaryRequirement.values)
+                        FilterChip(
+                          label: Text(switch (requirement) {
+                            DietaryRequirement.halal => t('Halal', 'حلال'),
+                            DietaryRequirement.kosher => t('Kosher', 'كوشير'),
+                            DietaryRequirement.glutenFree => t(
+                              'Gluten-free',
+                              'خالٍ من الغلوتين',
+                            ),
+                            DietaryRequirement.lactoseFree => t(
+                              'Lactose-free',
+                              'خالٍ من اللاكتوز',
+                            ),
+                          }),
+                          selected: dietaryRequirements.contains(requirement),
+                          onSelected: (selected) => setState(() {
+                            selected
+                                ? dietaryRequirements.add(requirement)
+                                : dietaryRequirements.remove(requirement);
+                            dirty = true;
+                          }),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    t(
+                      'Exclude declared allergens from suggestions',
+                      'استبعاد مسببات الحساسية المحددة من الاقتراحات',
+                    ),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final allergen in DietaryAllergen.values)
+                        FilterChip(
+                          label: Text(switch (allergen) {
+                            DietaryAllergen.milk => t('Milk', 'الحليب'),
+                            DietaryAllergen.egg => t('Egg', 'البيض'),
+                            DietaryAllergen.fish => t('Fish', 'السمك'),
+                            DietaryAllergen.shellfish => t(
+                              'Shellfish',
+                              'المحار',
+                            ),
+                            DietaryAllergen.peanut => t(
+                              'Peanut',
+                              'الفول السوداني',
+                            ),
+                            DietaryAllergen.treeNut => t(
+                              'Tree nuts',
+                              'المكسرات',
+                            ),
+                            DietaryAllergen.wheat => t('Wheat', 'القمح'),
+                            DietaryAllergen.soy => t('Soy', 'الصويا'),
+                            DietaryAllergen.sesame => t('Sesame', 'السمسم'),
+                          }),
+                          selected: dietaryAllergens.contains(allergen),
+                          onSelected: (selected) => setState(() {
+                            selected
+                                ? dietaryAllergens.add(allergen)
+                                : dietaryAllergens.remove(allergen);
+                            dirty = true;
+                          }),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    t(
+                      'Ingredient labels and medical restrictions still require your review.',
+                      'لا تزال ملصقات المكونات والقيود الطبية بحاجة إلى مراجعتك.',
+                    ),
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 20),
                   FilledButton.icon(

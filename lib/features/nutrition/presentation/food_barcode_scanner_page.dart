@@ -19,7 +19,7 @@ class FoodBarcodeScannerPage extends StatefulWidget {
 }
 
 class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   final MobileScannerController controller = MobileScannerController(
     autoStart: false,
     detectionSpeed: DetectionSpeed.noDuplicates,
@@ -28,6 +28,8 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
   bool starting = true;
   bool handled = false;
   Object? startError;
+  late final AnimationController _scanBeamController;
+  late final Animation<double> _scanBeamProgress;
 
   bool get isWindows =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.windows;
@@ -44,6 +46,14 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _scanBeamController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1650),
+    );
+    _scanBeamProgress = CurvedAnimation(
+      parent: _scanBeamController,
+      curve: Curves.easeInOutCubic,
+    );
 
     if (!widget.scannerEnabled) {
       starting = false;
@@ -56,6 +66,7 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
         if (mounted) _startWindows();
       });
     } else if (mobileScannerSupported) {
+      _scanBeamController.repeat(reverse: true);
       _startMobile();
     } else {
       starting = false;
@@ -134,9 +145,13 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
     if (!mobileScannerSupported || isWindows) return;
 
     if (state == AppLifecycleState.resumed && !handled) {
+      if (!_scanBeamController.isAnimating) {
+        _scanBeamController.repeat(reverse: true);
+      }
       _startMobile();
     } else if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused) {
+      _scanBeamController.stop();
       controller.stop();
     }
   }
@@ -153,6 +168,7 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
     if (value == null) return;
 
     handled = true;
+    _scanBeamController.stop();
     controller.stop();
     Navigator.of(context).pop(value);
   }
@@ -160,6 +176,7 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _scanBeamController.dispose();
     controller.dispose();
     super.dispose();
   }
@@ -212,8 +229,10 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
                 ),
                 IgnorePointer(
                   child: CustomPaint(
+                    key: const Key('barcode-animated-scan-beam'),
                     painter: _ScanFramePainter(
                       color: Theme.of(context).colorScheme.primary,
+                      progress: _scanBeamProgress,
                     ),
                   ),
                 ),
@@ -393,9 +412,11 @@ class _ScannerError extends StatelessWidget {
 }
 
 class _ScanFramePainter extends CustomPainter {
-  const _ScanFramePainter({required this.color});
+  _ScanFramePainter({required this.color, required this.progress})
+    : super(repaint: progress);
 
   final Color color;
+  final Animation<double> progress;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -422,9 +443,32 @@ class _ScanFramePainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 4,
     );
+
+    final beamY = rect.top + 14 + (rect.height - 28) * progress.value;
+    final beamRect = Rect.fromLTRB(
+      rect.left + 16,
+      beamY - 1.5,
+      rect.right - 16,
+      beamY + 1.5,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(beamRect, const Radius.circular(999)),
+      Paint()
+        ..shader = LinearGradient(
+          colors: [
+            color.withValues(alpha: 0),
+            color.withValues(alpha: .95),
+            Colors.white,
+            color.withValues(alpha: .95),
+            color.withValues(alpha: 0),
+          ],
+          stops: const [0, .22, .5, .78, 1],
+        ).createShader(beamRect)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
+    );
   }
 
   @override
   bool shouldRepaint(covariant _ScanFramePainter oldDelegate) =>
-      oldDelegate.color != color;
+      oldDelegate.color != color || oldDelegate.progress != progress;
 }

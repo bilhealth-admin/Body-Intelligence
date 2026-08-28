@@ -11,9 +11,12 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
     with _WellnessCopy {
   Timer? timer;
   FastingSession? session;
-  int targetHours = 12;
+  int targetHours = 16;
   List<FastingHistoryEntry> history = const [];
   bool notifyAtTarget = false;
+  BilNotificationPermissionState notificationPermission =
+      BilNotificationPermissionState.unknown;
+  bool fastingNotificationScheduled = false;
   bool loading = true;
   bool busy = false;
   Object? loadError;
@@ -74,11 +77,13 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
             restored?.targetHours ??
             (savedTarget != null && savedTarget >= 1 && savedTarget <= 48
                 ? savedTarget
-                : 12);
+                : 16);
         history = FastingHistoryCodec.decode(encodedHistory);
         notifyAtTarget = notify == 'true';
         loading = false;
       });
+      await _refreshNotificationTruth();
+      await _restoreActiveNotificationState();
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -87,6 +92,66 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
       });
     }
   }
+
+  Future<void> _refreshNotificationTruth() async {
+    try {
+      final service = ref.read(fastingNotificationServiceProvider);
+      final permission = await service.permissionState();
+      final pending = await service.pendingNotificationIds();
+      if (!mounted) return;
+      setState(() {
+        notificationPermission = permission;
+        fastingNotificationScheduled = pending.contains(
+          BilNotificationService.fastingTargetNotificationId,
+        );
+      });
+    } on Object {
+      if (!mounted) return;
+      setState(() {
+        notificationPermission = BilNotificationPermissionState.unknown;
+        fastingNotificationScheduled = false;
+      });
+    }
+  }
+
+  Future<void> _restoreActiveNotificationState() async {
+    final current = session;
+    if (current == null ||
+        notificationPermission != BilNotificationPermissionState.granted) {
+      return;
+    }
+    final target = current.targetNotificationAt(DateTime.now());
+    if (target == null) return;
+    try {
+      final service = ref.read(fastingNotificationServiceProvider);
+      final languageCode = Localizations.localeOf(context).languageCode;
+      await service.showFastingOngoing(
+        target: target,
+        languageCode: languageCode,
+      );
+      await service.scheduleFastingHydration(
+        startedAt: current.startedAt,
+        target: target,
+        languageCode: languageCode,
+      );
+      if (notifyAtTarget) {
+        await service.scheduleFastingTarget(
+          target: target,
+          languageCode: languageCode,
+        );
+      }
+      await _refreshNotificationTruth();
+    } on Object {
+      // The active local timer stays authoritative. The visible permission
+      // state and explicit start message report delivery failures.
+    }
+  }
+
+  bool get _notificationNeedsSettings =>
+      notificationPermission ==
+          BilNotificationPermissionState.permanentlyDenied ||
+      notificationPermission == BilNotificationPermissionState.restricted ||
+      notificationPermission == BilNotificationPermissionState.unknown;
 
   Duration get elapsed => session?.elapsedAt(DateTime.now()) ?? Duration.zero;
   String clock(Duration value) {
@@ -100,10 +165,14 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
   Widget build(BuildContext context) {
     final active = session != null;
     final progress = session?.progressAt(DateTime.now()) ?? 0.0;
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
     return PopScope(
       canPop: !busy,
       child: Scaffold(
         appBar: AppBar(
+          // Give translated and accessibility-scaled titles real vertical
+          // room. A wrapping AppBar title must never paint over the timer.
+          toolbarHeight: (64 * textScale).clamp(64, 112).toDouble(),
           leading: IconButton(
             onPressed: busy
                 ? null
@@ -112,7 +181,12 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
                       : context.go('/dashboard'),
             icon: const Icon(Icons.arrow_back_rounded),
           ),
-          title: Text(tr('Intermittent fasting', 'الصيام المتقطع')),
+          title: Text(
+            tr('Intermittent fasting', 'الصيام المتقطع'),
+            key: const Key('fasting-page-title'),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
         body: loading
             ? const Center(child: CircularProgressIndicator())
@@ -162,8 +236,8 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
                           const SizedBox(height: 12),
                           _FastingBenefit(
                             text: tr(
-                              'Choose from three intermittent fasting windows',
-                              'اختر من ثلاث نوافذ للصيام المتقطع',
+                              'Choose a standard or custom intermittent fasting window',
+                              'اختر نافذة صيام متقطع قياسية أو مخصصة',
                             ),
                           ),
                           _FastingBenefit(
@@ -202,7 +276,7 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
                     ),
                   ),
                   const SizedBox(height: 18),
-                  _HeroPanel(
+                  _FastingStatusPanel(
                     icon: Icons.timelapse_rounded,
                     title: active
                         ? tr(
@@ -235,57 +309,94 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
                             value: active
                                 ? '${(progress * 100).round()}%'
                                 : '0%',
-                            child: SizedBox(
-                              width: 220,
-                              height: 220,
-                              child: Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  SizedBox.expand(
-                                    child: CircularProgressIndicator(
-                                      value: progress,
-                                      strokeWidth: 14,
-                                      backgroundColor: Theme.of(
-                                        context,
-                                      ).colorScheme.surfaceContainerHighest,
-                                    ),
-                                  ),
-                                  Column(
-                                    mainAxisSize: MainAxisSize.min,
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                final diameter = constraints.maxWidth < 220
+                                    ? constraints.maxWidth
+                                    : 220.0;
+                                return SizedBox(
+                                  key: const Key('fasting-timer-ring'),
+                                  width: diameter,
+                                  height: diameter,
+                                  child: Stack(
+                                    alignment: Alignment.center,
                                     children: [
-                                      Text(
-                                        clock(elapsed),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headlineMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w700,
-                                            ),
+                                      SizedBox.expand(
+                                        child: CircularProgressIndicator(
+                                          value: progress,
+                                          strokeWidth: 14,
+                                          backgroundColor: Theme.of(context)
+                                              .colorScheme
+                                              .surfaceContainerHighest,
+                                        ),
                                       ),
-                                      Text(
-                                        tr(
-                                          'of $targetHours hours',
-                                          'من $targetHours ساعة',
+                                      Padding(
+                                        padding: const EdgeInsets.all(24),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              clock(elapsed),
+                                              maxLines: 1,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .headlineMedium
+                                                  ?.copyWith(
+                                                    fontWeight: FontWeight.w700,
+                                                  ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              tr(
+                                                'of $targetHours hours',
+                                                'من $targetHours ساعة',
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
+                                );
+                              },
                             ),
                           ),
                           const SizedBox(height: 20),
-                          SegmentedButton<int>(
-                            segments: const [
-                              ButtonSegment(value: 12, label: Text('12:12')),
-                              ButtonSegment(value: 14, label: Text('14:10')),
-                              ButtonSegment(value: 16, label: Text('16:8')),
+                          Wrap(
+                            key: const Key('fasting-window-options'),
+                            spacing: 8,
+                            runSpacing: 8,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              for (final option in const [
+                                (13, '13:11'),
+                                (14, '14:10'),
+                                (16, '16:8'),
+                                (18, '18:6'),
+                                (20, '20:4'),
+                              ])
+                                ChoiceChip(
+                                  label: Text(option.$2),
+                                  selected: targetHours == option.$1,
+                                  onSelected: active || busy
+                                      ? null
+                                      : (_) => setState(
+                                          () => targetHours = option.$1,
+                                        ),
+                                ),
+                              ActionChip(
+                                key: const Key('fasting-custom-window'),
+                                avatar: const Icon(
+                                  Icons.tune_rounded,
+                                  size: 18,
+                                ),
+                                label: Text(tr('Custom', 'مخصص')),
+                                onPressed: active || busy
+                                    ? null
+                                    : _chooseCustomWindow,
+                              ),
                             ],
-                            selected: {targetHours},
-                            onSelectionChanged: active || busy
-                                ? null
-                                : (value) =>
-                                      setState(() => targetHours = value.first),
                           ),
                           SwitchListTile.adaptive(
                             contentPadding: EdgeInsets.zero,
@@ -296,16 +407,46 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
                               ),
                             ),
                             subtitle: Text(
-                              tr(
-                                'Optional one-time device notification',
-                                'إشعار اختياري لمرة واحدة على الجهاز',
-                              ),
+                              fastingNotificationScheduled
+                                  ? tr(
+                                      'Scheduled on this phone',
+                                      'مجدول على هذا الهاتف',
+                                    )
+                                  : notificationPermission ==
+                                        BilNotificationPermissionState.granted
+                                  ? tr(
+                                      'Allowed; starts when you begin a fast',
+                                      'مسموح؛ يُجدول عند بدء الصيام',
+                                    )
+                                  : tr(
+                                      'Notification permission is not active',
+                                      'إذن الإشعارات غير مفعّل',
+                                    ),
                             ),
                             value: notifyAtTarget,
                             onChanged: active || busy
                                 ? null
                                 : _setTargetNotification,
                           ),
+                          if (notifyAtTarget && _notificationNeedsSettings)
+                            Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: TextButton.icon(
+                                key: const Key(
+                                  'fasting-open-notification-settings',
+                                ),
+                                onPressed: busy
+                                    ? null
+                                    : _openNotificationSettings,
+                                icon: const Icon(Icons.settings_outlined),
+                                label: Text(
+                                  tr(
+                                    'Open notification settings',
+                                    'فتح إعدادات الإشعارات',
+                                  ),
+                                ),
+                              ),
+                            ),
                           const SizedBox(height: 18),
                           SizedBox(
                             width: double.infinity,
@@ -402,32 +543,46 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
         },
       );
       if (mounted) setState(() => session = next);
-      if (notifyAtTarget) {
-        try {
-          final notifications = ref.read(fastingNotificationServiceProvider);
-          final allowed = await notifications.requestPermission();
-          final target = next.targetNotificationAt(DateTime.now());
-          if (!allowed) {
-            _message(
-              tr(
-                'The fast started, but notifications are not permitted on this device.',
-                'بدأ الصيام المتقطع، لكن الإشعارات غير مسموح بها على هذا الجهاز.',
-              ),
-            );
-          } else if (target != null) {
+      try {
+        final notifications = ref.read(fastingNotificationServiceProvider);
+        final allowed = await notifications.requestPermission();
+        final target = next.targetNotificationAt(DateTime.now());
+        if (!allowed) {
+          _message(
+            tr(
+              'The fast started, but notifications are not permitted on this device.',
+              'بدأ الصيام المتقطع، لكن الإشعارات غير مسموح بها على هذا الجهاز.',
+            ),
+          );
+          if (notifyAtTarget) {
+            await prefs.set('wellness_fasting_notify_target', 'false');
+            if (mounted) setState(() => notifyAtTarget = false);
+          }
+        } else if (target != null) {
+          await notifications.showFastingOngoing(
+            target: target,
+            languageCode: languageCode,
+          );
+          await notifications.scheduleFastingHydration(
+            startedAt: next.startedAt,
+            target: target,
+            languageCode: languageCode,
+          );
+          if (notifyAtTarget) {
             await notifications.scheduleFastingTarget(
               target: target,
               languageCode: languageCode,
             );
           }
-        } catch (_) {
-          _message(
-            tr(
-              'The fast started, but its notification could not be scheduled.',
-              'بدأ الصيام المتقطع، لكن تعذر جدولة الإشعار.',
-            ),
-          );
+          await _refreshNotificationTruth();
         }
+      } catch (_) {
+        _message(
+          tr(
+            'The fast started, but its notification could not be scheduled.',
+            'بدأ الصيام المتقطع، لكن تعذر جدولة الإشعار.',
+          ),
+        );
       }
       try {
         await ref
@@ -488,7 +643,8 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
       try {
         await ref
             .read(fastingNotificationServiceProvider)
-            .cancelFastingTarget();
+            .cancelFastingSessionNotifications();
+        await _refreshNotificationTruth();
       } catch (_) {
         _message(
           tr(
@@ -513,10 +669,30 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
     if (busy) return;
     setState(() => busy = true);
     try {
+      if (value) {
+        final allowed = await ref
+            .read(fastingNotificationServiceProvider)
+            .requestPermission();
+        if (!allowed) {
+          _message(
+            tr(
+              'Notification permission is off. You can enable it in phone settings.',
+              'إذن الإشعارات متوقف. يمكنك تفعيله من إعدادات الهاتف.',
+            ),
+          );
+          await ref
+              .read(preferencesRepositoryProvider)
+              .set('wellness_fasting_notify_target', 'false');
+          if (mounted) setState(() => notifyAtTarget = false);
+          await _refreshNotificationTruth();
+          return;
+        }
+      }
       await ref
           .read(preferencesRepositoryProvider)
           .set('wellness_fasting_notify_target', '$value');
       if (mounted) setState(() => notifyAtTarget = value);
+      await _refreshNotificationTruth();
     } catch (_) {
       _message(
         tr(
@@ -526,6 +702,64 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
       );
     } finally {
       if (mounted) setState(() => busy = false);
+    }
+  }
+
+  Future<void> _openNotificationSettings() async {
+    try {
+      await ref.read(fastingNotificationServiceProvider).openSystemSettings();
+      await _refreshNotificationTruth();
+    } on Object {
+      _message(
+        tr(
+          'Phone notification settings could not be opened.',
+          'تعذّر فتح إعدادات إشعارات الهاتف.',
+        ),
+      );
+    }
+  }
+
+  Future<void> _chooseCustomWindow() async {
+    final controller = TextEditingController(text: '$targetHours');
+    final selected = await showDialog<int>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(tr('Custom fasting window', 'نافذة صيام مخصصة')),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: tr('Fasting hours', 'ساعات الصيام'),
+            helperText: '1–23',
+          ),
+          onSubmitted: (value) {
+            final hours = int.tryParse(value.trim());
+            if (hours != null && hours >= 1 && hours <= 23) {
+              Navigator.pop(dialogContext, hours);
+            }
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(tr('Cancel', 'إلغاء')),
+          ),
+          FilledButton(
+            onPressed: () {
+              final hours = int.tryParse(controller.text.trim());
+              if (hours != null && hours >= 1 && hours <= 23) {
+                Navigator.pop(dialogContext, hours);
+              }
+            },
+            child: Text(tr('Apply', 'تطبيق')),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (selected != null && mounted) {
+      setState(() => targetHours = selected);
     }
   }
 
@@ -553,6 +787,85 @@ class _FastingBenefit extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(child: Text(text)),
       ],
+    ),
+  );
+}
+
+/// Fasting-specific hero that keeps long translated titles away from the
+/// circular icon instead of squeezing either element into an unreadable row.
+class _FastingStatusPanel extends StatelessWidget {
+  const _FastingStatusPanel({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    key: const Key('fasting-status-panel'),
+    clipBehavior: Clip.antiAlias,
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(
+        colors: [Color(0xFF071829), Color(0xFF123B54)],
+      ),
+      borderRadius: BorderRadius.circular(28),
+    ),
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        final textScale = MediaQuery.textScalerOf(context).scale(1);
+        final stackContent = constraints.maxWidth < 330 || textScale > 1.25;
+        final iconWidget = CircleAvatar(
+          key: const Key('fasting-status-icon'),
+          radius: 28,
+          backgroundColor: const Color(0xFF19C6DF),
+          child: Icon(icon, color: const Color(0xFF071829)),
+        );
+        final copy = Column(
+          key: const Key('fasting-status-copy'),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title,
+              key: const Key('fasting-status-title'),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                height: 1.15,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              style: const TextStyle(
+                color: Color(0xFFC7D9E6),
+                height: 1.45,
+              ),
+            ),
+          ],
+        );
+
+        return Padding(
+          padding: const EdgeInsets.all(24),
+          child: stackContent
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [iconWidget, const SizedBox(height: 16), copy],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    iconWidget,
+                    const SizedBox(width: 16),
+                    Expanded(child: copy),
+                  ],
+                ),
+        );
+      },
     ),
   );
 }

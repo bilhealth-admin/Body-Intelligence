@@ -17,7 +17,9 @@ class BilStoreOfferMetadata {
     this.offerId,
     this.basePlanId,
     this.localizedOriginalPrice,
+    this.originalPriceMicros,
     this.savingsPercent,
+    this.purchaseOfferToken,
     this.trialPeriodIso8601,
     this.trialEligible,
   });
@@ -36,9 +38,27 @@ class BilStoreOfferMetadata {
   final String? offerId;
   final String? basePlanId;
   final String? localizedOriginalPrice;
+  final int? originalPriceMicros;
   final int? savingsPercent;
+  final String? purchaseOfferToken;
   final String? trialPeriodIso8601;
   final bool? trialEligible;
+
+  /// Returns 50 only when the store supplied a complete, internally
+  /// consistent half-price AI Boost offer that can be selected at checkout.
+  /// A plain localized price, or two unrelated prices, never qualifies.
+  int? get verifiedAiBoostDiscountPercent {
+    if (kind != BilStoreProductKind.aiBoostConsumable ||
+        savingsPercent != 50 ||
+        priceMicros <= 0 ||
+        originalPriceMicros == null ||
+        originalPriceMicros != priceMicros * 2 ||
+        !(offerId?.trim().isNotEmpty ?? false) ||
+        !(purchaseOfferToken?.trim().isNotEmpty ?? false)) {
+      return null;
+    }
+    return 50;
+  }
 
   bool get valid =>
       productId.trim().isNotEmpty &&
@@ -46,6 +66,7 @@ class BilStoreOfferMetadata {
       localizedPrice.trim().isNotEmpty &&
       currencyCode.trim().isNotEmpty &&
       priceMicros >= 0 &&
+      (originalPriceMicros == null || originalPriceMicros! > 0) &&
       (savingsPercent == null ||
           (savingsPercent! >= 0 && savingsPercent! <= 100));
 }

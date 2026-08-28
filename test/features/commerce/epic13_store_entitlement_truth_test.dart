@@ -136,12 +136,12 @@ void main() {
     );
     await tester.pump();
     await tester.pump();
-    expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.close_rounded), findsOneWidget);
     expect(find.text('Gratuit'), findsOneWidget);
     expect(find.text('Premium'), findsOneWidget);
-    expect(find.text('Premium AI Coach'), findsOneWidget);
+    expect(find.text('Premium AI Coach'), findsNothing);
     expect(find.text('BIL AI Boost'), findsOneWidget);
-    expect(find.text('Prix indisponible sur cet appareil'), findsNWidgets(3));
+    expect(find.text('Prix indisponible sur cet appareil'), findsNWidgets(2));
     // No price, discount, or unavailable tier is invented without live store
     // metadata and configured owner product identifiers.
     expect(find.textContaining(r'$'), findsNothing);
@@ -159,7 +159,7 @@ void main() {
       'lib/features/commerce/services/verified_store_purchase_service.dart',
     ).readAsStringSync();
     final canonicalMigration = File(
-      'supabase/migrations/202608160001_bil_canonical_consumer_tiers.sql',
+      'supabase/migrations/20260815225624_bil_canonical_consumer_tiers.sql',
     ).readAsStringSync();
 
     expect(migration, contains('unique (provider, original_transaction_id)'));

@@ -13,7 +13,6 @@ abstract final class DashboardSectionIds {
   static const quickLog = 'quick_log';
   static const discover = 'discover';
   static const bestAction = 'best_action';
-  static const dailyIntelligence = 'daily_intelligence';
   static const progress = 'progress';
   static const connectedHealth = 'connected_health';
   static const bodyTwin = 'body_twin';
@@ -26,7 +25,6 @@ abstract final class DashboardSectionIds {
     quickLog,
     discover,
     bestAction,
-    dailyIntelligence,
     progress,
     connectedHealth,
     bodyTwin,
@@ -67,6 +65,10 @@ abstract final class DashboardNutrientGoalIds {
     sodium,
     potassium,
   ];
+
+  // Protein and carbohydrates are already represented in Today's primary
+  // macro summary. Only genuinely additional nutrients are customizable cards.
+  static const dashboardCards = <String>[fat, fiber, sodium, potassium];
 }
 
 final dashboardNutrientGoalCardsProvider = StreamProvider<Set<String>>((ref) {
@@ -76,7 +78,7 @@ final dashboardNutrientGoalCardsProvider = StreamProvider<Set<String>>((ref) {
       .map(
         (value) => (value ?? '')
             .split(',')
-            .where(DashboardNutrientGoalIds.all.contains)
+            .where(DashboardNutrientGoalIds.dashboardCards.contains)
             .toSet(),
       );
 });

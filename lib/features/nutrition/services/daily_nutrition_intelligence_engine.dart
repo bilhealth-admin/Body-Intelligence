@@ -1,4 +1,5 @@
 import '../domain/daily_nutrition_intelligence.dart';
+import '../domain/dietary_preferences.dart';
 
 class DailyNutritionIntelligenceEngine {
   const DailyNutritionIntelligenceEngine();
@@ -8,6 +9,7 @@ class DailyNutritionIntelligenceEngine {
     required int mealCount,
     required int waterMl,
     required DailyNutritionTargets targets,
+    DietaryPreferences dietaryPreferences = const DietaryPreferences(),
   }) {
     if (mealCount < 0) {
       throw ArgumentError.value(mealCount, 'mealCount', 'Must be non-negative');
@@ -82,11 +84,12 @@ class DailyNutritionIntelligenceEngine {
       }
       if (targets.protein > 0 && protein < targets.protein * 0.8) {
         insights.add(
-          const DailyNutritionInsight(
+          DailyNutritionInsight(
             kind: DailyNutritionInsightKind.proteinBelowTarget,
             explanation: 'Recorded protein is below 80% of the daily target.',
-            action:
-                'Consider an appropriate protein source if the day is still open.',
+            action: dietaryPreferences.hasFoodSelectionConstraints
+                ? 'Consider a protein source compatible with your saved dietary preferences if the day is still open.'
+                : 'Consider an appropriate protein source if the day is still open.',
           ),
         );
       }
@@ -94,10 +97,12 @@ class DailyNutritionIntelligenceEngine {
           targets.fiber > 0 &&
           fiber < targets.fiber * 0.8) {
         insights.add(
-          const DailyNutritionInsight(
+          DailyNutritionInsight(
             kind: DailyNutritionInsightKind.fiberBelowTarget,
             explanation: 'Known fiber is below 80% of the daily target.',
-            action: 'Consider a suitable fiber-containing food if appropriate.',
+            action: dietaryPreferences.hasFoodSelectionConstraints
+                ? 'Consider a fiber-containing food compatible with your saved dietary preferences if appropriate.'
+                : 'Consider a suitable fiber-containing food if appropriate.',
           ),
         );
       }

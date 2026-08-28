@@ -3,6 +3,16 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  String analyticsSource() => [
+    'lib/features/analytics/nutrition_analytics_page.dart',
+    'lib/features/analytics/nutrition_analytics_food.dart',
+    'lib/features/analytics/nutrition_analytics_totals.dart',
+    'lib/features/analytics/nutrition_analytics_calories.dart',
+    'lib/features/analytics/nutrition_analytics_nutrients.dart',
+    'lib/features/analytics/nutrition_analytics_macros.dart',
+    'lib/features/analytics/nutrition_analytics_components.dart',
+  ].map((path) => File(path).readAsStringSync()).join('\n');
+
   test('nutrition analytics is routed without replacing food search', () {
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
     final analytics = File(
@@ -16,9 +26,7 @@ void main() {
   });
 
   test('nutrition analytics uses live meal and stored plan providers', () {
-    final source = File(
-      'lib/features/analytics/nutrition_analytics_page.dart',
-    ).readAsStringSync();
+    final source = analyticsSource();
     for (final contract in const [
       'dailyMealsProvider',
       'userProfileProvider',
@@ -42,9 +50,7 @@ void main() {
   });
 
   test('general references never become personal goal or left values', () {
-    final source = File(
-      'lib/features/analytics/nutrition_analytics_page.dart',
-    ).readAsStringSync();
+    final source = analyticsSource();
     expect(source, contains("TrackedNutrient.sodium, null, 'mg'"));
     expect(source, contains("TrackedNutrient.potassium, null, 'mg'"));
     expect(source, contains("TrackedNutrient.calcium, null, 'mg'"));

@@ -62,6 +62,9 @@ void main() {
     expect(saved.steps, 6400);
     expect(saved.exerciseNotes, 'walk');
     expect(find.textContaining('Recorded today:'), findsOneWidget);
+    expect(find.byKey(const Key('sleep-manual-source')), findsOneWidget);
+    expect(find.text('Source: Manual'), findsOneWidget);
+    expect(find.textContaining('Updated locally'), findsOneWidget);
   });
 
   testWidgets('record load failure exposes a working retry', (tester) async {
@@ -105,6 +108,26 @@ void main() {
     expect(find.text('Sleep history unavailable'), findsNothing);
     expect(repository.insightsSubscriptions, subscriptionsBeforeRetry + 1);
     expect(repository.activeInsightsSubscriptions, 1);
+  });
+
+  testWidgets('insights explicitly offer 7 and 30 day windows', (tester) async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final repository = _ControlledDailyLogRepository(database);
+    await _pumpSleep(tester, database, repository);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Insights'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('sleep-insight-window')), findsOneWidget);
+    expect(find.text('7 days'), findsOneWidget);
+    expect(find.text('30 days'), findsOneWidget);
+    await tester.tap(find.text('30 days'));
+    await tester.pump();
+    final selector = tester.widget<SegmentedButton<int>>(
+      find.byKey(const Key('sleep-insight-window')),
+    );
+    expect(selector.selected, <int>{30});
   });
 
   testWidgets('write failure keeps input and clears busy state', (

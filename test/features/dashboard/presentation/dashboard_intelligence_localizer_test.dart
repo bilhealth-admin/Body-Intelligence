@@ -78,4 +78,58 @@ void main() {
     );
     expect(english.insightTitle('Unknown insight'), 'Unknown insight');
   });
+
+  test('deep 20 resolves dashboard intelligence without English fallback', () {
+    const tags = <String>{
+      'de',
+      'it',
+      'pt-BR',
+      'pt-PT',
+      'ur',
+      'fa',
+      'hi',
+      'id',
+      'ms',
+      'ja',
+      'ko',
+      'zh-Hans',
+      'zh-Hant',
+      'ru',
+      'bn',
+      'vi',
+      'th',
+      'pl',
+      'nl',
+      'uk',
+    };
+    const action = BestAction(
+      type: BestActionType.protein,
+      title: 'Add about 32 g protein',
+      reason: 'Protein is the largest actionable gap in today’s logged plan.',
+      evidence: [],
+    );
+    for (final tag in tags) {
+      final localizer = DashboardIntelligenceLocalizer(localeTag: tag);
+      expect(
+        localizer.compositionIssue(BodyCompositionIssue.missingAge),
+        isNot('Age is not recorded'),
+        reason: tag,
+      );
+      expect(
+        localizer.bestActionTitle(action),
+        isNot(action.title),
+        reason: tag,
+      );
+      expect(
+        localizer.bestActionReason(action),
+        isNot(action.reason),
+        reason: tag,
+      );
+      expect(
+        localizer.insightTitle('Protein below target'),
+        isNot('Protein below target'),
+        reason: tag,
+      );
+    }
+  });
 }

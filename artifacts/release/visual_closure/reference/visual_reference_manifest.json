@@ -16,8 +16,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 57938,
-    "evidence_sha256": "1309aecb4dbbcfde66b382c680ec366488dc6554cfc58e727f7f4b7820444e07"
+    "evidence_bytes": 103945,
+    "evidence_sha256": "27e79a6a8fbabec89448e26e2015608a2107ebf3a0790561c74f441d64fee0da"
   },
   {
     "reference": 4822,
@@ -36,8 +36,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_2.png",
-    "evidence_bytes": 117471,
-    "evidence_sha256": "6b1288a7d904ee2354f475ab47d01a57e93d1910f84de44b0ebd613fb90eea34"
+    "evidence_bytes": 67797,
+    "evidence_sha256": "7bf8034f703ef98a0256cde96257427ec699d8ad66749f138a7d2c20f4c59f01"
   },
   {
     "reference": 4823,
@@ -56,8 +56,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_3.png",
-    "evidence_bytes": 263746,
-    "evidence_sha256": "758a5e68cab50c4133713e08a9cef4efebb705886b0189f96d8ad24e148d9bb8"
+    "evidence_bytes": 190895,
+    "evidence_sha256": "ea984d21021ad35e43cc28acf54ffb07171ac233e3e3b363caac44748bacd661"
   },
   {
     "reference": 4824,
@@ -76,8 +76,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_4.png",
-    "evidence_bytes": 240320,
-    "evidence_sha256": "59b4cf2b20903ffba79eb502707034ac1bcfa85a52fbec7380f48f5811f905a5"
+    "evidence_bytes": 267706,
+    "evidence_sha256": "7632981d599ddbffb2efb371103109b1b9f16b1454b2bb87af234c845d7642d8"
   },
   {
     "reference": 4825,
@@ -96,8 +96,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_5.png",
-    "evidence_bytes": 57261,
-    "evidence_sha256": "0ca7ff400c5d990d0c2d81f4036a4bcb0f81936f5036717c619a7de38d187733"
+    "evidence_bytes": 193068,
+    "evidence_sha256": "1c3140a7075c8ab2795fe646d19c3bedfe0475690175101fad9251fbb560c2cd"
   },
   {
     "reference": 4826,
@@ -116,8 +116,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_6.png",
-    "evidence_bytes": 52613,
-    "evidence_sha256": "8980fe6c59ecc9d1ea8c06a0da2dbb7a451283a5b59a4fc98e77a343d9fabbe8"
+    "evidence_bytes": 194005,
+    "evidence_sha256": "cc8c736f7b054e23ab5b4fee5752e25229619146c31d28970737e74f58c96f84"
   },
   {
     "reference": 4827,
@@ -136,8 +136,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_7.png",
-    "evidence_bytes": 52665,
-    "evidence_sha256": "2bf23f97e334c3e4222cdf1514f71bda9806cc1987fe13ff8108658546a88334"
+    "evidence_bytes": 193936,
+    "evidence_sha256": "68b319e8ca639ef7e5e77ce5ece8f075bbdc8968393fc65c4208d6b07841dbad"
   },
   {
     "reference": 4828,
@@ -236,8 +236,8 @@
     "production_file": "lib/features/daily_log/daily_log_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_food_meal_search_phone.png",
-    "evidence_bytes": 21193,
-    "evidence_sha256": "6b2110ae7bb43708be1e34c98d61bf96655b3a99d0d75a67819a5c762efb3974"
+    "evidence_bytes": 24200,
+    "evidence_sha256": "8b536a0aa3a7e8b52290e412188015fbbc6099055498858b952a6f74d3c3507d"
   },
   {
     "reference": 4833,
@@ -1116,8 +1116,8 @@
     "production_file": "lib/features/profile/premium_profile_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 57938,
-    "evidence_sha256": "1309aecb4dbbcfde66b382c680ec366488dc6554cfc58e727f7f4b7820444e07"
+    "evidence_bytes": 103945,
+    "evidence_sha256": "27e79a6a8fbabec89448e26e2015608a2107ebf3a0790561c74f441d64fee0da"
   },
   {
     "reference": 4877,
@@ -1396,8 +1396,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/quick_add_en_light_phone.png",
-    "evidence_bytes": 46372,
-    "evidence_sha256": "75fdca70080c513fb38e678b2bfbf64142451c51b859be8ce762fe56763c5868"
+    "evidence_bytes": 29964,
+    "evidence_sha256": "656a6a74e606e4399511c8bfbe1407ba230e02083e2fd340e78dab37066b024d"
   },
   {
     "reference": 4891,
@@ -1936,8 +1936,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_verified_result_phone.png",
-    "evidence_bytes": 188067,
-    "evidence_sha256": "136e8c2928d4f8911cd56df15ea3922b58fd3cefcae9763f5c08d61bc403f12f"
+    "evidence_bytes": 201086,
+    "evidence_sha256": "b8f8935535c157b686a5bfaebbb85f6699b7bcaaf72a28c08e6ef90dc78d8d3c"
   },
   {
     "reference": 4918,
@@ -1956,8 +1956,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_favorite_result_phone.png",
-    "evidence_bytes": 188272,
-    "evidence_sha256": "56ac18ff3aa1cb16fe21d70efd7f14347bda166e4f0110160efafdc8e2ab77eb"
+    "evidence_bytes": 201177,
+    "evidence_sha256": "6baafc83e168731d901c9090610744014d3ba5473f345144374153b265afeadc"
   },
   {
     "reference": 4919,
@@ -1976,8 +1976,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_recent_result_phone.png",
-    "evidence_bytes": 188519,
-    "evidence_sha256": "c1caef46aac2b776af78081b46a79ab5438416ade2cb05f8201d6113eb47440e"
+    "evidence_bytes": 201299,
+    "evidence_sha256": "ea6a5dc49f3ecdceb908c71fd568f27b693bb6acfed39de682e8e3cb6aaefaad"
   },
   {
     "reference": 4920,
@@ -1996,8 +1996,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_custom_food_phone.png",
-    "evidence_bytes": 45867,
-    "evidence_sha256": "b2f6c89a825a6995b5bf9d99e2f856cd1316bf4ffaddfe3b04a6d4a39bc7a436"
+    "evidence_bytes": 29145,
+    "evidence_sha256": "f0dc8cbe066bd30d2ff46bcaf80a9a6e7b06daffd61ab43a2460780f3a22109f"
   },
   {
     "reference": 4921,
@@ -2016,8 +2016,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_phone.png",
-    "evidence_bytes": 186747,
-    "evidence_sha256": "7c40f5cb2b54f333d54203ee4d5203b3eb57d287951acfd640a2552bf35d5f0a"
+    "evidence_bytes": 185296,
+    "evidence_sha256": "57fd7fbb75f67bc68bd20777d8e44dbe52d223c9bfde16d7a10f7cc6c3c310ae"
   },
   {
     "reference": 4922,
@@ -2036,8 +2036,8 @@
     "production_file": "lib/features/daily_log/daily_log_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png",
-    "evidence_bytes": 39734,
-    "evidence_sha256": "ff65276340d8da764e0cab9360b534d2db7ecbd18902cf95968a0a40623bc673"
+    "evidence_bytes": 37475,
+    "evidence_sha256": "c0d1919b6a8d19be1b35bf6a45300647a296abcc72b784b1474953bf216a6e64"
   },
   {
     "reference": 4923,
@@ -2276,8 +2276,8 @@
     "production_file": "lib/features/analytics/weekly_report_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/goldens/epic8_weekly_report_phone_ltr_light.png",
-    "evidence_bytes": 64611,
-    "evidence_sha256": "1ed466af866cac158a92a220998b04f67caf2ade78bd5c09637601df1fb10bd0"
+    "evidence_bytes": 152529,
+    "evidence_sha256": "5347bc20b15df350bb7f47ef8748ad63ca88fb452700e648d95b06c6734b5ab5"
   },
   {
     "reference": 4935,
@@ -2296,8 +2296,8 @@
     "production_file": "lib/features/analytics/weekly_report_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/goldens/epic8_weekly_report_coverage_phone.png",
-    "evidence_bytes": 55293,
-    "evidence_sha256": "e4568803d6e4d02d42c506f7097c354be1d91e40cd148d1cf04c1fdfb46d02e0"
+    "evidence_bytes": 129540,
+    "evidence_sha256": "7a037d37efed6cd12e133f91196ebcf3cb9c430bff695482a2ae924f5abeb9a7"
   },
   {
     "reference": 4936,
@@ -2316,8 +2316,8 @@
     "production_file": "lib/features/analytics/weekly_report_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/goldens/epic8_weekly_report_calories_anchor.png",
-    "evidence_bytes": 44523,
-    "evidence_sha256": "e48ece46a69ce44c16cce991dfec9e4865be06970195906187a0669074a0763a"
+    "evidence_bytes": 41581,
+    "evidence_sha256": "92fb4f3648d7784823b5e3c50b0e48061e417b9f6866548b86d6d3bf95c64368"
   },
   {
     "reference": 4937,
@@ -2336,8 +2336,8 @@
     "production_file": "lib/features/analytics/weekly_report_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/goldens/epic8_weekly_report_frequent_anchor.png",
-    "evidence_bytes": 36850,
-    "evidence_sha256": "78b2052f9b0d682e0be9076036c44f6c3f2515e0ddb54d916113c5aec0c77e0a"
+    "evidence_bytes": 36930,
+    "evidence_sha256": "06d0c73b0946a01f9a4ecd53a65cabefbe27f22a63de6e91a85dd4f6fdf1d27c"
   },
   {
     "reference": 4938,
@@ -2356,8 +2356,8 @@
     "production_file": "lib/features/analytics/weekly_report_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/goldens/epic8_weekly_report_macros_anchor.png",
-    "evidence_bytes": 42179,
-    "evidence_sha256": "ab070003325f417dab3c206202b9a931fc77a36dc0d8edd38772c4f7f8f7b41c"
+    "evidence_bytes": 40572,
+    "evidence_sha256": "e35f6bfb090d04b52c385df31922419f78ebeff04d29b0ac9b8c24d9bdc04349"
   },
   {
     "reference": 4939,
@@ -2376,8 +2376,8 @@
     "production_file": "lib/features/analytics/weekly_report_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/goldens/epic8_weekly_report_exercise_anchor.png",
-    "evidence_bytes": 41301,
-    "evidence_sha256": "28c46e76704ab2b373c5ea774eb7a420f4de486139683fcaed2cf5843dc82130"
+    "evidence_bytes": 40001,
+    "evidence_sha256": "e240e940110590bf764634b4933c3f7b3914f5a90d85614cca3314af66a46c6c"
   },
   {
     "reference": 4940,
@@ -2396,8 +2396,8 @@
     "production_file": "lib/features/analytics/weekly_report_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/goldens/epic8_weekly_report_alltime_anchor.png",
-    "evidence_bytes": 28001,
-    "evidence_sha256": "d63964f32196b4ac3bc3aa0ed4d6eaf9ca4154e1cb6bf84140e7523a9147efd6"
+    "evidence_bytes": 34366,
+    "evidence_sha256": "644285f74985893eff8202d879950c219334ca644849b385c86c85dca18e1700"
   },
   {
     "reference": 4941,
@@ -3356,8 +3356,8 @@
     "production_file": "lib/features/connected_health/connected_health_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/goldens/epic15_iphone_69_ar_06_connected_health.png",
-    "evidence_bytes": 85906,
-    "evidence_sha256": "820c1d1375ede3b34a1e61eca844bfbf1517958a307e8bca653d10d589247c16"
+    "evidence_bytes": 110599,
+    "evidence_sha256": "40ee45fe2934197dfc46699eda12fba72f1473db7074be9fa3c56308d129de84"
   },
   {
     "reference": 4989,
@@ -3376,8 +3376,8 @@
     "production_file": "lib/features/connected_health/connected_health_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/goldens/epic15_iphone_69_en_05_connected_health.png",
-    "evidence_bytes": 79044,
-    "evidence_sha256": "7fa4512379b4f4c6021ee524b68f94e77c3fb6581cf82f77ad90a0e9b447b445"
+    "evidence_bytes": 99663,
+    "evidence_sha256": "63b01dc01b9fcab405b5ca0cc6bb683e7f24f38d49b1af363f98b89ddc5cf84b"
   },
   {
     "reference": 4990,
@@ -3396,8 +3396,8 @@
     "production_file": "lib/features/connected_health/connected_health_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/goldens/epic15_iphone_69_ar_08_privacy_settings_dark.png",
-    "evidence_bytes": 66642,
-    "evidence_sha256": "2b474bcbb0b5b99e087c5e8e5af2b045c99fdf9d6dbe84fe398d4047d4c3f66b"
+    "evidence_bytes": 64943,
+    "evidence_sha256": "236d77bc52f020ed9e6deca54b9e22699a6ff305c30097b3fe61a0dbfcf0fe1b"
   },
   {
     "reference": 4991,
@@ -3416,8 +3416,8 @@
     "production_file": "lib/features/connected_health/connected_health_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/goldens/epic15_android_phone_ar_06_connected_health.png",
-    "evidence_bytes": 56575,
-    "evidence_sha256": "32d46b4bd8749320582c203a9ca22b2646ac6beb5f3e994aa9c294fae106d1b3"
+    "evidence_bytes": 80727,
+    "evidence_sha256": "4b8d7da592020659e09521de9b4798d3462ead0cb5f9250ff469c2171ee7e931"
   },
   {
     "reference": 4992,

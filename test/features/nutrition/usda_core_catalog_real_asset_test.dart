@@ -72,7 +72,97 @@ void main() {
 
     expect(result.source, FoodRuntimeSearchSource.catalogAndLocal);
     expect(result.foods, isNotEmpty);
-    expect(result.foods.first.uuid, startsWith('usda:'));
-    expect(result.foods.first.source, startsWith('USDA FoodData Central'));
+    final fuji = result.foods.first;
+    expect(fuji.uuid, 'usda:1105897');
+    expect(fuji.source, startsWith('USDA FoodData Central'));
+    expect(fuji.verified, isTrue);
+    expect(fuji.isCustom, isFalse);
+    expect(fuji.calories, 58);
+    expect(fuji.protein, 0.15);
+    expect(fuji.carbs, 15.7);
+    expect(fuji.fats, 0.16);
+    expect(fuji.sodium, 1);
+    expect(fuji.potassium, 104);
+    for (final nutrient in const <FoodNutrient>[
+      FoodNutrient.calories,
+      FoodNutrient.protein,
+      FoodNutrient.carbohydrates,
+      FoodNutrient.fat,
+      FoodNutrient.sodium,
+      FoodNutrient.potassium,
+    ]) {
+      expect(
+        UnifiedFood.evidenceFromMask(fuji.nutrientEvidenceMask, nutrient),
+        isTrue,
+        reason: nutrient.name,
+      );
+    }
   });
+
+  test(
+    'nutrientless USDA components are not verified search candidates',
+    () async {
+      final repository = UsdaCoreCatalogRepository.open(
+        'assets/catalogs/bil_food_core.sqlite',
+      );
+      addTearDown(repository.close);
+
+      final hits = await repository.searchUnified('apple', limit: 250);
+      expect(hits, isNotEmpty);
+      expect(hits.map((hit) => hit.food.id), isNot(contains('usda:1105782')));
+      expect(
+        hits.every(
+          (hit) => const <FoodNutrient>[
+            FoodNutrient.calories,
+            FoodNutrient.protein,
+            FoodNutrient.carbohydrates,
+            FoodNutrient.fat,
+          ].every(hit.food.hasEvidence),
+        ),
+        isTrue,
+      );
+
+      final component = await repository.findById('usda:1105782');
+      expect(component, isNotNull);
+      expect(component!.name, 'APPLES, FUJI');
+      expect(component.nutrients, isEmpty);
+      expect(component.verified, isFalse);
+    },
+  );
+
+  test('real bundled catalog resolves supported writing systems', () async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final authority = FoodRuntimeSearchAuthority(
+      FoodRepository(database),
+      catalogResolver: () async => UsdaCoreCatalogRepository.open(
+        'assets/catalogs/bil_food_core.sqlite',
+      ),
+    );
+
+    for (final query in ['яблоко', 'りんご', '苹果', 'सेब', 'تفاح']) {
+      final result = await authority.searchDetailed(query, limit: 3);
+      expect(result.foods, isNotEmpty, reason: query);
+      expect(
+        result.foods.any((food) => food.name.toLowerCase().contains('apple')),
+        isTrue,
+        reason: query,
+      );
+    }
+  });
+
+  test(
+    'real catalog never collapses duck rows to one lossy Arabic word',
+    () async {
+      final repository = UsdaCoreCatalogRepository.open(
+        'assets/catalogs/bil_food_core.sqlite',
+      );
+      addTearDown(repository.close);
+
+      final hits = await repository.searchUnified('duck', limit: 20);
+
+      expect(hits, isNotEmpty);
+      expect(hits.map((hit) => hit.food.arabicName), isNot(contains('بط')));
+    },
+  );
 }

@@ -1,8 +1,8 @@
-"NSHealthShareUsageDescription" = "O BIL lê apenas as categorias de Saúde que escolher—atividade, sono, medições corporais, dados cardíacos e respiratórios, tensão arterial, oxigénio, glicose, hidratação e nutrição—para apresentar uma cronologia e análises privadas neste dispositivo.";
+"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
 "NSHealthUpdateUsageDescription" = "BIL apenas grava os registos de saúde que escolhe explicitamente, após consentimento de gravação separado.";
-"NSBluetoothAlwaysUsageDescription" = "BIL liga-se apenas a dispositivos de saúde que emparelha explicitamente para que as medições possam ser importadas localmente.";
-"NSBluetoothPeripheralUsageDescription" = "BIL liga-se apenas a dispositivos de saúde que emparelha explicitamente para que as medições possam ser importadas localmente.";
+"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Utilize a câmara apenas quando optar por ler um código de barras, rever uma fotografia de refeição ou adicionar um perfil privado ou uma fotografia de progresso.";
 "NSPhotoLibraryUsageDescription" = "Selecione uma refeição, perfil ou fotografia de progresso para análise antes de a guardar ou carregar.";
-"NSMicrophoneUsageDescription" = "BIL utiliza o microfone apenas quando escolhe a entrada de voz para uma refeição.";
-"NSSpeechRecognitionUsageDescription" = "BIL converte a frase sobre comida que fala em texto para que possa revê-la antes de guardar.";
+"NSMicrophoneUsageDescription" = "BIL utiliza o microfone apenas quando escolhe registar uma refeição por voz ou falar diretamente com o BIL AI Coach.";
+"NSSpeechRecognitionUsageDescription" = "BIL converte em texto a fala que inicia para registar refeições ou usar o BIL AI Coach, para que a possa rever ou enviar.";

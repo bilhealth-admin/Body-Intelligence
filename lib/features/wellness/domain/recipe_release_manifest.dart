@@ -78,7 +78,10 @@ final class RecipeReleaseManifest {
       canonicalSha256: _digest(json, 'canonical_sha256'),
       canonicalSizeBytes: _positiveInteger(json, 'canonical_size_bytes'),
       indexPath: indexPath,
-      indexSizeBytes: _boundedSize(json, 'index_size_bytes', 4 * 1024 * 1024),
+      // The 1,500-entry index carries direct titles for all 25 production
+      // locales so list/search never fall back or load a detail shard. Keep a
+      // fixed defensive ceiling above the measured ~4.9 MB release artifact.
+      indexSizeBytes: _boundedSize(json, 'index_size_bytes', 8 * 1024 * 1024),
       indexSha256: _digest(json, 'index_sha256'),
       imageManifestPath: imageManifestPath,
       imageManifestSizeBytes: _boundedSize(

@@ -22,6 +22,13 @@ final class _ManagedBridge implements ManagedBleMedicalBridge {
       firmwareVersion: '1.0',
       manufacturer: 'Test manufacturer',
     ),
+    BlePeripheral(
+      id: 'unsupported-1',
+      name: 'Unsupported regulated profile',
+      profiles: {},
+      firmwareVersion: '1.0',
+      manufacturer: 'Test manufacturer',
+    ),
   ];
 
   @override
@@ -68,6 +75,13 @@ final class _ManagedBridge implements ManagedBleMedicalBridge {
       'kind': 'weight',
       'value': 80,
       'unit': 'stone',
+      'observedAt': asOf.toIso8601String(),
+    },
+    {
+      'sampleId': '${peripheral.id}:regulated',
+      'kind': 'oxygen',
+      'value': 98,
+      'unit': '%',
       'observedAt': asOf.toIso8601String(),
     },
   ];
@@ -201,11 +215,6 @@ void main() {
       'heartRate',
       'restingHeartRate',
       'hrv',
-      'oxygen',
-      'respiratoryRate',
-      'glucose',
-      'bloodPressureSystolic',
-      'bloodPressureDiastolic',
       'water',
       'nutrition',
       'nutritionProtein',
@@ -220,6 +229,7 @@ void main() {
       'weight',
       'nutrition',
     });
+    expect(BilHealthScope.excludesKey('unsupported_observation'), isTrue);
   });
 
   test('manual evidence wins a source conflict without losing provenance', () {
@@ -334,6 +344,7 @@ void main() {
       final controller = MedicalDeviceController(bridge, store: store);
 
       await controller.scan();
+      expect(controller.state.devices.map((device) => device.id), ['scale-1']);
       await controller.connect(controller.state.devices.single);
 
       expect(controller.state.status, MedicalDeviceConnectionStatus.connected);

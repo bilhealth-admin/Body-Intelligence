@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BIL - Registro de Inteligência Corporal</string>
+    <string name="health_permissions_rationale_title">Privacidade de dados de saúde</string>
+    <string name="health_permissions_rationale_body">BIL solicita apenas os tipos de dados Health Connect necessários para os recursos que você escolhe usar. Seus dados de saúde são processados ​​localmente por padrão. Você pode conceder, negar ou revogar permissões individuais a qualquer momento nas configurações de Health Connect. BIL não vende dados de saúde nem os utiliza para publicidade.</string>
+    <string name="health_permissions_privacy_policy_action">Leia a política de privacidade completa da BIL</string>
+</resources>

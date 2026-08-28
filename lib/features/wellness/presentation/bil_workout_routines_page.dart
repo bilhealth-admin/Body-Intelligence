@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:ui' as ui;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,12 +7,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../commerce/domain/subscription_state.dart';
+import '../../commerce/domain/commerce_plan.dart';
+import '../../commerce/presentation/premium_collection_item_gate.dart';
+import '../../commerce/presentation/premium_label_badge.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
+import '../domain/static_workout_artwork.dart';
 import '../domain/wellness_content_pack.dart';
-import '../domain/workout_release_catalog_item.dart';
 import '../domain/workout_routine_contract.dart';
-import '../repositories/workout_release_catalog_repository.dart';
 import '../services/wellness_content_pack_manager.dart';
 import '../services/wellness_media_cache.dart';
 import 'workout_access_policy.dart';
@@ -26,6 +26,7 @@ part 'bil_workout_routine_media.dart';
 part 'bil_workout_routine_presenters.dart';
 part 'bil_workout_routine_visuals.dart';
 part 'bil_custom_workout_routines.dart';
+part 'bil_workout_routines_states.dart';
 
 typedef WorkoutLibraryLoader =
     Future<List<WellnessContentItem>> Function(String locale);
@@ -55,6 +56,7 @@ class BilWorkoutRoutinesPage extends ConsumerStatefulWidget {
     this.mediaCache,
     this.customRoutineWriter,
     this.offline = false,
+    this.initialItemId,
   });
 
   final WellnessContentPackManager? manager;
@@ -62,6 +64,7 @@ class BilWorkoutRoutinesPage extends ConsumerStatefulWidget {
   final WorkoutLogHandler? onLogWorkout;
   final WellnessMediaCache? mediaCache;
   final CustomRoutineWriter? customRoutineWriter;
+  final String? initialItemId;
 
   /// Set by the owning connectivity provider. Installed packs remain usable
   /// while this is true; no remote availability is inferred by this page.
@@ -83,9 +86,6 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
       widget.mediaCache ?? WellnessMediaCache();
   late final TabController _tabs;
   final _searchController = TextEditingController();
-  late final Future<List<WorkoutReleaseCatalogItem>> _releaseCatalog =
-      const WorkoutReleaseCatalogRepository().load();
-
   Future<List<WellnessContentItem>>? _items;
   String? _loadedLocale;
   String _query = '';
@@ -94,11 +94,12 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
   Set<String> _routineIds = const {};
   List<_CustomWorkoutRoutine> _customRoutines = const [];
   bool _customMutationBusy = false;
+  bool _initialItemHandled = false;
 
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 2, vsync: this)..addListener(_onTabChanged);
+    _tabs = TabController(length: 3, vsync: this)..addListener(_onTabChanged);
     _loadRoutineIds();
   }
 
@@ -199,8 +200,8 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
 
   Future<void> _toggleRoutine(WellnessContentItem item) async {
     final next = {..._routineIds};
-    final saved = !next.remove(item.id);
-    if (saved) next.add(item.id);
+    final saved = !next.remove(item.stableId);
+    if (saved) next.add(item.stableId);
     try {
       final preferences = await SharedPreferences.getInstance();
       await preferences.setStringList(_routineIdsKey, next.toList()..sort());
@@ -254,7 +255,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
     final existing = await repository.getForDay(now);
     final entry = jsonEncode({
       'kind': 'trusted_workout_routine',
-      'id': item.id,
+      'id': item.stableId,
       'title': item.title,
       'durationMinutes': item.durationMinutes,
       'source': item.sourceUrl.toString(),
@@ -320,6 +321,12 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
         title: Text(_copy(context, 'Workout Routines', 'روتينات التمارين')),
         actions: [
           IconButton(
+            key: const ValueKey('workout-programs-action'),
+            tooltip: _copy(context, 'Add exercise', 'إضافة تمرين'),
+            onPressed: () => context.push('/wellness/workouts/log'),
+            icon: const Icon(Icons.playlist_add_check_circle_outlined),
+          ),
+          IconButton(
             key: const ValueKey('workout-packs-action'),
             tooltip: _copy(
               context,
@@ -333,8 +340,9 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
         bottom: TabBar(
           controller: _tabs,
           tabs: [
-            Tab(text: _copy(context, 'Explore', 'استكشف')),
-            Tab(text: _copy(context, 'My Routines', 'روتيناتي')),
+            Tab(text: _workoutHubCopy(context, 'Gym')),
+            Tab(text: _workoutHubCopy(context, 'Home')),
+            Tab(text: _workoutHubCopy(context, 'My plans')),
           ],
         ),
       ),
@@ -352,15 +360,36 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
                     onRetry: _reload,
                   );
                 }
-                return _buildLibrary(snapshot.data ?? const []);
+                final items = snapshot.data ?? const <WellnessContentItem>[];
+                _scheduleInitialItem(items);
+                return _buildLibrary(items);
               },
             ),
     );
   }
 
   Widget _buildLibrary(List<WellnessContentItem> items) {
+    final subscription = _usableVerifiedSubscription(
+      ref.watch(verifiedSubscriptionStateProvider),
+    );
+    final premiumUnlocked =
+        subscription != null && subscription.plan != CommercePlan.free;
+    final storefrontPlan = ref.watch(storefrontTargetPlanProvider).value;
+    final premiumTier = storefrontPlan == CommercePlan.premiumAiCoach
+        ? 'BIL PREMIUM AI COACH'
+        : 'BIL PREMIUM';
+    void openPremium() => context.push(
+      storefrontPlan == CommercePlan.premiumAiCoach
+          ? '/plans?focus=boost'
+          : '/plans?focus=subscription',
+    );
+    final selectedItems = switch (_tabs.index) {
+      0 => items.where((item) => item.releaseBundleId != 'home-training'),
+      1 => items.where((item) => item.releaseBundleId == 'home-training'),
+      _ => items.where((item) => _routineIds.contains(item.stableId)),
+    };
     final categoryOrders = <String, int>{};
-    for (final item in items) {
+    for (final item in selectedItems) {
       final category = item.category?.trim();
       if (category == null || category.isEmpty) continue;
       final order = item.categoryOrder ?? 1 << 30;
@@ -375,9 +404,6 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
     if (_category != null && !categories.contains(_category)) {
       _category = null;
     }
-    final selectedItems = _tabs.index == 1
-        ? items.where((item) => _routineIds.contains(item.id))
-        : items;
     final query = _query.trim().toLowerCase();
     final visible = selectedItems
         .where((item) {
@@ -408,59 +434,6 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  FutureBuilder<List<WorkoutReleaseCatalogItem>>(
-                    future: _releaseCatalog,
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) return const SizedBox.shrink();
-                      final rows = snapshot.requireData;
-                      final valid = rows
-                          .where(
-                            (row) =>
-                                row.availability ==
-                                WorkoutReleaseAvailability
-                                    .durationValidAwaitingHumanReview,
-                          )
-                          .length;
-                      final remediation = rows
-                          .where(
-                            (row) =>
-                                row.availability ==
-                                WorkoutReleaseAvailability
-                                    .durationNonconformant,
-                          )
-                          .length;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: Material(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.surfaceContainerHigh,
-                          borderRadius: BorderRadius.circular(16),
-                          child: Padding(
-                            padding: const EdgeInsets.all(14),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.verified_user_outlined),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    _copy(
-                                      context,
-                                      '$valid movement videos passed the technical media contract and await human movement review. $remediation require media remediation. None are playable yet.',
-                                      '$valid فيديو حركة اجتاز عقد الوسائط التقني وينتظر مراجعة بشرية للحركة. يحتاج $remediation إلى معالجة، ولا يوجد فيديو قابل للتشغيل بعد.',
-                                    ),
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodySmall,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
                   if (widget.offline) ...[
                     const _OfflineInstalledBanner(),
                     const SizedBox(height: 14),
@@ -487,21 +460,6 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
                             ),
                     ),
                   ),
-                  if (_tabs.index == 0) ...[
-                    const SizedBox(height: 12),
-                    OutlinedButton.icon(
-                      key: const ValueKey('manual-workout-entry'),
-                      onPressed: () => context.push('/wellness/workouts/log'),
-                      icon: const Icon(Icons.add_task_rounded),
-                      label: Text(
-                        _copy(
-                          context,
-                          'Log an activity manually',
-                          'تسجيل نشاط يدويًا',
-                        ),
-                      ),
-                    ),
-                  ],
                   const SizedBox(height: 16),
                   _WorkoutPresenterFilterPanel(
                     value: _presenterFilter,
@@ -536,7 +494,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
               ),
             ),
           ),
-          if (visible.isEmpty && _tabs.index == 0 && items.isEmpty)
+          if (visible.isEmpty && _tabs.index != 2 && items.isEmpty)
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
               sliver: SliverToBoxAdapter(
@@ -550,7 +508,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
                 ),
               ),
             )
-          else if (visible.isEmpty && _tabs.index == 0)
+          else if (visible.isEmpty && _tabs.index != 2)
             SliverFillRemaining(
               hasScrollBody: false,
               child: _WorkoutLibraryEmpty(
@@ -561,7 +519,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
                 onManagePacks: () => context.push('/wellness/content-packs'),
               ),
             )
-          else if (_tabs.index == 0)
+          else if (_tabs.index != 2)
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(20, 8, 0, 40),
               sliver: SliverToBoxAdapter(
@@ -570,7 +528,10 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
                   savedIds: _routineIds,
                   mediaCache: _mediaCache,
                   online: !widget.offline,
+                  premiumUnlocked: premiumUnlocked,
+                  premiumTier: premiumTier,
                   isLocked: _isLocked,
+                  onUpgrade: openPremium,
                   onOpen: _openDetails,
                   onToggleSaved: _toggleRoutine,
                 ),
@@ -630,7 +591,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
       MaterialPageRoute(
         builder: (_) => BilWorkoutRoutineDetailsPage(
           item: item,
-          initiallySaved: _routineIds.contains(item.id),
+          initiallySaved: _routineIds.contains(item.stableId),
           onToggleSaved: () => _toggleRoutine(item),
           onLogWorkout: _logTrustedRoutine,
           mediaCache: _mediaCache,
@@ -639,6 +600,35 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
       ),
     );
     if (mounted) setState(() {});
+  }
+
+  void _scheduleInitialItem(List<WellnessContentItem> items) {
+    if (_initialItemHandled) return;
+    final requested = widget.initialItemId?.trim();
+    if (requested == null || requested.isEmpty) {
+      _initialItemHandled = true;
+      return;
+    }
+    final matches = items.where((item) => item.stableId == requested);
+    if (matches.isEmpty) {
+      _initialItemHandled = true;
+      return;
+    }
+    _initialItemHandled = true;
+    final item = matches.first;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_isLocked(item)) {
+        final storefrontPlan = ref.read(storefrontTargetPlanProvider).value;
+        context.push(
+          storefrontPlan == CommercePlan.premiumAiCoach
+              ? '/plans?focus=boost'
+              : '/plans?focus=subscription',
+        );
+        return;
+      }
+      _openDetails(item);
+    });
   }
 
   bool _isLocked(WellnessContentItem item) {

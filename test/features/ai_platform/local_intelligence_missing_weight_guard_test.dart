@@ -61,6 +61,7 @@ Future<void> _seedNonWeightEvidence(AppDatabase database) async {
     sodium: 2200,
     potassium: 3200,
     servingSize: 100,
+    servingUnit: 'g',
   );
   final start = DateTime.utc(2026, 6, 15);
   for (var index = 0; index < 36; index++) {

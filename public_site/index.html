@@ -1,11 +1,70 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><title>BIL Health</title><style>:root{color-scheme:light dark;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{margin:0;background:#f5f6f8;color:#172033}main{max-width:760px;margin:auto;padding:48px 22px 80px}article{background:#fff;border:1px solid #e2e6ec;border-radius:18px;padding:28px;box-shadow:0 8px 28px #1720330d}h1{font-size:30px;margin:0 0 8px}h2{font-size:20px;margin-top:28px}p{line-height:1.65;color:#4f596b}a{color:#0867d8}.muted{font-size:14px;color:#727c8d}nav{display:flex;flex-wrap:wrap;gap:12px;margin:22px 0}@media(prefers-color-scheme:dark){body{background:#10141c;color:#f3f5f8}article{background:#171d27;border-color:#293141}p,.muted{color:#b6bfcc}}</style></head><body><main><article id="content"></article></main><script>
-const admin='bilhealth.app@gmail.com';const pages={
-'/privacy':['Privacy Policy',`BIL processes nutrition logs, body measurements, activity, preferences, and health data only when you choose the related feature. Data is used for logging, trends, reports, synchronization, and requested services. Sensitive health data is not sold or used for advertising. You can revoke permissions, disconnect devices, clear local data, and request account deletion. Contact ${admin}.`],
-'/terms':['Terms of Use',`BIL is a wellness and self-tracking tool, not a medical device, diagnosis, or substitute for professional care. Store subscriptions renew under the price and period displayed by Apple or Google. Cancellation and refunds follow the applicable store rules. Contact ${admin}.`],
-'/support':['Support',`Help is available for account access, deletion, food logging, catalog sources, subscriptions, connected-health permissions, BLE devices, offline use, accessibility, and community safety. Contact ${admin}. Never email passwords, tokens, receipts, or raw health exports.`],
-'/contact':['Contact',`Official administration, support, privacy, and security contact: ${admin}. The aliases support@bilhealth.com and privacy@bilhealth.com receive and forward inbound mail; outbound sending from those aliases is not claimed.`],
-'/account-deletion':['Account deletion',`Authenticated users can request deletion from BIL privacy and account controls. If the app is unavailable, email ${admin} from the account address. Do not attach health data. Identity is verified before deletion and legally required retention is disclosed.`],
-'/data-deletion':['Data deletion',`Users can delete eligible cloud records and community content, clear local data, and revoke connected-health permissions. Account deletion includes associated cloud data subject to documented legal retention. Requests can be sent to ${admin}.`],
-'/subscription-terms':['Subscription terms',`Free requires no purchase. Plus and Pro activate only after platform-store and BIL entitlement verification. Price, currency, tax, renewal, and cancellation terms come from the store. BIL applies no invented global VAT rate. Restore Purchases is available.`],
-'/health-disclaimer':['Health disclaimer',`BIL supports nutrition, activity, weight, sleep, fitness, and general wellness tracking. It does not diagnose, treat, cure, or prevent disease and does not claim regulated medical-device status. Seek qualified professional care for medical decisions.`]};const nav=Object.entries(pages).map(([p,v])=>`<a href="${p}">${v[0]}</a>`).join('');const path=location.pathname.replace(/\/$/,'')||'/';const page=pages[path];document.getElementById('content').innerHTML=page?`<h1>${page[0]}</h1><p class="muted">Body Intelligence Log (BIL) · BIL Health · Effective 5 August 2026</p><p>${page[1]}</p><h2>Privacy and safety</h2><p>Data is minimized, protected in transit, and never exposed in public notifications by default. External features fail closed when configuration or consent is absent.</p><nav>${nav}</nav>`:`<h1>BIL Health</h1><p>Official information for Body Intelligence Log.</p><nav>${nav}</nav>`;
-</script></body></html>
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07111f">
+  <meta name="color-scheme" content="dark light">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="description" content="BIL turns nutrition, activity, body signals, and daily context into clear, privacy-conscious wellness guidance.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="BIL Health">
+  <meta property="og:title" content="BIL Health — Understand your body">
+  <meta property="og:description" content="One intelligent home for nutrition, progress, connected health, and explainable AI coaching.">
+  <meta property="og:url" content="https://www.bilhealth.com/">
+  <meta name="twitter:card" content="summary">
+  <link rel="canonical" href="https://www.bilhealth.com/">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="stylesheet" href="/styles.css">
+  <title>BIL Health — Understand your body</title>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="BIL Health home">
+      <span class="brand-mark" aria-hidden="true"><span>B</span></span>
+      <span class="brand-copy"><strong>BIL</strong><small>BODY INTELLIGENCE LOG</small></span>
+    </a>
+    <nav class="top-nav" aria-label="Primary navigation">
+      <a href="/" data-nav="home">Product</a>
+      <a href="/privacy" data-nav="privacy">Privacy</a>
+      <a href="/support" data-nav="support">Support</a>
+      <a href="/health-disclaimer" data-nav="health-disclaimer">Health</a>
+    </nav>
+    <div class="header-actions">
+      <button class="language-button" id="language-toggle" type="button" aria-label="Switch language">العربية</button>
+      <a class="header-cta" href="/support">Get support</a>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <div id="app" aria-live="polite"></div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <span class="brand-mark mini" aria-hidden="true"><span>B</span></span>
+      <div><strong>BIL Health</strong><p>Clarity for everyday health decisions.</p></div>
+    </div>
+    <div class="footer-links">
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+      <a href="/subscription-terms">Subscriptions</a>
+      <a href="/account-deletion">Delete account</a>
+      <a href="/contact">Contact</a>
+    </div>
+    <p class="footer-note">© 2026 BIL Health. BIL is a wellness tool, not a medical device.</p>
+  </footer>
+
+  <noscript>
+    <section class="noscript-card">
+      <h1>BIL Health</h1>
+      <p>JavaScript is required to display this page. Legal and support documents remain available by email at <a href="mailto:support@bilhealth.com">support@bilhealth.com</a>.</p>
+    </section>
+  </noscript>
+  <script src="/app.js" defer></script>
+</body>
+</html>

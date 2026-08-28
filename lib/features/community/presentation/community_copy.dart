@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy_extended.dart';
+import 'community_media_locale_copy.dart';
+import 'community_safety_locale_copy.dart';
 
 String communityText(BuildContext context, String en, String ar) =>
     communityTextForLanguage(
@@ -11,11 +13,16 @@ String communityText(BuildContext context, String en, String ar) =>
     );
 
 String communityTextForLanguage(String languageCode, String en, String ar) {
-  final code = languageCode.toLowerCase();
+  final canonical =
+      BilLocalePolicy.canonicalSupportedTag(languageCode) ?? languageCode;
+  final code = canonical.toLowerCase();
   if (code == 'ar') return ar;
   if (code == 'en') return en;
-  return _communityCopy[code]?[en] ??
-      ExtendedRuntimeCopy.values[en]?[languageCode] ??
+  final baseLanguage = code.split('-').first;
+  return communityMediaText(canonical, en) ??
+      _communityCopy[baseLanguage]?[en] ??
+      communitySafetyText(canonical, en) ??
+      ExtendedRuntimeCopy.values[en]?[canonical] ??
       en;
 }
 

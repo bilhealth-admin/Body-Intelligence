@@ -14,10 +14,14 @@ void main() {
       expect(source, contains("tr('Saturated fat'"));
       expect(source, contains("tr('Sodium'"));
       expect(source, contains("tr('Fiber'"));
-      expect(source, contains("tr('Carb Conscious'"));
-      expect(source, contains("tr('Sugar'"));
-      expect(source, contains("tr('Fiber'"));
+      expect(source, isNot(contains("tr('Carb Conscious'")));
       expect(source, contains('/analytics/nutrition?tab=nutrients'));
+      expect(source, contains('_CircularNutrientCard('));
+      expect(source, contains('_OverviewCardsCarousel('));
+      expect(source, contains('cards: overviewCards'));
+      expect(source, contains('PremiumDashboardCardLock('));
+      expect(source, contains('locked: !premiumUnlocked'));
+      expect(source, isNot(contains('_ReferenceStatusCard(')));
     },
   );
 

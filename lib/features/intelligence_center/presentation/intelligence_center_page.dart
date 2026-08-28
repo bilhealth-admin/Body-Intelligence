@@ -1,13 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../app/services/app_settings_provider.dart';
+import '../../../app/services/runtime_permission_policy.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../data/database/database_provider.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
@@ -23,15 +27,32 @@ import '../services/intelligence_center_engine.dart';
 import '../services/bil_text_to_speech.dart';
 import '../services/coach_intent_normalizer.dart';
 import '../services/coach_language_resolver.dart';
+import '../services/coach_speech_policy.dart';
+import '../services/coach_voice_turn_policy.dart';
+import '../services/coach_daily_brief.dart';
+import '../services/coach_memory_repository.dart';
 import '../services/intelligence_health_context_provider.dart';
 import '../services/coach_context_provider.dart';
 import '../services/local_coach_api.dart';
 import '../services/local_model_gateway.dart';
+import '../services/coach_catalog_grounding.dart';
+import '../services/ai_coach_feedback_service.dart';
 import '../../nutrition/domain/barcode_identity.dart';
 import '../../nutrition/services/bil_speech_to_text.dart';
 import '../../nutrition/services/meal_image_analysis_service.dart';
 import '../../nutrition/presentation/meal_image_review_dialog.dart';
 import '../intelligence_locale_copy.dart';
+
+part 'intelligence_center_widgets.dart';
+part 'intelligence_center_message_widgets.dart';
+part 'intelligence_center_voice_widgets.dart';
+part 'intelligence_conversation_voice.dart';
+part 'intelligence_query_flow.dart';
+part 'intelligence_action_flow.dart';
+
+enum _CoachVoiceMode { idle, dictation, liveCall }
+
+enum _CoachReplyPhase { idle, preparing, searching, failed }
 
 class IntelligenceCenterPage extends ConsumerStatefulWidget {
   const IntelligenceCenterPage({
@@ -49,14 +70,42 @@ class IntelligenceCenterPage extends ConsumerStatefulWidget {
 }
 
 class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
-    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
-  late final TabController tabs;
+    with WidgetsBindingObserver {
   final question = TextEditingController();
   final conversationScroll = ScrollController();
+  final speech = SpeechToText();
+  final catalogGrounding = CoachCatalogGrounding();
   final messages = <IntelligenceMessage>[];
+  Timer? voiceSilenceTimer;
+  Timer? replyDelayTimer;
+  String? voiceLanguageHint;
+  String pendingVoiceTranscript = '';
+  _CoachVoiceMode voiceMode = _CoachVoiceMode.idle;
+  _CoachReplyPhase replyPhase = _CoachReplyPhase.idle;
+  bool liveCallPaused = false;
+  int requestGeneration = 0;
+  ({
+    String text,
+    String? detectedLanguageTag,
+    bool autoSpeak,
+    CoachInputChannel channel,
+  })?
+  failedRequest;
   bool sending = false;
   bool listening = false;
+  bool voiceSubmitPending = false;
   bool analyzingFoodImage = false;
+  bool consentPromptVisible = false;
+  bool welcomeSeeded = false;
+  bool introVisible = true;
+
+  void _updateState(VoidCallback update) => setState(update);
+  CoachServiceStatus lastServiceStatus = CoachServiceStatus.ready;
+  CoachAnswerRuntime lastRuntime = CoachAnswerRuntime.onDevice;
+  final messageRuntimes = <String, CoachAnswerRuntime>{};
+  final messageFeedback = <String, bool>{};
+  static const _speechPolicy = CoachSpeechPolicy();
+  static const _voiceTurnPolicy = CoachVoiceTurnPolicy();
 
   bool get arabic =>
       Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
@@ -65,27 +114,16 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
 
   Future<void> _analyzeFoodImageInChat() async {
     if (analyzingFoodImage || sending) return;
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      builder: (context) => SafeArea(
-        child: Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt_outlined),
-              title: Text(tr('Take food photo', 'التقط صورة للطعام')),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
-              title: Text(tr('Choose food photo', 'اختر صورة للطعام')),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (source == null || !mounted) return;
-    setState(() => analyzingFoodImage = true);
+    if (!await _ensureCoachRuntimePermission(BilRuntimeCapability.camera) ||
+        !mounted) {
+      return;
+    }
+    // This affordance is deliberately unambiguous: camera means camera.
+    const source = ImageSource.camera;
+    setState(() {
+      analyzingFoodImage = true;
+      introVisible = false;
+    });
     try {
       final image = await ImagePicker().pickImage(
         source: source,
@@ -125,6 +163,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                 '$summary\n${tr('Review and confirm a verified BIL food match before logging.', 'راجع وأكد مطابقة طعام موثقة في BIL قبل التسجيل.')}',
             createdAt: DateTime.now(),
             confidence: 1,
+            modality: IntelligenceMessageModality.image,
           ),
         ),
       );
@@ -165,15 +204,37 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Conversation is the primary AI Coach surface. The overview remains
-    // available, but opening AI Coach must always reveal a usable chat first.
-    tabs = TabController(length: 2, initialIndex: 1, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _loadConversation();
       if (!mounted) return;
+      unawaited(_syncCoachMemory());
       _applyInitialBarcode(widget.initialBarcode);
       if (widget.startWithVisionCapture) await _analyzeFoodImageInChat();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (welcomeSeeded) return;
+    welcomeSeeded = true;
+    messages.add(
+      IntelligenceMessage(
+        id: 'welcome-immediate-${DateTime.now().microsecondsSinceEpoch}',
+        role: IntelligenceMessageRole.bil,
+        kind: IntelligenceMessageKind.coach,
+        text: _sessionWelcome(null),
+        createdAt: DateTime.now(),
+        modality: IntelligenceMessageModality.system,
+      ),
+    );
+  }
+
+  Future<void> _syncCoachMemory() async {
+    await CoachMemoryRepository(
+      preferences: ref.read(preferencesRepositoryProvider),
+    ).mergeFromCloud();
+    ref.invalidate(coachContextSnapshotProvider);
   }
 
   @override
@@ -185,6 +246,19 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     if (!oldWidget.startWithVisionCapture && widget.startWithVisionCapture) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _analyzeFoodImageInChat();
+      });
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed || !listening) return;
+    voiceSilenceTimer?.cancel();
+    unawaited(speech.cancel());
+    if (mounted) {
+      setState(() {
+        listening = false;
+        if (voiceMode == _CoachVoiceMode.liveCall) liveCallPaused = true;
       });
     }
   }
@@ -247,1219 +321,339 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     _scrollToLatest();
   }
 
-  Future<void> _loadConversation() async {
-    final stored = await ref
-        .read(preferencesRepositoryProvider)
-        .get('intelligenceConversationV1');
-    if (!mounted) return;
-    final restored = <IntelligenceMessage>[];
-    if (stored != null && stored.isNotEmpty) {
-      try {
-        final decoded = jsonDecode(stored) as List<Object?>;
-        for (final value in decoded.whereType<Map>()) {
-          restored.add(
-            _presentationSafeMessage(
-              IntelligenceMessage.fromJson(Map<String, Object?>.from(value)),
-            ),
-          );
-        }
-      } catch (_) {
-        restored.clear();
-      }
-    }
-    setState(() {
-      messages
-        ..clear()
-        ..addAll(restored);
-      if (messages.isEmpty) {
-        messages.add(
-          IntelligenceMessage(
-            id: 'welcome',
-            role: IntelligenceMessageRole.bil,
-            kind: IntelligenceMessageKind.coach,
-            text: tr(
-              'I am BIL. I explain what I know, expose what I do not know, and never execute an action without your approval.',
-              'أنا BIL. أشرح ما أعرفه، أوضح ما لا أعرفه، ولا أنفذ إجراءً دون موافقتك.',
-            ),
-            createdAt: DateTime.now(),
-            evidence: const <String>['local-intelligence-platform'],
-            confidence: .8,
-          ),
-        );
-      }
-    });
-    _scrollToLatest(jump: true);
-  }
-
-  void _scrollToLatest({bool jump = false}) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !conversationScroll.hasClients) return;
-      final target = conversationScroll.position.maxScrollExtent;
-      if (jump) {
-        conversationScroll.jumpTo(target);
-      } else {
-        conversationScroll.animateTo(
-          target,
-          duration: const Duration(milliseconds: 280),
-          curve: Curves.easeOutCubic,
-        );
-      }
-    });
-  }
-
-  Future<void> _saveConversation() async {
-    try {
-      await ref
-          .read(preferencesRepositoryProvider)
-          .set(
-            'intelligenceConversationV1',
-            jsonEncode(messages.map((item) => item.toJson()).toList()),
-          );
-    } on Object {
-      // Conversation persistence is best-effort. A local storage failure must
-      // not escape an unawaited save and terminate an otherwise valid reply.
-    }
-  }
-
-  Future<void> _clearConversation() async {
-    try {
-      await ref
-          .read(preferencesRepositoryProvider)
-          .remove('intelligenceConversationV1');
-    } on Object {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            tr(
-              'The local conversation could not be cleared. Your data was unchanged.',
-              'تعذر مسح المحادثة المحلية. لم تتغير بياناتك.',
-            ),
-          ),
-        ),
-      );
-      return;
-    }
-    if (!mounted) return;
-    setState(() {
-      messages
-        ..clear()
-        ..add(
-          IntelligenceMessage(
-            id: 'welcome-${DateTime.now().microsecondsSinceEpoch}',
-            role: IntelligenceMessageRole.bil,
-            kind: IntelligenceMessageKind.coach,
-            text: tr(
-              'I am BIL. I use your recorded data and explain the reason, confidence, and what is missing. I do not diagnose or make changes without your approval.',
-              'أنا BIL. أفهم بياناتك المسجلة، وأشرح السبب والثقة وما ينقصني. لا أشخّص ولا أنفّذ أي تغيير دون موافقتك.',
-            ),
-            createdAt: DateTime.now(),
-            evidence: const <String>['Body Twin', 'Truth Engine'],
-            confidence: .8,
-          ),
-        );
-    });
-    unawaited(_saveConversation());
-  }
-
-  Future<void> _speakQuestion() async {
-    if (listening || sending) return;
-    final speech = SpeechToText();
-    var transcript = '';
-    var failed = false;
-    StateSetter? refresh;
-    setState(() => listening = true);
-    try {
-      final available = await speech.initialize(
-        onError: (_) {
-          failed = true;
-          refresh?.call(() {});
-        },
-      );
-      if (!available || !mounted) {
-        if (mounted) _showVoiceUnavailable();
-        return;
-      }
-      final interfaceLocale = BilLocalePolicy.canonicalTag(
-        Localizations.localeOf(context),
-      );
-      final previousUserMessage = messages.reversed
-          .where((message) => message.role == IntelligenceMessageRole.user)
-          .map((message) => message.text.trim())
-          .where((text) => text.isNotEmpty)
-          .firstOrNull;
-      final spokenLanguageHint = previousUserMessage == null
-          ? interfaceLocale
-          : const CoachLanguageResolver()
-                .resolve(input: previousUserMessage, uiLocale: interfaceLocale)
-                .languageTag;
-      final requested = spokenLanguageHint
-          .toLowerCase()
-          .split(RegExp('[-_]'))
-          .first;
-      final locales = await speech.locales();
-      final locale = locales
-          .where((item) => item.localeId.toLowerCase().startsWith(requested))
-          .map((item) => item.localeId)
-          .firstOrNull;
-      if (locale == null || !mounted) {
-        if (mounted) _showVoiceUnavailable();
-        return;
-      }
-      await speech.listen(
-        onResult: (result) {
-          transcript = result.recognizedWords;
-          refresh?.call(() {});
-        },
-        listenOptions: SpeechListenOptions(
-          localeId: locale,
-          listenFor: const Duration(seconds: 45),
-          pauseFor: const Duration(seconds: 4),
-          listenMode: ListenMode.confirmation,
-          partialResults: true,
-          cancelOnError: true,
-          // Android 14+ can detect/switch spoken language independently from
-          // the BIL interface language. The selected locale remains only the
-          // recognizer's fallback on older devices.
-          autoDetectLanguage: true,
-          allowedLocaleIds: BilLocalePolicy.productionTags.toList(
-            growable: false,
-          ),
-        ),
-      );
-      if (!mounted) return;
-      await showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (dialogContext) => StatefulBuilder(
-          builder: (context, setDialogState) {
-            refresh = setDialogState;
-            return AlertDialog(
-              icon: Icon(
-                failed ? Icons.mic_off_outlined : Icons.graphic_eq_rounded,
-              ),
-              title: Text(tr('Talk to AI Coach', 'تحدث إلى AI Coach')),
-              content: Text(
-                failed
-                    ? tr(
-                        'Speech recognition stopped. Close this dialog and type your question, or try another spoken language.',
-                        'توقف التعرف على الكلام. أغلق هذه النافذة واكتب سؤالك، أو جرّب لغة كلام أخرى.',
-                      )
-                    : transcript.trim().isEmpty
-                    ? tr('Listening…', 'أنا أستمع…')
-                    : transcript,
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    transcript = '';
-                    Navigator.pop(dialogContext);
-                  },
-                  child: Text(tr('Cancel', 'إلغاء')),
-                ),
-                FilledButton(
-                  onPressed: failed
-                      ? () => Navigator.pop(dialogContext)
-                      : transcript.trim().isEmpty
-                      ? null
-                      : () => Navigator.pop(dialogContext),
-                  child: Text(
-                    failed
-                        ? tr('Close', 'إغلاق')
-                        : tr('Use text', 'استخدام النص'),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      );
-      refresh = null;
-      if (failed && transcript.trim().isEmpty && mounted) {
-        _showVoiceUnavailable();
-      }
-      if (mounted && transcript.trim().isNotEmpty) {
-        question.text = transcript.trim();
-        await ask(inputChannel: CoachInputChannel.voice);
-      }
-    } on Object {
-      if (mounted) _showVoiceUnavailable();
-    } finally {
-      try {
-        await speech.stop();
-      } on Object {
-        // The plugin can report an unavailable recognizer while stopping.
-        // The localized UI message above is the only user-facing failure.
-      }
-      if (mounted) setState(() => listening = false);
-    }
-  }
-
-  void _showVoiceUnavailable() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          tr(
-            'Voice input is unavailable right now. You can type and send your question.',
-            'تعذر تشغيل الإدخال الصوتي الآن. يمكنك كتابة سؤالك وإرساله.',
-          ),
-        ),
-      ),
+  Future<void> _openCoachMenuSheet() async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      useSafeArea: true,
+      showDragHandle: true,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      builder: (context) => const _CoachMenuSheet(),
     );
+    if (!mounted || action == null) return;
+    if (action == 'memory') {
+      await context.push('/decision-memory');
+    } else if (action == 'settings') {
+      await _openAiCoachSettings();
+    } else if (action == 'clear') {
+      await _clearConversation();
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    tabs.dispose();
+    voiceSilenceTimer?.cancel();
+    replyDelayTimer?.cancel();
+    unawaited(const BilTextToSpeech().stop());
+    unawaited(speech.dispose());
     question.dispose();
     conversationScroll.dispose();
     super.dispose();
   }
 
-  Future<void> ask({
-    CoachInputChannel inputChannel = CoachInputChannel.text,
-  }) async {
-    final text = question.text.trim();
-    if (text.isEmpty || sending) return;
-    final localeCode = BilLocalePolicy.canonicalTag(
-      Localizations.localeOf(context),
-    );
-    setState(() {
-      sending = true;
-      messages.add(
-        IntelligenceMessage(
-          id: 'user-${DateTime.now().microsecondsSinceEpoch}',
-          role: IntelligenceMessageRole.user,
-          kind: IntelligenceMessageKind.freeQuestion,
-          text: text,
-          createdAt: DateTime.now(),
-        ),
-      );
-      question.clear();
-    });
-    _scrollToLatest();
-    unawaited(_saveConversation());
-    try {
-      IntelligenceHealthContext? healthContext;
-      try {
-        healthContext = await ref.read(
-          intelligenceHealthContextProvider.future,
-        );
-      } catch (_) {
-        healthContext = null;
-      }
-      LocalCoachApi localApi = const DeterministicLocalCoachApi();
-      late final CoachContextSnapshot coachContext;
-      try {
-        coachContext = await ref.read(coachContextSnapshotProvider.future);
-      } on Object {
-        // Missing or temporarily unavailable personal context is represented
-        // explicitly as empty. It must not silently disable the signed-in AI
-        // Coach or cause generic questions to bypass its usage ledger.
-        coachContext = CoachContextSnapshot.empty();
-      }
-      localApi = ModelBackedLocalCoachApi(
-        gateway: createLocalModelGateway(),
-        context: coachContext,
-      );
-      final activeEngine = IntelligenceCenterEngine(localApi: localApi);
-      final reply = await activeEngine.answer(
-        question: text,
-        arabic: arabic,
-        localeCode: localeCode,
-        healthContext: healthContext,
-        coachContext: coachContext,
-        inputChannel: inputChannel,
-      );
-      if (!mounted) return;
-      setState(() => messages.add(_presentationSafeMessage(reply.message)));
-      _scrollToLatest();
-      unawaited(_saveConversation());
-      final spokenReply = reply.spokenText?.trim();
-      if (inputChannel == CoachInputChannel.voice &&
-          spokenReply != null &&
-          spokenReply.isNotEmpty) {
-        final spokenLocale = const CoachLanguageResolver()
-            .resolve(input: spokenReply, uiLocale: localeCode)
-            .languageTag;
-        try {
-          await const BilTextToSpeech().speak(spokenReply, spokenLocale);
-        } on Object {
-          // The full written answer is already visible and authoritative.
-          // A local TTS failure must not turn a successful AI reply into an
-          // error or cause the metered request to be retried.
-        }
-      }
-      if (reply.actions.isNotEmpty && mounted) {
-        await showModalBottomSheet<void>(
-          context: context,
-          showDragHandle: true,
-          builder: (context) =>
-              _ActionSheet(actions: reply.actions, onAction: _executeAction),
-        );
-      }
-    } on Object {
-      if (!mounted) return;
-      setState(() {
-        messages.add(
-          IntelligenceMessage(
-            id: 'coach-error-${DateTime.now().microsecondsSinceEpoch}',
-            role: IntelligenceMessageRole.bil,
-            kind: IntelligenceMessageKind.safety,
-            text: tr(
-              'AI Coach could not prepare your context. Your data was not changed; try again.',
-              'تعذر تجهيز سياق AI Coach الآن. لم تتغير بياناتك؛ أعد المحاولة.',
-            ),
-            createdAt: DateTime.now(),
-            evidence: const ['local-coach-runtime'],
-            confidence: 1,
-          ),
-        );
-      });
-      _scrollToLatest();
-      unawaited(_saveConversation());
-    } finally {
-      if (mounted) setState(() => sending = false);
-    }
-  }
-
-  IntelligenceMessage _presentationSafeMessage(IntelligenceMessage message) {
-    if (message.role == IntelligenceMessageRole.user) return message;
-    final normalized = message.text.toLowerCase();
-    const technicalMarkers = <String>[
-      'local-coach-runtime',
-      'ai context is not accepted',
-      'decision memory evidence',
-      'safety boundary did not approve',
-      'bil did not expose an action',
-      'accepted ai context',
-      'source summary is required',
-      'one best action output',
-    ];
-    if (!technicalMarkers.any(normalized.contains)) return message;
-    return IntelligenceMessage(
-      id: message.id,
-      role: message.role,
-      kind: IntelligenceMessageKind.safety,
-      text: tr(
-        'AI Coach could not complete this reply. Your data was not changed; try again.',
-        'تعذر إكمال هذا الرد الآن. لم تتغير بياناتك؛ أعد المحاولة.',
-      ),
-      createdAt: message.createdAt,
-      confidence: 1,
-    );
-  }
-
-  Future<void> _executeAction(IntelligenceAction action) async {
-    try {
-      if (action.requiresConfirmation && !await _confirmAction(action)) {
-        return;
-      }
-      if (!mounted) return;
-      switch (action.type) {
-        case IntelligenceActionType.navigate:
-          final target = action.payload['target']?.toString();
-          final path = target == null
-              ? null
-              : const BilNavigationRegistry().resolve(target);
-          if (path == null) return;
-          context.go(path);
-        case IntelligenceActionType.readNutritionRemaining:
-          final snapshot = await ref.read(coachContextSnapshotProvider.future);
-          final remaining = snapshot.nutritionRemainingFor(DateTime.now());
-          if (remaining == null) return;
-          if (mounted) {
-            _showActionCompleted(
-              tr(
-                'Remaining today: ${remaining['caloriesKcal']!.round()} kcal, ${remaining['proteinG']!.round()} g protein, ${remaining['carbsG']!.round()} g carbs, ${remaining['fatG']!.round()} g fat.',
-                'المتبقي اليوم: ${remaining['caloriesKcal']!.round()} سعرة، ${remaining['proteinG']!.round()} غ بروتين، ${remaining['carbsG']!.round()} غ كربوهيدرات، ${remaining['fatG']!.round()} غ دهون.',
-              ),
-            );
-          }
-        case IntelligenceActionType.readProfileIdentity:
-          final snapshot = await ref.read(coachContextSnapshotProvider.future);
-          final name = snapshot.minimalIdentity['displayName']?.toString();
-          if (mounted) {
-            _showActionCompleted(
-              name == null
-                  ? tr(
-                      'No profile name is saved.',
-                      'لا يوجد اسم محفوظ في الملف الشخصي.',
-                    )
-                  : tr('Profile name: $name', 'اسم الملف الشخصي: $name'),
-            );
-          }
-        case IntelligenceActionType.openDailyLog:
-          final requested = action.payload['action']?.toString();
-          const supportedActions = {
-            'barcode',
-            'voice',
-            'photo',
-            'water',
-            'notes',
-            'exercise',
-          };
-          final safeAction = supportedActions.contains(requested)
-              ? requested
-              : null;
-          context.go(
-            Uri(
-              path: '/daily-log',
-              queryParameters: safeAction == null
-                  ? null
-                  : {'action': safeAction},
-            ).toString(),
-          );
-        case IntelligenceActionType.addWater:
-          final amount = action.payload['amountMl'];
-          if (amount is! int) return;
-          final entityId = await ref
-              .read(waterRepositoryProvider)
-              .add(occurredAt: DateTime.now(), amountMl: amount);
-          final receipt = BilActionReceipt(
-            actionId: action.id,
-            committed: entityId > 0,
-            completedAt: DateTime.now(),
-            entityType: 'water_entry',
-            entityId: entityId.toString(),
-            refreshTargets: const {'dailyWater', 'dashboard', 'coachContext'},
-          );
-          if (mounted && receipt.verified) {
-            _showActionCompleted(
-              tr('Water logged locally.', 'تم تسجيل الماء محليًا.'),
-            );
-          }
-        case IntelligenceActionType.addWeight:
-          final value = action.payload['weightKg'];
-          if (value is! num) {
-            context.go('/daily-check-in');
-            return;
-          }
-          final requestedDate = action.payload['date']?.toString();
-          final occurredAt = requestedDate == null
-              ? DateTime.now()
-              : DateTime.tryParse(requestedDate);
-          if (occurredAt == null) return;
-          final entityId = await ref
-              .read(weightRepositoryProvider)
-              .addWeight(
-                value.toDouble(),
-                date: occurredAt,
-                measurementContext: 'differentConditions',
-              );
-          final receipt = BilActionReceipt(
-            actionId: action.id,
-            committed: entityId > 0,
-            completedAt: DateTime.now(),
-            entityType: 'weight_entry',
-            entityId: entityId.toString(),
-            refreshTargets: const {
-              'weightHistory',
-              'progress',
-              'dashboard',
-              'coachContext',
-            },
-          );
-          if (mounted && receipt.verified) {
-            _showActionCompleted(
-              tr('Weight logged locally.', 'تم تسجيل الوزن محليًا.'),
-            );
-          }
-        case IntelligenceActionType.reviewMeal:
-          final dayOffset = action.payload['dayOffset'];
-          if (dayOffset is int && dayOffset != 0) {
-            ref.read(selectedLogDateProvider.notifier).state = DateTime.now()
-                .add(Duration(days: dayOffset));
-          }
-          context.go('/daily-log?focus=meal');
-        case IntelligenceActionType.reviewWorkout:
-          context.push('/wellness/workouts/log');
-        case IntelligenceActionType.openPlan:
-          context.go('/plan');
-        case IntelligenceActionType.openReport:
-          context.go('/analytics');
-        case IntelligenceActionType.manageSubscription:
-          context.push('/plans');
-        case IntelligenceActionType.setThemeMode:
-          final mode = action.payload['mode']?.toString();
-          if (!const {'dark', 'light', 'system'}.contains(mode)) return;
-          await ref.read(appSettingsProvider.notifier).setThemeMode(mode!);
-          if (mounted) {
-            _showActionCompleted(tr('Appearance updated.', 'تم تحديث المظهر.'));
-          }
-        case IntelligenceActionType.setLanguage:
-          final locale = BilLocalePolicy.canonicalSupportedTag(
-            action.payload['locale']?.toString(),
-          );
-          if (locale == null) return;
-          await ref.read(appSettingsProvider.notifier).setLocale(locale);
-          if (mounted) {
-            _showActionCompleted(tr('Language updated.', 'تم تحديث اللغة.'));
-          }
-        case IntelligenceActionType.updateGoal:
-          final target = action.payload['targetWeightKg'];
-          if (target is! num) return;
-          final profile = await ref.read(userProfileProvider.future);
-          if (profile == null) return;
-          final existing = await ref.read(activeGoalProvider.future);
-          final targetDate = action.payload['targetDate'] == null
-              ? null
-              : DateTime.tryParse(action.payload['targetDate'].toString());
-          final type = target < profile.currentWeight
-              ? 'lose'
-              : target > profile.currentWeight
-              ? 'gain'
-              : 'maintain';
-          final entityId = await ref.read(databaseProvider).transaction(
-            () async {
-              await ref
-                  .read(userProfileRepositoryProvider)
-                  .save(
-                    gender: profile.gender,
-                    age: profile.age,
-                    height: profile.height,
-                    currentWeight: profile.currentWeight,
-                    targetWeight: target.toDouble(),
-                    activityLevel: profile.activityLevel,
-                    exercises: profile.exercises,
-                    medicalConditions: profile.medicalConditions,
-                    waist: profile.waist,
-                    neck: profile.neck,
-                    chest: profile.chest,
-                    arm: profile.arm,
-                    thigh: profile.thigh,
-                  );
-              return ref
-                  .read(goalRepositoryProvider)
-                  .save(
-                    uuid: existing?.uuid,
-                    profileUuid: profile.uuid,
-                    type: type,
-                    targetWeight: target.toDouble(),
-                    targetDate: targetDate,
-                  );
-            },
-          );
-          ref.invalidate(userProfileProvider);
-          ref.invalidate(activeGoalProvider);
-          if (mounted && entityId > 0) {
-            _showActionCompleted(tr('Goal updated.', 'تم تحديث الهدف.'));
-          }
-        case IntelligenceActionType.saveMeasurements:
-          double? measurement(String key) =>
-              (action.payload[key] as num?)?.toDouble();
-          final requestedDate = action.payload['date']?.toString();
-          final date = requestedDate == null
-              ? DateTime.now()
-              : DateTime.tryParse(requestedDate);
-          if (date == null) return;
-          await ref
-              .read(bodyMeasurementRepositoryProvider)
-              .saveForDay(
-                date: date,
-                neckCm: measurement('neckCm'),
-                waistCm: measurement('waistCm'),
-                hipsCm: measurement('hipsCm'),
-                chestCm: measurement('chestCm'),
-                armCm: measurement('armCm'),
-                thighCm: measurement('thighCm'),
-              );
-          ref.invalidate(bodyMeasurementHistoryProvider);
-          ref.invalidate(coachContextSnapshotProvider);
-          if (mounted) {
-            _showActionCompleted(
-              tr('Measurements updated.', 'تم تحديث القياسات.'),
-            );
-          }
-        case IntelligenceActionType.quickAddMacros:
-          final date = action.payload['date'] == null
-              ? DateTime.now()
-              : DateTime.tryParse(action.payload['date'].toString());
-          if (date == null) return;
-          final entityId = await ref
-              .read(mealRepositoryProvider)
-              .addQuickMacroEntry(
-                date: date,
-                mealType: action.payload['mealType']!.toString(),
-                calories: (action.payload['calories']! as num).toDouble(),
-                protein: (action.payload['protein']! as num).toDouble(),
-                carbohydrates: (action.payload['carbohydrates']! as num)
-                    .toDouble(),
-                fat: (action.payload['fat']! as num).toDouble(),
-                caloriesKnown: true,
-                proteinKnown: true,
-                carbohydratesKnown: true,
-                fatKnown: true,
-              );
-          ref.invalidate(dailyMealsProvider);
-          ref.invalidate(coachContextSnapshotProvider);
-          if (mounted && entityId > 0) {
-            _showActionCompleted(tr('Meal updated.', 'تم تحديث الوجبة.'));
-          }
-        case IntelligenceActionType.updateMealItem:
-          await ref
-              .read(mealRepositoryProvider)
-              .updateMealItem(
-                id: action.payload['itemId']! as int,
-                quantity: (action.payload['quantityGrams']! as num).toDouble(),
-              );
-          ref.invalidate(dailyMealsProvider);
-          ref.invalidate(coachContextSnapshotProvider);
-          if (mounted) {
-            _showActionCompleted(
-              tr('Meal item updated.', 'تم تحديث عنصر الوجبة.'),
-            );
-          }
-        case IntelligenceActionType.deleteMealItem:
-          await ref
-              .read(mealRepositoryProvider)
-              .deleteMealItem(action.payload['itemId']! as int);
-          ref.invalidate(dailyMealsProvider);
-          ref.invalidate(coachContextSnapshotProvider);
-          if (mounted) {
-            _showActionCompleted(
-              tr('Meal item deleted.', 'تم حذف عنصر الوجبة.'),
-            );
-          }
-        case IntelligenceActionType.moveMealItem:
-          await ref
-              .read(mealRepositoryProvider)
-              .moveMealItemToType(
-                id: action.payload['itemId']! as int,
-                mealType: action.payload['mealType']!.toString(),
-              );
-          ref.invalidate(dailyMealsProvider);
-          ref.invalidate(coachContextSnapshotProvider);
-          if (mounted) {
-            _showActionCompleted(tr('Meal item moved.', 'تم نقل عنصر الوجبة.'));
-          }
-        case IntelligenceActionType.requestAccountDeletion:
-          context.push('/community/profile');
-        case IntelligenceActionType.saveMemory:
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                tr(
-                  'This action requires confirmation and a repository write before execution.',
-                  'يتطلب هذا الإجراء تأكيدًا وربطًا بمخزن البيانات قبل التنفيذ.',
-                ),
-              ),
-            ),
-          );
-      }
-    } on Object {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            tr(
-              'The action was not completed. Your data stayed unchanged; review the value and try again.',
-              'لم يُنفذ الإجراء. بقيت بياناتك دون تغيير؛ راجع القيمة وحاول مجددًا.',
-            ),
-          ),
-        ),
-      );
-    }
-  }
-
-  Future<bool> _confirmAction(IntelligenceAction action) async {
-    final accepted = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        icon: Icon(
-          action.destructive
-              ? BilSemanticIcons.deleteAccount
-              : _iconForAction(action.type),
-          color: action.destructive
-              ? Theme.of(context).colorScheme.error
-              : Theme.of(context).colorScheme.primary,
-        ),
-        title: Text(tr('Confirm action', 'تأكيد الإجراء')),
-        content: Text(action.label),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(tr('Cancel', 'إلغاء')),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text(tr('Continue', 'متابعة')),
-          ),
-        ],
-      ),
-    );
-    if (accepted != true) return false;
-    if (!action.destructive || !mounted) return true;
-    return _confirmDestructiveAction(action);
-  }
-
-  Future<bool> _confirmDestructiveAction(IntelligenceAction action) async {
-    final controller = TextEditingController();
-    try {
-      return await showDialog<bool>(
-            context: context,
-            barrierDismissible: false,
-            builder: (dialogContext) => AlertDialog(
-              icon: Icon(
-                BilSemanticIcons.deleteAccount,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              title: Text(tr('Final confirmation', 'التأكيد النهائي')),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(action.label),
-                  const SizedBox(height: 12),
-                  Text(
-                    tr(
-                      'Type DELETE to continue. This confirmation cannot be supplied by AI Coach.',
-                      'اكتب حذف للمتابعة. لا يستطيع المدرب الذكي تقديم هذا التأكيد نيابةً عنك.',
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: controller,
-                    autofocus: true,
-                    decoration: InputDecoration(
-                      labelText: tr('Confirmation word', 'كلمة التأكيد'),
-                    ),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext, false),
-                  child: Text(tr('Cancel', 'إلغاء')),
-                ),
-                FilledButton(
-                  onPressed: () {
-                    final value = controller.text.trim();
-                    Navigator.pop(
-                      dialogContext,
-                      value == 'DELETE' || value == 'حذف',
-                    );
-                  },
-                  child: Text(tr('Confirm', 'تأكيد')),
-                ),
-              ],
-            ),
-          ) ??
-          false;
-    } finally {
-      controller.dispose();
-    }
-  }
-
-  void _showActionCompleted(String text) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
-  }
-
-  void usePrompt(String value) {
-    tabs.animateTo(1);
-    question.text = value;
-    ask();
-  }
-
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final coachContext = ref.watch(coachContextSnapshotProvider);
+    final snapshot = coachContext.asData?.value;
+    final dailyBrief = snapshot == null
+        ? null
+        : const CoachDailyBriefEngine().build(
+            context: snapshot,
+            now: DateTime.now(),
+            locale: BilLocalePolicy.canonicalTag(
+              Localizations.localeOf(context),
+            ),
+          );
+    final visibleMessages = messages.toList(growable: false);
+    final showLiveVoiceDraft =
+        listening && pendingVoiceTranscript.trim().isNotEmpty;
+    final showReplyProgress =
+        replyPhase == _CoachReplyPhase.searching ||
+        replyPhase == _CoachReplyPhase.failed;
+    final showIntroBrief = introVisible && dailyBrief != null;
+    final coachStatus = voiceMode == _CoachVoiceMode.liveCall && liveCallPaused
+        ? tr('Live call paused', 'المكالمة المباشرة متوقفة مؤقتًا')
+        : listening
+        ? tr(
+            'Listening live · pause to send',
+            'أكتب كلامك مباشرة · اسكت للإرسال',
+          )
+        : sending
+        ? tr('Thinking with your BIL data', 'أفكر باستخدام بيانات BIL')
+        : tr('Ready', 'جاهز');
+    const coachNavy = Color(0xFF071923);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(tr('BIL AI Coach', 'مدرب BIL الذكي')),
-        actions: [
-          IconButton(
-            tooltip: tr('Clear local conversation', 'مسح المحادثة المحلية'),
-            onPressed: messages.isEmpty ? null : _clearConversation,
-            icon: const Icon(Icons.delete_outline_rounded),
-          ),
-        ],
-        bottom: TabBar(
-          controller: tabs,
-          tabs: [
-            Tab(
-              icon: const Icon(Icons.auto_awesome_rounded),
-              text: tr('AI Coach', 'المدرب الذكي'),
-            ),
-            Tab(
-              icon: const Icon(Icons.chat_bubble_outline),
-              text: tr('Ask BIL', 'اسأل BIL'),
-            ),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: tabs,
-        children: [
-          _CoachOverview(onPrompt: usePrompt),
-          Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  controller: conversationScroll,
-                  padding: const EdgeInsets.all(16),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) =>
-                      _MessageBubble(message: messages[index]),
-                ),
-              ),
-              _QuickQuestions(onSelected: usePrompt),
-              SafeArea(
-                top: false,
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-                  decoration: BoxDecoration(
-                    color: scheme.surface,
-                    border: Border(
-                      top: BorderSide(color: scheme.outlineVariant),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        key: const Key('ai-coach-food-image-button'),
-                        tooltip: tr('Analyze a food photo', 'حلّل صورة طعام'),
-                        onPressed: analyzingFoodImage || sending
-                            ? null
-                            : _analyzeFoodImageInChat,
-                        icon: analyzingFoodImage
-                            ? const SizedBox.square(
-                                dimension: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.add_a_photo_outlined),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: TextField(
-                          key: const Key('ai-coach-question-field'),
-                          controller: question,
-                          minLines: 1,
-                          maxLines: 4,
-                          textInputAction: TextInputAction.send,
-                          onTap: _scrollToLatest,
-                          onSubmitted: (_) => ask(),
-                          onChanged: (value) {
-                            if (!sending && value.endsWith('\n')) {
-                              question.value = TextEditingValue(
-                                text: value.trimRight(),
-                                selection: TextSelection.collapsed(
-                                  offset: value.trimRight().length,
-                                ),
-                              );
-                              unawaited(ask());
-                            }
-                          },
-                          decoration: InputDecoration(
-                            hintText: tr(
-                              'Ask about your body, food, or progress...',
-                              'اسأل عن جسمك أو غذائك أو تقدمك...',
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      IconButton.filledTonal(
-                        key: const Key('ai-coach-voice-button'),
-                        tooltip: tr('Talk to AI Coach', 'تحدث إلى AI Coach'),
-                        onPressed: listening || sending ? null : _speakQuestion,
-                        icon: Icon(
-                          listening
-                              ? Icons.graphic_eq_rounded
-                              : Icons.mic_rounded,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      IconButton.filled(
-                        key: const Key('ai-coach-send-button'),
-                        onPressed: sending ? null : ask,
-                        icon: sending
-                            ? const SizedBox.square(
-                                dimension: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Icon(Icons.arrow_upward_rounded),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CoachOverview extends StatelessWidget {
-  const _CoachOverview({required this.onPrompt});
-  final ValueChanged<String> onPrompt;
-
-  @override
-  Widget build(BuildContext context) {
-    final prompts = <String>[
-      intelligenceText(
-        context,
-        'Analyze my weight plateau',
-        'حلل سبب ثبات وزني',
-      ),
-      intelligenceText(
-        context,
-        'Is my protein enough today?',
-        'هل بروتيني كافٍ اليوم؟',
-      ),
-      intelligenceText(
-        context,
-        'What is my best action now?',
-        'ما أفضل خطوة لي الآن؟',
-      ),
-      intelligenceText(context, 'Review my food day', 'راجع يومي الغذائي'),
-      intelligenceText(context, 'What data is missing?', 'ماذا ينقص بياناتي؟'),
-    ];
-
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        Text(
-          intelligenceText(
-            context,
-            'How can AI Coach help?',
-            'كيف يساعدك AI Coach؟',
-          ),
-          style: Theme.of(
-            context,
-          ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          intelligenceText(
-            context,
-            'It surfaces observations from your data, explains why, and proposes an action for your approval.',
-            'يعرض ملاحظات مبنية على بياناتك، يشرح السبب، ويقترح إجراءً بعد موافقتك.',
-          ),
-        ),
-        const SizedBox(height: 20),
-        Text(
-          intelligenceText(context, 'Try now', 'جرّب الآن'),
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-        ),
-        const SizedBox(height: 10),
-        for (final prompt in prompts)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: FilledButton.tonalIcon(
-              onPressed: () => onPrompt(prompt),
-              icon: const Icon(Icons.auto_awesome_outlined),
-              label: Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: Text(prompt),
-              ),
-            ),
-          ),
-        const SizedBox(height: 8),
-        Card(
+      backgroundColor: coachNavy,
+      body: ColoredBox(
+        color: coachNavy,
+        child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              intelligenceText(
-                context,
-                'Important: full external conversation and body-context integration are not complete, so BIL will not present a personal plan before that connection is finished.',
-                'مهم: الربط الكامل بالمحادثة الخارجية وبكل سياق جسمك ما زال غير مكتمل، لذلك لن يعرض BIL خطة شخصية قبل اكتمال هذا الربط.',
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _QuickQuestions extends StatelessWidget {
-  const _QuickQuestions({required this.onSelected});
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final prompts = <String>[
-      intelligenceText(context, 'Ask about my body', 'اسأل عن جسمي'),
-      intelligenceText(context, 'Why is my weight stable?', 'لماذا وزني ثابت؟'),
-      intelligenceText(context, 'What should I eat now?', 'ماذا آكل الآن؟'),
-      intelligenceText(context, 'Build me a plan', 'اعمل لي خطة'),
-      intelligenceText(context, 'Review my day', 'راجع يومي'),
-    ];
-
-    return SizedBox(
-      height: 54,
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        scrollDirection: Axis.horizontal,
-        itemCount: prompts.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
-        itemBuilder: (context, index) => ActionChip(
-          label: Text(prompts[index]),
-          onPressed: () => onSelected(prompts[index]),
-        ),
-      ),
-    );
-  }
-}
-
-class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({required this.message});
-  final IntelligenceMessage message;
-
-  @override
-  Widget build(BuildContext context) {
-    final user = message.role == IntelligenceMessageRole.user;
-    final scheme = Theme.of(context).colorScheme;
-    return Align(
-      alignment: user ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 620),
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: user ? scheme.primaryContainer : scheme.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(message.text),
-            if (!user) ...[
-              const SizedBox(height: 6),
-              Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: IconButton(
-                  key: Key('ai-coach-speak-${message.id}'),
-                  visualDensity: VisualDensity.compact,
-                  tooltip: intelligenceText(
-                    context,
-                    'Listen to response',
-                    'استمع إلى الرد',
+            padding: const EdgeInsets.fromLTRB(6, 3, 6, 6),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                width: double.infinity,
+                constraints: const BoxConstraints(maxWidth: 760),
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: scheme.surface,
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: const Color(0xFF1D4A60),
+                    width: 1.2,
                   ),
-                  onPressed: () async {
-                    try {
-                      final uiTag = Localizations.localeOf(
-                        context,
-                      ).toLanguageTag();
-                      final spokenLocale = const CoachLanguageResolver()
-                          .resolve(input: message.text, uiLocale: uiTag)
-                          .languageTag;
-                      await const BilTextToSpeech().speak(
-                        _compactSpokenCoachReply(message.text),
-                        spokenLocale,
-                      );
-                    } on Object {
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            intelligenceText(
-                              context,
-                              'A voice for this language is unavailable on this device.',
-                              'الصوت غير متاح لهذه اللغة على الجهاز.',
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: .3),
+                      blurRadius: 28,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    _CoachHero(
+                      key: const ValueKey('ai-coach-hero'),
+                      onStart: _toggleLiveCall,
+                      onStop: _stopLiveCall,
+                      liveCallActive: voiceMode == _CoachVoiceMode.liveCall,
+                      liveCallPaused: liveCallPaused,
+                      active: listening || sending,
+                      status: coachStatus,
+                      onBack: () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.go('/dashboard');
+                        }
+                      },
+                      onMenu: () => unawaited(_openCoachMenuSheet()),
+                    ),
+                    Expanded(
+                      child: visibleMessages.isEmpty
+                          ? _CoachEmptyState(
+                              onVoice: _toggleLiveCall,
+                              onCamera: _analyzeFoodImageInChat,
+                            )
+                          : ListView.builder(
+                              controller: conversationScroll,
+                              reverse: true,
+                              keyboardDismissBehavior:
+                                  ScrollViewKeyboardDismissBehavior.onDrag,
+                              padding: const EdgeInsets.fromLTRB(
+                                16,
+                                18,
+                                16,
+                                12,
+                              ),
+                              itemCount:
+                                  visibleMessages.length +
+                                  (showLiveVoiceDraft ? 1 : 0) +
+                                  (showReplyProgress ? 1 : 0) +
+                                  (showIntroBrief ? 1 : 0),
+                              itemBuilder: (context, index) {
+                                if (showReplyProgress && index == 0) {
+                                  return _CoachReplyProgress(
+                                    phase: replyPhase,
+                                    onCancel: _cancelCurrentCoachRequest,
+                                    onRetry: failedRequest == null
+                                        ? null
+                                        : _retryFailedCoachRequest,
+                                  );
+                                }
+                                final progressOffset = showReplyProgress
+                                    ? 1
+                                    : 0;
+                                if (showLiveVoiceDraft &&
+                                    index == progressOffset) {
+                                  return _LiveVoiceTranscript(
+                                    text: pendingVoiceTranscript.trim(),
+                                    liveCall:
+                                        voiceMode == _CoachVoiceMode.liveCall,
+                                  );
+                                }
+                                var cursor =
+                                    index -
+                                    progressOffset -
+                                    (showLiveVoiceDraft ? 1 : 0);
+                                if (cursor == 0 && visibleMessages.isNotEmpty) {
+                                  return _buildMessage(
+                                    visibleMessages.last,
+                                    messageFeedback,
+                                  );
+                                }
+                                cursor -= 1;
+                                if (showIntroBrief && cursor == 0) {
+                                  return _InlineCoachDecision(
+                                    brief: dailyBrief,
+                                    onAction: () {
+                                      if (dailyBrief.kind ==
+                                          CoachDailyBriefKind.experiment) {
+                                        context.push('/experiments');
+                                      } else {
+                                        usePrompt(dailyBrief.suggestedPrompt);
+                                      }
+                                    },
+                                  );
+                                }
+                                if (showIntroBrief) cursor -= 1;
+                                final messageIndex =
+                                    visibleMessages.length - 2 - cursor;
+                                final message = visibleMessages[messageIndex];
+                                return _buildMessage(message, messageFeedback);
+                              },
                             ),
+                    ),
+                    SafeArea(
+                      top: false,
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        margin: const EdgeInsets.fromLTRB(12, 5, 12, 12),
+                        padding: const EdgeInsets.fromLTRB(8, 6, 6, 6),
+                        decoration: BoxDecoration(
+                          color: scheme.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color: listening
+                                ? scheme.primary.withValues(alpha: .62)
+                                : scheme.outlineVariant.withValues(alpha: .55),
+                            width: listening ? 1.5 : .8,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: scheme.shadow.withValues(alpha: .07),
+                              blurRadius: 22,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
                         ),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.volume_up_rounded),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            IconButton(
+                              key: const Key('ai-coach-food-image-button'),
+                              tooltip: tr('Open camera', 'افتح الكاميرا'),
+                              onPressed: analyzingFoodImage || sending
+                                  ? null
+                                  : _analyzeFoodImageInChat,
+                              icon: analyzingFoodImage
+                                  ? const SizedBox.square(
+                                      dimension: 19,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.camera_alt_outlined,
+                                      size: 21,
+                                    ),
+                            ),
+                            Expanded(
+                              child: listening
+                                  ? _ListeningComposerLabel(
+                                      label: tr(
+                                        'Listening — pause when you’re done',
+                                        'أستمع — اسكت عندما تنتهي',
+                                      ),
+                                      transcript: pendingVoiceTranscript,
+                                    )
+                                  : TextField(
+                                      key: const Key('ai-coach-question-field'),
+                                      controller: question,
+                                      minLines: 1,
+                                      maxLines: 4,
+                                      textInputAction: TextInputAction.send,
+                                      onTap: _scrollToLatest,
+                                      onSubmitted: (_) => ask(),
+                                      onChanged: (_) => setState(() {}),
+                                      decoration: InputDecoration(
+                                        hintText: tr(
+                                          'Ask BIL anything about your day…',
+                                          'اسأل BIL أي شيء عن يومك…',
+                                        ),
+                                        border: InputBorder.none,
+                                        enabledBorder: InputBorder.none,
+                                        focusedBorder: InputBorder.none,
+                                        filled: false,
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 10,
+                                            ),
+                                      ),
+                                    ),
+                            ),
+                            const SizedBox(width: 4),
+                            if (question.text.trim().isEmpty || listening)
+                              IconButton.filled(
+                                key: const Key('ai-coach-voice-button'),
+                                tooltip: listening
+                                    ? tr('Stop listening', 'إيقاف الاستماع')
+                                    : tr('Talk to BIL', 'تحدث مع BIL'),
+                                onPressed: sending ? null : _toggleDictation,
+                                style: IconButton.styleFrom(
+                                  backgroundColor: const Color(0xFF12394E),
+                                  foregroundColor: const Color(0xFFC8F3FF),
+                                  minimumSize: const Size.square(46),
+                                ),
+                                icon: listening
+                                    ? const _VoiceListeningWave(
+                                        color: Color(0xFFC8F3FF),
+                                        compact: true,
+                                      )
+                                    : const Icon(Icons.graphic_eq_rounded),
+                              )
+                            else
+                              IconButton.filled(
+                                key: const Key('ai-coach-send-button'),
+                                tooltip: tr('Send', 'إرسال'),
+                                onPressed: sending ? null : ask,
+                                style: IconButton.styleFrom(
+                                  minimumSize: const Size.square(46),
+                                ),
+                                icon: sending
+                                    ? const SizedBox.square(
+                                        dimension: 19,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : const Icon(Icons.arrow_upward_rounded),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ],
+            ),
+          ),
         ),
       ),
     );
   }
-}
 
-String _compactSpokenCoachReply(String detailedReply) {
-  final plain = detailedReply
-      .replaceAll(RegExp(r'[`*_#>]'), '')
-      .replaceAll(RegExp(r'\s+'), ' ')
-      .trim();
-  if (plain.length <= 140) return plain;
-  final sentenceEnd = RegExp(r'[.!?؟。]').firstMatch(plain);
-  if (sentenceEnd != null && sentenceEnd.end >= 24 && sentenceEnd.end <= 140) {
-    return plain.substring(0, sentenceEnd.end).trim();
-  }
-  return '${plain.substring(0, 137).trimRight()}…';
-}
-
-class _ActionSheet extends StatelessWidget {
-  const _ActionSheet({required this.actions, required this.onAction});
-
-  final List<IntelligenceAction> actions;
-  final ValueChanged<IntelligenceAction> onAction;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: ListView(
-        shrinkWrap: true,
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text(
-            intelligenceText(context, 'Suggested actions', 'إجراءات مقترحة'),
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          for (final action in actions)
-            ListTile(
-              leading: Icon(_iconForAction(action.type)),
-              title: Text(action.label),
-              subtitle: Text(
-                action.requiresConfirmation
-                    ? intelligenceText(
-                        context,
-                        'Requires your confirmation',
-                        'يتطلب تأكيدك',
-                      )
-                    : '',
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                onAction(action);
-              },
-            ),
-        ],
-      ),
+  Widget _buildMessage(
+    IntelligenceMessage message,
+    Map<String, bool> feedback,
+  ) {
+    final canRate =
+        message.role == IntelligenceMessageRole.bil &&
+        !message.id.startsWith('welcome') &&
+        !message.id.startsWith('tool-');
+    return _MessageBubble(
+      message: message,
+      feedbackValue: feedback[message.id],
+      onFeedback: canRate
+          ? (helpful) => _recordFeedback(message, helpful)
+          : null,
+      onReport: canRate
+          ? (reason) => _recordFeedback(message, false, reason: reason)
+          : null,
     );
   }
 }
-
-IconData _iconForAction(IntelligenceActionType type) => switch (type) {
-  IntelligenceActionType.navigate => Icons.navigation_outlined,
-  IntelligenceActionType.readNutritionRemaining => Icons.pie_chart_outline,
-  IntelligenceActionType.readProfileIdentity => Icons.person_outline,
-  IntelligenceActionType.openDailyLog => BilSemanticIcons.diary,
-  IntelligenceActionType.addWater => BilSemanticIcons.water,
-  IntelligenceActionType.addWeight => BilSemanticIcons.weight,
-  IntelligenceActionType.reviewMeal => BilSemanticIcons.meal,
-  IntelligenceActionType.reviewWorkout => BilSemanticIcons.workout,
-  IntelligenceActionType.openPlan => Icons.route_outlined,
-  IntelligenceActionType.openReport => BilSemanticIcons.insights,
-  IntelligenceActionType.manageSubscription => BilSemanticIcons.subscription,
-  IntelligenceActionType.setThemeMode => Icons.contrast_rounded,
-  IntelligenceActionType.setLanguage => Icons.language_rounded,
-  IntelligenceActionType.updateGoal => Icons.flag_outlined,
-  IntelligenceActionType.saveMeasurements => Icons.straighten_outlined,
-  IntelligenceActionType.quickAddMacros => BilSemanticIcons.meal,
-  IntelligenceActionType.updateMealItem => Icons.edit_outlined,
-  IntelligenceActionType.moveMealItem => Icons.drive_file_move_outline,
-  IntelligenceActionType.deleteMealItem => Icons.delete_outline_rounded,
-  IntelligenceActionType.requestAccountDeletion =>
-    BilSemanticIcons.deleteAccount,
-  IntelligenceActionType.saveMemory => Icons.bookmark_add_outlined,
-};

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<scale xmlns:android="http://schemas.android.com/apk/res/android"
-    android:drawable="@drawable/bil_splash_wordmark"
-    android:scaleWidth="12%"
-    android:scaleHeight="12%"
-    android:scaleGravity="center"
-    android:useLevel="false" />

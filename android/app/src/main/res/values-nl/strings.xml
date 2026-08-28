@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BIL - Lichaamsintelligentielogboek</string>
+    <string name="health_permissions_rationale_title">Privacy van gezondheidsgegevens</string>
+    <string name="health_permissions_rationale_body">BIL vraagt ​​alleen de gegevenstypen Health Connect op die nodig zijn voor de functies die u wilt gebruiken. Uw gezondheidsgegevens worden standaard lokaal verwerkt. U kunt op elk gewenst moment individuele machtigingen verlenen, weigeren of intrekken via de Health Connect-instellingen. BIL verkoopt geen gezondheidsgegevens en gebruikt deze niet voor reclame.</string>
+    <string name="health_permissions_privacy_policy_action">Lees het volledige privacybeleid van BIL</string>
+</resources>

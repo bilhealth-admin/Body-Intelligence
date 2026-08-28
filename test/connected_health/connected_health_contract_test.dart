@@ -92,6 +92,51 @@ void main() {
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
     expect(router, contains("path: '/connected-health'"));
     expect(router, contains('ConnectedHealthPage'));
+    final healthRouteStart = router.indexOf("path: '/connected-health'");
+    final stepsRouteStart = router.indexOf("path: '/connected-health/steps'");
+    final healthRoute = router.substring(healthRouteStart, stepsRouteStart);
+    expect(healthRoute, isNot(contains('PremiumRouteGlassGate')));
+  });
+
+  test('Apps and Devices exposes consumer copy and an empty-state action', () {
+    final components = File(
+      'lib/features/connected_health/connected_health_components.dart',
+    ).readAsStringSync();
+
+    expect(components, contains("Key('connected-sources-add-cta')"));
+    expect(components, contains("'Health Connect'"));
+    expect(components, contains("'Apple Health'"));
+    expect(
+      components,
+      isNot(
+        contains('Implementation ready; physical-device verification required'),
+      ),
+    );
+    expect(components, isNot(contains('entry.protocol')));
+  });
+
+  test('watch sync stays free while fitness-device Bluetooth is Premium', () {
+    final dashboard = File(
+      'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
+    ).readAsStringSync();
+    final page = File(
+      'lib/features/connected_health/connected_health_page.dart',
+    ).readAsStringSync();
+    final card = File(
+      'lib/features/connected_health/widgets/connected_health_card.dart',
+    ).readAsStringSync();
+
+    expect(dashboard, isNot(contains('Smart-watch and health sync')));
+    expect(page, contains("Key('medical-devices-premium-gate')"));
+    expect(page, contains("Key('connected-health-live-watch-card')"));
+    expect(page, contains('child: const _MedicalDeviceSection()'));
+    expect(card, contains('LiveHealthWatch('));
+    expect(card, contains('BilMedicalMonitor('));
+    expect(card, contains('PremiumDashboardCardLock('));
+    expect(card, contains('locked: !widget.medicalDevicesUnlocked'));
+    expect(card, contains("Key('dashboard-live-health-watch-slot')"));
+    expect(card, contains("Key('dashboard-medical-device-preview')"));
+    expect(card, contains("context.push('/connected-health')"));
   });
 
   test('all connected health presentation uses the direct25 contract', () {

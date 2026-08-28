@@ -37,8 +37,11 @@ class NutritionGoalTarget {
   }
 
   bool get isValid =>
-      calories >= 500 &&
-      calories <= 10000 &&
+      calories.isFinite &&
+      calories > 0 &&
+      carbsPercent.isFinite &&
+      proteinPercent.isFinite &&
+      fatPercent.isFinite &&
       carbsPercent >= 0 &&
       proteinPercent >= 0 &&
       fatPercent >= 0 &&
@@ -129,6 +132,20 @@ class NutritionGoalScheduleRepository {
     target == null ? meals.remove(mealType) : meals[mealType] = target;
     await _write(
       NutritionGoalSchedule(dayTargets: current.dayTargets, mealTargets: meals),
+    );
+  }
+
+  Future<void> replaceDayTargets(Map<int, NutritionGoalTarget> targets) async {
+    if (targets.keys.any((day) => day < 1 || day > 7) ||
+        targets.values.any((target) => !target.isValid)) {
+      throw ArgumentError.value(targets);
+    }
+    final current = await read();
+    await _write(
+      NutritionGoalSchedule(
+        dayTargets: Map<int, NutritionGoalTarget>.of(targets),
+        mealTargets: current.mealTargets,
+      ),
     );
   }
 

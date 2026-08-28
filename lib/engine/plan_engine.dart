@@ -1,9 +1,7 @@
 import 'body_profile.dart';
-import 'bmr_engine.dart';
+import 'body_model_engine.dart';
 import 'daily_targets.dart';
-import 'hydration_engine.dart';
-import 'nutrition_engine.dart';
-import 'tdee_engine.dart';
+import '../features/nutrition/domain/dietary_preferences.dart';
 
 class PlanRecommendation {
   const PlanRecommendation({
@@ -11,11 +9,13 @@ class PlanRecommendation {
     required this.tdee,
     required this.targets,
     required this.assumptions,
+    required this.bodyModel,
   });
   final double bmr;
   final double tdee;
   final DailyTargets targets;
   final List<String> assumptions;
+  final BodyModelResult bodyModel;
 }
 
 class PlanOverrides {
@@ -38,31 +38,21 @@ class PlanOverrides {
 class PlanEngine {
   const PlanEngine._();
 
-  static PlanRecommendation recommend(BodyProfile profile) {
-    final bmr = BMREngine.calculate(profile);
-    final tdee = TDEEEngine.calculate(
-      bmr: bmr,
-      activityLevel: profile.activityLevel,
-    );
-    final nutrition = NutritionEngine.calculate(profile: profile, tdee: tdee);
-    final water = HydrationEngine.calculate(profile);
+  static PlanRecommendation recommend(
+    BodyProfile profile, {
+    DietaryPreferences dietaryPreferences = const DietaryPreferences(),
+  }) {
+    final model = BodyModelEngine.calculate(profile);
     return PlanRecommendation(
-      bmr: bmr,
-      tdee: tdee,
-      targets: DailyTargets(
-        calories: nutrition.calories,
-        protein: nutrition.protein,
-        carbs: nutrition.carbs,
-        fats: nutrition.fats,
-        potassium: nutrition.potassium,
-        sodium: nutrition.sodium,
-        fiber: nutrition.fiber,
-        water: water,
-      ),
+      bmr: model.bmrKcal,
+      tdee: model.tdeeKcal,
+      targets: model.targets,
+      bodyModel: model,
       assumptions: [
-        'Mifflin–St Jeor BMR using the saved age, sex, height, and current weight',
+        'Mifflin-St Jeor BMR using the saved age, sex, height, and current weight',
         'Activity factor: ${profile.activityLevel}',
         'Goal direction: ${profile.goalType}',
+        'Dietary approach: ${dietaryPreferences.approach}; food-selection constraints do not alter nutrient requirements',
         'Logged scale weight cannot distinguish fat from muscle',
       ],
     );

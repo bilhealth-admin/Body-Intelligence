@@ -1,4 +1,5 @@
 import 'food_search_normalizer.dart';
+import 'food_multilingual_lexicon.dart';
 
 class FoodSearchAssistance {
   const FoodSearchAssistance();
@@ -183,6 +184,13 @@ class FoodSearchAssistance {
     "ground": "مفروم",
     "minced": "مفروم",
     "raw": "نيّئ",
+    "peel": "بقشره",
+    "peeled": "مقشّر",
+    "pickle": "مخلل",
+    "pickles": "مخلل",
+    "dill": "شبت",
+    "kosher": "كوشير",
+    "sour": "حامض",
     "cooked": "مطهو",
     "roasted": "مشوي",
     "grilled": "مشوي",
@@ -282,6 +290,13 @@ class FoodSearchAssistance {
     "frozen": "مجمد",
     "canned": "معلب",
     "dried": "مجفف",
+    "not": "غير",
+    "only": "فقط",
+    "whole": "كامل",
+    "eaten": "مأكول",
+    "boneless": "بدون عظم",
+    "bone": "عظم",
+    "prepared": "محضر",
     "fuji": "فوجي",
     "gala": "جالا",
     "basmati": "بسمتي",
@@ -292,7 +307,7 @@ class FoodSearchAssistance {
     if (normalized.isEmpty) {
       return const <String>[];
     }
-    final expanded = <String>{normalized};
+    final expanded = <String>{...FoodMultilingualLexicon.expand(normalized)};
     final exact = _queryExpansions[normalized];
     if (exact != null) {
       expanded.addAll(exact);
@@ -345,6 +360,20 @@ class FoodSearchAssistance {
     return values == null || values.isEmpty ? best : values.first;
   }
 
+  /// Returns only an authored correction/translation for the exact query.
+  ///
+  /// Meal search uses this conservative boundary for an empty result state.
+  /// Fuzzy dictionary neighbours are useful for ranking, but presenting them
+  /// as user-facing alternatives can suggest unrelated food names.
+  String? explicitCorrectionFor(String query) {
+    final normalized = FoodSearchNormalizer.normalize(query);
+    if (normalized.isEmpty) return null;
+    final values = _queryExpansions[normalized];
+    if (values == null || values.isEmpty) return null;
+    final correction = values.first.trim();
+    return correction.isEmpty || correction == normalized ? null : correction;
+  }
+
   List<String> suggestionsFor(String query, {int limit = 6}) {
     final normalized = FoodSearchNormalizer.normalize(query);
     if (normalized.isEmpty) {
@@ -362,15 +391,46 @@ class FoodSearchAssistance {
   String? arabicNameFor(String description) {
     final normalized = FoodSearchNormalizer.normalize(description);
     final result = <String>[];
+    var meaningfulTokens = 0;
+    var translatedTokens = 0;
     for (final token in normalized.split(RegExp(r'\s+'))) {
       final clean = token.replaceAll(RegExp(r'[^a-z]'), '');
+      if (clean.isEmpty || _englishStopWords.contains(clean)) continue;
+      meaningfulTokens += 1;
       final translated = _englishToArabic[clean];
       if (translated != null && !result.contains(translated)) {
         result.add(translated);
+        translatedTokens += 1;
       }
     }
-    return result.isEmpty ? null : result.join(' ');
+    if (meaningfulTokens == 0 || result.isEmpty) return null;
+
+    // A partial label is worse than no translation: it collapses distinct USDA
+    // records into misleading names such as dozens of unrelated rows all shown
+    // as just "بط". Only expose a generated Arabic display name when most of
+    // the source meaning survived; otherwise the authoritative source name is
+    // displayed intact.
+    final coverage = translatedTokens / meaningfulTokens;
+    if (coverage < 0.75) return null;
+    return result.join(' ');
   }
+
+  static const Set<String> _englishStopWords = <String>{
+    'a',
+    'an',
+    'and',
+    'as',
+    'at',
+    'by',
+    'for',
+    'from',
+    'in',
+    'of',
+    'or',
+    'the',
+    'to',
+    'with',
+  };
 
   int _levenshtein(String a, String b) {
     var previous = List<int>.generate(b.length + 1, (i) => i);

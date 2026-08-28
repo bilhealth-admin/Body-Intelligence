@@ -24,9 +24,11 @@ void main() {
   });
 
   test('intelligence locale contract declares every production language', () {
-    final source = File(
+    final source = [
       'lib/features/intelligence_center/intelligence_locale_copy.dart',
-    ).readAsStringSync();
+      'lib/features/intelligence_center/intelligence_service_locale_copy.dart',
+      'lib/features/intelligence_center/intelligence_ui_locale_copy.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     for (final code in ['fr', 'es', 'tr']) {
       expect(source, contains("'$code':"));
     }

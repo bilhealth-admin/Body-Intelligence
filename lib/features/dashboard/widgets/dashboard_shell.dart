@@ -96,7 +96,11 @@ class DashboardShell extends StatelessWidget {
           ],
           */
           SafeArea(
-            child: RefreshIndicator(
+            // Keep the familiar pull gesture without covering cached Today
+            // content with loading chrome. The provider refresh continues in
+            // the background and reports its final outcome from DashboardPage.
+            child: RefreshIndicator.noSpinner(
+              key: const Key('dashboard-background-refresh'),
               onRefresh: onRefresh,
               child: LayoutBuilder(
                 builder: (context, constraints) {

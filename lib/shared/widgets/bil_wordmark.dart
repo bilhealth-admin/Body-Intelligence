@@ -150,15 +150,19 @@ class _WordmarkLockup extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: EdgeInsets.only(left: height * .07, top: height * .02),
+          padding: EdgeInsets.only(left: height * .065, top: height * .005),
           child: Text(
             '™',
             textDirection: TextDirection.ltr,
             style: TextStyle(
               color: color,
-              fontSize: height * .22,
+              // The former 0.22 lockup made the trademark disappear on phone
+              // dashboards and the launch frame. Keep it subordinate to the
+              // wordmark, but large enough to survive rasterisation and common
+              // Android display scaling.
+              fontSize: height * .34,
               height: 1,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ),

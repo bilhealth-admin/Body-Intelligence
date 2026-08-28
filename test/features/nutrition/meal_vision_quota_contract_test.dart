@@ -36,29 +36,50 @@ void main() {
     },
   );
 
-  test('combines Coach weekly allowance and paid Boost balance', () {
+  test('legacy quota display can parse shared Coach and Boost balances', () {
     final usage = MealVisionUsage.fromAiUsageStatus(const {
       'plan': 'ai_coach',
       'week_start': '2026-08-10',
-      'capabilities': {
-        'vision': {
-          'weekly_limit': 25,
-          'weekly_used': 4,
-          'weekly_reserved': 1,
-          'weekly_remaining': 20,
-          'paid_granted': 50,
-          'paid_used': 3,
-          'paid_reserved': 2,
-          'paid_remaining': 45,
-        },
+      'credits': {
+        'unit': 'BIL AI Token',
+        'billing_scope': 'shared',
+        'weekly_limit': 5000,
+        'weekly_used': 800,
+        'weekly_reserved': 100,
+        'weekly_remaining': 4100,
+        'paid_granted': 5000,
+        'paid_used': 300,
+        'paid_reserved': 200,
+        'paid_remaining': 4500,
       },
     });
 
-    expect(usage.limit, 75);
-    expect(usage.used, 7);
-    expect(usage.reserved, 3);
-    expect(usage.remaining, 65);
+    expect(usage.limit, 10000);
+    expect(usage.used, 1100);
+    expect(usage.reserved, 300);
+    expect(usage.remaining, 8600);
     expect(usage.periodStart, DateTime(2026, 8, 10));
+  });
+
+  test('production meal Vision reservation uses paid Boost only', () {
+    final sql = File(
+      'supabase/migrations/'
+      '20260821174122_require_paid_boost_for_meal_vision.sql',
+    ).readAsStringSync();
+    final client = File(
+      'lib/features/commerce/providers/commerce_providers.dart',
+    ).readAsStringSync();
+    expect(sql, contains('bil_reserve_paid_ai_vision_usage'));
+    expect(sql, contains("raise exception 'ai_boost_required'"));
+    expect(sql, contains("'billing_source','paid_boost'"));
+    expect(sql, contains('credit_weekly_debit, credit_paid_debit'));
+    expect(sql, contains("0, v_credit_reserve, 'usd-1e-4-v1'"));
+    expect(
+      sql,
+      isNot(contains("bil_reserve_ai_usage(p_owner_id,p_request_id,'vision'")),
+    );
+    expect(client, contains('final aiBoostVisionAccessProvider'));
+    expect(client, contains('paidRemaining >= 100'));
   });
 
   test(

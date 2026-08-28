@@ -5,11 +5,15 @@ import 'package:body_intelligence_log/app/services/external_capabilities.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('unverified external capabilities never advertise availability', () {
+  test('only the verified production account boundary is available', () {
     for (final capability in ExternalCapability.values) {
       final status = ExternalCapabilities.status(capability);
       expect(status.capability, capability);
-      expect(status.available, isFalse);
+      expect(
+        status.available,
+        capability == ExternalCapability.account,
+        reason: capability.name,
+      );
       expect(status.reason.trim(), isNotEmpty);
     }
     expect(

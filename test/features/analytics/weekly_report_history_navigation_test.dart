@@ -2,6 +2,9 @@ import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_engine.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_page.dart';
 import 'package:body_intelligence_log/features/analytics/weekly_report_provider.dart';
+import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
+import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -42,6 +45,11 @@ void main() {
       overrides: [
         weeklyReportClockProvider.overrideWithValue(() => today),
         weeklyReportProvider.overrideWith((ref) async => report),
+        accountCreatedAtProvider.overrideWithValue(null),
+        userProfileProvider.overrideWith((ref) => Stream.value(null)),
+        verifiedSubscriptionStateProvider.overrideWithValue(
+          AsyncData(FreePlan.createState()),
+        ),
       ],
     );
     addTearDown(container.dispose);

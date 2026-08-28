@@ -27,15 +27,28 @@ const _targets = <String, String>{
   'uk': 'uk',
 };
 
+const _coachBaseTargets = <String, String>{
+  'ar': 'ar',
+  'fr': 'fr',
+  'es': 'es',
+  'tr': 'tr',
+};
+
 const _delimiter = 'ZXQPSEGMENT9X7ZXQP';
 const _bilToken = 'ZXQPBILBRAND9X7ZXQP';
 const _coachToken = 'ZXQPAICOACHBRAND9X7ZXQP';
+const _premiumToken = 'ZXQPPREMIUMBRAND9X7ZXQP';
+const _geminiToken = 'ZXQPGEMINIBRAND9X7ZXQP';
 
 // Reviewed exceptions where the generic translator preserved an English UI
 // label even though the locale has a clearer native equivalent.
 const _reviewedOverrides = <(String, String), String>{
+  ('th', 'All cuisines'): 'อาหารทุกประเภท',
   ('vi', 'Low carb'): 'Ít carbohydrate',
   ('uk', 'Custom'): 'Користувацький',
+  ('it', 'Add about {count} g protein'): 'Aggiungi circa {count} g di proteine',
+  ('de', 'Needs changes'): 'Änderungen erforderlich',
+  ('de', 'BIL Community'): 'BIL-Community',
   (
     'de',
     _invalidLink,
@@ -108,6 +121,19 @@ const _invalidLink =
     'This link cannot be opened safely. Return to the dashboard and try again.';
 
 Future<void> main(List<String> args) async {
+  if (args.contains('--core-pages-base')) {
+    await _writeBaseCopy(
+      sources: _corePageBaseSources,
+      className: 'CorePagesRuntimeCopy',
+      outputPath: 'lib/app/localization/runtime_copy_core_pages.dart',
+      commandFlag: '--core-pages-base',
+    );
+    return;
+  }
+  if (args.contains('--coach-base')) {
+    await _writeCoachBaseCopy(await _coachModernSources());
+    return;
+  }
   final mergeMissing = args.contains('--merge-missing');
   final only = args.where((value) => value != '--merge-missing').toSet();
   final targets = Map<String, String>.fromEntries(
@@ -177,6 +203,143 @@ Future<void> main(List<String> args) async {
   await File(
     'lib/app/localization/runtime_copy_extended.dart',
   ).writeAsString(output.toString());
+}
+
+const _corePageBaseSources = <String>{
+  'Loading Today dashboard',
+  'Complete your profile to calculate personalized targets.',
+  'Complete profile',
+  'No body trend data recorded yet.',
+  'No nutrition data recorded yet.',
+  'No trend data recorded yet.',
+  'Meals',
+  'Calories',
+  'Steps',
+  'Copy from',
+  'Manual barcode · Premium',
+  'Complete diary',
+  'Review today’s entries, then complete the diary to preserve an authoritative snapshot.',
+  'Save log',
+  'Checking subscription',
+  'AI Coach',
+  'AI Coach settings',
+  'Advertising privacy',
+  'Delete account',
+  'BIL Premium',
+  'Good morning',
+  'Good afternoon',
+  'Good evening',
+  'Close',
+  'Serving unit',
+  'Fiber',
+  'Sodium',
+  'I’m ready for your next useful decision.',
+  'Coach controls',
+  'Your BIL Coach',
+  'I speak every language and turn your body data into the next clear decision.',
+  'Talk now',
+  'BIL Coach',
+  'FOR TODAY',
+};
+
+const _corePageReviewedOverrides = <(String, String), String>{
+  ('ar', 'Good morning'): 'صباح الخير',
+  ('fr', 'Good morning'): 'Bonjour',
+  ('es', 'Good morning'): 'Buenos días',
+  ('tr', 'Good morning'): 'Günaydın',
+  ('ar', 'Good afternoon'): 'مساء الخير',
+  ('fr', 'Good afternoon'): 'Bon après-midi',
+  ('es', 'Good afternoon'): 'Buenas tardes',
+  ('tr', 'Good afternoon'): 'İyi günler',
+  ('ar', 'Close'): 'إغلاق',
+  ('fr', 'Close'): 'Fermer',
+  ('es', 'Close'): 'Cerrar',
+  ('tr', 'Close'): 'Kapat',
+  ('ar', 'Serving unit'): 'وحدة الحصة',
+  ('fr', 'Serving unit'): 'Unité de portion',
+  ('es', 'Serving unit'): 'Unidad de porción',
+  ('tr', 'Serving unit'): 'Porsiyon birimi',
+  ('ar', 'Fiber'): 'الألياف',
+  ('fr', 'Fiber'): 'Fibres',
+  ('es', 'Fiber'): 'Fibra',
+  ('tr', 'Fiber'): 'Lif',
+  ('ar', 'Sodium'): 'الصوديوم',
+  ('fr', 'Sodium'): 'Sodium',
+  ('es', 'Sodium'): 'Sodio',
+  ('tr', 'Sodium'): 'Sodyum',
+  ('ar', 'BIL Coach'): 'مدرب BIL',
+  ('fr', 'BIL Coach'): 'Coach BIL',
+  ('es', 'BIL Coach'): 'Coach BIL',
+  ('tr', 'BIL Coach'): 'BIL Koçu',
+  ('ar', 'Coach controls'): 'أدوات تحكم المدرب',
+  ('fr', 'Coach controls'): 'Commandes du coach',
+  ('es', 'Coach controls'): 'Controles del coach',
+  ('tr', 'Coach controls'): 'Koç kontrolleri',
+  ('ar', 'Complete diary'): 'إكمال اليوميات',
+  ('fr', 'Complete diary'): 'Terminer le journal',
+  ('es', 'Complete diary'): 'Completar el diario',
+  ('ar', 'Complete profile'): 'إكمال الملف الشخصي',
+  ('fr', 'Complete profile'): 'Compléter le profil',
+  ('es', 'Complete profile'): 'Completar perfil',
+  ('tr', 'Copy from'): 'Şuradan kopyala',
+  ('ar', 'Loading Today dashboard'): 'جارٍ تحميل لوحة اليوم',
+  ('fr', 'Loading Today dashboard'):
+      'Chargement du tableau de bord Aujourd’hui',
+  ('fr', 'Steps'): 'Pas',
+  ('ar', 'Your BIL Coach'): 'مدرب BIL الخاص بك',
+  ('fr', 'Your BIL Coach'): 'Votre coach BIL',
+  ('es', 'Your BIL Coach'): 'Tu coach BIL',
+  ('tr', 'Your BIL Coach'): 'BIL Koçunuz',
+  (
+    'fr',
+    'Review today’s entries, then complete the diary to preserve an authoritative snapshot.',
+  ): 'Passez en revue les entrées du jour, puis terminez le journal pour conserver un instantané de référence.',
+  (
+    'es',
+    'Review today’s entries, then complete the diary to preserve an authoritative snapshot.',
+  ): 'Revisa las entradas de hoy y completa el diario para conservar una instantánea fiable.',
+  (
+    'tr',
+    'Review today’s entries, then complete the diary to preserve an authoritative snapshot.',
+  ): 'Bugünün girişlerini gözden geçirip güvenilir bir kayıt oluşturmak için günlüğü tamamlayın.',
+};
+
+Future<void> _writeBaseCopy({
+  required Set<String> sources,
+  required String className,
+  required String outputPath,
+  required String commandFlag,
+}) async {
+  final ordered = sources.toList(growable: false)..sort();
+  final translated = <String, List<String>>{};
+  for (final entry in _coachBaseTargets.entries) {
+    stdout.writeln(
+      'Translating $className ${entry.key} (${ordered.length} entries)',
+    );
+    translated[entry.key] = await _translateCatalog(ordered, entry.value);
+  }
+  final output = StringBuffer()
+    ..writeln('// GENERATED FILE. Regenerate with:')
+    ..writeln(
+      '// dart run tool/localization/generate_extended_runtime_copy.dart $commandFlag',
+    )
+    ..writeln('abstract final class $className {')
+    ..writeln('  static const values = <String, Map<String, String>>{');
+  for (var index = 0; index < ordered.length; index += 1) {
+    output.writeln('    ${_dartString(ordered[index])}: {');
+    output.writeln("      'en': ${_dartString(ordered[index])},");
+    for (final tag in _coachBaseTargets.keys) {
+      final value =
+          _corePageReviewedOverrides[(tag, ordered[index])] ??
+          translated[tag]![index];
+      output.writeln('      ${_dartString(tag)}: ${_dartString(value)},');
+    }
+    output.writeln('    },');
+  }
+  output
+    ..writeln('  };')
+    ..writeln('}');
+  await File(outputPath).writeAsString(output.toString());
 }
 
 Future<List<String>> _translateCatalog(
@@ -275,11 +438,16 @@ String _protectBrands(String value) {
         (_) => 'ZXQPVAR${variableIndex++}X7ZXQP',
       )
       .replaceAll('AI Coach', _coachToken)
+      .replaceAll('Gemini', _geminiToken)
+      .replaceAll('Premium', _premiumToken)
       .replaceAll('BIL', _bilToken);
 }
 
-String _restoreBrands(String value) =>
-    value.replaceAll(_coachToken, 'AI Coach').replaceAll(_bilToken, 'BIL');
+String _restoreBrands(String value) => value
+    .replaceAll(_coachToken, 'AI Coach')
+    .replaceAll(_geminiToken, 'Gemini')
+    .replaceAll(_premiumToken, 'Premium')
+    .replaceAll(_bilToken, 'BIL');
 
 String _restoreProtectedBrands(String source, String translated) {
   var restored = _restoreBrands(translated).replaceAllMapped(
@@ -291,6 +459,12 @@ String _restoreProtectedBrands(String source, String translated) {
   }
   if (source.contains('BIL') && !restored.contains('BIL')) {
     restored = '$restored BIL';
+  }
+  if (source.contains('Premium') && !restored.contains('Premium')) {
+    restored = '$restored Premium';
+  }
+  if (source.contains('Gemini') && !restored.contains('Gemini')) {
+    restored = '$restored Gemini';
   }
   final variables = RegExp(
     r'\{[^}]+\}',
@@ -305,11 +479,11 @@ String _dartString(String value) => jsonEncode(value).replaceAll(r'$', r'\$');
 
 Future<Set<String>> _additionalSources() async {
   final app = await File(
-    'lib/app/localization/app_localizations.dart',
+    'lib/app/localization/app_localizations_base_catalog.dart',
   ).readAsString();
-  final marker = 'static const Map<String, String> _en = {';
+  final marker = 'const _appLocaleEn = {';
   final start = app.indexOf(marker);
-  final end = app.indexOf('\n  };', start);
+  final end = app.indexOf('\n};', start);
   if (start < 0 || end < 0) throw StateError('English base catalog not found');
   final feature = await File(
     'lib/app/localization/feature_strings.dart',
@@ -319,15 +493,18 @@ Future<Set<String>> _additionalSources() async {
   for (final match in valuePattern.allMatches(app.substring(start, end))) {
     values.add(_unescapeDartSingle(match.group(1)!));
   }
-  final arabicMarker = 'static const Map<String, String> _arabicText = {';
-  final arabicStart = app.indexOf(arabicMarker);
-  final arabicEnd = app.indexOf('\n  };', arabicStart);
+  final arabic = await File(
+    'lib/app/localization/app_localizations_arabic_runtime.dart',
+  ).readAsString();
+  final arabicMarker = 'const _appLocaleArabicRuntime = {';
+  final arabicStart = arabic.indexOf(arabicMarker);
+  final arabicEnd = arabic.indexOf('\n};', arabicStart);
   if (arabicStart < 0 || arabicEnd < 0) {
     throw StateError('Arabic text catalog not found');
   }
   final keyPattern = RegExp(r"^\s*'((?:\\.|[^'])*)':", multiLine: true);
   for (final match in keyPattern.allMatches(
-    app.substring(arabicStart, arabicEnd),
+    arabic.substring(arabicStart, arabicEnd),
   )) {
     values.add(_unescapeDartSingle(match.group(1)!));
   }
@@ -356,7 +533,7 @@ Future<Set<String>> _additionalSources() async {
   );
   values.addAll(
     await _authoredMapKeys(
-      'lib/features/intelligence_center/intelligence_locale_copy.dart',
+      'lib/features/intelligence_center/intelligence_service_locale_copy.dart',
       'const _serviceAuthored',
     ),
   );
@@ -375,6 +552,7 @@ Future<Set<String>> _additionalSources() async {
   values.addAll(await _progressEnglishValues());
   values.addAll(await _fastingEnglishValues());
   values.addAll(await _notificationSettingsEnglishValues());
+  values.addAll(await _nutritionPathwayEnglishValues());
   values.addAll(const {
     'Food names in connected health',
     'With your permission, BIL can export a meal name, calories, and macros to connected health. You can revoke access at any time.',
@@ -405,6 +583,22 @@ Future<Set<String>> _additionalSources() async {
     ),
   );
   values.addAll(await _wellnessLearnEnglishValues());
+  values.addAll(
+    await _authoredMapKeys(
+      'lib/features/wellness/presentation/wellness_copy_catalog_a.dart',
+      'const _wellnessSecondaryA',
+    ),
+  );
+  values.addAll(
+    await _authoredMapKeys(
+      'lib/features/wellness/presentation/wellness_copy_catalog_b.dart',
+      'const _wellnessSecondaryB',
+    ),
+  );
+  values.addAll(await _fallbackHelperEnglishValues());
+  values.addAll(await _centralRuntimeLiteralSources());
+  values.addAll(await _coachModernSources());
+  values.addAll(await _dashboardIntelligenceEnglishValues());
   values.addAll(const {
     'Steps',
     'Choose a source',
@@ -449,13 +643,19 @@ Future<Set<String>> _additionalSources() async {
   values.addAll(await _advertisingPrivacyEnglishValues());
   values.addAll(
     await _authoredMapKeys(
-      'lib/features/settings/reference_preferences_pages.dart',
+      'lib/features/settings/reference_preferences_macros.dart',
       'const _nutritionGoalCopy',
     ),
   );
   values.addAll(
+    await _englishMapKeys(
+      'lib/features/settings/sharing_privacy_settings_page.dart',
+      "  'en': {",
+    ),
+  );
+  values.addAll(
     await _authoredMapKeys(
-      'lib/features/settings/reference_goals_page.dart',
+      'lib/features/settings/reference_goals_components.dart',
       'const _copy',
       indentation: 2,
     ),
@@ -542,7 +742,7 @@ Future<Set<String>> _additionalSources() async {
   });
   values.addAll(
     await _englishMapKeys(
-      'lib/features/analytics/nutrition_analytics_page.dart',
+      'lib/features/analytics/nutrition_analytics_components.dart',
       "  'en': {",
       afterMarker: 'const _copy = <String, Map<String, String>>{',
     ),
@@ -555,7 +755,7 @@ Future<Set<String>> _additionalSources() async {
   );
   values.addAll(
     await _authoredMapKeys(
-      'lib/features/intelligence_center/intelligence_locale_copy.dart',
+      'lib/features/intelligence_center/intelligence_ui_locale_copy.dart',
       'const _authored',
     ),
   );
@@ -579,14 +779,19 @@ Future<Set<String>> _additionalSources() async {
     ),
   );
   values.addAll(
+    await _allEnglishMapValues(
+      'lib/features/nutrition/presentation/meals_recipes_components.dart',
+    ),
+  );
+  values.addAll(
     await _englishMapValues(
-      'lib/features/daily_log/daily_log_meal_entry.dart',
+      'lib/features/daily_log/daily_log_meal_search.dart',
       "  'en': {",
     ),
   );
   values.addAll(
     await _englishListValues(
-      'lib/features/daily_log/daily_log_meal_entry.dart',
+      'lib/features/daily_log/daily_log_meal_search.dart',
       "  'en': [",
     ),
   );
@@ -610,8 +815,251 @@ Future<Set<String>> _additionalSources() async {
       endMarker: '\n    }),',
     ),
   );
-  values.addAll(const {'Previous day', 'Today', 'Next day', 'Save log'});
+  values.addAll(const {
+    'Previous day',
+    'Today',
+    'Next day',
+    'Save log',
+    'Copy from',
+    'Manual barcode · Premium',
+    'Complete diary',
+    'Review today’s entries, then complete the diary to preserve an authoritative snapshot.',
+  });
   values.addAll(await _releaseSurfaceEnglishValues());
+  return values;
+}
+
+Future<Set<String>> _nutritionPathwayEnglishValues() async {
+  final sources = await Future.wait(
+    Directory('lib/features/nutrition_plans/domain/pathways')
+        .listSync()
+        .whereType<File>()
+        .where((file) => file.path.endsWith('.dart'))
+        .map((file) => file.readAsString()),
+  );
+  final source = sources.join('\n');
+  final values = <String>{};
+  for (final key in const ['enTitle', 'enSubtitle']) {
+    final pattern = RegExp(
+      '$key:\\s*'
+      r"'((?:\\.|[^'])*)'",
+      multiLine: true,
+    );
+    for (final match in pattern.allMatches(source)) {
+      values.add(_unescapeDartSingle(match.group(1)!));
+    }
+  }
+  for (final key in const ['enTags', 'enApproach', 'enTracking']) {
+    final blocks = RegExp(
+      '$key:\\s*\\[(.*?)\\]',
+      multiLine: true,
+      dotAll: true,
+    );
+    for (final block in blocks.allMatches(source)) {
+      for (final match in RegExp(
+        r"'((?:\\.|[^'])*)'",
+      ).allMatches(block.group(1)!)) {
+        values.add(_unescapeDartSingle(match.group(1)!));
+      }
+    }
+  }
+  return values;
+}
+
+Future<Set<String>> _coachModernSources() async {
+  final values = <String>{};
+  for (final path in const [
+    'lib/features/commerce/presentation/premium_route_glass_gate.dart',
+    'lib/features/intelligence_center/presentation/intelligence_center_page.dart',
+    'lib/features/intelligence_center/presentation/intelligence_center_widgets.dart',
+    'lib/features/intelligence_center/services/coach_daily_brief.dart',
+    'lib/features/experiments/experiments_page.dart',
+    'lib/features/life_context/decision_memory_page.dart',
+  ]) {
+    final source = await File(path).readAsString();
+    values.addAll(
+      RegExp(r"\b(?:tr|t|f)\(\s*'((?:\\.|[^'])*)'", multiLine: true)
+          .allMatches(source)
+          .map((match) => _unescapeDartSingle(match.group(1)!))
+          .where((value) => !value.contains(r'$')),
+    );
+  }
+  return values;
+}
+
+Future<void> _writeCoachBaseCopy(Set<String> sourceSet) async {
+  final sources = sourceSet.toList(growable: false)..sort();
+  final translated = <String, List<String>>{};
+  for (final entry in _coachBaseTargets.entries) {
+    stdout.writeln(
+      'Translating modern Coach base copy ${entry.key} (${sources.length} entries)',
+    );
+    translated[entry.key] = await _translateCatalog(sources, entry.value);
+  }
+  final output = StringBuffer()
+    ..writeln('// GENERATED FILE. Regenerate with:')
+    ..writeln(
+      '// dart run tool/localization/generate_extended_runtime_copy.dart --coach-base',
+    )
+    ..writeln('abstract final class CoachRuntimeCopy {')
+    ..writeln('  static const values = <String, Map<String, String>>{');
+  for (var index = 0; index < sources.length; index += 1) {
+    output.writeln('    ${_dartString(sources[index])}: {');
+    output.writeln("      'en': ${_dartString(sources[index])},");
+    for (final tag in _coachBaseTargets.keys) {
+      output.writeln(
+        '      ${_dartString(tag)}: ${_dartString(translated[tag]![index])},',
+      );
+    }
+    output.writeln('    },');
+  }
+  output
+    ..writeln('  };')
+    ..writeln('}');
+  await File(
+    'lib/app/localization/runtime_copy_coach.dart',
+  ).writeAsString(output.toString());
+}
+
+/// English source strings passed through legacy five-locale helpers. These
+/// helpers preserve their reviewed base-language copy while extended locales
+/// resolve the same English source through [ExtendedRuntimeCopy].
+Future<Set<String>> _fallbackHelperEnglishValues() async {
+  final values = <String>{};
+  values.addAll(
+    await _authoredMapKeys(
+      'lib/features/analytics/analytics_locale_copy.dart',
+      'const _copy',
+    ),
+  );
+
+  Future<String> read(String path) => File(path).readAsString();
+  void addMatches(String source, RegExp pattern, {int group = 1}) {
+    values.addAll(
+      pattern
+          .allMatches(source)
+          .map((match) => _unescapeDartSingle(match.group(group)!)),
+    );
+  }
+
+  addMatches(
+    await read('lib/features/commerce/presentation/commerce_paywall.dart'),
+    RegExp(
+      r"_commerceLabel\(.*?\ben:\s*'((?:\\.|[^'])*)'",
+      multiLine: true,
+      dotAll: true,
+    ),
+  );
+  addMatches(
+    await read(
+      'lib/features/wellness/presentation/professional_content_library_page.dart',
+    ),
+    RegExp(
+      r"_localized\(\s*context,\s*'(?:\\.|[^'])*',\s*'((?:\\.|[^'])*)'",
+      multiLine: true,
+    ),
+  );
+  addMatches(
+    await read(
+      'lib/features/intelligence_center/presentation/ai_coach_settings_page.dart',
+    ),
+    RegExp(r"\bt\(\s*'((?:\\.|[^'])*)'\s*,", multiLine: true),
+  );
+  addMatches(
+    await read(
+      'lib/features/intelligence_center/services/intelligence_center_engine.dart',
+    ),
+    RegExp(r"\btr\(\s*'((?:\\.|[^'])*)'\s*,", multiLine: true),
+  );
+  values.addAll(
+    await _englishMapValues(
+      'lib/features/nutrition/presentation/barcode_runtime_copy.dart',
+      "    'en': BarcodeRuntimeCopy(",
+      endMarker: '\n    ),',
+    ),
+  );
+  return values;
+}
+
+/// Keeps literal calls to the central localization APIs inside the generated
+/// 25-locale catalog. Dynamic prose must use a named placeholder template.
+Future<Set<String>> _centralRuntimeLiteralSources() async {
+  final values = <String>{};
+  final files = Directory('lib')
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((file) => file.path.endsWith('.dart'));
+  final patterns = <RegExp>[
+    RegExp(
+      r"(?:strings\.text|RuntimeCopy\.resolve)\(\s*'((?:\\.|[^'])*)'",
+      multiLine: true,
+    ),
+    RegExp(
+      r"(?:analyticsText|wellnessCopy|connectedHealthText|communityText|nutritionText|intelligenceText|profileLocaleText|onboardingText|_bodyCanvasText|_trustText|_referenceText|_learnText)\(\s*context\s*,\s*'((?:\\.|[^'])*)'",
+      multiLine: true,
+    ),
+    RegExp(
+      r"(?:authFiveLocaleText|dashboardFiveLocaleText|_inputText)\(\s*'((?:\\.|[^'])*)'",
+      multiLine: true,
+    ),
+  ];
+  for (final file in files) {
+    final source = await file.readAsString();
+    for (final pattern in patterns) {
+      values.addAll(
+        pattern
+            .allMatches(source)
+            .map((match) => _unescapeDartSingle(match.group(1)!)),
+      );
+    }
+  }
+  values.addAll(const {
+    'Recorded today: {value}',
+    'Duration: {value}',
+    'of {value} hours',
+    '{count} recorded nights · {average} h average',
+    '{minutes} min • {count} ingredients',
+    '{minutes} minutes • guidance quantities',
+    '{count} selected',
+  });
+  return values;
+}
+
+Future<Set<String>> _dashboardIntelligenceEnglishValues() async {
+  final values = <String>{
+    'Gender is not recorded',
+    'Gender value is unsupported',
+    'Age is not recorded',
+    'Age value is invalid',
+    'Height is not recorded',
+    'Height value is invalid',
+    'Current weight is not recorded',
+    'Current weight is invalid',
+    'Neck circumference is not recorded',
+    'Neck circumference is invalid',
+    'Waist circumference is not recorded',
+    'Waist circumference is invalid',
+    'Body fat estimate is invalid',
+    'Protein below target',
+    'Hydration opportunity',
+    'Possible plateau',
+    'Possible short-term water retention',
+    'Build your baseline',
+    'Add about {count} g protein',
+    'Drink {count} ml gradually',
+  };
+  for (final path in const [
+    'lib/engine/one_best_action_engine.dart',
+    'lib/engine/what_changed_engine.dart',
+  ]) {
+    final source = await File(path).readAsString();
+    values.addAll(
+      RegExp(r"(?:title|reason|summary):\s*'((?:\\.|[^'])*)'", multiLine: true)
+          .allMatches(source)
+          .map((match) => _unescapeDartSingle(match.group(1)!))
+          .where((value) => !value.contains(r'$')),
+    );
+  }
   return values;
 }
 
@@ -641,6 +1089,7 @@ Future<Set<String>> _releaseSurfaceEnglishValues() async {
   for (final path in const [
     'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
     'lib/features/dashboard/widgets/dashboard_reference_phone_components.dart',
+    'lib/features/dashboard/widgets/dashboard_reference_goal_components.dart',
   ]) {
     final dashboardPhoneSource = await File(path).readAsString();
     values.addAll(
@@ -666,7 +1115,7 @@ Future<Set<String>> _releaseSurfaceEnglishValues() async {
   );
   values.addAll(
     await _authoredMapKeys(
-      'lib/features/daily_log/daily_log_page.dart',
+      'lib/features/daily_log/daily_log_copy.dart',
       'const _dailyLogCopy',
       indentation: 2,
     ),
@@ -679,6 +1128,9 @@ Future<Set<String>> _releaseSurfaceEnglishValues() async {
   );
   for (final path in <String>[
     'lib/features/analytics/weekly_report_page.dart',
+    'lib/features/analytics/weekly_report_body.dart',
+    'lib/features/analytics/weekly_report_food.dart',
+    'lib/features/analytics/weekly_report_components.dart',
   ]) {
     final source = await File(path).readAsString();
     values.addAll(
@@ -728,11 +1180,45 @@ Future<Set<String>> _releaseSurfaceEnglishValues() async {
     'No body trend data recorded yet.',
     'No nutrition data recorded yet.',
     'No trend data recorded yet.',
+    'All cuisines',
+    'Ingredients',
+    'Method',
+    'Per serving',
+    'kcal',
+    'Choose cuisine',
+    'Global recipes',
+    'Egyptian cuisine',
+    'Levantine cuisine',
+    'Palestinian cuisine',
+    'Gulf cuisine',
+    'Iraqi cuisine',
+    'Maghrebi cuisine',
+    'Algerian cuisine',
+    'Moroccan cuisine',
+    'Tunisian cuisine',
+    'Spanish cuisine',
+    'Mexican cuisine',
+    'Central American cuisine',
+    'Costa Rican cuisine',
+    'Honduran cuisine',
+    'South American cuisine',
+    'Caribbean cuisine',
+    'American cuisine',
+    'Canadian cuisine',
+    'British cuisine',
+    'Irish cuisine',
+    'Australian cuisine',
+    'New Zealand cuisine',
+    'French cuisine',
+    'Québécois cuisine',
+    'West African cuisine',
+    'Turkish cuisine',
   });
   values.addAll(
     await _englishMapValues(
       'lib/features/commerce/presentation/bil_store_copy.dart',
       "    'en': {",
+      endMarker: '\n    },',
     ),
   );
   values.addAll(const {
@@ -838,8 +1324,9 @@ Future<Set<String>> _englishMapValues(
 }) async {
   final source = await File(path).readAsString();
   final start = source.indexOf(marker);
+  if (start < 0) return const <String>{};
   final end = source.indexOf(endMarker, start);
-  if (start < 0 || end < 0) return const <String>{};
+  if (end < 0) return const <String>{};
   return RegExp(r":\s*'((?:\\.|[^'])*)'", multiLine: true)
       .allMatches(source.substring(start, end))
       .map((match) => _unescapeDartSingle(match.group(1)!))
@@ -884,8 +1371,9 @@ Future<Set<String>> _allEnglishMapValues(String path) async {
 Future<Set<String>> _englishListValues(String path, String marker) async {
   final source = await File(path).readAsString();
   final start = source.indexOf(marker);
+  if (start < 0) return const <String>{};
   final end = source.indexOf('\n  ],', start);
-  if (start < 0 || end < 0) return const <String>{};
+  if (end < 0) return const <String>{};
   return RegExp(r"'((?:\\.|[^'])*)'", multiLine: true)
       .allMatches(source.substring(start + marker.length, end))
       .map((match) => _unescapeDartSingle(match.group(1)!))
@@ -913,7 +1401,7 @@ Future<Set<String>> _authoredMapKeys(
 
 Future<Set<String>> _progressEnglishValues() async {
   final source = await File(
-    'lib/features/history/progress_page.dart',
+    'lib/features/history/progress_page_copy.dart',
   ).readAsString();
   const marker = "  'en': {";
   final start = source.indexOf(marker);
@@ -946,9 +1434,12 @@ Future<Set<String>> _notificationSettingsEnglishValues() async {
       endMarker: '\n  ),',
     ),
   );
-  final source = await File(
-    'lib/features/notifications/presentation/notification_settings_page.dart',
-  ).readAsString();
+  final source = await Future.wait(
+    [
+      'lib/features/notifications/presentation/notification_settings_page.dart',
+      'lib/features/notifications/presentation/notification_settings_actions.dart',
+    ].map((path) => File(path).readAsString()),
+  ).then((parts) => parts.join('\n'));
   values.addAll(
     RegExp(
       r"_ui\(\s*'((?:\\.|[^'])*)'\s*,",

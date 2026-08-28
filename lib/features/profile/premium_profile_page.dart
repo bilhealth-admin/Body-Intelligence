@@ -1,17 +1,29 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../app/environment/app_environment.dart';
 import '../../data/database/app_database.dart';
 import '../../data/database/database_provider.dart';
 import '../../shared/widgets/secondary_page_app_bar.dart';
 import '../../shared/widgets/bil_mobile_list.dart';
+import '../../shared/widgets/bil_account_avatar.dart';
+import '../nutrition/domain/dietary_preferences.dart';
+import '../nutrition_plans/domain/nutrition_pathway_catalog.dart';
+import '../onboarding/domain/adult_eligibility.dart';
+import 'dietary_system_labels.dart';
+import 'domain/goal_timeline_estimator.dart';
+import 'goal_timeline_card.dart';
 import 'providers/user_profile_provider.dart';
 import 'profile_locale_copy.dart';
+import 'services/profile_photo_service.dart';
+
+part 'premium_profile_components.dart';
+part 'premium_profile_actions.dart';
+part 'premium_profile_editors.dart';
 
 class PremiumProfilePage extends ConsumerStatefulWidget {
   const PremiumProfilePage({super.key});
@@ -41,275 +53,19 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
   double target = 70;
   bool exercises = true;
 
+  void _updateState(VoidCallback update) => setState(update);
+
   String tr(String english, String arabic) =>
       profileLocaleText(context, english, arabic);
-
-  Future<void> hydrate(UserProfileData profile) async {
-    if (loaded || hydrating) {
-      return;
-    }
-    setState(() {
-      hydrating = true;
-      hydrateError = null;
-    });
-    try {
-      final repo = ref.read(preferencesRepositoryProvider);
-      final values = await Future.wait([
-        repo.get('displayName'),
-        repo.get('profileLocation'),
-        repo.get('profilePostalCode'),
-        repo.get('profileTimeZone'),
-        repo.get('profileEmail'),
-        repo.get('units'),
-        repo.get('profileDateOfBirth'),
-        repo.get('countryRegion'),
-        repo.get('cityName'),
-        repo.get('timezoneName'),
-        repo.get('units.height'),
-      ]);
-      if (!mounted) return;
-      setState(() {
-        name = values[0]?.trim().isNotEmpty == true ? values[0]!.trim() : 'BIL';
-        final canonicalLocation = [values[8], values[7]]
-            .whereType<String>()
-            .where((value) => value.trim().isNotEmpty)
-            .join(', ');
-        location = canonicalLocation.isNotEmpty
-            ? canonicalLocation
-            : values[1] ?? '';
-        postalCode = values[2] ?? '';
-        timeZone = values[9]?.trim().isNotEmpty == true
-            ? values[9]!
-            : values[3]?.trim().isNotEmpty == true
-            ? values[3]!
-            : DateTime.now().timeZoneName;
-        email = values[4] ?? '';
-        units = values[10] == 'Feet/Inches' || values[5] == 'imperial'
-            ? 'imperial'
-            : 'metric';
-        dateOfBirth = DateTime.tryParse(values[6] ?? '');
-        gender = profile.gender;
-        activity = profile.activityLevel;
-        age = profile.age;
-        height = profile.height;
-        weight = profile.currentWeight;
-        target = profile.targetWeight;
-        exercises = profile.exercises;
-        loaded = true;
-      });
-    } catch (error) {
-      if (mounted) setState(() => hydrateError = error);
-    } finally {
-      if (mounted) setState(() => hydrating = false);
-    }
-  }
-
-  Future<void> pickPhoto() async {
-    const types = XTypeGroup(
-      label: 'images',
-      extensions: ['jpg', 'jpeg', 'png', 'webp'],
-      mimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
-    );
-    final file = await openFile(acceptedTypeGroups: [types]);
-    if (file == null) {
-      return;
-    }
-    final bytes = await file.readAsBytes();
-    if (!mounted) {
-      return;
-    }
-    if (bytes.lengthInBytes > 5 * 1024 * 1024) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            tr(
-              'Choose an image smaller than 5 MB.',
-              'اختر صورة أصغر من 5 ميجابايت.',
-            ),
-          ),
-        ),
-      );
-      return;
-    }
-    await ref
-        .read(preferencesRepositoryProvider)
-        .set('profilePhoto', base64Encode(bytes));
-  }
-
-  Future<String?> edit(
-    String title,
-    String value, {
-    bool number = false,
-  }) async {
-    final controller = TextEditingController(text: value);
-    final result = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      showDragHandle: true,
-      builder: (sheetContext) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          24,
-          4,
-          24,
-          MediaQuery.viewInsetsOf(sheetContext).bottom + 24,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.headlineSmall),
-            const SizedBox(height: 18),
-            TextField(
-              controller: controller,
-              autofocus: true,
-              keyboardType: number
-                  ? const TextInputType.numberWithOptions(decimal: true)
-                  : TextInputType.text,
-              decoration: InputDecoration(labelText: title),
-              onSubmitted: (value) => Navigator.pop(sheetContext, value.trim()),
-            ),
-            const SizedBox(height: 18),
-            FilledButton(
-              onPressed: () =>
-                  Navigator.pop(sheetContext, controller.text.trim()),
-              child: Text(tr('Apply', 'اعتماد')),
-            ),
-          ],
-        ),
-      ),
-    );
-    await WidgetsBinding.instance.endOfFrame;
-    await Future<void>.delayed(const Duration(milliseconds: 300));
-    controller.dispose();
-    return result;
-  }
-
-  Future<T?> choose<T>(String title, Map<T, String> options) =>
-      showModalBottomSheet<T>(
-        context: context,
-        useSafeArea: true,
-        showDragHandle: true,
-        builder: (sheetContext) => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            for (final option in options.entries)
-              ListTile(
-                title: Text(option.value),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => Navigator.pop(sheetContext, option.key),
-              ),
-            const SizedBox(height: 12),
-          ],
-        ),
-      );
-
-  Future<void> save(UserProfileData profile, Goal? activeGoal) async {
-    if (saving) return;
-    final snapshot = (
-      name: name,
-      gender: gender,
-      activity: activity,
-      location: location,
-      postalCode: postalCode,
-      timeZone: timeZone,
-      email: email,
-      units: units,
-      dateOfBirth: dateOfBirth,
-      age: age,
-      height: height,
-      weight: weight,
-      target: target,
-      exercises: exercises,
-    );
-    setState(() => saving = true);
-    try {
-      final database = ref.read(databaseProvider);
-      await database.transaction(() async {
-        await ref
-            .read(userProfileRepositoryProvider)
-            .save(
-              gender: snapshot.gender,
-              age: snapshot.age,
-              height: snapshot.height,
-              currentWeight: snapshot.weight,
-              targetWeight: snapshot.target,
-              activityLevel: snapshot.activity,
-              exercises: snapshot.exercises,
-              medicalConditions: profile.medicalConditions,
-              waist: profile.waist,
-              neck: profile.neck,
-              chest: profile.chest,
-              arm: profile.arm,
-              thigh: profile.thigh,
-            );
-        await ref
-            .read(goalRepositoryProvider)
-            .save(
-              uuid: activeGoal?.uuid,
-              profileUuid: profile.uuid,
-              type: snapshot.target < snapshot.weight
-                  ? 'lose'
-                  : snapshot.target > snapshot.weight
-                  ? 'gain'
-                  : 'maintain',
-              targetWeight: snapshot.target,
-              targetDate: activeGoal?.targetDate,
-            );
-        await ref
-            .read(preferencesRepositoryProvider)
-            .setManyInCurrentTransaction({
-              'displayName': snapshot.name,
-              'profileLocation': snapshot.location,
-              'profilePostalCode': snapshot.postalCode,
-              'profileTimeZone': snapshot.timeZone,
-              'profileEmail': snapshot.email,
-              'units': snapshot.units,
-              'profileDateOfBirth':
-                  snapshot.dateOfBirth?.toIso8601String() ?? '',
-            });
-      });
-      ref.invalidate(userProfileProvider);
-      ref.invalidate(activeGoalProvider);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              tr(
-                'Your health profile is updated.',
-                'تم تحديث ملفك الصحي بأمان.',
-              ),
-            ),
-          ),
-        );
-      }
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              tr(
-                'Your health profile could not be saved. Try again.',
-                'تعذّر حفظ ملفك الصحي. حاول مجددًا.',
-              ),
-            ),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => saving = false);
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(userProfileProvider);
     final goalAsync = ref.watch(activeGoalProvider);
+    final dietaryAsync = ref.watch(dietaryPreferencesProvider);
+    final activePathwayId = ref.watch(activeNutritionPathwayProvider).value;
     final photoAsync = ref.watch(profilePhotoProvider);
+    final photoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
     return PopScope(
       canPop: !saving,
       child: Scaffold(
@@ -370,6 +126,22 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
               return const Center(child: CircularProgressIndicator());
             }
             final photo = photoAsync.value;
+            final dietaryPreferences =
+                dietaryAsync.value ?? const DietaryPreferences();
+            final activePathway = nutritionPathways
+                .where((pathway) => pathway.id == activePathwayId)
+                .firstOrNull;
+            final timelineGoalType = target < weight
+                ? 'lose'
+                : target > weight
+                ? 'gain'
+                : 'maintain';
+            final goalTimeline = GoalTimelineEstimator.estimate(
+              currentWeightKg: weight,
+              targetWeightKg: target,
+              goalType: timelineGoalType,
+              asOf: DateTime.now(),
+            );
             return AbsorbPointer(
               absorbing: saving,
               child: ListView(
@@ -396,7 +168,7 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
                     key: const Key('profile-photo-row'),
                     icon: Icons.photo_camera_outlined,
                     label: tr('Profile photo', 'الصورة الشخصية'),
-                    value: photo == null
+                    value: photo == null && (photoUrl?.trim().isEmpty ?? true)
                         ? tr('Add photo', 'إضافة صورة')
                         : tr('Change photo', 'تغيير الصورة'),
                     onTap: pickPhoto,
@@ -477,6 +249,19 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
                     onTap: () => openSettingsRoute('/settings/units', profile),
                   ),
                   _Row(
+                    key: const Key('profile-dietary-system-row'),
+                    icon: Icons.restaurant_menu_rounded,
+                    label: tr('Dietary system', 'النظام الغذائي'),
+                    value: dietaryAsync.isLoading
+                        ? tr('Loading…', 'جارٍ التحميل…')
+                        : dietaryAsync.hasError
+                        ? tr('Unavailable', 'غير متاح')
+                        : activePathway == null
+                        ? dietarySystemSummary(context, dietaryPreferences)
+                        : tr(activePathway.enTitle, activePathway.arTitle),
+                    onTap: () => context.push('/plan?origin=profile'),
+                  ),
+                  _Row(
                     key: const Key('profile-goals-row'),
                     icon: Icons.flag_outlined,
                     label: tr('Goals', 'الأهداف'),
@@ -487,6 +272,7 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
                     onTap: () => openSettingsRoute('/goals', profile),
                   ),
                   _Section(tr('Health goals', 'الأهداف الصحية')),
+                  GoalTimelineCard(estimate: goalTimeline),
                   _Row(
                     icon: Icons.monitor_weight_outlined,
                     label: tr('Current weight', 'الوزن الحالي'),
@@ -536,7 +322,7 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
                       'Plan details & recommendations',
                       'تفاصيل الخطة والتوصيات',
                     ),
-                    onTap: () => context.push('/plan'),
+                    onTap: () => context.push('/plan?origin=profile'),
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
@@ -577,305 +363,4 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
       ),
     );
   }
-
-  Widget textRow(
-    IconData icon,
-    String label,
-    String value,
-    String title,
-    ValueChanged<String> apply,
-  ) => _Row(
-    icon: icon,
-    label: label,
-    value: value.isEmpty ? tr('Not set', 'غير محدد') : value,
-    onTap: () async {
-      final result = await edit(title, value);
-      if (result != null) {
-        setState(() => apply(result));
-      }
-    },
-  );
-
-  Future<void> editNumber(
-    String title,
-    double current,
-    double min,
-    double max,
-    ValueChanged<double> apply,
-  ) async {
-    final value = await edit(title, current.toStringAsFixed(1), number: true);
-    final parsed = double.tryParse(value?.replaceAll(',', '.') ?? '');
-    if (parsed != null && parsed >= min && parsed <= max) {
-      setState(() => apply(parsed));
-    }
-  }
-
-  Future<void> editDateOfBirth() async {
-    final now = DateTime.now();
-    final selected = await showDatePicker(
-      context: context,
-      initialDate: dateOfBirth ?? DateTime(now.year - age),
-      firstDate: DateTime(now.year - 120),
-      lastDate: DateTime(now.year - 13, now.month, now.day),
-      helpText: tr('Date of birth', 'تاريخ الميلاد'),
-    );
-    if (selected == null || !mounted) return;
-    var years = now.year - selected.year;
-    if (now.month < selected.month ||
-        (now.month == selected.month && now.day < selected.day)) {
-      years--;
-    }
-    setState(() {
-      dateOfBirth = selected;
-      age = years;
-    });
-  }
-
-  Future<void> editHeight() async {
-    if (_heightEditorOpen) return;
-    _heightEditorOpen = true;
-    var editorUnit = units == 'imperial' ? 'imperial' : 'metric';
-    final controller = TextEditingController(
-      text: editorUnit == 'metric'
-          ? height.toStringAsFixed(0)
-          : (height / 2.54).toStringAsFixed(1),
-    );
-    double? result;
-    try {
-      result = await showModalBottomSheet<double>(
-        context: context,
-        isScrollControlled: true,
-        useSafeArea: true,
-        builder: (sheetContext) => StatefulBuilder(
-          builder: (context, setSheetState) => Padding(
-            padding: EdgeInsets.fromLTRB(
-              20,
-              16,
-              20,
-              MediaQuery.viewInsetsOf(sheetContext).bottom + 24,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.pop(sheetContext),
-                      icon: const Icon(Icons.close_rounded),
-                    ),
-                    Expanded(
-                      child: Text(
-                        tr('Your height', 'طولك'),
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        final parsed = double.tryParse(
-                          controller.text.replaceAll(',', '.'),
-                        );
-                        if (parsed == null) return;
-                        Navigator.pop(
-                          sheetContext,
-                          editorUnit == 'metric' ? parsed : parsed * 2.54,
-                        );
-                      },
-                      icon: const Icon(Icons.check_rounded),
-                    ),
-                  ],
-                ),
-                SegmentedButton<String>(
-                  segments: [
-                    ButtonSegment(
-                      value: 'imperial',
-                      label: Text(tr('Feet/Inches', 'قدم/بوصة')),
-                    ),
-                    ButtonSegment(
-                      value: 'metric',
-                      label: Text(tr('Centimeters', 'سنتيمترات')),
-                    ),
-                  ],
-                  selected: {editorUnit},
-                  onSelectionChanged: (selection) {
-                    final next = selection.first;
-                    if (next == editorUnit) return;
-                    editorUnit = next;
-                    controller.text = next == 'metric'
-                        ? height.toStringAsFixed(0)
-                        : (height / 2.54).toStringAsFixed(1);
-                    setSheetState(() {});
-                  },
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  key: const Key('profile-height-editor'),
-                  controller: controller,
-                  autofocus: false,
-                  textAlign: TextAlign.center,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: InputDecoration(
-                    suffixText: editorUnit == 'metric' ? 'cm' : 'in',
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    } finally {
-      // A modal sheet can finish before Flutter has removed its overlay
-      // entries. The controller is still owned by the outgoing TextField,
-      // so disposing it before that transition completes can tear down an
-      // inherited dependency and trigger `_dependents.isEmpty`.
-      await WidgetsBinding.instance.endOfFrame;
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-      controller.dispose();
-      _heightEditorOpen = false;
-    }
-    final nextHeight = result;
-    if (nextHeight != null &&
-        nextHeight >= 100 &&
-        nextHeight <= 250 &&
-        mounted) {
-      setState(() => height = nextHeight);
-    }
-  }
-
-  Future<void> openSettingsRoute(String route, UserProfileData profile) async {
-    await context.push(route);
-    if (!mounted) return;
-    loaded = false;
-    await hydrate(profile);
-  }
-
-  String get heightLabel {
-    if (units == 'metric') return '${height.round()} cm';
-    final totalInches = height / 2.54;
-    return '${totalInches ~/ 12} ft, ${(totalInches % 12).round()} in';
-  }
-
-  String get birthDateLabel {
-    final value = dateOfBirth;
-    if (value == null) return tr('Not set', 'غير محدد');
-    return MaterialLocalizations.of(context).formatMediumDate(value);
-  }
-
-  String get activityLabel => switch (activity) {
-    'sedentary' => tr('Sedentary', 'حركة محدودة'),
-    'light' => tr('Lightly active', 'نشاط خفيف'),
-    'active' => tr('Active', 'نشاط مرتفع'),
-    'very_active' => tr('Very active', 'نشاط مكثف'),
-    _ => tr('Moderately active', 'نشاط متوسط'),
-  };
-}
-
-class ProfileHero extends StatelessWidget {
-  const ProfileHero({
-    super.key,
-    required this.name,
-    required this.photo,
-    required this.onPhoto,
-  });
-  final String name;
-  final Uint8List? photo;
-  final VoidCallback onPhoto;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Container(
-      color: colors.surface,
-      padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
-      child: Row(
-        children: [
-          InkWell(
-            onTap: onPhoto,
-            borderRadius: BorderRadius.circular(46),
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                CircleAvatar(
-                  radius: 38,
-                  backgroundColor: colors.primaryContainer,
-                  foregroundImage: photo == null ? null : MemoryImage(photo!),
-                  child: photo == null
-                      ? Icon(
-                          Icons.person_rounded,
-                          size: 44,
-                          color: colors.primary,
-                        )
-                      : null,
-                ),
-                PositionedDirectional(
-                  end: -2,
-                  bottom: -2,
-                  child: CircleAvatar(
-                    radius: 14,
-                    backgroundColor: colors.primary,
-                    child: const Icon(
-                      Icons.edit_rounded,
-                      size: 14,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  profileLocaleText(
-                    context,
-                    'Edit profile and photo',
-                    'تعديل الملف والصورة',
-                  ),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: colors.primary),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Section extends StatelessWidget {
-  const _Section(this.label);
-  final String label;
-  @override
-  Widget build(BuildContext context) => BilMobileSectionHeader(label);
-}
-
-class _Row extends StatelessWidget {
-  const _Row({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.onTap,
-  });
-  final IconData icon;
-  final String label;
-  final String value;
-  final VoidCallback onTap;
-  @override
-  Widget build(BuildContext context) =>
-      BilMobileListRow(label: label, value: value, onTap: onTap);
 }

@@ -2,14 +2,24 @@ import '../core/global_platform_core.dart';
 import 'medical_device_platform.dart';
 
 enum BleMedicalProfile {
-  bloodPressure,
-  glucose,
   weightScale,
   bodyComposition,
-  pulseOximeter,
   heartRate,
-  thermometer,
 }
+
+const Set<BleMedicalProfile> bleFitnessProfiles = <BleMedicalProfile>{
+  BleMedicalProfile.weightScale,
+  BleMedicalProfile.bodyComposition,
+  BleMedicalProfile.heartRate,
+};
+
+const Set<String> bleFitnessMeasurementKinds = fitnessDeviceMeasurementKinds;
+
+Set<String> _kindsFor(Set<BleMedicalProfile> profiles) => <String>{
+  if (profiles.contains(BleMedicalProfile.weightScale)) 'weight',
+  if (profiles.contains(BleMedicalProfile.bodyComposition)) 'body_fat',
+  if (profiles.contains(BleMedicalProfile.heartRate)) 'heart_rate',
+};
 
 final class BlePeripheral {
   const BlePeripheral({
@@ -60,24 +70,6 @@ final class BleMeasurementPolicy {
 
   static const Map<String, BleMeasurementPolicy> supported =
       <String, BleMeasurementPolicy>{
-        'blood_pressure_systolic': BleMeasurementPolicy(
-          canonicalUnit: 'mmHg',
-          minimum: 40,
-          maximum: 300,
-          requiresConfirmation: true,
-        ),
-        'blood_pressure_diastolic': BleMeasurementPolicy(
-          canonicalUnit: 'mmHg',
-          minimum: 20,
-          maximum: 200,
-          requiresConfirmation: true,
-        ),
-        'glucose': BleMeasurementPolicy(
-          canonicalUnit: 'mg/dL',
-          minimum: 20,
-          maximum: 700,
-          requiresConfirmation: true,
-        ),
         'weight': BleMeasurementPolicy(
           canonicalUnit: 'kg',
           minimum: 2,
@@ -90,23 +82,11 @@ final class BleMeasurementPolicy {
           maximum: 75,
           requiresConfirmation: false,
         ),
-        'oxygen': BleMeasurementPolicy(
-          canonicalUnit: '%',
-          minimum: 50,
-          maximum: 100,
-          requiresConfirmation: true,
-        ),
         'heart_rate': BleMeasurementPolicy(
           canonicalUnit: 'bpm',
           minimum: 20,
           maximum: 260,
           requiresConfirmation: false,
-        ),
-        'temperature': BleMeasurementPolicy(
-          canonicalUnit: 'celsius',
-          minimum: 25,
-          maximum: 45,
-          requiresConfirmation: true,
         ),
       };
 }
@@ -130,7 +110,17 @@ final class BleMedicalDeviceProvider implements MedicalDeviceProvider {
 
   @override
   Future<List<MedicalDeviceIdentity>> discover() async {
-    final devices = await bridge.discover(const Duration(seconds: 12));
+    final devices = <BlePeripheral>[
+      for (final device in await bridge.discover(const Duration(seconds: 12)))
+        if (device.profiles.intersection(bleFitnessProfiles).isNotEmpty)
+          BlePeripheral(
+            id: device.id,
+            name: device.name,
+            profiles: device.profiles.intersection(bleFitnessProfiles),
+            firmwareVersion: device.firmwareVersion,
+            manufacturer: device.manufacturer,
+          ),
+    ];
     for (final device in devices) {
       _discovered[device.id] = device;
       await store.put('medical_device_registry', device.id, <String, Object?>{
@@ -162,6 +152,9 @@ final class BleMedicalDeviceProvider implements MedicalDeviceProvider {
     if (peripheral == null) {
       throw StateError('unknown_ble_device');
     }
+    if (peripheral.profiles.intersection(bleFitnessProfiles).isEmpty) {
+      throw StateError('unsupported_fitness_device');
+    }
 
     Object? lastError;
     for (var attempt = 1; attempt <= maxReconnectAttempts; attempt++) {
@@ -181,7 +174,8 @@ final class BleMedicalDeviceProvider implements MedicalDeviceProvider {
           }
           final kind = packet['kind'] as String;
           final policy = BleMeasurementPolicy.supported[kind];
-          if (policy == null) {
+          if (policy == null ||
+              !_kindsFor(peripheral.profiles).contains(kind)) {
             await _auditRejected(
               deviceId,
               sampleId,
@@ -328,12 +322,6 @@ final class BleMedicalDeviceProvider implements MedicalDeviceProvider {
     }
     if (unit == 'lb' && canonicalUnit == 'kg') {
       return value * 0.45359237;
-    }
-    if (unit == 'mmol/L' && canonicalUnit == 'mg/dL') {
-      return value * 18.0182;
-    }
-    if (unit == 'fahrenheit' && canonicalUnit == 'celsius') {
-      return (value - 32) * 5 / 9;
     }
     throw StateError('unsupported_medical_unit:$unit:$canonicalUnit');
   }

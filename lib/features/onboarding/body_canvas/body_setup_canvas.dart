@@ -36,22 +36,51 @@ class _BodySetupCanvas extends StatelessWidget {
   int? get _age {
     final birthDate = draft.birthDate;
     if (birthDate == null) return null;
-    final today = DateTime.now();
-    var age = today.year - birthDate.year;
-    final birthdayPassed =
-        today.month > birthDate.month ||
-        (today.month == birthDate.month && today.day >= birthDate.day);
-    if (!birthdayPassed) age--;
-    return age;
+    return BilAdultEligibility.ageOn(birthDate);
+  }
+
+  bool get _adultEligible {
+    final birthDate = draft.birthDate;
+    return birthDate != null &&
+        BilAdultEligibility.isEligibleBirthDate(birthDate);
   }
 
   bool get _canContinue =>
       draft.weight != null &&
       draft.height != null &&
-      draft.birthDate != null &&
+      _adultEligible &&
       draft.sexConfirmed &&
       draft.goalConfirmed &&
       draft.activityConfirmed;
+
+  BodyModelResult? get _expectedModel {
+    if (!_canContinue || _age == null) return null;
+    return BodyModelEngine.calculate(
+      BodyProfile(
+        age: _age!,
+        gender: draft.sex == BilSex.male ? 'male' : 'female',
+        height: draft.heightCm!,
+        weight: draft.weightKg!,
+        targetWeight: draft.weightKg!,
+        activityLevel: switch (draft.activity) {
+          BilActivity.low => 'sedentary',
+          BilActivity.light => 'light',
+          BilActivity.moderate => 'moderate',
+          BilActivity.high => 'active',
+          BilActivity.veryHigh => 'very_active',
+        },
+        exercises: draft.activity != BilActivity.low,
+        goalType: switch (draft.goal) {
+          BilGoal.loseFat => 'lose',
+          BilGoal.maintain => 'maintain',
+          BilGoal.buildMuscle => 'gain',
+        },
+        waistCm: draft.waistCm,
+        neckCm: draft.neckCm,
+        hipCm: draft.hipsCm,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +92,6 @@ class _BodySetupCanvas extends StatelessWidget {
         return Stack(
           fit: StackFit.expand,
           children: [
-            const ColoredBox(color: _BilColors.background),
             SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(horizontal, 12, horizontal, 18),
               child: Column(
@@ -101,6 +129,10 @@ class _BodySetupCanvas extends StatelessWidget {
                                   context,
                                   type: _CanvasField.neck,
                                 ),
+                                onHips: () => _editMeasurement(
+                                  context,
+                                  type: _CanvasField.hips,
+                                ),
                                 onBirthDate: () => _editBirthDate(context),
                                 onSex: () => _editSex(context),
                                 onGoal: () => _editGoal(context),
@@ -126,12 +158,32 @@ class _BodySetupCanvas extends StatelessWidget {
                                   context,
                                   type: _CanvasField.neck,
                                 ),
+                                onHips: () => _editMeasurement(
+                                  context,
+                                  type: _CanvasField.hips,
+                                ),
                                 onBirthDate: () => _editBirthDate(context),
                                 onSex: () => _editSex(context),
                                 onGoal: () => _editGoal(context),
                                 onActivity: () => _editActivity(context),
                               ),
                       ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  if (draft.birthDate != null && !_adultEligible) ...[
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 760),
+                      child: const _AdultEligibilityNotice(),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 760),
+                    child: _ExpectedCompositionCard(
+                      model: _expectedModel,
+                      isArabic: isArabic,
+                      units: draft.units,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -185,6 +237,252 @@ class _BodySetupCanvas extends StatelessWidget {
       },
     );
   }
+}
+
+class _AdultEligibilityNotice extends StatelessWidget {
+  const _AdultEligibilityNotice();
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    container: true,
+    liveRegion: true,
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF1F0),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFFDA29B)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.block_rounded, color: Color(0xFFB42318)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              _adultEligibilityText(context),
+              style: const TextStyle(
+                color: Color(0xFF912018),
+                fontSize: 13.5,
+                height: 1.35,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _ExpectedCompositionCard extends StatelessWidget {
+  const _ExpectedCompositionCard({
+    required this.model,
+    required this.isArabic,
+    required this.units,
+  });
+
+  final BodyModelResult? model;
+  final bool isArabic;
+  final BilUnits units;
+
+  String _text(BuildContext context, String en, String ar) =>
+      _bodyCanvasText(context, en, ar);
+
+  @override
+  Widget build(BuildContext context) {
+    final composition = model?.composition;
+    final bodyFat = composition?.bodyFatPercentage;
+    final fatFreeMassKg = composition?.fatFreeMassKg;
+    final available = bodyFat?.isAvailable == true;
+    final highUncertainty = bodyFat?.uncertainty == EstimateUncertainty.higher;
+    final method = bodyFat?.method;
+    final fatFreeMass = fatFreeMassKg?.isAvailable == true
+        ? units == BilUnits.metric
+              ? fatFreeMassKg!.value!
+              : fatFreeMassKg!.value! * BilOnboardingDraft.poundsPerKilogram
+        : null;
+    final massUnit = units == BilUnits.metric ? 'kg' : 'lb';
+    final detail = !available
+        ? _text(
+            context,
+            'Complete the required values to calculate an estimate.',
+            'أكمل القيم المطلوبة لحساب التقدير.',
+          )
+        : method == BodyFatEstimateMethod.circumferenceHodgdonBeckett
+        ? model!.profile.gender == 'female'
+              ? _text(
+                  context,
+                  'Circumference estimate using waist, hips, neck and height.',
+                  'تقدير بالمحيطات باستخدام الخصر والورك والرقبة والطول.',
+                )
+              : _text(
+                  context,
+                  'Circumference estimate using waist, neck and height.',
+                  'تقدير بالمحيطات باستخدام الخصر والرقبة والطول.',
+                )
+        : _text(
+            context,
+            'BMI-and-age fallback. Add complete circumferences for a more direct estimate.',
+            'تقدير بديل يعتمد على مؤشر الكتلة والعمر. أضف المحيطات الكاملة لتقدير أكثر مباشرة.',
+          );
+
+    return Semantics(
+      container: true,
+      liveRegion: true,
+      label: _text(context, 'Expected body composition', 'تركيب الجسم المتوقع'),
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: const Color(0xF7FFFFFF),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFFDCE8F2)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x140A4566),
+              blurRadius: 24,
+              offset: Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.insights_rounded, color: _BilColors.blue),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    _text(
+                      context,
+                      'Expected body composition',
+                      'تركيب الجسم المتوقع',
+                    ),
+                    style: const TextStyle(
+                      color: Color(0xFF101828),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                _EstimateBadge(
+                  label: highUncertainty
+                      ? _text(context, 'Higher uncertainty', 'عدم يقين أعلى')
+                      : _text(context, 'Estimate', 'تقدير'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: _ExpectedMetric(
+                    label: _text(
+                      context,
+                      'Expected body fat',
+                      'دهون الجسم المتوقعة',
+                    ),
+                    value: available
+                        ? '${bodyFat!.value!.toStringAsFixed(1)}%'
+                        : '—',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ExpectedMetric(
+                    label: _text(
+                      context,
+                      'Expected fat-free mass',
+                      'الكتلة الخالية من الدهون المتوقعة',
+                    ),
+                    value: fatFreeMass != null
+                        ? '${fatFreeMass.toStringAsFixed(1)} $massUnit'
+                        : '—',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              '$detail ${_text(context, 'Educational estimate, not a diagnosis.', 'تقدير تعليمي وليس تشخيصًا.')}',
+              style: const TextStyle(
+                color: Color(0xFF667085),
+                fontSize: 12.5,
+                height: 1.35,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ExpectedMetric extends StatelessWidget {
+  const _ExpectedMetric({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+    decoration: BoxDecoration(
+      color: const Color(0xFFF4F8FC),
+      borderRadius: BorderRadius.circular(16),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: Color(0xFF667085),
+            fontSize: 11.5,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 4),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: Color(0xFF101828),
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _EstimateBadge extends StatelessWidget {
+  const _EstimateBadge({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+    decoration: BoxDecoration(
+      color: const Color(0xFFE8F4FF),
+      borderRadius: BorderRadius.circular(99),
+    ),
+    child: Text(
+      label,
+      style: const TextStyle(
+        color: Color(0xFF1769AA),
+        fontSize: 10.5,
+        fontWeight: FontWeight.w800,
+      ),
+    ),
+  );
 }
 
 class _FlagshipContinueButton extends StatefulWidget {
@@ -306,13 +604,12 @@ class _CanvasHeader extends StatelessWidget {
             height: 58,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white,
-              border: Border.all(color: _BilColors.stroke),
+              color: const Color(0xEFFFFFFF),
               boxShadow: const [
                 BoxShadow(
-                  color: Color(0x14101828),
-                  blurRadius: 16,
-                  offset: Offset(0, 6),
+                  color: Color(0x1F0A4566),
+                  blurRadius: 22,
+                  offset: Offset(0, 8),
                 ),
               ],
             ),
@@ -338,8 +635,9 @@ class _CanvasHeader extends StatelessWidget {
                 ),
                 style: const TextStyle(
                   color: Color(0xFF101828),
-                  fontSize: 23,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
                 ),
               ),
               const SizedBox(height: 6),
@@ -587,7 +885,7 @@ class _CanvasOrbitPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-enum _CanvasField { weight, height, waist, neck }
+enum _CanvasField { weight, height, waist, neck, hips }
 
 class _EditorResult {
   const _EditorResult.value(this.value) : clear = false;
