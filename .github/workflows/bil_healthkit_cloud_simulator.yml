@@ -207,7 +207,7 @@ jobs:
             > artifacts/release/healthkit_native_4988_4991/4988_accessibility.json || true
           if ! cat artifacts/release/healthkit_native_4988_4991/4988_accessibility.json \
                    artifacts/release/healthkit_native_4988_4991/4988_ocr.txt \
-                 | grep -Eiq 'Allow BIL|BIL.*health|Health Access|Health Data'; then
+                 | grep -Eiq 'Allow BIL|Health Access|Turn On All'; then
             cat > artifacts/release/healthkit_native_4988_4991/PHYSICAL_DEVICE_REQUIRED.txt <<'EOF'
           The clean iOS Simulator build/install/launch completed, but this
           simulator did not expose the native HealthKit authorization sheet.
