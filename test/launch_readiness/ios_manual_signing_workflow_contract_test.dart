@@ -55,4 +55,26 @@ void main() {
     );
     expect(source, contains('grep -Fq "DEVELOPMENT_TEAM = \$APPLE_TEAM_ID"'));
   });
+
+  test('signed IPA entitlements use literal plist keys instead of key paths', () {
+    final source = File(workflowPath).readAsStringSync();
+
+    expect(source, contains('codesign -d --entitlements -'));
+    expect(source, contains("plistlib.load(handle)"));
+    expect(
+      source,
+      contains("entitlements.get('com.apple.developer.healthkit')"),
+    );
+    expect(
+      source,
+      contains("entitlements.get('com.apple.developer.applesignin', [])"),
+    );
+    expect(source, contains("entitlements.get('aps-environment')"));
+    expect(source, contains("entitlements.get('get-task-allow', False)"));
+    expect(source, contains('SIGNED_IPA_ENTITLEMENTS_GATE=PASS'));
+    expect(
+      source,
+      isNot(contains('plutil -extract com.apple.developer.healthkit')),
+    );
+  });
 }

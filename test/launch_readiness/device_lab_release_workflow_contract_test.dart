@@ -55,7 +55,6 @@ void main() {
       expect(source, contains("entitlements.get('aps-environment')"));
       expect(source, contains("entitlements.get('get-task-allow', False)"));
       expect(source, contains("profile.get('ExpirationDate')"));
-      expect(source, contains('plutil -extract get-task-allow raw'));
     },
   );
 
