@@ -53,6 +53,7 @@ test('release contract is permanently locked to existing closed alpha v5', () =>
   assert.equal(RELEASE_CONTRACT.versionCode, '5');
   assert.equal(RELEASE_CONTRACT.status, 'completed');
   assert.equal(RELEASE_CONTRACT.reviewBoundary, 'ERROR_IF_IN_REVIEW');
+  assert.ok(RELEASE_CONTRACT.releaseName.length <= 50);
 });
 
 test('track body contains exact release and concise English/Arabic notes', () => {

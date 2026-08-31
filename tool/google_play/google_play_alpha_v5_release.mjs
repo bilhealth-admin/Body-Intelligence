@@ -22,7 +22,7 @@ export const RELEASE_CONTRACT = Object.freeze({
   versionCode: '5',
   status: 'completed',
   reviewBoundary: 'ERROR_IF_IN_REVIEW',
-  releaseName: 'Body Intelligence Log 1.0.0 (5) - Quality and AI Coach',
+  releaseName: 'Body Intelligence Log 1.0.0 (5) - AI Coach',
 });
 
 export const RELEASE_NOTES = Object.freeze([
