@@ -9,6 +9,7 @@ import {
   RELEASE_NOTES,
   SafeFailure,
   buildCommitResource,
+  buildReadOnlyPreflightResource,
   buildTrackUpdate,
   classifyAlphaState,
   parseArguments,
@@ -46,6 +47,19 @@ test('track body contains exact release and concise English/Arabic notes', () =>
   assert.match(RELEASE_NOTES[1].text, /AI Coach/);
   assert.match(RELEASE_NOTES[1].text, /التمارين والوجبات/);
   assert.match(RELEASE_NOTES[1].text, /الباركود/);
+  assert.equal(
+    RELEASE_NOTES[1].text.includes('Ø') ||
+      RELEASE_NOTES[1].text.includes('Ù'),
+    false,
+    'Arabic release notes must be real UTF-8 Arabic, never mojibake',
+  );
+  assert.equal(RELEASE_NOTES[1].text.startsWith('تحسينات'), true);
+  assert.deepEqual(
+    [...RELEASE_NOTES[1].text.slice(0, 7)].map(
+      (character) => character.codePointAt(0),
+    ),
+    [1578, 1581, 1587, 1610, 1606, 1575, 1578],
+  );
 });
 
 test('commit always uses ERROR_IF_IN_REVIEW and no implicit review flags', () => {
@@ -61,11 +75,23 @@ test('commit always uses ERROR_IF_IN_REVIEW and no implicit review flags', () =>
 test('default CLI mode is dry-run and conflicting modes are rejected', () => {
   assert.equal(parseArguments([]).mode, 'dry-run');
   assert.equal(parseArguments(['--execute']).mode, 'execute');
+  assert.equal(
+    parseArguments(['--read-only-preflight']).mode,
+    'read-only-preflight',
+  );
   assert.throws(
     () => parseArguments(['--execute', '--dry-run']),
     (error) => error instanceof SafeFailure &&
       error.code === 'CONFLICTING_MODES',
   );
+  const resource = buildReadOnlyPreflightResource();
+  assert.equal(
+    resource,
+    '/applications/com.bilhealth.bodyintelligencelog/reviews?maxResults=1',
+  );
+  assert.equal(resource.includes('/edits'), false);
+  assert.equal(resource.includes('/bundles'), false);
+  assert.equal(resource.includes('/tracks'), false);
 });
 
 test('default process makes zero network calls and performs zero mutation', () => {
@@ -185,6 +211,6 @@ test('source never mutates testers and upload is unavailable in dry run', () => 
   assert.match(source, /const credentials = loadCredentials/);
   assert.ok(
     source.indexOf("if (options.mode === 'dry-run')") <
-      source.indexOf('const credentials = loadCredentials'),
+      source.lastIndexOf('const credentials = loadCredentials'),
   );
 });

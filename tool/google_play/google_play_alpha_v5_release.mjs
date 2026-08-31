@@ -92,8 +92,17 @@ export function parseArguments(argv = []) {
       options.help = true;
       continue;
     }
-    if (item === '--execute' || item === '--dry-run') {
-      const requested = item === '--execute' ? 'execute' : 'dry-run';
+    if (
+      item === '--execute' ||
+      item === '--dry-run' ||
+      item === '--read-only-preflight'
+    ) {
+      const requested =
+        item === '--execute'
+          ? 'execute'
+          : item === '--read-only-preflight'
+            ? 'read-only-preflight'
+            : 'dry-run';
       if (explicitMode && explicitMode !== requested) {
         fail('CONFLICTING_MODES');
       }
@@ -577,6 +586,58 @@ function packagePath() {
   );
 }
 
+export function buildReadOnlyPreflightResource() {
+  const query = new URLSearchParams({ maxResults: '1' });
+  return packagePath() + '/reviews?' + query.toString();
+}
+
+async function runReadOnlyPreflight(options) {
+  if (!options.credentials) fail('CREDENTIAL_PATH_REQUIRED');
+  const credentials = loadCredentials(options.credentials);
+  const report = baseReport('read-only-preflight-get-only');
+  report.credentialCandidate = path.basename(
+    path.resolve(options.credentials),
+  );
+  report.credentialsReady = true;
+  report.networkRequestsMade = 0;
+  report.outcome = 'started';
+
+  let token;
+  try {
+    token = await accessToken(credentials);
+    report.networkRequestsMade += 1;
+    report.oauth = { ok: true };
+  } catch (error) {
+    report.networkRequestsMade += 1;
+    report.oauth = { ok: false };
+    report.outcome = 'oauth-failed';
+    report.failure = sanitizeFailure(error);
+    return report;
+  }
+
+  const client = new PlayClient(token);
+  try {
+    const reviews = await client.json(
+      'GET',
+      buildReadOnlyPreflightResource(),
+      undefined,
+      'REVIEWS_LIST_GET',
+    );
+    report.packageRead = {
+      ok: true,
+      httpStatus: reviews.httpStatus,
+      returnedReviewCount: (reviews.value?.reviews ?? []).length,
+    };
+    report.outcome = 'authorized-read-only';
+  } catch (error) {
+    report.packageRead = { ok: false };
+    report.outcome = 'package-read-failed';
+    report.failure = sanitizeFailure(error);
+  }
+  report.networkRequestsMade += client.requestCount;
+  return report;
+}
+
 async function insertEdit(client, label) {
   const result = await client.json(
     'POST',
@@ -860,6 +921,9 @@ function helpText() {
     '  --aab <signed-v5.aab> --credentials <service-account.json>',
     '  --output G:/BIL_Temp/google-play-alpha-v5-report.json',
     '',
+    'Credential/package GET-only check (no App Edit):',
+    '  --read-only-preflight --credentials <service-account.json>',
+    '',
     'Live execution additionally requires --execute and every exact',
     'confirmation printed by the dry-run report, including the AAB SHA-256.',
     'The live path is permanently locked to package ' +
@@ -871,6 +935,12 @@ function helpText() {
 export async function runCli(argv = process.argv.slice(2)) {
   const options = parseArguments(argv);
   if (options.help) return { help: helpText() };
+
+  if (options.mode === 'read-only-preflight') {
+    const report = await runReadOnlyPreflight(options);
+    if (options.output) writeReport(options.output, report);
+    return { report };
+  }
 
   if (options.mode === 'dry-run') {
     const report = await createDryRun(options);

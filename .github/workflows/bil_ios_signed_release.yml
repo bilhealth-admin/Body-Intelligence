@@ -175,6 +175,9 @@ jobs:
         run: |
           xcrun simctl shutdown "$UDID" 2>/dev/null || true
 
+      - name: Exclude dev-only native plugins from iOS release
+        run: dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios
+
       - name: Build signed archive
         env:
           BUILD_NUMBER: ${{ inputs.build_number }}

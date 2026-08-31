@@ -101,6 +101,9 @@ jobs:
             -d emulator-5554
             --timeout 10m
 
+      - name: Exclude dev-only native plugins from Android release
+        run: dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android
+
       - name: Build signed Android App Bundle
         env:
           BUILD_NUMBER: ${{ inputs.build_number }}
