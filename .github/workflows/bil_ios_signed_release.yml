@@ -282,26 +282,11 @@ jobs:
           codesign -d --entitlements - \
             build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app \
             > BIL-ios-entitlements.plist
-          python3 - BIL-ios-entitlements.plist "$APPLE_TEAM_ID" <<'PY'
-          import plistlib
-          import sys
-
-          entitlements_path, team_id = sys.argv[1:]
-          with open(entitlements_path, 'rb') as handle:
-              entitlements = plistlib.load(handle)
-          expected_app_id = f'{team_id}.com.bilhealth.bodyintelligencelog'
-          if entitlements.get('application-identifier') != expected_app_id:
-              raise SystemExit('Signed IPA has the wrong application identifier.')
-          if entitlements.get('com.apple.developer.healthkit') is not True:
-              raise SystemExit('Signed IPA does not authorize HealthKit.')
-          if 'Default' not in entitlements.get('com.apple.developer.applesignin', []):
-              raise SystemExit('Signed IPA does not authorize Sign in with Apple.')
-          if entitlements.get('aps-environment') != 'production':
-              raise SystemExit('Signed IPA does not authorize production push.')
-          if entitlements.get('get-task-allow', False) is not False:
-              raise SystemExit('Signed IPA unexpectedly enables get-task-allow.')
-          print('SIGNED_IPA_ENTITLEMENTS_GATE=PASS')
-          PY
+          test -s BIL-ios-entitlements.plist
+          python3 tool/release/verify_signed_ios_entitlements.py \
+            --entitlements BIL-ios-entitlements.plist \
+            --team-id "$APPLE_TEAM_ID" \
+            --bundle-id com.bilhealth.bodyintelligencelog
           shasum -a 256 "$IPA" | tee BIL-ios-ipa.sha256
           stat -f '%z' "$IPA" | tee BIL-ios-ipa.size
           git rev-parse HEAD | tee BIL-source-head.txt

@@ -56,25 +56,34 @@ void main() {
     expect(source, contains('grep -Fq "DEVELOPMENT_TEAM = \$APPLE_TEAM_ID"'));
   });
 
-  test('signed IPA entitlements use literal plist keys instead of key paths', () {
-    final source = File(workflowPath).readAsStringSync();
+  test(
+    'signed IPA entitlements use literal plist keys instead of key paths',
+    () {
+      final source = File(workflowPath).readAsStringSync();
+      final verifier = File(
+        'tool/release/verify_signed_ios_entitlements.py',
+      ).readAsStringSync();
 
-    expect(source, contains('codesign -d --entitlements -'));
-    expect(source, contains("plistlib.load(handle)"));
-    expect(
-      source,
-      contains("entitlements.get('com.apple.developer.healthkit')"),
-    );
-    expect(
-      source,
-      contains("entitlements.get('com.apple.developer.applesignin', [])"),
-    );
-    expect(source, contains("entitlements.get('aps-environment')"));
-    expect(source, contains("entitlements.get('get-task-allow', False)"));
-    expect(source, contains('SIGNED_IPA_ENTITLEMENTS_GATE=PASS'));
-    expect(
-      source,
-      isNot(contains('plutil -extract com.apple.developer.healthkit')),
-    );
-  });
+      expect(source, contains('codesign -d --entitlements -'));
+      expect(source, contains('verify_signed_ios_entitlements.py'));
+      expect(verifier, contains('_CSMAGIC_EMBEDDED_ENTITLEMENTS = 0xFADE7171'));
+      expect(verifier, contains('declared_length != len(raw)'));
+      expect(verifier, contains('raw[_GENERIC_BLOB_HEADER_BYTES:]'));
+      expect(
+        verifier,
+        contains('entitlements.get("com.apple.developer.healthkit")'),
+      );
+      expect(
+        verifier,
+        contains('entitlements.get("com.apple.developer.applesignin")'),
+      );
+      expect(verifier, contains('entitlements.get("aps-environment")'));
+      expect(verifier, contains('entitlements.get("get-task-allow", False)'));
+      expect(verifier, contains('SIGNED_IPA_ENTITLEMENTS_GATE=PASS'));
+      expect(
+        source,
+        isNot(contains('plutil -extract com.apple.developer.healthkit')),
+      );
+    },
+  );
 }
