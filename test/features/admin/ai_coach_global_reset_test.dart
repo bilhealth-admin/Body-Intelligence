@@ -93,6 +93,8 @@ void main() {
       'compensation',
     );
 
+    await tester.ensureVisible(button);
+    await tester.pumpAndSettle();
     await tester.tap(button);
     await tester.pumpAndSettle();
     expect(
@@ -419,10 +421,14 @@ void main() {
       'supabase/functions/community_push_dispatch.ts',
     ]) {
       final source = File(path).readAsStringSync();
-      expect(source, contains("event.category === 'ai_coach'"), reason: path);
       expect(
         source,
-        contains("'You have a new private update.'"),
+        matches(RegExp(r'''event\.category\s*===\s*["']ai_coach["']''')),
+        reason: path,
+      );
+      expect(
+        source,
+        contains('"You have a new private update."'),
         reason: path,
       );
     }
@@ -608,6 +614,21 @@ final class _FakeAdminGateway implements AiCoachAdminGateway {
     lastIndividualIdempotencyKey = idempotencyKey;
     return individualMatched;
   }
+
+  @override
+  Future<AiCoachAdminNotificationResult> sendNotification({
+    required AiCoachAdminNotificationKind kind,
+    required AiCoachAdminNotificationAudience audience,
+    String? email,
+    String? message,
+    required String idempotencyKey,
+  }) async {
+    return const AiCoachAdminNotificationResult(
+      matched: true,
+      duplicate: false,
+      recipientsEnqueued: 1,
+    );
+  }
 }
 
 final class _FakeNoticeGateway implements AiCoachResetNoticeGateway {
@@ -699,6 +720,17 @@ final class _SwitchingAdminGateway implements AiCoachAdminGateway {
   Future<bool> individualReset({
     required String email,
     required String reason,
+    required String idempotencyKey,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AiCoachAdminNotificationResult> sendNotification({
+    required AiCoachAdminNotificationKind kind,
+    required AiCoachAdminNotificationAudience audience,
+    String? email,
+    String? message,
     required String idempotencyKey,
   }) {
     throw UnimplementedError();

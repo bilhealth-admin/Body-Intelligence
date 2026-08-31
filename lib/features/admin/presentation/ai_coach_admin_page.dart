@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/router/invalid_route_page.dart';
 import '../services/ai_coach_admin_service.dart';
+import 'admin_notification_controls.dart';
 
 class AiCoachAdminPage extends ConsumerStatefulWidget {
   const AiCoachAdminPage({super.key});
@@ -245,6 +246,8 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
               ),
             ),
           ),
+          const SizedBox(height: 16),
+          const AdminNotificationControls(),
         ],
       ),
     );

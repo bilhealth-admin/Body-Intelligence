@@ -37,10 +37,9 @@ export const RELEASE_NOTES = Object.freeze([
   Object.freeze({
     language: 'ar',
     text:
-      'تحسينات في الجودة والاستقرار في Body Intelligence Log، مع تطوير ' +
-      'وضوح استخدام وإعادة ضبط AI Coach، وتحسين مسارات التمارين والوجبات، ' +
-      'وتعزيز البحث التدريجي عن الأطعمة والتعامل مع الباركود، ورفع موثوقية ' +
-      'التطبيق عموماً.',
+      'تحسينات شاملة في الجودة والاستقرار، مع توضيح استخدام AI Coach ' +
+      'وإعادة ضبطه، وتحسين تجربة التمارين والوجبات والبحث عن الأطعمة ' +
+      'والباركود، ورفع موثوقية التطبيق.',
   }),
 ]);
 
@@ -52,6 +51,12 @@ const TOKEN_URI = 'https://oauth2.googleapis.com/token';
 const SCOPE = 'https://www.googleapis.com/auth/androidpublisher';
 const JSON_TIMEOUT_MS = 60_000;
 const UPLOAD_TIMEOUT_MS = 300_000;
+const UPLOAD_CHUNK_ALIGNMENT_BYTES = 256 * 1024;
+export const UPLOAD_CHUNK_BYTES = 8 * 1024 * 1024;
+const UPLOAD_MAX_RETRIES = 4;
+const UPLOAD_RETRY_BASE_DELAY_MS = 1_000;
+const UPLOAD_RETRY_MAX_DELAY_MS = 16_000;
+const GOOGLE_ERROR_MESSAGE_MAX_LENGTH = 400;
 
 const VALUE_FLAGS = new Set([
   '--aab',
@@ -402,29 +407,184 @@ async function accessToken(credentials) {
   return parsed.access_token;
 }
 
-function apiErrorDetail(response, parsed) {
-  const reasons = [];
-  for (const item of parsed?.error?.details ?? []) {
-    if (typeof item?.reason === 'string') reasons.push(item.reason);
+export function sanitizeGoogleErrorMessage(value) {
+  if (typeof value !== 'string') return null;
+  const normalized = value
+    .replace(/[\u0000-\u001f\u007f]+/g, ' ')
+    .replace(/\bBearer\s+\S+/gi, 'Bearer [REDACTED]')
+    .replace(
+      /\b(access_token|refresh_token|id_token)=([^&\s]+)/gi,
+      '$1=[REDACTED]',
+    )
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!normalized) return null;
+  if (normalized.length <= GOOGLE_ERROR_MESSAGE_MAX_LENGTH) {
+    return normalized;
   }
+  return normalized.slice(0, GOOGLE_ERROR_MESSAGE_MAX_LENGTH - 3) + '...';
+}
+
+export function apiErrorDetail(response, parsed) {
+  const reasons = [];
+  for (const items of [
+    parsed?.error?.details ?? [],
+    parsed?.error?.errors ?? [],
+  ]) {
+    for (const item of items) {
+      if (typeof item?.reason === 'string') reasons.push(item.reason);
+    }
+  }
+  const message = sanitizeGoogleErrorMessage(parsed?.error?.message);
   return {
     httpStatus: response.status,
     status: parsed?.error?.status ?? null,
     reasons: [...new Set(reasons)].sort(),
+    ...(message ? { message } : {}),
   };
 }
 
-class PlayClient {
-  constructor(token) {
+function assertUploadByteLength(byteLength) {
+  if (!Number.isSafeInteger(byteLength) || byteLength <= 0) {
+    fail('BUNDLE_UPLOAD_LENGTH_INVALID');
+  }
+}
+
+export function buildResumableInitiationHeaders(token, byteLength) {
+  assertUploadByteLength(byteLength);
+  return {
+    Authorization: 'Bearer ' + token,
+    Accept: 'application/json',
+    'Content-Length': '0',
+    'X-Upload-Content-Type': 'application/octet-stream',
+    'X-Upload-Content-Length': String(byteLength),
+  };
+}
+
+export function buildResumableChunkHeaders(
+  token,
+  start,
+  end,
+  byteLength,
+) {
+  assertUploadByteLength(byteLength);
+  if (
+    !Number.isSafeInteger(start) ||
+    !Number.isSafeInteger(end) ||
+    start < 0 ||
+    end < start ||
+    end >= byteLength
+  ) {
+    fail('BUNDLE_UPLOAD_RANGE_INVALID');
+  }
+  return {
+    Authorization: 'Bearer ' + token,
+    Accept: 'application/json',
+    'Content-Type': 'application/octet-stream',
+    'Content-Length': String(end - start + 1),
+    'Content-Range': `bytes ${start}-${end}/${byteLength}`,
+  };
+}
+
+export function buildResumableStatusHeaders(token, byteLength) {
+  assertUploadByteLength(byteLength);
+  return {
+    Authorization: 'Bearer ' + token,
+    Accept: 'application/json',
+    'Content-Length': '0',
+    'Content-Range': `bytes */${byteLength}`,
+  };
+}
+
+export function resumableOffsetFromRange(rangeHeader, byteLength) {
+  assertUploadByteLength(byteLength);
+  if (rangeHeader === null || rangeHeader === undefined) return 0;
+  const match = /^(?:bytes=)?0-(\d+)$/.exec(String(rangeHeader).trim());
+  if (!match) fail('BUNDLE_UPLOAD_RANGE_INVALID');
+  const lastReceivedByte = Number(match[1]);
+  if (
+    !Number.isSafeInteger(lastReceivedByte) ||
+    lastReceivedByte < 0 ||
+    lastReceivedByte >= byteLength - 1
+  ) {
+    fail('BUNDLE_UPLOAD_RANGE_INVALID');
+  }
+  return lastReceivedByte + 1;
+}
+
+function resumableSessionUri(value) {
+  let uri;
+  try {
+    uri = new URL(value);
+  } catch {
+    fail('BUNDLE_UPLOAD_SESSION_LOCATION_INVALID');
+  }
+  const trustedGoogleHost =
+    uri.hostname === 'www.googleapis.com' ||
+    uri.hostname.endsWith('.googleapis.com');
+  if (
+    uri.protocol !== 'https:' ||
+    !trustedGoogleHost ||
+    uri.username ||
+    uri.password
+  ) {
+    fail('BUNDLE_UPLOAD_SESSION_LOCATION_INVALID');
+  }
+  return uri.toString();
+}
+
+function retryableUploadStatus(status) {
+  return status === 408 || status === 429 || status >= 500;
+}
+
+function retryDelayMs(attempt, response = null) {
+  const retryAfter = response?.headers?.get('retry-after');
+  if (retryAfter && /^\d+$/.test(retryAfter.trim())) {
+    return Math.min(
+      Number(retryAfter.trim()) * 1_000,
+      UPLOAD_RETRY_MAX_DELAY_MS,
+    );
+  }
+  return Math.min(
+    UPLOAD_RETRY_BASE_DELAY_MS * (2 ** Math.max(0, attempt - 1)),
+    UPLOAD_RETRY_MAX_DELAY_MS,
+  );
+}
+
+function defaultSleep(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+export class PlayClient {
+  constructor(token, dependencies = {}) {
     this.token = token;
     this.requestCount = 0;
+    this.fetchImpl = dependencies.fetchImpl ?? globalThis.fetch;
+    this.sleep = dependencies.sleep ?? defaultSleep;
+    this.chunkBytes = dependencies.chunkBytes ?? UPLOAD_CHUNK_BYTES;
+    if (
+      !Number.isSafeInteger(this.chunkBytes) ||
+      this.chunkBytes <= 0 ||
+      this.chunkBytes % UPLOAD_CHUNK_ALIGNMENT_BYTES !== 0
+    ) {
+      fail('BUNDLE_UPLOAD_CHUNK_SIZE_INVALID');
+    }
+  }
+
+  async fetch(url, options) {
+    this.requestCount += 1;
+    return this.fetchImpl(url, options);
+  }
+
+  async waitForRetry(attempt, response = null) {
+    await this.sleep(retryDelayMs(attempt, response));
   }
 
   async json(method, resource, body, label) {
     this.requestCount += 1;
     let response;
     try {
-      response = await fetch(API_ROOT + resource, {
+      response = await this.fetchImpl(API_ROOT + resource, {
         method,
         headers: {
           Authorization: 'Bearer ' + this.token,
@@ -457,33 +617,191 @@ class PlayClient {
     return { httpStatus: response.status, value: parsed };
   }
 
-  async upload(editPath, aab) {
-    this.requestCount += 1;
-    const query = new URLSearchParams({ uploadType: 'media' });
+  async startUploadSession(editPath, aab) {
+    const query = new URLSearchParams({ uploadType: 'resumable' });
     const resource = editPath + '/bundles?' + query.toString();
-    let response;
-    try {
-      response = await fetch(UPLOAD_ROOT + resource, {
-        method: 'POST',
-        headers: {
-          Authorization: 'Bearer ' + this.token,
-          Accept: 'application/json',
-          'Content-Type': 'application/octet-stream',
-          'Content-Length': String(aab.byteLength),
-        },
-        body: fs.createReadStream(aab.path),
-        duplex: 'half',
-        signal: AbortSignal.timeout(UPLOAD_TIMEOUT_MS),
-      });
-    } catch {
-      fail('BUNDLE_UPLOAD_NETWORK_FAILED');
+    for (let attempt = 0; attempt <= UPLOAD_MAX_RETRIES; attempt += 1) {
+      let response;
+      try {
+        response = await this.fetch(UPLOAD_ROOT + resource, {
+          method: 'POST',
+          headers: buildResumableInitiationHeaders(
+            this.token,
+            aab.byteLength,
+          ),
+          redirect: 'manual',
+          signal: AbortSignal.timeout(JSON_TIMEOUT_MS),
+        });
+      } catch {
+        if (attempt === UPLOAD_MAX_RETRIES) {
+          fail('BUNDLE_UPLOAD_NETWORK_FAILED');
+        }
+        await this.waitForRetry(attempt + 1);
+        continue;
+      }
+      if (response.ok) {
+        const location = response.headers.get('location');
+        if (!location) fail('BUNDLE_UPLOAD_SESSION_LOCATION_MISSING');
+        return resumableSessionUri(location);
+      }
+      if (
+        !retryableUploadStatus(response.status) ||
+        attempt === UPLOAD_MAX_RETRIES
+      ) {
+        const parsed = await response.json().catch(() => null);
+        fail('BUNDLE_UPLOAD_FAILED', apiErrorDetail(response, parsed));
+      }
+      await this.waitForRetry(attempt + 1, response);
     }
+    fail('BUNDLE_UPLOAD_NETWORK_FAILED');
+  }
+
+  async completedUpload(response) {
     const parsed = await response.json().catch(() => null);
-    if (!response.ok) {
-      fail('BUNDLE_UPLOAD_FAILED', apiErrorDetail(response, parsed));
-    }
     if (!parsed) fail('BUNDLE_UPLOAD_INVALID_JSON');
     return { httpStatus: response.status, value: parsed };
+  }
+
+  async uploadStatus(sessionUri, byteLength) {
+    for (let attempt = 0; attempt <= UPLOAD_MAX_RETRIES; attempt += 1) {
+      let response;
+      try {
+        response = await this.fetch(sessionUri, {
+          method: 'PUT',
+          headers: buildResumableStatusHeaders(this.token, byteLength),
+          redirect: 'manual',
+          signal: AbortSignal.timeout(JSON_TIMEOUT_MS),
+        });
+      } catch {
+        if (attempt === UPLOAD_MAX_RETRIES) {
+          fail('BUNDLE_UPLOAD_NETWORK_FAILED');
+        }
+        await this.waitForRetry(attempt + 1);
+        continue;
+      }
+      if (response.status === 308) {
+        return {
+          complete: false,
+          offset: resumableOffsetFromRange(
+            response.headers.get('range'),
+            byteLength,
+          ),
+          sessionUri: response.headers.get('location')
+            ? resumableSessionUri(response.headers.get('location'))
+            : sessionUri,
+        };
+      }
+      if (response.ok) {
+        return {
+          complete: true,
+          result: await this.completedUpload(response),
+          sessionUri,
+        };
+      }
+      if (
+        !retryableUploadStatus(response.status) ||
+        attempt === UPLOAD_MAX_RETRIES
+      ) {
+        const parsed = await response.json().catch(() => null);
+        fail('BUNDLE_UPLOAD_FAILED', apiErrorDetail(response, parsed));
+      }
+      await this.waitForRetry(attempt + 1, response);
+    }
+    fail('BUNDLE_UPLOAD_NETWORK_FAILED');
+  }
+
+  async upload(editPath, aab) {
+    assertUploadByteLength(aab.byteLength);
+    let sessionUri = await this.startUploadSession(editPath, aab);
+    let offset = 0;
+    let consecutiveRecoveries = 0;
+
+    while (offset < aab.byteLength) {
+      const end = Math.min(
+        offset + this.chunkBytes,
+        aab.byteLength,
+      ) - 1;
+      const body = fs.createReadStream(aab.path, { start: offset, end });
+      let response;
+      try {
+        response = await this.fetch(sessionUri, {
+          method: 'PUT',
+          headers: buildResumableChunkHeaders(
+            this.token,
+            offset,
+            end,
+            aab.byteLength,
+          ),
+          body,
+          duplex: 'half',
+          redirect: 'manual',
+          signal: AbortSignal.timeout(UPLOAD_TIMEOUT_MS),
+        });
+      } catch {
+        body.destroy();
+        consecutiveRecoveries += 1;
+        if (consecutiveRecoveries > UPLOAD_MAX_RETRIES) {
+          fail('BUNDLE_UPLOAD_NETWORK_FAILED');
+        }
+        await this.waitForRetry(consecutiveRecoveries);
+        const status = await this.uploadStatus(
+          sessionUri,
+          aab.byteLength,
+        );
+        sessionUri = status.sessionUri;
+        if (status.complete) return status.result;
+        if (status.offset < offset) {
+          fail('BUNDLE_UPLOAD_RANGE_INVALID');
+        }
+        if (status.offset > offset) consecutiveRecoveries = 0;
+        offset = status.offset;
+        continue;
+      }
+
+      if (response.status === 308) {
+        if (response.headers.get('location')) {
+          sessionUri = resumableSessionUri(
+            response.headers.get('location'),
+          );
+        }
+        const nextOffset = resumableOffsetFromRange(
+          response.headers.get('range'),
+          aab.byteLength,
+        );
+        if (nextOffset < offset) fail('BUNDLE_UPLOAD_RANGE_INVALID');
+        if (nextOffset === offset) {
+          consecutiveRecoveries += 1;
+          if (consecutiveRecoveries > UPLOAD_MAX_RETRIES) {
+            fail('BUNDLE_UPLOAD_NETWORK_FAILED');
+          }
+          await this.waitForRetry(consecutiveRecoveries, response);
+        } else {
+          consecutiveRecoveries = 0;
+        }
+        offset = nextOffset;
+        continue;
+      }
+
+      if (response.ok) return this.completedUpload(response);
+      if (!retryableUploadStatus(response.status)) {
+        const parsed = await response.json().catch(() => null);
+        fail('BUNDLE_UPLOAD_FAILED', apiErrorDetail(response, parsed));
+      }
+
+      consecutiveRecoveries += 1;
+      if (consecutiveRecoveries > UPLOAD_MAX_RETRIES) {
+        const parsed = await response.json().catch(() => null);
+        fail('BUNDLE_UPLOAD_FAILED', apiErrorDetail(response, parsed));
+      }
+      await this.waitForRetry(consecutiveRecoveries, response);
+      const status = await this.uploadStatus(sessionUri, aab.byteLength);
+      sessionUri = status.sessionUri;
+      if (status.complete) return status.result;
+      if (status.offset < offset) fail('BUNDLE_UPLOAD_RANGE_INVALID');
+      if (status.offset > offset) consecutiveRecoveries = 0;
+      offset = status.offset;
+    }
+    fail('BUNDLE_UPLOAD_INVALID_JSON');
   }
 }
 

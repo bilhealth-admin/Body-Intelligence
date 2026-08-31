@@ -147,6 +147,7 @@ class ModernOnboardingScaffold extends StatelessWidget {
                             ],
                             const SizedBox(height: 24),
                             FocusTraversalOrder(
+                              key: const Key('onboarding-step-input-content'),
                               order: const NumericFocusOrder(1),
                               child: body,
                             ),
@@ -264,7 +265,8 @@ class ModernOnboardingScaffold extends StatelessWidget {
 
 /// Responsive, decorative photo slot for approved BIL-owned onboarding
 /// photography. It is intentionally absent from semantics: every instruction
-/// remains available as real text, and the crop never controls page height.
+/// remains available as real text. The photo keeps its complete source aspect
+/// ratio and sits directly on the page without a card, border, or tint layer.
 class ModernOnboardingPhotoHero extends StatelessWidget {
   const ModernOnboardingPhotoHero({
     super.key,
@@ -279,43 +281,25 @@ class ModernOnboardingPhotoHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     final media = MediaQuery.of(context);
     final scale = media.textScaler.scale(1);
     final compactHeight = media.size.height < 650;
     final resolvedHeight = scale >= 1.8
-        ? 84.0
+        ? 80.0
         : scale >= 1.4 || compactHeight
-        ? 104.0
+        ? 96.0
         : height;
     return ExcludeSemantics(
       child: SizedBox(
         height: resolvedHeight,
         width: double.infinity,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(22),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image(
-                image: image,
-                fit: BoxFit.cover,
-                alignment: alignment,
-                filterQuality: FilterQuality.medium,
-              ),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: AlignmentDirectional.topStart,
-                    end: AlignmentDirectional.bottomEnd,
-                    colors: [
-                      scheme.primary.withValues(alpha: .02),
-                      scheme.primary.withValues(alpha: .20),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+        child: Center(
+          child: Image(
+            image: image,
+            height: resolvedHeight,
+            fit: BoxFit.contain,
+            alignment: alignment,
+            filterQuality: FilterQuality.medium,
           ),
         ),
       ),

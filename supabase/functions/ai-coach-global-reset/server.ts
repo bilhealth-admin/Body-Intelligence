@@ -53,6 +53,10 @@ const validEmail = (value: string) =>
   value.length <= 254 &&
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
+const notificationKinds = new Set(["compensation", "gift", "custom"]);
+const notificationAudiences = new Set(["all", "email"]);
+const characterLength = (value: string) => Array.from(value).length;
+
 const containsControlCharacter = (value: string) => {
   for (const character of value) {
     const codePoint = character.codePointAt(0) ?? 0;
@@ -236,6 +240,116 @@ export async function handler(
       // An authorized administrator learns only whether the submitted address
       // matched. UUIDs, reset ids, PII, and affected-row counts stay private.
       return json({ matched: true });
+    }
+
+    if (operation === "notification") {
+      if (
+        typeof body.notification_kind !== "string" ||
+        typeof body.audience !== "string"
+      ) {
+        return json({ error: "invalid_notification_request" }, 400);
+      }
+      const notificationKind = body.notification_kind.trim().toLowerCase();
+      const audience = body.audience.trim().toLowerCase();
+      const normalizedEmail = typeof body.email === "string"
+        ? body.email.trim().toLowerCase()
+        : "";
+      const message = typeof body.message === "string"
+        ? body.message.trim()
+        : "";
+
+      if (!notificationKinds.has(notificationKind)) {
+        return json({ error: "invalid_notification_kind" }, 400);
+      }
+      if (!notificationAudiences.has(audience)) {
+        return json({ error: "invalid_notification_audience" }, 400);
+      }
+      if (
+        notificationKind === "custom"
+          ? typeof body.message !== "string" ||
+            characterLength(message) < 1 ||
+            characterLength(message) > 180 ||
+            containsControlCharacter(message)
+          : body.message != null &&
+            (typeof body.message !== "string" || message.length !== 0)
+      ) {
+        return json({ error: "invalid_notification_message" }, 400);
+      }
+      if (
+        audience === "email"
+          ? typeof body.email !== "string" || !validEmail(normalizedEmail)
+          : body.email != null &&
+            (typeof body.email !== "string" || normalizedEmail.length !== 0)
+      ) {
+        return json({ error: "invalid_target" }, 400);
+      }
+
+      const rateResponse = await consumeRateLimit(
+        c.auth,
+        audience === "all"
+          ? "admin_notification_all"
+          : "admin_notification_individual",
+        audience === "all" ? 10 : 50,
+      );
+      if (rateResponse != null) return rateResponse;
+
+      let targetId: string | null = null;
+      if (audience === "email") {
+        const resolved = await c.admin.rpc(
+          "bil_resolve_admin_notification_target",
+          {
+            p_actor_id: authResult.data.user.id,
+            p_normalized_email: normalizedEmail,
+          },
+        );
+        if (resolved.error) {
+          const denied = deniedByDatabase(resolved.error.message);
+          return json(
+            { error: denied ? "not_found" : "notification_failed" },
+            denied ? 404 : 500,
+          );
+        }
+        targetId = typeof resolved.data === "string" ? resolved.data : null;
+        if (targetId == null || targetId.length === 0) {
+          return json({
+            matched: false,
+            duplicate: false,
+            recipients_enqueued: 0,
+          });
+        }
+      }
+
+      const enqueued = await resetWithConcurrencyRetry(
+        c.admin,
+        "bil_enqueue_admin_notification",
+        {
+          p_actor_id: authResult.data.user.id,
+          p_notification_kind: notificationKind,
+          p_audience: audience,
+          p_target_id: targetId,
+          p_custom_body: notificationKind === "custom" ? message : null,
+          p_idempotency_key: idempotencyKey,
+        },
+      );
+      if (enqueued.error) {
+        const denied = deniedByDatabase(enqueued.error.message);
+        return json(
+          { error: denied ? "not_found" : "notification_failed" },
+          denied ? 404 : 500,
+        );
+      }
+
+      const data = enqueued.data != null &&
+          typeof enqueued.data === "object"
+        ? enqueued.data as Record<string, unknown>
+        : {};
+      return json({
+        matched: true,
+        duplicate: data.duplicate === true,
+        recipients_enqueued: typeof data.recipients_enqueued === "number"
+          ? Math.max(0, Math.trunc(data.recipients_enqueued))
+          : 0,
+      });
     }
 
     return json({ error: "invalid_operation" }, 400);

@@ -15,6 +15,33 @@ abstract interface class AiCoachAdminGateway {
     required String reason,
     required String idempotencyKey,
   });
+
+  Future<AiCoachAdminNotificationResult> sendNotification({
+    required AiCoachAdminNotificationKind kind,
+    required AiCoachAdminNotificationAudience audience,
+    String? email,
+    String? message,
+    required String idempotencyKey,
+  });
+}
+
+enum AiCoachAdminNotificationKind {
+  compensation('compensation'),
+  gift('gift'),
+  custom('custom');
+
+  const AiCoachAdminNotificationKind(this.wireValue);
+
+  final String wireValue;
+}
+
+enum AiCoachAdminNotificationAudience {
+  all('all'),
+  email('email');
+
+  const AiCoachAdminNotificationAudience(this.wireValue);
+
+  final String wireValue;
 }
 
 final class SupabaseAiCoachAdminGateway implements AiCoachAdminGateway {
@@ -83,6 +110,35 @@ final class SupabaseAiCoachAdminGateway implements AiCoachAdminGateway {
     }
     return matched;
   }
+
+  @override
+  Future<AiCoachAdminNotificationResult> sendNotification({
+    required AiCoachAdminNotificationKind kind,
+    required AiCoachAdminNotificationAudience audience,
+    String? email,
+    String? message,
+    required String idempotencyKey,
+  }) async {
+    final response = await _client.functions.invoke(
+      'ai-coach-global-reset',
+      body: <String, Object?>{
+        'operation': 'notification',
+        'notification_kind': kind.wireValue,
+        'audience': audience.wireValue,
+        if (audience == AiCoachAdminNotificationAudience.email)
+          'email': email?.trim().toLowerCase(),
+        if (kind == AiCoachAdminNotificationKind.custom)
+          'message': message?.trim(),
+        'idempotency_key': idempotencyKey,
+      },
+    );
+    if (response.status != 200 || response.data is! Map) {
+      throw StateError('ai_coach_admin_notification_failed');
+    }
+    return AiCoachAdminNotificationResult.fromJson(
+      Map<String, Object?>.from(response.data as Map),
+    );
+  }
 }
 
 final aiCoachAdminGatewayProvider = Provider<AiCoachAdminGateway>((ref) {
@@ -136,6 +192,35 @@ final class AiCoachGlobalResetResult {
   final bool duplicate;
 }
 
+final class AiCoachAdminNotificationResult {
+  const AiCoachAdminNotificationResult({
+    required this.matched,
+    required this.duplicate,
+    required this.recipientsEnqueued,
+  });
+
+  factory AiCoachAdminNotificationResult.fromJson(Map<String, Object?> json) {
+    final matched = json['matched'];
+    final duplicate = json['duplicate'];
+    final recipientsEnqueued = json['recipients_enqueued'];
+    if (matched is! bool ||
+        duplicate is! bool ||
+        recipientsEnqueued is! num ||
+        recipientsEnqueued < 0) {
+      throw const FormatException('invalid_admin_notification_result');
+    }
+    return AiCoachAdminNotificationResult(
+      matched: matched,
+      duplicate: duplicate,
+      recipientsEnqueued: recipientsEnqueued.toInt(),
+    );
+  }
+
+  final bool matched;
+  final bool duplicate;
+  final int recipientsEnqueued;
+}
+
 final class _UnavailableAiCoachAdminGateway implements AiCoachAdminGateway {
   const _UnavailableAiCoachAdminGateway();
 
@@ -154,6 +239,17 @@ final class _UnavailableAiCoachAdminGateway implements AiCoachAdminGateway {
   Future<bool> individualReset({
     required String email,
     required String reason,
+    required String idempotencyKey,
+  }) {
+    throw StateError('ai_coach_admin_unavailable');
+  }
+
+  @override
+  Future<AiCoachAdminNotificationResult> sendNotification({
+    required AiCoachAdminNotificationKind kind,
+    required AiCoachAdminNotificationAudience audience,
+    String? email,
+    String? message,
     required String idempotencyKey,
   }) {
     throw StateError('ai_coach_admin_unavailable');

@@ -610,7 +610,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       key: Key('onboarding-photo-$step'),
       image: AssetImage(asset),
       alignment: focalAlignment,
-      height: 132,
+      height: 120,
     );
   }
 }
