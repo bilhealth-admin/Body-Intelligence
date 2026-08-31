@@ -69,8 +69,8 @@ jobs:
       - name: Analyze release source
         run: flutter analyze --no-pub
 
-      - name: Run release tests
-        run: flutter test --no-pub --timeout 30s
+      - name: Run portable release tests
+        run: python3 tool/release/run_portable_release_tests.py
 
       - name: Run explicit system-crypto source gate
         run: >-

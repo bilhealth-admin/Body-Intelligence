@@ -135,7 +135,7 @@ jobs:
         run: |
           flutter pub get
           flutter analyze --no-pub
-          flutter test --no-pub --timeout 30s
+          python3 tool/release/run_portable_release_tests.py
           flutter test --no-pub \
             test/launch_readiness/system_crypto_export_compliance_contract_test.dart \
             --timeout 2m
