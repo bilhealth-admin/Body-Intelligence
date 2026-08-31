@@ -64,7 +64,11 @@ void main() {
         'tool/release/verify_signed_ios_entitlements.py',
       ).readAsStringSync();
 
-      expect(source, contains('codesign -d --entitlements -'));
+      expect(source, contains('codesign --display --entitlements - --xml'));
+      expect(
+        source,
+        contains('plutil -convert xml1 -o BIL-ios-entitlements.plist -'),
+      );
       expect(source, contains('verify_signed_ios_entitlements.py'));
       expect(verifier, contains('_CSMAGIC_EMBEDDED_ENTITLEMENTS = 0xFADE7171'));
       expect(verifier, contains('declared_length != len(raw)'));

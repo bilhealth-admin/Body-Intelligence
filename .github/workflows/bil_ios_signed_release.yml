@@ -279,9 +279,9 @@ jobs:
           IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
           test -s "$IPA"
           codesign -dv --verbose=4 build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app 2> BIL-ios-codesign.txt
-          codesign -d --entitlements - \
+          codesign --display --entitlements - --xml \
             build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app \
-            > BIL-ios-entitlements.plist
+            | plutil -convert xml1 -o BIL-ios-entitlements.plist -
           test -s BIL-ios-entitlements.plist
           python3 tool/release/verify_signed_ios_entitlements.py \
             --entitlements BIL-ios-entitlements.plist \
