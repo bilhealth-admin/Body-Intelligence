@@ -178,13 +178,83 @@ jobs:
       - name: Exclude dev-only native plugins from iOS release
         run: dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios
 
+      - name: Configure manual App Store distribution signing
+        shell: bash
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          PROFILE_PLIST="$RUNNER_TEMP/BIL-profile.plist"
+          EXPORT_OPTIONS="$RUNNER_TEMP/BIL-export-options.plist"
+          test -s "$PROFILE_PLIST" || {
+            echo 'Decoded provisioning-profile metadata is missing.' >&2
+            exit 1
+          }
+          PROFILE_NAME="$(/usr/libexec/PlistBuddy -c 'Print :Name' "$PROFILE_PLIST")"
+          PROFILE_UUID="$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$PROFILE_PLIST")"
+          test -n "$PROFILE_NAME" || {
+            echo 'Provisioning profile name is missing.' >&2
+            exit 1
+          }
+          test -n "$PROFILE_UUID" || {
+            echo 'Provisioning profile UUID is missing.' >&2
+            exit 1
+          }
+
+          {
+            printf '\n// CI App Store distribution signing\n'
+            printf 'CODE_SIGN_STYLE = Manual\n'
+            printf 'CODE_SIGN_IDENTITY[sdk=iphoneos*] = Apple Distribution\n'
+            printf 'DEVELOPMENT_TEAM = %s\n' "$APPLE_TEAM_ID"
+            printf 'PROVISIONING_PROFILE_SPECIFIER = %s\n' "$PROFILE_NAME"
+            printf 'PROVISIONING_PROFILE = %s\n' "$PROFILE_UUID"
+          } >> ios/Flutter/Release.xcconfig
+
+          python3 - "$EXPORT_OPTIONS" "$APPLE_TEAM_ID" "$PROFILE_UUID" <<'PY'
+          import pathlib
+          import plistlib
+          import sys
+
+          output_path, team_id, profile_uuid = sys.argv[1:]
+          options = {
+              'method': 'app-store-connect',
+              'signingStyle': 'manual',
+              'teamID': team_id,
+              'signingCertificate': 'Apple Distribution',
+              'provisioningProfiles': {
+                  'com.bilhealth.bodyintelligencelog': profile_uuid,
+              },
+              'manageAppVersionAndBuildNumber': False,
+              'uploadSymbols': True,
+              'stripSwiftSymbols': True,
+          }
+          with pathlib.Path(output_path).open('wb') as handle:
+              plistlib.dump(options, handle, sort_keys=True)
+          PY
+          plutil -lint "$EXPORT_OPTIONS"
+
+          BUILD_SETTINGS="$(xcodebuild \
+            -workspace ios/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -sdk iphoneos \
+            -showBuildSettings 2>&1)"
+          grep -Fq 'CODE_SIGN_STYLE = Manual' <<< "$BUILD_SETTINGS"
+          grep -Fq 'CODE_SIGN_IDENTITY = Apple Distribution' <<< "$BUILD_SETTINGS"
+          grep -Fq "DEVELOPMENT_TEAM = $APPLE_TEAM_ID" <<< "$BUILD_SETTINGS"
+          grep -Fq "PROVISIONING_PROFILE_SPECIFIER = $PROFILE_NAME" <<< "$BUILD_SETTINGS"
+          grep -Fq "PROVISIONING_PROFILE = $PROFILE_UUID" <<< "$BUILD_SETTINGS"
+          printf '%s\n' 'IOS_MANUAL_DISTRIBUTION_SIGNING_GATE=PASS'
+
       - name: Build signed archive
         env:
           BUILD_NUMBER: ${{ inputs.build_number }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         shell: bash
         run: |
           set -euo pipefail
-          flutter build ipa --release --no-pub --export-method app-store \
+          flutter build ipa --release --no-pub \
+            --export-options-plist "$RUNNER_TEMP/BIL-export-options.plist" \
             --build-number "$BUILD_NUMBER" \
             --dart-define=BIL_ENVIRONMENT=production \
             --dart-define=BIL_PAYMENTS_ENABLED=true \
