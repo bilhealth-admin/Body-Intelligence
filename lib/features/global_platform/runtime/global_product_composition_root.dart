@@ -10,9 +10,9 @@ import '../core/global_platform_core.dart';
 import '../globalization/globalization_accessibility_platform.dart';
 import '../health_data/android_health_connect_platform.dart';
 import '../health_data/apple_health_platform.dart';
-import '../medical_devices/ble_medical_device_platform.dart';
-import '../medical_devices/medical_device_platform.dart';
-import '../medical_devices/native_ble_medical_bridge.dart';
+import '../fitness_devices/ble_fitness_device_platform.dart';
+import '../fitness_devices/fitness_device_platform.dart';
+import '../fitness_devices/native_ble_fitness_bridge.dart';
 import '../persistence/global_platform_sqlite_store.dart';
 import '../plugins/plugin_platform.dart';
 import '../product/global_product_coordinators.dart';
@@ -110,8 +110,8 @@ final class GlobalNativeIntegrationHost {
       ...configuration.additionalWearableProviders,
     ];
 
-    final medicalProvider = BleMedicalDeviceProvider(
-      bridge: MethodChannelBleMedicalBridge(),
+    final fitnessProvider = BleFitnessDeviceProvider(
+      bridge: MethodChannelBleFitnessBridge(),
       store: store,
       audit: audit,
     );
@@ -211,8 +211,8 @@ final class GlobalNativeIntegrationHost {
         store: store,
         audit: audit,
       ),
-      medical: MedicalDeviceRuntime(
-        providers: <MedicalDeviceProvider>[medicalProvider],
+      fitness: FitnessDeviceRuntime(
+        providers: <FitnessDeviceProvider>[fitnessProvider],
         store: store,
         audit: audit,
       ),
@@ -241,7 +241,7 @@ final class GlobalNativeIntegrationHost {
               ? 'native_health_connect_available'
               : 'android_platform_required',
         ),
-        'medical': GlobalProductCapabilityState(
+        'fitness': GlobalProductCapabilityState(
           status: isMobileNative
               ? GlobalProductCapabilityStatus.available
               : GlobalProductCapabilityStatus.unavailable,

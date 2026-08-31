@@ -6,6 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/billing_client_wrappers.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
+import 'package:in_app_purchase_storekit/store_kit_2_wrappers.dart';
+import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -14,98 +17,8 @@ import '../domain/commerce_plan.dart';
 import '../domain/store_catalog_configuration.dart';
 import '../domain/subscription_term.dart';
 
-enum VerifiedStoreState {
-  loading,
-  ready,
-  unavailable,
-  offline,
-  purchasePending,
-  verified,
-  cancelled,
-  failed,
-}
+part 'verified_store_purchase_support.dart';
 
-/// Selects deterministically when Play returns multiple eligible offers for
-/// the same product id. An eligible free-trial offer wins over a paid-only
-/// offer; otherwise the first response remains authoritative.
-ProductDetails preferredStoreProduct(
-  ProductDetails current,
-  ProductDetails candidate,
-) {
-  bool hasTrial(ProductDetails value) {
-    if (value is! GooglePlayProductDetails || value.subscriptionIndex == null) {
-      return false;
-    }
-    final offers = value.productDetails.subscriptionOfferDetails;
-    final index = value.subscriptionIndex!;
-    if (offers == null || index < 0 || index >= offers.length) return false;
-    return offers[index].pricingPhases.any(
-      (phase) => phase.priceAmountMicros == 0,
-    );
-  }
-
-  if (!hasTrial(current) && hasTrial(candidate)) return candidate;
-  return current;
-}
-
-/// Builds the purchase request with the exact eligible one-time offer token
-/// that produced the displayed price. Other platforms keep their native
-/// ProductDetails selection unchanged.
-PurchaseParam verifiedBoostPurchaseParam({
-  required ProductDetails product,
-  required String accountHash,
-  required TargetPlatform platform,
-  String? offerToken,
-}) {
-  if (platform == TargetPlatform.android &&
-      product is GooglePlayProductDetails) {
-    return GooglePlayPurchaseParam(
-      productDetails: product,
-      applicationUserName: accountHash,
-      obfuscatedProfileId: accountHash,
-      offerToken: offerToken,
-    );
-  }
-  return PurchaseParam(
-    productDetails: product,
-    applicationUserName: accountHash,
-  );
-}
-
-final class VerifiedStoreEntitlement {
-  const VerifiedStoreEntitlement({
-    required this.plan,
-    required this.lifecycle,
-    required this.verifiedAt,
-    this.renewsOrExpiresAt,
-    this.gracePeriodEndsAt,
-    this.provider,
-  });
-
-  final CommercePlan plan;
-  final String lifecycle;
-  final DateTime verifiedAt;
-  final DateTime? renewsOrExpiresAt;
-  final DateTime? gracePeriodEndsAt;
-  final String? provider;
-
-  bool get grantsPaidAccess {
-    if (plan == CommercePlan.free) return false;
-    final boundary = lifecycle == 'grace_period'
-        ? gracePeriodEndsAt
-        : renewsOrExpiresAt;
-    return const {
-          'active',
-          'trial',
-          'grace_period',
-          'cancelled',
-        }.contains(lifecycle) &&
-        boundary != null &&
-        !DateTime.now().toUtc().isAfter(boundary.toUtc());
-  }
-}
-
-/// Store transport that can never grant an entitlement locally.
 class VerifiedStorePurchaseService extends ChangeNotifier {
   VerifiedStorePurchaseService({InAppPurchase? purchase})
     : _purchase = purchase ?? InAppPurchase.instance;
@@ -156,9 +69,12 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       final loaded = <String, ProductDetails>{};
       for (final product in response.productDetails) {
         final existing = loaded[product.id];
-        loaded[product.id] = existing == null
-            ? product
-            : preferredStoreProduct(existing, product);
+        final selected = preferredStoreProduct(existing, product);
+        if (selected == null) {
+          loaded.remove(product.id);
+        } else {
+          loaded[product.id] = selected;
+        }
       }
       // Regional availability deliberately returns a partial catalog: a
       // profitable market exposes Premium AI Coach, while a localized market
@@ -190,7 +106,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       plan: plan,
       term: term,
     );
-    return binding == null ? null : products[binding.productId.trim()];
+    return binding == null ? null : products[binding.productId];
   }
 
   Future<void> purchasePlan(
@@ -209,7 +125,10 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     state = VerifiedStoreState.purchasePending;
     messageCode = null;
     notifyListeners();
-    final accountHash = sha256.convert(utf8.encode(user.id)).toString();
+    final accountHash = storeAccountIdentifier(
+      ownerId: user.id,
+      platform: defaultTargetPlatform,
+    );
     final PurchaseParam purchaseParam;
     if (defaultTargetPlatform == TargetPlatform.android &&
         product is GooglePlayProductDetails) {
@@ -265,7 +184,10 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     state = VerifiedStoreState.purchasePending;
     messageCode = null;
     notifyListeners();
-    final accountHash = sha256.convert(utf8.encode(user.id)).toString();
+    final accountHash = storeAccountIdentifier(
+      ownerId: user.id,
+      platform: defaultTargetPlatform,
+    );
     final purchaseParam = verifiedBoostPurchaseParam(
       product: product,
       accountHash: accountHash,

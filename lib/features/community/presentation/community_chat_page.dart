@@ -293,6 +293,14 @@ class _CommunityChatPageState extends State<CommunityChatPage> {
                         ),
                       ),
                       IconButton.filled(
+                        tooltip: _copy(
+                          context,
+                          'إرسال الرسالة',
+                          'Send message',
+                          'Envoyer le message',
+                          'Enviar mensaje',
+                          'Mesaj gönder',
+                        ),
                         onPressed: _sending ? null : _send,
                         icon: _sending
                             ? const SizedBox.square(

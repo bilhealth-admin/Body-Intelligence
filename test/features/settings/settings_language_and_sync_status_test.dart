@@ -1,6 +1,7 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_cloud_sync.dart';
 import 'package:body_intelligence_log/features/cloud_platform/providers/cloud_manual_sync_status_provider.dart';
 import 'package:body_intelligence_log/features/settings/cloud_sync_status_presentation.dart';
 import 'package:body_intelligence_log/features/settings/reference_settings_copy.dart';
@@ -20,7 +21,6 @@ const _settingsSources = <String>{
   'Retry subscription check',
   'BIL Premium',
   'Premium',
-  'Start 7-day free trial',
   'Account & profile',
   'My Profile',
   'Profile',
@@ -70,6 +70,7 @@ const _settingsSources = <String>{
 };
 
 const _privacySources = <String>{
+  ...CloudSyncConsentCopy.sources,
   'Diary sharing',
   'Private',
   'Profile visibility',

@@ -52,8 +52,8 @@ class AppDatabase extends _$AppDatabase {
       localStorageScope = LocalDatabaseScope.keyForOwner(localOwnerId),
       super(openDatabaseConnection(localOwnerId: localOwnerId));
 
-  AppDatabase.forTesting(super.executor)
-    : localOwnerId = null,
+  AppDatabase.forTesting(super.executor, {String? localOwnerId})
+    : localOwnerId = _normalizeOwnerId(localOwnerId),
       localStorageScope = 'test';
 
   final String? localOwnerId;

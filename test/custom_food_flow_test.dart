@@ -107,7 +107,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Custom food'));
+    // Custom food is intentionally nested behind the single Add food action so
+    // the catalog keeps one clear primary task instead of exposing competing
+    // capture buttons above the fold.
+    await tester.tap(find.byKey(const Key('food-primary-add-action')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('food-add-custom-food')));
     await tester.pumpAndSettle();
     expect(find.text('Create custom food'), findsOneWidget);
     expect(

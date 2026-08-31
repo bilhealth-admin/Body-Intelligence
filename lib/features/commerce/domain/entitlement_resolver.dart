@@ -50,16 +50,16 @@ final class EntitlementResolver {
     }
 
     return switch (record.lifecycle) {
-      SubscriptionLifecycle.trial => _notAfter(now, record.trialEndsAt),
-      SubscriptionLifecycle.active => _notAfter(
+      SubscriptionLifecycle.trial => _beforeBoundary(now, record.trialEndsAt),
+      SubscriptionLifecycle.active => _beforeBoundary(
         now,
         record.currentPeriodEndsAt,
       ),
-      SubscriptionLifecycle.gracePeriod => _notAfter(
+      SubscriptionLifecycle.gracePeriod => _beforeBoundary(
         now,
         record.gracePeriodEndsAt,
       ),
-      SubscriptionLifecycle.cancelled => _notAfter(
+      SubscriptionLifecycle.cancelled => _beforeBoundary(
         now,
         record.currentPeriodEndsAt,
       ),
@@ -76,10 +76,12 @@ final class EntitlementResolver {
     };
   }
 
-  bool _notAfter(DateTime now, DateTime? boundary) {
+  bool _beforeBoundary(DateTime now, DateTime? boundary) {
     if (boundary == null) {
       return false;
     }
-    return !now.isAfter(boundary.toUtc());
+    // Store and SQL lifecycle authorities treat the boundary instant itself
+    // as expired. Keeping the client strict prevents a one-tick stale grant.
+    return boundary.toUtc().isAfter(now.toUtc());
   }
 }

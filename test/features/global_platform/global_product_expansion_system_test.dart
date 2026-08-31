@@ -17,8 +17,8 @@ void main() {
           store: store,
           audit: audit,
         ),
-        medical: MedicalDeviceRuntime(
-          providers: [TestMedical()],
+        fitness: FitnessDeviceRuntime(
+          providers: [TestFitness()],
           store: store,
           audit: audit,
         ),
@@ -70,7 +70,8 @@ void main() {
 
       expect(state.capabilityCount, greaterThanOrEqualTo(5));
       expect(state.healthSignals, isNotEmpty);
-      expect(state.medicalMeasurements.single.value, 120);
+      expect(state.fitnessMeasurements.single.kind, 'weight');
+      expect(state.fitnessMeasurements.single.value, 80);
       expect(state.status, GlobalRuntimeStatus.blocked);
       expect(state.auditCount, greaterThan(0));
     },

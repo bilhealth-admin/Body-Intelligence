@@ -43,7 +43,7 @@ final class ServerEntitlementRepository {
           closedTestRows.isNotEmpty &&
           closedTestRows.first['active'] == true &&
           closedTestExpiresAt != null &&
-          !now.isAfter(closedTestExpiresAt);
+          closedTestExpiresAt.isAfter(now);
       final rows = await client
           .from('bil_subscriptions')
           .select()
@@ -239,7 +239,7 @@ final class VerifiedEntitlementSessionCache {
   }) {
     final entry = _entries[ownerId];
     if (entry == null) return null;
-    if (now.toUtc().isAfter(entry.validUntil)) {
+    if (!entry.validUntil.isAfter(now.toUtc())) {
       _entries.remove(ownerId);
       return null;
     }

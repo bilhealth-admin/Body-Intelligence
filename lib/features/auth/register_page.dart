@@ -106,7 +106,7 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Center(child: BilWordmark(height: 44)),
+                  const Center(child: BilFullWordmark(height: 44)),
                   Text(
                     tr('Create your private account', 'أنشئ حسابك الخاص'),
                     textAlign: TextAlign.center,

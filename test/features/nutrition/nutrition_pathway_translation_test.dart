@@ -4,15 +4,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
-    'all eleven pathways have balanced French Spanish and Turkish content',
+    'all ten release pathways have balanced French Spanish and Turkish content',
     () {
       final ids = nutritionPathways.map((plan) => plan.id).toSet();
-      expect(ids, hasLength(11));
+      expect(ids, hasLength(10));
       expect(ids, contains('carb-cycling'));
+      expect(ids, isNot(contains('psmf')));
       for (final locale in const ['fr', 'es', 'tr']) {
         final localized = nutritionPathwayTranslations[locale]!;
-        expect(localized.keys.toSet(), ids, reason: locale);
-        for (final value in localized.values) {
+        expect(localized.keys, containsAll(ids), reason: locale);
+        for (final id in ids) {
+          final value = localized[id]!;
           expect(value.title.trim(), isNotEmpty);
           expect(value.subtitle.trim(), isNotEmpty);
           expect(value.tags, hasLength(3));
@@ -36,10 +38,6 @@ void main() {
     expect(
       nutritionPathwayTranslations['es']!['pregnancy']!.tags,
       contains('Seguridad alimentaria'),
-    );
-    expect(
-      nutritionPathwayTranslations['tr']!['psmf']!.tracking,
-      contains('Güvenlik durumu'),
     );
   });
 }

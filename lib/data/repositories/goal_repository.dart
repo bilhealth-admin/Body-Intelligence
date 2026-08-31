@@ -53,4 +53,12 @@ class GoalRepository {
           ..limit(1))
         .watchSingleOrNull();
   }
+
+  Future<Goal?> getActive() {
+    return (_database.select(_database.goals)
+          ..where((row) => row.deletedAt.isNull())
+          ..orderBy([(row) => OrderingTerm.desc(row.updatedAt)])
+          ..limit(1))
+        .getSingleOrNull();
+  }
 }

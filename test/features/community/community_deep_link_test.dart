@@ -167,6 +167,7 @@ void main() {
       'community/safety/': '/community/safety',
       'settings/': '/settings',
       'settings/notifications/': '/notification-settings',
+      'settings/ai-coach/': '/intelligence-center',
     };
     for (final entry in expected.entries) {
       expect(

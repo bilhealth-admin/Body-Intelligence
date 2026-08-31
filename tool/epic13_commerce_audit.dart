@@ -16,6 +16,10 @@ void requireText(String source, String value, String message) {
   if (!source.contains(value)) _fail(message);
 }
 
+void requirePattern(RegExp pattern, String source, String message) {
+  if (!pattern.hasMatch(source)) _fail(message);
+}
+
 void reject(RegExp pattern, String source, String message) {
   if (pattern.hasMatch(source)) _fail(message);
 }
@@ -30,6 +34,9 @@ void main() {
   final environment = read('lib/app/environment/app_environment.dart');
   final backend = read(
     'supabase/functions/verify-store-purchase/store_backend.ts',
+  );
+  final storeEnvironment = read(
+    'supabase/functions/verify-store-purchase/store_environment.ts',
   );
   final migration = read(
     'supabase/migrations/202608040004_bil_store_entitlement_truth.sql',
@@ -125,9 +132,9 @@ void main() {
     'RTDN identity check missing.',
   );
   requireText(backend, 'signedPayload', 'Apple Notifications V2 missing.');
-  requireText(
+  requirePattern(
+    RegExp(r'''header\.alg\s*!==\s*["']ES256["']'''),
     backend,
-    "header.alg !== 'ES256'",
     'Apple JWS algorithm check missing.',
   );
   requireText(
@@ -155,9 +162,9 @@ void main() {
     'purchases/voidedpurchases',
     'Google refund/revocation reconciliation missing.',
   );
-  requireText(
+  requirePattern(
+    RegExp(r'''body\.action\s*===\s*["']reconcile["']'''),
     backend,
-    "body.action === 'reconcile'",
     'Scheduled reconciliation action missing.',
   );
   requireText(
@@ -166,9 +173,19 @@ void main() {
     'Verification rate limit missing.',
   );
   requireText(
-    backend,
-    "if (value === 'sandbox' || value === 'production')",
+    storeEnvironment,
+    "normalized === 'sandbox' || normalized === 'production'",
     'Sandbox and production store environments must be validated strictly.',
+  );
+  requireText(
+    backend,
+    'googleSubscriptionEnvironment(data.testPurchase)',
+    'Google environment must come from the authenticated Publisher response.',
+  );
+  requireText(
+    backend,
+    'verifiedStoreEnvironment(payload.environment)',
+    'Apple environment must come from the verified transaction JWS.',
   );
 
   requireText(
@@ -197,9 +214,9 @@ void main() {
     'bil_persist_verified_store_purchase',
     'Atomic subscription and entitlement persistence is missing.',
   );
-  requireText(
+  requirePattern(
+    RegExp(r'''admin\.rpc\(\s*["']bil_persist_verified_store_purchase["']'''),
     backend,
-    "admin.rpc(\n    'bil_persist_verified_store_purchase'",
     'The verification backend must use atomic entitlement persistence.',
   );
 

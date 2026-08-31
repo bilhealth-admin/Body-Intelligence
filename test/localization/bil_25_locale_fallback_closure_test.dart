@@ -78,4 +78,24 @@ void main() {
       }
     }
   });
+
+  test('accessibility and wellness labels never fall back to English', () {
+    for (final source in const [
+      'Read answer aloud',
+      'Wellness programs',
+      'Verified workout video library',
+    ]) {
+      for (final tag in BilLocalePolicy.productionTags) {
+        final translated = RuntimeCopy.resolve(source, tag);
+        expect(translated, isNotNull, reason: '$tag: $source');
+        expect(translated!.trim(), isNotEmpty, reason: '$tag: $source');
+        if (tag != 'en') {
+          expect(translated, isNot(source), reason: '$tag: $source');
+        }
+        for (final marker in const ['Ã', 'Â', '�']) {
+          expect(translated, isNot(contains(marker)), reason: '$tag: $source');
+        }
+      }
+    }
+  });
 }

@@ -17,9 +17,10 @@ import '../../features/nutrition/services/offline_barcode_resolver.dart';
 part 'food_repository_ranking.dart';
 part 'food_repository_validation.dart';
 part 'food_repository_access.dart';
+part 'food_repository_read_streams.dart';
 
 class FoodRepository
-    with _FoodRepositoryAccessMethods
+    with _FoodRepositoryReadStreams, _FoodRepositoryAccessMethods
     implements UnifiedFoodRepository {
   @override
   final AppDatabase _database;
@@ -165,39 +166,6 @@ class FoodRepository
             ),
           );
     });
-  }
-
-  Stream<List<Food>> watchFavorites() async* {
-    final query =
-        _database.select(_database.foods).join([
-            innerJoin(
-              _database.favorites,
-              _database.favorites.foodId.equalsExp(_database.foods.id),
-            ),
-          ])
-          ..where(_database.foods.deletedAt.isNull())
-          ..orderBy([OrderingTerm.asc(_database.foods.name)]);
-    List<Food> decode(List<TypedResult> rows) =>
-        rows.map((row) => row.readTable(_database.foods)).toList();
-    yield decode(await query.get());
-    yield* query.watch().map(decode).skip(1);
-  }
-
-  Stream<List<Food>> watchRecent({int limit = 20}) async* {
-    final query =
-        _database.select(_database.foods).join([
-            innerJoin(
-              _database.recentFoods,
-              _database.recentFoods.foodId.equalsExp(_database.foods.id),
-            ),
-          ])
-          ..where(_database.foods.deletedAt.isNull())
-          ..orderBy([OrderingTerm.desc(_database.recentFoods.lastUsedAt)])
-          ..limit(limit);
-    List<Food> decode(List<TypedResult> rows) =>
-        rows.map((row) => row.readTable(_database.foods)).toList();
-    yield decode(await query.get());
-    yield* query.watch().map(decode).skip(1);
   }
 
   Stream<List<Food>> watchFoods() {

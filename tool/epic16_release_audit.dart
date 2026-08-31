@@ -19,6 +19,15 @@ void _require(bool condition, String message) {
   if (!condition) _fail(message);
 }
 
+String _releaseVersion(String pubspec) {
+  final match = RegExp(
+    r'^version:\s*([0-9]+\.[0-9]+\.[0-9]+\+[0-9]+)\s*(?:#.*)?$',
+    multiLine: true,
+  ).firstMatch(pubspec);
+  if (match == null) _fail('pubspec.yaml has no canonical release version');
+  return match.group(1)!;
+}
+
 void main() {
   final external = _json(
     'docs/release/BIL_EPIC16_EXTERNAL_ACCOUNT_STATUS.json',
@@ -27,6 +36,10 @@ void main() {
   final platform = _json('docs/release/BIL_EPIC15_PLATFORM_METADATA.json');
   final store = _json('docs/release/BIL_EPIC15_STORE_METADATA.json');
   final pubspec = _read('pubspec.yaml');
+  final releaseVersion = _releaseVersion(pubspec);
+  final candidateGate = _read(
+    'docs/launch_readiness/BIL_RELEASE_CANDIDATE_GATE.md',
+  );
   final android = _read('android/app/build.gradle.kts');
   final ios = _read('ios/Runner.xcodeproj/project.pbxproj');
   final environment = _read('lib/app/environment/app_environment.dart');
@@ -44,6 +57,7 @@ void main() {
     'lib/features/settings/settings_page.dart',
     'lib/features/settings/settings_page_actions.dart',
   ].map(_read).join('\n');
+  final dataExport = _read('lib/app/services/data_export_service.dart');
   final publicPages = _read('docs/release/BIL_EPIC15_PUBLIC_PAGES.md');
 
   _require(
@@ -94,8 +108,8 @@ void main() {
   );
 
   _require(
-    pubspec.contains('version: 1.0.0+1'),
-    'Unexpected release version/build number',
+    candidateGate.contains('Version metadata: `$releaseVersion`'),
+    'Release candidate gate version differs from pubspec.yaml',
   );
   _require(
     pubspec.contains('google_mobile_ads:') &&
@@ -117,11 +131,13 @@ void main() {
   }
   for (final token in const [
     'paidSubscription',
-    'consentMissing',
+    'entitlementUnverified',
     'sensitiveContext',
     'providerUnavailable',
     'offline',
-    'contextualOnly',
+    'ageUnknown',
+    'underage',
+    'allowed',
   ]) {
     _require(adPolicy.contains(token), 'Ad policy is missing $token');
   }
@@ -164,9 +180,10 @@ void main() {
     'Advertising privacy is not reachable from Settings when enabled',
   );
   _require(
-    settings.contains('Choose where to save your private export.') &&
-        !settings.contains('Copy JSON export to clipboard'),
-    'Local export copy does not match the private OS save/share flow',
+    dataExport.contains('SharePlus.instance.share') &&
+        dataExport.contains('XFile.fromData') &&
+        !dataExport.contains('Clipboard'),
+    'Private export must use the OS share/save boundary without clipboard data',
   );
   final forbiddenAdMarkers = RegExp(
     r'ca-app-pub-3940256099942544|testAdUnit|sampleAdUnit|demoAdUnit',
@@ -208,6 +225,7 @@ void main() {
   stdout.writeln('EPIC16_RELEASE_AUDIT=PASS');
   stdout.writeln('ANDROID_IDENTIFIER=$identifier');
   stdout.writeln('IOS_IDENTIFIER=$identifier');
+  stdout.writeln('VERSION=$releaseVersion');
   stdout.writeln(
     'IDENTIFIER_CHANGE=OWNER_APPROVED_COM_BILHEALTH_BODYINTELLIGENCELOG',
   );

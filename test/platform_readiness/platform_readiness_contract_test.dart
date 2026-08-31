@@ -27,7 +27,7 @@ void main() {
   test('web does not claim native health or BLE', () {
     for (final capability in [
       PlatformCapability.nativeHealth,
-      PlatformCapability.medicalBluetooth,
+      PlatformCapability.fitnessBluetooth,
     ]) {
       final status = PlatformReadinessMatrix.status(
         platform: BilRuntimePlatform.web,

@@ -15,6 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "artifacts/meal_catalog/recipe_canonical_100.json"
+VERIFIED_SOURCE = ROOT / "artifacts/meal_catalog/recipe_canonical_100_verified.json"
 TERMS_OUTPUT = ROOT / "artifacts/meal_catalog/recipe_generated_locale_terms_25.json"
 TARGETS = {
     "ar": "ar", "en": "en", "fr": "fr", "es": "es", "tr": "tr",
@@ -267,6 +268,206 @@ CORRECTED_INGREDIENTS_EN = {
     ],
 }
 
+# Offline, corpus-pattern repairs for the reviewed catalog. These entries fix
+# target arrays that were accidentally left byte-for-byte equal to English
+# when the primary-locale rows were first materialized. Wording and formatting
+# follow translations already used by the surrounding reviewed corpus; no
+# network translation or nutrition data is involved.
+EXACT_ENGLISH_COPY_REPAIRS = {
+    ("jareesh-chicken", "ar", "ingredients"): [
+        "420 جرام قمح",
+        "700 جرام صدر دجاج",
+        "250 جرام زبادي",
+        "180 جرام بصل",
+    ],
+    ("chicken-kabsa", "ar", "steps"): [
+        "قِس المكونات وجهّزها: الأرز، صدر الدجاج، الطماطم، البصل، الجزر.",
+        "يُطهى تحت الغطاء ثم يُطهى على البخار حتى تنضج الحبوب.",
+        "تقسم إلى الحصص المذكورة وتقدم.",
+    ],
+    ("egyptian-koshari", "ar", "steps"): [
+        "قِس المكونات وجهّزها: الأرز، العدس، الحمص، البصل، صلصة الطماطم.",
+        "اطهي المكونات بشكل منفصل، ثم ضعيها في طبقات قبل التقديم.",
+        "تقسم إلى الحصص المذكورة وتقدم.",
+    ],
+    ("fatta-chicken", "ar", "steps"): [
+        "قِس المكونات وجهّزها: الأرز، صدر الدجاج، خبز البيتا، الزبادي.",
+        "اطهي المكونات بشكل منفصل، ثم ضعيها في طبقات قبل التقديم.",
+        "تقسم إلى الحصص المذكورة وتقدم.",
+    ],
+    ("machboos-fish", "ar", "steps"): [
+        "قِس المكونات وجهّزها: سمك النهاش، الأرز، الطماطم، البصل.",
+        "يُطهى تحت الغطاء ثم يُطهى على البخار حتى تنضج الحبوب.",
+        "تقسم إلى الحصص المذكورة وتقدم.",
+    ],
+    ("maqluba-eggplant-chicken", "ar", "steps"): [
+        "قِس المكونات وجهّزها: الأرز، صدر الدجاج، الباذنجان، الطماطم.",
+        "يُطهى تحت الغطاء ثم يُطهى على البخار حتى تنضج الحبوب.",
+        "تقسم إلى الحصص المذكورة وتقدم.",
+    ],
+    ("palestinian-musakhan", "ar", "steps"): [
+        "قِس المكونات وجهّزها: صدر الدجاج، البصل، زيت الزيتون، خبز البيتا.",
+        "اخبزيها حتى تنضج تمامًا وتكتسب لونًا بنيًا متساويًا.",
+        "تقسم إلى الحصص المذكورة وتقدم.",
+    ],
+    ("sayadieh-fish-rice", "ar", "steps"): [
+        "قِس المكونات وجهّزها: سمك القد، الأرز، البصل، الطماطم.",
+        "يُطهى تحت الغطاء ثم يُطهى على البخار حتى تنضج الحبوب.",
+        "تقسم إلى الحصص المذكورة وتقدم.",
+    ],
+    ("tunisian-couscous-vegetables", "ar", "steps"): [
+        "قِس المكونات وجهّزها: الكسكس، الحمص، الكوسة، الجزر، الطماطم.",
+        "يُطهى تحت الغطاء ثم يُطهى على البخار حتى تنضج الحبوب.",
+        "تقسم إلى الحصص المذكورة وتقدم.",
+    ],
+    ("aji-gallina-ligero", "es", "ingredients"): [
+        "800 g de pechuga de pollo",
+        "350 g de leche",
+        "180 g de pan",
+        "180 g de cebolla",
+        "70 g de nueces",
+    ],
+    ("arroz-con-gandules", "es", "ingredients"): [
+        "420 g de arroz",
+        "350 g de gandules",
+        "300 g de tomate",
+        "200 g de pimiento morrón",
+        "160 g de cebolla",
+    ],
+    ("casamiento-hondureno", "es", "ingredients"): [
+        "350 g de arroz",
+        "400 g de frijoles rojos",
+        "180 g de pimiento morrón",
+        "140 g de cebolla",
+    ],
+    ("fabada-ligera", "es", "ingredients"): [
+        "500 g de judías blancas",
+        "300 g de salchicha de pavo",
+        "180 g de cebolla",
+        "300 g de tomate",
+        "200 g de espinacas",
+    ],
+    ("lentejas-verduras", "es", "ingredients"): [
+        "400 g de lentejas",
+        "220 g de zanahoria",
+        "350 g de tomate",
+        "250 g de espinacas",
+        "180 g de cebolla",
+    ],
+    ("pollo-chilindron", "es", "ingredients"): [
+        "800 g de pechuga de pollo",
+        "400 g de pimiento morrón",
+        "450 g de tomate",
+        "200 g de cebolla",
+    ],
+    ("pozole-rojo-pollo", "es", "ingredients"): [
+        "900 g de pechuga de pollo",
+        "700 g de maíz pozolero",
+        "400 g de tomate",
+        "180 g de cebolla",
+        "300 g de repollo",
+    ],
+    ("seco-pollo-quinoa", "es", "ingredients"): [
+        "800 g de pechuga de pollo",
+        "360 g de quinoa",
+        "350 g de tomate",
+        "220 g de guisantes",
+        "180 g de cebolla",
+    ],
+    ("arroz-con-gandules", "es", "steps"): [
+        "Mide y prepara: arroz, gandules, tomate, pimiento morrón y cebolla.",
+        "Cocine tapado y luego cocine al vapor hasta que los granos estén tiernos.",
+        "Dividir en las porciones indicadas y servir.",
+    ],
+    ("casamiento-hondureno", "es", "steps"): [
+        "Mide y prepara: arroz, frijoles rojos, pimiento morrón y cebolla.",
+        "Sofríe por etapas a fuego medio hasta que todo esté bien cocido.",
+        "Dividir en las porciones indicadas y servir.",
+    ],
+    ("enchiladas-frijol-pollo", "es", "steps"): [
+        "Mide y prepara: pechuga de pollo, frijoles negros, tortilla de maíz y tomate.",
+        "Hornee hasta que esté bien cocido y dorado uniformemente.",
+        "Dividir en las porciones indicadas y servir.",
+    ],
+    ("gallo-pinto-huevo", "es", "steps"): [
+        "Mide y prepara: arroz, frijoles negros, huevo, pimiento morrón y cebolla.",
+        "Sofríe por etapas a fuego medio hasta que todo esté bien cocido.",
+        "Dividir en las porciones indicadas y servir.",
+    ],
+    ("tacos-pescado-col", "es", "steps"): [
+        "Mide y prepara: bacalao, tortilla de maíz, repollo, tomate y aguacate.",
+        "Ase en tandas hasta que esté bien cocido y ligeramente carbonizado.",
+        "Dividir en las porciones indicadas y servir.",
+    ],
+    ("truite-erable-quinoa", "fr", "ingredients"): [
+        "700 g de truite",
+        "280 g de quinoa",
+        "300 g de haricots verts",
+        "40 g de sirop d’érable",
+    ],
+    ("cabillaud-poireaux-pommes", "fr", "steps"): [
+        "Mesurer et préparer : cabillaud, poireau, pomme de terre, lait.",
+        "Cuire au four jusqu'à ce qu'il soit bien cuit et uniformément doré.",
+        "Répartissez dans les portions indiquées et servez.",
+    ],
+    ("cassoulet-haricots-dinde", "fr", "steps"): [
+        "Mesurer et préparer : haricots blancs, poitrine de dinde, tomate, carotte, oignon.",
+        "Cuire au four jusqu'à ce qu'il soit bien cuit et uniformément doré.",
+        "Répartissez dans les portions indiquées et servez.",
+    ],
+    ("couscous-poisson-legumes", "fr", "steps"): [
+        "Mesurer et préparer : couscous, cabillaud, courgette, carotte, tomate.",
+        "Cuire à couvert, puis cuire à la vapeur jusqu'à ce que les grains soient tendres.",
+        "Répartissez dans les portions indiquées et servez.",
+    ],
+    ("pate-chinois-dinde", "fr", "steps"): [
+        "Mesurer et préparer : dinde hachée, pomme de terre, maïs, oignon.",
+        "Cuire au four jusqu'à ce qu'il soit bien cuit et uniformément doré.",
+        "Répartissez dans les portions indiquées et servez.",
+    ],
+    ("quiche-epinards-saumon", "fr", "steps"): [
+        "Mesurer et préparer : saumon, épinards, œuf, lait, pâte à tarte.",
+        "Cuire au four jusqu'à ce qu'il soit bien cuit et uniformément doré.",
+        "Répartissez dans les portions indiquées et servez.",
+    ],
+    ("salade-lentilles-saumon", "fr", "steps"): [
+        "Mesurer et préparer : lentilles, saumon, épinards, tomate.",
+        "Mélanger délicatement et dresser immédiatement avant de servir.",
+        "Répartissez dans les portions indiquées et servez.",
+    ],
+    ("saumon-bleuet-orge", "fr", "steps"): [
+        "Mesurer et préparer : saumon, orge, bleuets, haricots verts.",
+        "Cuire au four jusqu'à ce qu'il soit bien cuit et uniformément doré.",
+        "Répartissez dans les portions indiquées et servez.",
+    ],
+    ("thieboudienne-poisson", "fr", "steps"): [
+        "Mesurer et préparer : cabillaud, riz, tomate, carotte, chou.",
+        "Cuire à couvert, puis cuire à la vapeur jusqu'à ce que les grains soient tendres.",
+        "Répartissez dans les portions indiquées et servez.",
+    ],
+    ("tourtiere-lentilles", "fr", "steps"): [
+        "Mesurer et préparer : lentilles, pomme de terre, champignons, oignon, pâte à tarte.",
+        "Cuire au four jusqu'à ce qu'il soit bien cuit et uniformément doré.",
+        "Répartissez dans les portions indiquées et servez.",
+    ],
+    ("truite-erable-quinoa", "fr", "steps"): [
+        "Mesurer et préparer : truite, quinoa, haricots verts, sirop d’érable.",
+        "Cuire au four jusqu'à ce qu'il soit bien cuit et uniformément doré.",
+        "Répartissez dans les portions indiquées et servez.",
+    ],
+    ("moroccan-harira", "zh-Hans", "ingredients"): [
+        "250 克 鹰嘴豆",
+        "180 克 小扁豆",
+        "500 克 番茄",
+        "180 克 洋葱",
+        "120 克 芹菜",
+    ],
+}
+
+# Whole-array equality is forbidden unless a future reviewed recipe consists
+# exclusively of proper-name terms and is explicitly approved here.
+EXACT_ENGLISH_COPY_ALLOWLIST: set[tuple[str, str, str]] = set()
+
 
 def translate(texts: list[str], source: str, target: str) -> list[str]:
     values: list[str] = []
@@ -478,15 +679,110 @@ def ensure_cuisine_prefixes() -> None:
     print(f"RECIPE_CUISINE_PREFIXES=PASS locales={len(localized)}")
 
 
+def exact_english_copy_violations(
+    records: list[dict],
+) -> list[tuple[str, str, str]]:
+    violations: list[tuple[str, str, str]] = []
+    for record in records:
+        english = record["localizations"]["en"]
+        for locale, localization in record["localizations"].items():
+            if locale == "en":
+                continue
+            for field in ("ingredients", "steps"):
+                key = (record["canonicalId"], locale, field)
+                if (
+                    localization[field] == english[field]
+                    and key not in EXACT_ENGLISH_COPY_ALLOWLIST
+                ):
+                    violations.append(key)
+    return sorted(violations)
+
+
+def repair_exact_english_copies(records: list[dict]) -> int:
+    by_id = {record["canonicalId"]: record for record in records}
+    repaired = 0
+    for key, replacement in EXACT_ENGLISH_COPY_REPAIRS.items():
+        recipe_id, locale, field = key
+        record = by_id.get(recipe_id)
+        if record is None:
+            raise RuntimeError(f"localization repair recipe missing: {recipe_id}")
+        english = record["localizations"]["en"][field]
+        localization = record["localizations"].get(locale)
+        if localization is None:
+            raise RuntimeError(
+                f"localization repair locale missing: {recipe_id}/{locale}"
+            )
+        current = localization[field]
+        if current != replacement:
+            if current != english:
+                raise RuntimeError(
+                    "localization repair source changed unexpectedly: "
+                    f"{recipe_id}/{locale}/{field}"
+                )
+            if len(replacement) != len(current):
+                raise RuntimeError(
+                    "localization repair array length mismatch: "
+                    f"{recipe_id}/{locale}/{field}"
+                )
+            localization[field] = replacement
+            repaired += 1
+        localization["translationStatus"] = "deterministic-localized"
+
+    violations = exact_english_copy_violations(records)
+    if violations:
+        preview = ", ".join("/".join(value) for value in violations[:5])
+        raise RuntimeError(
+            f"exact English localization copies remain ({len(violations)}): {preview}"
+        )
+    return repaired
+
+
+def sync_verified_localizations(records: list[dict]) -> None:
+    payload = json.loads(VERIFIED_SOURCE.read_text(encoding="utf-8-sig"))
+    verified_records = payload.get("records", [])
+    source_by_id = {record["canonicalId"]: record for record in records}
+    verified_by_id = {record["canonicalId"]: record for record in verified_records}
+    if set(source_by_id) != set(verified_by_id):
+        raise RuntimeError("verified recipe IDs do not match localization source")
+    for recipe_id, verified in verified_by_id.items():
+        source = source_by_id[recipe_id]
+        if source["contentFingerprint"] != verified["contentFingerprint"]:
+            raise RuntimeError(
+                f"verified localization fingerprint mismatch: {recipe_id}"
+            )
+        verified["localizations"] = source["localizations"]
+    if exact_english_copy_violations(verified_records):
+        raise RuntimeError("verified recipe localizations failed exact-copy audit")
+    VERIFIED_SOURCE.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--write", action="store_true")
+    parser.add_argument("--repair-exact-copies-offline", action="store_true")
     args = parser.parse_args()
-    if not args.write:
+    if not args.write and not args.repair_exact_copies_offline:
         raise SystemExit("Refusing network translation without --write")
 
     payload = json.loads(SOURCE.read_text(encoding="utf-8-sig"))
     records = payload["records"]
+    repaired = repair_exact_english_copies(records)
+    if args.repair_exact_copies_offline:
+        SOURCE.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        sync_verified_localizations(records)
+        print(
+            "RECIPE_EXACT_ENGLISH_COPY_REPAIR=PASS "
+            f"changed={repaired} governed={len(EXACT_ENGLISH_COPY_REPAIRS)}"
+        )
+        print("RECIPE_EXACT_ENGLISH_COPY_VIOLATIONS=0")
+        return
+
     pending: dict[tuple[str, str], list[tuple[dict, int, list[str]]]] = {}
     for record in records:
         source_locale = "en"
@@ -546,6 +842,7 @@ def main() -> None:
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+    sync_verified_localizations(records)
     if TERMS_OUTPUT.exists():
         terms_payload = json.loads(TERMS_OUTPUT.read_text(encoding="utf-8"))
         expected = set(TARGETS).difference(BASE_LOCALES)

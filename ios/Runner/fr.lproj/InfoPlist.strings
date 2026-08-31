@@ -1,8 +1,8 @@
 "NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
-"NSHealthUpdateUsageDescription" = "BIL écrit uniquement les données de santé que vous choisissez, après une autorisation distincte.";
+"NSHealthUpdateUsageDescription" = "BIL écrit des données de poids uniquement après votre autorisation distincte d’écriture dans Santé.";
 "NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Utilisez la caméra uniquement pour scanner un code-barres, examiner une photo de repas ou ajouter une photo privée de profil ou de progression.";
-"NSPhotoLibraryUsageDescription" = "Sélectionnez une photo de repas, de profil ou de progression pour l’examiner avant son enregistrement ou son envoi.";
-"NSMicrophoneUsageDescription" = "BIL utilise le microphone uniquement lorsque vous choisissez de saisir un repas à la voix ou de parler directement à BIL AI Coach.";
-"NSSpeechRecognitionUsageDescription" = "BIL convertit en texte la parole que vous lancez pour enregistrer un repas ou utiliser BIL AI Coach, afin que vous puissiez la vérifier ou l’envoyer.";
+"NSPhotoLibraryUsageDescription" = "BIL accède uniquement à une photo que vous choisissez pour un repas, un profil, une progression, une publication communautaire ou une contribution alimentaire, afin que vous puissiez la vérifier avant l’enregistrement ou l’envoi.";
+"NSMicrophoneUsageDescription" = "BIL utilise le microphone uniquement lorsque vous choisissez de saisir votre poids ou un repas à la voix, ou de parler directement à BIL AI Coach.";
+"NSSpeechRecognitionUsageDescription" = "BIL convertit en texte la parole que vous lancez pour enregistrer votre poids, un repas ou utiliser BIL AI Coach, afin que vous puissiez la vérifier ou l’envoyer.";

@@ -9,6 +9,9 @@ void main() {
       'intelligence_center_message_widgets.dart',
     ).readAsStringSync();
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
+    final linkDomain = File(
+      'lib/features/intelligence_center/domain/intelligence_message.dart',
+    ).readAsStringSync();
     final recipes = File(
       'lib/features/wellness/presentation/recipe_library_page.dart',
     ).readAsStringSync();
@@ -18,7 +21,9 @@ void main() {
 
     expect(bubble, contains('link.isTrustedLocalRoute'));
     expect(bubble, contains('onPressed: () => context.push(link.route)'));
-    expect(bubble, contains('IntelligenceMessageLinkKind.workout'));
+    expect(bubble, contains('IntelligenceMessageLinkKind.recipe'));
+    expect(linkDomain, contains('IntelligenceMessageLinkKind.workout'));
+    expect(linkDomain, contains("'/wellness/workouts/routines'"));
     expect(bubble, contains('TextDirection.rtl'));
     expect(router, contains("queryParameters['recipe']"));
     expect(router, contains("queryParameters['item']"));

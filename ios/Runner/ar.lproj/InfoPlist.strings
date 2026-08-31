@@ -1,8 +1,8 @@
 "NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
-"NSHealthUpdateUsageDescription" = "يكتب BIL فقط السجلات الصحية التي تختارها صراحةً وبعد موافقة منفصلة على الكتابة.";
+"NSHealthUpdateUsageDescription" = "يكتب BIL سجلات الوزن فقط بعد موافقتك بشكل منفصل على إذن الكتابة إلى Health.";
 "NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "تُستخدم الكاميرا فقط عندما تختار مسح باركود أو مراجعة صورة وجبة أو إضافة صورة خاصة للملف أو التقدم.";
-"NSPhotoLibraryUsageDescription" = "اختر صورة وجبة أو ملف أو تقدم لمراجعتها قبل حفظها أو رفعها.";
-"NSMicrophoneUsageDescription" = "يستخدم BIL الميكروفون فقط عندما تختار إدخال وجبة صوتيًا أو التحدث مباشرة مع مدرب BIL الذكي.";
-"NSSpeechRecognitionUsageDescription" = "يحوّل BIL الكلام الذي تبدأه لتسجيل وجبة أو التحدث مع مدرب BIL الذكي إلى نص لتراجعه أو ترسله.";
+"NSPhotoLibraryUsageDescription" = "يصل BIL فقط إلى صورة تختارها لوجبة أو ملف شخصي أو تقدم أو منشور مجتمع أو مساهمة طعام كي تراجعها قبل الحفظ أو الرفع.";
+"NSMicrophoneUsageDescription" = "يستخدم BIL الميكروفون فقط عندما تختار إدخال الوزن أو وجبة صوتيًا، أو التحدث مباشرة مع مدرب BIL الذكي.";
+"NSSpeechRecognitionUsageDescription" = "يحوّل BIL الكلام الذي تبدأه لإدخال الوزن أو تسجيل وجبة أو التحدث مع مدرب BIL الذكي إلى نص لتراجعه أو ترسله.";

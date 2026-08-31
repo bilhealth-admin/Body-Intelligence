@@ -1,8 +1,8 @@
 "NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
-"NSHealthUpdateUsageDescription" = "BIL schreibt nur die Gesundheitsakten, die Sie nach gesonderter Schreiberlaubnis ausdrücklich auswählen.";
+"NSHealthUpdateUsageDescription" = "BIL schreibt Gewichtseinträge nur, nachdem Sie den Schreibzugriff auf Health separat erlaubt haben.";
 "NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Verwenden Sie die Kamera nur, wenn Sie einen Barcode scannen, ein Essensfoto überprüfen oder ein privates Profil oder Fortschrittsfoto hinzufügen möchten.";
-"NSPhotoLibraryUsageDescription" = "Wählen Sie eine Mahlzeit, ein Profil oder ein Fortschrittsfoto zur Überprüfung aus, bevor es gespeichert oder hochgeladen wird.";
-"NSMicrophoneUsageDescription" = "BIL nutzt das Mikrofon nur, wenn Sie eine Mahlzeit per Sprache erfassen oder direkt mit BIL AI Coach sprechen.";
-"NSSpeechRecognitionUsageDescription" = "BIL wandelt von Ihnen gestartete Sprache für die Mahlzeitenerfassung oder BIL AI Coach in Text um, damit Sie ihn prüfen oder senden können.";
+"NSPhotoLibraryUsageDescription" = "BIL greift nur auf ein von Ihnen gewähltes Foto für Mahlzeiten, Profil, Fortschritt, Community-Beiträge oder Lebensmittelbeiträge zu, damit Sie es vor dem Speichern oder Hochladen prüfen können.";
+"NSMicrophoneUsageDescription" = "BIL nutzt das Mikrofon nur, wenn Sie Ihr Gewicht oder eine Mahlzeit per Sprache erfassen oder direkt mit BIL AI Coach sprechen.";
+"NSSpeechRecognitionUsageDescription" = "BIL wandelt von Ihnen gestartete Sprache für die Gewichts- oder Mahlzeitenerfassung oder BIL AI Coach in Text um, damit Sie ihn prüfen oder senden können.";

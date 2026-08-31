@@ -50,9 +50,10 @@ void main() {
 
     test('Diary summary and food rows stay intentionally compact', () {
       final page = source('lib/features/daily_log/daily_log_page.dart');
-      final meals = source(
+      final meals = [
         'lib/features/daily_log/presentation/daily_log_meals_list.dart',
-      );
+        'lib/features/daily_log/presentation/daily_log_meal_detail_items.dart',
+      ].map(source).join('\n');
       final row = between(
         meals,
         'class _DiaryFoodRow',
@@ -69,44 +70,65 @@ void main() {
       expect(row, isNot(contains('MealItemEvidencePresenter')));
     });
 
-    test('Food Search has four tools and compact tab-free results only', () {
-      final search = source(
-        'lib/features/daily_log/daily_log_meal_search.dart',
-      );
-      final tile = between(
-        search,
-        'Widget _mealSearchFoodTile',
-        'String _displayFoodName',
-      );
-
-      for (final removedTab in const [
-        'all',
-        'myMeals',
-        'myRecipes',
-        'myFoods',
-      ]) {
-        expect(
-          search,
-          isNot(contains("_mealCopy('$removedTab')")),
-          reason: 'removed tab $removedTab',
+    test(
+      'Food Search stays focused while global Quick Add owns capture tools',
+      () {
+        final search = source(
+          'lib/features/daily_log/daily_log_meal_search.dart',
         );
-      }
-      for (final tool in const [
-        'barcodeScan',
-        'voiceLog',
-        'mealScan',
-        'quickAdd',
-      ]) {
-        expect(search, contains("_mealCopy('$tool')"), reason: 'tool $tool');
-      }
-      expect(tile, contains('food.calories.round()'));
-      expect(tile, contains('servingSize'));
-      expect(tile, isNot(contains('food.protein')));
-      expect(tile, isNot(contains('food.carbs')));
-      expect(tile, isNot(contains('food.fats')));
-      expect(tile, isNot(contains('food.source')));
-      expect(tile, isNot(contains('verifiedSource')));
-    });
+        final diary = [
+          'lib/features/daily_log/daily_log_page.dart',
+          'lib/features/daily_log/daily_log_navigation_actions.dart',
+        ].map(source).join('\n');
+        final shell = source('lib/app/router/responsive_app_shell.dart');
+        final tile = between(
+          search,
+          'Widget _mealSearchFoodTile',
+          'String _displayFoodName',
+        );
+
+        for (final removedTab in const [
+          'all',
+          'myMeals',
+          'myRecipes',
+          'myFoods',
+        ]) {
+          expect(
+            search,
+            isNot(contains("_mealCopy('$removedTab')")),
+            reason: 'removed tab $removedTab',
+          );
+        }
+        for (final tool in const [
+          'barcodeScan',
+          'voiceLog',
+          'mealScan',
+          'quickAdd',
+        ]) {
+          expect(
+            search,
+            isNot(contains("_mealCopy('$tool')")),
+            reason: 'Focused meal search must not duplicate global tool $tool',
+          );
+        }
+        expect(shell, contains("'/daily-log?action=barcode&from=\$origin'"));
+        expect(shell, contains("'/daily-log?action=voice&from=\$origin'"));
+        expect(shell, contains("'/daily-log?action=photo&from=\$origin'"));
+        expect(diary, contains("case 'barcode':"));
+        expect(diary, contains('await _scanBarcode();'));
+        expect(diary, contains("case 'voice':"));
+        expect(diary, contains('await _captureMealVoice();'));
+        expect(diary, contains("case 'photo':"));
+        expect(diary, contains('await _analyzeMealImage();'));
+        expect(tile, contains('food.calories.round()'));
+        expect(tile, contains('servingSize'));
+        expect(tile, isNot(contains('food.protein')));
+        expect(tile, isNot(contains('food.carbs')));
+        expect(tile, isNot(contains('food.fats')));
+        expect(tile, isNot(contains('food.source')));
+        expect(tile, isNot(contains('verifiedSource')));
+      },
+    );
 
     test('Add Food owns controls, calorie macros, then Nutrition Facts', () {
       final entry = source('lib/features/daily_log/daily_log_meal_entry.dart');
@@ -121,9 +143,7 @@ void main() {
         "for (final unit in const ['g', 'oz', 'kg', 'lb'])",
       );
       final ring = details.indexOf('DailyLogCalorieMacroRing(');
-      final facts = details.indexOf(
-        "FoodPresentationLocalizer.label('nutritionFacts', locale)",
-      );
+      final facts = details.indexOf("Key('daily-log-nutrition-facts')");
       expect(serving, greaterThanOrEqualTo(0));
       expect(unit, greaterThan(serving));
       expect(ring, greaterThan(unit));
@@ -134,7 +154,10 @@ void main() {
     test('Water is a focused route instead of a full inline diary editor', () {
       final router = source('lib/app/router/app_router.dart');
       final shell = source('lib/app/router/responsive_app_shell.dart');
-      final diary = source('lib/features/daily_log/daily_log_page.dart');
+      final diary = [
+        'lib/features/daily_log/daily_log_page.dart',
+        'lib/features/daily_log/daily_log_navigation_actions.dart',
+      ].map(source).join('\n');
       final water = source('lib/features/daily_log/daily_water_page.dart');
 
       expect(router, contains("path: '/daily-log/water'"));
@@ -175,12 +198,15 @@ void main() {
   });
 
   group('plans and premium route acceptance', () {
-    test('Plans keeps a crown, dynamic store truth, and explicit trial CTA', () {
+    test('Plans keeps a crown and metadata-backed store truth', () {
       final plans = source(
         'lib/features/commerce/presentation/bil_store_plans_page.dart',
       );
       final components = source(
         'lib/features/commerce/presentation/bil_dynamic_store_components.dart',
+      );
+      final offers = source(
+        'lib/features/commerce/presentation/bil_dynamic_store_offers.dart',
       );
       final copy = source(
         'lib/features/commerce/presentation/bil_store_copy.dart',
@@ -189,9 +215,19 @@ void main() {
       expect(plans, contains('BilDynamicStoreOffers('));
       expect(components, contains('PremiumCrownEmblem('));
       expect(copy, contains("'premium': 'Premium'"));
-      expect(copy, contains("'premium_ai_coach': 'Premium AI Coach'"));
+      expect(copy, contains("'premium_ai_coach': 'AI Coach'"));
+      expect(copy, isNot(contains("'premium_ai_coach': 'Premium + AI Coach'")));
       expect(copy, contains("'trial_7_days': '7 days free'"));
       expect(copy, contains("'premium_benefit_trial'"));
+      expect(offers, contains('offer.trialEligible == true'));
+      expect(
+        offers,
+        contains("const {'P1W', 'P7D'}.contains(offer.trialPeriodIso8601)"),
+      );
+      expect(
+        offers,
+        contains("const {'P1M', 'P1Y'}.contains(offer.billingPeriodIso8601)"),
+      );
     });
 
     test('route glass paints real content, blurs it, and blocks its input', () {

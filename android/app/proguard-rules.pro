@@ -3,7 +3,7 @@
 -keep class com.bilhealth.bodyintelligencelog.MainActivity { *; }
 -keep class com.bilhealth.bodyintelligencelog.PermissionsRationaleActivity { *; }
 -keep class com.bilhealth.bodyintelligencelog.BILGlobalHealthBridge { *; }
--keep class com.bilhealth.bodyintelligencelog.BILMedicalBleBridge { *; }
+-keep class com.bilhealth.bodyintelligencelog.BILFitnessBleBridge { *; }
 
 # Room creates generated database implementations by class name. Keep the
 # WorkManager database pair stable under release R8 optimization so AndroidX

@@ -114,7 +114,8 @@ void main() {
 
     expect(storyboard, contains('image="BILLaunchWordmark"'));
     expect(storyboard, contains('red="0.031372549"'));
-    expect(storyboard, contains('green="0.48627451"'));
+    expect(storyboard, contains('green="0.466666667"'));
+    expect(storyboard, contains('blue="0.976470588"'));
     expect(assetCatalog, contains('BILLaunchWordmark.png'));
     expect(flutterSplash, contains('bil_splash_identity.png'));
     expect(flutterSplash, contains('bil_splash_motion.mp4'));

@@ -133,19 +133,18 @@ current workspace, not a substitute for inspecting the final signed AAB.
 | `ACCESS_FINE_LOCATION` | Legacy BLE scanning, `maxSdkVersion=30` | Same as above; never transmit location to ads. |
 | `BLUETOOTH`, `BLUETOOTH_ADMIN` | Legacy BLE, `maxSdkVersion=30` | Compatibility only. |
 | `com.android.vending.BILLING` | Google Play products/subscriptions | Required for Play Billing. |
-| `com.google.android.gms.permission.AD_ID` | Google Mobile Ads identifier | Present through the ads integration, but not inherently required for non-personalized ads. Decide the measurement strategy; if retained, reconcile it in Data Safety/ads disclosures, or use the SDK-supported manifest opt-out and retest. |
-| `ACCESS_ADSERVICES_AD_ID` | Google Mobile Ads/Privacy Sandbox surface | Not established as necessary for contextual/NPA serving. Retain only with a documented release purpose and accurate disclosure, or opt out through supported SDK/manifest controls and retest. |
-| `ACCESS_ADSERVICES_ATTRIBUTION` | Google Mobile Ads attribution surface | Not established as necessary for contextual/NPA serving. Android's Ad Privacy Sandbox was deprecated on 17 October 2025; decide whether attribution remains an intended production purpose. |
+| `com.google.android.gms.permission.AD_ID` | Google Mobile Ads identifier | Explicitly removed from manifest merge; BIL's contextual/non-personalized policy does not use the device advertising identifier. |
+| `ACCESS_ADSERVICES_AD_ID` | Google Mobile Ads/Privacy Sandbox surface | Explicitly removed from manifest merge; no Privacy Sandbox advertising-ID purpose is claimed. |
+| `ACCESS_ADSERVICES_ATTRIBUTION` | Google Mobile Ads attribution surface | Explicitly removed from manifest merge; no cross-app attribution purpose is claimed. |
 | App-specific `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION` | AndroidX protection for dynamic receivers | Internal signature permission; no user prompt. |
 
 The app manifest explicitly removes `ACCESS_ADSERVICES_TOPICS` contributed by
 Google Mobile Ads, because BIL's policy is contextual/non-personalized only.
 Removing Topics avoids an interest-based signal inconsistent with that promise.
-The remaining AD_ID/attribution permissions are merger surfaces, not proof that
-they are required for NPA. If retained, their actual collection and purpose must
-be disclosed. If the owner does not intend identifier/attribution measurement,
-use Google's supported opt-out controls, rebuild the final AAB, and regression-
-test ads/UMP rather than deleting permissions blindly.
+The manifest also removes the Mobile Ads SDK's advertising-ID and attribution
+permissions. BIL does not claim device-ID measurement or cross-app attribution;
+the final signed artifact must preserve these merge removals and contextual ad
+loading must be regression-tested before release.
 
 ### 4.2 Permissions proved absent
 
@@ -156,6 +155,7 @@ test ads/UMP rather than deleting permissions blindly.
 | `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO` | Absent. |
 | `READ_EXTERNAL_STORAGE`, `WRITE_EXTERNAL_STORAGE` | Explicitly removed from manifest merge. |
 | `ACCESS_ADSERVICES_TOPICS` | Explicitly removed from manifest merge. |
+| `com.google.android.gms.permission.AD_ID`, `ACCESS_ADSERVICES_AD_ID`, `ACCESS_ADSERVICES_ATTRIBUTION` | Explicitly removed from manifest merge. |
 | `ACTIVITY_RECOGNITION` | Absent; activity comes from user entry/Health Connect rather than an Android sensor runtime permission. |
 
 ## 5. Health Connect declaration and permission matrix
@@ -639,9 +639,8 @@ The workspace was already heavily modified by other active agents. This audit
 did not reset, overwrite, or claim unrelated work. Its scoped changes are:
 
 1. Removed transitive legacy external-storage permissions from manifest merge.
-2. Removed `ACCESS_ADSERVICES_TOPICS`; left AD_ID/attribution merger surfaces
-   unchanged pending the owner's measurement/opt-out decision and final ad/UMP
-   regression test. Their presence is not asserted as required for NPA.
+2. Removed `ACCESS_ADSERVICES_TOPICS`, AD_ID and attribution merger surfaces;
+   final contextual-ad/UMP regression testing remains required.
 3. Added a public privacy-policy action to the Health Connect rationale.
 4. Added an in-app unsafe/offensive reporting action to rateable AI Coach
    answers and persisted the safety reason through the existing feedback RPC.

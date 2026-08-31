@@ -178,12 +178,12 @@ class _FitnessDeviceSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     String tr(String en, String ar) => connectedHealthText(context, en, ar);
-    final snapshot = ref.watch(medicalDeviceProvider);
-    final controller = ref.read(medicalDeviceProvider.notifier);
+    final snapshot = ref.watch(fitnessDeviceProvider);
+    final controller = ref.read(fitnessDeviceProvider.notifier);
     final busy =
-        snapshot.status == MedicalDeviceConnectionStatus.scanning ||
-        snapshot.status == MedicalDeviceConnectionStatus.requestingPermission ||
-        snapshot.status == MedicalDeviceConnectionStatus.connecting;
+        snapshot.status == FitnessDeviceConnectionStatus.scanning ||
+        snapshot.status == FitnessDeviceConnectionStatus.requestingPermission ||
+        snapshot.status == FitnessDeviceConnectionStatus.connecting;
 
     return PremiumSurface(
       key: const Key('fitness-bluetooth-section'),
@@ -198,60 +198,26 @@ class _FitnessDeviceSection extends ConsumerWidget {
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: PremiumDesignTokens.spaceSm),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final image = Image.asset(
-                'assets/images/connected_health/bil_medical_hub.png',
-                key: const Key('bil-fitness-device-image'),
-                fit: BoxFit.contain,
-                semanticLabel: tr(
-                  'Bluetooth fitness device and smart watch',
-                  'جهاز لياقة وساعة ذكية عبر البلوتوث',
-                ),
-              );
-              final copy = Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    tr(
-                      'Connect verified Bluetooth measurements',
-                      'اربط قياسات البلوتوث الموثوقة',
-                    ),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: PremiumDesignTokens.spaceXs),
-                  Text(
-                    tr(
-                      'Weight, body composition, and heart rate from compatible fitness devices.',
-                      'الوزن وتركيب الجسم ومعدل ضربات القلب من أجهزة اللياقة المتوافقة.',
-                    ),
-                  ),
-                  const SizedBox(height: PremiumDesignTokens.spaceSm),
-                  _FitnessDeviceStatusText(
-                    snapshot: snapshot,
-                    languageCode: Localizations.localeOf(context).languageCode,
-                  ),
-                ],
-              );
-              if (constraints.maxWidth < 620) {
-                return Column(
-                  children: [
-                    SizedBox(height: 190, child: image),
-                    copy,
-                  ],
-                );
-              }
-              return Row(
-                children: [
-                  Expanded(child: SizedBox(height: 210, child: image)),
-                  const SizedBox(width: PremiumDesignTokens.spaceMd),
-                  Expanded(child: copy),
-                ],
-              );
-            },
+          Text(
+            tr(
+              'Connect verified Bluetooth measurements',
+              'اربط قياسات البلوتوث الموثوقة',
+            ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceXs),
+          Text(
+            tr(
+              'Weight, body composition, and heart rate from compatible fitness devices.',
+              'الوزن وتركيب الجسم ومعدل ضربات القلب من أجهزة اللياقة المتوافقة.',
+            ),
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceSm),
+          _FitnessDeviceStatusText(
+            snapshot: snapshot,
+            languageCode: Localizations.localeOf(context).languageCode,
           ),
           if (snapshot.devices.isNotEmpty) ...[
             const SizedBox(height: PremiumDesignTokens.spaceSm),
@@ -325,55 +291,67 @@ class _FitnessDeviceStatusText extends StatelessWidget {
     required this.languageCode,
   });
 
-  final MedicalDeviceSnapshot snapshot;
+  final FitnessDeviceSnapshot snapshot;
   final String languageCode;
 
   @override
   Widget build(BuildContext context) {
     String tr(String en, String ar) => connectedHealthText(context, en, ar);
     final text = switch (snapshot.status) {
-      MedicalDeviceConnectionStatus.unavailable => tr(
+      FitnessDeviceConnectionStatus.unavailable => tr(
         'Bluetooth fitness-device linking is unavailable here.',
         'ربط أجهزة اللياقة عبر البلوتوث غير متاح على هذه المنصة.',
       ),
-      MedicalDeviceConnectionStatus.idle =>
+      FitnessDeviceConnectionStatus.idle =>
         snapshot.devices.isEmpty
             ? tr('Ready to search nearby.', 'جاهز للبحث عن الأجهزة القريبة.')
-            : tr(
-                '${snapshot.devices.length} device(s) found.',
-                'تم العثور على ${snapshot.devices.length} جهاز.',
+            : ConnectedHealthRuntimeCopy.format(
+                context,
+                ConnectedHealthRuntimeCopy.devicesFound,
+                count: MaterialLocalizations.of(
+                  context,
+                ).formatDecimal(snapshot.devices.length),
               ),
-      MedicalDeviceConnectionStatus.requestingPermission => tr(
+      FitnessDeviceConnectionStatus.requestingPermission => tr(
         'Waiting for Bluetooth permission…',
         'بانتظار إذن البلوتوث…',
       ),
-      MedicalDeviceConnectionStatus.scanning => tr(
+      FitnessDeviceConnectionStatus.scanning => tr(
         'Searching nearby…',
         'جارٍ البحث عن الأجهزة القريبة…',
       ),
-      MedicalDeviceConnectionStatus.connecting => tr(
+      FitnessDeviceConnectionStatus.connecting => tr(
         'Connecting securely…',
         'جارٍ الاتصال الآمن…',
       ),
-      MedicalDeviceConnectionStatus.connected => tr(
+      FitnessDeviceConnectionStatus.connected =>
         snapshot.failureCode != null
-            ? 'Fitness device paired, but measurement sync failed (${snapshot.failureCode}).'
+            ? ConnectedHealthRuntimeCopy.format(
+                context,
+                ConnectedHealthRuntimeCopy.measurementSyncFailed,
+                code: snapshot.failureCode,
+              )
             : snapshot.batteryPercent == null
-            ? 'Fitness device connected. Battery was not reported. Last sync: ${_time(context)}.'
-            : 'Fitness device connected. Battery ${snapshot.batteryPercent}%. Last sync: ${_time(context)}.',
-        snapshot.failureCode != null
-            ? 'تم اقتران جهاز اللياقة، لكن فشلت مزامنة القياس (${snapshot.failureCode}).'
-            : snapshot.batteryPercent == null
-            ? 'جهاز اللياقة متصل. لم يرسل الجهاز حالة البطارية. آخر مزامنة: ${_time(context)}.'
-            : 'جهاز اللياقة متصل. البطارية ${snapshot.batteryPercent}٪. آخر مزامنة: ${_time(context)}.',
-      ),
-      MedicalDeviceConnectionStatus.failed => _failureText(context),
+            ? ConnectedHealthRuntimeCopy.format(
+                context,
+                ConnectedHealthRuntimeCopy.connectedWithoutBattery,
+                time: _time(context),
+              )
+            : ConnectedHealthRuntimeCopy.format(
+                context,
+                ConnectedHealthRuntimeCopy.connectedWithBattery,
+                percent: MaterialLocalizations.of(
+                  context,
+                ).formatDecimal(snapshot.batteryPercent!),
+                time: _time(context),
+              ),
+      FitnessDeviceConnectionStatus.failed => _failureText(context),
     };
     return Text(
       text,
       key: const Key('fitness-device-status'),
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-        color: snapshot.status == MedicalDeviceConnectionStatus.failed
+        color: snapshot.status == FitnessDeviceConnectionStatus.failed
             ? Theme.of(context).colorScheme.error
             : Theme.of(context).colorScheme.primary,
         fontWeight: FontWeight.w700,
@@ -423,19 +401,19 @@ class _FitnessDeviceStatusText extends StatelessWidget {
   }
 }
 
-String _fitnessProfileLabel(BuildContext context, BleMedicalProfile profile) =>
+String _fitnessProfileLabel(BuildContext context, BleFitnessProfile profile) =>
     switch (profile) {
-      BleMedicalProfile.weightScale => connectedHealthText(
+      BleFitnessProfile.weightScale => connectedHealthText(
         context,
         'Weight',
         'الوزن',
       ),
-      BleMedicalProfile.bodyComposition => connectedHealthText(
+      BleFitnessProfile.bodyComposition => connectedHealthText(
         context,
         'Body composition',
         'تركيب الجسم',
       ),
-      BleMedicalProfile.heartRate => connectedHealthText(
+      BleFitnessProfile.heartRate => connectedHealthText(
         context,
         'Heart rate',
         'نبض القلب',

@@ -5,7 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../visual_closure/visual_evidence_font.dart';
+
 void main() {
+  setUpAll(loadVisualEvidenceFont);
+
   for (final locale in const [Locale('en'), Locale('ar')]) {
     testWidgets(
       'Plans light reference ${locale.languageCode} 390x844 at 160%',
@@ -23,11 +27,22 @@ void main() {
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            builder: (context, child) => MediaQuery(
-              data: MediaQuery.of(
-                context,
-              ).copyWith(textScaler: const TextScaler.linear(1.6)),
-              child: child!,
+            theme: visualEvidenceTheme(
+              ThemeData(),
+              fontFamily: locale.languageCode == 'ar'
+                  ? 'NotoArabicEvidence'
+                  : 'RobotoEvidence',
+            ),
+            builder: (context, child) => visualEvidenceTextSurface(
+              MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(textScaler: const TextScaler.linear(1.6)),
+                child: child!,
+              ),
+              fontFamily: locale.languageCode == 'ar'
+                  ? 'NotoArabicEvidence'
+                  : 'RobotoEvidence',
             ),
             home: BilStorePlansPage(
               catalog: _PlansVisualCatalog(),
@@ -42,7 +57,11 @@ void main() {
           find.byKey(const ValueKey('store-purchase-cta')),
           findsOneWidget,
         );
-        expect(find.textContaining(r'$'), findsWidgets);
+        expect(find.textContaining('EGP'), findsWidgets);
+        expect(
+          find.text(locale.languageCode == 'ar' ? 'وفّر 36%' : 'Save 36%'),
+          findsOneWidget,
+        );
         await expectLater(
           find.byType(BilStorePlansPage),
           matchesGoldenFile(
@@ -63,20 +82,21 @@ final class _PlansVisualCatalog implements BilStoreCatalogGateway {
       productId: 'premium.monthly',
       kind: BilStoreProductKind.premiumSubscription,
       localizedTitle: 'Monthly',
-      localizedPrice: r'$5.99 / EGP 299',
-      currencyCode: 'USD',
-      priceMicros: 5990000,
+      localizedPrice: 'EGP 129.99',
+      currencyCode: 'EGP',
+      priceMicros: 129990000,
+      storeCountryCode: 'EGY',
       billingPeriodIso8601: 'P1M',
     ),
     BilStoreOfferMetadata(
       productId: 'premium.annual',
       kind: BilStoreProductKind.premiumSubscription,
       localizedTitle: 'Annual',
-      localizedPrice: r'$34.99 / EGP 1,749',
-      currencyCode: 'USD',
-      priceMicros: 34990000,
+      localizedPrice: 'EGP 999.99',
+      currencyCode: 'EGP',
+      priceMicros: 999990000,
+      storeCountryCode: 'EGY',
       billingPeriodIso8601: 'P1Y',
-      savingsPercent: 51,
       trialPeriodIso8601: 'P1W',
       trialEligible: true,
     ),

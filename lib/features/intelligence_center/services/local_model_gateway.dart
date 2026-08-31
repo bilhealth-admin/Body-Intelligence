@@ -8,10 +8,28 @@ enum CoachServiceStatus {
   signedOut,
   consentRequired,
   quotaExhausted,
+  creditsRequired,
   temporarilyUnavailable,
 }
 
 enum CoachAnswerRuntime { cloudPersonalized, onDevice, localFallback }
+
+/// Maps the trusted Edge Function error envelope to a UI-safe state.
+///
+/// Credit exhaustion is intentionally distinct from generic provider quota so
+/// the UI can route directly to AI Coach/Boost purchasing. The status/code
+/// pair must match exactly; aliases and unrelated 402 responses stay generic.
+CoachServiceStatus coachServiceStatusForFunctionError(
+  int status,
+  String? code,
+) => switch ((status, code)) {
+  (401, _) => CoachServiceStatus.signedOut,
+  (403, 'ai_consent_required') => CoachServiceStatus.consentRequired,
+  (403, 'voice_ai_consent_required') => CoachServiceStatus.consentRequired,
+  (402, 'ai_usage_exhausted') => CoachServiceStatus.creditsRequired,
+  (402, _) => CoachServiceStatus.quotaExhausted,
+  _ => CoachServiceStatus.temporarilyUnavailable,
+};
 
 class CoachConversationTurn {
   const CoachConversationTurn({required this.role, required this.content});

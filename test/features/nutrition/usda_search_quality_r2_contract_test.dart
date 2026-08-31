@@ -27,7 +27,11 @@ void main() {
     expect(materializer, contains('hasNewEvidence'));
     expect(materializer, contains('incomingCalories ?? byUuid.calories'));
     expect(materializer, contains('incomingProtein ?? byUuid.protein'));
-    expect(authority, contains('byIdentity'));
+    expect(authority, contains('_mergeCommunity'));
+    expect(authority, contains('_sameFoodIdentity'));
+    expect(authority, contains('FoodSearchNormalizer.normalize(a.name)'));
+    expect(authority, contains('a.servingUnit.toLowerCase()'));
+    expect(authority, contains('(a.servingSize - b.servingSize).abs() < 0.01'));
     expect(
       foodPage,
       contains("final arabic = Localizations.localeOf(context)"),

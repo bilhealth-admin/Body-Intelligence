@@ -5,6 +5,18 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   String source(String path) => File(path).readAsStringSync();
 
+  String librarySource(String path) {
+    final library = File(path);
+    final entrypoint = library.readAsStringSync();
+    final parts = RegExp(r"part '([^']+)';")
+        .allMatches(entrypoint)
+        .map((match) => File('${library.parent.path}/${match.group(1)!}'));
+    return <String>[
+      entrypoint,
+      for (final part in parts) part.readAsStringSync(),
+    ].join('\n');
+  }
+
   test(
     'identity submissions preserve provenance without invented nutrition',
     () {
@@ -29,7 +41,7 @@ void main() {
   );
 
   test('barcode journeys expose the moderated review path', () {
-    final foodPage = source('lib/features/nutrition/food_page.dart');
+    final foodPage = librarySource('lib/features/nutrition/food_page.dart');
     final dailyCaptureActions = source(
       'lib/features/daily_log/daily_log_capture_actions.dart',
     );

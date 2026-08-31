@@ -40,9 +40,9 @@ class DietMacroTarget {
       carbsGrams.isFinite &&
       proteinGrams.isFinite &&
       fatGrams.isFinite &&
-      carbsGrams >= 0 &&
-      proteinGrams >= 0 &&
-      fatGrams >= 0 &&
+      carbsGrams > 0 &&
+      proteinGrams > 0 &&
+      fatGrams > 0 &&
       (calculatedCalories - calories).abs() < .0001;
 
   NutritionGoalTarget toScheduledGoal() {
@@ -65,12 +65,12 @@ abstract final class DietMacroAllocator {
     if (!calories.isFinite ||
         !carbsGrams.isFinite ||
         calories <= 0 ||
-        carbsGrams < 0) {
+        carbsGrams <= 0) {
       return null;
     }
     final carbohydrateEnergy = carbsGrams * 4;
     final remainingEnergy = calories - carbohydrateEnergy;
-    if (remainingEnergy < 0) return null;
+    if (remainingEnergy <= 0) return null;
     final fatEnergy = remainingEnergy * fatLevel.remainingEnergyShare;
     final proteinEnergy = remainingEnergy - fatEnergy;
     final target = DietMacroTarget(
@@ -94,10 +94,10 @@ abstract final class DietMacroAllocator {
     required double grams,
     required DietFatLevel fallbackFatLevel,
   }) {
-    if (!current.isValid || !grams.isFinite || grams < 0) return null;
+    if (!current.isValid || !grams.isFinite || grams <= 0) return null;
     final editedFactor = edited == DietMacroComponent.fat ? 9.0 : 4.0;
     final editedEnergy = grams * editedFactor;
-    if (editedEnergy > current.calories) return null;
+    if (editedEnergy >= current.calories) return null;
     final remainingEnergy = current.calories - editedEnergy;
 
     double carbsEnergy = current.carbsGrams * 4;

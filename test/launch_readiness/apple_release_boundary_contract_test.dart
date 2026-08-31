@@ -127,6 +127,12 @@ void main() {
         expect(localized, contains('"$key"'), reason: '$locale missing $key');
       }
     }
+    expect(
+      info,
+      matches(RegExp(r'<key>ITSAppUsesNonExemptEncryption</key>\s*<false/>')),
+      reason:
+          'The iOS client delegates AES-256-GCM to Apple CryptoKit and ships no non-exempt cipher implementation.',
+    );
   });
 
   test('Apple collected-data declarations follow current cloud boundaries', () {
@@ -252,7 +258,6 @@ void main() {
         '.bloodGlucose',
         '.bloodPressureSystolic',
         '.bloodPressureDiastolic',
-        'enableBackgroundDelivery',
       ]) {
         expect(
           bridge,
@@ -260,6 +265,8 @@ void main() {
           reason: 'Medical/background API remains: $removed',
         );
       }
+      expect(bridge, contains('case "enableBackgroundDelivery"'));
+      expect(bridge, contains('foreground-refresh-only'));
       for (final entitlement in entitlements) {
         expect(entitlement, isNot(contains('healthkit.background-delivery')));
       }

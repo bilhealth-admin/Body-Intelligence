@@ -65,6 +65,8 @@ class _RecipeDiscoveryHeader extends StatelessWidget {
     required this.cuisine,
     required this.visibleCount,
     required this.totalCount,
+    required this.showPremiumMarker,
+    required this.premiumSemanticLabel,
     required this.onSearchChanged,
     required this.onClearSearch,
     required this.onChooseCuisine,
@@ -76,6 +78,8 @@ class _RecipeDiscoveryHeader extends StatelessWidget {
   final String cuisine;
   final int visibleCount;
   final int totalCount;
+  final bool showPremiumMarker;
+  final String premiumSemanticLabel;
   final ValueChanged<String> onSearchChanged;
   final VoidCallback onClearSearch;
   final VoidCallback onChooseCuisine;
@@ -135,53 +139,62 @@ class _RecipeDiscoveryHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              ActionChip(
-                key: const Key('recipe-cuisine-selector'),
-                avatar: const Icon(Icons.public_rounded, size: 17),
-                label: Text(recipeCuisineLabel(context, cuisine)),
-                onPressed: onChooseCuisine,
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            ActionChip(
+              key: const Key('recipe-cuisine-selector'),
+              avatar: const Icon(Icons.public_rounded, size: 17),
+              label: Text(recipeCuisineLabel(context, cuisine)),
+              onPressed: onChooseCuisine,
+              visualDensity: VisualDensity.compact,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              side: BorderSide(
+                color: cuisine == 'all'
+                    ? scheme.outlineVariant
+                    : scheme.primary.withValues(alpha: .48),
+              ),
+              backgroundColor: cuisine == 'all'
+                  ? scheme.surfaceContainerLow
+                  : scheme.primaryContainer.withValues(alpha: .62),
+            ),
+            for (final value in categories)
+              ChoiceChip(
+                key: ValueKey('recipe-category-$value'),
+                label: Text(_recipeCategoryLabel(context, value)),
+                selected: category == value,
+                showCheckmark: value != 'all',
                 visualDensity: VisualDensity.compact,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                side: BorderSide(
-                  color: cuisine == 'all'
-                      ? scheme.outlineVariant
-                      : scheme.primary.withValues(alpha: .48),
-                ),
-                backgroundColor: cuisine == 'all'
-                    ? scheme.surfaceContainerLow
-                    : scheme.primaryContainer.withValues(alpha: .62),
+                onSelected: (_) => onCategorySelected(value),
               ),
-              const SizedBox(width: 8),
-              for (final value in categories)
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(end: 8),
-                  child: ChoiceChip(
-                    key: ValueKey('recipe-category-$value'),
-                    label: Text(_recipeCategoryLabel(context, value)),
-                    selected: category == value,
-                    showCheckmark: value != 'all',
-                    visualDensity: VisualDensity.compact,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onSelected: (_) => onCategorySelected(value),
-                  ),
-                ),
-            ],
-          ),
+          ],
         ),
         const SizedBox(height: 16),
-        Text(
-          heading,
-          key: const Key('recipe-cuisine-heading'),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w900,
-            letterSpacing: -.25,
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Text(
+                heading,
+                key: const Key('recipe-cuisine-heading'),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -.25,
+                ),
+              ),
+            ),
+            if (showPremiumMarker) ...[
+              const SizedBox(width: 8),
+              PremiumLabelBadge(
+                key: const Key('recipe-premium-page-label'),
+                semanticLabel: premiumSemanticLabel,
+              ),
+            ],
+          ],
         ),
         const SizedBox(height: 3),
         Text(

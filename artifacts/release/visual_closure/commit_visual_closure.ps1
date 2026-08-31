@@ -1,4 +1,5 @@
 $ErrorActionPreference = "Stop"
+throw "VISUAL_CLOSURE_COMMIT=HISTORICAL_NON_AUTHORITATIVE. An ignored historical summary cannot authorize staging or committing current source. Use docs/launch_readiness/BIL_RELEASE_CANDIDATE_GATE.md and .github/workflows/bil_android_release_candidate.yml. No Git state was changed."
 
 $project = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $summaryPath = Join-Path $PSScriptRoot "visual_closure_summary.txt"

@@ -114,6 +114,7 @@ class _StoreReviewerLoginPageState extends State<StoreReviewerLoginPage> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Row(
+                                key: const Key('reviewer-login-header-actions'),
                                 children: [
                                   IconButton(
                                     key: const Key('reviewer-login-back'),
@@ -127,12 +128,17 @@ class _StoreReviewerLoginPageState extends State<StoreReviewerLoginPage> {
                                       color: Colors.white,
                                     ),
                                   ),
-                                  const Spacer(),
-                                  const AuthLanguageSelector(),
+                                  const SizedBox(width: 8),
+                                  const Expanded(
+                                    child: Align(
+                                      alignment: AlignmentDirectional.centerEnd,
+                                      child: AuthLanguageSelector(),
+                                    ),
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              const Center(child: BilWordmark(height: 48)),
+                              const Center(child: BilFullWordmark(height: 48)),
                               const SizedBox(height: 12),
                               Text(
                                 tr(
@@ -215,6 +221,15 @@ class _StoreReviewerLoginPageState extends State<StoreReviewerLoginPage> {
                                       Icons.lock_outline_rounded,
                                     ).copyWith(
                                       suffixIcon: IconButton(
+                                        tooltip: obscure
+                                            ? tr(
+                                                'Show password',
+                                                'إظهار كلمة المرور',
+                                              )
+                                            : tr(
+                                                'Hide password',
+                                                'إخفاء كلمة المرور',
+                                              ),
                                         onPressed: configured
                                             ? () => setState(
                                                 () => obscure = !obscure,

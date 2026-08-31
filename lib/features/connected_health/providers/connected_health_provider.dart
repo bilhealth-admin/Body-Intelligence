@@ -298,6 +298,7 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
       final stored = await _flows.store.get('connected_health_ui', 'snapshot');
       final signals = <ConnectedHealthSignalView>[];
       final retainedSignalMaps = <Map<String, Object?>>[];
+      var hasVerifiedNativeEvidence = false;
       var removedLegacyClinicalSignal = false;
       for (final raw in stored?['signals'] as List<Object?>? ?? const []) {
         final signal = GlobalHealthSignal.fromMap(
@@ -309,6 +310,8 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
         }
         retainedSignalMaps.add(signal.toMap());
         signals.add(ConnectedHealthSignalView.fromSignal(signal));
+        hasVerifiedNativeEvidence =
+            hasVerifiedNativeEvidence || _isEvidenceFromNativeBridge(signal);
       }
       if (removedLegacyClinicalSignal && stored != null) {
         await _flows.store
@@ -347,7 +350,7 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
             : DateTime.parse(lastSyncRaw).toLocal(),
         failureCode: null,
         availabilityStatus: availability['status']?.toString(),
-        deviceVerified: true,
+        deviceVerified: hasVerifiedNativeEvidence,
       );
     } catch (_) {
       return ConnectedHealthSnapshot(
@@ -457,7 +460,7 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
         failureCode: result['revoked'] == true
             ? null
             : 'revoke_in_system_settings_required',
-        deviceVerified: true,
+        deviceVerified: false,
       );
     } catch (_) {
       return (await load()).copyWith(failureCode: 'health_revoke_failed');
@@ -567,7 +570,7 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
         importedCount: records.length,
         lastSyncAt: now,
         failureCode: null,
-        deviceVerified: true,
+        deviceVerified: selected.any(_isEvidenceFromNativeBridge),
       );
     } catch (_) {
       final cached = await load();
@@ -580,6 +583,9 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
 
   NativeHealthBridge get _bridge =>
       _isIos ? _flows.appleHealth.bridge : _flows.healthConnect.bridge;
+
+  bool _isEvidenceFromNativeBridge(GlobalHealthSignal signal) =>
+      signal.provenance.providerId == _bridge.id;
 
   List<GlobalHealthSignal> _selectRepresentativeSignals(
     List<GlobalHealthSignal> records,

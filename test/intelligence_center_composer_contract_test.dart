@@ -71,19 +71,28 @@ void main() {
   test('typed and voice turns have separate presentation contracts', () {
     expect(page, contains('IntelligenceMessageModality.voice'));
     expect(page, contains('inputChannel == CoachInputChannel.voice'));
-    expect(page, isNot(contains("Key('ai-coach-speak-\${message.id}')")));
-    expect(page, isNot(contains('Replay voice reply')));
+    expect(
+      page,
+      contains('message.modality == IntelligenceMessageModality.voice'),
+    );
+    expect(page, contains("Key('ai-coach-speak-\${message.id}')"));
+    expect(page, contains('Read answer aloud'));
+    expect(page, contains('onSpeak:'));
+    expect(page, contains(': null,'));
     expect(page, contains('final String text;'));
     expect(page, contains('final visibleMessages = messages.toList'));
   });
 
   test('session greeting and day-one decision remain visible', () {
-    expect(page, contains('_sessionWelcome(displayName)'));
+    expect(page, contains('_sessionWelcome(displayName, at: now)'));
+    expect(page, contains('intelligenceConversationClockProvider'));
     expect(page, contains('_InlineCoachDecision'));
     expect(page, contains('final showIntroBrief = introVisible'));
     expect(page, contains("ValueKey('ai-coach-hero')"));
     expect(page, contains("Key('ai-coach-hero-start')"));
-    expect(page, contains('bil_male_smart_coach_v1.png'));
+    expect(page, contains('BilCoachPortrait('));
+    expect(page, isNot(contains('BilAccountAvatar(')));
+    expect(page, isNot(contains('profilePhotoProvider')));
     expect(page, contains('colors: [Color(0xFF12394E), Color(0xFF071923)]'));
     expect(page, contains("tr('Ready', 'جاهز')"));
     expect(page, contains('Thinking with your BIL data'));

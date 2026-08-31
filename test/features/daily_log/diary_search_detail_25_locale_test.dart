@@ -240,19 +240,14 @@ void main() {
         reason: '$tag preserves the focused save action',
       );
       expect(
-        find.byKey(const Key('daily-log-food-macros-glass')),
+        find.byKey(const Key('daily-log-food-premium-group')),
         findsOneWidget,
-        reason: '$tag macro values are Premium',
-      );
-      expect(
-        find.byKey(const Key('daily-log-nutrition-facts-glass')),
-        findsOneWidget,
-        reason: '$tag detailed nutrients are Premium',
+        reason: '$tag keeps paid macro and nutrient values under one gate',
       );
       expect(
         find.byKey(const Key('premium-nutrition-glass')),
-        findsNWidgets(2),
-        reason: '$tag no macro or micronutrient leak for Free',
+        findsOneWidget,
+        reason: '$tag has one Premium glass group without repeated badges',
       );
       final nutritionFacts = find.byKey(const Key('daily-log-nutrition-facts'));
       await tester.ensureVisible(nutritionFacts);

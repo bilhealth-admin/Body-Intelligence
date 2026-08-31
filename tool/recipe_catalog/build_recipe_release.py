@@ -32,6 +32,10 @@ SUPPORTED_LOCALES = {
     "bn", "vi", "th", "pl", "nl", "uk",
 }
 
+# Whole localized ingredient/step arrays may match English only after an
+# explicit proper-name review. No current recipe needs such an exception.
+EXACT_ENGLISH_COPY_ALLOWLIST: set[tuple[str, str, str]] = set()
+
 
 def _pairs(items):
     value = {}
@@ -142,6 +146,20 @@ def validate_record(record: dict) -> None:
             raise ValueError(f"invalid localized ingredients: {recipe_id}")
         if not isinstance(localization.get("steps"), list) or len(localization["steps"]) != len(method) or not all(isinstance(value, str) and value.strip() for value in localization["steps"]):
             raise ValueError(f"invalid localized steps: {recipe_id}")
+        if code != "en":
+            english = record["localizations"].get("en")
+            if not isinstance(english, dict):
+                raise ValueError(f"missing English localization: {recipe_id}")
+            for field in ("ingredients", "steps"):
+                key = (recipe_id, code, field)
+                if (
+                    localization[field] == english[field]
+                    and key not in EXACT_ENGLISH_COPY_ALLOWLIST
+                ):
+                    raise ValueError(
+                        "exact English localization copy: "
+                        f"{recipe_id}/{code}/{field}"
+                    )
 
 
 def ingredient_evidence_complete(record: dict) -> bool:

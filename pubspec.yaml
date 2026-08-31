@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+3
+version: 1.0.0+5
 
 environment:
   sdk: ^3.12.2
@@ -43,7 +43,6 @@ dependencies:
   path: ^1.9.1
   shared_preferences: ^2.5.5
   crypto: ^3.0.6
-  pointycastle: ^4.0.0
   flutter_secure_storage: ^10.3.1
   uuid: ^4.5.3
   archive: ^4.0.7
@@ -60,6 +59,7 @@ dependencies:
   mobile_scanner: ^7.4.0
   simple_barcode_scanner: ^0.6.0
   url_launcher: ^6.3.2
+  qr: ^3.0.2
   file_selector: ^1.1.0
   image_picker: ^1.2.3
   image: ^4.9.1
@@ -103,6 +103,18 @@ dev_dependencies:
 dependency_overrides:
   app_links:
     path: tool/vendor_app_links
+  # BIL creates and reads only unencrypted report ZIPs. The upstream archive
+  # package embeds its own AES/PBKDF2/HMAC/ZipCrypto implementations even when
+  # no password is supplied. This compatibility fork removes those providers
+  # and fails closed if encrypted ZIP or SHA-256 XZ support is requested.
+  archive:
+    path: tool/vendor_archive
+  # Supabase exposes an optional local JWT verification method that BIL does
+  # not call. The upstream compatibility dependency otherwise pulls an entire
+  # pure-Dart crypto provider into the app. This fail-closed surface preserves
+  # the server-verified auth/session flow and keeps release crypto OS-backed.
+  dart_jsonwebtoken:
+    path: tool/vendor_dart_jsonwebtoken
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -145,12 +157,14 @@ flutter:
     - assets/images/daily_context/
     # Spring lifestyle art for the half-height Quick Add glass surface.
     - assets/images/quick_add/
+    # Original BIL photographic onboarding heroes (adult fitness, blue identity).
+    - assets/images/onboarding_2026/
     - assets/images/commerce/
-    - assets/images/ai_coach/
     - assets/catalogs/bil_food_core.sqlite
-    # Release catalogs are metadata-only runtime assets. Workout media remains
-    # blocked until an independently reviewed, hash-verified content pack is
-    # installed. The recipe index is parsed off the UI isolate and full records
+    # Workout discovery metadata is bundled, but only the generated, exact
+    # free-preview video allowlist is playable after authentication. Full pack
+    # records remain entitlement/install gated. The recipe index is parsed off
+    # the UI isolate and full records
     # are loaded from bounded, hash-verified shards on demand. Recipe pixels are
     # deliberately not bundled here.
     - assets/catalogs/recipes/v1/
@@ -158,12 +172,14 @@ flutter:
     - artifacts/workout_media/workout_release_bundle_registry_v1.json
     - artifacts/workout_media/workout_release_bundle_home_v1.json
     - artifacts/workout_media/workout_release_bundle_gym_six_month_v1.json
+    - artifacts/workout_media/workout_discovery_catalog_v1.json
+    - artifacts/workout_media/gym_six_month_plan_runtime_v1.json
+    - artifacts/workout_media/cloudflare_runtime_v2/free_preview_keys_v1.json
     - artifacts/workout_media/workout_owner_approval_home_200.json
     - artifacts/workout_media/workout_owner_approval_gym_102.json
     - assets/images/v10_master/bil_hologram_master.png
     - assets/images/v10_master/bil_hdr_starfield_master.png
     - assets/images/dashboard/bil_body_profile.svg
-    - assets/images/connected_health/bil_medical_hub.png
     - assets/images/flagship/bil_body_intelligence_journey_v1.png
     - assets/images/flagship/bil_meal_discovery_v1.png
     - assets/images/flagship/bil_meal_discovery_v2.png
@@ -173,6 +189,8 @@ flutter:
     - assets/fonts/NotoNaskhArabic-Regular.ttf
     - assets/fonts/NotoNaskhArabic-Bold.ttf
     - assets/fonts/OFL.txt
+    - assets/fonts/Montserrat-Bold.ttf
+    - assets/fonts/OFL-Montserrat.txt
     - lib/l10n/app_en.arb
     - lib/l10n/app_ar.arb
     - lib/l10n/app_fr.arb
@@ -183,6 +201,10 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   fonts:
+    - family: BILDisplay
+      fonts:
+        - asset: assets/fonts/Montserrat-Bold.ttf
+          weight: 700
     - family: BILArabic
       fonts:
         - asset: assets/fonts/NotoNaskhArabic-Regular.ttf

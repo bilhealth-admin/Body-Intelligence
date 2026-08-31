@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
-
-import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../commerce/domain/store_catalog_configuration.dart';
+import '../../commerce/services/verified_store_catalog_adapter.dart';
+import '../../commerce/services/verified_store_purchase_service.dart';
 
 enum AiBoostPurchaseState {
   loading,
@@ -21,10 +22,12 @@ final class AiBoostPurchaseService extends ChangeNotifier {
   AiBoostPurchaseService({InAppPurchase? purchase})
     : _purchase = purchase ?? InAppPurchase.instance;
 
-  static const productId = 'bil_ai_boost';
+  static const productId = StoreCatalogConfiguration.aiBoost;
   final InAppPurchase _purchase;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
   ProductDetails? product;
+  String? displayPrice;
+  String? _purchaseOfferToken;
   AiBoostPurchaseState state = AiBoostPurchaseState.loading;
   String? errorCode;
 
@@ -47,6 +50,11 @@ final class AiBoostPurchaseService extends ChangeNotifier {
     product = response.productDetails
         .where((item) => item.id == productId)
         .firstOrNull;
+    final discount = product == null
+        ? null
+        : googlePlayOneTimeDiscountMetadata(product!);
+    displayPrice = discount?.localizedPrice ?? product?.price;
+    _purchaseOfferToken = discount?.offerToken;
     state = response.error == null && product != null
         ? AiBoostPurchaseState.ready
         : AiBoostPurchaseState.unavailable;
@@ -65,11 +73,16 @@ final class AiBoostPurchaseService extends ChangeNotifier {
     state = AiBoostPurchaseState.pending;
     errorCode = null;
     notifyListeners();
-    final accountHash = sha256.convert(utf8.encode(user.id)).toString();
+    final accountHash = storeAccountIdentifier(
+      ownerId: user.id,
+      platform: defaultTargetPlatform,
+    );
     final started = await _purchase.buyConsumable(
-      purchaseParam: PurchaseParam(
-        productDetails: selected,
-        applicationUserName: accountHash,
+      purchaseParam: verifiedBoostPurchaseParam(
+        product: selected,
+        accountHash: accountHash,
+        platform: defaultTargetPlatform,
+        offerToken: _purchaseOfferToken,
       ),
       autoConsume: false,
     );

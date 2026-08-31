@@ -35,9 +35,9 @@ void main() {
       'docs/launch_readiness/BIL_RELEASE_CANDIDATE_GATE.md',
     );
 
-    expect(pubspec, contains('version: 1.0.0+3'));
+    expect(pubspec, contains('version: 1.0.0+5'));
     expect(boundary, contains('BIL-V1-LAUNCH-006'));
-    expect(candidate, contains('1.0.0+3'));
+    expect(candidate, contains('1.0.0+5'));
     expect(candidate.toLowerCase(), contains('external'));
   });
 

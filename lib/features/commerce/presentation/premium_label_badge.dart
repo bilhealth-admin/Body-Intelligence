@@ -13,39 +13,46 @@ class PremiumLabelBadge extends StatelessWidget {
   final String? semanticLabel;
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    label: semanticLabel ?? context.strings.text('Premium'),
-    child: ExcludeSemantics(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFFE7A0), Color(0xFFF4C451)],
-          ),
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: const Color(0xFFF8D878)),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x2ED69B27),
-              blurRadius: 12,
-              offset: Offset(0, 4),
+  Widget build(BuildContext context) {
+    final strings = Localizations.of<AppLocalizations>(
+      context,
+      AppLocalizations,
+    );
+    final label = semanticLabel ?? strings?.text('Premium') ?? 'Premium';
+    return Semantics(
+      label: label,
+      child: ExcludeSemantics(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFFE7A0), Color(0xFFF4C451)],
             ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          child: Text(
-            context.strings.text('Premium'),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Color(0xFF332300),
-              fontSize: 12,
-              fontWeight: FontWeight.w900,
-              letterSpacing: .2,
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: const Color(0xFFF8D878)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x2ED69B27),
+                blurRadius: 12,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Color(0xFF332300),
+                fontSize: 12,
+                fontWeight: FontWeight.w900,
+                letterSpacing: .2,
+              ),
             ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }

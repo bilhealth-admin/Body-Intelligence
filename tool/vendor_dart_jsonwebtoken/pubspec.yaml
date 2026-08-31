@@ -1,0 +1,10 @@
+name: dart_jsonwebtoken
+description: >-
+  BIL fail-closed compatibility surface for Supabase's unused local JWT
+  verification path. It intentionally contains no cryptographic implementation.
+version: 3.4.1
+publish_to: none
+
+environment:
+  sdk: ^3.12.2
+

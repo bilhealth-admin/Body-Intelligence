@@ -1,12 +1,16 @@
 import 'dart:convert';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
+import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_accessibility_wellness.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_release_polish.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
+import 'package:body_intelligence_log/features/commerce/presentation/premium_label_badge.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/wellness/domain/wellness_content_pack.dart';
 import 'package:body_intelligence_log/features/wellness/presentation/bil_workout_routines_page.dart';
@@ -23,6 +27,29 @@ void main() {
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+  });
+
+  testWidgets('phone header renders the complete workout title readably', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 720);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      _TestApp(child: BilWorkoutRoutinesPage(loader: (_) async => const [])),
+    );
+    await tester.pumpAndSettle();
+
+    final title = tester.widget<Text>(
+      find.byKey(const ValueKey('workout-videos-routines-title')),
+    );
+    expect(title.data, 'Workout Videos & Routines');
+    expect(title.maxLines, 2);
+    expect(title.overflow, TextOverflow.visible);
+    expect(title.style?.fontSize, greaterThanOrEqualTo(16));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets(
@@ -310,21 +337,21 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(find.byType(PremiumLabelBadge), findsOneWidget);
       expect(
-        find.byKey(const ValueKey('locked-workout-badge')),
+        find.byKey(const ValueKey('premium-collection-upgrade')),
         findsOneWidget,
       );
-      await tester.tap(find.byKey(const ValueKey('workout-card-pro-01')));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const ValueKey('unlock-workout-cta')), findsOneWidget);
-      expect(find.byKey(const ValueKey('log-workout-cta')), findsNothing);
-      expect(find.text('PRIVATE INSTRUCTION MUST STAY HIDDEN'), findsNothing);
-      expect(find.text('Unlock this verified routine'), findsOneWidget);
       expect(
-        mediaCache.resolutions,
+        find.textContaining(RegExp(r'\bPremium\b', caseSensitive: false)),
+        findsOneWidget,
+      );
+      expect(find.text('PRIVATE INSTRUCTION MUST STAY HIDDEN'), findsNothing);
+      expect(mediaCache.posterResolutions, 1);
+      expect(
+        mediaCache.videoResolutions,
         0,
-        reason: 'Locked paid media must not be resolved from cache or network.',
+        reason: 'The glass wall may show the approved poster, never paid MP4.',
       );
     },
   );
@@ -505,6 +532,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.tap(find.text('Gym'));
+    await tester.pumpAndSettle();
     expect(find.text('Push'), findsOneWidget);
     var row = tester.widget<ListView>(
       find.byKey(const ValueKey('workout-category-Push')),
@@ -519,12 +548,12 @@ void main() {
 
     await tester.tap(find.text('Home'));
     await tester.pumpAndSettle();
-    expect(find.text('Core Stability'), findsOneWidget);
+    expect(find.text('Core stability'), findsOneWidget);
     expect(find.text('Push'), findsNothing);
   });
 
   testWidgets(
-    'presenter filter uses explicit metadata without claiming medical eligibility',
+    'presenter filter uses explicit metadata without claiming training eligibility',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(430, 1050));
       addTearDown(() => tester.binding.setSurfaceSize(null));
@@ -553,7 +582,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Workout audience'), findsOneWidget);
-      expect(find.textContaining('does not determine medical'), findsOneWidget);
+      expect(
+        find.textContaining('does not determine training'),
+        findsOneWidget,
+      );
 
       await tester.tap(
         find.byKey(const ValueKey('workout-presenter-filter-men')),
@@ -573,6 +605,68 @@ void main() {
       expect(find.text('Adult female presenter'), findsOneWidget);
     },
   );
+
+  testWidgets('presenter disclaimer uses training suitability in five locales', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(430, 1050));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final workout = _workoutForCategory(
+      'localized-presenter-preview',
+      'Strength',
+      presenter: WellnessWorkoutPresenter.adultMale,
+      syntheticPreview: true,
+    );
+    final cases = <(Locale, String)>[
+      (
+        const Locale('en'),
+        'Visual preference only; it does not determine training suitability.',
+      ),
+      (const Locale('ar'), 'تفضيل بصري فقط؛ ولا يحدد مدى ملاءمة التمرين.'),
+      (
+        const Locale('fr'),
+        'Préférence visuelle uniquement ; elle ne détermine pas l’aptitude à l’entraînement.',
+      ),
+      (
+        const Locale('es'),
+        'Solo es una preferencia visual; no determina la aptitud para entrenar.',
+      ),
+      (
+        const Locale('tr'),
+        'Yalnızca görsel bir tercihtir; antrenman uygunluğunu belirlemez.',
+      ),
+    ];
+
+    for (var index = 0; index < cases.length; index++) {
+      final entry = cases[index];
+      final localeTag = BilLocalePolicy.canonicalTag(entry.$1);
+      final expected = ReleasePolishRuntimeCopy.textForLocale(
+        ReleasePolishRuntimeCopy.presenterSuitability,
+        entry.$1,
+      );
+      await tester.pumpWidget(
+        _TestApp(
+          locale: entry.$1,
+          child: BilWorkoutRoutinesPage(
+            key: ValueKey('localized-presenter-disclaimer-$index'),
+            loader: (_) async => [workout],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(expected.trim(), isNotEmpty, reason: localeTag);
+      expect(find.text(expected), findsOneWidget);
+      expect(
+        find.text(
+          AccessibilityWellnessRuntimeCopy.verifiedWorkoutVideoCount(
+            1,
+            localeTag,
+          ),
+        ),
+        findsOneWidget,
+      );
+    }
+  });
 }
 
 class _TestApp extends StatelessWidget {
@@ -676,7 +770,7 @@ final _paidWorkout = WellnessContentItem(
   type: WellnessContentType.workouts,
   locale: 'en',
   title: 'Advanced verified strength',
-  description: 'A premium routine with server-controlled instructions.',
+  description: 'A paid routine with server-controlled instructions.',
   publisher: 'BIL Health',
   sourceUrl: Uri.parse('https://bilhealth.com/workouts/pro-01'),
   licenseName: 'BIL licensed original',
@@ -697,6 +791,12 @@ final _paidWorkout = WellnessContentItem(
     sha256: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
     sizeBytes: 2048,
   ),
+  videoMedia: WellnessMediaAsset(
+    url: Uri.parse('https://cdn.bilhealth.com/workouts/pro-01.mp4'),
+    mimeType: 'video/mp4',
+    sha256: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    sizeBytes: 4096,
+  ),
 );
 
 SubscriptionState _verifiedPaidState(CommercePlan plan) => SubscriptionState(
@@ -709,14 +809,16 @@ SubscriptionState _verifiedPaidState(CommercePlan plan) => SubscriptionState(
 );
 
 class _RecordingMediaCache extends WellnessMediaCache {
-  int resolutions = 0;
+  int posterResolutions = 0;
+  int videoResolutions = 0;
 
   @override
   Future<WellnessMediaCacheResult> resolve(
     WellnessMediaAsset asset, {
     required bool online,
   }) async {
-    resolutions++;
+    if (asset.mimeType.startsWith('image/')) posterResolutions += 1;
+    if (asset.mimeType.startsWith('video/')) videoResolutions += 1;
     return const WellnessMediaCacheResult.unavailableOffline();
   }
 }

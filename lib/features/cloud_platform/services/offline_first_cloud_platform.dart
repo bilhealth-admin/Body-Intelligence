@@ -49,7 +49,7 @@ final class OfflineFirstCloudPlatform {
       updatedAt: record.updatedAt,
       deletedAt: record.deletedAt,
       schemaVersion: record.schemaVersion,
-      payload: cipher.encrypt(record.payload),
+      payload: await cipher.encrypt(record.payload),
     );
     await localStore.saveOperation(
       CloudSyncOperation(
@@ -137,7 +137,7 @@ final class OfflineFirstCloudPlatform {
         updatedAt: encryptedRemote.updatedAt,
         deletedAt: encryptedRemote.deletedAt,
         schemaVersion: encryptedRemote.schemaVersion,
-        payload: cipher.decrypt(encryptedRemote.payload),
+        payload: await cipher.decrypt(encryptedRemote.payload),
       );
       final local = await localStore.readRecord(remote.stableKey);
       if (local == null) {

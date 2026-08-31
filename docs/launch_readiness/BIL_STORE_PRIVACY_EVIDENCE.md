@@ -10,9 +10,9 @@
 
 | Claim | Repository evidence |
 | --- | --- |
-| Local-first default | `AppEnvironment.useSupabase` defaults to false; external account, sync, AI, commerce, community, and coach capabilities remain unavailable. |
-| No activated advertising or telemetry | No advertising, attribution, analytics, or crash-reporting dependency is declared in `pubspec.yaml`. |
-| Android health minimization | The manifest requests explicit Health Connect types; writes are limited to weight and hydration. |
+| Local-first records with optional cloud features | Core logging is local, while `AppEnvironment.useSupabase` currently defaults to true. Account, Community, AI, entitlement and user-authorized sync features therefore use the configured Supabase service and must be declared according to their runtime data flows. |
+| Contextual advertising; no telemetry vendor | `google_mobile_ads` is declared. Ads remain fail-closed unless the production flags and identifiers are supplied, and requests are limited to eligible registered adult Free users after Google's UMP permits them. Product analytics is disabled and crash reporting remains local-only. |
+| Android health minimization | The manifest requests explicit fitness/wellness Health Connect types; writes are limited to weight and nutrition. BLE accepts only standard weight-scale, body-composition and heart-rate fitness profiles. |
 | Apple health minimization | HealthKit permission text is localized; production writes are limited to body mass and dietary water. |
 | No tracking declaration | The Apple privacy manifest declares tracking false and has no tracking domains. |
 | User-directed export | Export uses the platform share surface and requires the user to choose a destination. |

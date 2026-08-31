@@ -28,6 +28,7 @@ void main() {
     final profile = File(surfaces[1]).readAsStringSync();
     expect(settings, contains('Retry subscription check'));
     expect(settings, contains("copy('Start 7-day free trial')"));
+    expect(settings, isNot(contains("copy('Explore Premium')")));
     expect(settings, isNot(contains("copy('Try Premium for Free')")));
     expect(profile, contains('Retry subscription check'));
   });

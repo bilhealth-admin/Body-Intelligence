@@ -29,6 +29,7 @@ void main() {
       expect(swift, contains('HKAnchoredObjectQuery'));
       expect(swift, contains('requestAuthorization'));
       expect(swift, contains('enableBackgroundDelivery'));
+      expect(swift, contains('foreground-refresh-only'));
       expect(swift, isNot(contains('result([[String: Any]]())')));
       expect(appDelegate, contains('BILGlobalHealthBridge.register'));
       expect(appDelegate, contains('BILSpeechBridge(messenger:'));
@@ -40,6 +41,8 @@ void main() {
       expect(kotlin, contains('HealthConnectClient'));
       expect(kotlin, contains('getChangesToken'));
       expect(kotlin, contains('DeletionChange'));
+      expect(kotlin, contains('foreground-refresh-only'));
+      expect(kotlin, isNot(contains('workmanager-scheduler')));
       expect(kotlin, isNot(contains('emptyList<Map<String, Any>>()')));
       expect(activity, contains('BILGlobalHealthBridge('));
     },

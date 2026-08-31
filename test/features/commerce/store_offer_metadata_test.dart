@@ -31,4 +31,21 @@ void main() {
     );
     expect(placeholder.localizedPrice, isNull);
   });
+
+  test('store-derived saving respects whole-percent currency rounding', () {
+    expect(
+      storeDerivedSavingsPercent(
+        priceMicros: 2500000,
+        originalPriceMicros: 4990000,
+      ),
+      50,
+    );
+    expect(
+      storeDerivedSavingsPercent(
+        priceMicros: 2500000,
+        originalPriceMicros: 4900000,
+      ),
+      49,
+    );
+  });
 }

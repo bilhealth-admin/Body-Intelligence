@@ -58,6 +58,40 @@ void main() {
     );
   });
 
+  test('accepts the store-rounded 2.50 launch offer against 4.99', () {
+    const base = OneTimePurchaseOfferDetailsWrapper(
+      formattedPrice: r'$4.99',
+      priceAmountMicros: 4990000,
+      priceCurrencyCode: 'USD',
+    );
+    const discount = _ExplicitOneTimeDiscountOffer(
+      formattedPrice: r'$2.50',
+      priceAmountMicros: 2500000,
+      priceCurrencyCode: 'USD',
+      fullPriceMicros: 4990000,
+      percentageDiscount: 50,
+      offerId: 'launch-half-price',
+      offerToken: 'opaque-play-offer-token',
+    );
+    const wrapper = ProductDetailsWrapper(
+      description: '2,500 AI tokens',
+      name: 'BIL AI Boost',
+      productId: StoreCatalogConfiguration.aiBoost,
+      productType: ProductType.inapp,
+      title: 'BIL AI Boost',
+      oneTimePurchaseOfferDetails: base,
+      oneTimePurchaseOfferDetailsList: [base, discount],
+    );
+    final product = GooglePlayProductDetails.fromProductDetails(wrapper).single;
+
+    final metadata = googlePlayOneTimeDiscountMetadata(product);
+
+    expect(metadata, isNotNull);
+    expect(metadata!.localizedPrice, r'$2.50');
+    expect(metadata.localizedOriginalPrice, r'$4.99');
+    expect(metadata.savingsPercent, 50);
+  });
+
   test('does not infer a discount from a normal Play price', () {
     const regular = OneTimePurchaseOfferDetailsWrapper(
       formattedPrice: r'$2.50',
@@ -112,11 +146,11 @@ void main() {
       productId: StoreCatalogConfiguration.aiBoost,
       kind: BilStoreProductKind.aiBoostConsumable,
       localizedTitle: 'BIL AI Boost',
-      localizedPrice: r'$2.50',
-      localizedOriginalPrice: r'$5.00',
+      localizedPrice: r'$2.49',
+      localizedOriginalPrice: r'$4.99',
       currencyCode: 'USD',
-      priceMicros: 2500000,
-      originalPriceMicros: 5000000,
+      priceMicros: 2490000,
+      originalPriceMicros: 4990000,
       savingsPercent: 50,
       offerId: 'launch-half-price',
       purchaseOfferToken: 'opaque-play-offer-token',
@@ -140,11 +174,11 @@ void main() {
       tester.widget<Text>(originalPrice).style?.decoration,
       TextDecoration.lineThrough,
     );
-    expect(find.textContaining(r'$2.50'), findsNWidgets(2));
+    expect(find.textContaining(r'$2.49'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('normal 2.50 store price shows no discount claim', (
+  testWidgets('normal 2.49 store price shows no unverified discount claim', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(320, 800));
@@ -153,9 +187,9 @@ void main() {
       productId: StoreCatalogConfiguration.aiBoost,
       kind: BilStoreProductKind.aiBoostConsumable,
       localizedTitle: 'BIL AI Boost',
-      localizedPrice: r'$2.50',
+      localizedPrice: r'$2.49',
       currencyCode: 'USD',
-      priceMicros: 2500000,
+      priceMicros: 2490000,
     );
 
     await _pumpStore(tester, offer);
@@ -169,7 +203,7 @@ void main() {
       findsNothing,
     );
     expect(find.textContaining('50%'), findsNothing);
-    expect(find.textContaining(r'$2.50'), findsNWidgets(2));
+    expect(find.textContaining(r'$2.49'), findsNWidgets(2));
     expect(tester.takeException(), isNull);
   });
 }

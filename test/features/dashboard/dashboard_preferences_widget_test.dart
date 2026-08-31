@@ -387,7 +387,7 @@ void main() {
     await tester.tap(trigger);
     await tester.pumpAndSettle();
     expect(find.text('Add nutrient goal cards'), findsWidgets);
-    await tester.tap(find.text('View Premium plans'));
+    await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
     expect(find.text('plans-target'), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());

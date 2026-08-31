@@ -223,7 +223,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
       _snack(
         nutritionText(
           context,
-          'Check the fixed calories and every daily macro value.',
+          'Macronutrients',
           'راجع السعرات الثابتة وجميع قيم الماكروز اليومية.',
         ),
       );
@@ -266,32 +266,32 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     }
   }
 
-  String _activationFailureMessage(
-    NutritionPathwayActivationFailure failure,
-  ) => switch (failure) {
-    NutritionPathwayActivationFailure.premiumRequired => nutritionText(
-      context,
-      'Premium access could not be verified. Reopen this pathway after your subscription refreshes.',
-      'تعذر التحقق من اشتراك Premium. أعد فتح المسار بعد تحديث اشتراكك.',
-    ),
-    NutritionPathwayActivationFailure.clinicianReviewRequired => nutritionText(
-      context,
-      'Confirm clinician review before activation.',
-      'أكد مراجعة المختص قبل التفعيل.',
-    ),
-    NutritionPathwayActivationFailure.medicalSupervisionRequired =>
-      nutritionText(
-        context,
-        'This pathway stays locked without medical supervision.',
-        'يبقى هذا المسار مقفلاً دون إشراف طبي.',
-      ),
-    NutritionPathwayActivationFailure.unknownPathway ||
-    NutritionPathwayActivationFailure.invalidAuthorization => nutritionText(
-      context,
-      'This nutrition pathway is not available.',
-      'هذا المسار الغذائي غير متاح.',
-    ),
-  };
+  String _activationFailureMessage(NutritionPathwayActivationFailure failure) =>
+      switch (failure) {
+        NutritionPathwayActivationFailure.premiumRequired => nutritionText(
+          context,
+          'Subscription check unavailable',
+          'تعذر التحقق من اشتراك Premium. أعد فتح المسار بعد تحديث اشتراكك.',
+        ),
+        NutritionPathwayActivationFailure.clinicianReviewRequired =>
+          nutritionText(
+            context,
+            'Confirm clinician review before activation.',
+            'أكد مراجعة المختص قبل التفعيل.',
+          ),
+        NutritionPathwayActivationFailure.medicalSupervisionRequired =>
+          nutritionText(
+            context,
+            'This protocol stays locked without active medical supervision.',
+            'يبقى هذا المسار مقفلاً دون إشراف طبي.',
+          ),
+        NutritionPathwayActivationFailure.unknownPathway ||
+        NutritionPathwayActivationFailure.invalidAuthorization => nutritionText(
+          context,
+          'Unavailable',
+          'هذا المسار الغذائي غير متاح.',
+        ),
+      };
 
   NutritionGoalTarget? _recommendedTarget() {
     final profile = ref.read(userProfileProvider).value;
@@ -493,11 +493,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
                       'يتطلب إشرافًا طبيًا',
                     )
                   : _active
-                  ? nutritionText(
-                      context,
-                      'Save target changes',
-                      'حفظ تعديلات الأهداف',
-                    )
+                  ? nutritionText(context, 'Save', 'حفظ تعديلات الأهداف')
                   : nutritionText(
                       context,
                       'Activate weekly targets',

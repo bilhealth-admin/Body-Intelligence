@@ -1,5 +1,10 @@
 part of 'daily_log_page.dart';
 
+bool dailyLogShouldExportNutritionSample({
+  required DateTime selectedDate,
+  required DateTime now,
+}) => !DateUtils.dateOnly(selectedDate).isAfter(DateUtils.dateOnly(now));
+
 extension _DailyLogMutationActions on _DailyLogPageState {
   Future<void> _save() async {
     if (!await _ensureDiaryOpen()) return;
@@ -71,6 +76,7 @@ extension _DailyLogMutationActions on _DailyLogPageState {
           quantityGrams: quantityGrams,
           mealId: mealId,
           committedMealType: committedMealType,
+          committedDate: committedDate,
         );
       } catch (_) {
         // Connected-health export is best effort after the local commit.
@@ -95,7 +101,16 @@ extension _DailyLogMutationActions on _DailyLogPageState {
     required double quantityGrams,
     required int mealId,
     required String committedMealType,
+    required DateTime committedDate,
   }) async {
+    // A future diary entry is a plan, not evidence that food was consumed.
+    // Keep it in BIL, but never export it as a measured nutrition sample.
+    if (!dailyLogShouldExportNutritionSample(
+      selectedDate: committedDate,
+      now: DateTime.now(),
+    )) {
+      return;
+    }
     final preference = FoodNameHealthSyncPreferenceRepository(
       ref.read(preferencesRepositoryProvider),
     );

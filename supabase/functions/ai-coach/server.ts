@@ -592,8 +592,9 @@ export async function handler(
         },
     );
     if (reserveError) {
+      const reserveCode = reserveError.message.trim();
       throw new Error(
-        reserveError.message.includes("ai_usage_exhausted")
+        reserveCode === "ai_usage_exhausted"
           ? "ai_usage_exhausted"
           : "reservation_failed",
       );

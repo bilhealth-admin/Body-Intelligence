@@ -172,6 +172,7 @@ class _WorkoutSegmentVideoPage extends StatelessWidget {
       children: [
         _VerifiedCachedVideo(
           asset: segment.videoMedia,
+          poster: segment.imageMedia,
           mediaCache: mediaCache,
           online: online,
           unavailableText: _copy(
@@ -268,6 +269,7 @@ class _WorkoutHeroMedia extends StatelessWidget {
     if (item.videoMedia != null) {
       return _VerifiedCachedVideo(
         asset: item.videoMedia!,
+        poster: item.imageMedia,
         mediaCache: mediaCache,
         online: online,
         unavailableText: _copy(
@@ -322,11 +324,13 @@ class _WorkoutHeroMedia extends StatelessWidget {
 class _VerifiedCachedVideo extends StatefulWidget {
   const _VerifiedCachedVideo({
     required this.asset,
+    this.poster,
     required this.mediaCache,
     required this.online,
     required this.unavailableText,
   });
   final WellnessMediaAsset asset;
+  final WellnessMediaAsset? poster;
   final WellnessMediaCache mediaCache;
   final bool online;
   final String unavailableText;
@@ -337,77 +341,171 @@ class _VerifiedCachedVideo extends StatefulWidget {
 
 class _VerifiedCachedVideoState extends State<_VerifiedCachedVideo> {
   VideoPlayerController? _controller;
-  late final Future<void> _ready;
+  WellnessMediaCacheResult? _cached;
+  bool _checkingCache = true;
+  bool _busy = false;
   bool _unavailableOffline = false;
+  Object? _error;
+  int _generation = 0;
 
   @override
   void initState() {
     super.initState();
-    _ready = _prepare();
+    _inspectCache();
   }
 
-  Future<void> _prepare() async {
-    if (!_workoutVideoPlaybackSupported) return;
-    final result = await widget.mediaCache.resolve(
-      widget.asset,
-      online: widget.online,
-    );
-    if (!result.isReady || result.file == null) {
-      _unavailableOffline = true;
+  @override
+  void didUpdateWidget(covariant _VerifiedCachedVideo oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.mediaCache, widget.mediaCache) ||
+        !_sameMediaAsset(oldWidget.asset, widget.asset)) {
+      _generation += 1;
+      _controller?.dispose();
+      _controller = null;
+      _cached = null;
+      _checkingCache = true;
+      _busy = false;
+      _unavailableOffline = false;
+      _error = null;
+      _inspectCache();
+    }
+  }
+
+  Future<void> _inspectCache() async {
+    if (!_workoutVideoPlaybackSupported) {
+      if (mounted) setState(() => _checkingCache = false);
       return;
     }
-    final controller = VideoPlayerController.file(result.file!);
-    await controller.initialize();
-    if (!mounted) {
-      await controller.dispose();
-      return;
+    final generation = _generation;
+    try {
+      // This is a disk-only integrity check. Opening workout details therefore
+      // performs no MP4 request; network transfer starts only after Play or
+      // Download is explicitly pressed.
+      final result = await widget.mediaCache.resolve(
+        widget.asset,
+        online: false,
+      );
+      if (!mounted || generation != _generation) return;
+      setState(() {
+        _cached = result.isReady ? result : null;
+        _checkingCache = false;
+      });
+    } on Object catch (error) {
+      if (!mounted || generation != _generation) return;
+      setState(() {
+        _error = error;
+        _checkingCache = false;
+      });
     }
-    _controller = controller;
   }
 
   @override
   void dispose() {
+    _generation += 1;
     _controller?.dispose();
     super.dispose();
   }
 
+  Future<void> _play() async {
+    final controller = _controller;
+    if (controller != null && controller.value.isInitialized) {
+      controller.value.isPlaying
+          ? await controller.pause()
+          : await controller.play();
+      if (mounted) setState(() {});
+      return;
+    }
+    await _resolveExplicitly(play: true);
+  }
+
+  Future<void> _download() => _resolveExplicitly(play: false);
+
+  Future<void> _resolveExplicitly({required bool play}) async {
+    if (_busy || !_workoutVideoPlaybackSupported) return;
+    final generation = _generation;
+    setState(() {
+      _busy = true;
+      _error = null;
+      _unavailableOffline = false;
+    });
+    try {
+      final cached = _cached;
+      final result = cached?.isReady == true
+          ? cached!
+          : await widget.mediaCache.resolve(
+              widget.asset,
+              online: widget.online,
+            );
+      if (!mounted || generation != _generation) return;
+      if (!result.isReady || result.file == null) {
+        setState(() {
+          _cached = null;
+          _unavailableOffline = true;
+        });
+        return;
+      }
+      _cached = result;
+      if (!play) return;
+      final videoController = VideoPlayerController.file(result.file!);
+      await videoController.initialize();
+      if (!mounted || generation != _generation) {
+        await videoController.dispose();
+        return;
+      }
+      _controller = videoController;
+      await videoController.play();
+    } on Object catch (error) {
+      if (mounted && generation == _generation) _error = error;
+    } finally {
+      if (mounted && generation == _generation) {
+        setState(() => _busy = false);
+      }
+    }
+  }
+
+  Future<void> _removeDownload() async {
+    if (_busy) return;
+    final generation = _generation;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final controller = _controller;
+      _controller = null;
+      if (controller != null) await controller.dispose();
+      await widget.mediaCache.remove(widget.asset);
+      if (!mounted || generation != _generation) return;
+      _cached = null;
+      _unavailableOffline = false;
+    } on Object catch (error) {
+      if (mounted && generation == _generation) _error = error;
+    } finally {
+      if (mounted && generation == _generation) {
+        setState(() => _busy = false);
+      }
+    }
+  }
+
   @override
-  Widget build(BuildContext context) => AspectRatio(
-    aspectRatio: 16 / 9,
-    child: FutureBuilder<void>(
-      future: _ready,
-      builder: (context, snapshot) {
-        if (!_workoutVideoPlaybackSupported) {
-          return _VideoUnavailable(
-            text: _copy(
-              context,
-              'Verified workout video playback is available on Android and iOS.',
-              'تشغيل فيديو التمرين الموثق متاح على Android وiOS.',
-            ),
-          );
-        }
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const ColoredBox(
-            color: Colors.black,
-            child: Center(child: CircularProgressIndicator()),
-          );
-        }
-        final controller = _controller;
-        if (_unavailableOffline) {
-          return _VideoUnavailable(
-            text: _copy(
-              context,
-              'This verified video is not cached on this device. Connect to download it securely.',
-              'هذا الفيديو الموثق غير محفوظ على هذا الجهاز. اتصل لتنزيله بأمان.',
-            ),
-          );
-        }
-        if (snapshot.hasError ||
-            controller == null ||
-            !controller.value.isInitialized) {
-          return _VideoUnavailable(text: widget.unavailableText);
-        }
-        return Stack(
+  Widget build(BuildContext context) {
+    if (!_workoutVideoPlaybackSupported) {
+      return AspectRatio(
+        aspectRatio: 16 / 9,
+        child: _VideoUnavailable(
+          text: _copy(
+            context,
+            'Verified workout video playback is available on Android and iOS.',
+            'تشغيل فيديو التمرين الموثق متاح على Android وiOS.',
+          ),
+        ),
+      );
+    }
+    final controller = _controller;
+    if (controller != null && controller.value.isInitialized) {
+      return AspectRatio(
+        aspectRatio: 16 / 9,
+        child: Stack(
           alignment: Alignment.center,
           children: [
             ColoredBox(
@@ -421,12 +519,10 @@ class _VerifiedCachedVideoState extends State<_VerifiedCachedVideo> {
             ),
             IconButton.filled(
               key: const ValueKey('workout-video-playback'),
-              onPressed: () async {
-                controller.value.isPlaying
-                    ? await controller.pause()
-                    : await controller.play();
-                if (mounted) setState(() {});
-              },
+              tooltip: controller.value.isPlaying
+                  ? wellnessWorkoutVideoAction(context, 'Pause video')
+                  : wellnessWorkoutVideoAction(context, 'Play video'),
+              onPressed: _busy ? null : _play,
               iconSize: 34,
               icon: Icon(
                 controller.value.isPlaying
@@ -434,12 +530,112 @@ class _VerifiedCachedVideoState extends State<_VerifiedCachedVideo> {
                     : Icons.play_arrow_rounded,
               ),
             ),
+            PositionedDirectional(
+              end: 10,
+              bottom: 10,
+              child: IconButton.filledTonal(
+                key: const ValueKey('workout-video-remove'),
+                tooltip: wellnessWorkoutVideoAction(context, 'Remove download'),
+                onPressed: _busy ? null : _removeDownload,
+                icon: const Icon(Icons.delete_outline_rounded),
+              ),
+            ),
           ],
-        );
-      },
-    ),
-  );
+        ),
+      );
+    }
+    return AspectRatio(
+      aspectRatio: 16 / 9,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (widget.poster case final poster?)
+            _VerifiedCachedImage(
+              asset: poster,
+              mediaCache: widget.mediaCache,
+              online: widget.online,
+              fit: BoxFit.cover,
+              fallback: const ColoredBox(color: Colors.black),
+            )
+          else
+            const ColoredBox(color: Colors.black),
+          ColoredBox(color: Colors.black.withValues(alpha: .48)),
+          if (_checkingCache || _busy)
+            const Center(child: CircularProgressIndicator())
+          else
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_unavailableOffline || _error != null) ...[
+                      Text(
+                        _unavailableOffline
+                            ? _copy(
+                                context,
+                                'This verified video is not cached on this device. Connect to download it securely.',
+                                'هذا الفيديو الموثق غير محفوظ على هذا الجهاز. اتصل لتنزيله بأمان.',
+                              )
+                            : widget.unavailableText,
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 10,
+                      runSpacing: 8,
+                      children: [
+                        FilledButton.icon(
+                          key: const ValueKey('workout-video-play'),
+                          onPressed: _play,
+                          icon: const Icon(Icons.play_arrow_rounded),
+                          label: Text(
+                            wellnessWorkoutVideoAction(context, 'Play video'),
+                          ),
+                        ),
+                        if (_cached?.isReady == true)
+                          FilledButton.tonalIcon(
+                            key: const ValueKey('workout-video-remove'),
+                            onPressed: _removeDownload,
+                            icon: const Icon(Icons.delete_outline_rounded),
+                            label: Text(
+                              wellnessWorkoutVideoAction(
+                                context,
+                                'Remove download',
+                              ),
+                            ),
+                          )
+                        else
+                          FilledButton.tonalIcon(
+                            key: const ValueKey('workout-video-download'),
+                            onPressed: _download,
+                            icon: const Icon(Icons.download_rounded),
+                            label: Text(
+                              wellnessWorkoutVideoAction(context, 'Download'),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
+
+bool _sameMediaAsset(WellnessMediaAsset left, WellnessMediaAsset right) =>
+    left.url == right.url &&
+    left.mimeType == right.mimeType &&
+    left.sha256 == right.sha256 &&
+    left.sizeBytes == right.sizeBytes;
 
 class _VideoUnavailable extends StatelessWidget {
   const _VideoUnavailable({required this.text});

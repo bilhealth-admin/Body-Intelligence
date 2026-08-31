@@ -16,10 +16,20 @@ void main() {
       expect(route, contains('BilWorkoutRoutinesPage('));
       expect(route, isNot(contains('WorkoutEntryChooserPage')));
 
-      final library = File(
+      final library = [
         'lib/features/wellness/presentation/bil_workout_routines_page.dart',
-      ).readAsStringSync();
+        'lib/features/wellness/presentation/bil_workout_routines_library.dart',
+      ].map((path) => File(path).readAsStringSync()).join('\n');
       expect(library, contains("ValueKey('workout-programs-action')"));
+      expect(library, contains("ValueKey('workout-programs-inline-action')"));
+      expect(library, contains("ValueKey('workout-video-library-header')"));
+      expect(library, contains('wellnessVerifiedWorkoutVideoCount('));
+      expect(
+        library,
+        isNot(contains("'\$verifiedVideoCount verified workout videos'")),
+      );
+      expect(library, contains("'Verified workout video library'"));
+      expect(library, isNot(contains("'300+ home workout videos'")));
       expect(library, contains("context.push('/wellness/workouts/log')"));
       expect(library, isNot(contains("ValueKey('manual-workout-entry')")));
     },

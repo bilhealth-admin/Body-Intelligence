@@ -3,18 +3,91 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/theme/premium_design_tokens.dart';
+import '../../../app/localization/runtime_copy_connected_health.dart';
 import '../../../shared/widgets/premium_surface.dart';
 import '../../commerce/presentation/premium_nutrition_glass.dart';
 import '../../dashboard/widgets/dashboard_carousel.dart';
 import '../../global_platform/health_data/unified_health_data_integration.dart';
-import '../../global_platform/medical_devices/ble_medical_device_platform.dart';
+import '../../global_platform/fitness_devices/ble_fitness_device_platform.dart';
 import '../connected_health_model.dart';
 import '../connected_health_copy.dart';
 import '../providers/connected_health_provider.dart';
-import '../providers/medical_device_provider.dart';
+import '../providers/fitness_device_provider.dart';
 import 'connected_health_primitives.dart';
 import 'health_hub_empty_state.dart';
 import 'live_health_watch.dart';
+
+@visibleForTesting
+ConnectedHealthSnapshot dashboardWatchSnapshot(
+  ConnectedHealthSnapshot snapshot,
+  FitnessDeviceSnapshot fitnessDevices,
+) {
+  final connected =
+      fitnessDevices.status == FitnessDeviceConnectionStatus.connected &&
+      fitnessDevices.connectedDeviceId?.trim().isNotEmpty == true;
+  if (!connected) return snapshot;
+
+  ConnectedHealthSignalView? latestHeartRate;
+  for (final packet in fitnessDevices.measurements) {
+    if (packet['kind'] != 'heart_rate' || packet['unit'] != 'bpm') continue;
+    final value = packet['value'];
+    final observedAt = DateTime.tryParse('${packet['observedAt'] ?? ''}');
+    if (value is! num ||
+        !value.toDouble().isFinite ||
+        observedAt == null ||
+        value < BleMeasurementPolicy.supported['heart_rate']!.minimum ||
+        value > BleMeasurementPolicy.supported['heart_rate']!.maximum) {
+      continue;
+    }
+    final candidate = ConnectedHealthSignalView(
+      key: 'heartRate',
+      value: value.toDouble(),
+      unit: 'bpm',
+      source: 'ble:${fitnessDevices.connectedDeviceId}',
+      observedAt: observedAt.toUtc(),
+      confidence: 1,
+      attributes: const <String, Object?>{'transport': 'ble'},
+    );
+    if (latestHeartRate == null ||
+        candidate.observedAt.isAfter(latestHeartRate.observedAt)) {
+      latestHeartRate = candidate;
+    }
+  }
+  const bleSource = 'Bluetooth fitness device';
+  final baseUsable = liveHealthWatchCanShowMetrics(snapshot);
+  final availableSources = <String>{
+    if (baseUsable)
+      ...snapshot.availableSources.where((source) => source.trim().isNotEmpty),
+    bleSource,
+  }.toList(growable: false);
+  final baseLastSync = baseUsable ? snapshot.lastSyncAt : null;
+  final latestSync = latestHeartRate == null
+      ? baseLastSync
+      : baseLastSync == null || latestHeartRate.observedAt.isAfter(baseLastSync)
+      ? latestHeartRate.observedAt
+      : baseLastSync;
+  return ConnectedHealthSnapshot(
+    status: latestHeartRate == null
+        ? baseUsable
+              ? snapshot.status
+              : ConnectedHealthStatus.ready
+        : ConnectedHealthStatus.synchronized,
+    platformSource:
+        baseUsable && snapshot.platformSource?.trim().isNotEmpty == true
+        ? snapshot.platformSource
+        : bleSource,
+    availableSources: availableSources,
+    signals: <ConnectedHealthSignalView>[
+      if (baseUsable) ...snapshot.signals,
+      ?latestHeartRate,
+    ],
+    importedCount: baseUsable ? snapshot.importedCount : 0,
+    lastSyncAt: latestSync,
+    failureCode: null,
+    availabilityStatus: null,
+    deviceVerified: true,
+  );
+}
 
 class ConnectedHealthCard extends ConsumerWidget {
   const ConnectedHealthCard({
@@ -34,7 +107,7 @@ class ConnectedHealthCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(connectedHealthProvider);
-    final fitnessDevices = ref.watch(medicalDeviceProvider);
+    final fitnessDevices = ref.watch(fitnessDeviceProvider);
     return Semantics(
       container: true,
       label: tr('Health Hub', 'المركز الصحي'),
@@ -77,17 +150,15 @@ class _DashboardDevicePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final inherited = MediaQuery.of(context);
-    final scale = inherited.textScaler.scale(1).clamp(1.0, 1.15).toDouble();
+    final scale = inherited.textScaler.scale(1).clamp(1.0, 2.0).toDouble();
+    final previewSide = 212 + ((scale - 1) * 68);
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 212, maxHeight: 212),
-        child: AspectRatio(
-          aspectRatio: 1,
-          child: MediaQuery(
-            data: inherited.copyWith(textScaler: TextScaler.linear(scale)),
-            child: child,
-          ),
+        constraints: BoxConstraints(
+          maxWidth: previewSide,
+          maxHeight: previewSide,
         ),
+        child: AspectRatio(aspectRatio: 1, child: child),
       ),
     );
   }
@@ -105,7 +176,7 @@ class _ConnectedHealthContent extends StatelessWidget {
   });
 
   final ConnectedHealthSnapshot snapshot;
-  final MedicalDeviceSnapshot fitnessDevices;
+  final FitnessDeviceSnapshot fitnessDevices;
   final String languageCode;
   final bool compact;
   final bool dashboardCompact;
@@ -218,36 +289,54 @@ class _ConnectedHealthContent extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildPages(BuildContext context) => <Widget>[
-    HealthSlide(
-      title: tr('Smart-watch reading', 'قراءة الساعة الذكية'),
-      result: _statusLabel(snapshot.status),
-      explanation: _statusExplanation(snapshot.status),
-      footer: _displaySource(snapshot.platformSource),
-      icon: Icons.watch_outlined,
-    ),
-    HealthSlide(
-      title: tr('Latest synchronization', 'آخر مزامنة'),
-      result: snapshot.lastSyncAt == null
-          ? tr('Waiting for first sync', 'بانتظار أول مزامنة')
-          : TimeOfDay.fromDateTime(snapshot.lastSyncAt!).format(context),
-      explanation: tr(
-        '${snapshot.importedCount} new records were imported during the last synchronization.',
-        'تم استيراد ${snapshot.importedCount} سجلًا جديدًا خلال آخر مزامنة.',
+  List<Widget> _buildPages(BuildContext context) {
+    final pages = <Widget>[
+      HealthSlide(
+        title: tr('Smart-watch reading', 'قراءة الساعة الذكية'),
+        result: _statusLabel(snapshot.status),
+        explanation: _statusExplanation(snapshot.status),
+        footer: _displaySource(snapshot.platformSource),
+        icon: Icons.watch_outlined,
       ),
-      footer: snapshot.availableSources.isEmpty
-          ? tr('No connected sources', 'لا توجد مصادر متصلة')
-          : snapshot.availableSources.map(_displaySource).join(' • '),
-      icon: Icons.sync_rounded,
-    ),
+      HealthSlide(
+        title: tr('Latest synchronization', 'آخر مزامنة'),
+        result: snapshot.lastSyncAt == null
+            ? tr('Waiting for first sync', 'بانتظار أول مزامنة')
+            : TimeOfDay.fromDateTime(snapshot.lastSyncAt!).format(context),
+        explanation: ConnectedHealthRuntimeCopy.format(
+          context,
+          ConnectedHealthRuntimeCopy.importedRecords,
+          count: MaterialLocalizations.of(
+            context,
+          ).formatDecimal(snapshot.importedCount),
+        ),
+        footer: snapshot.availableSources.isEmpty
+            ? tr('No connected sources', 'لا توجد مصادر متصلة')
+            : snapshot.availableSources.map(_displaySource).join(' • '),
+        icon: Icons.sync_rounded,
+      ),
+    ];
+    var premiumLabelAvailable = true;
     for (final signal
         in snapshot.signals
             .where((signal) => !BilHealthScope.excludesKey(signal.key))
-            .take(4))
-      _connectedSignalSlide(signal),
-  ];
+            .take(4)) {
+      final nutritionSignal = signal.key.startsWith('nutrition');
+      pages.add(
+        _connectedSignalSlide(
+          signal,
+          showPremiumLabel: nutritionSignal && premiumLabelAvailable,
+        ),
+      );
+      if (nutritionSignal) premiumLabelAvailable = false;
+    }
+    return pages;
+  }
 
-  Widget _connectedSignalSlide(ConnectedHealthSignalView signal) {
+  Widget _connectedSignalSlide(
+    ConnectedHealthSignalView signal, {
+    required bool showPremiumLabel,
+  }) {
     final slide = HealthSlide(
       title: _signalTitle(signal.key),
       result: '${_formatValue(signal.value)} ${signal.unit}',
@@ -261,6 +350,7 @@ class _ConnectedHealthContent extends StatelessWidget {
     if (!signal.key.startsWith('nutrition')) return slide;
     return PremiumNutritionGlass(
       key: Key('connected-health-${signal.key}-premium-glass'),
+      showLabel: showPremiumLabel,
       child: slide,
     );
   }
@@ -395,50 +485,24 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
   });
 
   final ConnectedHealthSnapshot snapshot;
-  final MedicalDeviceSnapshot fitnessDevices;
+  final FitnessDeviceSnapshot fitnessDevices;
   final String languageCode;
   final VoidCallback onManage;
 
   String tr(String en, String ar) =>
       connectedHealthTextForLanguage(languageCode, en, ar);
 
-  List<({String kind, double value, String unit})> get _readings {
-    final values = <String, ({String kind, double value, String unit})>{};
-    for (final packet in fitnessDevices.measurements) {
-      final kind = packet['kind'] as String?;
-      final value = packet['value'];
-      final unit = packet['unit'] as String?;
-      if (kind != null &&
-          value is num &&
-          unit != null &&
-          bleFitnessMeasurementKinds.contains(kind)) {
-        values.putIfAbsent(
-          kind,
-          () => (kind: kind, value: value.toDouble(), unit: unit),
-        );
-      }
-    }
-    for (final signal in snapshot.signals) {
-      final kind = switch (signal.key) {
-        'weight' => 'weight',
-        'bodyFat' => 'body_fat',
-        'heartRate' || 'restingHeartRate' => 'heart_rate',
-        _ => null,
-      };
-      if (kind != null) {
-        values.putIfAbsent(
-          kind,
-          () => (kind: kind, value: signal.value, unit: signal.unit),
-        );
-      }
-    }
-    return values.values.take(3).toList(growable: false);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final readings = _readings;
-    final hasData = readings.isNotEmpty || snapshot.lastSyncAt != null;
+    final watchSnapshot = dashboardWatchSnapshot(snapshot, fitnessDevices);
+    final hasMeasuredData =
+        liveHealthWatchCanShowMetrics(watchSnapshot) &&
+        watchSnapshot.signals.any(liveHealthWatchSignalIsActual);
+    final showLastSync =
+        liveHealthWatchCanShowMetrics(watchSnapshot) &&
+        watchSnapshot.lastSyncAt != null;
+    final hasData = hasMeasuredData || showLastSync;
+    final hasConnectedSource = liveHealthWatchCanShowMetrics(watchSnapshot);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -452,7 +516,7 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
               ),
             ),
-            ConnectedHealthStatusDot(status: snapshot.status),
+            ConnectedHealthStatusDot(status: watchSnapshot.status),
             const SizedBox(width: 8),
             const Icon(Icons.arrow_forward_rounded, size: 21),
           ],
@@ -461,11 +525,11 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
         _DashboardDevicePreview(
           key: const Key('dashboard-live-fitness-watch-slot'),
           child: LiveHealthWatch(
-            snapshot: snapshot,
+            snapshot: watchSnapshot,
             languageCode: languageCode,
             compact: true,
             showConnectControl: false,
-            showMetrics: false,
+            showMetrics: true,
             onStepsTap: () => context.push('/connected-health/steps'),
             onHeartTap: () => context.push('/connected-health/heart'),
             onActiveEnergyTap: () =>
@@ -480,25 +544,19 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
             spacing: 8,
             runSpacing: 8,
             children: [
-              for (final reading in readings)
-                _DashboardFitnessReading(
-                  kind: reading.kind,
-                  value: reading.value,
-                  unit: reading.unit,
-                  languageCode: languageCode,
-                ),
-              if (snapshot.lastSyncAt case final syncedAt?)
-                _DashboardSyncReading(
-                  syncedAt: syncedAt,
-                  languageCode: languageCode,
-                ),
+              if (watchSnapshot.lastSyncAt case final syncedAt?)
+                if (showLastSync)
+                  _DashboardSyncReading(
+                    syncedAt: syncedAt,
+                    languageCode: languageCode,
+                  ),
             ],
           ),
         ],
         const SizedBox(height: 10),
         Align(
           alignment: Alignment.center,
-          child: hasData
+          child: hasConnectedSource
               ? OutlinedButton.icon(
                   key: const Key('dashboard-fitness-link-action'),
                   onPressed: onManage,
@@ -521,54 +579,6 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
                 ),
         ),
       ],
-    );
-  }
-}
-
-class _DashboardFitnessReading extends StatelessWidget {
-  const _DashboardFitnessReading({
-    required this.kind,
-    required this.value,
-    required this.unit,
-    required this.languageCode,
-  });
-
-  final String kind;
-  final double value;
-  final String unit;
-  final String languageCode;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = switch (kind) {
-      'weight' => connectedHealthTextForLanguage(
-        languageCode,
-        'Weight',
-        'الوزن',
-      ),
-      'body_fat' => connectedHealthTextForLanguage(
-        languageCode,
-        'Body composition',
-        'تركيب الجسم',
-      ),
-      'heart_rate' => connectedHealthTextForLanguage(
-        languageCode,
-        'Heart rate',
-        'نبض القلب',
-      ),
-      _ => '',
-    };
-    final formatted = value == value.roundToDouble()
-        ? value.round().toString()
-        : value.toStringAsFixed(1);
-    return Chip(
-      key: ValueKey('dashboard-fitness-reading-$kind'),
-      avatar: Icon(switch (kind) {
-        'weight' => Icons.monitor_weight_outlined,
-        'body_fat' => Icons.accessibility_new_rounded,
-        _ => Icons.favorite_outline_rounded,
-      }, size: 17),
-      label: Text('$label  $formatted $unit', textDirection: TextDirection.ltr),
     );
   }
 }

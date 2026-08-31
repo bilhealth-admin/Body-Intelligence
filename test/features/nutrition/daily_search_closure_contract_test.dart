@@ -13,6 +13,14 @@ void main() {
     ].map((path) => File(path).readAsStringSync()).join('\n');
     expect(daily, contains('FoodSearchAssistance'));
     expect(daily, contains('هل تقصد'));
+    expect(daily, contains("Key('daily-search-open-food-library')"));
+    expect(daily, contains("context.push('/food-libraries')"));
+    expect(
+      daily,
+      contains(
+        'No result after correction. Open the food catalog to download more.',
+      ),
+    );
     for (final label in const [
       'Sodium',
       'Potassium',

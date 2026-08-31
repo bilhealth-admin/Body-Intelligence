@@ -222,7 +222,19 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         }
         return;
       }
-      final presented = _presentationSafeMessage(reply.message).copyWith(
+      final activeAiSubscription =
+          reply.serviceStatus == CoachServiceStatus.creditsRequired &&
+          hasVerifiedAiSubscription(
+            ref.read(verifiedSubscriptionStateProvider).value,
+          );
+      final safeMessage = _presentationSafeMessage(reply.message);
+      final presented = safeMessage.copyWith(
+        text: activeAiSubscription
+            ? tr(
+                'Your Premium AI Coach subscription is active, but its available AI tokens are exhausted. No message was charged. Add AI Boost tokens to continue now.',
+                'اشتراك Premium AI Coach لديك فعّال، لكن توكينات AI المتاحة نفدت. لم تُحتسب الرسالة. أضف توكينات AI Boost للمتابعة الآن.',
+              )
+            : safeMessage.text,
         modality: autoSpeakReply
             ? IntelligenceMessageModality.voice
             : IntelligenceMessageModality.text,
@@ -269,12 +281,21 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         await _speakCoachText(spokenReply, spokenLocale);
         await _resumeLiveCallIfNeeded(generation);
       }
-      if (reply.actions.isNotEmpty && mounted) {
+      final availableActions = activeAiSubscription
+          ? reply.actions
+                .where(
+                  (action) =>
+                      action.type !=
+                      IntelligenceActionType.openAiCoachSubscription,
+                )
+                .toList(growable: false)
+          : reply.actions;
+      if (availableActions.isNotEmpty && mounted) {
         await showModalBottomSheet<void>(
           context: context,
           showDragHandle: true,
           builder: (context) =>
-              _ActionSheet(actions: reply.actions, onAction: _executeAction),
+              _ActionSheet(actions: availableActions, onAction: _executeAction),
         );
       }
     } on Object {
@@ -309,7 +330,16 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       unawaited(_saveConversation());
     } finally {
       replyDelayTimer?.cancel();
+      if (mounted) {
+        // Refresh even when the local request generation was cancelled: the
+        // server may still have settled a reservation before its reply was
+        // discarded. autoDispose clears the snapshot when this page is gone.
+        ref.invalidate(aiCoachCreditAccessProvider);
+      }
       if (mounted && generation == requestGeneration) {
+        // A successful settlement or a quota rejection may have changed the
+        // reserved-aware total. Refresh once after the request completes so
+        // zero returns the AI Coach glass immediately without polling/loops.
         _updateState(() {
           sending = false;
           if (replyPhase != _CoachReplyPhase.failed) {

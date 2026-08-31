@@ -10,6 +10,7 @@ class PremiumCollectionItemGate extends StatelessWidget {
     required this.tier,
     required this.onUpgrade,
     required this.child,
+    this.showLabel = true,
     super.key,
   });
 
@@ -17,6 +18,7 @@ class PremiumCollectionItemGate extends StatelessWidget {
   final String tier;
   final VoidCallback onUpgrade;
   final Widget child;
+  final bool showLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -36,18 +38,24 @@ class PremiumCollectionItemGate extends StatelessWidget {
             ),
           ),
         ),
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            key: const ValueKey('premium-collection-upgrade'),
-            onTap: onUpgrade,
-            borderRadius: BorderRadius.circular(18),
-            child: Align(
-              alignment: AlignmentDirectional.topEnd,
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: PremiumLabelBadge(semanticLabel: tier),
-              ),
+        Semantics(
+          button: true,
+          label: tier,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              key: const ValueKey('premium-collection-upgrade'),
+              onTap: onUpgrade,
+              borderRadius: BorderRadius.circular(18),
+              child: showLabel
+                  ? Align(
+                      alignment: AlignmentDirectional.topEnd,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: PremiumLabelBadge(semanticLabel: tier),
+                      ),
+                    )
+                  : const SizedBox.expand(),
             ),
           ),
         ),

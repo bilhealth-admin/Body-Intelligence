@@ -23,7 +23,7 @@ void main() {
     for (final module in [
       'health_data',
       'wearables',
-      'medical_devices',
+      'fitness_devices',
       'vision',
       'cloud_ai',
       'plugins',

@@ -57,6 +57,8 @@ const _corePages = <_CorePage>[
   (name: 'AI Coach', build: IntelligenceCenterPage.new),
 ];
 
+const _coachLanguagePromise = 'Global multilingual voice';
+
 const _coreRuntimeSources = <String>{
   'Loading Today dashboard',
   'Complete your profile to calculate personalized targets.',
@@ -83,7 +85,7 @@ const _coreRuntimeSources = <String>{
   'I’m ready for your next useful decision.',
   'Coach controls',
   'Your BIL Coach',
-  'I speak every language and turn your body data into the next clear decision.',
+  _coachLanguagePromise,
   'Talk now',
   'BIL Coach',
   'FOR TODAY',
@@ -141,6 +143,43 @@ void main() {
           RuntimeCopy.resolve(source, tag),
           isNotNull,
           reason: '$tag must localize "$source"',
+        );
+      }
+    }
+  });
+
+  test('AI Coach language promise never falls back or contains mojibake', () {
+    const mojibakeMarkers = <String>[
+      'Ã',
+      'Â',
+      'â€',
+      'Ø§',
+      'Ù',
+      'Ð',
+      'Ñ',
+      'à¤',
+      'à¸',
+      'ì ',
+      'ç§',
+      '\uFFFD',
+    ];
+    for (final locale in AppLocalizations.supportedLocales) {
+      final tag = BilLocalePolicy.canonicalTag(locale);
+      final reviewed = RuntimeCopy.resolve(_coachLanguagePromise, tag);
+      expect(reviewed, isNotNull, reason: '$tag missing coach promise');
+      expect(reviewed!.trim(), isNotEmpty, reason: '$tag empty coach promise');
+      if (tag != 'en') {
+        expect(
+          reviewed,
+          isNot(_coachLanguagePromise),
+          reason: '$tag fell back to English',
+        );
+      }
+      for (final marker in mojibakeMarkers) {
+        expect(
+          reviewed,
+          isNot(contains(marker)),
+          reason: '$tag contains mojibake marker $marker',
         );
       }
     }

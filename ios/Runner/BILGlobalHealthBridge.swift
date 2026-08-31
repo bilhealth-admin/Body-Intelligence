@@ -41,6 +41,12 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       result(permissionSnapshot(arguments: call.arguments))
     case "requestPermissions":
       requestAuthorization(arguments: call.arguments, result: result)
+    case "enableBackgroundDelivery":
+      // BIL v1 deliberately ships without the HealthKit background-delivery
+      // entitlement. A foreground refresh remains available after explicit
+      // authorization, and this handled response prevents a successful read
+      // from ending in FlutterMethodNotImplemented.
+      result(["enabled": false, "contract": "foreground-refresh-only"])
     case "revokeAccess":
       // HealthKit access is withdrawn by the user in system Settings.
       result(["revoked": false, "requiresSystemSettings": true, "platform": "healthkit"])

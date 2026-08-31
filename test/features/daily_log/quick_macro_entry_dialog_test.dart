@@ -63,4 +63,58 @@ void main() {
     expect(find.text('455'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('compact RTL dark layout keeps identity, fields, and actions', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final semantics = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        locale: const Locale('ar'),
+        theme: ThemeData.dark(useMaterial3: true).copyWith(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF1D4ED8),
+            brightness: Brightness.dark,
+          ),
+        ),
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(2)),
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: child ?? const SizedBox.shrink(),
+          ),
+        ),
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () => showQuickMacroEntryDialog(
+                context: context,
+                copy: (_, arabic) => arabic,
+                mealLabel: 'الإفطار',
+                onSave: (_) async {},
+              ),
+              child: const Text('فتح'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('فتح'));
+    await tester.pumpAndSettle();
+
+    final wordmark = find.byKey(const Key('quick-macro-wordmark'));
+    expect(wordmark, findsOneWidget);
+    expect(tester.getSemantics(wordmark).label, 'Body Intelligence Log');
+    expect(find.byKey(const Key('quick-macro-field-0')), findsOneWidget);
+    expect(find.byKey(const Key('quick-macro-field-3')), findsOneWidget);
+    expect(find.text('إضافة'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    semantics.dispose();
+  });
 }

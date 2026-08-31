@@ -27,7 +27,9 @@ void main() {
     expect(shell, isNot(contains('EdgeInsets.only(bottom: 82)')));
     expect(shell, contains('Theme.of(context).scaffoldBackgroundColor'));
     expect(shell, contains('Brightness.dark'));
-    expect(shell, contains('Color(0xB8F4F8FC)'));
+    expect(shell, contains('Color(0xF20B1725)'));
+    expect(shell, contains('Color(0xF7FFFFFF)'));
+    expect(shell, contains('BackdropFilter('));
   });
 
   test('dashboard dynamic evidence is localized', () {

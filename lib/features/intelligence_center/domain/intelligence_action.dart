@@ -9,6 +9,8 @@ enum IntelligenceActionType {
   reviewWorkout,
   openPlan,
   openReport,
+  openAiCoachSubscription,
+  buyAiBoost,
   manageSubscription,
   setThemeMode,
   setLanguage,

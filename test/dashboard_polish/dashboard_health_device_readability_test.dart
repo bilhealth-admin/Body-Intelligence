@@ -34,6 +34,7 @@ final class _ReadableHealthGateway implements ConnectedHealthGateway {
     importedCount: 4,
     lastSyncAt: DateTime(2026, 8, 21, 10, 19),
     failureCode: null,
+    deviceVerified: true,
   );
 
   @override
@@ -144,6 +145,10 @@ void main() {
       findsOneWidget,
     );
     expect(find.byKey(const Key('dashboard-fitness-last-sync')), findsNothing);
+    expect(find.byKey(const Key('watch-metric-steps')), findsNothing);
+    expect(find.byKey(const Key('watch-metric-heart-rate')), findsNothing);
+    expect(find.byKey(const Key('watch-metric-active-energy')), findsNothing);
+    expect(find.byKey(const Key('watch-metric-sleep')), findsNothing);
     expect(find.text('غير متصل'), findsNothing);
     expect(find.text('Not connected'), findsNothing);
     expect(tester.takeException(), isNull);
@@ -170,6 +175,26 @@ void main() {
         expect(
           find.byKey(const Key('dashboard-fitness-link-action')),
           findsOneWidget,
+          reason: locale.toLanguageTag(),
+        );
+        expect(
+          find.byKey(const Key('watch-metric-steps')),
+          findsOneWidget,
+          reason: locale.toLanguageTag(),
+        );
+        expect(
+          find.byKey(const Key('watch-metric-heart-rate')),
+          findsOneWidget,
+          reason: locale.toLanguageTag(),
+        );
+        expect(
+          find.byKey(const Key('watch-metric-sleep')),
+          findsOneWidget,
+          reason: locale.toLanguageTag(),
+        );
+        expect(
+          find.byKey(const Key('watch-metric-active-energy')),
+          findsNothing,
           reason: locale.toLanguageTag(),
         );
         expect(tester.takeException(), isNull, reason: locale.toLanguageTag());
@@ -207,29 +232,36 @@ void main() {
         final artwork = find.byKey(const Key('bil-live-health-watch'));
         expect(artwork, findsOneWidget);
         final size = tester.getSize(artwork);
-        expect(size.width, inInclusiveRange(190, 212));
-        expect(size.height, inInclusiveRange(190, 212));
+        final expectedSide =
+            212 + ((configuration.scale.clamp(1.0, 2.0) - 1) * 68);
+        expect(size.width, closeTo(expectedSide, .1));
+        expect(size.height, closeTo(expectedSide, .1));
         expect(
           Directionality.of(tester.element(watchSlot)),
           configuration.locale.languageCode == 'ar'
               ? TextDirection.rtl
               : TextDirection.ltr,
         );
+        // Keep the user's accessibility scale intact. The preview itself grows
+        // with the scale, so the watch copy does not need to be artificially
+        // capped to fit.
         expect(
           MediaQuery.textScalerOf(
             tester.element(find.byKey(const Key('bil-live-health-watch'))),
           ).scale(1),
-          lessThanOrEqualTo(1.15),
+          closeTo(configuration.scale, .01),
         );
         expect(tester.takeException(), isNull);
         expect(
           find.byKey(const Key('dashboard-fitness-last-sync')),
           findsOneWidget,
         );
+        expect(find.byKey(const Key('watch-metric-steps')), findsOneWidget);
         expect(
-          find.byKey(const Key('dashboard-fitness-reading-weight')),
+          find.byKey(const Key('watch-metric-heart-rate')),
           findsOneWidget,
         );
+        expect(find.byKey(const Key('watch-metric-sleep')), findsOneWidget);
         expect(
           find.byKey(const Key('dashboard-fitness-link-action')),
           findsOneWidget,

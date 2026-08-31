@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:body_intelligence_log/features/global_platform/medical_devices/native_ble_medical_bridge.dart';
+import 'package:body_intelligence_log/features/global_platform/fitness_devices/native_ble_fitness_bridge.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -39,5 +39,4 @@ void main() {
       isEmpty,
     );
   });
-
 }

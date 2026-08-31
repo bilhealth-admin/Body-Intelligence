@@ -7,9 +7,14 @@ export type AppleSubscriptionLifecycle =
   | 'refunded'
   | 'revoked';
 
-const appleSubscriptionProductIds = new Set([
+const appleEligibleSubscriptionProductIds = new Set([
   'bil_premium',
   'bil_premium_annual',
+  'bil_premium_ai_coach',
+  'bil_premium_ai_coach_annual',
+]);
+
+const appleAiTrialProductIds = new Set([
   'bil_premium_ai_coach',
   'bil_premium_ai_coach_annual',
 ]);
@@ -35,10 +40,19 @@ function normalizedAppleLifecycle(
 }
 
 function isAppleIntroductoryFreeTrial(payload: Record<string, unknown>) {
-  if (!appleSubscriptionProductIds.has(String(payload.productId ?? ''))) {
+  if (!appleAiTrialProductIds.has(String(payload.productId ?? ''))) {
     return false;
   }
   if (Number(payload.offerType) !== 1) return false;
+  const purchaseDate = Number(payload.purchaseDate ?? 0);
+  const expiresDate = Number(payload.expiresDate ?? 0);
+  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+  if (
+    !Number.isFinite(purchaseDate) ||
+    !Number.isFinite(expiresDate) ||
+    purchaseDate <= 0 ||
+    expiresDate - purchaseDate !== sevenDaysMs
+  ) return false;
   if (String(payload.offerDiscountType ?? '').toUpperCase() === 'FREE_TRIAL') {
     return true;
   }
@@ -50,10 +64,15 @@ export function appleTransactionLifecycle(
   nowMs = Date.now(),
 ): AppleSubscriptionLifecycle {
   if (payload.revocationDate) return 'revoked';
+  const productId = String(payload.productId ?? '');
+  // The verified Apple transaction helper is also used for the exact Boost
+  // consumable. Unknown, legacy, aliased, or malformed product identities are
+  // terminal here even though persistence repeats the registry check.
+  if (productId === 'bil_ai_boost') return 'active';
+  if (!appleEligibleSubscriptionProductIds.has(productId)) return 'revoked';
   const expires = Number(payload.expiresDate ?? 0);
   if (
-    appleSubscriptionProductIds.has(String(payload.productId ?? '')) &&
-    (!Number.isFinite(expires) || expires <= 0)
+    !Number.isFinite(expires) || expires <= 0
   ) {
     return 'expired';
   }
@@ -67,6 +86,9 @@ export function appleServerStatusLifecycle(
   verifiedLifecycle: string,
 ): AppleSubscriptionLifecycle {
   const fallback = normalizedAppleLifecycle(verifiedLifecycle);
+  // A server-status code cannot rehabilitate an unknown/aliased transaction
+  // lifecycle. Keep the terminal fail-closed result across every status.
+  if (fallback === 'revoked') return 'revoked';
   switch (status) {
     case 1:
       return fallback === 'trial' || fallback === 'active'

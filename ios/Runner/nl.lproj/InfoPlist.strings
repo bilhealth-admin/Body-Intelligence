@@ -1,8 +1,8 @@
 "NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
-"NSHealthUpdateUsageDescription" = "BIL schrijft alleen de medische dossiers die u expliciet kiest, na afzonderlijke schriftelijke toestemming.";
+"NSHealthUpdateUsageDescription" = "BIL schrijft alleen gewichtsgegevens nadat u afzonderlijk schrijftoegang tot Gezondheid hebt toegestaan.";
 "NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Gebruik de camera alleen als u ervoor kiest een streepjescode te scannen, een maaltijdfoto te bekijken of een privéprofiel of voortgangsfoto toe te voegen.";
-"NSPhotoLibraryUsageDescription" = "Selecteer een maaltijd-, profiel- of voortgangsfoto om te beoordelen voordat deze wordt opgeslagen of geüpload.";
-"NSMicrophoneUsageDescription" = "BIL gebruikt de microfoon alleen wanneer je een maaltijd met je stem registreert of rechtstreeks met BIL AI Coach praat.";
-"NSSpeechRecognitionUsageDescription" = "BIL zet spraak die je start voor maaltijdregistratie of BIL AI Coach om in tekst, zodat je die kunt controleren of verzenden.";
+"NSPhotoLibraryUsageDescription" = "BIL opent alleen een foto die u kiest voor een maaltijd, profiel, voortgang, communitybericht of voedselbijdrage, zodat u die vóór opslaan of uploaden kunt controleren.";
+"NSMicrophoneUsageDescription" = "BIL gebruikt de microfoon alleen wanneer je je gewicht of een maaltijd met je stem registreert, of rechtstreeks met BIL AI Coach praat.";
+"NSSpeechRecognitionUsageDescription" = "BIL zet spraak die je start voor gewichts- of maaltijdregistratie of BIL AI Coach om in tekst, zodat je die kunt controleren of verzenden.";

@@ -11,24 +11,8 @@ import 'coach_speech_policy.dart';
 import 'local_coach_api.dart';
 import 'local_model_gateway.dart';
 
-class IntelligenceCenterReply {
-  const IntelligenceCenterReply({
-    required this.message,
-    required this.actions,
-    required this.usedExternalKnowledge,
-    this.spokenText,
-    this.serviceStatus = CoachServiceStatus.ready,
-    this.runtime = CoachAnswerRuntime.onDevice,
-  });
-  final IntelligenceMessage message;
-  final List<IntelligenceAction> actions;
-  final bool usedExternalKnowledge;
-  final String? spokenText;
-  final CoachServiceStatus serviceStatus;
-  final CoachAnswerRuntime runtime;
-}
+part 'intelligence_center_reply.dart';
 
-/// Safety-first, presentation-neutral orchestration for AI Coach.
 class IntelligenceCenterEngine {
   const IntelligenceCenterEngine({
     this.externalProvider = const DisabledExternalKnowledgeProvider(),
@@ -514,6 +498,10 @@ class IntelligenceCenterEngine {
         'Your AI Coach allowance is exhausted for this period. No message was charged and I will not pretend this is a Gemini answer.',
         'استهلكت حصة المدرب الذكي لهذه الفترة. لم تُحتسب هذه الرسالة، ولن أدّعي أن الرد صادر من Gemini.',
       ),
+      CoachServiceStatus.creditsRequired => tr(
+        'Your available AI tokens are exhausted. No message was charged. Reactivate the smart coach with Premium AI Coach or add AI Boost tokens.',
+        'نفدت توكنات AI المتاحة. لم تُحتسب الرسالة. أعد تفعيل المدرب الذكي عبر Premium AI Coach أو أضف توكنات AI Boost.',
+      ),
       CoachServiceStatus.temporarilyUnavailable => tr(
         'The personalized AI Coach is temporarily unavailable. No message was charged; try again shortly.',
         'المدرب الذكي المخصص غير متاح مؤقتًا. لم تُحتسب الرسالة؛ حاول مجددًا بعد قليل.',
@@ -525,6 +513,25 @@ class IntelligenceCenterEngine {
       kind: IntelligenceMessageKind.safety,
       confidence: 1,
       evidence: const ['AI Coach service status'],
+      actions: status == CoachServiceStatus.creditsRequired
+          ? [
+              IntelligenceAction(
+                id: 'open-ai-coach-subscription',
+                type: IntelligenceActionType.openAiCoachSubscription,
+                // The exhausted-credit message above already names the tier.
+                // Keep the route-wide Premium label budget at one while the
+                // action remains explicit about its destination.
+                label: tr('View membership plans', 'عرض خطط العضوية'),
+                requiresConfirmation: false,
+              ),
+              IntelligenceAction(
+                id: 'buy-ai-boost',
+                type: IntelligenceActionType.buyAiBoost,
+                label: tr('Get AI Boost', 'احصل على AI Boost'),
+                requiresConfirmation: false,
+              ),
+            ]
+          : const [],
       serviceStatus: status,
       runtime: CoachAnswerRuntime.localFallback,
     );

@@ -18,8 +18,11 @@ and no token, message, or health value is uploaded.
   relationship/content lifecycle events write metadata-only audit records;
   bodies, health values, and push tokens are prohibited from audit metadata.
 - Account deletion is queued by an authenticated RPC. A secret-protected Edge
-  Function uses the service role to delete the Auth user, allowing database
-  cascades to remove user-owned data. Push tokens are disabled immediately.
+  Function first removes and verifies the user's object prefixes in every
+  BIL-owned Storage bucket through the Storage API, then uses the service role
+  to delete the Auth user so database cascades remove user-owned rows. Storage
+  or Auth failure returns the durable request to `pending`; the superseded
+  database-only worker fails closed. Push tokens are disabled immediately.
 - Push tokens are registered only after opt-in. Time zone and deep links are
   stored server-side. Lock-screen text stays generic unless the user separately
   consents to sensitive previews.

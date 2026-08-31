@@ -86,9 +86,11 @@ bool _matchesWorkoutPresenter(
 ) => switch (filter) {
   _WorkoutPresenterFilter.all => true,
   _WorkoutPresenterFilter.men =>
-    _workoutAudience(item) != _WorkoutPresenterFilter.women,
+    _workoutAudience(item) != _WorkoutPresenterFilter.women &&
+        _workoutPresenter(item) != _WorkoutPresenter.woman,
   _WorkoutPresenterFilter.women =>
-    _workoutAudience(item) != _WorkoutPresenterFilter.men,
+    _workoutAudience(item) != _WorkoutPresenterFilter.men &&
+        _workoutPresenter(item) != _WorkoutPresenter.man,
 };
 
 bool _hasAdultPresenter(WellnessContentItem item) {
@@ -208,14 +210,10 @@ String _presenterFilterChoice(
 }
 
 String _presenterFilterDisclaimer(BuildContext context) =>
-    switch (Localizations.localeOf(context).languageCode) {
-      'ar' => 'اختيار بصري فقط؛ ولا يحدد الملاءمة الطبية للتمرين.',
-      'fr' =>
-        'Choix visuel uniquement ; il ne détermine pas l’aptitude médicale.',
-      'es' => 'Solo es una preferencia visual; no determina la aptitud médica.',
-      'tr' => 'Yalnızca görsel bir tercihtir; tıbbi uygunluğu belirlemez.',
-      _ => 'Visual preference only; it does not determine medical suitability.',
-    };
+    ReleasePolishRuntimeCopy.textForLocale(
+      ReleasePolishRuntimeCopy.presenterSuitability,
+      Localizations.localeOf(context),
+    );
 
 String _presenterFilterSemantics(BuildContext context) =>
     '${_presenterFilterHeading(context)}. ${_presenterFilterDisclaimer(context)}';

@@ -3,7 +3,7 @@
 ## Already determined from code
 
 - Package ID: `com.bilhealth.bodyintelligencelog`
-- Current version: `1.0.0+3`
+- Current version: `1.0.0+5`
 - Languages: 25 configured Android locales, including Arabic, English, French,
   Spanish, and Turkish. Final localized-listing availability is a separate Play
   Console choice and must not be overstated.

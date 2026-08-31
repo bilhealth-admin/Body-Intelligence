@@ -14,6 +14,7 @@ class PartnerIntegrationCapability {
     required this.state,
     required this.dataTypes,
     required this.reasonCode,
+    this.officialSetupUrl,
   });
 
   final String id;
@@ -21,6 +22,7 @@ class PartnerIntegrationCapability {
   final PartnerIntegrationState state;
   final Set<String> dataTypes;
   final String reasonCode;
+  final String? officialSetupUrl;
 
   bool get canConnect =>
       state == PartnerIntegrationState.nativeBridge ||
@@ -48,7 +50,7 @@ abstract final class PartnerIntegrationRegistry {
       reasonCode: 'ios_native_bridge',
     ),
     PartnerIntegrationCapability(
-      id: 'medical-ble',
+      id: 'fitness-ble',
       category: 'Fitness device',
       state: PartnerIntegrationState.deviceBridge,
       dataTypes: {'weight', 'bodyComposition', 'heartRate'},
@@ -60,6 +62,7 @@ abstract final class PartnerIntegrationRegistry {
       state: PartnerIntegrationState.configurationRequired,
       dataTypes: {},
       reasonCode: 'oauth_credentials_and_runtime_registration_missing',
+      officialSetupUrl: 'https://connect.garmin.com/start/',
     ),
     PartnerIntegrationCapability(
       id: 'fitbit',
@@ -67,6 +70,8 @@ abstract final class PartnerIntegrationRegistry {
       state: PartnerIntegrationState.configurationRequired,
       dataTypes: {},
       reasonCode: 'oauth_credentials_and_runtime_registration_missing',
+      officialSetupUrl:
+          'https://support.google.com/googlehealth/answer/14236818?hl=en',
     ),
     PartnerIntegrationCapability(
       id: 'samsung-health',
@@ -74,11 +79,21 @@ abstract final class PartnerIntegrationRegistry {
       state: PartnerIntegrationState.noAdapter,
       dataTypes: {},
       reasonCode: 'no_registered_adapter',
+      officialSetupUrl: 'https://www.samsung.com/us/apps/samsung-health/',
     ),
   ];
 
   static PartnerIntegrationCapability byId(String id) =>
       capabilities.singleWhere((entry) => entry.id == id);
+
+  static bool isVerifiedOfficialSetupUri(String id, Uri uri) {
+    if (uri.scheme != 'https' || uri.userInfo.isNotEmpty || uri.hasFragment) {
+      return false;
+    }
+    final capability = capabilities.where((entry) => entry.id == id);
+    if (capability.length != 1) return false;
+    return capability.single.officialSetupUrl == uri.toString();
+  }
 }
 
 final partnerIntegrationRegistryProvider =

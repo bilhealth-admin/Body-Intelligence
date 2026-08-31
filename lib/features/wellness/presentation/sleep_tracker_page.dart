@@ -16,7 +16,7 @@ class _LegacySleepTrackerPageState
 
   @override
   Widget build(BuildContext context) {
-    final today = DateTime.now();
+    final today = ref.read(sleepNowProvider)();
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(

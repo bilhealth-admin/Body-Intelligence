@@ -18,8 +18,8 @@ const bilSplashMinimumDisplayDuration = Duration(milliseconds: 2300);
 /// StartupPage owns readiness and can therefore never wait on video playback.
 const bilSplashPlaybackSafetyTimeout = bilSplashMinimumDisplayDuration;
 
-/// Decoded before `runApp`, while Android is already showing the exact same
-/// raster. RawImage can therefore paint Flutter's first frame without a flash.
+/// Decoded before `runApp`, while the native launch surface already shows the
+/// same blue. RawImage can paint the matching identity without a decode flash.
 ui.Image? bilPredecodedLaunchWordmark;
 
 /// The exact BIL action blue shared by native Android and Flutter startup.
@@ -449,7 +449,7 @@ class _SplashIdentity extends StatelessWidget {
             child: SizedBox.square(
               key: const ValueKey('premium-splash-wordmark'),
               dimension: frameWidth,
-              child: Transform.scale(scale: 1.4, child: identity),
+              child: identity,
             ),
           ),
         );

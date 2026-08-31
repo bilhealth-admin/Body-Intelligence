@@ -2,6 +2,7 @@ import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_extended.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
+import 'package:body_intelligence_log/data/repositories/goal_repository.dart';
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
 import 'package:body_intelligence_log/data/repositories/user_profile_repository.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
@@ -11,6 +12,7 @@ import 'package:body_intelligence_log/features/commerce/domain/subscription_stat
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/settings/premium_meal_features_page.dart';
 import 'package:body_intelligence_log/features/settings/reference_goals_page.dart';
+import 'package:body_intelligence_log/features/settings/settings_page.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -222,6 +224,47 @@ void main() {
     await tester.pumpAndSettle();
     await database.close();
   });
+
+  testWidgets(
+    'Health Goal updates one durable row and the signed summary card',
+    (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      await _seedProfile(database);
+      final profile = (await UserProfileRepository(database).getProfile())!;
+      final goals = GoalRepository(database);
+      await goals.save(
+        profileUuid: profile.uuid,
+        type: 'lose',
+        targetWeight: 85,
+      );
+
+      await _pumpPage(tester, database, const ReferenceGoalsPage(), _premium());
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Goal Weight'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '80');
+      await tester.tap(find.byIcon(Icons.check_rounded));
+      await tester.pumpAndSettle();
+
+      expect(
+        (await UserProfileRepository(database).getProfile())?.targetWeight,
+        80,
+      );
+      expect((await goals.getActive())?.targetWeight, 80);
+      expect(await database.select(database.goals).get(), hasLength(1));
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+      await _pumpPage(tester, database, const SettingsPage(), _premium());
+      expect(find.text('93.4 kg'), findsOneWidget);
+      expect(find.text('+13.4 kg'), findsOneWidget);
+      expect(find.text('80.0 kg'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+      await database.close();
+    },
+  );
 }
 
 SubscriptionState _premium() => SubscriptionState(

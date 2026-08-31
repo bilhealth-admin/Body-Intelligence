@@ -1,20 +1,96 @@
 import '../../../app/localization/runtime_copy.dart';
 
 abstract final class BilStoreCopy {
+  static const _runtimeFallbackSource = <String, String>{
+    'premium_store_title': 'Know your body. Progress intelligently.',
+    'premium_detail': 'No ads',
+    'premium_ai_detail': 'Everything included in BIL Free',
+    'premium_benefit_workouts': '300+ home workout videos',
+    'premium_benefit_community': 'Friends and requests',
+    'premium_benefit_messages': 'Messages',
+    'boost_detail': 'Global multilingual voice',
+  };
+
+  /// Store renewal disclosure for the 20 extended locales. The five primary
+  /// locales live in [catalogs] below. `{price}` must remain untouched so the
+  /// device-store localized price can be inserted at render time.
+  static const _extendedTrialRenewalCopy = <String, Map<String, String>>{
+    'trial_renews_monthly': {
+      'de':
+          'Danach {price} pro Monat. Verlängert sich automatisch bis zur Kündigung.',
+      'it':
+          'Poi {price} al mese. Si rinnova automaticamente fino alla disdetta.',
+      'pt-br':
+          'Depois, {price} por mês. Renovação automática até o cancelamento.',
+      'pt-pt':
+          'Depois, {price} por mês. Renova automaticamente até ser cancelada.',
+      'ur': 'پھر {price} فی ماہ۔ منسوخ کرنے تک خودکار تجدید ہوتی ہے۔',
+      'fa': 'سپس {price} در ماه. تا زمان لغو به‌صورت خودکار تمدید می‌شود.',
+      'hi': 'फिर {price} प्रति माह। रद्द करने तक अपने आप नवीनीकृत होता है।',
+      'id': 'Lalu {price} per bulan. Diperpanjang otomatis hingga dibatalkan.',
+      'ms':
+          'Kemudian {price} sebulan. Diperbaharui secara automatik sehingga dibatalkan.',
+      'ja': 'その後は月額{price}。キャンセルするまで自動更新されます。',
+      'ko': '이후 월 {price}. 취소할 때까지 자동 갱신됩니다.',
+      'zh-hans': '之后每月 {price}。自动续订，直至取消。',
+      'zh-hant': '之後每月 {price}。自動續訂，直到取消。',
+      'ru': 'Затем {price} в месяц. Автоматически продлевается до отмены.',
+      'bn':
+          'এরপর প্রতি মাসে {price}। বাতিল না করা পর্যন্ত স্বয়ংক্রিয়ভাবে নবায়ন হবে।',
+      'vi': 'Sau đó {price} mỗi tháng. Tự động gia hạn cho đến khi hủy.',
+      'th': 'จากนั้น {price} ต่อเดือน ต่ออายุอัตโนมัติจนกว่าจะยกเลิก',
+      'pl':
+          'Następnie {price} miesięcznie. Odnawia się automatycznie do anulowania.',
+      'nl':
+          'Daarna {price} per maand. Wordt automatisch verlengd tot opzegging.',
+      'uk': 'Потім {price} на місяць. Автоматично поновлюється до скасування.',
+    },
+    'trial_renews_annually': {
+      'de':
+          'Danach {price} pro Jahr. Verlängert sich automatisch bis zur Kündigung.',
+      'it':
+          "Poi {price} all'anno. Si rinnova automaticamente fino alla disdetta.",
+      'pt-br':
+          'Depois, {price} por ano. Renovação automática até o cancelamento.',
+      'pt-pt':
+          'Depois, {price} por ano. Renova automaticamente até ser cancelada.',
+      'ur': 'پھر {price} فی سال۔ منسوخ کرنے تک خودکار تجدید ہوتی ہے۔',
+      'fa': 'سپس {price} در سال. تا زمان لغو به‌صورت خودکار تمدید می‌شود.',
+      'hi': 'फिर {price} प्रति वर्ष। रद्द करने तक अपने आप नवीनीकृत होता है।',
+      'id': 'Lalu {price} per tahun. Diperpanjang otomatis hingga dibatalkan.',
+      'ms':
+          'Kemudian {price} setahun. Diperbaharui secara automatik sehingga dibatalkan.',
+      'ja': 'その後は年額{price}。キャンセルするまで自動更新されます。',
+      'ko': '이후 연 {price}. 취소할 때까지 자동 갱신됩니다.',
+      'zh-hans': '之后每年 {price}。自动续订，直至取消。',
+      'zh-hant': '之後每年 {price}。自動續訂，直到取消。',
+      'ru': 'Затем {price} в год. Автоматически продлевается до отмены.',
+      'bn':
+          'এরপর প্রতি বছরে {price}। বাতিল না করা পর্যন্ত স্বয়ংক্রিয়ভাবে নবায়ন হবে।',
+      'vi': 'Sau đó {price} mỗi năm. Tự động gia hạn cho đến khi hủy.',
+      'th': 'จากนั้น {price} ต่อปี ต่ออายุอัตโนมัติจนกว่าจะยกเลิก',
+      'pl':
+          'Następnie {price} rocznie. Odnawia się automatycznie do anulowania.',
+      'nl':
+          'Daarna {price} per jaar. Wordt automatisch verlengd tot opzegging.',
+      'uk': 'Потім {price} на рік. Автоматично поновлюється до скасування.',
+    },
+  };
+
   static const catalogs = <String, Map<String, String>>{
     'en': {
       'free': 'Free',
       'plans': 'Plans',
-      'premium_store_title': 'Know your body. Progress intelligently.',
-      'premium_store_eyebrow': 'BIL Premium',
+      'premium_store_title': 'Know your body. Go further.',
+      'premium_store_eyebrow': 'Plans',
       'premium_store_subtitle': 'Price from the store',
       'current_plan': 'Current plan',
       'free_detail': 'Core tracking and daily tools',
-      'premium_detail': 'The complete experience, without ads',
-      'premium_ai_detail': 'Premium plus a personal multilingual AI Coach',
+      'premium_detail': 'More insights. No ads.',
+      'premium_ai_detail': 'BIL Free + every paid feature + AI Coach',
       'boost_eyebrow': 'YOUR COACH. YOUR PLAN. EVERY DAY.',
       'boost_detail':
-          'BIL AI Coach speaks every language and works beside you as a training and nutrition partner.',
+          'BIL AI Coach supports multiple languages and works beside you as a training and nutrition partner.',
       'free_benefit_1': 'Food, water and weight tracking',
       'free_benefit_2': 'Core nutrition insights',
       'free_benefit_3': 'Local progress analytics',
@@ -37,17 +113,16 @@ abstract final class BilStoreCopy {
       'premium_benefit_body': 'Detailed body profile',
       'premium_benefit_4': 'Connected health',
       'premium_benefit_5': 'Custom calories and macros',
-      'premium_benefit_medical_devices':
+      'premium_benefit_fitness_devices':
           'Compatible fitness device connections',
-      'premium_benefit_community':
-          'Premium community, friends, and private messaging',
+      'premium_benefit_community': 'Friends and requests',
+      'premium_benefit_messages': 'Private messages',
       'premium_benefit_trial': '7-day trial includes 1,000 AI tokens',
       'ai_benefit_1': 'Everything included in BIL Premium',
       'ai_benefit_2': 'Advanced personalized AI Coach',
       'ai_benefit_3': 'Global multilingual voice',
       'ai_benefit_4': '2,500 AI tokens each week, up to 10,000 each month',
-      'ai_benefit_community':
-          'All Premium community and friend features included',
+      'ai_benefit_community': 'Community, friends, and private messaging',
       'ai_benefit_trial': '7-day trial includes 1,000 AI tokens',
       'boost_benefit_1': '2,500 BIL AI Coach tokens',
       'boost_benefit_2': 'Daily, weekly, and monthly plans for your goal',
@@ -56,7 +131,7 @@ abstract final class BilStoreCopy {
       'boost_benefit_4': 'One-time purchase',
       'boost_benefit_5': 'Tokens stack and never expire',
       'premium': 'Premium',
-      'premium_ai_coach': 'Premium AI Coach',
+      'premium_ai_coach': 'AI Coach',
       'ai_boost': 'BIL AI Boost',
       'monthly': 'Monthly',
       'annual': 'Annual',
@@ -69,6 +144,10 @@ abstract final class BilStoreCopy {
       'versus_monthly': 'versus 12 monthly payments',
       'trial': 'Free trial',
       'trial_7_days': '7 days free',
+      'trial_renews_monthly':
+          'Then {price} per month. Renews automatically until canceled.',
+      'trial_renews_annually':
+          'Then {price} per year. Renews automatically until canceled.',
       'continue': 'Continue',
       'restore': 'Restore purchases',
       'restore_checking': 'Checking purchase history…',
@@ -79,6 +158,8 @@ abstract final class BilStoreCopy {
       'restore_failed': 'Purchases could not be restored. Try again.',
       'restore_timeout': 'The store did not respond. Try again.',
       'manage': 'Manage subscription',
+      'view_all_features': 'View all features',
+      'show_fewer_features': 'Show fewer features',
       'store_loading': 'Loading price from the store…',
       'store_unavailable': 'Price unavailable on this device',
       'purchase_error':
@@ -88,17 +169,16 @@ abstract final class BilStoreCopy {
     'ar': {
       'free': 'مجاني',
       'plans': 'الخطط',
-      'premium_store_title': 'عضوية مصممة حولك',
+      'premium_store_title': 'افهم جسمك. تقدّم.',
       'premium_store_eyebrow': 'عضوية BIL',
-      'premium_store_subtitle':
-          'شاهد كل شيء قبل أن تختار. يعرض المتجر السعر بعملتك المحلية.',
+      'premium_store_subtitle': 'السعر الفعلي من المتجر',
       'current_plan': 'خطتك الحالية',
       'free_detail': 'التسجيل الأساسي وأدواتك اليومية',
-      'premium_detail': 'التجربة الكاملة، بدون إعلانات',
-      'premium_ai_detail': 'بريميوم مع مدرب AI شخصي متعدد اللغات',
+      'premium_detail': 'مزايا متقدمة بلا إعلانات',
+      'premium_ai_detail': 'كل مزايا BIL المجانية والمدفوعة + مدرب AI',
       'boost_eyebrow': 'مدربك. خطتك. كل يوم.',
       'boost_detail':
-          'يتحدث مدرب BIL الذكي جميع اللغات ويعمل معك كشريك في التمرين والدايت.',
+          'يدعم مدرب BIL الذكي لغات متعددة ويعمل معك كشريك في التمرين والتغذية.',
       'free_benefit_1': 'تسجيل الطعام والماء والوزن',
       'free_benefit_2': 'أساسيات وتحليلات التغذية',
       'free_benefit_3': 'تحليلات التقدم المحلية',
@@ -121,23 +201,23 @@ abstract final class BilStoreCopy {
       'premium_benefit_body': 'قياسات الجسم وملف التركيب المفصل',
       'premium_benefit_4': 'ربط المصادر الصحية',
       'premium_benefit_5': 'سعرات ومغذيات كبرى مخصصة',
-      'premium_benefit_medical_devices': 'اتصالات أجهزة اللياقة المتوافقة',
-      'premium_benefit_community':
-          'مجتمع بريميوم، إضافة الأصدقاء والمراسلة الخاصة',
+      'premium_benefit_fitness_devices': 'اتصالات أجهزة اللياقة المتوافقة',
+      'premium_benefit_community': 'الأصدقاء والطلبات',
+      'premium_benefit_messages': 'الرسائل الخاصة',
       'premium_benefit_trial': 'تجربة 7 أيام تشمل 1,000 توكن AI',
-      'ai_benefit_1': 'كل ما في بريميوم',
+      'ai_benefit_1': 'كل مزايا BIL Premium مشمولة',
       'ai_benefit_2': 'مدرب AI شخصي متقدم',
       'ai_benefit_3': 'صوت عالمي متعدد اللغات',
       'ai_benefit_4': '2,500 توكن AI أسبوعيًا، وبحد 10,000 شهريًا',
-      'ai_benefit_community': 'يشمل كل مزايا مجتمع بريميوم والأصدقاء',
+      'ai_benefit_community': 'المجتمع والأصدقاء والمراسلة الخاصة',
       'ai_benefit_trial': 'تجربة 7 أيام تشمل 1,000 توكن AI',
       'boost_benefit_1': '2,500 توكن لمدرب BIL الذكي',
       'boost_benefit_2': 'خطط يومية وأسبوعية وشهرية حسب هدفك',
       'boost_benefit_3': 'شريك للتمرين والدايت يتابع تقدمك',
       'boost_benefit_4': 'شراء لمرة واحدة',
       'boost_benefit_5': 'يتراكم الرصيد ولا تنتهي صلاحيته',
-      'premium': 'بريميوم',
-      'premium_ai_coach': 'بريميوم AI Coach',
+      'premium': 'Premium',
+      'premium_ai_coach': 'AI Coach',
       'ai_boost': 'BIL AI Boost',
       'monthly': 'شهري',
       'annual': 'سنوي',
@@ -150,6 +230,8 @@ abstract final class BilStoreCopy {
       'versus_monthly': 'مقارنةً بـ12 دفعة شهرية',
       'trial': 'تجربة مجانية',
       'trial_7_days': '7 أيام مجانًا',
+      'trial_renews_monthly': 'ثم {price} شهريًا. يتجدد تلقائيًا حتى الإلغاء.',
+      'trial_renews_annually': 'ثم {price} سنويًا. يتجدد تلقائيًا حتى الإلغاء.',
       'continue': 'متابعة',
       'restore': 'استعادة المشتريات',
       'restore_checking': 'جارٍ التحقق من سجل المشتريات…',
@@ -160,6 +242,8 @@ abstract final class BilStoreCopy {
       'restore_failed': 'تعذرت استعادة المشتريات. حاول مرة أخرى.',
       'restore_timeout': 'لم يستجب المتجر. حاول مرة أخرى.',
       'manage': 'إدارة الاشتراك',
+      'view_all_features': 'عرض كل المزايا',
+      'show_fewer_features': 'عرض مزايا أقل',
       'store_loading': 'جارٍ تحميل السعر من المتجر…',
       'store_unavailable': 'السعر غير متاح على هذا الجهاز',
       'purchase_error': 'لم تكتمل عملية الشراء ولم يتم منح أي صلاحية.',
@@ -168,19 +252,19 @@ abstract final class BilStoreCopy {
     'fr': {
       'free': 'Gratuit',
       'plans': 'Forfaits',
-      'premium_store_title':
-          'Connaissez votre corps. Progressez intelligemment.',
-      'premium_store_eyebrow': 'BIL Premium',
+      'premium_store_title': 'Votre corps. Vos progrès.',
+      'premium_store_eyebrow': 'Forfaits',
       'premium_store_subtitle': 'Prix fourni par la boutique',
       'current_plan': 'Forfait actuel',
       'free_detail': 'Suivi essentiel et outils quotidiens',
-      'premium_detail': 'L’expérience complète, sans publicité',
-      'premium_ai_detail': 'Premium avec un AI Coach personnel multilingue',
+      'premium_detail': 'Plus d’analyses, sans publicité',
+      'premium_ai_detail':
+          'BIL Gratuit + toutes les fonctions payantes + AI Coach',
       'boost_eyebrow': 'VOTRE COACH. VOTRE PLAN. CHAQUE JOUR.',
       'boost_detail':
-          'BIL AI Coach parle toutes les langues et vous accompagne comme partenaire d’entraînement et de nutrition.',
+          'BIL AI Coach prend en charge plusieurs langues et vous accompagne comme partenaire d’entraînement et de nutrition.',
       'premium': 'Premium',
-      'premium_ai_coach': 'Premium AI Coach',
+      'premium_ai_coach': 'AI Coach',
       'ai_boost': 'BIL AI Boost',
       'free_benefit_1': 'Suivi des aliments, de l’eau et du poids',
       'free_benefit_2': 'Analyses nutritionnelles essentielles',
@@ -190,8 +274,7 @@ abstract final class BilStoreCopy {
       'premium_benefit_1': 'Tout ce qui est inclus dans BIL Gratuit',
       'premium_benefit_2': 'Sans publicité',
       'premium_benefit_3': 'Planificateur de repas personnalisé',
-      'premium_benefit_barcode':
-          'Scanner Premium des codes-barres alimentaires',
+      'premium_benefit_barcode': 'Scanner les codes-barres alimentaires',
       'premium_benefit_dashboard':
           'Cercles des nutriments et de la santé cardiaque, objectifs personnalisés',
       'premium_benefit_recipes':
@@ -208,17 +291,16 @@ abstract final class BilStoreCopy {
       'premium_benefit_body': 'Mesures et profil corporel détaillés',
       'premium_benefit_4': 'Santé connectée',
       'premium_benefit_5': 'Calories et macros personnalisées',
-      'premium_benefit_medical_devices':
+      'premium_benefit_fitness_devices':
           'Connexions aux appareils de fitness compatibles',
-      'premium_benefit_community':
-          'Communauté Premium, amis et messagerie privée',
+      'premium_benefit_community': 'Amis et demandes',
+      'premium_benefit_messages': 'Messagerie privée',
       'premium_benefit_trial': 'Essai de 7 jours avec 1 000 jetons AI',
       'ai_benefit_1': 'Tout ce qui est inclus dans BIL Premium',
       'ai_benefit_2': 'AI Coach personnalisé avancé',
       'ai_benefit_3': 'Voix mondiale multilingue',
       'ai_benefit_4': '2 500 jetons AI par semaine, jusqu’à 10 000 par mois',
-      'ai_benefit_community':
-          'Toutes les fonctions Premium de communauté et d’amis incluses',
+      'ai_benefit_community': 'Communauté, amis et messagerie privée',
       'ai_benefit_trial': 'Essai de 7 jours avec 1 000 jetons AI',
       'boost_benefit_1': '2 500 jetons BIL AI Coach',
       'boost_benefit_2':
@@ -238,6 +320,10 @@ abstract final class BilStoreCopy {
       'versus_monthly': 'par rapport à 12 paiements mensuels',
       'trial': 'Essai gratuit',
       'trial_7_days': '7 jours gratuits',
+      'trial_renews_monthly':
+          'Puis {price} par mois. Renouvellement automatique jusqu’à résiliation.',
+      'trial_renews_annually':
+          'Puis {price} par an. Renouvellement automatique jusqu’à résiliation.',
       'continue': 'Continuer',
       'restore': 'Restaurer les achats',
       'restore_checking': 'Vérification de l’historique des achats…',
@@ -248,6 +334,8 @@ abstract final class BilStoreCopy {
       'restore_failed': 'Impossible de restaurer les achats. Réessayez.',
       'restore_timeout': 'La boutique ne répond pas. Réessayez.',
       'manage': 'Gérer l’abonnement',
+      'view_all_features': 'Voir toutes les fonctionnalités',
+      'show_fewer_features': 'Afficher moins de fonctionnalités',
       'store_loading': 'Chargement du prix depuis la boutique…',
       'store_unavailable': 'Prix indisponible sur cet appareil',
       'purchase_error': 'L’achat n’a pas abouti. Aucun accès n’a été accordé.',
@@ -257,18 +345,19 @@ abstract final class BilStoreCopy {
     'es': {
       'free': 'Gratis',
       'plans': 'Planes',
-      'premium_store_title': 'Conoce tu cuerpo. Progresa con inteligencia.',
-      'premium_store_eyebrow': 'BIL Premium',
+      'premium_store_title': 'Conoce tu cuerpo. Avanza.',
+      'premium_store_eyebrow': 'Planes',
       'premium_store_subtitle': 'Precio de la tienda',
       'current_plan': 'Plan actual',
       'free_detail': 'Seguimiento esencial y herramientas diarias',
-      'premium_detail': 'La experiencia completa, sin anuncios',
-      'premium_ai_detail': 'Premium con un AI Coach personal multilingüe',
+      'premium_detail': 'Más análisis, sin anuncios',
+      'premium_ai_detail':
+          'BIL Gratis + todas las funciones de pago + AI Coach',
       'boost_eyebrow': 'TU COACH. TU PLAN. CADA DÍA.',
       'boost_detail':
-          'BIL AI Coach habla todos los idiomas y trabaja contigo como compañero de entrenamiento y nutrición.',
+          'BIL AI Coach admite varios idiomas y trabaja contigo como compañero de entrenamiento y nutrición.',
       'premium': 'Premium',
-      'premium_ai_coach': 'Premium AI Coach',
+      'premium_ai_coach': 'AI Coach',
       'ai_boost': 'BIL AI Boost',
       'free_benefit_1': 'Seguimiento de comida, agua y peso',
       'free_benefit_2': 'Información nutricional esencial',
@@ -278,7 +367,7 @@ abstract final class BilStoreCopy {
       'premium_benefit_1': 'Todo lo incluido en BIL Gratis',
       'premium_benefit_2': 'Sin anuncios',
       'premium_benefit_3': 'Planificador de comidas personalizado',
-      'premium_benefit_barcode': 'Escáner Premium de códigos de alimentos',
+      'premium_benefit_barcode': 'Escáner de códigos de alimentos',
       'premium_benefit_dashboard':
           'Círculos de nutrientes y salud cardíaca con objetivos personalizados',
       'premium_benefit_recipes': '1.500 recetas con información nutricional',
@@ -293,17 +382,16 @@ abstract final class BilStoreCopy {
       'premium_benefit_body': 'Medidas y perfil corporal detallados',
       'premium_benefit_4': 'Salud conectada',
       'premium_benefit_5': 'Calorías y macros personalizadas',
-      'premium_benefit_medical_devices':
+      'premium_benefit_fitness_devices':
           'Conexiones con dispositivos de fitness compatibles',
-      'premium_benefit_community':
-          'Comunidad Premium, amigos y mensajería privada',
+      'premium_benefit_community': 'Amigos y solicitudes',
+      'premium_benefit_messages': 'Mensajes privados',
       'premium_benefit_trial': 'Prueba de 7 días con 1.000 tokens AI',
       'ai_benefit_1': 'Todo lo incluido en BIL Premium',
       'ai_benefit_2': 'AI Coach personalizado avanzado',
       'ai_benefit_3': 'Voz global multilingüe',
       'ai_benefit_4': '2.500 tokens AI por semana, hasta 10.000 al mes',
-      'ai_benefit_community':
-          'Incluye todas las funciones Premium de comunidad y amigos',
+      'ai_benefit_community': 'Comunidad, amigos y mensajería privada',
       'ai_benefit_trial': 'Prueba de 7 días con 1.000 tokens AI',
       'boost_benefit_1': '2.500 tokens de BIL AI Coach',
       'boost_benefit_2':
@@ -323,6 +411,10 @@ abstract final class BilStoreCopy {
       'versus_monthly': 'frente a 12 pagos mensuales',
       'trial': 'Prueba gratuita',
       'trial_7_days': '7 días gratis',
+      'trial_renews_monthly':
+          'Después, {price} al mes. Se renueva automáticamente hasta que canceles.',
+      'trial_renews_annually':
+          'Después, {price} al año. Se renueva automáticamente hasta que canceles.',
       'continue': 'Continuar',
       'restore': 'Restaurar compras',
       'restore_checking': 'Comprobando el historial de compras…',
@@ -335,6 +427,8 @@ abstract final class BilStoreCopy {
           'No se pudieron restaurar las compras. Inténtalo de nuevo.',
       'restore_timeout': 'La tienda no respondió. Inténtalo de nuevo.',
       'manage': 'Gestionar suscripción',
+      'view_all_features': 'Ver todas las funciones',
+      'show_fewer_features': 'Mostrar menos funciones',
       'store_loading': 'Cargando el precio desde la tienda…',
       'store_unavailable': 'Precio no disponible en este dispositivo',
       'purchase_error': 'La compra no se completó. No se concedió acceso.',
@@ -343,18 +437,18 @@ abstract final class BilStoreCopy {
     'tr': {
       'free': 'Ücretsiz',
       'plans': 'Planlar',
-      'premium_store_title': 'Vücudunu tanı. Akıllıca ilerle.',
-      'premium_store_eyebrow': 'BIL Premium',
+      'premium_store_title': 'Vücudunu tanı. İlerle.',
+      'premium_store_eyebrow': 'Planlar',
       'premium_store_subtitle': 'Mağazadaki fiyat',
       'current_plan': 'Mevcut plan',
       'free_detail': 'Temel takip ve günlük araçlar',
-      'premium_detail': 'Reklamsız eksiksiz deneyim',
-      'premium_ai_detail': 'Kişisel çok dilli AI Coach içeren Premium',
+      'premium_detail': 'Daha fazla analiz, reklamsız',
+      'premium_ai_detail': 'BIL Ücretsiz + tüm ücretli özellikler + AI Coach',
       'boost_eyebrow': 'KOÇUNUZ. PLANINIZ. HER GÜN.',
       'boost_detail':
-          'BIL AI Coach tüm dilleri konuşur ve antrenman ile beslenme ortağınız olarak yanınızda çalışır.',
+          'BIL AI Coach birden fazla dili destekler ve antrenman ile beslenme ortağınız olarak yanınızda çalışır.',
       'premium': 'Premium',
-      'premium_ai_coach': 'Premium AI Coach',
+      'premium_ai_coach': 'AI Coach',
       'ai_boost': 'BIL AI Boost',
       'free_benefit_1': 'Yemek, su ve kilo takibi',
       'free_benefit_2': 'Temel beslenme bilgileri',
@@ -364,7 +458,7 @@ abstract final class BilStoreCopy {
       'premium_benefit_1': 'BIL Ücretsiz’deki her şey',
       'premium_benefit_2': 'Reklamsız',
       'premium_benefit_3': 'Kişiselleştirilmiş Öğün Planlayıcı',
-      'premium_benefit_barcode': 'Premium yiyecek barkodu tarayıcısı',
+      'premium_benefit_barcode': 'Yiyecek barkodu tarayıcısı',
       'premium_benefit_dashboard':
           'Besin ve kalp sağlığı halkaları ile özel hedefler',
       'premium_benefit_recipes': 'Besin değerleriyle 1.500 tarif',
@@ -379,16 +473,15 @@ abstract final class BilStoreCopy {
       'premium_benefit_body': 'Ayrıntılı vücut ölçümleri ve profili',
       'premium_benefit_4': 'Bağlı sağlık',
       'premium_benefit_5': 'Özel kaloriler ve makrolar',
-      'premium_benefit_medical_devices': 'Uyumlu fitness cihazı bağlantıları',
-      'premium_benefit_community':
-          'Premium topluluk, arkadaşlar ve özel mesajlaşma',
+      'premium_benefit_fitness_devices': 'Uyumlu fitness cihazı bağlantıları',
+      'premium_benefit_community': 'Arkadaşlar ve istekler',
+      'premium_benefit_messages': 'Özel mesajlar',
       'premium_benefit_trial': '1.000 AI token içeren 7 günlük deneme',
       'ai_benefit_1': 'BIL Premium’daki her şey',
       'ai_benefit_2': 'Gelişmiş kişisel AI Coach',
       'ai_benefit_3': 'Küresel çok dilli ses',
       'ai_benefit_4': 'Haftada 2.500 AI token, ayda en fazla 10.000',
-      'ai_benefit_community':
-          'Tüm Premium topluluk ve arkadaş özellikleri dahildir',
+      'ai_benefit_community': 'Topluluk, arkadaşlar ve özel mesajlaşma',
       'ai_benefit_trial': '1.000 AI token içeren 7 günlük deneme',
       'boost_benefit_1': '2.500 BIL AI Coach tokeni',
       'boost_benefit_2': 'Hedefinize göre günlük, haftalık ve aylık planlar',
@@ -406,6 +499,10 @@ abstract final class BilStoreCopy {
       'versus_monthly': '12 aylık ödemeye kıyasla',
       'trial': 'Ücretsiz deneme',
       'trial_7_days': '7 gün ücretsiz',
+      'trial_renews_monthly':
+          'Sonrasında aylık {price}. İptal edilene kadar otomatik yenilenir.',
+      'trial_renews_annually':
+          'Sonrasında yıllık {price}. İptal edilene kadar otomatik yenilenir.',
       'continue': 'Devam et',
       'restore': 'Satın alımları geri yükle',
       'restore_checking': 'Satın alma geçmişi kontrol ediliyor…',
@@ -416,6 +513,8 @@ abstract final class BilStoreCopy {
       'restore_failed': 'Satın alımlar geri yüklenemedi. Tekrar deneyin.',
       'restore_timeout': 'Mağaza yanıt vermedi. Tekrar deneyin.',
       'manage': 'Aboneliği yönet',
+      'view_all_features': 'Tüm özellikleri göster',
+      'show_fewer_features': 'Daha az özellik göster',
       'store_loading': 'Fiyat mağazadan yükleniyor…',
       'store_unavailable': 'Fiyat bu cihazda kullanılamıyor',
       'purchase_error': 'Satın alma tamamlanmadı. Erişim verilmedi.',
@@ -425,10 +524,13 @@ abstract final class BilStoreCopy {
   };
 
   static String text(String locale, String key) {
-    final language = locale.toLowerCase().split(RegExp('[-_]')).first;
+    final normalized = locale.replaceAll('_', '-').toLowerCase();
+    final language = normalized.split('-').first;
     final english = catalogs['en']![key] ?? key;
     return catalogs[language]?[key] ??
-        RuntimeCopy.resolve(english, locale) ??
+        _extendedTrialRenewalCopy[key]?[normalized] ??
+        _extendedTrialRenewalCopy[key]?[language] ??
+        RuntimeCopy.resolve(_runtimeFallbackSource[key] ?? english, locale) ??
         english;
   }
 }

@@ -29,6 +29,25 @@ void main() {
       r'tools:node="remove"',
     );
     expect(android, matches(topicsOptOut));
+    final advertisingIdOptOut = RegExp(
+      r'com\.google\.android\.gms\.permission\.AD_ID"\s*'
+      r'tools:node="remove"',
+    );
+    expect(android, matches(advertisingIdOptOut));
+    for (final privacySandboxPermission in const [
+      'android.permission.ACCESS_ADSERVICES_AD_ID',
+      'android.permission.ACCESS_ADSERVICES_ATTRIBUTION',
+    ]) {
+      expect(
+        android,
+        matches(
+          RegExp(
+            '${RegExp.escape(privacySandboxPermission)}"\\s*'
+            'tools:node="remove"',
+          ),
+        ),
+      );
+    }
     expect(android, isNot(contains('android.permission.ACTIVITY_RECOGNITION')));
 
     for (final usage in const [
@@ -62,9 +81,10 @@ void main() {
     final dashboard = File(
       'lib/features/dashboard/dashboard_page.dart',
     ).readAsStringSync();
-    final foodPage = File(
+    final foodPage = [
       'lib/features/nutrition/food_page.dart',
-    ).readAsStringSync();
+      'lib/features/nutrition/presentation/food_page_actions.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
 
     expect(policy, contains('openAppSettings'));
     expect(policy, contains('Permission.speech'));

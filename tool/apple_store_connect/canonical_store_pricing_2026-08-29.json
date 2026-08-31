@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "status": "canonical",
+  "effectiveDate": "2026-08-29",
+  "pricingAuthority": "device_store_localized_metadata",
+  "displayPolicy": {
+    "annualSavingsBadgePolicy": "rounded_percent_from_annual_vs_monthly_times_12",
+    "annualReferencePricePolicy": "monthly_store_price_times_12",
+    "pricesMustBeStoreDerived": true,
+    "hardcodedFlutterPricesAllowed": false
+  },
+  "marketPolicy": {
+    "appleLaunchMarketCount": 172,
+    "premiumOnlyIso2": ["EG", "IN", "PK", "TR"],
+    "premiumAiCoachMarketCount": 168,
+    "premiumAiCoachRule": "all Apple launch markets except premiumOnlyIso2",
+    "heldIso2": ["BY", "CN", "RU"]
+  },
+  "products": {
+    "bil_premium": {
+      "term": "ONE_MONTH",
+      "businessTargetUsd": "2.50",
+      "appleReferenceTerritory": "US",
+      "appleReferencePriceUsd": "2.49",
+      "applePriceSelection": "closest_supported_price_not_above_business_target",
+      "localization": "apple_equalized"
+    },
+    "bil_premium_annual": {
+      "term": "ONE_YEAR",
+      "businessTargetUsd": "21.00",
+      "appleReferenceTerritory": "US",
+      "appleReferencePriceUsd": "21.00",
+      "applePriceSelection": "exact_supported_price",
+      "localization": "apple_equalized"
+    },
+    "bil_premium_ai_coach": {
+      "term": "ONE_MONTH",
+      "businessTargetUsd": "5.99",
+      "appleReferenceTerritory": "US",
+      "appleReferencePriceUsd": "5.99",
+      "applePriceSelection": "exact_supported_price",
+      "localization": "apple_equalized"
+    },
+    "bil_premium_ai_coach_annual": {
+      "term": "ONE_YEAR",
+      "businessTargetUsd": "49.99",
+      "appleReferenceTerritory": "US",
+      "appleReferencePriceUsd": "49.99",
+      "applePriceSelection": "exact_supported_price",
+      "localization": "apple_equalized"
+    },
+    "bil_ai_boost": {
+      "kind": "CONSUMABLE",
+      "businessTargetUsd": "2.50",
+      "appleReferenceTerritory": "US",
+      "appleReferencePriceUsd": "2.49",
+      "applePriceSelection": "closest_supported_price_not_above_business_target",
+      "localization": "apple_equalized"
+    }
+  },
+  "history": {
+    "supersedesForActivePricing": [
+      "artifacts/pricing/BIL_FINAL_GLOBAL_STORE_PRICING_2026-08-28.json",
+      "artifacts/pricing/BIL_FINAL_GLOBAL_STORE_PRICING_2026-08-28.md",
+      "artifacts/pricing/BIL_EXECUTIVE_PRODUCT_PRICING_MATRIX_2026-08-28.csv",
+      "artifacts/pricing/BIL_EXECUTIVE_PRODUCT_PRICING_MATRIX_2026-08-28.md",
+      "artifacts/pricing/BIL_vs_MyFitnessPal_40pct_all_countries_2026-08-28.md",
+      "artifacts/pricing/mfp_global_price_research_2026-08-28.json"
+    ],
+    "historicalFilesRemainImmutable": true,
+    "note": "The superseded files remain research evidence only and must not drive active store configuration."
+  }
+}

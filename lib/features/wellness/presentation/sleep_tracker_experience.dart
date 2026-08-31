@@ -31,7 +31,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
   @override
   void initState() {
     super.initState();
-    recordDate = DateTime.now();
+    recordDate = ref.read(sleepNowProvider)();
     tabController = TabController(length: 3, vsync: this);
     insightsStream = ref.read(dailyLogRepositoryProvider).watchAll();
     sleepScheduleStore = SleepScheduleStore();
@@ -263,7 +263,11 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
     }
     final sync = snapshot.lastSyncAt;
     if (latest == null || sync == null) return null;
-    if (DateTime.now().difference(latest.observedAt.toLocal()).inHours > 36) {
+    if (ref
+            .read(sleepNowProvider)()
+            .difference(latest.observedAt.toLocal())
+            .inHours >
+        36) {
       return null;
     }
     return _ConnectedSleepEvidence(signal: latest, lastSyncAt: sync);
@@ -444,7 +448,9 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
       if (!snapshot.hasData) {
         return const Center(child: CircularProgressIndicator());
       }
-      final cutoff = DateTime.now().subtract(Duration(days: insightWindowDays));
+      final cutoff = ref
+          .read(sleepNowProvider)()
+          .subtract(Duration(days: insightWindowDays));
       final recorded = snapshot.data!
           .where(
             (entry) => entry.sleepHours != null && !entry.date.isBefore(cutoff),
@@ -823,7 +829,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
       if (!mounted) return;
       setState(() {
         recordedHours = selectedHours;
-        manualUpdatedAt = saved?.updatedAt ?? DateTime.now();
+        manualUpdatedAt = saved?.updatedAt ?? ref.read(sleepNowProvider)();
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

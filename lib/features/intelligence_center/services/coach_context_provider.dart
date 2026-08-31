@@ -11,6 +11,7 @@ import '../../../engine/body_profile.dart';
 import '../../../engine/plan_engine.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
 import '../../daily_log/domain/daily_body_context_codec.dart';
+import '../../connected_health/connected_health_model.dart';
 import '../../connected_health/providers/connected_health_provider.dart';
 import '../../foods/providers/food_provider.dart';
 import '../../profile/providers/user_profile_provider.dart';
@@ -21,11 +22,15 @@ import '../../exercise_calorie_controls/domain/exercise_calorie_policy.dart';
 import '../../exercise_calorie_controls/providers/exercise_calorie_providers.dart';
 import '../../wellness/domain/fasting_session.dart';
 import '../domain/coach_context_snapshot.dart';
+import '../domain/coach_context_preferences.dart';
 import '../domain/coach_nutrition_goal_resolver.dart';
+import '../../onboarding/domain/onboarding_goal_bindings.dart';
 import '../../nutrition/domain/macro_gram_goals.dart';
 import '../../nutrition/domain/percentage_nutrition_goals.dart';
 import '../../nutrition/domain/dietary_preferences.dart';
 import 'coach_health_tools.dart';
+
+part 'coach_context_assembly.dart';
 
 // A voice turn starts reading this snapshot only after recording has stopped.
 // Keep the provider alive while its asynchronous repository reads complete;
@@ -143,6 +148,12 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
     }
   })();
   final displayNameFuture = preferences.get('displayName');
+  final onboardingGoalsFuture = preferences.get(
+    OnboardingGoalBindings.storageKey,
+  );
+  final coachContextPreferencesFuture = preferences.get(
+    CoachContextPreferences.storageKey,
+  );
   final explicitMemoriesFuture = (() async {
     try {
       final raw = await preferences.get('coachExplicitMemoriesV1');
@@ -206,6 +217,12 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
   final personalExperiments = await personalExperimentsFuture;
   final dietaryPreferences = await dietaryPreferencesFuture;
   final displayName = (await displayNameFuture)?.trim();
+  final onboardingGoals = OnboardingGoalBindings.decode(
+    await onboardingGoalsFuture,
+  );
+  final coachContextPreferences = CoachContextPreferences.decode(
+    await coachContextPreferencesFuture,
+  );
   final explicitMemories = await explicitMemoriesFuture;
   final goalSchedule = await goalScheduleFuture;
   dailyLogs.sort((left, right) => right.date.compareTo(left.date));
@@ -227,84 +244,7 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
   );
   final activeFast = FastingSession.tryParse(await fastingFuture);
 
-  final byDay = <String, List<MealWithItems>>{};
-  for (final meal in meals) {
-    final date = meal.meal.date;
-    final day =
-        '${date.year.toString().padLeft(4, '0')}-'
-        '${date.month.toString().padLeft(2, '0')}-'
-        '${date.day.toString().padLeft(2, '0')}';
-    byDay.putIfAbsent(day, () => []).add(meal);
-  }
-  final nutrition = <CoachNutritionDay>[];
-  for (final entry in byDay.entries) {
-    var calories = 0.0;
-    var protein = 0.0;
-    var carbs = 0.0;
-    var fat = 0.0;
-    var sodium = 0.0;
-    var itemCount = 0;
-    final knownTotals = <String>{
-      'caloriesKcal',
-      'proteinG',
-      'carbsG',
-      'fatG',
-      'sodiumMg',
-    };
-    final mealJson = <Map<String, Object?>>[];
-    for (final meal in entry.value) {
-      final items = <Map<String, Object?>>[];
-      for (final item in meal.items) {
-        itemCount += 1;
-        bool knows(TrackedNutrient nutrient) =>
-            NutrientEvidenceMask.contains(item.nutrientEvidenceMask, nutrient);
-        if (!knows(TrackedNutrient.calories)) {
-          knownTotals.remove('caloriesKcal');
-        }
-        if (!knows(TrackedNutrient.protein)) {
-          knownTotals.remove('proteinG');
-        }
-        if (!knows(TrackedNutrient.carbohydrates)) {
-          knownTotals.remove('carbsG');
-        }
-        if (!knows(TrackedNutrient.fat)) knownTotals.remove('fatG');
-        if (!knows(TrackedNutrient.sodium)) knownTotals.remove('sodiumMg');
-        calories += item.calories;
-        protein += item.protein;
-        carbs += item.carbs;
-        fat += item.fats;
-        sodium += item.sodium;
-        items.add({
-          'itemId': item.id,
-          'food': meal.foodsById[item.foodId]?.name ?? 'historical-food',
-          'quantity': item.quantity,
-          if (knows(TrackedNutrient.calories)) 'caloriesKcal': item.calories,
-          if (knows(TrackedNutrient.protein)) 'proteinG': item.protein,
-          if (knows(TrackedNutrient.carbohydrates)) 'carbsG': item.carbs,
-          if (knows(TrackedNutrient.fat)) 'fatG': item.fats,
-          if (knows(TrackedNutrient.sodium)) 'sodiumMg': item.sodium,
-        });
-      }
-      mealJson.add({
-        'type': meal.meal.type,
-        'name': meal.meal.name,
-        'items': items,
-      });
-    }
-    nutrition.add(
-      CoachNutritionDay(
-        day: entry.key,
-        meals: mealJson,
-        calories: calories,
-        protein: protein,
-        carbs: carbs,
-        fat: fat,
-        sodium: sodium,
-        knownTotals: itemCount == 0 ? const <String>{} : knownTotals,
-      ),
-    );
-  }
-  nutrition.sort((a, b) => b.day.compareTo(a.day));
+  final nutrition = _coachNutritionDays(meals);
 
   final latestWeightKg = weights.isEmpty
       ? profile?.currentWeight
@@ -559,116 +499,101 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
             'mealTargets': CoachNutritionGoalResolver.mealTargets(goalSchedule),
           },
         };
-  List<Map<String, Object?>> exercisesFor(DailyLog log) {
-    final result = <Map<String, Object?>>[];
-    for (final line in (log.exerciseNotes ?? '').split('\n')) {
-      if (line.trim().isEmpty) continue;
-      try {
-        final decoded = jsonDecode(line);
-        if (decoded is Map) {
-          result.add(Map<String, Object?>.from(decoded));
-        }
-      } on Object {
-        // Legacy free text is excluded from remote Coach context.
-      }
-    }
-    return result.take(12).toList(growable: false);
-  }
+  final activityHistory = _coachActivityHistory(dailyLogs, connectedHealth);
 
-  final activityByDay = <String, Map<String, Object?>>{
-    for (final log in dailyLogs.take(14))
-      log.dayKey: <String, Object?>{
-        'day': log.dayKey,
-        if (log.sleepHours != null) ...{
-          'sleepHours': log.sleepHours,
-          'sleepSource': 'manual',
-        },
-        if (log.steps != null) 'steps': log.steps,
-        if (exercisesFor(log).isNotEmpty) 'exercises': exercisesFor(log),
-      },
-  };
-  if (connectedHealth?.deviceVerified == true) {
-    for (final signal in connectedHealth!.signals) {
-      if (signal.key != 'sleep' ||
-          !signal.value.isFinite ||
-          signal.value <= 0 ||
-          signal.value > 14) {
-        continue;
-      }
-      final local = signal.observedAt.toLocal();
-      final day =
-          '${local.year.toString().padLeft(4, '0')}-'
-          '${local.month.toString().padLeft(2, '0')}-'
-          '${local.day.toString().padLeft(2, '0')}';
-      final row = activityByDay.putIfAbsent(
-        day,
-        () => <String, Object?>{'day': day},
-      );
-      final previousAt = DateTime.tryParse(
-        row['sleepObservedAt']?.toString() ?? '',
-      );
-      if (previousAt == null || signal.observedAt.isAfter(previousAt)) {
-        row
-          ..['sleepHours'] = signal.value
-          ..['sleepSource'] = 'connected_health'
-          ..['sleepDeviceSource'] = signal.source
-          ..['sleepObservedAt'] = signal.observedAt.toUtc().toIso8601String()
-          ..['sleepLastSyncAt'] = connectedHealth.lastSyncAt
-              ?.toUtc()
-              .toIso8601String();
-      }
-    }
-  }
-  final activityHistory =
-      activityByDay.values
-          .where((day) => day.length > 1)
+  final includeNutrition = coachContextPreferences.includes(
+    CoachContextFocus.nutrition,
+  );
+  final includeTraining = coachContextPreferences.includes(
+    CoachContextFocus.training,
+  );
+  final includeHabits = coachContextPreferences.includes(
+    CoachContextFocus.habits,
+  );
+  final includeAnalytics = coachContextPreferences.includes(
+    CoachContextFocus.analytics,
+  );
+  final selectedGoalNames =
+      onboardingGoals.map((goal) => goal.name).toList(growable: false)..sort();
+  final selectedGoalConsumers =
+      onboardingGoals
+          .expand(
+            (goal) =>
+                OnboardingGoalBindings.consumers[goal] ??
+                const <OnboardingGoalConsumer>{},
+          )
+          .map((consumer) => consumer.name)
+          .toSet()
           .toList(growable: false)
-        ..sort((a, b) => '${b['day']}'.compareTo('${a['day']}'));
+        ..sort();
+  final scopedHealth = _scopeCoachHealth(
+    health: health,
+    includeNutrition: includeNutrition,
+    includeTraining: includeTraining,
+    includeHabits: includeHabits,
+    includeAnalytics: includeAnalytics,
+  );
 
   return CoachContextSnapshot(
     generatedAt: DateTime.now(),
     profile: profile == null
         ? <String, Object?>{
-            'dietaryPreferences': dietaryPreferences.toCoachContext(),
+            'selectedGoals': selectedGoalNames,
+            'goalConsumers': selectedGoalConsumers,
+            if (includeNutrition)
+              'dietaryPreferences': dietaryPreferences.toCoachContext(),
           }
         : {
             if (displayName != null && displayName.isNotEmpty)
               'displayName': displayName,
-            'age': profile.age,
-            'gender': profile.gender,
-            'heightCm': profile.height,
-            'currentWeightKg': latestWeightKg,
-            'targetWeightKg': profile.targetWeight,
-            'activityLevel': profile.activityLevel,
-            'exercises': profile.exercises,
-            'waistCm': latestWaistCm,
-            'neckCm': latestNeckCm,
-            'hipCm': latestHipCm,
-            'chestCm': profile.chest,
-            'armCm': profile.arm,
-            'thighCm': profile.thigh,
-            'dietaryPreferences': dietaryPreferences.toCoachContext(),
+            'selectedGoals': selectedGoalNames,
+            'goalConsumers': selectedGoalConsumers,
+            if (includeNutrition || includeTraining || includeAnalytics) ...{
+              'age': profile.age,
+              'gender': profile.gender,
+              'heightCm': profile.height,
+              'currentWeightKg': latestWeightKg,
+              'targetWeightKg': profile.targetWeight,
+            },
+            if (includeTraining) ...{
+              'activityLevel': profile.activityLevel,
+              'exercises': profile.exercises,
+            },
+            if (includeAnalytics) ...{
+              'waistCm': latestWaistCm,
+              'neckCm': latestNeckCm,
+              'hipCm': latestHipCm,
+              'chestCm': profile.chest,
+              'armCm': profile.arm,
+              'thighCm': profile.thigh,
+            },
+            if (includeNutrition)
+              'dietaryPreferences': dietaryPreferences.toCoachContext(),
           },
-    weights: weights
-        .map(
-          (item) => CoachWeightPoint(
-            at: item.date,
-            kg: item.weight,
-            measurementContext: item.measurementContext,
-          ),
-        )
-        .toList(growable: false),
-    nutritionDays: nutrition,
-    waterHistory: water
-        .map(
-          (item) => <String, Object?>{
-            'at': item.occurredAt.toUtc().toIso8601String(),
-            'amountMl': item.amountMl,
-          },
-        )
-        .toList(growable: false),
-    computedHealth: health,
-    canonicalIntelligence: canonicalOutput == null
+    weights: !includeAnalytics
+        ? const <CoachWeightPoint>[]
+        : weights
+              .map(
+                (item) => CoachWeightPoint(
+                  at: item.date,
+                  kg: item.weight,
+                  measurementContext: item.measurementContext,
+                ),
+              )
+              .toList(growable: false),
+    nutritionDays: includeNutrition ? nutrition : const <CoachNutritionDay>[],
+    waterHistory: !includeNutrition
+        ? const <Map<String, Object?>>[]
+        : water
+              .map(
+                (item) => <String, Object?>{
+                  'at': item.occurredAt.toUtc().toIso8601String(),
+                  'amountMl': item.amountMl,
+                },
+              )
+              .toList(growable: false),
+    computedHealth: scopedHealth,
+    canonicalIntelligence: !includeAnalytics || canonicalOutput == null
         ? const <String, Object?>{'status': 'unavailable', 'canPresent': false}
         : <String, Object?>{
             'status': canonicalOutput.brainResult.status.name,
@@ -722,41 +647,51 @@ final coachContextSnapshotProvider = FutureProvider<CoachContextSnapshot>((
                 'evidenceIds': action.evidenceIds.take(8).toList(),
               },
           },
-    decisionMemory: decisionMemories
-        .take(10)
-        .map(
-          (memory) => <String, Object?>{
-            'recommendationKey': memory.recommendationKey,
-            'title': memory.title,
-            'reason': memory.reason,
-            'confidence': memory.confidence,
-            'response': memory.response,
-            if (memory.outcome != null) 'outcome': memory.outcome,
-            if (memory.helpfulness != null) 'helpfulness': memory.helpfulness,
-            'surfacedAt': memory.surfacedAt.toUtc().toIso8601String(),
-          },
-        )
-        .toList(growable: false),
+    decisionMemory: !includeAnalytics
+        ? const <Map<String, Object?>>[]
+        : decisionMemories
+              .take(10)
+              .map(
+                (memory) => <String, Object?>{
+                  'recommendationKey': memory.recommendationKey,
+                  'title': memory.title,
+                  'reason': memory.reason,
+                  'confidence': memory.confidence,
+                  'response': memory.response,
+                  if (memory.outcome != null) 'outcome': memory.outcome,
+                  if (memory.helpfulness != null)
+                    'helpfulness': memory.helpfulness,
+                  'surfacedAt': memory.surfacedAt.toUtc().toIso8601String(),
+                },
+              )
+              .toList(growable: false),
     explicitMemories: explicitMemories,
-    activityHistory: activityHistory.take(14).toList(growable: false),
-    bodyContextHistory: bodyContextHistory.take(42).toList(growable: false),
-    personalExperiments: personalExperiments
-        .take(6)
-        .map(
-          (experiment) => <String, Object?>{
-            'id': experiment.uuid,
-            'hypothesis': experiment.hypothesis,
-            'changedVariable': experiment.changedVariable,
-            'requiredData': experiment.requiredData,
-            'startedAt': experiment.startedAt.toUtc().toIso8601String(),
-            'endsAt': experiment.endsAt.toUtc().toIso8601String(),
-            'status': experiment.status,
-            if (experiment.adherence != null) 'adherence': experiment.adherence,
-            if (experiment.result != null) 'result': experiment.result,
-            'confidence': experiment.confidence,
-            'limitations': experiment.limitations,
-          },
-        )
-        .toList(growable: false),
+    activityHistory: includeTraining || includeHabits
+        ? activityHistory.take(14).toList(growable: false)
+        : const <Map<String, Object?>>[],
+    bodyContextHistory: includeHabits
+        ? bodyContextHistory.take(42).toList(growable: false)
+        : const <Map<String, Object?>>[],
+    personalExperiments: !includeAnalytics
+        ? const <Map<String, Object?>>[]
+        : personalExperiments
+              .take(6)
+              .map(
+                (experiment) => <String, Object?>{
+                  'id': experiment.uuid,
+                  'hypothesis': experiment.hypothesis,
+                  'changedVariable': experiment.changedVariable,
+                  'requiredData': experiment.requiredData,
+                  'startedAt': experiment.startedAt.toUtc().toIso8601String(),
+                  'endsAt': experiment.endsAt.toUtc().toIso8601String(),
+                  'status': experiment.status,
+                  if (experiment.adherence != null)
+                    'adherence': experiment.adherence,
+                  if (experiment.result != null) 'result': experiment.result,
+                  'confidence': experiment.confidence,
+                  'limitations': experiment.limitations,
+                },
+              )
+              .toList(growable: false),
   );
 });

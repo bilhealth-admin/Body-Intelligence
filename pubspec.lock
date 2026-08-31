@@ -51,10 +51,9 @@ packages:
   archive:
     dependency: "direct main"
     description:
-      name: archive
-      sha256: a96e8b390886ee8abb49b7bd3ac8df6f451c621619f52a26e815fdcf568959ff
-      url: "https://pub.dev"
-    source: hosted
+      path: "tool/vendor_archive"
+      relative: true
+    source: path
     version: "4.0.9"
   args:
     dependency: transitive
@@ -337,12 +336,11 @@ packages:
     source: hosted
     version: "1.0.9"
   dart_jsonwebtoken:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: dart_jsonwebtoken
-      sha256: ad84e60181696513d04d5f2078e0bbc20365b911f46f647797317414bdc88fbe
-      url: "https://pub.dev"
-    source: hosted
+      path: "tool/vendor_dart_jsonwebtoken"
+      relative: true
+    source: path
     version: "3.4.1"
   dart_style:
     dependency: transitive
@@ -1203,14 +1201,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.8"
-  pointycastle:
-    dependency: "direct main"
-    description:
-      name: pointycastle
-      sha256: "92aa3841d083cc4b0f4709b5c74fd6409a3e6ba833ffc7dc6a8fee096366acf5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.0.0"
   pool:
     dependency: transitive
     description:
@@ -1260,7 +1250,7 @@ packages:
     source: hosted
     version: "1.5.0"
   qr:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: qr
       sha256: "5a1d2586170e172b8a8c8470bbbffd5eb0cd38a66c0d77155ea138d3af3a4445"

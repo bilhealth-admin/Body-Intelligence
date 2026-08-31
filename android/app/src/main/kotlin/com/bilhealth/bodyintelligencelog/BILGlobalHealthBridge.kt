@@ -64,7 +64,9 @@ class BILGlobalHealthBridge(
             "readChanges" -> run(result) { readChanges(call) }
             "write" -> run(result) { write(call) }
             "delete" -> run(result) { delete(call) }
-            "enableBackgroundDelivery" -> result.success(mapOf("enabled" to true, "contract" to "workmanager-scheduler"))
+            // The first public release refreshes connected fitness data only
+            // while BIL is in use. Do not claim a continuous background job.
+            "enableBackgroundDelivery" -> result.success(mapOf("enabled" to false, "contract" to "foreground-refresh-only"))
             else -> result.notImplemented()
         }
     }
@@ -121,8 +123,18 @@ class BILGlobalHealthBridge(
         if (incomingToken == null) {
             val since = TimeRangeFilter.after(Instant.now().minusSeconds(366L * 24L * 60L * 60L))
             suspend fun <T : Record> readInitial(recordType: KClass<T>) {
-                client.readRecords(ReadRecordsRequest(recordType, since))
-                    .records.mapNotNullTo(records, ::serialize)
+                var pageToken: String? = null
+                do {
+                    val page = client.readRecords(
+                        ReadRecordsRequest(
+                            recordType = recordType,
+                            timeRangeFilter = since,
+                            pageToken = pageToken,
+                        ),
+                    )
+                    page.records.mapNotNullTo(records, ::serialize)
+                    pageToken = page.pageToken
+                } while (pageToken != null)
             }
             for (name in supportedRequestedNames) when (name) {
                 "steps" -> readInitial(StepsRecord::class)

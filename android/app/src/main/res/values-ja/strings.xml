@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BIL - 身体インテリジェンス ログ</string>
+    <string name="app_name">身体インテリジェンス ログ</string>
     <string name="health_permissions_rationale_title">医療データのプライバシー</string>
     <string name="health_permissions_rationale_body">BIL は、使用することを選択した機能に必要な Health Connect データ型のみを要求します。健康データはデフォルトでローカルで処理されます。 Health Connect 設定から、いつでも個々のアクセス許可を付与、拒否、または取り消すことができます。 BIL は、健康データを販売したり、広告に使用したりすることはありません。</string>
     <string name="health_permissions_privacy_policy_action">BIL のプライバシーポリシー全文を読む</string>

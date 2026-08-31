@@ -4,11 +4,23 @@ import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_extended.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+String _librarySource(String path) {
+  final library = File(path);
+  final entrypoint = library.readAsStringSync();
+  final parts = RegExp(r"part '([^']+)';")
+      .allMatches(entrypoint)
+      .map((match) => File('${library.parent.path}/${match.group(1)!}'));
+  return <String>[
+    entrypoint,
+    for (final part in parts) part.readAsStringSync(),
+  ].join('\n');
+}
+
 void main() {
   test('account deletion has direct copy for every extended locale', () {
-    final source = File(
+    final source = _librarySource(
       'lib/features/settings/account_deletion_page.dart',
-    ).readAsStringSync();
+    );
     final englishStart = source.indexOf("    'en': {");
     final englishEnd = source.indexOf("\n    'ar': {", englishStart);
     expect(englishStart, greaterThanOrEqualTo(0));
@@ -17,13 +29,17 @@ void main() {
         .allMatches(source.substring(englishStart, englishEnd))
         .map((match) => match.group(1)!)
         .toSet();
-    expect(values, hasLength(15));
+    expect(values, hasLength(23));
     expect(RuntimeCopy.supported, hasLength(25));
     const directStatusKeys = {
       'Status',
       'Request reference',
       'Pending',
       'Processing',
+      'Completed',
+      'Deleting your BIL account does not cancel an App Store or Google Play subscription. Billing can continue. Cancel it in your device store before you continue.',
+      'If immediate processing is unavailable, BIL retries the queued deletion within 15 minutes. Keep the reference until deletion completes.',
+      'Your BIL account and developer-controlled cloud data were deleted. Store billing and records managed by Apple or Google remain separate.',
     };
     for (final value in values.where(
       (value) => !directStatusKeys.contains(value),
@@ -47,9 +63,9 @@ void main() {
   });
 
   test('all five authored locales preserve the complete surface key set', () {
-    final source = File(
+    final source = _librarySource(
       'lib/features/settings/account_deletion_page.dart',
-    ).readAsStringSync();
+    );
     const locales = ['en', 'ar', 'fr', 'es', 'tr'];
     Set<String>? expected;
     for (var index = 0; index < locales.length; index++) {
@@ -67,7 +83,7 @@ void main() {
           .toSet();
       expected ??= keys;
       expect(keys, expected, reason: 'surface drift in $locale');
-      expect(keys, hasLength(15), reason: 'incomplete $locale surface');
+      expect(keys, hasLength(23), reason: 'incomplete $locale surface');
     }
   });
 
@@ -91,6 +107,10 @@ void main() {
     expect(page, contains('canPop: !_submitting'));
     expect(page, contains("response['request_id']"));
     expect(page, contains("status != 'pending' && status != 'processing'"));
+    expect(page, contains("'account-data-deletion'"));
+    expect(page, contains("workerData['status'] == 'completed'"));
+    expect(page, contains('SignOutScope.local'));
+    expect(page, contains('https://apps.apple.com/account/subscriptions'));
     expect(migration, contains('bil_account_deletion_one_active_per_user'));
     expect(migration, contains('pg_advisory_xact_lock'));
     expect(

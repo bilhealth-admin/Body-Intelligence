@@ -129,6 +129,10 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           context.go('/plan?origin=dashboard');
         case IntelligenceActionType.openReport:
           context.go('/analytics');
+        case IntelligenceActionType.openAiCoachSubscription:
+          context.push('/plans?focus=ai-coach');
+        case IntelligenceActionType.buyAiBoost:
+          context.push('/plans?focus=boost');
         case IntelligenceActionType.manageSubscription:
           context.push('/plans');
         case IntelligenceActionType.setThemeMode:

@@ -399,6 +399,7 @@ class HistoryPage extends ConsumerWidget {
                     ),
                     onTap: () => _edit(context, ref, entry),
                     trailing: IconButton(
+                      tooltip: context.strings.text('Delete'),
                       icon: const Icon(Icons.delete_outline),
                       onPressed: () => _delete(context, ref, entry),
                     ),

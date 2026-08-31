@@ -48,6 +48,7 @@ void main() {
 
     expect(find.text('Explore Premium'), findsNothing);
     expect(find.text('Go Premium'), findsNothing);
+    expect(find.text('Start 7-day free trial'), findsNothing);
   });
 
   testWidgets(
@@ -126,7 +127,9 @@ void main() {
       contains("await preferences.set('profilePhotoPublicUrl', url)"),
     );
     expect(avatar, contains('foregroundImage: foreground'));
-    expect(avatar, contains('backgroundImage: _backgroundImage'));
+    expect(avatar, contains('final background = _backgroundImage'));
+    expect(avatar, contains('backgroundImage: background'));
+    expect(avatar, contains('onForegroundImageError:'));
     expect(photoService, contains(".select('avatar_url')"));
     expect(photoService, contains('if (updated == null'));
   });

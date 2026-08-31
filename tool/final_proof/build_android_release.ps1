@@ -23,6 +23,8 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
+throw 'FINAL_PROOF_ANDROID_BUILD=HISTORICAL_NON_CANDIDATE. This local helper cannot establish the reviewed production defines or current signed release contract. Use .github/workflows/bil_android_release_candidate.yml. No artifact was produced.'
+
 $repoRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
 $registrant = Join-Path $repoRoot 'android\app\src\main\java\io\flutter\plugins\GeneratedPluginRegistrant.java'
 $releaseAab = Join-Path $repoRoot 'build\app\outputs\bundle\release\app-release.aab'

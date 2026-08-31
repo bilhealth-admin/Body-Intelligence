@@ -1,8 +1,13 @@
 part of 'premium_profile_page.dart';
 
 extension _PremiumProfileActions on _PremiumProfilePageState {
-  Future<void> hydrate(UserProfileData profile) async {
-    if (loaded || hydrating) {
+  Future<void> hydrate(
+    UserProfileData profile,
+    double effectiveCurrentWeight,
+    ProfileAuthIdentity authIdentity,
+  ) async {
+    final requestedKey = authIdentity.hydrationKey(profile.uuid);
+    if ((loaded && hydrationIdentityKey == requestedKey) || hydrating) {
       return;
     }
     _updateState(() {
@@ -11,6 +16,9 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
     });
     try {
       final repo = ref.read(preferencesRepositoryProvider);
+      if (repo.localOwnerId != authIdentity.ownerId) {
+        throw StateError('Profile storage owner does not match auth owner.');
+      }
       final values = await Future.wait([
         repo.get('displayName'),
         repo.get('profileLocation'),
@@ -25,6 +33,16 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
         repo.get('units.height'),
       ]);
       if (!mounted) return;
+      final currentIdentity = ref.read(profileAuthIdentityProvider).value;
+      final liveOwner = AppEnvironment.supabaseRuntimeReady
+          ? Supabase.instance.client.auth.currentUser?.id.trim()
+          : null;
+      if (currentIdentity?.ownerId != authIdentity.ownerId ||
+          repo.localOwnerId != authIdentity.ownerId ||
+          (AppEnvironment.supabaseRuntimeReady &&
+              liveOwner != authIdentity.ownerId)) {
+        return;
+      }
       _updateState(() {
         name = values[0]?.trim().isNotEmpty == true ? values[0]!.trim() : 'BIL';
         final canonicalLocation = [values[8], values[7]]
@@ -40,15 +58,14 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
             : values[3]?.trim().isNotEmpty == true
             ? values[3]!
             : DateTime.now().timeZoneName;
-        final storedEmail = values[4]?.trim();
-        String? authenticatedEmail;
-        if (AppEnvironment.supabaseRuntimeReady) {
-          authenticatedEmail = Supabase.instance.client.auth.currentUser?.email
-              ?.trim();
-        }
-        email = storedEmail?.isNotEmpty == true
-            ? storedEmail!
-            : authenticatedEmail ?? '';
+        final storedEmail = values[4];
+        // A live authenticated session is the identity authority. A cached
+        // email can only support local/offline mode and must never cover a
+        // different signed-in account.
+        email = resolveAuthoritativeProfileEmail(
+          authIdentity: authIdentity,
+          cachedEmail: storedEmail,
+        );
         units = values[10] == 'Feet/Inches' || values[5] == 'imperial'
             ? 'imperial'
             : 'metric';
@@ -57,9 +74,10 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
         activity = profile.activityLevel;
         age = profile.age;
         height = profile.height;
-        weight = profile.currentWeight;
+        weight = effectiveCurrentWeight;
         target = profile.targetWeight;
         exercises = profile.exercises;
+        hydrationIdentityKey = requestedKey;
         loaded = true;
       });
     } catch (error) {
@@ -95,6 +113,18 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
             tr(
               'Choose an image smaller than 5 MB.',
               'اختر صورة أصغر من 5 ميجابايت.',
+            ),
+          ),
+        ),
+      );
+    } on ProfilePhotoIdentityChangedException {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            tr(
+              'Your account changed. Open your profile and choose the photo again.',
+              'تغيّر حسابك. افتح ملفك واختر الصورة مجددًا.',
             ),
           ),
         ),
@@ -174,6 +204,13 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
 
   Future<void> save(UserProfileData profile, Goal? activeGoal) async {
     if (saving) return;
+    final authIdentity = ref.read(profileAuthIdentityProvider).value;
+    final database = ref.read(databaseProvider);
+    if (authIdentity == null ||
+        database.localOwnerId != authIdentity.ownerId ||
+        hydrationIdentityKey != authIdentity.hydrationKey(profile.uuid)) {
+      return;
+    }
     final snapshot = (
       name: name,
       gender: gender,
@@ -192,7 +229,16 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
     );
     _updateState(() => saving = true);
     try {
-      final database = ref.read(databaseProvider);
+      final authoritativeCurrent =
+          ref.read(effectiveCurrentWeightProvider) ?? profile.currentWeight;
+      final currentChanged =
+          (snapshot.weight - authoritativeCurrent).abs() >= 0.0001;
+      final goalType = goalTypeForUpdate(
+        currentWeightKg: snapshot.weight,
+        targetWeightKg: snapshot.target,
+        storedGoalType: activeGoal?.type,
+        storedTargetWeightKg: activeGoal?.targetWeight,
+      );
       await database.transaction(() async {
         await ref
             .read(userProfileRepositoryProvider)
@@ -211,16 +257,21 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
               arm: profile.arm,
               thigh: profile.thigh,
             );
+        if (currentChanged) {
+          await ref
+              .read(weightRepositoryProvider)
+              .addWeight(
+                snapshot.weight,
+                date: DateTime.now(),
+                measurementContext: 'unspecified',
+              );
+        }
         await ref
             .read(goalRepositoryProvider)
             .save(
               uuid: activeGoal?.uuid,
               profileUuid: profile.uuid,
-              type: snapshot.target < snapshot.weight
-                  ? 'lose'
-                  : snapshot.target > snapshot.weight
-                  ? 'gain'
-                  : 'maintain',
+              type: goalType,
               targetWeight: snapshot.target,
               targetDate: activeGoal?.targetDate,
             );
@@ -239,6 +290,9 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
       });
       ref.invalidate(userProfileProvider);
       ref.invalidate(activeGoalProvider);
+      ref.invalidate(latestWeightProvider);
+      ref.invalidate(todayWeightProvider);
+      ref.invalidate(weightHistoryProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

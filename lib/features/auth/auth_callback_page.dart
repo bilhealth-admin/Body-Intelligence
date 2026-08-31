@@ -124,7 +124,7 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const BilWordmark(height: 48, color: Colors.white),
+                  const BilFullWordmark(height: 48),
                   const SizedBox(height: 28),
                   if (!_failed) ...[
                     const CircularProgressIndicator(),

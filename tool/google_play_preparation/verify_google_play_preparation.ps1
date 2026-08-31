@@ -1,5 +1,7 @@
 param([Parameter(Mandatory = $true)][string]$ProjectRoot)
 $ErrorActionPreference = 'Stop'
+throw 'GOOGLE_PLAY_PREPARATION=HISTORICAL_NON_AUTHORITATIVE. This legacy verifier cannot build or certify a release AAB. Use .github/workflows/bil_android_release_candidate.yml. No artifact was produced.'
+
 Set-Location $ProjectRoot
 
 $ReportDir = Join-Path $ProjectRoot 'artifacts\google_play_preparation'

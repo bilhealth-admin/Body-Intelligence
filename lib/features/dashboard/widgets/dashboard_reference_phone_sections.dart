@@ -129,30 +129,6 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
         '/wellness/recipes',
         true,
       ),
-      (
-        'assets/images/flagship/bil_movement_v1.png',
-        Icons.fitness_center_rounded,
-        _referenceText(context, 'Workouts', 'التمارين'),
-        _referenceText(
-          context,
-          'Explore 10 training categories with clear movement guidance and reusable routines.',
-          'استكشف 10 فئات تدريبية مع إرشادات حركة واضحة وروتينات قابلة لإعادة الاستخدام.',
-        ),
-        '/wellness/workouts/routines',
-        true,
-      ),
-      (
-        'assets/images/connected_health/bil_medical_hub.png',
-        Icons.sync_rounded,
-        _referenceText(context, 'Sync up', 'المزامنة'),
-        _referenceText(
-          context,
-          'Watch and health synchronization',
-          'مزامنة الساعة والصحة',
-        ),
-        '/connected-health',
-        false,
-      ),
       if (AppEnvironment.communityConfigured) ...[
         (
           'assets/images/flagship/bil_body_intelligence_journey_v1.png',
@@ -160,7 +136,7 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
           _referenceText(context, 'Friends', 'الأصدقاء'),
           _referenceText(context, 'Your support squad', 'دائرة دعمك'),
           '/community/connections',
-          false,
+          true,
         ),
         (
           'assets/images/dashboard/bio_intelligence_v1.png',
@@ -172,7 +148,7 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
             'إلهام غذائي ورياضي',
           ),
           '/community',
-          false,
+          true,
         ),
       ],
     ];
@@ -318,18 +294,22 @@ class _DiscoverTile extends StatelessWidget {
               start: 10,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: const Color(0xB3071928),
+                  color: premium
+                      ? const Color(0xD99A6500)
+                      : const Color(0xB3071928),
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: const Color(0x33FFFFFF)),
+                  border: Border.all(
+                    color: premium
+                        ? const Color(0x99FFE7A0)
+                        : const Color(0x33FFFFFF),
+                  ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(6),
+                child: const Padding(
+                  padding: EdgeInsets.all(6),
                   child: Icon(
-                    premium
-                        ? Icons.workspace_premium_rounded
-                        : Icons.arrow_forward_rounded,
+                    Icons.arrow_forward_rounded,
                     size: 18,
-                    color: premium ? const Color(0xFFFFCB55) : Colors.white,
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -383,17 +363,7 @@ class _ReferenceAiCoachCard extends StatelessWidget {
                   border: Border.all(color: Colors.white70, width: 1.5),
                 ),
                 child: ClipOval(
-                  child: Image.asset(
-                    'assets/images/ai_coach/bil_male_smart_coach_v1.png',
-                    fit: BoxFit.cover,
-                    excludeFromSemantics: true,
-                    errorBuilder: (_, _, _) => Image.asset(
-                      'assets/images/flagship/bil_body_intelligence_journey_v1.png',
-                      fit: BoxFit.cover,
-                      alignment: const Alignment(.18, -.72),
-                      excludeFromSemantics: true,
-                    ),
-                  ),
+                  child: const BilCoachPortrait(fit: BoxFit.cover),
                 ),
               ),
               const SizedBox(width: 12),

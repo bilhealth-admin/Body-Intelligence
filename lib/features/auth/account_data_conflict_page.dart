@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../shared/widgets/bil_wordmark.dart';
 import 'auth_five_locale_copy.dart';
 
 /// Fail-closed account-switch surface.
@@ -60,6 +61,11 @@ class _AccountDataConflictPageState extends State<AccountDataConflictPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      const BilFullWordmark(
+                        key: Key('account-conflict-wordmark'),
+                        height: 40,
+                      ),
+                      const SizedBox(height: 20),
                       const Icon(
                         Icons.shield_outlined,
                         size: 52,
@@ -89,7 +95,8 @@ class _AccountDataConflictPageState extends State<AccountDataConflictPage> {
                           height: 1.5,
                         ),
                       ),
-                      if (signedInEmail != null && signedInEmail.isNotEmpty) ...[
+                      if (signedInEmail != null &&
+                          signedInEmail.isNotEmpty) ...[
                         const SizedBox(height: 14),
                         Text(
                           signedInEmail,
@@ -113,7 +120,9 @@ class _AccountDataConflictPageState extends State<AccountDataConflictPage> {
                         width: double.infinity,
                         child: FilledButton.icon(
                           key: const Key('account-conflict-sign-out'),
-                          onPressed: signingOut ? null : _signOutAndKeepLocalData,
+                          onPressed: signingOut
+                              ? null
+                              : _signOutAndKeepLocalData,
                           icon: signingOut
                               ? const SizedBox.square(
                                   dimension: 18,

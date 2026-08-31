@@ -32,7 +32,7 @@ abstract final class CorePagesRuntimeCopy {
     },
     "BIL Premium": {
       'en': "BIL Premium",
-      "ar": "BIL بريميوم",
+      "ar": "BIL Premium",
       "fr": "BIL Premium",
       "es": "BIL Premium",
       "tr": "BIL Premium",
@@ -150,16 +150,12 @@ abstract final class CorePagesRuntimeCopy {
       "es": "Sodio",
       "tr": "Sodyum",
     },
-    "I speak every language and turn your body data into the next clear decision.": {
-      'en':
-          "I speak every language and turn your body data into the next clear decision.",
-      "ar": "أنا أتحدث كل لغة وأحول بيانات جسدك إلى القرار الواضح التالي.",
-      "fr":
-          "Je parle toutes les langues et je transforme vos données corporelles en la prochaine décision claire.",
-      "es":
-          "Hablo todos los idiomas y convierto los datos de tu cuerpo en la siguiente decisión clara.",
-      "tr":
-          "Her dili konuşuyorum ve vücut verilerinizi bir sonraki net karara dönüştürüyorum.",
+    "Global multilingual voice": {
+      'en': "Global multilingual voice",
+      "ar": "صوت متعدد اللغات",
+      "fr": "Voix multilingue mondiale",
+      "es": "Voz multilingüe global",
+      "tr": "Küresel çok dilli ses",
     },
     "I’m ready for your next useful decision.": {
       'en': "I’m ready for your next useful decision.",

@@ -29,7 +29,6 @@ import '../composition/dashboard_command_coordinator.dart';
 import '../composition/dashboard_intelligence_input_adapter.dart';
 import '../domain/dashboard_intelligence_composer.dart';
 import '../domain/dashboard_decision_explanation.dart';
-import '../domain/dashboard_trusted_truth_decision_adapter.dart';
 import '../domain/dashboard_trusted_body_twin_adapter.dart';
 import '../domain/dashboard_runtime_state.dart';
 import '../domain/nutrient_dashboard.dart';
@@ -363,19 +362,12 @@ class DashboardGrid extends ConsumerWidget {
     final localizedChanged = localizer.changedSummary(changed);
     final primaryInsight = intelligence.insights.first;
     final localizedInsightTitle = localizer.insightTitle(primaryInsight.title);
-    final canonicalEvidence = canonicalOutput?.brainResult.evidenceIds.toList();
-    final localizedActionEvidence = canonicalOutput != null
-        ? (canonicalEvidence == null || canonicalEvidence.isEmpty
-              ? tr('Evidence is still forming', 'الأدلة لا تزال قيد التكوين')
-              : tr(
-                  canonicalEvidence.join(' · '),
-                  'مبني على Body Twin وTruth Engine وبياناتك المحلية.',
-                ))
-        : bestAction.evidence.isEmpty
-        ? tr('Evidence is still forming', 'الأدلة لا تزال قيد التكوين')
-        : arabic
-        ? 'يستند إلى بياناتك المحلية المسجلة المتاحة.'
-        : bestAction.evidence.join(' · ');
+    final rawDecisionEvidence =
+        canonicalOutput?.brainResult.evidenceIds.toList() ??
+        bestAction.evidence;
+    final localizedActionEvidence = rawDecisionEvidence.isEmpty
+        ? localizer.evidenceGap()
+        : localizer.evidenceSummary();
     final localizedConfidence = canonicalOutput != null
         ? '${(canonicalOutput.brainResult.confidence * 100).round()}%'
         : switch (honesty.reliability) {
@@ -388,26 +380,24 @@ class DashboardGrid extends ConsumerWidget {
             DataReliability.strong => tr('Strong', 'قوية'),
           };
     final decisionExplanation = DashboardDecisionExplanation(
-      actionType: canonicalAction?.id ?? bestAction.type.name,
+      actionType: localizedBestTitle,
       title: localizedBestTitle,
       reason: localizedBestReason,
-      evidence:
-          canonicalOutput?.brainResult.evidenceIds.toList() ??
-          bestAction.evidence,
+      evidence: [localizedActionEvidence],
       confidence: localizedConfidence,
-      missingEvidence: canonicalOutput == null
-          ? honesty.missing
-          : [
-              ...canonicalOutput.brainResult.reconciliationIssues,
-              for (final signal in canonicalOutput.brainResult.signals)
-                if (!signal.accepted) ...signal.reasons,
-            ],
-      engineVersion: canonicalOutput == null
-          ? DashboardTrustedTruthDecisionAdapter.engineVersion
-          : 'bil-reality-runtime-v1',
-      inputSources: canonicalOutput == null
-          ? DashboardTrustedTruthDecisionAdapter.inputEvidenceKeys
-          : const ['Body Twin', 'Truth Engine', 'Local Reality Runtime'],
+      missingEvidence:
+          (canonicalOutput == null
+                  ? honesty.missing
+                  : [
+                      ...canonicalOutput.brainResult.reconciliationIssues,
+                      for (final signal in canonicalOutput.brainResult.signals)
+                        if (!signal.accepted) ...signal.reasons,
+                    ])
+              .isEmpty
+          ? const []
+          : [localizer.evidenceGap()],
+      engineVersion: 'BIL',
+      inputSources: [localizer.evidenceSummary()],
     );
     final twinCopy = DashboardBodyTwinCopy.compose(
       trusted: trustedTwin,

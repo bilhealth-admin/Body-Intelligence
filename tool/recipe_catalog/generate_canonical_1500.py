@@ -23,6 +23,10 @@ ALL_LOCALES = (
     "bn", "vi", "th", "pl", "nl", "uk",
 )
 
+# Whole localized ingredient/step arrays may match English only after an
+# explicit proper-name review. No current recipe needs such an exception.
+EXACT_ENGLISH_COPY_ALLOWLIST: set[tuple[str, str, str]] = set()
+
 # name, FDC id, kcal, protein, carbohydrate, fat, fibre, sugar, sodium, potassium / 100 g
 FOODS = {
     "chicken": (171477, 165, 31.0, 0.0, 3.6, 0.0, 0.0, 74, 256),
@@ -282,6 +286,20 @@ def validate(records: list[dict]) -> None:
     for record in records:
         if set(record["localizations"]) != set(ALL_LOCALES):
             raise RuntimeError(f"incomplete 25-language recipe: {record['canonicalId']}")
+        english = record["localizations"]["en"]
+        for locale, localization in record["localizations"].items():
+            if locale == "en":
+                continue
+            for field in ("ingredients", "steps"):
+                key = (record["canonicalId"], locale, field)
+                if (
+                    localization[field] == english[field]
+                    and key not in EXACT_ENGLISH_COPY_ALLOWLIST
+                ):
+                    raise RuntimeError(
+                        "exact English localization copy: "
+                        f"{record['canonicalId']}/{locale}/{field}"
+                    )
         if record["timing"]["totalMinutes"] != record["timing"]["prepMinutes"] + record["timing"]["cookMinutes"]:
             raise RuntimeError(f"invalid timing: {record['canonicalId']}")
         if [s["order"] for s in record["method"]] != list(range(1, len(record["method"]) + 1)):

@@ -47,7 +47,7 @@ void main() {
     expect(
       cache.fallbackFor(
         ownerId: 'owner-a',
-        now: now.add(const Duration(seconds: 31)),
+        now: now.add(const Duration(seconds: 30)),
       ),
       isNull,
     );

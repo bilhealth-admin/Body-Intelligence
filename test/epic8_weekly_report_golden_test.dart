@@ -24,7 +24,12 @@ class _FailingWeeklyPreferences extends PreferencesRepository {
 
   @override
   Future<String?> get(String key) async {
-    if (failRead) throw StateError('injected read failure');
+    // Keep the injected failure scoped to the weekly-feedback boundary under
+    // test. Other widgets on the page share PreferencesRepository and may
+    // legitimately read unrelated keys after the assertion completes.
+    if (failRead && key.startsWith('weekly_report_feedback_')) {
+      throw StateError('injected read failure');
+    }
     return null;
   }
 

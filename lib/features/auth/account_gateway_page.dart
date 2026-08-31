@@ -143,7 +143,7 @@ class _LegacyAccountGatewayPageState
                               child: AuthLanguageSelector(),
                             ),
                             const SizedBox(height: 16),
-                            const Center(child: BilWordmark(height: 54)),
+                            const Center(child: BilFullWordmark(height: 54)),
                             const SizedBox(height: 18),
                             Text(
                               authFiveLocaleText(

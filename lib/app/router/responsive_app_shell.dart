@@ -111,6 +111,8 @@ class ResponsiveAppShell extends StatelessWidget {
         ),
       ),
       builder: (sheetContext) => BilQuickAddSheet(
+        photoAsset:
+            'assets/images/onboarding_2026/bil_onboarding_meal_quick_add_photo_v1.webp',
         onFood: () {
           Navigator.pop(sheetContext);
           final origin = Uri.encodeComponent(paths[index]);

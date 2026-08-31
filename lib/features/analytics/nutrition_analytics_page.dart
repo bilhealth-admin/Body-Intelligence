@@ -42,7 +42,8 @@ class NutritionAnalyticsPage extends ConsumerWidget {
         .value
         ?.firstOrNull;
     final goalState = ref.watch(activeGoalProvider);
-    if (profileState.isLoading || goalState.isLoading) {
+    if ((profileState.isLoading && !profileState.hasValue) ||
+        (goalState.isLoading && !goalState.hasValue)) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (profileState.hasError || goalState.hasError) {
@@ -70,8 +71,8 @@ class NutritionAnalyticsPage extends ConsumerWidget {
       for (final key in goalKeys)
         key: ref.watch(dashboardNutrientGoalProvider(key)),
     };
-    if (presetState.isLoading ||
-        goalStates.values.any((state) => state.isLoading)) {
+    if ((presetState.isLoading && !presetState.hasValue) ||
+        goalStates.values.any((state) => state.isLoading && !state.hasValue)) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (presetState.hasError ||
@@ -110,7 +111,7 @@ class NutritionAnalyticsPage extends ConsumerWidget {
     final planState = profile == null
         ? const AsyncValue<PlanSetting?>.data(null)
         : ref.watch(planSettingProvider(profile.uuid));
-    if (planState.isLoading) {
+    if (planState.isLoading && !planState.hasValue) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     if (planState.hasError) {
@@ -202,6 +203,8 @@ class NutritionAnalyticsPage extends ConsumerWidget {
             ),
             Expanded(
               child: meals.when(
+                skipLoadingOnRefresh: true,
+                skipLoadingOnReload: true,
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (_, _) => Center(
                   child: FilledButton(

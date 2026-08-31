@@ -27,7 +27,8 @@ void main() {
     expect(readiness.blockers, contains('ios_verified_links'));
     expect(readiness.blockers, contains('android_admob'));
     expect(readiness.blockers, contains('ios_admob'));
-    expect(readiness.blockers, contains('store_products'));
+    expect(readiness.storeProducts, isTrue);
+    expect(readiness.blockers, isNot(contains('store_products')));
     expect(readiness.blockers, contains('analytics_provider'));
   });
 }

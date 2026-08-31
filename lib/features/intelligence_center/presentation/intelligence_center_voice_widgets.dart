@@ -187,7 +187,19 @@ class _VoiceListeningWaveState extends State<_VoiceListeningWave>
     controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 620),
-    )..repeat(reverse: true);
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      controller
+        ..stop()
+        ..value = 0;
+    } else if (!controller.isAnimating) {
+      controller.repeat(reverse: true);
+    }
   }
 
   @override

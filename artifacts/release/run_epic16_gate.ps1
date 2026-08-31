@@ -1,3 +1,6 @@
+$ErrorActionPreference = 'Stop'
+throw 'EPIC16_GATE=HISTORICAL_NON_AUTHORITATIVE. This legacy local gate cannot build or certify a release candidate. Use .github/workflows/bil_android_release_candidate.yml and .github/workflows/bil_ios_signed_release.yml. No artifact was produced.'
+
 $ErrorActionPreference = 'Continue'
 if (Test-Path variable:PSNativeCommandUseErrorActionPreference) {
   $PSNativeCommandUseErrorActionPreference = $false

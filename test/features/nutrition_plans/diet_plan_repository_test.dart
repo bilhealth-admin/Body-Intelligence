@@ -268,7 +268,7 @@ void main() {
     expect((await schedule.read()).dayTargets, hasLength(7));
   });
 
-  test('PSMF stays medically locked even for verified Premium', () async {
+  test('hidden PSMF cannot be activated even for verified Premium', () async {
     final draft = DietDraft(
       pathwayId: 'psmf',
       calories: 1600,
@@ -279,9 +279,7 @@ void main() {
     await expectLater(
       command.activate(draft),
       throwsA(
-        _activationFailure(
-          NutritionPathwayActivationFailure.medicalSupervisionRequired,
-        ),
+        _activationFailure(NutritionPathwayActivationFailure.unknownPathway),
       ),
     );
     expect(await repository.readActivePathway(), isNull);
@@ -292,8 +290,8 @@ void main() {
     expect(await preferences.get(DietPlanRepository.activePathwayKey), isNull);
   });
 
-  test('medical PSMF never inherits an editable preset fallback', () async {
-    await expectLater(repository.read('psmf'), throwsStateError);
+  test('hidden PSMF never inherits an editable preset fallback', () async {
+    await expectLater(repository.read('psmf'), throwsArgumentError);
     expect(await repository.readActivePathway(), isNull);
   });
 }

@@ -5,7 +5,7 @@
     "category": "Health & Fitness",
     "tags": ["nutrition", "fitness", "wellness", "weight management", "health tracking"],
     "ads_declaration": "CONTEXTUAL_NON_PERSONALIZED_FREE_TIER_ONLY_DISABLED_UNTIL_REVIEWED_PROVIDER_CONFIGURATION",
-    "target_audience": "13_PLUS_GENERAL_WELLNESS_OWNER_MUST_CONFIRM_CONSOLE_QUESTIONNAIRE",
+    "target_audience": "ADULTS_18_PLUS_PRODUCT_GATE_ENFORCED_OWNER_MUST_CONFIRM_CONSOLE_QUESTIONNAIRE",
     "content_rating": "OWNER_INPUT_REQUIRED_COMPLETE_IARC_FROM_ACTUAL_COMMUNITY_AND_MESSAGING_BEHAVIOR",
     "data_safety": {
       "status": "DRAFT_MATCHED_TO_CODE_OWNER_MUST_CONFIRM_DEPLOYED_CONFIGURATION",

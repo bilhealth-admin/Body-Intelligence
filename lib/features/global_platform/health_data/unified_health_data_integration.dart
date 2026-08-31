@@ -60,6 +60,11 @@ abstract final class BilHealthScope {
       'heartrate',
       'restingheartrate',
       'hrv',
+      // Garmin's Body Battery is a fitness-readiness score. Keep both the
+      // provider key and its canonical BIL key so normalization cannot be
+      // discarded before or after the provider mapping is applied.
+      'bodybattery',
+      'recoveryscore',
       'water',
       'nutrition',
       'nutritionprotein',

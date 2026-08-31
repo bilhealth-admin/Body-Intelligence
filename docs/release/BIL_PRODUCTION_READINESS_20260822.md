@@ -7,7 +7,7 @@ complete and the physical-device soak finishes.
 ## Installed Android release candidate
 
 - Package: `com.bilhealth.bodyintelligencelog`
-- Version: `1.0.0+3`
+- Version: `1.0.0+5`
 - Minimum / target SDK: 26 / 36
 - APK: `build/app/outputs/flutter-apk/app-release.apk`
 - APK SHA-256: `38477CCCF40B3D89EAA10C4DD0287E4BB13FF630882352817317C395816CF1D9`
@@ -119,9 +119,12 @@ pre-import body-history answer.
 2. Run the real ten-day physical-device soak. It cannot be replaced by an
    accelerated automated test. HealthKit requires Apple hardware; Health
    Connect and BLE need the intended physical devices. Record each real day
-   with `artifacts/release/record_physical_soak_day.ps1`; the append-only
-   harness rejects duplicate/backdated days, binds evidence and the tested APK
-   by SHA-256, and cannot close day 10 before nine date boundaries have passed.
+   with `tool/device_lab/record_physical_soak_day.ps1`; the append-only
+   harness rejects duplicate/backdated days, binds evidence and the exact
+   platform artifact by SHA-256, requires passing coverage for Health Connect,
+   HealthKit, Apple Watch via HealthKit, Wear OS via Health Connect, and the
+   fitness-only BLE bridge, and cannot close day 10 before nine date boundaries
+   have passed.
 3. Create the four final subscription products and regional prices in Google
    Play and App Store Connect, then enter their product/base-plan/offer IDs.
 4. Perform real Google closed-track and Apple Sandbox/TestFlight purchase,

@@ -51,7 +51,9 @@ class _NutritionTaskBar extends StatelessWidget {
 }
 
 class _FoodAddActionSheet extends StatelessWidget {
-  const _FoodAddActionSheet();
+  const _FoodAddActionSheet({required this.showPremiumLabel});
+
+  final bool showPremiumLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -71,19 +73,33 @@ class _FoodAddActionSheet extends StatelessWidget {
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
-            _FoodAddActionTile(
-              actionKey: const Key('food-add-scan-barcode'),
-              icon: Icons.qr_code_scanner_rounded,
-              label: nutritionText(context, 'Scan barcode', 'مسح الباركود'),
-              premium: true,
-              onTap: () => Navigator.pop(context, _FoodAddMethod.scanBarcode),
-            ),
-            _FoodAddActionTile(
-              actionKey: const Key('food-add-manual-barcode'),
-              icon: Icons.dialpad_rounded,
-              label: t('Enter barcode manually'),
-              premium: true,
-              onTap: () => Navigator.pop(context, _FoodAddMethod.manualBarcode),
+            PremiumNutritionGlass(
+              key: const Key('food-add-barcode-premium-group'),
+              compact: true,
+              showLabel: showPremiumLabel,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _FoodAddActionTile(
+                    actionKey: const Key('food-add-scan-barcode'),
+                    icon: Icons.qr_code_scanner_rounded,
+                    label: nutritionText(
+                      context,
+                      'Scan barcode',
+                      'مسح الباركود',
+                    ),
+                    onTap: () =>
+                        Navigator.pop(context, _FoodAddMethod.scanBarcode),
+                  ),
+                  _FoodAddActionTile(
+                    actionKey: const Key('food-add-manual-barcode'),
+                    icon: Icons.dialpad_rounded,
+                    label: t('Enter barcode manually'),
+                    onTap: () =>
+                        Navigator.pop(context, _FoodAddMethod.manualBarcode),
+                  ),
+                ],
+              ),
             ),
             _FoodAddActionTile(
               actionKey: const Key('food-add-meal-photo'),
@@ -114,14 +130,12 @@ class _FoodAddActionTile extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
-    this.premium = false,
   });
 
   final Key actionKey;
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  final bool premium;
 
   @override
   Widget build(BuildContext context) {
@@ -148,40 +162,7 @@ class _FoodAddActionTile extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontWeight: FontWeight.w700),
         ),
-        trailing: premium
-            ? Semantics(
-                label: 'Premium',
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFF2C6),
-                    borderRadius: BorderRadius.circular(99),
-                    border: Border.all(color: const Color(0x66C68A12)),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.workspace_premium_rounded,
-                          size: 17,
-                          color: Color(0xFF9A6500),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Premium',
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                color: const Color(0xFF704800),
-                                fontWeight: FontWeight.w800,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              )
-            : const Icon(Icons.chevron_right_rounded),
+        trailing: const Icon(Icons.chevron_right_rounded),
         onTap: onTap,
       ),
     );
@@ -282,12 +263,12 @@ class _NutritionQuickActions extends StatelessWidget {
     final actions = <(IconData, String, VoidCallback)>[
       (
         Icons.qr_code_scanner_rounded,
-        '${nutritionTextForLanguage(languageCode, 'Scan', 'مسح المنتج')} · Premium',
+        nutritionTextForLanguage(languageCode, 'Scan', 'مسح المنتج'),
         onScan,
       ),
       (
         Icons.dialpad_rounded,
-        '${nutritionTextForLanguage(languageCode, 'Barcode', 'الباركود')} · Premium',
+        nutritionTextForLanguage(languageCode, 'Barcode', 'الباركود'),
         onManualBarcode,
       ),
       (
@@ -298,16 +279,36 @@ class _NutritionQuickActions extends StatelessWidget {
     ];
     return Row(
       children: [
-        for (var index = 0; index < actions.length; index++) ...[
-          if (index > 0) const SizedBox(width: 8),
-          Expanded(
-            child: _NutritionAction(
-              icon: actions[index].$1,
-              label: actions[index].$2,
-              onTap: actions[index].$3,
+        Expanded(
+          flex: 2,
+          child: PremiumNutritionGlass(
+            key: const Key('food-barcode-premium-group'),
+            compact: true,
+            borderRadius: BilFlagshipTokens.radiusMd,
+            child: Row(
+              children: [
+                for (var index = 0; index < 2; index++) ...[
+                  if (index > 0) const SizedBox(width: 8),
+                  Expanded(
+                    child: _NutritionAction(
+                      icon: actions[index].$1,
+                      label: actions[index].$2,
+                      onTap: actions[index].$3,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
-        ],
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _NutritionAction(
+            icon: actions[2].$1,
+            label: actions[2].$2,
+            onTap: actions[2].$3,
+          ),
+        ),
       ],
     );
   }

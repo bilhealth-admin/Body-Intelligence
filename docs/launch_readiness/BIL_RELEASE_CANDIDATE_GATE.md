@@ -5,7 +5,7 @@
 - Branch: `phase-3-product-excellence`
 - Parent HEAD: `71bea9c806b08a1dd40df6a342fc46afe6b7d565`
 - Package: `BIL-V1-LAUNCH-005`
-- Version metadata: `1.0.0+3`
+- Version metadata: `1.0.0+5`
 
 ## Repository release-candidate gate
 

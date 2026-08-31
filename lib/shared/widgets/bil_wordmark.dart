@@ -65,28 +65,8 @@ class BilWordmark extends StatelessWidget {
   final Color? color;
 
   @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: 'Body Intelligence Log, trademark',
-      image: true,
-      child: ExcludeSemantics(
-        child: SizedBox(
-          width: height * 8.8,
-          height: height,
-          child: Align(
-            alignment: alignment,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: _WordmarkLockup(
-                height: height,
-                color: color ?? Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      BilFullWordmark(height: height, alignment: alignment, color: color);
 }
 
 /// Full product wordmark used on the dashboard and authentication surfaces.
@@ -95,26 +75,37 @@ class BilFullWordmark extends StatelessWidget {
     super.key,
     this.height = 32,
     this.alignment = Alignment.center,
+    this.color,
   });
 
   final double height;
   final AlignmentGeometry alignment;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Body Intelligence Log, trademark',
+      label: 'Body Intelligence Log',
       image: true,
       child: ExcludeSemantics(
-        child: SizedBox(
+        child: Container(
           height: height,
+          padding: EdgeInsets.symmetric(horizontal: height * .22),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(height * .24),
+          ),
           child: Align(
             alignment: alignment,
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: _WordmarkLockup(
                 height: height,
-                color: Theme.of(context).colorScheme.onSurface,
+                // The full product lockup is intentionally black on its own
+                // light identity surface. Keep [color] only for source
+                // compatibility with older callers; it cannot recolor the
+                // canonical mark.
+                color: const Color(0xFF050505),
               ),
             ),
           ),
@@ -143,10 +134,11 @@ class _WordmarkLockup extends StatelessWidget {
           maxLines: 1,
           style: TextStyle(
             color: color,
-            fontSize: height * .54,
-            height: 1.08,
-            fontWeight: FontWeight.w600,
-            letterSpacing: height * .014,
+            fontFamily: 'BILDisplay',
+            fontSize: height * .48,
+            height: 1.06,
+            fontWeight: FontWeight.w800,
+            letterSpacing: height * .008,
           ),
         ),
         Padding(
@@ -160,7 +152,8 @@ class _WordmarkLockup extends StatelessWidget {
               // dashboards and the launch frame. Keep it subordinate to the
               // wordmark, but large enough to survive rasterisation and common
               // Android display scaling.
-              fontSize: height * .34,
+              fontFamily: 'BILDisplay',
+              fontSize: height * .30,
               height: 1,
               fontWeight: FontWeight.w800,
             ),

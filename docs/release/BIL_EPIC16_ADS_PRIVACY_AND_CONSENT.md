@@ -1,15 +1,17 @@
 # BIL advertising, privacy, and consent boundary
 
-BIL remains a free download. Free users may see contextual, non-personalized
-advertising only after explicit consent and only after a reviewed production
-provider adapter and real store identifiers are configured. Plus and Pro
-subscribers are ad-free.
+BIL remains a free download. Eligible registered adult Free users may see
+contextual, non-personalized advertising only when Google's UMP state permits
+an ad request and a reviewed production provider plus real store identifiers
+are configured. Premium subscribers are ad-free and Guests are excluded.
 
 The shipped default is fail-closed: advertising, provider readiness, and unit
 identifiers are disabled or empty. No demo IDs, test ads, fallback provider, or
-fabricated fill is shipped. No ad request is made when consent is unknown or
-declined, the device is offline, the provider is unavailable, or the placement
-is sensitive.
+fabricated fill is shipped. No ad request is made when UMP cannot authorize it,
+the account entitlement or adult gate is unresolved, the device is offline,
+the provider is unavailable, or the placement is sensitive. BIL does not
+provide a separate product-level switch that permanently converts the Free
+plan into an ad-free plan.
 
 Advertising must never use health records, nutrition entries, food searches,
 weight, body measurements, device readings, location-health inferences,

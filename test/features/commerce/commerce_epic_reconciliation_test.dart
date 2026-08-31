@@ -45,8 +45,11 @@ void main() {
 
       expect(sources, isNot(contains('SubscriptionState(')));
       expect(sources, isNot(contains('authorityVerified: true')));
-      expect(sources, isNot(contains('StoreKit')));
-      expect(sources, isNot(contains('BillingClient')));
+      // Presentation may explain that metadata is store-authoritative, but it
+      // must never import or invoke either native billing SDK directly.
+      expect(sources, isNot(contains('package:in_app_purchase')));
+      expect(sources, isNot(contains('SKPaymentQueue')));
+      expect(sources, isNot(contains('BillingClient(')));
       expect(sources, isNot(contains('stripe')));
     });
 

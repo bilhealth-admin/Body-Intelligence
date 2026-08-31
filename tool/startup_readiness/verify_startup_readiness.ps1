@@ -36,7 +36,7 @@ $Required = @(
     'android/key.properties.example',
     'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/MainActivity.kt',
     'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILGlobalHealthBridge.kt',
-    'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILMedicalBleBridge.kt',
+    'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILFitnessBleBridge.kt',
     'ios/Runner/Info.plist'
 )
 $Missing = @($Required | Where-Object { -not (Test-Path -LiteralPath (Join-Path $ProjectRoot $_) -PathType Leaf) })
@@ -102,7 +102,7 @@ $AllowedChanged = @(
     'android/key.properties.example',
     'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/MainActivity.kt',
     'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILGlobalHealthBridge.kt',
-    'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILMedicalBleBridge.kt',
+    'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILFitnessBleBridge.kt',
     'ios/Runner/Info.plist',
     'tool/startup_readiness/verify_startup_readiness.ps1',
     'docs/startup_readiness/BIL_STARTUP_READINESS_001.md'

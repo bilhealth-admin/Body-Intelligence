@@ -42,6 +42,19 @@ final class TrustedRecipeIngredientReconciler {
         }
       }
       final normalized = FoodSearchNormalizer.normalize(ingredient.name);
+      final localExact = await _search.findExactLocalNameCandidates(
+        ingredient.name,
+        limit: 8,
+      );
+      if (localExact.length > 1) {
+        output.add(
+          TrustedIngredientMatch(
+            ingredient: ingredient,
+            status: IngredientMatchStatus.ambiguous,
+          ),
+        );
+        continue;
+      }
       final candidates = await _search.search(ingredient.name, limit: 8);
       final exact = candidates
           .where(

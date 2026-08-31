@@ -30,9 +30,10 @@ final class BodyMeasurementRepository {
     double? chestCm,
     double? armCm,
     double? thighCm,
+    bool allowEmptySnapshot = false,
   }) async {
     final values = [neckCm, waistCm, hipsCm, chestCm, armCm, thighCm];
-    if (values.every((value) => value == null)) return;
+    if (!allowEmptySnapshot && values.every((value) => value == null)) return;
     for (final value in values.whereType<double>()) {
       if (!value.isFinite || value < 20 || value > 300) {
         throw ArgumentError.value(value, 'measurementCm');

@@ -1,5 +1,48 @@
 part of 'ai_coach_settings_page.dart';
 
+class _ResetGiftBanner extends StatelessWidget {
+  const _ResetGiftBanner({required this.message, required this.onDismiss});
+
+  final String message;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    key: const Key('ai-coach-global-reset-notice'),
+    color: const Color(0xFFEAF8F0),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(18),
+      side: const BorderSide(color: Color(0xFFB7E3CA)),
+    ),
+    child: Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(16, 14, 8, 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.card_giftcard_rounded, color: Color(0xFF17784C)),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: Color(0xFF123D2B),
+                height: 1.4,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          IconButton(
+            key: const Key('ai-coach-global-reset-notice-dismiss'),
+            onPressed: onDismiss,
+            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+            icon: const Icon(Icons.close_rounded, size: 20),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 class _BoostCard extends StatelessWidget {
   const _BoostCard({required this.boost, required this.t});
   final AiBoostPurchaseService boost;
@@ -63,10 +106,10 @@ class _BoostCard extends StatelessWidget {
           ),
           style: const TextStyle(color: Color(0xFF536873), height: 1.4),
         ),
-        if (boost.product != null) ...[
+        if (boost.displayPrice != null) ...[
           const SizedBox(height: 7),
           Text(
-            boost.product!.price,
+            boost.displayPrice!,
             style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
           ),
         ],

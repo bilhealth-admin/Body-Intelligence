@@ -4,6 +4,22 @@ import '../../../app/localization/app_localizations.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../data/repositories/meal_repository.dart';
 
+IconData dashboardMealIcon(String type, DateTime? recordedAt) {
+  if (type == 'snack') return Icons.schedule_rounded;
+  final hour = recordedAt?.toLocal().hour;
+  if (hour != null) {
+    if (hour < 11) return Icons.wb_sunny_outlined;
+    if (hour < 17) return Icons.restaurant_outlined;
+    return Icons.nights_stay_outlined;
+  }
+  return switch (type) {
+    'breakfast' => Icons.wb_sunny_outlined,
+    'lunch' => Icons.restaurant_outlined,
+    'dinner' => Icons.nights_stay_outlined,
+    _ => Icons.schedule_rounded,
+  };
+}
+
 class DashboardMealsTimeline extends StatelessWidget {
   const DashboardMealsTimeline({
     super.key,
@@ -29,13 +45,6 @@ class DashboardMealsTimeline extends StatelessWidget {
     'lunch' => context.strings.text('Lunch'),
     'dinner' => context.strings.text('Dinner'),
     _ => context.strings.text('Snack'),
-  };
-
-  IconData mealIcon(String type) => switch (type) {
-    'breakfast' => Icons.free_breakfast_outlined,
-    'lunch' => Icons.lunch_dining_outlined,
-    'dinner' => Icons.dinner_dining_outlined,
-    _ => Icons.cookie_outlined,
   };
 
   @override
@@ -99,7 +108,6 @@ class DashboardMealsTimeline extends StatelessWidget {
             _MealTimelineEntry(
               type: types[index],
               label: mealLabel(context, types[index]),
-              icon: mealIcon(types[index]),
               meal: meals
                   .where((entry) => entry.meal.type == types[index])
                   .firstOrNull,
@@ -141,7 +149,6 @@ class _MealTimelineEntry extends StatelessWidget {
   const _MealTimelineEntry({
     required this.type,
     required this.label,
-    required this.icon,
     required this.meal,
     required this.last,
     required this.onOpenMeal,
@@ -149,7 +156,6 @@ class _MealTimelineEntry extends StatelessWidget {
 
   final String type;
   final String label;
-  final IconData icon;
   final MealWithItems? meal;
   final bool last;
   final ValueChanged<String> onOpenMeal;
@@ -159,22 +165,12 @@ class _MealTimelineEntry extends StatelessWidget {
     final entry = meal;
     final calories =
         entry?.items.fold<double>(0, (sum, item) => sum + item.calories) ?? 0;
-    final protein =
-        entry?.items.fold<double>(0, (sum, item) => sum + item.protein) ?? 0;
-    final foodNames =
-        entry?.items
-            .map(
-              (item) =>
-                  entry.foodsById[item.foodId]?.name ??
-                  context.strings.text('Historical food'),
-            )
-            .toList() ??
-        const <String>[];
     final time = entry == null
         ? null
         : MaterialLocalizations.of(
             context,
           ).formatTimeOfDay(TimeOfDay.fromDateTime(entry.meal.date));
+    final icon = dashboardMealIcon(type, entry?.meal.date);
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -195,41 +191,26 @@ class _MealTimelineEntry extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ExpansionTile(
+            child: ListTile(
               key: ValueKey('today-meal-$type'),
-              tilePadding: const EdgeInsetsDirectional.only(end: 16),
+              onTap: () => onOpenMeal(type),
+              contentPadding: const EdgeInsetsDirectional.only(end: 16),
               title: Text(label),
               subtitle: Text(
                 entry == null
                     ? context.strings.text('No foods logged yet')
-                    : '${calories.round()} kcal · ${protein.round()} g ${context.strings.text('protein')} · $time',
+                    : '${calories.round()} kcal · $time',
               ),
-              childrenPadding: const EdgeInsetsDirectional.fromSTEB(
-                0,
-                0,
-                16,
-                12,
+              trailing: FilledButton.tonalIcon(
+                key: ValueKey('today-open-meal-$type'),
+                onPressed: () => onOpenMeal(type),
+                icon: Icon(
+                  entry == null ? Icons.add_rounded : Icons.edit_outlined,
+                ),
+                label: Text(
+                  context.strings.text(entry == null ? 'Add food' : 'Edit'),
+                ),
               ),
-              children: [
-                if (foodNames.isEmpty)
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: TextButton.icon(
-                      onPressed: () => onOpenMeal(type),
-                      icon: const Icon(Icons.add),
-                      label: Text(context.strings.text('Add food')),
-                    ),
-                  )
-                else
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: TextButton.icon(
-                      onPressed: () => onOpenMeal(type),
-                      icon: const Icon(Icons.edit_outlined),
-                      label: Text(foodNames.join(' · ')),
-                    ),
-                  ),
-              ],
             ),
           ),
         ],

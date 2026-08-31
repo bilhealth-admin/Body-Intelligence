@@ -48,7 +48,7 @@ final class DurableOfflineFirstCloudPlatform {
       updatedAt: record.updatedAt,
       deletedAt: record.deletedAt,
       schemaVersion: record.schemaVersion,
-      payload: cipher.encrypt(record.payload),
+      payload: await cipher.encrypt(record.payload),
     );
     final id = '${record.stableKey}:${record.revision.token}';
     if (await store.hasIdempotencyKey(id)) {
@@ -138,7 +138,7 @@ final class DurableOfflineFirstCloudPlatform {
           updatedAt: encrypted.updatedAt,
           deletedAt: encrypted.deletedAt,
           schemaVersion: encrypted.schemaVersion,
-          payload: cipher.decrypt(encrypted.payload),
+          payload: await cipher.decrypt(encrypted.payload),
         );
         final local = await store.readInboxRecord(remote.stableKey);
         if (local == null) {

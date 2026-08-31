@@ -9,7 +9,6 @@ import 'pathways/low_carb.dart';
 import 'pathways/mediterranean.dart';
 import 'pathways/plant_forward.dart';
 import 'pathways/pregnancy.dart';
-import 'pathways/psmf.dart';
 import 'pathways/smart_fat_loss.dart';
 
 const nutritionPathways = <NutritionPathway>[
@@ -23,7 +22,6 @@ const nutritionPathways = <NutritionPathway>[
   lowCarbPathway,
   ketoPathway,
   pregnancyPathway,
-  psmfPathway,
 ];
 
 final dietPresets = <String, DietPreset>{

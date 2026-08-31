@@ -10,6 +10,10 @@ String coachGreetingKeyForHour(int hour) {
   return 'Good evening';
 }
 
+@visibleForTesting
+String coachGreetingSeparator({required bool arabic}) =>
+    arabic ? '\u060C' : ',';
+
 extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
   Future<bool> _ensureCoachRuntimePermission(
     BilRuntimeCapability capability, {
@@ -137,7 +141,8 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     }
     final displayName = await _resolvedCoachDisplayName();
     if (!mounted) return;
-    final welcome = _sessionWelcome(displayName);
+    final now = ref.read(intelligenceConversationClockProvider)();
+    final welcome = _sessionWelcome(displayName, at: now);
     _updateState(() {
       introVisible = true;
       messages
@@ -145,11 +150,11 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
         ..addAll(restored.where((message) => !message.id.startsWith('welcome')))
         ..add(
           IntelligenceMessage(
-            id: 'welcome-session-${DateTime.now().microsecondsSinceEpoch}',
+            id: 'welcome-session-${now.microsecondsSinceEpoch}',
             role: IntelligenceMessageRole.bil,
             kind: IntelligenceMessageKind.coach,
             text: welcome,
-            createdAt: DateTime.now(),
+            createdAt: now,
             modality: IntelligenceMessageModality.system,
           ),
         );
@@ -220,8 +225,8 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
         normalized.contains('موافقة الذكاء الاصطناعي البعيد');
   }
 
-  String _sessionWelcome(String? displayName) {
-    final hour = DateTime.now().hour;
+  String _sessionWelcome(String? displayName, {required DateTime at}) {
+    final hour = at.hour;
     final greeting = switch (coachGreetingKeyForHour(hour)) {
       'Good morning' => tr('Good morning', 'صباح الخير'),
       'Good afternoon' => tr('Good afternoon', 'مساء الخير'),
@@ -235,7 +240,8 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
       'I’m ready for your next useful decision.',
       'أنا جاهز لقرارك المفيد التالي.',
     );
-    return '$greeting، $memberName. $next';
+    final separator = coachGreetingSeparator(arabic: arabic);
+    return '$greeting$separator $memberName. $next';
   }
 
   Future<String?> _resolvedCoachDisplayName() async {
@@ -354,17 +360,18 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     if (!mounted) return;
     final displayName = await _resolvedCoachDisplayName();
     if (!mounted) return;
-    final welcome = _sessionWelcome(displayName);
+    final now = ref.read(intelligenceConversationClockProvider)();
+    final welcome = _sessionWelcome(displayName, at: now);
     _updateState(() {
       messages
         ..clear()
         ..add(
           IntelligenceMessage(
-            id: 'welcome-${DateTime.now().microsecondsSinceEpoch}',
+            id: 'welcome-${now.microsecondsSinceEpoch}',
             role: IntelligenceMessageRole.bil,
             kind: IntelligenceMessageKind.coach,
             text: welcome,
-            createdAt: DateTime.now(),
+            createdAt: now,
             modality: IntelligenceMessageModality.system,
           ),
         );

@@ -30,11 +30,19 @@ void main() {
   });
 
   test('onboarding locale contract declares all production languages', () {
-    final source = File(
-      'lib/features/onboarding/onboarding_locale_copy.dart',
+    final appLocalizations = File(
+      'lib/app/localization/app_localizations.dart',
     ).readAsStringSync();
-    for (final code in ['fr', 'es', 'tr']) {
-      expect(source, contains("'$code':"));
-    }
+    final onboarding = File(
+      'lib/features/onboarding/onboarding_page.dart',
+    ).readAsStringSync();
+    final onboardingCopy = File(
+      'lib/features/onboarding/onboarding_runtime_copy.dart',
+    ).readAsStringSync();
+    expect(appLocalizations, contains('supportedLocales'));
+    expect(onboarding, contains('OnboardingRuntimeCopy.resolve'));
+    expect(onboardingCopy, contains('static const supportedTags'));
+    expect(onboardingCopy, contains('BilLocalePolicy.canonicalTag'));
+    expect(onboarding, isNot(contains("Locale('en')")));
   });
 }

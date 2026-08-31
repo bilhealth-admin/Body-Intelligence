@@ -512,6 +512,8 @@ class WeeklyReportPage extends ConsumerWidget {
     body: ref
         .watch(weeklyReportProvider)
         .when(
+          skipLoadingOnRefresh: true,
+          skipLoadingOnReload: true,
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (_, _) => _Message(_t(context, 'read_error')),
           data: (report) => _Body(report: report),

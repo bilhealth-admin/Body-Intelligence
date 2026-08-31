@@ -95,7 +95,11 @@ void main() {
           reason: '$key touch target',
         );
       }
-      expect(find.byIcon(Icons.workspace_premium_rounded), findsNWidgets(2));
+      expect(find.byIcon(Icons.workspace_premium_rounded), findsOneWidget);
+      expect(
+        find.byKey(const Key('food-add-barcode-premium-group')),
+        findsOneWidget,
+      );
       expect(tester.takeException(), isNull);
     },
   );

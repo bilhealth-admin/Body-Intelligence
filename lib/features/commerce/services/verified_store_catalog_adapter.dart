@@ -95,20 +95,27 @@ Future<AppleStoreOfferMetadata?> appleStoreOfferMetadata(
 }) async {
   String? billingPeriod;
   String? configuredTrialPeriod;
+  final trialProduct = StoreCatalogConfiguration.isAiTrialProduct(product.id);
 
   if (product is AppStoreProduct2Details) {
     final subscription = product.sk2Product.subscription;
     if (subscription == null) return null;
     billingPeriod = _storeKit2PeriodIso8601(subscription.subscriptionPeriod);
-    for (final offer in subscription.promotionalOffers) {
-      if (offer.type == SK2SubscriptionOfferType.introductory &&
-          offer.paymentMode == SK2SubscriptionOfferPaymentMode.freeTrial &&
-          offer.price == 0) {
-        configuredTrialPeriod = _storeKit2PeriodIso8601(
-          offer.period,
-          multiplier: offer.periodCount,
-        );
-        break;
+    if (trialProduct) {
+      final freeIntros = subscription.promotionalOffers
+          .where(
+            (offer) =>
+                offer.type == SK2SubscriptionOfferType.introductory &&
+                offer.paymentMode ==
+                    SK2SubscriptionOfferPaymentMode.freeTrial &&
+                offer.price == 0,
+          )
+          .toList(growable: false);
+      if (freeIntros.length == 1 && freeIntros.single.periodCount == 1) {
+        final period = _storeKit2PeriodIso8601(freeIntros.single.period);
+        if (const {'P1W', 'P7D'}.contains(period)) {
+          configuredTrialPeriod = period;
+        }
       }
     }
   } else if (product is AppStoreProductDetails) {
@@ -116,14 +123,16 @@ Future<AppleStoreOfferMetadata?> appleStoreOfferMetadata(
       product.skProduct.subscriptionPeriod,
     );
     final offer = product.skProduct.introductoryPrice;
-    if (offer != null &&
+    if (trialProduct &&
+        offer != null &&
         offer.type == SKProductDiscountType.introductory &&
         offer.paymentMode == SKProductDiscountPaymentMode.freeTrail &&
-        double.tryParse(offer.price) == 0) {
-      configuredTrialPeriod = _storeKit1PeriodIso8601(
-        offer.subscriptionPeriod,
-        multiplier: offer.numberOfPeriods,
-      );
+        double.tryParse(offer.price) == 0 &&
+        offer.numberOfPeriods == 1) {
+      final period = _storeKit1PeriodIso8601(offer.subscriptionPeriod);
+      if (const {'P1W', 'P7D'}.contains(period)) {
+        configuredTrialPeriod = period;
+      }
     }
   } else {
     return null;
@@ -207,7 +216,11 @@ GooglePlayOneTimeDiscountMetadata? googlePlayOneTimeDiscountMetadata(
         offerId == null ||
         offerToken == null ||
         offer.priceAmountMicros <= 0 ||
-        fullPriceMicros != offer.priceAmountMicros * 2) {
+        storeDerivedSavingsPercent(
+              priceMicros: offer.priceAmountMicros,
+              originalPriceMicros: fullPriceMicros,
+            ) !=
+            percentageDiscount) {
       continue;
     }
     String? localizedOriginalPrice;
@@ -251,9 +264,9 @@ String? _readNonEmptyString(Object? Function() read) {
 }
 
 /// Reads only the exact Google Play offer represented by [product]. Google
-/// Play filters subscription offers for the current user, so a zero-priced
-/// phase on this selected offer is an eligible trial, not an app-authored
-/// promise.
+/// Play filters subscription offers for the current user, but BIL still
+/// recognizes a trial only for the two exact AI products and the approved
+/// offer id/tag/seven-day phase. Regular Premium metadata is always paid.
 GooglePlayOfferMetadata? googlePlayOfferMetadata(ProductDetails product) {
   if (product is! GooglePlayProductDetails ||
       product.subscriptionIndex == null) {
@@ -264,15 +277,21 @@ GooglePlayOfferMetadata? googlePlayOfferMetadata(ProductDetails product) {
   if (offers == null || index < 0 || index >= offers.length) return null;
   final offer = offers[index];
   if (offer.pricingPhases.isEmpty) return null;
-  final paidPhases = offer.pricingPhases
-      .where((phase) => phase.priceAmountMicros > 0)
-      .toList(growable: false);
-  if (paidPhases.isEmpty) return null;
-  final paid = paidPhases.last;
-  final trialPhases = offer.pricingPhases
+  final paid = googlePlayRecurringPhase(product);
+  if (paid == null) return null;
+  final freePhases = offer.pricingPhases
       .where((phase) => phase.priceAmountMicros == 0)
       .toList(growable: false);
-  final trial = trialPhases.isEmpty ? null : trialPhases.first;
+  final trialPhase =
+      freePhases.length == 1 &&
+          isExactGoogleSevenDayTrialPhase(freePhases.single)
+      ? freePhases.single
+      : null;
+  final approvedTrial =
+      StoreCatalogConfiguration.isAiTrialProduct(product.id) &&
+      offer.offerId == StoreCatalogConfiguration.googleAiTrialOfferId &&
+      offer.offerTags.contains(StoreCatalogConfiguration.googleAiTrialOfferTag);
+  final trial = approvedTrial ? trialPhase : null;
   return GooglePlayOfferMetadata(
     localizedPrice: paid.formattedPrice,
     currencyCode: paid.priceCurrencyCode,
@@ -299,6 +318,11 @@ final class VerifiedStoreCatalogAdapter implements BilStoreCatalogGateway {
     for (final product in store.products.values.where(
       (product) => productIds.contains(product.id),
     )) {
+      // Keep the adapter independently fail-closed. The production purchase
+      // service already filters its map, but injected/restored catalog state
+      // must not be able to surface a forbidden Premium trial or malformed
+      // recurring term if it bypasses that first layer.
+      if (!releaseEligibleStoreProduct(product)) continue;
       if (product.id == StoreCatalogConfiguration.aiBoost) {
         final discount = googlePlayOneTimeDiscountMetadata(product);
         offers.add(
@@ -323,6 +347,9 @@ final class VerifiedStoreCatalogAdapter implements BilStoreCatalogGateway {
       if (binding == null) continue;
       final playOffer = googlePlayOfferMetadata(product);
       final appleOffer = await appleStoreOfferMetadata(product);
+      final allowsTrial =
+          binding.plan == CommercePlan.premiumAiCoach &&
+          StoreCatalogConfiguration.isAiTrialProduct(product.id);
       offers.add(
         BilStoreOfferMetadata(
           productId: product.id,
@@ -344,9 +371,12 @@ final class VerifiedStoreCatalogAdapter implements BilStoreCatalogGateway {
               },
           offerId: playOffer?.offerId,
           basePlanId: playOffer?.basePlanId,
-          trialPeriodIso8601:
-              playOffer?.trialPeriodIso8601 ?? appleOffer?.trialPeriodIso8601,
-          trialEligible: playOffer?.trialEligible ?? appleOffer?.trialEligible,
+          trialPeriodIso8601: allowsTrial
+              ? playOffer?.trialPeriodIso8601 ?? appleOffer?.trialPeriodIso8601
+              : null,
+          trialEligible: allowsTrial
+              ? playOffer?.trialEligible ?? appleOffer?.trialEligible
+              : false,
         ),
       );
     }

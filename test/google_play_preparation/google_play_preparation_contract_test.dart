@@ -4,6 +4,21 @@ import 'package:flutter_test/flutter_test.dart';
 
 String read(String path) => File(path).readAsStringSync();
 
+String readLibrary(String path) {
+  final library = File(path);
+  final source = library.readAsStringSync();
+  final directory = library.parent;
+  final parts = RegExp(
+    r"^part\s+'([^']+)'\s*;",
+    multiLine: true,
+  ).allMatches(source);
+  return <String>[
+    source,
+    for (final part in parts)
+      File('${directory.path}/${part.group(1)!}').readAsStringSync(),
+  ].join('\n');
+}
+
 void main() {
   test('release typography does not fetch Google Fonts at runtime', () {
     final pubspec = read('pubspec.yaml');
@@ -28,8 +43,8 @@ void main() {
     final gradle = read('android/app/build.gradle.kts');
     final manifest = read('android/app/src/main/AndroidManifest.xml');
     final settings = read('lib/features/settings/settings_page.dart');
-    final onboarding = read(
-      'lib/features/onboarding/widgets/profile_step.dart',
+    final onboarding = readLibrary(
+      'lib/features/onboarding/onboarding_page.dart',
     );
 
     expect(
@@ -41,7 +56,7 @@ void main() {
     expect(manifest, contains('android:usesCleartextTraffic="false"'));
     expect(manifest, contains('ACTION_SHOW_PERMISSIONS_RATIONALE'));
     expect(settings, contains("copy('Privacy')"));
-    expect(onboarding, contains('not individual medical advice'));
+    expect(onboarding, contains('not medical advice'));
   });
 
   test('store purchases require real billing and server verification', () {

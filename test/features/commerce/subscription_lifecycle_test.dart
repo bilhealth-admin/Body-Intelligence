@@ -27,14 +27,14 @@ void main() {
     gracePeriodEndsAt: graceEnd,
   );
 
-  test('trial grants paid access through the inclusive trial boundary', () {
+  test('trial expires at its exact boundary', () {
     final state = resolver.resolve(
       record: record(SubscriptionLifecycle.trial, trialEnd: now),
       now: now,
     );
 
-    expect(state.plan, CommercePlan.pro);
-    expect(state.grants(CommerceEntitlement.advancedIntelligence), isTrue);
+    expect(state.plan, CommercePlan.free);
+    expect(state.grants(CommerceEntitlement.advancedIntelligence), isFalse);
   });
 
   test(
@@ -58,9 +58,14 @@ void main() {
           ),
           now: now,
         );
+        final exactBoundary = resolver.resolve(
+          record: record(lifecycle, periodEnd: now),
+          now: now,
+        );
 
         expect(entitled.plan, CommercePlan.pro);
         expect(ended.plan, CommercePlan.free);
+        expect(exactBoundary.plan, CommercePlan.free);
       }
     },
   );

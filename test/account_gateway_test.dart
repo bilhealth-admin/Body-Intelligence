@@ -76,6 +76,7 @@ void main() {
 
     expect(find.text('Welcome'), findsNothing);
     expect(find.byTooltip('Profile'), findsOneWidget);
+    expect(find.byTooltip('Customize dashboard'), findsOneWidget);
     expect(find.byKey(const Key('dashboard-edit-today')), findsOneWidget);
   });
 }

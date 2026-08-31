@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-29",
+  "mode": "release-catalog-preparation-only",
+  "app": {
+    "name": "Body Intelligence Log",
+    "appStoreConnectAppId": "6805349703",
+    "bundleId": "com.bilhealth.bodyintelligencelog"
+  },
+  "subscriptionGroup": {
+    "referenceName": "BIL Membership",
+    "appStoreConnectGroupId": "22343739"
+  },
+  "authoritativeSources": {
+    "productBindings": "lib/features/commerce/domain/store_catalog_configuration.dart",
+    "commerceContract": "docs/architecture/BIL_V1_EPIC13_COMMERCE_CLOSURE.md",
+    "marketPolicy": "supabase/migrations/20260829233000_canonical_store_market_pricing_policy.sql",
+    "canonicalPricing": "tool/apple_store_connect/canonical_store_pricing_2026-08-29.json"
+  },
+  "availability": {
+    "premiumOnlyIso2": ["EG", "IN", "PK", "TR"],
+    "heldIso2": ["BY", "CN", "RU"],
+    "expectedAppleLaunchCount": 172,
+    "expectedPremiumOnlyCount": 4,
+    "expectedPremiumAiCoachCount": 168,
+    "subscriptionPlanType": "UPFRONT"
+  },
+  "trialPolicy": {
+    "decision": "BOTH_AI_PRODUCTS_NO_PREMIUM_TRIAL",
+    "eligibleProductIds": [
+      "bil_premium_ai_coach",
+      "bil_premium_ai_coach_annual"
+    ],
+    "ineligibleProductIds": [
+      "bil_premium",
+      "bil_premium_annual"
+    ],
+    "mode": "FREE_TRIAL",
+    "duration": "ONE_WEEK",
+    "numberOfPeriods": 1,
+    "includedAiTokens": 1000,
+    "offersCreatedByThisPolicy": false
+  },
+  "products": [
+    {
+      "productId": "bil_premium",
+      "appStoreConnectId": "6806555342",
+      "referenceName": "BIL Premium",
+      "kind": "subscription",
+      "plan": "premium",
+      "subscriptionPeriod": "ONE_MONTH",
+      "groupLevel": 2,
+      "territoryPolicy": "premiumOnlyIso2",
+      "pricingPolicyId": "bil_premium",
+      "introductoryOffer": {
+        "state": "INELIGIBLE_BY_POLICY",
+        "decision": "BOTH_AI_PRODUCTS_NO_PREMIUM_TRIAL",
+        "reason": "Regular Premium is a valid paid subscription but is never eligible for the AI trial."
+      }
+    },
+    {
+      "productId": "bil_premium_annual",
+      "appStoreConnectId": "6806555198",
+      "referenceName": "BIL Premium Annual",
+      "kind": "subscription",
+      "plan": "premium",
+      "subscriptionPeriod": "ONE_YEAR",
+      "groupLevel": 2,
+      "territoryPolicy": "premiumOnlyIso2",
+      "pricingPolicyId": "bil_premium_annual",
+      "introductoryOffer": {
+        "state": "INELIGIBLE_BY_POLICY",
+        "decision": "BOTH_AI_PRODUCTS_NO_PREMIUM_TRIAL",
+        "reason": "Regular Premium is a valid paid subscription but is never eligible for the AI trial."
+      }
+    },
+    {
+      "productId": "bil_premium_ai_coach",
+      "appStoreConnectId": "6806555282",
+      "referenceName": "BIL Premium + AI Coach",
+      "kind": "subscription",
+      "plan": "premium_ai_coach",
+      "subscriptionPeriod": "ONE_MONTH",
+      "groupLevel": 1,
+      "territoryPolicy": "premiumAiCoachIso2",
+      "pricingPolicyId": "bil_premium_ai_coach",
+      "introductoryOffer": {
+        "state": "DECLARED_NOT_CREATED",
+        "decision": "BOTH_AI_PRODUCTS_NO_PREMIUM_TRIAL",
+        "mode": "FREE_TRIAL",
+        "duration": "ONE_WEEK",
+        "numberOfPeriods": 1,
+        "includedAiTokens": 1000,
+        "reason": "The monthly AI product is eligible by policy; this declarative package does not create the App Store offer."
+      }
+    },
+    {
+      "productId": "bil_premium_ai_coach_annual",
+      "appStoreConnectId": "6806555344",
+      "referenceName": "BIL Premium + AI Coach Annual",
+      "kind": "subscription",
+      "plan": "premium_ai_coach",
+      "subscriptionPeriod": "ONE_YEAR",
+      "groupLevel": 1,
+      "territoryPolicy": "premiumAiCoachIso2",
+      "pricingPolicyId": "bil_premium_ai_coach_annual",
+      "introductoryOffer": {
+        "state": "DECLARED_NOT_CREATED",
+        "decision": "BOTH_AI_PRODUCTS_NO_PREMIUM_TRIAL",
+        "mode": "FREE_TRIAL",
+        "duration": "ONE_WEEK",
+        "numberOfPeriods": 1,
+        "includedAiTokens": 1000,
+        "reason": "The annual AI product is eligible by policy; this declarative package does not create the App Store offer."
+      }
+    },
+    {
+      "productId": "bil_ai_boost",
+      "appStoreConnectId": null,
+      "referenceName": "BIL AI Boost",
+      "kind": "consumable",
+      "inAppPurchaseType": "CONSUMABLE",
+      "territoryPolicy": "allLaunchIso2",
+      "pricingPolicyId": "bil_ai_boost",
+      "localPricePolicy": {
+        "state": "APPLE_EQUALIZED",
+        "reason": "Use the closest supported Apple reference point not above the USD 2.50 business target, then use Apple's equalized prices."
+      }
+    }
+  ],
+  "metadata": {
+    "exactBenefitTruth": {
+      "free": [
+        "Food, water and weight logging",
+        "Core nutrition targets",
+        "Local progress insights",
+        "Export your own data",
+        "Watch and connected-health sync"
+      ],
+      "premium": [
+        "Everything in BIL Free",
+        "No ads",
+        "Meal planner",
+        "Barcode logging",
+        "Macro and nutrient trends",
+        "1,500 recipes",
+        "300+ workout videos",
+        "100+ weight-training plans",
+        "Weekly meal plan",
+        "Nutrition pathways",
+        "Weekly reports",
+        "Fasting",
+        "Sleep",
+        "Body profile",
+        "Connected health",
+        "Custom calories and macros",
+        "Fitness devices",
+        "Community, friends and messages"
+      ],
+      "premiumAiCoach": [
+        "Everything in BIL Free",
+        "All paid Premium capabilities",
+        "AI Coach with multilingual voice",
+        "2,500 weekly AI tokens",
+        "10,000 monthly AI tokens"
+      ],
+      "aiBoost": [
+        "2,500 AI Coach tokens",
+        "Ask about food, workouts and plans",
+        "Use with your BIL profile and progress",
+        "One-time purchase",
+        "Tokens stack and do not expire"
+      ]
+    },
+    "appStoreLocalizations": {
+      "state": "MISSING_FROM_REPOSITORY",
+      "reason": "No authoritative App Store Connect localization snapshot with accepted display names and descriptions was found. The sync tool reports live values but does not invent or overwrite them."
+    }
+  }
+}

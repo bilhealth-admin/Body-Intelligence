@@ -7,6 +7,7 @@ import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy.dart';
 import '../../commerce/domain/commerce_entitlement.dart';
+import '../../commerce/presentation/premium_label_badge.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../providers/dashboard_preferences_provider.dart';

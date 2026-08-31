@@ -11,6 +11,8 @@ import '../../commerce/domain/subscription_state.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../data/community_repository.dart';
 
+part 'community_connections_copy.dart';
+
 SupabaseClient? _initializedConnectionsClient() {
   if (!AppEnvironment.cloudConfigured) return null;
   try {
@@ -221,6 +223,17 @@ class _CommunityConnectionsPageState
                       final name = row.displayName ?? copy.member;
                       final avatar = row.avatarUrl;
                       final busy = _busyConnections.contains(row.id);
+                      if (status == 'pending' && incoming && !friendsUnlocked) {
+                        return _LockedIncomingConnectionCard(
+                          rowId: row.id,
+                          name: name,
+                          avatarUrl: avatar,
+                          status: copy.status(status, incoming: incoming),
+                          declineLabel: copy.decline,
+                          busy: busy,
+                          onDecline: () => _respond(row.id, accept: false),
+                        );
+                      }
                       return Card(
                         child: ListTile(
                           leading: BilAccountAvatar(
@@ -243,38 +256,19 @@ class _CommunityConnectionsPageState
                                                 _respond(row.id, accept: false),
                                       icon: const Icon(Icons.close_rounded),
                                     ),
-                                    if (friendsUnlocked)
-                                      IconButton.filled(
-                                        tooltip: copy.accept,
-                                        onPressed: busy
-                                            ? null
-                                            : () => _respond(
-                                                row.id,
-                                                accept: true,
-                                              ),
-                                        icon: Icon(
-                                          Icons.check_rounded,
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onPrimary,
-                                        ),
-                                      )
-                                    else
-                                      FilledButton.tonal(
-                                        key: ValueKey(
-                                          'community-premium-accept-${row.id}',
-                                        ),
-                                        onPressed: () => context.push(
-                                          '/plans?focus=subscription',
-                                        ),
-                                        child: Text(
-                                          context.strings.text('Premium'),
-                                          style: const TextStyle(
-                                            color: Color(0xFFC28A16),
-                                            fontWeight: FontWeight.w900,
-                                          ),
-                                        ),
+                                    IconButton.filled(
+                                      tooltip: copy.accept,
+                                      onPressed: busy
+                                          ? null
+                                          : () =>
+                                                _respond(row.id, accept: true),
+                                      icon: Icon(
+                                        Icons.check_rounded,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimary,
                                       ),
+                                    ),
                                   ],
                                 )
                               : status == 'accepted'
@@ -332,6 +326,85 @@ class _CommunityConnectionsPageState
                 );
               },
             ),
+    );
+  }
+}
+
+class _LockedIncomingConnectionCard extends StatelessWidget {
+  const _LockedIncomingConnectionCard({
+    required this.rowId,
+    required this.name,
+    required this.avatarUrl,
+    required this.status,
+    required this.declineLabel,
+    required this.busy,
+    required this.onDecline,
+  });
+
+  final String rowId;
+  final String name;
+  final String? avatarUrl;
+  final String status;
+  final String declineLabel;
+  final bool busy;
+  final VoidCallback onDecline;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                BilAccountAvatar(radius: 20, networkUrl: avatarUrl),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        status,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                TextButton.icon(
+                  onPressed: busy ? null : onDecline,
+                  icon: const Icon(Icons.close_rounded),
+                  label: Text(declineLabel),
+                ),
+                FilledButton.tonal(
+                  key: ValueKey('community-premium-accept-$rowId'),
+                  onPressed: () => context.push('/plans?focus=subscription'),
+                  child: Text(
+                    context.strings.text('View membership plans'),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -553,198 +626,4 @@ class _EmptyConnections extends StatelessWidget {
       ),
     ),
   );
-}
-
-class _ConnectionsCopy {
-  const _ConnectionsCopy({
-    required this.title,
-    required this.findPeople,
-    required this.loadFailed,
-    required this.empty,
-    required this.member,
-    required this.accept,
-    required this.decline,
-    required this.message,
-    required this.pendingIncoming,
-    required this.pendingOutgoing,
-    required this.accepted,
-    required this.declined,
-    required this.manage,
-    required this.remove,
-    required this.block,
-    required this.report,
-    required this.reportSubmitted,
-    required this.actionFailed,
-    required this.signInRequired,
-    required this.signIn,
-    required this.retry,
-    required this.all,
-    required this.requests,
-    required this.educationTitle,
-    required this.educationBody,
-  });
-
-  factory _ConnectionsCopy.of(
-    BuildContext context,
-  ) => switch (Localizations.localeOf(context).languageCode) {
-    'ar' => const _ConnectionsCopy(
-      title: 'الأصدقاء والطلبات',
-      findPeople: 'البحث عن أشخاص',
-      loadFailed: 'تعذر تحميل العلاقات بأمان.',
-      empty: 'لا توجد طلبات أو صداقات بعد.',
-      member: 'عضو BIL',
-      accept: 'قبول',
-      decline: 'رفض',
-      message: 'مراسلة',
-      pendingIncoming: 'طلب صداقة وارد',
-      pendingOutgoing: 'طلب مرسل بانتظار الرد',
-      accepted: 'صديق',
-      declined: 'طلب مرفوض',
-      manage: 'إدارة العلاقة',
-      remove: 'إزالة الصداقة',
-      block: 'حظر العضو',
-      report: 'الإبلاغ عن العضو',
-      reportSubmitted: 'تم إرسال البلاغ إلى فريق الإشراف.',
-      actionFailed: 'تعذر تنفيذ الإجراء بأمان. حاول مجددًا.',
-      signInRequired: 'سجّل الدخول لعرض الأصدقاء والطلبات.',
-      signIn: 'تسجيل الدخول',
-      retry: 'إعادة المحاولة',
-      all: 'الكل',
-      requests: 'الطلبات',
-      educationTitle: 'أنت تتحكم في علاقاتك',
-      educationBody: 'لا نشارك بياناتك الصحية. اقبل فقط الأشخاص الذين تعرفهم.',
-    ),
-    'fr' => const _ConnectionsCopy(
-      title: 'Amis et demandes',
-      findPeople: 'Trouver des personnes',
-      loadFailed: 'Impossible de charger les relations.',
-      empty: 'Aucune demande ou amitié.',
-      member: 'Membre BIL',
-      accept: 'Accepter',
-      decline: 'Refuser',
-      message: 'Message',
-      pendingIncoming: 'Demande reçue',
-      pendingOutgoing: 'Demande envoyée',
-      accepted: 'Ami',
-      declined: 'Demande refusée',
-      manage: 'Gérer',
-      remove: 'Retirer l’amitié',
-      block: 'Bloquer',
-      report: 'Signaler le membre',
-      reportSubmitted: 'Signalement envoyé à la modération.',
-      actionFailed: 'Action impossible. Réessayez.',
-      signInRequired: 'Connectez-vous pour voir les amis et les demandes.',
-      signIn: 'Se connecter',
-      retry: 'Réessayer',
-      all: 'Tous',
-      requests: 'Demandes',
-      educationTitle: 'Vous contrôlez vos relations',
-      educationBody:
-          'Vos données de santé restent privées. N’acceptez que les personnes que vous connaissez.',
-    ),
-    'es' => const _ConnectionsCopy(
-      title: 'Amigos y solicitudes',
-      findPeople: 'Buscar personas',
-      loadFailed: 'No se pudieron cargar las relaciones.',
-      empty: 'Aún no hay solicitudes ni amistades.',
-      member: 'Miembro BIL',
-      accept: 'Aceptar',
-      decline: 'Rechazar',
-      message: 'Mensaje',
-      pendingIncoming: 'Solicitud recibida',
-      pendingOutgoing: 'Solicitud enviada',
-      accepted: 'Amigo',
-      declined: 'Solicitud rechazada',
-      manage: 'Gestionar',
-      remove: 'Eliminar amistad',
-      block: 'Bloquear',
-      report: 'Denunciar miembro',
-      reportSubmitted: 'Denuncia enviada a moderación.',
-      actionFailed: 'No se pudo completar la acción.',
-      signInRequired: 'Inicia sesión para ver amigos y solicitudes.',
-      signIn: 'Iniciar sesión',
-      retry: 'Reintentar',
-      all: 'Todos',
-      requests: 'Solicitudes',
-      educationTitle: 'Tú controlas tus conexiones',
-      educationBody:
-          'Tus datos de salud son privados. Acepta solo a personas que conozcas.',
-    ),
-    'tr' => const _ConnectionsCopy(
-      title: 'Arkadaşlar ve istekler',
-      findPeople: 'Kişi bul',
-      loadFailed: 'Bağlantılar yüklenemedi.',
-      empty: 'Henüz istek veya arkadaş yok.',
-      member: 'BIL üyesi',
-      accept: 'Kabul et',
-      decline: 'Reddet',
-      message: 'Mesaj',
-      pendingIncoming: 'Gelen arkadaşlık isteği',
-      pendingOutgoing: 'Gönderilen istek',
-      accepted: 'Arkadaş',
-      declined: 'İstek reddedildi',
-      manage: 'Yönet',
-      remove: 'Arkadaşlığı kaldır',
-      block: 'Engelle',
-      report: 'Üyeyi bildir',
-      reportSubmitted: 'Bildirim moderasyona gönderildi.',
-      actionFailed: 'İşlem tamamlanamadı. Tekrar deneyin.',
-      signInRequired: 'Arkadaşları ve istekleri görmek için oturum açın.',
-      signIn: 'Oturum aç',
-      retry: 'Tekrar dene',
-      all: 'Tümü',
-      requests: 'İstekler',
-      educationTitle: 'Bağlantılarınızı siz kontrol edersiniz',
-      educationBody:
-          'Sağlık verileriniz gizli kalır. Yalnızca tanıdığınız kişileri kabul edin.',
-    ),
-    _ => _ConnectionsCopy.extended(context),
-  };
-
-  factory _ConnectionsCopy.extended(BuildContext context) {
-    String t(String value) => AppLocalizations.of(context).text(value);
-    return _ConnectionsCopy(
-      title: t('Friends and requests'),
-      findPeople: t('Find people'),
-      loadFailed: t('Could not load connections safely.'),
-      empty: t('No requests or friends yet.'),
-      member: t('BIL member'),
-      accept: t('Accept'),
-      decline: t('Decline'),
-      message: t('Message'),
-      pendingIncoming: t('Incoming friend request'),
-      pendingOutgoing: t('Request awaiting response'),
-      accepted: t('Friend'),
-      declined: t('Request declined'),
-      manage: t('Manage connection'),
-      remove: t('Remove friend'),
-      block: t('Block member'),
-      report: t('Report member'),
-      reportSubmitted: t('Report sent to moderation.'),
-      actionFailed: t('Could not complete that action safely. Try again.'),
-      signInRequired: t('Sign in to view friends and requests.'),
-      signIn: t('Sign in'),
-      retry: t('Retry'),
-      all: t('All'),
-      requests: t('Requests'),
-      educationTitle: t('You control your connections'),
-      educationBody: t(
-        'Your health data stays private. Only accept people you know.',
-      ),
-    );
-  }
-
-  final String title, findPeople, loadFailed, empty, member;
-  final String accept, decline, message;
-  final String pendingIncoming, pendingOutgoing, accepted, declined;
-  final String manage, remove, block, report, reportSubmitted;
-  final String actionFailed, signInRequired;
-  final String signIn, retry;
-  final String all, requests, educationTitle, educationBody;
-
-  String status(String value, {required bool incoming}) => switch (value) {
-    'accepted' => accepted,
-    'declined' => declined,
-    _ => incoming ? pendingIncoming : pendingOutgoing,
-  };
 }

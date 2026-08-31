@@ -156,15 +156,15 @@ void main() {
             return <String, Object?>{
               'records': <Object?>[],
               'deletedIds': <Object?>['hc-deleted'],
-              'nextChangeToken': 'token-2',
+              'nextAnchor': 'token-2',
               'hasMore': true,
             };
           }
-          expect(arguments['token'], 'token-2');
+          expect(arguments['anchor'], 'token-2');
           return <String, Object?>{
             'records': <Object?>[],
             'deletedIds': <Object?>[],
-            'nextChangeToken': 'token-final',
+            'nextAnchor': 'token-final',
             'hasMore': false,
           };
         });

@@ -17,7 +17,7 @@ Deno.serve(async (request) => {
       const gateway = Deno.env.get(token.platform === 'apns' ? 'BIL_APNS_GATEWAY_URL' : 'BIL_FCM_GATEWAY_URL');
       const secret = Deno.env.get(token.platform === 'apns' ? 'BIL_APNS_GATEWAY_SECRET' : 'BIL_FCM_GATEWAY_SECRET');
       if (!gateway || !secret) { failure = 'provider_not_configured'; continue; }
-      const response = await fetch(gateway, {method: 'POST', headers: {authorization: `Bearer ${secret}`, 'content-type': 'application/json'}, body: JSON.stringify({token: token.token_ciphertext, title: 'BIL', body: token.sensitive_preview_allowed ? event.body : 'You have a new private update.', deep_link: event.deep_link, data: {category: event.category, outbox_id: event.id}})});
+      const response = await fetch(gateway, {method: 'POST', headers: {authorization: `Bearer ${secret}`, 'content-type': 'application/json'}, body: JSON.stringify({token: token.token_ciphertext, title: 'BIL', body: event.category === 'ai_coach' || token.sensitive_preview_allowed ? event.body : 'You have a new private update.', deep_link: event.deep_link, data: {category: event.category, outbox_id: event.id}})});
       if (response.ok) delivered += 1; else failure = `provider_${response.status}`;
     }
     await client.from('bil_push_outbox').update({dispatched_at: failure ? null : new Date().toISOString(), failure_code: failure}).eq('id', event.id);

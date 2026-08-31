@@ -39,11 +39,29 @@ void main() {
     }
     await tester.tap(find.text('Breakfast'));
     await tester.pumpAndSettle();
-    expect(find.text('Add food'), findsOneWidget);
-    await tester.tap(find.text('Add food'));
     expect(opened, 1);
     expect(openedType, 'breakfast');
+    expect(find.text('Add food'), findsNWidgets(4));
     expect(tester.takeException(), isNull);
+  });
+
+  test('meal icon follows the recorded local time', () {
+    expect(
+      dashboardMealIcon('breakfast', DateTime(2026, 8, 29, 8)),
+      Icons.wb_sunny_outlined,
+    );
+    expect(
+      dashboardMealIcon('lunch', DateTime(2026, 8, 29, 13)),
+      Icons.restaurant_outlined,
+    );
+    expect(
+      dashboardMealIcon('dinner', DateTime(2026, 8, 29, 20)),
+      Icons.nights_stay_outlined,
+    );
+    expect(
+      dashboardMealIcon('snack', DateTime(2026, 8, 29, 20)),
+      Icons.schedule_rounded,
+    );
   });
 
   testWidgets(

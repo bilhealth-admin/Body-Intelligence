@@ -5,11 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../shared/widgets/bil_coach_identity.dart';
 import '../domain/commerce_entitlement.dart';
 import '../domain/commerce_plan.dart';
-import '../domain/subscription_lifecycle.dart';
 import '../domain/subscription_state.dart';
 import '../providers/commerce_providers.dart';
+import 'bil_store_copy.dart';
 import 'premium_crown_emblem.dart';
 
 enum PremiumGateFeature {
@@ -51,25 +52,31 @@ class PremiumRouteGlassGate extends ConsumerWidget {
     final state = subscription.value;
     final isAiCoach = feature == PremiumGateFeature.aiCoach;
     final isNutritionPrograms = feature == PremiumGateFeature.nutritionPrograms;
-    final creditAccess = isAiCoach
-        ? ref.watch(aiCoachCreditAccessProvider).value ?? false
-        : false;
-    final isVerifiedTrial = state?.lifecycle == SubscriptionLifecycle.trial;
+    final creditSnapshot = isAiCoach
+        ? ref.watch(aiCoachCreditAccessProvider)
+        : const AsyncValue<bool>.data(false);
+    final creditAccess = creditSnapshot.value ?? false;
+    final activeAiSubscription = hasVerifiedAiSubscription(state);
     final hasAccess = isAiCoach
-        ? creditAccess ||
-              (!isVerifiedTrial && state?.plan == CommercePlan.premiumAiCoach)
+        ? creditAccess
         : isNutritionPrograms
         ? state?.authority == EntitlementAuthority.verifiedServer &&
               (state?.grants(CommerceEntitlement.premiumPrograms) ?? false)
         : state != null && state.plan != CommercePlan.free;
     if (hasAccess) return child;
 
-    final loading = subscription.isLoading;
+    final loading =
+        subscription.isLoading || (isAiCoach && creditSnapshot.isLoading);
     final content = _contentFor(context, feature);
+    final storeLocale = Localizations.localeOf(context).toLanguageTag();
     // The glass names the only subscription family exposed by the verified
     // billing storefront. Unknown storefronts fail closed to Premium; an
     // underpriced AI-inclusive membership is never advertised by locale/IP.
-    final tier = storefrontPlan == CommercePlan.premiumAiCoach
+    final tier = isAiCoach
+        ? activeAiSubscription
+              ? 'BIL PREMIUM AI COACH · ${context.strings.text('Current')}'
+              : 'BIL PREMIUM AI COACH'
+        : storefrontPlan == CommercePlan.premiumAiCoach
         ? 'BIL PREMIUM AI COACH'
         : 'BIL PREMIUM';
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -118,17 +125,28 @@ class PremiumRouteGlassGate extends ConsumerWidget {
                     title: content.title,
                     body: content.body,
                     benefits: content.benefits,
-                    action: content.action,
-                    secondaryAction: null,
+                    action: isAiCoach
+                        ? activeAiSubscription
+                              ? context.strings.text('Get AI Boost')
+                              : BilStoreCopy.text(storeLocale, 'continue')
+                        : BilStoreCopy.text(storeLocale, 'plans'),
+                    secondaryAction: isAiCoach && !activeAiSubscription
+                        ? context.strings.text('Get AI Boost')
+                        : null,
                     loading: loading,
                     compact: compact,
                     isDark: isDark,
+                    showCoach: isAiCoach,
                     onPressed: () => context.push(
                       isAiCoach
-                          ? '/plans?focus=boost'
+                          ? activeAiSubscription
+                                ? '/plans?focus=boost'
+                                : '/plans?focus=ai-coach'
                           : '/plans?focus=subscription',
                     ),
-                    onSecondaryPressed: null,
+                    onSecondaryPressed: isAiCoach && !activeAiSubscription
+                        ? () => context.push('/plans?focus=boost')
+                        : null,
                   ),
                 ),
               );
@@ -183,10 +201,9 @@ _PremiumGateContent _contentFor(
         t('A diet matched to your calories and macros'),
         t('Training matched to your goal and progress'),
         t('Follow-up from the body data you log'),
-        t('Ready · speak any language'),
+        t('Global multilingual voice'),
         t('2,500 non-expiring AI Boost tokens'),
       ],
-      action: t('Get AI Boost'),
     );
   }
 
@@ -282,7 +299,7 @@ _PremiumGateContent _contentFor(
       ],
     ),
     PremiumGateFeature.contentPacks => (
-      t('Premium wellness programs'),
+      t('Guided wellness packs'),
       t(
         'Open structured packs for nutrition, movement, sleep, and sustainable habits.',
       ),
@@ -309,9 +326,7 @@ _PremiumGateContent _contentFor(
     ),
     PremiumGateFeature.premium || PremiumGateFeature.aiCoach => (
       t('Your complete BIL experience'),
-      t(
-        'Preview the feature now, then unlock every Premium tool and remove ads instantly.',
-      ),
+      t('Everything included in BIL Free'),
       [t('No ads'), t('Advanced insights'), t('Secure sync')],
     ),
   };
@@ -319,7 +334,6 @@ _PremiumGateContent _contentFor(
     title: details.$1,
     body: details.$2,
     benefits: details.$3,
-    action: t('Start 7-day free trial'),
   );
 }
 
@@ -328,13 +342,11 @@ final class _PremiumGateContent {
     required this.title,
     required this.body,
     required this.benefits,
-    required this.action,
   });
 
   final String title;
   final String body;
   final List<String> benefits;
-  final String action;
 }
 
 class _PremiumGateCard extends StatelessWidget {
@@ -348,6 +360,7 @@ class _PremiumGateCard extends StatelessWidget {
     required this.loading,
     required this.compact,
     required this.isDark,
+    required this.showCoach,
     required this.onPressed,
     required this.onSecondaryPressed,
   });
@@ -361,6 +374,7 @@ class _PremiumGateCard extends StatelessWidget {
   final bool loading;
   final bool compact;
   final bool isDark;
+  final bool showCoach;
   final VoidCallback onPressed;
   final VoidCallback? onSecondaryPressed;
 
@@ -397,7 +411,19 @@ class _PremiumGateCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    PremiumCrownEmblem(size: compact ? 54 : 60),
+                    if (showCoach)
+                      Container(
+                        width: compact ? 54 : 60,
+                        height: compact ? 54 : 60,
+                        padding: const EdgeInsets.all(2),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFC8F3FF),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const ClipOval(child: BilCoachPortrait()),
+                      )
+                    else
+                      PremiumCrownEmblem(size: compact ? 54 : 60),
                     const SizedBox(width: 15),
                     Expanded(
                       child: Column(

@@ -4,10 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/localization/runtime_copy.dart';
 import '../../data/database/app_database.dart';
+import '../../data/database/database_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../commerce/domain/commerce_entitlement.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../weight/providers/weight_provider.dart';
+import '../weight/domain/weight_goal_progress.dart';
 
 part 'reference_goals_components.dart';
 
@@ -323,24 +325,64 @@ class _ReferenceGoalsPageState extends ConsumerState<ReferenceGoalsPage> {
     double? target,
     String? activityValue,
   }) async {
-    await ref
-        .read(userProfileRepositoryProvider)
-        .save(
-          gender: profile.gender,
-          age: profile.age,
-          height: profile.height,
-          currentWeight: current ?? profile.currentWeight,
-          targetWeight: target ?? profile.targetWeight,
-          activityLevel: activityValue ?? activity ?? profile.activityLevel,
-          exercises: profile.exercises,
-          medicalConditions: profile.medicalConditions,
-          waist: profile.waist,
-          neck: profile.neck,
-          chest: profile.chest,
-          arm: profile.arm,
-          thigh: profile.thigh,
+    final resolvedCurrent =
+        current ??
+        ref.read(effectiveCurrentWeightProvider) ??
+        profile.currentWeight;
+    final resolvedTarget = target ?? profile.targetWeight;
+    // Read the durable row directly instead of relying on AsyncValue.value.
+    // This page can be opened before activeGoalProvider has emitted, and using
+    // a transient null there would create a duplicate goal rather than update
+    // the existing Health Goal.
+    final goalRepository = ref.read(goalRepositoryProvider);
+    final activeGoal = target == null ? null : await goalRepository.getActive();
+    await ref.read(databaseProvider).transaction(() async {
+      await ref
+          .read(userProfileRepositoryProvider)
+          .save(
+            gender: profile.gender,
+            age: profile.age,
+            height: profile.height,
+            currentWeight: resolvedCurrent,
+            targetWeight: resolvedTarget,
+            activityLevel: activityValue ?? activity ?? profile.activityLevel,
+            exercises: profile.exercises,
+            medicalConditions: profile.medicalConditions,
+            waist: profile.waist,
+            neck: profile.neck,
+            chest: profile.chest,
+            arm: profile.arm,
+            thigh: profile.thigh,
+          );
+      if (current != null) {
+        await ref
+            .read(weightRepositoryProvider)
+            .addWeight(
+              current,
+              date: DateTime.now(),
+              measurementContext: 'unspecified',
+            );
+      }
+      if (target != null) {
+        await goalRepository.save(
+          uuid: activeGoal?.uuid,
+          profileUuid: profile.uuid,
+          type: goalTypeForUpdate(
+            currentWeightKg: resolvedCurrent,
+            targetWeightKg: resolvedTarget,
+            storedGoalType: activeGoal?.type,
+            storedTargetWeightKg: activeGoal?.targetWeight,
+          ),
+          targetWeight: resolvedTarget,
+          targetDate: activeGoal?.targetDate,
         );
+      }
+    });
     ref.invalidate(userProfileProvider);
+    ref.invalidate(activeGoalProvider);
+    ref.invalidate(latestWeightProvider);
+    ref.invalidate(todayWeightProvider);
+    ref.invalidate(weightHistoryProvider);
   }
 
   Future<void> chooseWeeklyGoal() async {

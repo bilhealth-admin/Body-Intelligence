@@ -35,9 +35,11 @@ void main() {
     expect(cards, contains('viewportFraction: 1'));
     expect(cards, isNot(contains('viewportFraction: .94')));
     expect(cards, contains('padEnds: false'));
-    expect(health, contains("Key('dashboard-health-device-pager')"));
-    expect(health, contains('height: 188'));
-    expect(health, contains('maxWidth: 188, maxHeight: 188'));
+    expect(health, contains("Key('dashboard-live-fitness-watch-slot')"));
+    expect(health, isNot(contains("Key('dashboard-health-device-pager')")));
+    expect(health, contains('final previewSide = 212 + ((scale - 1) * 68)'));
+    expect(health, contains('maxWidth: previewSide'));
+    expect(health, contains('maxHeight: previewSide'));
     expect(health, contains('compact: true'));
     expect(health, isNot(contains('child: FittedBox(')));
     expect(cards, contains('(224 +'));

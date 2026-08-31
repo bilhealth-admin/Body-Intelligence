@@ -115,13 +115,22 @@ void main() {
       expect(coach, containsAll(premium));
     });
 
-    test('missing owner configuration exposes no invented products', () {
-      expect(StoreCatalogConfiguration.consumerProductsConfigured, isFalse);
-      expect(StoreCatalogConfiguration.productIds, isEmpty);
+    test('owner catalog exposes only the four canonical subscriptions', () {
+      expect(StoreCatalogConfiguration.consumerProductsConfigured, isTrue);
+      expect(StoreCatalogConfiguration.productIds, <String>{
+        StoreCatalogConfiguration.premiumMonthly,
+        StoreCatalogConfiguration.premiumAnnual,
+        StoreCatalogConfiguration.premiumAiCoachMonthly,
+        StoreCatalogConfiguration.premiumAiCoachAnnual,
+      });
+      expect(
+        StoreCatalogConfiguration.storefrontProductIds,
+        contains(StoreCatalogConfiguration.aiBoost),
+      );
     });
   });
 
-  testWidgets('unconfigured paywall is honest and localized', (tester) async {
+  testWidgets('disconnected paywall is honest and localized', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         locale: Locale('fr'),
@@ -142,8 +151,7 @@ void main() {
     expect(find.text('Premium AI Coach'), findsNothing);
     expect(find.text('BIL AI Boost'), findsOneWidget);
     expect(find.text('Prix indisponible sur cet appareil'), findsNWidgets(2));
-    // No price, discount, or unavailable tier is invented without live store
-    // metadata and configured owner product identifiers.
+    // No price or discount is invented without live store metadata.
     expect(find.textContaining(r'$'), findsNothing);
     expect(find.textContaining('%'), findsNothing);
   });

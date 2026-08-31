@@ -6,11 +6,13 @@ class _MessageBubble extends StatelessWidget {
     this.feedbackValue,
     this.onFeedback,
     this.onReport,
+    this.onSpeak,
   });
   final IntelligenceMessage message;
   final bool? feedbackValue;
   final ValueChanged<bool>? onFeedback;
   final ValueChanged<String>? onReport;
+  final VoidCallback? onSpeak;
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +125,18 @@ class _MessageBubble extends StatelessWidget {
                               'لماذا هذا الجواب',
                             ),
                           ),
+                        ),
+                      if (onSpeak != null)
+                        IconButton(
+                          key: Key('ai-coach-speak-${message.id}'),
+                          tooltip: intelligenceText(
+                            context,
+                            'Read answer aloud',
+                            'اقرأ الإجابة بصوت عالٍ',
+                          ),
+                          onPressed: onSpeak,
+                          visualDensity: VisualDensity.compact,
+                          icon: const Icon(Icons.volume_up_rounded, size: 19),
                         ),
                       if (onFeedback != null)
                         _QuickFeedbackBar(
@@ -524,6 +538,9 @@ IconData _iconForAction(IntelligenceActionType type) => switch (type) {
   IntelligenceActionType.reviewWorkout => BilSemanticIcons.workout,
   IntelligenceActionType.openPlan => Icons.route_outlined,
   IntelligenceActionType.openReport => BilSemanticIcons.insights,
+  IntelligenceActionType.openAiCoachSubscription =>
+    Icons.workspace_premium_outlined,
+  IntelligenceActionType.buyAiBoost => Icons.bolt_rounded,
   IntelligenceActionType.manageSubscription => BilSemanticIcons.subscription,
   IntelligenceActionType.setThemeMode => Icons.contrast_rounded,
   IntelligenceActionType.setLanguage => Icons.language_rounded,

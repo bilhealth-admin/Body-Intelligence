@@ -43,9 +43,11 @@ final class _Cipher implements CloudPayloadCipher {
   @override
   bool get isAvailable => true;
   @override
-  Map<String, Object?> decrypt(Map<String, Object?> ciphertext) => ciphertext;
+  Future<Map<String, Object?>> decrypt(Map<String, Object?> ciphertext) async =>
+      ciphertext;
   @override
-  Map<String, Object?> encrypt(Map<String, Object?> cleartext) => cleartext;
+  Future<Map<String, Object?>> encrypt(Map<String, Object?> cleartext) async =>
+      cleartext;
 }
 
 final class _Failure implements CloudFailureInjector {

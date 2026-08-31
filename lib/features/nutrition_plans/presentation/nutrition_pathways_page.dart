@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
+import '../../commerce/presentation/premium_label_badge.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../domain/nutrition_pathway.dart';
 import '../domain/nutrition_pathway_catalog.dart';
@@ -60,6 +61,16 @@ class NutritionPathwaysPage extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 20),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: PremiumLabelBadge(
+                key: Key('nutrition-pathways-premium-page-label'),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
           SizedBox(
             height: 334,
             child: ListView.separated(
@@ -255,11 +266,7 @@ class _PathwayAccessBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final premium = plan.access == NutritionPathwayAccess.premium;
-    final label = nutritionTextForLanguage(
-      localeTag,
-      premium ? 'Premium' : 'Free',
-      premium ? 'Premium' : 'مجاني',
-    );
+    final label = nutritionTextForLanguage(localeTag, 'Free', 'مجاني');
     return Container(
       key: Key('nutrition-pathway-access-$surface-${plan.id}'),
       constraints: BoxConstraints(maxWidth: compact ? 86 : 116),
@@ -289,24 +296,24 @@ class _PathwayAccessBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            premium ? Icons.lock_rounded : Icons.lock_open_rounded,
+            premium ? Icons.circle : Icons.lock_open_rounded,
             size: compact ? 14 : 16,
             color: premium ? const Color(0xFF4C3300) : const Color(0xFF006D60),
           ),
-          const SizedBox(width: 5),
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: premium
-                    ? const Color(0xFF4C3300)
-                    : const Color(0xFF006D60),
-                fontWeight: FontWeight.w900,
+          if (!premium) ...[
+            const SizedBox(width: 5),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: const Color(0xFF006D60),
+                  fontWeight: FontWeight.w900,
+                ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );

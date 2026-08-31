@@ -35,5 +35,29 @@ void main() {
       BilAdultEligibility.latestEligibleBirthDate(on: reference),
       DateTime(2008, 8, 24),
     );
+    expect(BilAdultEligibility.isEligibleAge(121), isFalse);
+  });
+
+  test('leap-day cutoff never normalizes into an ineligible March date', () {
+    final leapReference = DateTime(2024, 2, 29);
+
+    expect(
+      BilAdultEligibility.latestEligibleBirthDate(on: leapReference),
+      DateTime(2006, 2, 28),
+    );
+    expect(
+      BilAdultEligibility.isEligibleBirthDate(
+        DateTime(2006, 2, 28),
+        on: leapReference,
+      ),
+      isTrue,
+    );
+    expect(
+      BilAdultEligibility.isEligibleBirthDate(
+        DateTime(2006, 3, 1),
+        on: leapReference,
+      ),
+      isFalse,
+    );
   });
 }

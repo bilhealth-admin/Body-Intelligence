@@ -17,12 +17,14 @@ class PremiumNutritionGlass extends ConsumerWidget {
     required this.child,
     this.borderRadius = 16,
     this.compact = false,
+    this.showLabel = true,
     super.key,
   });
 
   final Widget child;
   final double borderRadius;
   final bool compact;
+  final bool showLabel;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -55,52 +57,62 @@ class PremiumNutritionGlass extends ConsumerWidget {
                 child: InkWell(
                   key: const Key('premium-nutrition-glass'),
                   onTap: () => context.push('/plans'),
-                  child: Center(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: light
-                            ? const Color(0xD9FFFFFF)
-                            : const Color(0xB8141820),
-                        borderRadius: BorderRadius.circular(99),
-                        border: Border.all(color: const Color(0x99D79A1E)),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x22000000),
-                            blurRadius: 12,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: compact ? 9 : 14,
-                          vertical: compact ? 4 : 8,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.workspace_premium_rounded,
-                              color: const Color(0xFFD79A1E),
-                              size: compact ? 16 : 20,
+                  child: showLabel
+                      ? Center(
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: light
+                                  ? const Color(0xD9FFFFFF)
+                                  : const Color(0xB8141820),
+                              borderRadius: BorderRadius.circular(99),
+                              border: Border.all(
+                                color: const Color(0x99D79A1E),
+                              ),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x22000000),
+                                  blurRadius: 12,
+                                  offset: Offset(0, 4),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              'Premium',
-                              style: Theme.of(context).textTheme.labelLarge
-                                  ?.copyWith(
-                                    color: light
-                                        ? const Color(0xFF231B0B)
-                                        : Colors.white,
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: compact ? 12 : null,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: compact ? 9 : 14,
+                                vertical: compact ? 4 : 8,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.workspace_premium_rounded,
+                                    color: const Color(0xFFD79A1E),
+                                    size: compact ? 16 : 20,
                                   ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Premium',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelLarge
+                                        ?.copyWith(
+                                          color: light
+                                              ? const Color(0xFF231B0B)
+                                              : Colors.white,
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: compact ? 12 : null,
+                                        ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ],
+                          ),
+                        )
+                      : Semantics(
+                          label: 'Premium',
+                          button: true,
+                          child: const SizedBox.expand(),
                         ),
-                      ),
-                    ),
-                  ),
                 ),
               ),
             ),

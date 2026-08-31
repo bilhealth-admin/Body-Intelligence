@@ -11,6 +11,7 @@ import 'package:body_intelligence_log/features/nutrition/services/food_quality_e
 import 'package:body_intelligence_log/features/nutrition/services/offline_barcode_resolver.dart';
 import 'package:body_intelligence_log/features/nutrition/services/offline_food_search_pipeline.dart';
 import 'package:body_intelligence_log/features/nutrition/services/regional_barcode_network_resolver.dart';
+import 'package:body_intelligence_log/features/nutrition/services/trusted_food_network_search_resolver.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -207,15 +208,76 @@ void main() {
     expect(outcome.foods.single.name, 'Local oats');
   });
 
-  test('catalog barcode failure returns a degraded empty result', () async {
+  test(
+    'trusted server search runs only after local community and catalog miss',
+    () async {
+      final network = _FakeNetworkSearchResolver(<UnifiedFood>[
+        _food(id: 'usda:2709216', name: 'Dragon fruit, raw'),
+      ]);
+      final authority = FoodRuntimeSearchAuthority(
+        local,
+        catalogResolver: () async => _FakeCatalog(const []),
+        networkSearchResolver: network,
+      );
+
+      final outcome = await authority.searchDetailed('dragon fruit');
+
+      expect(network.calls, 1);
+      expect(outcome.source, FoodRuntimeSearchSource.catalogAndLocal);
+      expect(outcome.foods.single.uuid, 'usda:2709216');
+      expect((await local.getFoods()).single.uuid, 'usda:2709216');
+    },
+  );
+
+  test('local search hit suppresses trusted network enrichment', () async {
+    await local.addFood(
+      name: 'Local oats',
+      category: 'food',
+      calories: 40,
+      protein: 2,
+      carbs: 7,
+      fats: 1,
+      servingSize: 100,
+      servingUnit: 'g',
+    );
+    final network = _FakeNetworkSearchResolver(<UnifiedFood>[
+      _food(id: 'usda:oats', name: 'Oats'),
+    ]);
+    final authority = FoodRuntimeSearchAuthority(
+      local,
+      catalogResolver: () async => _FakeCatalog(const []),
+      networkSearchResolver: network,
+    );
+
+    final outcome = await authority.searchDetailed('oats');
+
+    expect(network.calls, 0);
+    expect(outcome.foods.single.name, 'Local oats');
+  });
+
+  test('trusted network outage keeps the offline miss non-fatal', () async {
     final authority = FoodRuntimeSearchAuthority(
       local,
       catalogResolver: () async => _ThrowingCatalog(),
+      networkSearchResolver: _ThrowingNetworkSearchResolver(),
+    );
+
+    final outcome = await authority.searchDetailed('unavailable food');
+
+    expect(outcome.source, FoodRuntimeSearchSource.localFallback);
+    expect(outcome.foods, isEmpty);
+  });
+
+  test('catalog barcode failure continues to the network source', () async {
+    final authority = FoodRuntimeSearchAuthority(
+      local,
+      catalogResolver: () async => _ThrowingCatalog(),
+      networkBarcodeResolver: const _NotFoundNetworkResolver(),
     );
 
     final outcome = await authority.lookupBarcodeDetailed('4006381333931');
 
-    expect(outcome.source, FoodRuntimeSearchSource.localFallback);
+    expect(outcome.source, FoodRuntimeSearchSource.localOnly);
     expect(outcome.foods, isEmpty);
   });
 
@@ -270,17 +332,21 @@ void main() {
     expect(outcome.foods, isEmpty);
   });
 
-  test('catalog exception reports degraded barcode state', () async {
-    final authority = FoodRuntimeSearchAuthority(
-      local,
-      catalogResolver: () async => _ThrowingCatalog(),
-    );
+  test(
+    'catalog exception falls through to the real network resolver',
+    () async {
+      final authority = FoodRuntimeSearchAuthority(
+        local,
+        catalogResolver: () async => _ThrowingCatalog(),
+        networkBarcodeResolver: const _NotFoundNetworkResolver(),
+      );
 
-    final outcome = await authority.lookupBarcodeJourney('4006381333931');
+      final outcome = await authority.lookupBarcodeJourney('4006381333931');
 
-    expect(outcome.status, FoodRuntimeBarcodeStatus.degraded);
-    expect(outcome.degraded, isTrue);
-  });
+      expect(outcome.status, FoodRuntimeBarcodeStatus.notFound);
+      expect(outcome.degraded, isFalse);
+    },
+  );
 }
 
 class _NotFoundNetworkResolver extends RegionalBarcodeNetworkResolver {
@@ -293,6 +359,26 @@ class _NotFoundNetworkResolver extends RegionalBarcodeNetworkResolver {
       source: 'test-network-miss',
       fromCache: false,
     );
+  }
+}
+
+class _FakeNetworkSearchResolver extends TrustedFoodNetworkSearchResolver {
+  _FakeNetworkSearchResolver(this.foods);
+
+  final List<UnifiedFood> foods;
+  int calls = 0;
+
+  @override
+  Future<List<UnifiedFood>> search(String query, {int limit = 10}) async {
+    calls += 1;
+    return foods.take(limit).toList(growable: false);
+  }
+}
+
+class _ThrowingNetworkSearchResolver extends TrustedFoodNetworkSearchResolver {
+  @override
+  Future<List<UnifiedFood>> search(String query, {int limit = 10}) {
+    throw StateError('network unavailable');
   }
 }
 

@@ -71,11 +71,22 @@ Future<void> _loadRobotoIntoTestFamily() async {
   final productionArabic = FontLoader('BILArabic')
     ..addFont(bytes(projectArabicRegular))
     ..addFont(bytes(projectArabicBold));
+  final bilDisplay = FontLoader('BILDisplay')
+    ..addFont(
+      bytes(
+        File(
+          '${Directory.current.path}${Platform.pathSeparator}assets'
+          '${Platform.pathSeparator}fonts${Platform.pathSeparator}'
+          'Montserrat-Bold.ttf',
+        ),
+      ),
+    );
   await Future.wait([
     loader.load(),
     fallback.load(),
     arabic.load(),
     productionArabic.load(),
+    bilDisplay.load(),
     icons.load(),
   ]);
 }
@@ -175,6 +186,16 @@ ThemeData visualEvidenceTheme(
   String fontFamily = 'RobotoEvidence',
 }) {
   TextStyle? face(TextStyle? style) => style?.copyWith(fontFamily: fontFamily);
+  final snackBarContentStyle =
+      (theme.snackBarTheme.contentTextStyle ??
+              theme.textTheme.bodyMedium ??
+              const TextStyle())
+          .copyWith(
+            fontFamily: fontFamily,
+            color:
+                theme.snackBarTheme.contentTextStyle?.color ??
+                theme.colorScheme.onInverseSurface,
+          );
   ButtonStyle? buttonFace(ButtonStyle? style) {
     if (style == null) return null;
     final inherited = style.textStyle;
@@ -203,6 +224,12 @@ ThemeData visualEvidenceTheme(
     ),
     textButtonTheme: TextButtonThemeData(
       style: buttonFace(theme.textButtonTheme.style),
+    ),
+    snackBarTheme: theme.snackBarTheme.copyWith(
+      contentTextStyle: snackBarContentStyle,
+      actionTextColor:
+          theme.snackBarTheme.actionTextColor ??
+          theme.colorScheme.inversePrimary,
     ),
     segmentedButtonTheme: SegmentedButtonThemeData(
       style: buttonFace(theme.segmentedButtonTheme.style),

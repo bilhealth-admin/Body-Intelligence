@@ -2,13 +2,10 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
-const bilCoachFallbackAvatarAsset =
-    'assets/images/ai_coach/bil_male_smart_coach_v1.png';
-
 /// The single visual contract for the signed-in member's avatar.
 ///
-/// AI Coach keeps its own fixed portrait. Account surfaces use that portrait
-/// only as the established fallback until the member chooses a personal photo.
+/// AI Coach keeps its own fixed portrait. Account surfaces deliberately use a
+/// neutral member placeholder until the member chooses a personal photo.
 class BilAccountAvatar extends StatelessWidget {
   const BilAccountAvatar({
     super.key,
@@ -23,10 +20,10 @@ class BilAccountAvatar extends StatelessWidget {
   final String? networkUrl;
   final Color? borderColor;
 
-  ImageProvider<Object> get _backgroundImage {
+  ImageProvider<Object>? get _backgroundImage {
     final bytes = photoBytes;
     if (bytes != null && bytes.isNotEmpty) return MemoryImage(bytes);
-    return const AssetImage(bilCoachFallbackAvatarAsset);
+    return null;
   }
 
   ImageProvider<Object>? get _foregroundImage {
@@ -37,13 +34,18 @@ class BilAccountAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final foreground = _foregroundImage;
+    final background = _backgroundImage;
     final avatar = CircleAvatar(
       radius: radius,
       // The cloud URL is authoritative across devices. Local bytes remain a
-      // resilient offline fallback, followed by the fixed AI Coach portrait.
+      // resilient offline fallback. The coach identity is never an account
+      // placeholder.
       foregroundImage: foreground,
       onForegroundImageError: foreground == null ? null : (_, _) {},
-      backgroundImage: _backgroundImage,
+      backgroundImage: background,
+      child: foreground == null && background == null
+          ? Icon(Icons.person_rounded, size: radius, color: Colors.white)
+          : null,
     );
     final border = borderColor;
     if (border == null) return avatar;

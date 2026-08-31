@@ -7,6 +7,18 @@ import 'package:body_intelligence_log/features/daily_log/daily_log_page.dart';
 import 'package:body_intelligence_log/features/nutrition/services/food_presentation_localizer.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+String _librarySource(String path) {
+  final library = File(path);
+  final entrypoint = library.readAsStringSync();
+  final parts = RegExp(r"part '([^']+)';")
+      .allMatches(entrypoint)
+      .map((match) => File('${library.parent.path}/${match.group(1)!}'));
+  return <String>[
+    entrypoint,
+    for (final part in parts) part.readAsStringSync(),
+  ].join('\n');
+}
+
 void main() {
   final tags = AppLocalizations.supportedLocales
       .map(BilLocalePolicy.canonicalTag)
@@ -268,9 +280,9 @@ void main() {
       final search = File(
         'lib/features/daily_log/daily_log_meal_search.dart',
       ).readAsStringSync();
-      final diary = File(
+      final diary = _librarySource(
         'lib/features/daily_log/presentation/daily_log_meals_list.dart',
-      ).readAsStringSync();
+      );
       final detail = File(
         'lib/features/daily_log/daily_log_meal_entry.dart',
       ).readAsStringSync();

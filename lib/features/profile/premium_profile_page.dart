@@ -14,16 +14,27 @@ import '../../shared/widgets/bil_account_avatar.dart';
 import '../nutrition/domain/dietary_preferences.dart';
 import '../nutrition_plans/domain/nutrition_pathway_catalog.dart';
 import '../onboarding/domain/adult_eligibility.dart';
+import '../weight/domain/weight_goal_progress.dart';
+import '../weight/providers/weight_provider.dart';
 import 'dietary_system_labels.dart';
 import 'domain/goal_timeline_estimator.dart';
 import 'goal_timeline_card.dart';
 import 'providers/user_profile_provider.dart';
+import 'providers/profile_auth_identity_provider.dart';
 import 'profile_locale_copy.dart';
 import 'services/profile_photo_service.dart';
 
 part 'premium_profile_components.dart';
 part 'premium_profile_actions.dart';
 part 'premium_profile_editors.dart';
+
+/// Clock boundary for date-sensitive profile projections.
+///
+/// Production continues to use the device clock while visual evidence can
+/// freeze the projection date without changing runtime behavior.
+final premiumProfileClockProvider = Provider<DateTime Function()>(
+  (ref) => DateTime.now,
+);
 
 class PremiumProfilePage extends ConsumerStatefulWidget {
   const PremiumProfilePage({super.key});
@@ -52,6 +63,7 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
   double weight = 70;
   double target = 70;
   bool exercises = true;
+  String? hydrationIdentityKey;
 
   void _updateState(VoidCallback update) => setState(update);
 
@@ -63,9 +75,11 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
     final profileAsync = ref.watch(userProfileProvider);
     final goalAsync = ref.watch(activeGoalProvider);
     final dietaryAsync = ref.watch(dietaryPreferencesProvider);
+    final effectiveCurrentWeight = ref.watch(effectiveCurrentWeightProvider);
     final activePathwayId = ref.watch(activeNutritionPathwayProvider).value;
     final photoAsync = ref.watch(profilePhotoProvider);
     final photoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
+    final authIdentityAsync = ref.watch(profileAuthIdentityProvider);
     return PopScope(
       canPop: !saving,
       child: Scaffold(
@@ -82,6 +96,10 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
             ),
           ),
           data: (profile) {
+            final authIdentity = authIdentityAsync.value;
+            if (authIdentity == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
             if (profile == null) {
               return Center(
                 child: Text(
@@ -114,14 +132,25 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
             if (hydrateError != null) {
               return Center(
                 child: FilledButton(
-                  onPressed: () => hydrate(profile),
+                  onPressed: () => hydrate(
+                    profile,
+                    effectiveCurrentWeight ?? profile.currentWeight,
+                    authIdentity,
+                  ),
                   child: Text(tr('Try again', 'إعادة المحاولة')),
                 ),
               );
             }
-            if (!loaded) {
+            final expectedHydrationKey = authIdentity.hydrationKey(
+              profile.uuid,
+            );
+            if (!loaded || hydrationIdentityKey != expectedHydrationKey) {
               WidgetsBinding.instance.addPostFrameCallback(
-                (_) => hydrate(profile),
+                (_) => hydrate(
+                  profile,
+                  effectiveCurrentWeight ?? profile.currentWeight,
+                  authIdentity,
+                ),
               );
               return const Center(child: CircularProgressIndicator());
             }
@@ -140,7 +169,7 @@ class _PremiumProfilePageState extends ConsumerState<PremiumProfilePage> {
               currentWeightKg: weight,
               targetWeightKg: target,
               goalType: timelineGoalType,
-              asOf: DateTime.now(),
+              asOf: ref.watch(premiumProfileClockProvider)(),
             );
             return AbsorbPointer(
               absorbing: saving,

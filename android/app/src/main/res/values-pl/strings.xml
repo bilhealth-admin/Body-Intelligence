@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BIL — Dziennik inteligencji organizmu</string>
+    <string name="app_name">Dziennik inteligencji organizmu</string>
     <string name="health_permissions_rationale_title">Prywatność danych zdrowotnych</string>
     <string name="health_permissions_rationale_body">BIL żąda tylko typów danych Health Connect potrzebnych dla wybranych funkcji. Twoje dane dotyczące zdrowia są domyślnie przetwarzane lokalnie. Możesz przyznać, odmówić lub cofnąć indywidualne uprawnienia w dowolnym momencie w ustawieniach Health Connect. BIL nie sprzedaje danych dotyczących zdrowia ani nie wykorzystuje ich do celów reklamowych.</string>
     <string name="health_permissions_privacy_policy_action">Przeczytaj pełną politykę prywatności BIL</string>

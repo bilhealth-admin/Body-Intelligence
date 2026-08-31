@@ -1,10 +1,25 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../app/localization/bil_locale_policy.dart';
+import 'barcode_runtime_copy.dart';
 import 'nutrition_copy.dart';
+
+/// Extracts the first non-empty scanner value for both live-camera and image
+/// analysis captures. Validation stays downstream in BarcodeIdentity.
+String? barcodeRawValueFromCapture(BarcodeCapture? capture) {
+  if (capture == null) return null;
+  return capture.barcodes
+      .map((barcode) => barcode.rawValue?.trim())
+      .whereType<String>()
+      .where((value) => value.isNotEmpty)
+      .firstOrNull;
+}
 
 class FoodBarcodeScannerPage extends StatefulWidget {
   const FoodBarcodeScannerPage({super.key, this.scannerEnabled = true});
@@ -26,6 +41,7 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
   );
 
   bool starting = true;
+  bool analyzingImage = false;
   bool handled = false;
   Object? startError;
   late final AnimationController _scanBeamController;
@@ -39,6 +55,11 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
       defaultTargetPlatform == TargetPlatform.android ||
       defaultTargetPlatform == TargetPlatform.iOS ||
       defaultTargetPlatform == TargetPlatform.macOS;
+
+  bool get galleryAnalysisSupported =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
 
   bool get scannerSupported => isWindows || mobileScannerSupported;
 
@@ -66,10 +87,34 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
         if (mounted) _startWindows();
       });
     } else if (mobileScannerSupported) {
-      _scanBeamController.repeat(reverse: true);
       _startMobile();
     } else {
       starting = false;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncScanBeamMotion();
+  }
+
+  void _syncScanBeamMotion() {
+    if (!widget.scannerEnabled ||
+        !mobileScannerSupported ||
+        isWindows ||
+        handled) {
+      _scanBeamController.stop();
+      return;
+    }
+    final reduceMotion =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    if (reduceMotion) {
+      _scanBeamController
+        ..stop()
+        ..value = .5;
+    } else if (!_scanBeamController.isAnimating) {
+      _scanBeamController.repeat(reverse: true);
     }
   }
 
@@ -106,8 +151,7 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
         return;
       }
 
-      handled = true;
-      Navigator.of(context).pop(value);
+      _lookupBarcodeValue(value);
     } catch (error) {
       if (mounted) {
         setState(() => startError = error);
@@ -120,7 +164,12 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
   }
 
   Future<void> _startMobile() async {
-    if (!mounted || !mobileScannerSupported || isWindows) return;
+    if (!mounted ||
+        !widget.scannerEnabled ||
+        !mobileScannerSupported ||
+        isWindows) {
+      return;
+    }
 
     setState(() {
       starting = true;
@@ -142,12 +191,10 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!mobileScannerSupported || isWindows) return;
+    if (!widget.scannerEnabled || !mobileScannerSupported || isWindows) return;
 
     if (state == AppLifecycleState.resumed && !handled) {
-      if (!_scanBeamController.isAnimating) {
-        _scanBeamController.repeat(reverse: true);
-      }
+      _syncScanBeamMotion();
       _startMobile();
     } else if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused) {
@@ -157,20 +204,95 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
   }
 
   void _onDetect(BarcodeCapture capture) {
+    _lookupBarcodeValue(barcodeRawValueFromCapture(capture));
+  }
+
+  void _lookupBarcodeValue(String? rawValue) {
     if (handled) return;
-
-    final value = capture.barcodes
-        .map((barcode) => barcode.rawValue?.trim())
-        .whereType<String>()
-        .where((item) => item.isNotEmpty)
-        .firstOrNull;
-
-    if (value == null) return;
-
+    final value = rawValue?.trim();
+    if (value == null || value.isEmpty) return;
     handled = true;
     _scanBeamController.stop();
     controller.stop();
     Navigator.of(context).pop(value);
+  }
+
+  Future<void> _analyzeGalleryImage() async {
+    if (!galleryAnalysisSupported || analyzingImage || handled) return;
+    final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (image == null || !mounted || handled) return;
+
+    setState(() => analyzingImage = true);
+    try {
+      final capture = await controller.analyzeImage(
+        image.path,
+        formats: const <BarcodeFormat>[
+          BarcodeFormat.ean8,
+          BarcodeFormat.ean13,
+          BarcodeFormat.upcA,
+          BarcodeFormat.itf14,
+        ],
+      );
+      if (!mounted || handled) return;
+      final value = barcodeRawValueFromCapture(capture);
+      if (value == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_barcodeImageCopy(context).noBarcodeFound)),
+        );
+        return;
+      }
+      _lookupBarcodeValue(value);
+    } on Object {
+      if (!mounted || handled) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_barcodeImageCopy(context).imageUnreadable)),
+      );
+    } finally {
+      if (mounted && !handled) setState(() => analyzingImage = false);
+    }
+  }
+
+  Future<void> _enterBarcodeManually() async {
+    if (handled) return;
+    final input = TextEditingController();
+    final value = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          nutritionText(
+            dialogContext,
+            'Enter barcode manually',
+            'أدخل الباركود يدويًا',
+          ),
+        ),
+        content: TextField(
+          key: const Key('barcode-manual-input'),
+          controller: input,
+          autofocus: true,
+          keyboardType: TextInputType.number,
+          inputFormatters: <TextInputFormatter>[
+            FilteringTextInputFormatter.allow(RegExp(r'[0-9٠-٩۰-۹\s-]')),
+          ],
+          onSubmitted: (raw) => Navigator.pop(dialogContext, raw),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(
+              MaterialLocalizations.of(dialogContext).cancelButtonLabel,
+            ),
+          ),
+          FilledButton(
+            key: const Key('barcode-manual-submit'),
+            onPressed: () => Navigator.pop(dialogContext, input.text),
+            child: Text(nutritionText(dialogContext, 'Look up', 'بحث')),
+          ),
+        ],
+      ),
+    );
+    input.dispose();
+    if (!mounted) return;
+    _lookupBarcodeValue(value);
   }
 
   @override
@@ -189,7 +311,30 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
       appBar: AppBar(
         title: Text(t('Scan food barcode')),
         actions: [
-          if (mobileScannerSupported && !isWindows)
+          if (widget.scannerEnabled)
+            IconButton(
+              key: const Key('barcode-manual-entry-action'),
+              tooltip: nutritionText(
+                context,
+                'Enter barcode manually',
+                'إدخال الباركود يدويًا',
+              ),
+              onPressed: handled ? null : _enterBarcodeManually,
+              icon: const Icon(Icons.keyboard_alt_outlined),
+            ),
+          if (widget.scannerEnabled && galleryAnalysisSupported)
+            IconButton(
+              key: const Key('barcode-gallery-image-action'),
+              tooltip: _barcodeImageCopy(context).chooseImage,
+              onPressed: analyzingImage ? null : _analyzeGalleryImage,
+              icon: analyzingImage
+                  ? const SizedBox.square(
+                      dimension: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.image_search_rounded),
+            ),
+          if (widget.scannerEnabled && mobileScannerSupported && !isWindows)
             ValueListenableBuilder<MobileScannerState>(
               valueListenable: controller,
               builder: (context, state, _) => IconButton(
@@ -207,9 +352,7 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
         ],
       ),
       body: !widget.scannerEnabled || !scannerSupported
-          ? _UnsupportedScanner(
-              onManualEntry: () => Navigator.of(context).pop(),
-            )
+          ? _UnsupportedScanner(onManualEntry: _enterBarcodeManually)
           : isWindows
           ? _WindowsScannerLauncher(
               starting: starting,
@@ -276,6 +419,11 @@ class _FoodBarcodeScannerPageState extends State<FoodBarcodeScannerPage>
     );
   }
 }
+
+BarcodeImageRuntimeCopy _barcodeImageCopy(BuildContext context) =>
+    BarcodeImageRuntimeCopy.of(
+      BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
+    );
 
 class _WindowsScannerLauncher extends StatelessWidget {
   const _WindowsScannerLauncher({

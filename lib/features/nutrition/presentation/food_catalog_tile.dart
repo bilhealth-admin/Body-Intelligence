@@ -15,11 +15,12 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
   @override
   void initState() {
     super.initState();
+    // Resolve the dependency while this ConsumerState is mounted. The async
+    // lookup may finish after a route transition; consulting `ref` from that
+    // deferred callback would then access an already-unmounted State.
+    final repository = ref.read(foodRepositoryProvider);
     Future<void>(() async {
-      final rows = await ref
-          .read(foodRepositoryProvider)
-          .watchFavorites()
-          .first;
+      final rows = await repository.watchFavorites().first;
       if (mounted) {
         setState(
           () => favorite = rows.any((food) => food.id == widget.food.id),

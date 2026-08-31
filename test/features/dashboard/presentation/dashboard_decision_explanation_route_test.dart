@@ -17,10 +17,8 @@ void main() {
     expect(router, contains('DashboardDecisionExplanationPage('));
     expect(router, contains('state.extra is DashboardDecisionExplanation'));
     expect(grid, contains('DashboardDecisionExplanation('));
-    expect(
-      grid,
-      contains('DashboardTrustedTruthDecisionAdapter.engineVersion'),
-    );
+    expect(grid, contains('localizer.evidenceSummary()'));
+    expect(grid, isNot(contains('dashboard-truth-adapter-v1')));
     expect(grid, contains("'/dashboard/decision-explanation'"));
     expect(surface, contains("Key('dashboard-explain-decision')"));
   });

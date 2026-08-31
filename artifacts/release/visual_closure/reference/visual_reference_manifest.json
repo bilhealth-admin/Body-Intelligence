@@ -16,8 +16,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 103945,
-    "evidence_sha256": "27e79a6a8fbabec89448e26e2015608a2107ebf3a0790561c74f441d64fee0da"
+    "evidence_bytes": 82577,
+    "evidence_sha256": "1fb764f8fe2f869a1d9c8bf0d0d628562b63a1b1581f6086a074635b7ae7e4c8"
   },
   {
     "reference": 4822,
@@ -36,8 +36,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_2.png",
-    "evidence_bytes": 67797,
-    "evidence_sha256": "7bf8034f703ef98a0256cde96257427ec699d8ad66749f138a7d2c20f4c59f01"
+    "evidence_bytes": 133207,
+    "evidence_sha256": "9a7021ae5be9998f54ae5e5f2a69e38abc55ab0fb6f66d2a9b39f0689dfa93eb"
   },
   {
     "reference": 4823,
@@ -56,8 +56,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_3.png",
-    "evidence_bytes": 190895,
-    "evidence_sha256": "ea984d21021ad35e43cc28acf54ffb07171ac233e3e3b363caac44748bacd661"
+    "evidence_bytes": 331133,
+    "evidence_sha256": "eff900bb4db9e74b8242179fb2277833deee9fa576d23e711354d2b52aad26c5"
   },
   {
     "reference": 4824,
@@ -76,8 +76,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_4.png",
-    "evidence_bytes": 267706,
-    "evidence_sha256": "7632981d599ddbffb2efb371103109b1b9f16b1454b2bb87af234c845d7642d8"
+    "evidence_bytes": 278872,
+    "evidence_sha256": "cf271750511bd68d078aa5cb67409a3d4b89e0a6711a3704bf9a182a58c2956c"
   },
   {
     "reference": 4825,
@@ -96,8 +96,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_5.png",
-    "evidence_bytes": 193068,
-    "evidence_sha256": "1c3140a7075c8ab2795fe646d19c3bedfe0475690175101fad9251fbb560c2cd"
+    "evidence_bytes": 185433,
+    "evidence_sha256": "adbde424ea0e52a778bad4bd6faad34c785b6748112dd2f5328aa1ebdf402d67"
   },
   {
     "reference": 4826,
@@ -116,8 +116,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone_6.png",
-    "evidence_bytes": 194005,
-    "evidence_sha256": "cc8c736f7b054e23ab5b4fee5752e25229619146c31d28970737e74f58c96f84"
+    "evidence_bytes": 187074,
+    "evidence_sha256": "d27585b9f0d6f379f2a6867fd7850b2953b74352af675f617a774ac133f49385"
   },
   {
     "reference": 4827,
@@ -216,8 +216,8 @@
     "production_file": "lib/features/wellness/presentation/sleep_tracker_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_sleep_trend_phone.png",
-    "evidence_bytes": 92255,
-    "evidence_sha256": "dd66e31ad4ec18487f50ca5445932adae9e3c82c98ffdd29b2c6362faea5b868"
+    "evidence_bytes": 97595,
+    "evidence_sha256": "c016fc25feb55a0fb1ba4bd620cdee5ce66cbcbfcb2280020ffcda5fcfc650bb"
   },
   {
     "reference": 4832,
@@ -236,8 +236,8 @@
     "production_file": "lib/features/daily_log/daily_log_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_food_meal_search_phone.png",
-    "evidence_bytes": 24200,
-    "evidence_sha256": "8b536a0aa3a7e8b52290e412188015fbbc6099055498858b952a6f74d3c3507d"
+    "evidence_bytes": 11797,
+    "evidence_sha256": "69047f1c48c4d177e517fa1e784c942f723252d7e25f8f895618adfd9814f486"
   },
   {
     "reference": 4833,
@@ -256,8 +256,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone.png",
-    "evidence_bytes": 34835,
-    "evidence_sha256": "d2422fb8565ecd20f02cb9fd06134f936a18eb91dcbc7911c693596a91650016"
+    "evidence_bytes": 198166,
+    "evidence_sha256": "49e554f044be8498f684e5bb41017acb766f65a674236beae159584dcb848b52"
   },
   {
     "reference": 4834,
@@ -276,8 +276,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_2.png",
-    "evidence_bytes": 32404,
-    "evidence_sha256": "052ffbc9968b53b791967da2eeb88958a04efe888eb63bb837b78bbce0071b7b"
+    "evidence_bytes": 118352,
+    "evidence_sha256": "a8450c92bb4d7d661422bf1093dc852213bbfe7d4d466095eaa84a2b1dc88ce1"
   },
   {
     "reference": 4835,
@@ -296,8 +296,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_3.png",
-    "evidence_bytes": 39794,
-    "evidence_sha256": "1f845d15c5ac3267c5fc94b9d39c3c14be3be64a3fb212598a233bd8be66b683"
+    "evidence_bytes": 112535,
+    "evidence_sha256": "67c04c3e7d4019b434b5c8411ad4a3bc4e5b539413ddf67e1f4c759ada7f8844"
   },
   {
     "reference": 4836,
@@ -316,8 +316,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_4.png",
-    "evidence_bytes": 40197,
-    "evidence_sha256": "0cf2d509b1737415aad656bd72d8caf690869baa2efc5c661d653ad7f99b89fb"
+    "evidence_bytes": 138306,
+    "evidence_sha256": "54a4e21f6370e47d7b61d0f7836c5a26b0ddc3f5689b8feb96f4d0dd6b5af9c0"
   },
   {
     "reference": 4837,
@@ -336,8 +336,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_5.png",
-    "evidence_bytes": 35803,
-    "evidence_sha256": "b8297228f0ccb7a972b80dd17f65a458b0d42ad6e22fc850fc293fa30f2de776"
+    "evidence_bytes": 94375,
+    "evidence_sha256": "c3857244d36ac87de22ddfdedb174d987cc5e8de2479ab2bb05502232ec8e9f8"
   },
   {
     "reference": 4838,
@@ -356,8 +356,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_6.png",
-    "evidence_bytes": 32643,
-    "evidence_sha256": "27b75f8bd48362a182822b50d8e0add1239bc12914c997bf0e8abab235838772"
+    "evidence_bytes": 145360,
+    "evidence_sha256": "2259f91ec169a5178ac08235e0f70be5c903be083206831e63051a3e272fd0e1"
   },
   {
     "reference": 4839,
@@ -376,8 +376,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_7.png",
-    "evidence_bytes": 34069,
-    "evidence_sha256": "ba7319f1ff620abb76884d873a25b6634a29fc0f92c69f6b5da65ba5c2dd1f0c"
+    "evidence_bytes": 152640,
+    "evidence_sha256": "fb6737eccc3658e94e6f428cf007ebfe1a16856f2ca57eb87f9390a07cf37be8"
   },
   {
     "reference": 4840,
@@ -396,8 +396,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_8.png",
-    "evidence_bytes": 33136,
-    "evidence_sha256": "17ab74f7e75684bfab44a2f87685b990dca1fbe711ee9297c301afed136ae524"
+    "evidence_bytes": 150968,
+    "evidence_sha256": "6ec734e0d96b4ebe51a5c8ee342140230f8df2da38b5954ff0be597592d81ae9"
   },
   {
     "reference": 4841,
@@ -416,8 +416,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_9.png",
-    "evidence_bytes": 32126,
-    "evidence_sha256": "e72ff20dd0a361cb6aa403cdd526ff261c56ea346879af3ab876dd767adf0365"
+    "evidence_bytes": 133062,
+    "evidence_sha256": "c5f7d0d8f24061732a259404aed720d08d122075896606c5bda86230dedbc0dd"
   },
   {
     "reference": 4842,
@@ -436,8 +436,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_10.png",
-    "evidence_bytes": 39650,
-    "evidence_sha256": "aade1957bc0ddb1ae8b4bf96b15c7e0da1c075837a0569886b765f02f1a52cc9"
+    "evidence_bytes": 146508,
+    "evidence_sha256": "dc06e84e409e0571bf4612e383c9d4a85ccacae95642a1c89993622bf3aa0ad3"
   },
   {
     "reference": 4843,
@@ -456,8 +456,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_11.png",
-    "evidence_bytes": 40274,
-    "evidence_sha256": "dca94ef0ae4538bef9df5840e0680d634e6f3dd65125f6897968ac49578eb48d"
+    "evidence_bytes": 109879,
+    "evidence_sha256": "6373eb1d4b297a2ad3b1be3d3c02d2774e4dbab69ea60a59a92900282b422bd5"
   },
   {
     "reference": 4844,
@@ -476,8 +476,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_12.png",
-    "evidence_bytes": 37113,
-    "evidence_sha256": "ed4dcd53b3d996b29449c458b996d27780e8f046bf965588db1753767828d031"
+    "evidence_bytes": 135577,
+    "evidence_sha256": "fb9b13c2f54db09165081a2569e4f7b94fa8ee84c5dcc84e3563125be532736c"
   },
   {
     "reference": 4845,
@@ -496,8 +496,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_discovery_phone_13.png",
-    "evidence_bytes": 38033,
-    "evidence_sha256": "67e8d891693ed1a624ae7a1fa8a01c0acabaa6ef4da0c68b8b6edb3b6056b5d2"
+    "evidence_bytes": 155227,
+    "evidence_sha256": "d9040f8ea4875e4273a5320ae04a87c3993f31fde68340cbca504fb7a479bb72"
   },
   {
     "reference": 4846,
@@ -516,8 +516,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_collection_plant_phone.png",
-    "evidence_bytes": 431554,
-    "evidence_sha256": "f31fe9b9d2949d090a2e305d8d5b6f4d552a03d13e45d9d231b2667329d0444a"
+    "evidence_bytes": 152786,
+    "evidence_sha256": "e3b2e10e04d8561d909277054a024d8041ec1c4383056a74b606976ca3e2c212"
   },
   {
     "reference": 4847,
@@ -536,8 +536,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_collection_quick_phone.png",
-    "evidence_bytes": 413994,
-    "evidence_sha256": "50eafc57b254290fc9cfaa7994fc30e3056e4973647db04425aeca26dab6a5ec"
+    "evidence_bytes": 190678,
+    "evidence_sha256": "1a084e178bb8c747c81e553096a51a5da1448b729e3d6152853db10651c50252"
   },
   {
     "reference": 4848,
@@ -556,8 +556,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_collection_regional_phone.png",
-    "evidence_bytes": 361388,
-    "evidence_sha256": "7a204ddfb96c66ff4ef58070e7b373793ab2fe04e0df561fe3ad06b6927dd1d8"
+    "evidence_bytes": 125316,
+    "evidence_sha256": "fe487a7af49dbfd60ca748ad4196164da5216babc25c6d5c584781df570f844a"
   },
   {
     "reference": 4849,
@@ -576,8 +576,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_recipe_collection_saved_phone.png",
-    "evidence_bytes": 19726,
-    "evidence_sha256": "a0c38a8fd933c1274690d0d0e9c7807378f9478e0b39cf2e9e8ce2c97562f86d"
+    "evidence_bytes": 89439,
+    "evidence_sha256": "77b15b1e22175509f6641395db914f2cabbe20f43467036ad6462c8141f181d0"
   },
   {
     "reference": 4850,
@@ -596,8 +596,8 @@
     "production_file": "lib/features/commerce/presentation/bil_store_plans_page.dart",
     "status": "independent_visual_review_limited_state_acceptance",
     "evidence_after": "test/visual_closure/goldens/visual_closure_store_plans_phone.png",
-    "evidence_bytes": 26592,
-    "evidence_sha256": "a4a8bffa99d1844d59c85471d7177337d4893626c8dc3b39e86d8f034a542653"
+    "evidence_bytes": 112116,
+    "evidence_sha256": "b3aa740598aab49bb2c10e3f97e5865417c839d053c510cbdb28864c7ddd0672"
   },
   {
     "reference": 4851,
@@ -616,8 +616,8 @@
     "production_file": "lib/features/commerce/presentation/bil_store_plans_page.dart",
     "status": "independent_visual_review_limited_state_acceptance",
     "evidence_after": "test/visual_closure/goldens/visual_closure_store_plans_phone_2.png",
-    "evidence_bytes": 30693,
-    "evidence_sha256": "53fc624752fc59cafbcc6f35340ab9ee0c026605f7325522d86a26e3928abf45"
+    "evidence_bytes": 88602,
+    "evidence_sha256": "c6162eb9627e11767d10894166794abcc59bdcfa80efa2853bc36df8a26f3cff"
   },
   {
     "reference": 4852,
@@ -656,8 +656,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone.png",
-    "evidence_bytes": 114276,
-    "evidence_sha256": "b69e6aa737d085ee1c1bcae9fd2292e2ea34a67983f9bf133911b501fe088a37"
+    "evidence_bytes": 128984,
+    "evidence_sha256": "ab0f1eb073c595ce6b7548b3a93c420fca973bc10e465235ea2a7250cc2ed900"
   },
   {
     "reference": 4854,
@@ -676,8 +676,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone_2.png",
-    "evidence_bytes": 113752,
-    "evidence_sha256": "f8f2b332700f1c475321d2c5d2279e36b444813f8f0f6a568fb488f5e8a707c1"
+    "evidence_bytes": 128222,
+    "evidence_sha256": "f914e5c0090fb8cdfe7da46b62028718e3fdc8628a0d43567437a7bc380ff430"
   },
   {
     "reference": 4855,
@@ -696,8 +696,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone_3.png",
-    "evidence_bytes": 117281,
-    "evidence_sha256": "4c9436b54260499beefe1049830f35c905c16b1aecf98cdbaccc0b43708feb26"
+    "evidence_bytes": 130928,
+    "evidence_sha256": "c5a8d61a990a682b6b4d6b718a5ba2ffbc2fc01b5ccbcd2fe4bf38fe783936c0"
   },
   {
     "reference": 4856,
@@ -716,8 +716,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_log_phone_4.png",
-    "evidence_bytes": 114776,
-    "evidence_sha256": "5ea3ea15433065b351862fc55970c5fd3c43e16231757044d45b6e36b4e3b6e7"
+    "evidence_bytes": 129874,
+    "evidence_sha256": "c886a82f189692bc181da32e17465211cd43fc050059f84a267206db0959dfcb"
   },
   {
     "reference": 4857,
@@ -736,8 +736,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_my_exercises_phone.png",
-    "evidence_bytes": 116808,
-    "evidence_sha256": "247a50e918890725100792b1a09ffa661db690fdebe95eee8cd783a68ff96ec6"
+    "evidence_bytes": 131057,
+    "evidence_sha256": "247e65eceaef328f6974672bbd1c8f7117e0387d52e58244acf8189a0cb32967"
   },
   {
     "reference": 4858,
@@ -756,8 +756,8 @@
     "production_file": "lib/features/wellness/presentation/professional_content_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_core_phone.png",
-    "evidence_bytes": 28763,
-    "evidence_sha256": "6cfb3e28c968eb69c47563a68401be47f2679a72d7cfa00a8c4318fc27de6c67"
+    "evidence_bytes": 29387,
+    "evidence_sha256": "11f945eb42d690056f76ddb09e24e0df101721f649e349d8c1cf981a28549bfb"
   },
   {
     "reference": 4859,
@@ -776,8 +776,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "approved_visual_equivalence",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_routines_saved_phone.png",
-    "evidence_bytes": 54742,
-    "evidence_sha256": "4b03cb271b142d060487e5a8fb687706500ef86a1eef94e2357f6163248549e3"
+    "evidence_bytes": 55773,
+    "evidence_sha256": "e138928371b90a60772a8e39bd33fa5486cfa7605bd45c0301766c07bdd93e62"
   },
   {
     "reference": 4860,
@@ -816,8 +816,8 @@
     "production_file": "lib/features/connected_health/connected_health_page.dart",
     "status": "independent_visual_review_limited_family_acceptance",
     "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_permission_phone.png",
-    "evidence_bytes": 70003,
-    "evidence_sha256": "0ef31821a7f404900f2aa57774b63d30014e2a842fec47d2585e08a8087d40bc"
+    "evidence_bytes": 85790,
+    "evidence_sha256": "48319e82ae31506c6203983af5b6d7f084b0f8fba35243d05f88983cee4668dd"
   },
   {
     "reference": 4862,
@@ -836,8 +836,8 @@
     "production_file": "lib/features/connected_health/connected_health_page.dart",
     "status": "independent_visual_review_limited_family_acceptance",
     "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_compatibility_phone.png",
-    "evidence_bytes": 59862,
-    "evidence_sha256": "2b9c3b3e6787a85b8232b4d43e1b1a390619c2ee43341bf6a9062d79286a51a4"
+    "evidence_bytes": 56724,
+    "evidence_sha256": "c430c5684203908ee031cb3c466d69c35ca35a7b1e6bf5638b11fa1dabf0bc13"
   },
   {
     "reference": 4863,
@@ -856,8 +856,8 @@
     "production_file": "lib/features/connected_health/connected_health_page.dart",
     "status": "independent_visual_review_limited_family_acceptance",
     "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_unavailable_phone.png",
-    "evidence_bytes": 72484,
-    "evidence_sha256": "5679cca609b0d721e2a6bf65bd02131e8ec69eb8379180017a8812e84bf04f5c"
+    "evidence_bytes": 85790,
+    "evidence_sha256": "48319e82ae31506c6203983af5b6d7f084b0f8fba35243d05f88983cee4668dd"
   },
   {
     "reference": 4864,
@@ -876,8 +876,8 @@
     "production_file": "lib/features/connected_health/connected_health_page.dart",
     "status": "independent_visual_review_limited_family_acceptance",
     "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_update_required_phone.png",
-    "evidence_bytes": 69606,
-    "evidence_sha256": "a27f7bb2859f04e00bbe9927255c945829ff817433c9621f747ba2978eb01d50"
+    "evidence_bytes": 85790,
+    "evidence_sha256": "48319e82ae31506c6203983af5b6d7f084b0f8fba35243d05f88983cee4668dd"
   },
   {
     "reference": 4865,
@@ -896,8 +896,8 @@
     "production_file": "lib/features/connected_health/connected_health_page.dart",
     "status": "independent_visual_review_limited_family_acceptance",
     "evidence_after": "test/visual_closure/goldens/visual_closure_connected_health_offline_phone.png",
-    "evidence_bytes": 69763,
-    "evidence_sha256": "36f0afdd3c22fbef1d4888a53465f0c4a3665f82558bd8359bcf1773341d4811"
+    "evidence_bytes": 85790,
+    "evidence_sha256": "48319e82ae31506c6203983af5b6d7f084b0f8fba35243d05f88983cee4668dd"
   },
   {
     "reference": 4866,
@@ -916,8 +916,8 @@
     "production_file": "lib/features/community/presentation/community_connections_page.dart",
     "status": "direct_limited_equivalence_accepted",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_friend_authenticated_phone.png",
-    "evidence_bytes": 19671,
-    "evidence_sha256": "3c74075fe51fdfd7e8f8a9eddfb2d015bfd463876345c01ac609e67b35aa9ef8"
+    "evidence_bytes": 19614,
+    "evidence_sha256": "e529b0993396f89028b9d5d85ef983d6773b08c97e68f73f5f4aec4d44f9c015"
   },
   {
     "reference": 4867,
@@ -936,8 +936,8 @@
     "production_file": "lib/features/community/presentation/community_connections_page.dart",
     "status": "direct_limited_equivalence_accepted",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_request_authenticated_phone.png",
-    "evidence_bytes": 21627,
-    "evidence_sha256": "ca0c6f1d8d9ac21b871c2e62beaad21dbb7d99227e9187f60c99cd772065fdc3"
+    "evidence_bytes": 24145,
+    "evidence_sha256": "1822c6ab4c963fd6bc4624ec1dd5d3d75d5dfdff9aed4cdb75c7f1adb9cea635"
   },
   {
     "reference": 4868,
@@ -956,8 +956,8 @@
     "production_file": "lib/features/community/presentation/community_people_page.dart",
     "status": "direct_limited_equivalence_accepted",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_add_friends_authenticated_phone.png",
-    "evidence_bytes": 17884,
-    "evidence_sha256": "d204128cb1e9e94ae7f7b9b26f6f80c3fb3468cf685b0209a060345cb6e6f73e"
+    "evidence_bytes": 18964,
+    "evidence_sha256": "602cb6a134300b0a9a340f15119f5704798a5f275c131b9f84902920e2ee6747"
   },
   {
     "reference": 4869,
@@ -976,8 +976,8 @@
     "production_file": "lib/features/community/presentation/community_people_page.dart",
     "status": "direct_limited_equivalence_accepted",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_people_search_authenticated_phone.png",
-    "evidence_bytes": 17481,
-    "evidence_sha256": "a12202f5b1e7f66e22fe841004daf5eac2438578994f223939621bfa25223459"
+    "evidence_bytes": 17818,
+    "evidence_sha256": "8517ba3571a96cee5f0903169848aa4f5ba51e106f498c1fa3410c6794c2b331"
   },
   {
     "reference": 4870,
@@ -996,8 +996,8 @@
     "production_file": "lib/features/community/presentation/community_profile_page.dart",
     "status": "family_equivalent_limited_acceptance",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png",
-    "evidence_bytes": 41353,
-    "evidence_sha256": "5cacf0a0c3195e600c28559452edc012552ede13d4d6af2f3d761d47e6bb46e3"
+    "evidence_bytes": 44906,
+    "evidence_sha256": "5113dd4b336531f809cdb5884cfb011964c81179bc26d8f529e81f5868901c60"
   },
   {
     "reference": 4871,
@@ -1016,8 +1016,8 @@
     "production_file": "lib/features/community/presentation/community_profile_page.dart",
     "status": "family_equivalent_limited_acceptance",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png",
-    "evidence_bytes": 41353,
-    "evidence_sha256": "5cacf0a0c3195e600c28559452edc012552ede13d4d6af2f3d761d47e6bb46e3"
+    "evidence_bytes": 44906,
+    "evidence_sha256": "5113dd4b336531f809cdb5884cfb011964c81179bc26d8f529e81f5868901c60"
   },
   {
     "reference": 4872,
@@ -1056,8 +1056,8 @@
     "production_file": "lib/features/profile/premium_profile_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_profile_phone.png",
-    "evidence_bytes": 37786,
-    "evidence_sha256": "836240adbc545e1c00ee58105e13b6a545c2e7a53bbec6efc9997c0584eab531"
+    "evidence_bytes": 39225,
+    "evidence_sha256": "935e70219905e694fcea9a533b425ec6db459519397957cbf802b86e502a6907"
   },
   {
     "reference": 4874,
@@ -1116,8 +1116,8 @@
     "production_file": "lib/features/profile/premium_profile_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_phone.png",
-    "evidence_bytes": 103945,
-    "evidence_sha256": "27e79a6a8fbabec89448e26e2015608a2107ebf3a0790561c74f441d64fee0da"
+    "evidence_bytes": 82577,
+    "evidence_sha256": "1fb764f8fe2f869a1d9c8bf0d0d628562b63a1b1581f6086a074635b7ae7e4c8"
   },
   {
     "reference": 4877,
@@ -1136,8 +1136,8 @@
     "production_file": "lib/features/profile/premium_profile_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_calories_phone.png",
-    "evidence_bytes": 45006,
-    "evidence_sha256": "4ab8e21eb75fbbd3622444a6aa1c991ddb26c93717116741c8edbfad717b15dc"
+    "evidence_bytes": 46886,
+    "evidence_sha256": "c329b8969f12495a6daac6d83f493584fc04ac6746869ce62e50f54ad92c6415"
   },
   {
     "reference": 4878,
@@ -1156,8 +1156,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone.png",
-    "evidence_bytes": 48368,
-    "evidence_sha256": "705597214a0b86dd96f2944f8e3351303d5c5999a937dd127967c9c0368a1f65"
+    "evidence_bytes": 48270,
+    "evidence_sha256": "14c3aa316d3de75e0b0c016f0d07177a0649f18debce54c4a0905127d4142864"
   },
   {
     "reference": 4879,
@@ -1176,8 +1176,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone_2.png",
-    "evidence_bytes": 45423,
-    "evidence_sha256": "7095ef6f251a87ab9e090dc688669707aae8ee98786cf48aef1d4b136c5b16f0"
+    "evidence_bytes": 46607,
+    "evidence_sha256": "a89158b2be4500ba8288d26590040deb1a424270d129df42ca225974ea9498b7"
   },
   {
     "reference": 4880,
@@ -1196,8 +1196,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_calories_phone.png",
-    "evidence_bytes": 45006,
-    "evidence_sha256": "4ab8e21eb75fbbd3622444a6aa1c991ddb26c93717116741c8edbfad717b15dc"
+    "evidence_bytes": 46886,
+    "evidence_sha256": "c329b8969f12495a6daac6d83f493584fc04ac6746869ce62e50f54ad92c6415"
   },
   {
     "reference": 4881,
@@ -1216,8 +1216,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_macros_phone.png",
-    "evidence_bytes": 45744,
-    "evidence_sha256": "c5feba59847a20a17a1b10529db4ecd7f9733bb3a64e964c16fcbe23a6f3114a"
+    "evidence_bytes": 43800,
+    "evidence_sha256": "e2aac2eb9f7b3f2eae1f5a1b7031515c27fb17691ef93357fb782c4c8fc6ad80"
   },
   {
     "reference": 4882,
@@ -1236,8 +1236,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_activity_phone.png",
-    "evidence_bytes": 45745,
-    "evidence_sha256": "f0016eb297069187a44f1b314125a9fbd77f5ee4989996ba9a018b3d0d523417"
+    "evidence_bytes": 43801,
+    "evidence_sha256": "d5a42afc20576528e604448997ac01739fd777c2beec2d1ecc837eb750c8336a"
   },
   {
     "reference": 4883,
@@ -1256,8 +1256,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_quick_log_phone.png",
-    "evidence_bytes": 44205,
-    "evidence_sha256": "ce4df1a6fd7fd5ae397af36758dae68b51c3070205bf6d2aa3553f81c9b7c278"
+    "evidence_bytes": 45878,
+    "evidence_sha256": "967bb5df19f0fa59040e6e833eb2d22d0efadc78a020f1d4b4396ed262f5b9eb"
   },
   {
     "reference": 4884,
@@ -1276,8 +1276,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_discover_phone.png",
-    "evidence_bytes": 39931,
-    "evidence_sha256": "a69fb423213e31b6b5bf84eba6e002033b17b851c1a448faaeb8a4c678163c1a"
+    "evidence_bytes": 41619,
+    "evidence_sha256": "aa3cd11c93033c6d0784099be9d481de420d643b28bf6ca771bb68ebbbdb0493"
   },
   {
     "reference": 4885,
@@ -1296,8 +1296,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_best_action_phone.png",
-    "evidence_bytes": 44420,
-    "evidence_sha256": "0db8a5ce5dc4c45331c9076632d00d4364e4b62ac64be2ed06cf979258541256"
+    "evidence_bytes": 45593,
+    "evidence_sha256": "bee590ef8491b164357703243c3803557898c809be4d67ee07e6ec992cea17ed"
   },
   {
     "reference": 4886,
@@ -1336,8 +1336,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_progress_phone.png",
-    "evidence_bytes": 41534,
-    "evidence_sha256": "88f8a47d86a9443c20f1710fc03906d5a36f4c3af69cf0b6caecbaeaf3c9e4e7"
+    "evidence_bytes": 41825,
+    "evidence_sha256": "310091946bee60aee4320ff83fc890ae5d891c0d91bf3582a431200271d18798"
   },
   {
     "reference": 4888,
@@ -1356,8 +1356,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_connected_health_phone.png",
-    "evidence_bytes": 41560,
-    "evidence_sha256": "fe7ce16164438785d2c642dd8d840b06d4be95c0fbea9693d92905502151fe87"
+    "evidence_bytes": 43288,
+    "evidence_sha256": "d3b0e181baaef5a7d20c929bcf48cddc0869838c872da2c7523c940c7e41fba9"
   },
   {
     "reference": 4889,
@@ -1376,8 +1376,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_body_twin_phone.png",
-    "evidence_bytes": 40934,
-    "evidence_sha256": "34a5f41e8a53ba7e301d445d5eb2b6e854c10ca82a7cbc945becbb06790d0d7a"
+    "evidence_bytes": 43314,
+    "evidence_sha256": "1e8e96c50ca5847cf024566d2072723791d7e78e01d90848fb4352aa141f87a9"
   },
   {
     "reference": 4890,
@@ -1396,8 +1396,8 @@
     "production_file": "lib/features/dashboard/dashboard_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/quick_add_en_light_phone.png",
-    "evidence_bytes": 29964,
-    "evidence_sha256": "656a6a74e606e4399511c8bfbe1407ba230e02083e2fd340e78dab37066b024d"
+    "evidence_bytes": 50143,
+    "evidence_sha256": "7b969b1905100e8b5d024ea68a9f7f17e084ec8a39736a0231ef762fcffec0a0"
   },
   {
     "reference": 4891,
@@ -1416,8 +1416,8 @@
     "production_file": "lib/features/daily_log/daily_log_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_water_entry_phone.png",
-    "evidence_bytes": 39393,
-    "evidence_sha256": "fd446bce32ebfa967a7d2e7ae547a6f2d2a1681e4d4fc52fd707a22024b26d95"
+    "evidence_bytes": 19965,
+    "evidence_sha256": "f5645de2db56c95b1ec90bfcfa42636a9801a7f9c43c7165d3bf309c153f80fa"
   },
   {
     "reference": 4892,
@@ -1436,8 +1436,8 @@
     "production_file": "lib/features/daily_check_in/daily_check_in_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_daily_check_in_phone.png",
-    "evidence_bytes": 30275,
-    "evidence_sha256": "df41fb2e79ec0b7e6b2180d890f5e21b1c4302c094f01b3cae6d9f30cc194464"
+    "evidence_bytes": 130861,
+    "evidence_sha256": "163e308712a941bfc41e7076e1634f580333f5ccd8601917330703164f458b19"
   },
   {
     "reference": 4893,
@@ -1456,8 +1456,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_walk_phone.png",
-    "evidence_bytes": 28901,
-    "evidence_sha256": "8e61b75ffe7cbb1330ec4f75fc69aaefe137ba049ce502a63ffb461fabc5edd1"
+    "evidence_bytes": 28698,
+    "evidence_sha256": "574d5819fc4def47fda42fb4cc8fb4fcc17e5a86e8769846918d66f277f38387"
   },
   {
     "reference": 4894,
@@ -1476,8 +1476,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_run_phone.png",
-    "evidence_bytes": 29621,
-    "evidence_sha256": "c5fde9b3afa7fe4d40dc5d3518751ab55a948fdec6a7ed45ee1f9ba3d1da5ce2"
+    "evidence_bytes": 29211,
+    "evidence_sha256": "560946b8b68adff83c17f66eab1cc33d6a733eec4a14019dc37687ee02729750"
   },
   {
     "reference": 4895,
@@ -1496,8 +1496,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_cycle_phone.png",
-    "evidence_bytes": 30471,
-    "evidence_sha256": "b7554d0a1d01913379e2f3e86c247b38762353789fb851cd2122ea7d0b927aa1"
+    "evidence_bytes": 29378,
+    "evidence_sha256": "7e59dab9968ad09a296a1053592ea1e6d0ba8bf4726008af52575d60c255a006"
   },
   {
     "reference": 4896,
@@ -1516,8 +1516,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_swim_phone.png",
-    "evidence_bytes": 27606,
-    "evidence_sha256": "70ee44aa9ad9e097be641033d73ebdfd3c5c3d817231f44bb0310517536c3635"
+    "evidence_bytes": 28364,
+    "evidence_sha256": "1d26cd6bf835ef67a7b61e8b91befb2fcc3e590b6c430e436dbd0401e3fa0fb3"
   },
   {
     "reference": 4897,
@@ -1536,8 +1536,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_strength_phone.png",
-    "evidence_bytes": 31908,
-    "evidence_sha256": "633bb8750af593d25ad6cba0a2c822fc1abc0134b8975dad1d24a23497652506"
+    "evidence_bytes": 56793,
+    "evidence_sha256": "cb2ffd2480422739daa2ea235a8f1fd8021305506eb3f26e68df135ff8ce148f"
   },
   {
     "reference": 4898,
@@ -1556,8 +1556,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_upper_phone.png",
-    "evidence_bytes": 31607,
-    "evidence_sha256": "af45a096a6e530d467c4f7230c98358313c52a9dec5141529bf9a837ee03e52b"
+    "evidence_bytes": 29294,
+    "evidence_sha256": "df7e242adaad9b14f279bed41418a740ad576ccac5143334ead5ac6fad063e69"
   },
   {
     "reference": 4899,
@@ -1576,8 +1576,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_lower_phone.png",
-    "evidence_bytes": 30223,
-    "evidence_sha256": "f651f01f126d2ca050c3b2354b0c1399f31c7a593b12e18a73d4538d3a5bbc7f"
+    "evidence_bytes": 30497,
+    "evidence_sha256": "5d66ef5c8ecd619e13abc7ba63bb75c109a7d468a15bcd6f2ff46bf3eb439f64"
   },
   {
     "reference": 4900,
@@ -1596,8 +1596,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_core_phone.png",
-    "evidence_bytes": 28763,
-    "evidence_sha256": "6cfb3e28c968eb69c47563a68401be47f2679a72d7cfa00a8c4318fc27de6c67"
+    "evidence_bytes": 29387,
+    "evidence_sha256": "11f945eb42d690056f76ddb09e24e0df101721f649e349d8c1cf981a28549bfb"
   },
   {
     "reference": 4901,
@@ -1616,8 +1616,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_circuit_phone.png",
-    "evidence_bytes": 29048,
-    "evidence_sha256": "1e65ea3d0690291724cb557c993cefae216a803a099548c578f69b5cc0e3ef3c"
+    "evidence_bytes": 28846,
+    "evidence_sha256": "e5c83704363b5b368b6313860cbff4c364fb932d41bb0a66a13f92a389dc1365"
   },
   {
     "reference": 4902,
@@ -1636,8 +1636,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_row_phone.png",
-    "evidence_bytes": 28272,
-    "evidence_sha256": "e428b2631980383a83d91dd3b3221d96b33bfbd86e9eb9bdc7349b0d10ce8053"
+    "evidence_bytes": 28068,
+    "evidence_sha256": "1c913e887b0849a2bc7a6580e90994ae5ee81f225623d93ea06debcbfed32b8e"
   },
   {
     "reference": 4903,
@@ -1656,8 +1656,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_stairs_phone.png",
-    "evidence_bytes": 29272,
-    "evidence_sha256": "1797c1415e8914dae1635de4ed474e262f784df8e079947d94485da67f2d052a"
+    "evidence_bytes": 28408,
+    "evidence_sha256": "67ea811589bac9e63c5f408948d43cbf57d7395981fa3579c259c188249f48c8"
   },
   {
     "reference": 4904,
@@ -1676,8 +1676,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_hike_phone.png",
-    "evidence_bytes": 27488,
-    "evidence_sha256": "06df3dc82709d9d317639a22e0649be25b618824218bf2586725373231c3d81b"
+    "evidence_bytes": 27730,
+    "evidence_sha256": "1da26e58d8963c2a50cdd2d4b1f5ecde2302cf6d74145b07e7783d457ab9c65e"
   },
   {
     "reference": 4905,
@@ -1696,8 +1696,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_dance_phone.png",
-    "evidence_bytes": 28655,
-    "evidence_sha256": "b5b2d66ff98d2437c2202af91b23296a50a1674487f6a3f875c3c788fdf901cd"
+    "evidence_bytes": 29063,
+    "evidence_sha256": "5f2df65637fac9df2fefa2a6f87e5067e0aacf16bdc54d3184daeb2242e6c58b"
   },
   {
     "reference": 4906,
@@ -1716,8 +1716,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_yoga_phone.png",
-    "evidence_bytes": 28340,
-    "evidence_sha256": "90d7faa72460068620737c8d7d3cfbf553663eeaf4e3de6f677dcebae668f56b"
+    "evidence_bytes": 28133,
+    "evidence_sha256": "06dceddf082effec02a71cbe4aa65dbaa04eb56b26521bd7e86315ad9407f6fb"
   },
   {
     "reference": 4907,
@@ -1736,8 +1736,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_pilates_phone.png",
-    "evidence_bytes": 28333,
-    "evidence_sha256": "f6126eb12bee074b0b52172873dc7881582225aac66b3f95658c8628873393aa"
+    "evidence_bytes": 28128,
+    "evidence_sha256": "f25b40ebc3a655bf1c3fc4551d56cd28cb030931d423348a7a982d0c230f42d1"
   },
   {
     "reference": 4908,
@@ -1756,8 +1756,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_mobility_phone.png",
-    "evidence_bytes": 49226,
-    "evidence_sha256": "e935bebafc9b22bdebe1c606f271bea3c1b9493ce24a2bcdbf8363bc58c131fb"
+    "evidence_bytes": 54992,
+    "evidence_sha256": "03fc7c1b27a06d75e20c65604e8232d5ba73d49ddc1d82a5beb63b7fe608e54f"
   },
   {
     "reference": 4909,
@@ -1776,8 +1776,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_stretch_phone.png",
-    "evidence_bytes": 28397,
-    "evidence_sha256": "bf24e8ed017999d6d33f47bbcf4a39e7d965e2fbb1e5c56dc644ae332d5f1fe2"
+    "evidence_bytes": 29784,
+    "evidence_sha256": "28a9464fd5cabe5499654b196fb59177cc9c6444201a66c63073e204a0debda9"
   },
   {
     "reference": 4910,
@@ -1796,8 +1796,8 @@
     "production_file": "lib/features/wellness/presentation/workout_library_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_workout_entry_breathing_phone.png",
-    "evidence_bytes": 29818,
-    "evidence_sha256": "3d5e82f17ea6fd49fbd7472bf9024d21323545729daab89f1a796efa7c3e2cd3"
+    "evidence_bytes": 30780,
+    "evidence_sha256": "afefea93154641cc09bcdcda842a8876cb653291cf87be7c4844a50cbd37b8ec"
   },
   {
     "reference": 4911,
@@ -1816,8 +1816,8 @@
     "production_file": "lib/features/daily_log/daily_log_page_actions.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_meal_image_guide_1_phone.png",
-    "evidence_bytes": 32435,
-    "evidence_sha256": "5010ebb5c3348bc35b4a61fc41838901bb21c92ee7c09098c9cb7dad80bfffa7"
+    "evidence_bytes": 35582,
+    "evidence_sha256": "c16bdbc3cdb313249978752a2eb7f477dd3fcac74c048503bbf94372e5e41463"
   },
   {
     "reference": 4912,
@@ -1856,8 +1856,8 @@
     "production_file": "lib/features/daily_log/daily_log_page_actions.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_meal_image_guide_3_phone.png",
-    "evidence_bytes": 34338,
-    "evidence_sha256": "e60c80f7966dcdef62d4c364c286fdbc2995a92a25492b97c3015b7090e79f27"
+    "evidence_bytes": 38642,
+    "evidence_sha256": "cc583491530c35c9317b10a770b5583b63ad442ad0e50db525c952e4cc7cf25a"
   },
   {
     "reference": 4914,
@@ -1876,8 +1876,8 @@
     "production_file": "lib/features/nutrition/presentation/food_barcode_scanner_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_barcode_unavailable_phone.png",
-    "evidence_bytes": 15915,
-    "evidence_sha256": "98b48f6f5c902e70a1eadfbd3eeed925f9d1c6014aaa9f93320a20f780e16cf9"
+    "evidence_bytes": 15483,
+    "evidence_sha256": "84d75a34c2c18743524a6c2e57351a3c556f040b8faa7b791a5a113d10876d09"
   },
   {
     "reference": 4915,
@@ -1896,8 +1896,8 @@
     "production_file": "lib/features/daily_log/daily_log_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_meal_entry_phone.png",
-    "evidence_bytes": 37314,
-    "evidence_sha256": "5286ecbe938dbfe491c487a87eafd18ad03e18ff9f69d98495c29307d86c0818"
+    "evidence_bytes": 47077,
+    "evidence_sha256": "8b8c6a8a5bbd72ebcacea1d27e35aa2c5294137637d45226bbad519012c78451"
   },
   {
     "reference": 4916,
@@ -1936,8 +1936,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_verified_result_phone.png",
-    "evidence_bytes": 201086,
-    "evidence_sha256": "b8f8935535c157b686a5bfaebbb85f6699b7bcaaf72a28c08e6ef90dc78d8d3c"
+    "evidence_bytes": 196069,
+    "evidence_sha256": "fbe900f7e8b1ae2412e4fec765233981a6bb7a3be5d875654a6640de134593c3"
   },
   {
     "reference": 4918,
@@ -1956,8 +1956,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_favorite_result_phone.png",
-    "evidence_bytes": 201177,
-    "evidence_sha256": "6baafc83e168731d901c9090610744014d3ba5473f345144374153b265afeadc"
+    "evidence_bytes": 196041,
+    "evidence_sha256": "354ff05223899b02cbbefb1f49f2415bc9436f9c5edd871ed32cca894f3d47f9"
   },
   {
     "reference": 4919,
@@ -1976,8 +1976,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_recent_result_phone.png",
-    "evidence_bytes": 201299,
-    "evidence_sha256": "ea6a5dc49f3ecdceb908c71fd568f27b693bb6acfed39de682e8e3cb6aaefaad"
+    "evidence_bytes": 196287,
+    "evidence_sha256": "a473d33e2a6cd125d539712b635c51f180abb169048170c52265bcb39554c9df"
   },
   {
     "reference": 4920,
@@ -1996,8 +1996,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_custom_food_phone.png",
-    "evidence_bytes": 29145,
-    "evidence_sha256": "f0dc8cbe066bd30d2ff46bcaf80a9a6e7b06daffd61ab43a2460780f3a22109f"
+    "evidence_bytes": 29135,
+    "evidence_sha256": "7adeef55b062cbcf4071e31c912d3452c47d2fcc1fa0ed5b76455e04602ffcce"
   },
   {
     "reference": 4921,
@@ -2016,8 +2016,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_food_catalog_phone.png",
-    "evidence_bytes": 185296,
-    "evidence_sha256": "57fd7fbb75f67bc68bd20777d8e44dbe52d223c9bfde16d7a10f7cc6c3c310ae"
+    "evidence_bytes": 191099,
+    "evidence_sha256": "bf255298011341e4ee4187ff5bf3f5c24aad1ac6facb333d5cff65a797f0dc05"
   },
   {
     "reference": 4922,
@@ -2036,8 +2036,8 @@
     "production_file": "lib/features/daily_log/daily_log_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_empty_phone.png",
-    "evidence_bytes": 37475,
-    "evidence_sha256": "c0d1919b6a8d19be1b35bf6a45300647a296abcc72b784b1474953bf216a6e64"
+    "evidence_bytes": 45479,
+    "evidence_sha256": "817aa6caa9f6831db48cb7f72b0345d85537515b0cab1200724efbcc56b2003f"
   },
   {
     "reference": 4923,
@@ -2056,8 +2056,8 @@
     "production_file": "lib/features/daily_log/daily_log_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_sections_middle_phone.png",
-    "evidence_bytes": 42925,
-    "evidence_sha256": "8bbc2844c4b8eaec6a16822bb6679c46ac3844491ac51891876653b5576a05d6"
+    "evidence_bytes": 40042,
+    "evidence_sha256": "85114ddf16e1ce24a539970c347966a457563d4262bc31fbf1e9ad4c774b5340"
   },
   {
     "reference": 4924,
@@ -2076,8 +2076,8 @@
     "production_file": "lib/features/daily_log/daily_log_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_daily_log_sections_lower_phone.png",
-    "evidence_bytes": 36833,
-    "evidence_sha256": "bf8bcce45924598a0de723e53f590ce4608ee564c07dd2e0aa205ff980660552"
+    "evidence_bytes": 35468,
+    "evidence_sha256": "e71df8802643010608dc92b72dcc4f13f7b190d3fc17f76b39847778f7f902fc"
   },
   {
     "reference": 4925,
@@ -2096,8 +2096,8 @@
     "production_file": "lib/features/dashboard/presentation/dashboard_preferences_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone.png",
-    "evidence_bytes": 48368,
-    "evidence_sha256": "705597214a0b86dd96f2944f8e3351303d5c5999a937dd127967c9c0368a1f65"
+    "evidence_bytes": 48270,
+    "evidence_sha256": "14c3aa316d3de75e0b0c016f0d07177a0649f18debce54c4a0905127d4142864"
   },
   {
     "reference": 4926,
@@ -2116,8 +2116,8 @@
     "production_file": "lib/features/history/progress_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_progress_steps_month_phone.png",
-    "evidence_bytes": 31696,
-    "evidence_sha256": "9ab4384759b8536957ac6c42a2e30e2a161e2aacf967ee92af179c8c0605e709"
+    "evidence_bytes": 74588,
+    "evidence_sha256": "f8ef611622a72f32ae63f38ef6e7653eb11493dd8d28562356aa48029e14fb84"
   },
   {
     "reference": 4927,
@@ -2136,8 +2136,8 @@
     "production_file": "lib/features/history/progress_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_progress_range_picker_phone.png",
-    "evidence_bytes": 19646,
-    "evidence_sha256": "3e3de48a790da5d773d10ab4b01964f3c07be9a62704f34aec72c2ad8e1bc92a"
+    "evidence_bytes": 26082,
+    "evidence_sha256": "03694f8eecd97e3210877b508eb6be92c60d480c040ed26ab7177a6dd2499647"
   },
   {
     "reference": 4928,
@@ -2156,8 +2156,8 @@
     "production_file": "lib/features/history/progress_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_progress_metric_picker_phone.png",
-    "evidence_bytes": 25628,
-    "evidence_sha256": "2d0728f67de638335c2324bd7b2205cf3fc180a465463ef78b9d3a8ac4f8d53e"
+    "evidence_bytes": 32105,
+    "evidence_sha256": "72dd04dc0aa1694193dcaef3d1df5b6dd88f81e0d146fad101bbf453a05aa0f0"
   },
   {
     "reference": 4929,
@@ -2176,8 +2176,8 @@
     "production_file": "lib/features/history/progress_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_progress_metric_picker_lower_phone.png",
-    "evidence_bytes": 24361,
-    "evidence_sha256": "703866d8258eb7e9fdaf3e57f8b9f515369cbd77b01b31a36b0620e0fd95d546"
+    "evidence_bytes": 30833,
+    "evidence_sha256": "d254462e3ea3778bb5b1c28284ee99c5b53abd1dca6b14300be2b3b6e79ffaec"
   },
   {
     "reference": 4930,
@@ -2196,8 +2196,8 @@
     "production_file": "lib/features/settings/settings_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_more_phone.png",
-    "evidence_bytes": 26446,
-    "evidence_sha256": "6901200abaef306d2af2afff72f028c5d141213769632dfe9f2661dac8903f5b"
+    "evidence_bytes": 53725,
+    "evidence_sha256": "aa0477567a002025ae8d1e64da36e0c4a3633e86ee3e1d1d00f0a0aa7c4dca53"
   },
   {
     "reference": 4931,
@@ -2216,8 +2216,8 @@
     "production_file": "lib/features/settings/settings_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_more_lower_phone.png",
-    "evidence_bytes": 22679,
-    "evidence_sha256": "823468a4cfc83477342bb1cf7591ea39b487052dddcd5c37294a9da8ace6d22a"
+    "evidence_bytes": 33173,
+    "evidence_sha256": "d6b2767fa44a127e5f68fb1a68ad604489813c7d94286c4e29b6ba8327c766f0"
   },
   {
     "reference": 4932,
@@ -2236,8 +2236,8 @@
     "production_file": "lib/features/history/progress_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_progress_body_empty_phone.png",
-    "evidence_bytes": 16932,
-    "evidence_sha256": "662e5fec709921258f1f8c83296fb61f814641610e1079a4ee31463fcb48f5d6"
+    "evidence_bytes": 26383,
+    "evidence_sha256": "8537503dc8b53c95dd61d65cbb5db9f3adc783c8f9d003d5c0d56dd28422b0e4"
   },
   {
     "reference": 4933,
@@ -2256,8 +2256,8 @@
     "production_file": "lib/features/wellness/presentation/fasting_timer_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_fasting_phone.png",
-    "evidence_bytes": 59672,
-    "evidence_sha256": "e4e573c10c01c55169955d2b1be5d3d088560d08f12484dc696a53ff7e8a7d49"
+    "evidence_bytes": 147915,
+    "evidence_sha256": "939f356866f94528c2de0e10b177d747bd1befa844da0594453cd116d617d5e2"
   },
   {
     "reference": 4934,
@@ -2416,8 +2416,8 @@
     "production_file": "lib/features/analytics/nutrition_analytics_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_nutrition_analytics_macros_phone.png",
-    "evidence_bytes": 23029,
-    "evidence_sha256": "07d022a39dbd60ca9f32a707e30e73dbbb122d2d6a6a40bf36c13bb4dfe08856"
+    "evidence_bytes": 23228,
+    "evidence_sha256": "eef07e9942ed4a33705df788bf4ea6fd256c32ad352e1e66153176bd289fa4c0"
   },
   {
     "reference": 4942,
@@ -2436,8 +2436,8 @@
     "production_file": "lib/features/analytics/nutrition_analytics_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_nutrition_analytics_nutrients_phone.png",
-    "evidence_bytes": 26317,
-    "evidence_sha256": "19bc2fe6631907733074a9c9eeb97cacd47b758e9620612c1837023049338921"
+    "evidence_bytes": 26514,
+    "evidence_sha256": "75ff9727f8ec11e7cf93513e9d2aa6073112a7acd7e4e2e7068239a6b645c2e4"
   },
   {
     "reference": 4943,
@@ -2456,8 +2456,8 @@
     "production_file": "lib/features/analytics/nutrition_analytics_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_nutrition_analytics_calories_phone.png",
-    "evidence_bytes": 22006,
-    "evidence_sha256": "4f5f9ee22471a9ae0027218aa185146af8c72ddbf29af86a929f81735b632ebc"
+    "evidence_bytes": 22207,
+    "evidence_sha256": "58a605df251d421004c2c20b86972d84b98d0d736e16adea2ac1bcf39f099759"
   },
   {
     "reference": 4944,
@@ -2536,8 +2536,8 @@
     "production_file": "lib/features/nutrition/food_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_saved_nutrition_my_foods_phone.png",
-    "evidence_bytes": 189264,
-    "evidence_sha256": "78f19742830c995629d421af7406d26b4b248aabed6b5b48da9e6c70801d81ff"
+    "evidence_bytes": 29465,
+    "evidence_sha256": "adac219d493256a21ad8c872eef762bfb15a0d0e62486efab2fe822fa8292017"
   },
   {
     "reference": 4948,
@@ -2556,8 +2556,8 @@
     "production_file": "lib/features/notifications/presentation/notification_settings_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_notification_settings_phone.png",
-    "evidence_bytes": 34724,
-    "evidence_sha256": "c22a12e7c33fbfa5bc6db811afcbc2973e4038b01d48c577c568bc52a66001a1"
+    "evidence_bytes": 53942,
+    "evidence_sha256": "a2c6c719c2b229b4480703bd2474a18183823c8dbd742a7d6c60a74554d9a63a"
   },
   {
     "reference": 4949,
@@ -2576,8 +2576,8 @@
     "production_file": "lib/features/community/presentation/community_hub_page.dart",
     "status": "limited_family_equivalent_independent_review_passed",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_hub_authenticated_phone.png",
-    "evidence_bytes": 29941,
-    "evidence_sha256": "a8a6df6cf7616d9dd244ac107861d84cbb839febb351c6e58545f0d08329cad8"
+    "evidence_bytes": 32234,
+    "evidence_sha256": "83e0397794e51c9e8fafd09a235a96521b12aab9209fafcb2499c090ce83407b"
   },
   {
     "reference": 4950,
@@ -2596,8 +2596,8 @@
     "production_file": "lib/features/community/presentation/community_profile_page.dart",
     "status": "limited_family_equivalent_independent_review_passed",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png",
-    "evidence_bytes": 41353,
-    "evidence_sha256": "5cacf0a0c3195e600c28559452edc012552ede13d4d6af2f3d761d47e6bb46e3"
+    "evidence_bytes": 44906,
+    "evidence_sha256": "5113dd4b336531f809cdb5884cfb011964c81179bc26d8f529e81f5868901c60"
   },
   {
     "reference": 4951,
@@ -2616,8 +2616,8 @@
     "production_file": "lib/features/community/presentation/community_hub_page.dart",
     "status": "limited_family_equivalent_independent_review_passed",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_navigation_menu_authenticated_phone.png",
-    "evidence_bytes": 34767,
-    "evidence_sha256": "4a6742bd326ac2710f3a8bd3b35387a754f4d450e014966ad15965fd5ffdbc15"
+    "evidence_bytes": 37185,
+    "evidence_sha256": "f21c4ae35ac5c31cd91d1af924e2b05aa0dcf4eccd35605036b361f4edb10eff"
   },
   {
     "reference": 4952,
@@ -2636,8 +2636,8 @@
     "production_file": "lib/features/community/presentation/community_hub_page.dart",
     "status": "limited_family_equivalent_independent_review_passed",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_hub_authenticated_phone.png",
-    "evidence_bytes": 29941,
-    "evidence_sha256": "a8a6df6cf7616d9dd244ac107861d84cbb839febb351c6e58545f0d08329cad8"
+    "evidence_bytes": 32234,
+    "evidence_sha256": "83e0397794e51c9e8fafd09a235a96521b12aab9209fafcb2499c090ce83407b"
   },
   {
     "reference": 4953,
@@ -2656,8 +2656,8 @@
     "production_file": "lib/features/community/presentation/community_profile_page.dart",
     "status": "limited_family_equivalent_independent_review_passed",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_profile_authenticated_phone.png",
-    "evidence_bytes": 41353,
-    "evidence_sha256": "5cacf0a0c3195e600c28559452edc012552ede13d4d6af2f3d761d47e6bb46e3"
+    "evidence_bytes": 44906,
+    "evidence_sha256": "5113dd4b336531f809cdb5884cfb011964c81179bc26d8f529e81f5868901c60"
   },
   {
     "reference": 4954,
@@ -2676,8 +2676,8 @@
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_phone.png",
-    "evidence_bytes": 238519,
-    "evidence_sha256": "d22df0a6350742eead565097e49bf79197bddb92120db0329349de1517e709f7"
+    "evidence_bytes": 241363,
+    "evidence_sha256": "b3e5745165c6fec01dd844354db250f3dbae59f8468349f0c018cc802d1b0b59"
   },
   {
     "reference": 4955,
@@ -2716,8 +2716,8 @@
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_sleep_phone.png",
-    "evidence_bytes": 54825,
-    "evidence_sha256": "10540536f03d3d39e04af8a5109a21ad01f52ce04022453f5f5ee461e452f726"
+    "evidence_bytes": 61758,
+    "evidence_sha256": "fe3f61e9385ebc35270b96cbacc1e06218b3bf2477c186853ef9b3232540ce03"
   },
   {
     "reference": 4957,
@@ -2756,8 +2756,8 @@
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_privacy_phone.png",
-    "evidence_bytes": 53916,
-    "evidence_sha256": "53be3ec217141956a6f14ef80abba23dd7663f00ed11a309cb04dd39168295e7"
+    "evidence_bytes": 61284,
+    "evidence_sha256": "18b4595bee0966581ef5498a2d0895e6577949edd5bdffcedd2566a500f115a2"
   },
   {
     "reference": 4959,
@@ -2776,8 +2776,8 @@
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_search_phone.png",
-    "evidence_bytes": 53566,
-    "evidence_sha256": "3c64b0e4a7cc3a2a1dd5c1d8fc10629c4a05ebf9fd5d0e2f80f0ea74fabff4f9"
+    "evidence_bytes": 60488,
+    "evidence_sha256": "9a470ff08e251e9f9c83a86eef418e097750945f5ac9e07603f36bd47c5ccb9f"
   },
   {
     "reference": 4960,
@@ -2796,8 +2796,8 @@
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
     "status": "family_equivalent_distinct_article_state",
     "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_sleep_phone.png",
-    "evidence_bytes": 87148,
-    "evidence_sha256": "08c36bac4370f4d450b5ba9500202ffb04d5bfd2faf909bda929eab312caf63d"
+    "evidence_bytes": 91082,
+    "evidence_sha256": "37d6c8de66320249c8557b4aa5bc23279ffe411885e5f206bb95fd4731872ca0"
   },
   {
     "reference": 4961,
@@ -2816,8 +2816,8 @@
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
     "status": "family_equivalent_distinct_article_state",
     "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_movement_phone.png",
-    "evidence_bytes": 104704,
-    "evidence_sha256": "087c6ce6856ca106e56d1c1a1c5fd83957776ca02b7283c4bc49a11c96166893"
+    "evidence_bytes": 116536,
+    "evidence_sha256": "70fd4cc941412b429f70b2087be88573e233a8b85e4cbd3780153343e9ff8f2d"
   },
   {
     "reference": 4962,
@@ -2836,8 +2836,8 @@
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
     "status": "family_equivalent_distinct_article_state",
     "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_privacy_phone.png",
-    "evidence_bytes": 64637,
-    "evidence_sha256": "53f6cde94a3b4a010c797afda8f1b84b216b0774eb52ff093e61fd6aae411547"
+    "evidence_bytes": 70210,
+    "evidence_sha256": "2fc64f29f5e1e93664b8ece2413c311f0c0d1d852e5a7c847a1cbfde9982b34b"
   },
   {
     "reference": 4963,
@@ -2856,8 +2856,8 @@
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
     "status": "family_equivalent_distinct_article_state",
     "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_article_nutrition_phone.png",
-    "evidence_bytes": 79095,
-    "evidence_sha256": "5792fa77976a2c96124bffe2432d80a574419dfa2635c000bbdeaf9541c6bd19"
+    "evidence_bytes": 81916,
+    "evidence_sha256": "5095c3477db57f3e3e6b952dea63b00b0a06ac2fc36fdaaeb7eaae884526fb18"
   },
   {
     "reference": 4964,
@@ -2916,8 +2916,8 @@
     "production_file": "lib/features/wellness/presentation/wellness_learn_page.dart",
     "status": "family_equivalent_distinct_topic_state",
     "evidence_after": "test/visual_closure/goldens/visual_closure_wellness_learn_sleep_phone.png",
-    "evidence_bytes": 54825,
-    "evidence_sha256": "10540536f03d3d39e04af8a5109a21ad01f52ce04022453f5f5ee461e452f726"
+    "evidence_bytes": 61758,
+    "evidence_sha256": "fe3f61e9385ebc35270b96cbacc1e06218b3bf2477c186853ef9b3232540ce03"
   },
   {
     "reference": 4967,
@@ -2936,8 +2936,8 @@
     "production_file": "lib/features/community/presentation/community_connections_page.dart",
     "status": "direct_limited_equivalence_accepted",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_friend_authenticated_phone.png",
-    "evidence_bytes": 19671,
-    "evidence_sha256": "3c74075fe51fdfd7e8f8a9eddfb2d015bfd463876345c01ac609e67b35aa9ef8"
+    "evidence_bytes": 19614,
+    "evidence_sha256": "e529b0993396f89028b9d5d85ef983d6773b08c97e68f73f5f4aec4d44f9c015"
   },
   {
     "reference": 4968,
@@ -2956,8 +2956,8 @@
     "production_file": "lib/features/community/presentation/community_messages_page.dart",
     "status": "direct_limited_equivalence_accepted",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_inbox_authenticated_phone.png",
-    "evidence_bytes": 13520,
-    "evidence_sha256": "f568d4cb219ee026ff65b41560ccb5bce1d6f4e99d5c7b1cb0c442688bd46383"
+    "evidence_bytes": 13488,
+    "evidence_sha256": "b1e2939a0c390013a7be00e53918129fd650533dddf25cfbb0bce679597b677a"
   },
   {
     "reference": 4969,
@@ -2976,8 +2976,8 @@
     "production_file": "lib/features/community/presentation/community_messages_page.dart",
     "status": "direct_limited_equivalence_accepted",
     "evidence_after": "test/visual_closure/goldens/visual_closure_community_sent_authenticated_phone.png",
-    "evidence_bytes": 12899,
-    "evidence_sha256": "736a90edbea059597d49734c2bdadfc14829cb41bcb1d18fb3da3bfff36c2e02"
+    "evidence_bytes": 12888,
+    "evidence_sha256": "605dacbf94298b4201dddb38dc0955bf9c126100045750bd4683c523d79368b3"
   },
   {
     "reference": 4970,
@@ -2996,8 +2996,8 @@
     "production_file": "lib/features/settings/reference_settings_home_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_settings_phone.png",
-    "evidence_bytes": 55799,
-    "evidence_sha256": "e0d0bf660dfcd297178cf306374dc4b1ba26bcbd63cf8fb98c2bf5321a9a2312"
+    "evidence_bytes": 55479,
+    "evidence_sha256": "27d00069f3760db01ff5c5f1eea0c7fbdb83e96ab9d199de4113a612a0a9a4d8"
   },
   {
     "reference": 4971,
@@ -3016,8 +3016,8 @@
     "production_file": "lib/features/profile/premium_profile_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_profile_phone.png",
-    "evidence_bytes": 37786,
-    "evidence_sha256": "836240adbc545e1c00ee58105e13b6a545c2e7a53bbec6efc9997c0584eab531"
+    "evidence_bytes": 39225,
+    "evidence_sha256": "935e70219905e694fcea9a533b425ec6db459519397957cbf802b86e502a6907"
   },
   {
     "reference": 4972,
@@ -3136,8 +3136,8 @@
     "production_file": "lib/features/dashboard/presentation/dashboard_preferences_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/visual_closure/goldens/visual_closure_dashboard_preferences_phone.png",
-    "evidence_bytes": 48368,
-    "evidence_sha256": "705597214a0b86dd96f2944f8e3351303d5c5999a937dd127967c9c0368a1f65"
+    "evidence_bytes": 48270,
+    "evidence_sha256": "14c3aa316d3de75e0b0c016f0d07177a0649f18debce54c4a0905127d4142864"
   },
   {
     "reference": 4978,
@@ -3156,8 +3156,8 @@
     "production_file": "lib/features/settings/legal_document_page.dart",
     "status": "family_equivalent_embedded_legal_document",
     "evidence_after": "test/visual_closure/goldens/visual_closure_terms_phone.png",
-    "evidence_bytes": 71820,
-    "evidence_sha256": "8fbe5478da3c6f7340beaa35f71b51415b0135cbea47757aecf7493b70523c89"
+    "evidence_bytes": 72767,
+    "evidence_sha256": "e728dc09ed3e632d49272124790ea57d140e1609525832b0958d04a88abec29e"
   },
   {
     "reference": 4979,
@@ -3176,8 +3176,8 @@
     "production_file": "lib/features/settings/legal_document_page.dart",
     "status": "family_equivalent_embedded_legal_document",
     "evidence_after": "test/visual_closure/goldens/visual_closure_privacy_policy_phone.png",
-    "evidence_bytes": 75098,
-    "evidence_sha256": "25f61f4ebf3d319f7d1815adb62468437be392aa93d44ace8675da4c54e7cadd"
+    "evidence_bytes": 79023,
+    "evidence_sha256": "f47ce0e77978145a8b0b844436a09d17907d31a3a5d2287cc639cbdc566fb4b8"
   },
   {
     "reference": 4980,
@@ -3196,8 +3196,8 @@
     "production_file": "lib/features/ads/advertising_privacy_page.dart",
     "status": "family_equivalent_fail_closed_advertising_state",
     "evidence_after": "test/visual_closure/goldens/visual_closure_advertising_privacy_phone.png",
-    "evidence_bytes": 42197,
-    "evidence_sha256": "3491c06c5927dd07329eef1b1b26640455e545d56a5f94e5474dc150c7e74f7d"
+    "evidence_bytes": 41900,
+    "evidence_sha256": "d28fe902db7c3d6bbe10356d561f98c7d1211e2bf06f85c9a423e8c96c14d7ec"
   },
   {
     "reference": 4981,
@@ -3216,8 +3216,8 @@
     "production_file": "lib/features/settings/sharing_privacy_settings_page.dart",
     "status": "family_equivalent_review_passed",
     "evidence_after": "test/visual_closure/goldens/visual_closure_sharing_privacy_phone.png",
-    "evidence_bytes": 43120,
-    "evidence_sha256": "cc9c38f95c036ac1ec04a3de7eb5ef58cae2192d0fb7b7d13bcef08ecc458105"
+    "evidence_bytes": 42004,
+    "evidence_sha256": "f564486f1eaa0f7551b2247da639ce228393a324d93db73db6eee65a00db6c49"
   },
   {
     "reference": 4982,
@@ -3356,8 +3356,8 @@
     "production_file": "lib/features/connected_health/connected_health_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/goldens/epic15_iphone_69_ar_06_connected_health.png",
-    "evidence_bytes": 110599,
-    "evidence_sha256": "40ee45fe2934197dfc46699eda12fba72f1473db7074be9fa3c56308d129de84"
+    "evidence_bytes": 98023,
+    "evidence_sha256": "451106191b9fa3923dd23e61fd1612a8c4d77328d1a01e7b88950a2b2aaa2e2c"
   },
   {
     "reference": 4989,
@@ -3376,8 +3376,8 @@
     "production_file": "lib/features/connected_health/connected_health_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/goldens/epic15_iphone_69_en_05_connected_health.png",
-    "evidence_bytes": 99663,
-    "evidence_sha256": "63b01dc01b9fcab405b5ca0cc6bb683e7f24f38d49b1af363f98b89ddc5cf84b"
+    "evidence_bytes": 89271,
+    "evidence_sha256": "b21e631d980ec9cb6c9b519935c5226c892d4330f26c3292721aefbb8a3cfc98"
   },
   {
     "reference": 4990,
@@ -3396,8 +3396,8 @@
     "production_file": "lib/features/connected_health/connected_health_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/goldens/epic15_iphone_69_ar_08_privacy_settings_dark.png",
-    "evidence_bytes": 64943,
-    "evidence_sha256": "236d77bc52f020ed9e6deca54b9e22699a6ff305c30097b3fe61a0dbfcf0fe1b"
+    "evidence_bytes": 64693,
+    "evidence_sha256": "1c3f2c282d139580ca9adaedfdd07db634ee2c860b42a365e997aab5ee11795d"
   },
   {
     "reference": 4991,
@@ -3416,8 +3416,8 @@
     "production_file": "lib/features/connected_health/connected_health_page.dart",
     "status": "unmatched_until_human_or_pixel_review_passes",
     "evidence_after": "test/goldens/epic15_android_phone_ar_06_connected_health.png",
-    "evidence_bytes": 80727,
-    "evidence_sha256": "4b8d7da592020659e09521de9b4798d3462ead0cb5f9250ff469c2171ee7e931"
+    "evidence_bytes": 69850,
+    "evidence_sha256": "1a2efb2437722656c4e2be897b8bbe5d3f403784f1fd01633c90b39729164b97"
   },
   {
     "reference": 4992,

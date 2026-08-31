@@ -1,8 +1,8 @@
 "NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
-"NSHealthUpdateUsageDescription" = "BIL เขียนเฉพาะบันทึกสุขภาพที่คุณเลือกอย่างชัดเจน หลังจากได้รับความยินยอมในการเขียนแยกต่างหาก";
+"NSHealthUpdateUsageDescription" = "BIL เขียนเฉพาะบันทึกน้ำหนักหลังจากคุณอนุมัติสิทธิ์เขียนใน Health แยกต่างหาก";
 "NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "ใช้กล้องเฉพาะเมื่อคุณเลือกที่จะสแกนบาร์โค้ด ดูภาพอาหาร หรือเพิ่มโปรไฟล์ส่วนตัวหรือภาพถ่ายความคืบหน้า";
-"NSPhotoLibraryUsageDescription" = "เลือกอาหาร โปรไฟล์ หรือรูปถ่ายความคืบหน้าเพื่อตรวจสอบก่อนที่จะบันทึกหรืออัปโหลด";
-"NSMicrophoneUsageDescription" = "BIL ใช้ไมโครโฟนเฉพาะเมื่อคุณเลือกบันทึกมื้ออาหารด้วยเสียงหรือพูดคุยกับ BIL AI Coach โดยตรง";
-"NSSpeechRecognitionUsageDescription" = "BIL แปลงคำพูดที่คุณเริ่มสำหรับการบันทึกมื้ออาหารหรือ BIL AI Coach เป็นข้อความเพื่อให้คุณตรวจสอบหรือส่งได้";
+"NSPhotoLibraryUsageDescription" = "BIL เข้าถึงเฉพาะรูปที่คุณเลือกสำหรับมื้ออาหาร โปรไฟล์ ความคืบหน้า โพสต์ชุมชน หรือการส่งข้อมูลอาหาร เพื่อให้คุณตรวจสอบก่อนบันทึกหรืออัปโหลด";
+"NSMicrophoneUsageDescription" = "BIL ใช้ไมโครโฟนเฉพาะเมื่อคุณเลือกบันทึกน้ำหนักหรือมื้ออาหารด้วยเสียง หรือพูดคุยกับ BIL AI Coach โดยตรง";
+"NSSpeechRecognitionUsageDescription" = "BIL แปลงคำพูดที่คุณเริ่มสำหรับการบันทึกน้ำหนัก มื้ออาหาร หรือ BIL AI Coach เป็นข้อความเพื่อให้คุณตรวจสอบหรือส่งได้";

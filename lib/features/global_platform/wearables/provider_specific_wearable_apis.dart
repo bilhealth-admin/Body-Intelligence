@@ -157,7 +157,7 @@ final class WearOsWearableApi extends ProviderHttpWearableApi {
   Uri endpoint(String? cursor, DateTime asOf) => Uri.parse(base).replace(
     queryParameters: <String, String>{
       'operation': 'changes',
-      'token': ?cursor,
+      'anchor': ?cursor,
       'asOf': asOf.toUtc().toIso8601String(),
     },
   );
@@ -168,7 +168,12 @@ final class WearOsWearableApi extends ProviderHttpWearableApi {
   ) => <String, Object?>{
     'records': p['records'] ?? const [],
     'deletedIds': p['deletedIds'] ?? const [],
-    'nextCursor': (p['changeToken'] ?? p['nextChangeToken']) as String?,
+    'nextCursor':
+        (p['anchor'] ??
+                p['nextAnchor'] ??
+                p['changeToken'] ??
+                p['nextChangeToken'])
+            as String?,
     'hasMore': p['hasMore'] == true,
     'rateLimitRemaining': 999,
   };

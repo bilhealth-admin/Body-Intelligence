@@ -1,10 +1,5 @@
 part of 'intelligence_center_page.dart';
 
-const _bilMaleSmartCoachAsset =
-    'assets/images/ai_coach/bil_male_smart_coach_v1.png';
-const _bilMaleCoachFallbackAsset =
-    'assets/images/flagship/bil_body_intelligence_journey_v1.png';
-
 class _CoachMenuSheet extends StatelessWidget {
   const _CoachMenuSheet();
 
@@ -359,8 +354,8 @@ class _CoachHero extends StatelessWidget {
                     Text(
                       intelligenceText(
                         context,
-                        'I speak every language and turn your body data into the next clear decision.',
-                        'أتحدث كل اللغات، وأحوّل بيانات جسمك إلى قرارك التالي بوضوح.',
+                        'Global multilingual voice',
+                        'صوت متعدد اللغات',
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -476,17 +471,9 @@ class _CoachHeroPortrait extends StatelessWidget {
         border: Border.all(color: Colors.white.withValues(alpha: .7), width: 2),
       ),
       child: ClipOval(
-        child: Image.asset(
-          _bilMaleSmartCoachAsset,
+        child: const BilCoachPortrait(
           fit: BoxFit.cover,
           filterQuality: FilterQuality.medium,
-          excludeFromSemantics: true,
-          errorBuilder: (_, _, _) => Image.asset(
-            _bilMaleCoachFallbackAsset,
-            fit: BoxFit.cover,
-            alignment: const Alignment(.18, -.72),
-            excludeFromSemantics: true,
-          ),
         ),
       ),
     );
@@ -513,17 +500,9 @@ class _BilResponseMark extends StatelessWidget {
           border: Border.all(color: scheme.primary.withValues(alpha: .32)),
         ),
         child: ClipOval(
-          child: Image.asset(
-            _bilMaleSmartCoachAsset,
+          child: const BilCoachPortrait(
             fit: BoxFit.cover,
             filterQuality: FilterQuality.medium,
-            excludeFromSemantics: true,
-            errorBuilder: (_, _, _) => Image.asset(
-              _bilMaleCoachFallbackAsset,
-              fit: BoxFit.cover,
-              alignment: const Alignment(.18, -.72),
-              excludeFromSemantics: true,
-            ),
           ),
         ),
       ),

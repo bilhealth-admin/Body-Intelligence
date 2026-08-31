@@ -16,8 +16,8 @@ void main() {
         store: store,
         audit: audit,
       );
-      final medical = MedicalDeviceRuntime(
-        providers: [TestMedical()],
+      final fitness = FitnessDeviceRuntime(
+        providers: [TestFitness()],
         store: store,
         audit: audit,
       );
@@ -57,7 +57,7 @@ void main() {
       final runtime = const BilGlobalProductExpansionCompositionRoot().create(
         health: health,
         wearables: wearable,
-        medical: medical,
+        fitness: fitness,
         vision: vision,
         cloudAi: cloud,
         plugins: plugins,
@@ -78,7 +78,7 @@ void main() {
       );
       expect(state.capabilityCount, greaterThanOrEqualTo(5));
       expect(state.healthSignals, isNotEmpty);
-      expect(state.medicalMeasurements, isNotEmpty);
+      expect(state.fitnessMeasurements, isNotEmpty);
       expect(state.productStates.length, 11);
       expect(state.status, GlobalRuntimeStatus.blocked);
     },

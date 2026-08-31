@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
-const bilAiBoostCoachArtworkAsset =
-    'assets/images/commerce/bil_ai_boost_coach_icon_512.png';
+import '../../../shared/widgets/bil_coach_identity.dart';
 
-/// Approved product artwork shared by the live AI Boost purchase surfaces.
+const bilAiBoostCoachArtworkAsset = bilApprovedAiCoachAsset;
+
+/// Approved coach identity shared by the live AI Boost purchase surfaces.
 class BilAiBoostCoachArtwork extends StatelessWidget {
   const BilAiBoostCoachArtwork({
     required this.size,
@@ -41,15 +42,13 @@ class BilAiBoostCoachArtwork extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(size * .24 - 1),
-              child: Image.asset(
-                bilAiBoostCoachArtworkAsset,
-                key: const ValueKey('ai-boost-coach-artwork-image'),
+              child: BilCoachPortrait(
+                imageKey: const ValueKey('ai-boost-coach-artwork-image'),
                 width: size,
                 height: size,
                 fit: BoxFit.cover,
                 cacheWidth: cacheSize,
                 cacheHeight: cacheSize,
-                filterQuality: FilterQuality.medium,
               ),
             ),
           ),

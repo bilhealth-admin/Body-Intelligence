@@ -364,38 +364,46 @@ extension _DashboardPreferencesActions on _DashboardPreferencesPageState {
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
-            Text(
-              _sectionCopy(
-                sheetContext,
-                'Choose the nutrients you want to track as dashboard cards. This is an independent Premium feature.',
-                'اختر المغذيات التي تريد متابعتها كبطاقات في الداشبورد. هذه ميزة Premium مستقلة.',
+            const Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: PremiumLabelBadge(
+                key: Key('dashboard-nutrient-premium-page-label'),
               ),
             ),
             const SizedBox(height: 12),
-            for (final label in const [
-              'Protein',
-              'Carbohydrates',
-              'Fat',
-              'Fiber',
-              'Sodium',
-              'Potassium',
-            ])
-              ListTile(
-                dense: true,
-                leading: const Icon(Icons.lock_outline_rounded),
-                title: Text(context.strings.text(label)),
+            DecoratedBox(
+              key: const Key('dashboard-nutrient-glass-group'),
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  sheetContext,
+                ).colorScheme.surfaceContainerLow.withValues(alpha: .82),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: const Color(0x66D79A1E)),
               ),
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final label in const [
+                      'Protein',
+                      'Carbohydrates',
+                      'Fat',
+                      'Fiber',
+                      'Sodium',
+                      'Potassium',
+                    ])
+                      Chip(label: Text(context.strings.text(label))),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 8),
             FilledButton.icon(
               onPressed: () => Navigator.pop(sheetContext, true),
               icon: const Icon(Icons.workspace_premium_rounded),
-              label: Text(
-                _sectionCopy(
-                  sheetContext,
-                  'View Premium plans',
-                  'عرض خطط Premium',
-                ),
-              ),
+              label: Text(sheetContext.strings.text('Continue')),
             ),
           ],
         ),

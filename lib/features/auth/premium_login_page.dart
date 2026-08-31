@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../app/environment/app_environment.dart';
+import '../../shared/widgets/bil_wordmark.dart';
 import 'auth_entry_locale_copy.dart';
 import 'auth_error_localizer.dart';
 import 'auth_five_locale_copy.dart';
@@ -106,8 +107,11 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final configured = AppEnvironment.cloudConfigured;
+    final scheme = Theme.of(context).colorScheme;
+    final dark = scheme.brightness == Brightness.dark;
+    final pageBackground = dark ? scheme.surface : Colors.white;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: pageBackground,
       body: SafeArea(
         child: Column(
           children: [
@@ -136,13 +140,19 @@ class _LoginPageState extends State<LoginPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
+                                const BilFullWordmark(
+                                  key: Key('login-wordmark'),
+                                  height: 38,
+                                  alignment: Alignment.center,
+                                ),
+                                SizedBox(height: compact ? 18 : 24),
                                 Text(
                                   authEntryText(
                                     context,
                                     AuthEntryCopyKey.emailAddress,
                                   ),
-                                  style: const TextStyle(
-                                    color: Color(0xFF737780),
+                                  style: TextStyle(
+                                    color: scheme.onSurfaceVariant,
                                     fontSize: 13.5,
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -161,12 +171,12 @@ class _LoginPageState extends State<LoginPage> {
                                   autocorrect: false,
                                   enableSuggestions: false,
                                   autofillHints: const [AutofillHints.email],
-                                  style: const TextStyle(
-                                    color: Color(0xFF111318),
+                                  style: TextStyle(
+                                    color: scheme.onSurface,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
-                                  decoration: _emailDecoration(),
+                                  decoration: _emailDecoration(context),
                                   validator: (value) =>
                                       AuthInputValidation.isValidEmail(value)
                                       ? null
@@ -250,10 +260,10 @@ class _LoginPageState extends State<LoginPage> {
                                     context,
                                     AuthEntryCopyKey.continueApple,
                                   ),
-                                  brand: const Icon(
+                                  brand: Icon(
                                     Icons.apple,
                                     size: 27,
-                                    color: Color(0xFF111111),
+                                    color: scheme.onSurface,
                                   ),
                                 ),
                                 if (AppEnvironment.facebookLoginEnabled) ...[
@@ -334,31 +344,40 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  InputDecoration _emailDecoration() => InputDecoration(
-    filled: true,
-    fillColor: const Color(0xFFFDFDFE),
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
-    enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Color(0xFFD6D8DC), width: 1.3),
-    ),
-    disabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Color(0xFFE1E3E7), width: 1.2),
-    ),
-    focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Color(0xFF0877F9), width: 1.7),
-    ),
-    errorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Color(0xFFD92D20)),
-    ),
-    focusedErrorBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: const BorderSide(color: Color(0xFFD92D20), width: 1.6),
-    ),
-  );
+  InputDecoration _emailDecoration(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final dark = scheme.brightness == Brightness.dark;
+    return InputDecoration(
+      filled: true,
+      fillColor: dark
+          ? scheme.surfaceContainerHighest
+          : const Color(0xFFFDFDFE),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: scheme.outlineVariant, width: 1.3),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(
+          color: scheme.outlineVariant.withValues(alpha: .7),
+          width: 1.2,
+        ),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFF0877F9), width: 1.7),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: scheme.error),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: scheme.error, width: 1.6),
+      ),
+    );
+  }
 
   Widget _oauthButton({
     required Key key,
@@ -367,11 +386,13 @@ class _LoginPageState extends State<LoginPage> {
     required Widget brand,
     bool available = true,
   }) {
+    final scheme = Theme.of(context).colorScheme;
+    final dark = scheme.brightness == Brightness.dark;
     final busy = oauthLoading == provider;
     final enabled = available && !loading && oauthLoading == null;
     return Material(
       key: key,
-      color: Colors.white,
+      color: dark ? scheme.surfaceContainerHigh : Colors.white,
       borderRadius: BorderRadius.circular(12),
       shadowColor: const Color(0x22000000),
       elevation: 5,
@@ -386,9 +407,12 @@ class _LoginPageState extends State<LoginPage> {
               PositionedDirectional(
                 start: 18,
                 child: busy
-                    ? const SizedBox.square(
+                    ? SizedBox.square(
                         dimension: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: scheme.primary,
+                        ),
                       )
                     : SizedBox(width: 28, child: Center(child: brand)),
               ),
@@ -401,8 +425,8 @@ class _LoginPageState extends State<LoginPage> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: enabled
-                        ? const Color(0xFF111318)
-                        : const Color(0xFF9CA1AA),
+                        ? scheme.onSurface
+                        : scheme.onSurfaceVariant.withValues(alpha: .7),
                     fontSize: 15.5,
                     fontWeight: FontWeight.w700,
                     height: 1.15,
@@ -427,13 +451,17 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              Colors.white.withValues(alpha: 0.52),
-                              const Color(0xFFEAF3FF).withValues(alpha: 0.72),
+                              (dark
+                                      ? scheme.surfaceContainerHigh
+                                      : Colors.white)
+                                  .withValues(alpha: 0.72),
+                              (dark
+                                      ? scheme.primaryContainer
+                                      : const Color(0xFFEAF3FF))
+                                  .withValues(alpha: 0.78),
                             ],
                           ),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.88),
-                          ),
+                          border: Border.all(color: scheme.outlineVariant),
                         ),
                         child: Align(
                           alignment: AlignmentDirectional.centerEnd,
@@ -490,56 +518,62 @@ class _AuthTopBar extends StatelessWidget {
   final VoidCallback onBack;
 
   @override
-  Widget build(BuildContext context) => Container(
-    height: 72,
-    decoration: const BoxDecoration(
-      color: Color(0xFFFAFAFC),
-      border: Border(bottom: BorderSide(color: Color(0xFFE8E9ED), width: 1)),
-    ),
-    child: Stack(
-      alignment: Alignment.center,
-      children: [
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: Padding(
-            padding: const EdgeInsetsDirectional.only(start: 16),
-            child: Material(
-              color: Colors.white,
-              shape: const CircleBorder(),
-              elevation: 4,
-              shadowColor: const Color(0x1F000000),
-              child: IconButton(
-                key: backKey,
-                tooltip: authEntryText(context, AuthEntryCopyKey.back),
-                onPressed: onBack,
-                icon: Icon(
-                  Directionality.of(context) == TextDirection.rtl
-                      ? Icons.arrow_forward_ios_rounded
-                      : Icons.arrow_back_ios_new_rounded,
-                  size: 19,
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final dark = scheme.brightness == Brightness.dark;
+    return Container(
+      height: 72,
+      decoration: BoxDecoration(
+        color: dark ? scheme.surfaceContainerLow : const Color(0xFFFAFAFC),
+        border: Border(
+          bottom: BorderSide(color: scheme.outlineVariant, width: 1),
+        ),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.only(start: 16),
+              child: Material(
+                color: dark ? scheme.surfaceContainerHighest : Colors.white,
+                shape: const CircleBorder(),
+                elevation: 4,
+                shadowColor: const Color(0x1F000000),
+                child: IconButton(
+                  key: backKey,
+                  tooltip: authEntryText(context, AuthEntryCopyKey.back),
+                  onPressed: onBack,
+                  icon: Icon(
+                    Directionality.of(context) == TextDirection.rtl
+                        ? Icons.arrow_forward_ios_rounded
+                        : Icons.arrow_back_ios_new_rounded,
+                    size: 19,
+                  ),
+                  color: scheme.onSurface,
                 ),
-                color: const Color(0xFF111318),
               ),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 74),
-          child: Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Color(0xFF111318),
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -.25,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 74),
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: scheme.onSurface,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -.25,
+              ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }
 
 class _OrDivider extends StatelessWidget {
@@ -548,23 +582,26 @@ class _OrDivider extends StatelessWidget {
   final String label;
 
   @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      const Expanded(child: Divider(color: Color(0xFFE2E3E7))),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14),
-        child: Text(
-          label,
-          style: const TextStyle(
-            color: Color(0xFF7B7F87),
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Row(
+      children: [
+        Expanded(child: Divider(color: scheme.outlineVariant)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: scheme.onSurfaceVariant,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-      ),
-      const Expanded(child: Divider(color: Color(0xFFE2E3E7))),
-    ],
-  );
+        Expanded(child: Divider(color: scheme.outlineVariant)),
+      ],
+    );
+  }
 }
 
 class _StatusPanel extends StatelessWidget {
@@ -573,16 +610,19 @@ class _StatusPanel extends StatelessWidget {
   final String message;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(13),
-    decoration: BoxDecoration(
-      color: const Color(0xFFFFECEA),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Text(
-      message,
-      textAlign: TextAlign.center,
-      style: const TextStyle(color: Color(0xFFB42318), height: 1.35),
-    ),
-  );
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: scheme.errorContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        message,
+        textAlign: TextAlign.center,
+        style: TextStyle(color: scheme.onErrorContainer, height: 1.35),
+      ),
+    );
+  }
 }

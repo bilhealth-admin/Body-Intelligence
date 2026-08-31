@@ -1,0 +1,188 @@
+{
+  "auditDate": "2026-08-29",
+  "appStoreConnectAppId": "6805349703",
+  "version": "1.0",
+  "platform": "IOS",
+  "sourceStatus": "FINAL_MACOS_IOS_CAPTURE_REQUIRED",
+  "safeToUploadNow": false,
+  "localReviewAttachmentStatus": "READY_NOT_UPLOADED",
+  "supportedDeviceFamilies": [
+    "IPHONE",
+    "IPAD"
+  ],
+  "localizations": [
+    {
+      "locale": "en-US",
+      "productPageScreenshotSets": [
+        {
+          "displayType": "APP_IPHONE_67",
+          "canonicalPortraitSize": {
+            "width": 1320,
+            "height": 2868
+          },
+          "acceptedPortraitSizes": [
+            "1260x2736",
+            "1290x2796",
+            "1320x2868"
+          ],
+          "currentValidCount": 0,
+          "requiredMinimum": 1,
+          "plannedCount": 8,
+          "outputDirectory": "store_assets/screenshots/apple/v1.0/en-US/iphone-6.9",
+          "files": [
+            "01-dashboard.png",
+            "02-today-meal.png",
+            "03-recipes.png",
+            "04-workouts.png",
+            "05-progress.png",
+            "06-body-model.png",
+            "07-ai-coach-paid.png",
+            "08-plans-storekit.png"
+          ]
+        },
+        {
+          "displayType": "APP_IPAD_PRO_3GEN_129",
+          "canonicalPortraitSize": {
+            "width": 2064,
+            "height": 2752
+          },
+          "acceptedPortraitSizes": [
+            "2064x2752",
+            "2048x2732"
+          ],
+          "currentValidCount": 0,
+          "requiredMinimum": 1,
+          "plannedCount": 8,
+          "outputDirectory": "store_assets/screenshots/apple/v1.0/en-US/ipad-13",
+          "files": [
+            "01-dashboard.png",
+            "02-today-meal.png",
+            "03-recipes.png",
+            "04-workouts.png",
+            "05-progress.png",
+            "06-body-model.png",
+            "07-ai-coach-paid.png",
+            "08-plans-storekit.png"
+          ]
+        }
+      ]
+    }
+  ],
+  "captureRules": {
+    "scope": "PUBLIC_PRODUCT_PAGE_SCREENSHOTS_ONLY",
+    "mustBeFinalIosRuntime": true,
+    "mustUseRawSimulatorOrDevicePixels": true,
+    "mustNotUseAndroidFrames": true,
+    "mustNotUseFlutterWidgetGoldens": true,
+    "mustNotUpscaleOrStretch": true,
+    "mustNotContainAlpha": true,
+    "mustUseNonSensitiveDemoData": true,
+    "mustIdentifyPaidFeaturesAccurately": true
+  },
+  "localReviewScreenshotPackage": {
+    "purpose": "SUBSCRIPTION_AND_IAP_REVIEW_ATTACHMENTS",
+    "directory": "store_assets/review/apple/v1.0",
+    "packageManifest": "store_assets/review/apple/v1.0/manifest.json",
+    "sourceTest": "test/features/commerce/apple_review_product_screenshot_test.dart",
+    "packagingTool": "tool/apple_store_connect/package_app_review_goldens.dart",
+    "pixelSize": "1170x2532",
+    "opaqueRgbPng": true,
+    "uploaded": false,
+    "products": [
+      {
+        "productId": "bil_premium",
+        "file": "store_assets/review/apple/v1.0/bil_premium.png",
+        "selectedTerm": "MONTHLY",
+        "localizedPrice": "EGP 129.99",
+        "currencyCode": "EGP",
+        "storeCountryCode": "EGY",
+        "availabilityPolicy": "EGY/IND/PAK/TUR only"
+      },
+      {
+        "productId": "bil_premium_annual",
+        "file": "store_assets/review/apple/v1.0/bil_premium_annual.png",
+        "selectedTerm": "ANNUAL",
+        "localizedPrice": "EGP 999.99",
+        "currencyCode": "EGP",
+        "storeCountryCode": "EGY",
+        "availabilityPolicy": "EGY/IND/PAK/TUR only",
+        "derivedSavingsBadge": "Save 36%",
+        "badgeCalculation": "round((129.99 * 12 - 999.99) / (129.99 * 12) * 100)",
+        "comparisonBasis": "EGP 129.99 x 12 = EGP 1,559.88; EGP 999.99 rounds to 36% savings"
+      },
+      {
+        "productId": "bil_premium_ai_coach",
+        "file": "store_assets/review/apple/v1.0/bil_premium_ai_coach.png",
+        "selectedTerm": "MONTHLY",
+        "localizedPrice": "$5.99",
+        "currencyCode": "USD",
+        "storeCountryCode": "USA"
+      },
+      {
+        "productId": "bil_premium_ai_coach_annual",
+        "file": "store_assets/review/apple/v1.0/bil_premium_ai_coach_annual.png",
+        "selectedTerm": "ANNUAL",
+        "localizedPrice": "$49.99",
+        "currencyCode": "USD",
+        "storeCountryCode": "USA",
+        "derivedSavingsBadge": "Save 30%",
+        "badgeCalculation": "round((5.99 * 12 - 49.99) / (5.99 * 12) * 100)",
+        "comparisonBasis": "$5.99 x 12 = $71.88"
+      },
+      {
+        "productId": "bil_ai_boost",
+        "file": "store_assets/review/apple/v1.0/bil_ai_boost.png",
+        "selectedTerm": "ONE_TIME_CONSUMABLE",
+        "localizedPrice": "$2.49",
+        "currencyCode": "USD",
+        "storeCountryCode": "USA",
+        "discountBadge": null
+      }
+    ]
+  },
+  "appReviewInformation": {
+    "currentRecordExists": false,
+    "contactFirstName": "OWNER_INPUT_REQUIRED",
+    "contactLastName": "OWNER_INPUT_REQUIRED",
+    "contactEmail": "OWNER_CONFIRM_MONITORED_SUPPORT_ADDRESS",
+    "contactPhone": "OWNER_INPUT_REQUIRED_IN_INTERNATIONAL_FORMAT",
+    "demoAccountRequired": true,
+    "demoAccountName": "play-review@bilhealth.com",
+    "demoAccountPassword": "ENTER_PRIVATELY_IN_APP_STORE_CONNECT_ONLY",
+    "notesTemplate": "docs/release/BIL_APP_STORE_REVIEW_ASSETS_AUDIT_2026-08-29.md"
+  },
+  "publicUrls": {
+    "marketing": "https://www.bilhealth.com",
+    "support": "https://www.bilhealth.com/support",
+    "privacy": "https://www.bilhealth.com/privacy",
+    "terms": "https://www.bilhealth.com/terms",
+    "accountDeletion": "https://www.bilhealth.com/account-deletion"
+  },
+  "firstSubmissionProducts": [
+    {
+      "productId": "bil_premium",
+      "type": "AUTO_RENEWABLE_SUBSCRIPTION",
+      "reviewScreenshotAction": "LOCAL_REPLACEMENT_READY_NOT_UPLOADED"
+    },
+    {
+      "productId": "bil_premium_annual",
+      "type": "AUTO_RENEWABLE_SUBSCRIPTION",
+      "reviewScreenshotAction": "LOCAL_REPLACEMENT_READY_NOT_UPLOADED"
+    },
+    {
+      "productId": "bil_premium_ai_coach",
+      "type": "AUTO_RENEWABLE_SUBSCRIPTION",
+      "reviewScreenshotAction": "LOCAL_REPLACEMENT_READY_NOT_UPLOADED"
+    },
+    {
+      "productId": "bil_premium_ai_coach_annual",
+      "type": "AUTO_RENEWABLE_SUBSCRIPTION",
+      "reviewScreenshotAction": "LOCAL_REPLACEMENT_READY_NOT_UPLOADED"
+    },
+    {
+      "productId": "bil_ai_boost",
+      "type": "CONSUMABLE",
+      "reviewScreenshotAction": "LOCAL_REPLACEMENT_READY_NOT_UPLOADED"
+    }
+  ]
+}

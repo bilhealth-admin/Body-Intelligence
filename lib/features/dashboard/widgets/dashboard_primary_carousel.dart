@@ -1,7 +1,28 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/localization/runtime_copy.dart';
 import '../../../app/theme/bil_premium_responsive_layout.dart';
 import 'dashboard_twin_deck_shell.dart';
+
+Map<String, String> dashboardPrimaryCarouselCopy(String localeTag) {
+  final normalized = localeTag.replaceAll('_', '-').toLowerCase();
+  final language = normalized.split('-').first;
+  final authored = _primaryCarouselCopy[language];
+  if (authored != null) return authored;
+
+  String resolve(String english) =>
+      RuntimeCopy.resolve(english, localeTag) ?? english;
+  final action = resolve('One best action');
+  final summary = resolve('Today Summary');
+  final insights = resolve('Daily insights');
+  return <String, String>{
+    'signal': resolve('Today'),
+    'action': action,
+    'summary': summary,
+    'insights': insights,
+    'semantic': '$action. $summary. $insights',
+  };
+}
 
 class DashboardPrimaryCarousel extends StatelessWidget {
   const DashboardPrimaryCarousel({
@@ -19,11 +40,9 @@ class DashboardPrimaryCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final copy =
-        _primaryCarouselCopy[Localizations.localeOf(
-          context,
-        ).languageCode.toLowerCase()] ??
-        _primaryCarouselCopy['en']!;
+    final copy = dashboardPrimaryCarouselCopy(
+      Localizations.localeOf(context).toLanguageTag(),
+    );
     final width = MediaQuery.sizeOf(context).width;
     final height = BilPremiumResponsiveLayout.twinBaseHeight(width);
 

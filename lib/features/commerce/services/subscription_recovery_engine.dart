@@ -62,13 +62,13 @@ final class SubscriptionRecoveryEngine {
     final record = snapshot.record;
     return switch (record.lifecycle) {
       SubscriptionLifecycle.trial =>
-        record.trialEndsAt == null || now.isAfter(record.trialEndsAt!.toUtc()),
+        record.trialEndsAt == null || !record.trialEndsAt!.toUtc().isAfter(now),
       SubscriptionLifecycle.gracePeriod =>
         record.gracePeriodEndsAt == null ||
-            now.isAfter(record.gracePeriodEndsAt!.toUtc()),
+            !record.gracePeriodEndsAt!.toUtc().isAfter(now),
       SubscriptionLifecycle.active || SubscriptionLifecycle.cancelled =>
         record.currentPeriodEndsAt == null ||
-            now.isAfter(record.currentPeriodEndsAt!.toUtc()),
+            !record.currentPeriodEndsAt!.toUtc().isAfter(now),
       SubscriptionLifecycle.inactive ||
       SubscriptionLifecycle.pending ||
       SubscriptionLifecycle.billingRetry ||

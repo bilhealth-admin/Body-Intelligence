@@ -15,6 +15,9 @@ void main() {
       'lib/features/connected_health/widgets/health_hub_empty_state.dart',
       'lib/features/connected_health/widgets/live_health_watch.dart',
     ].map(read).join('\n');
+    final watch = read(
+      'lib/features/connected_health/widgets/live_health_watch.dart',
+    );
     final grid = read('lib/features/dashboard/widgets/dashboard_grid.dart');
     final analytics = <String>[
       'lib/features/analytics/analytics_page.dart',
@@ -32,11 +35,30 @@ void main() {
 
     expect(health, contains("Key('health-hub-device-carousel')"));
     expect(health, contains('viewportFraction: .88'));
-    expect(health, contains('Color(0xFF2D3439)'));
-    expect(health, contains('crownCenter'));
+    // The approved watch is a dark fitness surface. Keep its exact dark shell
+    // palette and crown while preventing the retired white metallic frame and
+    // in-watch BIL logo from returning.
+    expect(watch, contains("Key('bil-live-health-watch')"));
+    expect(watch, contains('final shell = RRect.fromRectAndRadius('));
+    expect(watch, contains('Color(0xFF07131B)'));
+    expect(watch, contains('Color(0xFF163442)'));
+    expect(watch, contains('Color(0xFF0B202C)'));
+    expect(watch, contains('Color(0xFF050D13)'));
+    expect(watch, contains('stops: [0, .33, .68, 1]'));
+    expect(watch, contains('crownCenter'));
+    expect(watch, isNot(contains('Color(0xFF2D3439)')));
+    expect(watch, isNot(contains('Color(0xFFF4F6F7)')));
+    expect(watch, isNot(contains('Color(0xFFFFFFFF)')));
+    expect(watch, isNot(contains('Color(0xFFF7F8F8)')));
+    expect(watch, isNot(contains('BilWordmark')));
+    expect(watch, isNot(contains("bil_wordmark.dart")));
 
     expect(grid, isNot(contains("'kcal/day'")));
-    expect(grid, contains("? 'BMI' : ''"));
+    // The public dashboard is fitness-only: it must not restore the retired
+    // BMI label while keeping unit-aware weight and body-composition values.
+    expect(grid, isNot(contains("? 'BMI' : ''")));
+    expect(grid, contains('bodyFatUnit:'));
+    expect(grid, contains('fatFreeMass:'));
     expect(grid, contains('weightUnit: UnitConverter.weightUnit(system)'));
     expect(analyticsCenter, contains('textDirection: TextDirection.ltr'));
     expect(profile, contains('mainAxisAlignment: MainAxisAlignment.center'));

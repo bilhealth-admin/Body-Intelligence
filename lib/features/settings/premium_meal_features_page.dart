@@ -109,12 +109,6 @@ class VerifiedPremiumFeatureGate extends ConsumerWidget {
                 children: [
                   const Icon(Icons.workspace_premium_rounded, size: 54),
                   const SizedBox(height: 16),
-                  Text(
-                    _copy(context, 'This is an independent Premium feature.'),
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 16),
                   FilledButton(
                     onPressed: () => context.push('/plans'),
                     child: Text(_copy(context, 'View Premium plans')),

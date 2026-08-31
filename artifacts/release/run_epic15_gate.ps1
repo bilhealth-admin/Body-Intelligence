@@ -1,3 +1,6 @@
+$ErrorActionPreference = 'Stop'
+throw 'EPIC15_GATE=HISTORICAL_NON_AUTHORITATIVE. This legacy local gate cannot mutate store assets or certify a release candidate. Use the reviewed store-media workflow and .github/workflows/bil_android_release_candidate.yml. No asset or artifact was produced.'
+
 $ErrorActionPreference = 'Continue'
 if (Test-Path variable:PSNativeCommandUseErrorActionPreference) {
   $PSNativeCommandUseErrorActionPreference = $false

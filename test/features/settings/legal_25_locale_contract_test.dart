@@ -61,7 +61,7 @@ void main() {
 
   test('all legal documents share one auditable policy revision', () {
     expect(bilLegalPolicyId, 'BIL-LEGAL');
-    expect(bilLegalPolicyRevision, '2026-08-27');
+    expect(bilLegalPolicyRevision, '2026-08-29');
     expect(bilLegalPublicationStatus, 'PUBLISHED');
     expect(BilLegalDocument.values, hasLength(3));
   });

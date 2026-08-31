@@ -24,8 +24,8 @@ abstract interface class CloudTransport {
 
 abstract interface class CloudPayloadCipher {
   bool get isAvailable;
-  Map<String, Object?> encrypt(Map<String, Object?> cleartext);
-  Map<String, Object?> decrypt(Map<String, Object?> ciphertext);
+  Future<Map<String, Object?>> encrypt(Map<String, Object?> cleartext);
+  Future<Map<String, Object?>> decrypt(Map<String, Object?> ciphertext);
 }
 
 abstract interface class CloudConnectivity {

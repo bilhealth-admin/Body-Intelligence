@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../app/localization/bil_locale_policy.dart';
+import '../../../app/localization/runtime_copy_release_polish.dart';
 import '../../commerce/domain/subscription_state.dart';
 import '../../commerce/domain/commerce_plan.dart';
 import '../../commerce/presentation/premium_collection_item_gate.dart';
@@ -13,12 +16,16 @@ import '../../commerce/presentation/premium_label_badge.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
 import '../domain/static_workout_artwork.dart';
+import '../domain/gym_six_month_plan.dart';
 import '../domain/wellness_content_pack.dart';
 import '../domain/workout_routine_contract.dart';
+import '../domain/workout_free_preview_policy.dart';
+import '../repositories/gym_six_month_plan_repository.dart';
 import '../services/wellness_content_pack_manager.dart';
 import '../services/wellness_media_cache.dart';
 import 'workout_access_policy.dart';
 import 'wellness_copy.dart';
+import 'workout_video_group_copy.dart';
 
 part 'bil_workout_routines_list.dart';
 part 'bil_workout_routine_details.dart';
@@ -27,11 +34,14 @@ part 'bil_workout_routine_presenters.dart';
 part 'bil_workout_routine_visuals.dart';
 part 'bil_custom_workout_routines.dart';
 part 'bil_workout_routines_states.dart';
+part 'bil_workout_routines_library.dart';
+part 'bil_workout_videos_wall.dart';
 
 typedef WorkoutLibraryLoader =
     Future<List<WellnessContentItem>> Function(String locale);
 typedef WorkoutLogHandler = Future<void> Function(WellnessContentItem workout);
 typedef CustomRoutineWriter = Future<bool> Function(List<String> encodedRows);
+typedef GymPlanLoader = Future<GymSixMonthPlan> Function();
 
 SubscriptionState? _usableVerifiedSubscription(
   AsyncValue<SubscriptionState> snapshot,
@@ -43,10 +53,12 @@ SubscriptionState? _usableVerifiedSubscription(
 
 /// A verified, offline-first workout-routine browser.
 ///
-/// The page only renders items that passed [WellnessContentPackManager]'s
-/// trusted-item boundary. A video surface is shown as playable only when the
-/// installed item carries integrity metadata for licensed media; an image or
-/// an unverified URL is never presented as a workout video.
+/// The page only renders release-approved discovery items or installed items
+/// that passed [WellnessContentPackManager]'s trusted-item boundary. Discovery
+/// rows contain no executable routine steps or playable downloaded media. A
+/// video surface is shown as playable only when an installed item carries
+/// integrity metadata for licensed media; an image or an unverified URL is
+/// never presented as a workout video.
 class BilWorkoutRoutinesPage extends ConsumerStatefulWidget {
   const BilWorkoutRoutinesPage({
     super.key,
@@ -55,6 +67,7 @@ class BilWorkoutRoutinesPage extends ConsumerStatefulWidget {
     this.onLogWorkout,
     this.mediaCache,
     this.customRoutineWriter,
+    this.gymPlanLoader,
     this.offline = false,
     this.initialItemId,
   });
@@ -64,6 +77,7 @@ class BilWorkoutRoutinesPage extends ConsumerStatefulWidget {
   final WorkoutLogHandler? onLogWorkout;
   final WellnessMediaCache? mediaCache;
   final CustomRoutineWriter? customRoutineWriter;
+  final GymPlanLoader? gymPlanLoader;
   final String? initialItemId;
 
   /// Set by the owning connectivity provider. Installed packs remain usable
@@ -79,6 +93,18 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
     with SingleTickerProviderStateMixin {
   static const _routineIdsKey = 'bil.saved_workout_routine_ids.v1';
   static const _customRoutinesKey = 'bil.custom_workout_routines.v1';
+  static const _emptyInjectedGymPlan = GymSixMonthPlan(
+    sourcePath: 'injected-catalog',
+    sourceContractId: 'injected-catalog',
+    sourceSha256: '',
+    releaseManifestPath: 'injected-catalog',
+    releaseManifestSha256: '',
+    months: [],
+    sessions: [],
+    warmups: GymPlanWarmups(exerciseIds: [], groups: []),
+    libraryPages: [],
+    exerciseIds: [],
+  );
 
   late final WellnessContentPackManager _manager =
       widget.manager ?? WellnessContentPackManager();
@@ -87,6 +113,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
   late final TabController _tabs;
   final _searchController = TextEditingController();
   Future<List<WellnessContentItem>>? _items;
+  late final Future<GymSixMonthPlan> _gymPlan;
   String? _loadedLocale;
   String _query = '';
   String? _category;
@@ -96,17 +123,41 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
   bool _customMutationBusy = false;
   bool _initialItemHandled = false;
 
+  /// Owns UI mutations initiated by the split library-surface extension.
+  void _mutateWorkoutLibrary(VoidCallback mutation) {
+    if (mounted) setState(mutation);
+  }
+
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 3, vsync: this)..addListener(_onTabChanged);
+    _tabs = TabController(length: 4, vsync: this)..addListener(_onTabChanged);
+    _gymPlan =
+        widget.gymPlanLoader?.call() ??
+        (widget.loader == null
+            ? _loadBundledGymPlan()
+            : Future.value(_emptyInjectedGymPlan));
     _loadRoutineIds();
+  }
+
+  Future<GymSixMonthPlan> _loadBundledGymPlan() async {
+    const repository = GymSixMonthPlanRepository();
+    final sources = await Future.wait([
+      rootBundle.loadString(GymSixMonthPlanRepository.artifactPath),
+      rootBundle.loadString(GymSixMonthPlanRepository.releaseManifestPath),
+    ]);
+    return repository.parse(
+      sources[0],
+      releaseManifestBytes: utf8.encode(sources[1]),
+    );
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final locale = Localizations.localeOf(context).languageCode;
+    final locale = BilLocalePolicy.canonicalTag(
+      Localizations.localeOf(context),
+    );
     if (_loadedLocale == locale) return;
     _loadedLocale = locale;
     _reload();
@@ -191,10 +242,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
     setState(() {
       _items =
           widget.loader?.call(locale) ??
-          _manager.loadTrustedInstalledItems(
-            WellnessContentType.workouts,
-            locale: locale,
-          );
+          _manager.loadWorkoutLibraryItems(locale: locale);
     });
   }
 
@@ -240,7 +288,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
     final subscription = _usableVerifiedSubscription(
       ref.read(verifiedSubscriptionStateProvider),
     );
-    if (!workoutAccessGranted(item.minimumAccess, subscription)) {
+    if (!workoutItemAccessGranted(item, subscription)) {
       throw StateError(
         '${item.minimumAccess.name.toUpperCase()} access is required.',
       );
@@ -309,8 +357,11 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
     // library immediately if the verified server snapshot changes.
     ref.watch(verifiedSubscriptionStateProvider);
     final future = _items;
+    final compactHeader = MediaQuery.sizeOf(context).width < 520;
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: compactHeader ? 72 : null,
+        titleSpacing: compactHeader ? 0 : null,
         leading: IconButton(
           tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           onPressed: () => context.canPop()
@@ -318,11 +369,24 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
               : context.go('/wellness-library'),
           icon: const Icon(Icons.arrow_back_rounded),
         ),
-        title: Text(_copy(context, 'Workout Routines', 'روتينات التمارين')),
+        title: Text(
+          wellnessWorkoutVideosAndRoutinesTitle(context),
+          key: const ValueKey('workout-videos-routines-title'),
+          maxLines: compactHeader ? 2 : 1,
+          overflow: compactHeader
+              ? TextOverflow.visible
+              : TextOverflow.ellipsis,
+          style: compactHeader
+              ? Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  height: 1.08,
+                )
+              : null,
+        ),
         actions: [
           IconButton(
             key: const ValueKey('workout-programs-action'),
-            tooltip: _copy(context, 'Add exercise', 'إضافة تمرين'),
+            tooltip: _copy(context, '10 training categories', '10 فئات تدريب'),
             onPressed: () => context.push('/wellness/workouts/log'),
             icon: const Icon(Icons.playlist_add_check_circle_outlined),
           ),
@@ -340,6 +404,7 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
         bottom: TabBar(
           controller: _tabs,
           tabs: [
+            Tab(text: _workoutHubCopy(context, 'Videos')),
             Tab(text: _workoutHubCopy(context, 'Gym')),
             Tab(text: _workoutHubCopy(context, 'Home')),
             Tab(text: _workoutHubCopy(context, 'My plans')),
@@ -362,202 +427,23 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
                 }
                 final items = snapshot.data ?? const <WellnessContentItem>[];
                 _scheduleInitialItem(items);
-                return _buildLibrary(items);
+                return FutureBuilder<GymSixMonthPlan>(
+                  future: _gymPlan,
+                  builder: (context, planSnapshot) {
+                    if (planSnapshot.connectionState != ConnectionState.done) {
+                      return const _WorkoutLibraryLoading();
+                    }
+                    if (planSnapshot.hasError || planSnapshot.data == null) {
+                      return _WorkoutLibraryError(
+                        offline: widget.offline,
+                        onRetry: _reload,
+                      );
+                    }
+                    return _buildLibrary(items, planSnapshot.data!);
+                  },
+                );
               },
             ),
-    );
-  }
-
-  Widget _buildLibrary(List<WellnessContentItem> items) {
-    final subscription = _usableVerifiedSubscription(
-      ref.watch(verifiedSubscriptionStateProvider),
-    );
-    final premiumUnlocked =
-        subscription != null && subscription.plan != CommercePlan.free;
-    final storefrontPlan = ref.watch(storefrontTargetPlanProvider).value;
-    final premiumTier = storefrontPlan == CommercePlan.premiumAiCoach
-        ? 'BIL PREMIUM AI COACH'
-        : 'BIL PREMIUM';
-    void openPremium() => context.push(
-      storefrontPlan == CommercePlan.premiumAiCoach
-          ? '/plans?focus=boost'
-          : '/plans?focus=subscription',
-    );
-    final selectedItems = switch (_tabs.index) {
-      0 => items.where((item) => item.releaseBundleId != 'home-training'),
-      1 => items.where((item) => item.releaseBundleId == 'home-training'),
-      _ => items.where((item) => _routineIds.contains(item.stableId)),
-    };
-    final categoryOrders = <String, int>{};
-    for (final item in selectedItems) {
-      final category = item.category?.trim();
-      if (category == null || category.isEmpty) continue;
-      final order = item.categoryOrder ?? 1 << 30;
-      final current = categoryOrders[category];
-      if (current == null || order < current) categoryOrders[category] = order;
-    }
-    final categories = categoryOrders.keys.toList()
-      ..sort((left, right) {
-        final order = categoryOrders[left]!.compareTo(categoryOrders[right]!);
-        return order == 0 ? left.compareTo(right) : order;
-      });
-    if (_category != null && !categories.contains(_category)) {
-      _category = null;
-    }
-    final query = _query.trim().toLowerCase();
-    final visible = selectedItems
-        .where((item) {
-          if (_category != null && item.category != _category) return false;
-          if (!_matchesWorkoutPresenter(item, _presenterFilter)) return false;
-          if (query.isEmpty) return true;
-          final searchable = <String>[
-            item.title,
-            item.description,
-            item.category ?? '',
-            item.difficulty ?? '',
-            ...item.equipment,
-            ...item.tags,
-          ].join(' ').toLowerCase();
-          return searchable.contains(query);
-        })
-        .toList(growable: false);
-
-    return RefreshIndicator(
-      onRefresh: () async => _reload(),
-      child: CustomScrollView(
-        key: ValueKey('workout-library-tab-${_tabs.index}'),
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (widget.offline) ...[
-                    const _OfflineInstalledBanner(),
-                    const SizedBox(height: 14),
-                  ],
-                  TextField(
-                    controller: _searchController,
-                    onChanged: (value) => setState(() => _query = value),
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search_rounded),
-                      hintText: _copy(
-                        context,
-                        'Search verified workouts',
-                        'ابحث في التمارين الموثقة',
-                      ),
-                      suffixIcon: _query.isEmpty
-                          ? null
-                          : IconButton(
-                              tooltip: _copy(context, 'Clear', 'مسح'),
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() => _query = '');
-                              },
-                              icon: const Icon(Icons.close_rounded),
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _WorkoutPresenterFilterPanel(
-                    value: _presenterFilter,
-                    onChanged: (value) =>
-                        setState(() => _presenterFilter = value),
-                  ),
-                  if (categories.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      height: 42,
-                      child: ListView(
-                        key: const ValueKey('workout-category-list'),
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          _CategoryChip(
-                            label: _copy(context, 'All', 'الكل'),
-                            selected: _category == null,
-                            onSelected: () => setState(() => _category = null),
-                          ),
-                          for (final category in categories)
-                            _CategoryChip(
-                              label: category,
-                              selected: _category == category,
-                              onSelected: () =>
-                                  setState(() => _category = category),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          if (visible.isEmpty && _tabs.index != 2 && items.isEmpty)
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
-              sliver: SliverToBoxAdapter(
-                child: _WorkoutMetadataPreviews(
-                  offline: widget.offline,
-                  onCardio: () =>
-                      context.push('/wellness/workouts/log?category=Cardio'),
-                  onStrength: () =>
-                      context.push('/wellness/workouts/log?category=Strength'),
-                  onManagePacks: () => context.push('/wellness/content-packs'),
-                ),
-              ),
-            )
-          else if (visible.isEmpty && _tabs.index != 2)
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: _WorkoutLibraryEmpty(
-                myRoutines: false,
-                offline: widget.offline,
-                hasInstalledItems: true,
-                onExplore: () => _tabs.animateTo(0),
-                onManagePacks: () => context.push('/wellness/content-packs'),
-              ),
-            )
-          else if (_tabs.index != 2)
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 0, 40),
-              sliver: SliverToBoxAdapter(
-                child: _WorkoutExploreSections(
-                  items: visible,
-                  savedIds: _routineIds,
-                  mediaCache: _mediaCache,
-                  online: !widget.offline,
-                  premiumUnlocked: premiumUnlocked,
-                  premiumTier: premiumTier,
-                  isLocked: _isLocked,
-                  onUpgrade: openPremium,
-                  onOpen: _openDetails,
-                  onToggleSaved: _toggleRoutine,
-                ),
-              ),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
-              sliver: SliverToBoxAdapter(
-                child: _MyWorkoutRoutinesView(
-                  items: items,
-                  savedItems: visible,
-                  routines: _customRoutines,
-                  mediaCache: _mediaCache,
-                  online: !widget.offline,
-                  isLocked: _isLocked,
-                  onOpen: _openDetails,
-                  onToggleSaved: _toggleRoutine,
-                  onCreate: () => _showCustomRoutineBuilder(items),
-                  onDelete: _customMutationBusy ? null : _deleteCustomRoutine,
-                  onComplete: _logCustomRoutine,
-                ),
-              ),
-            ),
-        ],
-      ),
     );
   }
 
@@ -635,6 +521,6 @@ class _BilWorkoutRoutinesPageState extends ConsumerState<BilWorkoutRoutinesPage>
     final subscription = _usableVerifiedSubscription(
       ref.read(verifiedSubscriptionStateProvider),
     );
-    return !workoutAccessGranted(item.minimumAccess, subscription);
+    return !workoutItemAccessGranted(item, subscription);
   }
 }

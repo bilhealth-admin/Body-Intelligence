@@ -86,7 +86,7 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(dialogContext).colorScheme.surface,
         title: Text(
           authEntryText(context, AuthEntryCopyKey.restorePreviousDataQuestion),
         ),
@@ -118,19 +118,29 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    // ButtonStyle replaces the surrounding text theme. Re-attach its active
+    // family so visual tests keep their real Arabic face while production
+    // continues to use the platform-native family.
+    final accountActionFontFamily = Theme.of(
+      context,
+    ).textTheme.labelLarge?.fontFamily;
+    final pageBackground = scheme.brightness == Brightness.dark
+        ? scheme.surface
+        : Colors.white;
     if (_hasAuthenticatedSession || redirectingAuthenticatedUser) {
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => _redirectAuthenticatedUser(),
       );
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: pageBackground,
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     final snapshot = ref.watch(validRecoverySnapshotProvider);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: pageBackground,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -179,10 +189,11 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
-                            textStyle: const TextStyle(
+                            textStyle: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w700,
                               letterSpacing: -.15,
+                              fontFamily: accountActionFontFamily,
                             ),
                           ),
                           child: Text(
@@ -201,9 +212,10 @@ class _AccountGatewayPageState extends ConsumerState<AccountGatewayPage> {
                               horizontal: 18,
                               vertical: 12,
                             ),
-                            textStyle: const TextStyle(
+                            textStyle: TextStyle(
                               fontSize: 14.5,
                               fontWeight: FontWeight.w700,
+                              fontFamily: accountActionFontFamily,
                             ),
                           ),
                           child: Text(
@@ -266,7 +278,7 @@ class _GatewayBrandHeader extends StatelessWidget {
         authEntryText(context, AuthEntryCopyKey.welcomeTo),
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: const Color(0xFF8A8F98),
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
           fontSize: compact ? 12 : 13,
           height: 1.1,
           fontWeight: FontWeight.w600,
@@ -274,7 +286,7 @@ class _GatewayBrandHeader extends StatelessWidget {
         ),
       ),
       SizedBox(height: compact ? 4 : 5),
-      BilWordmark(height: compact ? 40 : 46),
+      BilFullWordmark(height: compact ? 40 : 46),
     ],
   );
 }
@@ -292,6 +304,7 @@ class _GatewayStoryPager extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final stories =
         <({String asset, String title, String body, IconData icon})>[
           (
@@ -427,8 +440,8 @@ class _GatewayStoryPager extends StatelessWidget {
                   Text(
                     story.title,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Color(0xFF111318),
+                    style: TextStyle(
+                      color: scheme.onSurface,
                       fontSize: 21.5,
                       height: 1.16,
                       fontWeight: FontWeight.w800,
@@ -441,8 +454,8 @@ class _GatewayStoryPager extends StatelessWidget {
                     child: Text(
                       story.body,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Color(0xFF666C76),
+                      style: TextStyle(
+                        color: scheme.onSurfaceVariant,
                         fontSize: 13.5,
                         height: 1.35,
                         fontWeight: FontWeight.w500,
@@ -465,8 +478,8 @@ class _GatewayStoryPager extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
                 color: itemIndex == index
-                    ? const Color(0xFF0877F9)
-                    : const Color(0xFFD1D3D8),
+                    ? scheme.primary
+                    : scheme.outlineVariant,
                 shape: BoxShape.circle,
               ),
             ),
@@ -483,47 +496,60 @@ class _StoryGlassSignal extends StatelessWidget {
   final IconData icon;
 
   @override
-  Widget build(BuildContext context) => ClipRRect(
-    borderRadius: BorderRadius.circular(16),
-    child: BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-      child: Container(
-        width: 104,
-        height: 66,
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: .76),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: .78)),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Icon(icon, color: const Color(0xFF0877F9), size: 19),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(5, (index) {
-                  const heights = <double>[13, 22, 18, 29, 35];
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 220),
-                    width: 5,
-                    height: heights[index],
-                    decoration: BoxDecoration(
-                      color: const Color(
-                        0xFF0877F9,
-                      ).withValues(alpha: .58 + (index * .08)),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  );
-                }),
-              ),
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        child: Container(
+          width: 104,
+          height: 66,
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+          decoration: BoxDecoration(
+            color:
+                (scheme.brightness == Brightness.dark
+                        ? scheme.surfaceContainerHighest
+                        : Colors.white)
+                    .withValues(alpha: .76),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color:
+                  (scheme.brightness == Brightness.dark
+                          ? scheme.outlineVariant
+                          : Colors.white)
+                      .withValues(alpha: .78),
             ),
-          ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Icon(icon, color: const Color(0xFF0877F9), size: 19),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: List.generate(5, (index) {
+                    const heights = <double>[13, 22, 18, 29, 35];
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      width: 5,
+                      height: heights[index],
+                      decoration: BoxDecoration(
+                        color: const Color(
+                          0xFF0877F9,
+                        ).withValues(alpha: .58 + (index * .08)),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }

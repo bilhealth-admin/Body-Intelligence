@@ -2,6 +2,8 @@
 param()
 
 $ErrorActionPreference = 'Stop'
+throw 'EPIC2_COMMIT=HISTORICAL_NON_AUTHORITATIVE. An ignored historical summary cannot authorize staging or committing current source. Use docs/launch_readiness/BIL_RELEASE_CANDIDATE_GATE.md and .github/workflows/bil_android_release_candidate.yml. No Git state was changed.'
+
 $project = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
 $summaryFile = Join-Path $PSScriptRoot 'epic2_summary.txt'
 $commitSummary = Join-Path $PSScriptRoot 'epic2_commit_summary.txt'

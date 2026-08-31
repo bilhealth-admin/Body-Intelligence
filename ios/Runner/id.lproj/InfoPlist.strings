@@ -1,8 +1,8 @@
 "NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
-"NSHealthUpdateUsageDescription" = "BIL hanya menulis catatan kesehatan yang Anda pilih secara eksplisit, setelah persetujuan tulis terpisah.";
+"NSHealthUpdateUsageDescription" = "BIL hanya menulis catatan berat badan setelah Anda menyetujui akses tulis Health secara terpisah.";
 "NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Gunakan kamera hanya ketika Anda memilih untuk memindai kode batang, meninjau foto makanan, atau menambahkan profil pribadi atau foto kemajuan.";
-"NSPhotoLibraryUsageDescription" = "Pilih foto makanan, profil, atau kemajuan untuk ditinjau sebelum disimpan atau diunggah.";
-"NSMicrophoneUsageDescription" = "BIL menggunakan mikrofon hanya saat Anda memilih pencatatan makanan dengan suara atau berbicara langsung dengan BIL AI Coach.";
-"NSSpeechRecognitionUsageDescription" = "BIL mengubah ucapan yang Anda mulai untuk pencatatan makanan atau BIL AI Coach menjadi teks agar dapat Anda tinjau atau kirim.";
+"NSPhotoLibraryUsageDescription" = "BIL hanya mengakses foto yang Anda pilih untuk makanan, profil, kemajuan, postingan komunitas, atau kiriman makanan agar dapat Anda tinjau sebelum disimpan atau diunggah.";
+"NSMicrophoneUsageDescription" = "BIL menggunakan mikrofon hanya saat Anda memilih pencatatan berat badan atau makanan dengan suara, atau berbicara langsung dengan BIL AI Coach.";
+"NSSpeechRecognitionUsageDescription" = "BIL mengubah ucapan yang Anda mulai untuk pencatatan berat badan, makanan, atau BIL AI Coach menjadi teks agar dapat Anda tinjau atau kirim.";

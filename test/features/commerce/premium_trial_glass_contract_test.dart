@@ -31,47 +31,67 @@ void main() {
   });
 
   test('watch sync is free while fitness devices remain behind glass', () {
-    final discover = File(
-      'lib/features/dashboard/widgets/dashboard_reference_phone_sections.dart',
+    final dashboard = File(
+      'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
+    ).readAsStringSync();
+    final healthCard = File(
+      'lib/features/connected_health/widgets/connected_health_card.dart',
     ).readAsStringSync();
     final health = File(
       'lib/features/connected_health/connected_health_page.dart',
     ).readAsStringSync();
 
-    final syncRoute = discover.indexOf("'/connected-health'");
-    expect(syncRoute, greaterThan(0));
-    expect(discover.substring(syncRoute, syncRoute + 50), contains('false'));
+    expect(
+      dashboard,
+      contains('visibleSections.contains(DashboardSectionIds.connectedHealth)'),
+    );
+    expect(dashboard, contains('connectedHealth!'));
+    expect(
+      dashboard,
+      isNot(contains("Key('dashboard-connected-health-premium-lock')")),
+    );
+    expect(healthCard, contains('onSync:'));
+    expect(healthCard, contains('.synchronize()'));
+    expect(healthCard, isNot(contains('PremiumDashboardCardLock')));
     expect(health, contains('PremiumDashboardCardLock'));
+    expect(health, contains("Key('fitness-devices-premium-gate')"));
     expect(health, contains('Premium fitness device connections'));
     expect(health, contains('Weight, body composition, and heart rate'));
   });
 
-  test('destination glass names the hidden feature and seven-day trial', () {
-    final lock = File(
-      'lib/features/dashboard/widgets/premium_dashboard_card_lock.dart',
-    ).readAsStringSync();
-    final routeGate = File(
-      'lib/features/commerce/presentation/premium_route_glass_gate.dart',
-    ).readAsStringSync();
+  test(
+    'destination glass names the hidden feature without inventing a trial',
+    () {
+      final lock = File(
+        'lib/features/dashboard/widgets/premium_dashboard_card_lock.dart',
+      ).readAsStringSync();
+      final routeGate = File(
+        'lib/features/commerce/presentation/premium_route_glass_gate.dart',
+      ).readAsStringSync();
 
-    expect(lock, contains("RuntimeCopy.resolve('7 days free'"));
-    expect(lock, contains('detail'));
-    expect(routeGate, contains('1,500 nutrition-aware recipes'));
-    expect(routeGate, contains('Nutrition and food facts'));
-    expect(routeGate, contains('Step-by-step preparation'));
-    expect(routeGate, isNot(contains('Nutrition and portions included')));
-    expect(routeGate, contains('10 training categories'));
-    expect(routeGate, contains('My Routines'));
-    expect(routeGate, isNot(contains('300+ home workout videos')));
-    expect(
-      routeGate,
-      isNot(contains('100+ video-guided weight-training plans')),
-    );
-    expect(routeGate, isNot(contains('200 guided workout movements')));
-    expect(routeGate, contains("? '/plans?focus=boost'"));
-    expect(routeGate, contains("action: t('Get AI Boost')"));
-    expect(routeGate, contains('2,500 verified, non-expiring tokens'));
-  });
+      expect(lock, contains('PremiumLabelBadge'));
+      expect(lock, contains('label: title'));
+      expect(lock, isNot(contains("RuntimeCopy.resolve('7 days free'")));
+      expect(lock, contains('detail'));
+      expect(routeGate, contains('1,500 nutrition-aware recipes'));
+      expect(routeGate, contains('Nutrition and food facts'));
+      expect(routeGate, contains('Step-by-step preparation'));
+      expect(routeGate, isNot(contains('Nutrition and portions included')));
+      expect(routeGate, contains('10 training categories'));
+      expect(routeGate, contains('My Routines'));
+      expect(routeGate, isNot(contains('300+ home workout videos')));
+      expect(
+        routeGate,
+        isNot(contains('100+ video-guided weight-training plans')),
+      );
+      expect(routeGate, isNot(contains('200 guided workout movements')));
+      expect(routeGate, contains("? '/plans?focus=boost'"));
+      expect(routeGate, contains("context.strings.text('Get AI Boost')"));
+      expect(routeGate, contains("BilStoreCopy.text(storeLocale, 'plans')"));
+      expect(routeGate, isNot(contains("action: t('Start 7-day free trial')")));
+      expect(routeGate, contains('2,500 verified, non-expiring tokens'));
+    },
+  );
 
   test('discover destinations preserve Android back navigation', () {
     final source = File(

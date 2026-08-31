@@ -20,7 +20,8 @@ import UserNotifications
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
     BILGlobalHealthBridge.register(with: engineBridge.pluginRegistry.registrar(forPlugin: "BILGlobalHealthBridge")!)
-    BILMedicalBleBridge.register(with: engineBridge.pluginRegistry.registrar(forPlugin: "BILMedicalBleBridge")!)
+    BILFitnessBleBridge.register(with: engineBridge.pluginRegistry.registrar(forPlugin: "BILFitnessBleBridge")!)
+    BILSystemCryptoBridge.register(with: engineBridge.pluginRegistry.registrar(forPlugin: "BILSystemCryptoBridge")!)
     let speechRegistrar = engineBridge.pluginRegistry.registrar(forPlugin: "BILSpeechBridge")!
     speechBridge = BILSpeechBridge(messenger: speechRegistrar.messenger())
     textToSpeechBridge = BILTextToSpeechBridge(messenger: speechRegistrar.messenger())

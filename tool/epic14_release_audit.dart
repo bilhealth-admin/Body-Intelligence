@@ -16,8 +16,26 @@ void _requires(String body, String value, String path) {
   if (!body.contains(value)) _fail('$path missing: $value');
 }
 
+String _releaseVersion(String pubspec) {
+  final match = RegExp(
+    r'^version:\s*([0-9]+\.[0-9]+\.[0-9]+\+[0-9]+)\s*(?:#.*)?$',
+    multiLine: true,
+  ).firstMatch(pubspec);
+  if (match == null) _fail('pubspec.yaml has no canonical release version.');
+  return match.group(1)!;
+}
+
 void main() {
   final pubspec = _read('pubspec.yaml');
+  final releaseVersion = _releaseVersion(pubspec);
+  final candidateGate = _read(
+    'docs/launch_readiness/BIL_RELEASE_CANDIDATE_GATE.md',
+  );
+  _requires(
+    candidateGate,
+    'Version metadata: `$releaseVersion`',
+    'release candidate gate',
+  );
   final appGradle = _read('android/app/build.gradle.kts');
   final settings = _read('android/settings.gradle.kts');
   final properties = _read('android/gradle.properties');
@@ -30,7 +48,6 @@ void main() {
   final project = _read('ios/Runner.xcodeproj/project.pbxproj');
 
   for (final pair in <(String, String)>[
-    (pubspec, 'version: 1.0.0+1'),
     (appGradle, 'applicationId = "com.bilhealth.bodyintelligencelog"'),
     (appGradle, 'namespace = "com.bilhealth.bodyintelligencelog"'),
     (appGradle, 'compileSdk = 36'),
@@ -122,9 +139,34 @@ void main() {
     _requires(signedIos, value, 'signed iOS workflow');
   }
 
-  if (manifest.contains('android.permission.health.READ_HEART_RATE') ||
-      manifest.contains('android.permission.health.READ_SLEEP')) {
-    _fail('Android requests unsupported Health Connect data.');
+  for (final fitnessPermission in const <String>[
+    'READ_STEPS',
+    'READ_ACTIVE_CALORIES_BURNED',
+    'READ_EXERCISE',
+    'READ_SLEEP',
+    'READ_HEART_RATE',
+    'READ_RESTING_HEART_RATE',
+    'READ_HEART_RATE_VARIABILITY',
+    'READ_WEIGHT',
+    'WRITE_WEIGHT',
+    'READ_NUTRITION',
+    'WRITE_NUTRITION',
+  ]) {
+    _requires(
+      manifest,
+      'android.permission.health.$fitnessPermission',
+      'Android fitness permission contract',
+    );
+  }
+  for (final medicalPermission in const <String>[
+    'READ_BLOOD_PRESSURE',
+    'READ_OXYGEN_SATURATION',
+    'READ_BLOOD_GLUCOSE',
+    'READ_BODY_TEMPERATURE',
+  ]) {
+    if (manifest.contains('android.permission.health.$medicalPermission')) {
+      _fail('Android requests forbidden medical data: $medicalPermission');
+    }
   }
   if (appGradle.contains('signingConfigs.getByName("debug")')) {
     _fail('Release configuration falls back to debug signing.');
@@ -133,7 +175,7 @@ void main() {
   stdout.writeln('EPIC14_RELEASE_AUDIT=PASS');
   stdout.writeln('ANDROID_ID=com.bilhealth.bodyintelligencelog');
   stdout.writeln('APPLE_ID=com.bilhealth.bodyintelligencelog');
-  stdout.writeln('VERSION=1.0.0+1');
+  stdout.writeln('VERSION=$releaseVersion');
   stdout.writeln('TARGET_API=36');
   stdout.writeln(
     'APPLE_SIGNED_BUILD=EXTERNAL_CREDENTIALS_REQUIRED_NOT_CLAIMED',

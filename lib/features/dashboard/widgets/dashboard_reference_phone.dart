@@ -116,12 +116,13 @@ class _ReferenceDashboardPhone extends StatelessWidget {
         PremiumDashboardCardLock(
           key: const Key('dashboard-macros-premium-lock'),
           locked: !premiumUnlocked,
-          title: tr('Premium nutrient goals', 'أهداف المغذيات Premium'),
+          title: tr('Nutrient goals', 'أهداف المغذيات'),
           detail: tr(
             'See protein, carbs, and fat progress at a glance.',
             'تابع تقدم البروتين والكربوهيدرات والدهون بلمحة.',
           ),
           borderRadius: 12,
+          showLabel: false,
           onTap: () => context.push('/plans'),
           child: _ReferenceMacrosCard(
             onEdit: () => context.push('/settings/nutrition-goals'),
@@ -152,12 +153,13 @@ class _ReferenceDashboardPhone extends StatelessWidget {
         PremiumDashboardCardLock(
           key: const Key('dashboard-heart-premium-lock'),
           locked: !premiumUnlocked,
-          title: tr('Premium heart health', 'صحة القلب Premium'),
+          title: tr('Heart health', 'صحة القلب'),
           detail: tr(
             'Follow saturated fat, sodium, and fiber with clear rings.',
             'تابع الدهون المشبعة والصوديوم والألياف بدوائر واضحة.',
           ),
           borderRadius: 12,
+          showLabel: false,
           onTap: () => context.push('/plans'),
           child: _CircularNutrientCard(
             key: const Key('dashboard-heart-circle-card'),
@@ -193,6 +195,17 @@ class _ReferenceDashboardPhone extends StatelessWidget {
       key: const Key('premium-dashboard-benchmark'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (!premiumUnlocked &&
+            (visibleSections.contains(DashboardSectionIds.macros) ||
+                visibleSections.contains(
+                  DashboardSectionIds.connectedHealth,
+                ))) ...[
+          const Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: PremiumLabelBadge(key: Key('dashboard-premium-page-label')),
+          ),
+          const SizedBox(height: 12),
+        ],
         if (visibleSections.contains(DashboardSectionIds.aiCoach)) ...[
           _ReferenceAiCoachCard(arabic: arabic),
           const SizedBox(height: 12),
@@ -270,36 +283,12 @@ class _ReferenceDashboardPhone extends StatelessWidget {
         if (visibleSections.contains(DashboardSectionIds.progress) &&
             progressSection != null) ...[
           const SizedBox(height: 12),
-          Row(
-            key: const Key('dashboard-summary-and-workout-rail'),
-            children: [
-              Expanded(
-                child: _VisualInsightShortcut(
-                  key: const Key('dashboard-mobile-summary-card'),
-                  title: tr('Today Summary', 'ملخص اليوم'),
-                  subtitle: tr(
-                    'Meals, water and progress',
-                    'وجباتك وماؤك وتقدمك',
-                  ),
-                  imageAsset: 'assets/images/dashboard/today_summary_v1.png',
-                  onTap: () => context.go('/daily-log'),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _VisualInsightShortcut(
-                  key: const Key('dashboard-mobile-workout-library-card'),
-                  title: tr('Workout Videos', 'فيديوهات التمارين'),
-                  subtitle: tr(
-                    '302 approved workout guides',
-                    '302 دليل تمرين معتمد',
-                  ),
-                  imageAsset:
-                      'assets/images/professional/strength_training_cover.png',
-                  onTap: () => context.push('/wellness/workouts/routines'),
-                ),
-              ),
-            ],
+          _VisualInsightShortcut(
+            key: const Key('dashboard-mobile-summary-card'),
+            title: tr('Today Summary', 'ملخص اليوم'),
+            subtitle: tr('Meals, water and progress', 'وجباتك وماؤك وتقدمك'),
+            imageAsset: 'assets/images/dashboard/today_summary_v1.png',
+            onTap: () => context.go('/daily-log'),
           ),
         ],
         const SizedBox(height: 12),
@@ -337,6 +326,11 @@ const _referencePhoneCopy = <String, Map<String, String>>{
     'es': 'Círculos nutricionales Premium',
     'tr': 'Premium besin halkaları',
   },
+  'Nutrient goals': {
+    'fr': 'Objectifs nutritionnels',
+    'es': 'Objetivos de nutrientes',
+    'tr': 'Besin hedefleri',
+  },
   'See protein, carbs, and fat progress at a glance.': {
     'fr': 'Suivez en un coup d’œil les protéines, glucides et lipides.',
     'es':
@@ -347,6 +341,11 @@ const _referencePhoneCopy = <String, Map<String, String>>{
     'fr': 'Santé cardiaque Premium',
     'es': 'Salud cardíaca Premium',
     'tr': 'Premium kalp sağlığı',
+  },
+  'Heart health': {
+    'fr': 'Santé cardiaque',
+    'es': 'Salud cardíaca',
+    'tr': 'Kalp sağlığı',
   },
   'Follow saturated fat, sodium, and fiber with clear rings.': {
     'fr':
@@ -449,10 +448,10 @@ const _referencePhoneCopy = <String, Map<String, String>>{
     'es': 'Vídeos de entrenamiento',
     'tr': 'Egzersiz videoları',
   },
-  '302 approved workout guides': {
-    'fr': '302 guides d’entraînement approuvés',
-    'es': '302 guías de entrenamiento aprobadas',
-    'tr': '302 onaylı egzersiz rehberi',
+  '300+ home workout videos': {
+    'fr': 'Plus de 300 vidéos d’entraînement à domicile',
+    'es': 'Más de 300 vídeos de entrenamiento en casa',
+    'tr': '300’den fazla ev antrenmanı videosu',
   },
   'Body Twin': {
     'fr': 'Jumeau corporel',

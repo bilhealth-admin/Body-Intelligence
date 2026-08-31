@@ -57,6 +57,13 @@ abstract final class RuntimeCopyTrial {
       'es': 'Conexiones de dispositivos de fitness compatibles',
       'tr': 'Uyumlu fitness cihazı bağlantıları',
     },
+    'Premium AI Coach': {
+      'en': 'Premium AI Coach',
+      'ar': 'Premium AI Coach',
+      'fr': 'Premium AI Coach',
+      'es': 'Premium AI Coach',
+      'tr': 'Premium AI Coach',
+    },
     '7-day trial includes 1,000 AI tokens': {
       'en': '7-day trial includes 1,000 AI tokens',
       'ar': 'تجربة 7 أيام تشمل 1,000 توكين AI',

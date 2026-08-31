@@ -34,7 +34,7 @@ void main() {
     ).readAsStringSync();
     final info = File('ios/Runner/Info.plist').readAsStringSync();
 
-    expect(pubspec, contains('version: 1.0.0+3'));
+    expect(pubspec, contains('version: 1.0.0+5'));
     expect(
       gradle,
       contains('applicationId = "com.bilhealth.bodyintelligencelog"'),

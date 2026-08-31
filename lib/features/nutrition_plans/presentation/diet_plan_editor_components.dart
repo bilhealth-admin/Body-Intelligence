@@ -153,7 +153,7 @@ class _MacroEditingNotice extends StatelessWidget {
           child: Text(
             nutritionText(
               context,
-              'Calories stay fixed. Change carbs, protein, or fat and BIL rebalances the other two so 4C + 4P + 9F always matches your target.',
+              'Calories and macros balanced for you',
               'تبقى السعرات ثابتة. عدّل الكربوهيدرات أو البروتين أو الدهون وسيوازن BIL القيمتين الأخريين ليبقى 4ك + 4ب + 9د مساويًا لهدفك.',
             ),
             style: const TextStyle(height: 1.4, color: Color(0xFF344054)),
@@ -283,7 +283,7 @@ class _DietDayCard extends StatelessWidget {
               child: Text(
                 nutritionText(
                   context,
-                  'These macro values must fit the fixed calorie target: 4C + 4P + 9F.',
+                  'Fixed calories',
                   'يجب أن تقع قيم الماكروز ضمن هدف السعرات الثابت: 4ك + 4ب + 9د.',
                 ),
                 style: const TextStyle(color: Color(0xFFB42318)),

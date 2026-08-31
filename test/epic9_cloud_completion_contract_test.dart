@@ -123,18 +123,31 @@ void main() {
     },
   );
 
-  test(
-    'account deletion worker uses privileged auth deletion and no client secret',
-    () {
-      final worker = source('supabase/functions/account_data_deletion.ts');
-      expect(worker, contains('SUPABASE_SERVICE_ROLE_KEY'));
-      expect(worker, contains('auth.admin.deleteUser'));
-      expect(worker, contains('BIL_INTERNAL_DELETION_SECRET'));
-      expect(worker, contains("status: 'pending'"));
-      expect(worker, contains('failed'));
-      expect(worker, isNot(contains('anonKey')));
-    },
-  );
+  test('account deletion is privileged, Storage-first and fails closed', () {
+    final entry = source('supabase/functions/account_data_deletion.ts');
+    final worker = source(
+      'supabase/functions/_shared/account_deletion_worker.ts',
+    );
+    final storage = source(
+      'supabase/functions/_shared/account_deletion_storage.ts',
+    );
+    expect(entry, contains('handleAccountDeletion'));
+    expect(worker, contains('SUPABASE_SERVICE_ROLE_KEY'));
+    expect(worker, contains('auth.admin.deleteUser'));
+    expect(worker, contains('BIL_INTERNAL_DELETION_SECRET'));
+    expect(worker, contains('status: "pending"'));
+    expect(worker, contains('storage_cleanup_failed'));
+    expect(worker, contains('deleteBilUserStorage'));
+    expect(storage, contains('profile-avatars'));
+    expect(storage, contains('community-post-images'));
+    expect(storage, contains('bucket.remove(chunk)'));
+    expect(storage, contains('storage_cleanup_incomplete'));
+    expect(
+      worker.indexOf('deleteBilUserStorage'),
+      lessThan(worker.indexOf('auth.admin.deleteUser')),
+    );
+    expect(worker, isNot(contains('anonKey')));
+  });
 
   test('edge functions exist in canonical deploy directories', () {
     final gate = source('artifacts/release/run_epic9_gate.ps1');
@@ -149,7 +162,7 @@ void main() {
     expect(gate, contains('index.ts'));
     expect(gate, contains('BLOCKED_CREDENTIALS_FEATURE_HIDDEN'));
     expect(dispatch, contains('BIL_INTERNAL_DISPATCH_SECRET'));
-    expect(deletion, contains('BIL_INTERNAL_DELETION_SECRET'));
+    expect(deletion, contains('handleAccountDeletion'));
   });
 
   test(

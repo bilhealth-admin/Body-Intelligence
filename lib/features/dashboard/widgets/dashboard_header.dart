@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../shared/widgets/bil_wordmark.dart';
+import '../../../shared/widgets/bil_coach_identity.dart';
 import '../dashboard_five_locale_copy.dart';
 
 part 'dashboard_guide_orb.dart';
@@ -83,16 +84,8 @@ class _CoachConversationEntry extends StatelessWidget {
                   border: Border.all(color: Colors.white70),
                 ),
                 child: ClipOval(
-                  child: Image.asset(
-                    'assets/images/ai_coach/bil_male_smart_coach_v1.png',
+                  child: const BilCoachPortrait(
                     fit: BoxFit.cover,
-                    excludeFromSemantics: true,
-                    errorBuilder: (_, _, _) => Image.asset(
-                      'assets/images/flagship/bil_body_intelligence_journey_v1.png',
-                      fit: BoxFit.cover,
-                      alignment: const Alignment(.18, -.72),
-                      excludeFromSemantics: true,
-                    ),
                   ),
                 ),
               ),

@@ -35,6 +35,20 @@ final class StoreCatalogConfiguration {
   static const premiumAiCoachMonthly = 'bil_premium_ai_coach';
   static const premiumAiCoachAnnual = 'bil_premium_ai_coach_annual';
 
+  /// The only release-approved introductory offer. Trial decisions use exact
+  /// identifiers deliberately: aliases, casing changes, whitespace, legacy
+  /// SKUs, and missing metadata all fail closed.
+  static const googleAiTrialOfferId = 'trial-7-day';
+  static const googleAiTrialOfferTag = 'new-customer';
+  static const googleAiTrialPeriodIso8601 = 'P7D';
+  static const aiTrialProductIds = <String>{
+    premiumAiCoachMonthly,
+    premiumAiCoachAnnual,
+  };
+
+  static bool isAiTrialProduct(String productId) =>
+      aiTrialProductIds.contains(productId);
+
   /// Repeatable AI credit pack. This identifier is intentionally stable
   /// across storefronts; regional price and availability remain store-owned.
   static const aiBoost = 'bil_ai_boost';
@@ -92,9 +106,8 @@ final class StoreCatalogConfiguration {
   }
 
   static StoreProductBinding? bindingForProduct(String productId) {
-    final normalizedProductId = productId.trim();
     for (final binding in products) {
-      if (binding.productId.trim() == normalizedProductId) return binding;
+      if (binding.productId == productId) return binding;
     }
     return null;
   }

@@ -1,8 +1,8 @@
 "NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
-"NSHealthUpdateUsageDescription" = "BIL yalnızca açıkça seçtiğiniz sağlık kayıtlarını, ayrı yazma izninden sonra yazar.";
+"NSHealthUpdateUsageDescription" = "BIL yalnızca Health yazma erişimini ayrıca onayladıktan sonra kilo kayıtlarını yazar.";
 "NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Kamerayı yalnızca barkod taramayı, öğün fotoğrafını incelemeyi veya özel profil ya da ilerleme fotoğrafı eklemeyi seçtiğinizde kullanın.";
-"NSPhotoLibraryUsageDescription" = "Kaydedilmeden veya yüklenmeden önce incelemek için öğün, profil ya da ilerleme fotoğrafı seçin.";
-"NSMicrophoneUsageDescription" = "BIL mikrofonu yalnızca sesle öğün kaydetmeyi veya BIL AI Coach ile doğrudan konuşmayı seçtiğinizde kullanır.";
-"NSSpeechRecognitionUsageDescription" = "BIL, öğün kaydı veya BIL AI Coach için başlattığınız konuşmayı inceleyip gönderebilmeniz için metne dönüştürür.";
+"NSPhotoLibraryUsageDescription" = "BIL yalnızca öğün, profil, ilerleme, topluluk gönderisi veya yiyecek katkısı için seçtiğiniz fotoğrafa erişir; böylece kaydetmeden ya da yüklemeden önce inceleyebilirsiniz.";
+"NSMicrophoneUsageDescription" = "BIL mikrofonu yalnızca sesle kilo veya öğün kaydetmeyi ya da BIL AI Coach ile doğrudan konuşmayı seçtiğinizde kullanır.";
+"NSSpeechRecognitionUsageDescription" = "BIL, kilo veya öğün kaydı ya da BIL AI Coach için başlattığınız konuşmayı inceleyip gönderebilmeniz için metne dönüştürür.";

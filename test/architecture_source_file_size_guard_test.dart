@@ -6,6 +6,12 @@ void main() {
   test('hand-maintained Dart sources stay below the architecture ceiling', () async {
     const maximumLines = 700;
     const reviewedCeilings = <String, int>{
+      // These are audited locale data catalogs rather than runtime
+      // coordinators or UI surfaces. Keeping each 25-locale matrix intact
+      // preserves source/placeholder reviewability; behavior lives elsewhere.
+      'lib/app/localization/runtime_copy_profile.dart': 1300,
+      'lib/app/localization/runtime_copy_release_closure.dart': 1075,
+      'lib/features/profile/profile_locale_copy.dart': 875,
       // This part owns one cohesive phone composition. Its reusable cards,
       // goal controls, and discover sections already live in sibling parts;
       // the remaining 23 lines avoid splitting a single build hierarchy.

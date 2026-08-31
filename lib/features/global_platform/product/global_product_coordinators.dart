@@ -3,7 +3,7 @@ import '../commerce/commerce_platform.dart';
 import '../core/global_platform_core.dart';
 import '../health_data/apple_health_platform.dart';
 import '../health_data/android_health_connect_platform.dart';
-import '../medical_devices/medical_device_platform.dart';
+import '../fitness_devices/fitness_device_platform.dart';
 import '../plugins/plugin_platform.dart';
 import '../professional/professional_platform.dart';
 import '../reports/scientific_reports_platform.dart';
@@ -39,7 +39,7 @@ final class GlobalProductFlows {
     required this.vision,
     required this.cloudAi,
     required this.wearables,
-    required this.medical,
+    required this.fitness,
     required this.reports,
     required this.professional,
     required this.commerce,
@@ -57,7 +57,7 @@ final class GlobalProductFlows {
   final VisionRuntime? vision;
   final OptionalCloudAiRuntime? cloudAi;
   final WearableRuntime wearables;
-  final MedicalDeviceRuntime medical;
+  final FitnessDeviceRuntime fitness;
   final WorldClassReportRuntime reports;
   final ProfessionalRuntime professional;
   final CommerceRuntime? commerce;
@@ -67,13 +67,13 @@ final class GlobalProductFlows {
 
   Future<Map<String, Object?>> synchronizeHealth(DateTime asOf) async {
     final wearable = await wearables.synchronize(asOf);
-    final measurements = await medical.ingest(asOf);
+    final measurements = await fitness.ingest(asOf);
     await store.put('product_flow_state', 'health_sync', <String, Object?>{
       'at': asOf.toUtc().toIso8601String(),
       'wearable': wearable.length,
-      'medical': measurements.length,
+      'fitness': measurements.length,
     });
-    return <String, Object?>{'wearable': wearable, 'medical': measurements};
+    return <String, Object?>{'wearable': wearable, 'fitness': measurements};
   }
 
   Future<VisionJob> submitMealVision({

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:body_intelligence_log/features/nutrition/services/food_search_assistance.dart';
 import 'package:body_intelligence_log/features/nutrition/services/food_search_normalizer.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -56,6 +58,12 @@ void main() {
   test('empty-state correction never invents a fuzzy neighbouring food', () {
     expect(assistance.explicitCorrectionFor('chiken'), 'chicken');
     expect(assistance.explicitCorrectionFor('totally unknown dish'), isNull);
+
+    final foodPage = File(
+      'lib/features/nutrition/food_page.dart',
+    ).readAsStringSync();
+    expect(foodPage, contains('_assistance.explicitCorrectionFor(trimmed)'));
+    expect(foodPage, isNot(contains('_assistance.correctionFor(trimmed)')));
   });
 
   test('normalizer preserves every supported writing system', () {

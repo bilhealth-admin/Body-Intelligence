@@ -2,6 +2,18 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+String _librarySource(String path) {
+  final library = File(path);
+  final entrypoint = library.readAsStringSync();
+  final parts = RegExp(r"part '([^']+)';")
+      .allMatches(entrypoint)
+      .map((match) => File('${library.parent.path}/${match.group(1)!}'));
+  return <String>[
+    entrypoint,
+    for (final part in parts) part.readAsStringSync(),
+  ].join('\n');
+}
+
 void main() {
   test('dashboard profile and camera flows have five-locale copy', () {
     final source = File(
@@ -57,12 +69,12 @@ void main() {
     final input = File(
       'lib/features/daily_log/presentation/daily_log_input_sections.dart',
     ).readAsStringSync();
-    final summary = File(
+    final summary = _librarySource(
       'lib/features/daily_log/presentation/daily_log_summary_widgets.dart',
-    ).readAsStringSync();
-    final meals = File(
+    );
+    final meals = _librarySource(
       'lib/features/daily_log/presentation/daily_log_meals_list.dart',
-    ).readAsStringSync();
+    );
 
     expect(input, contains("'Browse workouts': {"));
     expect(input, isNot(contains('=> arabic ? ar : en')));

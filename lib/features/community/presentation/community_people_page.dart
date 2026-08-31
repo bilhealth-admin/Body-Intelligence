@@ -9,7 +9,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/bil_locale_policy.dart';
-import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/runtime_copy.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
 import '../../commerce/domain/commerce_entitlement.dart';
@@ -570,10 +569,13 @@ class _CommunityPeoplePageState extends ConsumerState<CommunityPeoplePage> {
                                       '/plans?focus=subscription',
                                     ),
                                     child: Text(
-                                      context.strings.text('Premium'),
-                                      style: const TextStyle(
-                                        color: Color(0xFFC28A16),
-                                        fontWeight: FontWeight.w900,
+                                      _copy(
+                                        context,
+                                        'عرض خطط العضوية',
+                                        'View membership plans',
+                                        'Voir les offres d’abonnement',
+                                        'Ver planes de membresía',
+                                        'Üyelik planlarını gör',
                                       ),
                                     ),
                                   ),

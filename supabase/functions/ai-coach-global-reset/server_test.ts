@@ -1,0 +1,244 @@
+import { assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
+import { handler } from "./server.ts";
+
+type RpcResult = {
+  data: unknown;
+  error: null | { message: string; code?: string };
+};
+type Call = { name: string; args?: Record<string, unknown> };
+
+function request(body: Record<string, unknown>) {
+  return new Request("https://example.test/ai-coach-global-reset", {
+    method: "POST",
+    headers: {
+      authorization: "Bearer user-jwt",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+}
+
+const globalBody = {
+  operation: "global",
+  idempotency_key: "global-reset-request-0001",
+};
+
+function fakeClients({
+  allowed,
+  calls,
+  resolvedTarget = "00000000-0000-4000-8000-000000000099",
+  rateLimited = false,
+  retryableErrors = [],
+}: {
+  allowed: boolean;
+  calls: Call[];
+  resolvedTarget?: string | null;
+  rateLimited?: boolean;
+  retryableErrors?: string[];
+}) {
+  const pendingErrors = [...retryableErrors];
+  return () =>
+    ({
+      auth: {
+        auth: {
+          // deno-lint-ignore require-await
+          getUser: async () => ({
+            data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
+            error: null,
+          }),
+        },
+        // deno-lint-ignore require-await
+        rpc: async (
+          name: string,
+          args?: Record<string, unknown>,
+        ): Promise<RpcResult> => {
+          calls.push({ name, args });
+          if (name === "bil_can_manage_ai_coach") {
+            return { data: allowed, error: null };
+          }
+          if (name === "bil_consume_rate_limit") {
+            return rateLimited
+              ? { data: null, error: { message: "rate limit exceeded" } }
+              : { data: null, error: null };
+          }
+          throw new Error(`unexpected auth rpc: ${name}`);
+        },
+      },
+      admin: {
+        // deno-lint-ignore require-await
+        rpc: async (
+          name: string,
+          args?: Record<string, unknown>,
+        ): Promise<RpcResult> => {
+          calls.push({ name, args });
+          if (name === "bil_resolve_ai_coach_reset_target") {
+            return { data: resolvedTarget, error: null };
+          }
+          if (pendingErrors.length > 0) {
+            const code = pendingErrors.shift()!;
+            return {
+              data: null,
+              error: { message: "retryable concurrency conflict", code },
+            };
+          }
+          return {
+            data: { duplicate: false, users_notified: 2 },
+            error: null,
+          };
+        },
+      },
+    }) as never;
+}
+
+Deno.test("web preflight is handled without invoking auth", async () => {
+  const response = await handler(
+    new Request("https://example.test/ai-coach-global-reset", {
+      method: "OPTIONS",
+    }),
+  );
+  assertEquals(response.status, 204);
+  assertEquals(
+    response.headers.get("access-control-allow-methods"),
+    "POST, OPTIONS",
+  );
+});
+
+Deno.test("ordinary user is hidden before payload validation or mutation", async () => {
+  const calls: Call[] = [];
+  const response = await handler(request({ operation: "individual" }), {
+    clients: fakeClients({ allowed: false, calls }),
+  });
+  assertEquals(response.status, 404);
+  assertEquals(calls.map((call) => call.name), ["bil_can_manage_ai_coach"]);
+});
+
+Deno.test("authorized global reset reaches rate gate then service RPC", async () => {
+  const calls: Call[] = [];
+  const response = await handler(request(globalBody), {
+    clients: fakeClients({ allowed: true, calls }),
+  });
+  assertEquals(response.status, 200);
+  assertEquals(calls.map((call) => call.name), [
+    "bil_can_manage_ai_coach",
+    "bil_consume_rate_limit",
+    "bil_global_reset_ai_coach",
+  ]);
+  assertEquals((await response.json()).users_notified, 2);
+});
+
+Deno.test("contended reset makes three bounded attempts with identical args", async () => {
+  const calls: Call[] = [];
+  const response = await handler(request(globalBody), {
+    clients: fakeClients({
+      allowed: true,
+      calls,
+      retryableErrors: ["55P03", "40P01"],
+    }),
+  });
+  assertEquals(response.status, 200);
+  assertEquals(calls.map((call) => call.name), [
+    "bil_can_manage_ai_coach",
+    "bil_consume_rate_limit",
+    "bil_global_reset_ai_coach",
+    "bil_global_reset_ai_coach",
+    "bil_global_reset_ai_coach",
+  ]);
+  assertEquals(calls[2].args, calls[3].args);
+  assertEquals(calls[3].args, calls[4].args);
+});
+
+Deno.test("serialization retry stops after three attempts", async () => {
+  const calls: Call[] = [];
+  const response = await handler(request(globalBody), {
+    clients: fakeClients({
+      allowed: true,
+      calls,
+      retryableErrors: ["40001", "40001", "40001", "40001"],
+    }),
+  });
+  assertEquals(response.status, 500);
+  assertEquals(
+    calls.filter((call) => call.name === "bil_global_reset_ai_coach").length,
+    3,
+  );
+});
+
+Deno.test("invalid idempotency is rejected only after permission", async () => {
+  const calls: Call[] = [];
+  const response = await handler(
+    request({ operation: "global", idempotency_key: "short" }),
+    { clients: fakeClients({ allowed: true, calls }) },
+  );
+  assertEquals(response.status, 400);
+  assertEquals(calls.map((call) => call.name), ["bil_can_manage_ai_coach"]);
+});
+
+Deno.test("individual email is normalized server-side and target stays private", async () => {
+  const calls: Call[] = [];
+  const response = await handler(
+    request({
+      operation: "individual",
+      email: "  Person@Example.COM ",
+      reason: " compensation ",
+      idempotency_key: "individual-reset-request-0001",
+    }),
+    { clients: fakeClients({ allowed: true, calls }) },
+  );
+  assertEquals(response.status, 200);
+  assertEquals(await response.json(), { matched: true });
+  assertEquals(calls.map((call) => call.name), [
+    "bil_can_manage_ai_coach",
+    "bil_consume_rate_limit",
+    "bil_resolve_ai_coach_reset_target",
+    "bil_individual_reset_ai_coach",
+  ]);
+  assertEquals(calls[2].args?.p_normalized_email, "person@example.com");
+  assertEquals(calls[3].args?.p_reason, "compensation");
+});
+
+Deno.test("admin receives only matched false for an unknown email", async () => {
+  const knownCalls: Call[] = [];
+  const unknownCalls: Call[] = [];
+  const body = {
+    operation: "individual",
+    email: "nobody@example.com",
+    reason: "reward",
+    idempotency_key: "individual-reset-request-0002",
+  };
+  const known = await handler(request(body), {
+    clients: fakeClients({ allowed: true, calls: knownCalls }),
+  });
+  const unknown = await handler(request(body), {
+    clients: fakeClients({
+      allowed: true,
+      calls: unknownCalls,
+      resolvedTarget: null,
+    }),
+  });
+  assertEquals(known.status, 200);
+  assertEquals(unknown.status, 200);
+  assertEquals(await known.json(), { matched: true });
+  assertEquals(await unknown.json(), { matched: false });
+  assertEquals(unknownCalls.map((call) => call.name), [
+    "bil_can_manage_ai_coach",
+    "bil_consume_rate_limit",
+    "bil_resolve_ai_coach_reset_target",
+  ]);
+});
+
+Deno.test("individual reset is rate limited before account resolution", async () => {
+  const calls: Call[] = [];
+  const response = await handler(
+    request({
+      operation: "individual",
+      email: "person@example.com",
+      idempotency_key: "individual-reset-request-0003",
+    }),
+    { clients: fakeClients({ allowed: true, calls, rateLimited: true }) },
+  );
+  assertEquals(response.status, 429);
+  assertEquals(calls.map((call) => call.name), [
+    "bil_can_manage_ai_coach",
+    "bil_consume_rate_limit",
+  ]);
+});

@@ -81,6 +81,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('shell-quick-add')));
       await tester.pumpAndSettle();
+      await settleVisualAssetImages(tester);
       await expectLater(
         find.byType(MaterialApp),
         matchesGoldenFile('goldens/quick_add_${scenario.$1}_phone.png'),

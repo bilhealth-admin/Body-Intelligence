@@ -131,4 +131,13 @@ class DashboardIntelligenceLocalizer {
       _ => 'الأهداف اليومية متقاربة بصورة عامة',
     };
   }
+
+  /// User-facing evidence must never expose engine identifiers or raw
+  /// provenance keys. The detailed identifiers remain available to the
+  /// decision pipeline, while the Dashboard presents a reviewed explanation
+  /// in the active locale.
+  String evidenceSummary() =>
+      _localized('Progress is calculated only from actual local records.');
+
+  String evidenceGap() => _localized('Evidence is still forming');
 }

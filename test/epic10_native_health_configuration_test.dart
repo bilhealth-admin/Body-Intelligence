@@ -67,4 +67,22 @@ void main() {
       expect(entitlements, contains('com.apple.developer.healthkit'));
     },
   );
+
+  test('initial Health Connect import consumes every records page', () {
+    final android = File(
+      'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILGlobalHealthBridge.kt',
+    ).readAsStringSync();
+    final initialStart = android.indexOf(
+      'suspend fun <T : Record> readInitial',
+    );
+    final initialEnd = android.indexOf(
+      'for (name in supportedRequestedNames)',
+      initialStart,
+    );
+    final initialRead = android.substring(initialStart, initialEnd);
+
+    expect(initialRead, contains('pageToken = pageToken'));
+    expect(initialRead, contains('pageToken = page.pageToken'));
+    expect(initialRead, contains('while (pageToken != null)'));
+  });
 }

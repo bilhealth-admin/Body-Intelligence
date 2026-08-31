@@ -24,7 +24,6 @@ void main() {
       'Intermittent Fasting',
       'Sleep',
       'Recipe Discovery',
-      'Workout Routines',
       'Goals',
       'Progress',
       'Weekly Report',
@@ -45,6 +44,11 @@ void main() {
       final index = more.indexOf("copy('$label')");
       expect(index, greaterThan(-1), reason: label);
     }
+    expect(
+      more,
+      contains('wellnessWorkoutVideosAndRoutinesTitle(context)'),
+      reason: 'the workout destination must use the shared localized title',
+    );
 
     var previous = -1;
     for (final label in const [

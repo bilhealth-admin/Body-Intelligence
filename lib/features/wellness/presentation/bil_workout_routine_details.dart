@@ -87,7 +87,7 @@ class _BilWorkoutRoutineDetailsPageState
     final subscription = _usableVerifiedSubscription(
       ref.watch(verifiedSubscriptionStateProvider),
     );
-    final locked = !workoutAccessGranted(item.minimumAccess, subscription);
+    final locked = !workoutItemAccessGranted(item, subscription);
     return Scaffold(
       appBar: AppBar(
         title: Text(item.title),
@@ -179,7 +179,7 @@ class _BilWorkoutRoutineDetailsPageState
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    PremiumLabelBadge(semanticLabel: item.minimumAccess.name),
+                    const Icon(Icons.arrow_forward_rounded),
                     const SizedBox(width: 10),
                     Flexible(
                       child: Text(
@@ -238,7 +238,7 @@ class _LockedWorkoutHero extends StatelessWidget {
               'Premium workout. Instructions stay locked until server-verified access is active.',
               'تمرين مميز. تبقى التعليمات مقفلة حتى تفعيل الوصول الموثق من الخادم.',
             ),
-            child: PremiumLabelBadge(semanticLabel: item.minimumAccess.name),
+            child: const PremiumLabelBadge(),
           ),
         ),
       ],
@@ -269,7 +269,11 @@ class _LockedWorkoutPanel extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  PremiumLabelBadge(semanticLabel: minimumAccess.name),
+                  const Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 28,
+                    color: Color(0xFFF6CF63),
+                  ),
                   const SizedBox(height: 10),
                   Text(
                     _copy(
@@ -306,17 +310,11 @@ String _lockedWorkoutSemantics(
   WellnessContentAccess minimumAccess,
 ) {
   final level = minimumAccess.name.toUpperCase();
-  return switch (Localizations.localeOf(context).languageCode) {
-    'ar' => 'تعليمات التمرين مقفلة. يلزم وصول $level موثق من الخادم.',
-    'fr' =>
-      'Instructions verrouillées. Un accès $level vérifié par le serveur est requis.',
-    'es' =>
-      'Instrucciones bloqueadas. Se requiere acceso $level verificado por el servidor.',
-    'tr' =>
-      'Antrenman talimatları kilitli. Sunucu tarafından doğrulanmış $level erişimi gerekir.',
-    _ =>
-      'Workout instructions locked. Server-verified $level access is required.',
-  };
+  return ReleasePolishRuntimeCopy.format(
+    ReleasePolishRuntimeCopy.lockedWorkoutSemantics,
+    Localizations.localeOf(context),
+    level: level,
+  );
 }
 
 class _RoutineMeta extends StatelessWidget {
@@ -428,9 +426,9 @@ class _SourceAndSafety extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          Text('${item.publisher} • ${item.licenseName}'),
-          if (item.author?.isNotEmpty == true) Text(item.author!),
-          if (item.attribution?.isNotEmpty == true) Text(item.attribution!),
+          // Legal provenance remains on the verified item, but internal
+          // license/author strings are not consumer-facing workout copy.
+          Text(item.publisher),
           const SizedBox(height: 8),
           Text(
             _copy(

@@ -5,6 +5,8 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+throw 'BIL_V1_RC_FINALIZER=HISTORICAL_NON_AUTHORITATIVE. The retired Epic 16 summary is not bound to the current source SHA and cannot authorize a tag. Use docs/launch_readiness/BIL_RELEASE_CANDIDATE_GATE.md for source freeze, then .github/workflows/bil_android_release_candidate.yml and .github/workflows/bil_ios_signed_release.yml. No tag was created.'
+
 $project = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 Set-Location -LiteralPath $project
 
@@ -28,4 +30,3 @@ if ($LASTEXITCODE -ne 0) { throw 'RC tag creation failed.' }
 "VISUAL_OWNER_APPROVAL=$VisualOwnerApproval"
 "RC_TAG=bil-v1.0.0-rc1"
 "RC_HEAD=$((& git rev-parse HEAD).Trim())"
-

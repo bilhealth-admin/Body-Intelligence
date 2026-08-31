@@ -140,6 +140,13 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage> {
   @override
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context).toLanguageTag();
+    final scheme = Theme.of(context).colorScheme;
+    final pageBackground = scheme.brightness == Brightness.dark
+        ? scheme.surface
+        : Colors.white;
+    final pageForeground = scheme.brightness == Brightness.dark
+        ? scheme.onSurface
+        : const Color(0xFF171717);
     // Production is mounted below ProviderScope. Keeping this preview-safe
     // fallback also lets isolated visual and localization tests render it.
     var currentPlan = CommercePlan.free;
@@ -151,10 +158,10 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage> {
       currentPlan = CommercePlan.free;
     }
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: pageBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF171717),
+        backgroundColor: pageBackground,
+        foregroundColor: pageForeground,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
         leading: IconButton(
@@ -167,7 +174,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage> {
         title: Text(
           BilStoreCopy.text(locale, 'plans'),
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: const Color(0xFF171717),
+            color: pageForeground,
             fontWeight: FontWeight.w700,
           ),
         ),

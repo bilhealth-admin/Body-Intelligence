@@ -83,7 +83,7 @@ class BilAccountBrand extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const BilWordmark(height: 46),
+        const BilFullWordmark(height: 46),
         const SizedBox(height: 22),
         Text(
           title,

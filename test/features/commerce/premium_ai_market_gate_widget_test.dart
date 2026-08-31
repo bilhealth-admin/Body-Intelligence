@@ -8,9 +8,14 @@ import 'package:body_intelligence_log/features/commerce/providers/commerce_provi
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../visual_closure/visual_evidence_font.dart';
+
 void main() {
+  setUpAll(loadVisualEvidenceFont);
+
   Future<void> pumpGate(
     WidgetTester tester, {
     required CommercePlan storefrontPlan,
@@ -26,6 +31,9 @@ void main() {
             plan: subscriptionPlan,
             entitlements: const {},
             authority: EntitlementAuthority.verifiedServer,
+            currentPeriodEndsAt: DateTime.now().toUtc().add(
+              const Duration(days: 30),
+            ),
             isPurchasable: true,
             canRestorePurchases: true,
           );
@@ -50,6 +58,18 @@ void main() {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
+          theme: visualEvidenceTheme(
+            ThemeData(),
+            fontFamily: locale.languageCode == 'ar'
+                ? 'NotoArabicEvidence'
+                : 'RobotoEvidence',
+          ),
+          builder: (context, child) => visualEvidenceTextSurface(
+            child,
+            fontFamily: locale.languageCode == 'ar'
+                ? 'NotoArabicEvidence'
+                : 'RobotoEvidence',
+          ),
           home: PremiumRouteGlassGate(
             feature: feature,
             child:
@@ -65,24 +85,27 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('profitable storefront lock offers only AI Boost', (
+  testWidgets('no AI subscription offers AI subscription and AI Boost', (
     tester,
   ) async {
     await pumpGate(tester, storefrontPlan: CommercePlan.premiumAiCoach);
 
     expect(find.text('Get AI Boost'), findsOneWidget);
+    expect(find.text('Continue'), findsOneWidget);
+    expect(find.text('BIL PREMIUM AI COACH'), findsOneWidget);
     expect(find.text('Start 7-day free trial'), findsNothing);
     expect(find.textContaining('non-expiring'), findsWidgets);
   });
 
-  testWidgets('token storefront shows the same Boost-only lock', (
+  testWidgets('token storefront still routes both exact AI choices', (
     tester,
   ) async {
     await pumpGate(tester, storefrontPlan: CommercePlan.premium);
 
     expect(find.text('Get AI Boost'), findsOneWidget);
+    expect(find.text('Continue'), findsOneWidget);
     expect(find.text('Start 7-day free trial'), findsNothing);
-    expect(find.text('Ready · speak any language'), findsOneWidget);
+    expect(find.text('Global multilingual voice'), findsOneWidget);
   });
 
   testWidgets('glass names the subscription family returned by the store', (
@@ -129,6 +152,23 @@ void main() {
     expect(find.text('Get AI Boost'), findsOneWidget);
   });
 
+  testWidgets('regular Premium plus verified Boost unlocks only AI Coach', (
+    tester,
+  ) async {
+    await pumpGate(
+      tester,
+      storefrontPlan: CommercePlan.premium,
+      subscriptionPlan: CommercePlan.premium,
+      creditAccess: true,
+    );
+
+    expect(find.byKey(const ValueKey('unlocked-ai-coach')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('premium-route-glass-blur')),
+      findsNothing,
+    );
+  });
+
   testWidgets('Free previews community behind glass', (tester) async {
     await pumpGate(
       tester,
@@ -149,7 +189,62 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Friends and requests'), findsOneWidget);
-    expect(find.text('Start 7-day free trial'), findsOneWidget);
+    expect(find.text('Start 7-day free trial'), findsNothing);
+    expect(find.text('Plans'), findsOneWidget);
+  });
+
+  testWidgets('glass gate shows at most one Premium label per route', (
+    tester,
+  ) async {
+    Future<void> expectSinglePremiumLabel({
+      required CommercePlan storefrontPlan,
+      required PremiumGateFeature feature,
+    }) async {
+      await pumpGate(tester, storefrontPlan: storefrontPlan, feature: feature);
+      final labels = tester
+          .widgetList<Text>(find.byType(Text))
+          .where(
+            (widget) => (widget.data ?? '').toLowerCase().contains('premium'),
+          );
+      expect(labels, hasLength(1));
+    }
+
+    await expectSinglePremiumLabel(
+      storefrontPlan: CommercePlan.premium,
+      feature: PremiumGateFeature.premium,
+    );
+    await expectSinglePremiumLabel(
+      storefrontPlan: CommercePlan.premiumAiCoach,
+      feature: PremiumGateFeature.aiCoach,
+    );
+    await expectSinglePremiumLabel(
+      storefrontPlan: CommercePlan.premium,
+      feature: PremiumGateFeature.contentPacks,
+    );
+  });
+
+  testWidgets('verified Boost never unlocks a Premium entitlement', (
+    tester,
+  ) async {
+    await pumpGate(
+      tester,
+      storefrontPlan: CommercePlan.premiumAiCoach,
+      creditAccess: true,
+      feature: PremiumGateFeature.community,
+      child: const ColoredBox(
+        key: ValueKey('boost-cannot-unlock-community'),
+        color: Colors.white,
+      ),
+    );
+
+    expect(
+      find.byKey(const ValueKey('boost-cannot-unlock-community')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('premium-route-glass-blur')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Premium AI Coach inherits and opens community', (tester) async {
@@ -174,15 +269,36 @@ void main() {
     );
   });
 
-  testWidgets('Premium AI Coach subscription unlocks AI Coach', (tester) async {
+  testWidgets('active AI subscription with allowance unlocks AI Coach', (
+    tester,
+  ) async {
+    await pumpGate(
+      tester,
+      storefrontPlan: CommercePlan.premiumAiCoach,
+      subscriptionPlan: CommercePlan.premiumAiCoach,
+      creditAccess: true,
+    );
+
+    expect(find.byKey(const ValueKey('unlocked-ai-coach')), findsOneWidget);
+    expect(find.text('Get AI Boost'), findsNothing);
+  });
+
+  testWidgets('active AI subscription at zero shows Boost only', (
+    tester,
+  ) async {
     await pumpGate(
       tester,
       storefrontPlan: CommercePlan.premiumAiCoach,
       subscriptionPlan: CommercePlan.premiumAiCoach,
     );
 
-    expect(find.byKey(const ValueKey('unlocked-ai-coach')), findsOneWidget);
-    expect(find.text('Get AI Boost'), findsNothing);
+    expect(
+      find.byKey(const ValueKey('premium-route-glass-blur')),
+      findsOneWidget,
+    );
+    expect(find.text('Get AI Boost'), findsOneWidget);
+    expect(find.text('Premium AI Coach'), findsNothing);
+    expect(find.textContaining('Current'), findsOneWidget);
   });
 
   testWidgets('server AI grant opens coach in profitable storefront', (
@@ -197,6 +313,96 @@ void main() {
     expect(find.byKey(const ValueKey('unlocked-ai-coach')), findsOneWidget);
     expect(find.text('Get AI Boost'), findsNothing);
   });
+
+  testWidgets(
+    'zero, Boost purchase, consumption to zero, and subscription restore refresh gate',
+    (tester) async {
+      final accessState = StateProvider<bool>((_) => false);
+      final planState = StateProvider<CommercePlan>((_) => CommercePlan.free);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            verifiedSubscriptionStateProvider.overrideWith((ref) async {
+              final plan = ref.watch(planState);
+              return plan == CommercePlan.free
+                  ? FreePlan.createState()
+                  : SubscriptionState(
+                      plan: plan,
+                      entitlements: const {},
+                      authority: EntitlementAuthority.verifiedServer,
+                      currentPeriodEndsAt: DateTime.now().toUtc().add(
+                        const Duration(days: 30),
+                      ),
+                      isPurchasable: true,
+                      canRestorePurchases: true,
+                    );
+            }),
+            storefrontTargetPlanProvider.overrideWith(
+              (_) async => CommercePlan.premiumAiCoach,
+            ),
+            aiCoachCreditAccessProvider.overrideWith(
+              (ref) async => ref.watch(accessState),
+            ),
+          ],
+          child: const MaterialApp(
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: PremiumRouteGlassGate(
+              feature: PremiumGateFeature.aiCoach,
+              child: ColoredBox(
+                key: ValueKey('dynamic-ai-coach'),
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(PremiumRouteGlassGate)),
+      );
+
+      expect(
+        find.byKey(const ValueKey('premium-route-glass-blur')),
+        findsOneWidget,
+      );
+
+      container.read(accessState.notifier).state = true;
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('premium-route-glass-blur')),
+        findsNothing,
+      );
+
+      container.read(accessState.notifier).state = false;
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('premium-route-glass-blur')),
+        findsOneWidget,
+      );
+
+      container.read(planState.notifier).state = CommercePlan.premiumAiCoach;
+      container.read(accessState.notifier).state = true;
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('premium-route-glass-blur')),
+        findsNothing,
+      );
+
+      container.read(planState.notifier).state = CommercePlan.free;
+      container.read(accessState.notifier).state = false;
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('premium-route-glass-blur')),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgets('locked route stays built and painted but cannot be used', (
     tester,

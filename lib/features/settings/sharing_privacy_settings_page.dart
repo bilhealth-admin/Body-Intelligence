@@ -5,6 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/environment/app_environment.dart';
 import '../../app/localization/app_localizations.dart';
+import '../../app/localization/runtime_copy_cloud_sync.dart';
+import '../cloud_platform/presentation/cloud_sync_consent_summary.dart';
 import '../cloud_platform/providers/cloud_manual_sync_status_provider.dart';
 import '../cloud_platform/providers/cloud_sync_providers.dart';
 import '../cloud_platform/services/cloud_manual_sync_service.dart';
@@ -367,13 +369,13 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
       loading: () => SwitchListTile.adaptive(
         value: false,
         onChanged: null,
-        title: Text(_privacyText(context, 'Encrypted cloud sync')),
+        title: Text(context.strings.text(CloudSyncConsentCopy.settingsTitle)),
         subtitle: Text(_privacyText(context, 'Checking cloud sync…')),
       ),
       error: (_, _) => SwitchListTile.adaptive(
         value: false,
         onChanged: null,
-        title: Text(_privacyText(context, 'Encrypted cloud sync')),
+        title: Text(context.strings.text(CloudSyncConsentCopy.settingsTitle)),
         subtitle: Text(
           _privacyText(context, 'Cloud sync is temporarily unavailable.'),
         ),
@@ -390,7 +392,7 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
           ),
           CloudSyncConsentAvailability.available => _privacyText(
             context,
-            'Sync profile, weight and water across your devices. Nutrition stays local until supported.',
+            CloudSyncConsentCopy.settingsSubtitle,
           ),
         };
         return Column(
@@ -401,14 +403,16 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
               onChanged: !_saving && !syncing && value.canChange
                   ? (next) => _setConsent(next, value)
                   : null,
-              title: Text(_privacyText(context, 'Encrypted cloud sync')),
+              title: Text(
+                context.strings.text(CloudSyncConsentCopy.settingsTitle),
+              ),
               subtitle: Text(subtitle),
               secondary: _saving
                   ? const SizedBox.square(
                       dimension: 22,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Icon(Icons.cloud_outlined),
+                  : const Icon(Icons.backup_rounded),
             ),
             if (value.granted &&
                 value.availability == CloudSyncConsentAvailability.available)
@@ -489,34 +493,27 @@ class _CloudSyncConsentTileState extends ConsumerState<_CloudSyncConsentTile> {
             context: context,
             builder: (dialogContext) => AlertDialog(
               title: Text(
-                _privacyText(context, 'Turn on encrypted cloud sync?'),
+                dialogContext.strings.text(CloudSyncConsentCopy.title),
               ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _privacyText(
-                      context,
-                      'BIL encrypts profile, weight and water before cloud storage. You can turn sync off at any time.',
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    context.strings.text(
-                      'If you later turn sync off, future uploads stop. An existing cloud copy is retained until you delete your account or request data deletion in Privacy.',
-                    ),
-                  ),
-                ],
+              content: const SingleChildScrollView(
+                child: CloudSyncConsentSummary(showDeletionControl: true),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(false),
-                  child: Text(_privacyText(context, 'Cancel')),
+                  child: Text(
+                    dialogContext.strings.text(
+                      CloudSyncConsentCopy.localAction,
+                    ),
+                  ),
                 ),
                 FilledButton(
                   onPressed: () => Navigator.of(dialogContext).pop(true),
-                  child: Text(_privacyText(context, 'Turn on')),
+                  child: Text(
+                    dialogContext.strings.text(
+                      CloudSyncConsentCopy.primaryAction,
+                    ),
+                  ),
                 ),
               ],
             ),

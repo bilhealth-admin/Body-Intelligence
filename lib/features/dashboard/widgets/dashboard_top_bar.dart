@@ -28,30 +28,56 @@ class DashboardTopBar extends StatelessWidget {
           (key, value) => MapEntry(key, context.strings.text(value)),
         );
 
+    final profile = _RoundProfileButton(
+      tooltip: copy['profile']!,
+      onTap: onProfile,
+      imageBytes: profilePhoto,
+      imageUrl: profilePhotoUrl,
+    );
+    final notifications = IconButton(
+      tooltip: copy['notifications']!,
+      onPressed: () => context.push('/notification-settings'),
+      icon: const Icon(Icons.notifications_none_rounded),
+    );
+    final edit = _DashboardEditButton(tooltip: copy['edit']!);
+    const brand = Directionality(
+      textDirection: TextDirection.ltr,
+      child: BilFullWordmark(
+        key: Key('dashboard-wordmark'),
+        height: 38,
+        alignment: Alignment.centerLeft,
+      ),
+    );
+
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(2, 0, 2, 2),
-      child: Row(
-        children: [
-          _RoundProfileButton(
-            tooltip: copy['profile']!,
-            onTap: onProfile,
-            imageBytes: profilePhoto,
-            imageUrl: profilePhotoUrl,
-          ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Directionality(
-              textDirection: TextDirection.ltr,
-              child: BilFullWordmark(height: 32),
-            ),
-          ),
-          IconButton(
-            tooltip: copy['notifications']!,
-            onPressed: () => context.push('/notification-settings'),
-            icon: const Icon(Icons.notifications_none_rounded),
-          ),
-          _DashboardEditButton(tooltip: copy['edit']!),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 370) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                brand,
+                const SizedBox(height: 6),
+                SizedBox(
+                  height: 44,
+                  child: Row(
+                    children: [profile, const Spacer(), notifications, edit],
+                  ),
+                ),
+              ],
+            );
+          }
+          return Row(
+            children: [
+              const Expanded(child: brand),
+              const SizedBox(width: 8),
+              profile,
+              notifications,
+              edit,
+            ],
+          );
+        },
       ),
     );
   }
@@ -64,36 +90,34 @@ class _DashboardEditButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF12394E), Color(0xFF2563EB)],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF12394E).withValues(alpha: .18),
-              blurRadius: 16,
-              offset: const Offset(0, 7),
-            ),
-          ],
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF12394E), Color(0xFF2563EB)],
         ),
-        child: IconButton(
-          key: const Key('dashboard-edit-today'),
-          onPressed: () => context.push('/dashboard/preferences'),
-          style: IconButton.styleFrom(
-            minimumSize: const Size.square(40),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF12394E).withValues(alpha: .18),
+            blurRadius: 16,
+            offset: const Offset(0, 7),
           ),
-          icon: const Icon(
-            Icons.dashboard_customize_rounded,
-            color: Colors.white,
-            size: 20,
-          ),
+        ],
+      ),
+      child: IconButton(
+        key: const Key('dashboard-edit-today'),
+        tooltip: tooltip,
+        onPressed: () => context.push('/dashboard/preferences'),
+        style: IconButton.styleFrom(
+          minimumSize: const Size.square(40),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        icon: const Icon(
+          Icons.dashboard_customize_rounded,
+          color: Colors.white,
+          size: 20,
         ),
       ),
     );

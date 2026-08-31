@@ -23855,6 +23855,48 @@ abstract final class ExtendedRuntimeCopy {
       "uk":
           "Зображення їжі та голос не надсилаються, якщо не налаштовано відповідний захищений серверний шлюз і ви не вирішите його використовувати. Додаток показує стан недоступності, коли шлюз відсутній. Дозволи пристрою можна скасувати в налаштуваннях системи.",
     },
+    "A meal image is sent only when you choose analysis and the secure server gateway is configured. Apple or another platform speech service may process audio you initiate under its terms, but BIL’s backend and Gemini receive only the recognized transcript—not raw microphone audio. Device permissions can be withdrawn in system settings.": {
+      "de":
+          "Ein Mahlzeitenbild wird nur gesendet, wenn Sie die Analyse auswählen und das sichere Server-Gateway konfiguriert ist. Apple oder ein anderer Plattform-Sprachdienst kann von Ihnen gestartetes Audio nach seinen Bedingungen verarbeiten; das BIL-Backend und Gemini erhalten jedoch nur das erkannte Transkript – kein rohes Mikrofonaudio. Geräteberechtigungen können in den Systemeinstellungen entzogen werden.",
+      "it":
+          "L’immagine di un pasto viene inviata solo quando scegli l’analisi e il gateway sicuro del server è configurato. Apple o un altro servizio vocale della piattaforma può elaborare l’audio che avvii secondo i propri termini, ma il backend di BIL e Gemini ricevono solo la trascrizione riconosciuta, non l’audio grezzo del microfono. Le autorizzazioni del dispositivo possono essere revocate nelle impostazioni di sistema.",
+      "pt-BR":
+          "Uma imagem de refeição só é enviada quando você escolhe a análise e o gateway seguro do servidor está configurado. A Apple ou outro serviço de fala da plataforma pode processar o áudio iniciado por você conforme seus termos, mas o backend do BIL e o Gemini recebem apenas a transcrição reconhecida, não o áudio bruto do microfone. As permissões do dispositivo podem ser revogadas nos ajustes do sistema.",
+      "pt-PT":
+          "Uma imagem de refeição só é enviada quando escolhe a análise e o gateway seguro do servidor está configurado. A Apple ou outro serviço de voz da plataforma pode processar o áudio iniciado por si segundo os respetivos termos, mas o backend do BIL e o Gemini recebem apenas a transcrição reconhecida, não o áudio bruto do microfone. As permissões do dispositivo podem ser revogadas nas definições do sistema.",
+      "ur":
+          "کھانے کی تصویر صرف اس وقت بھیجی جاتی ہے جب آپ تجزیہ منتخب کریں اور محفوظ سرور گیٹ وے ترتیب دیا گیا ہو۔ Apple یا پلیٹ فارم کی کوئی دوسری تقریر سروس آپ کی شروع کی ہوئی آڈیو کو اپنی شرائط کے تحت پراسیس کر سکتی ہے، لیکن BIL کا بیک اینڈ اور Gemini صرف شناخت شدہ متن وصول کرتے ہیں، خام مائیکروفون آڈیو نہیں۔ آلے کی اجازتیں سسٹم سیٹنگز میں واپس لی جا سکتی ہیں۔",
+      "fa":
+          "تصویر غذا فقط زمانی ارسال می‌شود که تحلیل را انتخاب کنید و درگاه امن سرور پیکربندی شده باشد. Apple یا سرویس گفتار دیگری در پلتفرم ممکن است صدایی را که شما آغاز می‌کنید طبق شرایط خود پردازش کند، اما سامانه پشتی BIL و Gemini فقط متن تشخیص‌داده‌شده را دریافت می‌کنند، نه صدای خام میکروفون. مجوزهای دستگاه را می‌توان در تنظیمات سیستم لغو کرد.",
+      "hi":
+          "भोजन की छवि केवल तब भेजी जाती है जब आप विश्लेषण चुनते हैं और सुरक्षित सर्वर गेटवे कॉन्फ़िगर होता है। Apple या कोई अन्य प्लेटफ़ॉर्म वाक् सेवा आपके द्वारा शुरू किए गए ऑडियो को अपनी शर्तों के तहत संसाधित कर सकती है, लेकिन BIL का बैकएंड और Gemini केवल पहचाना गया प्रतिलेख प्राप्त करते हैं, कच्चा माइक्रोफ़ोन ऑडियो नहीं। डिवाइस अनुमतियाँ सिस्टम सेटिंग में वापस ली जा सकती हैं।",
+      "id":
+          "Gambar makanan dikirim hanya saat Anda memilih analisis dan gateway server aman telah dikonfigurasi. Apple atau layanan ucapan platform lain dapat memproses audio yang Anda mulai sesuai ketentuannya, tetapi backend BIL dan Gemini hanya menerima transkrip yang dikenali, bukan audio mikrofon mentah. Izin perangkat dapat dicabut di pengaturan sistem.",
+      "ms":
+          "Imej hidangan dihantar hanya apabila anda memilih analisis dan gerbang pelayan selamat telah dikonfigurasikan. Apple atau perkhidmatan pertuturan platform lain boleh memproses audio yang anda mulakan mengikut terma mereka, tetapi bahagian belakang BIL dan Gemini hanya menerima transkrip yang dikenali, bukan audio mikrofon mentah. Kebenaran peranti boleh ditarik balik dalam tetapan sistem.",
+      "ja":
+          "食事画像は、分析を選択し、安全なサーバーゲートウェイが構成されている場合にのみ送信されます。Apple またはその他のプラットフォーム音声サービスは、利用規約に従って開始した音声を処理する場合がありますが、BIL のバックエンドと Gemini が受け取るのは認識された文字起こしのみで、生のマイク音声ではありません。デバイスの権限はシステム設定で取り消せます。",
+      "ko":
+          "식사 이미지는 사용자가 분석을 선택하고 보안 서버 게이트웨이가 구성된 경우에만 전송됩니다. Apple 또는 다른 플랫폼 음성 서비스는 사용자가 시작한 오디오를 해당 약관에 따라 처리할 수 있지만, BIL 백엔드와 Gemini는 인식된 텍스트만 수신하며 원본 마이크 오디오는 수신하지 않습니다. 기기 권한은 시스템 설정에서 철회할 수 있습니다.",
+      "zh-Hans":
+          "只有当您选择分析且安全服务器网关已配置时，餐食图片才会发送。Apple 或其他平台语音服务可能会根据其条款处理您主动发起的音频，但 BIL 后端和 Gemini 只会收到识别后的文字稿，而不会收到原始麦克风音频。您可以在系统设置中撤销设备权限。",
+      "zh-Hant":
+          "只有當您選擇分析且安全伺服器閘道已設定時，餐點圖片才會傳送。Apple 或其他平台語音服務可能會依其條款處理您主動發起的音訊，但 BIL 後端和 Gemini 只會收到辨識後的文字稿，而不會收到原始麥克風音訊。您可在系統設定中撤銷裝置權限。",
+      "ru":
+          "Изображение блюда отправляется только тогда, когда вы выбираете анализ и настроен защищённый серверный шлюз. Apple или другая речевая служба платформы может обрабатывать инициированное вами аудио по своим условиям, но сервер BIL и Gemini получают только распознанную расшифровку, а не исходный звук с микрофона. Разрешения устройства можно отозвать в системных настройках.",
+      "bn":
+          "আপনি বিশ্লেষণ বেছে নিলে এবং নিরাপদ সার্ভার গেটওয়ে কনফিগার করা থাকলেই খাবারের ছবি পাঠানো হয়। Apple বা অন্য কোনো প্ল্যাটফর্ম স্পিচ পরিষেবা তাদের শর্ত অনুযায়ী আপনার শুরু করা অডিও প্রক্রিয়া করতে পারে, তবে BIL-এর ব্যাকএন্ড ও Gemini শুধু শনাক্ত করা প্রতিলিপি পায়, কাঁচা মাইক্রোফোন অডিও নয়। সিস্টেম সেটিংসে ডিভাইসের অনুমতি প্রত্যাহার করা যায়।",
+      "vi":
+          "Hình ảnh bữa ăn chỉ được gửi khi bạn chọn phân tích và cổng máy chủ an toàn đã được cấu hình. Apple hoặc một dịch vụ nhận dạng giọng nói khác của nền tảng có thể xử lý âm thanh do bạn chủ động bắt đầu theo điều khoản của họ, nhưng hệ thống BIL và Gemini chỉ nhận bản chép lời đã nhận dạng, không nhận âm thanh thô từ micrô. Bạn có thể thu hồi quyền của thiết bị trong cài đặt hệ thống.",
+      "th":
+          "รูปภาพมื้ออาหารจะถูกส่งเฉพาะเมื่อคุณเลือกการวิเคราะห์และมีการกำหนดค่าเกตเวย์เซิร์ฟเวอร์ที่ปลอดภัยแล้ว Apple หรือบริการรู้จำเสียงอื่นของแพลตฟอร์มอาจประมวลผลเสียงที่คุณเป็นผู้เริ่มตามข้อกำหนดของบริการนั้น แต่ระบบเบื้องหลังของ BIL และ Gemini จะได้รับเฉพาะข้อความถอดเสียงที่รู้จำแล้ว ไม่ใช่เสียงดิบจากไมโครโฟน คุณสามารถเพิกถอนสิทธิ์ของอุปกรณ์ได้ในการตั้งค่าระบบ",
+      "pl":
+          "Zdjęcie posiłku jest wysyłane tylko wtedy, gdy wybierzesz analizę i skonfigurowano bezpieczną bramę serwera. Apple lub inna usługa rozpoznawania mowy platformy może przetwarzać zainicjowany przez Ciebie dźwięk zgodnie ze swoimi warunkami, ale zaplecze BIL i Gemini otrzymują wyłącznie rozpoznaną transkrypcję, a nie surowy dźwięk z mikrofonu. Uprawnienia urządzenia można wycofać w ustawieniach systemu.",
+      "nl":
+          "Een maaltijdafbeelding wordt alleen verzonden wanneer u analyse kiest en de beveiligde servergateway is geconfigureerd. Apple of een andere spraakdienst van het platform kan door u gestarte audio volgens de eigen voorwaarden verwerken, maar de backend van BIL en Gemini ontvangen alleen het herkende transcript, niet de onbewerkte microfoonaudio. Apparaatrechten kunnen in de systeeminstellingen worden ingetrokken.",
+      "uk":
+          "Зображення страви надсилається лише тоді, коли ви обираєте аналіз і налаштовано захищений серверний шлюз. Apple або інша мовна служба платформи може обробляти ініційоване вами аудіо за власними умовами, але сервер BIL і Gemini отримують лише розпізнану транскрипцію, а не необроблений звук із мікрофона. Дозволи пристрою можна відкликати в системних налаштуваннях.",
+    },
     "4. Community and safety": {
       "de": "4. Gemeinschaft und Sicherheit",
       "it": "4. Comunità e sicurezza",
@@ -39648,47 +39690,47 @@ abstract final class ExtendedRuntimeCopy {
     },
     "Premium": {
       "de": "Premium",
-      "it": "Premio",
-      "pt-BR": "Prêmio",
-      "pt-PT": "Prémio",
-      "ur": "پریمیم",
-      "fa": "حق بیمه",
-      "hi": "प्रीमियम",
-      "id": "Premi",
+      "it": "Premium",
+      "pt-BR": "Premium",
+      "pt-PT": "Premium",
+      "ur": "Premium",
+      "fa": "Premium",
+      "hi": "Premium",
+      "id": "Premium",
       "ms": "Premium",
-      "ja": "プレミアム",
-      "ko": "프리미엄",
-      "zh-Hans": "高级版",
-      "zh-Hant": "高級版",
-      "ru": "Премиум",
-      "bn": "প্রিমিয়াম",
-      "vi": "Cao cấp",
-      "th": "พรีเมี่ยม",
+      "ja": "Premium",
+      "ko": "Premium",
+      "zh-Hans": "Premium",
+      "zh-Hant": "Premium",
+      "ru": "Premium",
+      "bn": "Premium",
+      "vi": "Premium",
+      "th": "Premium",
       "pl": "Premium",
-      "nl": "Premie",
-      "uk": "Преміум",
+      "nl": "Premium",
+      "uk": "Premium",
     },
     "Premium AI Coach": {
       "de": "Premium AI Coach",
       "it": "Premium AI Coach",
       "pt-BR": "Premium AI Coach",
       "pt-PT": "Premium AI Coach",
-      "ur": "پریمیم AI Coach",
-      "fa": "ممتاز AI Coach",
-      "hi": "प्रीमियम AI Coach",
-      "id": "AI Coach Premium",
+      "ur": "Premium AI Coach",
+      "fa": "Premium AI Coach",
+      "hi": "Premium AI Coach",
+      "id": "Premium AI Coach",
       "ms": "Premium AI Coach",
-      "ja": "プレミアム AI Coach",
-      "ko": "프리미엄 AI Coach",
-      "zh-Hans": "优质 AI Coach",
-      "zh-Hant": "優質 AI Coach",
-      "ru": "Премиум AI Coach",
-      "bn": "প্রিমিয়াম AI Coach",
-      "vi": "AI Coach cao cấp",
-      "th": "พรีเมี่ยม AI Coach",
+      "ja": "Premium AI Coach",
+      "ko": "Premium AI Coach",
+      "zh-Hans": "Premium AI Coach",
+      "zh-Hant": "Premium AI Coach",
+      "ru": "Premium AI Coach",
+      "bn": "Premium AI Coach",
+      "vi": "Premium AI Coach",
+      "th": "Premium AI Coach",
       "pl": "Premium AI Coach",
       "nl": "Premium AI Coach",
-      "uk": "Преміум AI Coach",
+      "uk": "Premium AI Coach",
     },
     "BIL AI Boost": {
       "de": "BIL KI-Boost",
@@ -40009,25 +40051,25 @@ abstract final class ExtendedRuntimeCopy {
     },
     "Premium+": {
       "de": "Premium+",
-      "it": "Premio+",
-      "pt-BR": "Prêmio+",
-      "pt-PT": "Prémio+",
-      "ur": "پریمیم+",
-      "fa": "حق بیمه +",
-      "hi": "प्रीमियम+",
-      "id": "Premi+",
+      "it": "Premium+",
+      "pt-BR": "Premium+",
+      "pt-PT": "Premium+",
+      "ur": "Premium+",
+      "fa": "Premium+",
+      "hi": "Premium+",
+      "id": "Premium+",
       "ms": "Premium+",
-      "ja": "プレミアム+",
-      "ko": "프리미엄+",
-      "zh-Hans": "高级+",
-      "zh-Hant": "高級+",
-      "ru": "Премиум+",
-      "bn": "প্রিমিয়াম+",
-      "vi": "Cao cấp+",
-      "th": "พรีเมี่ยม+",
+      "ja": "Premium+",
+      "ko": "Premium+",
+      "zh-Hans": "Premium+",
+      "zh-Hant": "Premium+",
+      "ru": "Premium+",
+      "bn": "Premium+",
+      "vi": "Premium+",
+      "th": "Premium+",
       "pl": "Premium+",
-      "nl": "Premie+",
-      "uk": "Преміум+",
+      "nl": "Premium+",
+      "uk": "Premium+",
     },
     "BIL Free": {
       "de": "BIL Kostenlos",
@@ -40056,41 +40098,41 @@ abstract final class ExtendedRuntimeCopy {
       "it": "BIL Premium",
       "pt-BR": "BIL Premium",
       "pt-PT": "BIL Premium",
-      "ur": "BIL پریمیم",
+      "ur": "BIL Premium",
       "fa": "BIL Premium",
-      "hi": "BIL प्रीमियम",
+      "hi": "BIL Premium",
       "id": "BIL Premium",
       "ms": "BIL Premium",
-      "ja": "BIL プレミアム",
-      "ko": "BIL 프리미엄",
-      "zh-Hans": "BIL 高级版",
-      "zh-Hant": "BIL 進階版",
-      "ru": "BIL Премиум",
-      "bn": "BIL প্রিমিয়াম",
-      "vi": "BIL cao cấp",
-      "th": "BIL พรีเมี่ยม",
+      "ja": "BIL Premium",
+      "ko": "BIL Premium",
+      "zh-Hans": "BIL Premium",
+      "zh-Hant": "BIL Premium",
+      "ru": "BIL Premium",
+      "bn": "BIL Premium",
+      "vi": "BIL Premium",
+      "th": "BIL Premium",
       "pl": "BIL Premium",
       "nl": "BIL Premium",
-      "uk": "BIL Преміум",
+      "uk": "BIL Premium",
     },
     "BIL Premium+": {
       "de": "BIL Premium+",
       "it": "BIL Premium+",
       "pt-BR": "BIL Premium+",
       "pt-PT": "BIL Premium+",
-      "ur": "BIL پریمیم+",
+      "ur": "BIL Premium+",
       "fa": "BIL Premium+",
-      "hi": "BIL प्रीमियम+",
+      "hi": "BIL Premium+",
       "id": "BIL Premium+",
       "ms": "BIL Premium+",
-      "ja": "BIL プレミアム+",
-      "ko": "BIL 프리미엄+",
-      "zh-Hans": "BIL 高级+",
-      "zh-Hant": "BIL 進階+",
-      "ru": "BIL Премиум+",
-      "bn": "BIL প্রিমিয়াম+",
+      "ja": "BIL Premium+",
+      "ko": "BIL Premium+",
+      "zh-Hans": "BIL Premium+",
+      "zh-Hant": "BIL Premium+",
+      "ru": "BIL Premium+",
+      "bn": "BIL Premium+",
       "vi": "BIL Premium+",
-      "th": "BIL พรีเมี่ยม+",
+      "th": "BIL Premium+",
       "pl": "BIL Premium+",
       "nl": "BIL Premium+",
       "uk": "BIL Premium+",
@@ -40246,17 +40288,17 @@ abstract final class ExtendedRuntimeCopy {
       "it": "Tutto incluso in BIL Premium",
       "pt-BR": "Tudo incluído no BIL Premium",
       "pt-PT": "Tudo incluído no BIL Premium",
-      "ur": "BIL پریمیم میں شامل ہر چیز",
+      "ur": "BIL Premium میں شامل ہر چیز",
       "fa": "همه چیز موجود در BIL Premium",
-      "hi": "BIL प्रीमियम में सब कुछ शामिल है",
+      "hi": "BIL Premium में सब कुछ शामिल है",
       "id": "Semuanya termasuk dalam BIL Premium",
       "ms": "Semuanya termasuk dalam BIL Premium",
-      "ja": "BIL プレミアムに含まれるものすべて",
-      "ko": "BIL 프리미엄에 포함된 모든 것",
+      "ja": "BIL Premium に含まれるものすべて",
+      "ko": "BIL Premium에 포함된 모든 것",
       "zh-Hans": "BIL Premium 中包含的所有内容",
       "zh-Hant": "BIL Premium 中包含的所有內容",
       "ru": "Все включено в BIL Premium",
-      "bn": "সবকিছু BIL প্রিমিয়ামে অন্তর্ভুক্ত",
+      "bn": "সবকিছু BIL Premium-এ অন্তর্ভুক্ত",
       "vi": "Mọi thứ có trong BIL Premium",
       "th": "ทุกอย่างรวมอยู่ใน BIL Premium",
       "pl": "Wszystko zawarte w BIL Premium",
@@ -41847,10 +41889,8 @@ abstract final class ExtendedRuntimeCopy {
           "BIL mengimpor pengukuran kebugaran hanya dengan izin Anda dan mendukung profil BLE kebugaran yang kompatibel.",
       "ms":
           "BIL mengimport ukuran kecergasan hanya dengan kebenaran anda dan menyokong profil BLE kecergasan yang serasi.",
-      "ja":
-          "BIL は許可を得た場合にのみフィットネス測定値をインポートし、対応するフィットネス BLE プロファイルをサポートします。",
-      "ko":
-          "BIL은 사용자의 허가 후에만 피트니스 측정값을 가져오며 호환 피트니스 BLE 프로필을 지원합니다.",
+      "ja": "BIL は許可を得た場合にのみフィットネス測定値をインポートし、対応するフィットネス BLE プロファイルをサポートします。",
+      "ko": "BIL은 사용자의 허가 후에만 피트니스 측정값을 가져오며 호환 피트니스 BLE 프로필을 지원합니다.",
       "zh-Hans": "BIL 仅在您许可后导入健身测量值，并支持兼容的健身 BLE 配置文件。",
       "zh-Hant": "BIL 僅在您許可後匯入健身測量值，並支援相容的健身 BLE 設定檔。",
       "ru":
@@ -42818,39 +42858,39 @@ abstract final class ExtendedRuntimeCopy {
       "nl": "slaap",
       "uk": "сон",
     },
-    "Live health watch showing current time and available measured data": {
+    "Live fitness watch showing current time and available measured data": {
       "de":
-          "Live-Gesundheitsuhr mit aktueller Uhrzeit und verfügbaren Messdaten",
+          "Live-Fitnessuhr mit aktueller Uhrzeit und verfügbaren Messdaten",
       "it":
-          "Orologio sanitario in tempo reale che mostra l'ora corrente e i dati misurati disponibili",
+          "Orologio fitness in tempo reale con l'ora corrente e i dati misurati disponibili",
       "pt-BR":
-          "Relógio de saúde ao vivo mostrando a hora atual e os dados medidos disponíveis",
+          "Relógio fitness ao vivo mostrando a hora atual e os dados medidos disponíveis",
       "pt-PT":
-          "Relógio de saúde ao vivo que mostra a hora atual e os dados medidos disponíveis",
-      "ur": "لائیو ہیلتھ واچ موجودہ وقت اور دستیاب ماپا ڈیٹا دکھا رہی ہے۔",
+          "Relógio de fitness em direto com a hora atual e os dados medidos disponíveis",
+      "ur": "لائیو فٹنس گھڑی موجودہ وقت اور دستیاب پیمائش شدہ ڈیٹا دکھا رہی ہے",
       "fa":
-          "ساعت زنده سلامتی که زمان فعلی و داده‌های اندازه‌گیری شده موجود را نشان می‌دهد",
-      "hi": "लाइव स्वास्थ्य घड़ी वर्तमान समय और उपलब्ध मापा डेटा दिखाती है",
+          "ساعت زنده تناسب اندام که زمان فعلی و داده‌های اندازه‌گیری‌شده موجود را نشان می‌دهد",
+      "hi": "लाइव फ़िटनेस घड़ी वर्तमान समय और उपलब्ध मापा गया डेटा दिखाती है",
       "id":
-          "Jam tangan kesehatan langsung menunjukkan waktu saat ini dan data terukur yang tersedia",
+          "Jam tangan kebugaran langsung yang menampilkan waktu saat ini dan data terukur yang tersedia",
       "ms":
-          "Tontonan kesihatan langsung menunjukkan masa semasa dan data terukur yang tersedia",
-      "ja": "現在の時刻と利用可能な測定データを表示するライブヘルスウォッチ",
-      "ko": "현재 시간과 사용 가능한 측정 데이터를 보여주는 실시간 건강 시계",
-      "zh-Hans": "实时健康手表显示当前时间和可用的测量数据",
-      "zh-Hant": "即時健康手錶顯示當前時間和可用的測量數據",
+          "Jam kecergasan langsung yang memaparkan masa semasa dan data ukuran yang tersedia",
+      "ja": "現在時刻と利用可能な測定データを表示するライブフィットネスウォッチ",
+      "ko": "현재 시간과 사용 가능한 측정 데이터를 보여 주는 실시간 피트니스 시계",
+      "zh-Hans": "显示当前时间和可用实测数据的实时健身手表",
+      "zh-Hant": "顯示目前時間和可用實測資料的即時健身手錶",
       "ru":
-          "Часы здоровья в режиме реального времени, показывающие текущее время и доступные данные измерений.",
-      "bn": "লাইভ স্বাস্থ্য ঘড়ি বর্তমান সময় এবং উপলব্ধ পরিমাপ ডেটা দেখাচ্ছে",
+          "Фитнес-часы, показывающие текущее время и доступные измеренные данные",
+      "bn": "বর্তমান সময় ও উপলভ্য পরিমাপ করা ডেটা দেখানো লাইভ ফিটনেস ঘড়ি",
       "vi":
-          "Đồng hồ sức khỏe trực tiếp hiển thị thời gian hiện tại và dữ liệu đo có sẵn",
-      "th": "นาฬิกาสุขภาพสดแสดงเวลาปัจจุบันและข้อมูลที่วัดได้",
+          "Đồng hồ thể chất trực tiếp hiển thị thời gian hiện tại và dữ liệu đã đo hiện có",
+      "th": "นาฬิกาฟิตเนสแบบเรียลไทม์ที่แสดงเวลาปัจจุบันและข้อมูลที่วัดได้",
       "pl":
-          "Zegarek zdrowotny na żywo pokazujący aktualny czas i dostępne dane pomiarowe",
+          "Zegarek fitness pokazujący bieżący czas i dostępne zmierzone dane",
       "nl":
-          "Live gezondheidshorloge met de huidige tijd en beschikbare meetgegevens",
+          "Live fitnesshorloge met de huidige tijd en beschikbare gemeten gegevens",
       "uk":
-          "Живий годинник із показом поточного часу та доступних виміряних даних",
+          "Фітнес-годинник, що показує поточний час і доступні виміряні дані",
     },
     "Health Hub status could not be read. No data was deleted or uploaded.": {
       "de":
@@ -56171,90 +56211,6 @@ abstract final class ExtendedRuntimeCopy {
       "nl": "Mondiale meertalige stem",
       "uk": "Глобальний багатомовний голос",
     },
-    "When enabled, each microphone recording is sent once to BIL’s Gemini service to transcribe the complete question and answer it in the spoken language. Audio is held only for that request, is not saved to conversation history, and the temporary device file is deleted before upload completes.": {
-      "de":
-          "Wenn diese Option aktiviert ist, wird jede Mikrofonaufnahme einmal an den Gemini-Dienst von BIL gesendet, um die vollständige Frage zu transkribieren und in der gesprochenen Sprache zu beantworten. Audio wird nur für diese Anfrage zurückgehalten, nicht im Gesprächsverlauf gespeichert und die temporäre Gerätedatei wird gelöscht, bevor der Upload abgeschlossen ist.",
-      "it":
-          "Se abilitata, ogni registrazione del microfono viene inviata una volta al servizio Gemini di BIL per trascrivere la domanda completa e rispondere nella lingua parlata. L'audio viene trattenuto solo per quella richiesta, non viene salvato nella cronologia delle conversazioni e il file temporaneo del dispositivo viene eliminato prima del completamento del caricamento.",
-      "pt-BR":
-          "Quando ativado, cada gravação do microfone é enviada uma vez ao serviço Gemini do BIL para transcrever a pergunta completa e respondê-la no idioma falado. O áudio é retido apenas para essa solicitação, não é salvo no histórico de conversas e o arquivo temporário do dispositivo é excluído antes da conclusão do upload.",
-      "pt-PT":
-          "Quando ativado, cada gravação do microfone é enviada uma vez para o serviço Gemini do BIL para transcrever a pergunta completa e respondê-la na língua falada. O áudio é retido apenas para este pedido, não é guardado no histórico de conversas e o ficheiro temporário do dispositivo é eliminado antes da conclusão do carregamento.",
-      "ur":
-          "فعال ہونے پر، ہر مائیکروفون ریکارڈنگ ایک بار BIL کی Gemini سروس کو بھیجی جاتی ہے تاکہ مکمل سوال کو نقل کیا جا سکے اور بولی جانے والی زبان میں اس کا جواب دیا جا سکے۔ آڈیو کو صرف اس درخواست کے لیے رکھا جاتا ہے، بات چیت کی سرگزشت میں محفوظ نہیں کیا جاتا ہے، اور عارضی ڈیوائس فائل کو اپ لوڈ مکمل ہونے سے پہلے ہی حذف کر دیا جاتا ہے۔",
-      "fa":
-          "وقتی فعال باشد، هر ضبط میکروفون یک بار به سرویس Gemini BIL ارسال می‌شود تا سؤال کامل را رونویسی کند و به زبان گفتاری پاسخ دهد. صدا فقط برای آن درخواست نگهداری می شود، در سابقه مکالمه ذخیره نمی شود و فایل موقت دستگاه قبل از تکمیل آپلود حذف می شود.",
-      "hi":
-          "सक्षम होने पर, प्रत्येक माइक्रोफ़ोन रिकॉर्डिंग को पूरे प्रश्न को लिखने और बोली जाने वाली भाषा में उत्तर देने के लिए BIL की जेमिनी सेवा पर एक बार भेजा जाता है। ऑडियो केवल उस अनुरोध के लिए रखा जाता है, वार्तालाप इतिहास में सहेजा नहीं जाता है, और अपलोड पूरा होने से पहले अस्थायी डिवाइस फ़ाइल हटा दी जाती है।",
-      "id":
-          "Saat diaktifkan, setiap rekaman mikrofon dikirim satu kali ke layanan Gemini BIL untuk mentranskripsikan pertanyaan lengkap dan menjawabnya dalam bahasa lisan. Audio ditahan hanya untuk permintaan tersebut, tidak disimpan ke riwayat percakapan, dan file perangkat sementara dihapus sebelum pengunggahan selesai.",
-      "ms":
-          "Apabila didayakan, setiap rakaman mikrofon dihantar sekali ke perkhidmatan Gemini BIL untuk menyalin soalan lengkap dan menjawabnya dalam bahasa pertuturan. Audio ditahan hanya untuk permintaan itu, tidak disimpan pada sejarah perbualan dan fail peranti sementara dipadamkan sebelum muat naik selesai.",
-      "ja":
-          "有効にすると、各マイク録音が BIL の Gemini サービスに 1 回送信され、完全な質問が文字に起こされ、音声言語で回答されます。音声はそのリクエストの間のみ保持され、会話履歴には保存されず、一時デバイス ファイルはアップロードが完了する前に削除されます。",
-      "ko":
-          "활성화되면 각 마이크 녹음이 BIL의 Gemini 서비스로 한 번 전송되어 전체 질문을 기록하고 음성 언어로 답변합니다. 오디오는 해당 요청에 대해서만 보관되며 대화 기록에 저장되지 않으며 업로드가 완료되기 전에 임시 장치 파일이 삭제됩니다.",
-      "zh-Hans":
-          "启用后，每个麦克风录音都会发送到 BIL 的 Gemini 服务一次，以转录完整的问题并用口语回答。仅针对该请求保留音频，不会保存到对话历史记录中，并且在上传完成之前删除临时设备文件。",
-      "zh-Hant":
-          "啟用後，每個麥克風錄音都會發送到 BIL 的 Gemini 服務一次，以轉錄完整的問題並用口語回答。僅針對該請求保留音頻，不會儲存到對話歷史記錄中，並且在上傳完成之前刪除臨時設備檔案。",
-      "ru":
-          "Если этот параметр включен, каждая запись с микрофона отправляется один раз в службу Gemini BIL для расшифровки полного вопроса и ответа на него на разговорном языке. Звук сохраняется только для этого запроса, не сохраняется в истории разговоров, а временный файл устройства удаляется до завершения загрузки.",
-      "bn":
-          "সক্রিয় করা হলে, প্রতিটি মাইক্রোফোন রেকর্ডিং একবার BIL-এর জেমিনি পরিষেবাতে পাঠানো হয় যাতে সম্পূর্ণ প্রশ্নটি প্রতিলিপি করা হয় এবং কথ্য ভাষায় উত্তর দেওয়া হয়। অডিও শুধুমাত্র সেই অনুরোধের জন্য রাখা হয়, কথোপকথনের ইতিহাসে সংরক্ষণ করা হয় না এবং আপলোড সম্পূর্ণ হওয়ার আগে অস্থায়ী ডিভাইস ফাইলটি মুছে ফেলা হয়।",
-      "vi":
-          "Khi được bật, mỗi bản ghi micrô sẽ được gửi một lần đến dịch vụ Gemini của BIL để chép lại câu hỏi hoàn chỉnh và trả lời câu hỏi đó bằng ngôn ngữ nói. Âm thanh chỉ được giữ lại cho yêu cầu đó, không được lưu vào lịch sử hội thoại và tệp thiết bị tạm thời sẽ bị xóa trước khi quá trình tải lên hoàn tất.",
-      "th":
-          "เมื่อเปิดใช้งาน การบันทึกไมโครโฟนแต่ละครั้งจะถูกส่งหนึ่งครั้งไปยังบริการ Gemini ของ BIL เพื่อถอดเสียงคำถามที่สมบูรณ์และตอบเป็นภาษาพูด เสียงจะถูกเก็บไว้สำหรับคำขอนั้นเท่านั้น จะไม่บันทึกลงในประวัติการสนทนา และไฟล์อุปกรณ์ชั่วคราวจะถูกลบก่อนที่การอัปโหลดจะเสร็จสิ้น",
-      "pl":
-          "Po włączeniu każde nagranie z mikrofonu jest wysyłane jednorazowo do usługi Gemini BIL w celu transkrypcji całego pytania i udzielenia odpowiedzi w języku mówionym. Dźwięk jest zatrzymywany tylko na potrzeby tego żądania, nie jest zapisywany w historii rozmów, a tymczasowy plik urządzenia jest usuwany przed zakończeniem przesyłania.",
-      "nl":
-          "Indien ingeschakeld, wordt elke microfoonopname één keer naar de Gemini-service van BIL gestuurd om de volledige vraag te transcriberen en in de gesproken taal te beantwoorden. Audio wordt alleen voor dat verzoek bewaard, wordt niet opgeslagen in de gespreksgeschiedenis en het tijdelijke apparaatbestand wordt verwijderd voordat het uploaden is voltooid.",
-      "uk":
-          "Якщо ввімкнути цю функцію, кожен запис із мікрофона надсилається один раз до служби Gemini BIL для транскрипції повного запитання та відповіді на нього розмовною мовою. Аудіо зберігається лише для цього запиту, не зберігається в історії розмов, а тимчасовий файл пристрою видаляється до завершення завантаження.",
-    },
-    "Without Global Voice, speech recognition stays on your device and a Gemini answer uses one text message. With Global Voice, only the actual recorded seconds use the voice allowance; the answer is not charged again as text.": {
-      "de":
-          "Ohne Global Voice bleibt die Spracherkennung auf Ihrem Gerät und für eine Gemini-Antwort wird eine Textnachricht benötigt. Bei Global Voice nutzen nur die tatsächlich aufgezeichneten Sekunden das Sprachkontingent; Die Antwort wird nicht erneut als Text berechnet.",
-      "it":
-          "Senza Global Voice, il riconoscimento vocale rimane sul tuo dispositivo e una risposta Gemini utilizza un messaggio di testo. Con Global Voice, solo i secondi effettivamente registrati utilizzano il limite vocale; la risposta non viene addebitata nuovamente come testo.",
-      "pt-BR":
-          "Sem o Global Voice, o reconhecimento de fala permanece no seu dispositivo e uma resposta do Gemini usa uma mensagem de texto. Com o Global Voice, apenas os segundos reais gravados utilizam a permissão de voz; a resposta não é cobrada novamente como texto.",
-      "pt-PT":
-          "Sem o Global Voice, o reconhecimento de voz permanece no seu dispositivo e uma resposta Gemini utiliza uma mensagem de texto. Com o Global Voice, apenas os segundos reais gravados utilizam a permissão de voz; a resposta não é cobrada novamente como texto.",
-      "ur":
-          "گلوبل وائس کے بغیر، اسپیچ ریکگنیشن آپ کے آلے پر رہتی ہے اور جیمنی جواب ایک ٹیکسٹ میسج استعمال کرتا ہے۔ گلوبل وائس کے ساتھ، صرف حقیقی ریکارڈ شدہ سیکنڈ ہی وائس الاؤنس استعمال کرتے ہیں۔ جواب متن کے طور پر دوبارہ چارج نہیں کیا جاتا ہے۔",
-      "fa":
-          "بدون Global Voice، تشخیص گفتار در دستگاه شما باقی می‌ماند و پاسخ Gemini از یک پیام متنی استفاده می‌کند. با Global Voice، تنها ثانیه های ضبط شده واقعی از کمک هزینه صدا استفاده می کنند. پاسخ دوباره به عنوان متن شارژ نمی شود.",
-      "hi":
-          "ग्लोबल वॉयस के बिना, वाक् पहचान आपके डिवाइस पर बनी रहती है और जेमिनी उत्तर एक टेक्स्ट संदेश का उपयोग करता है। ग्लोबल वॉयस के साथ, केवल वास्तविक रिकॉर्ड किए गए सेकंड ही वॉयस भत्ते का उपयोग करते हैं; उत्तर को पाठ के रूप में दोबारा चार्ज नहीं किया जाता है।",
-      "id":
-          "Tanpa Global Voice, pengenalan ucapan tetap ada di perangkat Anda dan jawaban Gemini menggunakan satu pesan teks. Dengan Global Voice, hanya detik-detik rekaman sebenarnya yang menggunakan tunjangan suara; jawabannya tidak dibebankan lagi sebagai teks.",
-      "ms":
-          "Tanpa Global Voice, pengecaman pertuturan kekal pada peranti anda dan jawapan Gemini menggunakan satu mesej teks. Dengan Global Voice, hanya detik yang dirakam sebenar menggunakan elaun suara; jawapan tidak dicaj semula sebagai teks.",
-      "ja":
-          "Global Voice を使用しない場合、音声認識はデバイス上に留まり、Gemini の回答には 1 つのテキスト メッセージが使用されます。 Global Voice では、実際に録音された秒数のみが音声許容量を使用します。回答がテキストとして再度請求されることはありません。",
-      "ko":
-          "Global Voice가 없으면 음성 인식이 장치에 유지되며 Gemini 답변은 하나의 문자 메시지를 사용합니다. Global Voice를 사용하면 실제 녹음된 초만 음성 허용량을 사용합니다. 답변은 문자로 다시 청구되지 않습니다.",
-      "zh-Hans":
-          "如果没有 Global Voice，语音识别功能将保留在您的设备上，Gemini 的答案将使用一条短信。对于全球语音，只有实际录制的秒数才使用语音限额；答案不会再次以文本形式收费。",
-      "zh-Hant":
-          "如果沒有 Global Voice，語音辨識功能將保留在您的裝置上，Gemini 的答案將使用一條簡訊。對於全球語音，只有實際錄製的秒數才使用語音限額；答案不會再次以文字形式收費。",
-      "ru":
-          "Без Global Voice распознавание речи остается на вашем устройстве, а для ответа Gemini используется одно текстовое сообщение. При использовании Global Voice голосовой лимит используется только для фактически записанных секунд; ответ не тарифицируется повторно в виде текста.",
-      "bn":
-          "গ্লোবাল ভয়েস ছাড়া, বক্তৃতা শনাক্তকরণ আপনার ডিভাইসে থাকে এবং একটি Gemini উত্তর একটি পাঠ্য বার্তা ব্যবহার করে। গ্লোবাল ভয়েসের সাথে, শুধুমাত্র প্রকৃত রেকর্ড করা সেকেন্ড ভয়েস ভাতা ব্যবহার করে; উত্তরটি আবার পাঠ্য হিসাবে চার্জ করা হয় না।",
-      "vi":
-          "Nếu không có Global Voice, tính năng nhận dạng giọng nói sẽ vẫn ở trên thiết bị của bạn và câu trả lời của Gemini sẽ sử dụng một tin nhắn văn bản. Với Global Voice, chỉ những giây được ghi thực tế mới sử dụng trợ cấp giọng nói; câu trả lời không bị tính phí lại dưới dạng văn bản.",
-      "th":
-          "หากไม่มี Global Voice การรู้จำเสียงจะยังคงอยู่ในอุปกรณ์ของคุณ และคำตอบของGeminiจะใช้ข้อความเดียว ด้วย Global Voice เฉพาะวินาทีที่บันทึกไว้จริงเท่านั้นที่ใช้ค่าเผื่อเสียง คำตอบจะไม่ถูกเรียกเก็บเงินอีกครั้งในรูปแบบข้อความ",
-      "pl":
-          "Bez Global Voice rozpoznawanie mowy pozostaje na Twoim urządzeniu, a odpowiedź Gemini wykorzystuje jedną wiadomość tekstową. W przypadku Global Voice z limitu głosu korzystają tylko faktycznie nagrane sekundy; odpowiedź nie jest ponownie naliczana jako tekst.",
-      "nl":
-          "Zonder Global Voice blijft de spraakherkenning op je toestel staan en gebruikt een Gemini-antwoord één sms-bericht. Met Global Voice gebruiken alleen de werkelijk opgenomen seconden de stemlimiet; het antwoord wordt niet opnieuw als tekst in rekening gebracht.",
-      "uk":
-          "Без Global Voice розпізнавання мовлення залишається на вашому пристрої, а відповідь Gemini використовує одне текстове повідомлення. З Global Voice лише фактично записані секунди використовують голосову надбавку; відповідь не стягується знову як текст.",
-    },
     "BIL is learning from verified check-ins": {
       "de": "BIL lernt aus verifizierten Check-ins",
       "it": "BIL sta imparando dai check-in verificati",
@@ -60980,44 +60936,6 @@ abstract final class ExtendedRuntimeCopy {
       "pl": "Kontrola trenera",
       "nl": "Coach controleert",
       "uk": "Управління тренера",
-    },
-    "I speak every language and turn your body data into the next clear decision.": {
-      "de":
-          "Ich spreche jede Sprache und wandele Ihre Körperdaten in die nächste klare Entscheidung um.",
-      "it":
-          "Parlo ogni lingua e trasformo i dati del tuo corpo nella prossima decisione chiara.",
-      "pt-BR":
-          "Eu falo todos os idiomas e transformo os dados do seu corpo na próxima decisão clara.",
-      "pt-PT":
-          "Falo todas as línguas e transformo os dados do seu corpo na próxima decisão clara.",
-      "ur":
-          "میں ہر زبان بولتا ہوں اور آپ کے باڈی ڈیٹا کو اگلے واضح فیصلے میں بدل دیتا ہوں۔",
-      "fa":
-          "من به هر زبانی صحبت می کنم و داده های بدن شما را به تصمیم روشن بعدی تبدیل می کنم.",
-      "hi":
-          "मैं हर भाषा बोलता हूं और आपके शरीर के डेटा को अगले स्पष्ट निर्णय में बदल देता हूं।",
-      "id":
-          "Saya berbicara dalam setiap bahasa dan mengubah data tubuh Anda menjadi keputusan jelas berikutnya.",
-      "ms":
-          "Saya bercakap setiap bahasa dan menukar data badan anda menjadi keputusan jelas seterusnya.",
-      "ja": "私はあらゆる言語を話し、あなたの体のデータを次の明確な決定に変えます。",
-      "ko": "저는 모든 언어를 구사하며 귀하의 신체 데이터를 다음의 명확한 결정으로 전환합니다.",
-      "zh-Hans": "我会说每种语言，并将您的身体数据转化为下一个明确的决定。",
-      "zh-Hant": "我會說每種語言，並將您的身體數據轉化為下一個明確的決定。",
-      "ru":
-          "Я говорю на всех языках и превращаю данные вашего тела в следующее четкое решение.",
-      "bn":
-          "আমি প্রতিটি ভাষায় কথা বলি এবং আপনার শরীরের ডেটাকে পরবর্তী স্পষ্ট সিদ্ধান্তে পরিণত করি।",
-      "vi":
-          "Tôi nói mọi ngôn ngữ và biến dữ liệu cơ thể của bạn thành quyết định rõ ràng tiếp theo.",
-      "th":
-          "ฉันพูดทุกภาษาและเปลี่ยนข้อมูลร่างกายของคุณให้เป็นการตัดสินใจที่ชัดเจนครั้งต่อไป",
-      "pl":
-          "Mówię w każdym języku i zamieniam dane Twojego ciała w następną jasną decyzję.",
-      "nl":
-          "Ik spreek elke taal en zet uw lichaamsgegevens om in de volgende heldere beslissing.",
-      "uk":
-          "Я володію всіма мовами та перетворюю дані про ваше тіло в наступне чітке рішення.",
     },
     "Talk now": {
       "de": "Talk now",
@@ -70440,6 +70358,138 @@ abstract final class ExtendedRuntimeCopy {
       "pl": "Netto",
       "nl": "Netto",
       "uk": "Чисті",
+    },
+    "Body composition": {
+      "de": "Körperzusammensetzung",
+      "it": "Composizione corporea",
+      "pt-BR": "Composição corporal",
+      "pt-PT": "Composição corporal",
+      "ur": "جسمانی ساخت",
+      "fa": "ترکیب بدن",
+      "hi": "शारीरिक संरचना",
+      "id": "Komposisi tubuh",
+      "ms": "Komposisi badan",
+      "ja": "体組成",
+      "ko": "신체 구성",
+      "zh-Hans": "身体成分",
+      "zh-Hant": "身體組成",
+      "ru": "Состав тела",
+      "bn": "শরীরের গঠন",
+      "vi": "Thành phần cơ thể",
+      "th": "องค์ประกอบร่างกาย",
+      "pl": "Skład ciała",
+      "nl": "Lichaamssamenstelling",
+      "uk": "Склад тіла",
+    },
+    "Workout Videos": {
+      "de": "Trainingsvideos",
+      "it": "Video di allenamento",
+      "pt-BR": "Vídeos de treino",
+      "pt-PT": "Vídeos de treino",
+      "ur": "ورزش کی ویڈیوز",
+      "fa": "ویدیوهای تمرینی",
+      "hi": "वर्कआउट वीडियो",
+      "id": "Video latihan",
+      "ms": "Video senaman",
+      "ja": "ワークアウト動画",
+      "ko": "운동 영상",
+      "zh-Hans": "锻炼视频",
+      "zh-Hant": "健身影片",
+      "ru": "Видео тренировок",
+      "bn": "ওয়ার্কআউট ভিডিও",
+      "vi": "Video tập luyện",
+      "th": "วิดีโอออกกำลังกาย",
+      "pl": "Filmy treningowe",
+      "nl": "Trainingsvideo's",
+      "uk": "Відео тренувань",
+    },
+    // Machine-translated operational guidance. Do not label native-reviewed
+    // until each locale has completed human review.
+    "Finish removing Sign in with Apple access": {
+      "de": "Entfernen des Zugriffs über „Mit Apple anmelden“ abschließen",
+      "it": "Completa la rimozione dell’accesso con Apple",
+      "pt-BR": "Concluir a remoção do acesso com a Apple",
+      "pt-PT": "Concluir a remoção do acesso com a Apple",
+      "ur": "Apple کے ساتھ سائن اِن کی رسائی ہٹانا مکمل کریں",
+      "fa": "حذف دسترسی «ورود با Apple» را تکمیل کنید",
+      "hi": "Apple से साइन इन की पहुँच हटाना पूरा करें",
+      "id": "Selesaikan penghapusan akses Masuk dengan Apple",
+      "ms": "Selesaikan pengalihan akses Daftar Masuk dengan Apple",
+      "ja": "Appleでサインインへのアクセス削除を完了する",
+      "ko": "Apple로 로그인 접근 권한 삭제 완료",
+      "zh-Hans": "完成移除“通过 Apple 登录”访问权限",
+      "zh-Hant": "完成移除「使用 Apple 登入」取用權",
+      "ru": "Завершите удаление доступа «Вход с Apple»",
+      "bn": "Apple দিয়ে সাইন ইন অ্যাক্সেস সরানো সম্পূর্ণ করুন",
+      "vi": "Hoàn tất việc xóa quyền truy cập Đăng nhập bằng Apple",
+      "th": "ดำเนินการลบสิทธิ์การเข้าถึงลงชื่อเข้าใช้ด้วย Apple ให้เสร็จ",
+      "pl": "Dokończ usuwanie dostępu „Zaloguj się przez Apple”",
+      "nl": "Rond het verwijderen van toegang via Log in met Apple af",
+      "uk": "Завершіть видалення доступу «Вхід з Apple»",
+    },
+    "Your BIL account was deleted. BIL cannot automatically revoke Apple authorization because it does not retain an Apple token. To remove access manually: Settings > [your name] > Sign in with Apple > BIL > Delete or Stop Using. This optional Apple step does not affect the completed BIL deletion.": {
+      "de":
+          "Ihr BIL-Konto wurde gelöscht. BIL kann die Apple-Autorisierung nicht automatisch widerrufen, da kein Apple-Token gespeichert wird. So entfernen Sie den Zugriff manuell: Einstellungen > [Ihr Name] > Mit Apple anmelden > BIL > Löschen oder Nicht mehr verwenden. Dieser optionale Apple-Schritt ändert nichts an der bereits abgeschlossenen BIL-Löschung.",
+      "it":
+          "Il tuo account BIL è stato eliminato. BIL non può revocare automaticamente l’autorizzazione Apple perché non conserva un token Apple. Per rimuovere manualmente l’accesso: Impostazioni > [il tuo nome] > Accedi con Apple > BIL > Elimina o Interrompi l’utilizzo. Questo passaggio Apple facoltativo non modifica l’eliminazione BIL già completata.",
+      "pt-BR":
+          "Sua conta BIL foi excluída. O BIL não pode revogar automaticamente a autorização da Apple porque não armazena um token da Apple. Para remover o acesso manualmente: Ajustes > [seu nome] > Iniciar sessão com a Apple > BIL > Apagar ou Parar de usar. Esta etapa opcional da Apple não afeta a exclusão do BIL já concluída.",
+      "pt-PT":
+          "A sua conta BIL foi eliminada. O BIL não pode revogar automaticamente a autorização da Apple porque não guarda um token Apple. Para remover o acesso manualmente: Definições > [o seu nome] > Iniciar sessão com a Apple > BIL > Apagar ou Deixar de usar. Este passo opcional da Apple não afeta a eliminação do BIL já concluída.",
+      "ur":
+          "آپ کا BIL اکاؤنٹ حذف ہو گیا ہے۔ BIL خودکار طور پر Apple کی اجازت منسوخ نہیں کر سکتا کیونکہ وہ Apple ٹوکن محفوظ نہیں رکھتا۔ رسائی دستی طور پر ہٹانے کے لیے: ترتیبات > [آپ کا نام] > Apple کے ساتھ سائن اِن > BIL > حذف کریں یا استعمال بند کریں۔ Apple کا یہ اختیاری مرحلہ مکمل شدہ BIL حذف کو متاثر نہیں کرتا۔",
+      "fa":
+          "حساب BIL شما حذف شد. BIL نمی‌تواند مجوز Apple را به‌طور خودکار لغو کند، زیرا توکن Apple را نگه نمی‌دارد. برای حذف دستی دسترسی: تنظیمات > [نام شما] > ورود با Apple > BIL > حذف یا توقف استفاده. این مرحله اختیاری Apple بر حذف تکمیل‌شده BIL اثری ندارد.",
+      "hi":
+          "आपका BIL खाता हटा दिया गया है। BIL Apple प्राधिकरण को अपने-आप रद्द नहीं कर सकता क्योंकि वह Apple टोकन संग्रहीत नहीं करता। पहुँच को मैन्युअल रूप से हटाने के लिए: सेटिंग्स > [आपका नाम] > Apple से साइन इन > BIL > हटाएँ या उपयोग बंद करें। Apple का यह वैकल्पिक चरण पूरी हो चुकी BIL खाता हटाने की प्रक्रिया को प्रभावित नहीं करता।",
+      "id":
+          "Akun BIL Anda telah dihapus. BIL tidak dapat mencabut otorisasi Apple secara otomatis karena tidak menyimpan token Apple. Untuk menghapus akses secara manual: Pengaturan > [nama Anda] > Masuk dengan Apple > BIL > Hapus atau Berhenti Menggunakan. Langkah Apple opsional ini tidak memengaruhi penghapusan BIL yang telah selesai.",
+      "ms":
+          "Akaun BIL anda telah dipadam. BIL tidak boleh membatalkan kebenaran Apple secara automatik kerana ia tidak menyimpan token Apple. Untuk mengalih keluar akses secara manual: Tetapan > [nama anda] > Daftar Masuk dengan Apple > BIL > Padam atau Berhenti Menggunakan. Langkah Apple pilihan ini tidak menjejaskan pemadaman BIL yang telah selesai.",
+      "ja":
+          "BILアカウントは削除されました。BILはAppleトークンを保持していないため、Appleの認証を自動的に取り消すことはできません。アクセスを手動で削除するには、設定 > [あなたの名前] > Appleでサインイン > BIL > 削除または使用を停止、の順に進みます。この任意のApple手順は、完了したBILの削除には影響しません。",
+      "ko":
+          "BIL 계정이 삭제되었습니다. BIL은 Apple 토큰을 보관하지 않으므로 Apple 권한을 자동으로 취소할 수 없습니다. 접근 권한을 직접 삭제하려면 설정 > [사용자 이름] > Apple로 로그인 > BIL > 삭제 또는 사용 중단으로 이동하세요. 이 선택적 Apple 단계는 이미 완료된 BIL 삭제에 영향을 주지 않습니다.",
+      "zh-Hans":
+          "您的 BIL 帐户已删除。由于 BIL 不保留 Apple 令牌，因此无法自动撤销 Apple 授权。要手动移除访问权限，请前往：设置 > [您的姓名] > 通过 Apple 登录 > BIL > 删除或停止使用。此可选 Apple 步骤不会影响已经完成的 BIL 删除。",
+      "zh-Hant":
+          "您的 BIL 帳戶已刪除。由於 BIL 不保留 Apple 權杖，因此無法自動撤銷 Apple 授權。若要手動移除取用權，請前往：設定 > [您的姓名] > 使用 Apple 登入 > BIL > 刪除或停止使用。此選用的 Apple 步驟不會影響已完成的 BIL 刪除。",
+      "ru":
+          "Ваша учетная запись BIL удалена. BIL не может автоматически отозвать авторизацию Apple, поскольку не хранит токен Apple. Чтобы удалить доступ вручную, откройте: Настройки > [ваше имя] > Вход с Apple > BIL > Удалить или Прекратить использование. Этот необязательный шаг Apple не влияет на уже завершенное удаление BIL.",
+      "bn":
+          "আপনার BIL অ্যাকাউন্ট মুছে ফেলা হয়েছে। BIL কোনো Apple টোকেন সংরক্ষণ করে না, তাই Apple অনুমোদন স্বয়ংক্রিয়ভাবে প্রত্যাহার করতে পারে না। হাতে অ্যাক্সেস সরাতে যান: সেটিংস > [আপনার নাম] > Apple দিয়ে সাইন ইন > BIL > মুছুন বা ব্যবহার বন্ধ করুন। Apple-এর এই ঐচ্ছিক ধাপটি ইতিমধ্যে সম্পন্ন BIL মুছে ফেলার প্রক্রিয়াকে প্রভাবিত করে না।",
+      "vi":
+          "Tài khoản BIL của bạn đã bị xóa. BIL không thể tự động thu hồi ủy quyền Apple vì không lưu mã thông báo Apple. Để xóa quyền truy cập theo cách thủ công: Cài đặt > [tên của bạn] > Đăng nhập bằng Apple > BIL > Xóa hoặc Ngừng sử dụng. Bước Apple tùy chọn này không ảnh hưởng đến việc xóa BIL đã hoàn tất.",
+      "th":
+          "บัญชี BIL ของคุณถูกลบแล้ว BIL ไม่สามารถเพิกถอนการอนุญาตของ Apple โดยอัตโนมัติได้เพราะไม่ได้เก็บโทเค็น Apple หากต้องการลบสิทธิ์ด้วยตนเอง ให้ไปที่ การตั้งค่า > [ชื่อของคุณ] > ลงชื่อเข้าใช้ด้วย Apple > BIL > ลบหรือหยุดใช้ ขั้นตอน Apple ที่เป็นตัวเลือกนี้ไม่กระทบการลบ BIL ที่เสร็จสมบูรณ์แล้ว",
+      "pl":
+          "Twoje konto BIL zostało usunięte. BIL nie może automatycznie wycofać autoryzacji Apple, ponieważ nie przechowuje tokenu Apple. Aby usunąć dostęp ręcznie: Ustawienia > [Twoje imię] > Zaloguj się przez Apple > BIL > Usuń lub Przestań używać. Ten opcjonalny krok Apple nie wpływa na zakończone usunięcie BIL.",
+      "nl":
+          "Uw BIL-account is verwijderd. BIL kan de Apple-autorisatie niet automatisch intrekken omdat het geen Apple-token bewaart. U verwijdert de toegang handmatig via: Instellingen > [uw naam] > Log in met Apple > BIL > Verwijder of Stop met gebruiken. Deze optionele Apple-stap heeft geen invloed op de voltooide BIL-verwijdering.",
+      "uk":
+          "Ваш обліковий запис BIL видалено. BIL не може автоматично відкликати авторизацію Apple, оскільки не зберігає токен Apple. Щоб видалити доступ вручну, відкрийте: Параметри > [ваше ім’я] > Вхід з Apple > BIL > Видалити або Припинити використання. Цей необов’язковий крок Apple не впливає на вже завершене видалення BIL.",
+    },
+    "Open Apple instructions": {
+      "de": "Apple-Anleitung öffnen",
+      "it": "Apri le istruzioni Apple",
+      "pt-BR": "Abrir as instruções da Apple",
+      "pt-PT": "Abrir as instruções da Apple",
+      "ur": "Apple کی ہدایات کھولیں",
+      "fa": "باز کردن دستورالعمل Apple",
+      "hi": "Apple निर्देश खोलें",
+      "id": "Buka petunjuk Apple",
+      "ms": "Buka arahan Apple",
+      "ja": "Appleの手順を開く",
+      "ko": "Apple 안내 열기",
+      "zh-Hans": "打开 Apple 说明",
+      "zh-Hant": "開啟 Apple 說明",
+      "ru": "Открыть инструкции Apple",
+      "bn": "Apple নির্দেশনা খুলুন",
+      "vi": "Mở hướng dẫn của Apple",
+      "th": "เปิดคำแนะนำของ Apple",
+      "pl": "Otwórz instrukcje Apple",
+      "nl": "Open Apple-instructies",
+      "uk": "Відкрити інструкції Apple",
     },
   };
 }

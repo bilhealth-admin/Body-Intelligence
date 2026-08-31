@@ -15,6 +15,12 @@ seven-day Premium AI Coach trial is displayed only when the store returns that
 offer and the current account is eligible. Missing products make the paywall
 unavailable without changing user data.
 
+Trial decision `BOTH_AI_PRODUCTS_NO_PREMIUM_TRIAL`: both
+`bil_premium_ai_coach` and `bil_premium_ai_coach_annual` may carry the verified
+seven-day/1,000-token offer. `bil_premium` and `bil_premium_annual` remain valid
+paid subscriptions but can never resolve to an AI trial or its token allowance.
+This source decision does not create a store offer.
+
 ## End-to-end authority
 
 1. The client loads fresh `ProductDetails` and sends the selected transaction
@@ -54,17 +60,21 @@ control or chat. Supply secrets through Supabase, GitHub, or CI secret stores.
   Barcode for Free.
 - The client never manufactures a price, discount, saving, currency, or trial;
   Google Play and App Store metadata remain authoritative.
-- Google base plans/offers in Play Console; service-account JSON only in
-  `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`.
+- Google base plans/offers in Play Console; the backend prefers the dedicated
+  `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` and safely falls back to the already
+  provisioned `BIL_PLAY_INTEGRITY_SERVICE_ACCOUNT_JSON` when that account has
+  Android Publisher access. Neither value belongs in the repository or app.
 - Pub/Sub push audience and identity:
   `GOOGLE_PUBSUB_AUDIENCE`, `GOOGLE_PUBSUB_SERVICE_ACCOUNT`; notification URL
   points to the deployed verification function.
 - Apple may remain disabled while its external account issue is unresolved.
   Its client path and bundle configuration are retained. When enabled, supply
   the Apple subscription group, App Store Connect issuer/key IDs, ES256 private
-  key in `APPLE_PRIVATE_KEY`, and Apple root CA SHA-256 pin in
-  `APPLE_ROOT_CA_SHA256`.
-- `BIL_STORE_ENVIRONMENT` is explicitly `sandbox` or `production`; never mix.
+  key in `APPLE_PRIVATE_KEY`, and the comma-separated SHA-256 pins for the
+  current Apple Root CA G2/G3 certificates in `APPLE_ROOT_CA_SHA256`.
+  - No client-selected store environment is accepted. Google test state comes
+    from the authenticated Publisher API response; Apple environment comes
+    from the verified transaction JWS and selects the matching Server API.
 - Scheduled job calls action `reconcile` with `BIL_RECONCILIATION_SECRET`.
 - Publish HTTPS `BIL_TERMS_URL` and `BIL_PRIVACY_URL`; links remain hidden
   until both are valid.

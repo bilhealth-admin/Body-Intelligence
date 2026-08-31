@@ -1,4 +1,5 @@
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
+import 'package:body_intelligence_log/features/intelligence_center/domain/intelligence_action.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/local_coach_api.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_intent_normalizer.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/local_coach_command_parser.dart';
@@ -7,6 +8,31 @@ import 'package:body_intelligence_log/features/intelligence_center/services/inte
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test(
+    'only exact AI credit exhaustion maps to the purchase-required state',
+    () {
+      expect(
+        coachServiceStatusForFunctionError(402, 'ai_usage_exhausted'),
+        CoachServiceStatus.creditsRequired,
+      );
+      for (final code in <String?>[
+        null,
+        'quota_exhausted',
+        'AI_USAGE_EXHAUSTED',
+        'ai_usage_exhausted ',
+      ]) {
+        expect(
+          coachServiceStatusForFunctionError(402, code),
+          CoachServiceStatus.quotaExhausted,
+        );
+      }
+      expect(
+        coachServiceStatusForFunctionError(500, 'ai_usage_exhausted'),
+        CoachServiceStatus.temporarilyUnavailable,
+      );
+    },
+  );
+
   test('analysis questions are not hijacked by logging navigation', () {
     const parser = LocalCoachCommandParser();
     expect(parser.parse('Analyze my weight plateau', locale: 'en'), isEmpty);
@@ -56,6 +82,28 @@ void main() {
       expect(result.confidence, .9);
       expect(result.evidence, ['canonicalIntelligence.plateauRisk']);
       expect(result.responseId, 'coach-correlated-request-01');
+    },
+  );
+
+  test(
+    'exhausted AI tokens expose only the two direct reactivation routes',
+    () async {
+      final reply =
+          await const IntelligenceCenterEngine(
+            localApi: _CreditsRequiredApi(),
+          ).answer(
+            question: 'Build my plan from my recent data',
+            arabic: false,
+            localeCode: 'en',
+            coachContext: CoachContextSnapshot.empty(),
+          );
+
+      expect(reply.serviceStatus, CoachServiceStatus.creditsRequired);
+      expect(reply.actions.map((action) => action.type), [
+        IntelligenceActionType.openAiCoachSubscription,
+        IntelligenceActionType.buyAiBoost,
+      ]);
+      expect(reply.message.text, contains('No message was charged'));
     },
   );
 
@@ -177,4 +225,18 @@ class _RecordingGateway implements LocalModelGateway {
       ),
     );
   }
+}
+
+class _CreditsRequiredApi implements LocalCoachApi {
+  const _CreditsRequiredApi();
+
+  @override
+  Future<LocalCoachResult> understand(LocalCoachRequest request) async =>
+      const LocalCoachResult(
+        actions: [],
+        processedOnDevice: false,
+        serviceStatus: CoachServiceStatus.creditsRequired,
+        runtime: CoachAnswerRuntime.localFallback,
+        diagnosticCode: 'ai_usage_exhausted',
+      );
 }

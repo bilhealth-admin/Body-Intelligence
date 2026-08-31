@@ -92,11 +92,22 @@ void main() {
     // The only execute grant for credit must be the service role.
     expect(policySql, contains('to service_role;'));
 
-    expect(store, contains("body.action === 'verify_ai_boost'"));
-    expect(store, contains("productId !== 'bil_ai_boost'"));
+    expect(
+      store,
+      matches(RegExp(r'''body\.action\s*===\s*["']verify_ai_boost["']''')),
+    );
+    expect(
+      store,
+      matches(RegExp(r'''productId\s*!==\s*["']bil_ai_boost["']''')),
+    );
     expect(store, contains('verifyGoogleConsumable'));
     expect(store, contains('verifyApple(verification)'));
-    expect(store, contains("admin.rpc('bil_credit_ai_boost_verified'"));
+    expect(
+      store,
+      matches(
+        RegExp(r'''admin\.rpc\(\s*["']bil_credit_ai_boost_verified["']'''),
+      ),
+    );
     expect(store, contains('consumeGoogleConsumable'));
     expect(store, isNot(contains('BIL_GEMINI_API_KEY')));
 

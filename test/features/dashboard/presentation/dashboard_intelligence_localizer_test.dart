@@ -2,6 +2,7 @@ import 'package:body_intelligence_log/engine/body_composition_engine.dart';
 import 'package:body_intelligence_log/engine/one_best_action_engine.dart';
 import 'package:body_intelligence_log/engine/what_changed_engine.dart';
 import 'package:body_intelligence_log/features/dashboard/presentation/dashboard_intelligence_localizer.dart';
+import 'package:body_intelligence_log/features/dashboard/widgets/dashboard_primary_carousel.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -128,6 +129,85 @@ void main() {
       expect(
         localizer.insightTitle('Protein below target'),
         isNot('Protein below target'),
+        reason: tag,
+      );
+    }
+  });
+
+  test('deep 20 carousel labels stay in one localized voice', () {
+    const tags = <String>{
+      'de',
+      'it',
+      'pt-BR',
+      'pt-PT',
+      'ur',
+      'fa',
+      'hi',
+      'id',
+      'ms',
+      'ja',
+      'ko',
+      'zh-Hans',
+      'zh-Hant',
+      'ru',
+      'bn',
+      'vi',
+      'th',
+      'pl',
+      'nl',
+      'uk',
+    };
+    const english = <String>{
+      'Today',
+      'One best action',
+      'Today Summary',
+      'Daily insights',
+    };
+
+    for (final tag in tags) {
+      final copy = dashboardPrimaryCarouselCopy(tag);
+      expect(copy.values, everyElement(isNotEmpty), reason: tag);
+      expect(copy.values.toSet().intersection(english), isEmpty, reason: tag);
+    }
+  });
+
+  test('decision evidence never exposes raw English IDs outside English', () {
+    const tags = <String>{
+      'ar',
+      'fr',
+      'es',
+      'tr',
+      'de',
+      'it',
+      'pt-BR',
+      'pt-PT',
+      'ur',
+      'fa',
+      'hi',
+      'id',
+      'ms',
+      'ja',
+      'ko',
+      'zh-Hans',
+      'zh-Hant',
+      'ru',
+      'bn',
+      'vi',
+      'th',
+      'pl',
+      'nl',
+      'uk',
+    };
+    for (final tag in tags) {
+      final localizer = DashboardIntelligenceLocalizer(localeTag: tag);
+      expect(
+        localizer.evidenceSummary(),
+        isNot('Progress is calculated only from actual local records.'),
+        reason: tag,
+      );
+      expect(
+        localizer.evidenceGap(),
+        isNot('Evidence is still forming'),
         reason: tag,
       );
     }

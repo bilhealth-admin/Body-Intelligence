@@ -2,6 +2,18 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+String _librarySource(String path) {
+  final library = File(path);
+  final entrypoint = library.readAsStringSync();
+  final parts = RegExp(r"part '([^']+)';")
+      .allMatches(entrypoint)
+      .map((match) => File('${library.parent.path}/${match.group(1)!}'));
+  return <String>[
+    entrypoint,
+    for (final part in parts) part.readAsStringSync(),
+  ].join('\n');
+}
+
 void main() {
   test('sleep UI prefers verified connected evidence with source and sync', () {
     final page = File(
@@ -39,10 +51,20 @@ void main() {
   });
 
   test('Coach context dedupes connected sleep over same-night manual data', () {
-    final provider = File(
+    final provider = _librarySource(
       'lib/features/intelligence_center/services/coach_context_provider.dart',
-    ).readAsStringSync();
+    );
     expect(provider, contains('connectedHealthProvider'));
+    expect(provider, contains('connectedHealth?.deviceVerified == true'));
+    expect(
+      provider,
+      matches(
+        RegExp(
+          r"'sleep'\s*:\s*connectedSleep\s*!=\s*null[\s\S]*?"
+          r"'source'\s*:\s*'connected_health'",
+        ),
+      ),
+    );
     expect(provider, contains("'sleepSource'] = 'connected_health'"));
     expect(provider, contains("'sleepDeviceSource'] = signal.source"));
     expect(provider, contains("'sleepLastSyncAt']"));

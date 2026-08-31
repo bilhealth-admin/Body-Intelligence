@@ -13,7 +13,7 @@ void main() {
           .map((f) => f.readAsStringSync())
           .join('\n');
       expect(source, contains('WearableProviderCatalog'));
-      expect(source, contains('BleMedicalDeviceProvider'));
+      expect(source, contains('BleFitnessDeviceProvider'));
       expect(source, contains('WorldClassReportRuntime'));
       expect(source, contains('GlobalProductFlows'));
       expect(source, contains('GlobalTypedRepository'));

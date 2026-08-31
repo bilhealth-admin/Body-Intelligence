@@ -4,6 +4,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $project = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
+throw 'EPIC15_ASSET_PREPARATION=HISTORICAL_NON_AUTHORITATIVE. No reviewed fitness-only connected-device source asset is registered. Refusing to mutate store assets or restore a medical-device claim.'
+
 $storeRoot = Join-Path $project 'store_assets'
 $brandArchive = 'C:\Users\HP 1040 G8\Downloads\BIL-Brand-Assets-v1.zip'
 $brandExtractRoot = Join-Path $storeRoot 'source'
@@ -183,7 +185,6 @@ $approvedCopies = @{
   'assets\images\professional\mediterranean_protein_bowl.png' = 'graphics\product\recipe_protein_bowl.png'
   'assets\images\professional\strength_training_cover.png' = 'graphics\product\workout_strength.png'
   'assets\images\v10_master\bil_hologram_master.png' = 'graphics\product\body_twin.png'
-  'assets\images\connected_health\bil_medical_hub.png' = 'graphics\product\connected_devices.png'
 }
 foreach ($sourceRelative in $approvedCopies.Keys) {
   $sourcePath = Join-Path $project $sourceRelative

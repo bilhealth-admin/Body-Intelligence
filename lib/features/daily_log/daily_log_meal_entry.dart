@@ -23,6 +23,7 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
                 ),
                 viewHintText: _mealCopy('searchDetail'),
                 builder: (context, controller) => SearchBar(
+                  key: const Key('daily-meal-food-search-bar'),
                   enabled: !mealSaving,
                   controller: controller,
                   leading: const Icon(Icons.search),
@@ -317,70 +318,51 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
             },
           ),
           const SizedBox(height: 18),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final macroRow = Row(
-                children: [
-                  Expanded(
-                    child: _FoodMacroValue(
-                      label: _mealCopy('carbs'),
-                      value: carbs,
-                      color: const Color(0xFF0A8F88),
-                    ),
-                  ),
-                  Expanded(
-                    child: _FoodMacroValue(
-                      label: _mealCopy('fat'),
-                      value: fat,
-                      color: const Color(0xFF6F1096),
-                    ),
-                  ),
-                  Expanded(
-                    child: _FoodMacroValue(
-                      label: _mealCopy('protein'),
-                      value: protein,
-                      color: const Color(0xFFC56A00),
-                    ),
-                  ),
-                ],
-              );
-              final ring = DailyLogCalorieMacroRing(
-                calories: calories,
-                calorieGoal: null,
-                carbs: carbs,
-                fat: fat,
-                protein: protein,
-              );
-              final guardedMacros = PremiumNutritionGlass(
-                key: const Key('daily-log-food-macros-glass'),
-                borderRadius: 14,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: macroRow,
-                ),
-              );
-              if (constraints.maxWidth < 420 ||
-                  MediaQuery.textScalerOf(context).scale(1) >= 1.35) {
-                return Column(
-                  children: [ring, const SizedBox(height: 16), guardedMacros],
-                );
-              }
-              return Row(
-                children: [
-                  ring,
-                  const SizedBox(width: 16),
-                  Expanded(child: guardedMacros),
-                ],
-              );
-            },
+          Center(
+            child: DailyLogCalorieMacroRing(
+              calories: calories,
+              calorieGoal: null,
+              carbs: carbs,
+              fat: fat,
+              protein: protein,
+            ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
           PremiumNutritionGlass(
-            key: const Key('daily-log-nutrition-facts-glass'),
+            key: const Key('daily-log-food-premium-group'),
             borderRadius: 14,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _FoodMacroValue(
+                          label: _mealCopy('carbs'),
+                          value: carbs,
+                          color: const Color(0xFF0A8F88),
+                        ),
+                      ),
+                      Expanded(
+                        child: _FoodMacroValue(
+                          label: _mealCopy('fat'),
+                          value: fat,
+                          color: const Color(0xFF6F1096),
+                        ),
+                      ),
+                      Expanded(
+                        child: _FoodMacroValue(
+                          label: _mealCopy('protein'),
+                          value: protein,
+                          color: const Color(0xFFC56A00),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Divider(height: 1, color: scheme.outlineVariant),
                 Semantics(
                   button: true,
                   expanded: nutritionFactsExpanded,

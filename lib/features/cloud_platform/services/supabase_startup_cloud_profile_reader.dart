@@ -48,7 +48,9 @@ final class SupabaseStartupCloudProfileReader
       throw const FormatException('Invalid startup cloud profile envelope.');
     }
     final encryptedPayload = Map<String, Object?>.from(row['payload']! as Map);
-    final payload = AesGcmCloudPayloadCipher(key).decrypt(encryptedPayload);
+    final payload = await AesGcmCloudPayloadCipher(
+      key,
+    ).decrypt(encryptedPayload);
     return CloudRecordEnvelope(
       entityKind: CloudEntityKind.profile,
       recordId: _requiredString(row, 'record_id'),

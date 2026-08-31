@@ -191,10 +191,12 @@ void main() {
       ..['presenter'] = 'adult_female'
       ..['synthetic_performer'] = true;
     ((payload['media'] as Map<String, dynamic>)['video']
-        as Map<String, dynamic>)['media_role'] = 'preview';
+            as Map<String, dynamic>)['media_role'] =
+        'preview';
     final segment = (payload['segments'] as List<Map<String, dynamic>>).single;
     ((segment['media'] as Map<String, dynamic>)['video']
-        as Map<String, dynamic>)['media_role'] = 'instruction';
+            as Map<String, dynamic>)['media_role'] =
+        'instruction';
 
     final item = WellnessContentItem.fromJson(
       payload,
@@ -226,11 +228,11 @@ void main() {
   test('invalid workout presentation metadata fails closed', () {
     final invalidAudience = trustedWorkout()..['audience'] = 'children';
     final invalidPresenter = trustedWorkout()..['presenter'] = 'model';
-    final invalidSynthetic = trustedWorkout()
-      ..['synthetic_performer'] = 'yes';
+    final invalidSynthetic = trustedWorkout()..['synthetic_performer'] = 'yes';
     final invalidMediaRole = trustedWorkout();
     ((invalidMediaRole['media'] as Map<String, dynamic>)['video']
-        as Map<String, dynamic>)['media_role'] = 'demo';
+            as Map<String, dynamic>)['media_role'] =
+        'demo';
 
     for (final payload in <Map<String, dynamic>>[
       invalidAudience,
@@ -345,16 +347,44 @@ void main() {
   });
 
   test(
-    'production library consumes trusted items and exposes activity log',
+    'production library consumes release-approved items and exposes activity log',
     () {
-      final source = File(
+      final pageSource = File(
         'lib/features/wellness/presentation/bil_workout_routines_page.dart',
       ).readAsStringSync();
+      final managerSource = File(
+        'lib/features/wellness/services/wellness_content_pack_manager.dart',
+      ).readAsStringSync();
 
-      expect(source, contains('loadTrustedInstalledItems'));
-      expect(source, contains('dailyLogRepositoryProvider'));
-      expect(source, contains("'kind': 'trusted_workout_routine'"));
-      expect(source, isNot(contains("'calories'")));
+      expect(
+        pageSource,
+        contains('_manager.loadWorkoutLibraryItems(locale: locale)'),
+      );
+      expect(pageSource, isNot(contains('_manager.loadInstalledItems(')));
+      expect(pageSource, contains('dailyLogRepositoryProvider'));
+      expect(pageSource, contains("'kind': 'trusted_workout_routine'"));
+      expect(pageSource, isNot(contains("'calories'")));
+
+      // Discovery is not a trust bypass: the complete catalog is parsed
+      // against the approved release, and an installed override is accepted
+      // only when its exact pack version, count, bundle and stable IDs match.
+      expect(managerSource, contains('await _workoutReleaseLoader()'));
+      expect(
+        managerSource,
+        contains('WorkoutDiscoveryCatalogRepository.itemCount'),
+      );
+      expect(
+        managerSource,
+        contains(
+          'WorkoutDiscoveryCatalogRepository.releasePackVersions[packId]',
+        ),
+      );
+      expect(managerSource, contains('entry.value.length != expectedCount'));
+      expect(managerSource, contains('item.releaseBundleId != expectedBundle'));
+      expect(
+        managerSource,
+        contains('!installedItems.keys.toSet().containsAll(expectedStableIds)'),
+      );
     },
   );
 }

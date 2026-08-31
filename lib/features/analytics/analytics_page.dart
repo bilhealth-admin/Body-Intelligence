@@ -29,6 +29,14 @@ import 'widgets/analytics_weight_trend_chart.dart';
 
 part 'widgets/analytics_page_primitives.dart';
 
+/// Single clock boundary for Analytics range and recovery calculations.
+///
+/// Runtime behavior continues to use the device clock, while tests can freeze
+/// the page to one instant so a render cannot drift across calendar days.
+final analyticsClockProvider = Provider<DateTime Function()>(
+  (ref) => DateTime.now,
+);
+
 class AnalyticsPage extends ConsumerStatefulWidget {
   const AnalyticsPage({super.key, this.showSettingsBack = false});
 
@@ -110,6 +118,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final now = ref.watch(analyticsClockProvider)();
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
     String tr(String en, String ar) => analyticsText(context, en, ar);
     final weightsAsync = ref.watch(weightHistoryProvider);
@@ -183,7 +192,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
     final allContexts = contextsAsync.value ?? const [];
     final start = range.days == null
         ? null
-        : DateTime.now().subtract(Duration(days: range.days! - 1));
+        : now.subtract(Duration(days: range.days! - 1));
     bool included(DateTime date) =>
         start == null || dayKeyFor(date).compareTo(dayKeyFor(start)) >= 0;
     final weights = allWeights.where((row) => included(row.date)).toList();
@@ -236,9 +245,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
           .toList(),
     );
     final rate = progress.weeklyDirectionKg;
-    final cutoffKey = dayKeyFor(
-      DateTime.now().subtract(const Duration(days: 6)),
-    );
+    final cutoffKey = dayKeyFor(now.subtract(const Duration(days: 6)));
     final recentWeightDays = weights
         .where((row) => dayKeyFor(row.date).compareTo(cutoffKey) >= 0)
         .map((row) => dayKeyFor(row.date))
@@ -276,7 +283,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
           .map((row) => row.date),
     ]..sort();
     final recovery = RecoveryEngine.evaluate(
-      now: DateTime.now(),
+      now: now,
       lastTrackedAt: activityDates.lastOrNull,
     );
     final baseline = PersonalBaselineEngine.evaluate(
@@ -587,6 +594,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
             else
               PremiumNutritionGlass(
                 key: const Key('analytics-daily-nutrition-premium-glass'),
+                showLabel: false,
                 child: Column(
                   children: caloriesByDay.keys
                       .toList()

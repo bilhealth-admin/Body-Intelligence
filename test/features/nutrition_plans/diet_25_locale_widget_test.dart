@@ -18,6 +18,26 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+Future<void> _scrollUntilBuilt(
+  WidgetTester tester,
+  Finder target, {
+  int maxSwipes = 12,
+  double swipeDistance = 240,
+}) async {
+  final scrollable = find.byType(Scrollable).first;
+  expect(scrollable, findsOneWidget);
+  for (var attempt = 0; attempt < maxSwipes; attempt++) {
+    if (target.evaluate().isNotEmpty) {
+      await tester.ensureVisible(target);
+      await tester.pumpAndSettle();
+      return;
+    }
+    await tester.drag(scrollable, Offset(0, -swipeDistance));
+    await tester.pumpAndSettle();
+  }
+  expect(target, findsOneWidget);
+}
+
 void main() {
   test('diet copy and all pathways resolve across 25 locales', () {
     expect(AppLocalizations.supportedLocales, hasLength(25));
@@ -125,10 +145,9 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
       expect(find.byKey(const Key('diet-calories-field')), findsOneWidget);
-      await tester.scrollUntilVisible(
+      await _scrollUntilBuilt(
+        tester,
         find.byKey(const Key('diet-macro-editing-notice')),
-        260,
-        scrollable: find.byType(Scrollable).first,
       );
       expect(
         find.byKey(const Key('diet-macro-editing-notice')),

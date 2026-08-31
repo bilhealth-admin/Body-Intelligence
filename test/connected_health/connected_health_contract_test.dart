@@ -88,6 +88,16 @@ void main() {
     expect(provider, isNot(contains('https://')));
   });
 
+  test('device verification requires persisted native evidence', () {
+    final provider = File(
+      'lib/features/connected_health/providers/connected_health_provider.dart',
+    ).readAsStringSync();
+
+    expect(provider, isNot(contains('deviceVerified: true')));
+    expect(provider, contains('signal.provenance.providerId == _bridge.id'));
+    expect(provider, contains('selected.any(_isEvidenceFromNativeBridge)'));
+  });
+
   test('management route is registered', () {
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
     expect(router, contains("path: '/connected-health'"));
@@ -113,6 +123,12 @@ void main() {
       ),
     );
     expect(components, isNot(contains('entry.protocol')));
+    expect(
+      components,
+      isNot(contains('bil_medical_hub.png')),
+      reason: 'The fitness surface must not show a blood-pressure device.',
+    );
+    expect(components, isNot(contains("Key('bil-fitness-device-image')")));
   });
 
   test(
@@ -120,6 +136,9 @@ void main() {
     () {
       final dashboard = File(
         'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
+      ).readAsStringSync();
+      final dashboardSections = File(
+        'lib/features/dashboard/widgets/dashboard_reference_phone_sections.dart',
       ).readAsStringSync();
       final page = File(
         'lib/features/connected_health/connected_health_page.dart',
@@ -129,6 +148,11 @@ void main() {
       ).readAsStringSync();
 
       expect(dashboard, isNot(contains('Smart-watch and health sync')));
+      expect(
+        dashboardSections,
+        isNot(contains('assets/images/connected_health/bil_medical_hub.png')),
+        reason: 'The Dashboard must not retain a blood-pressure side card.',
+      );
       expect(page, contains("Key('fitness-devices-premium-gate')"));
       expect(page, contains("Key('connected-health-live-watch-card')"));
       expect(page, contains('child: const _FitnessDeviceSection()'));

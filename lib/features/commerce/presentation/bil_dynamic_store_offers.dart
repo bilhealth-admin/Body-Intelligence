@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../domain/commerce_plan.dart';
 import '../domain/market_offer_policy.dart';
+import '../domain/store_catalog_configuration.dart';
 import '../domain/store_offer_metadata.dart';
 import '../domain/store_price_comparison.dart';
 import 'ai_boost_coach_artwork.dart';
@@ -10,6 +11,14 @@ import 'bil_store_copy.dart';
 import 'premium_crown_emblem.dart';
 
 part 'bil_dynamic_store_components.dart';
+part 'bil_dynamic_store_plan_components.dart';
+
+bool _isVerifiedAiTrialOffer(BilStoreOfferMetadata offer) =>
+    offer.kind == BilStoreProductKind.premiumAiCoachSubscription &&
+    StoreCatalogConfiguration.isAiTrialProduct(offer.productId) &&
+    offer.trialEligible == true &&
+    const {'P1W', 'P7D'}.contains(offer.trialPeriodIso8601) &&
+    const {'P1M', 'P1Y'}.contains(offer.billingPeriodIso8601);
 
 /// Store-driven offers. Prices and promotions always come from the device
 /// store; this surface never grants entitlement locally.
@@ -72,6 +81,18 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
       for (final offer in visible) {
         if (offer.kind == BilStoreProductKind.aiBoostConsumable) return offer;
       }
+      // A Boost deep link must never fall through to a subscription purchase.
+      return null;
+    }
+    if (widget.initialFocus == 'ai-coach') {
+      for (final offer in visible) {
+        if (offer.kind == BilStoreProductKind.premiumAiCoachSubscription) {
+          return offer;
+        }
+      }
+      // The AI Coach subscription CTA is exact. If that product is unavailable
+      // in the current storefront, do not silently select ordinary Premium.
+      return null;
     }
     final subscriptions = visible
         .where((offer) => offer.kind != BilStoreProductKind.aiBoostConsumable)
@@ -88,6 +109,8 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final dark = scheme.brightness == Brightness.dark;
     final grouped = <BilStoreProductKind, List<BilStoreOfferMetadata>>{};
     final visibleOffers = MarketOfferPolicy.visibleOffers(widget.offers);
     for (final offer in visibleOffers) {
@@ -117,7 +140,10 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
       children: [
         Positioned.fill(
           child: DecoratedBox(
-            decoration: const BoxDecoration(color: Colors.white),
+            key: const ValueKey('store-offers-background'),
+            decoration: BoxDecoration(
+              color: dark ? scheme.surface : Colors.white,
+            ),
             child: SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(
                 20,
@@ -132,11 +158,14 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _StoreHero(
-                        eyebrow: _copy('premium_store_eyebrow'),
+                        // Keep one visible Premium label per route. The tier
+                        // title below owns that label in Premium storefronts;
+                        // AI storefronts name the coach and use one inherited
+                        // benefit line to explain the Premium relationship.
+                        eyebrow: _copy('plans'),
                         title: _copy('premium_store_title'),
-                        subtitle: _copy('premium_store_subtitle'),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
                       for (final kind in kinds) ...[
                         _StoreTierCard(
                           kind: kind,
@@ -160,6 +189,7 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                               : null,
                           benefits: _benefitKeys(
                             kind,
+                            grouped[kind] ?? const [],
                           ).map(_copy).toList(growable: false),
                           currentLabel: _isCurrent(kind)
                               ? _copy('current_plan')
@@ -178,9 +208,16 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                           monthlyEquivalentLabel: _copy('monthly_equivalent'),
                           perMonthLabel: _copy('per_month'),
                           saveLabel: _copy('save'),
-                          versusMonthlyLabel: _copy('versus_monthly'),
                           trialLabel: _copy('trial'),
                           sevenDayTrialLabel: _copy('trial_7_days'),
+                          trialRenewsMonthlyLabel: _copy(
+                            'trial_renews_monthly',
+                          ),
+                          trialRenewsAnnuallyLabel: _copy(
+                            'trial_renews_annually',
+                          ),
+                          viewAllFeaturesLabel: _copy('view_all_features'),
+                          showFewerFeaturesLabel: _copy('show_fewer_features'),
                           loading: widget.loading,
                           selectedOfferIdentity: _offerIdentity(selectedOffer),
                           onOfferSelected: (offer) =>
@@ -206,8 +243,14 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                             : widget.onRestore,
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size.fromHeight(50),
-                          foregroundColor: const Color(0xFF343434),
-                          side: const BorderSide(color: Color(0xFFE0E0E5)),
+                          foregroundColor: dark
+                              ? scheme.onSurface
+                              : const Color(0xFF343434),
+                          side: BorderSide(
+                            color: dark
+                                ? scheme.outlineVariant
+                                : const Color(0xFFE0E0E5),
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -231,7 +274,9 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                       TextButton(
                         onPressed: widget.onManage,
                         style: TextButton.styleFrom(
-                          foregroundColor: const Color(0xFF66666F),
+                          foregroundColor: dark
+                              ? scheme.onSurfaceVariant
+                              : const Color(0xFF66666F),
                         ),
                         child: Text(_copy('manage')),
                       ),
@@ -266,32 +311,47 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
     BilStoreProductKind.aiBoostConsumable => false,
   };
 
-  List<String> _benefitKeys(BilStoreProductKind kind) => switch (kind) {
-    BilStoreProductKind.premiumSubscription => const [
-      'premium_benefit_1',
-      'premium_benefit_2',
-      'premium_benefit_barcode',
-      'premium_benefit_dashboard',
-      'premium_benefit_recipes',
-      'premium_benefit_workouts',
-      'premium_benefit_meal_plan',
-      'premium_benefit_programs',
-      'premium_benefit_reports',
-      'premium_benefit_fasting',
-      'premium_benefit_sleep',
-      'premium_benefit_body',
-      'premium_benefit_medical_devices',
-      'premium_benefit_community',
-      'premium_benefit_5',
-      'premium_benefit_trial',
-    ],
-    BilStoreProductKind.premiumAiCoachSubscription => const [
+  static const _premiumPaidBenefitKeys = <String>[
+    'premium_benefit_2',
+    'premium_benefit_barcode',
+    'premium_benefit_dashboard',
+    'premium_benefit_recipes',
+    'premium_benefit_workouts',
+    'premium_benefit_strength_plans',
+    'premium_benefit_3',
+    'premium_benefit_meal_plan',
+    'premium_benefit_programs',
+    'premium_benefit_reports',
+    'premium_benefit_fasting',
+    'premium_benefit_sleep',
+    'premium_benefit_body',
+    'premium_benefit_4',
+    'premium_benefit_fitness_devices',
+    'premium_benefit_community',
+    'premium_benefit_messages',
+    'premium_benefit_5',
+  ];
+
+  static const _premiumCoreBenefitKeys = <String>[
+    'premium_benefit_1',
+    ..._premiumPaidBenefitKeys,
+  ];
+
+  List<String> _benefitKeys(
+    BilStoreProductKind kind,
+    List<BilStoreOfferMetadata> offers,
+  ) => switch (kind) {
+    BilStoreProductKind.premiumSubscription => [..._premiumCoreBenefitKeys],
+    // The two paid tiers are sold in different storefront markets, so the AI
+    // route must stand on its own: one inheritance line names the complete
+    // Premium relationship, then the concrete paid and AI benefits prove it.
+    BilStoreProductKind.premiumAiCoachSubscription => [
       'ai_benefit_1',
       'ai_benefit_2',
       'ai_benefit_3',
       'ai_benefit_4',
-      'ai_benefit_community',
-      'ai_benefit_trial',
+      ..._premiumPaidBenefitKeys,
+      if (_hasVerifiedTrial(offers)) 'ai_benefit_trial',
     ],
     BilStoreProductKind.aiBoostConsumable => const [
       'boost_benefit_1',
@@ -301,4 +361,10 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
       'boost_benefit_5',
     ],
   };
+
+  /// A trial is user-visible only when the selected storefront reports both
+  /// eligibility and a concrete introductory period. BIL never authors a
+  /// trial promise independently of Play Billing / StoreKit metadata.
+  static bool _hasVerifiedTrial(List<BilStoreOfferMetadata> offers) =>
+      offers.any(_isVerifiedAiTrialOffer);
 }

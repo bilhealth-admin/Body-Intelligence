@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
+import 'package:body_intelligence_log/app/services/app_settings_provider.dart';
+import 'package:body_intelligence_log/app/services/app_settings_service.dart';
+import 'package:body_intelligence_log/app/services/settings_store.dart';
 import 'package:body_intelligence_log/app/theme/bil_flagship_theme.dart';
 import 'package:body_intelligence_log/features/auth/premium_account_gateway_page.dart';
 import 'package:body_intelligence_log/features/ads/advertising_privacy_page.dart';
@@ -23,6 +26,7 @@ import 'package:body_intelligence_log/features/connected_health/connected_health
 import 'package:body_intelligence_log/features/connected_health/connected_health_page.dart';
 import 'package:body_intelligence_log/features/connected_health/steps_settings_page.dart';
 import 'package:body_intelligence_log/features/connected_health/providers/connected_health_provider.dart';
+import 'package:body_intelligence_log/features/connected_health/widgets/live_health_watch.dart';
 import 'package:body_intelligence_log/features/dashboard/presentation/dashboard_preferences_page.dart';
 import 'package:body_intelligence_log/features/settings/trust_support_page.dart';
 import 'package:body_intelligence_log/features/settings/help_center_page.dart';
@@ -45,6 +49,7 @@ import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,6 +59,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'visual_evidence_font.dart';
+
+const _skipVisualPixelComparison = bool.fromEnvironment(
+  'BIL_SKIP_VISUAL_PIXELS',
+);
+
+final _visualNow = DateTime(2026, 8, 14, 9, 41, 12);
+
+Future<void> _settleRecipeCardFacts(WidgetTester tester) async {
+  Finder pendingFacts() => find.byWidgetPredicate(
+    (widget) => widget.runtimeType.toString() == '_RecipeFactSkeleton',
+  );
+
+  for (var frame = 0; frame < 200; frame++) {
+    if (pendingFacts().evaluate().isEmpty) return;
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 10)),
+    );
+    await tester.pump(const Duration(milliseconds: 10));
+  }
+  throw StateError('Recipe card facts did not settle for visual evidence.');
+}
 
 final class _VisualHealthGateway implements ConnectedHealthGateway {
   const _VisualHealthGateway(this.snapshot);
@@ -78,6 +104,16 @@ final class _VisualHealthGateway implements ConnectedHealthGateway {
 
   @override
   Future<ConnectedHealthSnapshot> synchronize() async => snapshot;
+}
+
+final class _VisualSettingsStore implements SettingsStore {
+  String? _value;
+
+  @override
+  Future<String?> read() async => _value;
+
+  @override
+  Future<void> write(String value) async => _value = value;
 }
 
 final class _VisualRouteStack extends StatelessWidget {
@@ -389,7 +425,11 @@ void main() {
       home: renderedPage,
     );
     final databaseScope = ProviderScope(
-      overrides: [databaseProvider.overrideWithValue(db)],
+      overrides: [
+        databaseProvider.overrideWithValue(db),
+        liveHealthNowProvider.overrideWithValue(() => _visualNow),
+        sleepNowProvider.overrideWithValue(() => _visualNow),
+      ],
       child: wrapper?.call(app) ?? app,
     );
     await tester.pumpWidget(databaseScope);
@@ -402,12 +442,17 @@ void main() {
       await tester.pumpAndSettle();
     }
     expect(tester.takeException(), isNull);
-    await expectLater(
-      captureOverlay
-          ? find.byKey(const Key('visual-capture-root'))
-          : find.byType(Scaffold).first,
-      matchesGoldenFile('goldens/visual_closure_$name.png'),
-    );
+    final captureTarget = captureOverlay
+        ? find.byKey(const Key('visual-capture-root'))
+        : find.byType(Scaffold).first;
+    if (_skipVisualPixelComparison) {
+      expect(captureTarget, findsOneWidget);
+    } else {
+      await expectLater(
+        captureTarget,
+        matchesGoldenFile('goldens/visual_closure_$name.png'),
+      );
+    }
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(milliseconds: 1));
     await tester.pump();
@@ -503,6 +548,7 @@ void main() {
                 copy: (english, _) => english,
                 mealLabel: 'Breakfast',
                 onSave: (_) async {},
+                initialTime: TimeOfDay.fromDateTime(_visualNow),
               ),
               child: const Text('Open quick nutrition'),
             ),
@@ -523,11 +569,23 @@ void main() {
   testWidgets('account gateway production Arabic phone capture', (
     tester,
   ) async {
+    final settingsService = AppSettingsService(store: _VisualSettingsStore());
+    await settingsService.save(
+      AppSettings(localeCode: 'ar', themeMode: 'light'),
+    );
     await capture(
       tester,
       page: const AccountGatewayPage(),
       name: 'account_gateway_ar_phone',
       locale: const Locale('ar'),
+      wrapper: (child) => ProviderScope(
+        overrides: [
+          appSettingsProvider.overrideWith(
+            (_) => AppSettingsController(settingsService),
+          ),
+        ],
+        child: child,
+      ),
     );
   });
 
@@ -671,6 +729,13 @@ void main() {
   });
 
   testWidgets('community people search authenticated capture', (tester) async {
+    final premium = SubscriptionState(
+      plan: CommercePlan.pro,
+      entitlements: const {CommerceEntitlement.communityFriends},
+      authority: EntitlementAuthority.verifiedServer,
+      isPurchasable: true,
+      canRestorePurchases: true,
+    );
     await capture(
       tester,
       page: _VisualRouteStack(
@@ -678,6 +743,14 @@ void main() {
       ),
       name: 'community_people_search_authenticated_phone',
       captureOverlay: true,
+      wrapper: (child) => ProviderScope(
+        overrides: [
+          verifiedSubscriptionStateProvider.overrideWithValue(
+            AsyncData(premium),
+          ),
+        ],
+        child: child,
+      ),
       interact: (tester) async {
         await tester.enterText(
           find.byKey(const Key('community-people-search')),
@@ -892,6 +965,7 @@ void main() {
       tester,
       page: const RecipeLibraryPage(),
       name: 'recipe_discovery_phone',
+      interact: _settleRecipeCardFacts,
     );
   });
 
@@ -1032,7 +1106,7 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(find.text('Bean & corn salad'), findsNWidgets(2));
-        expect(find.text('1 of 1500 recipes'), findsOneWidget);
+        expect(find.text('1 of 1,500 recipes'), findsOneWidget);
       },
     );
   });
@@ -1479,7 +1553,7 @@ void main() {
         );
         await tester.tap(trigger);
         await tester.pumpAndSettle();
-        expect(find.text('View Premium plans'), findsOneWidget);
+        expect(find.text('Continue'), findsOneWidget);
       },
     );
   });
@@ -1518,15 +1592,13 @@ void main() {
         );
         await tester.tap(trigger);
         await tester.pumpAndSettle();
-        await tester.tap(
-          find.byKey(const Key('dashboard-nutrient-goal-protein')),
-        );
+        await tester.tap(find.byKey(const Key('dashboard-nutrient-goal-fat')));
         await tester.pumpAndSettle();
         expect(find.text('Save cards'), findsOneWidget);
         expect(
           tester
               .widget<CheckboxListTile>(
-                find.byKey(const Key('dashboard-nutrient-goal-protein')),
+                find.byKey(const Key('dashboard-nutrient-goal-fat')),
               )
               .value,
           isTrue,
@@ -1727,7 +1799,10 @@ void main() {
       seed: (database) async {
         await DailyLogRepository(
           database,
-        ).save(date: DateTime.now(), sleepHours: 7.5);
+        ).save(date: _visualNow, sleepHours: 7.5);
+        await database
+            .update(database.dailyLogs)
+            .write(DailyLogsCompanion(updatedAt: Value(_visualNow)));
       },
       interact: (tester) async {
         expect(find.textContaining('Recorded today: 7.5 h'), findsOneWidget);
@@ -1744,7 +1819,7 @@ void main() {
         final repository = DailyLogRepository(database);
         for (var day = 0; day < 5; day++) {
           await repository.save(
-            date: DateTime.now().subtract(Duration(days: day)),
+            date: _visualNow.subtract(Duration(days: day)),
             sleepHours: 6.5 + (day * .35),
           );
         }

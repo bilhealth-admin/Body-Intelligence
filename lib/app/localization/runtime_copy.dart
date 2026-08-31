@@ -15,6 +15,15 @@ import 'runtime_copy_profile_photo.dart';
 import 'runtime_copy_legal_status.dart';
 import 'runtime_copy_check_in.dart';
 import 'runtime_copy_body_model.dart';
+import 'runtime_copy_ai_access.dart';
+import 'runtime_copy_accessibility_wellness.dart';
+import 'runtime_copy_cloud_sync.dart';
+import 'runtime_copy_release_polish.dart';
+import 'runtime_copy_release_actions.dart';
+import 'runtime_copy_food_actions.dart';
+import 'runtime_copy_daily_log_actions.dart';
+import 'runtime_copy_fitness_watch.dart';
+import 'runtime_copy_connected_health.dart';
 
 /// Reviewed runtime copy used by legacy call-sites that still pass an English
 /// sentence instead of a typed key. Every entry is complete in the five
@@ -43,6 +52,33 @@ abstract final class RuntimeCopy {
 
   static String? resolve(String english, String localeTag) {
     final normalized = localeTag.replaceAll('_', '-').toLowerCase();
+    final connectedHealth = ConnectedHealthRuntimeCopy.resolve(
+      english,
+      localeTag,
+    );
+    if (connectedHealth != null) return connectedHealth;
+    final releasePolish = ReleasePolishRuntimeCopy.resolve(english, localeTag);
+    if (releasePolish != null) return releasePolish;
+    final releaseAction = ReleaseActionRuntimeCopy.resolve(english, localeTag);
+    if (releaseAction != null) return releaseAction;
+    final foodAction = FoodActionRuntimeCopy.resolve(english, localeTag);
+    if (foodAction != null) return foodAction;
+    final dailyLogAction = DailyLogActionRuntimeCopy.resolve(
+      english,
+      localeTag,
+    );
+    if (dailyLogAction != null) return dailyLogAction;
+    final fitnessWatch = FitnessWatchRuntimeCopy.resolve(english, localeTag);
+    if (fitnessWatch != null) return fitnessWatch;
+    final cloudSync = CloudSyncConsentCopy.resolve(english, localeTag);
+    if (cloudSync != null) return cloudSync;
+    final accessibilityWellness = AccessibilityWellnessRuntimeCopy.resolve(
+      english,
+      localeTag,
+    );
+    if (accessibilityWellness != null) return accessibilityWellness;
+    final aiAccess = AiAccessRuntimeCopy.resolve(english, localeTag);
+    if (aiAccess != null) return aiAccess;
     final bodyModel = BodyModelRuntimeCopy.resolve(english, localeTag);
     if (bodyModel != null) return bodyModel;
     final releaseClosure = ReleaseClosureRuntimeCopy.resolve(
@@ -121,6 +157,15 @@ abstract final class RuntimeCopy {
         ) &&
         CheckInRuntimeCopy.balanced &&
         BodyModelRuntimeCopy.balanced &&
+        AiAccessRuntimeCopy.balanced &&
+        AccessibilityWellnessRuntimeCopy.balanced &&
+        CloudSyncConsentCopy.balanced &&
+        ConnectedHealthRuntimeCopy.balanced &&
+        ReleasePolishRuntimeCopy.balanced &&
+        ReleaseActionRuntimeCopy.balanced &&
+        FoodActionRuntimeCopy.balanced &&
+        DailyLogActionRuntimeCopy.balanced &&
+        FitnessWatchRuntimeCopy.balanced &&
         ReleaseClosureRuntimeCopy.balanced &&
         ProfileRuntimeCopy.balanced &&
         ExtendedRuntimeCopy.values.values.every(

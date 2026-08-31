@@ -13,6 +13,7 @@ import {
   type RecipeImageObject,
 } from "./recipe-images";
 import approvedObjects from "../../../artifacts/workout_media/cloudflare_runtime_v2/protected_object_keys_v2.json";
+import freePreviews from "../../../artifacts/workout_media/cloudflare_runtime_v2/free_preview_keys_v1.json";
 
 const protectedObjectPrefix = "/v2/objects/";
 const videoKey = /^workouts\/v1\/(?:home|gym-six-month)\/movements\/[a-z0-9]+(?:-[a-z0-9]+)*\.mp4$/;
@@ -25,6 +26,19 @@ if (
   approvedObjectKeys.size !== 606
 ) {
   throw new Error("generated_workout_object_allowlist_invalid");
+}
+const freePreviewVideoKeys = new Set(freePreviews.videoObjectKeys);
+if (
+  freePreviews.schema !== "bil.workout-media.free-previews.v1" ||
+  freePreviews.version !== 1 ||
+  freePreviews.groupCount !== 20 ||
+  freePreviews.uniqueVideoCount !== 15 ||
+  freePreviewVideoKeys.size !== 15 ||
+  [...freePreviewVideoKeys].some(
+    (key) => !videoKey.test(key) || !approvedObjectKeys.has(key),
+  )
+) {
+  throw new Error("generated_workout_free_preview_allowlist_invalid");
 }
 
 export interface RuntimeServices {
@@ -118,17 +132,24 @@ async function handleRequest(
         "www-authenticate": 'Bearer realm="bil-workouts"',
       });
     }
-    let entitled: boolean;
-    try {
-      entitled = await services.hasPremiumEntitlement(user, env);
-    } catch (error) {
-      if (error instanceof EntitlementError) {
-        return jsonError("entitlement_unavailable", 503, request, env);
+    // Authenticated members may discover every approved poster and play only
+    // the exact generated free-preview video keys. Packs and all other videos
+    // retain the verified Premium entitlement boundary.
+    const freeMemberObject =
+      posterKey.test(objectKey) || freePreviewVideoKeys.has(objectKey);
+    if (!freeMemberObject) {
+      let entitled: boolean;
+      try {
+        entitled = await services.hasPremiumEntitlement(user, env);
+      } catch (error) {
+        if (error instanceof EntitlementError) {
+          return jsonError("entitlement_unavailable", 503, request, env);
+        }
+        throw error;
       }
-      throw error;
-    }
-    if (!entitled) {
-      return jsonError("premium_entitlement_required", 403, request, env);
+      if (!entitled) {
+        return jsonError("premium_entitlement_required", 403, request, env);
+      }
     }
     return serveR2(
       request,

@@ -9,6 +9,8 @@ import '../../../data/repositories/meal_repository.dart';
 import '../../commerce/presentation/premium_nutrition_glass.dart';
 import 'macro_value_formatter.dart';
 
+part 'daily_log_summary_locale_copy.dart';
+
 class DiaryDateNavigator extends StatelessWidget {
   const DiaryDateNavigator({
     super.key,
@@ -168,11 +170,11 @@ class DailyLogSnapshot extends StatelessWidget {
         builder: (context, constraints) {
           final ring = DailyLogCalorieMacroRing(
             calories: calories,
-            calorieGoal: null,
+            calorieGoal: calorieGoal,
             carbs: carbs,
             fat: fat,
             protein: protein,
-            dimension: 100,
+            dimension: 108,
           );
           final macros = Row(
             children: [
@@ -203,9 +205,13 @@ class DailyLogSnapshot extends StatelessWidget {
             ],
           );
           return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              ring,
+              Transform.translate(
+                key: const Key('daily-log-summary-ring-raised'),
+                offset: const Offset(0, -3),
+                child: ring,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: PremiumNutritionGlass(
@@ -283,82 +289,75 @@ class DailyMealDetailSummary extends StatelessWidget {
             protein: protein,
             dimension: 116,
           );
-          final macroDials = PremiumNutritionGlass(
+          final macroDials = Row(
             key: const Key('daily-meal-detail-macros'),
+            children: [
+              Expanded(
+                child: _MealMacroDial(
+                  label: _summaryText(context, 'carbs'),
+                  grams: carbs,
+                  progress: ratio(carbs * 4),
+                  color: const Color(0xFF0A8F88),
+                ),
+              ),
+              Expanded(
+                child: _MealMacroDial(
+                  label: _summaryText(context, 'fat'),
+                  grams: fat,
+                  progress: ratio(fat * 9),
+                  color: const Color(0xFF6F1096),
+                ),
+              ),
+              Expanded(
+                child: _MealMacroDial(
+                  label: _summaryText(context, 'proteinShort'),
+                  grams: protein,
+                  progress: ratio(protein * 4),
+                  color: const Color(0xFFC56A00),
+                ),
+              ),
+            ],
+          );
+          final minerals = Wrap(
+            key: const Key('daily-meal-detail-minerals'),
+            alignment: WrapAlignment.center,
+            spacing: 7,
+            runSpacing: 7,
+            children: [
+              NutrientMetric(
+                label: context.strings.text('Sodium'),
+                value: sodium,
+                unit: 'mg',
+              ),
+              NutrientMetric(
+                label: context.strings.text('Potassium'),
+                value: potassium,
+                unit: 'mg',
+              ),
+              NutrientMetric(
+                label: context.strings.text('Magnesium'),
+                value: magnesium,
+                unit: 'mg',
+              ),
+            ],
+          );
+          final premiumNutrition = PremiumNutritionGlass(
+            key: const Key('daily-meal-detail-premium-group'),
             compact: true,
             borderRadius: 18,
-            child: Row(
-              children: [
-                Expanded(
-                  child: _MealMacroDial(
-                    label: _summaryText(context, 'carbs'),
-                    grams: carbs,
-                    progress: ratio(carbs * 4),
-                    color: const Color(0xFF0A8F88),
-                  ),
-                ),
-                Expanded(
-                  child: _MealMacroDial(
-                    label: _summaryText(context, 'fat'),
-                    grams: fat,
-                    progress: ratio(fat * 9),
-                    color: const Color(0xFF6F1096),
-                  ),
-                ),
-                Expanded(
-                  child: _MealMacroDial(
-                    label: _summaryText(context, 'proteinShort'),
-                    grams: protein,
-                    progress: ratio(protein * 4),
-                    color: const Color(0xFFC56A00),
-                  ),
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Column(
+                children: [macroDials, const SizedBox(height: 14), minerals],
+              ),
             ),
           );
-          final stacked =
-              constraints.maxWidth < 360 ||
-              MediaQuery.textScalerOf(context).scale(1) >= 1.45;
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (stacked) ...[
-                Center(child: calorieRing),
-                const SizedBox(height: 14),
-                macroDials,
-              ] else
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    calorieRing,
-                    const SizedBox(width: 12),
-                    Expanded(child: macroDials),
-                  ],
-                ),
+              Center(child: calorieRing),
               const SizedBox(height: 14),
-              PremiumNutritionGlass(
-                key: const Key('daily-meal-detail-minerals'),
-                compact: true,
-                borderRadius: 16,
-                child: Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 7,
-                  runSpacing: 7,
-                  children: [
-                    NutrientMetric(label: 'Sodium', value: sodium, unit: 'mg'),
-                    NutrientMetric(
-                      label: 'Potassium',
-                      value: potassium,
-                      unit: 'mg',
-                    ),
-                    NutrientMetric(
-                      label: 'Magnesium',
-                      value: magnesium,
-                      unit: 'mg',
-                    ),
-                  ],
-                ),
-              ),
+              premiumNutrition,
             ],
           );
         },
@@ -657,120 +656,4 @@ class NutrientMetric extends StatelessWidget {
       ),
     );
   }
-}
-
-String _summaryText(BuildContext context, String key) {
-  final active = Localizations.localeOf(context);
-  final locale = active.languageCode.toLowerCase();
-  final english = _dailySummaryCopy['en']?[key] ?? key;
-  return _dailySummaryCopy[locale]?[key] ??
-      RuntimeCopy.resolve(english, BilLocalePolicy.canonicalTag(active)) ??
-      english;
-}
-
-const _dailySummaryCopy = <String, Map<String, String>>{
-  'en': {
-    'today': 'Today',
-    'previous': 'Previous day',
-    'next': 'Next day',
-    'summary': 'Today’s recorded summary',
-    'kcal': 'kcal',
-    'carbs': 'Carbs',
-    'fat': 'Fat',
-    'proteinShort': 'Protein',
-    'noWater': 'No water recorded',
-    'mlWater': 'ml water',
-    'protein': 'g protein',
-    'water': 'ml water',
-    'honest':
-        'BIL shows only what you recorded and never fills missing values automatically.',
-    'g': 'g',
-    'mg': 'mg',
-  },
-  'ar': {
-    'today': 'اليوم',
-    'previous': 'اليوم السابق',
-    'next': 'اليوم التالي',
-    'summary': 'ملخص اليوم المسجّل',
-    'kcal': 'سعرة',
-    'carbs': 'كربوهيدرات',
-    'fat': 'دهون',
-    'proteinShort': 'بروتين',
-    'noWater': 'لم يُسجّل ماء',
-    'mlWater': 'مل ماء',
-    'protein': 'جم بروتين',
-    'water': 'مل ماء',
-    'honest': 'يعرض BIL ما سُجّل فقط، ولا يملأ القيم الناقصة تلقائيًا.',
-    'g': 'جم',
-    'mg': 'مجم',
-  },
-  'fr': {
-    'today': 'Aujourd’hui',
-    'previous': 'Jour précédent',
-    'next': 'Jour suivant',
-    'summary': 'Résumé enregistré du jour',
-    'kcal': 'kcal',
-    'carbs': 'Glucides',
-    'fat': 'Lipides',
-    'proteinShort': 'Protéines',
-    'noWater': 'Aucune eau enregistrée',
-    'mlWater': 'ml d’eau',
-    'protein': 'g de protéines',
-    'water': 'ml d’eau',
-    'honest':
-        'BIL affiche uniquement ce que vous avez enregistré et ne complète jamais automatiquement les valeurs manquantes.',
-    'g': 'g',
-    'mg': 'mg',
-  },
-  'es': {
-    'today': 'Hoy',
-    'previous': 'Día anterior',
-    'next': 'Día siguiente',
-    'summary': 'Resumen registrado de hoy',
-    'kcal': 'kcal',
-    'carbs': 'Carbohidratos',
-    'fat': 'Grasa',
-    'proteinShort': 'Proteína',
-    'noWater': 'No hay agua registrada',
-    'mlWater': 'ml de agua',
-    'protein': 'g de proteína',
-    'water': 'ml de agua',
-    'honest':
-        'BIL solo muestra lo que registraste y nunca completa automáticamente los valores que faltan.',
-    'g': 'g',
-    'mg': 'mg',
-  },
-  'tr': {
-    'today': 'Bugün',
-    'previous': 'Önceki gün',
-    'next': 'Sonraki gün',
-    'summary': 'Bugünün kayıtlı özeti',
-    'kcal': 'kcal',
-    'carbs': 'Karbonhidrat',
-    'fat': 'Yağ',
-    'proteinShort': 'Protein',
-    'noWater': 'Su kaydı yok',
-    'mlWater': 'ml su',
-    'protein': 'g protein',
-    'water': 'ml su',
-    'honest':
-        'BIL yalnızca kaydettiğiniz verileri gösterir ve eksik değerleri otomatik olarak doldurmaz.',
-    'g': 'g',
-    'mg': 'mg',
-  },
-};
-
-double? knownNutrientTotal(
-  List<MealItem> items,
-  TrackedNutrient nutrient,
-  double Function(MealItem item) valueOf,
-) {
-  if (items.isEmpty ||
-      items.any(
-        (item) =>
-            !NutrientEvidenceMask.contains(item.nutrientEvidenceMask, nutrient),
-      )) {
-    return null;
-  }
-  return items.fold<double>(0, (total, item) => total + valueOf(item));
 }

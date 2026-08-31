@@ -11,7 +11,7 @@ void main() {
     final apple = read('ios/Runner.xcodeproj/project.pbxproj');
     final gate = read('docs/launch_readiness/BIL_RELEASE_CANDIDATE_GATE.md');
 
-    expect(pubspec, contains('version: 1.0.0+3'));
+    expect(pubspec, contains('version: 1.0.0+5'));
     expect(
       android,
       contains('applicationId = "com.bilhealth.bodyintelligencelog"'),

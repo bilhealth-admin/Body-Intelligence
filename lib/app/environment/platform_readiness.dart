@@ -5,7 +5,7 @@ enum BilRuntimePlatform { android, ios, windows, macos, linux, web, unknown }
 enum PlatformCapability {
   localCore,
   nativeHealth,
-  medicalBluetooth,
+  fitnessBluetooth,
   cloudSync,
   cloudAi,
   commerce,
@@ -63,7 +63,7 @@ class PlatformReadinessMatrix {
 
     return switch (capability) {
       PlatformCapability.nativeHealth => _nativeHealth(platform),
-      PlatformCapability.medicalBluetooth => _medicalBluetooth(platform),
+      PlatformCapability.fitnessBluetooth => _fitnessBluetooth(platform),
       PlatformCapability.cloudSync => _external(
         capability,
         cloudActivated,
@@ -108,14 +108,14 @@ class PlatformReadinessMatrix {
     );
   }
 
-  static PlatformCapabilityStatus _medicalBluetooth(
+  static PlatformCapabilityStatus _fitnessBluetooth(
     BilRuntimePlatform platform,
   ) {
     final supported =
         platform != BilRuntimePlatform.web &&
         platform != BilRuntimePlatform.unknown;
     return PlatformCapabilityStatus(
-      capability: PlatformCapability.medicalBluetooth,
+      capability: PlatformCapability.fitnessBluetooth,
       readiness: supported
           ? CapabilityReadiness.configurationRequired
           : CapabilityReadiness.unavailable,

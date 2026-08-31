@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BIL - Журнал телесного интеллекта</string>
+    <string name="app_name">Журнал телесного интеллекта</string>
     <string name="health_permissions_rationale_title">Конфиденциальность данных о здоровье</string>
     <string name="health_permissions_rationale_body">BIL запрашивает только типы данных Health Connect, необходимые для функций, которые вы решите использовать. Данные о вашем здоровье по умолчанию обрабатываются локально. Вы можете предоставить, отклонить или отозвать отдельные разрешения в любое время в настройках Health Connect. BIL не продает данные о здоровье и не использует их в рекламных целях.</string>
     <string name="health_permissions_privacy_policy_action">Прочитать полную политику конфиденциальности BIL</string>

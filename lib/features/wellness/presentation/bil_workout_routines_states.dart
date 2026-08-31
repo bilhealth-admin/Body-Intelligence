@@ -142,19 +142,13 @@ class _WorkoutMetadataPreviews extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       Text(
-        _copy(context, 'Explore workout styles', 'استكشف أنماط التمارين'),
+        WorkoutRoutinesStateCopy.of(context).exploreStyles,
         style: Theme.of(
           context,
         ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
       ),
       const SizedBox(height: 6),
-      Text(
-        _copy(
-          context,
-          'Original BIL previews. Log an activity now, or install a reviewed pack for guided routines. No video is available from a preview.',
-          'معاينات أصلية من BIL. سجّل نشاطًا الآن، أو ثبّت حزمة مراجعة للروتينات الموجّهة. لا يتوفر فيديو من المعاينة.',
-        ),
-      ),
+      Text(WorkoutRoutinesStateCopy.of(context).previewExplanation),
       const SizedBox(height: 16),
       _WorkoutMetadataPreviewCard(
         key: const ValueKey('workout-metadata-preview-cardio'),
@@ -174,19 +168,11 @@ class _WorkoutMetadataPreviews extends StatelessWidget {
         key: const ValueKey('workout-preview-manage-packs'),
         onPressed: onManagePacks,
         icon: const Icon(Icons.verified_outlined),
-        label: Text(
-          _copy(context, 'Manage reviewed packs', 'إدارة الحزم المراجعة'),
-        ),
+        label: Text(WorkoutRoutinesStateCopy.of(context).manageReviewedPacks),
       ),
       if (offline) ...[
         const SizedBox(height: 10),
-        Text(
-          _copy(
-            context,
-            'Offline: only previously installed reviewed packs can provide guided routines.',
-            'دون اتصال: لا توفر الروتينات الموجّهة إلا الحزم المراجعة المثبتة مسبقًا.',
-          ),
-        ),
+        Text(WorkoutRoutinesStateCopy.of(context).offlineExplanation),
       ],
     ],
   );
@@ -207,7 +193,7 @@ class _WorkoutMetadataPreviewCard extends StatelessWidget {
   Widget build(BuildContext context) => Semantics(
     button: true,
     label:
-        '$title. ${_copy(context, 'Metadata preview; no playable video', 'معاينة بيانات؛ لا يوجد فيديو قابل للتشغيل')}',
+        '$title. ${WorkoutRoutinesStateCopy.of(context).metadataPreviewLabel}',
     child: Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -289,46 +275,36 @@ String _copy(BuildContext context, String english, String arabic) =>
     wellnessCopy(context, english, arabic);
 
 String _routineCount(BuildContext context, int count) =>
-    switch (Localizations.localeOf(context).languageCode) {
-      'ar' => '$count روتين',
-      'fr' => '$count routines',
-      'es' => '$count rutinas',
-      'tr' => '$count rutin',
-      _ => '$count routines',
-    };
+    ReleasePolishRuntimeCopy.format(
+      ReleasePolishRuntimeCopy.routineCount,
+      Localizations.localeOf(context),
+      count: count,
+    );
 
 String _workoutMinutes(BuildContext context, int minutes) =>
-    switch (Localizations.localeOf(context).languageCode) {
-      'ar' => '$minutes دقيقة',
-      'fr' => '$minutes min',
-      'es' => '$minutes min',
-      'tr' => '$minutes dk',
-      _ => '$minutes min',
-    };
+    ReleasePolishRuntimeCopy.format(
+      ReleasePolishRuntimeCopy.workoutMinutes,
+      Localizations.localeOf(context),
+      count: minutes,
+    );
 
 String _workoutRepetitions(BuildContext context, int repetitions) =>
-    switch (Localizations.localeOf(context).languageCode) {
-      'ar' => '$repetitions تكرار',
-      'fr' => '$repetitions répétitions',
-      'es' => '$repetitions repeticiones',
-      'tr' => '$repetitions tekrar',
-      _ => '$repetitions reps',
-    };
+    ReleasePolishRuntimeCopy.format(
+      ReleasePolishRuntimeCopy.workoutRepetitions,
+      Localizations.localeOf(context),
+      count: repetitions,
+    );
 
 String _workoutSeconds(BuildContext context, int seconds) =>
-    switch (Localizations.localeOf(context).languageCode) {
-      'ar' => '$seconds ثانية',
-      'fr' => '$seconds s',
-      'es' => '$seconds s',
-      'tr' => '$seconds sn',
-      _ => '$seconds sec',
-    };
+    ReleasePolishRuntimeCopy.format(
+      ReleasePolishRuntimeCopy.workoutSeconds,
+      Localizations.localeOf(context),
+      count: seconds,
+    );
 
 String _workoutRestSeconds(BuildContext context, int seconds) =>
-    switch (Localizations.localeOf(context).languageCode) {
-      'ar' => 'راحة $seconds ثانية',
-      'fr' => '$seconds s de repos',
-      'es' => '$seconds s de descanso',
-      'tr' => '$seconds sn dinlenme',
-      _ => '$seconds sec rest',
-    };
+    ReleasePolishRuntimeCopy.format(
+      ReleasePolishRuntimeCopy.workoutRestSeconds,
+      Localizations.localeOf(context),
+      count: seconds,
+    );

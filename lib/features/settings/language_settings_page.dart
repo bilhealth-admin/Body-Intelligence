@@ -30,12 +30,16 @@ class LanguageSettingsPage extends ConsumerWidget {
               minTileHeight: 58,
               title: Text(
                 BilLocaleNames.native[tag]!,
+                key: Key('settings-language-option-label-$tag'),
                 locale: BilLocalePolicy.localeFromTag(tag),
                 textDirection: optionDirection,
                 textAlign: TextAlign.left,
               ),
               trailing: selected == tag
-                  ? const Icon(Icons.check_rounded)
+                  ? const Icon(
+                      Icons.check_rounded,
+                      key: Key('settings-language-option-check'),
+                    )
                   : null,
               onTap: () async {
                 await ref.read(appSettingsProvider.notifier).setLocale(tag);

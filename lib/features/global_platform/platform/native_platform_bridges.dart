@@ -131,8 +131,8 @@ final class MethodChannelWearableBridge {
   Future<void> revoke() => _channel.invokeMethod<void>('revoke');
 }
 
-final class MethodChannelMedicalDeviceBridge {
-  MethodChannelMedicalDeviceBridge({required String channelName})
+final class MethodChannelFitnessDeviceBridge {
+  MethodChannelFitnessDeviceBridge({required String channelName})
     : _channel = MethodChannel(channelName);
   final MethodChannel _channel;
 

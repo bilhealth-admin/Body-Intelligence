@@ -9,6 +9,8 @@ void main() {
   test('local splash MP4 is immutable, silent, portrait, and fast-started', () {
     final file = File('assets/branding/bil_splash_motion.mp4');
     final bytes = file.readAsBytesSync();
+    final fallback = File('assets/branding/bil_splash_identity.png');
+    final fallbackBytes = fallback.readAsBytesSync();
     final manifest =
         jsonDecode(
               File(
@@ -19,6 +21,14 @@ void main() {
 
     expect(bytes.length, manifest['output_bytes']);
     expect(sha256.convert(bytes).toString(), manifest['output_sha256']);
+    expect(fallbackBytes.length, manifest['fallback_first_frame_bytes']);
+    expect(
+      sha256.convert(fallbackBytes).toString(),
+      manifest['fallback_first_frame_sha256'],
+    );
+    final fallbackData = ByteData.sublistView(fallbackBytes);
+    expect(fallbackData.getUint32(16), 1080);
+    expect(fallbackData.getUint32(20), 1080);
     expect(bytes.length, lessThan(512 * 1024));
     expect(manifest['canonical_background_rgb'], '#0877F9');
     expect(manifest['decoded_background_rgb'], '#0876F8');
@@ -69,6 +79,8 @@ void main() {
       ).readAsStringSync();
 
       expect(pubspec, contains('assets/branding/bil_splash_motion.mp4'));
+      expect(pubspec, contains('family: BILDisplay'));
+      expect(pubspec, contains('assets/fonts/Montserrat-Bold.ttf'));
       expect(flutterSource, contains('VideoPlayerController.asset('));
       expect(flutterSource, contains('VideoViewType.textureView'));
       expect(flutterSource, contains('controller.value.position'));
@@ -108,6 +120,9 @@ void main() {
       );
       expect(startupSource, isNot(contains('await controller.play()')));
       expect(composition.toLowerCase(), contains('#0877f9'));
+      expect(composition, contains('font-family: "Montserrat"'));
+      expect(composition, contains('BODY INTELLIGENCE LOG'));
+      expect(composition, contains('™'));
       expect(composition, isNot(contains('<audio')));
       expect(composition, isNot(contains('<video')));
     },

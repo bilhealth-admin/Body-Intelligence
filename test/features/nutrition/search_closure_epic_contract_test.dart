@@ -25,7 +25,7 @@ void main() {
     expect(assistance.arabicNameFor('Apples Fuji raw'), contains('تفاح'));
   });
 
-  test('Windows camera and USDA download route are enabled', () {
+  test('Windows camera and the in-app food guide route are enabled', () {
     final pubspec = File('pubspec.yaml').readAsStringSync();
     final scanner = File(
       'lib/features/nutrition/presentation/food_barcode_scanner_page.dart',
@@ -34,10 +34,13 @@ void main() {
       'lib/features/nutrition/food_page.dart',
     ).readAsStringSync();
     expect(pubspec, contains('simple_barcode_scanner: ^0.6.0'));
-    expect(pubspec, contains('url_launcher: ^6.3.2'));
     expect(scanner, contains('SimpleBarcodeScanner.scanBarcode'));
     expect(scanner, contains('TargetPlatform.windows'));
-    expect(foodPage, contains('https://fdc.nal.usda.gov/download-datasets/'));
-    expect(foodPage, contains('Download more foods'));
+    expect(foodPage, contains("context.push('/food-libraries')"));
+    expect(
+      foodPage,
+      isNot(contains('https://fdc.nal.usda.gov/download-datasets/')),
+      reason: 'A failed search must stay inside the installable food guide.',
+    );
   });
 }

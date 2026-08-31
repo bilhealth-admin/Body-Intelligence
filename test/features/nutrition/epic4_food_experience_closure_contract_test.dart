@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('active food routes use the verified scanner and honest fallbacks', () {
-    final foodPage = File(
-      'lib/features/nutrition/food_page.dart',
-    ).readAsStringSync();
+    final foodPage = ['food_page.dart', 'presentation/food_page_actions.dart']
+        .map((name) => File('lib/features/nutrition/$name').readAsStringSync())
+        .join('\n');
     final dailyActions =
         [
               'daily_log_page_actions.dart',
@@ -70,7 +70,11 @@ void main() {
     expect(repository, contains("syncStatus: const Value('pendingDelete')"));
     expect(mealEntry, contains('isFavorite(selectedFood!.id)'));
     expect(mealEntry, contains('setFavorite(selectedFood!.id, !favorite)'));
-    expect(mealEntry, contains('repeatMeal'));
+    // The focused meal editor intentionally keeps historical-meal suggestions
+    // out of the search surface. Reversible duplication lives in the saved
+    // meal item action sheet, while repository-level repeatMeal remains
+    // available to explicitly reviewed historical flows.
+    expect(dailyActions, contains('duplicateMealItem'));
     expect(dailyActions, contains('recordRecent'));
   });
 

@@ -94,6 +94,34 @@ void main() {
     );
   });
 
+  test(
+    'non-English ingredient and step arrays are not exact English copies',
+    () {
+      // A future whole-array exception is allowed only for an explicitly
+      // reviewed proper-name-only record. There are no approved exceptions.
+      const exactCopyAllowlist = <String>{};
+      for (final record in records) {
+        final recipeId = record['canonicalId'] as String;
+        final localizations = record['localizations'] as Map;
+        final english = localizations['en'] as Map;
+        for (final entry in localizations.entries) {
+          final locale = entry.key as String;
+          if (locale == 'en') continue;
+          final localization = entry.value as Map;
+          for (final field in const ['ingredients', 'steps']) {
+            final key = '$recipeId/$locale/$field';
+            if (exactCopyAllowlist.contains(key)) continue;
+            expect(
+              localization[field],
+              isNot(equals(english[field])),
+              reason: '$key must contain locale-specific copy',
+            );
+          }
+        }
+      }
+    },
+  );
+
   test('new records have complete local USDA and serving contracts', () {
     for (final record in records.skip(100)) {
       final timing = record['timing'] as Map;

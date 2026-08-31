@@ -1,20 +1,31 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import '../../../app/localization/bil_locale_policy.dart';
 import '../../commerce/domain/subscription_state.dart';
 import '../../commerce/repositories/server_entitlement_repository.dart';
 import '../domain/workout_release_catalog_item.dart';
 import '../domain/wellness_content_access_policy.dart';
 import '../domain/wellness_content_pack.dart';
+import '../repositories/workout_discovery_catalog_repository.dart';
+import '../repositories/workout_discovery_localizer.dart';
 import '../repositories/workout_release_catalog_repository.dart';
 import 'wellness_access_token.dart';
 import 'wellness_media_cache.dart';
+import 'workout_release_verifier.dart';
 
 typedef WellnessEntitlementLoader = Future<SubscriptionState> Function();
 typedef WorkoutReleaseCatalogLoader =
     Future<List<WorkoutReleaseCatalogItem>> Function();
+typedef WorkoutDiscoveryCatalogLoader =
+    Future<List<WellnessContentItem>> Function();
+typedef WorkoutDiscoveryLocalizerLoader =
+    Future<WorkoutDiscoveryLocalizer> Function(
+      List<WellnessContentItem> discovery,
+    );
 
 class WellnessContentPackManager {
   WellnessContentPackManager({
@@ -23,6 +34,8 @@ class WellnessContentPackManager {
     Directory? packsDirectory,
     WellnessEntitlementLoader? entitlementLoader,
     WorkoutReleaseCatalogLoader? workoutReleaseLoader,
+    WorkoutDiscoveryCatalogLoader? workoutDiscoveryLoader,
+    WorkoutDiscoveryLocalizerLoader? workoutDiscoveryLocalizerLoader,
     WellnessAccessTokenLoader? accessTokenLoader,
   }) : _client = client ?? HttpClient(),
        _mediaCache = mediaCache ?? WellnessMediaCache(),
@@ -31,6 +44,9 @@ class WellnessContentPackManager {
            entitlementLoader ?? const ServerEntitlementRepository().current,
        _workoutReleaseLoader =
            workoutReleaseLoader ?? const WorkoutReleaseCatalogRepository().load,
+       _injectedWorkoutDiscoveryLoader = workoutDiscoveryLoader,
+       _injectedWorkoutDiscoveryLocalizerLoader =
+           workoutDiscoveryLocalizerLoader,
        _accessTokenLoader = accessTokenLoader ?? loadCurrentWellnessAccessToken;
   static const manifestUrl = String.fromEnvironment(
     'BIL_WELLNESS_MANIFEST_URL',
@@ -41,7 +57,15 @@ class WellnessContentPackManager {
   final Directory? _injectedPacksDirectory;
   final WellnessEntitlementLoader _entitlementLoader;
   final WorkoutReleaseCatalogLoader _workoutReleaseLoader;
+  final WorkoutDiscoveryCatalogLoader? _injectedWorkoutDiscoveryLoader;
+  final WorkoutDiscoveryLocalizerLoader?
+  _injectedWorkoutDiscoveryLocalizerLoader;
   final WellnessAccessTokenLoader _accessTokenLoader;
+  Future<List<WellnessContentItem>>? _workoutDiscoveryCache;
+  Future<WorkoutDiscoveryLocalizer>? _workoutDiscoveryLocalizerCache;
+
+  WorkoutReleaseVerifier get _workoutReleaseVerifier =>
+      WorkoutReleaseVerifier(_workoutReleaseLoader);
 
   Future<List<WellnessContentPack>> fetchCatalog() async {
     if (manifestUrl.trim().isEmpty) return const [];
@@ -120,7 +144,7 @@ class WellnessContentPackManager {
         'Wellness pack integrity verification failed.',
       );
     }
-    await _validatePayload(temporary, pack);
+    await _workoutReleaseVerifier.validatePayload(temporary, pack);
     if (await target.exists()) await target.delete();
     await temporary.rename(target.path);
     final installed = InstalledWellnessContentPack(
@@ -252,7 +276,7 @@ class WellnessContentPackManager {
   }) async {
     final result = <Map<String, dynamic>>[];
     final approvedWorkoutBundles = type == WellnessContentType.workouts
-        ? await _approvedWorkoutRelease()
+        ? await _workoutReleaseVerifier.approvedRelease()
         : null;
     final packsDirectory = await _packsDirectory();
     for (final installed in await installedPacks()) {
@@ -267,18 +291,29 @@ class WellnessContentPackManager {
       }
       final decoded = jsonDecode(await file.readAsString());
       if (decoded is! Map<String, dynamic> ||
+          decoded['pack_id'] != installed.id ||
+          decoded['version'] != installed.version ||
           decoded['type'] != type.name ||
           decoded['items'] is! List) {
         continue;
       }
       final schemaVersion = (decoded['schema_version'] as num?)?.toInt() ?? 1;
+      if (type == WellnessContentType.workouts &&
+          (decoded['schema_version'] is! int ||
+              decoded['schema_version'] != 2)) {
+        continue;
+      }
       final approvedWorkouts = approvedWorkoutBundles?[installed.id];
       for (final raw in decoded['items'] as List) {
         if (raw is! Map<String, dynamic>) continue;
         if (type == WellnessContentType.workouts) {
           if (schemaVersion != 2) continue;
           final approval = approvedWorkouts?[raw['id']];
-          if (approval == null || !_rawWorkoutMatchesApproval(raw, approval)) {
+          if (approval == null ||
+              !WorkoutReleaseVerifier.rawWorkoutMatchesApproval(
+                raw,
+                approval,
+              )) {
             continue;
           }
         }
@@ -292,6 +327,8 @@ class WellnessContentPackManager {
         }
         result.add({
           ...raw,
+          '_pack_id': installed.id,
+          '_pack_version': installed.version,
           '_pack_schema_version': schemaVersion,
           '_pack_minimum_access': installed.minimumAccess.name,
           if (type == WellnessContentType.workouts) ...{
@@ -330,227 +367,174 @@ class WellnessContentPackManager {
     return trusted;
   }
 
-  Future<void> _validatePayload(File file, WellnessContentPack pack) async {
-    final data = jsonDecode(await file.readAsString());
-    final schemaVersion = data is Map<String, dynamic>
-        ? (data['schema_version'] as num?)?.toInt()
-        : null;
-    if (data is! Map<String, dynamic> ||
-        (schemaVersion != 1 && schemaVersion != 2) ||
-        schemaVersion != pack.schemaVersion ||
-        data['pack_id'] != pack.id ||
-        data['version'] != pack.version ||
-        data['type'] != pack.type.name ||
-        data['items'] is! List) {
-      throw const FormatException('Invalid wellness pack payload.');
+  /// Returns all 302 redacted discovery cards before any paid pack is
+  /// installed, then substitutes only locally verified version-1 pack records
+  /// with the same bundle-scoped stable identity.
+  ///
+  /// Loading this list is metadata-only: it never requests an MP4 and it does
+  /// not bypass [install]'s server-verified PRO entitlement boundary.
+  Future<List<WellnessContentItem>> loadWorkoutLibraryItems({
+    String? locale,
+  }) async {
+    final discovery = await _loadWorkoutDiscovery();
+    if (discovery.length != WorkoutDiscoveryCatalogRepository.itemCount) {
+      throw const FormatException('Workout discovery catalog is incomplete.');
     }
-    final items = data['items'] as List;
-    if (items.length != pack.itemCount) {
-      throw const FormatException('Wellness pack item count mismatch.');
-    }
-    final declaredCategories = <String>{};
-    Map<String, WorkoutReleaseCatalogItem>? approvedWorkouts;
-    if (schemaVersion == 2 && pack.type == WellnessContentType.workouts) {
-      approvedWorkouts = (await _approvedWorkoutRelease())[pack.id];
-      if (approvedWorkouts == null) {
-        throw const FormatException(
-          'Workout pack is not registered in the approved bundle registry.',
-        );
+
+    final allStableIds = <String>{};
+    final merged = <String, WellnessContentItem>{};
+    for (final item in discovery) {
+      if (item.type != WellnessContentType.workouts ||
+          item.releaseKey == null ||
+          item.minimumAccess != WellnessContentAccess.pro ||
+          item.instructions.isNotEmpty ||
+          item.steps.isNotEmpty ||
+          item.segments.isNotEmpty ||
+          !allStableIds.add(item.stableId)) {
+        throw const FormatException('Workout discovery item is invalid.');
       }
-      final rawCategories = data['categories'];
-      if (rawCategories is! List) {
-        throw const FormatException('Workout categories must be declared.');
-      }
-      declaredCategories.addAll(
-        rawCategories
-            .whereType<String>()
-            .map((value) => value.trim())
-            .where((value) => value.isNotEmpty),
-      );
-      if (declaredCategories.isEmpty ||
-          declaredCategories.length != rawCategories.length) {
-        throw const FormatException('Workout categories are invalid.');
-      }
-      final approvedCategories = approvedWorkouts.values
-          .map((item) => item.primaryGroupId)
-          .toSet();
-      if (declaredCategories.length != approvedCategories.length ||
-          !declaredCategories.containsAll(approvedCategories)) {
-        throw const FormatException(
-          'Workout categories do not match the approved release.',
-        );
-      }
-      if (items.length != approvedWorkouts.length) {
-        throw const FormatException(
-          'The workout pack must contain its complete approved bundle.',
-        );
+      if (_matchesWorkoutLocale(item.locale, locale)) {
+        merged[item.stableId] = item;
       }
     }
-    final categoryCounts = <String, int>{};
-    final categoryDescriptions = <String, String>{};
-    final categoryOrders = <String, int>{};
-    final itemIds = <String>{};
-    final videoUrls = <Uri>{};
-    final videoDigests = <String>{};
-    for (final raw in items) {
-      if (raw is! Map<String, dynamic>) {
-        throw const FormatException('Invalid wellness content item.');
+
+    final installedByPack = <String, List<Map<String, dynamic>>>{};
+    for (final raw in await loadInstalledItems(WellnessContentType.workouts)) {
+      final packId = raw['_pack_id'];
+      final packVersion = raw['_pack_version'];
+      if (packId is! String ||
+          packVersion is! int ||
+          WorkoutDiscoveryCatalogRepository.releasePackVersions[packId] !=
+              packVersion ||
+          raw['_pack_minimum_access'] != WellnessContentAccess.pro.name) {
+        continue;
       }
-      final item = WellnessContentItem.fromJson(
-        raw,
-        expectedType: pack.type,
-        schemaVersion: schemaVersion!,
-      );
-      if (schemaVersion == 2 && pack.type == WellnessContentType.workouts) {
-        final approval = approvedWorkouts![item.id];
-        if (approval == null || !_workoutMatchesApproval(item, approval)) {
-          throw const FormatException(
-            'Workout media is not in the owner-approved release.',
+      installedByPack.putIfAbsent(packId, () => []).add(raw);
+    }
+
+    final installedStableIds = <String>{};
+    for (final entry in installedByPack.entries) {
+      final packId = entry.key;
+      final expectedCount =
+          WorkoutDiscoveryCatalogRepository.releasePackItemCounts[packId];
+      final expectedBundle =
+          WorkoutDiscoveryCatalogRepository.releaseBundleIds[packId];
+      if (expectedCount == null ||
+          expectedBundle == null ||
+          entry.value.length != expectedCount) {
+        continue;
+      }
+      final installedItems = <String, WellnessContentItem>{};
+      var validPack = true;
+      for (final raw in entry.value) {
+        try {
+          final item = WellnessContentItem.fromJson(
+            raw,
+            expectedType: WellnessContentType.workouts,
+            schemaVersion: 2,
           );
-        }
-        if (!itemIds.add(item.id)) {
-          throw const FormatException('Duplicate workout movement id.');
-        }
-        if (!WorkoutReleaseMediaContract.canonicalMovementId.hasMatch(
-          item.id,
-        )) {
-          throw const FormatException(
-            'Workout movement id, duration, or video filename violates the release contract.',
-          );
-        }
-        final category = item.category!;
-        if (!declaredCategories.contains(category)) {
-          throw const FormatException('Workout uses an undeclared category.');
-        }
-        categoryCounts.update(
-          category,
-          (value) => value + 1,
-          ifAbsent: () => 1,
-        );
-        final description = item.categoryDescription!;
-        final order = item.categoryOrder!;
-        final existingDescription = categoryDescriptions[category];
-        final existingOrder = categoryOrders[category];
-        if ((existingDescription != null &&
-                existingDescription != description) ||
-            (existingOrder != null && existingOrder != order)) {
-          throw const FormatException(
-            'Workout category metadata must be consistent.',
-          );
-        }
-        categoryDescriptions[category] = description;
-        categoryOrders[category] = order;
-        final video = item.videoMedia!;
-        if (!videoUrls.add(video.url) || !videoDigests.add(video.sha256)) {
-          throw const FormatException('Duplicate workout video media.');
-        }
-        for (final segment in item.segments) {
-          if (!videoUrls.add(segment.videoMedia.url) ||
-              !videoDigests.add(segment.videoMedia.sha256)) {
-            throw const FormatException('Duplicate workout video media.');
+          if (item.releaseBundleId != expectedBundle ||
+              installedItems[item.stableId] != null) {
+            validPack = false;
+            break;
           }
+          installedItems[item.stableId] = item;
+        } on FormatException {
+          validPack = false;
+          break;
         }
-        if (pack.minimumAccess != WellnessContentAccess.free &&
-            item.rights?.paid != true) {
+      }
+      final expectedStableIds = discovery
+          .where((item) => item.releaseBundleId == expectedBundle)
+          .map((item) => item.stableId)
+          .toSet();
+      if (!validPack ||
+          installedItems.length != expectedCount ||
+          expectedStableIds.length != expectedCount ||
+          !installedItems.keys.toSet().containsAll(expectedStableIds)) {
+        continue;
+      }
+      for (final item in installedItems.values) {
+        if (!_matchesWorkoutLocale(item.locale, locale)) continue;
+        if (!merged.containsKey(item.stableId) ||
+            !installedStableIds.add(item.stableId)) {
           throw const FormatException(
-            'Paid workout packs require paid distribution rights.',
+            'Installed workout discovery override is invalid.',
           );
         }
+        merged[item.stableId] = item;
       }
     }
-    if (approvedWorkouts != null) {
-      final approvedCategoryCounts = <String, int>{};
-      for (final approval in approvedWorkouts.values) {
-        approvedCategoryCounts.update(
-          approval.primaryGroupId,
-          (value) => value + 1,
-          ifAbsent: () => 1,
-        );
-      }
-      if (itemIds.length != approvedWorkouts.length ||
-          !itemIds.containsAll(approvedWorkouts.keys) ||
-          declaredCategories.any(
-            (category) =>
-                categoryCounts[category] != approvedCategoryCounts[category],
-          )) {
-        throw const FormatException(
-          'Workout release identities or category counts are incomplete.',
-        );
-      }
+    final items = List<WellnessContentItem>.unmodifiable(merged.values);
+    final localeTag = locale == null
+        ? 'en'
+        : BilLocalePolicy.canonicalSupportedTag(locale);
+    if (localeTag == null) {
+      throw FormatException('Unsupported workout discovery locale: $locale.');
     }
+    if (localeTag == 'en') return items;
+    final localizer = await _loadWorkoutDiscoveryLocalizer(discovery);
+    return List.unmodifiable(
+      items.map((item) => localizer.localize(item, localeTag)),
+    );
   }
 
-  Future<Map<String, Map<String, WorkoutReleaseCatalogItem>>>
-  _approvedWorkoutRelease() async {
-    List<WorkoutReleaseCatalogItem> release;
-    try {
-      release = await _workoutReleaseLoader();
-    } on Object {
-      throw const FormatException(
-        'The bundled workout approval manifest is unavailable.',
-      );
-    }
-    final approved = <String, Map<String, WorkoutReleaseCatalogItem>>{};
-    for (final item in release.where((item) => item.canPlay)) {
-      final bundle = approved.putIfAbsent(item.contentPackId, () => {});
-      if (item.objectPath == null || bundle[item.assetId] != null) {
-        throw const FormatException(
-          'The bundled workout approval manifest is invalid.',
-        );
+  Future<List<WellnessContentItem>> _loadWorkoutDiscovery() {
+    final cached = _workoutDiscoveryCache;
+    if (cached != null) return cached;
+    final future = _loadWorkoutDiscoveryOnce();
+    _workoutDiscoveryCache = future;
+    future.catchError((Object _) {
+      if (identical(_workoutDiscoveryCache, future)) {
+        _workoutDiscoveryCache = null;
       }
-      bundle[item.assetId] = item;
-    }
-    if (approved.length != 2 ||
-        approved.values.fold<int>(0, (sum, bundle) => sum + bundle.length) !=
-            WorkoutReleaseCatalogRepository.approvedPlaybackCount ||
-        approved['bil-workouts-home-v1']?.length !=
-            WorkoutReleaseCatalogRepository.homeRecordCount ||
-        approved['bil-workouts-gym-six-month-v1']?.length !=
-            WorkoutReleaseCatalogRepository.gymRecordCount) {
-      throw const FormatException(
-        'The bundled workout approval count is invalid.',
-      );
-    }
-    return {
-      for (final entry in approved.entries)
-        entry.key: Map.unmodifiable(entry.value),
-    };
+      return <WellnessContentItem>[];
+    });
+    return future;
   }
 
-  static bool _rawWorkoutMatchesApproval(
-    Map<String, dynamic> raw,
-    WorkoutReleaseCatalogItem approval,
+  Future<List<WellnessContentItem>> _loadWorkoutDiscoveryOnce() async {
+    final injected = _injectedWorkoutDiscoveryLoader;
+    if (injected != null) return injected();
+    final source = await rootBundle.loadString(
+      WorkoutDiscoveryCatalogRepository.assetPath,
+    );
+    final approvedRelease = await _workoutReleaseLoader();
+    return const WorkoutDiscoveryCatalogRepository().parse(
+      source,
+      approvedRelease,
+    );
+  }
+
+  Future<WorkoutDiscoveryLocalizer> _loadWorkoutDiscoveryLocalizer(
+    List<WellnessContentItem> discovery,
   ) {
-    final media = raw['media'];
-    final video = media is Map<String, dynamic> ? media['video'] : null;
-    final segments = raw['segments'];
-    if (video is! Map<String, dynamic> ||
-        (segments != null && (segments is! List || segments.isNotEmpty))) {
-      return false;
-    }
-    final url = Uri.tryParse(video['url']?.toString() ?? '');
-    return raw['duration_seconds'] == approval.durationMilliseconds! ~/ 1000 &&
-        video['mime_type'] == 'video/mp4' &&
-        video['sha256'] == approval.expectedSha256 &&
-        video['size_bytes'] == approval.expectedBytes &&
-        url != null &&
-        url.scheme == 'https' &&
-        url.path.endsWith('/${approval.objectPath}');
+    final cached = _workoutDiscoveryLocalizerCache;
+    if (cached != null) return cached;
+    final future = _loadWorkoutDiscoveryLocalizerOnce(discovery);
+    _workoutDiscoveryLocalizerCache = future;
+    future.catchError((Object error) {
+      if (identical(_workoutDiscoveryLocalizerCache, future)) {
+        _workoutDiscoveryLocalizerCache = null;
+      }
+      throw error;
+    });
+    return future;
   }
 
-  static bool _workoutMatchesApproval(
-    WellnessContentItem item,
-    WorkoutReleaseCatalogItem approval,
-  ) {
-    final video = item.videoMedia;
-    return video != null &&
-        item.durationSeconds == approval.durationMilliseconds! ~/ 1000 &&
-        item.segments.isEmpty &&
-        video.mimeType == 'video/mp4' &&
-        video.sha256 == approval.expectedSha256 &&
-        video.sizeBytes == approval.expectedBytes &&
-        video.url.path.endsWith('/${approval.objectPath}');
+  Future<WorkoutDiscoveryLocalizer> _loadWorkoutDiscoveryLocalizerOnce(
+    List<WellnessContentItem> discovery,
+  ) async {
+    final injected = _injectedWorkoutDiscoveryLocalizerLoader;
+    if (injected != null) return injected(discovery);
+    return WorkoutDiscoveryLocalizer.fromDiscovery(discovery);
   }
+
+  static bool _matchesWorkoutLocale(String itemLocale, String? requested) =>
+      requested == null ||
+      itemLocale == requested ||
+      itemLocale == 'all' ||
+      itemLocale == 'en';
 
   Future<Directory> _packsDirectory() async {
     final directory =

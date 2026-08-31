@@ -11,6 +11,34 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('sign-in wordmark is centered in LTR and RTL', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    for (final locale in const [Locale('en'), Locale('ar')]) {
+      await tester.pumpWidget(_localizedApp(locale, const LoginPage()));
+      await tester.pump(const Duration(milliseconds: 120));
+
+      final wordmark = find.byKey(const Key('login-wordmark'));
+      expect(wordmark, findsOneWidget);
+      final align = find.descendant(of: wordmark, matching: find.byType(Align));
+      expect(align, findsOneWidget);
+      expect(tester.widget<Align>(align).alignment, Alignment.center);
+
+      final lockup = find.descendant(of: wordmark, matching: find.byType(Row));
+      expect(lockup, findsOneWidget);
+      expect(
+        tester.getCenter(lockup).dx,
+        closeTo(tester.getCenter(wordmark).dx, 0.5),
+        reason: locale.toLanguageTag(),
+      );
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    }
+  });
+
   testWidgets('email login and OTP render across every declared locale', (
     tester,
   ) async {
@@ -81,11 +109,117 @@ void main() {
       await tester.pump();
     }
   });
+
+  testWidgets('login and OTP keep themed surfaces in dark mode at 200%', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final darkTheme = ThemeData(
+      brightness: Brightness.dark,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xFF0877F9),
+        brightness: Brightness.dark,
+      ),
+    );
+
+    await tester.pumpWidget(
+      _localizedApp(
+        const Locale('en'),
+        const LoginPage(),
+        theme: darkTheme,
+        textScale: 2,
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 120));
+    expect(tester.takeException(), isNull);
+    expect(
+      tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor,
+      darkTheme.colorScheme.surface,
+    );
+    expect(find.byKey(const Key('login-email')), findsOneWidget);
+    expect(find.text('BODY INTELLIGENCE LOG'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.text('BODY INTELLIGENCE LOG')).style?.color,
+      const Color(0xFF050505),
+    );
+
+    await tester.pumpWidget(
+      _localizedApp(
+        const Locale('en'),
+        const VerifyEmailPage(email: 'person@example.com'),
+        theme: darkTheme,
+        textScale: 2,
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 120));
+    expect(tester.takeException(), isNull);
+    expect(
+      tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor,
+      darkTheme.colorScheme.surface,
+    );
+    expect(find.byKey(const Key('verification-code-boxes')), findsOneWidget);
+    expect(find.text('BODY INTELLIGENCE LOG'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets(
+    'reviewer header preserves every control on a narrow phone at 200%',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 568);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      for (final locale in const [
+        Locale('en'),
+        Locale('ar'),
+        Locale('pt', 'BR'),
+      ]) {
+        await tester.pumpWidget(
+          _localizedApp(locale, const StoreReviewerLoginPage(), textScale: 2),
+        );
+        await tester.pump(const Duration(milliseconds: 120));
+
+        expect(
+          tester.takeException(),
+          isNull,
+          reason: '${locale.toLanguageTag()} reviewer header overflowed',
+        );
+        expect(
+          find.byKey(const Key('reviewer-login-header-actions')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('reviewer-login-back')), findsOneWidget);
+        expect(find.byKey(const Key('auth-language-selector')), findsOneWidget);
+        expect(
+          find.byKey(const Key('auth-language-selector-label')),
+          findsOneWidget,
+        );
+
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      }
+    },
+  );
 }
 
-Widget _localizedApp(Locale locale, Widget home) => ProviderScope(
+Widget _localizedApp(
+  Locale locale,
+  Widget home, {
+  ThemeData? theme,
+  double textScale = 1.6,
+}) => ProviderScope(
   child: MaterialApp(
     locale: locale,
+    theme: theme,
+    darkTheme: theme,
+    themeMode: theme == null ? ThemeMode.system : ThemeMode.dark,
     supportedLocales: AppLocalizations.supportedLocales,
     localizationsDelegates: const [
       AppLocalizations.delegate,
@@ -96,7 +230,7 @@ Widget _localizedApp(Locale locale, Widget home) => ProviderScope(
     builder: (context, child) => MediaQuery(
       data: MediaQuery.of(
         context,
-      ).copyWith(textScaler: const TextScaler.linear(1.6)),
+      ).copyWith(textScaler: TextScaler.linear(textScale)),
       child: child ?? const SizedBox.shrink(),
     ),
     home: home,

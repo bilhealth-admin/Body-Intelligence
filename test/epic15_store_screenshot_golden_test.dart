@@ -13,7 +13,9 @@ import 'package:body_intelligence_log/features/commerce/presentation/bil_store_p
 import 'package:body_intelligence_log/features/connected_health/connected_health_model.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_page.dart';
 import 'package:body_intelligence_log/features/connected_health/providers/connected_health_provider.dart';
+import 'package:body_intelligence_log/features/connected_health/widgets/live_health_watch.dart';
 import 'package:body_intelligence_log/features/daily_log/daily_log_page.dart';
+import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
 import 'package:body_intelligence_log/features/dashboard/dashboard_page.dart';
 import 'package:body_intelligence_log/features/dashboard/providers/dashboard_provider.dart';
 import 'package:body_intelligence_log/features/nutrition/food_page.dart';
@@ -156,6 +158,18 @@ void main() {
             () => DateTime(2026, 8, 5, 9, 41, 12),
           ),
           weeklyReportClockProvider.overrideWithValue(
+            () => DateTime(2026, 8, 5, 9, 41, 12),
+          ),
+          analyticsClockProvider.overrideWithValue(
+            () => DateTime(2026, 8, 30, 9, 41, 12),
+          ),
+          selectedLogDateProvider.overrideWith(
+            (ref) => DateTime(2026, 8, 30, 9, 41, 12),
+          ),
+          premiumProfileClockProvider.overrideWithValue(
+            () => DateTime(2026, 8, 30, 9, 41, 12),
+          ),
+          liveHealthNowProvider.overrideWithValue(
             () => DateTime(2026, 8, 5, 9, 41, 12),
           ),
           connectedHealthGatewayProvider.overrideWithValue(

@@ -1,23 +1,31 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../shared/widgets/bil_coach_identity.dart';
 import '../../commerce/presentation/ai_boost_coach_artwork.dart';
+import '../../commerce/providers/commerce_providers.dart';
 import '../services/ai_boost_purchase_service.dart';
 
 part 'ai_coach_settings_components.dart';
+part 'ai_coach_settings_usage_widgets.dart';
 
-class AiCoachSettingsPage extends StatefulWidget {
+const _globalResetGiftCopy =
+    'A gift from BIL 🎁 Your AI Coach usage has been fully reset. You can use your allowance again until the end of your current cycle.';
+
+class AiCoachSettingsPage extends ConsumerStatefulWidget {
   const AiCoachSettingsPage({super.key});
 
   @override
-  State<AiCoachSettingsPage> createState() => _AiCoachSettingsPageState();
+  ConsumerState<AiCoachSettingsPage> createState() =>
+      _AiCoachSettingsPageState();
 }
 
-class _AiCoachSettingsPageState extends State<AiCoachSettingsPage>
+class _AiCoachSettingsPageState extends ConsumerState<AiCoachSettingsPage>
     with WidgetsBindingObserver {
   late final AiBoostPurchaseService boost;
   Future<Map<String, Object?>>? usage;
@@ -40,7 +48,10 @@ class _AiCoachSettingsPageState extends State<AiCoachSettingsPage>
 
   void _boostChanged() {
     if (!mounted) return;
-    if (boost.state == AiBoostPurchaseState.verified) usage = _loadUsage();
+    if (boost.state == AiBoostPurchaseState.verified) {
+      usage = _loadUsage();
+      ref.invalidate(aiCoachCreditAccessProvider);
+    }
     setState(() {});
   }
 
@@ -49,6 +60,8 @@ class _AiCoachSettingsPageState extends State<AiCoachSettingsPage>
     if (client.auth.currentSession == null) {
       throw StateError('authentication_required');
     }
+    final ownerId = client.auth.currentUser?.id;
+    if (ownerId == null) throw StateError('authentication_required');
     final value = await client.rpc('bil_get_ai_usage_status');
     final result = Map<String, Object?>.from(value as Map);
     try {
@@ -63,6 +76,22 @@ class _AiCoachSettingsPageState extends State<AiCoachSettingsPage>
       result['remote_ai_consent'] = false;
       result['cloud_voice_consent'] = false;
       result['consent_status_available'] = false;
+    }
+    try {
+      final notice = await client
+          .from('bil_ai_coach_reset_notices')
+          .select('reset_id,created_at')
+          .eq('owner_id', ownerId)
+          .isFilter('seen_at', null)
+          .order('created_at', ascending: false)
+          .limit(1)
+          .maybeSingle();
+      if (notice != null) {
+        result['reset_notice'] = Map<String, Object?>.from(notice);
+      }
+    } on Object {
+      // Older backends can still show usage while the additive notice
+      // migration is rolling out.
     }
     return result;
   }
@@ -171,11 +200,23 @@ class _AiCoachSettingsPageState extends State<AiCoachSettingsPage>
         ? 0.0
         : ((weeklyUsed + weeklyReserved) / weeklyLimit).clamp(0.0, 1.0);
     final active = data['plan'] == 'ai_coach';
+    final rawNotice = data['reset_notice'];
+    final notice = rawNotice is Map
+        ? Map<String, Object?>.from(rawNotice)
+        : const <String, Object?>{};
+    final resetNoticeId = notice['reset_id']?.toString() ?? '';
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
       children: [
+        if (resetNoticeId.isNotEmpty) ...[
+          _ResetGiftBanner(
+            message: context.strings.text(_globalResetGiftCopy),
+            onDismiss: () => _dismissResetNotice(resetNoticeId),
+          ),
+          const SizedBox(height: 14),
+        ],
         _TokenHero(
           totalRemaining: totalRemaining,
           weeklyRemaining: weeklyRemaining,
@@ -183,6 +224,7 @@ class _AiCoachSettingsPageState extends State<AiCoachSettingsPage>
           paidRemaining: paidRemaining,
           spentFraction: spentFraction,
           active: active,
+          weekStart: data['week_start']?.toString() ?? '—',
           resetAt: data['reset_at']?.toString() ?? '—',
           t: t,
         ),
@@ -370,6 +412,22 @@ class _AiCoachSettingsPageState extends State<AiCoachSettingsPage>
 
   int _int(Object? value) => value is num ? value.toInt() : 0;
 
+  Future<void> _dismissResetNotice(String resetId) async {
+    final client = Supabase.instance.client;
+    final ownerId = client.auth.currentUser?.id;
+    if (ownerId == null) return;
+    try {
+      final changed = await client.rpc(
+        'bil_dismiss_ai_coach_reset_notice',
+        params: <String, Object?>{'p_owner_id': ownerId, 'p_reset_id': resetId},
+      );
+      if (changed != true) return;
+      if (mounted) setState(() => usage = _loadUsage());
+    } on Object {
+      // Keep the notice visible when acknowledgement did not persist.
+    }
+  }
+
   Future<void> _manageSubscription() async {
     final uri = defaultTargetPlatform == TargetPlatform.iOS
         ? Uri.parse('https://apps.apple.com/account/subscriptions')
@@ -384,299 +442,4 @@ class _AiCoachSettingsPageState extends State<AiCoachSettingsPage>
     boost.dispose();
     super.dispose();
   }
-}
-
-typedef _Copy = String Function(String, String, String, String, String);
-
-class _TokenHero extends StatelessWidget {
-  const _TokenHero({
-    required this.totalRemaining,
-    required this.weeklyRemaining,
-    required this.weeklyLimit,
-    required this.paidRemaining,
-    required this.spentFraction,
-    required this.active,
-    required this.resetAt,
-    required this.t,
-  });
-
-  final int totalRemaining;
-  final int weeklyRemaining;
-  final int weeklyLimit;
-  final int paidRemaining;
-  final double spentFraction;
-  final bool active;
-  final String resetAt;
-  final _Copy t;
-
-  @override
-  Widget build(BuildContext context) {
-    const light = Color(0xFFC8F3FF);
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF12394E), Color(0xFF071923)],
-        ),
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x26071923),
-            blurRadius: 28,
-            offset: Offset(0, 14),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          PositionedDirectional(
-            end: -18,
-            bottom: -6,
-            child: Opacity(
-              opacity: 0.42,
-              child: Image.asset(
-                'assets/images/ai_coach/bil_male_smart_coach_v1.png',
-                height: 210,
-                fit: BoxFit.contain,
-                errorBuilder: (_, _, _) => Image.asset(
-                  'assets/images/flagship/bil_body_intelligence_journey_v1.png',
-                  height: 210,
-                  fit: BoxFit.cover,
-                  alignment: const Alignment(.18, -.72),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(22),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 190),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color:
-                              (active ? const Color(0xFF65D59A) : Colors.white)
-                                  .withValues(alpha: 0.14),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(
-                            color: active
-                                ? const Color(0xFF65D59A)
-                                : Colors.white54,
-                          ),
-                        ),
-                        child: Text(
-                          active
-                              ? t(
-                                  'COACH ACTIVE',
-                                  'المدرب نشط',
-                                  'COACH ACTIF',
-                                  'COACH ACTIVO',
-                                  'KOÇ AKTİF',
-                                )
-                              : t(
-                                  'BOOST BALANCE',
-                                  'رصيد BOOST',
-                                  'SOLDE BOOST',
-                                  'SALDO BOOST',
-                                  'BOOST BAKİYESİ',
-                                ),
-                          style: TextStyle(
-                            color: active
-                                ? const Color(0xFF8BE6B5)
-                                : Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.7,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    _number(totalRemaining),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 38,
-                      height: 1,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  const Text(
-                    'BIL AI Tokens',
-                    style: TextStyle(
-                      color: light,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 22),
-                  SizedBox(
-                    width: 225,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(99),
-                      child: LinearProgressIndicator(
-                        value: 1 - spentFraction,
-                        minHeight: 7,
-                        backgroundColor: Colors.white.withValues(alpha: 0.13),
-                        valueColor: const AlwaysStoppedAnimation(light),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 9),
-                  Text(
-                    t(
-                      '${_number(weeklyRemaining)} of ${_number(weeklyLimit)} left this week',
-                      'تبقى ${_number(weeklyRemaining)} من ${_number(weeklyLimit)} هذا الأسبوع',
-                      '${_number(weeklyRemaining)} sur ${_number(weeklyLimit)} cette semaine',
-                      '${_number(weeklyRemaining)} de ${_number(weeklyLimit)} esta semana',
-                      'Bu hafta ${_number(weeklyLimit)} tokenden ${_number(weeklyRemaining)} kaldı',
-                    ),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    paidRemaining > 0
-                        ? '${_number(paidRemaining)} ${t('non-expiring Boost', 'Boost لا تنتهي صلاحيته', 'Boost sans expiration', 'Boost sin caducidad', 'süresiz Boost')}'
-                        : '${t('Resets', 'يتجدد', 'Réinitialisation', 'Se reinicia', 'Yenilenir')} $resetAt',
-                    style: const TextStyle(
-                      color: Color(0xBFFFFFFF),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PremiumCard extends StatelessWidget {
-  const _PremiumCard({required this.child});
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => Material(
-    color: Colors.white,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(22),
-      side: const BorderSide(color: Color(0xFFE2EBEF)),
-    ),
-    clipBehavior: Clip.antiAlias,
-    child: Padding(padding: const EdgeInsets.all(18), child: child),
-  );
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.icon, required this.title});
-  final IconData icon;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    children: [
-      Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: const Color(0xFFE8F5FB),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Icon(icon, color: const Color(0xFF12394E)),
-      ),
-      const SizedBox(width: 11),
-      Expanded(
-        child: Text(
-          title,
-          style: const TextStyle(
-            color: Color(0xFF071923),
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ),
-    ],
-  );
-}
-
-class _CapabilityChip extends StatelessWidget {
-  const _CapabilityChip({required this.icon, required this.label});
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-    decoration: BoxDecoration(
-      color: const Color(0xFFF2F7FA),
-      borderRadius: BorderRadius.circular(999),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 17, color: const Color(0xFF1D8ACB)),
-        const SizedBox(width: 6),
-        Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
-      ],
-    ),
-  );
-}
-
-class _ConsentTile extends StatelessWidget {
-  const _ConsentTile({
-    required this.icon,
-    required this.value,
-    required this.enabled,
-    required this.onChanged,
-    required this.title,
-    required this.subtitle,
-  });
-
-  final IconData icon;
-  final bool value;
-  final bool enabled;
-  final ValueChanged<bool> onChanged;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) => _PremiumCard(
-    child: SwitchListTile.adaptive(
-      contentPadding: EdgeInsets.zero,
-      value: value,
-      onChanged: enabled ? onChanged : null,
-      activeTrackColor: const Color(0xFF1D8ACB),
-      secondary: Container(
-        width: 42,
-        height: 42,
-        decoration: BoxDecoration(
-          color: const Color(0xFFE8F5FB),
-          borderRadius: BorderRadius.circular(13),
-        ),
-        child: Icon(icon, color: const Color(0xFF12394E)),
-      ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(top: 5),
-        child: Text(subtitle, style: const TextStyle(height: 1.4)),
-      ),
-    ),
-  );
 }

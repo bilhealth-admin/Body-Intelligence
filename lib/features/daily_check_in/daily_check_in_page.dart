@@ -17,8 +17,18 @@ import '../weight/services/weight_voice_input_service.dart';
 import 'check_in_mutation_coordinator.dart';
 import 'daily_check_in_locale_copy.dart';
 
+typedef DailyCheckInVoiceCapture =
+    Future<SpokenWeightCandidate?> Function(
+      BuildContext context,
+      MeasurementSystem system,
+    );
+
 class DailyCheckInPage extends ConsumerStatefulWidget {
-  const DailyCheckInPage({super.key});
+  const DailyCheckInPage({super.key, this.voiceCapture});
+
+  /// A narrow test seam for the platform recognizer boundary. Production
+  /// routes leave this null and use [WeightVoiceInputService].
+  final DailyCheckInVoiceCapture? voiceCapture;
 
   @override
   ConsumerState<DailyCheckInPage> createState() => _DailyCheckInPageState();
@@ -103,13 +113,24 @@ class _DailyCheckInPageState extends ConsumerState<DailyCheckInPage> {
 
   Future<void> enterWeightByVoice(MeasurementSystem system) async {
     if (saving || skipping) return;
-    final candidate = await WeightVoiceInputService(
-      SpeechToText(),
-    ).capture(context: context, fallbackSystem: system);
+    final candidate = widget.voiceCapture == null
+        ? await WeightVoiceInputService(
+            SpeechToText(),
+          ).capture(context: context, fallbackSystem: system)
+        : await widget.voiceCapture!(context, system);
     if (!mounted || candidate == null) return;
+    final kilograms = candidate.kilograms;
+    if (!kilograms.isFinite || kilograms < 20 || kilograms > 500) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(dailyCheckInText(context, 'Enter a valid weight.')),
+        ),
+      );
+      return;
+    }
     setState(() {
       weightEdited = true;
-      weightKg = candidate.kilograms;
+      weightKg = kilograms;
     });
   }
 

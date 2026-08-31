@@ -22,6 +22,7 @@ import 'app/services/app_settings_provider.dart';
 import 'features/ads/presentation/ad_runtime_bootstrap.dart';
 import 'features/auth/bil_auth_callback_controller.dart';
 import 'features/notifications/services/inactivity_reminder_coordinator.dart';
+import 'features/notifications/presentation/ai_coach_reset_notice_coordinator.dart';
 import 'features/startup/premium_splash_experience.dart';
 import 'app/theme/bil_flagship_theme.dart';
 
@@ -353,12 +354,14 @@ class BILApp extends ConsumerWidget {
                 child: child ?? const SizedBox.shrink(),
               )
             : child ?? const SizedBox.shrink();
-        return InactivityReminderCoordinator(
-          child: AppSwitcherPrivacyShield(
-            child: Semantics(
-              container: true,
-              label: AppLocalizations.of(context).get('app_title'),
-              child: content,
+        return AiCoachResetNoticeCoordinator(
+          child: InactivityReminderCoordinator(
+            child: AppSwitcherPrivacyShield(
+              child: Semantics(
+                container: true,
+                label: AppLocalizations.of(context).get('app_title'),
+                child: content,
+              ),
             ),
           ),
         );

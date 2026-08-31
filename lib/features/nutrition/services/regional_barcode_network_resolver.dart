@@ -28,8 +28,9 @@ class RegionalBarcodeLookup {
 ///
 /// Open Food Facts is queried first because it is barcode-oriented and commonly
 /// contains products from multiple countries. USDA remains an optional branded
-/// enrichment path when BIL_USDA_API_KEY is provided through --dart-define.
-/// Successful responses are cached locally for future offline use.
+/// enrichment path when BIL_USDA_API_KEY is configured server-side. The key is
+/// never shipped in Flutter. Successful responses are cached locally for
+/// future offline use.
 class RegionalBarcodeNetworkResolver {
   const RegionalBarcodeNetworkResolver({
     this.productClassifier = const ProductClassifier(),

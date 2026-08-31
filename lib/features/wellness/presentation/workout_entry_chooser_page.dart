@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../shared/widgets/bil_wordmark.dart';
+import 'wellness_copy.dart';
 
 /// The exercise decision step shown before manual logging or guided routines.
 ///
@@ -128,7 +129,9 @@ class WorkoutEntryChooserPage extends StatelessWidget {
                             _ExercisePathCard(
                               key: const ValueKey('exercise-path-routines'),
                               icon: Icons.video_library_rounded,
-                              title: strings.text('Workout Routines'),
+                              title: wellnessWorkoutVideosAndRoutinesTitle(
+                                context,
+                              ),
                               description: strings.text(
                                 "Choose how you want to log today's movement.",
                               ),

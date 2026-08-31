@@ -4,6 +4,7 @@ import 'package:body_intelligence_log/features/commerce/domain/store_catalog_con
 import 'package:body_intelligence_log/features/commerce/domain/store_offer_metadata.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/ai_boost_coach_artwork.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_dynamic_store_offers.dart';
+import 'package:body_intelligence_log/shared/widgets/bil_coach_identity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -14,6 +15,11 @@ void main() {
     );
     final production = File(bilAiBoostCoachArtworkAsset);
 
+    expect(
+      bilAiBoostCoachArtworkAsset,
+      'assets/images/commerce/bil_ai_boost_coach_icon_512.png',
+    );
+    expect(bilApprovedAiCoachAsset, bilAiBoostCoachArtworkAsset);
     expect(approved.existsSync(), isTrue);
     expect(production.existsSync(), isTrue);
     expect(

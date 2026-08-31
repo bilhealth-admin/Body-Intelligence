@@ -5,6 +5,18 @@ import 'package:body_intelligence_log/app/localization/runtime_copy_extended.dar
 import 'package:body_intelligence_log/features/community/presentation/community_messages_page.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+String _librarySource(String path) {
+  final library = File(path);
+  final entrypoint = library.readAsStringSync();
+  final parts = RegExp(r"part '([^']+)';")
+      .allMatches(entrypoint)
+      .map((match) => File('${library.parent.path}/${match.group(1)!}'));
+  return <String>[
+    entrypoint,
+    for (final part in parts) part.readAsStringSync(),
+  ].join('\n');
+}
+
 void main() {
   test(
     'message subject is encoded inside body without inventing a schema column',
@@ -50,18 +62,18 @@ void main() {
   );
 
   test('messages copy has all five supported locales', () {
-    final source = File(
+    final source = _librarySource(
       'lib/features/community/presentation/community_messages_page.dart',
-    ).readAsStringSync();
+    );
     for (final locale in const ["'en'", "'ar'", "'fr'", "'es'", "'tr'"]) {
       expect(source, contains(locale));
     }
   });
 
   test('messages have truthful async and signed-out states', () {
-    final source = File(
+    final source = _librarySource(
       'lib/features/community/presentation/community_messages_page.dart',
-    ).readAsStringSync();
+    );
     expect(source, contains('_MessagesSignIn'));
     expect(source, contains('_MessagesLoadError'));
     expect(source, contains('onRefresh: onRetry'));

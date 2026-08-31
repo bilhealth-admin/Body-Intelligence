@@ -20,7 +20,7 @@ jobs:
       - name: Install Flutter stable
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          flutter-version: 3.44.6
           cache: true
 
       - name: Clean stale macOS and simulator state
@@ -265,6 +265,20 @@ jobs:
           xcodebuild -version > artifacts/release/healthkit_native_4988_4991/toolchain.txt
           xcrun simctl list devices | grep "$UDID" \
             >> artifacts/release/healthkit_native_4988_4991/toolchain.txt
+
+      - name: Record simulator versus physical-device boundary
+        if: always()
+        shell: bash
+        env:
+          CODE_GATE_STATUS: ${{ job.status == 'success' && 'PASS' || 'FAIL' }}
+        run: |
+          mkdir -p artifacts/release/healthkit_native_4988_4991
+          printf '%s\n' \
+            "CODE_GATE=$CODE_GATE_STATUS" \
+            'SIMULATOR_GATE=EVIDENCE_ONLY' \
+            'PHYSICAL_DEVICE_GATE=REQUIRED' \
+            'PHYSICAL_DEVICE_SCOPE=HealthKit authorization,Apple Watch import,fitness BLE' \
+            > artifacts/release/healthkit_native_4988_4991/gate-status.txt
 
       - name: Upload native HealthKit evidence
         if: always()

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/localization/bil_locale_policy.dart';
+import '../../../app/localization/runtime_copy_release_polish.dart';
+import '../../../app/localization/runtime_copy_release_actions.dart';
+
 class PremiumLoggingIntroPage extends StatelessWidget {
   const PremiumLoggingIntroPage({super.key});
 
@@ -65,9 +69,9 @@ class PremiumLoggingIntroPage extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  key: const Key('premium-logging-see-trial-options'),
+                  key: const Key('premium-logging-see-plans'),
                   onPressed: () => context.push('/plans'),
-                  child: Text(copy('See free-trial options')),
+                  child: Text(copy('See Premium plans')),
                 ),
               ),
               TextButton(
@@ -173,9 +177,14 @@ class _FeatureRow extends StatelessWidget {
 class _PremiumLoggingCopy {
   const _PremiumLoggingCopy(this.code);
   final String code;
-  static _PremiumLoggingCopy of(BuildContext context) =>
-      _PremiumLoggingCopy(Localizations.localeOf(context).languageCode);
-  String call(String key) => (_copy[code] ?? _copy['en']!)[key] ?? key;
+  static _PremiumLoggingCopy of(BuildContext context) => _PremiumLoggingCopy(
+    BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
+  );
+  String call(String key) =>
+      ReleasePolishRuntimeCopy.resolve(key, code) ??
+      ReleaseActionRuntimeCopy.resolve(key, code) ??
+      (_copy[code] ?? _copy['en']!)[key] ??
+      key;
 }
 
 const _copy = <String, Map<String, String>>{
@@ -194,7 +203,7 @@ const _copy = <String, Map<String, String>>{
     'Analyze a meal photo': 'حلّل صورة الوجبة',
     'Use a photo as a starting point and review portions and evidence.':
         'استخدم الصورة كنقطة بداية وراجع الحصص والأدلة.',
-    'See free-trial options': 'عرض خيارات التجربة المجانية',
+    'See Premium plans': 'عرض خطط Premium',
   },
   'fr': {
     'No thanks': 'Non merci',
@@ -210,7 +219,7 @@ const _copy = <String, Map<String, String>>{
     'Analyze a meal photo': 'Analyser une photo du repas',
     'Use a photo as a starting point and review portions and evidence.':
         'Utilisez une photo puis vérifiez les portions et les preuves.',
-    'See free-trial options': 'Voir les options d’essai gratuit',
+    'See Premium plans': 'Voir les offres Premium',
   },
   'es': {
     'No thanks': 'No, gracias',
@@ -226,7 +235,7 @@ const _copy = <String, Map<String, String>>{
     'Analyze a meal photo': 'Analizar una foto de la comida',
     'Use a photo as a starting point and review portions and evidence.':
         'Usa una foto como inicio y revisa porciones y evidencia.',
-    'See free-trial options': 'Ver opciones de prueba gratuita',
+    'See Premium plans': 'Ver planes Premium',
   },
   'tr': {
     'No thanks': 'Hayır, teşekkürler',
@@ -242,6 +251,6 @@ const _copy = <String, Map<String, String>>{
     'Analyze a meal photo': 'Öğün fotoğrafını analiz et',
     'Use a photo as a starting point and review portions and evidence.':
         'Fotoğrafı başlangıç olarak kullan, porsiyonları ve kanıtı incele.',
-    'See free-trial options': 'Ücretsiz deneme seçeneklerini gör',
+    'See Premium plans': 'Premium planlarını gör',
   },
 };

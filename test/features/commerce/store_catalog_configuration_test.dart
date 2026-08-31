@@ -42,4 +42,31 @@ void main() {
       );
     }
   });
+
+  test(
+    'aliases, casing, whitespace, legacy ids, and unknown ids fail closed',
+    () {
+      for (final productId in <String>[
+        '',
+        ' bil_premium_ai_coach',
+        'bil_premium_ai_coach ',
+        'BIL_PREMIUM_AI_COACH',
+        'premium_ai_coach',
+        'bil_premium_ai_coach_legacy',
+        'bil_plus',
+        'unknown_subscription',
+      ]) {
+        expect(
+          StoreCatalogConfiguration.bindingForProduct(productId),
+          isNull,
+          reason: productId,
+        );
+        expect(
+          StoreCatalogConfiguration.isAiTrialProduct(productId),
+          isFalse,
+          reason: productId,
+        );
+      }
+    },
+  );
 }

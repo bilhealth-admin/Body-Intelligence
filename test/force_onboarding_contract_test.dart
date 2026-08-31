@@ -37,8 +37,12 @@ void main() {
       final onboarding = File(
         'lib/features/onboarding/onboarding_page.dart',
       ).readAsStringSync();
+      final completion = File(
+        'lib/features/onboarding/domain/onboarding_completion_service.dart',
+      ).readAsStringSync();
 
-      expect(onboarding, contains("set('forceOnboarding', 'false')"));
+      expect(completion, contains("'forceOnboarding': 'false'"));
+      expect(completion, contains('setManyInCurrentTransaction'));
       expect(onboarding, contains("context.go('/dashboard')"));
       expect(onboarding, isNot(contains("context.go('/startup')")));
     },

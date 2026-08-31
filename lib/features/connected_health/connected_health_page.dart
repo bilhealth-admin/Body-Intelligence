@@ -4,16 +4,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/premium_design_tokens.dart';
+import '../../app/localization/runtime_copy_connected_health.dart';
 import '../../shared/widgets/premium_surface.dart';
 import '../commerce/domain/commerce_plan.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../dashboard/widgets/premium_dashboard_card_lock.dart';
-import '../global_platform/medical_devices/ble_medical_device_platform.dart';
+import '../global_platform/fitness_devices/ble_fitness_device_platform.dart';
 import 'connected_health_model.dart';
 import 'connected_health_copy.dart';
 import 'device_compatibility.dart';
 import 'providers/connected_health_provider.dart';
-import 'providers/medical_device_provider.dart';
+import 'providers/fitness_device_provider.dart';
 import 'widgets/food_name_health_sync_card.dart';
 import 'widgets/live_health_watch.dart';
 
@@ -486,6 +487,21 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage> {
                     'أجهزة اللياقة عبر البلوتوث',
                   ),
                 ),
+              ),
+              ListTile(
+                key: const Key('available-connections-capabilities-link'),
+                leading: const Icon(Icons.fact_check_outlined),
+                title: Text(
+                  connectedHealthText(
+                    context,
+                    'Connection capabilities',
+                    'قدرات الاتصال',
+                  ),
+                ),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  context.push('/connected-health/capabilities');
+                },
               ),
               Text(
                 connectedHealthText(

@@ -5,19 +5,32 @@ import 'package:flutter_test/flutter_test.dart';
 String read(String path) => File(path).readAsStringSync();
 
 void main() {
-  test('Android release bundle is optimized and never debug signed', () {
-    final gradle = read('android/app/build.gradle.kts');
-    expect(gradle, contains('isMinifyEnabled = true'));
-    expect(gradle, contains('isShrinkResources = true'));
-    expect(gradle, contains('proguard-rules.pro'));
-    expect(gradle, contains('abiFilters += listOf("arm64-v8a", "x86_64")'));
-    expect(gradle, isNot(contains('abiFilters += listOf("armeabi-v7a"')));
-    expect(gradle, contains('excludes += setOf("**/armeabi-v7a/**")'));
-    expect(gradle, isNot(contains('signingConfigs.getByName("debug")')));
-    expect(File('android/app/proguard-rules.pro').existsSync(), isTrue);
-    final gate = read('artifacts/release/epic14/run_epic14_gate.ps1');
-    expect(gate, contains('--target-platform android-arm64,android-x64'));
-  });
+  test(
+    'Android release config is optimized and legacy gate cannot certify',
+    () {
+      final gradle = read('android/app/build.gradle.kts');
+      expect(gradle, contains('isMinifyEnabled = true'));
+      expect(gradle, contains('isShrinkResources = true'));
+      expect(gradle, contains('proguard-rules.pro'));
+      expect(gradle, contains('abiFilters += listOf("arm64-v8a", "x86_64")'));
+      expect(gradle, isNot(contains('abiFilters += listOf("armeabi-v7a"')));
+      expect(gradle, contains('excludes += setOf("**/armeabi-v7a/**")'));
+      expect(gradle, isNot(contains('signingConfigs.getByName("debug")')));
+      expect(File('android/app/proguard-rules.pro').existsSync(), isTrue);
+      final gate = read('artifacts/release/epic14/run_epic14_gate.ps1');
+      final stop = gate.indexOf('HISTORICAL_NON_AUTHORITATIVE');
+      expect(stop, greaterThanOrEqualTo(0));
+      expect(
+        stop,
+        lessThan(gate.indexOf('flutter build appbundle')),
+        reason: 'The historical gate must stop before any local AAB build.',
+      );
+      expect(
+        gate,
+        contains('.github/workflows/bil_android_release_candidate.yml'),
+      );
+    },
+  );
 
   test('private Android upload identity has a recoverable local workflow', () {
     final script = read(

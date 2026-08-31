@@ -156,16 +156,6 @@ class ReferenceSettingsHomePage extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    Text(
-                      copy(
-                        'Premium adds advanced insights and customization. Your results still depend on your own data and actions.',
-                      ),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
                     FilledButton(
                       style: FilledButton.styleFrom(
                         backgroundColor: const Color(0xFFFFC857),

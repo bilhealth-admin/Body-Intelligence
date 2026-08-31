@@ -173,7 +173,17 @@ extension _PremiumProfileEditors on _PremiumProfilePageState {
     await context.push(route);
     if (!mounted) return;
     loaded = false;
-    await hydrate(profile);
+    ref.invalidate(userProfileProvider);
+    final refreshedProfile =
+        await ref.read(userProfileProvider.future) ?? profile;
+    final authIdentity = ref.read(profileAuthIdentityProvider).value;
+    if (authIdentity == null) return;
+    await hydrate(
+      refreshedProfile,
+      ref.read(effectiveCurrentWeightProvider) ??
+          refreshedProfile.currentWeight,
+      authIdentity,
+    );
   }
 
   String get heightLabel {

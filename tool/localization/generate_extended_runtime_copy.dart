@@ -2,8 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
-
 const _targets = <String, String>{
   'de': 'de',
   'it': 'it',
@@ -120,7 +118,109 @@ const _reviewedOverrides = <(String, String), String>{
 const _invalidLink =
     'This link cannot be opened safely. Return to the dashboard and try again.';
 
+const _legalMediaDisclosure =
+    'A meal image is sent only when you choose analysis and the secure server gateway is configured. Apple or another platform speech service may process audio you initiate under its terms, but BIL’s backend and Gemini receive only the recognized transcript—not raw microphone audio. Device permissions can be withdrawn in system settings.';
+
+// Human-reviewed translations for the precise privacy boundary. These must not
+// regress to the obsolete claim that voice is sent to BIL as raw audio.
+const _privacyReviewedOverrides = <(String, String), String>{
+  (
+    'de',
+    _legalMediaDisclosure,
+  ): 'Ein Mahlzeitenbild wird nur gesendet, wenn Sie die Analyse auswählen und das sichere Server-Gateway konfiguriert ist. Apple oder ein anderer Plattform-Sprachdienst kann von Ihnen gestartetes Audio nach seinen Bedingungen verarbeiten; das BIL-Backend und Gemini erhalten jedoch nur das erkannte Transkript – kein rohes Mikrofonaudio. Geräteberechtigungen können in den Systemeinstellungen entzogen werden.',
+  (
+    'it',
+    _legalMediaDisclosure,
+  ): 'L’immagine di un pasto viene inviata solo quando scegli l’analisi e il gateway sicuro del server è configurato. Apple o un altro servizio vocale della piattaforma può elaborare l’audio che avvii secondo i propri termini, ma il backend di BIL e Gemini ricevono solo la trascrizione riconosciuta, non l’audio grezzo del microfono. Le autorizzazioni del dispositivo possono essere revocate nelle impostazioni di sistema.',
+  (
+    'pt-BR',
+    _legalMediaDisclosure,
+  ): 'Uma imagem de refeição só é enviada quando você escolhe a análise e o gateway seguro do servidor está configurado. A Apple ou outro serviço de fala da plataforma pode processar o áudio iniciado por você conforme seus termos, mas o backend do BIL e o Gemini recebem apenas a transcrição reconhecida, não o áudio bruto do microfone. As permissões do dispositivo podem ser revogadas nos ajustes do sistema.',
+  (
+    'pt-PT',
+    _legalMediaDisclosure,
+  ): 'Uma imagem de refeição só é enviada quando escolhe a análise e o gateway seguro do servidor está configurado. A Apple ou outro serviço de voz da plataforma pode processar o áudio iniciado por si segundo os respetivos termos, mas o backend do BIL e o Gemini recebem apenas a transcrição reconhecida, não o áudio bruto do microfone. As permissões do dispositivo podem ser revogadas nas definições do sistema.',
+  (
+    'ur',
+    _legalMediaDisclosure,
+  ): 'کھانے کی تصویر صرف اس وقت بھیجی جاتی ہے جب آپ تجزیہ منتخب کریں اور محفوظ سرور گیٹ وے ترتیب دیا گیا ہو۔ Apple یا پلیٹ فارم کی کوئی دوسری تقریر سروس آپ کی شروع کی ہوئی آڈیو کو اپنی شرائط کے تحت پراسیس کر سکتی ہے، لیکن BIL کا بیک اینڈ اور Gemini صرف شناخت شدہ متن وصول کرتے ہیں، خام مائیکروفون آڈیو نہیں۔ آلے کی اجازتیں سسٹم سیٹنگز میں واپس لی جا سکتی ہیں۔',
+  (
+    'fa',
+    _legalMediaDisclosure,
+  ): 'تصویر غذا فقط زمانی ارسال می‌شود که تحلیل را انتخاب کنید و درگاه امن سرور پیکربندی شده باشد. Apple یا سرویس گفتار دیگری در پلتفرم ممکن است صدایی را که شما آغاز می‌کنید طبق شرایط خود پردازش کند، اما سامانه پشتی BIL و Gemini فقط متن تشخیص‌داده‌شده را دریافت می‌کنند، نه صدای خام میکروفون. مجوزهای دستگاه را می‌توان در تنظیمات سیستم لغو کرد.',
+  (
+    'hi',
+    _legalMediaDisclosure,
+  ): 'भोजन की छवि केवल तब भेजी जाती है जब आप विश्लेषण चुनते हैं और सुरक्षित सर्वर गेटवे कॉन्फ़िगर होता है। Apple या कोई अन्य प्लेटफ़ॉर्म वाक् सेवा आपके द्वारा शुरू किए गए ऑडियो को अपनी शर्तों के तहत संसाधित कर सकती है, लेकिन BIL का बैकएंड और Gemini केवल पहचाना गया प्रतिलेख प्राप्त करते हैं, कच्चा माइक्रोफ़ोन ऑडियो नहीं। डिवाइस अनुमतियाँ सिस्टम सेटिंग में वापस ली जा सकती हैं।',
+  (
+    'id',
+    _legalMediaDisclosure,
+  ): 'Gambar makanan dikirim hanya saat Anda memilih analisis dan gateway server aman telah dikonfigurasi. Apple atau layanan ucapan platform lain dapat memproses audio yang Anda mulai sesuai ketentuannya, tetapi backend BIL dan Gemini hanya menerima transkrip yang dikenali, bukan audio mikrofon mentah. Izin perangkat dapat dicabut di pengaturan sistem.',
+  (
+    'ms',
+    _legalMediaDisclosure,
+  ): 'Imej hidangan dihantar hanya apabila anda memilih analisis dan gerbang pelayan selamat telah dikonfigurasikan. Apple atau perkhidmatan pertuturan platform lain boleh memproses audio yang anda mulakan mengikut terma mereka, tetapi bahagian belakang BIL dan Gemini hanya menerima transkrip yang dikenali, bukan audio mikrofon mentah. Kebenaran peranti boleh ditarik balik dalam tetapan sistem.',
+  (
+    'ja',
+    _legalMediaDisclosure,
+  ): '食事画像は、分析を選択し、安全なサーバーゲートウェイが構成されている場合にのみ送信されます。Apple またはその他のプラットフォーム音声サービスは、利用規約に従って開始した音声を処理する場合がありますが、BIL のバックエンドと Gemini が受け取るのは認識された文字起こしのみで、生のマイク音声ではありません。デバイスの権限はシステム設定で取り消せます。',
+  (
+    'ko',
+    _legalMediaDisclosure,
+  ): '식사 이미지는 사용자가 분석을 선택하고 보안 서버 게이트웨이가 구성된 경우에만 전송됩니다. Apple 또는 다른 플랫폼 음성 서비스는 사용자가 시작한 오디오를 해당 약관에 따라 처리할 수 있지만, BIL 백엔드와 Gemini는 인식된 텍스트만 수신하며 원본 마이크 오디오는 수신하지 않습니다. 기기 권한은 시스템 설정에서 철회할 수 있습니다.',
+  (
+    'zh-Hans',
+    _legalMediaDisclosure,
+  ): '只有当您选择分析且安全服务器网关已配置时，餐食图片才会发送。Apple 或其他平台语音服务可能会根据其条款处理您主动发起的音频，但 BIL 后端和 Gemini 只会收到识别后的文字稿，而不会收到原始麦克风音频。您可以在系统设置中撤销设备权限。',
+  (
+    'zh-Hant',
+    _legalMediaDisclosure,
+  ): '只有當您選擇分析且安全伺服器閘道已設定時，餐點圖片才會傳送。Apple 或其他平台語音服務可能會依其條款處理您主動發起的音訊，但 BIL 後端和 Gemini 只會收到辨識後的文字稿，而不會收到原始麥克風音訊。您可在系統設定中撤銷裝置權限。',
+  (
+    'ru',
+    _legalMediaDisclosure,
+  ): 'Изображение блюда отправляется только тогда, когда вы выбираете анализ и настроен защищённый серверный шлюз. Apple или другая речевая служба платформы может обрабатывать инициированное вами аудио по своим условиям, но сервер BIL и Gemini получают только распознанную расшифровку, а не исходный звук с микрофона. Разрешения устройства можно отозвать в системных настройках.',
+  (
+    'bn',
+    _legalMediaDisclosure,
+  ): 'আপনি বিশ্লেষণ বেছে নিলে এবং নিরাপদ সার্ভার গেটওয়ে কনফিগার করা থাকলেই খাবারের ছবি পাঠানো হয়। Apple বা অন্য কোনো প্ল্যাটফর্ম স্পিচ পরিষেবা তাদের শর্ত অনুযায়ী আপনার শুরু করা অডিও প্রক্রিয়া করতে পারে, তবে BIL-এর ব্যাকএন্ড ও Gemini শুধু শনাক্ত করা প্রতিলিপি পায়, কাঁচা মাইক্রোফোন অডিও নয়। সিস্টেম সেটিংসে ডিভাইসের অনুমতি প্রত্যাহার করা যায়।',
+  (
+    'vi',
+    _legalMediaDisclosure,
+  ): 'Hình ảnh bữa ăn chỉ được gửi khi bạn chọn phân tích và cổng máy chủ an toàn đã được cấu hình. Apple hoặc một dịch vụ nhận dạng giọng nói khác của nền tảng có thể xử lý âm thanh do bạn chủ động bắt đầu theo điều khoản của họ, nhưng hệ thống BIL và Gemini chỉ nhận bản chép lời đã nhận dạng, không nhận âm thanh thô từ micrô. Bạn có thể thu hồi quyền của thiết bị trong cài đặt hệ thống.',
+  (
+    'th',
+    _legalMediaDisclosure,
+  ): 'รูปภาพมื้ออาหารจะถูกส่งเฉพาะเมื่อคุณเลือกการวิเคราะห์และมีการกำหนดค่าเกตเวย์เซิร์ฟเวอร์ที่ปลอดภัยแล้ว Apple หรือบริการรู้จำเสียงอื่นของแพลตฟอร์มอาจประมวลผลเสียงที่คุณเป็นผู้เริ่มตามข้อกำหนดของบริการนั้น แต่ระบบเบื้องหลังของ BIL และ Gemini จะได้รับเฉพาะข้อความถอดเสียงที่รู้จำแล้ว ไม่ใช่เสียงดิบจากไมโครโฟน คุณสามารถเพิกถอนสิทธิ์ของอุปกรณ์ได้ในการตั้งค่าระบบ',
+  (
+    'pl',
+    _legalMediaDisclosure,
+  ): 'Zdjęcie posiłku jest wysyłane tylko wtedy, gdy wybierzesz analizę i skonfigurowano bezpieczną bramę serwera. Apple lub inna usługa rozpoznawania mowy platformy może przetwarzać zainicjowany przez Ciebie dźwięk zgodnie ze swoimi warunkami, ale zaplecze BIL i Gemini otrzymują wyłącznie rozpoznaną transkrypcję, a nie surowy dźwięk z mikrofonu. Uprawnienia urządzenia można wycofać w ustawieniach systemu.',
+  (
+    'nl',
+    _legalMediaDisclosure,
+  ): 'Een maaltijdafbeelding wordt alleen verzonden wanneer u analyse kiest en de beveiligde servergateway is geconfigureerd. Apple of een andere spraakdienst van het platform kan door u gestarte audio volgens de eigen voorwaarden verwerken, maar de backend van BIL en Gemini ontvangen alleen het herkende transcript, niet de onbewerkte microfoonaudio. Apparaatrechten kunnen in de systeeminstellingen worden ingetrokken.',
+  (
+    'uk',
+    _legalMediaDisclosure,
+  ): 'Зображення страви надсилається лише тоді, коли ви обираєте аналіз і налаштовано захищений серверний шлюз. Apple або інша мовна служба платформи може обробляти ініційоване вами аудіо за власними умовами, але сервер BIL і Gemini отримують лише розпізнану транскрипцію, а не необроблений звук із мікрофона. Дозволи пристрою можна відкликати в системних налаштуваннях.',
+};
+
 Future<void> main(List<String> args) async {
+  if (args.contains('--check-sources')) {
+    final sources = <String>{
+      ...await _runtimeCopyBaseKeys(),
+      ...await _additionalSources(),
+    };
+    if (sources.isEmpty) {
+      stderr.writeln('No runtime-copy sources were discovered.');
+      exitCode = 1;
+      return;
+    }
+    stdout.writeln('EXTENDED_RUNTIME_SOURCE_CHECK=PASS');
+    stdout.writeln('SOURCES=${sources.length}');
+    return;
+  }
   if (args.contains('--core-pages-base')) {
     await _writeBaseCopy(
       sources: _corePageBaseSources,
@@ -145,7 +245,7 @@ Future<void> main(List<String> args) async {
     return;
   }
   final sources = <String>{
-    ...RuntimeCopy.values.keys,
+    ...await _runtimeCopyBaseKeys(),
     ...await _additionalSources(),
   }.toList(growable: false);
   if (mergeMissing) {
@@ -191,6 +291,7 @@ Future<void> main(List<String> args) async {
     output.writeln('    ${_dartString(sources[index])}: {');
     for (final tag in targets.keys) {
       final translated =
+          _privacyReviewedOverrides[(tag, sources[index])] ??
           _reviewedOverrides[(tag, sources[index])] ??
           translatedByTag[tag]![index];
       output.writeln('      ${_dartString(tag)}: ${_dartString(translated)},');
@@ -236,7 +337,6 @@ const _corePageBaseSources = <String>{
   'I’m ready for your next useful decision.',
   'Coach controls',
   'Your BIL Coach',
-  'I speak every language and turn your body data into the next clear decision.',
   'Talk now',
   'BIL Coach',
   'FOR TODAY',
@@ -477,6 +577,51 @@ String _restoreProtectedBrands(String source, String translated) {
 
 String _dartString(String value) => jsonEncode(value).replaceAll(r'$', r'\$');
 
+const _runtimeCopyBaseFiles = <String>[
+  'lib/app/localization/runtime_copy_primary.dart',
+  'lib/app/localization/runtime_copy_secondary.dart',
+  'lib/app/localization/runtime_copy_workouts.dart',
+  'lib/app/localization/runtime_copy_small_features_a.dart',
+  'lib/app/localization/runtime_copy_small_features_b.dart',
+  'lib/app/localization/runtime_copy_dashboard.dart',
+  'lib/app/localization/runtime_copy_trial.dart',
+  'lib/app/localization/runtime_copy_cuisines.dart',
+  'lib/app/localization/runtime_copy_diets.dart',
+  'lib/app/localization/runtime_copy_core_pages.dart',
+];
+
+/// Reads the canonical five-locale catalogs directly instead of importing the
+/// Flutter package. Keeping this generator a pure Dart command avoids running
+/// unrelated Flutter/native build hooks during localization audits.
+Future<Set<String>> _runtimeCopyBaseKeys() async {
+  final values = <String>{};
+  final singleQuotedKey = RegExp(
+    r"^    '((?:\\.|[^'])*)':\s*\{",
+    multiLine: true,
+  );
+  final doubleQuotedKey = RegExp(
+    r'^    ("(?:\\.|[^"])*"):\s*\{',
+    multiLine: true,
+  );
+  for (final path in _runtimeCopyBaseFiles) {
+    final source = await File(path).readAsString();
+    values.addAll(
+      singleQuotedKey
+          .allMatches(source)
+          .map((match) => _unescapeDartSingle(match.group(1)!)),
+    );
+    values.addAll(
+      doubleQuotedKey
+          .allMatches(source)
+          .map((match) => jsonDecode(match.group(1)!) as String),
+    );
+  }
+  if (values.isEmpty) {
+    throw StateError('No canonical RuntimeCopy keys were discovered.');
+  }
+  return values;
+}
+
 Future<Set<String>> _additionalSources() async {
   final app = await File(
     'lib/app/localization/app_localizations_base_catalog.dart',
@@ -519,18 +664,7 @@ Future<Set<String>> _additionalSources() async {
     ),
   );
   values.add('Set calories and percentages totaling 100% to calculate grams.');
-  values.addAll(
-    await _authoredMapKeys(
-      'lib/features/onboarding/onboarding_locale_copy.dart',
-      'const onboardingAuthoredCopy',
-    ),
-  );
-  values.addAll(
-    await _authoredMapKeys(
-      'lib/features/onboarding/shared/calibration_components.dart',
-      'const _bodyCanvasCopy',
-    ),
-  );
+  values.addAll(await _onboardingEnglishValues());
   values.addAll(
     await _authoredMapKeys(
       'lib/features/intelligence_center/intelligence_service_locale_copy.dart',
@@ -826,6 +960,35 @@ Future<Set<String>> _additionalSources() async {
     'Review today’s entries, then complete the diary to preserve an authoritative snapshot.',
   });
   values.addAll(await _releaseSurfaceEnglishValues());
+  return values;
+}
+
+/// Mirrors the canonical source discovery used by
+/// `generate_onboarding_runtime_copy.dart`. The old authored-map files were
+/// removed when onboarding moved to one generated 25-locale runtime catalog.
+Future<Set<String>> _onboardingEnglishValues() async {
+  final page = await File(
+    'lib/features/onboarding/onboarding_page.dart',
+  ).readAsString();
+  final scaffold = await File(
+    'lib/features/onboarding/widgets/modern_onboarding_scaffold.dart',
+  ).readAsString();
+  final values = <String>{};
+  values.addAll(
+    RegExp(
+      r"\bt\(\s*'((?:\\.|[^'])*)'",
+      multiLine: true,
+    ).allMatches(page).map((match) => _unescapeDartSingle(match.group(1)!)),
+  );
+  values.addAll(
+    RegExp(
+      r"_copy\(context,\s*'((?:\\.|[^'])*)'",
+      multiLine: true,
+    ).allMatches(scaffold).map((match) => _unescapeDartSingle(match.group(1)!)),
+  );
+  if (values.isEmpty) {
+    throw StateError('No onboarding runtime-copy sources found.');
+  }
   return values;
 }
 
@@ -1471,7 +1634,7 @@ Future<Set<String>> _wellnessLearnEnglishValues() async {
 
 Future<Set<String>> _communityConnectionsEnglishValues() async {
   final source = await File(
-    'lib/features/community/presentation/community_connections_page.dart',
+    'lib/features/community/presentation/community_connections_copy.dart',
   ).readAsString();
   final marker = 'factory _ConnectionsCopy.extended';
   final start = source.indexOf(marker);
@@ -1487,7 +1650,7 @@ Future<Set<String>> _communityConnectionsEnglishValues() async {
 
 Future<Set<String>> _communityMessagesEnglishValues() async {
   final source = await File(
-    'lib/features/community/presentation/community_messages_page.dart',
+    'lib/features/community/presentation/community_messages_copy.dart',
   ).readAsString();
   final marker = "    'en': {";
   final start = source.indexOf(marker);
@@ -1575,7 +1738,7 @@ Future<Set<String>> _helpCenterEnglishValues() async {
 
 Future<Set<String>> _accountDeletionEnglishValues() async {
   final source = await File(
-    'lib/features/settings/account_deletion_page.dart',
+    'lib/features/settings/account_deletion_copy.dart',
   ).readAsString();
   final start = source.indexOf("    'en': {");
   final end = source.indexOf("\n    },\n    'ar': {", start);
@@ -1613,8 +1776,6 @@ Future<Set<String>> _advertisingPrivacyEnglishValues() async {
   }
 
   addEnglishBlock('const _eligibilityCopy', "  'en': (", "\n  'ar':");
-  addEnglishBlock('const _adultConfirmationTitle', "  'en':", "\n  'ar':");
-  addEnglishBlock('const _adultConfirmationBody', "  'en':", "\n  'ar':");
   addEnglishBlock(
     'const _eligibilityDetailCopy',
     "      'en': (",

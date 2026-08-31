@@ -35,7 +35,7 @@ final class CloudBackupRestoreEngine {
       ownerId: ownerId,
       schemaVersion: schemaVersion,
       checksum: _digest(canonical),
-      encryptedPayload: cipher.encrypt(clear),
+      encryptedPayload: await cipher.encrypt(clear),
       createdAt: createdAt,
     );
     await store.saveBackup(backup);
@@ -68,7 +68,7 @@ final class CloudBackupRestoreEngine {
         diagnostics: const ['Schema versions are incompatible.'],
       );
     }
-    final clear = cipher.decrypt(backup.encryptedPayload);
+    final clear = await cipher.decrypt(backup.encryptedPayload);
     final canonical = jsonEncode(clear);
     if (_digest(canonical) != backup.checksum) {
       return CloudRestoreReport(

@@ -2,7 +2,9 @@ import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/data/repositories/preferences_repository.dart';
+import 'package:body_intelligence_log/data/repositories/goal_repository.dart';
 import 'package:body_intelligence_log/data/repositories/user_profile_repository.dart';
+import 'package:body_intelligence_log/data/repositories/weight_repository.dart';
 import 'package:body_intelligence_log/features/nutrition/domain/dietary_preferences.dart';
 import 'package:body_intelligence_log/features/nutrition/repositories/dietary_preferences_repository.dart';
 import 'package:body_intelligence_log/features/profile/premium_profile_page.dart';
@@ -183,6 +185,50 @@ void main() {
         92,
       );
       expect(tester.widget<Text>(timeline).data, live);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+      await database.close();
+    },
+  );
+
+  testWidgets(
+    'health-goal weight edit writes the authoritative measurement and preserves direction',
+    (tester) async {
+      final database = await _seedDatabase();
+      final profiles = UserProfileRepository(database);
+      final profile = (await profiles.getProfile())!;
+      await WeightRepository(
+        database,
+      ).addWeight(93.4, date: DateTime(2026, 8, 20));
+      await GoalRepository(
+        database,
+      ).save(profileUuid: profile.uuid, type: 'lose', targetWeight: 85);
+      await _pumpProfile(tester, database);
+
+      final currentWeightRow = find.text('Current weight');
+      await tester.scrollUntilVisible(
+        currentWeightRow,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(currentWeightRow);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField).last, '84');
+      await tester.tap(find.text('Apply'));
+      await tester.pumpAndSettle();
+
+      final save = find.byKey(const Key('profile-settings-save'));
+      await tester.ensureVisible(save);
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+
+      expect((await profiles.getProfile())?.currentWeight, 84);
+      expect((await WeightRepository(database).getAll()).first.weight, 84);
+      expect(
+        (await (database.select(database.goals)..limit(1)).getSingle()).type,
+        'lose',
+      );
 
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pumpAndSettle();

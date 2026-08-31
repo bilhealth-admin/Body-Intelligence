@@ -8,15 +8,29 @@ void main() {
         .listSync(recursive: true)
         .whereType<File>()
         .where((file) => file.path.endsWith('.dart'));
-    final visibleBranch = RegExp(
-      r'''(?:arabic|isArabic|\bar\b)\s*\?\s*['"]''',
+    final localeStringBranch = RegExp(
+      r'''(?:arabic|isArabic|\bar\b)\s*\?\s*(['"])(.*?)\1\s*:\s*(['"])(.*?)\3''',
       multiLine: true,
+      dotAll: true,
     );
+    final visibleLetter = RegExp(r'[A-Za-z\u0600-\u06FF]');
     for (final file in files) {
       final source = file.readAsStringSync();
-      expect(source, isNot(matches(visibleBranch)), reason: file.path);
-      expect(source, isNot(contains('=> arabic ?')), reason: file.path);
-      expect(source, isNot(contains('=> ar ?')), reason: file.path);
+      for (final match in localeStringBranch.allMatches(source)) {
+        final choices = [match.group(2)!, match.group(4)!].map(
+          (choice) => choice.replaceAll(
+            RegExp(r'''\\(?:u[0-9A-Fa-f]{4}|x[0-9A-Fa-f]{2}|.)'''),
+            '',
+          ),
+        );
+        expect(
+          choices.any(visibleLetter.hasMatch),
+          isFalse,
+          reason:
+              '${file.path}: locale ternaries may select punctuation, but '
+              'visible copy must come from the locale catalog.',
+        );
+      }
       for (final marker in ['Ø', 'Ù', 'Ã']) {
         expect(source, isNot(contains(marker)), reason: file.path);
       }

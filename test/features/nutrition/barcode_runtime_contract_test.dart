@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/features/nutrition/domain/barcode_identity.dart';
 import 'package:body_intelligence_log/features/nutrition/domain/product_identity.dart';
 import 'package:body_intelligence_log/features/nutrition/domain/unified_food.dart';
@@ -9,6 +10,40 @@ import 'package:body_intelligence_log/features/nutrition/services/barcode_food_c
 import 'package:body_intelligence_log/features/nutrition/presentation/barcode_runtime_copy.dart';
 
 void main() {
+  test('barcode image actions are reviewed in all 25 locales', () {
+    expect(
+      BarcodeImageRuntimeCopy.supportedTags,
+      BilLocalePolicy.productionTags,
+    );
+
+    final english = BarcodeImageRuntimeCopy.of('en');
+    expect(
+      english.noBarcodeFound,
+      'No barcode was found in this image. Choose a clearer photo.',
+    );
+    expect(
+      english.imageUnreadable,
+      'This barcode image could not be read. Nothing was uploaded.',
+    );
+    expect(english.chooseImage, 'Choose barcode image');
+
+    for (final tag in BilLocalePolicy.productionTags) {
+      final copy = BarcodeImageRuntimeCopy.of(tag);
+      expect(copy.noBarcodeFound.trim(), isNotEmpty, reason: tag);
+      expect(copy.imageUnreadable.trim(), isNotEmpty, reason: tag);
+      expect(copy.chooseImage.trim(), isNotEmpty, reason: tag);
+      if (tag != 'en') {
+        expect(copy.noBarcodeFound, isNot(english.noBarcodeFound), reason: tag);
+        expect(
+          copy.imageUnreadable,
+          isNot(english.imageUnreadable),
+          reason: tag,
+        );
+        expect(copy.chooseImage, isNot(english.chooseImage), reason: tag);
+      }
+    }
+  });
+
   test('regional fixtures cover GTIN-8/12/13/14 with valid check digits', () {
     final decoded =
         jsonDecode(

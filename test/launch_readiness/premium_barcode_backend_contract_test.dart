@@ -23,9 +23,10 @@ void main() {
     final dailyLog = File(
       'lib/features/daily_log/daily_log_capture_actions.dart',
     ).readAsStringSync();
-    final foodPage = File(
+    final foodPage = <String>[
       'lib/features/nutrition/food_page.dart',
-    ).readAsStringSync();
+      'lib/features/nutrition/presentation/food_page_actions.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
 
     expect(sql, contains('bil_has_premium_barcode_access'));
     expect(sql, contains("'pro','premium','premium_ai_coach'"));
@@ -53,7 +54,7 @@ void main() {
     expect(access, contains("context.push('/plans?focus=subscription')"));
     expect(
       RegExp('requestPremiumBarcodeAccess').allMatches(dailyLog).length,
-      2,
+      1,
     );
     expect(
       RegExp('requestPremiumBarcodeAccess').allMatches(foodPage).length,

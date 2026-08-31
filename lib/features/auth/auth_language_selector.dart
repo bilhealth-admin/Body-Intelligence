@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/localization/bil_locale_names.dart';
+import '../../app/localization/bil_locale_policy.dart';
 import '../../app/services/app_settings_provider.dart';
 import 'auth_entry_locale_copy.dart';
 
@@ -10,8 +11,9 @@ class AuthLanguageSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selected = ref.watch(appSettingsProvider).localeCode;
+    final configured = ref.watch(appSettingsProvider).localeCode;
     const languages = BilLocaleNames.native;
+    final selected = _effectiveLocaleTag(configured, languages);
     final label = authEntryTextForTag(
       selected,
       AuthEntryCopyKey.chooseLanguage,
@@ -46,18 +48,20 @@ class AuthLanguageSelector extends ConsumerWidget {
               ],
             ),
             child: Directionality(
-              textDirection: _isRtlLocaleTag(selected)
-                  ? TextDirection.rtl
-                  : TextDirection.ltr,
+              textDirection: TextDirection.ltr,
               child: Row(
+                key: const Key('auth-language-selector-row'),
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Flexible(
                     child: Text(
                       displayedLanguage,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      key: const Key('auth-language-selector-label'),
+                      locale: BilLocalePolicy.localeFromTag(selected),
+                      textDirection: BilLocalePolicy.isRtlTag(selected)
+                          ? TextDirection.rtl
+                          : TextDirection.ltr,
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Color(0xFF1C1C1E),
@@ -69,6 +73,7 @@ class AuthLanguageSelector extends ConsumerWidget {
                   ),
                   const SizedBox(width: 7),
                   const Icon(
+                    key: Key('auth-language-selector-arrow'),
                     Icons.keyboard_arrow_down_rounded,
                     size: 17,
                     color: Color(0xFF8E8E93),
@@ -88,21 +93,7 @@ class AuthLanguageSelector extends ConsumerWidget {
     required String selected,
   }) async {
     const languages = BilLocaleNames.native;
-    final orderedKeys = <String>[
-      ...BilLocaleNames.englishFirstAlphabeticalTags.where(
-        languages.containsKey,
-      ),
-    ];
-    final extras =
-        languages.keys
-            .where((key) => !orderedKeys.contains(key))
-            .toList(growable: false)
-          ..sort(
-            (left, right) => languages[left]!.toLowerCase().compareTo(
-              languages[right]!.toLowerCase(),
-            ),
-          );
-    orderedKeys.addAll(extras);
+    const orderedKeys = BilLocaleNames.englishFirstAlphabeticalTags;
 
     await showModalBottomSheet<void>(
       context: context,
@@ -171,9 +162,13 @@ class AuthLanguageSelector extends ConsumerWidget {
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(14),
-                        onTap: () {
-                          ref.read(appSettingsProvider.notifier).setLocale(key);
-                          Navigator.of(sheetContext).pop();
+                        onTap: () async {
+                          await ref
+                              .read(appSettingsProvider.notifier)
+                              .setLocale(key);
+                          if (sheetContext.mounted) {
+                            Navigator.of(sheetContext).pop();
+                          }
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
@@ -181,14 +176,19 @@ class AuthLanguageSelector extends ConsumerWidget {
                             vertical: 13,
                           ),
                           child: Directionality(
-                            textDirection: _isRtlLocaleTag(key)
-                                ? TextDirection.rtl
-                                : TextDirection.ltr,
+                            textDirection: TextDirection.ltr,
                             child: Row(
+                              key: Key('auth-language-option-row-$key'),
                               children: [
                                 Expanded(
                                   child: Text(
                                     languages[key]!,
+                                    key: Key('auth-language-option-label-$key'),
+                                    locale: BilLocalePolicy.localeFromTag(key),
+                                    textDirection: BilLocalePolicy.isRtlTag(key)
+                                        ? TextDirection.rtl
+                                        : TextDirection.ltr,
+                                    textAlign: TextAlign.left,
                                     style: TextStyle(
                                       color: const Color(0xFF1C1C1E),
                                       fontSize: 16,
@@ -201,6 +201,7 @@ class AuthLanguageSelector extends ConsumerWidget {
                                 ),
                                 if (isSelected)
                                   const Icon(
+                                    key: Key('auth-language-option-check'),
                                     Icons.check_rounded,
                                     size: 20,
                                     color: Color(0xFF007AFF),
@@ -222,12 +223,8 @@ class AuthLanguageSelector extends ConsumerWidget {
   }
 }
 
-bool _isRtlLocaleTag(String localeTag) {
-  final language = localeTag
-      .trim()
-      .replaceAll('_', '-')
-      .toLowerCase()
-      .split('-')
-      .first;
-  return const <String>{'ar', 'fa', 'he', 'ur'}.contains(language);
+String _effectiveLocaleTag(String configured, Map<String, String> languages) {
+  final canonical = BilLocalePolicy.canonicalSupportedTag(configured);
+  if (canonical != null && languages.containsKey(canonical)) return canonical;
+  return 'en';
 }

@@ -6,13 +6,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../app/environment/app_environment.dart';
 import '../../app/localization/app_localizations.dart';
+import '../../core/units/measurement_units.dart';
 import '../ads/presentation/safe_free_ad_anchor.dart';
+import '../admin/services/ai_coach_admin_service.dart';
 import '../cloud_platform/providers/cloud_manual_sync_status_provider.dart';
 import '../commerce/domain/commerce_plan.dart';
 import '../commerce/presentation/premium_crown_emblem.dart';
 import '../commerce/providers/commerce_providers.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../weight/providers/weight_provider.dart';
+import '../weight/domain/weight_goal_progress.dart';
+import '../wellness/presentation/wellness_copy.dart';
 import '../../shared/widgets/bil_account_avatar.dart';
 import 'reference_settings_copy.dart';
 import 'cloud_sync_status_presentation.dart';
@@ -29,23 +33,30 @@ class SettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final copy = ReferenceSettingsCopy.of(context);
     final profile = ref.watch(userProfileProvider).value;
-    final latestWeight = ref.watch(latestWeightProvider).value?.weight;
+    final current = ref.watch(effectiveCurrentWeightProvider);
+    final activeGoal = ref.watch(activeGoalProvider).value;
+    final system =
+        ref.watch(measurementSystemProvider).value ?? MeasurementSystem.metric;
     final displayName = ref.watch(displayNameProvider).value;
     final photo = ref.watch(profilePhotoProvider).value;
     final photoUrl = ref.watch(profilePhotoPublicUrlProvider).value;
     final subscription = ref.watch(verifiedSubscriptionStateProvider);
     final cloudSyncStatus = ref.watch(cloudManualSyncStatusProvider);
+    final adminAccess = ref.watch(aiCoachAdminAccessProvider);
     final name = displayName?.trim().isNotEmpty == true
         ? displayName!.trim()
         : copy('BIL member');
-    final profileWeight = profile?.currentWeight;
-    final current = latestWeight ?? profileWeight;
-    final target = profile?.targetWeight;
+    // The active goal row is the durable goal authority. Falling back to the
+    // profile keeps legacy/onboarding profiles readable before a goal row has
+    // been created. Watching both streams makes this card update immediately
+    // after the Health Goal editor commits either source.
+    final target = activeGoal?.targetWeight ?? profile?.targetWeight;
     final remaining = _remainingToGoal(
       current: current,
       target: target,
-      profileBaseline: profileWeight,
+      system: system,
     );
+    final unit = copy(UnitConverter.weightUnit(system));
 
     return Scaffold(
       appBar: AppBar(centerTitle: true, title: Text(copy('More'))),
@@ -58,9 +69,10 @@ class SettingsPage extends ConsumerWidget {
               name: name,
               photo: photo,
               photoUrl: photoUrl,
-              currentWeight: current?.toStringAsFixed(1) ?? '--',
-              goalWeight: target?.toStringAsFixed(1) ?? '--',
+              currentWeight: _displayWeight(current, system),
+              goalWeight: _displayWeight(target, system),
               lostWeight: remaining,
+              unit: unit,
               copy: copy,
               onTap: () => context.push('/profile-summary'),
             ),
@@ -76,7 +88,7 @@ class SettingsPage extends ConsumerWidget {
             data: (value) => _PremiumMembershipCard(
               label: value.plan == CommercePlan.free
                   ? copy('Start 7-day free trial')
-                  : copy('Premium'),
+                  : copy('Active'),
               onTap: () => context.push('/plans'),
             ),
           ),
@@ -132,7 +144,10 @@ class SettingsPage extends ConsumerWidget {
               _MoreRow(copy('Intermittent Fasting'), '/wellness/fasting'),
               _MoreRow(copy('Sleep'), '/wellness/sleep'),
               _MoreRow(copy('Recipe Discovery'), '/wellness/recipes'),
-              _MoreRow(copy('Workout Routines'), '/wellness/workouts/routines'),
+              _MoreRow(
+                wellnessWorkoutVideosAndRoutinesTitle(context),
+                '/wellness/workouts/routines',
+              ),
               _MoreRow(
                 copy('Apps & Devices'),
                 '/connected-health',
@@ -203,6 +218,19 @@ class SettingsPage extends ConsumerWidget {
               ),
             ],
           ),
+          if (adminAccess.asData?.value == true)
+            _MoreSection(
+              title: copy('Administration'),
+              icon: Icons.admin_panel_settings_outlined,
+              children: [
+                _MoreRow(
+                  copy('AI Coach administration'),
+                  '/admin/ai-coach',
+                  key: const Key('settings-ai-coach-admin-entry'),
+                  showDivider: false,
+                ),
+              ],
+            ),
         ],
       ),
     );
@@ -339,13 +367,22 @@ class _MoreSection extends StatelessWidget {
 String _remainingToGoal({
   required double? current,
   required double? target,
-  required double? profileBaseline,
+  required MeasurementSystem system,
 }) {
   if (current == null || target == null) return '--';
-  final gaining = profileBaseline != null && target > profileBaseline;
-  final remaining = gaining ? target - current : current - target;
-  return remaining.clamp(0, double.infinity).toStringAsFixed(1);
+  return formatSignedWeightValue(
+    kilograms: signedWeightRemainingKg(
+      currentWeightKg: current,
+      targetWeightKg: target,
+    ),
+    system: system,
+  );
 }
+
+String _displayWeight(double? kilograms, MeasurementSystem system) =>
+    kilograms == null
+    ? '--'
+    : UnitConverter.weightFromKg(kilograms, system).toStringAsFixed(1);
 
 class _ProfileSummary extends StatelessWidget {
   const _ProfileSummary({
@@ -355,6 +392,7 @@ class _ProfileSummary extends StatelessWidget {
     required this.currentWeight,
     required this.goalWeight,
     required this.lostWeight,
+    required this.unit,
     required this.copy,
     required this.onTap,
   });
@@ -365,6 +403,7 @@ class _ProfileSummary extends StatelessWidget {
   final String currentWeight;
   final String goalWeight;
   final String lostWeight;
+  final String unit;
   final String Function(String) copy;
   final VoidCallback onTap;
 
@@ -410,9 +449,9 @@ class _ProfileSummary extends StatelessWidget {
             const SizedBox(height: 20),
             Row(
               children: [
-                _Metric(currentWeight, copy('Current'), copy('kg')),
-                _Metric(lostWeight, copy('Remaining'), copy('kg')),
-                _Metric(goalWeight, copy('Goal'), copy('kg')),
+                _Metric(currentWeight, copy('Current'), unit),
+                _Metric(lostWeight, copy('Remaining'), unit),
+                _Metric(goalWeight, copy('Goal'), unit),
               ],
             ),
           ],
@@ -432,11 +471,14 @@ class _Metric extends StatelessWidget {
   Widget build(BuildContext context) => Expanded(
     child: Column(
       children: [
-        Text(
-          '$value $unit',
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Text(
+            '$value $unit',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
         ),
         const SizedBox(height: 3),
         Text(label, style: Theme.of(context).textTheme.bodySmall),

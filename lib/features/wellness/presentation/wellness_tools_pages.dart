@@ -25,11 +25,16 @@ part 'sleep_tracker_page.dart';
 part 'sleep_tracker_experience.dart';
 part 'workout_library_page.dart';
 part 'fasting_timer_page.dart';
+part 'fasting_timer_components.dart';
+part 'fasting_timer_actions.dart';
 part 'wellness_tool_components.dart';
 part 'sleep_tracker_education.dart';
 part 'workout_library_components.dart';
 part 'workout_library_actions.dart';
 part 'workout_library_selection.dart';
+
+/// Injectable wall clock for sleep UI and evidence capture.
+final sleepNowProvider = Provider<DateTime Function()>((_) => DateTime.now);
 
 final fastingNotificationServiceProvider = Provider<BilNotificationService>(
   (_) => BilNotificationService(FlutterLocalNotificationsPlugin()),

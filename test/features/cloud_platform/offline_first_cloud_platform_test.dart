@@ -134,13 +134,11 @@ final class _Cipher implements CloudPayloadCipher {
   @override
   bool get isAvailable => true;
   @override
-  Map<String, Object?> encrypt(Map<String, Object?> cleartext) => {
-    'cipher': cleartext['weight'].toString(),
-  };
+  Future<Map<String, Object?>> encrypt(Map<String, Object?> cleartext) async =>
+      {'cipher': cleartext['weight'].toString()};
   @override
-  Map<String, Object?> decrypt(Map<String, Object?> ciphertext) => {
-    'weight': double.parse(ciphertext['cipher']! as String),
-  };
+  Future<Map<String, Object?>> decrypt(Map<String, Object?> ciphertext) async =>
+      {'weight': double.parse(ciphertext['cipher']! as String)};
 }
 
 final class _Store implements CloudLocalStore, CloudTransport {

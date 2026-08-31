@@ -14,7 +14,7 @@ void main() {
     ).readAsStringSync();
     expect(
       androidDefaultStrings,
-      contains('<string name="app_name">BIL - Body Intelligence Log</string>'),
+      contains('<string name="app_name">Body Intelligence Log</string>'),
     );
     expect(android, contains('android:allowBackup="false"'));
     expect(android, contains('android:fullBackupContent="false"'));

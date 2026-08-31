@@ -4,6 +4,8 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+throw "ANDROID_LAUNCH_READINESS=HISTORICAL_NON_AUTHORITATIVE. This legacy verifier cannot build or certify a release AAB. Use .github/workflows/bil_android_release_candidate.yml. No artifact was produced."
+
 Set-Location $ProjectRoot
 
 $ReportRoot = Join-Path $ProjectRoot "artifacts\android_launch_readiness"

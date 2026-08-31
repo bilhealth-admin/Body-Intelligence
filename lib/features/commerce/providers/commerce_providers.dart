@@ -7,6 +7,7 @@ import '../domain/commerce_plan.dart';
 import '../domain/market_offer_policy.dart';
 import '../domain/store_catalog_configuration.dart';
 import '../domain/store_offer_metadata.dart';
+import '../domain/subscription_lifecycle.dart';
 import '../domain/subscription_state.dart';
 import '../repositories/entitlement_repository.dart';
 import '../repositories/local_entitlement_repository.dart';
@@ -50,28 +51,67 @@ final verifiedSubscriptionStateProvider = FutureProvider<SubscriptionState>((
   return const ServerEntitlementRepository().current();
 });
 
+double _positiveFiniteNumber(Object? value) {
+  if (value is! num) return 0;
+  final number = value.toDouble();
+  return number.isFinite && number > 0 ? number : 0;
+}
+
+/// Pure fail-closed mapping from the server quota snapshot to AI Coach route
+/// access. Subscription allowances and paid Boost credits unlock the coach;
+/// neither source is converted into a Premium entitlement.
+bool aiCoachAccessFromUsageStatus(Object? value) {
+  if (value is! Map) return false;
+  try {
+    final status = Map<String, Object?>.from(value);
+    final rawCredits = status['credits'];
+    if (rawCredits is! Map) return false;
+    final credits = Map<String, Object?>.from(rawCredits);
+    // The server computes total_remaining from reserved-aware included and paid
+    // balances in one transaction. Treat that single field as the access
+    // authority regardless of whether the balance came from an AI subscription
+    // allowance or a paid Boost. Reconstructing it (or gating it on the plan
+    // label) can race an in-flight reserve and can incorrectly reject a Boost
+    // owned by someone who also has ordinary Premium.
+    return _positiveFiniteNumber(credits['total_remaining']) > 0;
+  } on Object {
+    // Maps with non-string keys or malformed nested structures also fail
+    // closed instead of surfacing a parsing exception into the route gate.
+    return false;
+  }
+}
+
+bool hasVerifiedAiSubscription(SubscriptionState? state, {DateTime? now}) {
+  if (state?.authority != EntitlementAuthority.verifiedServer ||
+      state?.plan != CommercePlan.premiumAiCoach) {
+    return false;
+  }
+  final boundary = switch (state!.lifecycle) {
+    SubscriptionLifecycle.trial => state.trialEndsAt,
+    SubscriptionLifecycle.active ||
+    SubscriptionLifecycle.cancelled => state.currentPeriodEndsAt,
+    SubscriptionLifecycle.gracePeriod => state.gracePeriodEndsAt,
+    _ => null,
+  };
+  return boundary != null &&
+      boundary.toUtc().isAfter((now ?? DateTime.now()).toUtc());
+}
+
 /// Server-owned AI access truth for token markets.
 ///
 /// A local purchase callback is never enough to unlock the coach. The gate
-/// opens only after Supabase reports a verified, spendable Boost balance (or
-/// an active AI Coach plan). This keeps a consumed or forged store callback
-/// from granting paid cloud access on the device.
-final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
+/// opens only after Supabase reports a positive reserved-aware total from an
+/// AI subscription allowance and/or verified Boost balance. An active plan at
+/// zero does not bypass quota, and a consumed/forged callback grants nothing.
+final aiCoachCreditAccessProvider = FutureProvider.autoDispose<bool>((
+  ref,
+) async {
+  ref.watch(verifiedEntitlementOwnerProvider);
   final client = Supabase.instance.client;
   if (client.auth.currentSession == null) return false;
   try {
     final value = await client.rpc('bil_get_ai_usage_status');
-    final status = Map<String, Object?>.from(value as Map);
-    if (status['plan']?.toString() == 'ai_coach') return true;
-    final rawCredits = status['credits'];
-    if (rawCredits is! Map) return false;
-    final credits = Map<String, Object?>.from(rawCredits);
-    if (status['plan']?.toString() == 'trial') {
-      final included = credits['included_remaining'];
-      return included is num && included > 0;
-    }
-    final paid = credits['paid_remaining'];
-    return paid is num && paid > 0;
+    return aiCoachAccessFromUsageStatus(value);
   } on Object {
     // Access fails closed when the server cannot establish credit truth.
     return false;
@@ -82,6 +122,7 @@ final aiCoachCreditAccessProvider = FutureProvider<bool>((ref) async {
 /// It deliberately ignores subscription/included allowance and opens only
 /// when Supabase confirms enough paid credit for one Vision reservation.
 final aiBoostVisionAccessProvider = FutureProvider<bool>((ref) async {
+  ref.watch(verifiedEntitlementOwnerProvider);
   final client = Supabase.instance.client;
   if (client.auth.currentSession == null) return false;
   try {

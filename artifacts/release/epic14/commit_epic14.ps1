@@ -1,4 +1,6 @@
 $ErrorActionPreference = "Stop"
+throw "EPIC14_COMMIT=HISTORICAL_NON_AUTHORITATIVE. An ignored historical summary cannot authorize staging or committing current source. Use docs/launch_readiness/BIL_RELEASE_CANDIDATE_GATE.md and .github/workflows/bil_android_release_candidate.yml. No Git state was changed."
+
 if (Test-Path variable:PSNativeCommandUseErrorActionPreference) {
   $PSNativeCommandUseErrorActionPreference = $false
 }

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "app_identity": {
-    "name": "BIL - Body Intelligence Log",
+    "name": "Body Intelligence Log",
     "android_package": "com.bilhealth.bodyintelligencelog",
     "apple_bundle_id": "com.bilhealth.bodyintelligencelog",
     "primary_category": "Health & Fitness",
@@ -24,7 +24,7 @@
   },
   "locales": {
     "en-US": {
-      "title": "BIL - Body Intelligence Log",
+      "title": "Body Intelligence Log",
       "subtitle": "Your daily health intelligence",
       "short_description": "Track food, body trends and habits with clear, privacy-first insights.",
       "promotional_text": "Build a clearer picture of your nutrition, movement and progress—without invented data or medical diagnosis.",

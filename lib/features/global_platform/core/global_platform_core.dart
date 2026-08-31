@@ -8,7 +8,7 @@ enum GlobalModule {
   appleHealth,
   healthConnect,
   wearables,
-  medicalDevices,
+  fitnessDevices,
   vision,
   cloudAi,
   plugins,

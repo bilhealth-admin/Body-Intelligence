@@ -9,10 +9,12 @@ void main() {
     ).readAsStringSync();
 
     expect(shell, contains('extendBody: false'));
-    expect(shell, contains('height: 72'));
+    expect(shell, contains('final dockHeight = 90.0 +'));
+    expect(shell, contains('height: dockHeight'));
     expect(shell, contains("key: const Key('shell-quick-add')"));
-    expect(shell, contains('Color(0xB807111D)'));
-    expect(shell, contains('Color(0xB8F4F8FC)'));
+    expect(shell, contains('quickAdd: quickButton'));
+    expect(shell, contains('Color(0xF20B1725)'));
+    expect(shell, contains('Color(0xF7FFFFFF)'));
     expect(shell, isNot(contains('FloatingActionButtonLocation.centerDocked')));
   });
 }

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../shared/widgets/bil_wordmark.dart';
 import 'auth_entry_locale_copy.dart';
 import 'auth_error_localizer.dart';
 import 'supabase_auth_service.dart';
@@ -154,8 +155,11 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final dark = scheme.brightness == Brightness.dark;
+    final pageBackground = dark ? scheme.surface : Colors.white;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: pageBackground,
       body: SafeArea(
         child: Column(
           children: [
@@ -180,14 +184,20 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
+                            const BilFullWordmark(
+                              key: Key('verify-email-wordmark'),
+                              height: 38,
+                              alignment: AlignmentDirectional.centerStart,
+                            ),
+                            SizedBox(height: compact ? 18 : 24),
                             Text(
                               authEntryText(
                                 context,
                                 AuthEntryCopyKey.enterVerificationCode,
                               ),
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Color(0xFF111318),
+                              style: TextStyle(
+                                color: scheme.onSurface,
                                 fontSize: 24,
                                 height: 1.15,
                                 fontWeight: FontWeight.w800,
@@ -200,8 +210,8 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                               child: Text(
                                 authEntryCodeSent(context, widget.email),
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Color(0xFF6D727B),
+                                style: TextStyle(
+                                  color: scheme.onSurfaceVariant,
                                   fontSize: 14,
                                   height: 1.4,
                                   fontWeight: FontWeight.w500,
@@ -243,13 +253,16 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                                               height: 59,
                                               alignment: Alignment.center,
                                               decoration: BoxDecoration(
-                                                color: const Color(0xFFF9F9FB),
+                                                color: dark
+                                                    ? scheme
+                                                          .surfaceContainerHighest
+                                                    : const Color(0xFFF9F9FB),
                                                 borderRadius:
                                                     BorderRadius.circular(12),
                                                 border: Border.all(
                                                   color: active
-                                                      ? const Color(0xFF0877F9)
-                                                      : const Color(0xFFD7D9DE),
+                                                      ? scheme.primary
+                                                      : scheme.outlineVariant,
                                                   width: active ? 1.8 : 1.2,
                                                 ),
                                                 boxShadow: active
@@ -266,10 +279,10 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                                               ),
                                               child: Text(
                                                 value,
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontSize: 23,
                                                   fontWeight: FontWeight.w800,
-                                                  color: Color(0xFF111318),
+                                                  color: scheme.onSurface,
                                                 ),
                                               ),
                                             );
@@ -323,8 +336,8 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: statusIsError
-                                      ? const Color(0xFFFFECEA)
-                                      : const Color(0xFFEAF3FF),
+                                      ? scheme.errorContainer
+                                      : scheme.primaryContainer,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
@@ -332,8 +345,8 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: statusIsError
-                                        ? const Color(0xFFB42318)
-                                        : const Color(0xFF0668DB),
+                                        ? scheme.onErrorContainer
+                                        : scheme.onPrimaryContainer,
                                     height: 1.35,
                                   ),
                                 ),
@@ -408,7 +421,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                                   ? null
                                   : () => context.go('/login'),
                               style: TextButton.styleFrom(
-                                foregroundColor: const Color(0xFF686D76),
+                                foregroundColor: scheme.onSurfaceVariant,
                                 textStyle: const TextStyle(
                                   fontSize: 13.5,
                                   fontWeight: FontWeight.w600,
@@ -443,54 +456,60 @@ class _VerifyTopBar extends StatelessWidget {
   final VoidCallback? onBack;
 
   @override
-  Widget build(BuildContext context) => Container(
-    height: 72,
-    decoration: const BoxDecoration(
-      color: Color(0xFFFAFAFC),
-      border: Border(bottom: BorderSide(color: Color(0xFFE8E9ED), width: 1)),
-    ),
-    child: Stack(
-      alignment: Alignment.center,
-      children: [
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: Padding(
-            padding: const EdgeInsetsDirectional.only(start: 16),
-            child: Material(
-              color: Colors.white,
-              shape: const CircleBorder(),
-              elevation: 4,
-              shadowColor: const Color(0x1F000000),
-              child: IconButton(
-                key: const Key('verify-email-back'),
-                tooltip: authEntryText(context, AuthEntryCopyKey.back),
-                onPressed: onBack,
-                icon: Icon(
-                  Directionality.of(context) == TextDirection.rtl
-                      ? Icons.arrow_forward_ios_rounded
-                      : Icons.arrow_back_ios_new_rounded,
-                  size: 19,
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final dark = scheme.brightness == Brightness.dark;
+    return Container(
+      height: 72,
+      decoration: BoxDecoration(
+        color: dark ? scheme.surfaceContainerLow : const Color(0xFFFAFAFC),
+        border: Border(
+          bottom: BorderSide(color: scheme.outlineVariant, width: 1),
+        ),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.only(start: 16),
+              child: Material(
+                color: dark ? scheme.surfaceContainerHighest : Colors.white,
+                shape: const CircleBorder(),
+                elevation: 4,
+                shadowColor: const Color(0x1F000000),
+                child: IconButton(
+                  key: const Key('verify-email-back'),
+                  tooltip: authEntryText(context, AuthEntryCopyKey.back),
+                  onPressed: onBack,
+                  icon: Icon(
+                    Directionality.of(context) == TextDirection.rtl
+                        ? Icons.arrow_forward_ios_rounded
+                        : Icons.arrow_back_ios_new_rounded,
+                    size: 19,
+                  ),
+                  color: scheme.onSurface,
                 ),
-                color: const Color(0xFF111318),
               ),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 74),
-          child: Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Color(0xFF111318),
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -.25,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 74),
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: scheme.onSurface,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -.25,
+              ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }

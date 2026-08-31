@@ -58,6 +58,31 @@ void main() {
     );
     expect(result.answer, isNull);
   });
+
+  test(
+    'Edge Function error codes are extracted without alias normalization',
+    () {
+      expect(
+        functionErrorCodeFromDetails(const {'error': 'ai_usage_exhausted'}),
+        'ai_usage_exhausted',
+      );
+      expect(
+        functionErrorCodeFromDetails('{"error":"ai_usage_exhausted"}'),
+        'ai_usage_exhausted',
+      );
+      expect(
+        functionErrorCodeFromDetails(const {'error': 'ai_usage_exhausted '}),
+        'ai_usage_exhausted ',
+      );
+      expect(
+        functionErrorCodeFromDetails('{"error":" ai_usage_exhausted"}'),
+        ' ai_usage_exhausted',
+      );
+      expect(functionErrorCodeFromDetails(const {'error': 402}), isNull);
+      expect(functionErrorCodeFromDetails('{"error":402}'), isNull);
+      expect(functionErrorCodeFromDetails('not-json'), isNull);
+    },
+  );
 }
 
 CoachContextSnapshot _emptyContext() => CoachContextSnapshot(

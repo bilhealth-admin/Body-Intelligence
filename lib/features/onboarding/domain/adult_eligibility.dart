@@ -5,6 +5,7 @@
 /// fail-closed compatibility check until the user confirms their birth date.
 abstract final class BilAdultEligibility {
   static const int minimumAge = 18;
+  static const int maximumSupportedAge = 120;
 
   static int ageOn(DateTime birthDate, {DateTime? on}) {
     final date = DateTime(birthDate.year, birthDate.month, birthDate.day);
@@ -22,17 +23,28 @@ abstract final class BilAdultEligibility {
     return age;
   }
 
-  static bool isEligibleBirthDate(DateTime birthDate, {DateTime? on}) =>
-      ageOn(birthDate, on: on) >= minimumAge;
+  static bool isEligibleBirthDate(DateTime birthDate, {DateTime? on}) {
+    final age = ageOn(birthDate, on: on);
+    return age >= minimumAge && age <= maximumSupportedAge;
+  }
 
-  static bool isEligibleAge(int age) => age >= minimumAge;
+  static bool isEligibleAge(int age) =>
+      age >= minimumAge && age <= maximumSupportedAge;
 
   static DateTime latestEligibleBirthDate({DateTime? on}) {
     final reference = on ?? DateTime.now();
-    return DateTime(
-      reference.year - minimumAge,
-      reference.month,
-      reference.day,
-    );
+    final targetYear = reference.year - minimumAge;
+    // `DateTime(year, 2, 29)` normalizes to March 1 in a non-leap target
+    // year. Clamp explicitly so a Feb 29 reference never admits someone born
+    // on March 1 one day before their 18th birthday.
+    final lastDayOfTargetMonth = DateTime(
+      targetYear,
+      reference.month + 1,
+      0,
+    ).day;
+    final targetDay = reference.day > lastDayOfTargetMonth
+        ? lastDayOfTargetMonth
+        : reference.day;
+    return DateTime(targetYear, reference.month, targetDay);
   }
 }

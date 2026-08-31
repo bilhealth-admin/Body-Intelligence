@@ -356,6 +356,82 @@ Deno.test("reservation failure does not attempt settlement", async () => {
   assertEquals(settlements.length, 0);
 });
 
+Deno.test("exhausted total fails closed with a distinguishable Boost route code", async () => {
+  let providerCalls = 0;
+  let settlementCalls = 0;
+  const response = await handler(requestBody("coach-test-credits-required"), {
+    clients: ((_authorization: string) => ({
+      auth: {
+        auth: {
+          getUser: async () => ({
+            data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
+            error: null,
+          }),
+        },
+      },
+      admin: {
+        rpc: async (name: string) => {
+          if (name === "bil_has_remote_ai_consent") {
+            return { data: true, error: null };
+          }
+          if (name === "bil_reserve_ai_usage") {
+            return {
+              data: null,
+              error: { message: "ai_usage_exhausted" },
+            };
+          }
+          settlementCalls += 1;
+          return { data: null, error: null };
+        },
+      },
+    })) as never,
+    geminiCall: async () => {
+      providerCalls += 1;
+      throw new Error("must_not_run");
+    },
+  });
+
+  assertEquals(response.status, 402);
+  assertEquals((await response.json()).error, "ai_usage_exhausted");
+  assertEquals(providerCalls, 0);
+  assertEquals(settlementCalls, 0);
+});
+
+Deno.test("quota aliases cannot masquerade as exhausted AI credit", async () => {
+  for (const message of [
+    "not_ai_usage_exhausted",
+    "ai_usage_exhausted_alias",
+    "AI_USAGE_EXHAUSTED",
+  ]) {
+    let providerCalls = 0;
+    const response = await handler(requestBody(`coach-test-${message}`), {
+      clients: ((_authorization: string) => ({
+        auth: {
+          auth: {
+            getUser: async () => ({
+              data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
+              error: null,
+            }),
+          },
+        },
+        admin: {
+          rpc: async (name: string) =>
+            name === "bil_has_remote_ai_consent"
+              ? { data: true, error: null }
+              : { data: null, error: { message } },
+        },
+      })) as never,
+      geminiCall: async () => {
+        providerCalls += 1;
+        throw new Error("must_not_run");
+      },
+    });
+    assertEquals(response.status, 503);
+    assertEquals((await response.json()).error, "reservation_failed");
+    assertEquals(providerCalls, 0);
+  }
+});
+
 Deno.test("missing remote AI consent blocks before reservation and provider", async () => {
   let providerCalls = 0;
   let reservationCalls = 0;

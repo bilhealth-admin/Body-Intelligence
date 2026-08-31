@@ -4,15 +4,25 @@ import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+String _librarySource(String path) {
+  final library = File(path);
+  final entrypoint = library.readAsStringSync();
+  final parts = RegExp(r"part '([^']+)';")
+      .allMatches(entrypoint)
+      .map((match) => File('${library.parent.path}/${match.group(1)!}'));
+  return <String>[
+    entrypoint,
+    for (final part in parts) part.readAsStringSync(),
+  ].join('\n');
+}
+
 void main() {
   test('complete-meal action requests meal-focused diary context', () {
     final dashboard = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
-    final diary = File(
-      'lib/features/daily_log/daily_log_page.dart',
-    ).readAsStringSync();
+    final diary = _librarySource('lib/features/daily_log/daily_log_page.dart');
     final mealEntry = File(
       'lib/features/daily_log/daily_log_meal_entry.dart',
     ).readAsStringSync();
@@ -32,15 +42,15 @@ void main() {
     expect(diary, contains('this.focusMealEntry = false'));
     expect(diary, contains('if (!widget.focusMealEntry) ...['));
     expect(diary, contains('if (widget.focusMealEntry && !mealFocusApplied)'));
-    expect(diary, contains('addPostFrameCallback((_) => _focusMealEntry())'));
+    expect(diary, contains('(_) => _focusMealEntry(),'));
   });
 
   test(
     'a changed diary action is dispatched when the routed page is reused',
     () {
-      final diary = File(
+      final diary = _librarySource(
         'lib/features/daily_log/daily_log_page.dart',
-      ).readAsStringSync();
+      );
 
       expect(
         diary,
@@ -51,7 +61,25 @@ void main() {
         contains('oldWidget.initialAction != widget.initialAction'),
       );
       expect(diary, contains('initialActionApplied = false'));
-      expect(diary, contains('initialActionInFlight != null'));
+      expect(
+        diary,
+        matches(
+          RegExp(
+            r'action\s*==\s*null\s*\|\|\s*'
+            r'initialActionInFlight\s*!=\s*null',
+          ),
+        ),
+      );
+      expect(diary, contains('initialActionInFlight = action'));
+      expect(
+        diary,
+        matches(
+          RegExp(
+            r'initialActionInFlight\s*==\s*action\)\s*'
+            r'initialActionInFlight\s*=\s*null',
+          ),
+        ),
+      );
       expect(diary, contains('widget.initialAction != action'));
       expect(diary, contains('WidgetsBinding.instance.addPostFrameCallback('));
       expect(diary, contains('(_) => _applyInitialAction(),'));

@@ -113,6 +113,10 @@ final firstValueHandoffProvider = StreamProvider<bool>((ref) {
 final displayNameProvider = StreamProvider<String?>((ref) async* {
   final preferences = ref.watch(preferencesRepositoryProvider);
   await for (final value in preferences.watch('displayName')) {
+    if (!_preferencesMatchCurrentAuth(preferences)) {
+      yield null;
+      continue;
+    }
     final localName = value?.trim();
     if (AppEnvironment.supabaseRuntimeReady) {
       try {
@@ -176,9 +180,9 @@ final accountGatewayReviewedProvider = FutureProvider.autoDispose<bool>((
 });
 
 final profilePhotoProvider = StreamProvider<Uint8List?>((ref) {
-  return ref.watch(preferencesRepositoryProvider).watch('profilePhoto').map((
-    encoded,
-  ) {
+  final preferences = ref.watch(preferencesRepositoryProvider);
+  return preferences.watch('profilePhoto').map((encoded) {
+    if (!_preferencesMatchCurrentAuth(preferences)) return null;
     if (encoded == null || encoded.isEmpty) return null;
     try {
       return base64Decode(encoded);
@@ -200,7 +204,7 @@ final profilePhotoPublicUrlProvider = FutureProvider.autoDispose<String?>((
   }
   final client = Supabase.instance.client;
   final user = client.auth.currentUser;
-  if (user == null) return stored == null || stored.isEmpty ? null : stored;
+  if (user == null || preferences.localOwnerId != user.id) return null;
   try {
     final row = await client
         .from('bil_public_profiles')
@@ -217,3 +221,11 @@ final profilePhotoPublicUrlProvider = FutureProvider.autoDispose<String?>((
     return stored == null || stored.isEmpty ? null : stored;
   }
 });
+
+bool _preferencesMatchCurrentAuth(PreferencesRepository preferences) {
+  if (!AppEnvironment.supabaseRuntimeReady) return true;
+  final owner = Supabase.instance.client.auth.currentUser?.id.trim();
+  return owner != null &&
+      owner.isNotEmpty &&
+      preferences.localOwnerId == owner;
+}

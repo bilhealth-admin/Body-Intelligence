@@ -64,7 +64,7 @@ void main() {
     });
   }
 
-  testWidgets('phone exposes Body Twin and the paired workout rail', (
+  testWidgets('phone exposes Body Twin without duplicating workout entry', (
     tester,
   ) async {
     await setViewport(tester, width: 390, height: 2200);
@@ -72,16 +72,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.byKey(const Key('dashboard-summary-and-workout-rail')),
-      findsOneWidget,
-    );
-    expect(
       find.byKey(const Key('dashboard-mobile-summary-card')),
       findsOneWidget,
     );
     expect(
       find.byKey(const Key('dashboard-mobile-workout-library-card')),
-      findsOneWidget,
+      findsNothing,
     );
     expect(
       find.byKey(const Key('dashboard-mobile-body-twin-snapshot')),
@@ -108,7 +104,7 @@ void main() {
     expect(ai, findsOneWidget);
     expect(find.text('Personal Health AI test panel'), findsOneWidget);
     expect(
-      find.byKey(const Key('dashboard-summary-and-workout-rail')),
+      find.byKey(const Key('dashboard-mobile-workout-library-card')),
       findsNothing,
     );
     expect(

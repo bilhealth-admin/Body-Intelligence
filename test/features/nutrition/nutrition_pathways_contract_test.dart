@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:body_intelligence_log/features/nutrition_plans/domain/nutrition_pathway.dart';
+import 'package:body_intelligence_log/features/nutrition_plans/domain/nutrition_pathway_access_policy.dart';
 import 'package:body_intelligence_log/features/nutrition_plans/domain/nutrition_pathway_catalog.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -21,11 +22,12 @@ void main() {
         'low-carb',
         'keto',
         'pregnancy',
-        'psmf',
       }),
     );
     expect(ids.length, nutritionPathways.length);
-    expect(nutritionPathways, hasLength(11));
+    expect(nutritionPathways, hasLength(10));
+    expect(ids, isNot(contains('psmf')));
+    expect(nutritionPathwayForExactId('psmf'), isNull);
   });
 
   test('higher-risk pathways cannot masquerade as standard plans', () {
@@ -33,7 +35,20 @@ void main() {
 
     expect(byId['pregnancy']?.safety, NutritionPathwaySafety.clinicianReview);
     expect(byId['keto']?.safety, NutritionPathwaySafety.clinicianReview);
-    expect(byId['psmf']?.safety, NutritionPathwaySafety.medicalSupervision);
+  });
+
+  test('release catalog does not expose the supervision-only PSMF pathway', () {
+    final catalogSource = File(
+      'lib/features/nutrition_plans/domain/nutrition_pathway_catalog.dart',
+    ).readAsStringSync();
+    final pageSource = File(
+      'lib/features/nutrition_plans/presentation/nutrition_pathways_page.dart',
+    ).readAsStringSync();
+
+    expect(catalogSource, isNot(contains("pathways/psmf.dart")));
+    expect(catalogSource, isNot(contains('psmfPathway')));
+    expect(pageSource, contains('nutritionPathways'));
+    expect(nutritionPathwayForExactId('psmf'), isNull);
   });
 
   test('carb cycling is the only free nutrition pathway', () {

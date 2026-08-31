@@ -1,8 +1,8 @@
 "NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
-"NSHealthUpdateUsageDescription" = "BIL записывает только те медицинские записи, которые вы явно выбрали, после отдельного согласия на запись.";
+"NSHealthUpdateUsageDescription" = "BIL записывает данные о весе только после отдельного разрешения на запись в приложении «Здоровье».";
 "NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
 "NSCameraUsageDescription" = "Используйте камеру только тогда, когда вы решите отсканировать штрих-код, просмотреть фотографию еды или добавить личный профиль или фотографию прогресса.";
-"NSPhotoLibraryUsageDescription" = "Выберите еду, профиль или фотографию прогресса для просмотра перед сохранением или загрузкой.";
-"NSMicrophoneUsageDescription" = "BIL использует микрофон только когда вы выбираете голосовую запись еды или прямой разговор с BIL AI Coach.";
-"NSSpeechRecognitionUsageDescription" = "BIL преобразует речь, начатую вами для записи еды или BIL AI Coach, в текст, который можно проверить или отправить.";
+"NSPhotoLibraryUsageDescription" = "BIL получает доступ только к выбранной вами фотографии еды, профиля, прогресса, публикации сообщества или продукта, чтобы вы могли проверить её перед сохранением или загрузкой.";
+"NSMicrophoneUsageDescription" = "BIL использует микрофон только когда вы выбираете голосовую запись веса, еды или прямой разговор с BIL AI Coach.";
+"NSSpeechRecognitionUsageDescription" = "BIL преобразует речь, начатую вами для записи веса, еды или BIL AI Coach, в текст, который можно проверить или отправить.";

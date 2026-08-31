@@ -9,47 +9,94 @@ Set<String> _quotedCodes(String source) => RegExp(
 
 void main() {
   const migrationPath =
-      'supabase/migrations/20260828220000_final_store_market_policy_alignment.sql';
+      'supabase/migrations/20260829233000_canonical_store_market_pricing_policy.sql';
+  const pricingPath =
+      'tool/apple_store_connect/canonical_store_pricing_2026-08-29.json';
 
-  test('final migration exactly matches the approved sale-market matrix', () {
-    final migration = File(migrationPath).readAsStringSync();
-    final unnestBlocks = RegExp(
-      r'from unnest\(array\[(.*?)\]::text\[\]\) code',
-      dotAll: true,
-    ).allMatches(migration).toList(growable: false);
-    expect(unnestBlocks, hasLength(2));
+  test(
+    'canonical migration exactly matches the approved sale-market split',
+    () {
+      final migration = File(migrationPath).readAsStringSync();
+      final unnestBlocks = RegExp(
+        r'from unnest\(array\[(.*?)\]::text\[\]\) code',
+        dotAll: true,
+      ).allMatches(migration).toList(growable: false);
+      expect(unnestBlocks, hasLength(2));
 
-    final premiumCodes = _quotedCodes(unnestBlocks[0].group(1)!);
-    final aiCodes = _quotedCodes(unnestBlocks[1].group(1)!);
-    expect(premiumCodes, equals({'EG', 'NG', 'PK', 'TR'}));
-    expect(aiCodes, hasLength(168));
-    expect(premiumCodes.intersection(aiCodes), isEmpty);
+      final premiumCodes = _quotedCodes(unnestBlocks[0].group(1)!);
+      final aiCodes = _quotedCodes(unnestBlocks[1].group(1)!);
+      expect(premiumCodes, equals({'EG', 'IN', 'PK', 'TR'}));
+      expect(aiCodes, hasLength(168));
+      expect(aiCodes, contains('NG'));
+      expect(aiCodes, isNot(contains('IN')));
+      expect(premiumCodes.intersection(aiCodes), isEmpty);
 
-    final matrix =
-        jsonDecode(
-              File(
-                'artifacts/pricing/BIL_FINAL_GLOBAL_STORE_PRICING_2026-08-28.json',
-              ).readAsStringSync(),
-            )
+      final pricing =
+          jsonDecode(File(pricingPath).readAsStringSync())
+              as Map<String, dynamic>;
+      final marketPolicy = pricing['marketPolicy']! as Map<String, dynamic>;
+      final expectedPremium =
+          (marketPolicy['premiumOnlyIso2']! as List<dynamic>)
+              .cast<String>()
+              .toSet();
+
+      expect(expectedPremium, premiumCodes);
+      expect(marketPolicy['premiumAiCoachMarketCount'], aiCodes.length);
+      expect(expectedPremium.length + aiCodes.length, 172);
+    },
+  );
+
+  test('canonical pricing replaces research history without rewriting it', () {
+    final pricing =
+        jsonDecode(File(pricingPath).readAsStringSync())
             as Map<String, dynamic>;
-    final rows = (matrix['rows'] as List<dynamic>).cast<Map<String, dynamic>>();
-    final approvedAppleRows = rows.where(
-      (row) =>
-          row['apple_official_market'] == true &&
-          row['apple_launch_status'] == 'مقترح للبيع',
-    );
-    final expectedPremium = approvedAppleRows
-        .where((row) => row['plan'] == 'Premium فقط')
-        .map((row) => row['iso']! as String)
-        .toSet();
-    final expectedAi = approvedAppleRows
-        .where((row) => row['plan'] == 'Premium + AI Coach')
-        .map((row) => row['iso']! as String)
-        .toSet();
+    final display = pricing['displayPolicy']! as Map<String, dynamic>;
+    final products = pricing['products']! as Map<String, dynamic>;
+    final history = pricing['history']! as Map<String, dynamic>;
 
-    expect(expectedPremium, premiumCodes);
-    expect(expectedAi, aiCodes);
-    expect(expectedPremium.length + expectedAi.length, 172);
+    expect(pricing['status'], 'canonical');
+    expect(pricing['pricingAuthority'], 'device_store_localized_metadata');
+    expect(
+      display['annualSavingsBadgePolicy'],
+      'rounded_percent_from_annual_vs_monthly_times_12',
+    );
+    expect(
+      display['annualReferencePricePolicy'],
+      'monthly_store_price_times_12',
+    );
+    expect(display['pricesMustBeStoreDerived'], isTrue);
+    expect(display['hardcodedFlutterPricesAllowed'], isFalse);
+    expect(
+      (products['bil_premium'] as Map<String, dynamic>)['businessTargetUsd'],
+      '2.50',
+    );
+    expect(
+      (products['bil_premium']
+          as Map<String, dynamic>)['appleReferencePriceUsd'],
+      '2.49',
+    );
+    expect(
+      (products['bil_premium_annual']
+          as Map<String, dynamic>)['appleReferencePriceUsd'],
+      '21.00',
+    );
+    expect(
+      (products['bil_premium_ai_coach']
+          as Map<String, dynamic>)['appleReferencePriceUsd'],
+      '5.99',
+    );
+    expect(
+      (products['bil_premium_ai_coach_annual']
+          as Map<String, dynamic>)['appleReferencePriceUsd'],
+      '49.99',
+    );
+    expect(history['historicalFilesRemainImmutable'], isTrue);
+    expect(
+      history['supersedesForActivePricing'],
+      contains(
+        'artifacts/pricing/BIL_FINAL_GLOBAL_STORE_PRICING_2026-08-28.json',
+      ),
+    );
   });
 
   test('unknown and held markets fail closed instead of becoming Premium', () {
@@ -68,14 +115,14 @@ void main() {
     }
   });
 
-  test('all five immutable product IDs retain the correct authority', () {
+  test('all five immutable product IDs retain store authority', () {
     final catalog = File(
       'lib/features/commerce/domain/store_catalog_configuration.dart',
     ).readAsStringSync();
     final backend = File(
       'supabase/functions/verify-store-purchase/store_backend.ts',
     ).readAsStringSync();
-    final migration = File(migrationPath).readAsStringSync();
+    final pricing = File(pricingPath).readAsStringSync();
 
     for (final id in [
       'bil_premium',
@@ -85,9 +132,13 @@ void main() {
       'bil_ai_boost',
     ]) {
       expect(catalog, contains("'$id'"));
-      expect(migration, contains("'$id'"));
+      expect(pricing, contains('"$id"'));
     }
-    expect(backend, contains("productId !== 'bil_ai_boost'"));
-    expect(migration, contains('bil_store_registry_canonical_product_mapping'));
+    expect(
+      backend,
+      matches(RegExp(r'''productId\s*!==\s*["']bil_ai_boost["']''')),
+    );
+    expect(catalog, contains('Prices, trials, availability'));
+    expect(catalog, contains('always read from the active store'));
   });
 }

@@ -14,7 +14,9 @@ import '../../../app/services/app_settings_provider.dart';
 import '../../../app/services/runtime_permission_policy.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../data/database/database_provider.dart';
+import '../../../shared/widgets/bil_coach_identity.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
+import '../../commerce/providers/commerce_providers.dart';
 import '../../foods/providers/food_provider.dart';
 import '../domain/intelligence_action.dart';
 import '../domain/bil_navigation_registry.dart';
@@ -49,6 +51,14 @@ part 'intelligence_center_voice_widgets.dart';
 part 'intelligence_conversation_voice.dart';
 part 'intelligence_query_flow.dart';
 part 'intelligence_action_flow.dart';
+
+/// Single injectable wall clock for conversation copy and seeded messages.
+///
+/// Production still reads the device clock. Visual and widget tests override
+/// this provider so a morning/evening boundary cannot change their output.
+final intelligenceConversationClockProvider = Provider<DateTime Function()>(
+  (ref) => DateTime.now,
+);
 
 enum _CoachVoiceMode { idle, dictation, liveCall }
 
@@ -218,13 +228,14 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     super.didChangeDependencies();
     if (welcomeSeeded) return;
     welcomeSeeded = true;
+    final now = ref.read(intelligenceConversationClockProvider)();
     messages.add(
       IntelligenceMessage(
-        id: 'welcome-immediate-${DateTime.now().microsecondsSinceEpoch}',
+        id: 'welcome-immediate-${now.microsecondsSinceEpoch}',
         role: IntelligenceMessageRole.bil,
         kind: IntelligenceMessageKind.coach,
-        text: _sessionWelcome(null),
-        createdAt: DateTime.now(),
+        text: _sessionWelcome(null, at: now),
+        createdAt: now,
         modality: IntelligenceMessageModality.system,
       ),
     );
@@ -648,6 +659,21 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
     return _MessageBubble(
       message: message,
       feedbackValue: feedback[message.id],
+      onSpeak:
+          message.role == IntelligenceMessageRole.bil &&
+              message.modality == IntelligenceMessageModality.voice
+          ? () {
+              final language = const CoachLanguageResolver()
+                  .resolve(
+                    input: message.text,
+                    uiLocale: Localizations.localeOf(context).toLanguageTag(),
+                  )
+                  .languageTag;
+              unawaited(
+                _speakCoachText(message.text, language, showFailure: true),
+              );
+            }
+          : null,
       onFeedback: canRate
           ? (helpful) => _recordFeedback(message, helpful)
           : null,

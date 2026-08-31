@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../global_platform/medical_devices/ble_medical_device_platform.dart';
-import '../providers/medical_device_provider.dart';
+import '../../global_platform/fitness_devices/ble_fitness_device_platform.dart';
+import '../providers/fitness_device_provider.dart';
 import '../connected_health_copy.dart';
 import '../../../shared/widgets/bil_wordmark.dart';
 
@@ -89,7 +89,7 @@ class BilFitnessMonitor extends ConsumerWidget {
     this.compact = false,
   });
 
-  final MedicalDeviceSnapshot snapshot;
+  final FitnessDeviceSnapshot snapshot;
   final String languageCode;
   final bool compact;
 
@@ -99,7 +99,7 @@ class BilFitnessMonitor extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final connected =
-        snapshot.status == MedicalDeviceConnectionStatus.connected;
+        snapshot.status == FitnessDeviceConnectionStatus.connected;
     final readings = snapshot.measurements
         .where((packet) => bleFitnessMeasurementKinds.contains(packet['kind']))
         .take(3)
@@ -278,7 +278,7 @@ class BilFitnessMonitor extends ConsumerWidget {
                     IconButton(
                       tooltip: tr('Read again', 'قراءة جديدة'),
                       onPressed: () => ref
-                          .read(medicalDeviceProvider.notifier)
+                          .read(fitnessDeviceProvider.notifier)
                           .refreshMeasurements(),
                       icon: const Icon(Icons.refresh_rounded),
                       color: const Color(0xFF63DFF2),

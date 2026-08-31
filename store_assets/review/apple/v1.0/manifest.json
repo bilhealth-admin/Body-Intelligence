@@ -1,0 +1,79 @@
+{
+  "purpose": "App Store Connect subscription and IAP review screenshots",
+  "source": "test/features/commerce/goldens/app_store_review/v1.0",
+  "pixelSize": "1170x2532",
+  "files": [
+    {
+      "productId": "bil_premium",
+      "file": "store_assets/review/apple/v1.0/bil_premium.png",
+      "width": 1170,
+      "height": 2532,
+      "colorChannels": 3,
+      "hasAlpha": false,
+      "sha256": "b0eb180e68e75df701ebe808eaeeb2f2258ecaa05d3111495651424246b69f2f",
+      "selectedTerm": "MONTHLY",
+      "localizedPrice": "EGP 129.99",
+      "currencyCode": "EGP",
+      "storeCountryCode": "EGY",
+      "availabilityPolicy": "EGY/IND/PAK/TUR only"
+    },
+    {
+      "productId": "bil_premium_annual",
+      "file": "store_assets/review/apple/v1.0/bil_premium_annual.png",
+      "width": 1170,
+      "height": 2532,
+      "colorChannels": 3,
+      "hasAlpha": false,
+      "sha256": "dd89152ac148ab30a23381ca23006c800a0dcaa174132fdbf8b96ac27c6fc86e",
+      "selectedTerm": "ANNUAL",
+      "localizedPrice": "EGP 999.99",
+      "currencyCode": "EGP",
+      "storeCountryCode": "EGY",
+      "availabilityPolicy": "EGY/IND/PAK/TUR only",
+      "derivedSavingsBadge": "Save 36%",
+      "badgeCalculation": "round((129.99 * 12 - 999.99) / (129.99 * 12) * 100)"
+    },
+    {
+      "productId": "bil_premium_ai_coach",
+      "file": "store_assets/review/apple/v1.0/bil_premium_ai_coach.png",
+      "width": 1170,
+      "height": 2532,
+      "colorChannels": 3,
+      "hasAlpha": false,
+      "sha256": "cf65ac0f0e875223d76a853011f307a162f21ca6f7a2c8cd562e0b3b6f39cdf3",
+      "selectedTerm": "MONTHLY",
+      "localizedPrice": "$5.99",
+      "currencyCode": "USD",
+      "storeCountryCode": "USA"
+    },
+    {
+      "productId": "bil_premium_ai_coach_annual",
+      "file": "store_assets/review/apple/v1.0/bil_premium_ai_coach_annual.png",
+      "width": 1170,
+      "height": 2532,
+      "colorChannels": 3,
+      "hasAlpha": false,
+      "sha256": "127471bc2b784d10ef7a2226912ac0f39153f4ddfaf5c87f872a3dcde52825ef",
+      "selectedTerm": "ANNUAL",
+      "localizedPrice": "$49.99",
+      "currencyCode": "USD",
+      "storeCountryCode": "USA",
+      "derivedSavingsBadge": "Save 30%",
+      "badgeCalculation": "round((5.99 * 12 - 49.99) / (5.99 * 12) * 100)"
+    },
+    {
+      "productId": "bil_ai_boost",
+      "file": "store_assets/review/apple/v1.0/bil_ai_boost.png",
+      "width": 1170,
+      "height": 2532,
+      "colorChannels": 3,
+      "hasAlpha": false,
+      "sha256": "e5ec2bc3ebfae690abb39f6b79c6cab43bf0087d64af09e573a39ee3af8aeb7d",
+      "selectedTerm": "ONE_TIME_CONSUMABLE",
+      "localizedPrice": "$2.49",
+      "currencyCode": "USD",
+      "storeCountryCode": "USA",
+      "discountBadge": null
+    }
+  ]
+}

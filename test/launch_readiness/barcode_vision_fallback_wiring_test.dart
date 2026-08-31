@@ -2,14 +2,24 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+String _librarySource(String path) {
+  final library = File(path);
+  final entrypoint = library.readAsStringSync();
+  final parts = RegExp(r"part '([^']+)';")
+      .allMatches(entrypoint)
+      .map((match) => File('${library.parent.path}/${match.group(1)!}'));
+  return <String>[
+    entrypoint,
+    for (final part in parts) part.readAsStringSync(),
+  ].join('\n');
+}
+
 void main() {
   test('unknown barcode requires photo evidence before existing Vision path', () {
     final backend = File(
       'supabase/functions/barcode-lookup/index.ts',
     ).readAsStringSync();
-    final foodPage = File(
-      'lib/features/nutrition/food_page.dart',
-    ).readAsStringSync();
+    final foodPage = _librarySource('lib/features/nutrition/food_page.dart');
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
     final coach =
         [
@@ -37,7 +47,19 @@ void main() {
     expect(backend, isNot(contains('image_base64')));
 
     // The miss UI hands off only after the user accepts the label-photo guide.
-    expect(foodPage, contains('_UnverifiedBarcodeAction.scanProductLabel'));
+    expect(
+      foodPage,
+      matches(
+        RegExp(
+          r'enum\s+_UnverifiedBarcodeAction\s*\{[\s\S]*?'
+          r'\bscanProductLabel\s*,[\s\S]*?\}',
+        ),
+      ),
+    );
+    expect(
+      foodPage,
+      matches(RegExp(r'_UnverifiedBarcodeAction\s*\.\s*scanProductLabel')),
+    );
     expect(foodPage, contains('const MealImageGuidePage()'));
     expect(foodPage, contains('if (accepted == true && mounted)'));
     expect(foodPage, contains("'/intelligence-center?vision=capture&barcode="));

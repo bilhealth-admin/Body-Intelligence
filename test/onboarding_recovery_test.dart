@@ -8,14 +8,11 @@ void main() {
       'lib/features/onboarding/onboarding_page.dart',
     ).readAsStringSync();
 
-    expect(
-      source,
-      contains("context.strings.text('Could not restore your local setup')"),
-    );
-    expect(source, contains("context.strings.text('Try again')"));
-    expect(source, contains('loadInitialState();'));
+    expect(source, contains("_loadFailed = true"));
+    expect(source, contains("label: Text(t('Try again'))"));
+    expect(source, contains('unawaited(_load())'));
     expect(source, contains('Icons.refresh'));
-    expect(source, contains('loadFailed = true'));
+    expect(source, contains('Nothing was changed because BIL could not save'));
     expect(source, isNot(contains('private database detail')));
   });
 }

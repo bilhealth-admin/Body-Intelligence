@@ -93,8 +93,8 @@ const _translations = <String, Map<String, String>>{
     'sleep': 'sommeil',
     'kcal': 'kcal',
     'Try again': 'Réessayer',
-    'Live health watch showing current time and available measured data':
-        'Montre santé en direct affichant l’heure et les mesures disponibles',
+    'Live fitness watch showing current time and available measured data':
+        'Montre fitness en direct affichant l’heure actuelle et les données mesurées disponibles',
     'Health Hub status could not be read. No data was deleted or uploaded.':
         'Impossible de lire l’état du centre de santé. Aucune donnée n’a été supprimée ni envoyée.',
     'Health Hub status could not be read.':
@@ -180,8 +180,8 @@ const _translations = <String, Map<String, String>>{
     'sleep': 'sueño',
     'kcal': 'kcal',
     'Try again': 'Reintentar',
-    'Live health watch showing current time and available measured data':
-        'Reloj de salud en vivo con la hora y las mediciones disponibles',
+    'Live fitness watch showing current time and available measured data':
+        'Reloj de fitness en vivo que muestra la hora actual y los datos medidos disponibles',
     'Health Hub status could not be read. No data was deleted or uploaded.':
         'No se pudo leer el estado del centro de salud. No se eliminó ni subió ningún dato.',
     'Health Hub status could not be read.':
@@ -266,8 +266,8 @@ const _translations = <String, Map<String, String>>{
     'sleep': 'uyku',
     'kcal': 'kcal',
     'Try again': 'Tekrar dene',
-    'Live health watch showing current time and available measured data':
-        'Geçerli saati ve mevcut ölçümleri gösteren canlı sağlık saati',
+    'Live fitness watch showing current time and available measured data':
+        'Güncel saati ve mevcut ölçüm verilerini gösteren canlı fitness saati',
     'Health Hub status could not be read. No data was deleted or uploaded.':
         'Sağlık Merkezi durumu okunamadı. Hiçbir veri silinmedi veya yüklenmedi.',
     'Health Hub status could not be read.': 'Sağlık Merkezi durumu okunamadı.',

@@ -96,6 +96,7 @@ void main() {
     '/daily-log/water': 'diary',
     '/intelligence-center': 'intelligence',
     '/settings/ai-coach': 'intelligence',
+    '/admin/ai-coach': 'intelligence',
     '/nutrition': 'nutrition',
     '/foods': 'nutrition',
     '/history': 'progress',
@@ -112,7 +113,7 @@ void main() {
     ],
     'auth': ['test/auth_boundary_test.dart', 'test/account_gateway_test.dart'],
     'onboarding': [
-      'test/welcome_golden_test.dart',
+      'test/features/onboarding/onboarding_visual_golden_test.dart',
       'test/onboarding_recovery_test.dart',
     ],
     'capture': [
@@ -120,6 +121,7 @@ void main() {
     ],
     'intelligence': [
       'test/features/dashboard/presentation/dashboard_decision_explanation_page_test.dart',
+      'test/features/admin/ai_coach_global_reset_test.dart',
     ],
     'profile': [
       'test/premium_profile_page_contract_test.dart',

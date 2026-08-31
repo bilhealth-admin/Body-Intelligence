@@ -20,9 +20,9 @@ void main() {
     ).readAsStringSync();
 
     expect(dailyLog, contains('FoodBarcodeScannerPage'));
-    expect(dailyLog, contains('Manual barcode lookup'));
     expect(dailyLog, contains('lookupBarcodeJourney'));
     expect(dailyLog, contains('FoodPresentationLocalizer'));
+    expect(foodPage, contains('Manual barcode lookup'));
     expect(foodPage, contains('_cameraBarcodeLookup'));
     expect(scanner, contains('MobileScanner('));
     expect(scanner, contains('toggleTorch'));
@@ -64,16 +64,8 @@ void main() {
       reason: 'The old black content spacer must not return.',
     );
     expect(shell, contains("Key('shell-quick-add')"));
-    expect(
-      shell,
-      contains(
-        'floatingActionButton: immersiveCoach || isDailyLog ? null : quickButton',
-      ),
-    );
-    expect(
-      shell,
-      contains('reserveQuickAddSlot: !immersiveCoach && !isDailyLog'),
-    );
+    expect(shell, contains('bottomNavigationBar: immersiveCoach'));
+    expect(shell, contains('quickAdd: quickButton'));
     expect(
       shell,
       contains('floatingActionButton: isDashboard ? quickButton : null'),
@@ -84,8 +76,10 @@ void main() {
       contains('height: 76'),
       reason: 'The navigation bar keeps its compact visual height.',
     );
-    expect(shell, contains('Color(0xB807111D)'));
-    expect(shell, contains('Color(0xB8F4F8FC)'));
+    expect(shell, contains('final dockHeight = 90.0 +'));
+    expect(shell, contains('height: dockHeight'));
+    expect(shell, contains('Color(0xF20B1725)'));
+    expect(shell, contains('Color(0xF7FFFFFF)'));
   });
 
   test('Arabic localization includes review findings', () {

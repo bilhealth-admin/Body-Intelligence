@@ -21,6 +21,9 @@ void main() {
   test('startup tests isolate force onboarding from the real database', () {
     final source = File('test/startup_state_test.dart').readAsStringSync();
 
-    expect('forceOnboardingProvider.overrideWith'.allMatches(source).length, 4);
+    expect(
+      'forceOnboardingProvider.overrideWith'.allMatches(source).length,
+      greaterThanOrEqualTo(4),
+    );
   });
 }

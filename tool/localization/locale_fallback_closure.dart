@@ -2,6 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/runtime_copy_release_closure.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_release_polish.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_release_actions.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_food_actions.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_daily_log_actions.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_fitness_watch.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_connected_health.dart';
 
 const extendedLocaleTags = <String>{
   'de',
@@ -86,6 +92,10 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     File('lib/app/localization/runtime_copy_profile_photo.dart').readAsString(),
     File('lib/app/localization/runtime_copy_legal_status.dart').readAsString(),
     File('lib/app/localization/runtime_copy_check_in.dart').readAsString(),
+    File('lib/app/localization/runtime_copy_ai_access.dart').readAsString(),
+    File(
+      'lib/app/localization/runtime_copy_accessibility_wellness.dart',
+    ).readAsString(),
     File('lib/features/auth/auth_five_locale_copy.dart').readAsString(),
   ])).join('\n');
   final catalogKeys = <String>{
@@ -99,6 +109,12 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
         .allMatches(catalogSource)
         .map((match) => _unescapeDartSingle(match.group(1)!)),
     ...ReleaseClosureRuntimeCopy.sources,
+    ...ReleasePolishRuntimeCopy.sources,
+    ...ReleaseActionRuntimeCopy.sources,
+    ...FoodActionRuntimeCopy.sources,
+    ...DailyLogActionRuntimeCopy.sources,
+    ...FitnessWatchRuntimeCopy.sources,
+    ...ConnectedHealthRuntimeCopy.sources,
   };
   final required = await _requiredRuntimeSources();
   final missing =

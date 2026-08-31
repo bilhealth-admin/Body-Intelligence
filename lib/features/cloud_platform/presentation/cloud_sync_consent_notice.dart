@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../app/localization/runtime_copy_cloud_sync.dart';
 import '../providers/cloud_manual_sync_status_provider.dart';
 import '../providers/cloud_sync_providers.dart';
 import '../services/cloud_sync_consent_repository.dart';
+import 'cloud_sync_consent_summary.dart';
 
 /// One-time, explicit cloud retention choice for authenticated users.
 ///
@@ -62,38 +64,53 @@ class _CloudSyncConsentNoticeState
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Icon(Icons.cloud_done_outlined, size: 40),
+                Center(
+                  child: Container(
+                    width: 52,
+                    height: 52,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        sheetContext,
+                      ).colorScheme.primaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.backup_rounded,
+                      size: 28,
+                      color: Theme.of(
+                        sheetContext,
+                      ).colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 12),
                 Text(
-                  context.strings.text('Keep your BIL data safe?'),
+                  sheetContext.strings.text(CloudSyncConsentCopy.title),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  context.strings.text(
-                    'Encrypted backup stores your profile, weight and water so BIL can restore them after reinstalling or changing devices. Nutrition stays on this device.',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  context.strings.text(
-                    'If you later turn sync off, future uploads stop. An existing cloud copy is retained until you delete your account or request data deletion in Privacy.',
-                  ),
-                ),
+                const SizedBox(height: 18),
+                const CloudSyncConsentSummary(),
                 const SizedBox(height: 22),
                 FilledButton(
                   key: const Key('cloud-sync-enable-backup'),
                   onPressed: () => Navigator.of(sheetContext).pop(true),
-                  child: Text(context.strings.text('Enable encrypted backup')),
+                  child: Text(
+                    sheetContext.strings.text(
+                      CloudSyncConsentCopy.primaryAction,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 8),
                 TextButton(
                   key: const Key('cloud-sync-keep-local'),
                   onPressed: () => Navigator.of(sheetContext).pop(false),
-                  child: Text(context.strings.text('Keep only on this device')),
+                  child: Text(
+                    sheetContext.strings.text(CloudSyncConsentCopy.localAction),
+                  ),
                 ),
               ],
             ),

@@ -20,7 +20,7 @@
                                 <rect key="frame" x="105" y="105" width="390" height="390"/>
                             </imageView>
                         </subviews>
-                        <color key="backgroundColor" red="0.031372549" green="0.48627451" blue="0.811764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" red="0.031372549" green="0.466666667" blue="0.976470588" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="Bil-Wrd-026" firstAttribute="centerX" secondItem="Bil-Viw-003" secondAttribute="centerX" id="Bil-Cx-026"/>
                             <constraint firstItem="Bil-Wrd-026" firstAttribute="centerY" secondItem="Bil-Viw-003" secondAttribute="centerY" id="Bil-Cy-026"/>
@@ -34,6 +34,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="BILLaunchWordmark" width="864" height="864"/>
+        <image name="BILLaunchWordmark" width="1080" height="1080"/>
     </resources>
 </document>

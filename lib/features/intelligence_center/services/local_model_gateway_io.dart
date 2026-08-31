@@ -9,6 +9,24 @@ import 'local_model_gateway.dart';
 
 LocalModelGateway createLocalModelGateway() => const LlamaCppLocalGateway();
 
+/// Extracts the Edge Function's stable machine-readable error code without
+/// normalizing it. Only an exact string can drive a purchase route; coercing
+/// numbers or trimming whitespace would let an alias masquerade as the
+/// release-approved `ai_usage_exhausted` code.
+String? functionErrorCodeFromDetails(Object? details) {
+  String? exactCode(Object? value) =>
+      value is String && value.isNotEmpty ? value : null;
+
+  if (details is Map) return exactCode(details['error']);
+  if (details is! String) return null;
+  try {
+    final decoded = jsonDecode(details);
+    return decoded is Map ? exactCode(decoded['error']) : null;
+  } on FormatException {
+    return null;
+  }
+}
+
 class LlamaCppLocalGateway implements LocalModelGateway {
   const LlamaCppLocalGateway({
     this.endpoint = const String.fromEnvironment(
@@ -195,16 +213,9 @@ class LlamaCppLocalGateway implements LocalModelGateway {
         ),
       );
     } on FunctionException catch (error) {
-      final code = _functionErrorCode(error.details);
+      final code = functionErrorCodeFromDetails(error.details);
       return LocalModelResult(
-        status: switch ((error.status, code)) {
-          (401, _) => CoachServiceStatus.signedOut,
-          (403, 'ai_consent_required') => CoachServiceStatus.consentRequired,
-          (403, 'voice_ai_consent_required') =>
-            CoachServiceStatus.consentRequired,
-          (402, _) => CoachServiceStatus.quotaExhausted,
-          _ => CoachServiceStatus.temporarilyUnavailable,
-        },
+        status: coachServiceStatusForFunctionError(error.status, code),
         diagnosticCode: code ?? 'edge_function_${error.status}',
       );
     } on Object {
@@ -268,22 +279,6 @@ class LlamaCppLocalGateway implements LocalModelGateway {
             .take(6)
             .toList(growable: false)
       : const [];
-
-  String? _functionErrorCode(Object? details) {
-    if (details is Map) {
-      final code = details['error']?.toString().trim();
-      if (code != null && code.isNotEmpty) return code;
-    }
-    if (details is String) {
-      try {
-        final decoded = jsonDecode(details);
-        if (decoded is Map) return decoded['error']?.toString().trim();
-      } on FormatException {
-        return null;
-      }
-    }
-    return null;
-  }
 
   Map<String, Object?> _boundedContext(CoachContextSnapshot context) {
     final full = context.toJson();

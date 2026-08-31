@@ -1,6 +1,7 @@
 import '../../commerce/domain/subscription_state.dart';
 import '../domain/wellness_content_access_policy.dart';
 import '../domain/wellness_content_pack.dart';
+import '../domain/workout_free_preview_policy.dart';
 
 /// Fail-closed access policy for installed workout packs.
 ///
@@ -11,3 +12,10 @@ bool workoutAccessGranted(
   WellnessContentAccess minimumAccess,
   SubscriptionState? subscription,
 ) => wellnessContentAccessGranted(minimumAccess, subscription);
+
+/// Item-aware boundary used by every workout open/log/play surface. Only the
+/// generated bundle-scoped preview allowlist can bypass pack-level Pro access.
+bool workoutItemAccessGranted(
+  WellnessContentItem item,
+  SubscriptionState? subscription,
+) => WorkoutFreePreviewPolicy.accessGranted(item, subscription);

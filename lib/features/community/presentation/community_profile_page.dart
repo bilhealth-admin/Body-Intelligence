@@ -46,7 +46,7 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
       _loading = _load();
       return;
     }
-    if (!AppEnvironment.cloudConfigured) {
+    if (!AppEnvironment.supabaseRuntimeReady) {
       _loading = Future.value();
       return;
     }

@@ -10,7 +10,7 @@ void main() {
         'ios/Runner.xcodeproj/project.pbxproj',
       ).readAsStringSync();
       expect(project, contains('BILGlobalHealthBridge.swift in Sources'));
-      expect(project, contains('BILMedicalBleBridge.swift in Sources'));
+      expect(project, contains('BILFitnessBleBridge.swift in Sources'));
       final plist = File('ios/Runner/Info.plist').readAsStringSync();
       expect(plist, contains('NSBluetoothAlwaysUsageDescription'));
     },
@@ -18,7 +18,7 @@ void main() {
 
   test('iOS Bluetooth bridge scans fitness GATT services only', () {
     final source = File(
-      'ios/Runner/BILMedicalBleBridge.swift',
+      'ios/Runner/BILFitnessBleBridge.swift',
     ).readAsStringSync();
     final serviceList = RegExp(
       r'private var supportedServices:\s*\[CBUUID\]\s*\{\s*\[(.*?)\]\.map',
@@ -29,10 +29,7 @@ void main() {
     final serviceUuids = RegExp(
       r'"([0-9A-Fa-f]{4})"',
     ).allMatches(serviceList!).map((match) => match.group(1)!.toUpperCase());
-    expect(
-      serviceUuids,
-      unorderedEquals(<String>['181D', '181B', '180D']),
-    );
+    expect(serviceUuids, unorderedEquals(<String>['181D', '181B', '180D']));
 
     expect(source, contains('"Fitness device"'));
     expect(source, isNot(contains('"Medical device"')));

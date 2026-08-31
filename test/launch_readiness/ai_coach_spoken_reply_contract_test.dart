@@ -25,9 +25,15 @@ void main() {
     expect(page, contains('CoachLanguageResolver()'));
     expect(page, contains('inputChannel == CoachInputChannel.voice'));
     expect(page, contains('IntelligenceMessageModality.voice'));
-    expect(page, isNot(contains("Key('ai-coach-speak-\${message.id}')")));
+    expect(page, contains("Key('ai-coach-speak-\${message.id}')"));
+    expect(page, contains('Read answer aloud'));
+    expect(
+      page,
+      contains('message.modality == IntelligenceMessageModality.voice'),
+    );
     expect(page, isNot(contains('Replay voice reply')));
-    expect(page, contains('_sessionWelcome(displayName)'));
+    expect(page, contains('_sessionWelcome(displayName, at: now)'));
+    expect(page, contains('intelligenceConversationClockProvider'));
     expect(page, contains("tr('BIL member', 'عضو BIL')"));
     expect(page, isNot(contains('final email = user?.email')));
     expect(page, isNot(contains('email.substring(0')));

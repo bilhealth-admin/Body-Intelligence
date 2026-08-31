@@ -2,7 +2,7 @@ import 'package:body_intelligence_log/features/global_platform/cloud_ai/optional
 import 'package:body_intelligence_log/features/global_platform/commerce/commerce_platform.dart';
 import 'package:body_intelligence_log/features/global_platform/core/global_platform_core.dart';
 import 'package:body_intelligence_log/features/global_platform/health_data/unified_health_data_integration.dart';
-import 'package:body_intelligence_log/features/global_platform/medical_devices/medical_device_platform.dart';
+import 'package:body_intelligence_log/features/global_platform/fitness_devices/fitness_device_platform.dart';
 import 'package:body_intelligence_log/features/global_platform/plugins/plugin_platform.dart';
 import 'package:body_intelligence_log/features/global_platform/vision/computer_vision_platform.dart';
 import 'package:body_intelligence_log/features/global_platform/wearables/wearables_platform.dart';
@@ -13,7 +13,7 @@ export 'package:body_intelligence_log/features/global_platform/commerce/commerce
 export 'package:body_intelligence_log/features/global_platform/core/global_platform_core.dart';
 export 'package:body_intelligence_log/features/global_platform/globalization/globalization_accessibility_platform.dart';
 export 'package:body_intelligence_log/features/global_platform/health_data/unified_health_data_integration.dart';
-export 'package:body_intelligence_log/features/global_platform/medical_devices/medical_device_platform.dart';
+export 'package:body_intelligence_log/features/global_platform/fitness_devices/fitness_device_platform.dart';
 export 'package:body_intelligence_log/features/global_platform/plugins/plugin_platform.dart';
 export 'package:body_intelligence_log/features/global_platform/professional/professional_platform.dart';
 export 'package:body_intelligence_log/features/global_platform/reports/scientific_reports_platform.dart';
@@ -95,12 +95,12 @@ final class TestWearable implements WearableProvider {
   Future<void> revoke() async {}
 }
 
-final class TestMedical implements MedicalDeviceProvider {
+final class TestFitness implements FitnessDeviceProvider {
   @override
-  String get id => 'medical';
+  String get id => 'fitness';
   @override
-  Future<List<MedicalDeviceIdentity>> discover() async => const [
-    MedicalDeviceIdentity(
+  Future<List<FitnessDeviceIdentity>> discover() async => const [
+    FitnessDeviceIdentity(
       id: 'scale1',
       kind: 'weight_scale',
       manufacturer: 'BIL',
@@ -108,11 +108,11 @@ final class TestMedical implements MedicalDeviceProvider {
     ),
   ];
   @override
-  Future<List<MedicalMeasurement>> ingest({
+  Future<List<FitnessMeasurement>> ingest({
     required String deviceId,
     required DateTime asOf,
   }) async => [
-    MedicalMeasurement(
+    FitnessMeasurement(
       deviceId: deviceId,
       kind: 'weight',
       value: 80,

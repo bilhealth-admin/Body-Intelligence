@@ -86,10 +86,12 @@ class _WorkoutExploreSectionsState extends State<_WorkoutExploreSections> {
 class _WorkoutCategorySection extends StatelessWidget {
   const _WorkoutCategorySection({
     required this.title,
+    this.subtitle,
     required this.items,
     required this.totalCount,
     required this.expanded,
     required this.onToggleExpanded,
+    this.freePreviewStableId,
     required this.savedIds,
     required this.mediaCache,
     required this.online,
@@ -102,10 +104,16 @@ class _WorkoutCategorySection extends StatelessWidget {
   });
 
   final String title;
+  final String? subtitle;
   final List<WellnessContentItem> items;
   final int totalCount;
   final bool expanded;
   final VoidCallback onToggleExpanded;
+
+  /// When set, this section exposes exactly this first card to a Free member.
+  /// Other globally previewable items can occur through multi-group membership
+  /// but remain glass-gated in this section.
+  final String? freePreviewStableId;
   final Set<String> savedIds;
   final WellnessMediaCache mediaCache;
   final bool online;
@@ -115,115 +123,159 @@ class _WorkoutCategorySection extends StatelessWidget {
   final VoidCallback onUpgrade;
   final ValueChanged<WellnessContentItem> onOpen, onToggleSaved;
 
+  bool _isSectionItemLocked(WellnessContentItem item) {
+    if (premiumUnlocked) return false;
+    final previewId = freePreviewStableId;
+    if (previewId != null) {
+      return item.stableId != previewId ||
+          !WorkoutFreePreviewPolicy.isPreview(item);
+    }
+    return isLocked(item);
+  }
+
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Padding(
-        padding: const EdgeInsetsDirectional.only(end: 20),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-              ),
-            ),
-            TextButton(
-              onPressed: totalCount > 5 ? onToggleExpanded : null,
-              child: Text(
-                totalCount > 5
-                    ? expanded
-                          ? _workoutHubCopy(context, 'Show less')
-                          : _workoutHubCopy(context, 'See all')
-                    : _routineCount(context, totalCount),
-              ),
-            ),
-          ],
+  Widget build(BuildContext context) {
+    final hasLockedItems = items.any(_isSectionItemLocked);
+    final titleBlock = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+        ),
+        if (subtitle?.isNotEmpty == true) ...[
+          const SizedBox(height: 3),
+          Text(
+            subtitle!,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ],
+    );
+    final controls = <Widget>[
+      if (hasLockedItems)
+        PremiumLabelBadge(
+          key: ValueKey('workout-section-premium-$title'),
+          semanticLabel: premiumTier,
+        ),
+      TextButton(
+        onPressed: totalCount > 5 ? onToggleExpanded : null,
+        child: Text(
+          totalCount > 5
+              ? expanded
+                    ? _workoutHubCopy(context, 'Show less')
+                    : _workoutHubCopy(context, 'See all')
+              : _routineCount(context, totalCount),
         ),
       ),
-      const SizedBox(height: 12),
-      SizedBox(
-        height: 352,
-        child: ListView.separated(
-          key: ValueKey('workout-category-$title'),
-          scrollDirection: Axis.horizontal,
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
           padding: const EdgeInsetsDirectional.only(end: 20),
-          itemCount: items.length,
-          separatorBuilder: (_, _) => const SizedBox(width: 14),
-          itemBuilder: (context, index) {
-            final item = items[index];
-            final contentLocked = isLocked(item);
-            final collectionLocked = index > 0 && !premiumUnlocked;
-            return SizedBox(
-              width: 304,
-              child: PremiumCollectionItemGate(
-                key: ValueKey('workout-premium-gate-${item.stableId}'),
-                locked: collectionLocked,
-                tier: premiumTier,
-                onUpgrade: onUpgrade,
-                child: _WorkoutRoutineCard(
-                  item: item,
-                  saved: savedIds.contains(item.stableId),
-                  locked: contentLocked,
-                  mediaCache: mediaCache,
-                  online: online,
-                  onOpen: () => onOpen(item),
-                  onToggleSaved: () => onToggleSaved(item),
-                ),
-              ),
-            );
-          },
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final scale = MediaQuery.textScalerOf(context).scale(1);
+              if (constraints.maxWidth < 460 || scale > 1.25) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    titleBlock,
+                    const SizedBox(height: 6),
+                    Wrap(
+                      alignment: WrapAlignment.end,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: controls,
+                    ),
+                  ],
+                );
+              }
+              return Row(
+                children: [
+                  Expanded(child: titleBlock),
+                  const SizedBox(width: 8),
+                  ...controls,
+                ],
+              );
+            },
+          ),
         ),
-      ),
-    ],
-  );
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 352,
+          child: ListView.separated(
+            key: ValueKey('workout-category-$title'),
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsetsDirectional.only(end: 20),
+            itemCount: items.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 14),
+            itemBuilder: (context, index) {
+              final item = items[index];
+              final contentLocked = _isSectionItemLocked(item);
+              return SizedBox(
+                width: 304,
+                child: PremiumCollectionItemGate(
+                  key: ValueKey('workout-premium-gate-${item.stableId}'),
+                  locked: contentLocked,
+                  tier: premiumTier,
+                  onUpgrade: onUpgrade,
+                  showLabel: false,
+                  child: _WorkoutRoutineCard(
+                    item: item,
+                    saved: savedIds.contains(item.stableId),
+                    locked: contentLocked,
+                    mediaCache: mediaCache,
+                    online: online,
+                    onOpen: () => onOpen(item),
+                    onToggleSaved: () => onToggleSaved(item),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 String _workoutPlanGroupTitle(BuildContext context, String groupId) =>
-    switch (groupId) {
-      'gym-push' => _copy(context, 'Push', 'الدفع'),
-      'gym-pull' => _copy(context, 'Pull', 'السحب'),
-      'gym-legs' => _copy(context, 'Legs', 'الأرجل'),
-      'gym-warm-up-mobility' => _copy(
-        context,
-        'Warm-up & mobility',
-        'الإحماء والحركة',
-      ),
-      'gym-full-body' => _copy(context, 'Full body', 'كامل الجسم'),
-      'gym-upper-lower' => _copy(context, 'Upper / Lower', 'علوي / سفلي'),
-      'gym-muscle-pair-split' => _copy(
-        context,
-        'Muscle pair split',
-        'تقسيم العضلات المزدوج',
-      ),
-      'gym-arnold-split' => _copy(context, 'Arnold split', 'تقسيم أرنولد'),
-      'gym-powerbuilding' => _copy(
-        context,
-        'Strength + hypertrophy',
-        'القوة والتضخيم',
-      ),
-      'gym-exercise-technique' => _copy(
-        context,
-        'Exercise technique',
-        'تقنية التمرين',
-      ),
-      _ =>
-        groupId
-            .replaceFirst(RegExp(r'^home-'), '')
-            .split('-')
-            .map(
-              (word) => word.isEmpty
-                  ? word
-                  : '${word[0].toUpperCase()}${word.substring(1)}',
-            )
-            .join(' '),
-    };
+    workoutVideoGroupTitle(context, groupId);
 
 String _workoutHubCopy(BuildContext context, String key) {
   const copy = <String, Map<String, String>>{
+    'Videos': {
+      'ar': 'الفيديوهات',
+      'en': 'Videos',
+      'fr': 'Vidéos',
+      'es': 'Vídeos',
+      'tr': 'Videolar',
+      'de': 'Videos',
+      'it': 'Video',
+      'pt': 'Vídeos',
+      'ur': 'ویڈیوز',
+      'fa': 'ویدیوها',
+      'hi': 'वीडियो',
+      'id': 'Video',
+      'ms': 'Video',
+      'ja': '動画',
+      'ko': '영상',
+      'zh': '视频',
+      'ru': 'Видео',
+      'bn': 'ভিডিও',
+      'vi': 'Video',
+      'th': 'วิดีโอ',
+      'pl': 'Filmy',
+      'nl': "Video's",
+      'uk': 'Відео',
+    },
     'Gym': {
       'ar': 'النادي',
       'en': 'Gym',
@@ -412,13 +464,11 @@ class _WorkoutRoutineCard extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    locked
-                        ? _WorkoutCoverFallback(item: item)
-                        : _WorkoutCover(
-                            item: item,
-                            mediaCache: mediaCache,
-                            online: online,
-                          ),
+                    _WorkoutCover(
+                      item: item,
+                      mediaCache: mediaCache,
+                      online: online,
+                    ),
                     const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -435,9 +485,7 @@ class _WorkoutRoutineCard extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          locked
-                              ? _LockedBadge(minimumAccess: item.minimumAccess)
-                              : _VerifiedBadge(item: item),
+                          if (!locked) _VerifiedBadge(item: item),
                           if (!locked)
                             IconButton.filledTonal(
                               key: ValueKey('save-routine-${item.id}'),
@@ -567,18 +615,6 @@ class _WorkoutCover extends StatelessWidget {
     }
     return _WorkoutCoverFallback(item: item);
   }
-}
-
-class _LockedBadge extends StatelessWidget {
-  const _LockedBadge({required this.minimumAccess});
-
-  final WellnessContentAccess minimumAccess;
-
-  @override
-  Widget build(BuildContext context) => PremiumLabelBadge(
-    key: const ValueKey('locked-workout-badge'),
-    semanticLabel: minimumAccess.name,
-  );
 }
 
 class _VerifiedBadge extends StatelessWidget {

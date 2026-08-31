@@ -82,6 +82,42 @@ void main() {
       },
     );
 
+    test('requires calories and every macro to stay strictly positive', () {
+      const valid = DietMacroTarget(
+        calories: 170,
+        carbsGrams: 10,
+        proteinGrams: 10,
+        fatGrams: 10,
+      );
+      expect(valid.isValid, isTrue);
+      expect(
+        const DietMacroTarget(
+          calories: 130,
+          carbsGrams: 0,
+          proteinGrams: 10,
+          fatGrams: 10,
+        ).isValid,
+        isFalse,
+      );
+      expect(
+        DietMacroAllocator.allocate(
+          calories: 170,
+          carbsGrams: 0,
+          fatLevel: DietFatLevel.medium,
+        ),
+        isNull,
+      );
+      expect(
+        DietMacroAllocator.rebalance(
+          current: valid,
+          edited: DietMacroComponent.protein,
+          grams: 0,
+          fallbackFatLevel: DietFatLevel.medium,
+        ),
+        isNull,
+      );
+    });
+
     test('800 and 1000 kcal stay fixed while every macro is editable', () {
       final initial = DietMacroAllocator.allocate(
         calories: 800,

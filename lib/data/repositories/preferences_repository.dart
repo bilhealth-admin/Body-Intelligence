@@ -7,6 +7,8 @@ class PreferencesRepository {
 
   final AppDatabase _database;
 
+  String? get localOwnerId => _database.localOwnerId;
+
   Future<String?> get(String key) async {
     final row = await (_database.select(
       _database.preferences,
@@ -71,11 +73,18 @@ class PreferencesRepository {
   Future<void> removeMany(Iterable<String> keys) async {
     final values = keys.toSet();
     if (values.isEmpty) return;
-    await _database.transaction(() async {
-      await (_database.delete(
-        _database.preferences,
-      )..where((item) => item.key.isIn(values))).go();
-    });
+    await _database.transaction(() => removeManyInCurrentTransaction(values));
+  }
+
+  /// Removes a preference snapshot when the caller already owns the database
+  /// transaction. This is the deletion counterpart of
+  /// [setManyInCurrentTransaction].
+  Future<void> removeManyInCurrentTransaction(Iterable<String> keys) async {
+    final values = keys.toSet();
+    if (values.isEmpty) return;
+    await (_database.delete(
+      _database.preferences,
+    )..where((item) => item.key.isIn(values))).go();
   }
 
   /// Applies a preference snapshot as one database transaction.

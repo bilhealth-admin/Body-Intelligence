@@ -61,14 +61,18 @@ void main() {
       'workout',
       'sleep',
       'heartRate',
-      'bloodPressureSystolic',
-      'bloodPressureDiastolic',
-      'oxygen',
       'nutritionProtein',
       'nutritionCarbohydrates',
       'nutritionFat',
     ]) {
       expect(appleBridge, contains('"$type"'));
+    }
+    for (final removedType in <String>[
+      'bloodPressureSystolic',
+      'bloodPressureDiastolic',
+      'oxygen',
+    ]) {
+      expect(appleBridge, isNot(contains('"$removedType"')));
     }
   });
 
@@ -86,7 +90,7 @@ void main() {
     );
 
     for (final draft in <String>[dataSafety, health, appPrivacy]) {
-      expect(draft, contains('Do not submit'));
+      expect(draft.toUpperCase(), contains('DO NOT SUBMIT'));
     }
     expect(policy, contains('[REQUIRED]'));
     expect(policy, contains('[REQUIRED HTTPS URL]'));

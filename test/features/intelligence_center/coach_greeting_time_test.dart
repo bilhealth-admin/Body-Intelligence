@@ -16,4 +16,9 @@ void main() {
     expect(() => coachGreetingKeyForHour(-1), throwsArgumentError);
     expect(() => coachGreetingKeyForHour(24), throwsArgumentError);
   });
+
+  test('coach greeting punctuation follows the active writing system', () {
+    expect(coachGreetingSeparator(arabic: false), ',');
+    expect(coachGreetingSeparator(arabic: true), '\u060C');
+  });
 }

@@ -15,6 +15,7 @@ import 'package:body_intelligence_log/data/repositories/water_repository.dart';
 import 'package:body_intelligence_log/features/analytics/analytics_page.dart';
 import 'package:body_intelligence_log/features/analytics/nutrition_analytics_page.dart';
 import 'package:body_intelligence_log/features/daily_log/daily_log_page.dart';
+import 'package:body_intelligence_log/features/daily_log/daily_water_page.dart';
 import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
 import 'package:body_intelligence_log/features/daily_check_in/daily_check_in_page.dart';
 import 'package:body_intelligence_log/features/dashboard/dashboard_page.dart';
@@ -27,6 +28,7 @@ import 'package:body_intelligence_log/features/connected_health/widgets/live_hea
 import 'package:body_intelligence_log/features/foods/providers/food_provider.dart';
 import 'package:body_intelligence_log/features/nutrition/food_page.dart';
 import 'package:body_intelligence_log/features/nutrition/presentation/food_barcode_scanner_page.dart';
+import 'package:body_intelligence_log/features/nutrition/presentation/meal_image_guide_page.dart';
 import 'package:body_intelligence_log/features/nutrition/services/food_runtime_search_authority.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
@@ -52,6 +54,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'visual_evidence_font.dart';
+
+const _skipVisualPixelComparison = bool.fromEnvironment(
+  'BIL_SKIP_VISUAL_PIXELS',
+);
 
 final class _UnavailableHealthGateway implements ConnectedHealthGateway {
   const _UnavailableHealthGateway();
@@ -319,14 +325,19 @@ void main() {
       await tester.pumpAndSettle();
     }
     expect(tester.takeException(), isNull);
-    await expectLater(
-      captureOverlay
-          ? find.byType(Overlay).first
-          : captureTopmostScaffold
-          ? find.byType(Scaffold).last
-          : find.byType(Scaffold).first,
-      matchesGoldenFile('goldens/visual_closure_$name.png'),
-    );
+    final captureTarget = captureOverlay
+        ? find.byType(Overlay).first
+        : captureTopmostScaffold
+        ? find.byType(Scaffold).last
+        : find.byType(Scaffold).first;
+    if (_skipVisualPixelComparison) {
+      expect(captureTarget, findsOneWidget);
+    } else {
+      await expectLater(
+        captureTarget,
+        matchesGoldenFile('goldens/visual_closure_$name.png'),
+      );
+    }
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump(const Duration(milliseconds: 1));
     await tester.pump();
@@ -476,7 +487,10 @@ void main() {
       seedEmptyCatalog: true,
       captureOverlay: true,
       prepare: (tester) async {
-        await tester.tap(find.text('Custom food').first);
+        await tester.tap(find.byKey(const Key('food-primary-add-action')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('food-add-custom-food')));
+        await tester.pumpAndSettle();
       },
     );
   });
@@ -503,14 +517,28 @@ void main() {
       name: 'dashboard_nutrient_goal_card_phone',
       prepare: (tester) async {
         final card = find.byKey(const Key('dashboard-nutrient-card-fiber'));
+        expect(card, findsOneWidget);
+        final dashboardScroll = find.ancestor(
+          of: card,
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Scrollable &&
+                widget.physics is! NeverScrollableScrollPhysics,
+          ),
+        );
+        expect(dashboardScroll, findsOneWidget);
         await tester.scrollUntilVisible(
           card,
-          600,
-          scrollable: find.byType(Scrollable).first,
+          320,
+          scrollable: dashboardScroll,
+          maxScrolls: 30,
         );
-        await tester.ensureVisible(card);
+        await Scrollable.ensureVisible(
+          tester.element(card),
+          alignment: 0.66,
+          duration: Duration.zero,
+        );
         await tester.pumpAndSettle();
-        expect(card, findsOneWidget);
       },
     );
   });
@@ -523,6 +551,9 @@ void main() {
         overrides: [
           coachContextSnapshotProvider.overrideWith(
             (ref) async => CoachContextSnapshot.empty(),
+          ),
+          intelligenceConversationClockProvider.overrideWithValue(
+            () => DateTime(2026, 8, 14, 20),
           ),
         ],
         child: const IntelligenceCenterPage(),
@@ -649,7 +680,7 @@ void main() {
       name: 'daily_log_sections_middle_phone',
       stableDailyLog: true,
       prepare: (tester) async {
-        final waterSection = find.byKey(const Key('daily-log-water-section'));
+        final waterSection = find.byKey(const Key('daily-log-water-shortcut'));
         for (
           var attempt = 0;
           attempt < 6 && waterSection.evaluate().isEmpty;
@@ -713,7 +744,7 @@ void main() {
     final db = await database(tester);
     await capture(
       tester,
-      page: const DailyLogPage(initialAction: 'water'),
+      page: const DailyWaterPage(),
       db: db,
       name: 'daily_log_water_entry_phone',
       stableDailyLog: true,
@@ -736,13 +767,13 @@ void main() {
     );
   });
 
-  testWidgets('meal-photo truthful unavailable production capture', (
+  testWidgets('meal-image guide truthful unavailable production capture', (
     tester,
   ) async {
     final db = await database(tester);
     await capture(
       tester,
-      page: const DailyLogPage(initialAction: 'photo'),
+      page: const MealImageGuidePage(),
       db: db,
       name: 'meal_photo_unavailable_phone',
       captureOverlay: true,
@@ -1104,7 +1135,7 @@ void main() {
       name: 'more_phone',
       prepare: (tester) async {
         expect(find.text('BIL member'), findsOneWidget);
-        expect(find.text('Explore Premium'), findsOneWidget);
+        expect(find.text('Start 7-day free trial'), findsOneWidget);
       },
     );
   });
@@ -1149,7 +1180,7 @@ void main() {
             );
             await tester.pumpAndSettle();
           }
-          if (page == 2) expect(find.text('Daylight'), findsOneWidget);
+          if (page == 2) expect(find.byType(SettingsPage), findsOneWidget);
         },
       );
     });

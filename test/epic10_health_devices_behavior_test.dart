@@ -1,12 +1,13 @@
 import 'package:body_intelligence_log/features/connected_health/device_compatibility.dart';
-import 'package:body_intelligence_log/features/connected_health/providers/medical_device_provider.dart';
+import 'package:body_intelligence_log/features/connected_health/providers/fitness_device_provider.dart';
 import 'package:body_intelligence_log/features/global_platform/core/global_platform_core.dart';
 import 'package:body_intelligence_log/features/global_platform/health_data/unified_health_data_integration.dart';
-import 'package:body_intelligence_log/features/global_platform/medical_devices/ble_medical_device_platform.dart';
+import 'package:body_intelligence_log/features/global_platform/fitness_devices/ble_fitness_device_platform.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-final class _ManagedBridge implements ManagedBleMedicalBridge {
+final class _ManagedBridge implements ManagedBleFitnessBridge {
+  bool connected = true;
   bool forgotten = false;
   bool disconnected = false;
 
@@ -18,7 +19,7 @@ final class _ManagedBridge implements ManagedBleMedicalBridge {
     BlePeripheral(
       id: 'scale-1',
       name: 'Verified scale',
-      profiles: {BleMedicalProfile.weightScale},
+      profiles: {BleFitnessProfile.weightScale},
       firmwareVersion: '1.0',
       manufacturer: 'Test manufacturer',
     ),
@@ -41,7 +42,7 @@ final class _ManagedBridge implements ManagedBleMedicalBridge {
 
   @override
   Future<Map<String, Object?>> deviceStatus(String peripheralId) async => {
-    'connected': true,
+    'connected': connected,
     'batteryPercent': 74,
     'batteryVerified': true,
   };
@@ -341,13 +342,13 @@ void main() {
       debugDefaultTargetPlatformOverride = TargetPlatform.android;
       final bridge = _ManagedBridge();
       final store = InMemoryGlobalStore();
-      final controller = MedicalDeviceController(bridge, store: store);
+      final controller = FitnessDeviceController(bridge, store: store);
 
       await controller.scan();
       expect(controller.state.devices.map((device) => device.id), ['scale-1']);
       await controller.connect(controller.state.devices.single);
 
-      expect(controller.state.status, MedicalDeviceConnectionStatus.connected);
+      expect(controller.state.status, FitnessDeviceConnectionStatus.connected);
       expect(controller.state.batteryPercent, 74);
       expect(controller.state.measurements, hasLength(1));
       expect(controller.state.measurements.single['unit'], 'kg');
@@ -364,13 +365,31 @@ void main() {
       expect(bridge.forgotten, isTrue);
       expect(controller.state.devices, isEmpty);
       expect(controller.state.connectedDeviceId, isNull);
-      expect(await store.get('connected_medical_devices', 'scale-1'), isNull);
+      expect(await store.get('connected_fitness_devices', 'scale-1'), isNull);
       expect(
-        await store.get('connected_medical_measurements', 'scale-1'),
+        await store.get('connected_fitness_measurements', 'scale-1'),
         isNull,
       );
     },
   );
+
+  test('BLE never reports connected when native status is false', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    final bridge = _ManagedBridge()..connected = false;
+    final store = InMemoryGlobalStore();
+    final controller = FitnessDeviceController(bridge, store: store);
+
+    await controller.scan();
+    await controller.connect(controller.state.devices.single);
+
+    expect(controller.state.status, FitnessDeviceConnectionStatus.failed);
+    expect(controller.state.failureCode, 'ble_connection_not_verified');
+    expect(controller.state.connectedDeviceId, isNull);
+    expect(
+      await store.get('connected_fitness_device_state', 'scale-1'),
+      isNull,
+    );
+  });
 
   test('compatibility matrix never claims physical-device verification', () {
     expect(BilDeviceCompatibilityMatrix.entries, isNotEmpty);

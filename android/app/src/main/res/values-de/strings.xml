@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">BIL – Körperintelligenzprotokoll</string>
+    <string name="app_name">Körperintelligenzprotokoll</string>
     <string name="health_permissions_rationale_title">Datenschutz im Gesundheitsbereich</string>
     <string name="health_permissions_rationale_body">BIL fordert nur die Health Connect-Datentypen an, die für die von Ihnen ausgewählten Funktionen erforderlich sind. Ihre Gesundheitsdaten werden standardmäßig lokal verarbeitet. Sie können jederzeit über die Health Connect-Einstellungen einzelne Berechtigungen erteilen, verweigern oder widerrufen. BIL verkauft keine Gesundheitsdaten und nutzt sie nicht für Werbung.</string>
     <string name="health_permissions_privacy_policy_action">Vollständige Datenschutzrichtlinie von BIL lesen</string>

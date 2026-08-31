@@ -12,9 +12,10 @@ void main() {
       final sheet = File(
         'lib/app/router/bil_quick_add_sheet.dart',
       ).readAsStringSync();
-      final diary = File(
+      final diary = [
         'lib/features/daily_log/daily_log_page.dart',
-      ).readAsStringSync();
+        'lib/features/daily_log/daily_log_navigation_actions.dart',
+      ].map((path) => File(path).readAsStringSync()).join('\n');
 
       for (final action in const ['barcode', 'voice', 'photo']) {
         expect(shell, contains('action=$action'));
@@ -25,7 +26,7 @@ void main() {
       expect(shell, contains('/daily-log/body-context?from='));
       expect(diary, contains("case 'notes':"));
       expect(shell, contains("context.push('/wellness/workouts')"));
-    expect(shell, contains("context.go('/nutrition')"));
+      expect(shell, contains("context.go('/nutrition')"));
 
       for (final callback in const [
         'onFood',

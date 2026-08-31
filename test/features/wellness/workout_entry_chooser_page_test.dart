@@ -41,7 +41,7 @@ void main() {
 
     expect(find.text('Cardio'), findsOneWidget);
     expect(find.text('Strength'), findsOneWidget);
-    expect(find.text('Workout Routines'), findsOneWidget);
+    expect(find.text('Workout Videos & Routines'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('exercise-path-cardio')));
     await tester.pumpAndSettle();

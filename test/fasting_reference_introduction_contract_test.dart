@@ -4,9 +4,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('fasting route includes reference introduction and working timer', () {
-    final source = File(
-      'lib/features/wellness/presentation/fasting_timer_page.dart',
-    ).readAsStringSync();
+    final wellnessLibrary = File(
+      'lib/features/wellness/presentation/wellness_tools_pages.dart',
+    );
+    final entrypoint = wellnessLibrary.readAsStringSync();
+    final source = <String>[
+      entrypoint,
+      for (final part in RegExp(r"part '([^']+)';").allMatches(entrypoint))
+        File(
+          '${wellnessLibrary.parent.path}/${part.group(1)!}',
+        ).readAsStringSync(),
+    ].join('\n');
     expect(
       source,
       contains("key: const Key('fasting-reference-introduction')"),

@@ -25,6 +25,20 @@ void main() {
     expect(watch, contains("Key('bil-live-health-watch')"));
     expect(watch, contains('Timer.periodic(const Duration(seconds: 1)'));
     expect(watch, contains('StackFit.expand'));
+    expect(watch, isNot(contains('bil_wordmark.dart')));
+    expect(watch, isNot(contains('BilWordmark(')));
+    final painter = watch.substring(watch.indexOf('class _WatchPainter'));
+    for (final brightEdge in const [
+      'Color(0xFFFFFFFF)',
+      'Color(0xFFF4F6F7)',
+      'Color(0xFFF7F8F8)',
+      'Color(0xFFD9DEE1)',
+    ]) {
+      expect(painter, isNot(contains(brightEdge)), reason: brightEdge);
+    }
+    expect(painter, contains('final shell = RRect.fromRectAndRadius('));
+    expect(painter, contains('Color(0xFF07131B)'));
+    expect(painter, contains('Color(0xFF163442)'));
     expect(emptyState, contains("Text(tr('Connect now', 'ربط الآن'))"));
 
     expect(shell, contains("Key('dashboard-twin-header-slot')"));

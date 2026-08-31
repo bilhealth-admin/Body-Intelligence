@@ -11,7 +11,9 @@ import 'active_mobile_catalog_resolver.dart';
 import 'barcode_food_contract.dart';
 import 'food_search_normalizer.dart';
 import 'food_search_assistance.dart';
+import 'food_search_text_matcher.dart';
 import 'regional_barcode_network_resolver.dart';
+import 'trusted_food_network_search_resolver.dart';
 
 typedef MobileCatalogRepositoryResolver =
     Future<UnifiedFoodRepository?> Function();
@@ -61,21 +63,45 @@ class FoodRuntimeSearchResult {
 
 class FoodRuntimeSearchAuthority {
   static const FoodSearchAssistance _searchAssistance = FoodSearchAssistance();
+  static const FoodSearchTextMatcher _textMatcher = FoodSearchTextMatcher();
   final FoodRepository _localRepository;
   final MobileCatalogRepositoryResolver _catalogResolver;
   final CommunityFoodSearchResolver? communitySearchResolver;
   final RegionalBarcodeNetworkResolver _networkBarcodeResolver;
+  final TrustedFoodNetworkSearchResolver networkSearchResolver;
 
   FoodRuntimeSearchAuthority(
     this._localRepository, {
     MobileCatalogRepositoryResolver? catalogResolver,
     this.communitySearchResolver,
     this._networkBarcodeResolver = const RegionalBarcodeNetworkResolver(),
+    this.networkSearchResolver = const TrustedFoodNetworkSearchResolver(),
   }) : _catalogResolver =
            catalogResolver ?? ActiveMobileCatalogResolver().openIfAvailable;
 
   Future<List<Food>> search(String query, {int limit = 50}) async {
     return (await searchDetailed(query, limit: limit)).foods;
+  }
+
+  /// Returns every local row whose normalized name is exactly [query].
+  ///
+  /// This deliberately runs before semantic search deduplication. Importers
+  /// need to distinguish a single authoritative local match from two separate
+  /// foods that happen to share a name and serving, rather than silently
+  /// choosing one of them.
+  Future<List<Food>> findExactLocalNameCandidates(
+    String query, {
+    int limit = 8,
+  }) async {
+    if (limit <= 0) return const <Food>[];
+    final normalized = FoodSearchNormalizer.normalize(query);
+    if (normalized.isEmpty) return const <Food>[];
+    final candidates = await _searchLocal(query, limit: limit);
+    return candidates
+        .where(
+          (food) => FoodSearchNormalizer.normalize(food.name) == normalized,
+        )
+        .toList(growable: false);
   }
 
   Future<Food?> findExact(String id) async {
@@ -119,43 +145,101 @@ class FoodRuntimeSearchAuthority {
     try {
       catalog = await _catalogResolver();
     } catch (_) {
+      final network = local.isEmpty && community.isEmpty
+          ? await _loadTrustedNetwork(query, limit: limit)
+          : const <Food>[];
       return FoodRuntimeSearchResult(
-        foods: _mergeCommunity(local, const <Food>[], community, limit: limit),
-        source: community.isEmpty
-            ? FoodRuntimeSearchSource.localFallback
-            : FoodRuntimeSearchSource.catalogAndLocal,
+        foods: _mergeCommunity(
+          local,
+          network,
+          community,
+          query: query,
+          limit: limit,
+        ),
+        source: network.isNotEmpty || community.isNotEmpty
+            ? FoodRuntimeSearchSource.catalogAndLocal
+            : FoodRuntimeSearchSource.localFallback,
       );
     }
 
     if (catalog == null) {
+      final network = local.isEmpty && community.isEmpty
+          ? await _loadTrustedNetwork(query, limit: limit)
+          : const <Food>[];
       return FoodRuntimeSearchResult(
-        foods: _mergeCommunity(local, const <Food>[], community, limit: limit),
-        source: community.isEmpty
-            ? FoodRuntimeSearchSource.localOnly
-            : FoodRuntimeSearchSource.catalogAndLocal,
+        foods: _mergeCommunity(
+          local,
+          network,
+          community,
+          query: query,
+          limit: limit,
+        ),
+        source: network.isNotEmpty || community.isNotEmpty
+            ? FoodRuntimeSearchSource.catalogAndLocal
+            : FoodRuntimeSearchSource.localOnly,
       );
     }
 
     try {
       final expandedLimit = (limit * 5).clamp(limit, 250);
       final hits = await catalog.searchUnified(query, limit: expandedLimit);
+      final matchedHits = hits
+          .map((hit) => (hit: hit, match: _matchQuery(hit.food, query)))
+          .where((entry) => entry.match.matches)
+          .toList(growable: false);
+      final rankedHits =
+          _textMatcher.suppressIncompleteTokenPrefixes(
+            matchedHits,
+            (entry) => entry.match,
+          )..sort((left, right) {
+            final matchOrder = right.match.rank.compareTo(left.match.rank);
+            if (matchOrder != 0) return matchOrder;
+            return right.hit.score.compareTo(left.hit.score);
+          });
       final materialized = <Food>[];
-      for (final hit in hits.where((hit) => _matchesQuery(hit.food, query))) {
+      for (final entry in rankedHits) {
         materialized.add(
-          await _localRepository.materializeUnifiedFood(hit.food),
+          await _localRepository.materializeUnifiedFood(entry.hit.food),
         );
         if (materialized.length >= limit) break;
       }
+      final current = _mergeCommunity(
+        materialized,
+        local,
+        community,
+        query: query,
+        limit: limit,
+      );
+      final network = current.isEmpty
+          ? await _loadTrustedNetwork(query, limit: limit)
+          : const <Food>[];
       return FoodRuntimeSearchResult(
-        foods: _mergeCommunity(materialized, local, community, limit: limit),
+        foods: network.isEmpty
+            ? current
+            : _mergeCommunity(
+                network,
+                current,
+                community,
+                query: query,
+                limit: limit,
+              ),
         source: FoodRuntimeSearchSource.catalogAndLocal,
       );
     } catch (_) {
+      final network = local.isEmpty && community.isEmpty
+          ? await _loadTrustedNetwork(query, limit: limit)
+          : const <Food>[];
       return FoodRuntimeSearchResult(
-        foods: _mergeCommunity(local, const <Food>[], community, limit: limit),
-        source: community.isEmpty
-            ? FoodRuntimeSearchSource.localFallback
-            : FoodRuntimeSearchSource.catalogAndLocal,
+        foods: _mergeCommunity(
+          local,
+          network,
+          community,
+          query: query,
+          limit: limit,
+        ),
+        source: network.isNotEmpty || community.isNotEmpty
+            ? FoodRuntimeSearchSource.catalogAndLocal
+            : FoodRuntimeSearchSource.localFallback,
       );
     } finally {
       if (catalog is CompositeFoodCatalogRepository) {
@@ -168,6 +252,27 @@ class FoodRuntimeSearchAuthority {
     }
   }
 
+  Future<List<Food>> _loadTrustedNetwork(
+    String query, {
+    required int limit,
+  }) async {
+    if (limit <= 0) return const <Food>[];
+    try {
+      final unified = await networkSearchResolver.search(
+        query,
+        limit: limit < 20 ? limit : 20,
+      );
+      final foods = <Food>[];
+      for (final food in _rankUnifiedFoods(unified, query)) {
+        foods.add(await _localRepository.materializeUnifiedFood(food));
+        if (foods.length >= limit) break;
+      }
+      return foods;
+    } catch (_) {
+      return const <Food>[];
+    }
+  }
+
   Future<List<Food>> _loadCommunity(String query, {required int limit}) async {
     final resolver = communitySearchResolver;
     if (resolver == null || limit <= 0) return const <Food>[];
@@ -176,7 +281,7 @@ class FoodRuntimeSearchAuthority {
       final foods = <Food>[];
       // The server is an acceleration source, not the search authority. A
       // stale RPC/cache must never inject unrelated foods into a typed query.
-      for (final food in unified.where((food) => _matchesQuery(food, query))) {
+      for (final food in _rankUnifiedFoods(unified, query)) {
         foods.add(await _localRepository.materializeUnifiedFood(food));
       }
       return foods;
@@ -186,41 +291,51 @@ class FoodRuntimeSearchAuthority {
   }
 
   Future<List<Food>> _searchLocal(String query, {required int limit}) async {
-    final indexed = await _localRepository.search(query, limit: limit);
+    final expandedLimit = (limit * 5).clamp(limit, 250);
+    final indexed = _rankLocalFoods(
+      await _localRepository.search(query, limit: expandedLimit),
+      query,
+    ).take(limit).toList(growable: false);
     if (indexed.isNotEmpty || limit <= 0) return indexed;
 
     // A migrated/stale local search index must not make foods already used in
     // the diary disappear. This bounded scan is a recovery path and applies
     // the same strict token contract as catalog/community results.
     final all = await _localRepository.getFoods();
-    return all
-        .where((food) => _matchesLocalFood(food, query))
-        .take(limit)
-        .toList(growable: false);
+    return _rankLocalFoods(all, query).take(limit).toList(growable: false);
   }
 
   List<Food> _mergeCommunity(
     Iterable<Food> primary,
     Iterable<Food> fallback,
     Iterable<Food> community, {
+    required String query,
     required int limit,
   }) {
     if (limit <= 0) return const <Food>[];
     final communityRows = community.toList(growable: false);
     final reserve = communityRows.isEmpty ? 0 : (limit >= 10 ? 10 : 1);
-    final result = _merge(
-      primary,
-      fallback,
-      limit: limit - reserve,
-    ).toList(growable: true);
-    for (final candidate in communityRows) {
+    final nonCommunity = <Food>[];
+    for (final candidate in <Food>[...primary, ...fallback]) {
+      if (nonCommunity.any(
+        (existing) => _sameFoodIdentity(existing, candidate),
+      )) {
+        continue;
+      }
+      nonCommunity.add(candidate);
+    }
+    final result = _rankLocalFoods(
+      nonCommunity,
+      query,
+    ).take(limit - reserve).toList(growable: true);
+    for (final candidate in _rankLocalFoods(communityRows, query)) {
       if (result.any((existing) => _sameFoodIdentity(existing, candidate))) {
         continue;
       }
       result.add(candidate);
       if (result.length >= limit) break;
     }
-    return result;
+    return _rankLocalFoods(result, query).take(limit).toList(growable: false);
   }
 
   bool _sameFoodIdentity(Food a, Food b) {
@@ -271,12 +386,11 @@ class FoodRuntimeSearchAuthority {
     try {
       catalog = await _catalogResolver();
     } catch (_) {
-      return FoodRuntimeBarcodeResult(
-        status: FoodRuntimeBarcodeStatus.degraded,
-        foods: const <Food>[],
-        source: FoodRuntimeSearchSource.localFallback,
-        normalizedBarcode: barcode,
-      );
+      // A damaged, locked, or stale offline catalog must not terminate a real
+      // barcode journey. The BIL gateway is the authoritative final source
+      // (Open Food Facts first, then USDA when configured server-side), so
+      // attempt it exactly as we do for a clean local miss.
+      return _resolveOnlineBarcode(barcode);
     }
 
     if (catalog == null) {
@@ -297,12 +411,10 @@ class FoodRuntimeSearchAuthority {
         normalizedBarcode: barcode,
       );
     } catch (_) {
-      return FoodRuntimeBarcodeResult(
-        status: FoodRuntimeBarcodeStatus.degraded,
-        foods: const <Food>[],
-        source: FoodRuntimeSearchSource.localFallback,
-        normalizedBarcode: barcode,
-      );
+      // The installed catalog can fail independently of the network gateway
+      // (for example while an offline pack is being replaced). Keep the real
+      // barcode journey alive instead of presenting a false local-only miss.
+      return _resolveOnlineBarcode(barcode);
     } finally {
       if (catalog is CompositeFoodCatalogRepository) {
         catalog.close();
@@ -363,62 +475,65 @@ class FoodRuntimeSearchAuthority {
     );
   }
 
-  List<Food> _merge(
-    Iterable<Food> primary,
-    Iterable<Food> fallback, {
-    required int limit,
+  FoodSearchTextMatch _matchesSearchText({
+    required String query,
+    required String primaryName,
+    String? arabicName,
+    String? category,
+    Iterable<String> keywords = const <String>[],
   }) {
-    if (limit <= 0) return const <Food>[];
-    final byIdentity = <String, Food>{};
-    for (final food in <Food>[...primary, ...fallback]) {
-      // External catalog rows are materialized with their stable catalog id as
-      // the local UUID. Generated localized names can be partial and are not a
-      // safe identity (many distinct foods used to collapse into "بط").
-      final identity = food.uuid.trim().isNotEmpty
-          ? food.uuid.trim()
-          : '${food.barcode ?? ''}:${FoodSearchNormalizer.normalize(food.name)}';
-      byIdentity.putIfAbsent(identity, () => food);
-      if (byIdentity.length >= limit) break;
-    }
-    return byIdentity.values.toList(growable: false);
-  }
-
-  bool _matchesQuery(UnifiedFood food, String query) {
-    return _matchesSearchText(
-      <String>[
-        food.name,
-        food.arabicName ?? '',
-        food.category ?? '',
-        ...food.keywords,
-      ].join(' '),
-      query,
+    return _textMatcher.match(
+      query: query,
+      queryVariants: _searchAssistance.expand(query),
+      primaryName: primaryName,
+      arabicName: arabicName,
+      category: category,
+      keywords: keywords,
     );
   }
 
-  bool _matchesLocalFood(Food food, String query) {
-    return _matchesSearchText(
-      <String>[
-        food.name,
-        food.arabicName ?? '',
-        food.category ?? '',
-        food.keywords,
-      ].join(' '),
-      query,
-    );
+  FoodSearchTextMatch _matchQuery(UnifiedFood food, String query) =>
+      _matchesSearchText(
+        query: query,
+        primaryName: food.name,
+        arabicName: food.arabicName,
+        category: food.category,
+        keywords: food.keywords,
+      );
+
+  FoodSearchTextMatch _matchLocalFood(Food food, String query) =>
+      _matchesSearchText(
+        query: query,
+        primaryName: food.name,
+        arabicName: food.arabicName,
+        category: food.category,
+        keywords: food.keywords.split(','),
+      );
+
+  List<UnifiedFood> _rankUnifiedFoods(
+    Iterable<UnifiedFood> foods,
+    String query,
+  ) {
+    final matched = foods
+        .map((food) => (food: food, match: _matchQuery(food, query)))
+        .where((entry) => entry.match.matches)
+        .toList(growable: false);
+    final ranked = _textMatcher.suppressIncompleteTokenPrefixes(
+      matched,
+      (entry) => entry.match,
+    )..sort((left, right) => right.match.rank.compareTo(left.match.rank));
+    return ranked.map((entry) => entry.food).toList(growable: false);
   }
 
-  bool _matchesSearchText(String candidate, String query) {
-    final candidateTokens = FoodSearchNormalizer.tokens(candidate).toSet();
-    final expandedQueries = _searchAssistance.expand(query);
-    if (expandedQueries.isEmpty) return true;
-    return expandedQueries.any((expanded) {
-      final queryTokens = FoodSearchNormalizer.tokens(expanded);
-      return queryTokens.isNotEmpty &&
-          queryTokens.every(
-            (token) =>
-                candidateTokens.contains(token) ||
-                candidateTokens.contains('${token}s'),
-          );
-    });
+  List<Food> _rankLocalFoods(Iterable<Food> foods, String query) {
+    final matched = foods
+        .map((food) => (food: food, match: _matchLocalFood(food, query)))
+        .where((entry) => entry.match.matches)
+        .toList(growable: false);
+    final ranked = _textMatcher.suppressIncompleteTokenPrefixes(
+      matched,
+      (entry) => entry.match,
+    )..sort((left, right) => right.match.rank.compareTo(left.match.rank));
+    return ranked.map((entry) => entry.food).toList(growable: false);
   }
 }

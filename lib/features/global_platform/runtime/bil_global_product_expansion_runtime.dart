@@ -4,7 +4,7 @@ import '../core/global_platform_core.dart';
 import '../globalization/globalization_accessibility_platform.dart';
 import '../health_data/unified_health_data_integration.dart';
 import '../intelligence/global_health_evidence_graph.dart';
-import '../medical_devices/medical_device_platform.dart';
+import '../fitness_devices/fitness_device_platform.dart';
 import '../plugins/plugin_platform.dart';
 import '../professional/professional_platform.dart';
 import '../reports/scientific_reports_platform.dart';
@@ -96,7 +96,7 @@ final class GlobalProductExpansionState {
   const GlobalProductExpansionState({
     required this.status,
     required this.healthSignals,
-    required this.medicalMeasurements,
+    required this.fitnessMeasurements,
     required this.activePlugins,
     required this.failures,
     required this.capabilityCount,
@@ -109,7 +109,7 @@ final class GlobalProductExpansionState {
 
   final GlobalRuntimeStatus status;
   final List<GlobalHealthSignal> healthSignals;
-  final List<MedicalMeasurement> medicalMeasurements;
+  final List<FitnessMeasurement> fitnessMeasurements;
   final int activePlugins;
   final int capabilityCount;
   final int auditCount;
@@ -124,7 +124,7 @@ final class BilGlobalProductExpansionRuntime {
   BilGlobalProductExpansionRuntime({
     required this.health,
     required this.wearables,
-    required this.medical,
+    required this.fitness,
     required this.vision,
     required this.cloudAi,
     required this.plugins,
@@ -138,7 +138,7 @@ final class BilGlobalProductExpansionRuntime {
 
   final UnifiedHealthDataRuntime health;
   final WearableRuntime wearables;
-  final MedicalDeviceRuntime medical;
+  final FitnessDeviceRuntime fitness;
   final VisionRuntime vision;
   final OptionalCloudAiRuntime cloudAi;
   final PluginRegistry plugins;
@@ -266,27 +266,27 @@ final class BilGlobalProductExpansionRuntime {
       );
     }
 
-    var measurements = const <MedicalMeasurement>[];
+    var measurements = const <FitnessMeasurement>[];
     try {
-      measurements = await medical.ingest(utcAsOf);
-      executions[GlobalModule.medicalDevices] = GlobalModuleExecution(
-        module: GlobalModule.medicalDevices,
+      measurements = await fitness.ingest(utcAsOf);
+      executions[GlobalModule.fitnessDevices] = GlobalModuleExecution(
+        module: GlobalModule.fitnessDevices,
         status: GlobalModuleExecutionStatus.completed,
         evidenceCount: measurements.length,
         detail:
-            'Validated medical measurements ingested with device provenance.',
+            'Validated fitness measurements ingested with device provenance.',
       );
     } catch (error) {
       failures.add(
         const GlobalFailure(
-          module: GlobalModule.medicalDevices,
+          module: GlobalModule.fitnessDevices,
           kind: GlobalFailureKind.invalidData,
-          code: 'medical-ingest',
+          code: 'fitness-ingest',
           retryable: true,
         ),
       );
-      executions[GlobalModule.medicalDevices] = GlobalModuleExecution(
-        module: GlobalModule.medicalDevices,
+      executions[GlobalModule.fitnessDevices] = GlobalModuleExecution(
+        module: GlobalModule.fitnessDevices,
         status: GlobalModuleExecutionStatus.degraded,
         evidenceCount: 0,
         detail: error.runtimeType.toString(),
@@ -498,7 +498,7 @@ final class BilGlobalProductExpansionRuntime {
       GlobalModule.appleHealth,
       GlobalModule.healthConnect,
       GlobalModule.wearables,
-      GlobalModule.medicalDevices,
+      GlobalModule.fitnessDevices,
       GlobalModule.vision,
       GlobalModule.plugins,
       GlobalModule.reports,
@@ -529,7 +529,7 @@ final class BilGlobalProductExpansionRuntime {
         at: utcAsOf,
         metadata: <String, Object?>{
           'signals': graph.selectedSignals.length,
-          'medical': measurements.length,
+          'fitness': measurements.length,
           'plugins': plugins.active.length,
           'failures': failures.length,
           'completedModules': completedCount,
@@ -541,7 +541,7 @@ final class BilGlobalProductExpansionRuntime {
     return GlobalProductExpansionState(
       status: status,
       healthSignals: graph.selectedSignals,
-      medicalMeasurements: measurements,
+      fitnessMeasurements: measurements,
       activePlugins: plugins.active.length,
       failures: List<GlobalFailure>.unmodifiable(failures),
       capabilityCount: completedCount,
@@ -564,7 +564,7 @@ final class BilGlobalProductExpansionCompositionRoot {
   BilGlobalProductExpansionRuntime create({
     required UnifiedHealthDataRuntime health,
     required WearableRuntime wearables,
-    required MedicalDeviceRuntime medical,
+    required FitnessDeviceRuntime fitness,
     required VisionRuntime vision,
     required OptionalCloudAiRuntime cloudAi,
     required PluginRegistry plugins,
@@ -577,7 +577,7 @@ final class BilGlobalProductExpansionCompositionRoot {
   }) => BilGlobalProductExpansionRuntime(
     health: health,
     wearables: wearables,
-    medical: medical,
+    fitness: fitness,
     vision: vision,
     cloudAi: cloudAi,
     plugins: plugins,

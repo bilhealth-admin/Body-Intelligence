@@ -56,7 +56,7 @@ class _SignalOrb extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const BilWordmark(height: 15),
+                    const BilFullWordmark(height: 15),
                     const SizedBox(height: 7),
                     Directionality(
                       textDirection: TextDirection.ltr,

@@ -7,13 +7,17 @@ import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
 
 import worker from "../src/index";
+import approvedObjects from "../../../artifacts/workout_media/cloudflare_runtime_v2/protected_object_keys_v2.json";
+import freePreviews from "../../../artifacts/workout_media/cloudflare_runtime_v2/free_preview_keys_v1.json";
 import { network } from "./network";
 
 const userId = "d9428888-122b-4f5d-b69f-818f58ab0f12";
 const hs256Token =
   "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkOTQyODg4OC0xMjJiLTRmNWQtYjY5Zi04MThmNThhYjBmMTIifQ.signature";
-const protectedKey =
-  "workouts/v1/home/movements/home-bodyweight-air-squat-standard-7s-original.mp4";
+const freePreviewKey = freePreviews.videoObjectKeys[0]!;
+const paidVideoKey = approvedObjects.keys.find(
+  (key) => key.endsWith(".mp4") && !freePreviews.videoObjectKeys.includes(key),
+)!;
 
 function incoming(path: string, init?: RequestInit): Request {
   return new Request(`https://workouts.bilhealth.com${path}`, init);
@@ -88,10 +92,15 @@ describe("workout runtime Worker", () => {
 
   it("rejects missing authentication and unsafe object paths", async () => {
     const unauthenticated = await dispatch(
-      incoming(`/v2/objects/${protectedKey}`),
+      incoming(`/v2/objects/${paidVideoKey}`),
     );
     expect(unauthenticated.status).toBe(401);
     expect(unauthenticated.headers.get("www-authenticate")).toContain("Bearer");
+    expect(
+      (
+        await dispatch(incoming(`/v2/objects/${freePreviewKey}`))
+      ).status,
+    ).toBe(401);
 
     for (const path of [
       "/v2/objects/workouts/v2/packs/../../secret.json",
@@ -103,14 +112,80 @@ describe("workout runtime Worker", () => {
     }
   });
 
+  it("lets authenticated Free play only an exact generated preview", async () => {
+    mockAuthenticated(false);
+    await env.WORKOUTS.put(freePreviewKey, "0123456789", {
+      httpMetadata: { contentType: "video/mp4" },
+    });
+    await env.WORKOUTS.put(paidVideoKey, "premium", {
+      httpMetadata: { contentType: "video/mp4" },
+    });
+
+    const preview = await dispatch(
+      incoming(`/v2/objects/${freePreviewKey}`, {
+        headers: {
+          authorization: `Bearer ${hs256Token}`,
+          range: "bytes=1-3",
+        },
+      }),
+    );
+    expect(preview.status).toBe(206);
+    expect(preview.headers.get("content-range")).toBe("bytes 1-3/10");
+    expect(preview.headers.get("cache-control")).toContain("private");
+    expect(new TextDecoder().decode(await preview.arrayBuffer())).toBe("123");
+
+    const paid = await dispatch(
+      incoming(`/v2/objects/${paidVideoKey}`, {
+        headers: { authorization: `Bearer ${hs256Token}` },
+      }),
+    );
+    expect(paid.status).toBe(403);
+    await expect(paid.json()).resolves.toEqual({
+      error: "premium_entitlement_required",
+    });
+  });
+
+  it("lets authenticated Free discover exact posters but not pack JSON", async () => {
+    mockAuthenticated(false);
+    const posterKey = approvedObjects.keys.find((key) => key.endsWith(".webp"))!;
+    const packKey = approvedObjects.keys.find(
+      (key) => key.startsWith("workouts/v2/packs/") && key.endsWith(".json"),
+    )!;
+    await env.WORKOUTS.put(posterKey, "poster", {
+      httpMetadata: { contentType: "image/webp" },
+    });
+    await env.WORKOUTS.put(packKey, "pack", {
+      httpMetadata: { contentType: "application/json" },
+    });
+
+    expect(
+      (
+        await dispatch(
+          incoming(`/v2/objects/${posterKey}`, {
+            headers: { authorization: `Bearer ${hs256Token}` },
+          }),
+        )
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await dispatch(
+          incoming(`/v2/objects/${packKey}`, {
+            headers: { authorization: `Bearer ${hs256Token}` },
+          }),
+        )
+      ).status,
+    ).toBe(403);
+  });
+
   it("verifies Supabase auth and entitlement before streaming an R2 range", async () => {
     mockAuthenticated();
-    await env.WORKOUTS.put(protectedKey, "0123456789", {
+    await env.WORKOUTS.put(paidVideoKey, "0123456789", {
       httpMetadata: { contentType: "video/mp4" },
     });
 
     const response = await dispatch(
-      incoming(`/v2/objects/${protectedKey}`, {
+      incoming(`/v2/objects/${paidVideoKey}`, {
         headers: {
           authorization: `Bearer ${hs256Token}`,
           range: "bytes=2-5",
@@ -124,7 +199,7 @@ describe("workout runtime Worker", () => {
     expect(new TextDecoder().decode(await response.arrayBuffer())).toBe("2345");
 
     const staleIfRange = await dispatch(
-      incoming(`/v2/objects/${protectedKey}`, {
+      incoming(`/v2/objects/${paidVideoKey}`, {
         headers: {
           authorization: `Bearer ${hs256Token}`,
           "if-range": '"stale-etag"',
@@ -138,7 +213,7 @@ describe("workout runtime Worker", () => {
     );
 
     const conditionalHead = await dispatch(
-      incoming(`/v2/objects/${protectedKey}`, {
+      incoming(`/v2/objects/${paidVideoKey}`, {
         headers: {
           authorization: `Bearer ${hs256Token}`,
           "if-none-match": response.headers.get("etag")!,
@@ -152,7 +227,7 @@ describe("workout runtime Worker", () => {
   it("returns 403 when authentication succeeds without a premium grant", async () => {
     mockAuthenticated(false);
     const response = await dispatch(
-      incoming(`/v2/objects/${protectedKey}`, {
+      incoming(`/v2/objects/${paidVideoKey}`, {
         headers: { authorization: `Bearer ${hs256Token}` },
       }),
     );

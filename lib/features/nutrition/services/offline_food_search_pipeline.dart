@@ -1,6 +1,7 @@
 import '../domain/unified_food.dart';
 import 'food_quality_engine.dart';
 import 'food_search_normalizer.dart';
+import 'food_search_text_matcher.dart';
 
 class FoodSearchHit {
   final UnifiedFood food;
@@ -17,6 +18,8 @@ class FoodSearchHit {
 class OfflineFoodSearchPipeline {
   const OfflineFoodSearchPipeline();
 
+  static const FoodSearchTextMatcher _textMatcher = FoodSearchTextMatcher();
+
   List<FoodSearchHit> search({
     required Iterable<UnifiedFood> foods,
     required String query,
@@ -27,34 +30,42 @@ class OfflineFoodSearchPipeline {
     final normalizedQuery = FoodSearchNormalizer.normalize(query);
     final queryTokens = FoodSearchNormalizer.tokens(query);
     final normalizedBarcode = FoodSearchNormalizer.normalizeBarcode(query);
-    final hits = <FoodSearchHit>[];
+    final scoredHits = <({FoodSearchHit hit, FoodSearchTextMatch textMatch})>[];
 
     for (final food in foods) {
-      final hit = _score(
+      final scored = _score(
         food,
         normalizedQuery: normalizedQuery,
         queryTokens: queryTokens,
         normalizedBarcode: normalizedBarcode,
       );
-      if (normalizedQuery.isEmpty || hit.score > 0) hits.add(hit);
+      if (normalizedQuery.isEmpty || scored.hit.score > 0) {
+        scoredHits.add(scored);
+      }
     }
 
+    final hits = _textMatcher.suppressIncompleteTokenPrefixes(
+      scoredHits,
+      (entry) => entry.textMatch,
+    );
     hits.sort((left, right) {
-      final scoreOrder = right.score.compareTo(left.score);
+      final scoreOrder = right.hit.score.compareTo(left.hit.score);
       if (scoreOrder != 0) return scoreOrder;
       final qualityOrder = FoodQualityEngine.assess(
-        right.food,
-      ).score.compareTo(FoodQualityEngine.assess(left.food).score);
+        right.hit.food,
+      ).score.compareTo(FoodQualityEngine.assess(left.hit.food).score);
       if (qualityOrder != 0) return qualityOrder;
-      return left.food.name.toLowerCase().compareTo(
-        right.food.name.toLowerCase(),
+      return left.hit.food.name.toLowerCase().compareTo(
+        right.hit.food.name.toLowerCase(),
       );
     });
 
-    return List<FoodSearchHit>.unmodifiable(hits.take(limit));
+    return List<FoodSearchHit>.unmodifiable(
+      hits.take(limit).map((entry) => entry.hit),
+    );
   }
 
-  FoodSearchHit _score(
+  ({FoodSearchHit hit, FoodSearchTextMatch textMatch}) _score(
     UnifiedFood food, {
     required String normalizedQuery,
     required List<String> queryTokens,
@@ -62,60 +73,31 @@ class OfflineFoodSearchPipeline {
   }) {
     final reasons = <String>[];
     var score = normalizedQuery.isEmpty ? 1.0 : 0.0;
+    var textMatch = const FoodSearchTextMatch();
 
-    final name = FoodSearchNormalizer.normalize(food.name);
-    final arabicName = FoodSearchNormalizer.normalize(food.arabicName ?? '');
-    final category = FoodSearchNormalizer.normalize(food.category ?? '');
-    final keywords = food.keywords
-        .map(FoodSearchNormalizer.normalize)
-        .where((value) => value.isNotEmpty)
-        .join(' ');
-    final searchable = '$name $arabicName $category $keywords'.trim();
-    final searchableTokens = searchable
-        .split(' ')
-        .where((token) => token.isNotEmpty)
-        .toSet();
     final barcode = FoodSearchNormalizer.normalizeBarcode(food.barcode ?? '');
 
     if (normalizedBarcode.isNotEmpty && barcode == normalizedBarcode) {
       score += 1000;
       reasons.add('barcode-exact');
     }
-    if (normalizedQuery.isNotEmpty && name == normalizedQuery) {
-      score += 500;
-      reasons.add('primary-name-exact');
-    }
-    if (normalizedQuery.isNotEmpty && arabicName == normalizedQuery) {
-      score += 500;
-      reasons.add('arabic-name-exact');
-    }
-    if (normalizedQuery.isNotEmpty &&
-        _containsQueryTokens(
-          name.split(' '),
-          FoodSearchNormalizer.tokens(normalizedQuery),
-        )) {
-      score += 250;
-      reasons.add('primary-name-token');
-    }
-    if (normalizedQuery.isNotEmpty &&
-        _containsQueryTokens(
-          arabicName.split(' '),
-          FoodSearchNormalizer.tokens(normalizedQuery),
-        )) {
-      score += 250;
-      reasons.add('arabic-name-token');
-    }
-
-    if (queryTokens.isNotEmpty) {
-      final matched = queryTokens
-          .where((queryToken) => _containsToken(searchableTokens, queryToken))
-          .length;
-      if (matched == queryTokens.length) {
-        score += 80 + matched * 5;
-        reasons.add('all-tokens-match');
-      } else if (matched > 0) {
-        score += matched * 12;
-        reasons.add('partial-token-match');
+    if (normalizedQuery.isNotEmpty && queryTokens.isNotEmpty) {
+      textMatch = _textMatcher.match(
+        query: normalizedQuery,
+        primaryName: food.name,
+        arabicName: food.arabicName,
+        category: food.category,
+        keywords: food.keywords,
+      );
+      if (textMatch.matches) {
+        score += switch (textMatch.tier) {
+          FoodSearchTextMatchTier.exact => 500,
+          FoodSearchTextMatchTier.primaryPhrasePrefix => 350,
+          FoodSearchTextMatchTier.wordPrefix => 250,
+          FoodSearchTextMatchTier.keywordOrContains => 150,
+          FoodSearchTextMatchTier.none => 0,
+        };
+        reasons.add(_textReason(textMatch));
       }
     }
 
@@ -123,25 +105,31 @@ class OfflineFoodSearchPipeline {
     if (hasMatch && food.verified) score += 5;
     if (hasMatch && food.source == FoodDataSource.foundation) score += 2;
 
-    return FoodSearchHit(
-      food: food,
-      score: score,
-      reasons: List<String>.unmodifiable(reasons),
+    return (
+      hit: FoodSearchHit(
+        food: food,
+        score: score,
+        reasons: List<String>.unmodifiable(reasons),
+      ),
+      textMatch: textMatch,
     );
   }
 
-  bool _containsQueryTokens(
-    Iterable<String> candidateTokens,
-    Iterable<String> queryTokens,
-  ) {
-    final candidates = candidateTokens
-        .where((token) => token.isNotEmpty)
-        .toSet();
-    final queries = queryTokens.toList(growable: false);
-    return queries.isNotEmpty &&
-        queries.every((query) => _containsToken(candidates, query));
+  String _textReason(FoodSearchTextMatch match) {
+    final field = switch (match.field) {
+      FoodSearchTextField.primaryName => 'primary-name',
+      FoodSearchTextField.arabicName => 'arabic-name',
+      FoodSearchTextField.category => 'category',
+      FoodSearchTextField.keyword => 'keyword',
+      null => 'text',
+    };
+    final tier = switch (match.tier) {
+      FoodSearchTextMatchTier.exact => 'exact',
+      FoodSearchTextMatchTier.primaryPhrasePrefix => 'phrase-prefix',
+      FoodSearchTextMatchTier.wordPrefix => 'word-prefix',
+      FoodSearchTextMatchTier.keywordOrContains => 'contains',
+      FoodSearchTextMatchTier.none => 'none',
+    };
+    return '$field-$tier';
   }
-
-  bool _containsToken(Set<String> candidates, String query) =>
-      candidates.contains(query) || candidates.contains('${query}s');
 }

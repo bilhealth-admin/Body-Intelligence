@@ -163,6 +163,16 @@ const _authAuthoredCopy = <String, Map<String, String>>{
     'tr': 'Bulut hesabı bu sürümde etkin değil.',
   },
   'OR': {'fr': 'OU', 'es': 'O', 'tr': 'VEYA'},
+  'Show password': {
+    'fr': 'Afficher le mot de passe',
+    'es': 'Mostrar contraseña',
+    'tr': 'Şifreyi göster',
+  },
+  'Hide password': {
+    'fr': 'Masquer le mot de passe',
+    'es': 'Ocultar contraseña',
+    'tr': 'Şifreyi gizle',
+  },
   'Continue with Google': {
     'fr': 'Continuer avec Google',
     'es': 'Continuar con Google',

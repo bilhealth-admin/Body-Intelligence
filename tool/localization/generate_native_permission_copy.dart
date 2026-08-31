@@ -29,6 +29,10 @@ const _brand = 'ZXQPBILBRAND9X7ZXQP';
 const _healthConnect = 'ZXQPHEALTHCONNECTBRAND9X7ZXQP';
 
 Future<void> main(List<String> args) async {
+  if (args.contains('--check-android-app-name')) {
+    _checkAndroidAppNames();
+    return;
+  }
   if (args.contains('--android-only')) {
     await _generateAndroidResources();
     return;
@@ -85,7 +89,7 @@ Future<void> main(List<String> args) async {
 
 Future<void> _generateAndroidResources() async {
   const rows = <String, String>{
-    'app_name': 'BIL - Body Intelligence Log',
+    'app_name': 'Body Intelligence Log',
     'health_permissions_rationale_title': 'Health data privacy',
     'health_permissions_rationale_body':
         'BIL requests only the Health Connect data types needed for features you choose to use. Your health data is processed locally by default. You can grant, deny, or revoke individual permissions at any time from Health Connect settings. BIL does not sell health data or use it for advertising.',
@@ -122,10 +126,11 @@ Future<void> _generateAndroidResources() async {
       ..writeln('<?xml version="1.0" encoding="utf-8"?>')
       ..writeln('<resources>');
     for (var index = 0; index < rows.length; index++) {
-      output.writeln(
-        '    <string name="${rows.keys.elementAt(index)}">'
-        '${_escapeXml(values[index])}</string>',
-      );
+      final key = rows.keys.elementAt(index);
+      final value = key == 'app_name'
+          ? _withoutAndroidAppNameBrandPrefix(values[index])
+          : values[index];
+      output.writeln('    <string name="$key">${_escapeXml(value)}</string>');
     }
     output.writeln('</resources>');
     final directory = Directory(
@@ -134,6 +139,40 @@ Future<void> _generateAndroidResources() async {
     File('${directory.path}/strings.xml').writeAsStringSync(output.toString());
     stdout.writeln('WROTE Android ${target.key} (${rows.length})');
   }
+}
+
+void _checkAndroidAppNames() {
+  final files = Directory('android/app/src/main/res')
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((file) => file.path.endsWith('strings.xml'))
+      .toList(growable: false);
+  final appNamePattern = RegExp(r'<string name="app_name">([^<]+)</string>');
+  final forbiddenPrefix = RegExp(r'^\s*BIL\s*(?:-|–|—)\s*');
+  var checked = 0;
+  for (final file in files) {
+    final match = appNamePattern.firstMatch(file.readAsStringSync());
+    if (match == null) continue;
+    checked++;
+    final value = match.group(1)!.trim();
+    if (value.isEmpty || forbiddenPrefix.hasMatch(value)) {
+      throw StateError('Invalid Android app_name in ${file.path}: $value');
+    }
+  }
+  if (checked != 25) {
+    throw StateError('Expected 25 Android app_name resources; found $checked.');
+  }
+  stdout.writeln('ANDROID_APP_NAME_PREFIX_CHECK=PASS;COUNT=$checked');
+}
+
+String _withoutAndroidAppNameBrandPrefix(String value) {
+  final result = value
+      .replaceFirst(RegExp(r'^\s*BIL\s*(?:-|–|—)\s*'), '')
+      .trim();
+  if (result.isEmpty) {
+    throw StateError('Translated Android app_name became empty.');
+  }
+  return result;
 }
 
 String _androidQualifier(String locale) => switch (locale) {

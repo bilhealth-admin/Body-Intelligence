@@ -1,3 +1,4 @@
+import 'package:body_intelligence_log/features/commerce/presentation/premium_label_badge.dart';
 import 'package:body_intelligence_log/features/dashboard/providers/dashboard_preferences_provider.dart';
 import 'package:body_intelligence_log/features/dashboard/widgets/premium_dashboard_benchmark.dart';
 import 'package:flutter/material.dart';
@@ -92,54 +93,69 @@ void main() {
     expect(find.text('Saturated fat'), findsOneWidget);
     expect(find.text('Sodium'), findsOneWidget);
     expect(find.text('Fiber'), findsOneWidget);
-    expect(find.byKey(const Key('dashboard-premium-glass-lock')), findsNothing);
+    expect(find.byKey(const Key('dashboard-premium-lock')), findsNothing);
   });
 
-  testWidgets('free users see glass locks on macros and heart health', (
-    tester,
-  ) async {
-    await pumpDashboard(tester, premiumUnlocked: false);
+  testWidgets(
+    'free users see minimal Premium locks on macros and heart health',
+    (tester) async {
+      await pumpDashboard(tester, premiumUnlocked: false);
 
-    final heartLock = find.descendant(
-      of: find.byKey(const Key('dashboard-heart-premium-lock')),
-      matching: find.byKey(const Key('dashboard-premium-glass-lock')),
-    );
-    expect(heartLock, findsOneWidget);
+      final heartLock = find.descendant(
+        of: find.byKey(const Key('dashboard-heart-premium-lock')),
+        matching: find.byKey(const Key('dashboard-premium-lock')),
+      );
+      expect(heartLock, findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('dashboard-heart-premium-lock')),
+          matching: find.byType(PremiumLabelBadge),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const Key('dashboard-premium-page-label')),
+        findsOneWidget,
+      );
+      expect(find.byType(PremiumLabelBadge), findsOneWidget);
 
-    await tester.drag(
-      find.byKey(const Key('dashboard-calories-macros-horizontal')),
-      const Offset(320, 0),
-    );
-    await tester.pumpAndSettle();
-    final macrosLock = find.descendant(
-      of: find.byKey(const Key('dashboard-macros-premium-lock')),
-      matching: find.byKey(const Key('dashboard-premium-glass-lock')),
-    );
-    expect(macrosLock, findsOneWidget);
-    expect(
-      find.descendant(
+      await tester.drag(
+        find.byKey(const Key('dashboard-calories-macros-horizontal')),
+        const Offset(320, 0),
+      );
+      await tester.pumpAndSettle();
+      final macrosLock = find.descendant(
         of: find.byKey(const Key('dashboard-macros-premium-lock')),
-        matching: find.byType(BackdropFilter),
-      ),
-      findsOneWidget,
-    );
-    final glassColors = tester
-        .widgetList<DecoratedBox>(
-          find.descendant(
-            of: find.byKey(const Key('dashboard-macros-premium-lock')),
-            matching: find.byType(DecoratedBox),
-          ),
-        )
-        .map((widget) => widget.decoration)
-        .whereType<BoxDecoration>()
-        .map((decoration) => decoration.color)
-        .whereType<Color>()
-        .toSet();
-    expect(glassColors, contains(const Color(0x8CFFFFFF)));
-    expect(glassColors, isNot(contains(const Color(0x700B0D10))));
+        matching: find.byKey(const Key('dashboard-premium-lock')),
+      );
+      expect(macrosLock, findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('dashboard-macros-premium-lock')),
+          matching: find.byType(BackdropFilter),
+        ),
+        findsNothing,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('dashboard-macros-premium-lock')),
+          matching: find.byIcon(Icons.workspace_premium_rounded),
+        ),
+        findsNothing,
+      );
+      final macroBadge = find.descendant(
+        of: find.byKey(const Key('dashboard-macros-premium-lock')),
+        matching: find.byType(PremiumLabelBadge),
+      );
+      expect(macroBadge, findsNothing);
+      expect(
+        find.descendant(of: macrosLock, matching: find.byType(Text)),
+        findsNothing,
+      );
 
-    await tester.tap(macrosLock);
-    await tester.pumpAndSettle();
-    expect(find.text('plans-destination'), findsOneWidget);
-  });
+      await tester.tap(macrosLock);
+      await tester.pumpAndSettle();
+      expect(find.text('plans-destination'), findsOneWidget);
+    },
+  );
 }

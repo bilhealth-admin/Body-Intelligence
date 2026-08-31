@@ -2,6 +2,18 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+String _librarySource(String path) {
+  final library = File(path);
+  final entrypoint = library.readAsStringSync();
+  final parts = RegExp(r"part '([^']+)';")
+      .allMatches(entrypoint)
+      .map((match) => File('${library.parent.path}/${match.group(1)!}'));
+  return <String>[
+    entrypoint,
+    for (final part in parts) part.readAsStringSync(),
+  ].join('\n');
+}
+
 void main() {
   final root = Directory('lib/features/community');
   final dartFiles = root
@@ -26,19 +38,21 @@ void main() {
       expect(copy, contains("'$locale': {"), reason: locale);
     }
     final localizedPages = <String>[
-      File(
+      _librarySource(
         'lib/features/community/presentation/community_profile_page.dart',
-      ).readAsStringSync(),
+      ),
       ['community_people_page.dart', 'community_chat_page.dart']
           .map(
-            (name) => File(
-              'lib/features/community/presentation/$name',
-            ).readAsStringSync(),
+            (name) =>
+                _librarySource('lib/features/community/presentation/$name'),
           )
           .join('\n'),
-      File(
+      _librarySource(
         'lib/features/community/presentation/community_connections_page.dart',
-      ).readAsStringSync(),
+      ),
+      _librarySource(
+        'lib/features/community/presentation/community_messages_page.dart',
+      ),
     ];
     for (final source in localizedPages) {
       for (final locale in const ["'ar'", "'fr'", "'es'", "'tr'"]) {

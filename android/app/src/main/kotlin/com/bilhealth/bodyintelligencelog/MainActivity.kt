@@ -92,6 +92,7 @@ class MainActivity : FlutterFragmentActivity() {
         textToSpeechBridge = BILTextToSpeechBridge(this, flutterEngine.dartExecutor.binaryMessenger)
         healthBridge = BILGlobalHealthBridge(this, flutterEngine.dartExecutor.binaryMessenger, healthPermissionLauncher)
         playIntegrityBridge = BILPlayIntegrityBridge(this, flutterEngine.dartExecutor.binaryMessenger)
+        BILSystemCryptoBridge(flutterEngine.dartExecutor.binaryMessenger)
         io.flutter.plugin.common.MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "bil/push").setMethodCallHandler { call, result ->
             when (call.method) {
                 "requestToken" -> pushProvider.requestToken(result)
@@ -117,7 +118,7 @@ class MainActivity : FlutterFragmentActivity() {
                 else -> result.notImplemented()
             }
         }
-        BILMedicalBleBridge(this, flutterEngine.dartExecutor.binaryMessenger) { result ->
+        BILFitnessBleBridge(this, flutterEngine.dartExecutor.binaryMessenger) { result ->
             if (pendingBlePermissionResult != null) {
                 result.error("permission_request_in_progress", null, null)
             } else {

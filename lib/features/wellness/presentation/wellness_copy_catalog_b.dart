@@ -1,6 +1,39 @@
 part of 'wellness_copy.dart';
 
 const _wellnessSecondaryB = <String, Map<String, String>>{
+  'Workout Videos': {
+    'fr': 'Vidéos d’entraînement',
+    'es': 'Vídeos de entrenamiento',
+    'tr': 'Egzersiz videoları',
+  },
+  '10 training categories': {
+    'fr': 'Programmes d’entraînement',
+    'es': 'Programas de entrenamiento',
+    'tr': 'Egzersiz programları',
+  },
+  '300+ home workout videos': {
+    'fr': 'Plus de 300 vidéos d’entraînement',
+    'es': 'Más de 300 vídeos de entrenamiento',
+    'tr': '300’den fazla egzersiz videosu',
+  },
+  'Explore 10 training categories with clear movement guidance and reusable routines.': {
+    'fr':
+        'Vidéos vérifiées et programmes d’entraînement réutilisables au même endroit.',
+    'es':
+        'Vídeos verificados y programas de entrenamiento reutilizables en un solo lugar.',
+    'tr':
+        'Doğrulanmış videolar ve yeniden kullanılabilir antrenman programları tek yerde.',
+  },
+  'Wellness programs': {
+    'fr': 'Programmes bien-être',
+    'es': 'Programas de bienestar',
+    'tr': 'Sağlık programları',
+  },
+  'Verified workout video library': {
+    'fr': 'Bibliothèque de vidéos d’entraînement vérifiées',
+    'es': 'Biblioteca de vídeos de entrenamiento verificados',
+    'tr': 'Doğrulanmış egzersiz video kitaplığı',
+  },
   'The log works locally without an account. Sync, sharing, and health connections start only with explicit consent and can be revoked with data deletion.': {
     'fr':
         'Le journal fonctionne localement sans compte. Synchronisation, partage et connexions santé exigent un consentement explicite, révocable avec suppression des données.',

@@ -21,6 +21,15 @@ void main() {
     expect(settings, contains('cloudSyncConsentStateProvider'));
     expect(settings, contains('.setGranted(granted)'));
     expect(settings, contains('cloudRuntimePreparationProvider'));
+    expect(settings, contains('CloudSyncConsentCopy.settingsTitle'));
+    expect(settings, contains('CloudSyncConsentCopy.settingsSubtitle'));
+    expect(
+      settings,
+      contains('CloudSyncConsentSummary(showDeletionControl: true)'),
+    );
+    expect(settings, contains('CloudSyncConsentCopy.primaryAction'));
+    expect(settings, contains('CloudSyncConsentCopy.localAction'));
+    expect(settings, isNot(contains("_privacyText(context, 'Turn on')")));
     expect(
       settings,
       isNot(contains('CloudSyncConsentAvailability.premiumRequired')),

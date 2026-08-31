@@ -47,6 +47,9 @@ class CommunityDeepLink {
     'settings/sharing-privacy': '/settings/sharing-privacy',
     'settings/local-export': '/settings/local-export',
     'settings/nutrition-goals': '/settings/nutrition-goals',
+    // Reset gift notifications return ordinary users to the AI Coach surface;
+    // this alias never exposes the separate administration route.
+    'settings/ai-coach': '/intelligence-center',
     'trust-support': '/trust-support',
     'help': '/help',
     'help/faq': '/help/faq',

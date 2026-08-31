@@ -18,8 +18,7 @@ void main() {
     final copyAction = page.indexOf("Key('daily-log-copy-previous-day')");
     final adSlot = page.indexOf("Key('daily-log-free-ad-slot')", copyAction);
     final meals = page.indexOf('DailyMealsList(', summary);
-    final meal = page.indexOf('_buildMealEntry(', meals);
-    final water = page.indexOf('DailyWaterShortcut(', meal);
+    final water = page.indexOf('DailyWaterShortcut(', meals);
     final exercise = page.indexOf('DailyExerciseSection(', water);
     final bodyContext = page.indexOf(
       "Key('daily-log-body-context-link')",
@@ -31,8 +30,7 @@ void main() {
     expect(adSlot, greaterThan(copyAction));
     expect(meals, greaterThan(adSlot));
     expect(meals, greaterThan(copyAction));
-    expect(meal, greaterThan(meals));
-    expect(water, greaterThan(meal));
+    expect(water, greaterThan(meals));
     expect(exercise, greaterThan(water));
     expect(bodyContext, greaterThan(exercise));
     expect(page, isNot(contains('DailyBodyContextSection(')));
@@ -74,16 +72,19 @@ void main() {
   });
 
   test('meal slots match the reference cards and always cover four meals', () {
-    final meals = File(
+    final meals = <String>[
       'lib/features/daily_log/presentation/daily_log_meals_list.dart',
-    ).readAsStringSync();
+      'lib/features/daily_log/presentation/daily_log_meal_detail_items.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     for (final type in const ['breakfast', 'lunch', 'dinner', 'snack']) {
       expect(meals, contains("'$type':"));
     }
     expect(meals, contains("Key('daily-meal-card-\${slot.type}')"));
     expect(meals, contains("Key('daily-meal-log-\$type')"));
-    expect(meals, contains("'logFood': 'Log food'"));
-    expect(meals, contains("'logMore': 'Log more'"));
+    expect(meals, contains("'logFood': 'Plan meal'"));
+    expect(meals, contains("'logMore': 'Open meal'"));
+    expect(meals, isNot(contains("'logFood': 'Log food'")));
+    expect(meals, isNot(contains("'logMore': 'Log more'")));
     expect(meals, contains('BorderRadius.circular(24)'));
     expect(meals, contains('FilledButton.tonal'));
     expect(meals, isNot(contains('Colors.orange')));
@@ -109,19 +110,23 @@ void main() {
     );
     expect(entry, contains("Key('daily-log-selected-food-details')"));
     expect(page, contains("Key('daily-log-focused-food-detail')"));
-    expect(entry, contains("Key('daily-log-food-macros-glass')"));
-    expect(entry, contains("Key('daily-log-nutrition-facts-glass')"));
+    expect(entry, contains("Key('daily-log-food-premium-group')"));
+    expect(entry, isNot(contains("Key('daily-log-food-macros-glass')")));
+    expect(entry, isNot(contains("Key('daily-log-nutrition-facts-glass')")));
     expect(
       entry.indexOf('DailyLogCalorieMacroRing('),
-      lessThan(entry.indexOf("Key('daily-log-food-macros-glass')")),
-      reason: 'Calories stay visible while macro values are Premium.',
+      lessThan(entry.indexOf("Key('daily-log-food-premium-group')")),
+      reason:
+          'Calories stay visible while macros and detailed nutrients share one Premium group.',
     );
+    expect(page, contains('if (selectedFood != null)'));
     expect(
       page,
-      contains('if (selectedFood != null || mealSearchActive)'),
+      contains('if (mealSearchActive || widget.focusMealEntry)'),
       reason:
-          'Android back must close the in-page food flow before leaving Diary.',
+          'Android back must close the focused meal flow before leaving Diary.',
     );
+    expect(page, contains('_leaveMealDetail();'));
     expect(entry, contains("Key('daily-log-nutrition-facts')"));
     expect(entry, contains('DailyLogCalorieMacroRing('));
     expect(entry, contains("Key('daily-log-meal-type-field')"));
@@ -130,10 +135,14 @@ void main() {
     expect(entry, isNot(contains("_mealCopy('time')")));
     expect(entry, contains("Key('daily-log-serving-amount-field')"));
     expect(entry, contains("Key('daily-log-serving-unit-field')"));
-    expect(search, contains("_mealCopy('barcodeScan')"));
-    expect(search, contains("_mealCopy('voiceLog')"));
-    expect(search, contains("_mealCopy('mealScan')"));
-    expect(search, contains("_mealCopy('quickAdd')"));
+    expect(
+      entry,
+      isNot(contains("_mealCopy('barcodeScan')")),
+      reason: 'The focused meal page must not repeat global capture tools.',
+    );
+    expect(entry, isNot(contains("_mealCopy('voiceLog')")));
+    expect(entry, isNot(contains("_mealCopy('mealScan')")));
+    expect(entry, isNot(contains("_mealCopy('quickAdd')")));
     expect(search, isNot(contains('_foodMacroSummary')));
     expect(search, isNot(contains('verifiedSource :')));
   });
@@ -142,9 +151,10 @@ void main() {
     final page = File(
       'lib/features/daily_log/daily_log_page.dart',
     ).readAsStringSync();
-    final meals = File(
+    final meals = <String>[
       'lib/features/daily_log/presentation/daily_log_meals_list.dart',
-    ).readAsStringSync();
+      'lib/features/daily_log/presentation/daily_log_meal_detail_items.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
     final search = File(
       'lib/features/daily_log/daily_log_meal_search.dart',
     ).readAsStringSync();

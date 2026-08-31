@@ -5,11 +5,40 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../connected_health_model.dart';
 import '../connected_health_copy.dart';
-import '../../../shared/widgets/bil_wordmark.dart';
 
 final liveHealthNowProvider = Provider<DateTime Function()>((ref) {
   return DateTime.now;
 });
+
+const _watchMetricKeys = <String>{
+  'steps',
+  'heartRate',
+  'restingHeartRate',
+  'activeEnergy',
+  'sleep',
+};
+
+/// Metrics are visible only while a real, authorized source is currently in a
+/// usable state. Stale readings retained after disconnect/revocation never
+/// make the watch look connected.
+bool liveHealthWatchCanShowMetrics(ConnectedHealthSnapshot snapshot) {
+  final usableStatus = switch (snapshot.status) {
+    ConnectedHealthStatus.ready ||
+    ConnectedHealthStatus.syncing ||
+    ConnectedHealthStatus.synchronized => true,
+    _ => false,
+  };
+  final hasCurrentSource =
+      snapshot.platformSource?.trim().isNotEmpty == true ||
+      snapshot.availableSources.any((source) => source.trim().isNotEmpty);
+  return usableStatus && snapshot.deviceVerified && hasCurrentSource;
+}
+
+bool liveHealthWatchSignalIsActual(ConnectedHealthSignalView signal) =>
+    _watchMetricKeys.contains(signal.key) &&
+    signal.value.isFinite &&
+    signal.source.trim().isNotEmpty &&
+    signal.confidence > 0;
 
 class LiveHealthWatch extends ConsumerStatefulWidget {
   const LiveHealthWatch({
@@ -63,37 +92,29 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch> {
   }
 
   ConnectedHealthSignalView? _signal(String key) {
+    if (!liveHealthWatchCanShowMetrics(widget.snapshot)) return null;
+    ConnectedHealthSignalView? latest;
     for (final signal in widget.snapshot.signals) {
-      if (signal.key == key) return signal;
+      if (signal.key != key || !liveHealthWatchSignalIsActual(signal)) {
+        continue;
+      }
+      if (latest == null || signal.observedAt.isAfter(latest.observedAt)) {
+        latest = signal;
+      }
     }
-    return null;
+    return latest;
   }
 
-  String _value(String key, {int decimals = 0}) {
-    final signal = _signal(key);
-    if (signal == null) return '—';
+  String _value(ConnectedHealthSignalView signal, {int decimals = 0}) {
     return decimals == 0
         ? signal.value.round().toString()
         : signal.value.toStringAsFixed(decimals);
   }
 
-  String get _weekday {
-    const weekdays = <String, List<String>>{
-      'ar': [
-        'الاثنين',
-        'الثلاثاء',
-        'الأربعاء',
-        'الخميس',
-        'الجمعة',
-        'السبت',
-        'الأحد',
-      ],
-      'en': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      'fr': ['lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.'],
-      'es': ['lun.', 'mar.', 'mié.', 'jue.', 'vie.', 'sáb.', 'dom.'],
-      'tr': ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
-    };
-    return (weekdays[widget.languageCode] ?? weekdays['en']!)[_now.weekday - 1];
+  String _dateLine(BuildContext context) {
+    final localizations = MaterialLocalizations.of(context);
+    final weekday = localizations.narrowWeekdays[_now.weekday % 7];
+    return '$weekday  •  ${localizations.formatShortDate(_now)}';
   }
 
   @override
@@ -101,19 +122,28 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch> {
     final hour = _now.hour % 12;
     final minute = _now.minute;
     final second = _now.second;
-    final hasMeasuredData =
-        widget.snapshot.deviceVerified && widget.snapshot.signals.isNotEmpty;
-    final showMeasuredMetrics = hasMeasuredData && widget.showMetrics;
+    final steps = _signal('steps');
+    final heart = _signal('heartRate') ?? _signal('restingHeartRate');
+    final activeEnergy = _signal('activeEnergy');
+    final sleep = _signal('sleep');
+    final showMeasuredMetrics =
+        widget.showMetrics &&
+        <ConnectedHealthSignalView?>[
+          steps,
+          heart,
+          activeEnergy,
+          sleep,
+        ].any((signal) => signal != null);
     final compactConnectOnly = widget.compact && !showMeasuredMetrics;
     final digitalHour = _now.hour.toString().padLeft(2, '0');
     final digitalMinute = _now.minute.toString().padLeft(2, '0');
     final digitalSecond = _now.second.toString().padLeft(2, '0');
     return Semantics(
       image: true,
-      label: connectedHealthTextForLanguage(
-        widget.languageCode,
-        'Live health watch showing current time and available measured data',
-        'ساعة صحية حية تعرض الوقت والبيانات الصحية الحقيقية المتاحة',
+      label: connectedHealthText(
+        context,
+        'Live fitness watch showing current time and available measured data',
+        'ساعة لياقة حية تعرض الوقت الحالي والبيانات المقاسة المتاحة',
       ),
       child: SizedBox.expand(
         child: CustomPaint(
@@ -125,30 +155,25 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch> {
               Positioned(
                 left: widget.compact ? 28 : 54,
                 right: widget.compact ? 28 : 54,
-                top: widget.compact ? 20 : 36,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    BilWordmark(height: widget.compact ? 15 : 12),
-                    const SizedBox(height: 3),
-                    Text(
-                      '$_weekday  •  ${_now.day}/${_now.month}',
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: const Color(0xFF91AEC0),
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
+                top: widget.compact ? 25 : 42,
+                child: Text(
+                  _dateLine(context),
+                  key: const Key('watch-date-line'),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: const Color(0xFF91AEC0),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               Positioned(
                 left: widget.compact ? 38 : 50,
                 right: widget.compact ? 38 : 50,
-                top: widget.compact ? 60 : 92,
+                top: widget.compact ? 58 : 82,
                 child: Text.rich(
+                  key: const Key('watch-digital-time'),
                   TextSpan(
                     children: [
                       TextSpan(text: '$digitalHour:$digitalMinute'),
@@ -200,82 +225,98 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch> {
                   child: showMeasuredMetrics
                       ? Row(
                           children: [
-                            Expanded(
-                              child: _WatchMetricButton(
-                                onTap: _signal('steps') == null
-                                    ? null
-                                    : widget.onStepsTap,
-                                child: _WatchMetric(
-                                  icon: Icons.directions_walk_rounded,
-                                  color: const Color(0xFF55D66B),
-                                  value: _value('steps'),
-                                  compact: widget.compact,
-                                  label: connectedHealthTextForLanguage(
-                                    widget.languageCode,
-                                    'steps',
-                                    'خطوات',
+                            if (steps != null)
+                              Expanded(
+                                child: _WatchMetricButton(
+                                  key: const Key('watch-metric-steps'),
+                                  onTap: widget.onStepsTap,
+                                  child: _WatchMetric(
+                                    icon: Icons.directions_walk_rounded,
+                                    color: const Color(0xFF55D66B),
+                                    value: _value(steps),
+                                    compact: widget.compact,
+                                    label: connectedHealthText(
+                                      context,
+                                      'steps',
+                                      'خطوات',
+                                    ),
+                                    semanticLabel: connectedHealthText(
+                                      context,
+                                      'Steps',
+                                      'الخطوات',
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: _WatchMetricButton(
-                                onTap:
-                                    _signal('heartRate') == null &&
-                                        _signal('restingHeartRate') == null
-                                    ? null
-                                    : widget.onHeartTap,
-                                child: _WatchMetric(
-                                  icon: Icons.favorite_outline_rounded,
-                                  color: const Color(0xFFFF6472),
-                                  value: _signal('heartRate') == null
-                                      ? _value('restingHeartRate')
-                                      : _value('heartRate'),
-                                  compact: widget.compact,
-                                  label: connectedHealthTextForLanguage(
-                                    widget.languageCode,
-                                    'bpm',
-                                    'نبض',
+                            if (heart != null)
+                              Expanded(
+                                child: _WatchMetricButton(
+                                  key: const Key('watch-metric-heart-rate'),
+                                  onTap: widget.onHeartTap,
+                                  child: _WatchMetric(
+                                    icon: Icons.favorite_outline_rounded,
+                                    color: const Color(0xFFFF6472),
+                                    value: _value(heart),
+                                    compact: widget.compact,
+                                    label: connectedHealthText(
+                                      context,
+                                      'bpm',
+                                      'نبض',
+                                    ),
+                                    semanticLabel: connectedHealthText(
+                                      context,
+                                      'Heart rate',
+                                      'معدل نبض القلب',
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: _WatchMetricButton(
-                                onTap: _signal('activeEnergy') == null
-                                    ? null
-                                    : widget.onActiveEnergyTap,
-                                child: _WatchMetric(
-                                  icon: Icons.local_fire_department_outlined,
-                                  color: const Color(0xFFFFA24A),
-                                  value: _value('activeEnergy'),
-                                  compact: widget.compact,
-                                  label: connectedHealthTextForLanguage(
-                                    widget.languageCode,
-                                    'kcal',
-                                    'طاقة',
+                            if (activeEnergy != null)
+                              Expanded(
+                                child: _WatchMetricButton(
+                                  key: const Key('watch-metric-active-energy'),
+                                  onTap: widget.onActiveEnergyTap,
+                                  child: _WatchMetric(
+                                    icon: Icons.local_fire_department_outlined,
+                                    color: const Color(0xFFFFA24A),
+                                    value: _value(activeEnergy),
+                                    compact: widget.compact,
+                                    label: connectedHealthText(
+                                      context,
+                                      'kcal',
+                                      'سعرة',
+                                    ),
+                                    semanticLabel: connectedHealthText(
+                                      context,
+                                      'Active energy',
+                                      'الطاقة النشطة',
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: _WatchMetricButton(
-                                onTap: _signal('sleep') == null
-                                    ? null
-                                    : widget.onSleepTap,
-                                child: _WatchMetric(
-                                  icon: Icons.bedtime_outlined,
-                                  color: const Color(0xFFA982FF),
-                                  value: _value('sleep', decimals: 1),
-                                  compact: widget.compact,
-                                  label: connectedHealthTextForLanguage(
-                                    widget.languageCode,
-                                    'sleep',
-                                    'نوم',
+                            if (sleep != null)
+                              Expanded(
+                                child: _WatchMetricButton(
+                                  key: const Key('watch-metric-sleep'),
+                                  onTap: widget.onSleepTap,
+                                  child: _WatchMetric(
+                                    icon: Icons.bedtime_outlined,
+                                    color: const Color(0xFFA982FF),
+                                    value: _value(sleep, decimals: 1),
+                                    compact: widget.compact,
+                                    label: connectedHealthText(
+                                      context,
+                                      'sleep',
+                                      'نوم',
+                                    ),
+                                    semanticLabel: connectedHealthText(
+                                      context,
+                                      'Sleep',
+                                      'النوم',
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
                           ],
                         )
                       : !widget.showConnectControl
@@ -284,8 +325,8 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch> {
                       ? Center(
                           child: _CompactWatchConnectButton(
                             onPressed: widget.onConnectTap,
-                            semanticLabel: connectedHealthTextForLanguage(
-                              widget.languageCode,
+                            semanticLabel: connectedHealthText(
+                              context,
                               'Link fitness',
                               'ربط اللياقة',
                             ),
@@ -298,8 +339,8 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch> {
                             onPressed: widget.onConnectTap,
                             icon: const Icon(Icons.link_rounded, size: 15),
                             label: Text(
-                              connectedHealthTextForLanguage(
-                                widget.languageCode,
+                              connectedHealthText(
+                                context,
                                 'Connect fitness',
                                 'ربط اللياقة',
                               ),
@@ -374,7 +415,7 @@ class _CompactWatchConnectButton extends StatelessWidget {
 }
 
 class _WatchMetricButton extends StatelessWidget {
-  const _WatchMetricButton({required this.child, this.onTap});
+  const _WatchMetricButton({super.key, required this.child, this.onTap});
 
   final Widget child;
   final VoidCallback? onTap;
@@ -400,6 +441,7 @@ class _WatchMetric extends StatelessWidget {
     required this.color,
     required this.value,
     required this.label,
+    required this.semanticLabel,
     this.compact = false,
   });
 
@@ -407,33 +449,39 @@ class _WatchMetric extends StatelessWidget {
   final Color color;
   final String value;
   final String label;
+  final String semanticLabel;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: color, size: compact ? 13 : 16),
-        Text(
-          value,
-          maxLines: 1,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: Colors.white,
-            fontSize: compact ? 11 : 13,
-            fontWeight: FontWeight.w700,
-          ),
+    return Semantics(
+      label: '$semanticLabel, $value $label',
+      child: ExcludeSemantics(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: compact ? 13 : 16),
+            Text(
+              value,
+              maxLines: 1,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Colors.white,
+                fontSize: compact ? 11 : 13,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: const Color(0xFFD9EAF4),
+                fontSize: compact ? 9 : null,
+              ),
+            ),
+          ],
         ),
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: const Color(0xFFD9EAF4),
-            fontSize: compact ? 9 : null,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
@@ -454,68 +502,52 @@ class _WatchPainter extends CustomPainter {
     final rect = Offset.zero & size;
     final unit = size.shortestSide;
 
-    final caseRect = RRect.fromRectAndRadius(
+    final shell = RRect.fromRectAndRadius(
       Rect.fromLTWH(
-        unit * .025,
-        unit * .025,
-        size.width - unit * .075,
-        size.height - unit * .05,
+        unit * .032,
+        unit * .032,
+        size.width - unit * .086,
+        size.height - unit * .064,
       ),
       Radius.circular(unit * .22),
     );
 
     canvas.drawRRect(
-      caseRect.shift(Offset(0, unit * .018)),
+      shell.shift(Offset(0, unit * .018)),
       Paint()
-        ..color = Colors.black.withValues(alpha: .30)
+        ..color = Colors.black.withValues(alpha: .34)
         ..maskFilter = MaskFilter.blur(BlurStyle.normal, unit * .035),
     );
 
     canvas.drawRRect(
-      caseRect,
+      shell,
       Paint()
         ..shader = const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF2D3439),
-            Color(0xFF9CA5AB),
-            Color(0xFFF4F6F7),
-            Color(0xFF737E84),
-            Color(0xFFFFFFFF),
-            Color(0xFF5B666C),
-            Color(0xFFBBC2C6),
-            Color(0xFF30383D),
+            Color(0xFF07131B),
+            Color(0xFF163442),
+            Color(0xFF0B202C),
+            Color(0xFF050D13),
           ],
-          stops: [0, .12, .25, .40, .52, .67, .82, 1],
+          stops: [0, .33, .68, 1],
         ).createShader(rect),
     );
 
-    canvas.drawRRect(
-      caseRect.deflate(unit * .012),
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = unit * .010
-        ..shader = const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFFFFFFF), Color(0xFF7D878D), Color(0xFF20272B)],
-        ).createShader(rect),
-    );
-
-    final bezel = caseRect.deflate(unit * .050);
+    final bezel = shell.deflate(unit * .018);
     canvas.drawRRect(
       bezel,
       Paint()
         ..shader = const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF10171C), Color(0xFF515C63), Color(0xFF0B1115)],
+          colors: [Color(0xFF071017), Color(0xFF142A35), Color(0xFF050A0F)],
           stops: [0, .48, 1],
         ).createShader(rect),
     );
 
-    final screen = bezel.deflate(unit * .024);
+    final screen = bezel.deflate(unit * .021);
     canvas.drawRRect(
       screen,
       Paint()
@@ -535,7 +567,7 @@ class _WatchPainter extends CustomPainter {
         ..shader = const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFF8298A8), Color(0x2216232D), Color(0xFF05090C)],
+          colors: [Color(0xCC2A586A), Color(0x332E6678), Color(0xFF05090C)],
         ).createShader(rect),
     );
 
@@ -570,12 +602,12 @@ class _WatchPainter extends CustomPainter {
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
           colors: [
-            Color(0xFF30383D),
-            Color(0xFFAAB2B7),
-            Color(0xFFF7F8F8),
-            Color(0xFF737D82),
-            Color(0xFFD9DEE1),
-            Color(0xFF353E43),
+            Color(0xFF0B161D),
+            Color(0xFF294653),
+            Color(0xFF4F7481),
+            Color(0xFF1B323D),
+            Color(0xFF355764),
+            Color(0xFF091219),
           ],
           stops: [0, .18, .36, .58, .78, 1],
         ).createShader(crown.outerRect),
@@ -595,8 +627,8 @@ class _WatchPainter extends CustomPainter {
         Offset(crown.right - unit * .007, y),
         Paint()
           ..color = i.isEven
-              ? Colors.white.withValues(alpha: .62)
-              : Colors.black.withValues(alpha: .44)
+              ? const Color(0xFF527786).withValues(alpha: .72)
+              : Colors.black.withValues(alpha: .48)
           ..strokeWidth = .85,
       );
     }
@@ -624,9 +656,9 @@ class _WatchPainter extends CustomPainter {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.white.withValues(alpha: .24),
-            Colors.white.withValues(alpha: .055),
-            Colors.white.withValues(alpha: .0),
+            const Color(0xFF65CDE2).withValues(alpha: .18),
+            const Color(0xFF65CDE2).withValues(alpha: .045),
+            const Color(0xFF65CDE2).withValues(alpha: 0),
           ],
           stops: const [0, .42, 1],
         ).createShader(rect),

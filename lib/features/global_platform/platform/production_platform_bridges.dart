@@ -34,9 +34,9 @@ final class HealthPlatformBridge {
       _channel.invokeMethod<void>('deleteRecord', {'id': platformId});
 }
 
-final class MedicalBluetoothBridge {
-  MedicalBluetoothBridge({MethodChannel? channel})
-    : _channel = channel ?? const MethodChannel('bil/medical_devices');
+final class FitnessBluetoothBridge {
+  FitnessBluetoothBridge({MethodChannel? channel})
+    : _channel = channel ?? const MethodChannel('bil/fitness_devices');
   final MethodChannel _channel;
   Future<List<Map<String, Object?>>> scan() async =>
       (await _channel.invokeListMethod<Map<dynamic, dynamic>>('scan') ??

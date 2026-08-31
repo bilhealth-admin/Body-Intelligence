@@ -8,9 +8,10 @@ void main() {
       'lib/features/auth/premium_account_gateway_page.dart',
     ).readAsStringSync();
 
-    expect(gateway, contains('backgroundColor: Colors.white'));
+    expect(gateway, contains('final pageBackground = scheme.brightness'));
+    expect(gateway, contains('backgroundColor: pageBackground'));
     expect(gateway, contains('AuthEntryCopyKey.welcomeTo'));
-    expect(gateway, contains('BilWordmark'));
+    expect(gateway, contains('BilFullWordmark'));
     expect(gateway, contains('child: AuthLanguageSelector()'));
     expect(gateway, contains('const _gatewayStoryViewportFraction = .87;'));
     expect(gateway, contains('const _gatewayStoryCardAspectRatio = 1.0;'));
@@ -44,7 +45,7 @@ void main() {
     final brandRegion = gateway.substring(brandClass, storyClass);
     expect(
       brandRegion.indexOf('AuthEntryCopyKey.welcomeTo'),
-      lessThan(brandRegion.indexOf('BilWordmark')),
+      lessThan(brandRegion.indexOf('BilFullWordmark')),
     );
 
     expect(gateway, isNot(contains('AuthEntryCopyKey.privacyFooter')));
@@ -100,7 +101,7 @@ void main() {
   );
 
   test(
-    'login and OTP use navigation headers instead of repeated brand marks',
+    'login and OTP use the canonical full wordmark below navigation headers',
     () {
       final login = File(
         'lib/features/auth/premium_login_page.dart',
@@ -110,15 +111,28 @@ void main() {
       ).readAsStringSync();
 
       for (final source in [login, verify]) {
-        expect(source, contains('backgroundColor: Colors.white'));
+        expect(source, contains('backgroundColor: pageBackground'));
         expect(source, contains('Color(0xFFFAFAFC)'));
+        expect(source, contains('scheme.surfaceContainerLow'));
+        expect(source, contains('scheme.onSurface'));
         expect(source, contains('CircleBorder()'));
         expect(source, contains('Icons.arrow_back_ios_new_rounded'));
-        expect(source, isNot(contains('BilWordmark')));
+        expect(source, contains('BilFullWordmark'));
+        expect(source, isNot(contains('BilWordmark(')));
         expect(source, isNot(contains('auth_language_selector.dart')));
       }
 
       expect(login, contains('AuthEntryCopyKey.emailAddress'));
+      expect(login, contains("key: Key('login-wordmark')"));
+      expect(
+        login,
+        matches(
+          RegExp(
+            r"BilFullWordmark\([\s\S]{0,240}key: Key\('login-wordmark'\),"
+            r'[\s\S]{0,120}alignment: Alignment\.center,',
+          ),
+        ),
+      );
       expect(login, contains('Color(0xFF0877F9)'));
       expect(login, contains('elevation: 5'));
       expect(verify, contains('List.generate(6'));

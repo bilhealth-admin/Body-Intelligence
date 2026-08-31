@@ -6,6 +6,7 @@ import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../commerce/domain/commerce_plan.dart';
 import '../../commerce/presentation/premium_collection_item_gate.dart';
+import '../../commerce/presentation/premium_label_badge.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../../nutrition/domain/dietary_preferences.dart';
@@ -298,6 +299,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
         locked: locked,
         tier: premiumTier,
         onUpgrade: openPremium,
+        showLabel: false,
         child: _RecipeCard(
           recipe: recipe,
           title: resolvedTitle.text,
@@ -326,6 +328,9 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
               cuisine: _cuisine,
               visibleCount: visible.length,
               totalCount: compatibleSource.length,
+              showPremiumMarker:
+                  !premiumUnlocked && compatibleSource.length > 2,
+              premiumSemanticLabel: premiumTier,
               onSearchChanged: (_) =>
                   setState(() => _visibleLimit = _filteredPageSize),
               onClearSearch: () => setState(() {

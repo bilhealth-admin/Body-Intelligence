@@ -4,6 +4,23 @@ enum BilStoreProductKind {
   aiBoostConsumable,
 }
 
+/// Calculates the customer-facing whole-number saving from two verified store
+/// prices. Store price points can differ by the smallest currency unit (for
+/// example 4.99 instead of 5.00), so whole-percent rounding is intentional.
+int? storeDerivedSavingsPercent({
+  required int priceMicros,
+  required int originalPriceMicros,
+}) {
+  if (priceMicros <= 0 ||
+      originalPriceMicros <= 0 ||
+      priceMicros >= originalPriceMicros) {
+    return null;
+  }
+  final savingMicros = originalPriceMicros - priceMicros;
+  return ((savingMicros * 100) + (originalPriceMicros ~/ 2)) ~/
+      originalPriceMicros;
+}
+
 class BilStoreOfferMetadata {
   const BilStoreOfferMetadata({
     required this.productId,
@@ -48,11 +65,16 @@ class BilStoreOfferMetadata {
   /// consistent half-price AI Boost offer that can be selected at checkout.
   /// A plain localized price, or two unrelated prices, never qualifies.
   int? get verifiedAiBoostDiscountPercent {
+    final originalMicros = originalPriceMicros;
     if (kind != BilStoreProductKind.aiBoostConsumable ||
         savingsPercent != 50 ||
         priceMicros <= 0 ||
-        originalPriceMicros == null ||
-        originalPriceMicros != priceMicros * 2 ||
+        originalMicros == null ||
+        storeDerivedSavingsPercent(
+              priceMicros: priceMicros,
+              originalPriceMicros: originalMicros,
+            ) !=
+            savingsPercent ||
         !(offerId?.trim().isNotEmpty ?? false) ||
         !(purchaseOfferToken?.trim().isNotEmpty ?? false)) {
       return null;

@@ -62,15 +62,15 @@ void main() {
     );
   });
 
-  test('fresh trial restores until inclusive trial boundary', () {
+  test('fresh trial expires and refreshes at the exact boundary', () {
     final decision = engine.recover(
       snapshot: snapshot(lifecycle: SubscriptionLifecycle.trial, trialEnd: now),
       policy: policy,
       now: now,
     );
 
-    expect(decision.action, SubscriptionRecoveryAction.none);
-    expect(decision.state.plan, CommercePlan.pro);
+    expect(decision.action, SubscriptionRecoveryAction.refreshFromProvider);
+    expect(decision.state.plan, CommercePlan.free);
   });
 
   test('fresh grace snapshot restores through grace boundary', () {
