@@ -8,6 +8,10 @@ on:
         required: true
         default: false
         type: boolean
+      build_number:
+        description: App Store build number; use a value greater than every uploaded build
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -18,13 +22,38 @@ jobs:
     timeout-minutes: 75
     steps:
       - name: Checkout accepted source
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
       - name: Install Flutter stable
-        uses: subosito/flutter-action@v2
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
         with:
-          channel: stable
+          flutter-version: 3.44.6
           cache: true
+
+      - name: Validate release build number and Apple team
+        shell: bash
+        env:
+          BUILD_NUMBER: ${{ inputs.build_number }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          [[ "$BUILD_NUMBER" =~ ^[0-9]+$ ]] || {
+            echo 'build_number must be a positive integer.' >&2
+            exit 1
+          }
+          (( BUILD_NUMBER >= 5 )) || {
+            echo 'build_number must be at least 5 to keep both stores on one release identity.' >&2
+            exit 1
+          }
+          test -n "${APPLE_TEAM_ID:-}" || {
+            echo 'OWNER_INPUT_REQUIRED: APPLE_TEAM_ID' >&2
+            exit 1
+          }
+          grep -Eq "DEVELOPMENT_TEAM = \"?${APPLE_TEAM_ID}\"?;" \
+            ios/Runner.xcodeproj/project.pbxproj || {
+              echo 'Xcode DEVELOPMENT_TEAM does not match APPLE_TEAM_ID.' >&2
+              exit 1
+            }
 
       - name: Require Apple signing inputs
         shell: bash
@@ -47,7 +76,7 @@ jobs:
           test -n "${ASC_PRIVATE_KEY_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_PRIVATE_KEY_BASE64'; exit 1; }
 
       - name: Import distribution certificate
-        uses: apple-actions/import-codesign-certs@v3
+        uses: apple-actions/import-codesign-certs@63fff01cd422d4b7b855d40ca1e9d34d2de9427d
         with:
           p12-file-base64: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_BASE64 }}
           p12-password: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD }}
@@ -61,42 +90,117 @@ jobs:
           set -euo pipefail
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
           PROFILE="$HOME/Library/MobileDevice/Provisioning Profiles/BIL.mobileprovision"
-          printf '%s' "$PROFILE_BASE64" | base64 --decode > "$PROFILE"
+          python3 - "$PROFILE" <<'PY'
+          import base64
+          import binascii
+          import os
+          import pathlib
+          import sys
+
+          try:
+              decoded = base64.b64decode(os.environ['PROFILE_BASE64'], validate=True)
+          except (KeyError, ValueError, binascii.Error) as error:
+              raise SystemExit(f'Invalid provisioning-profile Base64: {error}')
+          pathlib.Path(sys.argv[1]).write_bytes(decoded)
+          PY
           security cms -D -i "$PROFILE" > "$RUNNER_TEMP/BIL-profile.plist"
-          PROFILE_APP_ID="$(/usr/libexec/PlistBuddy -c 'Print :Entitlements:application-identifier' "$RUNNER_TEMP/BIL-profile.plist")"
-          test "$PROFILE_APP_ID" = "$APPLE_TEAM_ID.com.bilhealth.bodyintelligencelog" || {
-            echo 'Provisioning profile does not authorize the BIL production bundle identifier.' >&2
-            exit 1
-          }
-          /usr/libexec/PlistBuddy -c 'Print :Entitlements:com.apple.developer.healthkit' "$RUNNER_TEMP/BIL-profile.plist" \
-            | grep -Eiq 'true|YES' || {
-              echo 'Provisioning profile does not authorize HealthKit.' >&2
-              exit 1
-            }
+          python3 - "$RUNNER_TEMP/BIL-profile.plist" "$APPLE_TEAM_ID" <<'PY'
+          import datetime as dt
+          import plistlib
+          import sys
+
+          profile_path, team_id = sys.argv[1:]
+          with open(profile_path, 'rb') as handle:
+              profile = plistlib.load(handle)
+          entitlements = profile.get('Entitlements', {})
+          expected_app_id = f'{team_id}.com.bilhealth.bodyintelligencelog'
+          if entitlements.get('application-identifier') != expected_app_id:
+              raise SystemExit('Provisioning profile has the wrong application identifier.')
+          if entitlements.get('com.apple.developer.healthkit') is not True:
+              raise SystemExit('Provisioning profile does not authorize HealthKit.')
+          if 'Default' not in entitlements.get('com.apple.developer.applesignin', []):
+              raise SystemExit('Provisioning profile does not authorize Sign in with Apple.')
+          if entitlements.get('aps-environment') != 'production':
+              raise SystemExit('Provisioning profile does not authorize production push.')
+          if entitlements.get('get-task-allow', False) is not False:
+              raise SystemExit('Provisioning profile unexpectedly enables get-task-allow.')
+          expiry = profile.get('ExpirationDate')
+          now = dt.datetime.now(dt.timezone.utc)
+          if expiry is None or expiry.replace(tzinfo=dt.timezone.utc) <= now:
+              raise SystemExit('Provisioning profile is expired.')
+          print('APPLE_PROVISIONING_PROFILE_GATE=PASS')
+          PY
 
       - name: Resolve and validate source
         run: |
           flutter pub get
           flutter analyze --no-pub
           flutter test --no-pub --timeout 30s
+          flutter test --no-pub \
+            test/launch_readiness/system_crypto_export_compliance_contract_test.dart \
+            --timeout 2m
           plutil -lint ios/Runner/Info.plist
           plutil -lint ios/Runner/PrivacyInfo.xcprivacy
           plutil -lint ios/Runner/Runner.entitlements
           plutil -lint ios/Runner/RunnerDebug.entitlements
 
-      - name: Build signed archive
-        env:
-          DEVELOPMENT_TEAM: ${{ secrets.APPLE_TEAM_ID }}
+      - name: Boot iOS Simulator for the system-crypto release gate
+        id: crypto_simulator
         shell: bash
         run: |
           set -euo pipefail
-          sed -i '' "s/DEVELOPMENT_TEAM = \"\";/DEVELOPMENT_TEAM = $DEVELOPMENT_TEAM;/g" ios/Runner.xcodeproj/project.pbxproj
-          flutter build ipa --release --no-pub --export-method app-store
+          UDID="$(xcrun simctl list devices available \
+            | awk -F '[()]' '/iPhone/ {print $2; exit}')"
+          test -n "$UDID" || {
+            echo 'No available iPhone Simulator was found.' >&2
+            exit 1
+          }
+          xcrun simctl boot "$UDID" 2>/dev/null || true
+          xcrun simctl bootstatus "$UDID" -b
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      - name: Run native AES-GCM gate on iOS Simulator
+        shell: bash
+        run: >-
+          flutter test --no-pub
+          integration_test/system_crypto_bridge_integration_test.dart
+          -d "${{ steps.crypto_simulator.outputs.udid }}"
+          --timeout 10m
+
+      - name: Remove system-crypto iOS Simulator
+        if: always() && steps.crypto_simulator.outputs.udid != ''
+        shell: bash
+        env:
+          UDID: ${{ steps.crypto_simulator.outputs.udid }}
+        run: |
+          xcrun simctl shutdown "$UDID" 2>/dev/null || true
+
+      - name: Build signed archive
+        env:
+          BUILD_NUMBER: ${{ inputs.build_number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build ipa --release --no-pub --export-method app-store \
+            --build-number "$BUILD_NUMBER" \
+            --dart-define=BIL_ENVIRONMENT=production \
+            --dart-define=BIL_PAYMENTS_ENABLED=true \
+            --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms \
+            --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy \
+            --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal \
+            --dart-define=BIL_WELLNESS_MANIFEST_URL=https://workouts.bilhealth.com/v2/manifest/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json \
+            --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true \
+            --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=false \
+            --dart-define=BIL_FACEBOOK_LOGIN_READY=false \
+            --dart-define=BIL_ADS_ENABLED=false \
+            --dart-define=BIL_AD_PROVIDER_READY=false \
+            --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
 
       - name: Capture signed IPA evidence
         shell: bash
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          BUILD_NUMBER: ${{ inputs.build_number }}
         run: |
           set -euo pipefail
           IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
@@ -109,9 +213,42 @@ jobs:
             = "$APPLE_TEAM_ID.com.bilhealth.bodyintelligencelog"
           plutil -extract com.apple.developer.healthkit raw BIL-ios-entitlements.plist \
             | grep -Eiq 'true|YES'
+          plutil -extract com.apple.developer.applesignin xml1 BIL-ios-entitlements.plist \
+            | grep -q '<string>Default</string>'
+          test "$(plutil -extract aps-environment raw BIL-ios-entitlements.plist)" = 'production'
+          GET_TASK_ALLOW="$(plutil -extract get-task-allow raw BIL-ios-entitlements.plist 2>/dev/null || printf false)"
+          test "$GET_TASK_ALLOW" = 'false'
           shasum -a 256 "$IPA" | tee BIL-ios-ipa.sha256
           stat -f '%z' "$IPA" | tee BIL-ios-ipa.size
           git rev-parse HEAD | tee BIL-source-head.txt
+          printf '%s\n' "BUILD_NUMBER=$BUILD_NUMBER" > BIL-build-number.txt
+
+      - name: Reject forbidden bundled crypto implementations in signed IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+          IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
+          SCAN_DIR="$RUNNER_TEMP/bil-ios-crypto-scan"
+          rm -rf "$SCAN_DIR"
+          mkdir -p "$SCAN_DIR"
+          unzip -qq "$IPA" -d "$SCAN_DIR"
+          if find "$SCAN_DIR/Payload" -type f -perm -0111 \
+            -exec strings {} + 2>/dev/null \
+            | grep -Eiq 'pointycastle|PcAESEngine|PcPBKDF2KeyDerivator|PcHMac|GCMBlockCipher|ZipCrypto'; then
+            echo 'Forbidden non-OS crypto implementation marker found in signed IPA.' >&2
+            exit 1
+          fi
+          printf '%s\n' 'SIGNED_IPA_FORBIDDEN_CRYPTO_MARKERS=0' \
+            | tee BIL-ios-crypto-scan.txt
+
+      - name: Record code and physical-device gate boundary
+        shell: bash
+        run: |
+          printf '%s\n' \
+            'CODE_GATE=PASS' \
+            'PHYSICAL_DEVICE_GATE=REQUIRED' \
+            'PHYSICAL_DEVICE_SCOPE=HealthKit,Apple Watch via HealthKit,fitness BLE,StoreKit sandbox' \
+            > BIL-ios-gate-status.txt
 
       - name: Validate candidate with App Store Connect
         shell: bash
@@ -122,7 +259,24 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.appstoreconnect/private_keys"
-          printf '%s' "$ASC_PRIVATE_KEY_BASE64" | base64 --decode > "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          ASC_KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          python3 - "$ASC_KEY_PATH" <<'PY'
+          import base64
+          import binascii
+          import os
+          import pathlib
+          import sys
+
+          try:
+              decoded = base64.b64decode(
+                  os.environ['ASC_PRIVATE_KEY_BASE64'],
+                  validate=True,
+              )
+          except (KeyError, ValueError, binascii.Error) as error:
+              raise SystemExit(f'Invalid App Store Connect key Base64: {error}')
+          pathlib.Path(sys.argv[1]).write_bytes(decoded)
+          PY
+          chmod 600 "$ASC_KEY_PATH"
           IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
           xcrun altool --validate-app -f "$IPA" -t ios --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
 
@@ -137,20 +291,6 @@ jobs:
           IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
           xcrun altool --upload-app -f "$IPA" -t ios \
             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
-
-      - name: Upload signed candidate
-        uses: actions/upload-artifact@v4
-        with:
-          name: bil-ios-signed-ipa-${{ github.sha }}
-          if-no-files-found: error
-          retention-days: 14
-          path: |
-            build/ios/ipa/*.ipa
-            BIL-ios-codesign.txt
-            BIL-ios-entitlements.plist
-            BIL-ios-ipa.sha256
-            BIL-ios-ipa.size
-            BIL-source-head.txt
 
       - name: Remove App Store Connect private key
         if: always()
