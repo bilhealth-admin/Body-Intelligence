@@ -270,18 +270,47 @@ extension _OnboardingCoreSteps on _OnboardingPageState {
         TextField(
           key: const Key('onboarding-country'),
           controller: _country,
-          textCapitalization: TextCapitalization.words,
+          readOnly: true,
+          onTap: _pickCountry,
           decoration: InputDecoration(
             labelText: t('Country or region'),
             helperText: '${t('App language')}: ${_draft.localeTag}',
+            suffixIcon: IconButton(
+              tooltip: t('Country or region'),
+              onPressed: _pickCountry,
+              icon: const Icon(Icons.arrow_drop_down_rounded),
+            ),
             border: const OutlineInputBorder(),
           ),
-          onChanged: (value) =>
-              _setDraft(_draft.copyWith(countryRegion: value)),
         ),
       ],
     ),
   );
+
+  void _pickCountry() {
+    showCountryPicker(
+      context: context,
+      useSafeArea: true,
+      showPhoneCode: false,
+      searchAutofocus: true,
+      countryListTheme: CountryListThemeData(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        inputDecoration: InputDecoration(
+          labelText: t('Country or region'),
+          prefixIcon: const Icon(Icons.search_rounded),
+          border: const OutlineInputBorder(),
+        ),
+      ),
+      onSelect: (country) {
+        final localizedName = country.nameLocalized?.trim();
+        final countryName = localizedName == null || localizedName.isEmpty
+            ? country.name.trim()
+            : localizedName;
+        _country.text = countryName;
+        _setDraft(_draft.copyWith(countryRegion: countryName), persist: true);
+      },
+    );
+  }
 
   void _setSex(String value) {
     final oldId = _stepId;

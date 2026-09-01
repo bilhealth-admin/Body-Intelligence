@@ -28,14 +28,21 @@ if (
   throw new Error("generated_workout_object_allowlist_invalid");
 }
 const freePreviewVideoKeys = new Set(freePreviews.videoObjectKeys);
+const freePreviewPosterKeys = new Set(
+  freePreviews.groups.map((group) => group.posterObjectKey),
+);
 if (
   freePreviews.schema !== "bil.workout-media.free-previews.v1" ||
   freePreviews.version !== 1 ||
   freePreviews.groupCount !== 20 ||
   freePreviews.uniqueVideoCount !== 15 ||
   freePreviewVideoKeys.size !== 15 ||
+  freePreviewPosterKeys.size !== 15 ||
   [...freePreviewVideoKeys].some(
     (key) => !videoKey.test(key) || !approvedObjectKeys.has(key),
+  ) ||
+  [...freePreviewPosterKeys].some(
+    (key) => !posterKey.test(key) || !approvedObjectKeys.has(key),
   )
 ) {
   throw new Error("generated_workout_free_preview_allowlist_invalid");
@@ -59,6 +66,10 @@ interface DeliveryPolicy {
 
 const publicManifestPolicy = {
   cacheControl: "public, max-age=300, must-revalidate",
+  varyAuthorization: false,
+} satisfies DeliveryPolicy;
+const publicWorkoutPreviewPolicy = {
+  cacheControl: "public, max-age=31536000, immutable",
   varyAuthorization: false,
 } satisfies DeliveryPolicy;
 const protectedWorkoutPolicy = {
@@ -118,6 +129,23 @@ async function handleRequest(
       return jsonError("not_found", 404, request, env);
     }
 
+    // The app exposes these exact, release-pinned objects as its free preview
+    // without requiring account sync. Keep only that generated allowlist
+    // public; every pack and every non-preview video still enters the
+    // authenticated entitlement boundary below.
+    if (
+      freePreviewVideoKeys.has(objectKey) ||
+      freePreviewPosterKeys.has(objectKey)
+    ) {
+      return serveR2(
+        request,
+        env.WORKOUTS,
+        objectKey,
+        publicWorkoutPreviewPolicy,
+        env,
+      );
+    }
+
     let user: AuthenticatedUser;
     try {
       user = await services.authenticate(bearerToken(request), env);
@@ -132,11 +160,9 @@ async function handleRequest(
         "www-authenticate": 'Bearer realm="bil-workouts"',
       });
     }
-    // Authenticated members may discover every approved poster and play only
-    // the exact generated free-preview video keys. Packs and all other videos
-    // retain the verified Premium entitlement boundary.
-    const freeMemberObject =
-      posterKey.test(objectKey) || freePreviewVideoKeys.has(objectKey);
+    // Authenticated members may discover every remaining approved poster.
+    // Packs and every non-preview video retain the verified Premium boundary.
+    const freeMemberObject = posterKey.test(objectKey);
     if (!freeMemberObject) {
       let entitled: boolean;
       try {

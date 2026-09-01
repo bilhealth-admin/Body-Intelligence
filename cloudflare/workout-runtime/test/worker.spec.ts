@@ -15,6 +15,7 @@ const userId = "d9428888-122b-4f5d-b69f-818f58ab0f12";
 const hs256Token =
   "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkOTQyODg4OC0xMjJiLTRmNWQtYjY5Zi04MThmNThhYjBmMTIifQ.signature";
 const freePreviewKey = freePreviews.videoObjectKeys[0]!;
+const freePreviewPosterKey = freePreviews.groups[0]!.posterObjectKey;
 const paidVideoKey = approvedObjects.keys.find(
   (key) => key.endsWith(".mp4") && !freePreviews.videoObjectKeys.includes(key),
 )!;
@@ -96,12 +97,6 @@ describe("workout runtime Worker", () => {
     );
     expect(unauthenticated.status).toBe(401);
     expect(unauthenticated.headers.get("www-authenticate")).toContain("Bearer");
-    expect(
-      (
-        await dispatch(incoming(`/v2/objects/${freePreviewKey}`))
-      ).status,
-    ).toBe(401);
-
     for (const path of [
       "/v2/objects/workouts/v2/packs/../../secret.json",
       "/v2/objects/workouts/v2/home/posters/not-content-pinned.webp",
@@ -112,10 +107,13 @@ describe("workout runtime Worker", () => {
     }
   });
 
-  it("lets authenticated Free play only an exact generated preview", async () => {
+  it("serves only exact generated free previews without account sync", async () => {
     mockAuthenticated(false);
     await env.WORKOUTS.put(freePreviewKey, "0123456789", {
       httpMetadata: { contentType: "video/mp4" },
+    });
+    await env.WORKOUTS.put(freePreviewPosterKey, "poster", {
+      httpMetadata: { contentType: "image/webp" },
     });
     await env.WORKOUTS.put(paidVideoKey, "premium", {
       httpMetadata: { contentType: "video/mp4" },
@@ -124,15 +122,20 @@ describe("workout runtime Worker", () => {
     const preview = await dispatch(
       incoming(`/v2/objects/${freePreviewKey}`, {
         headers: {
-          authorization: `Bearer ${hs256Token}`,
           range: "bytes=1-3",
         },
       }),
     );
     expect(preview.status).toBe(206);
     expect(preview.headers.get("content-range")).toBe("bytes 1-3/10");
-    expect(preview.headers.get("cache-control")).toContain("private");
+    expect(preview.headers.get("cache-control")).toContain("public");
+    expect(preview.headers.get("vary") ?? "").not.toContain("Authorization");
     expect(new TextDecoder().decode(await preview.arrayBuffer())).toBe("123");
+    expect(
+      (
+        await dispatch(incoming(`/v2/objects/${freePreviewPosterKey}`))
+      ).status,
+    ).toBe(200);
 
     const paid = await dispatch(
       incoming(`/v2/objects/${paidVideoKey}`, {

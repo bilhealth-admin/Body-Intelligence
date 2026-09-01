@@ -170,6 +170,53 @@ void main() {
     },
   );
 
+  testWidgets('facts page offers a searchable country list', (tester) async {
+    await pump(tester, valid(step: 'facts').copyWith(countryRegion: ''));
+
+    final country = find.byKey(const Key('onboarding-country'));
+    await tester.ensureVisible(country);
+    await tester.pumpAndSettle();
+    await tester.tap(country);
+    await tester.pumpAndSettle();
+
+    final searchField = find.byType(TextField).last;
+    await tester.enterText(searchField, 'Egypt');
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Egypt').last);
+    await tester.pumpAndSettle();
+
+    final countryField = tester.widget<TextField>(
+      find.byKey(const Key('onboarding-country')),
+    );
+    expect(countryField.controller!.text, 'Egypt');
+    expect((await drafts.load())!.countryRegion, 'Egypt');
+  });
+
+  testWidgets('target weight proceeds to weekly pace before pace validation', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      valid(
+        step: 'targetWeight',
+      ).copyWith(targetWeightKg: null, weeklyPaceKg: null),
+    );
+
+    await tester.enterText(
+      find.byKey(const Key('onboarding-target-weight')),
+      '70',
+    );
+    await tester.tap(find.byKey(const Key('onboarding-next')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Choose a weekly pace'), findsOneWidget);
+    expect(
+      find.text('Choose one of the safe weekly pace options shown.'),
+      findsNothing,
+    );
+    expect((await drafts.load())!.stepId, 'pace');
+  });
+
   for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
     testWidgets('$platform persists real metric measurements page by page', (
       tester,
