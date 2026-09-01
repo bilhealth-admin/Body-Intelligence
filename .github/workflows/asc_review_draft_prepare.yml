@@ -1,0 +1,45 @@
+name: BIL ASC review draft prepare
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prepare-review-draft:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare private App Store Connect key
+        env:
+          ASC_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+        run: |
+          set -euo pipefail
+          test -n "${ASC_PRIVATE_KEY_BASE64:-}"
+          printf '%s' "$ASC_PRIVATE_KEY_BASE64" | base64 --decode > "$RUNNER_TEMP/asc-api-key.p8"
+          chmod 600 "$RUNNER_TEMP/asc-api-key.p8"
+
+      - name: Prepare one review draft and stop before final submit
+        env:
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          ASC_PRIVATE_KEY_PATH: ${{ runner.temp }}/asc-api-key.p8
+          ASC_REVIEW_DRAFT_OUTPUT: ${{ runner.temp }}/asc-review-draft-result.json
+        run: |
+          set -euo pipefail
+          test -n "${ASC_KEY_ID:-}"
+          test -n "${ASC_ISSUER_ID:-}"
+          node tool/apple_store_connect/asc_review_draft_prepare.mjs
+
+      - name: Publish non-sensitive draft evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asc-review-draft-evidence
+          path: ${{ runner.temp }}/asc-review-draft-result.json
+          if-no-files-found: warn
+          retention-days: 7
+
