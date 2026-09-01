@@ -26,7 +26,7 @@ final class SupabaseStartupCloudProfileReader
     final user = client.auth.currentUser;
     if (owner.isEmpty || user == null || user.id != owner) return null;
 
-    final key = await keyRepository.readCached(owner);
+    final key = await keyRepository.resolveExisting(owner);
     if (key == null) return null;
     final rows = await client
         .from('bil_cloud_records')

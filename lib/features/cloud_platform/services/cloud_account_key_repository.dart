@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -29,6 +30,8 @@ final class FlutterSecureCloudSecretStore implements CloudSecretStore {
   Future<void> delete(String key) => _storage.delete(key: key);
 }
 
+typedef CloudKeyRpcLookup = FutureOr<dynamic> Function(String fnName);
+
 /// Resolves one stable 256-bit account payload key.
 ///
 /// The server stores the canonical account key in Supabase Vault, never in the
@@ -39,13 +42,16 @@ final class CloudAccountKeyRepository {
   CloudAccountKeyRepository({
     required this._client,
     CloudSecretStore? secureStore,
-  }) : _secureStore = secureStore ?? FlutterSecureCloudSecretStore();
+    CloudKeyRpcLookup? rpc,
+  }) : _secureStore = secureStore ?? FlutterSecureCloudSecretStore(),
+       _rpc = rpc ?? ((String fnName) => _client.rpc<dynamic>(fnName));
 
   static const _storagePrefix = 'bil.cloud.payload-key.v1.';
   static const keyByteLength = 32;
 
   final SupabaseClient _client;
   final CloudSecretStore _secureStore;
+  final CloudKeyRpcLookup _rpc;
 
   /// Reads only key material already cached for this authenticated account.
   ///
@@ -63,6 +69,35 @@ final class CloudAccountKeyRepository {
     }
     final cached = await _secureStore.read('$_storagePrefix$owner');
     return cached == null ? null : _decodeAndValidate(cached);
+  }
+
+  Future<Uint8List?> resolveExisting(String ownerId) async {
+    final owner = ownerId.trim();
+    if (owner.isEmpty) {
+      throw ArgumentError.value(ownerId, 'ownerId', 'Must not be empty');
+    }
+    final currentUser = _client.auth.currentUser;
+    if (currentUser == null || currentUser.id != owner) {
+      throw StateError('Cloud key request does not match the active account.');
+    }
+
+    final storageKey = '$_storagePrefix$owner';
+    final cached = await _secureStore.read(storageKey);
+    if (cached != null) {
+      return _decodeAndValidate(cached);
+    }
+
+    final response = await _rpc('bil_get_existing_cloud_key');
+    if (response == null) {
+      return null;
+    }
+    if (response is! String || response.trim().isEmpty) {
+      throw const FormatException('Invalid BIL cloud key response.');
+    }
+    final canonical = response.trim();
+    final key = _decodeAndValidate(canonical);
+    await _secureStore.write(storageKey, canonical);
+    return key;
   }
 
   Future<Uint8List> resolve(String ownerId) async {

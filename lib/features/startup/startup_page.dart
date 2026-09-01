@@ -23,26 +23,21 @@ final startupCloudProfileRestoreProvider = FutureProvider.autoDispose
           Supabase.instance.client.auth.currentUser?.id != ownerId) {
         return false;
       }
-      try {
-        final repository = ref.read(userProfileRepositoryProvider);
-        if (await repository.getProfile() != null) return true;
+      final repository = ref.read(userProfileRepositoryProvider);
+      if (await repository.getProfile() != null) return true;
 
-        final binding = await ref.read(localDataAccountBindingProvider.future);
-        if (binding == null || binding.requiresAccountResolution) return false;
+      final binding = await ref.read(localDataAccountBindingProvider.future);
+      if (binding == null || binding.requiresAccountResolution) return false;
 
-        final restored = await ref
-            .read(startupCloudProfileRestoreServiceProvider)
-            .restore(ownerId);
-        if (!restored || await repository.getProfile() == null) {
-          return false;
-        }
-
-        ref.invalidate(userProfileProvider);
-        await ref.read(userProfileProvider.future);
-        return true;
-      } on Object {
+      final restored = await ref
+          .read(startupCloudProfileRestoreServiceProvider)
+          .restore(ownerId);
+      if (!restored || await repository.getProfile() == null) {
         return false;
       }
+      ref.invalidate(userProfileProvider);
+      await ref.read(userProfileProvider.future);
+      return true;
     });
 
 class StartupPage extends ConsumerStatefulWidget {

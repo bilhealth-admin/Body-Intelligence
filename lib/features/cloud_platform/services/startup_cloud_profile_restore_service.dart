@@ -38,9 +38,9 @@ final class StartupCloudProfileRestoreService {
     if (owner.isEmpty || timeout <= Duration.zero) return false;
     try {
       return await _restore(owner).timeout(timeout);
-    } on Object {
-      // Startup is local-first: timeout, offline, missing key, malformed remote
-      // data, or a session switch simply leaves onboarding routing in control.
+    } on TimeoutException {
+      // Startup remains bounded. Timeout means we keep the caller in a safe
+      // retryable state without entering indefinite onboarding loops.
       return false;
     }
   }

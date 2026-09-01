@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:body_intelligence_log/features/cloud_platform/domain/cloud_sync_models.dart';
 import 'package:body_intelligence_log/features/cloud_platform/services/startup_cloud_profile_restore_service.dart';
@@ -72,6 +73,26 @@ void main() {
       expect(applied, 1);
     },
   );
+
+  test('network-like restore failures are surfaced for retry', () async {
+    final service = _service(
+      currentOwner: owner,
+      boundOwner: owner,
+      reader: _Reader(error: const SocketException('offline')),
+    );
+
+    await expectLater(service.restore(owner), throwsA(isA<SocketException>()));
+  });
+
+  test('decode-time validation failures are surfaced for retry', () async {
+    final service = _service(
+      currentOwner: owner,
+      boundOwner: owner,
+      reader: _Reader(error: const FormatException('bad key')),
+    );
+
+    await expectLater(service.restore(owner), throwsA(isA<FormatException>()));
+  });
 }
 
 StartupCloudProfileRestoreService _service({
@@ -100,15 +121,17 @@ CloudRecordEnvelope _profile(String ownerId) => CloudRecordEnvelope(
 );
 
 final class _Reader implements StartupCloudProfileReader {
-  _Reader({this.profile, this.pending});
+  _Reader({this.profile, this.pending, this.error});
 
   final CloudRecordEnvelope? profile;
   final Completer<CloudRecordEnvelope?>? pending;
+  final Object? error;
   int calls = 0;
 
   @override
   Future<CloudRecordEnvelope?> readLatestProfile(String ownerId) {
     calls++;
+    if (error != null) throw error!;
     return pending?.future ?? Future.value(profile);
   }
 }

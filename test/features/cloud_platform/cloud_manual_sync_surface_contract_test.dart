@@ -41,13 +41,15 @@ void main() {
       startupReader,
       contains(".eq('entity_kind', CloudEntityKind.profile.name)"),
     );
-    expect(startupReader, contains('readCached(owner)'));
+    expect(startupReader, contains('resolveExisting(owner)'));
+    expect(startupReader, contains('bil_get_existing_cloud_key'));
     for (final remoteMutation in const <String>[
       '.insert(',
       '.upsert(',
       '.update(',
       '.delete(',
       'bil_sync_records',
+      'readCached(owner)',
       'bil_get_or_create_cloud_key',
     ]) {
       expect(startupReader, isNot(contains(remoteMutation)));

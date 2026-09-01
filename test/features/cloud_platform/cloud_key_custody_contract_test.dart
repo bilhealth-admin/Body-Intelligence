@@ -20,8 +20,36 @@ void main() {
     );
     expect(
       source,
-      contains('revoke all on public.bil_cloud_key_refs from public, anon, authenticated'),
+      contains(
+        'revoke all on public.bil_cloud_key_refs from public, anon, authenticated',
+      ),
     );
+  });
+
+  test('existing-cloud-key RPC enforces consent-only read and no key creation', () {
+    final source = File(
+      'supabase/migrations/20260901000000_bil_existing_cloud_key_recovery.sql',
+    ).readAsStringSync();
+
+    expect(source, contains('public.bil_get_existing_cloud_key()'));
+    expect(source, contains('extensions, pg_temp'));
+    expect(source, contains("where purpose = 'cloud_sync'"));
+    expect(source, contains('vault_secret_id'));
+    expect(source, contains('vault.decrypted_secrets'));
+    expect(source, contains('return null'));
+    expect(
+      source,
+      contains(
+        'revoke all on function public.bil_get_existing_cloud_key() from public, anon',
+      ),
+    );
+    expect(
+      source,
+      contains(
+        'grant execute on function public.bil_get_existing_cloud_key() to authenticated',
+      ),
+    );
+    expect(source, isNot(contains('vault.create_secret')));
   });
 
   test('client key cache uses secure storage, not SharedPreferences', () {
