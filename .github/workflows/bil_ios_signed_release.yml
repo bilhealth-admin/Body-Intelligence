@@ -361,6 +361,23 @@ jobs:
           xcrun altool --upload-app -f "$IPA" -t ios \
             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
 
+      - name: Upload signed IPA and validation evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: bil-ios-signed-ipa-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            build/ios/ipa/*.ipa
+            BIL-ios-codesign.txt
+            BIL-ios-entitlements.plist
+            BIL-ios-ipa.sha256
+            BIL-ios-ipa.size
+            BIL-ios-crypto-scan.txt
+            BIL-ios-gate-status.txt
+            BIL-build-number.txt
+            BIL-source-head.txt
+
       - name: Remove App Store Connect private key
         if: always()
         shell: bash

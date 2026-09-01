@@ -36,13 +36,7 @@ final class StartupCloudProfileRestoreService {
   Future<bool> restore(String ownerId) async {
     final owner = ownerId.trim();
     if (owner.isEmpty || timeout <= Duration.zero) return false;
-    try {
-      return await _restore(owner).timeout(timeout);
-    } on TimeoutException {
-      // Startup remains bounded. Timeout means we keep the caller in a safe
-      // retryable state without entering indefinite onboarding loops.
-      return false;
-    }
+    return _restore(owner).timeout(timeout);
   }
 
   Future<bool> _restore(String ownerId) async {

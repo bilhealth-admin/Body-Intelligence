@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:country_picker/country_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -387,6 +388,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           return t('Review this information before continuing.');
         }
       case 'targetWeight':
+        final validation = OnboardingPlanCalculator.validateTargetWeight(
+          _draft,
+        );
+        return validation.isValid ? null : _validationMessage(validation.code!);
       case 'pace':
       case 'plan':
         final validation = OnboardingPlanCalculator.validate(_draft);
@@ -610,7 +615,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       key: Key('onboarding-photo-$step'),
       image: AssetImage(asset),
       alignment: focalAlignment,
-      height: 120,
+      height: 192,
     );
   }
 }

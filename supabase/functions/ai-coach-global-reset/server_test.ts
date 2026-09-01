@@ -404,32 +404,39 @@ Deno.test("custom notification requires exact non-empty safe text", async () => 
   );
 });
 
-Deno.test("canned notices reject injected text and conflicting targets", async () => {
-  for (
-    const body of [
-      {
-        operation: "notification",
-        notification_kind: "gift",
-        audience: "all",
-        message: "override",
-        idempotency_key: "admin-notification-request-0006",
-      },
-      {
-        operation: "notification",
-        notification_kind: "gift",
-        audience: "all",
-        email: "person@example.com",
-        idempotency_key: "admin-notification-request-0007",
-      },
-    ]
-  ) {
-    const calls: Call[] = [];
-    const response = await handler(request(body), {
-      clients: fakeClients({ allowed: true, calls }),
-    });
-    assertEquals(response.status, 400);
-    assertEquals(calls.map((call) => call.name), [
-      "bil_can_manage_ai_coach",
-    ]);
-  }
+Deno.test("authored gift keeps exact text for the atomic Boost grant", async () => {
+  const calls: Call[] = [];
+  const response = await handler(
+    request({
+      operation: "notification",
+      notification_kind: "gift",
+      audience: "all",
+      message: "  Exact administrator gift message.  ",
+      idempotency_key: "admin-notification-request-0006",
+    }),
+    { clients: fakeClients({ allowed: true, calls }) },
+  );
+  assertEquals(response.status, 200);
+  assertEquals(calls.map((call) => call.name), [
+    "bil_can_manage_ai_coach",
+    "bil_consume_rate_limit",
+    "bil_enqueue_admin_notification_with_message",
+  ]);
+  assertEquals(calls[2].args?.p_message, "Exact administrator gift message.");
+});
+
+Deno.test("broadcast notification rejects a conflicting email target", async () => {
+  const calls: Call[] = [];
+  const response = await handler(
+    request({
+      operation: "notification",
+      notification_kind: "gift",
+      audience: "all",
+      email: "person@example.com",
+      idempotency_key: "admin-notification-request-0007",
+    }),
+    { clients: fakeClients({ allowed: true, calls }) },
+  );
+  assertEquals(response.status, 400);
+  assertEquals(calls.map((call) => call.name), ["bil_can_manage_ai_coach"]);
 });

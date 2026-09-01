@@ -286,8 +286,10 @@ class ModernOnboardingPhotoHero extends StatelessWidget {
     final compactHeight = media.size.height < 650;
     final resolvedHeight = scale >= 1.8
         ? 80.0
-        : scale >= 1.4 || compactHeight
+        : scale >= 1.4
         ? 96.0
+        : compactHeight && height > 160
+        ? 160.0
         : height;
     return ExcludeSemantics(
       child: SizedBox(

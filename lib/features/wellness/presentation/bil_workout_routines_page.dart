@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,6 +31,7 @@ import 'workout_video_group_copy.dart';
 part 'bil_workout_routines_list.dart';
 part 'bil_workout_routine_details.dart';
 part 'bil_workout_routine_media.dart';
+part 'bil_workout_fullscreen_video.dart';
 part 'bil_workout_routine_presenters.dart';
 part 'bil_workout_routine_visuals.dart';
 part 'bil_custom_workout_routines.dart';

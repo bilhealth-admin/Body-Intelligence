@@ -11,6 +11,10 @@ void main() {
       // preserves source/placeholder reviewability; behavior lives elsewhere.
       'lib/app/localization/runtime_copy_profile.dart': 1300,
       'lib/app/localization/runtime_copy_release_closure.dart': 1075,
+      // Data-only 25-locale matrix for the admin notification surface. The
+      // resolver is intentionally kept beside the audited catalog so missing
+      // locales and placeholders remain reviewable as one complete contract.
+      'lib/app/localization/runtime_copy_admin_notifications.dart': 875,
       'lib/features/profile/profile_locale_copy.dart': 875,
       // This part owns one cohesive phone composition. Its reusable cards,
       // goal controls, and discover sections already live in sibling parts;

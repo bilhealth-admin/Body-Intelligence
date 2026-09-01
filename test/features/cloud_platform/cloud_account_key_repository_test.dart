@@ -2,8 +2,6 @@ import 'dart:convert';
 
 import 'package:body_intelligence_log/features/cloud_platform/services/cloud_account_key_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gotrue/gotrue.dart';
-import 'package:postgrest/postgrest.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
@@ -14,13 +12,7 @@ void main() {
   test('local cached key is used and skips RPC call', () async {
     final calls = <String>[];
     final repository = CloudAccountKeyRepository(
-      client: _FakeSupabaseClient(
-        user: _user(ownerId),
-        rpc: (fnName) {
-          calls.add(fnName);
-          return fail('RPC must not be called for cached key');
-        },
-      ),
+      client: _FakeSupabaseClient(user: _user(ownerId)),
       secureStore: _InMemorySecretStore(
         initialValues: {'bil.cloud.payload-key.v1.$ownerId': validEncoded},
       ),
@@ -32,7 +24,7 @@ void main() {
 
     final key = await repository.resolveExisting(ownerId);
     expect(key, isNotNull);
-    expect(key.length, 32);
+    expect(key!.length, 32);
     expect(calls, isEmpty);
   });
 
@@ -42,7 +34,7 @@ void main() {
       final calls = <String>[];
       final store = _InMemorySecretStore();
       final repository = CloudAccountKeyRepository(
-        client: _FakeSupabaseClient(user: _user(ownerId), rpc: (_) => null),
+        client: _FakeSupabaseClient(user: _user(ownerId)),
         secureStore: store,
         rpc: (fnName) {
           calls.add(fnName);
@@ -55,7 +47,7 @@ void main() {
 
       final key = await repository.resolveExisting(ownerId);
       expect(key, isNotNull);
-      expect(key.length, 32);
+      expect(key!.length, 32);
       expect(store.readSync('bil.cloud.payload-key.v1.$ownerId'), validEncoded);
       expect(store.writeCount, 1);
       expect(calls, ['bil_get_existing_cloud_key']);
@@ -68,7 +60,7 @@ void main() {
       final calls = <String>[];
       final store = _InMemorySecretStore();
       final repository = CloudAccountKeyRepository(
-        client: _FakeSupabaseClient(user: _user(ownerId), rpc: (_) => null),
+        client: _FakeSupabaseClient(user: _user(ownerId)),
         secureStore: store,
         rpc: (fnName) {
           calls.add(fnName);
@@ -85,7 +77,7 @@ void main() {
   test('owner mismatch is rejected before reading cache', () async {
     final calls = <String>[];
     final repository = CloudAccountKeyRepository(
-      client: _FakeSupabaseClient(user: _user(ownerMismatch), rpc: (_) => null),
+      client: _FakeSupabaseClient(user: _user(ownerMismatch)),
       secureStore: _InMemorySecretStore(
         initialValues: {'bil.cloud.payload-key.v1.$ownerId': validEncoded},
       ),
@@ -108,7 +100,7 @@ void main() {
       initialValues: {'bil.cloud.payload-key.v1.$ownerId': 'not-base64'},
     );
     final repository = CloudAccountKeyRepository(
-      client: _FakeSupabaseClient(user: _user(ownerId), rpc: (_) => null),
+      client: _FakeSupabaseClient(user: _user(ownerId)),
       secureStore: store,
       rpc: (fnName) {
         calls.add(fnName);
@@ -154,12 +146,10 @@ final class _InMemorySecretStore implements CloudSecretStore {
 }
 
 final class _FakeSupabaseClient extends Fake implements SupabaseClient {
-  _FakeSupabaseClient({required User user, required CloudKeyRpcLookup rpc})
-    : _authClient = _FakeAuthClient(user),
-      _rpc = rpc;
+  _FakeSupabaseClient({required User user})
+    : _authClient = _FakeAuthClient(user);
 
   final _FakeAuthClient _authClient;
-  final CloudKeyRpcLookup _rpc;
 
   @override
   GoTrueClient get auth => _authClient;
@@ -168,8 +158,8 @@ final class _FakeSupabaseClient extends Fake implements SupabaseClient {
   PostgrestFilterBuilder<T> rpc<T>(
     String fn, {
     Map<String, dynamic>? params,
-    bool get = false,
-  }) => _ImmediateRpcResult<T>(_rpc(fn)) as PostgrestFilterBuilder<T>;
+    dynamic get = false,
+  }) => throw UnsupportedError('RPC is injected directly in these tests.');
 }
 
 final class _FakeAuthClient extends Fake implements GoTrueClient {
@@ -177,21 +167,6 @@ final class _FakeAuthClient extends Fake implements GoTrueClient {
 
   @override
   final User currentUser;
-}
-
-final class _ImmediateRpcResult<T> extends Fake
-    implements PostgrestFilterBuilder<T> {
-  _ImmediateRpcResult(this.value);
-
-  final T value;
-
-  @override
-  Future<R> then<R>(
-    FutureOr<R> Function(T value) onValue, {
-    Function? onError,
-  }) {
-    return Future<T>.value(value).then(onValue, onError: onError);
-  }
 }
 
 User _user(String id) => User(

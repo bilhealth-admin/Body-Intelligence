@@ -32,12 +32,15 @@ The Worker exposes three routes:
 
 - `GET|HEAD /v2/manifest/<exact-sha-pinned-name>.json` is public. No alias or
   mutable `latest.json` route exists.
-- `GET|HEAD /v2/objects/<allowlisted-key>` requires a valid Supabase Bearer JWT
-  and a current premium entitlement. The Worker checks asymmetric JWTs against
-  the Supabase JWKS, delegates legacy HS256 validation to Supabase Auth, then
-  queries owner-scoped subscription/closed-test rows through RLS with the same
-  user token. Public JWKS are cached briefly per isolate; entitlement rows are
-  not cached. The boundary fails closed on unavailable or stale authority.
+- `GET|HEAD /v2/objects/<allowlisted-key>` serves only the generated set of 15
+  free-preview videos and their 15 exact posters without account sync. Every
+  other object requires a valid Supabase Bearer JWT; packs and non-preview
+  videos additionally require a current premium entitlement. The Worker checks
+  asymmetric JWTs against the Supabase JWKS, delegates legacy HS256 validation
+  to Supabase Auth, then queries owner-scoped subscription/closed-test rows
+  through RLS with the same user token. Public JWKS are cached briefly per
+  isolate; entitlement rows are not cached. The boundary fails closed on
+  unavailable or stale authority.
 - `GET|HEAD /v3/recipes/images/<canonical-id>/<sha256>` is a public discovery
   preview. The path must match one exact manifest ID and its exact digest; it
   never accepts an R2 key, filename alias, encoded alias, or mutable latest
@@ -130,11 +133,12 @@ Deployment requires explicit release approval. Once approved:
    `workouts.bilhealth.com` only after staging inventory succeeds.
 7. Smoke-test the exact public manifest URL from
    `artifacts/workout_media/cloudflare_runtime_v2/runtime_build_summary_v2.json`.
-   Confirm an uncredentialed protected request returns 401, a free account
-   returns 403, an entitled account returns 200/206, and a wrong SHA filename
-   returns 404. For recipes, confirm an exact ID+SHA returns 200/206 with the
-   pinned length/MIME/SHA header, while a wrong digest, object key, encoded
-   alias, or mismatched R2 metadata returns 404/502 as appropriate.
+   Confirm an exact generated free preview returns 200/206 without credentials,
+   an uncredentialed paid request returns 401, a free account returns 403, an
+   entitled account returns 200/206, and a wrong SHA filename returns 404. For
+   recipes, confirm an exact ID+SHA returns 200/206 with the pinned
+   length/MIME/SHA header, while a wrong digest, object key, encoded alias, or
+   mismatched R2 metadata returns 404/502 as appropriate.
 8. Build Flutter with the exact immutable manifest URL, for example:
 
    ```powershell

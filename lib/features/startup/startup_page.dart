@@ -41,7 +41,11 @@ final startupCloudProfileRestoreProvider = FutureProvider.autoDispose
     });
 
 class StartupPage extends ConsumerStatefulWidget {
-  const StartupPage({super.key});
+  const StartupPage({super.key, this.authClient});
+
+  /// Optional authentication seam for deterministic widget tests.
+  /// Production callers leave this null and use the initialized Supabase auth.
+  final GoTrueClient? authClient;
 
   @override
   ConsumerState<StartupPage> createState() => _StartupPageState();
@@ -76,13 +80,13 @@ class _StartupPageState extends ConsumerState<StartupPage>
   }
 
   void _beginAuthResolution() {
-    if (!AppEnvironment.supabaseRuntimeReady) {
+    if (widget.authClient == null && !AppEnvironment.supabaseRuntimeReady) {
       authStateResolved = true;
       authSession = null;
       return;
     }
 
-    final auth = Supabase.instance.client.auth;
+    final auth = widget.authClient ?? Supabase.instance.client.auth;
     authSession = auth.currentSession;
     if (authSession != null) {
       authStateResolved = true;

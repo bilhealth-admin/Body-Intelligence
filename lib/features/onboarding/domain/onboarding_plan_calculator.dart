@@ -76,6 +76,49 @@ final class OnboardingPlanCalculator {
     if (height == null || !height.isFinite || height < 120 || height > 250) {
       return const OnboardingPlanValidation.invalid('height_out_of_range');
     }
+
+    final targetValidation = validateTargetWeight(draft);
+    if (!targetValidation.isValid) return targetValidation;
+
+    final pace = draft.weeklyPaceKg ?? 0;
+    if (draft.primaryWeightGoal == 'maintain') {
+      if (pace.abs() > .001) {
+        return const OnboardingPlanValidation.invalid(
+          'maintenance_pace_must_be_zero',
+        );
+      }
+    } else if (!pace.isFinite || pace <= 0 || pace > maxSafePaceKg(draft)) {
+      return const OnboardingPlanValidation.invalid('pace_out_of_range');
+    }
+
+    for (final value in <double?>[draft.waistCm, draft.neckCm, draft.hipsCm]) {
+      if (value != null && (!value.isFinite || value < 20 || value > 300)) {
+        return const OnboardingPlanValidation.invalid(
+          'measurement_out_of_range',
+        );
+      }
+    }
+    if (draft.sex == 'male' &&
+        draft.waistCm != null &&
+        draft.neckCm != null &&
+        draft.waistCm! <= draft.neckCm!) {
+      return const OnboardingPlanValidation.invalid('waist_must_exceed_neck');
+    }
+    if (draft.sex == 'female' &&
+        draft.waistCm != null &&
+        draft.neckCm != null &&
+        draft.hipsCm != null &&
+        draft.waistCm! + draft.hipsCm! <= draft.neckCm!) {
+      return const OnboardingPlanValidation.invalid(
+        'circumference_relationship_invalid',
+      );
+    }
+    return const OnboardingPlanValidation.valid();
+  }
+
+  /// Validates only the values that are available on the target-weight step.
+  /// Weekly pace belongs to the following step and must not block navigation.
+  static OnboardingPlanValidation validateTargetWeight(OnboardingDraft draft) {
     final current = draft.currentWeightKg;
     final target = draft.targetWeightKg;
     if (current == null || !current.isFinite || current < 20 || current > 500) {
@@ -111,40 +154,6 @@ final class OnboardingPlanCalculator {
           );
         }
         break;
-    }
-
-    final pace = draft.weeklyPaceKg ?? 0;
-    if (draft.primaryWeightGoal == 'maintain') {
-      if (pace.abs() > .001) {
-        return const OnboardingPlanValidation.invalid(
-          'maintenance_pace_must_be_zero',
-        );
-      }
-    } else if (!pace.isFinite || pace <= 0 || pace > maxSafePaceKg(draft)) {
-      return const OnboardingPlanValidation.invalid('pace_out_of_range');
-    }
-
-    for (final value in <double?>[draft.waistCm, draft.neckCm, draft.hipsCm]) {
-      if (value != null && (!value.isFinite || value < 20 || value > 300)) {
-        return const OnboardingPlanValidation.invalid(
-          'measurement_out_of_range',
-        );
-      }
-    }
-    if (draft.sex == 'male' &&
-        draft.waistCm != null &&
-        draft.neckCm != null &&
-        draft.waistCm! <= draft.neckCm!) {
-      return const OnboardingPlanValidation.invalid('waist_must_exceed_neck');
-    }
-    if (draft.sex == 'female' &&
-        draft.waistCm != null &&
-        draft.neckCm != null &&
-        draft.hipsCm != null &&
-        draft.waistCm! + draft.hipsCm! <= draft.neckCm!) {
-      return const OnboardingPlanValidation.invalid(
-        'circumference_relationship_invalid',
-      );
     }
     return const OnboardingPlanValidation.valid();
   }

@@ -32,8 +32,8 @@ void main() {
     ).readAsStringSync();
 
     expect(source, contains('public.bil_get_existing_cloud_key()'));
-    expect(source, contains('extensions, pg_temp'));
-    expect(source, contains("where purpose = 'cloud_sync'"));
+    expect(source, contains("set search_path = ''"));
+    expect(source, matches(RegExp(r"\bpurpose\s*=\s*'cloud_sync'")));
     expect(source, contains('vault_secret_id'));
     expect(source, contains('vault.decrypted_secrets'));
     expect(source, contains('return null'));

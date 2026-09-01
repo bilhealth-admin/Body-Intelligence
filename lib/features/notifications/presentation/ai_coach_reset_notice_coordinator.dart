@@ -251,7 +251,10 @@ class _AiCoachResetNoticeCoordinatorState
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                if (resetNotice != null) ...[
+                                if (resetNotice != null ||
+                                    (adminNotice != null &&
+                                        adminNotice.kind !=
+                                            BilAdminNoticeKind.custom)) ...[
                                   const SizedBox(height: 5),
                                   TextButton(
                                     key: const Key(

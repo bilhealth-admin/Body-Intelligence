@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:body_intelligence_log/app/environment/app_environment.dart';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/cloud_platform/providers/cloud_sync_providers.dart';
 import 'package:body_intelligence_log/features/cloud_platform/services/cloud_runtime_access_gate.dart';
@@ -9,11 +7,11 @@ import 'package:body_intelligence_log/features/cloud_platform/services/cloud_run
 import 'package:body_intelligence_log/features/cloud_platform/services/local_data_account_boundary.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:body_intelligence_log/features/startup/startup_page.dart';
+import 'package:body_intelligence_log/features/weight/providers/weight_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gotrue/gotrue.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -22,10 +20,10 @@ void main() {
     'cloud profile restore success routes signed-in users to dashboard',
     (tester) async {
       const ownerId = 'owner-restored-dashboard';
-      await _seedSignedInSession(ownerId);
 
       await tester.pumpWidget(
         _app(
+          authClient: _FakeGoTrueClient(_session(ownerId)),
           overrides: [
             userProfileProvider.overrideWith((ref) => Stream.value(null)),
             dailyCheckInDueProvider.overrideWith((ref) async => false),
@@ -48,7 +46,7 @@ void main() {
       );
 
       await tester.pump(const Duration(milliseconds: 2300));
-      await tester.pumpAndSettle();
+      await _pumpUntilVisible(tester, find.text('Dashboard Page'));
       expect(find.text('Dashboard Page'), findsOneWidget);
       expect(find.text('Onboarding Page'), findsNothing);
     },
@@ -58,10 +56,10 @@ void main() {
     'recover errors keep startup retryable and do not route to onboarding',
     (tester) async {
       const ownerId = 'owner-restored-network-error';
-      await _seedSignedInSession(ownerId);
 
       await tester.pumpWidget(
         _app(
+          authClient: _FakeGoTrueClient(_session(ownerId)),
           overrides: [
             userProfileProvider.overrideWith((ref) => Stream.value(null)),
             dailyCheckInDueProvider.overrideWith((ref) async => false),
@@ -84,7 +82,7 @@ void main() {
       );
 
       await tester.pump(const Duration(milliseconds: 2300));
-      await tester.pumpAndSettle();
+      await _pumpUntilVisible(tester, find.text('تعذّر فتح بياناتك المحلية'));
 
       expect(find.text('تعذّر فتح بياناتك المحلية'), findsOneWidget);
       expect(find.byIcon(Icons.refresh), findsOneWidget);
@@ -96,10 +94,10 @@ void main() {
     tester,
   ) async {
     const ownerId = 'owner-new-account';
-    await _seedSignedInSession(ownerId);
 
     await tester.pumpWidget(
       _app(
+        authClient: _FakeGoTrueClient(_session(ownerId)),
         overrides: [
           userProfileProvider.overrideWith((ref) => Stream.value(null)),
           dailyCheckInDueProvider.overrideWith((ref) async => false),
@@ -122,34 +120,57 @@ void main() {
     );
 
     await tester.pump(const Duration(milliseconds: 2300));
-    await tester.pumpAndSettle();
+    await _pumpUntilVisible(tester, find.text('Onboarding Page'));
 
     expect(find.text('Onboarding Page'), findsOneWidget);
     expect(find.text('Dashboard Page'), findsNothing);
   });
 }
 
-Widget _app({required List<Override> overrides}) => ProviderScope(
-  overrides: overrides,
-  child: MaterialApp.router(
-    locale: const Locale('ar'),
-    routerConfig: _router(),
-    supportedLocales: AppLocalizations.supportedLocales,
-    localizationsDelegates: const [
-      AppLocalizations.delegate,
-      GlobalMaterialLocalizations.delegate,
-      GlobalWidgetsLocalizations.delegate,
-      GlobalCupertinoLocalizations.delegate,
-    ],
-  ),
-);
+Future<void> _pumpUntilVisible(
+  WidgetTester tester,
+  Finder finder, {
+  int maxPumps = 50,
+}) async {
+  for (var index = 0; index < maxPumps; index++) {
+    await tester.pump(const Duration(milliseconds: 100));
+    if (finder.evaluate().isNotEmpty) return;
+  }
+  final visibleText = tester
+      .widgetList<Text>(find.byType(Text))
+      .map((widget) => widget.data)
+      .whereType<String>()
+      .toList(growable: false);
+  throw TestFailure(
+    'Expected widget did not appear within the bounded wait. '
+    'Visible text: $visibleText',
+  );
+}
 
-GoRouter _router() => GoRouter(
+Widget _app({required dynamic overrides, required GoTrueClient authClient}) =>
+    ProviderScope(
+      overrides: overrides,
+      child: MaterialApp.router(
+        locale: const Locale('ar'),
+        routerConfig: _router(authClient),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+      ),
+    );
+
+GoRouter _router(GoTrueClient authClient) => GoRouter(
   routes: [
     GoRoute(
       path: '/startup',
-      builder: (context, state) =>
-          const MediaQuery(data: MediaQueryData(), child: StartupPage()),
+      builder: (context, state) => MediaQuery(
+        data: const MediaQueryData(),
+        child: StartupPage(authClient: authClient),
+      ),
     ),
     GoRoute(
       path: '/onboarding',
@@ -176,27 +197,6 @@ final _cleanBinding = LocalDataAccountBinding(
   hasSubstantiveLocalData: false,
 );
 
-String _fakeJwt(String userId) {
-  final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-  final header = base64Url
-      .encode(utf8.encode('{"alg":"HS256","typ":"JWT"}'))
-      .replaceAll('=', '');
-  final payload = base64Url
-      .encode(
-        utf8.encode(
-          jsonEncode({
-            'iss': 'test',
-            'aud': 'authenticated',
-            'sub': userId,
-            'exp': now + 3600,
-            'iat': now,
-          }),
-        ),
-      )
-      .replaceAll('=', '');
-  return '$header.$payload.';
-}
-
 User _fakeUser(String id) => User(
   id: id,
   appMetadata: const {},
@@ -205,22 +205,20 @@ User _fakeUser(String id) => User(
   createdAt: DateTime.now().toIso8601String(),
 );
 
-Future<void> _seedSignedInSession(String ownerId) async {
-  if (!Supabase.instance.isInitialized) {
-    await Supabase.initialize(
-      url: AppEnvironment.supabaseUrl,
-      anonKey: AppEnvironment.supabaseAnonKey,
-    );
-  }
+Session _session(String ownerId) => Session(
+  accessToken: 'test-access-token',
+  expiresIn: 3600,
+  refreshToken: 'refresh-$ownerId',
+  tokenType: 'bearer',
+  user: _fakeUser(ownerId),
+);
 
-  final session = Session(
-    accessToken: _fakeJwt(ownerId),
-    expiresIn: 3600,
-    refreshToken: 'refresh-$ownerId',
-    tokenType: 'bearer',
-    user: _fakeUser(ownerId),
-  );
-  await Supabase.instance.client.auth.recoverSession(
-    jsonEncode(session.toJson()),
-  );
+final class _FakeGoTrueClient extends Fake implements GoTrueClient {
+  _FakeGoTrueClient(this.currentSession);
+
+  @override
+  final Session? currentSession;
+
+  @override
+  Stream<AuthState> get onAuthStateChange => const Stream<AuthState>.empty();
 }

@@ -452,7 +452,7 @@ class _AdminNotificationComposerState
               const SizedBox(height: 8),
               Text(_description),
               const SizedBox(height: 18),
-              if (custom) ...[
+              ...[
                 TextFormField(
                   key: const Key('admin-notification-custom-message'),
                   controller: _messageController,
@@ -486,7 +486,7 @@ class _AdminNotificationComposerState
                   ),
                   validator: (value) {
                     final text = value?.trim() ?? '';
-                    if (text.isEmpty) {
+                    if (custom && text.isEmpty) {
                       return _copy(
                         'Write a message before continuing.',
                         ar: 'اكتب الرسالة قبل المتابعة.',
@@ -658,9 +658,9 @@ class _AdminNotificationComposerState
         email: _audience == AiCoachAdminNotificationAudience.email
             ? _emailController.text.trim().toLowerCase()
             : null,
-        message: widget.kind == AiCoachAdminNotificationKind.custom
-            ? _messageController.text.trim()
-            : null,
+        message: _messageController.text.trim().isEmpty
+            ? null
+            : _messageController.text.trim(),
       ),
     );
   }

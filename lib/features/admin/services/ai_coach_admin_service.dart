@@ -127,8 +127,7 @@ final class SupabaseAiCoachAdminGateway implements AiCoachAdminGateway {
         'audience': audience.wireValue,
         if (audience == AiCoachAdminNotificationAudience.email)
           'email': email?.trim().toLowerCase(),
-        if (kind == AiCoachAdminNotificationKind.custom)
-          'message': message?.trim(),
+        if (message?.trim().isNotEmpty == true) 'message': message!.trim(),
         'idempotency_key': idempotencyKey,
       },
     );

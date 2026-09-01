@@ -36,7 +36,7 @@ void main() {
     expect(applied, 0);
   });
 
-  test('timeout fails local-first without applying a profile', () async {
+  test('timeout is surfaced for retry without applying a profile', () async {
     var applied = 0;
     final service = _service(
       currentOwner: owner,
@@ -49,7 +49,7 @@ void main() {
       },
     );
 
-    expect(await service.restore(owner), isFalse);
+    await expectLater(service.restore(owner), throwsA(isA<TimeoutException>()));
     expect(applied, 0);
   });
 

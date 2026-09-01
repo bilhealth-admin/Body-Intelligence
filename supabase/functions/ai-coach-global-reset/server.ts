@@ -265,14 +265,15 @@ export async function handler(
         return json({ error: "invalid_notification_audience" }, 400);
       }
       if (
-        notificationKind === "custom"
-          ? typeof body.message !== "string" ||
-            characterLength(message) < 1 ||
-            characterLength(message) > 180 ||
-            containsControlCharacter(message)
-          : body.message != null &&
-            (typeof body.message !== "string" || message.length !== 0)
+        body.message != null &&
+        (typeof body.message !== "string" ||
+          (message.length > 0 &&
+            (characterLength(message) > 180 ||
+              containsControlCharacter(message))))
       ) {
+        return json({ error: "invalid_notification_message" }, 400);
+      }
+      if (notificationKind === "custom" && message.length < 1) {
         return json({ error: "invalid_notification_message" }, 400);
       }
       if (
@@ -319,17 +320,30 @@ export async function handler(
         }
       }
 
+      const authoredPreset = notificationKind !== "custom" &&
+        message.length > 0;
       const enqueued = await resetWithConcurrencyRetry(
         c.admin,
-        "bil_enqueue_admin_notification",
-        {
-          p_actor_id: authResult.data.user.id,
-          p_notification_kind: notificationKind,
-          p_audience: audience,
-          p_target_id: targetId,
-          p_custom_body: notificationKind === "custom" ? message : null,
-          p_idempotency_key: idempotencyKey,
-        },
+        authoredPreset
+          ? "bil_enqueue_admin_notification_with_message"
+          : "bil_enqueue_admin_notification",
+        authoredPreset
+          ? {
+            p_actor_id: authResult.data.user.id,
+            p_notification_kind: notificationKind,
+            p_audience: audience,
+            p_target_id: targetId,
+            p_message: message,
+            p_idempotency_key: idempotencyKey,
+          }
+          : {
+            p_actor_id: authResult.data.user.id,
+            p_notification_kind: notificationKind,
+            p_audience: audience,
+            p_target_id: targetId,
+            p_custom_body: notificationKind === "custom" ? message : null,
+            p_idempotency_key: idempotencyKey,
+          },
       );
       if (enqueued.error) {
         const denied = deniedByDatabase(enqueued.error.message);

@@ -7,9 +7,10 @@ import 'startup_cloud_profile_restore_service.dart';
 
 /// Supabase adapter for startup's profile-only, read-only recovery path.
 ///
-/// It performs one owner-filtered SELECT and decrypts only with key material
-/// already cached on this device. It cannot create a key, submit operations,
-/// register a device, or mutate any remote row.
+/// It resolves only an existing account key (from secure local storage or the
+/// read-only Vault recovery RPC), performs one owner-filtered SELECT, and then
+/// decrypts the profile. It cannot create a key, submit operations, register a
+/// device, or mutate any remote row.
 final class SupabaseStartupCloudProfileReader
     implements StartupCloudProfileReader {
   const SupabaseStartupCloudProfileReader({

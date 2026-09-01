@@ -6,7 +6,7 @@ create or replace function public.bil_get_existing_cloud_key()
 returns text
 language plpgsql
 security definer
-set search_path = public, vault, extensions, pg_temp
+set search_path = ''
 as $$
 declare
   v_owner uuid := auth.uid();

@@ -19,6 +19,9 @@ void main() {
     final startupReader = File(
       'lib/features/cloud_platform/services/supabase_startup_cloud_profile_reader.dart',
     ).readAsStringSync();
+    final keyRepository = File(
+      'lib/features/cloud_platform/services/cloud_account_key_repository.dart',
+    ).readAsStringSync();
     final service = File(
       'lib/features/cloud_platform/services/cloud_manual_sync_service.dart',
     ).readAsStringSync();
@@ -42,7 +45,11 @@ void main() {
       contains(".eq('entity_kind', CloudEntityKind.profile.name)"),
     );
     expect(startupReader, contains('resolveExisting(owner)'));
-    expect(startupReader, contains('bil_get_existing_cloud_key'));
+    expect(
+      keyRepository,
+      contains("final response = await _rpc('bil_get_existing_cloud_key')"),
+    );
+    expect(startupReader, isNot(contains('bil_get_existing_cloud_key')));
     for (final remoteMutation in const <String>[
       '.insert(',
       '.upsert(',

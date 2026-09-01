@@ -446,14 +446,12 @@ class _VerifiedCachedVideoState extends State<_VerifiedCachedVideo> {
       }
       _cached = result;
       if (!play) return;
-      final videoController = VideoPlayerController.file(result.file!);
-      await videoController.initialize();
-      if (!mounted || generation != _generation) {
-        await videoController.dispose();
-        return;
-      }
-      _controller = videoController;
-      await videoController.play();
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          fullscreenDialog: true,
+          builder: (_) => _FullscreenWorkoutVideoPage(file: result.file!),
+        ),
+      );
     } on Object catch (error) {
       if (mounted && generation == _generation) _error = error;
     } finally {
