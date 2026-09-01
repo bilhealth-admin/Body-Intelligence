@@ -8,11 +8,10 @@
  * snapshots, adds the seven expected items, and verifies the resulting draft.
  */
 
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-
-import { clientFromEnvironment } from './asc_catalog_sync.mjs';
 
 const APP_ID = '6805349703';
 const PLATFORM = 'IOS';
@@ -38,6 +37,87 @@ const REVIEWABLE_VERSION_STATES = new Set([
   'READY_FOR_REVIEW',
 ]);
 const OUTPUT = path.resolve(process.env.ASC_REVIEW_DRAFT_OUTPUT || 'asc-review-draft-result.json');
+
+function base64Url(value) {
+  return Buffer.from(value).toString('base64url');
+}
+
+function createJwt({ keyId, issuerId, privateKey }) {
+  const now = Math.floor(Date.now() / 1000);
+  const header = base64Url(JSON.stringify({ alg: 'ES256', kid: keyId, typ: 'JWT' }));
+  const payload = base64Url(JSON.stringify({
+    iss: issuerId,
+    iat: now,
+    exp: now + 15 * 60,
+    aud: 'appstoreconnect-v1',
+  }));
+  const signingInput = `${header}.${payload}`;
+  const signature = crypto.sign('sha256', Buffer.from(signingInput), {
+    key: privateKey,
+    dsaEncoding: 'ieee-p1363',
+  }).toString('base64url');
+  return `${signingInput}.${signature}`;
+}
+
+class AscClient {
+  constructor({ keyId, issuerId, privateKey }) {
+    this.keyId = keyId;
+    this.issuerId = issuerId;
+    this.privateKey = privateKey;
+    this.baseUrl = 'https://api.appstoreconnect.apple.com';
+  }
+
+  async request(method, resource, body) {
+    const url = resource.startsWith('http') ? resource : `${this.baseUrl}${resource}`;
+    const response = await fetch(url, {
+      method,
+      headers: {
+        Authorization: `Bearer ${createJwt(this)}`,
+        Accept: 'application/json',
+        ...(body ? { 'Content-Type': 'application/json' } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const text = await response.text();
+    const parsed = text ? JSON.parse(text) : null;
+    if (!response.ok) {
+      const details = parsed?.errors?.map((error) => ({
+        status: error.status,
+        code: error.code,
+        title: error.title,
+        detail: error.detail,
+        source: error.source,
+      })) ?? [{ status: response.status, detail: 'No JSON error body returned' }];
+      throw new Error(`ASC ${method} ${new URL(url).pathname} failed: ${JSON.stringify(details)}`);
+    }
+    return parsed;
+  }
+
+  async all(resource) {
+    const data = [];
+    let next = resource;
+    while (next) {
+      const page = await this.request('GET', next);
+      data.push(...(page?.data ?? []));
+      next = page?.links?.next ?? null;
+    }
+    return data;
+  }
+}
+
+function clientFromEnvironment() {
+  const keyId = process.env.ASC_KEY_ID?.trim();
+  const issuerId = process.env.ASC_ISSUER_ID?.trim();
+  const keyPath = process.env.ASC_PRIVATE_KEY_PATH?.trim();
+  if (!keyId || !issuerId || !keyPath) {
+    throw new Error('ASC_KEY_ID, ASC_ISSUER_ID, and ASC_PRIVATE_KEY_PATH are required');
+  }
+  return new AscClient({
+    keyId,
+    issuerId,
+    privateKey: fs.readFileSync(path.resolve(keyPath), 'utf8'),
+  });
+}
 
 const client = clientFromEnvironment();
 const changes = [];
@@ -327,4 +407,3 @@ const result = {
 fs.mkdirSync(path.dirname(OUTPUT), { recursive: true });
 fs.writeFileSync(OUTPUT, `${JSON.stringify(result, null, 2)}\n`, 'utf8');
 console.log(JSON.stringify(result, null, 2));
-
