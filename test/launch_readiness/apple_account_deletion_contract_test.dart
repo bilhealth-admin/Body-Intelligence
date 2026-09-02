@@ -55,7 +55,7 @@ void main() {
       'supabase/migrations/20260830034302_disable_unsafe_account_deletion_cron.sql',
     );
     final migration = source(
-      'supabase/migrations/20260830093000_account_deletion_storage_cleanup.sql',
+      'supabase/migrations/20260830053817_account_deletion_storage_cleanup_20260830093000.sql',
     );
     expect(emergency, contains("jobname = 'bil-account-data-deletion-15m'"));
     expect(emergency, contains('cron.unschedule(v_job_id)'));

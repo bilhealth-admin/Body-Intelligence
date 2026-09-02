@@ -58,7 +58,7 @@ void main() {
 
   test('pending migration normalizes AI access from canonical entitlement', () {
     final source = File(
-      'supabase/migrations/20260830110000_canonical_store_lifecycle_mirror_forward.sql',
+      'supabase/migrations/20260830120109_canonical_store_lifecycle_mirror_forward_20260830110000.sql',
     ).readAsStringSync();
     expect(source, contains('bil_sync_ai_coach_store_subscription'));
     expect(source, contains("new.lifecycle = 'cancelled' then 'active'"));

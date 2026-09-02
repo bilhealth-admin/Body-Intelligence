@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 const _migrationPath =
-    'supabase/migrations/20260831193304_sync_display_locale_preferences.sql';
+    'supabase/migrations/20260831194043_sync_display_locale_preferences.sql';
 
 void main() {
   test('migration accepts exactly the reviewed 25 canonical locale tags', () {

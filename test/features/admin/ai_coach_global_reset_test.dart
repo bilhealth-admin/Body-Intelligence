@@ -558,7 +558,7 @@ MaterialApp _localizedApp({required Widget home}) => MaterialApp(
 );
 
 String _migration() => File(
-  'supabase/migrations/20260831142124_ai_coach_global_reset.sql',
+  'supabase/migrations/20260831151527_ai_coach_admin_global_individual_reset.sql',
 ).readAsStringSync();
 
 String _function(String sql, String startName, String endName) {

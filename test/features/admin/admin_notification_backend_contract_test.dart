@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 const _migrationPath =
-    'supabase/migrations/20260831185334_admin_notification_controls.sql';
+    'supabase/migrations/20260831192412_admin_notification_controls.sql';
 
 void main() {
   test('admin notices are own-row durable and minimally exposed', () {

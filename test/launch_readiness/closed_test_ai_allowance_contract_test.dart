@@ -6,7 +6,7 @@ void main() {
   test('closed-test access resolves to paid AI Coach without forging a trial', () {
     final sql = File(
       'supabase/migrations/'
-      '20260831074500_closed_test_ai_allowance_resolution.sql',
+      '20260831074550_closed_test_ai_allowance_resolution.sql',
     ).readAsStringSync();
 
     final grantPredicate = sql.indexOf(

@@ -9,7 +9,7 @@ Set<String> _quotedCodes(String source) => RegExp(
 
 void main() {
   const migrationPath =
-      'supabase/migrations/20260829233000_canonical_store_market_pricing_policy.sql';
+      'supabase/migrations/20260830180011_canonical_store_market_pricing_policy.sql';
   const pricingPath =
       'tool/apple_store_connect/canonical_store_pricing_2026-08-29.json';
 

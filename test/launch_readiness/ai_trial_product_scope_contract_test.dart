@@ -10,7 +10,7 @@ void main() {
     () {
       final sql = File(
         'supabase/migrations/'
-        '20260830071418_restrict_ai_trials_to_ai_coach_products.sql',
+        '20260830175811_restrict_ai_trials_to_ai_coach_products.sql',
       ).readAsStringSync();
 
       expect(sql, contains('BOTH_AI_PRODUCTS_NO_PREMIUM_TRIAL'));
@@ -46,7 +46,7 @@ void main() {
     () {
       final sql = File(
         'supabase/migrations/'
-        '20260830071418_restrict_ai_trials_to_ai_coach_products.sql',
+        '20260830175811_restrict_ai_trials_to_ai_coach_products.sql',
       ).readAsStringSync();
 
       final anchorStart = sql.indexOf(
@@ -90,7 +90,7 @@ void main() {
       ).readAsStringSync();
       final hardeningSql = File(
         'supabase/migrations/'
-        '20260830071418_restrict_ai_trials_to_ai_coach_products.sql',
+        '20260830175811_restrict_ai_trials_to_ai_coach_products.sql',
       ).readAsStringSync();
 
       expect(allowanceSql, contains("values ('trial', 1000, 1000)"));
@@ -134,10 +134,10 @@ void main() {
 
       const forwardPath =
           'supabase/migrations/'
-          '20260830110000_canonical_store_lifecycle_mirror_forward.sql';
+          '20260830120109_canonical_store_lifecycle_mirror_forward_20260830110000.sql';
       expect(
         forwardPath.compareTo(
-          'supabase/migrations/20260830093000_account_deletion_storage_cleanup.sql',
+          'supabase/migrations/20260830053817_account_deletion_storage_cleanup_20260830093000.sql',
         ),
         greaterThan(0),
       );
