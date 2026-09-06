@@ -67,6 +67,9 @@ class ReleaseConfigurationValidator {
   const ReleaseConfigurationValidator._();
 
   static const approvedApplicationId = 'com.bilhealth.bodyintelligencelog';
+  static const approvedReleaseVersion = '1.0.0';
+  static const androidReleaseBuildNumber = 8;
+  static const iosReleaseBuildNumber = 9;
 
   static List<ReleaseConfigurationIssue> validate(
     ReleaseConfiguration configuration,
@@ -258,13 +261,23 @@ class ReleaseConfigurationValidator {
       );
     }
 
+    final expectedManifestBuildNumber = switch (platform) {
+      'android' => androidReleaseBuildNumber,
+      'ios' => iosReleaseBuildNumber,
+      _ => null,
+    };
     if (configuration.production &&
-        (configuration.manifestReleaseVersion != '1.0.0' ||
-            configuration.manifestReleaseBuildNumber != 8)) {
+        (configuration.manifestReleaseVersion != approvedReleaseVersion ||
+            configuration.manifestReleaseBuildNumber !=
+                expectedManifestBuildNumber)) {
       issues.add(
-        const ReleaseConfigurationIssue(
+        ReleaseConfigurationIssue(
           'wrong_frozen_release_version',
-          'The accepted manifest must bind exactly version 1.0.0 build 8.',
+          expectedManifestBuildNumber == null
+              ? 'The accepted manifest must bind an approved platform build.'
+              : 'The accepted manifest must bind exactly version '
+                    '$approvedReleaseVersion build $expectedManifestBuildNumber '
+                    'for $platform.',
         ),
       );
     }

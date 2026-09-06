@@ -18,12 +18,6 @@ void main() {
         contains('dart run tool/release/validate_release_configuration.dart'),
         reason: path,
       );
-      expect(source, contains('BIL_PLUS8_AUDITED_SOURCE_SHA'), reason: path);
-      expect(
-        source,
-        contains('BIL_PLUS8_STAGING_MANIFEST_SHA256'),
-        reason: path,
-      );
       expect(source, contains(r'BIL_SOURCE_COMMIT: ${{ github.sha }}'));
       expect(source, contains('BIL_FACEBOOK_REQUIRED: true'), reason: path);
       expect(
@@ -32,6 +26,15 @@ void main() {
         reason: path,
       );
     }
+
+    final android = _read(workflows.first);
+    final ios = _read(workflows.last);
+    expect(android, contains('BIL_PLUS8_AUDITED_SOURCE_SHA'));
+    expect(android, contains('BIL_PLUS8_STAGING_MANIFEST_SHA256'));
+    expect(ios, contains('BIL_IOS_PLUS9_AUDITED_SOURCE_SHA'));
+    expect(ios, contains('BIL_IOS_PLUS9_STAGING_MANIFEST_SHA256'));
+    expect(ios, isNot(contains('BIL_PLUS8_AUDITED_SOURCE_SHA')));
+    expect(ios, isNot(contains('BIL_PLUS8_STAGING_MANIFEST_SHA256')));
   });
 
   test('Android validator consumes the current frozen-source manifest', () {
@@ -52,6 +55,28 @@ void main() {
         ),
       ),
     );
+  });
+
+  test('iOS validator consumes only the build 9 hotfix manifest', () {
+    final source = _read(workflows.last);
+    expect(
+      source,
+      contains(
+        'BIL_RELEASE_MANIFEST_PATH: '
+        'docs/release/BIL_IOS_PLUS9_FROZEN_SOURCE_MANIFEST_2026-09-06.md',
+      ),
+    );
+    expect(
+      source,
+      isNot(
+        contains(
+          'BIL_RELEASE_MANIFEST_PATH: '
+          'docs/release/BIL_PLUS8_FROZEN_SOURCE_MANIFEST_2026-09-06.md',
+        ),
+      ),
+    );
+    expect(source, contains('(( BUILD_NUMBER == 9 ))'));
+    expect(source, isNot(contains('(( BUILD_NUMBER == 8 ))')));
   });
 
   test('signed workflows pin actions and stable runner families', () {

@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'defer_ios_google_mobile_ads.dart';
+
 final class ReleasePluginSanitizationResult {
   const ReleasePluginSanitizationResult({
     required this.document,
@@ -12,8 +14,9 @@ final class ReleasePluginSanitizationResult {
 }
 
 ReleasePluginSanitizationResult sanitizeFlutterPluginDependencies(
-  Map<String, Object?> source,
-) {
+  Map<String, Object?> source, {
+  Map<String, Set<String>> excludedPluginNamesByPlatform = const {},
+}) {
   final document = Map<String, Object?>.from(
     jsonDecode(jsonEncode(source)) as Map<String, Object?>,
   );
@@ -62,10 +65,14 @@ ReleasePluginSanitizationResult sanitizeFlutterPluginDependencies(
   final sanitizedPlatforms = <String, Object?>{};
   for (final platformEntry in pluginsValue.entries) {
     final entries = platformEntry.value! as List<Object?>;
+    final excludedNames =
+        excludedPluginNamesByPlatform[platformEntry.key] ?? const <String>{};
     sanitizedPlatforms[platformEntry.key] = entries
-        .where(
-          (value) => (value! as Map<String, Object?>)['dev_dependency'] != true,
-        )
+        .where((value) {
+          final plugin = value! as Map<String, Object?>;
+          return plugin['dev_dependency'] != true &&
+              !excludedNames.contains(plugin['name']);
+        })
         .toList(growable: false);
   }
   document['plugins'] = sanitizedPlatforms;
@@ -419,9 +426,23 @@ String sanitizeIosGeneratedPluginRegistrant(
 ReleasePluginSanitizationResult sanitizeFlutterReleaseProject({
   required Directory projectRoot,
   required String platform,
+  Set<String> excludedNativePluginNames = const {},
+  Set<String> alreadyExcludedNativePluginNames = const {},
 }) {
   if (platform != 'android' && platform != 'ios') {
     throw ArgumentError.value(platform, 'platform', 'Expected android or ios.');
+  }
+  if (excludedNativePluginNames.isNotEmpty && platform != 'ios') {
+    throw ArgumentError(
+      'Production native plugin exclusion is supported only for iOS.',
+    );
+  }
+  if (!excludedNativePluginNames.containsAll(
+    alreadyExcludedNativePluginNames,
+  )) {
+    throw ArgumentError(
+      'Already-excluded plugins must be part of the requested exclusion set.',
+    );
   }
 
   final dependenciesFile = File(
@@ -446,7 +467,21 @@ ReleasePluginSanitizationResult sanitizeFlutterReleaseProject({
     platform: platform,
     devDependency: false,
   );
-  final result = sanitizeFlutterPluginDependencies(decoded);
+  final missingExclusions = excludedNativePluginNames.difference(
+    platformProductionNames,
+  )..removeAll(alreadyExcludedNativePluginNames);
+  if (missingExclusions.isNotEmpty) {
+    throw FormatException(
+      'Requested iOS production plugins are missing from native metadata: '
+      '${missingExclusions.toList()..sort()}',
+    );
+  }
+  final result = sanitizeFlutterPluginDependencies(
+    decoded,
+    excludedPluginNamesByPlatform: <String, Set<String>>{
+      platform: excludedNativePluginNames,
+    },
+  );
 
   File projectFile(String relativePath) => File(
     '${projectRoot.path}${Platform.pathSeparator}'
@@ -483,8 +518,10 @@ ReleasePluginSanitizationResult sanitizeFlutterReleaseProject({
     _validateIosRegistrantHeader(header.readAsStringSync());
     sanitizedRegistrant = sanitizeIosGeneratedPluginRegistrant(
       registrant.readAsStringSync(),
-      devOnlyPluginNames: platformDevNames,
-      productionPluginNames: platformProductionNames,
+      devOnlyPluginNames: platformDevNames.union(excludedNativePluginNames),
+      productionPluginNames: platformProductionNames.difference(
+        excludedNativePluginNames,
+      ),
     );
   }
 
@@ -505,26 +542,64 @@ void main(List<String> arguments) {
   final platformArguments = arguments
       .where((argument) => argument.startsWith('--platform='))
       .toList(growable: false);
-  if (platformArguments.length != 1 || arguments.length != 1) {
+  final deferIosGoogleMobileAds = arguments
+      .where((argument) => argument == '--defer-ios-google-mobile-ads')
+      .length;
+  final validArguments = arguments.every(
+    (argument) =>
+        argument.startsWith('--platform=') ||
+        argument == '--defer-ios-google-mobile-ads',
+  );
+  if (platformArguments.length != 1 ||
+      deferIosGoogleMobileAds > 1 ||
+      !validArguments ||
+      arguments.length != 1 + deferIosGoogleMobileAds) {
     final scriptName = Platform.script.pathSegments.isEmpty
         ? 'sanitize_flutter_release_plugins.dart'
         : Platform.script.pathSegments.last;
-    stderr.writeln('Usage: dart run $scriptName --platform=android|ios');
+    stderr.writeln(
+      'Usage: dart run $scriptName --platform=android|ios '
+      '[--defer-ios-google-mobile-ads]',
+    );
     exitCode = 64;
     return;
   }
   final platform = platformArguments.single.substring('--platform='.length);
   try {
+    if (deferIosGoogleMobileAds == 1 && platform != 'ios') {
+      throw ArgumentError(
+        '--defer-ios-google-mobile-ads is valid only with --platform=ios.',
+      );
+    }
+    DeferredIosGoogleMobileAdsResult? deferredAds;
+    if (deferIosGoogleMobileAds == 1) {
+      deferredAds = prepareDeferredIosGoogleMobileAdsPackage(Directory.current);
+    } else if (platform == 'ios') {
+      assertNoStaleDeferredIosGoogleMobileAdsOverride(Directory.current);
+    }
+    final excludedPlugins = deferIosGoogleMobileAds == 1
+        ? const <String>{deferredIosGoogleMobileAdsPlugin}
+        : const <String>{};
     final result = sanitizeFlutterReleaseProject(
       projectRoot: Directory.current,
       platform: platform,
+      excludedNativePluginNames: excludedPlugins,
+      alreadyExcludedNativePluginNames: deferredAds?.alreadyPrepared == true
+          ? excludedPlugins
+          : const <String>{},
     );
+    if (deferredAds != null) {
+      verifyDeferredIosGoogleMobileAdsDiscovery(Directory.current);
+    }
     final removed = result.removedPluginNames.toList()..sort();
     stdout.writeln(
       jsonEncode(<String, Object?>{
         'status': 'sanitized',
         'platform': platform,
         'removed_dev_native_plugins': removed,
+        'deferred_ios_native_plugins': excludedPlugins.toList()..sort(),
+        if (deferredAds != null)
+          'deferred_package_override': deferredAds.overrideDirectory.path,
       }),
     );
   } on Object catch (error) {

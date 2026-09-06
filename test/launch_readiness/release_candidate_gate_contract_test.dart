@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 String read(String path) => File(path).readAsStringSync();
 
 void main() {
-  test('build-8 identity is exact while current candidate is not accepted', () {
+  test('platform build identity is exact while candidate is not accepted', () {
     final pubspec = read('pubspec.yaml');
     final android = read('android/app/build.gradle.kts');
     final apple = read('ios/Runner.xcodeproj/project.pbxproj');
@@ -31,9 +31,20 @@ void main() {
     expect(gate, contains('CURRENT_PLUS8_CANDIDATE_ACCEPTED: FALSE'));
     expect(gate, isNot(contains('## Accepted parent')));
     expect(androidWorkflow, contains('(( BUILD_NUMBER == 8 ))'));
-    expect(iosWorkflow, contains('(( BUILD_NUMBER == 8 ))'));
+    expect(iosWorkflow, contains('(( BUILD_NUMBER == 9 ))'));
+    expect(iosWorkflow, isNot(contains('(( BUILD_NUMBER == 8 ))')));
     expect(androidWorkflow, contains('build 7 must never be promoted'));
-    expect(iosWorkflow, contains('build 7 must never be selected'));
+    expect(
+      iosWorkflow,
+      contains(r'--build-number "$BUILD_NUMBER"'),
+      reason: 'iOS must override pubspec +8 with the signed hotfix build 9.',
+    );
+    expect(
+      iosWorkflow,
+      contains('BIL_IOS_PLUS9_FROZEN_SOURCE_MANIFEST_2026-09-06.md'),
+    );
+    expect(iosWorkflow, contains('BIL_IOS_PLUS9_AUDITED_SOURCE_SHA'));
+    expect(iosWorkflow, contains('BIL_IOS_PLUS9_STAGING_MANIFEST_SHA256'));
   });
 
   test('all accepted launch boundaries remain present', () {

@@ -9,7 +9,7 @@ on:
         default: false
         type: boolean
       build_number:
-        description: Exact App Store build number for this frozen candidate; must be 8
+        description: Exact App Store build number for the iOS startup hotfix; must be 9
         required: true
         type: string
       run_native_crypto_checks:
@@ -68,8 +68,8 @@ jobs:
             echo 'build_number must be a positive integer.' >&2
             exit 1
           }
-          (( BUILD_NUMBER == 8 )) || {
-            echo 'build_number must be exactly 8 for the audited +8 candidate; build 7 must never be selected.' >&2
+          (( BUILD_NUMBER == 9 )) || {
+            echo 'build_number must be exactly 9 for the audited iOS startup hotfix; crashing build 8 and build 7 must never be selected.' >&2
             exit 1
           }
           test -n "${APPLE_TEAM_ID:-}" || {
@@ -216,9 +216,9 @@ jobs:
           BIL_MOBILE_INTEGRITY_REQUIRED: true
           BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
           BIL_SOURCE_COMMIT: ${{ github.sha }}
-          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_PLUS8_AUDITED_SOURCE_SHA }}
-          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_PLUS8_FROZEN_SOURCE_MANIFEST_2026-09-06.md
-          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_PLUS8_STAGING_MANIFEST_SHA256 }}
+          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_PLUS9_AUDITED_SOURCE_SHA }}
+          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_PLUS9_FROZEN_SOURCE_MANIFEST_2026-09-06.md
+          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_IOS_PLUS9_STAGING_MANIFEST_SHA256 }}
         run: |
           flutter pub get
           flutter analyze --no-pub
@@ -284,14 +284,16 @@ jobs:
               'NATIVE_CRYPTO_RUNTIME_OWNER_WAIVER=EXPLICIT_WORKFLOW_INPUT'
           fi | tee BIL-ios-native-crypto-gate.txt
 
-      - name: Exclude dev-only native plugins from iOS release
-        run: dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios
+      - name: Exclude dev-only and owner-deferred ads native plugins from iOS release
+        run: dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios --defer-ios-google-mobile-ads
 
       - name: Apply owner-deferred AdMob source configuration
         shell: bash
         run: |
           set -euo pipefail
           python3 tool/release/test_configure_deferred_admob.py
+          python3 tool/release/test_verify_ios_deferred_ads_artifact.py
+          python3 tool/release/test_verify_ios_deferred_ads_plugin_graph.py
           python3 tool/release/configure_deferred_admob.py \
             --prepare-ios-source-plist ios/Runner/Info.plist \
             | tee BIL-ios-deferred-admob-source.txt
@@ -388,6 +390,13 @@ jobs:
             --dart-define=BIL_AD_PROVIDER_READY=false \
             --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
 
+      - name: Verify regenerated iOS native plugin graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/release/verify_ios_deferred_ads_plugin_graph.py \
+            --project-root . | tee BIL-ios-deferred-admob-plugin-graph.txt
+
       - name: Capture signed IPA evidence
         shell: bash
         env:
@@ -413,6 +422,9 @@ jobs:
           python3 tool/release/configure_deferred_admob.py \
             --verify-ios-final-plist "$SIGNED_APP/Info.plist" \
             | tee BIL-ios-deferred-admob.txt
+          python3 tool/release/verify_ios_deferred_ads_artifact.py \
+            --ipa "$IPA" --expected-build "$BUILD_NUMBER" \
+            | tee BIL-ios-deferred-admob-native-artifact.txt
 
           codesign --verify --deep --strict --verbose=4 "$SIGNED_APP" \
             2>&1 | tee BIL-ios-codesign-verify.txt
@@ -470,6 +482,8 @@ jobs:
             'ADS_COMPILED_GATE=DISABLED_OWNER_DEFERRED' \
             'ADMOB_IOS_PRODUCTION_CONFIGURATION_GATE=DEFERRED_NOT_CONFIGURED' \
             'ADMOB_IOS_DEFERRED_NATIVE_CONFIGURATION_GATE=PASS' \
+            'ADMOB_IOS_NATIVE_SDK_ARTIFACT_GATE=ABSENT_VERIFIED' \
+            'IOS_STARTUP_DEVICE_GATE=REQUIRED_AFTER_TESTFLIGHT_UPLOAD' \
             'MOBILE_INTEGRITY_CLIENT_GATE=ENABLED' \
             'MOBILE_INTEGRITY_BACKEND_GATE=OWNER_EVIDENCE_PRESENT_NOT_LIVE_VERIFIED' \
             'PHYSICAL_DEVICE_GATE=REQUIRED' \
@@ -536,6 +550,8 @@ jobs:
             BIL-ios-native-crypto-gate.txt
             BIL-ios-deferred-admob-source.txt
             BIL-ios-deferred-admob.txt
+            BIL-ios-deferred-admob-native-artifact.txt
+            BIL-ios-deferred-admob-plugin-graph.txt
             BIL-ios-gate-status.txt
             BIL-build-number.txt
             BIL-source-head.txt
