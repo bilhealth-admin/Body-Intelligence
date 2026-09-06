@@ -105,3 +105,44 @@ Both jobs rerun the portable suite from the immutable candidate, then validate
 their signed artifacts. Store upload, TestFlight, review submission, and public
 availability must each be reported from their own actual results. Apple public
 release remains manual; Google production-access review is a separate decision.
+
+## First clean GitHub execution and bounded correction
+
+The initial clean commit `1888807bd2011f1970f16eee5effdeb882aff639` ran on
+Android `34021076234` and iOS `34021077842`. Both completed unsuccessfully at
+the portable suite: **3,958 passed, one failed, one skipped**. Signing inputs
+and prior configuration gates passed, but signed artifact construction and
+store upload did not start. Do not report these runs as successful builds.
+
+Both failed the same stale assertion at line 62 of
+`test/features/nutrition_plans/nutrition_pathway_access_badge_test.dart`, which
+expected repeated visible Premium text inside each paid card. Existing
+application code deliberately keeps one page-level label and localized access
+labels on semantic icons. The corrected test verifies that intended behavior
+instead of restoring duplicated UI text.
+
+The correction retains free-plan visible text, correct icons, English/Arabic,
+hero and compact layouts, 1.6 text scale, scrolling and exception checks. It
+adds exact icon semantic labels and a single access-label line in the actual
+merged tappable-card semantics. The first local attempt assumed an isolated
+icon semantics node; Flutter correctly merged it with the card description.
+The second attempt exposed a redundant manually-created semantics handle.
+Both harness assumptions were corrected; the final test uses Flutter's own
+`semanticsEnabled: true` lifecycle. Their failed logs remain retained rather
+than represented as passes.
+
+Final command: `flutter test --no-pub` with the access-badge, pathways-contract,
+access-policy, and semantic-icon-spacing test files: **19/19 passed**.
+`dart analyze` on the modified file: **No issues found**. Formatting: one file,
+zero changes. No production source, dependency, CI step, exclusion or budget
+was changed. Both entire CI workflows must be rerun from the follow-up commit.
+
+| Retained log | SHA-256 |
+| --- | --- |
+| candidate-premium-semantic-verified.log | bf13161bd791365776439fe94e086692686f5273f87bf777ff5ce09df960e213 |
+| candidate-premium-semantic-analyze.log | b79d2097625d56e75afcfd49583a3d04232ab4f3ba0433b7804da23d5ecc4837 |
+| ios-run-34021077842-job-101453661896.log | 18be94941e50be7b6c1d4d90fd5cbb4d7445b88ea1f4984d8230a06f6efee17b |
+
+Logs are retained under `G:\BIL_Temp\plus8-preflight-20260906`. The skipped
+opt-in live-network test was already run explicitly and passed in the earlier
+local evidence; its default CI skip is not counted as a pass.

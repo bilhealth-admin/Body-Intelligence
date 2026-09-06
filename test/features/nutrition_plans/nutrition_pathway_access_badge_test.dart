@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets(
-    'pathway access badges render semantic icons and localized text',
+    'pathway access badges are localized without repeated Premium text',
     (tester) async {
       tester.view.physicalSize = const Size(430, 932);
       tester.view.devicePixelRatio = 1;
@@ -59,15 +59,31 @@ void main() {
           Key('nutrition-pathway-access-hero-$premiumPlanId'),
         );
         expect(premiumBadge, findsOneWidget);
+        // Premium appears once at page level. Individual paid badges retain
+        // localized screen-reader labels instead of repeating visible text.
+        expect(find.text(premiumLabel), findsOneWidget);
         expect(
           find.descendant(of: premiumBadge, matching: find.text(premiumLabel)),
-          findsOneWidget,
+          findsNothing,
         );
-        final premiumIcon = tester.widget<Icon>(
-          find.descendant(of: premiumBadge, matching: find.byType(Icon)),
+        final premiumIconFinder = find.descendant(
+          of: premiumBadge,
+          matching: find.byType(Icon),
         );
+        final premiumIcon = tester.widget<Icon>(premiumIconFinder);
         expect(premiumIcon.icon, BilSemanticIcons.subscription);
         expect(premiumIcon.icon, isNot(Icons.circle));
+        expect(premiumIcon.semanticLabel, premiumLabel);
+        // Flutter merges the icon into the card's tappable semantics node.
+        // Keep the access label exactly once alongside the plan description.
+        expect(
+          tester
+              .getSemantics(premiumIconFinder)
+              .label
+              .split('\n')
+              .where((label) => label == premiumLabel),
+          hasLength(1),
+        );
 
         final freeBadge = find.byKey(
           Key('nutrition-pathway-access-hero-$freePlanId'),
@@ -103,22 +119,32 @@ void main() {
             of: compactPremiumBadge,
             matching: find.text(premiumLabel),
           ),
-          findsOneWidget,
+          findsNothing,
+        );
+        final compactPremiumIcon = find.descendant(
+          of: compactPremiumBadge,
+          matching: find.byType(Icon),
+        );
+        expect(
+          tester.widget<Icon>(compactPremiumIcon).icon,
+          BilSemanticIcons.subscription,
+        );
+        expect(
+          tester.widget<Icon>(compactPremiumIcon).semanticLabel,
+          premiumLabel,
         );
         expect(
           tester
-              .widget<Icon>(
-                find.descendant(
-                  of: compactPremiumBadge,
-                  matching: find.byType(Icon),
-                ),
-              )
-              .icon,
-          BilSemanticIcons.subscription,
+              .getSemantics(compactPremiumIcon)
+              .label
+              .split('\n')
+              .where((label) => label == premiumLabel),
+          hasLength(1),
         );
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull, reason: locale.toLanguageTag());
       }
     },
+    semanticsEnabled: true,
   );
 }

@@ -116,3 +116,36 @@ before staging; bind this exact finalized file and the resulting commit in the
 two external GitHub variables before dispatch. Both CI jobs rerun source tests
 and verify real signatures, capabilities, and artifact identities. Apple
 public release remains manual; Google production access is under review.
+
+## Verified CI follow-up to the initial frozen candidate
+
+The initial accepted commit `1888807bd2011f1970f16eee5effdeb882aff639`
+reached the full portable suite on both GitHub platforms. Android run
+`34021076234` and iOS run `34021077842` each reported 3,958 passing tests,
+one failing test, and one intentional live-network skip in that suite. Neither
+run reached artifact construction or store upload. The source-transfer hashes
+above describe that initial transfer, not a claim that its CI build passed.
+
+The one failure was the old visible-Premium assertion in
+`test/features/nutrition_plans/nutrition_pathway_access_badge_test.dart`.
+The application already renders Premium once at page level and exposes each
+paid badge through its localized semantic icon label. The reviewed follow-up
+changes only this test and these two release-evidence documents. Application
+code, native code, assets, dependencies, signing configuration, workflow code,
+test exclusions, and performance budgets remain byte-identical to the initial
+accepted commit.
+
+The corrected test checks the single visible page label, no repeated visible
+paid-card label, exact localized icon labels, and one access-label line in the
+actual merged card semantics. It preserves English/Arabic, hero/compact badges,
+free-plan labels/icons, large text, scrolling, and exception checks. Flutter
+owns the semantic-handle lifecycle through `semanticsEnabled: true`.
+
+The four-file focused rerun passed **19/19**, the modified-file Dart analysis
+reported **No issues found**, formatting reported zero changes, and the follow-up
+diff passed whitespace checking. Raw-log hashes and honest intermediate test
+corrections are recorded in `BIL_PLUS8_AUTOMATED_PREFLIGHT_2026-09-06.md`.
+The exact three-path delta is reviewed before commit; its new commit and this
+new manifest digest must replace the external bindings before both complete
+signed CI workflows are dispatched again. No test was removed or skipped to
+make this correction, and no application UI was reverted.
