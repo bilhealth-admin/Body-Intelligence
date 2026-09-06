@@ -5,6 +5,48 @@ import 'package:body_intelligence_log/features/notifications/services/notificati
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('system notification titles carry stable category markers', () {
+    const dailyMarkers = <DailyReminderKind, String>{
+      DailyReminderKind.weight: '⚖️',
+      DailyReminderKind.meals: '🍽️',
+      DailyReminderKind.water: '💧',
+      DailyReminderKind.sleep: '🌙',
+      DailyReminderKind.fasting: '⏳',
+      DailyReminderKind.weeklyReview: '📊',
+      DailyReminderKind.returnAfter24Hours: '👋',
+    };
+    for (final locale in AppLocalizations.supportedLocales) {
+      for (final entry in dailyMarkers.entries) {
+        expect(
+          bilDailyReminderCopyForTesting(locale.toLanguageTag(), entry.key).$1,
+          startsWith('${entry.value} '),
+          reason: '${locale.toLanguageTag()} ${entry.key.name}',
+        );
+      }
+    }
+
+    final sleep = bilSleepScheduleCopyForTesting('ar-EG');
+    expect(sleep[0].$1, startsWith('🌙 '));
+    expect(sleep[1].$1, startsWith('🛏️ '));
+    expect(sleep[2].$1, startsWith('☀️ '));
+
+    const backgroundMarkers = <BilBackgroundCopyKind, String>{
+      BilBackgroundCopyKind.activation: '✅',
+      BilBackgroundCopyKind.fastingTarget: '⏳',
+      BilBackgroundCopyKind.fastingOngoing: '⏳',
+      BilBackgroundCopyKind.fastingHydration: '💧',
+      BilBackgroundCopyKind.returnAfterDay: '👋',
+      BilBackgroundCopyKind.dailyReminder: '🔔',
+    };
+    for (final entry in backgroundMarkers.entries) {
+      expect(
+        bilBackgroundCopyForTesting('en-US', entry.key).$1,
+        startsWith('${entry.value} '),
+        reason: entry.key.name,
+      );
+    }
+  });
+
   test(
     'all 25 shipped locales have non-English background notification copy',
     () {

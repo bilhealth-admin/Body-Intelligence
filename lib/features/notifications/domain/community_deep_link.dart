@@ -88,6 +88,9 @@ class CommunityDeepLink {
       if (segments.length == 2 && segments[1] == 'messages') {
         return '/community/messages';
       }
+      if (segments.length == 2 && segments[1] == 'moderation') {
+        return '/community/moderation';
+      }
       if (segments.length == 3 &&
           segments[1] == 'messages' &&
           segments[2] == 'new') {

@@ -18,6 +18,10 @@ void main() {
       'lib/features/intelligence_center/presentation/'
       'ai_coach_settings_page.dart',
     ).readAsStringSync();
+    final resetNotices = File(
+      'lib/features/notifications/presentation/'
+      'ai_coach_reset_notice_coordinator.dart',
+    ).readAsStringSync();
 
     expect(
       providers,
@@ -31,6 +35,13 @@ void main() {
     expect(plans, contains('ref.invalidate(aiCoachCreditAccessProvider);'));
     expect(settings, contains('boost.state == AiBoostPurchaseState.verified'));
     expect(settings, contains('ref.invalidate(aiCoachCreditAccessProvider);'));
+    expect(
+      resetNotices,
+      contains('ref.invalidate(aiCoachCreditAccessProvider);'),
+    );
+    expect(resetNotices, contains('.requestAuthoritativeReload();'));
+    expect(settings, contains('ref.listen<int>(aiCoachUsageRefreshProvider'));
+    expect(settings, contains('usage = _loadUsage();'));
   });
 
   test('exhaustion routes stay scoped to AI Coach and Boost', () {

@@ -31,6 +31,21 @@ class _CoachMenuSheet extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _CoachMenuTile(
+              icon: Icons.forum_outlined,
+              title: intelligenceText(
+                context,
+                'Conversation history',
+                'سجل المحادثات',
+              ),
+              subtitle: intelligenceText(
+                context,
+                'Open an earlier chat or start a new one',
+                'افتح محادثة سابقة أو ابدأ محادثة جديدة',
+              ),
+              onTap: () => Navigator.of(context).pop('history'),
+            ),
+            const SizedBox(height: 9),
+            _CoachMenuTile(
               icon: Icons.psychology_alt_rounded,
               title: intelligenceText(
                 context,
@@ -238,28 +253,50 @@ class _CoachHero extends StatelessWidget {
     required this.onStart,
     required this.onStop,
     required this.onBack,
+    required this.onHistory,
     required this.onMenu,
     required this.active,
     required this.status,
     required this.liveCallActive,
     required this.liveCallPaused,
+    this.interactionEnabled = true,
   });
 
   final VoidCallback onStart;
   final VoidCallback onStop;
   final VoidCallback onBack;
+  final VoidCallback onHistory;
   final VoidCallback onMenu;
   final bool active;
   final String status;
   final bool liveCallActive;
   final bool liveCallPaused;
+  final bool interactionEnabled;
 
   @override
   Widget build(BuildContext context) {
     const light = Color(0xFFC8F3FF);
+    final coachName = intelligenceText(context, 'Your BIL Coach', 'مدربك BIL');
+    final voiceTagline = intelligenceText(
+      context,
+      'Speak your language',
+      'أتكلم لغتك',
+    );
+    final voiceDescription = intelligenceText(
+      context,
+      'Global multilingual voice',
+      'صوت متعدد اللغات',
+    );
+    final callLabel = liveCallActive && !liveCallPaused
+        ? intelligenceText(context, 'Pause live call', 'إيقاف المكالمة مؤقتًا')
+        : liveCallPaused
+        ? intelligenceText(context, 'Resume live call', 'متابعة المكالمة')
+        : intelligenceText(context, 'Start live call', 'ابدأ مكالمة مباشرة');
+    final stopLabel = intelligenceText(context, 'End call', 'إنهاء المكالمة');
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 13),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -273,162 +310,162 @@ class _CoachHero extends StatelessWidget {
           bottomRight: Radius.circular(22),
         ),
       ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              _CoachHeroControl(
-                tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-                icon: const BackButtonIcon(),
-                onPressed: onBack,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 180),
-                  child: Row(
-                    key: ValueKey(status),
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (active) ...[
-                        const _VoiceListeningWave(color: light, compact: true),
-                        const SizedBox(width: 6),
-                      ] else ...[
-                        Container(
-                          width: 7,
-                          height: 7,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF65D59A),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                      ],
-                      Flexible(
-                        child: Text(
-                          status,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                color: light,
-                                fontWeight: FontWeight.w700,
-                              ),
-                        ),
-                      ),
-                    ],
+      child: Semantics(
+        container: true,
+        label: status.isEmpty
+            ? '$coachName. $voiceDescription'
+            : '$coachName. $voiceDescription. $status',
+        child: Row(
+          children: [
+            _CoachHeroControl(
+              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+              icon: const BackButtonIcon(),
+              onPressed: onBack,
+              size: 32,
+            ),
+            const SizedBox(width: 7),
+            _CoachHeroPortrait(
+              size: 48,
+              onTap: interactionEnabled ? onHistory : null,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    coachName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -.2,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 1),
+                  Text(
+                    voiceTagline,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: light.withValues(alpha: .86),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              _CoachHeroControl(
-                tooltip: intelligenceText(
-                  context,
-                  'Coach controls',
-                  'أدوات المدرب',
-                ),
-                icon: const Icon(Icons.tune_rounded, size: 19),
-                onPressed: onMenu,
+            ),
+            const SizedBox(width: 3),
+            Flexible(
+              child: _CoachStatusBadge(
+                active: active,
+                status: status,
+                light: light,
               ),
-            ],
-          ),
-          const SizedBox(height: 5),
-          Row(
-            children: [
-              const _CoachHeroPortrait(),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      intelligenceText(context, 'Your BIL Coach', 'مدربك BIL'),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -.2,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      intelligenceText(
-                        context,
-                        'Global multilingual voice',
-                        'صوت متعدد اللغات',
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withValues(alpha: .82),
-                        height: 1.35,
-                      ),
-                    ),
-                    const SizedBox(height: 7),
-                    TextButton.icon(
-                      key: const Key('ai-coach-hero-start'),
-                      onPressed: onStart,
-                      style: TextButton.styleFrom(
-                        foregroundColor: light,
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size(0, 30),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      icon: Icon(
-                        liveCallActive && !liveCallPaused
-                            ? Icons.pause_rounded
-                            : Icons.graphic_eq_rounded,
-                        size: 18,
-                      ),
-                      label: Text(
-                        liveCallActive && !liveCallPaused
-                            ? intelligenceText(
-                                context,
-                                'Pause live call',
-                                'إيقاف المكالمة مؤقتًا',
-                              )
-                            : liveCallPaused
-                            ? intelligenceText(
-                                context,
-                                'Resume live call',
-                                'متابعة المكالمة',
-                              )
-                            : intelligenceText(
-                                context,
-                                'Start live call',
-                                'ابدأ مكالمة مباشرة',
-                              ),
-                        style: const TextStyle(fontWeight: FontWeight.w800),
-                      ),
-                    ),
-                    if (liveCallActive)
-                      TextButton.icon(
-                        key: const Key('ai-coach-live-call-stop'),
-                        onPressed: onStop,
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white70,
-                          padding: EdgeInsets.zero,
-                          minimumSize: const Size(0, 30),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        icon: const Icon(Icons.call_end_rounded, size: 17),
-                        label: Text(
-                          intelligenceText(
-                            context,
-                            'End call',
-                            'إنهاء المكالمة',
-                          ),
-                        ),
-                      ),
-                  ],
+            ),
+            const SizedBox(width: 3),
+            IconButton(
+              key: const Key('ai-coach-hero-start'),
+              tooltip: callLabel,
+              onPressed: interactionEnabled ? onStart : null,
+              style: IconButton.styleFrom(
+                foregroundColor: light,
+                backgroundColor: Colors.white.withValues(alpha: .08),
+                minimumSize: const Size.square(36),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              icon: Icon(
+                liveCallActive && !liveCallPaused
+                    ? Icons.pause_rounded
+                    : Icons.mic_none_rounded,
+                size: 19,
+              ),
+            ),
+            if (liveCallActive) ...[
+              const SizedBox(width: 3),
+              IconButton(
+                key: const Key('ai-coach-live-call-stop'),
+                tooltip: stopLabel,
+                onPressed: interactionEnabled ? onStop : null,
+                style: IconButton.styleFrom(
+                  foregroundColor: Colors.white70,
+                  backgroundColor: Colors.white.withValues(alpha: .06),
+                  minimumSize: const Size.square(36),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
+                icon: const Icon(Icons.call_end_rounded, size: 18),
               ),
             ],
-          ),
-        ],
+            const SizedBox(width: 3),
+            _CoachHeroControl(
+              tooltip: intelligenceText(
+                context,
+                'Coach controls',
+                'أدوات المدرب',
+              ),
+              icon: const Icon(Icons.tune_rounded, size: 19),
+              onPressed: interactionEnabled ? onMenu : null,
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
+class _CoachStatusBadge extends StatelessWidget {
+  const _CoachStatusBadge({
+    required this.active,
+    required this.status,
+    required this.light,
+  });
+
+  final bool active;
+  final String status;
+  final Color light;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: Colors.white.withValues(alpha: active ? .14 : .08),
+      borderRadius: BorderRadius.circular(999),
+      border: Border.all(color: light.withValues(alpha: .22)),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          active
+              ? _VoiceListeningWave(color: light, compact: true)
+              : Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF65D59A),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+          if (status.isNotEmpty) ...[
+            const SizedBox(width: 5),
+            Flexible(
+              child: Text(
+                status,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: light,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    ),
+  );
 }
 
 class _CoachHeroControl extends StatelessWidget {
@@ -436,11 +473,13 @@ class _CoachHeroControl extends StatelessWidget {
     required this.tooltip,
     required this.icon,
     required this.onPressed,
+    this.size = 36,
   });
 
   final String tooltip;
   final Widget icon;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final double size;
 
   @override
   Widget build(BuildContext context) => IconButton(
@@ -449,7 +488,7 @@ class _CoachHeroControl extends StatelessWidget {
     style: IconButton.styleFrom(
       foregroundColor: Colors.white,
       backgroundColor: Colors.white.withValues(alpha: .08),
-      minimumSize: const Size.square(36),
+      minimumSize: Size.square(size),
       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
     ),
     icon: icon,
@@ -457,23 +496,46 @@ class _CoachHeroControl extends StatelessWidget {
 }
 
 class _CoachHeroPortrait extends StatelessWidget {
-  const _CoachHeroPortrait();
+  const _CoachHeroPortrait({this.size = 62, this.onTap});
+
+  final double size;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 62,
-      height: 62,
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        color: const Color(0xFFC8F3FF),
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withValues(alpha: .7), width: 2),
-      ),
-      child: ClipOval(
-        child: const BilCoachPortrait(
-          fit: BoxFit.cover,
-          filterQuality: FilterQuality.medium,
+    final label = intelligenceText(
+      context,
+      'Open conversation history',
+      'افتح سجل المحادثات',
+    );
+    return Semantics(
+      button: onTap != null,
+      label: label,
+      child: Tooltip(
+        message: label,
+        child: InkWell(
+          key: const Key('ai-coach-conversation-history-button'),
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Container(
+            width: size,
+            height: size,
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              color: const Color(0xFFC8F3FF),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.white.withValues(alpha: .7),
+                width: 2,
+              ),
+            ),
+            child: ClipOval(
+              child: const BilCoachPortrait(
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.medium,
+              ),
+            ),
+          ),
         ),
       ),
     );

@@ -19,10 +19,12 @@ pluginManagement {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "9.2.1" apply false
+    // Keep this trio aligned with the Flutter 3.44 stable template. AGP 9.2
+    // requires Gradle 9.4.1, which is outside Kotlin 2.2.20's supported range.
+    id("com.android.application") version "9.0.1" apply false
     // Flutter versions before 3.47 still use the temporary legacy-KGP bridge
     // for plugins that have not completed their built-in Kotlin migration.
-    id("org.jetbrains.kotlin.android") version "2.2.20" apply false
+    id("org.jetbrains.kotlin.android") version "2.3.20" apply false
 }
 
 include(":app")

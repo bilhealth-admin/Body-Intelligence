@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
+import 'package:body_intelligence_log/app/router/responsive_app_shell.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
+import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:body_intelligence_log/features/wellness/presentation/wellness_tools_pages.dart';
 import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
 import 'package:drift/native.dart';
@@ -11,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 void main() {
   testWidgets('sleep starts unset and saves an explicit repository value', (
@@ -183,6 +186,83 @@ void main() {
     await tester.pumpAndSettle();
     expect(repository.writeCalls, 1);
   });
+
+  testWidgets(
+    'sleep meal review enters the shell and dashboard remains navigable',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(430, 932));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      final router = GoRouter(
+        initialLocation: '/sleep',
+        routes: <RouteBase>[
+          GoRoute(path: '/sleep', builder: (_, _) => const SleepTrackerPage()),
+          ShellRoute(
+            builder: (_, _, child) => ResponsiveAppShell(child: child),
+            routes: <RouteBase>[
+              GoRoute(
+                path: '/dashboard',
+                builder: (_, _) =>
+                    const Scaffold(body: Text('Dashboard destination')),
+              ),
+              GoRoute(
+                path: '/daily-log',
+                builder: (_, _) =>
+                    const Scaffold(body: Text('Daily Log destination')),
+              ),
+              GoRoute(
+                path: '/settings',
+                builder: (_, _) => const Scaffold(body: Text('Settings')),
+              ),
+            ],
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            databaseProvider.overrideWithValue(database),
+            userProfileProvider.overrideWith((ref) => const Stream.empty()),
+          ],
+          child: MaterialApp.router(
+            locale: const Locale('en'),
+            routerConfig: router,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Insights'));
+      await tester.pumpAndSettle();
+
+      final reviewMeals = find.byKey(const Key('sleep-review-meals'));
+      await Scrollable.ensureVisible(
+        tester.element(reviewMeals),
+        alignment: .7,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(reviewMeals);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Daily Log destination'), findsOneWidget);
+      expect(find.byKey(const Key('glass-bottom-navigation')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('shell-dashboard-destination')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Dashboard destination'), findsOneWidget);
+      expect(find.text('Daily Log destination'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
 
 Future<void> _pumpSleep(

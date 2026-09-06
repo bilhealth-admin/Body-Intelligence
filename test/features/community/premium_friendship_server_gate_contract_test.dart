@@ -37,20 +37,31 @@ void main() {
     },
   );
 
-  test('every community route is previewed behind the Premium glass gate', () {
-    final router = File('lib/app/router/app_router.dart').readAsStringSync();
-    final gate = File(
-      'lib/features/commerce/presentation/premium_route_glass_gate.dart',
-    ).readAsStringSync();
+  test(
+    'customer community routes use Premium while moderation stays role-gated',
+    () {
+      final router = File('lib/app/router/app_router.dart').readAsStringSync();
+      final gate = File(
+        'lib/features/commerce/presentation/premium_route_glass_gate.dart',
+      ).readAsStringSync();
 
-    expect(gate, contains('PremiumGateFeature.community'));
-    expect(gate, contains("t('Friends and requests')"));
-    expect(gate, contains("t('Messages')"));
-    expect(
-      RegExp(
-        r"path: '/community(?:/[^']*)?'[\s\S]{0,260}PremiumGateFeature\.community",
-      ).allMatches(router).length,
-      10,
-    );
-  });
+      expect(gate, contains('PremiumGateFeature.community'));
+      expect(gate, contains("t('Friends and requests')"));
+      expect(gate, contains("t('Messages')"));
+      expect(
+        RegExp(
+          r"path: '/community(?:/[^']*)?'[\s\S]{0,260}PremiumGateFeature\.community",
+        ).allMatches(router).length,
+        10,
+      );
+      expect(
+        router,
+        matches(
+          RegExp(
+            r"path: '/community/moderation'[\s\S]{0,260}CommunityPostModerationPage",
+          ),
+        ),
+      );
+    },
+  );
 }

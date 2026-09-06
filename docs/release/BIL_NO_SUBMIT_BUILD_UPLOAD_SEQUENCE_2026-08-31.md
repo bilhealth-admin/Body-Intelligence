@@ -7,7 +7,7 @@ and one immutable release tag points to the accepted source commit.
 Current store identity:
 
 - version name: `1.0.0`;
-- next common build number: `5` (or a higher unused integer if another build is
+- next common build number: `8` (or a higher unused integer if another build is
   uploaded first);
 - Android package and Apple bundle ID:
   `com.bilhealth.bodyintelligencelog`;
@@ -41,7 +41,7 @@ Workflow: `.github/workflows/bil_android_release_candidate.yml`
 
 Input:
 
-- `build_number`: integer `5` or higher and greater than every Play upload.
+- `build_number`: integer `8` or higher and greater than every Play upload.
 
 Secrets:
 

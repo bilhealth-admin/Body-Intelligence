@@ -4,17 +4,29 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('settings can reopen onboarding without destructive reset', () {
-    final settings = [
-      File('lib/features/settings/settings_page.dart').readAsStringSync(),
-      File(
-        'lib/features/settings/settings_page_actions.dart',
-      ).readAsStringSync(),
-    ].join('\n');
+    final settingsPage = File(
+      'lib/features/settings/settings_page.dart',
+    ).readAsStringSync();
+    final actions = File(
+      'lib/features/settings/settings_page_actions.dart',
+    ).readAsStringSync();
 
-    expect(settings, contains("set('forceOnboarding', 'true')"));
-    expect(settings, contains("context.go('/onboarding')"));
-    expect(settings, contains("key: const Key('settings-review-onboarding')"));
-    expect(settings, contains('without deleting your profile or records'));
+    expect(actions, contains("set('forceOnboarding', 'true')"));
+    expect(actions, contains("context.go('/onboarding')"));
+    expect(
+      settingsPage,
+      contains("key: const Key('settings-review-onboarding')"),
+    );
+    expect(actions, contains('keeping your profile, weight records, meals'));
+    expect(actions, contains('Nothing will be deleted or uploaded.'));
+    for (final destructiveCall in const [
+      '.delete(',
+      'deleteAll(',
+      'clearAll(',
+      'resetDatabase(',
+    ]) {
+      expect(actions, isNot(contains(destructiveCall)));
+    }
   });
 
   test('startup honors force-onboarding before dashboard routing', () {

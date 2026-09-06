@@ -88,7 +88,8 @@ review submission, or public rollout.
 - Apple DSA trader status remains unprovided for 27 EU territories. This is an
   owner/App Store Connect compliance action, not a normal catalog API patch.
 - Apple currently has zero builds and zero pre-release versions. The current
-  local APK/AAB are build 4 and predate source `1.0.0+5`; there is no local IPA.
+  local APK/AAB were build 4 and predated the then-current source
+  `1.0.0+5`; this is historical evidence and there was no local IPA.
 - Public App Store screenshots require truthful final-build iPhone and iPad
   runtime captures; generated widget goldens and Android emulator captures are
   not substitutes.

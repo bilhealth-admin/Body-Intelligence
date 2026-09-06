@@ -10,9 +10,14 @@ void main() {
 
   test('portable release runner excludes only the reviewed failing files', () {
     final source = File(runnerPath).readAsStringSync();
-    final exclusions = RegExp(
-      r'"(test/[^"\r\n]+_test\.dart)"',
-    ).allMatches(source).map((match) => match.group(1)!).toSet();
+    final exclusionBlock = RegExp(
+      r'EXCLUDED_TESTS = frozenset\(\s*\{([\s\S]*?)\}\s*\)',
+    ).firstMatch(source);
+    expect(exclusionBlock, isNotNull);
+    final exclusions = RegExp(r'"(test/[^"\r\n]+_test\.dart)"')
+        .allMatches(exclusionBlock!.group(1)!)
+        .map((match) => match.group(1)!)
+        .toSet();
 
     expect(exclusions, hasLength(29));
     expect(
@@ -38,6 +43,37 @@ void main() {
     expect(source, contains('all_tests if path not in EXCLUDED_TESTS'));
     expect(source, contains('"flutter",'));
     expect(source, contains('"test",'));
+    expect(exclusions, isNot(contains('test/performance_budget_test.dart')));
+  });
+
+  test('performance budgets run first without concurrent test workers', () {
+    final source = File(runnerPath).readAsStringSync();
+    expect(
+      source,
+      contains('PERFORMANCE_BUDGET_TEST = "test/performance_budget_test.dart"'),
+    );
+    expect(
+      source,
+      contains('[*command, "--concurrency", "1", *performance_tests]'),
+    );
+    expect(
+      source,
+      contains('path for path in portable if path != PERFORMANCE_BUDGET_TEST'),
+    );
+    final performanceRun = source.indexOf('performance = subprocess.run(');
+    final failureCheck = source.indexOf('if performance.returncode != 0');
+    final failureReturn = source.indexOf('return performance.returncode');
+    final remainingRun = source.indexOf('[*command, *remaining_tests]');
+    expect(performanceRun, greaterThan(-1));
+    expect(failureCheck, greaterThan(performanceRun));
+    expect(failureReturn, greaterThan(failureCheck));
+    expect(remainingRun, greaterThan(failureReturn));
+    expect(source, contains('PORTABLE_RELEASE_SCHEDULED_TEST_FILES'));
+    expect(
+      source,
+      contains('PORTABLE_RELEASE_PERFORMANCE_SCHEDULED_TEST_FILES'),
+    );
+    expect(source, contains('PORTABLE_RELEASE_REMAINING_SCHEDULED_TEST_FILES'));
   });
 
   test('both signed workflows use the same portable release runner', () {

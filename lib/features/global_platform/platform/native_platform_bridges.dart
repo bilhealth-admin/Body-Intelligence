@@ -82,6 +82,7 @@ final class MethodChannelHealthBridge
       ),
       nextAnchor: raw?['nextAnchor'] as String?,
       hasMore: raw?['hasMore'] == true,
+      changesTokenExpired: raw?['changesTokenExpired'] == true,
     );
   }
 

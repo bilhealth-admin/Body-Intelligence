@@ -1,3 +1,7 @@
+import 'package:flutter/foundation.dart';
+
+import '../global_platform/health_data/unified_health_data_integration.dart';
+
 enum DeviceVerificationLevel {
   testedInAutomatedMock,
   implementationReadyDeviceRequired,
@@ -26,12 +30,13 @@ final class HealthDeviceCompatibility {
 /// advertising Bluetooth is compatible. Real-device certification remains an
 /// external release gate for each hardware/OS combination.
 abstract final class BilDeviceCompatibilityMatrix {
-  static const List<HealthDeviceCompatibility> entries = [
+  static final List<HealthDeviceCompatibility>
+  entries = List<HealthDeviceCompatibility>.unmodifiable([
     HealthDeviceCompatibility(
       id: 'android-health-connect',
       platforms: {'Android'},
       protocol: 'Health Connect SDK',
-      dataTypes: {'steps', 'activeEnergy', 'workout', 'weight'},
+      dataTypes: BilHealthScope.healthConnectReadTypeNames,
       verification: DeviceVerificationLevel.implementationReadyDeviceRequired,
       minimumVersion: 'Android 9 with Health Connect; Android 14 integrated',
     ),
@@ -39,7 +44,7 @@ abstract final class BilDeviceCompatibilityMatrix {
       id: 'apple-healthkit',
       platforms: {'iOS'},
       protocol: 'HealthKit',
-      dataTypes: {'steps', 'activeEnergy', 'workout', 'weight'},
+      dataTypes: BilHealthScope.appleHealthReadTypeNames,
       verification: DeviceVerificationLevel.implementationReadyDeviceRequired,
       minimumVersion: 'iOS 15+',
     ),
@@ -51,7 +56,23 @@ abstract final class BilDeviceCompatibilityMatrix {
       verification: DeviceVerificationLevel.implementationReadyDeviceRequired,
       minimumVersion: 'Android 8+ / iOS 15+',
     ),
-  ];
+  ]);
+
+  static List<HealthDeviceCompatibility> forTargetPlatform(
+    TargetPlatform platform, {
+    bool isWeb = false,
+  }) {
+    if (isWeb) return const <HealthDeviceCompatibility>[];
+    final platformName = switch (platform) {
+      TargetPlatform.android => 'Android',
+      TargetPlatform.iOS => 'iOS',
+      _ => null,
+    };
+    if (platformName == null) return const <HealthDeviceCompatibility>[];
+    return List<HealthDeviceCompatibility>.unmodifiable(
+      entries.where((entry) => entry.platforms.contains(platformName)),
+    );
+  }
 
   static bool isAdvertisable(String id) {
     final match = entries.where((entry) => entry.id == id);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../shared/widgets/bil_wordmark.dart';
 
 typedef QuickMacroCopy = String Function(String english, String arabic);
@@ -168,7 +169,7 @@ Future<bool?> showQuickMacroEntryDialog({
                         const BilFullWordmark(
                           key: Key('quick-macro-wordmark'),
                           height: 32,
-                          alignment: AlignmentDirectional.centerStart,
+                          alignment: Alignment.center,
                         ),
                         const SizedBox(height: 14),
                         Text(
@@ -181,7 +182,7 @@ Future<bool?> showQuickMacroEntryDialog({
                         ),
                         const SizedBox(height: 10),
                         _InfoTile(
-                          icon: Icons.restaurant_rounded,
+                          kind: BilSemanticIconKind.meal,
                           label: copy('Meal', 'الوجبة'),
                           value: mealLabel,
                         ),
@@ -221,7 +222,7 @@ Future<bool?> showQuickMacroEntryDialog({
                             ),
                           ),
                         _InfoTile(
-                          icon: Icons.schedule_rounded,
+                          kind: BilSemanticIconKind.time,
                           label: copy('Time', 'الوقت'),
                           value: time.format(context),
                           enabled: !saving,
@@ -289,13 +290,13 @@ Future<bool?> showQuickMacroEntryDialog({
 
 class _InfoTile extends StatelessWidget {
   const _InfoTile({
-    required this.icon,
+    required this.kind,
     required this.label,
     required this.value,
     this.enabled = true,
     this.onTap,
   });
-  final IconData icon;
+  final BilSemanticIconKind kind;
   final String label;
   final String value;
   final bool enabled;
@@ -309,8 +310,14 @@ class _InfoTile extends StatelessWidget {
       dense: true,
       enabled: enabled,
       onTap: onTap,
+      horizontalTitleGap: 12,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
+      leading: BilSemanticIconBadge(
+        kind: kind,
+        size: 36,
+        iconSize: 20,
+        shape: BoxShape.rectangle,
+      ),
       title: Text(label),
       trailing: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 150),

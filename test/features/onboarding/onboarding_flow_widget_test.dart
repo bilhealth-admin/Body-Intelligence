@@ -377,7 +377,10 @@ void main() {
     );
     await mountRouted(tester);
 
-    await tester.tap(find.byKey(const Key('onboarding-estimates-ack')));
+    final acknowledgement = find.byKey(const Key('onboarding-estimates-ack'));
+    await tester.ensureVisible(acknowledgement);
+    await tester.pump();
+    await tester.tap(acknowledgement);
     await tester.tap(find.byKey(const Key('onboarding-next')));
     await tester.pumpAndSettle();
 

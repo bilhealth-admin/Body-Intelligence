@@ -3,9 +3,12 @@ import 'dart:io';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../app/security/bil_mobile_integrity_service.dart';
 import '../domain/coach_context_snapshot.dart';
-import 'coach_cloud_payload_sanitizer.dart';
+import 'coach_cloud_privacy_boundary.dart';
 import 'local_model_gateway.dart';
+
+export 'coach_cloud_privacy_boundary.dart';
 
 LocalModelGateway createLocalModelGateway() => const LlamaCppLocalGateway();
 
@@ -27,6 +30,58 @@ String? functionErrorCodeFromDetails(Object? details) {
   }
 }
 
+/// A JSON response boundary small enough to fake without initializing
+/// Supabase or making a network request.
+class CoachCloudFunctionResponse {
+  const CoachCloudFunctionResponse({required this.status, this.data});
+
+  final int status;
+  final Object? data;
+}
+
+/// Privacy-sensitive cloud operations used by the Coach gateway.
+///
+/// Keeping this boundary injectable makes it possible to prove that a denied,
+/// failed, or signed-out consent preflight never invokes the Edge Function.
+abstract interface class CoachCloudAccess {
+  bool get hasAuthenticatedSession;
+
+  Future<Object?> readRemoteAiConsent();
+
+  Future<CoachCloudFunctionResponse> invokeCoach(Map<String, Object?> body);
+}
+
+class _SupabaseCoachCloudAccess implements CoachCloudAccess {
+  const _SupabaseCoachCloudAccess(this.client);
+
+  final SupabaseClient client;
+
+  @override
+  bool get hasAuthenticatedSession => client.auth.currentSession != null;
+
+  @override
+  Future<Object?> readRemoteAiConsent() =>
+      client.rpc('bil_get_remote_ai_consent');
+
+  @override
+  Future<CoachCloudFunctionResponse> invokeCoach(
+    Map<String, Object?> body,
+  ) async {
+    final protectedBody = await BilMobileIntegrityService.instance.protect(
+      action: 'ai_coach.request',
+      payload: body,
+    );
+    final response = await client.functions.invoke(
+      'ai-coach',
+      body: protectedBody,
+    );
+    return CoachCloudFunctionResponse(
+      status: response.status,
+      data: response.data,
+    );
+  }
+}
+
 class LlamaCppLocalGateway implements LocalModelGateway {
   const LlamaCppLocalGateway({
     this.endpoint = const String.fromEnvironment(
@@ -34,10 +89,15 @@ class LlamaCppLocalGateway implements LocalModelGateway {
       defaultValue: '',
     ),
     this.apiKey = const String.fromEnvironment('BIL_LOCAL_AI_API_KEY'),
+    this.cloudAccess,
+    this.cloudContextProjector =
+        const QuestionScopedCoachCloudContextProjector(),
   });
 
   final String endpoint;
   final String apiKey;
+  final CoachCloudAccess? cloudAccess;
+  final CoachCloudContextProjector cloudContextProjector;
 
   @override
   Future<LocalModelResult> answer({
@@ -63,15 +123,10 @@ class LlamaCppLocalGateway implements LocalModelGateway {
     if (base == null || !{'http', 'https'}.contains(base.scheme)) {
       return cloudFallback();
     }
-    final loopback =
-        base.host == 'localhost' ||
-        base.host == '127.0.0.1' ||
-        base.host == '::1';
-    // A model bound to this device's loopback interface is already isolated
-    // from the network and must remain usable in a genuinely local/offline
-    // installation. Any non-loopback endpoint still fails closed unless it
-    // has a strong bearer credential.
-    if (!loopback && apiKey.length < 32) return cloudFallback();
+    // "Local" means this device only. A bearer key cannot turn an Internet or
+    // LAN endpoint into an on-device model; every non-loopback URL must use the
+    // consent-gated BIL cloud path below.
+    if (!isLoopbackLocalModelEndpoint(endpoint)) return cloudFallback();
     final uri = base.replace(path: '/v1/chat/completions');
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 2);
     try {
@@ -104,7 +159,7 @@ class LlamaCppLocalGateway implements LocalModelGateway {
         }),
       );
       final response = await request.close().timeout(
-        const Duration(seconds: 45),
+        const Duration(seconds: 18),
       );
       if (response.statusCode != HttpStatus.ok) return cloudFallback();
       final payload = jsonDecode(await utf8.decoder.bind(response).join());
@@ -140,36 +195,77 @@ class LlamaCppLocalGateway implements LocalModelGateway {
     required bool languageDetected,
     required List<CoachConversationTurn> conversation,
   }) async {
+    late final CoachCloudAccess access;
     try {
-      final client = Supabase.instance.client;
-      if (client.auth.currentSession == null) {
+      access =
+          cloudAccess ?? _SupabaseCoachCloudAccess(Supabase.instance.client);
+      if (!access.hasAuthenticatedSession) {
         return const LocalModelResult(
           status: CoachServiceStatus.signedOut,
           diagnosticCode: 'authentication_required',
         );
       }
+    } on Object {
+      return const LocalModelResult(
+        status: CoachServiceStatus.temporarilyUnavailable,
+        diagnosticCode: 'cloud_access_unavailable',
+      );
+    }
+
+    Object? consent;
+    try {
+      consent = await access.readRemoteAiConsent().timeout(
+        const Duration(seconds: 8),
+      );
+    } on Object {
+      return const LocalModelResult(
+        status: CoachServiceStatus.temporarilyUnavailable,
+        diagnosticCode: 'remote_ai_consent_preflight_failed',
+      );
+    }
+    if (!isCurrentRemoteAiConsentGranted(consent)) {
+      return const LocalModelResult(
+        status: CoachServiceStatus.consentRequired,
+        diagnosticCode: 'ai_consent_required',
+      );
+    }
+
+    try {
       final requestId =
           'coach-${DateTime.now().toUtc().microsecondsSinceEpoch}';
-      // The Edge Function is the authoritative consent gate. Avoiding a
-      // duplicate client-side consent round trip improves every cloud turn
-      // without weakening privacy or quota enforcement.
-      final response = await client.functions
-          .invoke(
-            'ai-coach',
-            body: <String, Object?>{
-              'request_id': requestId,
-              'locale': locale,
-              if (languageDetected) 'language_hint': locale,
-              'messages': _conversationMessages(
-                question: question,
-                conversation: conversation,
-              ),
-              // The durable cloud ledger remains encrypted. Only this bounded,
-              // user-initiated snapshot is sent ephemerally for this answer.
-              'context': _boundedContext(context),
-            },
-          )
-          .timeout(const Duration(seconds: 45));
+      // Client preflight above prevents context projection and any Edge call
+      // before explicit consent. The server repeats its own authoritative gate
+      // as defense in depth against modified or obsolete clients.
+      final projection = cloudContextProjector.project(
+        question: question,
+        context: context,
+        conversation: conversation,
+      );
+      final scopedConversation = questionScopedCoachCloudConversation(
+        question: question,
+        conversation: conversation,
+      );
+      final cloudMessages = _conversationMessages(
+        question: question,
+        conversation: scopedConversation,
+      );
+      final disclosure = <String, Object?>{
+        ...projection.disclosure,
+        'included_prior_turn_count': cloudMessages.length - 1,
+        'sent_message_count': cloudMessages.length,
+      };
+      final response = await access
+          .invokeCoach(<String, Object?>{
+            'request_id': requestId,
+            'locale': locale,
+            if (languageDetected) 'language_hint': locale,
+            'messages': cloudMessages,
+            // Ephemeral fields and the disclosure are generated from the same
+            // question-scoped projection, so the UI/server evidence can match.
+            'context': projection.context,
+            'context_disclosure': disclosure,
+          })
+          .timeout(const Duration(seconds: 28));
       final data = response.data;
       if (response.status != 200 || data is! Map) {
         return const LocalModelResult(
@@ -280,77 +376,6 @@ class LlamaCppLocalGateway implements LocalModelGateway {
             .toList(growable: false)
       : const [];
 
-  Map<String, Object?> _boundedContext(CoachContextSnapshot context) {
-    final full = context.toJson();
-    final weight = Map<String, Object?>.from(full['weight']! as Map);
-    weight['history'] = context.weights
-        .take(60)
-        .map((item) => item.toJson())
-        .toList(growable: false);
-    final days = context.nutritionDays
-        .take(7)
-        .map((day) {
-          final value = day.toJson();
-          final meals = (value['meals']! as List)
-              .take(6)
-              .map((rawMeal) {
-                final meal = Map<String, Object?>.from(rawMeal as Map);
-                final items = meal['items'];
-                if (items is List) {
-                  meal['items'] = items.take(12).toList(growable: false);
-                }
-                return meal;
-              })
-              .toList(growable: false);
-          return <String, Object?>{...value, 'meals': meals};
-        })
-        .toList(growable: false);
-    var bounded = sanitizeCoachCloudObject(<String, Object?>{
-      'schema': full['schema'],
-      'generatedAt': full['generatedAt'],
-      'profile': full['profile'],
-      'weight': weight,
-      'nutritionHistory': days,
-      'waterHistory': context.waterHistory.take(30).toList(growable: false),
-      'computedHealth': full['computedHealth'],
-      'canonicalIntelligence': context.canonicalIntelligence,
-      'decisionMemory': context.decisionMemory.take(10).toList(growable: false),
-      'explicitMemories': context.explicitMemories
-          .take(20)
-          .toList(growable: false),
-      'activityHistory': context.activityHistory
-          .take(14)
-          .toList(growable: false),
-      'personalExperiments': context.personalExperiments
-          .take(6)
-          .toList(growable: false),
-    });
-    if (jsonEncode(bounded).length <= 19_000) return bounded;
-    // Preserve grounded targets and summaries if item-level history is large.
-    bounded['nutritionHistory'] = days
-        .map(
-          (day) => <String, Object?>{
-            'day': day['day'],
-            'totals': day['totals'],
-          },
-        )
-        .toList(growable: false);
-    bounded['decisionMemory'] = context.decisionMemory
-        .take(5)
-        .toList(growable: false);
-    bounded['explicitMemories'] = context.explicitMemories
-        .take(10)
-        .toList(growable: false);
-    bounded['activityHistory'] = context.activityHistory
-        .take(7)
-        .toList(growable: false);
-    bounded['personalExperiments'] = context.personalExperiments
-        .take(3)
-        .toList(growable: false);
-    bounded = sanitizeCoachCloudObject(bounded);
-    return bounded;
-  }
-
   String _systemPrompt(String locale) =>
       '''
 You are BIL AI Coach, a professional nutrition and fitness coach. Reply in
@@ -375,10 +400,29 @@ set_theme_mode, set_language, update_goal, save_measurements,
 quick_add_macros, update_meal_item, move_meal_item, delete_meal_item,
 read_nutrition_remaining, read_profile_identity, navigate,
 manage_subscription, request_account_deletion, save_memory. For writes include
-the exact
-validated value and expect BIL to request confirmation. Use save_memory with
-text and kind=user_fact|preference|constraint|goal|routine only when the user
-explicitly asks BIL to remember something. /no_think
+the exact validated value and expect BIL to request confirmation. Use these
+argument names exactly:
+navigate {"target":"dashboard|daily_log|nutrition|weight_history|measurements|goals|analytics|profile|settings|notifications|ai_coach"};
+log_water {"amountMl":number};
+log_weight {"weightKg":number,"date"?:"YYYY-MM-DD"};
+set_theme_mode {"mode":"dark|light|system"};
+set_language {"locale":"BCP-47"};
+update_goal {"targetWeightKg":number,"targetDate"?:"YYYY-MM-DD"};
+save_measurements {"date"?:"YYYY-MM-DD", one or more of "neckCm", "waistCm",
+"hipsCm", "chestCm", "armCm", "thighCm":number};
+quick_add_macros {"mealType":"breakfast|lunch|dinner|snack",
+"calories":number,"protein":number,"carbohydrates":number,"fat":number,
+"date"?:"YYYY-MM-DD"};
+update_meal_item {"itemId":integer,"quantityGrams":number};
+move_meal_item {"itemId":integer,"mealType":"breakfast|lunch|dinner|snack"};
+delete_meal_item {"itemId":integer};
+read_nutrition_remaining, read_profile_identity, open_weight_log, open_meals,
+open_meals_yesterday, open_workouts, open_plan, open_report,
+manage_subscription, request_account_deletion use {}.
+When the exact write value is clear, return the action now. Do not ask the user
+to type confirmation in chat because BIL presents the confirmation UI. Use
+save_memory with {"text":string,"kind":"user_fact|preference|constraint|goal|routine"}
+only when the user explicitly asks BIL to remember something. /no_think
 ''';
 
   String _languageName(String locale) {

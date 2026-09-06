@@ -9,14 +9,18 @@ import 'auth_five_locale_copy.dart';
 
 /// Completes a native OAuth callback without racing Supabase's PKCE exchange.
 ///
-/// The OS can deliver `bil://auth-callback` to both GoRouter and
-/// `supabase_flutter`. Navigation must therefore wait until Supabase has
-/// persisted the resulting session instead of immediately returning to the
-/// sign-in screen.
+/// The OS can deliver the verified BIL HTTPS callback through more than one
+/// lifecycle path. Navigation therefore waits until Supabase has persisted the
+/// resulting session instead of immediately returning to the sign-in screen.
 class AuthCallbackPage extends StatefulWidget {
-  const AuthCallbackPage({super.key, this.initiallyFailed = false});
+  const AuthCallbackPage({
+    super.key,
+    this.initiallyFailed = false,
+    this.onRetry,
+  });
 
   final bool initiallyFailed;
+  final Future<bool> Function()? onRetry;
 
   @override
   State<AuthCallbackPage> createState() => _AuthCallbackPageState();
@@ -28,6 +32,7 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
   StreamSubscription<AuthState>? _subscription;
   Timer? _timer;
   bool _completed = false;
+  bool _retrying = false;
   late bool _failed;
 
   @override
@@ -50,6 +55,7 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
       // GoRouter can retain this State when only the callback query changes.
       // Update synchronously because a rebuild is already in progress.
       _failed = true;
+      _retrying = false;
     }
   }
 
@@ -95,11 +101,29 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
     context.go('/startup');
   }
 
-  void _retry() {
+  Future<void> _retry() async {
+    if (_retrying || _completed) return;
     _timer?.cancel();
-    unawaited(_subscription?.cancel());
-    setState(() => _failed = false);
-    unawaited(_complete());
+    await _subscription?.cancel();
+    _subscription = null;
+    setState(() {
+      _failed = false;
+      _retrying = true;
+    });
+
+    var exchanged = false;
+    try {
+      exchanged = await widget.onRetry?.call() ?? false;
+    } catch (_) {
+      exchanged = false;
+    }
+    if (!mounted || _completed) return;
+
+    setState(() {
+      _retrying = false;
+      _failed = !exchanged;
+    });
+    if (exchanged) await _complete();
   }
 
   @override
@@ -154,7 +178,8 @@ class _AuthCallbackPageState extends State<AuthCallbackPage> {
                     ),
                     const SizedBox(height: 20),
                     FilledButton.icon(
-                      onPressed: _retry,
+                      key: const Key('auth-callback-retry'),
+                      onPressed: _retrying ? null : _retry,
                       icon: const Icon(Icons.refresh_rounded),
                       label: Text(tr('Try again', 'حاول مرة أخرى')),
                     ),

@@ -309,7 +309,7 @@ void main() {
     expect(barcode, contains(ReleaseActionRuntimeCopy.lookUp));
     expect(
       fitnessDevices,
-      contains(ReleaseActionRuntimeCopy.compatibleFitnessMeasurements),
+      contains(ConnectedHealthRuntimeCopy.supportedFitnessDevices),
     );
     for (final source in FoodActionRuntimeCopy.sources) {
       expect(foodActions, contains(source));

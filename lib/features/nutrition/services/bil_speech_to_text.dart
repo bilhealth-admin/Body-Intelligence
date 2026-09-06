@@ -69,6 +69,10 @@ class SpeechToText {
   StreamSubscription<Object?>? _subscription;
   void Function(SpeechRecognitionError error)? _onError;
   void Function(SpeechRecognitionResult result)? _onResult;
+  SpeechListenOptions? _lastListenOptions;
+  Timer? _transientRetry;
+  var _transientRetryCount = 0;
+  var _cancelRequested = false;
   bool _isListening = false;
 
   bool get isListening => _isListening;
@@ -101,24 +105,54 @@ class SpeechToText {
     required SpeechListenOptions listenOptions,
   }) async {
     _onResult = onResult;
-    await _methods.invokeMethod<void>('listen', <String, Object?>{
-      'localeId': listenOptions.localeId,
-      'listenForMs': listenOptions.listenFor.inMilliseconds,
-      'pauseForMs': listenOptions.pauseFor.inMilliseconds,
-      'partialResults': listenOptions.partialResults,
-      'cancelOnError': listenOptions.cancelOnError,
-      'autoDetectLanguage': listenOptions.autoDetectLanguage,
-      'allowedLocaleIds': listenOptions.allowedLocaleIds,
-    });
+    _lastListenOptions = listenOptions;
+    _transientRetryCount = 0;
+    _cancelRequested = false;
+    _transientRetry?.cancel();
+    _transientRetry = null;
+    await _startNativeListening(listenOptions);
+  }
+
+  Future<void> _startNativeListening(SpeechListenOptions listenOptions) async {
     _isListening = true;
+    try {
+      await _methods.invokeMethod<void>('listen', <String, Object?>{
+        'localeId': listenOptions.localeId,
+        'listenForMs': listenOptions.listenFor.inMilliseconds,
+        'pauseForMs': listenOptions.pauseFor.inMilliseconds,
+        'partialResults': listenOptions.partialResults,
+        'cancelOnError': listenOptions.cancelOnError,
+        'autoDetectLanguage': listenOptions.autoDetectLanguage,
+        'allowedLocaleIds': listenOptions.allowedLocaleIds,
+      });
+    } on Object catch (error) {
+      _isListening = false;
+      final code = _platformErrorCode(error);
+      if (_shouldRetryTransiently(code)) {
+        _transientRetryCount += 1;
+        await Future<void>.delayed(const Duration(milliseconds: 450));
+        if (!_cancelRequested && identical(_lastListenOptions, listenOptions)) {
+          return _startNativeListening(listenOptions);
+        }
+      }
+      rethrow;
+    }
   }
 
   Future<void> stop() async {
+    _cancelRequested = true;
+    _lastListenOptions = null;
+    _transientRetry?.cancel();
+    _transientRetry = null;
     await _methods.invokeMethod<void>('stop');
     _isListening = false;
   }
 
   Future<void> cancel() async {
+    _cancelRequested = true;
+    _lastListenOptions = null;
+    _transientRetry?.cancel();
+    _transientRetry = null;
     await _methods.invokeMethod<void>('cancel');
     _isListening = false;
   }
@@ -133,6 +167,9 @@ class SpeechToText {
     _subscription = null;
     _onError = null;
     _onResult = null;
+    _lastListenOptions = null;
+    _transientRetry?.cancel();
+    _transientRetry = null;
   }
 
   void _handleEvent(Object? raw) {
@@ -147,16 +184,56 @@ class SpeechToText {
             localeId: event['localeId']?.toString(),
           ),
         );
-        if (event['final'] == true) _isListening = false;
+        if (event['final'] == true) {
+          _isListening = false;
+          _lastListenOptions = null;
+          _transientRetry?.cancel();
+          _transientRetry = null;
+        }
       case 'error':
         _isListening = false;
-        _onError?.call(
-          SpeechRecognitionError(event['code']?.toString() ?? 'unavailable'),
-        );
+        final code = event['code']?.toString() ?? 'unavailable';
+        if (_shouldRetryTransiently(code)) {
+          _scheduleTransientRetry();
+        } else {
+          _lastListenOptions = null;
+          _onError?.call(SpeechRecognitionError(code));
+        }
       case 'status':
         if (event['listening'] is bool) {
           _isListening = event['listening']! as bool;
         }
     }
+  }
+
+  bool _shouldRetryTransiently(String code) =>
+      !_cancelRequested &&
+      _lastListenOptions != null &&
+      _transientRetryCount < 1 &&
+      const <String>{
+        'recognizer_error_5',
+        'speech_recognizer_busy',
+        'speech_start_failed',
+        'audio_input_unavailable',
+        'audio_session_unavailable',
+      }.contains(code);
+
+  String _platformErrorCode(Object error) =>
+      error is PlatformException ? error.code : 'speech_start_failed';
+
+  void _scheduleTransientRetry() {
+    _transientRetryCount += 1;
+    _transientRetry?.cancel();
+    _transientRetry = Timer(const Duration(milliseconds: 450), () async {
+      _transientRetry = null;
+      final options = _lastListenOptions;
+      if (_cancelRequested || options == null) return;
+      try {
+        await _startNativeListening(options);
+      } on Object catch (error) {
+        _lastListenOptions = null;
+        _onError?.call(SpeechRecognitionError(_platformErrorCode(error)));
+      }
+    });
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../../commerce/presentation/premium_label_badge.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../domain/nutrition_pathway.dart';
@@ -61,12 +62,13 @@ class NutritionPathwaysPage extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 20),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Align(
               alignment: AlignmentDirectional.centerStart,
               child: PremiumLabelBadge(
                 key: Key('nutrition-pathways-premium-page-label'),
+                semanticLabel: nutritionText(context, 'Premium', 'مميز'),
               ),
             ),
           ),
@@ -269,7 +271,7 @@ class _PathwayAccessBadge extends StatelessWidget {
     final label = nutritionTextForLanguage(localeTag, 'Free', 'مجاني');
     return Container(
       key: Key('nutrition-pathway-access-$surface-${plan.id}'),
-      constraints: BoxConstraints(maxWidth: compact ? 86 : 116),
+      constraints: BoxConstraints(maxWidth: compact ? 112 : 132),
       padding: EdgeInsets.symmetric(
         horizontal: compact ? 8 : 11,
         vertical: compact ? 5 : 7,
@@ -296,7 +298,10 @@ class _PathwayAccessBadge extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            premium ? Icons.circle : Icons.lock_open_rounded,
+            premium ? BilSemanticIcons.subscription : Icons.lock_open_rounded,
+            semanticLabel: premium
+                ? nutritionTextForLanguage(localeTag, 'Premium', 'مميز')
+                : null,
             size: compact ? 14 : 16,
             color: premium ? const Color(0xFF4C3300) : const Color(0xFF006D60),
           ),

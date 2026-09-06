@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 
 /// Redacts health content while the app is backgrounded or represented in the
 /// operating-system task switcher. The shield contains no user data.
+///
+/// `inactive` is intentionally not redacted: iOS emits that transient state
+/// while presenting camera, microphone, HealthKit, and photo-picker consent
+/// sheets. Covering the Flutter surface at that moment makes those native
+/// flows look like a frozen dark screen and can race camera/audio teardown.
+/// The OS-facing `hidden`/`paused` states still receive the privacy shield.
 class AppSwitcherPrivacyShield extends StatefulWidget {
   const AppSwitcherPrivacyShield({required this.child, super.key});
 
@@ -31,12 +36,8 @@ class _AppSwitcherPrivacyShieldState extends State<AppSwitcherPrivacyShield>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final mobilePlatform =
-        defaultTargetPlatform == TargetPlatform.android ||
-        defaultTargetPlatform == TargetPlatform.iOS;
     final redact = switch (state) {
-      AppLifecycleState.resumed => false,
-      AppLifecycleState.inactive => mobilePlatform,
+      AppLifecycleState.resumed || AppLifecycleState.inactive => false,
       AppLifecycleState.hidden ||
       AppLifecycleState.paused ||
       AppLifecycleState.detached => true,

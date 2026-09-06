@@ -97,6 +97,36 @@ bool hasVerifiedAiSubscription(SubscriptionState? state, {DateTime? now}) {
       boundary.toUtc().isAfter((now ?? DateTime.now()).toUtc());
 }
 
+typedef AiCoachUsageStatusLoader = Future<Object?> Function();
+
+/// Monotonic signal used by already-mounted AI Coach balance surfaces to
+/// request a fresh server snapshot.
+///
+/// The signal intentionally carries no balance data. Reset notices only tell
+/// consumers to reload; `bil_get_ai_usage_status` remains the sole authority
+/// for the numbers that are shown and for route access.
+final aiCoachUsageRefreshProvider =
+    NotifierProvider<AiCoachUsageRefreshController, int>(
+      AiCoachUsageRefreshController.new,
+    );
+
+final class AiCoachUsageRefreshController extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void requestAuthoritativeReload() => state += 1;
+}
+
+/// Keeps the Supabase boundary injectable so the access provider's failure
+/// state can be exercised without replacing the provider under test.
+final aiCoachUsageStatusLoaderProvider = Provider<AiCoachUsageStatusLoader>(
+  (_) => () async {
+    final client = Supabase.instance.client;
+    if (client.auth.currentSession == null) return null;
+    return client.rpc('bil_get_ai_usage_status');
+  },
+);
+
 /// Server-owned AI access truth for token markets.
 ///
 /// A local purchase callback is never enough to unlock the coach. The gate
@@ -107,16 +137,12 @@ final aiCoachCreditAccessProvider = FutureProvider.autoDispose<bool>((
   ref,
 ) async {
   ref.watch(verifiedEntitlementOwnerProvider);
-  final client = Supabase.instance.client;
-  if (client.auth.currentSession == null) return false;
-  try {
-    final value = await client.rpc('bil_get_ai_usage_status');
-    return aiCoachAccessFromUsageStatus(value);
-  } on Object {
-    // Access fails closed when the server cannot establish credit truth.
-    return false;
-  }
-});
+  final value = await ref.read(aiCoachUsageStatusLoaderProvider)();
+  // A signed-out or malformed response is a verified no-access result. An
+  // RPC exception is deliberately allowed through so Riverpod exposes
+  // AsyncError and the route shows retry instead of a purchase offer.
+  return aiCoachAccessFromUsageStatus(value);
+}, retry: (_, _) => null);
 
 /// Meal-photo analysis is purchased through AI Boost in every storefront.
 /// It deliberately ignores subscription/included allowance and opens only

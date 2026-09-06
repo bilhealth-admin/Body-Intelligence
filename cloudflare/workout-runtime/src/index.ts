@@ -12,6 +12,10 @@ import {
   resolveRecipeImage,
   type RecipeImageObject,
 } from "./recipe-images";
+import {
+  resolveRecipeThumbnail,
+  type RecipeThumbnailObject,
+} from "./recipe-thumbnails";
 import approvedObjects from "../../../artifacts/workout_media/cloudflare_runtime_v2/protected_object_keys_v2.json";
 import freePreviews from "../../../artifacts/workout_media/cloudflare_runtime_v2/free_preview_keys_v1.json";
 
@@ -60,7 +64,7 @@ const productionServices: RuntimeServices = {
 
 interface DeliveryPolicy {
   readonly cacheControl: string;
-  readonly recipeImage?: RecipeImageObject;
+  readonly publicMedia?: RecipeImageObject | RecipeThumbnailObject;
   readonly varyAuthorization: boolean;
 }
 
@@ -89,7 +93,6 @@ async function handleRequest(
   ctx: ExecutionContext,
   services: RuntimeServices = productionServices,
 ): Promise<Response> {
-  void ctx;
   const url = new URL(request.url);
   try {
     if (request.method === "OPTIONS") {
@@ -112,16 +115,20 @@ async function handleRequest(
     }
     const recipeImage = resolveRecipeImage(url.pathname);
     if (recipeImage !== null) {
-      return serveR2(
+      return servePublicRecipeMedia(
         request,
-        env.RECIPES,
-        recipeImage.objectKey,
-        {
-          cacheControl: "public, max-age=31536000, immutable",
-          recipeImage,
-          varyAuthorization: false,
-        },
         env,
+        ctx,
+        recipeImage,
+      );
+    }
+    const recipeThumbnail = resolveRecipeThumbnail(url.pathname);
+    if (recipeThumbnail !== null) {
+      return servePublicRecipeMedia(
+        request,
+        env,
+        ctx,
+        recipeThumbnail,
       );
     }
     const objectKey = resolveProtectedObject(url.pathname);
@@ -195,6 +202,75 @@ async function handleRequest(
     );
     return jsonError("internal_error", 500, request, env);
   }
+}
+
+async function servePublicRecipeMedia(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  media: RecipeImageObject | RecipeThumbnailObject,
+): Promise<Response> {
+  const policy = {
+    cacheControl: "public, max-age=31536000, immutable",
+    publicMedia: media,
+    varyAuthorization: false,
+  } satisfies DeliveryPolicy;
+  if (!canUsePublicMediaCache(request)) {
+    return serveR2(request, env.RECIPES, media.objectKey, policy, env);
+  }
+
+  const cacheKey = publicMediaCacheKey(request);
+  try {
+    const cached = await caches.default.match(cacheKey);
+    if (cached !== undefined) return withEdgeCacheState(cached, "HIT");
+  } catch {
+    // Cache availability is an optimization only. R2 remains authoritative.
+  }
+
+  const response = await serveR2(
+    request,
+    env.RECIPES,
+    media.objectKey,
+    policy,
+    env,
+  );
+  if (response.status === 200) {
+    ctx.waitUntil(
+      caches.default.put(cacheKey, response.clone()).catch(() => undefined),
+    );
+  }
+  return withEdgeCacheState(response, "MISS");
+}
+
+function canUsePublicMediaCache(request: Request): boolean {
+  if (request.method !== "GET") return false;
+  return [
+    "authorization",
+    "origin",
+    "range",
+    "if-match",
+    "if-none-match",
+    "if-modified-since",
+    "if-unmodified-since",
+    "if-range",
+  ].every((name) => request.headers.get(name) === null);
+}
+
+function publicMediaCacheKey(request: Request): Request {
+  const url = new URL(request.url);
+  url.search = "";
+  url.hash = "";
+  return new Request(url.toString(), { method: "GET" });
+}
+
+function withEdgeCacheState(response: Response, state: "HIT" | "MISS"): Response {
+  const headers = new Headers(response.headers);
+  headers.set("x-bil-edge-cache", state);
+  return new Response(response.body, {
+    headers,
+    status: response.status,
+    statusText: response.statusText,
+  });
 }
 
 function resolvePublicManifest(pathname: string, env: Env): string | null {
@@ -359,10 +435,10 @@ function objectHeaders(
   headers.set("etag", object.httpEtag);
   headers.set("x-content-type-options", "nosniff");
   headers.set("cross-origin-resource-policy", "cross-origin");
-  if (policy.recipeImage !== undefined) {
+  if (policy.publicMedia !== undefined) {
     headers.set("content-disposition", "inline");
-    headers.set("content-type", policy.recipeImage.mimeType);
-    headers.set("x-bil-content-sha256", policy.recipeImage.sha256);
+    headers.set("content-type", policy.publicMedia.mimeType);
+    headers.set("x-bil-content-sha256", policy.publicMedia.sha256);
   }
   applyCors(headers, request, env, policy.varyAuthorization);
   return headers;
@@ -372,7 +448,7 @@ function objectMatchesPolicy(
   object: R2Object,
   policy: DeliveryPolicy,
 ): boolean {
-  const expected = policy.recipeImage;
+  const expected = policy.publicMedia;
   if (expected === undefined) return true;
   const contentType = object.httpMetadata?.contentType
     ?.split(";", 1)[0]

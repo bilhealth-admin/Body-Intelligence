@@ -42,6 +42,17 @@ class _FeedTabState extends State<_FeedTab> {
           _selectedImage = null;
           _feed = refreshedFeed;
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              communityText(
+                context,
+                'Post submitted for human review. Only you can see it until it is approved.',
+                'تم إرسال المنشور للمراجعة البشرية. لن يراه سواك حتى يتم اعتماده.',
+              ),
+            ),
+          ),
+        );
       }
     } on CommunityTextPolicyException catch (error) {
       if (!mounted) return;
@@ -449,6 +460,10 @@ class _CommunityPostCard extends StatelessWidget {
                       ).formatShortDate(post.createdAt.toLocal()),
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
+                    if (post.authorId == currentUserId) ...[
+                      const SizedBox(height: 6),
+                      _CommunityPostStatusChip(post: post),
+                    ],
                   ],
                 ),
               ),
@@ -484,6 +499,48 @@ class _CommunityPostCard extends StatelessWidget {
       ),
     ),
   );
+}
+
+class _CommunityPostStatusChip extends StatelessWidget {
+  const _CommunityPostStatusChip({required this.post});
+
+  final CommunityPost post;
+
+  @override
+  Widget build(BuildContext context) {
+    final (icon, english, arabic) = switch (post.moderationStatus) {
+      CommunityPostModerationStatus.pending => (
+        Icons.schedule_rounded,
+        'Pending review',
+        'بانتظار المراجعة',
+      ),
+      CommunityPostModerationStatus.approved => (
+        Icons.verified_outlined,
+        'Approved',
+        'معتمد',
+      ),
+      CommunityPostModerationStatus.rejected => (
+        Icons.cancel_outlined,
+        'Rejected',
+        'مرفوض',
+      ),
+    };
+    final localizedStatus = communityText(context, english, arabic);
+    final statusLabel = communityText(
+      context,
+      'Post status: {status}',
+      'حالة المنشور: {status}',
+    ).replaceAll('{status}', localizedStatus);
+    return Semantics(
+      label: statusLabel,
+      child: Chip(
+        key: Key('community-post-status-${post.id}'),
+        avatar: Icon(icon, size: 16),
+        visualDensity: VisualDensity.compact,
+        label: Text(localizedStatus),
+      ),
+    );
+  }
 }
 
 class _CommunityFeedImage extends StatelessWidget {

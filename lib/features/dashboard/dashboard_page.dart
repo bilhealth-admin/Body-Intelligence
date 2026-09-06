@@ -1,19 +1,18 @@
-import 'dart:convert';
-
 import 'package:camera/camera.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../app/localization/app_localizations.dart';
 import '../../app/services/runtime_permission_policy.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 import '../cloud_platform/presentation/cloud_sync_consent_notice.dart';
 import '../life_context/providers/life_context_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
+import '../profile/services/profile_photo_service.dart';
 import '../weight/providers/weight_provider.dart';
+import '../../shared/widgets/bil_camera_capture_page.dart';
 import 'providers/dashboard_provider.dart';
 import 'widgets/dashboard_composition.dart';
 import 'widgets/dashboard_grid.dart';
@@ -34,8 +33,11 @@ class DashboardPage extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     Uint8List? currentPhoto,
+    String? currentPhotoUrl,
     String locale,
   ) async {
+    final hasPhoto =
+        currentPhoto != null || currentPhotoUrl?.trim().isNotEmpty == true;
     final action = await showModalBottomSheet<String>(
       context: context,
       useSafeArea: true,
@@ -45,27 +47,37 @@ class DashboardPage extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.photo_camera_outlined),
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.profile,
+                iconOverride: Icons.photo_camera_outlined,
+                appleIconOverride: Icons.photo_camera_outlined,
+              ),
               title: Text(_dashboardText(locale, 'takePhotoNow')),
               onTap: () => Navigator.pop(sheetContext, 'camera'),
             ),
             ListTile(
-              leading: const Icon(Icons.add_a_photo_outlined),
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.profile,
+                iconOverride: Icons.add_a_photo_outlined,
+                appleIconOverride: Icons.add_a_photo_outlined,
+              ),
               title: Text(
-                currentPhoto == null
+                !hasPhoto
                     ? _dashboardText(locale, 'addPhoto')
                     : _dashboardText(locale, 'changePhoto'),
               ),
               onTap: () => Navigator.pop(sheetContext, 'choose'),
             ),
-            if (currentPhoto != null)
+            if (hasPhoto)
               ListTile(
                 leading: const Icon(Icons.delete_outline_rounded),
                 title: Text(_dashboardText(locale, 'removePhoto')),
                 onTap: () => Navigator.pop(sheetContext, 'remove'),
               ),
             ListTile(
-              leading: const Icon(Icons.manage_accounts_outlined),
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.profile,
+              ),
               title: Text(_dashboardText(locale, 'profileSettings')),
               onTap: () => Navigator.pop(sheetContext, 'profile'),
             ),
@@ -74,14 +86,16 @@ class DashboardPage extends ConsumerWidget {
       ),
     );
     if (!context.mounted || action == null) return;
-    final repository = ref.read(preferencesRepositoryProvider);
     if (action == 'profile') {
       context.push('/profile-settings');
       return;
     }
     if (action == 'remove') {
       try {
-        await repository.remove('profilePhoto');
+        await ref.read(profilePhotoServiceProvider).remove();
+        if (context.mounted) {
+          ref.invalidate(profilePhotoPublicUrlProvider);
+        }
       } on Object {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -104,16 +118,20 @@ class DashboardPage extends ConsumerWidget {
                 barrierDismissible: false,
                 builder: (_) => _WindowsCameraCapture(locale: locale),
               )
-            : await ImagePicker().pickImage(
-                source: ImageSource.camera,
-                imageQuality: 86,
-                maxWidth: 1400,
-                maxHeight: 1400,
+            : await Navigator.of(context).push<XFile>(
+                MaterialPageRoute<XFile>(
+                  builder: (_) => BilCameraCapturePage(
+                    title: _dashboardText(locale, 'takeProfilePhoto'),
+                    captureLabel: _dashboardText(locale, 'capture'),
+                  ),
+                ),
               );
         if (captured == null || !context.mounted) return;
         final bytes = await captured.readAsBytes();
         if (!context.mounted) return;
-        await repository.set('profilePhoto', base64Encode(bytes));
+        await ref
+            .read(profilePhotoServiceProvider)
+            .save(bytes, contentType: 'image/jpeg');
       } catch (_) {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -123,25 +141,18 @@ class DashboardPage extends ConsumerWidget {
       return;
     }
 
-    const imageTypes = XTypeGroup(
-      label: 'images',
-      extensions: ['jpg', 'jpeg', 'png', 'webp'],
-      mimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
-      uniformTypeIdentifiers: ['public.jpeg', 'public.png', 'public.webp'],
-      webWildCards: ['image/*'],
-    );
     try {
-      final selected = await openFile(acceptedTypeGroups: [imageTypes]);
-      if (selected == null || !context.mounted) return;
-      final bytes = await selected.readAsBytes();
+      await ref.read(profilePhotoServiceProvider).chooseAndSave();
+    } on ProfilePhotoTooLargeException {
       if (!context.mounted) return;
-      if (bytes.lengthInBytes > 5 * 1024 * 1024) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_dashboardText(locale, 'imageTooLarge'))),
-        );
-        return;
-      }
-      await repository.set('profilePhoto', base64Encode(bytes));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_dashboardText(locale, 'imageTooLarge'))),
+      );
+    } on ProfilePhotoIdentityChangedException {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_dashboardText(locale, 'imageOpenFailed'))),
+      );
     } on Object {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -155,11 +166,12 @@ class DashboardPage extends ConsumerWidget {
     final current = await policy.status(BilRuntimeCapability.camera);
     if (current == BilRuntimePermissionState.granted) return true;
     if (!context.mounted) return false;
-    final blocked = current == BilRuntimePermissionState.permanentlyDenied ||
+    final blocked =
+        current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted;
     final proceed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => AlertDialog.adaptive(
         title: Text(
           context.strings.text(
             blocked ? 'Camera access is off' : 'Allow camera for this action?',
@@ -260,8 +272,13 @@ class DashboardPage extends ConsumerWidget {
         DashboardTopBar(
           profilePhoto: profilePhoto,
           profilePhotoUrl: profilePhotoUrl,
-          onProfile: () =>
-              manageProfilePhoto(context, ref, profilePhoto, locale),
+          onProfile: () => manageProfilePhoto(
+            context,
+            ref,
+            profilePhoto,
+            profilePhotoUrl,
+            locale,
+          ),
         ),
         const SizedBox(height: 18),
         if (showFirstValue) ...[

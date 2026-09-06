@@ -15,6 +15,7 @@ const _settingsSources = <String>{
   'View profile',
   'Current',
   'Remaining',
+  'Already at goal',
   'Goal',
   'kg',
   'Checking subscription',
@@ -61,11 +62,9 @@ const _settingsSources = <String>{
   'Premium adds advanced insights and customization. Your results still depend on your own data and actions.',
   'Reminders',
   'Review initial setup',
-  'Reopen onboarding without deleting your profile or records.',
-  'Privacy',
   'Advertising privacy',
   'Help',
-  'Sync',
+  'Sync now',
   'Delete account',
 };
 

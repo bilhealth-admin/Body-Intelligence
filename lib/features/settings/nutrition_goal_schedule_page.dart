@@ -1,50 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
+import '../../app/localization/runtime_copy_nutrition_goal_schedule.dart';
 import '../../data/repositories/nutrition_goal_schedule_repository.dart';
 import '../profile/providers/user_profile_provider.dart';
 
-class NutritionGoalSchedulePage extends ConsumerWidget {
+class NutritionGoalSchedulePage extends ConsumerStatefulWidget {
   const NutritionGoalSchedulePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NutritionGoalSchedulePage> createState() =>
+      _NutritionGoalSchedulePageState();
+}
+
+class _NutritionGoalSchedulePageState
+    extends ConsumerState<NutritionGoalSchedulePage> {
+  String? _savingTarget;
+
+  @override
+  Widget build(BuildContext context) {
     final schedule = ref.watch(nutritionGoalScheduleProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(_text(context, 'Scheduled goals'))),
+      appBar: AppBar(
+        title: Text(
+          _text(context, NutritionGoalScheduleRuntimeCopy.scheduledGoals),
+        ),
+      ),
       body: schedule.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) =>
-            Center(child: Text(_text(context, 'Goals unavailable'))),
+        error: (_, _) => Center(
+          child: Text(
+            _text(context, NutritionGoalScheduleRuntimeCopy.goalsUnavailable),
+          ),
+        ),
         data: (value) => ListView(
           children: [
-            _section(context, 'Different goals by day'),
+            _section(
+              context,
+              NutritionGoalScheduleRuntimeCopy.differentGoalsByDay,
+            ),
             for (var day = 1; day <= 7; day++)
               _targetTile(
                 context,
                 _weekday(context, day),
                 value.dayTargets[day],
-                () => _edit(context, value.dayTargets[day]).then((target) {
-                  if (target.$1) {
-                    ref
-                        .read(nutritionGoalScheduleRepositoryProvider)
-                        .saveDay(day, target.$2);
-                  }
-                }),
+                _savingTarget == null
+                    ? () => _editAndSave(
+                        operationKey: 'day:$day',
+                        initial: value.dayTargets[day],
+                        save: (target) => ref
+                            .read(nutritionGoalScheduleRepositoryProvider)
+                            .saveDay(day, target),
+                      )
+                    : null,
+                isSaving: _savingTarget == 'day:$day',
               ),
-            _section(context, 'Goals by meal'),
-            for (final meal in const ['breakfast', 'lunch', 'dinner', 'snack'])
+            _section(context, NutritionGoalScheduleRuntimeCopy.goalsByMeal),
+            for (final meal in const <(String, String)>[
+              ('breakfast', NutritionGoalScheduleRuntimeCopy.breakfast),
+              ('lunch', NutritionGoalScheduleRuntimeCopy.lunch),
+              ('dinner', NutritionGoalScheduleRuntimeCopy.dinner),
+              ('snack', NutritionGoalScheduleRuntimeCopy.snack),
+            ])
               _targetTile(
                 context,
-                _text(context, meal),
-                value.mealTargets[meal],
-                () => _edit(context, value.mealTargets[meal]).then((target) {
-                  if (target.$1) {
-                    ref
-                        .read(nutritionGoalScheduleRepositoryProvider)
-                        .saveMeal(meal, target.$2);
-                  }
-                }),
+                _text(context, meal.$2),
+                value.mealTargets[meal.$1],
+                _savingTarget == null
+                    ? () => _editAndSave(
+                        operationKey: 'meal:${meal.$1}',
+                        initial: value.mealTargets[meal.$1],
+                        save: (target) => ref
+                            .read(nutritionGoalScheduleRepositoryProvider)
+                            .saveMeal(meal.$1, target),
+                      )
+                    : null,
+                isSaving: _savingTarget == 'meal:${meal.$1}',
               ),
           ],
         ),
@@ -52,10 +84,40 @@ class NutritionGoalSchedulePage extends ConsumerWidget {
     );
   }
 
-  Widget _section(BuildContext context, String key) => Padding(
+  Future<void> _editAndSave({
+    required String operationKey,
+    required NutritionGoalTarget? initial,
+    required Future<void> Function(NutritionGoalTarget? target) save,
+  }) async {
+    final result = await _edit(context, initial);
+    if (!result.$1 || !mounted) return;
+
+    setState(() => _savingTarget = operationKey);
+    try {
+      await save(result.$2);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              _text(
+                context,
+                NutritionGoalScheduleRuntimeCopy.goalCouldNotBeSaved,
+              ),
+            ),
+          ),
+        );
+    } finally {
+      if (mounted) setState(() => _savingTarget = null);
+    }
+  }
+
+  Widget _section(BuildContext context, String source) => Padding(
     padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
     child: Text(
-      _text(context, key),
+      _text(context, source),
       style: Theme.of(context).textTheme.titleMedium,
     ),
   );
@@ -64,19 +126,27 @@ class NutritionGoalSchedulePage extends ConsumerWidget {
     BuildContext context,
     String title,
     NutritionGoalTarget? target,
-    VoidCallback onTap,
-  ) => ListTile(
+    VoidCallback? onTap, {
+    bool isSaving = false,
+  }) => ListTile(
     title: Text(title),
     subtitle: Text(
       target == null
-          ? _text(context, 'Use default goal')
-          : '${target.calories.toStringAsFixed(0)} ${_text(context, 'kcal')} · '
-                '${target.carbsPercent.toStringAsFixed(0)}% C · '
-                '${target.proteinPercent.toStringAsFixed(0)}% P · '
-                '${target.fatPercent.toStringAsFixed(0)}% F'
-                    .replaceAll(String.fromCharCodes(const [194, 183]), '·'),
+          ? _text(context, NutritionGoalScheduleRuntimeCopy.useDefaultGoal)
+          : NutritionGoalScheduleRuntimeCopy.formatGoalSummary(
+              locale: Localizations.localeOf(context),
+              calories: target.calories.toStringAsFixed(0),
+              carbs: target.carbsGrams.toStringAsFixed(1),
+              protein: target.proteinGrams.toStringAsFixed(1),
+              fat: target.fatGrams.toStringAsFixed(1),
+            ),
     ),
-    trailing: const Icon(Icons.chevron_right_rounded),
+    trailing: isSaving
+        ? const SizedBox.square(
+            dimension: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          )
+        : const Icon(Icons.chevron_right_rounded),
     onTap: onTap,
   );
 
@@ -86,55 +156,98 @@ class NutritionGoalSchedulePage extends ConsumerWidget {
   ) async {
     final values = [
       TextEditingController(text: '${initial?.calories ?? 2000}'),
-      TextEditingController(text: '${initial?.carbsPercent ?? 45}'),
-      TextEditingController(text: '${initial?.proteinPercent ?? 30}'),
-      TextEditingController(text: '${initial?.fatPercent ?? 25}'),
+      TextEditingController(text: '${initial?.carbsGrams ?? 225}'),
+      TextEditingController(text: '${initial?.proteinGrams ?? 150}'),
+      TextEditingController(text: '${initial?.fatGrams ?? 55.56}'),
     ];
     final result = await showDialog<(bool, NutritionGoalTarget?)>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(_text(context, 'Edit goal')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final entry in const [
-              ('Calories', 0),
-              ('Carbohydrates %', 1),
-              ('Protein %', 2),
-              ('Fat %', 3),
-            ])
-              TextField(
-                controller: values[entry.$2],
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: _text(context, entry.$1),
+      builder: (dialogContext) {
+        String? error;
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) => AlertDialog(
+            title: Text(
+              _text(context, NutritionGoalScheduleRuntimeCopy.editGoal),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final entry in const <(String, int)>[
+                  (NutritionGoalScheduleRuntimeCopy.calories, 0),
+                  (NutritionGoalScheduleRuntimeCopy.carbohydratesGrams, 1),
+                  (NutritionGoalScheduleRuntimeCopy.proteinGrams, 2),
+                  (NutritionGoalScheduleRuntimeCopy.fatGrams, 3),
+                ])
+                  TextField(
+                    controller: values[entry.$2],
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: _text(context, entry.$1),
+                    ),
+                  ),
+                if (error != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      error!,
+                      style: TextStyle(
+                        color: Theme.of(dialogContext).colorScheme.error,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, (true, null)),
+                child: Text(
+                  _text(context, NutritionGoalScheduleRuntimeCopy.useDefault),
                 ),
               ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, (true, null)),
-            child: Text(_text(context, 'Use default')),
+              FilledButton(
+                onPressed: () {
+                  final numbers = values
+                      .map(
+                        (controller) => double.tryParse(controller.text.trim()),
+                      )
+                      .toList();
+                  if (numbers.any((number) => number == null)) {
+                    setDialogState(
+                      () => error = _text(
+                        context,
+                        NutritionGoalScheduleRuntimeCopy.enterValidNumbers,
+                      ),
+                    );
+                    return;
+                  }
+                  try {
+                    final target = NutritionGoalTarget.fromGrams(
+                      calories: numbers[0]!,
+                      carbsGrams: numbers[1]!,
+                      proteinGrams: numbers[2]!,
+                      fatGrams: numbers[3]!,
+                    );
+                    Navigator.pop(dialogContext, (true, target));
+                  } on ArgumentError {
+                    setDialogState(
+                      () => error = _text(
+                        context,
+                        NutritionGoalScheduleRuntimeCopy
+                            .macroGramsMustMatchCalories,
+                      ),
+                    );
+                  }
+                },
+                child: Text(
+                  _text(context, NutritionGoalScheduleRuntimeCopy.save),
+                ),
+              ),
+            ],
           ),
-          FilledButton(
-            onPressed: () {
-              final numbers = values
-                  .map((e) => double.tryParse(e.text))
-                  .toList();
-              if (numbers.any((e) => e == null)) return;
-              final target = NutritionGoalTarget(
-                calories: numbers[0]!,
-                carbsPercent: numbers[1]!,
-                proteinPercent: numbers[2]!,
-                fatPercent: numbers[3]!,
-              );
-              if (target.isValid) Navigator.pop(dialogContext, (true, target));
-            },
-            child: Text(_text(context, 'Save')),
-          ),
-        ],
-      ),
+        );
+      },
     );
     for (final controller in values) {
       controller.dispose();
@@ -145,110 +258,14 @@ class NutritionGoalSchedulePage extends ConsumerWidget {
 
 String _weekday(BuildContext context, int weekday) {
   final monday = DateTime(2026, 1, 5 + weekday - 1);
-  return MaterialLocalizations.of(
-    context,
-  ).formatFullDate(monday).split(',').first;
+  return DateFormat(
+    'EEEE',
+    Localizations.localeOf(context).toLanguageTag(),
+  ).format(monday);
 }
 
-String _text(BuildContext context, String key) {
-  final language = Localizations.localeOf(context).languageCode;
-  return _copy[language]?[key] ?? _copy['en']![key] ?? key;
-}
-
-const _copy = <String, Map<String, String>>{
-  'en': {
-    'Scheduled goals': 'Scheduled goals',
-    'Goals unavailable': 'Goals unavailable',
-    'Different goals by day': 'Different goals by day',
-    'Goals by meal': 'Goals by meal',
-    'Use default goal': 'Use default goal',
-    'Use default': 'Use default',
-    'Edit goal': 'Edit goal',
-    'Calories': 'Calories',
-    'Carbohydrates %': 'Carbohydrates %',
-    'Protein %': 'Protein %',
-    'Fat %': 'Fat %',
-    'Save': 'Save',
-    'kcal': 'kcal',
-    'breakfast': 'Breakfast',
-    'lunch': 'Lunch',
-    'dinner': 'Dinner',
-    'snack': 'Snack',
-  },
-  'ar': {
-    'Scheduled goals': 'الأهداف المجدولة',
-    'Goals unavailable': 'تعذر عرض الأهداف',
-    'Different goals by day': 'أهداف مختلفة حسب اليوم',
-    'Goals by meal': 'الأهداف حسب الوجبة',
-    'Use default goal': 'استخدام الهدف الافتراضي',
-    'Use default': 'استخدام الافتراضي',
-    'Edit goal': 'تعديل الهدف',
-    'Calories': 'السعرات',
-    'Carbohydrates %': 'الكربوهيدرات %',
-    'Protein %': 'البروتين %',
-    'Fat %': 'الدهون %',
-    'Save': 'حفظ',
-    'kcal': 'سعرة',
-    'breakfast': 'الإفطار',
-    'lunch': 'الغداء',
-    'dinner': 'العشاء',
-    'snack': 'وجبة خفيفة',
-  },
-  'fr': {
-    'Scheduled goals': 'Objectifs planifiés',
-    'Goals unavailable': 'Objectifs indisponibles',
-    'Different goals by day': 'Objectifs selon le jour',
-    'Goals by meal': 'Objectifs par repas',
-    'Use default goal': "Utiliser l’objectif par défaut",
-    'Use default': 'Par défaut',
-    'Edit goal': "Modifier l’objectif",
-    'Calories': 'Calories',
-    'Carbohydrates %': 'Glucides %',
-    'Protein %': 'Protéines %',
-    'Fat %': 'Lipides %',
-    'Save': 'Enregistrer',
-    'kcal': 'kcal',
-    'breakfast': 'Petit-déjeuner',
-    'lunch': 'Déjeuner',
-    'dinner': 'Dîner',
-    'snack': 'Collation',
-  },
-  'es': {
-    'Scheduled goals': 'Objetivos programados',
-    'Goals unavailable': 'Objetivos no disponibles',
-    'Different goals by day': 'Objetivos según el día',
-    'Goals by meal': 'Objetivos por comida',
-    'Use default goal': 'Usar objetivo predeterminado',
-    'Use default': 'Usar predeterminado',
-    'Edit goal': 'Editar objetivo',
-    'Calories': 'Calorías',
-    'Carbohydrates %': 'Carbohidratos %',
-    'Protein %': 'Proteína %',
-    'Fat %': 'Grasa %',
-    'Save': 'Guardar',
-    'kcal': 'kcal',
-    'breakfast': 'Desayuno',
-    'lunch': 'Almuerzo',
-    'dinner': 'Cena',
-    'snack': 'Tentempié',
-  },
-  'tr': {
-    'Scheduled goals': 'Planlanmış hedefler',
-    'Goals unavailable': 'Hedefler kullanılamıyor',
-    'Different goals by day': 'Güne göre farklı hedefler',
-    'Goals by meal': 'Öğün hedefleri',
-    'Use default goal': 'Varsayılan hedefi kullan',
-    'Use default': 'Varsayılanı kullan',
-    'Edit goal': 'Hedefi düzenle',
-    'Calories': 'Kalori',
-    'Carbohydrates %': 'Karbonhidrat %',
-    'Protein %': 'Protein %',
-    'Fat %': 'Yağ %',
-    'Save': 'Kaydet',
-    'kcal': 'kcal',
-    'breakfast': 'Kahvaltı',
-    'lunch': 'Öğle yemeği',
-    'dinner': 'Akşam yemeği',
-    'snack': 'Ara öğün',
-  },
-};
+String _text(BuildContext context, String source) =>
+    NutritionGoalScheduleRuntimeCopy.text(
+      source,
+      Localizations.localeOf(context),
+    );

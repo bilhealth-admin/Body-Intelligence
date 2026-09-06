@@ -140,9 +140,9 @@ final cloudManualSyncServiceProvider = Provider<CloudManualSyncService>((ref) {
   );
 });
 
-/// Bounded profile-only recovery for an already-bound local account namespace.
-/// The Supabase adapter performs SELECT only and requires an existing local
-/// payload key; no general synchronization or remote mutation can start here.
+/// Bounded selective recovery for an already-bound local account namespace.
+/// The Supabase adapter performs SELECT only and resolves an existing payload
+/// key; no general synchronization or remote mutation can start here.
 final startupCloudProfileRestoreServiceProvider =
     Provider<StartupCloudProfileRestoreService>((ref) {
       if (!AppEnvironment.supabaseRuntimeReady) {
@@ -161,17 +161,20 @@ final startupCloudProfileRestoreServiceProvider =
         hasLocalProfile: () async =>
             (await database.select(database.userProfile).get()).isNotEmpty,
         reader: reader,
-        applyLocalProfile: (profile) async {
+        applyLocalRecords: (records) async {
           final report =
               await AppDatabaseCloudInboxApplier(
                 database: database,
                 accountBoundary: boundary,
               ).apply(
-                ownerId: profile.ownerId,
-                localDeviceId: 'startup-read-only-profile',
-                records: <CloudRecordEnvelope>[profile],
+                ownerId: records.first.ownerId,
+                localDeviceId: 'startup-read-only-restore',
+                records: records,
               );
-          return report.applied == 1 || report.acknowledged == 1;
+          return report.unsupported == 0 &&
+              report.conflicts == 0 &&
+              report.applied + report.acknowledged + report.localWins ==
+                  records.length;
         },
       );
     });

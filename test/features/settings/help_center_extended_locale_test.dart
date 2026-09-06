@@ -1,7 +1,9 @@
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_extended.dart';
+import 'package:body_intelligence_log/app/theme/bil_semantic_icons.dart';
 import 'package:body_intelligence_log/features/settings/help_center_page.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -63,6 +65,119 @@ void main() {
       expect(find.text('Help'), findsNothing);
       expect(find.text('About BIL'), findsNothing);
       expect(find.byType(HelpCenterPage), findsOneWidget);
+    }
+  });
+
+  testWidgets('help rows render functional semantic mappings per platform', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    final expected =
+        <
+          ({
+            String id,
+            String title,
+            BilSemanticIconKind kind,
+            IconData? androidOverride,
+            IconData? appleOverride,
+          })
+        >[
+          (
+            id: 'about',
+            title: 'About BIL',
+            kind: BilSemanticIconKind.support,
+            androidOverride: Icons.info_outline_rounded,
+            appleOverride: CupertinoIcons.info_circle,
+          ),
+          (
+            id: 'faq',
+            title: 'Frequently Asked Questions',
+            kind: BilSemanticIconKind.support,
+            androidOverride: Icons.quiz_outlined,
+            appleOverride: CupertinoIcons.question_circle,
+          ),
+          (
+            id: 'contact-support',
+            title: 'Contact Support',
+            kind: BilSemanticIconKind.support,
+            androidOverride: null,
+            appleOverride: null,
+          ),
+          (
+            id: 'terms',
+            title: 'Terms of Service',
+            kind: BilSemanticIconKind.legal,
+            androidOverride: null,
+            appleOverride: null,
+          ),
+          (
+            id: 'troubleshooting',
+            title: 'Troubleshooting',
+            kind: BilSemanticIconKind.preferences,
+            androidOverride: Icons.build_outlined,
+            appleOverride: CupertinoIcons.wrench,
+          ),
+          (
+            id: 'delete-account',
+            title: 'Delete Account',
+            kind: BilSemanticIconKind.accountDeletion,
+            androidOverride: null,
+            appleOverride: null,
+          ),
+          (
+            id: 'service-status',
+            title: 'Service Status',
+            kind: BilSemanticIconKind.health,
+            androidOverride: Icons.monitor_heart_outlined,
+            appleOverride: CupertinoIcons.waveform_path_ecg,
+          ),
+        ];
+
+    for (final platform in const [TargetPlatform.android, TargetPlatform.iOS]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: const HelpCenterPage(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      for (final item in expected) {
+        expect(find.text(item.title), findsOneWidget);
+        final badgeFinder = find.byKey(Key('help-center-icon-${item.id}'));
+        expect(badgeFinder, findsOneWidget);
+
+        final badge = tester.widget<BilSemanticIconBadge>(badgeFinder);
+        expect(badge.kind, item.kind);
+        final spec = BilSemanticIcons.spec(item.kind);
+        final expectedIcon = switch (platform) {
+          TargetPlatform.iOS => item.appleOverride ?? spec.appleIcon,
+          _ => item.androidOverride ?? spec.icon,
+        };
+        final icon = tester.widget<Icon>(
+          find.descendant(of: badgeFinder, matching: find.byType(Icon)),
+        );
+        expect(icon.icon, expectedIcon, reason: '${platform.name}:${item.id}');
+        expect(
+          icon.color,
+          spec.accent(Brightness.light),
+          reason: '${platform.name}:${item.id}:accent',
+        );
+
+        final container = tester.widget<Container>(
+          find.descendant(of: badgeFinder, matching: find.byType(Container)),
+        );
+        final decoration = container.decoration! as BoxDecoration;
+        expect(
+          decoration.color,
+          spec.container(Brightness.light),
+          reason: '${platform.name}:${item.id}:container',
+        );
+      }
+      expect(tester.takeException(), isNull, reason: platform.name);
     }
   });
 }

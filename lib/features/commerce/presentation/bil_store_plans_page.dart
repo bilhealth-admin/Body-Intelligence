@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../domain/commerce_plan.dart';
+import '../domain/market_offer_policy.dart';
 import '../domain/store_catalog_configuration.dart';
 import '../domain/store_offer_metadata.dart';
 import '../services/verified_store_catalog_adapter.dart';
@@ -33,17 +34,20 @@ class BilStorePlansPage extends ConsumerStatefulWidget {
   ConsumerState<BilStorePlansPage> createState() => _BilStorePlansPageState();
 }
 
-class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage> {
+class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
+    with WidgetsBindingObserver {
   VerifiedStorePurchaseService? _ownedStore;
   late final BilStoreCatalogGateway? _catalog;
   List<BilStoreOfferMetadata> _offers = const [];
   bool _loading = true;
+  bool _loadInFlight = false;
   bool _restoring = false;
   VerifiedStoreState? _lastStoreState;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     if (widget.catalog != null) {
       _catalog = widget.catalog;
     } else if (widget.store != null) {
@@ -56,6 +60,16 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage> {
     }
     (widget.store ?? _ownedStore)?.addListener(_onStoreChanged);
     _load();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // StoreKit and Play Billing can become ready after account/store dialogs
+    // or after returning from the background. Retry only an empty catalog;
+    // verified prices already on screen remain untouched.
+    if (state == AppLifecycleState.resumed && _offers.isEmpty) {
+      unawaited(_load());
+    }
   }
 
   void _onStoreChanged() {
@@ -71,32 +85,42 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage> {
   }
 
   Future<void> _load() async {
-    final catalog = _catalog;
-    final productIds =
-        widget.productIds ?? StoreCatalogConfiguration.storefrontProductIds;
-    if (catalog == null || productIds.isEmpty) {
-      if (mounted) setState(() => _loading = false);
-      return;
-    }
-    List<BilStoreOfferMetadata> offers;
+    if (_loadInFlight) return;
+    _loadInFlight = true;
+    if (mounted) setState(() => _loading = true);
     try {
-      // Some device-store implementations never complete their product query
-      // when Play Billing is unavailable (common on emulators and offline
-      // devices). The plans surface must settle into its truthful unavailable
-      // state instead of displaying an endless loading claim.
-      offers = await catalog
-          .loadOffers(productIds)
-          .timeout(const Duration(seconds: 12));
-    } on TimeoutException {
-      offers = const [];
-    } catch (_) {
-      offers = const [];
-    }
-    if (mounted) {
-      setState(() {
-        _offers = offers;
-        _loading = false;
-      });
+      final catalog = _catalog;
+      final productIds =
+          widget.productIds ?? StoreCatalogConfiguration.storefrontProductIds;
+      if (catalog == null || productIds.isEmpty) {
+        if (mounted) setState(() => _loading = false);
+        return;
+      }
+      List<BilStoreOfferMetadata> offers;
+      try {
+        // Some device-store implementations never complete their product
+        // query when Play Billing is unavailable (common on emulators and
+        // offline devices). The plans surface must settle into its truthful
+        // unavailable state instead of displaying an endless loading claim.
+        offers = await catalog
+            .loadOffers(productIds)
+            .timeout(const Duration(seconds: 12));
+      } on TimeoutException {
+        offers = const [];
+      } catch (_) {
+        offers = const [];
+      }
+      // Canonicalize at the page boundary too. Malformed provider entries
+      // must leave the catalog retryable on the next tap or app resume.
+      offers = MarketOfferPolicy.visibleOffers(offers);
+      if (mounted) {
+        setState(() {
+          _offers = offers;
+          _loading = false;
+        });
+      }
+    } finally {
+      _loadInFlight = false;
     }
   }
 
@@ -132,6 +156,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     (widget.store ?? _ownedStore)?.removeListener(_onStoreChanged);
     _ownedStore?.dispose();
     super.dispose();
@@ -194,6 +219,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage> {
         onManage: _catalog == null
             ? null
             : () => _catalog.openManageSubscriptions(),
+        onRetry: _catalog == null || _loading ? null : _load,
       ),
     );
   }

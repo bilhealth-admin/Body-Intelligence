@@ -138,6 +138,42 @@ class LocalCoachCommandParser {
         ];
       }
     }
+    final hasGoalUpdateIntent = _contains(value, const [
+      'change my target',
+      'change target weight',
+      'set my target',
+      'set target weight',
+      'update my goal',
+      'new target weight',
+      'غير الهدف',
+      'تغيير الهدف',
+      'غير الوزن المستهدف',
+      'تغيير الوزن المستهدف',
+      'الهدف الجديد',
+      'اجعل هدفي',
+      'modifier mon objectif',
+      'cambiar mi objetivo',
+      'hedefimi değiştir',
+    ]);
+    if (hasGoalUpdateIntent &&
+        number != null &&
+        number >= 20 &&
+        number <= 500) {
+      return [
+        IntelligenceAction(
+          id: 'update-goal-$number',
+          type: IntelligenceActionType.updateGoal,
+          label: tr(
+            'Update target weight to $number kg',
+            'تحديث الوزن المستهدف إلى $number كغ',
+          ),
+          // Goal changes always require an explicit confirmation in the
+          // action sheet; parsing alone never mutates profile data.
+          requiresConfirmation: true,
+          payload: {'targetWeightKg': number},
+        ),
+      ];
+    }
     final hasWeightConcept = _contains(value, const [
       'weight',
       'weigh',

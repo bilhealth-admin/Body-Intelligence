@@ -101,7 +101,7 @@ void main() {
 
     expect(safety, isNot(contains('Community is unavailable in this build')));
     expect(legal, contains("bilLegalPublicationStatus = 'PUBLISHED'"));
-    expect(legal, contains('Last updated: 22 August 2026'));
+    expect(legal, contains('Last updated: 5 September 2026'));
     expect(legal, isNot(contains('Effective date pending')));
     expect(legal, isNot(contains('Embedded draft')));
   });

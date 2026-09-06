@@ -306,7 +306,9 @@ extension _NotificationSettingsActions on _NotificationSettingsPageState {
           children: [
             for (final reminder in reminders)
               ListTile(
-                leading: Icon(_icon(reminder.kind)),
+                leading: BilSemanticIconBadge(
+                  kind: _semanticKind(reminder.kind),
+                ),
                 title: Text(_copy.label(reminder.kind)),
                 trailing: reminder.enabled
                     ? const Icon(Icons.check_rounded)

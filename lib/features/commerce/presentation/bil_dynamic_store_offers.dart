@@ -29,6 +29,7 @@ class BilDynamicStoreOffers extends StatefulWidget {
     required this.onPurchaseRequested,
     required this.onRestore,
     required this.onManage,
+    this.onRetry,
     this.loading = false,
     this.restoreInProgress = false,
     this.currentPlan = CommercePlan.free,
@@ -41,6 +42,7 @@ class BilDynamicStoreOffers extends StatefulWidget {
   final ValueChanged<BilStoreOfferMetadata> onPurchaseRequested;
   final VoidCallback? onRestore;
   final VoidCallback? onManage;
+  final VoidCallback? onRetry;
   final bool loading;
   final bool restoreInProgress;
   final CommercePlan currentPlan;
@@ -222,6 +224,7 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                           selectedOfferIdentity: _offerIdentity(selectedOffer),
                           onOfferSelected: (offer) =>
                               setState(() => _selectedOffer = offer),
+                          onRetry: widget.onRetry,
                         ),
                         const SizedBox(height: 14),
                       ],

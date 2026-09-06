@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../app/environment/app_environment.dart';
 import '../../app/localization/bil_locale_policy.dart';
 import '../../app/localization/runtime_copy.dart';
+import '../auth/apple_credential_lifecycle.dart';
 
 part 'account_deletion_copy.dart';
 
@@ -88,7 +89,9 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
       return;
     }
     final client = supabase.client;
+    final accountOwnerId = client.auth.currentUser!.id.trim();
     final usedAppleSignIn = accountUsesAppleSignIn(client.auth.currentUser);
+    final appleOwnerId = usedAppleSignIn ? accountOwnerId : null;
     if (_confirmation.text.trim().toUpperCase() != 'DELETE') {
       ScaffoldMessenger.of(
         context,
@@ -127,6 +130,39 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
         // The authenticated request is durable. A failed immediate Edge
         // Function call remains pending for the Storage-first retry worker.
       }
+
+      // A valid receipt means the deletion request is durable even when the
+      // worker finishes later. Clear the requesting account locally before
+      // any interactive dialog so an app termination cannot leave its session
+      // or Apple subject behind. Never sign out a replacement account.
+      final appleIdentifierStore = usedAppleSignIn
+          ? SecureAppleCredentialIdentifierStore()
+          : null;
+      if (appleIdentifierStore != null) {
+        try {
+          await appleIdentifierStore.markPendingCleanup(accountOwnerId);
+        } on Object {
+          // Continue with immediate cleanup. A fully unavailable Keychain must
+          // never keep a durable account-deletion request signed in.
+        }
+      }
+      await invalidateMatchingLocalSession(
+        expectedOwnerId: accountOwnerId,
+        readCurrentOwnerId: () => client.auth.currentUser?.id,
+        signOutLocal: () => client.auth.signOut(scope: SignOutScope.local),
+      );
+      if (appleIdentifierStore != null &&
+          appleOwnerId != null &&
+          appleOwnerId.isNotEmpty) {
+        try {
+          await appleIdentifierStore.delete(appleOwnerId);
+          await appleIdentifierStore.clearPendingCleanup(appleOwnerId);
+        } on Object {
+          // The durable marker remains for an automatic retry at next launch.
+          // Account deletion and local sign-out do not depend on this cleanup.
+        }
+      }
+
       if (!mounted) return;
       _confirmation.clear();
       await showDialog<void>(
@@ -154,7 +190,7 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                 textDirection: TextDirection.ltr,
                 child: SelectableText(requestId),
               ),
-              if (effectiveStatus == 'completed' && usedAppleSignIn) ...[
+              if (usedAppleSignIn) ...[
                 const SizedBox(height: 16),
                 const Divider(),
                 const SizedBox(height: 8),
@@ -163,7 +199,11 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 6),
-                Text(copy.appleAccessBody),
+                Text(
+                  effectiveStatus == 'completed'
+                      ? copy.appleAccessBody
+                      : copy.pendingTimingNotice,
+                ),
                 Align(
                   alignment: AlignmentDirectional.centerStart,
                   child: TextButton.icon(
@@ -183,14 +223,6 @@ class _AccountDeletionPageState extends State<AccountDeletionPage> {
           ],
         ),
       );
-      if (effectiveStatus == 'completed') {
-        try {
-          await client.auth.signOut(scope: SignOutScope.local);
-        } on Object {
-          // The server-side account is already deleted. Local JWT expiry is a
-          // fallback if clearing the client session is interrupted.
-        }
-      }
     } on Object {
       if (mounted) {
         ScaffoldMessenger.of(

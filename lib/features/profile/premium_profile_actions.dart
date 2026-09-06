@@ -87,11 +87,69 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
     }
   }
 
-  Future<void> pickPhoto() async {
+  Future<void> pickPhoto({bool recoveredOnly = false}) async {
     try {
-      final result = await ref
-          .read(profilePhotoServiceProvider)
-          .chooseAndSave();
+      final service = ref.read(profilePhotoServiceProvider);
+      ProfilePhotoSaveResult? result;
+      if (recoveredOnly) {
+        result = await service.chooseAndSave(recoveredOnly: recoveredOnly);
+      } else {
+        final source = await showModalBottomSheet<_ProfilePhotoSource>(
+          context: context,
+          useSafeArea: true,
+          showDragHandle: true,
+          builder: (sheetContext) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  key: const Key('profile-photo-camera-action'),
+                  leading: const BilSemanticIconBadge(
+                    kind: BilSemanticIconKind.profile,
+                    iconOverride: Icons.photo_camera_outlined,
+                    appleIconOverride: CupertinoIcons.camera,
+                  ),
+                  title: Text(tr('Take a photo', 'التقاط صورة')),
+                  onTap: () =>
+                      Navigator.pop(sheetContext, _ProfilePhotoSource.camera),
+                ),
+                ListTile(
+                  key: const Key('profile-photo-library-action'),
+                  leading: const BilSemanticIconBadge(
+                    kind: BilSemanticIconKind.profile,
+                    iconOverride: Icons.photo_library_outlined,
+                    appleIconOverride: CupertinoIcons.photo_on_rectangle,
+                  ),
+                  title: Text(tr('Choose from device', 'اختيار من الجهاز')),
+                  onTap: () =>
+                      Navigator.pop(sheetContext, _ProfilePhotoSource.library),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.close_rounded),
+                  title: Text(tr('Cancel', 'إلغاء')),
+                  onTap: () => Navigator.pop(sheetContext),
+                ),
+              ],
+            ),
+          ),
+        );
+        if (source == null || !mounted) return;
+        if (source == _ProfilePhotoSource.camera) {
+          if (!await _ensureProfileCameraPermission() || !mounted) return;
+          final image = await ref.read(profileCameraLauncherProvider)(
+            context,
+            title: tr('Take a photo', 'التقاط صورة'),
+            captureLabel: tr('Take a photo', 'التقاط صورة'),
+          );
+          if (image == null || !mounted) return;
+          result = await service.save(
+            await image.readAsBytes(),
+            contentType: 'image/jpeg',
+          );
+        } else {
+          result = await service.chooseAndSave();
+        }
+      }
       if (!mounted || result == null) return;
       if (!result.cloudSynced && AppEnvironment.supabaseRuntimeReady) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -129,7 +187,64 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
           ),
         ),
       );
+    } on Object {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            tr(
+              'The photo picker could not open or read that image. Check Photos access and try again.',
+              'تعذر فتح منتقي الصور أو قراءة هذه الصورة. تحقق من إذن الصور وحاول مجددًا.',
+            ),
+          ),
+        ),
+      );
     }
+  }
+
+  Future<bool> _ensureProfileCameraPermission() async {
+    final policy = ref.read(profileRuntimePermissionPolicyProvider);
+    final current = await policy.status(BilRuntimeCapability.camera);
+    if (current == BilRuntimePermissionState.granted) return true;
+    if (!mounted) return false;
+    final blocked =
+        current == BilRuntimePermissionState.permanentlyDenied ||
+        current == BilRuntimePermissionState.restricted;
+    final proceed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog.adaptive(
+        title: Text(
+          tr(
+            blocked ? 'Camera access is off' : 'Allow camera for this action?',
+            blocked
+                ? 'الوصول إلى الكاميرا متوقف'
+                : 'السماح بالكاميرا لهذا الإجراء؟',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(tr('Not now', 'ليس الآن')),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              tr(
+                blocked ? 'Open system settings' : 'Continue',
+                blocked ? 'فتح إعدادات النظام' : 'متابعة',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (proceed != true) return false;
+    if (blocked) {
+      await policy.openSettings();
+      return false;
+    }
+    return await policy.request(BilRuntimeCapability.camera) ==
+        BilRuntimePermissionState.granted;
   }
 
   Future<String?> edit(
@@ -193,8 +308,14 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
             const SizedBox(height: 8),
             for (final option in options.entries)
               ListTile(
-                title: Text(option.value),
-                trailing: const Icon(Icons.chevron_right_rounded),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+                title: Text(
+                  option.value,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 onTap: () => Navigator.pop(sheetContext, option.key),
               ),
             const SizedBox(height: 12),
@@ -202,14 +323,29 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
         ),
       );
 
-  Future<void> save(UserProfileData profile, Goal? activeGoal) async {
-    if (saving) return;
+  Future<void> showHealthGoalDetails(GoalTimelineEstimate estimate) =>
+      showModalBottomSheet<void>(
+        context: context,
+        useSafeArea: true,
+        showDragHandle: true,
+        builder: (sheetContext) => Padding(
+          padding: const EdgeInsets.only(bottom: 24),
+          child: GoalTimelineCard(estimate: estimate),
+        ),
+      );
+
+  Future<bool> save(
+    UserProfileData profile,
+    Goal? activeGoal, {
+    bool showSuccess = true,
+  }) async {
+    if (saving) return false;
     final authIdentity = ref.read(profileAuthIdentityProvider).value;
     final database = ref.read(databaseProvider);
     if (authIdentity == null ||
         database.localOwnerId != authIdentity.ownerId ||
         hydrationIdentityKey != authIdentity.hydrationKey(profile.uuid)) {
-      return;
+      return false;
     }
     final snapshot = (
       name: name,
@@ -293,7 +429,7 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
       ref.invalidate(latestWeightProvider);
       ref.invalidate(todayWeightProvider);
       ref.invalidate(weightHistoryProvider);
-      if (mounted) {
+      if (mounted && showSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -305,6 +441,7 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
           ),
         );
       }
+      return true;
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -318,6 +455,7 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
           ),
         );
       }
+      return false;
     } finally {
       if (mounted) {
         _updateState(() => saving = false);
@@ -325,3 +463,5 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
     }
   }
 }
+
+enum _ProfilePhotoSource { camera, library }

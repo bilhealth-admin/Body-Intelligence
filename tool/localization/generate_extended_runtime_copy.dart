@@ -38,6 +38,9 @@ const _coachToken = 'ZXQPAICOACHBRAND9X7ZXQP';
 const _premiumToken = 'ZXQPPREMIUMBRAND9X7ZXQP';
 const _geminiToken = 'ZXQPGEMINIBRAND9X7ZXQP';
 
+const _remoteNotificationDeliveryUnavailable =
+    'Remote notification delivery is not configured in this build.';
+
 // Reviewed exceptions where the generic translator preserved an English UI
 // label even though the locale has a clearer native equivalent.
 const _reviewedOverrides = <(String, String), String>{
@@ -47,6 +50,51 @@ const _reviewedOverrides = <(String, String), String>{
   ('it', 'Add about {count} g protein'): 'Aggiungi circa {count} g di proteine',
   ('de', 'Needs changes'): 'Änderungen erforderlich',
   ('de', 'BIL Community'): 'BIL-Community',
+  (
+    'de',
+    _remoteNotificationDeliveryUnavailable,
+  ): 'Die Zustellung von Remote-Benachrichtigungen ist in diesem Build nicht konfiguriert.',
+  ('it', _remoteNotificationDeliveryUnavailable):
+      'La consegna delle notifiche remote non è configurata in questa build.',
+  ('pt-BR', _remoteNotificationDeliveryUnavailable):
+      'O envio de notificações remotas não está configurado nesta versão.',
+  (
+    'pt-PT',
+    _remoteNotificationDeliveryUnavailable,
+  ): 'A entrega de notificações remotas não está configurada nesta compilação.',
+  ('ur', _remoteNotificationDeliveryUnavailable):
+      'اس بلڈ میں ریموٹ اطلاعات کی ترسیل ترتیب نہیں دی گئی ہے۔',
+  ('fa', _remoteNotificationDeliveryUnavailable):
+      'ارسال اعلان‌های راه دور در این نسخه پیکربندی نشده است.',
+  ('hi', _remoteNotificationDeliveryUnavailable):
+      'इस बिल्ड में रिमोट नोटिफ़िकेशन डिलीवरी कॉन्फ़िगर नहीं है।',
+  ('id', _remoteNotificationDeliveryUnavailable):
+      'Pengiriman notifikasi jarak jauh belum dikonfigurasi dalam build ini.',
+  (
+    'ms',
+    _remoteNotificationDeliveryUnavailable,
+  ): 'Penghantaran pemberitahuan jauh belum dikonfigurasikan dalam binaan ini.',
+  ('ja', _remoteNotificationDeliveryUnavailable): 'このビルドではリモート通知の配信が設定されていません。',
+  ('ko', _remoteNotificationDeliveryUnavailable):
+      '이 빌드에는 원격 알림 전송이 구성되어 있지 않습니다.',
+  ('zh-Hans', _remoteNotificationDeliveryUnavailable): '此版本尚未配置远程通知推送。',
+  ('zh-Hant', _remoteNotificationDeliveryUnavailable): '此版本尚未設定遠端通知推送。',
+  ('ru', _remoteNotificationDeliveryUnavailable):
+      'Доставка удалённых уведомлений не настроена в этой сборке.',
+  ('bn', _remoteNotificationDeliveryUnavailable):
+      'এই বিল্ডে রিমোট নোটিফিকেশন সরবরাহ কনফিগার করা নেই।',
+  ('vi', _remoteNotificationDeliveryUnavailable):
+      'Tính năng gửi thông báo từ xa chưa được cấu hình trong bản dựng này.',
+  ('th', _remoteNotificationDeliveryUnavailable):
+      'ยังไม่ได้กำหนดค่าการส่งการแจ้งเตือนระยะไกลในบิลด์นี้',
+  (
+    'pl',
+    _remoteNotificationDeliveryUnavailable,
+  ): 'Dostarczanie powiadomień zdalnych nie jest skonfigurowane w tej kompilacji.',
+  ('nl', _remoteNotificationDeliveryUnavailable):
+      'Externe meldingen zijn niet geconfigureerd in deze build.',
+  ('uk', _remoteNotificationDeliveryUnavailable):
+      'Доставку віддалених сповіщень не налаштовано в цій збірці.',
   (
     'de',
     _invalidLink,

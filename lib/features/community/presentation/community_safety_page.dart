@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/bil_locale_policy.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../data/community_repository.dart';
 import 'community_copy.dart';
 
@@ -100,7 +101,9 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
                     child: Column(
                       children: [
                         ListTile(
-                          leading: const Icon(Icons.policy_outlined),
+                          leading: const BilSemanticIconBadge(
+                            kind: BilSemanticIconKind.legal,
+                          ),
                           title: Text(_t('Content policy', 'سياسة المحتوى')),
                           subtitle: Text(
                             '${policy['version']} · ${policy['document_url']}',
@@ -142,7 +145,7 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
                   ),
                   const SizedBox(height: 12),
                   _SafetyTile(
-                    icon: Icons.health_and_safety_outlined,
+                    kind: BilSemanticIconKind.privacy,
                     title: _t('Health logs stay private', 'سجلاتك الصحية خاصة'),
                     body: _t(
                       'BIL never posts weight, meals, or measurements without an explicit share action.',
@@ -150,7 +153,7 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
                     ),
                   ),
                   _SafetyTile(
-                    icon: Icons.report_outlined,
+                    kind: BilSemanticIconKind.moderation,
                     title: _t(
                       'Report, block, and delete',
                       'الإبلاغ والحظر والحذف',
@@ -161,7 +164,7 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
                     ),
                   ),
                   _SafetyTile(
-                    icon: Icons.speed_outlined,
+                    kind: BilSemanticIconKind.moderation,
                     title: _t('Abuse prevention', 'مكافحة الإساءة'),
                     body: _t(
                       'Rate limits, human moderation, and metadata-only audit trails protect the community.',
@@ -177,18 +180,18 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
 
 class _SafetyTile extends StatelessWidget {
   const _SafetyTile({
-    required this.icon,
+    required this.kind,
     required this.title,
     required this.body,
   });
-  final IconData icon;
+  final BilSemanticIconKind kind;
   final String title;
   final String body;
 
   @override
   Widget build(BuildContext context) => Card(
     child: ListTile(
-      leading: Icon(icon),
+      leading: BilSemanticIconBadge(kind: kind),
       title: Text(title),
       subtitle: Text(body),
     ),

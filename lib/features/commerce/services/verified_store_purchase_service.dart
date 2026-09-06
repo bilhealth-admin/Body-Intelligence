@@ -13,6 +13,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../../../app/security/bil_mobile_integrity_service.dart';
 import '../domain/commerce_plan.dart';
 import '../domain/store_catalog_configuration.dart';
 import '../domain/subscription_term.dart';
@@ -390,15 +391,20 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       return false;
     }
     try {
+      final body = <String, Object?>{
+        'action': 'verify_purchase',
+        'product_id': purchase.productID,
+        'purchase_id': purchase.purchaseID,
+        'source': purchase.verificationData.source,
+        'verification_data': purchase.verificationData.serverVerificationData,
+      };
+      final protectedBody = await BilMobileIntegrityService.instance.protect(
+        action: 'store.verify_purchase',
+        payload: body,
+      );
       final response = await Supabase.instance.client.functions.invoke(
         'verify-store-purchase',
-        body: <String, Object?>{
-          'action': 'verify_purchase',
-          'product_id': purchase.productID,
-          'purchase_id': purchase.purchaseID,
-          'source': purchase.verificationData.source,
-          'verification_data': purchase.verificationData.serverVerificationData,
-        },
+        body: protectedBody,
       );
       final data = response.data;
       final verified =
@@ -416,14 +422,19 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   Future<bool> _verifyBoostOnServer(PurchaseDetails purchase) async {
     if (purchase.productID != StoreCatalogConfiguration.aiBoost) return false;
     try {
+      final body = <String, Object?>{
+        'action': 'verify_ai_boost',
+        'product_id': purchase.productID,
+        'source': purchase.verificationData.source,
+        'verification_data': purchase.verificationData.serverVerificationData,
+      };
+      final protectedBody = await BilMobileIntegrityService.instance.protect(
+        action: 'store.verify_ai_boost',
+        payload: body,
+      );
       final response = await Supabase.instance.client.functions.invoke(
         'verify-store-purchase',
-        body: <String, Object?>{
-          'action': 'verify_ai_boost',
-          'product_id': purchase.productID,
-          'source': purchase.verificationData.source,
-          'verification_data': purchase.verificationData.serverVerificationData,
-        },
+        body: protectedBody,
       );
       final data = response.data;
       return response.status == 200 && data is Map && data['verified'] == true;

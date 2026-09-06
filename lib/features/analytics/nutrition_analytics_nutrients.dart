@@ -23,11 +23,11 @@ class _PremiumNutrientDashboard extends StatelessWidget {
             })
           >[
             (
-              label: _t(context, 'Saturated fat'),
-              value: null,
-              goal: goals.saturatedFatG,
-              unit: 'g',
-              minimum: false,
+              label: _t(context, 'Potassium'),
+              value: evidence[TrackedNutrient.potassium]?.value,
+              goal: goals.potassiumMg,
+              unit: 'mg',
+              minimum: true,
             ),
             (
               label: _t(context, 'Sodium'),

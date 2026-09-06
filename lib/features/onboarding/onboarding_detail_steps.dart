@@ -274,17 +274,10 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
                     );
                   },
                 ),
-                const SizedBox(height: 16),
-                _InfoBanner(
-                  icon: Icons.science_outlined,
-                  text: t(
-                    'Source: Mifflin–St Jeor baseline, your activity selection, and 7,700 kcal per kg for the chosen weekly pace. Logged exercise remains separate.',
-                  ),
-                ),
                 if (plan.targetDate case final date?) ...[
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Text(
-                    '${t('Estimated target window')}: ${MaterialLocalizations.of(context).formatMediumDate(date)}',
+                    '${t('Expected time to goal')}: ${MaterialLocalizations.of(context).formatMediumDate(date)}',
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ],
@@ -458,7 +451,7 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
             label: Text(t('I agree — enable cloud AI')),
           ),
           const SizedBox(height: 8),
-          OutlinedButton(
+          TextButton(
             key: const Key('onboarding-decline-ai'),
             onPressed: _permissionBusy
                 ? null

@@ -17,7 +17,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
   testWidgets(
-    'cloud profile restore success routes signed-in users to dashboard',
+    'selective cloud restore success routes signed-in users to dashboard',
     (tester) async {
       const ownerId = 'owner-restored-dashboard';
 
@@ -124,6 +124,22 @@ void main() {
 
     expect(find.text('Onboarding Page'), findsOneWidget);
     expect(find.text('Dashboard Page'), findsNothing);
+  });
+
+  test('restored progress is re-read before startup chooses its route', () {
+    final source = File(
+      'lib/features/startup/startup_page.dart',
+    ).readAsStringSync();
+    final restoreStart = source.indexOf(
+      'final startupCloudProfileRestoreProvider',
+    );
+    final restoreEnd = source.indexOf('class StartupPage', restoreStart);
+    final restore = source.substring(restoreStart, restoreEnd);
+
+    expect(restore, contains('ref.invalidate(userProfileProvider)'));
+    expect(restore, contains('ref.invalidate(dailyCheckInDueProvider)'));
+    expect(restore, contains('await ref.read(userProfileProvider.future)'));
+    expect(restore, contains('await ref.read(dailyCheckInDueProvider.future)'));
   });
 }
 

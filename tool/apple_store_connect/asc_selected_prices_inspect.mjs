@@ -29,8 +29,8 @@ const observedAt = new Date();
 const targetTerritories = {
   bil_premium_ai_coach: ['USA'],
   bil_premium_ai_coach_annual: ['USA'],
-  bil_premium: ['EGY', 'IND', 'PAK', 'TUR'],
-  bil_premium_annual: ['EGY', 'IND', 'PAK', 'TUR'],
+  bil_premium: ['EGY', 'NGA', 'PAK', 'TUR'],
+  bil_premium_annual: ['EGY', 'NGA', 'PAK', 'TUR'],
 };
 
 const results = [];

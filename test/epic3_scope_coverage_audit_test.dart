@@ -35,6 +35,7 @@ void main() {
     '/weekly-report': 'reports',
     '/analytics/nutrition': 'progress',
     '/community': 'community',
+    '/community/moderation': 'community',
     '/community/people': 'community',
     '/community/notifications': 'community',
     '/community/connections': 'community',

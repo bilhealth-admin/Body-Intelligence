@@ -18,6 +18,10 @@ void main() {
       '/community/messages/new',
     );
     expect(
+      CommunityDeepLink.routeFor(Uri.parse('bil://community/moderation')),
+      '/community/moderation',
+    );
+    expect(
       CommunityDeepLink.routeFor(
         Uri.parse('bil://community/chat/8c2d80b2-266c-4a7c-820e-a36b4ef9ac28'),
       ),
@@ -164,6 +168,7 @@ void main() {
       'community/people/': '/community/people',
       'community/messages/': '/community/messages',
       'community/messages/new/': '/community/messages/new',
+      'community/moderation/': '/community/moderation',
       'community/safety/': '/community/safety',
       'settings/': '/settings',
       'settings/notifications/': '/notification-settings',

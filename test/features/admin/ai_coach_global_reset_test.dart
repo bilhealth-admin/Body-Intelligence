@@ -2,9 +2,11 @@ import 'dart:io';
 import 'dart:async';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
+import 'package:body_intelligence_log/app/router/app_router.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_ai_access.dart';
 import 'package:body_intelligence_log/features/admin/presentation/ai_coach_admin_page.dart';
 import 'package:body_intelligence_log/features/admin/services/ai_coach_admin_service.dart';
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/notifications/presentation/ai_coach_reset_notice_coordinator.dart';
 import 'package:body_intelligence_log/features/notifications/services/ai_coach_reset_notice_service.dart';
 import 'package:flutter/material.dart';
@@ -13,9 +15,45 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 const _gift =
-    'A gift from BIL 🎁 Your AI Coach usage has been fully reset. You can use your allowance again until the end of your current cycle.';
+    'A gift from BIL 🎁 Your current-period AI Coach usage was reset, and 2,500 non-expiring AI Boost tokens were added.';
 
 void main() {
+  test('global reset response rejects malformed success payloads', () {
+    expect(
+      () => AiCoachGlobalResetResult.fromJson(const {
+        'reset_id': '',
+        'usage_rows_reset': -1,
+        'monthly_rows_reset': 0,
+        'users_notified': 0,
+        'duplicate': false,
+      }),
+      throwsFormatException,
+    );
+    expect(
+      () => AiCoachGlobalResetResult.fromJson(const {
+        'reset_id': 'reset-1',
+        'usage_rows_reset': 0.5,
+        'monthly_rows_reset': 0,
+        'users_notified': 1,
+        'duplicate': false,
+        'boost_tokens_per_recipient': 2500,
+        'custom_message_applied': true,
+      }),
+      throwsFormatException,
+    );
+    expect(
+      () => AiCoachGlobalResetResult.fromJson(const {
+        'reset_id': 'reset-1',
+        'usage_rows_reset': 0,
+        'monthly_rows_reset': 0,
+        'users_notified': 1,
+        'boost_tokens_per_recipient': 2500,
+        'custom_message_applied': true,
+      }),
+      throwsFormatException,
+    );
+  });
+
   test('reset gift copy is complete for all 25 production locales', () {
     expect(AiAccessRuntimeCopy.supported, hasLength(25));
     expect(AiAccessRuntimeCopy.balanced, isTrue);
@@ -27,7 +65,7 @@ void main() {
     }
     expect(
       AiAccessRuntimeCopy.resolve(_gift, 'ar'),
-      'هدية من BIL 🎁 تمت إعادة ضبط استخدام AI Coach بالكامل، ويمكنك الاستفادة من حصتك مجددًا حتى نهاية دورتك الحالية.',
+      'هدية من BIL 🎁 تمت إعادة ضبط استخدام AI Coach في فترتك الحالية، وأُضيف 2,500 توكين AI Boost غير منتهية.',
     );
   });
 
@@ -55,6 +93,10 @@ void main() {
   ) async {
     final gateway = _FakeAdminGateway(allowed: true);
     await _pumpAdmin(tester, gateway: gateway, allowed: true);
+    await tester.enterText(
+      find.byKey(const Key('admin-ai-coach-global-message')),
+      'Enjoy 2,500 AI Boost tokens from BIL.',
+    );
 
     await tester.tap(find.byKey(const Key('admin-ai-coach-global-reset')));
     await tester.pumpAndSettle();
@@ -75,6 +117,7 @@ void main() {
 
     expect(gateway.globalResetCalls, 1);
     expect(gateway.lastGlobalIdempotencyKey, startsWith('admin:'));
+    expect(gateway.lastGlobalMessage, 'Enjoy 2,500 AI Boost tokens from BIL.');
   });
 
   testWidgets('individual reset validates and requires confirmation', (
@@ -91,6 +134,10 @@ void main() {
     await tester.enterText(
       find.byKey(const Key('admin-ai-coach-individual-reason')),
       'compensation',
+    );
+    await tester.enterText(
+      find.byKey(const Key('admin-ai-coach-individual-message')),
+      'A personal 2,500-token gift from BIL.',
     );
 
     await tester.ensureVisible(button);
@@ -115,6 +162,10 @@ void main() {
     expect(gateway.individualResetCalls, 1);
     expect(gateway.lastEmail, 'person@example.com');
     expect(gateway.lastReason, 'compensation');
+    expect(
+      gateway.lastIndividualMessage,
+      'A personal 2,500-token gift from BIL.',
+    );
     expect(gateway.lastIndividualIdempotencyKey, startsWith('individual:'));
   });
 
@@ -126,6 +177,10 @@ void main() {
     await tester.enterText(
       find.byKey(const Key('admin-ai-coach-individual-email')),
       'missing@example.com',
+    );
+    await tester.enterText(
+      find.byKey(const Key('admin-ai-coach-individual-message')),
+      'A personal 2,500-token gift from BIL.',
     );
     final button = find.byKey(const Key('admin-ai-coach-individual-reset'));
     await tester.ensureVisible(button);
@@ -161,6 +216,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('ai-coach-reset-root-notice')), findsOneWidget);
+    expect(find.text('A personal reset gift from BIL.'), findsOneWidget);
 
     await tester.tap(
       find.byKey(const Key('ai-coach-reset-root-notice-dismiss')),
@@ -174,6 +230,54 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('ai-coach-reset-root-notice')), findsNothing);
   });
+
+  testWidgets(
+    'opening a reset notice refreshes server balance and credit access',
+    (tester) async {
+      final gateway = _FakeNoticeGateway();
+      var accessLoads = 0;
+      addTearDown(() => AppRouter.router.go('/startup'));
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            aiCoachResetNoticeGatewayProvider.overrideWithValue(gateway),
+            verifiedEntitlementOwnerProvider.overrideWith(
+              (_) => Stream<String?>.value('owner-1'),
+            ),
+            aiCoachUsageStatusLoaderProvider.overrideWithValue(() async {
+              accessLoads += 1;
+              return <String, Object?>{
+                'credits': <String, Object?>{'total_remaining': 2500},
+              };
+            }),
+          ],
+          child: _localizedApp(
+            home: const AiCoachResetNoticeCoordinator(
+              child: Scaffold(body: _AiCoachRefreshProbe()),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final initialAccessLoads = accessLoads;
+      expect(initialAccessLoads, greaterThanOrEqualTo(1));
+      expect(find.text('refresh:0 access:true'), findsOneWidget);
+
+      await tester.tap(
+        find.byKey(const Key('ai-coach-reset-root-notice-open')),
+      );
+      await tester.pump();
+
+      // The navigation gesture is not held up by either authoritative reload.
+      expect(find.byKey(const Key('ai-coach-reset-root-notice')), findsNothing);
+      expect(find.textContaining('refresh:1 access:'), findsOneWidget);
+
+      await tester.pumpAndSettle();
+      expect(accessLoads, greaterThan(initialAccessLoads));
+      expect(find.text('refresh:1 access:true'), findsOneWidget);
+    },
+  );
 
   testWidgets('account switch cannot surface or dismiss the previous notice', (
     tester,
@@ -411,21 +515,31 @@ void main() {
     final settings = File(
       'lib/features/intelligence_center/presentation/ai_coach_settings_page.dart',
     ).readAsStringSync();
+    expect(settings, contains(".select('reset_id,created_at,message')"));
+    expect(settings, contains("notice['message']"));
     expect(settings, contains("'p_owner_id': ownerId"));
     expect(settings, contains("'p_reset_id': resetId"));
   });
 
-  test('AI Coach push keeps gift copy while other previews stay private', () {
+  test('only safe gift copy bypasses private push previews', () {
     for (final path in [
       'supabase/functions/community-push-dispatch/index.ts',
       'supabase/functions/community_push_dispatch.ts',
     ]) {
       final source = File(path).readAsStringSync();
+      expect(source, contains('"admin_notification_compensation_v1"'));
+      expect(source, contains('"admin_notification_gift_v1"'));
       expect(
         source,
-        matches(RegExp(r'''event\.category\s*===\s*["']ai_coach["']''')),
+        isNot(matches(RegExp(r'''event\.category\s*===\s*["']ai_coach["']'''))),
         reason: path,
       );
+      expect(
+        source,
+        contains('safeVisibleCopyKeys.has(event.copy_key) ||'),
+        reason: path,
+      );
+      expect(source, contains('token.sensitive_preview_allowed'));
       expect(
         source,
         contains('"You have a new private update."'),
@@ -460,7 +574,7 @@ void main() {
     expect(() => consumed.consumeIncluded(1), throwsStateError);
   });
 
-  test('true Free stays locked and receives no entitlement', () {
+  test('reset gift opens true Free until its 2,500 tokens are consumed', () {
     const free = _QuotaState(
       plan: 'free',
       weekStart: '2026-08-31',
@@ -472,34 +586,40 @@ void main() {
       reserved: 0,
       boostGranted: 0,
     );
-    final reset = free.resetConsumed();
+    final reset = free.resetWithGift();
     expect(reset.plan, 'free');
     expect(reset.weeklyLimit, 0);
     expect(reset.monthlyLimit, 0);
     expect(reset.canConsumeIncluded(1), isFalse);
+    expect(reset.boostGranted, 2500);
+    expect(reset.canAccessCoach, isTrue);
+    expect(reset._copy(boostGranted: 0).canAccessCoach, isFalse);
   });
 
-  test('prior-week monthly usage resets, reservations and Boost do not', () {
-    const state = _QuotaState(
-      plan: 'ai_coach',
-      weekStart: '2026-08-31',
-      monthStart: '2026-08-01',
-      weeklyLimit: 2500,
-      monthlyLimit: 10000,
-      weeklyUsed: 400,
-      monthlyUsed: 10000,
-      reserved: 120,
-      boostGranted: 2500,
-    );
-    final reset = state.resetConsumed();
-    expect(reset.weeklyUsed, 0);
-    expect(reset.monthlyUsed, 0);
-    expect(reset.reserved, 120);
-    expect(reset.boostGranted, 2500);
-    expect(reset.weekStart, state.weekStart);
-    expect(reset.monthStart, state.monthStart);
-    expect(reset.plan, state.plan);
-  });
+  test(
+    'reset preserves reservations and adds exactly one 2,500-token gift',
+    () {
+      const state = _QuotaState(
+        plan: 'ai_coach',
+        weekStart: '2026-08-31',
+        monthStart: '2026-08-01',
+        weeklyLimit: 2500,
+        monthlyLimit: 10000,
+        weeklyUsed: 400,
+        monthlyUsed: 10000,
+        reserved: 120,
+        boostGranted: 2500,
+      );
+      final reset = state.resetWithGift();
+      expect(reset.weeklyUsed, 0);
+      expect(reset.monthlyUsed, 0);
+      expect(reset.reserved, 120);
+      expect(reset.boostGranted, 5000);
+      expect(reset.weekStart, state.weekStart);
+      expect(reset.monthStart, state.monthStart);
+      expect(reset.plan, state.plan);
+    },
+  );
 
   test('user counter shows both unchanged current-period boundaries', () {
     final page = File(
@@ -525,6 +645,7 @@ void main() {
     expect(router, contains('builder: (_, _) => const AiCoachAdminPage()'));
     expect(settings, contains('if (adminAccess.asData?.value == true)'));
     expect(settings, contains("'/admin/ai-coach'"));
+    expect(settings, contains("copy('BIL Administration')"));
     expect(links, contains("'settings/ai-coach': '/intelligence-center'"));
   });
 }
@@ -578,9 +699,11 @@ final class _FakeAdminGateway implements AiCoachAdminGateway {
   int globalResetCalls = 0;
   int individualResetCalls = 0;
   String? lastGlobalIdempotencyKey;
+  String? lastGlobalMessage;
   String? lastIndividualIdempotencyKey;
   String? lastEmail;
   String? lastReason;
+  String? lastIndividualMessage;
 
   @override
   Future<bool> canManageAiCoach() async => allowed;
@@ -590,9 +713,13 @@ final class _FakeAdminGateway implements AiCoachAdminGateway {
       Stream<String?>.value(allowed ? 'admin-1' : 'ordinary-1');
 
   @override
-  Future<AiCoachGlobalResetResult> globalReset(String idempotencyKey) async {
+  Future<AiCoachGlobalResetResult> globalReset({
+    required String message,
+    required String idempotencyKey,
+  }) async {
     globalResetCalls += 1;
     lastGlobalIdempotencyKey = idempotencyKey;
+    lastGlobalMessage = message;
     return const AiCoachGlobalResetResult(
       resetId: '00000000-0000-4000-8000-000000000010',
       usageRowsReset: 2,
@@ -606,11 +733,13 @@ final class _FakeAdminGateway implements AiCoachAdminGateway {
   Future<bool> individualReset({
     required String email,
     required String reason,
+    required String message,
     required String idempotencyKey,
   }) async {
     individualResetCalls += 1;
     lastEmail = email;
     lastReason = reason;
+    lastIndividualMessage = message;
     lastIndividualIdempotencyKey = idempotencyKey;
     return individualMatched;
   }
@@ -644,13 +773,28 @@ final class _FakeNoticeGateway implements AiCoachResetNoticeGateway {
   @override
   Future<AiCoachResetNotice?> newestUnseen() async => dismissed
       ? null
-      : const AiCoachResetNotice(ownerId: 'owner-1', resetId: resetId);
+      : const AiCoachResetNotice(
+          ownerId: 'owner-1',
+          resetId: resetId,
+          message: 'A personal reset gift from BIL.',
+        );
 
   @override
   Future<void> dismiss(AiCoachResetNotice notice) async {
     dismissCalls += 1;
     dismissedResetId = notice.resetId;
     dismissed = true;
+  }
+}
+
+final class _AiCoachRefreshProbe extends ConsumerWidget {
+  const _AiCoachRefreshProbe();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final refresh = ref.watch(aiCoachUsageRefreshProvider);
+    final access = ref.watch(aiCoachCreditAccessProvider).asData?.value;
+    return Text('refresh:$refresh access:$access');
   }
 }
 
@@ -712,7 +856,10 @@ final class _SwitchingAdminGateway implements AiCoachAdminGateway {
   }
 
   @override
-  Future<AiCoachGlobalResetResult> globalReset(String idempotencyKey) {
+  Future<AiCoachGlobalResetResult> globalReset({
+    required String message,
+    required String idempotencyKey,
+  }) {
     throw UnimplementedError();
   }
 
@@ -720,6 +867,7 @@ final class _SwitchingAdminGateway implements AiCoachAdminGateway {
   Future<bool> individualReset({
     required String email,
     required String reason,
+    required String message,
     required String idempotencyKey,
   }) {
     throw UnimplementedError();
@@ -765,7 +913,13 @@ final class _QuotaState {
       weeklyUsed + reserved + units <= weeklyLimit &&
       monthlyUsed + reserved + units <= monthlyLimit;
 
+  bool get canAccessCoach =>
+      weeklyUsed + reserved < weeklyLimit || boostGranted > 0;
+
   _QuotaState resetConsumed() => _copy(weeklyUsed: 0, monthlyUsed: 0);
+
+  _QuotaState resetWithGift() =>
+      _copy(weeklyUsed: 0, monthlyUsed: 0, boostGranted: boostGranted + 2500);
 
   _QuotaState consumeIncluded(int units) {
     if (!canConsumeIncluded(units)) throw StateError('ai_usage_exhausted');
@@ -775,15 +929,16 @@ final class _QuotaState {
     );
   }
 
-  _QuotaState _copy({int? weeklyUsed, int? monthlyUsed}) => _QuotaState(
-    plan: plan,
-    weekStart: weekStart,
-    monthStart: monthStart,
-    weeklyLimit: weeklyLimit,
-    monthlyLimit: monthlyLimit,
-    weeklyUsed: weeklyUsed ?? this.weeklyUsed,
-    monthlyUsed: monthlyUsed ?? this.monthlyUsed,
-    reserved: reserved,
-    boostGranted: boostGranted,
-  );
+  _QuotaState _copy({int? weeklyUsed, int? monthlyUsed, int? boostGranted}) =>
+      _QuotaState(
+        plan: plan,
+        weekStart: weekStart,
+        monthStart: monthStart,
+        weeklyLimit: weeklyLimit,
+        monthlyLimit: monthlyLimit,
+        weeklyUsed: weeklyUsed ?? this.weeklyUsed,
+        monthlyUsed: monthlyUsed ?? this.monthlyUsed,
+        reserved: reserved,
+        boostGranted: boostGranted ?? this.boostGranted,
+      );
 }

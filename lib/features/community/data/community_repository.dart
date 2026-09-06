@@ -115,6 +115,37 @@ class CommunityRepository {
   Future<List<CommunityPost>> loadFeed({int limit = 40}) =>
       CommunityPostCloudStore(_client, _user).loadFeed(limit: limit);
 
+  Future<bool> isCommunityModerator() async {
+    if (_client.auth.currentUser == null) return false;
+    final response = await _client.rpc('bil_is_community_moderator');
+    if (response is! bool) {
+      throw const FormatException('Invalid community moderator result');
+    }
+    return response;
+  }
+
+  Future<List<CommunityPost>> loadPendingPostsForModeration({
+    int limit = 100,
+  }) =>
+      CommunityPostCloudStore(_client, _user).loadModerationQueue(limit: limit);
+
+  Future<CommunityPostModerationResult> moderatePost({
+    required String postId,
+    required CommunityPostModerationDecision decision,
+  }) async {
+    if (!_uuid.hasMatch(postId)) throw ArgumentError.value(postId, 'postId');
+    final response = await _client.rpc(
+      'bil_moderate_community_post',
+      params: {'p_post_id': postId, 'p_decision': decision.name},
+    );
+    if (response is! Map) {
+      throw const FormatException('Invalid community moderation result');
+    }
+    return CommunityPostModerationResult.fromJson(
+      Map<String, dynamic>.from(response),
+    );
+  }
+
   Future<void> publishPost(String body) =>
       CommunityPostCloudStore(_client, _user).publishText(body);
 

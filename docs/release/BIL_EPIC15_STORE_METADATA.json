@@ -76,7 +76,9 @@
     "terms_path": "/terms",
     "support_path": "/support",
     "account_deletion_path": "/account-deletion",
-    "status": "DOMAIN_LIVE_LOCAL_18_PLUS_PRIVACY_AND_TERMS_UPDATE_NOT_DEPLOYED_2026_08_24"
+    "status": "LIVE_HTTP_200_LOCAL_CONTENT_SHA256_MATCH_VERIFIED_2026_09_06_LEGAL_APPROVAL_NOT_CLAIMED",
+    "legal_approval": "NOT_CLAIMED",
+    "publication_verification_evidence": "docs/release/BIL_EPIC15_PUBLICATION_VERIFICATION_2026-09-06.json"
   },
   "subscriptions": {
     "group": "OWNER_INPUT_REQUIRED_APPLE_SUBSCRIPTION_GROUP",

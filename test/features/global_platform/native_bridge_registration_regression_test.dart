@@ -26,6 +26,9 @@ void main() {
       final activity = File(
         'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/MainActivity.kt',
       ).readAsStringSync();
+      final androidFitness = File(
+        'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILFitnessBleBridge.kt',
+      ).readAsStringSync();
       expect(swift, contains('HKAnchoredObjectQuery'));
       expect(swift, contains('requestAuthorization'));
       expect(swift, contains('enableBackgroundDelivery'));
@@ -45,6 +48,11 @@ void main() {
       expect(kotlin, isNot(contains('workmanager-scheduler')));
       expect(kotlin, isNot(contains('emptyList<Map<String, Any>>()')));
       expect(activity, contains('BILGlobalHealthBridge('));
+      expect(activity, contains('healthBridge?.dispose()'));
+      expect(activity, contains('fitnessBleBridge?.dispose()'));
+      expect(kotlin, contains('scope.cancel()'));
+      expect(androidFitness, contains('activeScans'));
+      expect(androidFitness, contains('channel.setMethodCallHandler(null)'));
     },
   );
 
@@ -59,5 +67,24 @@ void main() {
     );
     expect(connected, contains('DeferredConnectedHealthGateway'));
     expect(connected, contains('await host.initialize()'));
+  });
+
+  test('wearable native adapters are registered only on their own platform', () {
+    final composition = File(
+      'lib/features/global_platform/runtime/global_product_composition_root.dart',
+    ).readAsStringSync();
+    final providersStart = composition.indexOf(
+      'final nativeWearables = <WearableProvider>[',
+    );
+    final providersEnd = composition.indexOf(
+      'final fitnessProvider =',
+      providersStart,
+    );
+    final providers = composition.substring(providersStart, providersEnd);
+
+    expect(providers, contains('if (isIos)'));
+    expect(providers, contains('WearableVendor.appleWatch'));
+    expect(providers, contains('if (isAndroid)'));
+    expect(providers, contains('WearableVendor.wearOs'));
   });
 }

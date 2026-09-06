@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/localization/app_localizations.dart';
 import '../../app/services/store_review_prompt_service.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 import '../../core/units/measurement_units.dart';
 import '../../data/database/date_keys.dart';
 import '../../shared/widgets/actionable_error_state.dart';
@@ -469,7 +470,11 @@ class _WeightEntryCard extends StatelessWidget {
             child: FilledButton.tonalIcon(
               key: const Key('daily-check-in-weight-voice'),
               onPressed: busy ? null : onVoice,
-              icon: const Icon(Icons.mic_rounded),
+              icon: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.voice,
+                size: 32,
+                iconSize: 18,
+              ),
               label: Text(dailyCheckInText(context, 'Voice input')),
               style: FilledButton.styleFrom(
                 minimumSize: const Size(168, 48),

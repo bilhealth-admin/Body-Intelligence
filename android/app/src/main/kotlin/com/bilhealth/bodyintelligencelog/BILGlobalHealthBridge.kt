@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.result.ActivityResultLauncher
 import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.HealthConnectFeatures
 import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.changes.DeletionChange
 import androidx.health.connect.client.changes.UpsertionChange
@@ -20,6 +21,7 @@ import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.Instant
@@ -82,11 +84,25 @@ class BILGlobalHealthBridge(
     }
 
     private suspend fun permissionSnapshot(names: List<String>): Map<String, Boolean> {
-        val granted = requireClient().permissionController.getGrantedPermissions()
-        return names.associateWith { name ->
+        val healthClient = requireClient()
+        val granted = healthClient.permissionController.getGrantedPermissions()
+        val recordPermissions = names.associateWith { name ->
             if (name !in supportedNames) false
             else recordClass(name)?.let { HealthPermission.getReadPermission(it) in granted } ?: false
         }
+        // The durable Dart anchor belongs to both the record-type set and the
+        // effective history window. If the user later grants (or revokes)
+        // Additional access in Health Connect settings, this marker changes
+        // the scope signature and forces one correctly bounded bootstrap.
+        return recordPermissions + mapOf(
+            HISTORY_PERMISSION_SCOPE_MARKER to
+                (
+                    healthClient.features.getFeatureStatus(
+                        HealthConnectFeatures.FEATURE_READ_HEALTH_DATA_HISTORY,
+                    ) == HealthConnectFeatures.FEATURE_STATUS_AVAILABLE &&
+                        HealthPermission.PERMISSION_READ_HEALTH_DATA_HISTORY in granted
+                ),
+        )
     }
 
     private fun requestPermissions(call: MethodCall, result: MethodChannel.Result) {
@@ -96,9 +112,30 @@ class BILGlobalHealthBridge(
         }
         val names = call.argument<List<String>>("types") ?: supportedNames
         val write = call.argument<Boolean>("write") == true
-        val permissions = names.filter(supportedNames::contains).mapNotNull(::recordClass).flatMap { klass ->
-            buildList { add(HealthPermission.getReadPermission(klass)); if (write) add(HealthPermission.getWritePermission(klass)) }
-        }.toSet()
+        val recordPermissions = names
+            .filter(supportedNames::contains)
+            .mapNotNull(::recordClass)
+            .flatMap { klass ->
+                buildList {
+                    add(HealthPermission.getReadPermission(klass))
+                    if (write) add(HealthPermission.getWritePermission(klass))
+                }
+            }
+            .toSet()
+        // A one-year first import is useful for the trend screens and matches
+        // the bounded HealthKit window. Health Connect history access remains
+        // independently revocable: if it is declined, readChanges falls back
+        // to the ordinary 30-day window instead of failing the connection.
+        val historyReadAvailable = client?.features?.getFeatureStatus(
+            HealthConnectFeatures.FEATURE_READ_HEALTH_DATA_HISTORY,
+        ) == HealthConnectFeatures.FEATURE_STATUS_AVAILABLE
+        val permissions = if (
+            !write && recordPermissions.isNotEmpty() && historyReadAvailable
+        ) {
+            recordPermissions + HealthPermission.PERMISSION_READ_HEALTH_DATA_HISTORY
+        } else {
+            recordPermissions
+        }
         pendingPermissionResult = result
         permissionLauncher.launch(permissions)
     }
@@ -113,15 +150,36 @@ class BILGlobalHealthBridge(
         val client = requireClient()
         val names = call.argument<List<String>>("types") ?: supportedNames
         val supportedRequestedNames = names.filter(supportedNames::contains).distinct()
+        val requestedNameSet = supportedRequestedNames.toSet()
         val classes = supportedRequestedNames.mapNotNull(::recordClass).toSet()
         val incomingToken = call.argument<String>("anchor")
+        val asOf = call.argument<String>("asOf")
+            ?.let { raw -> runCatching { Instant.parse(raw) }.getOrNull() }
+            ?: Instant.now()
+        // Establish the incremental boundary before the first historical read.
+        // Otherwise a record inserted between history and token creation can
+        // fall through both windows and never be imported.
+        val token = incomingToken ?: client.getChangesToken(ChangesTokenRequest(classes))
         // A changes token only observes mutations after it is created. Read a
-        // bounded history for every requested type before creating the first
-        // token, otherwise existing sleep/activity/watch records are invisible
-        // forever on a user's first synchronization.
+        // bounded history for every requested type on the first synchronization
+        // so existing sleep/activity/watch records are not invisible forever.
         val records = mutableListOf<Map<String, Any?>>()
         if (incomingToken == null) {
-            val since = TimeRangeFilter.after(Instant.now().minusSeconds(366L * 24L * 60L * 60L))
+            val granted = client.permissionController.getGrantedPermissions()
+            val historyReadAvailable = client.features.getFeatureStatus(
+                HealthConnectFeatures.FEATURE_READ_HEALTH_DATA_HISTORY,
+            ) == HealthConnectFeatures.FEATURE_STATUS_AVAILABLE
+            val historyDays = if (
+                historyReadAvailable &&
+                HealthPermission.PERMISSION_READ_HEALTH_DATA_HISTORY in granted
+            ) 365L else 30L
+            // History remains least-privilege. A denied history grant never
+            // blocks current data: it simply selects Health Connect's ordinary
+            // 30-day window instead of the explicitly authorized one-year view.
+            val since = TimeRangeFilter.between(
+                asOf.minusSeconds(historyDays * 24L * 60L * 60L),
+                asOf,
+            )
             suspend fun <T : Record> readInitial(recordType: KClass<T>) {
                 var pageToken: String? = null
                 do {
@@ -132,32 +190,53 @@ class BILGlobalHealthBridge(
                             pageToken = pageToken,
                         ),
                     )
-                    page.records.mapNotNullTo(records, ::serialize)
+                    page.records.flatMapTo(records) { record ->
+                        serializeAll(record, requestedNameSet)
+                    }
                     pageToken = page.pageToken
-                } while (pageToken != null)
+                    // Some Health Connect implementations return an empty
+                    // token at the end of pagination instead of null.
+                } while (!pageToken.isNullOrEmpty())
             }
             for (name in supportedRequestedNames) when (name) {
                 "steps" -> readInitial(StepsRecord::class)
+                "distance" -> readInitial(DistanceRecord::class)
                 "activeEnergy" -> readInitial(ActiveCaloriesBurnedRecord::class)
                 "workout" -> readInitial(ExerciseSessionRecord::class)
                 "sleep" -> readInitial(SleepSessionRecord::class)
                 "weight" -> readInitial(WeightRecord::class)
+                "bodyFat" -> readInitial(BodyFatRecord::class)
+                "leanMass" -> readInitial(LeanBodyMassRecord::class)
                 "heartRate" -> readInitial(HeartRateRecord::class)
                 "restingHeartRate" -> readInitial(RestingHeartRateRecord::class)
                 "hrv" -> readInitial(HeartRateVariabilityRmssdRecord::class)
-                "nutrition" -> readInitial(NutritionRecord::class)
+                "water" -> readInitial(HydrationRecord::class)
+            }
+            if (supportedRequestedNames.any(nutritionLogicalNames::contains)) {
+                readInitial(NutritionRecord::class)
             }
         }
-        val token = incomingToken ?: client.getChangesToken(ChangesTokenRequest(classes))
         val response = client.getChanges(token)
         val deleted = mutableListOf<String>()
         response.changes.forEach { change ->
             when (change) {
                 is DeletionChange -> deleted += change.recordId
-                is UpsertionChange -> serialize(change.record)?.let(records::add)
+                is UpsertionChange -> records += serializeAll(
+                    change.record,
+                    requestedNameSet,
+                )
             }
         }
-        return mapOf("records" to records, "deletedIds" to deleted, "nextAnchor" to response.nextChangesToken, "hasMore" to response.hasMore)
+        return mapOf(
+            "records" to records,
+            "deletedIds" to deleted,
+            "nextAnchor" to response.nextChangesToken,
+            "hasMore" to response.hasMore,
+            // Health Connect reports expired/invalid change tokens as a
+            // response flag. Dart discards the durable anchor and performs one
+            // bounded bootstrap; it must never save this unusable next token.
+            "changesTokenExpired" to response.changesTokenExpired,
+        )
     }
 
     private suspend fun write(call: MethodCall): Map<String, Any> {
@@ -176,35 +255,88 @@ class BILGlobalHealthBridge(
         return mapOf("deleted" to deleted)
     }
 
-    private fun serialize(record: Record): Map<String, Any?>? {
+    private fun serializeAll(
+        record: Record,
+        requestedNames: Set<String>,
+    ): List<Map<String, Any?>> {
         val metadata = record.metadata
+        // Health Connect explicitly recommends ignoring records written by the
+        // calling app. Re-importing them would create an echo loop and could
+        // falsely make the native source look connected after a local export.
+        if (metadata.dataOrigin.packageName == activity.packageName) return emptyList()
+        val device = metadata.device
+        val provenanceAttributes = mutableMapOf<String, Any?>()
+        device?.manufacturer?.trim()?.takeIf { it.isNotEmpty() }?.let {
+            provenanceAttributes["deviceManufacturer"] = it
+        }
+        device?.model?.trim()?.takeIf { it.isNotEmpty() }?.let {
+            provenanceAttributes["deviceModel"] = it
+        }
+        if (device?.type == androidx.health.connect.client.records.metadata.Device.TYPE_WATCH) {
+            provenanceAttributes["wearableKind"] = "wear_os_watch"
+        }
         val base = mutableMapOf<String, Any?>(
             "id" to metadata.id,
             "sourceId" to metadata.dataOrigin.packageName,
-            "deviceId" to metadata.device?.model,
+            "deviceId" to device?.model,
             "confidence" to 1.0,
             "timeZoneId" to "UTC",
             "deleted" to false,
         )
-        fun output(type: String, value: Double, unit: String, observedAt: Instant): Map<String, Any?> = base + mapOf("type" to type, "value" to value, "unit" to unit, "observedAt" to observedAt.toString())
+        fun output(
+            type: String,
+            value: Double,
+            unit: String,
+            observedAt: Instant,
+            attributes: Map<String, Any?> = provenanceAttributes,
+            recordId: String = metadata.id,
+        ): Map<String, Any?> = base + mapOf(
+            "id" to recordId,
+            "type" to type,
+            "value" to value,
+            "unit" to unit,
+            "observedAt" to observedAt.toString(),
+            "attributes" to attributes,
+        )
+        fun single(name: String, row: Map<String, Any?>?): List<Map<String, Any?>> =
+            if (name in requestedNames && row != null) listOf(row) else emptyList()
         return when (record) {
-            is StepsRecord -> output("steps", record.count.toDouble(), "count", record.startTime)
-            is WeightRecord -> output("weight", record.weight.inKilograms, "kg", record.time)
-            is ActiveCaloriesBurnedRecord -> output("activeEnergy", record.energy.inKilocalories, "kcal", record.startTime)
-            is HeartRateRecord -> record.samples.lastOrNull()?.let { sample ->
-                output("heartRate", sample.beatsPerMinute.toDouble(), "count/min", sample.time)
+            is StepsRecord -> single("steps", output("steps", record.count.toDouble(), "count", record.startTime))
+            is DistanceRecord -> single("distance", output("distance", record.distance.inMeters, "m", record.startTime))
+            is WeightRecord -> single("weight", output("weight", record.weight.inKilograms, "kg", record.time))
+            is BodyFatRecord -> single("bodyFat", output("bodyFat", record.percentage.value, "%", record.time))
+            is LeanBodyMassRecord -> single("leanMass", output("leanMass", record.mass.inKilograms, "kg", record.time))
+            is ActiveCaloriesBurnedRecord -> single("activeEnergy", output("activeEnergy", record.energy.inKilocalories, "kcal", record.startTime))
+            is HeartRateRecord -> if ("heartRate" !in requestedNames) {
+                emptyList()
+            } else {
+                // HeartRateRecord is a series, not one observation. Keep every
+                // sample and give it a deterministic child identity. The
+                // parent id lets Dart replace the whole series on an upsert and
+                // remove every child when Health Connect emits one deletion.
+                record.samples.mapIndexed { index, sample ->
+                    output(
+                        "heartRate",
+                        sample.beatsPerMinute.toDouble(),
+                        "count/min",
+                        sample.time,
+                        attributes = provenanceAttributes + mapOf(
+                            "parentRecordId" to metadata.id,
+                            "seriesSampleIndex" to index,
+                        ),
+                        recordId = "${metadata.id}#heartRate#${sample.time.toEpochMilli()}#$index",
+                    )
+                }
             }
-            is RestingHeartRateRecord -> output("restingHeartRate", record.beatsPerMinute.toDouble(), "count/min", record.time)
-            is HeartRateVariabilityRmssdRecord -> output("hrv", record.heartRateVariabilityMillis, "ms", record.time)
-            is HydrationRecord -> output("water", record.volume.inLiters * 1000.0, "mL", record.startTime)
-            is SleepSessionRecord -> output(
+            is RestingHeartRateRecord -> single("restingHeartRate", output("restingHeartRate", record.beatsPerMinute.toDouble(), "count/min", record.time))
+            is HeartRateVariabilityRmssdRecord -> single("hrv", output("hrv", record.heartRateVariabilityMillis, "ms", record.time))
+            is HydrationRecord -> single("water", output("water", record.volume.inLiters * 1000.0, "mL", record.startTime))
+            is SleepSessionRecord -> single("sleep", output(
                 "sleep",
                 java.time.Duration.between(record.startTime, record.endTime).toMillis() / 3_600_000.0,
                 "h",
                 record.startTime,
-            ) + mapOf(
-                "timeZoneId" to (record.startZoneOffset?.id ?: "UTC"),
-                "attributes" to mapOf(
+                attributes = provenanceAttributes + mapOf(
                     "sessionId" to metadata.id,
                     "endedAt" to record.endTime.toString(),
                     "endTimeZoneOffset" to record.endZoneOffset?.id,
@@ -214,18 +346,35 @@ class BILGlobalHealthBridge(
                         "endedAt" to stage.endTime.toString(),
                     ) },
                 ).filterValues { it != null },
-            )
-            is ExerciseSessionRecord -> output("workout", java.time.Duration.between(record.startTime, record.endTime).seconds.toDouble(), "s", record.startTime)
-            is NutritionRecord -> output("nutrition", record.energy?.inKilocalories ?: 0.0, "kcal", record.startTime) + mapOf(
-                "attributes" to mapOf(
+            ) + mapOf(
+                "timeZoneId" to (record.startZoneOffset?.id ?: "UTC"),
+            ))
+            is ExerciseSessionRecord -> single("workout", output("workout", java.time.Duration.between(record.startTime, record.endTime).seconds.toDouble(), "s", record.startTime))
+            is NutritionRecord -> {
+                val attributes = provenanceAttributes + mapOf(
                     "foodName" to record.name,
                     "mealType" to record.mealType,
                     "proteinGrams" to record.protein?.inGrams,
                     "carbohydrateGrams" to record.totalCarbohydrate?.inGrams,
                     "fatGrams" to record.totalFat?.inGrams,
                 ).filterValues { it != null }
-            )
-            else -> null
+                buildList {
+                    fun addNutrient(name: String, value: Double?, unit: String = "g") {
+                        if (name in requestedNames && value != null) {
+                            add(output(name, value, unit, record.startTime, attributes))
+                        }
+                    }
+                    addNutrient("nutrition", record.energy?.inKilocalories, "kcal")
+                    addNutrient("nutritionProtein", record.protein?.inGrams)
+                    addNutrient("nutritionCarbohydrates", record.totalCarbohydrate?.inGrams)
+                    addNutrient("nutritionFat", record.totalFat?.inGrams)
+                    addNutrient("nutritionFiber", record.dietaryFiber?.inGrams)
+                    addNutrient("nutritionSugar", record.sugar?.inGrams)
+                    addNutrient("nutritionSodium", record.sodium?.inGrams?.times(1000.0), "mg")
+                    addNutrient("nutritionPotassium", record.potassium?.inGrams?.times(1000.0), "mg")
+                }
+            }
+            else -> emptyList()
         }
     }
 
@@ -257,25 +406,44 @@ class BILGlobalHealthBridge(
 
     private fun recordClass(name: String): kotlin.reflect.KClass<out Record>? = when (name) {
         "steps" -> StepsRecord::class
+        "distance" -> DistanceRecord::class
         "activeEnergy" -> ActiveCaloriesBurnedRecord::class
         "workout" -> ExerciseSessionRecord::class
         "sleep" -> SleepSessionRecord::class
         "weight" -> WeightRecord::class
+        "bodyFat" -> BodyFatRecord::class
+        "leanMass" -> LeanBodyMassRecord::class
         "heartRate" -> HeartRateRecord::class
         "restingHeartRate" -> RestingHeartRateRecord::class
         "hrv" -> HeartRateVariabilityRmssdRecord::class
         "water" -> HydrationRecord::class
-        "nutrition" -> NutritionRecord::class
+        in nutritionLogicalNames -> NutritionRecord::class
         else -> null
     }
 
     private fun requireClient(): HealthConnectClient = client ?: error("Health Connect SDK is unavailable or requires an update.")
 
+    fun dispose() {
+        pendingPermissionResult?.error("activity_disposed", null, null)
+        pendingPermissionResult = null
+        channel.setMethodCallHandler(null)
+        scope.cancel()
+    }
+
     companion object {
         const val CHANNEL = "bil/health_connect"
+        const val HISTORY_PERMISSION_SCOPE_MARKER = "__readHealthDataHistory"
+        val nutritionLogicalNames = setOf(
+            "nutrition", "nutritionProtein", "nutritionCarbohydrates",
+            "nutritionFat", "nutritionFiber", "nutritionSugar",
+            "nutritionSodium", "nutritionPotassium",
+        )
         val supportedNames = listOf(
-            "steps", "activeEnergy", "workout", "sleep", "weight",
-            "heartRate", "restingHeartRate", "hrv", "nutrition",
+            "steps", "distance", "activeEnergy", "workout", "sleep", "weight",
+            "bodyFat", "leanMass", "heartRate", "restingHeartRate", "hrv",
+            "water", "nutrition", "nutritionProtein", "nutritionCarbohydrates",
+            "nutritionFat", "nutritionFiber", "nutritionSugar",
+            "nutritionSodium", "nutritionPotassium",
         )
         fun permissionContract(activity: Activity) = PermissionController.createRequestPermissionResultContract()
     }

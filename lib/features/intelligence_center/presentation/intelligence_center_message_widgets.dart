@@ -4,15 +4,19 @@ class _MessageBubble extends StatelessWidget {
   const _MessageBubble({
     required this.message,
     this.feedbackValue,
+    this.reported = false,
     this.onFeedback,
     this.onReport,
     this.onSpeak,
+    this.onAction,
   });
   final IntelligenceMessage message;
   final bool? feedbackValue;
+  final bool reported;
   final ValueChanged<bool>? onFeedback;
   final ValueChanged<String>? onReport;
   final VoidCallback? onSpeak;
+  final ValueChanged<IntelligenceAction>? onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -43,13 +47,11 @@ class _MessageBubble extends StatelessWidget {
       );
     }
 
-    final hasDetails =
-        message.reason?.trim().isNotEmpty == true ||
-        message.evidence.isNotEmpty ||
-        message.missingData.isNotEmpty ||
-        message.confidence != null;
     final trustedLinks = message.links
         .where((link) => link.isTrustedLocalRoute)
+        .toList(growable: false);
+    final trustedActions = message.actionLinks
+        .where((action) => action.isTrusted)
         .toList(growable: false);
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 28, 22),
@@ -97,35 +99,40 @@ class _MessageBubble extends StatelessWidget {
                     ],
                   ),
                 ],
-                if (hasDetails || onFeedback != null || onReport != null) ...[
+                if (trustedActions.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final action in trustedActions)
+                        ActionChip(
+                          key: Key(
+                            'ai-coach-action-${action.type.name}-${action.id}',
+                          ),
+                          avatar: Icon(_iconForAction(action.type), size: 18),
+                          label: Text(action.label),
+                          tooltip: intelligenceText(
+                            context,
+                            'Open {label}',
+                            'افتح {label}',
+                          ).replaceAll('{label}', action.label),
+                          onPressed: onAction == null
+                              ? null
+                              : () => onAction!(action.toAction()),
+                        ),
+                    ],
+                  ),
+                ],
+                if (onFeedback != null ||
+                    onReport != null ||
+                    onSpeak != null) ...[
                   const SizedBox(height: 7),
                   Wrap(
                     crossAxisAlignment: WrapCrossAlignment.center,
                     spacing: 3,
                     runSpacing: 2,
                     children: [
-                      if (hasDetails)
-                        TextButton.icon(
-                          onPressed: () =>
-                              _showMessageDetails(context, message),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            minimumSize: const Size(0, 36),
-                            visualDensity: VisualDensity.compact,
-                            foregroundColor: scheme.onSurfaceVariant,
-                          ),
-                          icon: const Icon(
-                            Icons.info_outline_rounded,
-                            size: 16,
-                          ),
-                          label: Text(
-                            intelligenceText(
-                              context,
-                              'Why this answer',
-                              'لماذا هذا الجواب',
-                            ),
-                          ),
-                        ),
                       if (onSpeak != null)
                         IconButton(
                           key: Key('ai-coach-speak-${message.id}'),
@@ -145,23 +152,28 @@ class _MessageBubble extends StatelessWidget {
                           compact: true,
                         ),
                       if (onReport != null)
-                        TextButton.icon(
+                        IconButton(
                           key: Key('ai-coach-report-${message.id}'),
+                          tooltip: intelligenceText(
+                            context,
+                            'Report answer',
+                            'الإبلاغ عن الإجابة',
+                          ),
                           onPressed: () =>
                               _showAiAnswerReportSheet(context, onReport!),
-                          style: TextButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 5),
-                            minimumSize: const Size(0, 36),
+                          style: IconButton.styleFrom(
+                            minimumSize: const Size.square(32),
                             visualDensity: VisualDensity.compact,
-                            foregroundColor: scheme.onSurfaceVariant,
+                            foregroundColor: reported
+                                ? scheme.error
+                                : scheme.onSurfaceVariant,
+                            backgroundColor: reported
+                                ? scheme.error.withValues(alpha: .14)
+                                : Colors.transparent,
                           ),
-                          icon: const Icon(Icons.flag_outlined, size: 17),
-                          label: Text(
-                            intelligenceText(
-                              context,
-                              'Report answer',
-                              'الإبلاغ عن الإجابة',
-                            ),
+                          icon: Icon(
+                            reported ? Icons.flag_rounded : Icons.flag_outlined,
+                            size: 18,
                           ),
                         ),
                     ],
@@ -254,120 +266,6 @@ TextDirection _messageTextDirection(String text) {
     if (strongLtr) return TextDirection.ltr;
   }
   return TextDirection.ltr;
-}
-
-Future<void> _showMessageDetails(
-  BuildContext context,
-  IntelligenceMessage message,
-) async {
-  await showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    showDragHandle: true,
-    builder: (sheetContext) {
-      final scheme = Theme.of(sheetContext).colorScheme;
-      final confidence = message.confidence == null
-          ? null
-          : '${(message.confidence!.clamp(0, 1) * 100).round()}%';
-      return Center(
-        heightFactor: 1,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
-          child: ListView(
-            shrinkWrap: true,
-            padding: const EdgeInsets.fromLTRB(24, 4, 24, 28),
-            children: [
-              Text(
-                intelligenceText(
-                  sheetContext,
-                  'Why BIL answered this way',
-                  'لماذا أجاب BIL بهذه الطريقة',
-                ),
-                style: Theme.of(
-                  sheetContext,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-              ),
-              if (message.reason?.trim().isNotEmpty == true) ...[
-                const SizedBox(height: 18),
-                Text(
-                  intelligenceText(sheetContext, 'Reasoning', 'السبب'),
-                  style: Theme.of(sheetContext).textTheme.labelLarge?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(message.reason!),
-              ],
-              if (message.evidence.isNotEmpty) ...[
-                const SizedBox(height: 18),
-                Text(
-                  intelligenceText(
-                    sheetContext,
-                    'Evidence used',
-                    'الأدلة المستخدمة',
-                  ),
-                  style: Theme.of(sheetContext).textTheme.labelLarge?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: message.evidence
-                      .take(6)
-                      .map(
-                        (value) => Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 11,
-                            vertical: 7,
-                          ),
-                          decoration: BoxDecoration(
-                            color: scheme.surfaceContainerHigh,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            value,
-                            style: Theme.of(sheetContext).textTheme.labelMedium,
-                          ),
-                        ),
-                      )
-                      .toList(growable: false),
-                ),
-              ],
-              if (message.missingData.isNotEmpty) ...[
-                const SizedBox(height: 18),
-                Text(
-                  intelligenceText(
-                    sheetContext,
-                    'Still missing',
-                    'ما يزال ناقصاً',
-                  ),
-                  style: Theme.of(sheetContext).textTheme.labelLarge?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(message.missingData.join(' · ')),
-              ],
-              if (confidence != null) ...[
-                const SizedBox(height: 18),
-                Text(
-                  intelligenceText(
-                    sheetContext,
-                    'Answer confidence: {confidence}',
-                    'ثقة الإجابة: {confidence}',
-                  ).replaceAll('{confidence}', confidence),
-                  style: Theme.of(sheetContext).textTheme.labelLarge,
-                ),
-              ],
-            ],
-          ),
-        ),
-      );
-    },
-  );
 }
 
 class _QuickFeedbackBar extends StatelessWidget {
@@ -505,7 +403,17 @@ class _ActionSheet extends StatelessWidget {
           const SizedBox(height: 8),
           for (final action in actions)
             ListTile(
-              leading: Icon(_iconForAction(action.type)),
+              key: Key(
+                'ai-coach-action-sheet-${action.type.name}-${action.id}',
+              ),
+              leading: switch (_semanticKindForAction(action.type)) {
+                final kind? => BilSemanticIconBadge(
+                  kind: kind,
+                  iconOverride: _iconForAction(action.type),
+                  appleIconOverride: _iconForAction(action.type),
+                ),
+                null => Icon(_iconForAction(action.type)),
+              },
               title: Text(action.label),
               subtitle: Text(
                 action.requiresConfirmation
@@ -554,3 +462,31 @@ IconData _iconForAction(IntelligenceActionType type) => switch (type) {
     BilSemanticIcons.deleteAccount,
   IntelligenceActionType.saveMemory => Icons.bookmark_add_outlined,
 };
+
+BilSemanticIconKind? _semanticKindForAction(IntelligenceActionType type) =>
+    switch (type) {
+      IntelligenceActionType.readNutritionRemaining ||
+      IntelligenceActionType.openPlan ||
+      IntelligenceActionType.quickAddMacros => BilSemanticIconKind.nutrition,
+      IntelligenceActionType.readProfileIdentity => BilSemanticIconKind.profile,
+      IntelligenceActionType.openDailyLog ||
+      IntelligenceActionType.updateMealItem ||
+      IntelligenceActionType.moveMealItem ||
+      IntelligenceActionType.saveMemory => BilSemanticIconKind.notes,
+      IntelligenceActionType.addWater => BilSemanticIconKind.water,
+      IntelligenceActionType.addWeight => BilSemanticIconKind.weight,
+      IntelligenceActionType.reviewMeal => BilSemanticIconKind.meal,
+      IntelligenceActionType.reviewWorkout => BilSemanticIconKind.exercise,
+      IntelligenceActionType.openReport => BilSemanticIconKind.report,
+      IntelligenceActionType.setThemeMode => BilSemanticIconKind.appearance,
+      IntelligenceActionType.setLanguage => BilSemanticIconKind.language,
+      IntelligenceActionType.updateGoal => BilSemanticIconKind.goals,
+      IntelligenceActionType.saveMeasurements =>
+        BilSemanticIconKind.measurements,
+      IntelligenceActionType.openAiCoachSubscription ||
+      IntelligenceActionType.buyAiBoost ||
+      IntelligenceActionType.manageSubscription ||
+      IntelligenceActionType.navigate => BilSemanticIconKind.aiCoach,
+      IntelligenceActionType.deleteMealItem ||
+      IntelligenceActionType.requestAccountDeletion => null,
+    };

@@ -23,7 +23,7 @@ final class CommunityPostCloudStore {
     final rows = await _client
         .from('bil_community_posts')
         .select(
-          'id,author_id,body,created_at,media_object_path,media_mime_type,media_bytes,media_width,media_height',
+          'id,author_id,body,created_at,media_object_path,media_mime_type,media_bytes,media_width,media_height,moderation_status,reviewed_at',
         )
         .order('created_at', ascending: false)
         .limit(limit.clamp(1, 100));
@@ -72,6 +72,36 @@ final class CommunityPostCloudStore {
         .toList(growable: false);
   }
 
+  Future<List<CommunityPost>> loadModerationQueue({int limit = 100}) async {
+    final response = await _client.rpc(
+      'bil_list_pending_community_posts',
+      params: {'p_limit': limit.clamp(1, 200)},
+    );
+    if (response is! List) {
+      throw const FormatException('Invalid community moderation queue');
+    }
+    final rows = response
+        .whereType<Map>()
+        .map(Map<String, dynamic>.from)
+        .where(_validPostRow)
+        .toList(growable: false);
+    final mediaPaths = rows
+        .map((row) => row['media_object_path'])
+        .whereType<String>()
+        .toSet()
+        .toList(growable: false);
+    final signedUrls = await _signedUrls(mediaPaths);
+    return rows
+        .map((row) {
+          final path = row['media_object_path'] as String?;
+          return CommunityPost.fromJson({
+            ...row,
+            'media_url': path == null ? null : signedUrls[path],
+          });
+        })
+        .toList(growable: false);
+  }
+
   Future<Map<String, String>> _signedUrls(List<String> paths) async {
     if (paths.isEmpty) return const {};
     final urls = <String, String>{};
@@ -99,6 +129,7 @@ final class CommunityPostCloudStore {
       'author_id': _user.id,
       'body': text,
       'visibility': 'community',
+      'moderation_status': 'pending',
     });
   }
 
@@ -129,6 +160,7 @@ final class CommunityPostCloudStore {
         'author_id': _user.id,
         'body': text,
         'visibility': 'community',
+        'moderation_status': 'pending',
         'media_url': null,
         'media_object_path': path,
         'media_mime_type': validated.mimeType,
@@ -197,6 +229,7 @@ final class CommunityPostCloudStore {
     final authorId = row['author_id'];
     final body = row['body'];
     final createdAt = row['created_at'];
+    final moderationStatus = row['moderation_status'];
     if (id is! String ||
         !_uuid.hasMatch(id) ||
         authorId is! String ||
@@ -206,7 +239,9 @@ final class CommunityPostCloudStore {
         body.length > 1200 ||
         _unsafeText.hasMatch(body) ||
         createdAt is! String ||
-        DateTime.tryParse(createdAt) == null) {
+        DateTime.tryParse(createdAt) == null ||
+        moderationStatus is! String ||
+        !const {'pending', 'approved', 'rejected'}.contains(moderationStatus)) {
       return false;
     }
     final path = row['media_object_path'];

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:video_player/video_player.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/feature_strings.dart';
 import '../domain/wellness_content_pack.dart';
 import '../services/wellness_content_pack_manager.dart';
+import '../services/wellness_media_cache.dart';
+import 'bil_workout_routines_page.dart';
 
 class ProfessionalContentLibraryPage extends StatefulWidget {
   const ProfessionalContentLibraryPage({
@@ -133,7 +134,7 @@ class _ProfessionalContentLibraryPageState
                       item: item,
                       onOpen: () => Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (_) => item.videoUrl == null
+                          builder: (_) => item.videoMedia == null
                               ? _ContentDetailsPage(item: item)
                               : _VideoLessonPage(item: item),
                         ),
@@ -315,7 +316,7 @@ class _ContentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = item.imageUrl;
-    final videoUrl = item.videoUrl;
+    final videoUrl = item.videoMedia?.url;
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -412,63 +413,38 @@ class _VideoLessonPage extends StatefulWidget {
 }
 
 class _VideoLessonPageState extends State<_VideoLessonPage> {
-  late final VideoPlayerController _controller;
-  late final Future<void> _ready;
-  @override
-  void initState() {
-    super.initState();
-    _controller = VideoPlayerController.networkUrl(widget.item.videoUrl!);
-    _ready = _controller.initialize();
-  }
+  final _cache = WellnessMediaCache();
 
   @override
   void dispose() {
-    _controller.dispose();
+    _cache.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: Text(widget.item.title)),
-    body: FutureBuilder<void>(
-      future: _ready,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              _localized(
-                context,
-                'الفيديو غير متاح',
-                'Video unavailable',
-                'Vidéo indisponible',
-                'Vídeo no disponible',
-                'Video kullanılamıyor',
-              ),
+    body: ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        if (widget.item.videoMedia case final media?)
+          BilVerifiedWorkoutVideo(
+            asset: media,
+            poster: widget.item.imageMedia,
+            mediaCache: _cache,
+            online: true,
+            unavailableText: _localized(
+              context,
+              'الفيديو غير متاح',
+              'Video unavailable',
+              'Vidéo indisponible',
+              'Vídeo no disponible',
+              'Video kullanılamıyor',
             ),
-          );
-        }
-        return Center(
-          child: AspectRatio(
-            aspectRatio: _controller.value.aspectRatio,
-            child: VideoPlayer(_controller),
           ),
-        );
-      },
-    ),
-    floatingActionButton: FloatingActionButton(
-      onPressed: () => setState(
-        () => _controller.value.isPlaying
-            ? _controller.pause()
-            : _controller.play(),
-      ),
-      child: Icon(
-        _controller.value.isPlaying
-            ? Icons.pause_rounded
-            : Icons.play_arrow_rounded,
-      ),
+        const SizedBox(height: 16),
+        Text(widget.item.description),
+      ],
     ),
   );
 }

@@ -2,7 +2,7 @@ part of 'daily_log_page.dart';
 
 extension _DailyLogCaptureActions on _DailyLogPageState {
   Future<bool> _ensureCameraPermission() async {
-    const policy = BilRuntimePermissionPolicy();
+    final policy = ref.read(dailyLogRuntimePermissionPolicyProvider);
     final current = await policy.status(BilRuntimeCapability.camera);
     if (current == BilRuntimePermissionState.granted) return true;
     if (!mounted) return false;
@@ -10,7 +10,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
         current == BilRuntimePermissionState.restricted) {
       final open = await showDialog<bool>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
+        builder: (dialogContext) => AlertDialog.adaptive(
           title: Text(context.strings.text('Camera access is off')),
           content: Text(
             context.strings.text(
@@ -34,7 +34,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
     }
     final continueRequest = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => AlertDialog.adaptive(
         title: Text(context.strings.text('Allow camera for this action?')),
         content: Text(
           context.strings.text(
@@ -89,6 +89,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
         context,
         barcode: outcome.normalizedBarcode,
         candidates: outcome.foods,
+        ingredients: outcome.ingredients,
       );
       if (reviewed == null || !mounted) return;
       _updateState(() => selectedFood = reviewed);
@@ -108,11 +109,15 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
             ),
           ),
           content: Text(
-            productIdentityExplanation(
-              outcome.product!,
-              arabic: _arabic,
-              languageCode: Localizations.localeOf(context).languageCode,
-            ),
+            [
+              productIdentityExplanation(
+                outcome.product!,
+                arabic: _arabic,
+                languageCode: Localizations.localeOf(context).languageCode,
+              ),
+              if (outcome.ingredients?.trim().isNotEmpty == true)
+                '${_tr('Ingredients', 'المكونات')}: ${outcome.ingredients!.trim()}',
+            ].join('\n\n'),
           ),
           actions: [
             TextButton(
@@ -174,17 +179,19 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
   Future<void> _scanBarcode() async {
     if (!await requestPremiumBarcodeAccess(context, ref) || !mounted) return;
     if (!await _ensureCameraPermission() || !mounted) return;
-    final barcode = await Navigator.of(context).push<String>(
-      MaterialPageRoute<String>(builder: (_) => const FoodBarcodeScannerPage()),
+    final barcode = await ref.read(dailyLogBarcodeScannerLauncherProvider)(
+      context,
     );
-    if (barcode != null) await _resolveBarcode(barcode);
+    if (barcode != null && mounted) await _resolveBarcode(barcode);
   }
 
   Future<void> _captureMealVoice() async {
     final service = MealVoiceInputService(SpeechToText());
     final result = await service.capture(
       context: context,
-      localeId: Localizations.localeOf(context).languageCode,
+      // Preserve script/region variants so Portuguese and Chinese select the
+      // intended on-device recognizer instead of collapsing to pt/zh.
+      localeId: BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
       arabic: _arabic,
     );
     if (!mounted || result == null || result.foodQuery.isEmpty) return;
@@ -205,7 +212,7 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
     _updateState(() => selectedFood = foods.first);
   }
 
-  Future<void> _analyzeMealImage() async {
+  Future<void> _analyzeMealImage({bool recoveredOnly = false}) async {
     if (mealImageBusy) return;
     _updateState(() => mealImageBusy = true);
     try {
@@ -244,44 +251,73 @@ extension _DailyLogCaptureActions on _DailyLogPageState {
         );
         return;
       }
-      final imageSource = await showModalBottomSheet<ImageSource>(
-        context: context,
-        showDragHandle: true,
-        builder: (sheetContext) => SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_camera_rounded),
-                title: Text(visionCopy.text('take')),
-                onTap: () => Navigator.pop(sheetContext, ImageSource.camera),
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library_rounded),
-                title: Text(visionCopy.text('choose')),
-                onTap: () => Navigator.pop(sheetContext, ImageSource.gallery),
-              ),
-              ListTile(
-                leading: const Icon(Icons.close_rounded),
-                title: Text(visionCopy.text('cancel')),
-                onTap: () => Navigator.pop(sheetContext),
-              ),
-            ],
-          ),
-        ),
-      );
-      if (imageSource == null || !mounted) return;
-      if (imageSource == ImageSource.camera &&
-          (!await _ensureCameraPermission() || !mounted)) {
-        return;
-      }
       XFile? image;
       try {
-        image = await ImagePicker().pickImage(
-          source: imageSource,
-          imageQuality: 88,
-          maxWidth: 1800,
-        );
+        if (recoveredOnly) {
+          // Startup already verified the owner and paid Vision access. Take
+          // only the Android result; a stale one-shot route must never open a
+          // new picker after the file has been consumed or rejected.
+          image = await BilRecoverableImagePicker.instance.takeRecoveredImage(
+            BilImagePickerPurpose.mealPhoto,
+          );
+        } else {
+          final imageSource = await showModalBottomSheet<ImageSource>(
+            context: context,
+            showDragHandle: true,
+            builder: (sheetContext) => SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ListTile(
+                    leading: const BilSemanticIconBadge(
+                      kind: BilSemanticIconKind.mealPhoto,
+                      iconOverride: Icons.photo_camera_rounded,
+                      appleIconOverride: Icons.photo_camera_rounded,
+                    ),
+                    title: Text(visionCopy.text('take')),
+                    onTap: () =>
+                        Navigator.pop(sheetContext, ImageSource.camera),
+                  ),
+                  ListTile(
+                    leading: const BilSemanticIconBadge(
+                      kind: BilSemanticIconKind.mealPhoto,
+                      iconOverride: Icons.photo_library_rounded,
+                      appleIconOverride: Icons.photo_library_rounded,
+                    ),
+                    title: Text(visionCopy.text('choose')),
+                    onTap: () =>
+                        Navigator.pop(sheetContext, ImageSource.gallery),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.close_rounded),
+                    title: Text(visionCopy.text('cancel')),
+                    onTap: () => Navigator.pop(sheetContext),
+                  ),
+                ],
+              ),
+            ),
+          );
+          if (imageSource == null || !mounted) return;
+          if (imageSource == ImageSource.camera &&
+              (!await _ensureCameraPermission() || !mounted)) {
+            return;
+          }
+          image = imageSource == ImageSource.camera
+              ? await Navigator.of(context).push<XFile>(
+                  MaterialPageRoute<XFile>(
+                    builder: (_) => BilCameraCapturePage(
+                      title: visionCopy.text('take'),
+                      captureLabel: visionCopy.text('take'),
+                    ),
+                  ),
+                )
+              : await BilRecoverableImagePicker.instance.pickImage(
+                  purpose: BilImagePickerPurpose.mealPhoto,
+                  source: imageSource,
+                  imageQuality: 88,
+                  maxWidth: 1800,
+                );
+        }
       } catch (_) {
         if (!mounted) return;
         _message(visionCopy.text('camera_failed'));

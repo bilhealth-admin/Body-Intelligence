@@ -26,9 +26,8 @@ void main() {
       final canonicalTargets = entry.regionalVariants.isEmpty
           ? <String>{entry.tag}
           : entry.regionalVariants.toSet();
-      final isReady = canonicalTargets.every(
-        BilLocalePolicy.productionTags.contains,
-      ) ||
+      final isReady =
+          canonicalTargets.every(BilLocalePolicy.productionTags.contains) ||
           (relatedDrafts.isNotEmpty &&
               relatedDrafts.every((draft) => draft.eligibleForProduction));
       (isReady ? ready : hidden).add(entry.tag);

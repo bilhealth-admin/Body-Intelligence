@@ -59,11 +59,28 @@ class _ConnectedSourcesView extends StatelessWidget {
       ),
     ),
     data: (value) {
-      final connected =
+      final active =
           value.status == ConnectedHealthStatus.ready ||
           value.status == ConnectedHealthStatus.syncing ||
-          value.status == ConnectedHealthStatus.synchronized ||
-          value.status == ConnectedHealthStatus.degraded;
+          value.status == ConnectedHealthStatus.synchronized;
+      final paused =
+          value.status == ConnectedHealthStatus.degraded &&
+          (value.deviceVerified ||
+              value.lastSyncAt != null ||
+              value.signals.isNotEmpty);
+      final listed = active || paused;
+      final statusColor = active
+          ? const Color(0xFF178A4B)
+          : paused
+          ? const Color(0xFFE38B17)
+          : Theme.of(context).colorScheme.outline;
+      final sourceName = value.platformSource?.trim().isNotEmpty == true
+          ? value.platformSource!
+          : !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS
+          ? 'Apple Health'
+          : !kIsWeb && defaultTargetPlatform == TargetPlatform.android
+          ? 'Health Connect'
+          : connectedHealthText(context, 'Health source', 'مصدر صحي');
       return ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -72,25 +89,25 @@ class _ConnectedSourcesView extends StatelessWidget {
               context,
               'Connected ({count})',
               'المتصلة ({count})',
-            ).replaceFirst('{count}', connected ? '1' : '0'),
+            ).replaceFirst('{count}', listed ? '1' : '0'),
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
           ),
           const SizedBox(height: 16),
-          if (connected)
+          if (listed)
             ListTile(
-              leading: const CircleAvatar(
-                child: Icon(Icons.health_and_safety_outlined),
-              ),
-              title: Text(value.platformSource ?? 'Health Connect'),
-              subtitle: Text(
-                connectedHealthText(
-                  context,
-                  'Connected and ready to synchronize',
-                  'متصل وجاهز للمزامنة',
+              leading: CircleAvatar(
+                backgroundColor: statusColor.withValues(alpha: .12),
+                child: Icon(
+                  paused
+                      ? Icons.pause_circle_outline_rounded
+                      : Icons.health_and_safety_outlined,
+                  color: statusColor,
                 ),
               ),
+              title: Text(sourceName),
+              subtitle: Text(connectedHealthStatusText(context, value.status)),
             )
           else
             PremiumSurface(
@@ -128,9 +145,7 @@ class _ConnectedSourcesView extends StatelessWidget {
 }
 
 class _CompatibilitySection extends StatelessWidget {
-  const _CompatibilitySection({required this.languageCode});
-
-  final String languageCode;
+  const _CompatibilitySection();
 
   @override
   Widget build(BuildContext context) {
@@ -146,15 +161,30 @@ class _CompatibilitySection extends StatelessWidget {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: PremiumDesignTokens.spaceSm),
-          for (final entry in BilDeviceCompatibilityMatrix.entries)
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.verified_outlined),
-              title: Text(_consumerName(context, entry.id)),
-              subtitle: Text(
-                '${entry.platforms.join(' / ')} • ${entry.minimumVersion}',
-              ),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final entry
+                  in BilDeviceCompatibilityMatrix.forTargetPlatform(
+                    defaultTargetPlatform,
+                    isWeb: kIsWeb,
+                  ))
+                Chip(
+                  avatar: const Icon(Icons.check_circle_outline, size: 18),
+                  label: Text(_consumerName(context, entry.id)),
+                ),
+            ],
+          ),
+          const SizedBox(height: PremiumDesignTokens.spaceSm),
+          TextButton.icon(
+            key: const Key('health-device-capabilities-link'),
+            onPressed: () => context.push('/connected-health/capabilities'),
+            icon: const Icon(Icons.fact_check_outlined),
+            label: Text(
+              tr('What each connection reads', 'ما الذي يقرأه كل اتصال'),
             ),
+          ),
         ],
       ),
     );
@@ -192,7 +222,7 @@ class _FitnessDeviceSection extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            tr('Compatible fitness devices', 'أجهزة اللياقة المتوافقة'),
+            tr('Bluetooth fitness devices', 'أجهزة اللياقة عبر البلوتوث'),
             style: Theme.of(
               context,
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
@@ -200,20 +230,22 @@ class _FitnessDeviceSection extends ConsumerWidget {
           const SizedBox(height: PremiumDesignTokens.spaceSm),
           Text(
             tr(
-              'Connect verified Bluetooth measurements',
-              'اربط قياسات البلوتوث الموثوقة',
+              'Supported: scales, body-composition monitors, and heart-rate monitors.',
+              'المدعوم: موازين الوزن وأجهزة تركيب الجسم وأجهزة نبض القلب.',
             ),
             style: Theme.of(
               context,
             ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
-          const SizedBox(height: PremiumDesignTokens.spaceXs),
-          Text(
-            tr(
-              'Weight, body composition, and heart rate from compatible fitness devices.',
-              'الوزن وتركيب الجسم ومعدل ضربات القلب من أجهزة اللياقة المتوافقة.',
+          if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) ...[
+            const SizedBox(height: PremiumDesignTokens.spaceXs),
+            Text(
+              tr(
+                'Apple Watch data comes through Apple Health. Do not pair Apple Watch here.',
+                'تصل بيانات Apple Watch عبر Apple Health؛ لا تحاول إقران الساعة من هنا.',
+              ),
             ),
-          ),
+          ],
           const SizedBox(height: PremiumDesignTokens.spaceSm),
           _FitnessDeviceStatusText(
             snapshot: snapshot,
@@ -225,7 +257,11 @@ class _FitnessDeviceSection extends ConsumerWidget {
               ListTile(
                 key: Key('fitness-device-${device.id}'),
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.bluetooth_connected_rounded),
+                leading: const BilSemanticIconBadge(
+                  kind: BilSemanticIconKind.devices,
+                  iconOverride: Icons.bluetooth_connected_rounded,
+                  appleIconOverride: Icons.bluetooth_connected_rounded,
+                ),
                 title: Text(device.name),
                 subtitle: Text(
                   device.profiles
@@ -270,14 +306,6 @@ class _FitnessDeviceSection extends ConsumerWidget {
                   ? tr('Requires Android or iPhone', 'يتطلب Android أو iPhone')
                   : tr('Scan for fitness devices', 'البحث عن أجهزة لياقة'),
             ),
-          ),
-          const SizedBox(height: PremiumDesignTokens.spaceXs),
-          Text(
-            tr(
-              'BIL imports only fitness values actually received after permission. Bluetooth scan is the supported pairing path; no QR connection is claimed.',
-              'لا يستورد BIL إلا قيم اللياقة المستلمة فعليًا بعد الإذن. البحث عبر البلوتوث هو مسار الربط المدعوم ولا يدّعي التطبيق وجود ربط QR.',
-            ),
-            style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
       ),

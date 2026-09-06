@@ -67,6 +67,7 @@ final class PartnerCapabilitiesCopy {
     return switch (key) {
       'health-connect' => 'Health Connect',
       'healthkit' => 'Apple Health',
+      'fitness-ble' => text('Bluetooth fitness devices'),
       'garmin' => 'Garmin',
       'fitbit' => 'Fitbit',
       'samsung-health' => 'Samsung Health',

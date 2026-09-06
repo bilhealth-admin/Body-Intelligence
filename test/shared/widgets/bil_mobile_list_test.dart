@@ -78,7 +78,7 @@ void main() {
                         'Email address',
                         'البريد الإلكتروني',
                       ),
-                      value: 'play-review@bilhealth.com',
+                      value: 'profile account value',
                       onTap: () {},
                     ),
                     BilMobileListRow(

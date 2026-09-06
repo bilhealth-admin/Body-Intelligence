@@ -31,7 +31,10 @@ bool liveHealthWatchCanShowMetrics(ConnectedHealthSnapshot snapshot) {
   final hasCurrentSource =
       snapshot.platformSource?.trim().isNotEmpty == true ||
       snapshot.availableSources.any((source) => source.trim().isNotEmpty);
-  return usableStatus && snapshot.deviceVerified && hasCurrentSource;
+  return usableStatus &&
+      snapshot.deviceVerified &&
+      hasCurrentSource &&
+      connectedHealthSnapshotHasWearableEvidence(snapshot);
 }
 
 bool liveHealthWatchSignalIsActual(ConnectedHealthSignalView signal) =>
@@ -70,14 +73,21 @@ class LiveHealthWatch extends ConsumerStatefulWidget {
   ConsumerState<LiveHealthWatch> createState() => _LiveHealthWatchState();
 }
 
-class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch> {
+class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
+    with WidgetsBindingObserver {
   late DateTime _now;
   Timer? _timer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _now = ref.read(liveHealthNowProvider)();
+    _startClock();
+  }
+
+  void _startClock() {
+    _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) {
         setState(() => _now = ref.read(liveHealthNowProvider)());
@@ -86,7 +96,22 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      _timer?.cancel();
+      _timer = null;
+      return;
+    }
+    if (state != AppLifecycleState.resumed || _timer != null) return;
+    setState(() => _now = ref.read(liveHealthNowProvider)());
+    _startClock();
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     super.dispose();
   }
@@ -95,7 +120,9 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch> {
     if (!liveHealthWatchCanShowMetrics(widget.snapshot)) return null;
     ConnectedHealthSignalView? latest;
     for (final signal in widget.snapshot.signals) {
-      if (signal.key != key || !liveHealthWatchSignalIsActual(signal)) {
+      if (signal.key != key ||
+          !liveHealthWatchSignalIsActual(signal) ||
+          !connectedHealthSignalHasWearableProvenance(signal)) {
         continue;
       }
       if (latest == null || signal.observedAt.isAfter(latest.observedAt)) {

@@ -1,6 +1,34 @@
 part of 'runtime_copy_small_features.dart';
 
 const _runtimeCopySmallB = <String, Map<String, String>>{
+  'Private': {
+    'ar': 'خاص',
+    'en': 'Private',
+    'fr': 'Privé',
+    'es': 'Privado',
+    'tr': 'Özel',
+  },
+  'Friends only': {
+    'ar': 'الأصدقاء فقط',
+    'en': 'Friends only',
+    'fr': 'Amis uniquement',
+    'es': 'Solo amigos',
+    'tr': 'Yalnızca arkadaşlar',
+  },
+  'Public': {
+    'ar': 'عام',
+    'en': 'Public',
+    'fr': 'Public',
+    'es': 'Público',
+    'tr': 'Herkese açık',
+  },
+  'Locked with a key': {
+    'ar': 'مقفل بمفتاح',
+    'en': 'Locked with a key',
+    'fr': 'Verrouillé par une clé',
+    'es': 'Bloqueado con clave',
+    'tr': 'Anahtarla kilitli',
+  },
   'Could not load life context. Try again.': {
     'ar': 'تعذر تحميل سياق الحياة. حاول مجددًا.',
     'en': 'Could not load life context. Try again.',

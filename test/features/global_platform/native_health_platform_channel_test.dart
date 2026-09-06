@@ -40,6 +40,7 @@ void main() {
             'deletedIds': <String>['gone'],
             'nextAnchor': 'encoded-anchor',
             'hasMore': false,
+            'changesTokenExpired': true,
           };
         }
         return null;
@@ -55,6 +56,7 @@ void main() {
       expect(page.records.single.sourceId, 'com.apple.Health');
       expect(page.deletedIds, ['gone']);
       expect(page.nextAnchor, 'encoded-anchor');
+      expect(page.changesTokenExpired, isTrue);
       await bridge.enableBackgroundDelivery({'weight'});
       expect(
         calls.map((e) => e.method),

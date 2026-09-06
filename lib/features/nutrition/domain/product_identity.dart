@@ -23,6 +23,7 @@ class ProductIdentity {
     required this.confidence,
     this.arabicName,
     this.brand,
+    this.ingredients,
   });
 
   final String barcode;
@@ -30,6 +31,10 @@ class ProductIdentity {
   final String name;
   final String? arabicName;
   final String? brand;
+
+  /// Provider-supplied ingredient text for display; never used to infer
+  /// nutrition values.
+  final String? ingredients;
   final String source;
   final ProductIdentityConfidence confidence;
 

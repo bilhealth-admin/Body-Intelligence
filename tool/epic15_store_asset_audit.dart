@@ -2,6 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
+
+import 'legal_publication_verification.dart';
+
 Never _fail(String message) => throw StateError(message);
 
 Map<String, Object?> _json(String path) {
@@ -43,6 +47,9 @@ void _expectPng(
 }
 
 int _characters(String value) => value.runes.length;
+
+String _sha256(String path) =>
+    sha256.convert(File(path).readAsBytesSync()).toString();
 
 void main() {
   final metadata = _json('docs/release/BIL_EPIC15_STORE_METADATA.json');
@@ -98,10 +105,18 @@ void main() {
     _fail('Fake or local public URL found in store metadata');
   }
   final legal = metadata['legal_and_support'] as Map<String, Object?>;
-  if (legal['domain'] != 'bilhealth.com' ||
-      legal['support_email'] != 'support@bilhealth.com' ||
-      !'${legal['status']}'.startsWith('OWNER_CONFIRMED_PUBLISHED_')) {
-    _fail('Owner-confirmed legal identity or publication blocker is stale');
+  final legalEvidencePath = legal['publication_verification_evidence'];
+  if (legalEvidencePath is! String || legalEvidencePath.trim().isEmpty) {
+    _fail('Public legal publication verification evidence is not pinned');
+  }
+  final legalEvidence = _json(legalEvidencePath);
+  try {
+    validateLegalPublicationVerification(
+      metadata: metadata,
+      proof: legalEvidence,
+    );
+  } on StateError catch (error) {
+    _fail('$error');
   }
   final releaseSources = [
     'docs/release/BIL_EPIC15_STORE_METADATA.json',
@@ -126,31 +141,18 @@ void main() {
     _fail('Fake or local URL found in release materials');
   }
 
-  _expectPng(
-    'store_assets/graphics/google_play/feature_graphic.png',
-    1024,
-    500,
-    requireOpaque: true,
-  );
   _expectPng('store_assets/graphics/google_play/play_icon_512.png', 512, 512);
   if (File('store_assets/graphics/google_play/play_icon_512.png').lengthSync() >
       1024 * 1024) {
     _fail('Google Play icon exceeds 1 MB');
   }
-  for (final plan in const ['free', 'plus', 'pro']) {
-    _expectPng(
-      'store_assets/graphics/plans/$plan.png',
-      1080,
-      1440,
-      requireOpaque: true,
-    );
+  const canonicalAppIcon = 'assets/branding/bil_app_icon.png';
+  const canonicalAppIconSha256 =
+      'f6a183d2fdfb0a27e44c9eedc368cf6437b9e45ca65c4054da75818b092d0b46';
+  _expectPng(canonicalAppIcon, 1024, 1024);
+  if (_sha256(canonicalAppIcon) != canonicalAppIconSha256) {
+    _fail('Owner-approved canonical app icon hash changed');
   }
-  _expectPng(
-    'store_assets/graphics/brand/bil_horizontal_light.png',
-    1600,
-    900,
-    requireOpaque: true,
-  );
 
   const androidForegrounds = {
     'mdpi': 108,
@@ -177,18 +179,34 @@ void main() {
   if (!adaptive.contains('<foreground') || !adaptive.contains('<monochrome')) {
     _fail('Android adaptive/monochrome launcher wiring is incomplete');
   }
-  _expectPng(
+  const canonicalSplashIdentity = 'assets/branding/bil_splash_identity.png';
+  const canonicalSplashIdentitySha256 =
+      'ec56f3c02556f0f5a9736f65f3eef2be1b961d497715da788529dde6bc237429';
+  const nativeSplashIdentities = [
     'ios/Runner/Assets.xcassets/BILLaunchWordmark.imageset/'
-    'BILLaunchWordmark.png',
-    864,
-    864,
-  );
-  _expectPng(
+        'BILLaunchWordmark.png',
     'android/app/src/main/res/drawable-nodpi/'
-    'bil_splash_identity.png',
-    864,
-    864,
-  );
+        'bil_splash_identity.png',
+  ];
+  _expectPng(canonicalSplashIdentity, 1080, 1080);
+  if (_sha256(canonicalSplashIdentity) != canonicalSplashIdentitySha256) {
+    _fail('Owner-approved canonical splash identity hash changed');
+  }
+  for (final path in nativeSplashIdentities) {
+    _expectPng(path, 1080, 1080);
+    if (_sha256(path) != canonicalSplashIdentitySha256) {
+      _fail('$path is not byte-identical to the canonical splash identity');
+    }
+  }
+  final launchStoryboard = File(
+    'ios/Runner/Base.lproj/LaunchScreen.storyboard',
+  ).readAsStringSync();
+  if (!launchStoryboard.contains('contentMode="scaleAspectFit"') ||
+      !launchStoryboard.contains(
+        '<image name="BILLaunchWordmark" width="1080" height="1080"/>',
+      )) {
+    _fail('iOS launch wordmark must preserve aspect fit at 1080x1080');
+  }
 
   final apple = Directory('store_assets/screenshots/apple')
       .listSync()
@@ -257,7 +275,7 @@ void main() {
     _fail('Asset evidence matrix is missing');
   }
   final evidence = jsonDecode(evidenceJson.readAsStringSync()) as List<Object?>;
-  if (evidence.length < 54) _fail('Asset evidence matrix is incomplete');
+  if (evidence.length < 52) _fail('Asset evidence matrix is incomplete');
   for (final row in evidence.cast<Map<String, Object?>>()) {
     final path = row['path']! as String;
     if (!File(path).existsSync()) {
@@ -286,15 +304,64 @@ void main() {
     }
   }
 
+  final canonicalIdentity =
+      rights['canonical_brand_identity'] as Map<String, Object?>;
+  final approvedIcon = canonicalIdentity['app_icon'] as Map<String, Object?>;
+  final approvedWordmark =
+      canonicalIdentity['full_wordmark'] as Map<String, Object?>;
+  if (approvedIcon['path'] != canonicalAppIcon ||
+      approvedIcon['sha256'] != canonicalAppIconSha256 ||
+      approvedIcon['status'] != 'OWNER_APPROVED_CURRENT') {
+    _fail('Canonical app icon authority is stale');
+  }
+  if (approvedWordmark['path'] != 'lib/shared/widgets/bil_wordmark.dart' ||
+      approvedWordmark['symbol'] != 'BilFullWordmark' ||
+      approvedWordmark['text'] != 'BODY INTELLIGENCE LOG' ||
+      approvedWordmark['trademark'] != '™' ||
+      approvedWordmark['status'] != 'OWNER_APPROVED_CURRENT') {
+    _fail('Canonical full-wordmark authority is stale');
+  }
+  final wordmarkSource = File(
+    approvedWordmark['path']! as String,
+  ).readAsStringSync();
+  if (!wordmarkSource.contains('class BilFullWordmark') ||
+      !wordmarkSource.contains("'BODY INTELLIGENCE LOG'") ||
+      !wordmarkSource.contains("'™'")) {
+    _fail('Canonical full wordmark implementation is missing');
+  }
+
   final generated = rights['generated_for_bil_2026_08_05'] as List<Object?>;
-  final supplied =
-      rights['owner_supplied_brand_archive'] as Map<String, Object?>;
-  if (supplied['sha256'] !=
+  if (generated.isNotEmpty) {
+    _fail('Rejected 2026-08-05 brand derivatives remain approved');
+  }
+  final retired = rights['retired_brand_archive'] as Map<String, Object?>;
+  if (retired['sha256'] !=
       'c8fba5b1cd4c9a0ef31f59cffddde0980cfebc68ade6a90e333f21e3be8730ee') {
-    _fail('Owner-supplied BIL brand archive provenance is not pinned');
+    _fail('Retired BIL brand archive provenance is not pinned');
+  }
+  if (retired['status'] != 'OWNER_REJECTED_DO_NOT_SHIP_2026_09_06') {
+    _fail('Retired BIL brand archive is not marked owner-rejected');
+  }
+  if (!File('store_assets/source/BIL-Brand-Assets-v1/README.md').existsSync()) {
+    _fail('Rejected-brand tombstone is missing');
   }
   for (final path in const [
-    'store_assets/source/BIL-Brand-Assets-v1/README.md',
+    'assets/branding/bil_icon_master.png',
+    'assets/branding/bil_splash_wordmark.png',
+    'assets/branding/bil_wordmark_registered_blue.svg',
+    'assets/branding/bil_wordmark_registered_white.svg',
+    'assets/images/branding/bil_logo_registered_v8.webp',
+    'assets/images/branding/bil_logo_silver_v10.webp',
+    'assets/images/v9/v9_logo_registered.webp',
+    'artifacts/brand/bil_launch_badge.svg',
+    'artifacts/brand/bil_splash_preview_1080x2400.png',
+    'store_assets/graphics/brand/bil_emblem_master.png',
+    'store_assets/graphics/brand/bil_horizontal_dark.png',
+    'store_assets/graphics/brand/bil_horizontal_light.png',
+    'store_assets/graphics/google_play/feature_graphic.png',
+    'store_assets/graphics/plans/free.png',
+    'store_assets/graphics/plans/plus.png',
+    'store_assets/graphics/plans/pro.png',
     'store_assets/source/BIL-Brand-Assets-v1/01-bil-app-icon.png',
     'store_assets/source/BIL-Brand-Assets-v1/02-bil-splash.png',
     'store_assets/source/BIL-Brand-Assets-v1/03-bil-horizontal-logo.png',
@@ -302,13 +369,8 @@ void main() {
     'store_assets/source/BIL-Brand-Assets-v1/05-bil-store-feature-graphic.png',
     'store_assets/source/BIL-Brand-Assets-v1/06-bil-free-plus-pro.png',
   ]) {
-    if (!File(path).existsSync()) {
-      _fail('Owner-approved brand source is missing: $path');
-    }
-  }
-  for (final item in generated.cast<Map<String, Object?>>()) {
-    if (!File(item['path']! as String).existsSync()) {
-      _fail('Rights record points to missing generated asset: ${item['path']}');
+    if (FileSystemEntity.typeSync(path) != FileSystemEntityType.notFound) {
+      _fail('Owner-rejected historical branding remains in tree: $path');
     }
   }
   final screenshotTest = File(
@@ -407,5 +469,8 @@ void main() {
   stdout.writeln('APPLE_SCREENSHOTS=${apple.length}');
   stdout.writeln('GOOGLE_SCREENSHOTS=${google.length}');
   stdout.writeln('EVIDENCE_ROWS=${evidence.length}');
-  stdout.writeln('PUBLIC_URLS=OWNER_INPUT_REQUIRED_NOT_INVENTED');
+  stdout.writeln(
+    'PUBLIC_URLS=LIVE_HTTP_200_LOCAL_CONTENT_SHA256_MATCH_VERIFIED',
+  );
+  stdout.writeln('LEGAL_APPROVAL=NOT_CLAIMED');
 }

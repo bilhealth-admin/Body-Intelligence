@@ -1,5 +1,16 @@
 part of 'daily_log_page.dart';
 
+extension _DailyLogCopyAccess on _DailyLogPageState {
+  bool get _arabic =>
+      Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
+
+  String _tr(String en, String ar) {
+    final locale = Localizations.localeOf(context).languageCode.toLowerCase();
+    if (locale == 'ar') return ar;
+    return _dailyLogCopy[en]?[locale] ?? context.strings.text(en);
+  }
+}
+
 const _dailyLogCopy = <String, Map<String, String>>{
   'Quick Add macros': {
     'fr': 'Ajout rapide des macros',

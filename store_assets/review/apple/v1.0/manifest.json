@@ -15,7 +15,7 @@
       "localizedPrice": "EGP 129.99",
       "currencyCode": "EGP",
       "storeCountryCode": "EGY",
-      "availabilityPolicy": "EGY/IND/PAK/TUR only"
+      "availabilityPolicy": "EGY/NGA/PAK/TUR only"
     },
     {
       "productId": "bil_premium_annual",
@@ -29,7 +29,7 @@
       "localizedPrice": "EGP 999.99",
       "currencyCode": "EGP",
       "storeCountryCode": "EGY",
-      "availabilityPolicy": "EGY/IND/PAK/TUR only",
+      "availabilityPolicy": "EGY/NGA/PAK/TUR only",
       "derivedSavingsBadge": "Save 36%",
       "badgeCalculation": "round((129.99 * 12 - 999.99) / (129.99 * 12) * 100)"
     },

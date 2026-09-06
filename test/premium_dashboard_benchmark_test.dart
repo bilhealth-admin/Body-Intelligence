@@ -9,6 +9,7 @@ import 'visual_closure/visual_evidence_font.dart';
 
 void main() {
   setUpAll(() async {
+    await loadVisualEvidenceFont();
     final font = FontLoader('NotoNaskhArabic')
       ..addFont(rootBundle.load('assets/fonts/NotoNaskhArabic-Bold.ttf'));
     await font.load();
@@ -23,17 +24,31 @@ void main() {
     expect(find.byKey(const Key('dashboard-one-best-action')), findsNothing);
     expect(find.byKey(const Key('dashboard-key-insights-deck')), findsNothing);
     expect(find.byKey(const Key('dashboard-nutrition-context')), findsNothing);
-    expect(find.text('Daily Intelligence'), findsOneWidget);
+    expect(
+      find.byKey(const Key('dashboard-mobile-ai-coach-entry')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('dashboard-reference-calories-card')),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('unsupported recommendation keeps daily facts visible', (
+  testWidgets('legacy recommendation flag cannot replace current sections', (
     tester,
   ) async {
     await tester.pumpWidget(const _Harness(showRecommendation: false));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('dashboard-one-best-action')), findsNothing);
-    expect(find.text('Daily Intelligence'), findsOneWidget);
+    expect(
+      find.byKey(const Key('dashboard-reference-calories-card')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('dashboard-mobile-body-twin-snapshot')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('light unified dashboard retains readable theme contrast', (
@@ -41,7 +56,14 @@ void main() {
   ) async {
     await tester.pumpWidget(const _Harness(light: true));
     await tester.pumpAndSettle();
-    expect(find.byType(_DailyNarrative), findsOneWidget);
+    expect(
+      find.byKey(const Key('dashboard-unified-adaptive-layout')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('dashboard-reference-calories-card')),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
 
@@ -135,7 +157,14 @@ void main() {
         find.byKey(const Key('dashboard-trend-explanation')),
         findsNothing,
       );
-      expect(find.byType(_DailyNarrative), findsOneWidget);
+      expect(
+        find.byKey(const Key('dashboard-unified-adaptive-layout')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('dashboard-reference-calories-card')),
+        findsOneWidget,
+      );
       expect(find.byKey(const Key('dashboard-action-insight')), findsNothing);
       expect(tester.takeException(), isNull);
       semantics.dispose();

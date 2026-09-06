@@ -82,21 +82,21 @@ abstract final class CoachNutritionGoalResolver {
           ? 'saved_percentage_goal'
           : fallbackSources['caloriesKcal'] ?? 'fallback_calculation',
       'proteinG': scheduled != null
-          ? 'scheduled_percentage_goal'
+          ? 'scheduled_gram_goal'
           : gramGoals.protein != null
           ? 'saved_gram_goal'
           : percentages != null
           ? 'saved_percentage_goal'
           : fallbackSources['proteinG'] ?? 'fallback_calculation',
       'carbsG': scheduled != null
-          ? 'scheduled_percentage_goal'
+          ? 'scheduled_gram_goal'
           : gramGoals.carbohydrates != null
           ? 'saved_gram_goal'
           : percentages != null
           ? 'saved_percentage_goal'
           : fallbackSources['carbsG'] ?? 'fallback_calculation',
       'fatG': scheduled != null
-          ? 'scheduled_percentage_goal'
+          ? 'scheduled_gram_goal'
           : gramGoals.fat != null
           ? 'saved_gram_goal'
           : percentages != null
@@ -111,9 +111,12 @@ abstract final class CoachNutritionGoalResolver {
   ) => schedule.mealTargets.map(
     (key, value) => MapEntry(key, <String, double>{
       'caloriesKcal': value.calories,
-      'carbsPercent': value.carbsPercent,
-      'proteinPercent': value.proteinPercent,
-      'fatPercent': value.fatPercent,
+      // Coach receives the same user-facing units as the schedule editor and
+      // meal cards. Percentages remain an internal/legacy persistence detail;
+      // exposing both representations lets a model accidentally mix them.
+      'carbsG': value.carbsGrams,
+      'proteinG': value.proteinGrams,
+      'fatG': value.fatGrams,
     }),
   );
 }

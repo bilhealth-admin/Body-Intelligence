@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "recordDate": "2026-09-06",
+  "scope": "Worktree source hashes for the video/host test recheck; not a whole-tree freeze or signed build manifest.",
+  "proof": {
+    "regression": {
+      "sessionId": 16894,
+      "passed": 74,
+      "failed": 0,
+      "exitCode": 0
+    },
+    "livePublicRange": {
+      "sessionId": 6693,
+      "passed": 1,
+      "failed": 0,
+      "exitCode": 0
+    },
+    "wholeProjectAnalyze": {
+      "sessionId": 2010,
+      "result": "No issues found",
+      "exitCode": 0
+    },
+    "nativeDecoder": "not_exercised",
+    "buildOrUpload": "not_performed"
+  },
+  "files": [
+    {
+      "path": "lib/features/wellness/presentation/bil_workout_fullscreen_video.dart",
+      "sha256": "81eb952f545007bd339ca1c5c554cd077d4280eda5efb60acce064e0f0e20431"
+    },
+    {
+      "path": "lib/features/wellness/presentation/bil_workout_fullscreen_view.dart",
+      "sha256": "97e304e3219a1e3af5e3d8bfdf462fc619da68a749d48cb6643733e194777676"
+    },
+    {
+      "path": "lib/features/wellness/presentation/bil_workout_fullscreen_copy.dart",
+      "sha256": "3744cc93aa1ffd99e1f739070ed7a1900dbccca13e0fc99c4f8646247df821cd"
+    },
+    {
+      "path": "lib/features/wellness/presentation/bil_workout_routine_media.dart",
+      "sha256": "14dd803d290e1a85125ac75f471c57ad8161b12a3edc1fa1e42dd7c03bd824d6"
+    },
+    {
+      "path": "lib/features/wellness/presentation/bil_workout_routines_page.dart",
+      "sha256": "c973f2942bc059a9679e8c5ecb7748620ea3764e7f90fc08634f53cf1796161e"
+    },
+    {
+      "path": "lib/features/wellness/presentation/professional_content_library_page.dart",
+      "sha256": "78b1ecf061c6d2a5a5fbcf74532150035a5e3ef8310073805ba3529d466c6676"
+    },
+    {
+      "path": "lib/features/wellness/services/wellness_video_stream.dart",
+      "sha256": "38762e4c6e2cb21f09ee27373610c7e0ddeaa2b90c5d8e79aa96d881ee55ccb7"
+    },
+    {
+      "path": "lib/features/wellness/services/wellness_video_resume.dart",
+      "sha256": "c9a6524822bf2a67ffb7ea48cd25ced7b8e8ac3b5fd5d6d68570e7fc16a96c21"
+    },
+    {
+      "path": "lib/features/wellness/services/wellness_media_cache.dart",
+      "sha256": "58913616b3c7273e0540e8b91d72abc6ceb0730e71675e794d409a6547f871b0"
+    },
+    {
+      "path": "test/features/wellness/workout_fullscreen_player_test.dart",
+      "sha256": "580a5ab6f41e3bb8f3a9cbd18bb998be0b742cff0a4314af7928c40b6f0c1139"
+    },
+    {
+      "path": "test/features/wellness/workout_video_explicit_media_test.dart",
+      "sha256": "048c8b4c8962ef147e7c9c816f673af024d25ce3f2f41671a04ec59f41352648"
+    },
+    {
+      "path": "test/features/wellness/workout_fullscreen_experience_contract_test.dart",
+      "sha256": "7988995bf8311a686bac64a12b8a71616b0d885dc939dcac767805af6309fa51"
+    },
+    {
+      "path": "test/features/wellness/wellness_video_stream_test.dart",
+      "sha256": "d3d31038af0443812ac287d1961e3a08b2bc180208424461d8e3a4060574a62c"
+    },
+    {
+      "path": "test/features/wellness/wellness_video_stream_live_test.dart",
+      "sha256": "99713ae8d59af7c44dfda9769bcd4f5df0799fc4fe58a32080a9f2bd1a0ecd8e"
+    },
+    {
+      "path": "test/features/wellness/wellness_video_resume_test.dart",
+      "sha256": "c154acfbc135f49f053cca9596aa971d6aa39663e6ae24ef00d296de526bc9e8"
+    },
+    {
+      "path": "test/features/wellness/wellness_media_cache_test.dart",
+      "sha256": "1975acaaecadf6b4db63f790295b5ff1b2c0ffe1de398fba6b5ece7645450ac1"
+    },
+    {
+      "path": "test/features/wellness/support/fake_workout_video_platform.dart",
+      "sha256": "cafe5477e45de97ebedbe484775a1a467da1d588a67713d7c641a99e4c384c7b"
+    },
+    {
+      "path": "test/features/wellness/workout_videos_wall_test.dart",
+      "sha256": "6a4090c7be51ff05c0ea29ae1bba77ddcbc2d6ab20e95bd2a507ab2562d60fbc"
+    },
+    {
+      "path": "test/architecture_source_file_size_guard_test.dart",
+      "sha256": "4523dde46c5c7e926c8ff9ffefe52540ef894081a78b861c03bd1ef7c58746dc"
+    },
+    {
+      "path": "test/release_metadata_test.dart",
+      "sha256": "674a6e336bad81514646f21f2844ec918e0b205efbae4965fa61fb878f3627a0"
+    },
+    {
+      "path": "pubspec.yaml",
+      "sha256": "aceb3c1305fa55fd40d7e40c5cf5bd99d2e0efedcaa33c49d2dcd098ce69e4f5"
+    },
+    {
+      "path": "pubspec.lock",
+      "sha256": "ead65ade0b4b714fb1182e3a9bfd21d424b594e4173eb5639e74b356b7e9f436"
+    }
+  ]
+}

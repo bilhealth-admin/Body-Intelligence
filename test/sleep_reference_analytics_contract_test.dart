@@ -13,7 +13,7 @@ void main() {
       expect(source, contains("? 'N/A'"));
       expect(source, contains("context.push('/connected-health')"));
       expect(source, contains('Review meals alongside sleep'));
-      expect(source, contains("context.push('/daily-log')"));
+      expect(source, contains("context.go('/daily-log')"));
     },
   );
 }

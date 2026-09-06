@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:body_intelligence_log/features/commerce/domain/store_offer_metadata.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_plans_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -55,4 +57,178 @@ void main() {
     expect(routeSource, isNot(contains('glass_store_offer.dart')));
     expect(routeSource, contains('BilDynamicStoreOffers'));
   });
+
+  testWidgets('unavailable price is tappable and reloads the store catalog', (
+    tester,
+  ) async {
+    final catalog = _SequencedCatalog([
+      const [],
+      const [_monthlyOffer],
+    ]);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BilStorePlansPage(
+          catalog: catalog,
+          productIds: const {'premium.monthly'},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(catalog.loadCalls, 1);
+    final retry = find.byKey(
+      const ValueKey('store-price-retry-premiumSubscription'),
+    );
+    expect(retry, findsOneWidget);
+
+    await tester.tap(retry);
+    await tester.pumpAndSettle();
+
+    expect(catalog.loadCalls, 2);
+    expect(find.text('EGP 129.99'), findsWidgets);
+    expect(retry, findsNothing);
+  });
+
+  testWidgets('empty catalog reloads after returning to the foreground', (
+    tester,
+  ) async {
+    final catalog = _SequencedCatalog([
+      const [],
+      const [_monthlyOffer],
+    ]);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BilStorePlansPage(
+          catalog: catalog,
+          productIds: const {'premium.monthly'},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(catalog.loadCalls, 1);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+
+    expect(catalog.loadCalls, 2);
+    expect(find.text('EGP 129.99'), findsWidgets);
+  });
+
+  testWidgets('malformed catalog remains reloadable after app resume', (
+    tester,
+  ) async {
+    const malformed = BilStoreOfferMetadata(
+      productId: 'premium.monthly',
+      kind: BilStoreProductKind.premiumSubscription,
+      localizedTitle: 'Monthly',
+      localizedPrice: '',
+      currencyCode: 'EGP',
+      priceMicros: 129990000,
+      billingPeriodIso8601: 'P1M',
+    );
+    final catalog = _SequencedCatalog([
+      const [malformed],
+      const [_monthlyOffer],
+    ]);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BilStorePlansPage(
+          catalog: catalog,
+          productIds: const {'premium.monthly'},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Price unavailable on this device'), findsNWidgets(2));
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+
+    expect(catalog.loadCalls, 2);
+    expect(find.text('EGP 129.99'), findsWidgets);
+  });
+
+  testWidgets('resume does not duplicate an in-flight store query', (
+    tester,
+  ) async {
+    final catalog = _DeferredCatalog();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BilStorePlansPage(
+          catalog: catalog,
+          productIds: const {'premium.monthly'},
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(catalog.loadCalls, 1);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+
+    expect(catalog.loadCalls, 1);
+    catalog.complete(const [_monthlyOffer]);
+    await tester.pumpAndSettle();
+    expect(find.text('EGP 129.99'), findsWidgets);
+  });
+}
+
+const _monthlyOffer = BilStoreOfferMetadata(
+  productId: 'premium.monthly',
+  kind: BilStoreProductKind.premiumSubscription,
+  localizedTitle: 'Monthly',
+  localizedPrice: 'EGP 129.99',
+  currencyCode: 'EGP',
+  priceMicros: 129990000,
+  billingPeriodIso8601: 'P1M',
+);
+
+final class _SequencedCatalog implements BilStoreCatalogGateway {
+  _SequencedCatalog(this.responses);
+
+  final List<List<BilStoreOfferMetadata>> responses;
+  int loadCalls = 0;
+
+  @override
+  Future<List<BilStoreOfferMetadata>> loadOffers(Set<String> productIds) async {
+    final index = loadCalls < responses.length
+        ? loadCalls
+        : responses.length - 1;
+    loadCalls += 1;
+    return responses[index];
+  }
+
+  @override
+  Future<void> openManageSubscriptions() async {}
+
+  @override
+  Future<void> requestPurchase(BilStoreOfferMetadata offer) async {}
+
+  @override
+  Future<void> restorePurchases() async {}
+}
+
+final class _DeferredCatalog implements BilStoreCatalogGateway {
+  final Completer<List<BilStoreOfferMetadata>> _result = Completer();
+  int loadCalls = 0;
+
+  void complete(List<BilStoreOfferMetadata> offers) => _result.complete(offers);
+
+  @override
+  Future<List<BilStoreOfferMetadata>> loadOffers(Set<String> productIds) {
+    loadCalls += 1;
+    return _result.future;
+  }
+
+  @override
+  Future<void> openManageSubscriptions() async {}
+
+  @override
+  Future<void> requestPurchase(BilStoreOfferMetadata offer) async {}
+
+  @override
+  Future<void> restorePurchases() async {}
 }

@@ -36,10 +36,10 @@ test('catalog split and immutable product metadata match release truth', () => {
   const validation = validateCatalog(catalog);
   assert.equal(validation.valid, true, validation.errors.join('\n'));
   assert.equal(validation.applyReady, false);
-  assert.deepEqual(catalog.split.premiumOnlyIso2, ['EG', 'IN', 'PK', 'TR']);
+  assert.deepEqual(catalog.split.premiumOnlyIso2, ['EG', 'NG', 'PK', 'TR']);
   assert.equal(catalog.split.premiumAiCoachIso2.length, 168);
-  assert.equal(catalog.split.premiumAiCoachIso2.includes('NG'), true);
-  assert.equal(catalog.split.premiumAiCoachIso2.includes('IN'), false);
+  assert.equal(catalog.split.premiumAiCoachIso2.includes('IN'), true);
+  assert.equal(catalog.split.premiumAiCoachIso2.includes('NG'), false);
   assert.equal(catalog.split.allLaunchIso2.length, 172);
   assert.deepEqual(catalog.split.heldIso2, ['BY', 'CN', 'RU']);
 
@@ -114,10 +114,13 @@ test('dry-run proves zero live mutation without store credentials', () => {
   assert.equal(report.trialPolicy.offersCreatedByThisPolicy, false);
 });
 
-test('canonical reference prices and annual campaign copy are exact', () => {
+test('canonical reference prices and annual savings policy are exact', () => {
   const catalog = buildCatalog();
   const byId = Object.fromEntries(catalog.products.map((item) => [item.productId, item]));
-  assert.equal(catalog.canonicalPricing.displayPolicy.annualBadgeText, '30% OFF');
+  assert.equal(
+    catalog.canonicalPricing.displayPolicy.annualSavingsBadgePolicy,
+    'rounded_percent_from_annual_vs_monthly_times_12',
+  );
   assert.equal(catalog.canonicalPricing.displayPolicy.pricesMustBeStoreDerived, true);
   assert.equal(catalog.canonicalPricing.displayPolicy.hardcodedFlutterPricesAllowed, false);
   assert.equal(byId.bil_premium.appleReferencePrice.businessTargetAmount, 2.5);
@@ -134,5 +137,5 @@ test('canonical reference prices and annual campaign copy are exact', () => {
 });
 
 test('territory parser rejects incomplete SQL input', () => {
-  assert.throws(() => extractTerritoryMap("array['EG','IN','PK','TR']::text[]"));
+  assert.throws(() => extractTerritoryMap("array['EG','NG','PK','TR']::text[]"));
 });

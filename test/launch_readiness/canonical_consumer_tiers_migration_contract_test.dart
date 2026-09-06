@@ -47,18 +47,29 @@ void main() {
     expect(sql, contains('and active = true'));
   });
 
-  test('canonical subscriptions retain the authoritative Meal Vision quota', () {
-    expect(sql, contains('bil_vision_quota_config_plan_id_check'));
-    expect(
-      sql,
-      contains("('free', 'premium', 'premium_ai_coach', 'legacy_plus')"),
-    );
-    expect(sql, contains('create or replace function public.bil_reserve_vision_request'));
-    expect(sql, contains('create or replace function public.bil_get_vision_usage'));
-    expect(
-      sql,
-      contains("s.plan_id in ('premium', 'premium_ai_coach', 'legacy_plus')"),
-    );
-    expect(sql, isNot(contains("s.plan_id in ('pro','plus')")));
-  });
+  test(
+    'canonical subscriptions retain the authoritative Meal Vision quota',
+    () {
+      expect(sql, contains('bil_vision_quota_config_plan_id_check'));
+      expect(
+        sql,
+        contains("('free', 'premium', 'premium_ai_coach', 'legacy_plus')"),
+      );
+      expect(
+        sql,
+        contains(
+          'create or replace function public.bil_reserve_vision_request',
+        ),
+      );
+      expect(
+        sql,
+        contains('create or replace function public.bil_get_vision_usage'),
+      );
+      expect(
+        sql,
+        contains("s.plan_id in ('premium', 'premium_ai_coach', 'legacy_plus')"),
+      );
+      expect(sql, isNot(contains("s.plan_id in ('pro','plus')")));
+    },
+  );
 }

@@ -82,9 +82,7 @@ void main() {
     await database.close();
   });
 
-  testWidgets('failed clear keeps empty draft and stored goal', (
-    tester,
-  ) async {
+  testWidgets('failed clear keeps empty draft and stored goal', (tester) async {
     final database = AppDatabase.forTesting(NativeDatabase.memory());
     await PreferencesRepository(database).set('goal.calories', '1900');
     final repository = _FailingNutritionPreferences(database);
@@ -98,7 +96,10 @@ void main() {
 
     expect(find.byType(AlertDialog), findsOneWidget);
     expect(find.text('Could not save changes.'), findsOneWidget);
-    expect(tester.widget<TextField>(find.byType(TextField)).controller?.text, '');
+    expect(
+      tester.widget<TextField>(find.byType(TextField)).controller?.text,
+      '',
+    );
     expect(await repository.get('goal.calories'), '1900');
 
     await tester.pumpWidget(const SizedBox.shrink());
@@ -111,7 +112,7 @@ Future<void> _pumpGoals(
   WidgetTester tester,
   AppDatabase database,
   PreferencesRepository repository,
-  ) async {
+) async {
   // Keep setup deterministic: the page owns several independent preference
   // reads, so advance exactly one frame and one async completion window.
   await tester.pumpWidget(
@@ -137,6 +138,19 @@ Future<void> _pumpGoals(
 
 final class _FailingNutritionPreferences extends PreferencesRepository {
   _FailingNutritionPreferences(super.database);
+
+  @override
+  Future<void> setMany(Map<String, String> values) {
+    throw StateError('Injected atomic write failure');
+  }
+
+  @override
+  Future<void> mutate({
+    Map<String, String> set = const {},
+    Iterable<String> remove = const [],
+  }) {
+    throw StateError('Injected atomic mutation failure');
+  }
 
   @override
   Future<void> set(String key, String value) {

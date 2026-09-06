@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
+import '../../../app/localization/runtime_copy_community_moderation.dart';
 import '../../../app/localization/runtime_copy_extended.dart';
 import 'community_media_locale_copy.dart';
 import 'community_safety_locale_copy.dart';
@@ -19,7 +20,8 @@ String communityTextForLanguage(String languageCode, String en, String ar) {
   if (code == 'ar') return ar;
   if (code == 'en') return en;
   final baseLanguage = code.split('-').first;
-  return communityMediaText(canonical, en) ??
+  return CommunityModerationRuntimeCopy.resolve(en, canonical) ??
+      communityMediaText(canonical, en) ??
       _communityCopy[baseLanguage]?[en] ??
       communitySafetyText(canonical, en) ??
       ExtendedRuntimeCopy.values[en]?[canonical] ??
@@ -28,6 +30,23 @@ String communityTextForLanguage(String languageCode, String en, String ar) {
 
 const _communityCopy = <String, Map<String, String>>{
   'fr': {
+    'Community moderation': 'Modération de la communauté',
+    'Pending review': 'En attente d’examen',
+    'Approved': 'Approuvée',
+    'Rejected': 'Rejetée',
+    'Posts awaiting human review':
+        'Publications en attente d’une vérification humaine',
+    'No pending posts.': 'Aucune publication en attente.',
+    'Open reports': 'Signalements ouverts',
+    'No open reports.': 'Aucun signalement ouvert.',
+    'The moderation queue is clear.': 'La file de modération est vide.',
+    'Moderator access is required.': 'Un accès de modérateur est requis.',
+    'Approve this post?': 'Approuver cette publication ?',
+    'Reject this post?': 'Rejeter cette publication ?',
+    'Close report': 'Fermer le signalement',
+    'Remove reported content': 'Supprimer le contenu signalé',
+    'Post submitted for human review. Only you can see it until it is approved.':
+        'Publication envoyée à la modération humaine. Vous seul pouvez la voir jusqu’à son approbation.',
     'Confirm review': 'Confirmer l’examen',
     'Cancel': 'Annuler',
     'Submit': 'Envoyer',
@@ -152,6 +171,23 @@ const _communityCopy = <String, Map<String, String>>{
         'Impossible de charger la communauté. Aucune donnée n’a été perdue.',
   },
   'es': {
+    'Community moderation': 'Moderación de la comunidad',
+    'Pending review': 'Pendiente de revisión',
+    'Approved': 'Aprobada',
+    'Rejected': 'Rechazada',
+    'Posts awaiting human review':
+        'Publicaciones pendientes de revisión humana',
+    'No pending posts.': 'No hay publicaciones pendientes.',
+    'Open reports': 'Denuncias abiertas',
+    'No open reports.': 'No hay denuncias abiertas.',
+    'The moderation queue is clear.': 'La cola de moderación está vacía.',
+    'Moderator access is required.': 'Se requiere acceso de moderador.',
+    'Approve this post?': '¿Aprobar esta publicación?',
+    'Reject this post?': '¿Rechazar esta publicación?',
+    'Close report': 'Cerrar denuncia',
+    'Remove reported content': 'Eliminar el contenido denunciado',
+    'Post submitted for human review. Only you can see it until it is approved.':
+        'La publicación se envió a revisión humana. Solo tú puedes verla hasta que se apruebe.',
     'Confirm review': 'Confirmar revisión',
     'Cancel': 'Cancelar',
     'Submit': 'Enviar',
@@ -275,6 +311,22 @@ const _communityCopy = <String, Map<String, String>>{
         'No se pudo cargar la comunidad. No se perdió ningún dato.',
   },
   'tr': {
+    'Community moderation': 'Topluluk moderasyonu',
+    'Pending review': 'İnceleme bekliyor',
+    'Approved': 'Onaylandı',
+    'Rejected': 'Reddedildi',
+    'Posts awaiting human review': 'İnsan incelemesi bekleyen gönderiler',
+    'No pending posts.': 'Bekleyen gönderi yok.',
+    'Open reports': 'Açık bildirimler',
+    'No open reports.': 'Açık bildirim yok.',
+    'The moderation queue is clear.': 'Moderasyon kuyruğu boş.',
+    'Moderator access is required.': 'Moderatör erişimi gerekiyor.',
+    'Approve this post?': 'Bu gönderi onaylansın mı?',
+    'Reject this post?': 'Bu gönderi reddedilsin mi?',
+    'Close report': 'Bildirimi kapat',
+    'Remove reported content': 'Bildirilen içeriği kaldır',
+    'Post submitted for human review. Only you can see it until it is approved.':
+        'Gönderi insan incelemesine gönderildi. Onaylanana kadar yalnızca siz görebilirsiniz.',
     'Confirm review': 'İncelemeyi onayla',
     'Cancel': 'İptal',
     'Submit': 'Gönder',

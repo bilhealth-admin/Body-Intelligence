@@ -1,8 +1,11 @@
 {
   "name": "bilhealth",
   "compatibility_date": "2026-08-22",
+  "main": "./tool/release/bilhealth_site_worker.mjs",
   "assets": {
     "directory": "./public_site",
-    "not_found_handling": "single-page-application"
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/.well-known/*"]
   }
 }

@@ -64,9 +64,11 @@ class BilToolDescriptor {
         if (amount is! int || amount < 1 || amount > 5000) return null;
       case 'log_weight':
         final weight = raw['weightKg'];
-        if (weight is! num || weight < 20 || weight > 500) return null;
+        if (weight is! num || !weight.isFinite || weight < 20 || weight > 500) {
+          return null;
+        }
         final date = raw['date'];
-        if (date != null && DateTime.tryParse(date.toString()) == null) {
+        if (date != null && !_isCanonicalDate(date)) {
           return null;
         }
       case 'open_meals_yesterday':
@@ -85,14 +87,16 @@ class BilToolDescriptor {
         raw = <String, Object?>{...raw, 'locale': locale};
       case 'update_goal':
         final target = raw['targetWeightKg'];
-        if (target is! num || target < 20 || target > 500) return null;
+        if (target is! num || !target.isFinite || target < 20 || target > 500) {
+          return null;
+        }
         final date = raw['targetDate'];
-        if (date != null && DateTime.tryParse(date.toString()) == null) {
+        if (date != null && !_isCanonicalDate(date)) {
           return null;
         }
       case 'save_measurements':
         final date = raw['date'];
-        if (date != null && DateTime.tryParse(date.toString()) == null) {
+        if (date != null && !_isCanonicalDate(date)) {
           return null;
         }
         const keys = {
@@ -105,7 +109,7 @@ class BilToolDescriptor {
         };
         final values = keys.where(raw.containsKey).map((key) => raw[key]);
         if (values.isEmpty ||
-            values.any((v) => v is! num || v < 20 || v > 300)) {
+            values.any((v) => v is! num || !v.isFinite || v < 20 || v > 300)) {
           return null;
         }
       case 'quick_add_macros':
@@ -126,12 +130,22 @@ class BilToolDescriptor {
           final value = raw[key];
           if (value is! num || !value.isFinite || value < 0) return null;
         }
+        if ((raw['calories']! as num) > 10000 ||
+            (raw['protein']! as num) > 2000 ||
+            (raw['carbohydrates']! as num) > 2000 ||
+            (raw['fat']! as num) > 2000) {
+          return null;
+        }
         if (const [
           'calories',
           'protein',
           'carbohydrates',
           'fat',
         ].every((key) => (raw[key] as num) == 0)) {
+          return null;
+        }
+        final date = raw['date'];
+        if (date != null && !_isCanonicalDate(date)) {
           return null;
         }
       case 'update_meal_item':
@@ -170,6 +184,19 @@ class BilToolDescriptor {
         }
     }
     return Map<String, Object?>.unmodifiable(raw);
+  }
+
+  static bool _isCanonicalDate(Object value) {
+    if (value is! String || !RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value)) {
+      return false;
+    }
+    final parsed = DateTime.tryParse(value);
+    if (parsed == null) return false;
+    final canonical =
+        '${parsed.year.toString().padLeft(4, '0')}-'
+        '${parsed.month.toString().padLeft(2, '0')}-'
+        '${parsed.day.toString().padLeft(2, '0')}';
+    return canonical == value;
   }
 }
 

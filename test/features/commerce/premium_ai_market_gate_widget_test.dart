@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
@@ -84,6 +86,259 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
+
+  testWidgets('pending entitlement never flashes an upgrade offer', (
+    tester,
+  ) async {
+    final subscription = Completer<SubscriptionState>();
+    final credits = Completer<bool>();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          verifiedSubscriptionStateProvider.overrideWith(
+            (_) => subscription.future,
+          ),
+          storefrontTargetPlanProvider.overrideWith(
+            (_) async => CommercePlan.premiumAiCoach,
+          ),
+          aiCoachCreditAccessProvider.overrideWith((_) => credits.future),
+        ],
+        child: const MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: PremiumRouteGlassGate(
+            feature: PremiumGateFeature.aiCoach,
+            child: ColoredBox(
+              key: ValueKey('pending-ai-coach'),
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(
+      find.byKey(const ValueKey('premium-route-access-checking')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('premium-route-glass-blur')),
+      findsNothing,
+    );
+    expect(find.text('Continue'), findsNothing);
+    expect(find.text('Get AI Boost'), findsNothing);
+
+    subscription.complete(
+      SubscriptionState(
+        plan: CommercePlan.premiumAiCoach,
+        entitlements: const {},
+        authority: EntitlementAuthority.verifiedServer,
+        currentPeriodEndsAt: DateTime.now().toUtc().add(
+          const Duration(days: 30),
+        ),
+        isPurchasable: true,
+        canRestorePurchases: true,
+      ),
+    );
+    credits.complete(true);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('pending-ai-coach')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('premium-route-access-checking')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey('premium-route-glass-blur')),
+      findsNothing,
+    );
+  });
+
+  testWidgets(
+    'AI credit lookup error shows neutral retry and never a purchase CTA',
+    (tester) async {
+      var creditLookupFails = true;
+      var creditLookupAttempts = 0;
+      var protectedTaps = 0;
+      final activeSubscription = SubscriptionState(
+        plan: CommercePlan.premiumAiCoach,
+        entitlements: const {},
+        authority: EntitlementAuthority.verifiedServer,
+        currentPeriodEndsAt: DateTime.now().toUtc().add(
+          const Duration(days: 30),
+        ),
+        isPurchasable: true,
+        canRestorePurchases: true,
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          retry: (_, _) => null,
+          overrides: [
+            verifiedSubscriptionStateProvider.overrideWith(
+              (_) async => activeSubscription,
+            ),
+            storefrontTargetPlanProvider.overrideWith(
+              (_) async => CommercePlan.premiumAiCoach,
+            ),
+            aiCoachCreditAccessProvider.overrideWith((_) async {
+              creditLookupAttempts += 1;
+              if (creditLookupFails) {
+                throw StateError('usage status unavailable');
+              }
+              return true;
+            }),
+          ],
+          child: MaterialApp(
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: PremiumRouteGlassGate(
+              feature: PremiumGateFeature.aiCoach,
+              child: Scaffold(
+                body: Center(
+                  child: FilledButton(
+                    key: const ValueKey('credit-error-protected-content'),
+                    onPressed: () => protectedTaps += 1,
+                    child: const Text('PROTECTED AI COACH ACTION'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        find.byKey(const ValueKey('premium-route-access-unavailable')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('premium-route-glass-blur')),
+        findsNothing,
+      );
+      expect(find.text('Continue'), findsNothing);
+      expect(find.text('Get AI Boost'), findsNothing);
+      expect(creditLookupAttempts, 1);
+      await tester.tap(
+        find.byKey(const ValueKey('credit-error-protected-content')),
+        warnIfMissed: false,
+      );
+      expect(protectedTaps, 0);
+
+      creditLookupFails = false;
+      await tester.tap(
+        find.byKey(const ValueKey('premium-route-access-retry')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(creditLookupAttempts, 2);
+      expect(
+        find.byKey(const ValueKey('credit-error-protected-content')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('premium-route-access-unavailable')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey('premium-route-glass-blur')),
+        findsNothing,
+      );
+      await tester.tap(
+        find.byKey(const ValueKey('credit-error-protected-content')),
+      );
+      expect(protectedTaps, 1);
+    },
+  );
+
+  testWidgets('subscription lookup error never falls through to purchase UI', (
+    tester,
+  ) async {
+    var subscriptionLookupFails = true;
+    var subscriptionLookupAttempts = 0;
+    final activeSubscription = SubscriptionState(
+      plan: CommercePlan.premiumAiCoach,
+      entitlements: const {},
+      authority: EntitlementAuthority.verifiedServer,
+      currentPeriodEndsAt: DateTime.now().toUtc().add(const Duration(days: 30)),
+      isPurchasable: true,
+      canRestorePurchases: true,
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        retry: (_, _) => null,
+        overrides: [
+          verifiedSubscriptionStateProvider.overrideWith((_) async {
+            subscriptionLookupAttempts += 1;
+            if (subscriptionLookupFails) {
+              throw StateError('subscription unavailable');
+            }
+            return activeSubscription;
+          }),
+          storefrontTargetPlanProvider.overrideWith(
+            (_) async => CommercePlan.premiumAiCoach,
+          ),
+          aiCoachCreditAccessProvider.overrideWith((_) async => true),
+        ],
+        child: const MaterialApp(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: PremiumRouteGlassGate(
+            feature: PremiumGateFeature.aiCoach,
+            child: ColoredBox(
+              key: ValueKey('subscription-error-protected-content'),
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      find.byKey(const ValueKey('premium-route-access-unavailable')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('premium-route-glass-blur')),
+      findsNothing,
+    );
+    expect(find.text('Continue'), findsNothing);
+    expect(find.text('Get AI Boost'), findsNothing);
+    expect(subscriptionLookupAttempts, 1);
+
+    subscriptionLookupFails = false;
+    await tester.tap(find.byKey(const ValueKey('premium-route-access-retry')));
+    await tester.pumpAndSettle();
+
+    expect(subscriptionLookupAttempts, 2);
+    expect(
+      find.byKey(const ValueKey('subscription-error-protected-content')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('premium-route-access-unavailable')),
+      findsNothing,
+    );
+  });
 
   testWidgets('no AI subscription offers AI subscription and AI Boost', (
     tester,

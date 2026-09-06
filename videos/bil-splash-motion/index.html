@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" data-resolution="1080x2400">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=2400">
+    <title>BIL Splash Motion</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --bil-blue: #0877f9;
+        /* H.264 High/yuv420p BT.709 decodes the raw brand RGB 3/2/2 levels
+           darker on Android-class players. This pre-compensated capture value
+           decodes back to the canonical --bil-blue without a handoff flash. */
+        --bil-blue-for-h264: #0a79fc;
+        --bil-white: #ffffff;
+        --bil-light: #bfe5ff;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 1080px;
+        height: 2400px;
+        margin: 0;
+        overflow: hidden;
+        background: var(--bil-blue-for-h264);
+      }
+
+      #stage {
+        position: relative;
+        width: 1080px;
+        height: 2400px;
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      #background {
+        position: absolute;
+        inset: 0;
+        background: var(--bil-blue-for-h264);
+      }
+
+      #identity-scene {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+
+      #traveling-bloom {
+        position: absolute;
+        z-index: 1;
+        left: -275px;
+        top: 1050px;
+        width: 210px;
+        height: 300px;
+        border-radius: 50%;
+        background: radial-gradient(
+          ellipse at center,
+          rgb(191 229 255 / 62%) 0%,
+          rgb(191 229 255 / 20%) 38%,
+          rgb(191 229 255 / 0%) 76%
+        );
+        filter: blur(54px);
+        opacity: 0;
+        will-change: transform, opacity;
+      }
+
+      #lockup {
+        position: absolute;
+        z-index: 2;
+        left: 70px;
+        top: 1134px;
+        width: 940px;
+        height: 132px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform-origin: 50% 50%;
+        will-change: transform;
+      }
+
+      #body-wordmark,
+      #tm-crop {
+        color: var(--bil-white);
+        font-family: "Montserrat", sans-serif;
+        font-weight: 700;
+        text-rendering: geometricPrecision;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      #body-wordmark {
+        z-index: 2;
+        flex: 0 0 auto;
+        font-size: 54px;
+        line-height: 1;
+        letter-spacing: 2.7px;
+        white-space: nowrap;
+      }
+
+      #tm-wrap {
+        position: relative;
+        z-index: 3;
+        flex: 0 0 52px;
+        width: 52px;
+        height: 62px;
+        margin-left: 8px;
+        align-self: center;
+      }
+
+      #tm-halo {
+        position: absolute;
+        z-index: 1;
+        left: -57px;
+        top: -30px;
+        width: 162px;
+        height: 118px;
+        border-radius: 48%;
+        background: radial-gradient(
+          ellipse at center,
+          rgb(191 229 255 / 70%) 0%,
+          rgb(191 229 255 / 0%) 72%
+        );
+        filter: blur(32px);
+        opacity: 0;
+        will-change: transform, opacity;
+      }
+
+      #tm-crop {
+        position: relative;
+        z-index: 3;
+        width: 52px;
+        height: 52px;
+        font-size: 37px;
+        line-height: 1;
+        transform-origin: 50% 60%;
+        will-change: transform;
+      }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-tuu0" id="stage" data-composition-id="bil-splash-motion" data-start="0" data-duration="2" data-fps="30" data-width="1080" data-height="2400">
+      <div data-hf-id="hf-w96y" id="background" aria-hidden="true"></div>
+      <section data-hf-id="hf-roia" id="identity-scene" class="clip" data-start="0" data-duration="2" data-track-index="1" aria-label="BODY INTELLIGENCE LOG trademark">
+        <div data-hf-id="hf-0kp7" id="traveling-bloom" data-layout-ignore="" aria-hidden="true"></div>
+        <div data-hf-id="hf-mlav" id="lockup">
+          <div data-hf-id="hf-z39m" id="body-wordmark" aria-hidden="true">BODY INTELLIGENCE LOG</div>
+          <div data-hf-id="hf-zr1q" id="tm-wrap" aria-hidden="true">
+            <div data-hf-id="hf-uflh" id="tm-halo" data-layout-ignore="" aria-hidden="true"></div>
+            <div data-hf-id="hf-xezo" id="tm-crop" aria-hidden="true">™</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+
+      const tl = gsap.timeline({ paused: true });
+
+      tl.fromTo(
+        "#traveling-bloom",
+        { x: 0, scale: 0.82, opacity: 0 },
+        {
+          x: 780,
+          scale: 1,
+          opacity: 0.14,
+          duration: 0.7,
+          ease: "power1.out",
+        },
+        0.233333,
+      );
+      tl.to(
+        "#traveling-bloom",
+        {
+          x: 1320,
+          scale: 1.04,
+          opacity: 0,
+          duration: 0.633334,
+          ease: "power1.in",
+        },
+        0.933333,
+      );
+
+      tl.fromTo(
+        "#lockup",
+        { scale: 1 },
+        { scale: 1.014, duration: 0.7, ease: "sine.out" },
+        0.233333,
+      );
+      tl.to(
+        "#lockup",
+        { scale: 1, duration: 0.733334, ease: "sine.inOut" },
+        0.933333,
+      );
+
+      tl.fromTo(
+        "#tm-crop",
+        { scale: 1 },
+        { scale: 1.055, duration: 0.2, ease: "power2.out" },
+        1.333333,
+      );
+      tl.to(
+        "#tm-crop",
+        { scale: 1, duration: 0.333334, ease: "sine.out" },
+        1.533333,
+      );
+
+      tl.fromTo(
+        "#tm-halo",
+        { scale: 0.82, opacity: 0 },
+        { scale: 1, opacity: 0.16, duration: 0.2, ease: "power2.out" },
+        1.333333,
+      );
+      tl.to(
+        "#tm-halo",
+        { scale: 1.08, opacity: 0, duration: 0.333334, ease: "sine.out" },
+        1.533333,
+      );
+
+      tl.seek(0);
+      window.__timelines["bil-splash-motion"] = tl;
+    </script>
+  </body>
+</html>

@@ -7,6 +7,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/services.dart';
 
 import '../../app/environment/app_environment.dart';
+import '../../app/services/recoverable_image_picker.dart';
+import '../commerce/providers/commerce_providers.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../cloud_platform/providers/cloud_sync_providers.dart';
 import '../weight/providers/weight_provider.dart';
@@ -36,16 +38,26 @@ final startupCloudProfileRestoreProvider = FutureProvider.autoDispose
         return false;
       }
       ref.invalidate(userProfileProvider);
+      ref.invalidate(dailyCheckInDueProvider);
       await ref.read(userProfileProvider.future);
+      await ref.read(dailyCheckInDueProvider.future);
       return true;
     });
 
 class StartupPage extends ConsumerStatefulWidget {
-  const StartupPage({super.key, this.authClient});
+  const StartupPage({
+    super.key,
+    this.authClient,
+    this.imagePickerResumeResolver,
+  });
 
   /// Optional authentication seam for deterministic widget tests.
   /// Production callers leave this null and use the initialized Supabase auth.
   final GoTrueClient? authClient;
+
+  /// Deterministic seam for startup widget tests. Production resolves the
+  /// owner-bound Android lost-image intent and its entitlement in this page.
+  final Future<String?> Function(String ownerScope)? imagePickerResumeResolver;
 
   @override
   ConsumerState<StartupPage> createState() => _StartupPageState();
@@ -69,6 +81,11 @@ class _StartupPageState extends ConsumerState<StartupPage>
   String? readyLocation;
   bool redirectScheduled = false;
   bool retrying = false;
+  bool imagePickerRecoveryResolving = false;
+  bool imagePickerRecoveryResolved = false;
+  String? imagePickerRecoveryOwnerScope;
+  String? imagePickerRecoveryLocation;
+  int imagePickerRecoveryGeneration = 0;
 
   @override
   void initState() {
@@ -161,6 +178,93 @@ class _StartupPageState extends ConsumerState<StartupPage>
     });
   }
 
+  void _beginImagePickerRecoveryResolution(String ownerScope) {
+    if ((imagePickerRecoveryResolving || imagePickerRecoveryResolved) &&
+        imagePickerRecoveryOwnerScope == ownerScope) {
+      return;
+    }
+    imagePickerRecoveryGeneration += 1;
+    final generation = imagePickerRecoveryGeneration;
+    imagePickerRecoveryResolving = true;
+    imagePickerRecoveryResolved = false;
+    imagePickerRecoveryOwnerScope = ownerScope;
+    imagePickerRecoveryLocation = null;
+    // Start immediately so the bounded recovery runs inside the existing
+    // splash window. The first await yields before any setState, so this is
+    // safe even when startup providers resolve during build.
+    unawaited(_resolveImagePickerRecovery(ownerScope, generation));
+  }
+
+  Future<void> _resolveImagePickerRecovery(
+    String ownerScope,
+    int generation,
+  ) async {
+    String? resumeLocation;
+    try {
+      final testResolver = widget.imagePickerResumeResolver;
+      if (testResolver != null) {
+        resumeLocation = await testResolver(
+          ownerScope,
+        ).timeout(const Duration(seconds: 2));
+      } else {
+        final picker = BilRecoverableImagePicker.instance;
+        // Android recovery is a best-effort continuity feature. A stalled
+        // plugin/platform-channel call must never hold the launch screen.
+        final intent = await picker
+            .pendingRecoveryForOwner(ownerScope)
+            .timeout(const Duration(seconds: 2));
+        if (intent != null) {
+          var hasMealPhotoEntitlement = false;
+          if (intent.purpose == BilImagePickerPurpose.mealPhoto) {
+            try {
+              // Paid Vision authority is server-owned and fail-closed. A lost
+              // image never bypasses the same reservation threshold as a
+              // normal meal-photo action.
+              hasMealPhotoEntitlement = await ref
+                  .read(aiBoostVisionAccessProvider.future)
+                  .timeout(const Duration(seconds: 6));
+            } on Object {
+              hasMealPhotoEntitlement = false;
+            }
+          }
+          final candidate = BilImagePickerResumePolicy.locationFor(
+            intent.purpose,
+            hasMealPhotoEntitlement: hasMealPhotoEntitlement,
+          );
+          if (candidate != null &&
+              await picker.claimResume(
+                intent: intent,
+                ownerScope: ownerScope,
+              )) {
+            resumeLocation = candidate;
+          }
+        }
+      }
+    } on Object {
+      // Picker recovery is a convenience layered over safe startup. Failure
+      // falls back to the already-resolved app destination and never traps the
+      // user on the splash screen.
+    }
+    if (!mounted ||
+        generation != imagePickerRecoveryGeneration ||
+        imagePickerRecoveryOwnerScope != ownerScope) {
+      return;
+    }
+    setState(() {
+      imagePickerRecoveryResolving = false;
+      imagePickerRecoveryResolved = true;
+      imagePickerRecoveryLocation = resumeLocation;
+    });
+  }
+
+  void _resetImagePickerRecoveryResolution() {
+    imagePickerRecoveryGeneration += 1;
+    imagePickerRecoveryResolving = false;
+    imagePickerRecoveryResolved = false;
+    imagePickerRecoveryOwnerScope = null;
+    imagePickerRecoveryLocation = null;
+  }
+
   void retry() {
     redirectScheduled = false;
     readyLocation = null;
@@ -173,6 +277,7 @@ class _StartupPageState extends ConsumerState<StartupPage>
     ref.invalidate(accountGatewayReviewedProvider);
     ref.invalidate(localDataAccountBindingProvider);
     ref.invalidate(cloudRuntimePreparationProvider);
+    _resetImagePickerRecoveryResolution();
     // Preserve one complete loading frame before surfacing the result of the
     // new attempt. This prevents a stale AsyncError from flashing after the
     // tap, while a repeated failure still becomes visible and retryable.
@@ -231,28 +336,51 @@ class _StartupPageState extends ConsumerState<StartupPage>
           accountGatewayReviewed.value != true;
       final accountConflict =
           localAccountBinding.value?.requiresAccountResolution == true;
+      String baseReadyLocation;
       if (accountConflict) {
         // This is now only a corruption/legacy fail-safe. Normal account
         // switching uses a separate local SQLite namespace per BIL account.
-        readyLocation = '/account-data-conflict';
+        baseReadyLocation = '/account-data-conflict';
       } else if (forceOnboarding.value == true) {
-        readyLocation = '/onboarding';
+        baseReadyLocation = '/onboarding';
       } else if (user == null && cloudProfileRestore.value != true) {
         // A newly signed-in account owns a clean local database and must be
         // allowed to create its own profile instead of being sent back to the
         // sign-in gateway. Signed-out guest mode still starts at the gateway.
-        readyLocation = signedIn ? '/onboarding' : '/account-gateway';
+        baseReadyLocation = signedIn ? '/onboarding' : '/account-gateway';
       } else if (user != null && !BilAdultEligibility.isEligibleAge(user.age)) {
         // The production audience is adults only. Legacy local profiles keep
         // a calculated age rather than a full birth date, so they return to
         // the neutral date-of-birth gate instead of entering the product.
-        readyLocation = '/onboarding';
+        baseReadyLocation = '/onboarding';
       } else if (needsAccountChoice) {
-        readyLocation = '/account-gateway';
+        baseReadyLocation = '/account-gateway';
       } else {
-        readyLocation = checkInDue.value == true
+        baseReadyLocation = checkInDue.value == true
             ? '/daily-check-in'
             : '/dashboard';
+      }
+
+      final mayResumeProductJourney = const {
+        '/dashboard',
+        '/daily-check-in',
+      }.contains(baseReadyLocation);
+      if (mayResumeProductJourney) {
+        final ownerScope = BilRecoverableImagePicker.ownerScopeForUserId(
+          signedInOwnerId,
+        );
+        if (imagePickerRecoveryOwnerScope != ownerScope ||
+            !imagePickerRecoveryResolved) {
+          readyLocation = null;
+          _beginImagePickerRecoveryResolution(ownerScope);
+        } else {
+          readyLocation = imagePickerRecoveryLocation ?? baseReadyLocation;
+        }
+      } else {
+        // Account choice, conflict resolution and onboarding always outrank a
+        // recovered media intent. The image stays quarantined until an
+        // eligible owner reaches the product or explicitly reopens its flow.
+        readyLocation = baseReadyLocation;
       }
       _redirectIfReady();
     } else {

@@ -1,6 +1,7 @@
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
 import 'package:body_intelligence_log/features/nutrition/domain/barcode_identity.dart';
+import 'package:body_intelligence_log/features/nutrition/domain/product_identity.dart';
 import 'package:body_intelligence_log/features/nutrition/domain/unified_food.dart';
 import 'package:body_intelligence_log/features/nutrition/repositories/unified_food_repository.dart';
 import 'package:body_intelligence_log/features/nutrition/services/food_runtime_search_authority.dart';
@@ -318,6 +319,152 @@ void main() {
     expect(outcome.foods.single.name, 'Local product');
   });
 
+  test(
+    'legacy name-only barcode is enriched before it can be logged',
+    () async {
+      await local.addFood(
+        name: 'Legacy product name',
+        category: 'branded',
+        barcode: '4006381333931',
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fats: 0,
+        servingSize: 100,
+        servingUnit: 'g',
+        isCustom: false,
+        caloriesKnown: false,
+        proteinKnown: false,
+        carbsKnown: false,
+        fatsKnown: false,
+      );
+      final network = _FoundNetworkResolver(
+        food: _food(
+          id: 'off:4006381333931',
+          name: 'Enriched regional product',
+          barcode: '4006381333931',
+        ),
+        ingredients: 'Milk, cocoa',
+      );
+      final authority = FoodRuntimeSearchAuthority(
+        local,
+        catalogResolver: () async => _FakeCatalog(const []),
+        networkBarcodeResolver: network,
+      );
+
+      final outcome = await authority.lookupBarcodeJourney('4006381333931');
+
+      expect(network.calls, 1);
+      expect(outcome.status, FoodRuntimeBarcodeStatus.found);
+      expect(outcome.foods.single.name, 'Enriched regional product');
+      expect(outcome.foods.single.calories, 52);
+      expect(outcome.ingredients, 'Milk, cocoa');
+    },
+  );
+
+  test(
+    'calorie-only local barcode is enriched with macros and ingredients',
+    () async {
+      await local.addFood(
+        name: 'Partial local product',
+        category: 'branded',
+        barcode: '4006381333931',
+        calories: 88,
+        protein: 0,
+        carbs: 0,
+        fats: 0,
+        servingSize: 100,
+        servingUnit: 'g',
+        isCustom: false,
+        caloriesKnown: true,
+        proteinKnown: false,
+        carbsKnown: false,
+        fatsKnown: false,
+      );
+      final network = _FoundNetworkResolver(
+        food: _food(
+          id: 'off:4006381333931',
+          name: 'Complete regional product',
+          barcode: '4006381333931',
+        ),
+        ingredients: 'Oats, milk',
+      );
+      final authority = FoodRuntimeSearchAuthority(
+        local,
+        catalogResolver: () async => _FakeCatalog(const []),
+        networkBarcodeResolver: network,
+      );
+
+      final outcome = await authority.lookupBarcodeJourney('4006381333931');
+
+      expect(network.calls, 1);
+      expect(outcome.status, FoodRuntimeBarcodeStatus.found);
+      expect(outcome.foods.single.protein, 0.3);
+      expect(outcome.foods.single.carbs, 14);
+      expect(outcome.foods.single.fats, 0.2);
+      expect(outcome.ingredients, 'Oats, milk');
+    },
+  );
+
+  test('calorie-only catalog barcode is enriched before review', () async {
+    final partial = _food(
+      id: 'catalog:4006381333931',
+      name: 'Partial catalog product',
+      barcode: '4006381333931',
+      nutrients: const <FoodNutrient, NutrientAmount>{
+        FoodNutrient.calories: NutrientAmount.known(88),
+      },
+    );
+    final network = _FoundNetworkResolver(
+      food: _food(
+        id: 'off:4006381333931',
+        name: 'Complete regional product',
+        barcode: '4006381333931',
+      ),
+      ingredients: 'Oats, milk',
+    );
+    final authority = FoodRuntimeSearchAuthority(
+      local,
+      catalogResolver: () async => _FakeCatalog(<UnifiedFood>[partial]),
+      networkBarcodeResolver: network,
+    );
+
+    final outcome = await authority.lookupBarcodeJourney('4006381333931');
+
+    expect(network.calls, 1);
+    expect(outcome.foods.single.name, 'Complete regional product');
+    expect(outcome.ingredients, 'Oats, milk');
+  });
+
+  test(
+    'recognized barcode without calorie evidence remains review-only',
+    () async {
+      final product = ProductIdentity(
+        barcode: '4006381333931',
+        kind: ProductKind.food,
+        name: 'Recognized regional product',
+        source: 'Open Food Facts',
+        confidence: ProductIdentityConfidence.medium,
+        ingredients: 'Water, oats',
+      );
+      final authority = FoodRuntimeSearchAuthority(
+        local,
+        catalogResolver: () async => _FakeCatalog(const []),
+        networkBarcodeResolver: _FoundNetworkResolver(
+          product: product,
+          ingredients: product.ingredients,
+        ),
+      );
+
+      final outcome = await authority.lookupBarcodeJourney('4006381333931');
+
+      expect(outcome.status, FoodRuntimeBarcodeStatus.identifiedProduct);
+      expect(outcome.foods, isEmpty);
+      expect(outcome.product, same(product));
+      expect(outcome.ingredients, 'Water, oats');
+    },
+  );
+
   test('local, catalog, and regional network miss reports notFound', () async {
     final authority = FoodRuntimeSearchAuthority(
       local,
@@ -357,6 +504,27 @@ class _NotFoundNetworkResolver extends RegionalBarcodeNetworkResolver {
     return const RegionalBarcodeLookup(
       food: null,
       source: 'test-network-miss',
+      fromCache: false,
+    );
+  }
+}
+
+class _FoundNetworkResolver extends RegionalBarcodeNetworkResolver {
+  _FoundNetworkResolver({this.food, this.product, this.ingredients});
+
+  final UnifiedFood? food;
+  final ProductIdentity? product;
+  final String? ingredients;
+  int calls = 0;
+
+  @override
+  Future<RegionalBarcodeLookup> resolve(String barcode) async {
+    calls += 1;
+    return RegionalBarcodeLookup(
+      food: food,
+      product: product,
+      ingredients: ingredients,
+      source: 'test-regional-provider',
       fromCache: false,
     );
   }

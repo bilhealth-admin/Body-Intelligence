@@ -35,6 +35,7 @@ class DashboardTopBar extends StatelessWidget {
       imageUrl: profilePhotoUrl,
     );
     final notifications = IconButton(
+      key: const Key('dashboard-notifications'),
       tooltip: copy['notifications']!,
       onPressed: () => context.push('/notification-settings'),
       icon: const Icon(Icons.notifications_none_rounded),
@@ -45,37 +46,47 @@ class DashboardTopBar extends StatelessWidget {
       child: BilFullWordmark(
         key: Key('dashboard-wordmark'),
         height: 38,
-        alignment: Alignment.centerLeft,
+        alignment: Alignment.center,
       ),
     );
 
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(2, 0, 2, 2),
+      padding: const EdgeInsets.fromLTRB(2, 0, 2, 2),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          if (constraints.maxWidth < 370) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+          // Keep equal physical rails around the wordmark. Centering the mark
+          // in the space left by a Row would shift it toward Profile because
+          // the notifications/edit cluster is wider. The symmetric rails
+          // make the identity's centre equal the viewport/content centre on
+          // phones, tablets and both text directions.
+          // The right controls occupy 96dp. The extra 2dp per rail keeps the
+          // rendered lockup from visually touching them on 320dp devices.
+          const sideRailWidth = 98.0;
+          final brandWidth = (constraints.maxWidth - sideRailWidth * 2)
+              .clamp(0.0, double.infinity)
+              .toDouble();
+          return SizedBox(
+            key: const Key('dashboard-identity-header'),
+            height: 48,
+            child: Stack(
+              fit: StackFit.expand,
               children: [
-                brand,
-                const SizedBox(height: 6),
-                SizedBox(
-                  height: 44,
-                  child: Row(
-                    children: [profile, const Spacer(), notifications, edit],
+                Align(alignment: Alignment.centerLeft, child: profile),
+                Center(
+                  child: SizedBox(width: brandWidth, child: brand),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [notifications, edit],
+                    ),
                   ),
                 ),
               ],
-            );
-          }
-          return Row(
-            children: [
-              const Expanded(child: brand),
-              const SizedBox(width: 8),
-              profile,
-              notifications,
-              edit,
-            ],
+            ),
           );
         },
       ),
@@ -111,7 +122,7 @@ class _DashboardEditButton extends StatelessWidget {
         tooltip: tooltip,
         onPressed: () => context.push('/dashboard/preferences'),
         style: IconButton.styleFrom(
-          minimumSize: const Size.square(40),
+          minimumSize: const Size.square(48),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
         icon: const Icon(
@@ -133,7 +144,7 @@ class DashboardBrand extends StatelessWidget {
   Widget build(BuildContext context) {
     return BilFullWordmark(
       height: compact ? 38 : 46,
-      alignment: AlignmentDirectional.centerStart,
+      alignment: Alignment.center,
     );
   }
 }
@@ -195,41 +206,53 @@ class _RoundProfileButtonState extends State<_RoundProfileButton> {
         cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => hovered = true),
         onExit: (_) => setState(() => hovered = false),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          width: 42,
-          height: 42,
-          padding: const EdgeInsets.all(2),
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: const Color(0xFFC8F3FF),
-            border: Border.all(
-              color: hovered ? scheme.primary : scheme.outlineVariant,
-              width: hovered ? 2 : 1.2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF071923).withValues(alpha: .1),
-                blurRadius: 16,
-                offset: const Offset(0, 7),
-              ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            shape: const CircleBorder(),
-            clipBehavior: Clip.antiAlias,
-            child: InkWell(
-              onTap: widget.onTap,
-              child: BilAccountAvatar(
-                key:
-                    widget.imageBytes == null &&
-                        (widget.imageUrl?.trim().isEmpty ?? true)
-                    ? const Key('dashboard-default-profile-avatar')
-                    : const Key('dashboard-user-profile-avatar'),
-                radius: 19,
-                photoBytes: widget.imageBytes,
-                networkUrl: widget.imageUrl,
+        child: Material(
+          color: Colors.transparent,
+          child: InkResponse(
+            onTap: widget.onTap,
+            radius: 24,
+            customBorder: const CircleBorder(),
+            child: SizedBox.square(
+              key: const Key('dashboard-profile-control'),
+              dimension: 48,
+              child: Center(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  width: 42,
+                  height: 42,
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF12394E), Color(0xFF2563EB)],
+                    ),
+                    border: Border.all(
+                      color: hovered ? scheme.primary : const Color(0xFF8EC5FF),
+                      width: hovered ? 2 : 1.2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF071923).withValues(alpha: .1),
+                        blurRadius: 16,
+                        offset: const Offset(0, 7),
+                      ),
+                    ],
+                  ),
+                  child: BilAccountAvatar(
+                    key:
+                        widget.imageBytes == null &&
+                            (widget.imageUrl?.trim().isEmpty ?? true)
+                        ? const Key('dashboard-default-profile-avatar')
+                        : const Key('dashboard-user-profile-avatar'),
+                    radius: 19,
+                    photoBytes: widget.imageBytes,
+                    networkUrl: widget.imageUrl,
+                    backgroundColor: const Color(0xFF12394E),
+                    placeholderColor: Colors.white,
+                  ),
+                ),
               ),
             ),
           ),

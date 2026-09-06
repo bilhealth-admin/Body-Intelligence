@@ -86,6 +86,8 @@ const inputs = [
   { label: 'ai-monthly-reference', price: money(5, 990000000) },
   { label: 'ai-annual-reference', price: money(35, 990000000) },
   { label: 'boost-reference', price: money(4, 990000000) },
+  { label: 'ai-annual-canonical-target', price: money(49, 990000000) },
+  { label: 'boost-canonical-target', price: money(2, 490000000) },
 ];
 const conversions = [];
 

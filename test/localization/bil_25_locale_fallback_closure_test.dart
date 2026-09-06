@@ -1,5 +1,7 @@
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_community_moderation.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_platform_conversation.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_release_closure.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -75,6 +77,73 @@ void main() {
       expect(copy, contains('Gemini'), reason: tag);
       for (final zodiac in zodiacMistranslations) {
         expect(copy, isNot(contains(zodiac)), reason: '$tag: $zodiac');
+      }
+    }
+  });
+
+  test('platform and conversation labels close all 25 locale paths', () {
+    expect(PlatformConversationRuntimeCopy.balanced, isTrue);
+    expect(
+      PlatformConversationRuntimeCopy.supported,
+      BilLocalePolicy.productionTags,
+    );
+
+    for (final tag in BilLocalePolicy.productionTags) {
+      for (final source in PlatformConversationRuntimeCopy.sources) {
+        final translated = PlatformConversationRuntimeCopy.resolve(source, tag);
+        expect(translated, isNotNull, reason: '$tag: $source');
+        expect(translated!.trim(), isNotEmpty, reason: '$tag: $source');
+        expect(RuntimeCopy.resolve(source, tag), translated);
+        if (tag != 'en' &&
+            source != PlatformConversationRuntimeCopy.appleHealth &&
+            source != PlatformConversationRuntimeCopy.healthConnect) {
+          expect(translated, isNot(source), reason: '$tag: $source');
+        }
+      }
+      expect(
+        PlatformConversationRuntimeCopy.resolve(
+          PlatformConversationRuntimeCopy.appleHealth,
+          tag,
+        ),
+        PlatformConversationRuntimeCopy.appleHealth,
+      );
+      expect(
+        PlatformConversationRuntimeCopy.resolve(
+          PlatformConversationRuntimeCopy.healthConnect,
+          tag,
+        ),
+        PlatformConversationRuntimeCopy.healthConnect,
+      );
+    }
+  });
+
+  test('community moderation copy is native and placeholder-safe', () {
+    expect(CommunityModerationRuntimeCopy.balanced, isTrue);
+    expect(
+      CommunityModerationRuntimeCopy.supported,
+      BilLocalePolicy.productionTags.toSet(),
+    );
+
+    for (final tag in BilLocalePolicy.productionTags) {
+      for (final source in CommunityModerationRuntimeCopy.sources) {
+        final translated = CommunityModerationRuntimeCopy.resolve(source, tag);
+        expect(translated, isNotNull, reason: '$tag: $source');
+        expect(translated!.trim(), isNotEmpty, reason: '$tag: $source');
+        expect(RuntimeCopy.resolve(source, tag), translated);
+        if (tag != 'en') {
+          expect(translated, isNot(source), reason: '$tag: $source');
+        }
+        final sourcePlaceholders = RegExp(
+          r'\{[^}]+\}',
+        ).allMatches(source).map((match) => match.group(0)).toList();
+        final translatedPlaceholders = RegExp(
+          r'\{[^}]+\}',
+        ).allMatches(translated).map((match) => match.group(0)).toList();
+        expect(
+          translatedPlaceholders,
+          sourcePlaceholders,
+          reason: '$tag: $source',
+        );
       }
     }
   });

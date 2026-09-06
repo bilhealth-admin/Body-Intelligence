@@ -10,6 +10,7 @@ void main() {
       'lib/features/daily_log/daily_log_meal_entry.dart',
       'lib/features/daily_log/daily_log_meal_search.dart',
       'lib/features/daily_log/daily_log_capture_actions.dart',
+      'lib/features/daily_log/daily_log_capture_providers.dart',
       'lib/features/daily_log/daily_log_copy.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
     final foodPage = File(
@@ -49,6 +50,9 @@ void main() {
     final shell = File(
       'lib/app/router/responsive_app_shell.dart',
     ).readAsStringSync();
+    final topNavigation = File(
+      'lib/app/router/responsive_app_shell_top_navigation.dart',
+    ).readAsStringSync();
 
     expect(summary, contains('baseHeight +'));
     expect(summary, contains('maxLines: 2'));
@@ -72,10 +76,14 @@ void main() {
     );
     expect(shell, contains('extendBody: false'));
     expect(
-      shell,
-      contains('height: 76'),
-      reason: 'The navigation bar keeps its compact visual height.',
+      topNavigation,
+      contains("Key('shell-identity-header')"),
+      reason: 'The identity rail must stay separate from navigation labels.',
     );
+    expect(topNavigation, contains('height: 120'));
+    expect(topNavigation, contains('height: 48'));
+    expect(topNavigation, contains('alignment: Alignment.centerLeft'));
+    expect(topNavigation, contains('alignment: Alignment.center'));
     expect(shell, contains('final dockHeight = 90.0 +'));
     expect(shell, contains('height: dockHeight'));
     expect(shell, contains('Color(0xF20B1725)'));

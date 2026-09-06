@@ -63,11 +63,10 @@ final class ServerEntitlementRepository {
       final providerValue = '${row['provider']}'.trim();
       final verifiedAt = DateTime.tryParse('${row['verified_at']}')?.toUtc();
       if (!closedTestActive &&
-          (verifiedAt == null ||
-              (providerValue != 'closed_test' &&
-                  (verifiedAt.isAfter(now.add(const Duration(minutes: 5))) ||
-                      now.difference(verifiedAt) >
-                          const Duration(hours: 72))))) {
+          !isAcceptableServerVerificationTimestamp(
+            verifiedAt: verifiedAt,
+            now: now,
+          )) {
         return _remember(user.id, FreePlan.createState(), now);
       }
       final plan = closedTestActive
@@ -183,6 +182,20 @@ final class ServerEntitlementRepository {
     'revoked' => SubscriptionLifecycle.revoked,
     _ => SubscriptionLifecycle.inactive,
   };
+}
+
+/// `bil_subscriptions` is a protected server mirror, so an active row remains
+/// authoritative until its lifecycle boundary. `verified_at` must exist and
+/// must not be implausibly in the future, but it is not a 72-hour lease: store
+/// renewals can legitimately leave a still-active period unchanged for days.
+bool isAcceptableServerVerificationTimestamp({
+  required DateTime? verifiedAt,
+  required DateTime now,
+}) {
+  if (verifiedAt == null) return false;
+  return !verifiedAt.toUtc().isAfter(
+    now.toUtc().add(const Duration(minutes: 5)),
+  );
 }
 
 /// A short, owner-scoped continuity window for a previously server-verified

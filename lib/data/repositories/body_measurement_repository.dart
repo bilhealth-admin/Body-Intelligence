@@ -22,6 +22,11 @@ final class BodyMeasurementRepository {
     return query.getSingleOrNull();
   }
 
+  /// Saves the snapshot for [date].
+  ///
+  /// Ordinary editors keep replacement semantics. A caller handling a
+  /// validated partial patch can opt into [preserveExistingValues] so omitted
+  /// fields are retained instead of being interpreted as explicit clears.
   Future<void> saveForDay({
     required DateTime date,
     double? neckCm,
@@ -31,42 +36,65 @@ final class BodyMeasurementRepository {
     double? armCm,
     double? thighCm,
     bool allowEmptySnapshot = false,
+    bool preserveExistingValues = false,
   }) async {
-    final values = [neckCm, waistCm, hipsCm, chestCm, armCm, thighCm];
-    if (!allowEmptySnapshot && values.every((value) => value == null)) return;
-    for (final value in values.whereType<double>()) {
+    final suppliedValues = [neckCm, waistCm, hipsCm, chestCm, armCm, thighCm];
+    if (!allowEmptySnapshot && suppliedValues.every((value) => value == null)) {
+      return;
+    }
+    for (final value in suppliedValues.whereType<double>()) {
       if (!value.isFinite || value < 20 || value > 300) {
         throw ArgumentError.value(value, 'measurementCm');
       }
     }
-    final key = dayKeyFor(date);
-    final existing = await (_database.select(
-      _database.bodyMeasurementEntries,
-    )..where((row) => row.dayKey.equals(key))).getSingleOrNull();
-    await _database
-        .into(_database.bodyMeasurementEntries)
-        .insert(
-          BodyMeasurementEntriesCompanion(
-            id: existing == null ? const Value.absent() : Value(existing.id),
-            uuid: existing == null
-                ? const Value.absent()
-                : Value(existing.uuid),
-            date: Value(date),
-            dayKey: Value(key),
-            neckCm: Value(neckCm),
-            waistCm: Value(waistCm),
-            hipsCm: Value(hipsCm),
-            chestCm: Value(chestCm),
-            armCm: Value(armCm),
-            thighCm: Value(thighCm),
-            createdAt: existing == null
-                ? const Value.absent()
-                : Value(existing.createdAt),
-            updatedAt: Value(DateTime.now()),
-            revision: Value((existing?.revision ?? 0) + 1),
-            syncStatus: const Value('pending'),
-          ),
-          mode: InsertMode.insertOrReplace,
-        );
+    await _database.transaction(() async {
+      final key = dayKeyFor(date);
+      final existing = await (_database.select(
+        _database.bodyMeasurementEntries,
+      )..where((row) => row.dayKey.equals(key))).getSingleOrNull();
+      final resolvedNeck = preserveExistingValues
+          ? neckCm ?? existing?.neckCm
+          : neckCm;
+      final resolvedWaist = preserveExistingValues
+          ? waistCm ?? existing?.waistCm
+          : waistCm;
+      final resolvedHips = preserveExistingValues
+          ? hipsCm ?? existing?.hipsCm
+          : hipsCm;
+      final resolvedChest = preserveExistingValues
+          ? chestCm ?? existing?.chestCm
+          : chestCm;
+      final resolvedArm = preserveExistingValues
+          ? armCm ?? existing?.armCm
+          : armCm;
+      final resolvedThigh = preserveExistingValues
+          ? thighCm ?? existing?.thighCm
+          : thighCm;
+      await _database
+          .into(_database.bodyMeasurementEntries)
+          .insert(
+            BodyMeasurementEntriesCompanion(
+              id: existing == null ? const Value.absent() : Value(existing.id),
+              uuid: existing == null
+                  ? const Value.absent()
+                  : Value(existing.uuid),
+              date: Value(date),
+              dayKey: Value(key),
+              neckCm: Value(resolvedNeck),
+              waistCm: Value(resolvedWaist),
+              hipsCm: Value(resolvedHips),
+              chestCm: Value(resolvedChest),
+              armCm: Value(resolvedArm),
+              thighCm: Value(resolvedThigh),
+              createdAt: existing == null
+                  ? const Value.absent()
+                  : Value(existing.createdAt),
+              updatedAt: Value(DateTime.now()),
+              revision: Value((existing?.revision ?? 0) + 1),
+              syncStatus: const Value('pending'),
+            ),
+            mode: InsertMode.insertOrReplace,
+          );
+    });
   }
 }

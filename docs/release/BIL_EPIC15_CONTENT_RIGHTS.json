@@ -2,21 +2,31 @@
   "schema_version": 1,
   "owner": "BIL",
   "policy": "Only BIL-owned, generated-for-BIL, or separately licensed assets may ship or appear in store materials.",
-  "owner_supplied_brand_archive": {
+  "canonical_brand_identity": {
+    "app_icon": {
+      "path": "assets/branding/bil_app_icon.png",
+      "sha256": "f6a183d2fdfb0a27e44c9eedc368cf6437b9e45ca65c4054da75818b092d0b46",
+      "status": "OWNER_APPROVED_CURRENT"
+    },
+    "full_wordmark": {
+      "path": "lib/shared/widgets/bil_wordmark.dart",
+      "symbol": "BilFullWordmark",
+      "text": "BODY INTELLIGENCE LOG",
+      "trademark": "™",
+      "status": "OWNER_APPROVED_CURRENT"
+    }
+  },
+  "retired_brand_archive": {
     "source": "C:/Users/HP 1040 G8/Downloads/BIL-Brand-Assets-v1.zip",
     "sha256": "c8fba5b1cd4c9a0ef31f59cffddde0980cfebc68ade6a90e333f21e3be8730ee",
-    "rights_statement": "Original AI-generated assets created specifically for BIL, supplied and approved by the owner.",
+    "status": "OWNER_REJECTED_DO_NOT_SHIP_2026_09_06",
+    "rights_statement": "Historical BIL-owned artwork retained only in Git history for recovery provenance; it is explicitly rejected for runtime and store use.",
     "source_readme": "store_assets/source/BIL-Brand-Assets-v1/README.md",
-    "derivation_rule": "All platform sizes are deterministic derivatives of these masters; the identity is not regenerated per size."
+    "recovery": "Every removed file remains recoverable from repository history by its Git blob or the pinned archive SHA-256; no rejected raster remains in the working tree."
   },
-  "generated_for_bil_2026_08_05": [
-    {"path": "store_assets/graphics/google_play/feature_graphic.png", "generator": "owner-supplied BIL Brand Assets v1 master derivative", "rights": "original_generated_for_BIL", "human_review": "required_before_upload"},
-    {"path": "store_assets/graphics/plans/free.png", "generator": "owner-supplied BIL Brand Assets v1 plan-panel derivative", "rights": "original_generated_for_BIL", "human_review": "required_before_upload"},
-    {"path": "store_assets/graphics/plans/plus.png", "generator": "owner-supplied BIL Brand Assets v1 plan-panel derivative", "rights": "original_generated_for_BIL", "human_review": "required_before_upload"},
-    {"path": "store_assets/graphics/plans/pro.png", "generator": "owner-supplied BIL Brand Assets v1 plan-panel derivative", "rights": "original_generated_for_BIL", "human_review": "required_before_upload"}
-  ],
+  "generated_for_bil_2026_08_05": [],
   "existing_bil_assets": [
-    {"path": "assets/branding/bil_icon_master.png", "owner": "BIL", "rights": "BIL brand master", "use": "master emblem and derived launcher assets"},
+    {"path": "assets/branding/bil_app_icon.png", "owner": "BIL", "rights": "BIL brand master", "use": "owner-approved current app icon and deterministic platform derivatives", "sha256": "f6a183d2fdfb0a27e44c9eedc368cf6437b9e45ca65c4054da75818b092d0b46"},
     {"path": "assets/images/professional/mediterranean_protein_bowl.png", "owner": "BIL", "rights": "generated_original_for_BIL", "use": "recipe"},
     {"path": "assets/images/professional/strength_training_cover.png", "owner": "BIL", "rights": "generated_original_for_BIL", "use": "workout"},
     {"path": "assets/images/nutrition_plans/", "owner": "BIL", "rights": "generated_original_for_BIL", "use": "nutrition pathways"},

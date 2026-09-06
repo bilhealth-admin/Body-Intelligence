@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr/qr.dart' as qr;
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../app/localization/runtime_copy_connected_health.dart';
 import 'partner_capabilities_copy.dart';
+import 'connected_health_copy.dart';
 import 'partner_integration_registry.dart';
 import 'partner_setup_copy.dart';
 
@@ -138,6 +140,40 @@ class _CapabilityTile extends StatelessWidget {
                 size: 28,
               ),
             ),
+            if (entry.dataTypes.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 0, 18, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      connectedHealthText(
+                        context,
+                        ConnectedHealthRuntimeCopy.connectionDataDetails,
+                        'ما الذي يقرأه كل اتصال',
+                      ),
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: colors.onSurfaceVariant,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        for (final dataType in entry.dataTypes)
+                          Chip(
+                            label: Text(
+                              connectedHealthDataTypeText(context, dataType),
+                            ),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             if (verifiedSetupUri != null) ...[
               Padding(
                 padding: const EdgeInsets.fromLTRB(18, 0, 18, 14),

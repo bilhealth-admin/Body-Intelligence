@@ -3,10 +3,13 @@
 The owner-confirmed domain is `bilhealth.com`, the published website is
 `https://www.bilhealth.com`, and the administrative account is
 `bilhealth.app@gmail.com`. The owner confirmed publication on 2026-08-08;
-public HTTP status and page-content verification remain a release check. The domain
-mailboxes `support@bilhealth.com` and `privacy@bilhealth.com` are verified for
-inbound forwarding to the administrative mailbox only; outbound sending from
-those aliases is not claimed.
+fresh HTTP 200 responses and byte identity between the deployed and checked-in
+legal JavaScript were verified on 2026-09-06 in
+`BIL_EPIC15_PUBLICATION_VERIFICATION_2026-09-06.json`. That technical
+verification is not owner legal approval. The domain mailboxes
+`support@bilhealth.com` and `privacy@bilhealth.com` are verified for inbound
+forwarding to the administrative mailbox only; outbound sending from those
+aliases is not claimed.
 
 ## `/privacy`
 

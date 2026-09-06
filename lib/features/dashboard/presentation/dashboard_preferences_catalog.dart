@@ -1,5 +1,24 @@
 part of 'dashboard_preferences_page.dart';
 
+BilSemanticIconKind _dashboardPresetIconKind(String id) => switch (id) {
+  'heart' => BilSemanticIconKind.health,
+  _ => BilSemanticIconKind.nutrition,
+};
+
+BilSemanticIconKind _dashboardSectionIconKind(String id) => switch (id) {
+  DashboardSectionIds.aiCoach ||
+  DashboardSectionIds.bestAction => BilSemanticIconKind.aiCoach,
+  DashboardSectionIds.calories ||
+  DashboardSectionIds.macros => BilSemanticIconKind.nutrition,
+  DashboardSectionIds.activity => BilSemanticIconKind.exercise,
+  DashboardSectionIds.quickLog => BilSemanticIconKind.notes,
+  DashboardSectionIds.discover => BilSemanticIconKind.learn,
+  DashboardSectionIds.progress => BilSemanticIconKind.progress,
+  DashboardSectionIds.connectedHealth => BilSemanticIconKind.devices,
+  DashboardSectionIds.bodyTwin => BilSemanticIconKind.measurements,
+  _ => BilSemanticIconKind.preferences,
+};
+
 final _dashboardPresets =
     <
       ({

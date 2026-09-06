@@ -38,7 +38,11 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
       return <Widget>[
         if (correction != null)
           ListTile(
-            leading: const Icon(Icons.auto_fix_high),
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.foodSearch,
+              iconOverride: Icons.auto_fix_high,
+              appleIconOverride: Icons.auto_fix_high,
+            ),
             title: Text('${_mealCopy('didYouMean')} $correction?'),
             onTap: () {
               controller.text = correction;
@@ -50,13 +54,15 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
           title: Text(_mealCopy('noResult')),
         ),
         ListTile(
-          key: const Key('daily-search-open-food-library'),
-          leading: const Icon(Icons.library_books_outlined),
+          key: const Key('daily-search-open-food-catalog'),
+          leading: const BilSemanticIconBadge(
+            kind: BilSemanticIconKind.foodSearch,
+          ),
           title: Text(_mealCopy('openFoodLibrary')),
           trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
           onTap: () {
             controller.closeView(effectiveQuery);
-            context.push('/food-libraries');
+            context.push('/foods');
           },
         ),
       ];
@@ -84,13 +90,15 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
           title: Text(_mealCopy('noResult')),
         ),
         ListTile(
-          key: const Key('daily-search-open-food-library'),
-          leading: const Icon(Icons.library_books_outlined),
+          key: const Key('daily-search-open-food-catalog'),
+          leading: const BilSemanticIconBadge(
+            kind: BilSemanticIconKind.foodSearch,
+          ),
           title: Text(_mealCopy('openFoodLibrary')),
           trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
           onTap: () {
             controller.closeView(effectiveQuery);
-            context.push('/food-libraries');
+            context.push('/foods');
           },
         ),
       ];
@@ -378,8 +386,7 @@ const _mealEntryCopy = <String, Map<String, String>>{
     'protein': 'Protein',
     'didYouMean': 'Did you mean:',
     'noResult': 'No match yet. Try a broader name, brand, or barcode.',
-    'openFoodLibrary':
-        'No result after correction. Open the food catalog to download more.',
+    'openFoodLibrary': 'No result after correction. Open the food catalog.',
     'mealPhoto': 'Meal photo',
     'voiceInput': 'Voice input',
     'barcode': 'Barcode',
@@ -417,7 +424,7 @@ const _mealEntryCopy = <String, Map<String, String>>{
     'didYouMean': 'هل تقصد:',
     'noResult':
         'لا توجد نتيجة مطابقة بعد. جرّب اسمًا أبسط أو علامة تجارية أو باركود.',
-    'openFoodLibrary': 'لا نتيجة بعد التصحيح. افتح دليل الأطعمة لتنزيل المزيد.',
+    'openFoodLibrary': 'لا نتيجة بعد التصحيح. افتح دليل الأطعمة.',
     'mealPhoto': 'تصوير الوجبة',
     'voiceInput': 'إدخال صوتي',
     'barcode': 'باركود',
@@ -457,7 +464,7 @@ const _mealEntryCopy = <String, Map<String, String>>{
     'noResult':
         'Aucun résultat pour le moment. Essayez un nom plus simple, une marque ou un code-barres.',
     'openFoodLibrary':
-        'Aucun résultat après correction. Ouvrez le catalogue pour en télécharger davantage.',
+        'Aucun résultat après correction. Ouvrez le catalogue alimentaire.',
     'mealPhoto': 'Photo du repas',
     'voiceInput': 'Saisie vocale',
     'barcode': 'Code-barres',
@@ -496,7 +503,7 @@ const _mealEntryCopy = <String, Map<String, String>>{
     'noResult':
         'Aún no hay coincidencias. Prueba un nombre más simple, una marca o un código de barras.',
     'openFoodLibrary':
-        'No hay resultado tras la corrección. Abre el catálogo para descargar más.',
+        'No hay resultado tras la corrección. Abre el catálogo de alimentos.',
     'mealPhoto': 'Foto de la comida',
     'voiceInput': 'Entrada de voz',
     'barcode': 'Código',
@@ -533,8 +540,7 @@ const _mealEntryCopy = <String, Map<String, String>>{
     'didYouMean': 'Bunu mu demek istediniz:',
     'noResult':
         'Henüz eşleşme yok. Daha sade bir ad, marka veya barkod deneyin.',
-    'openFoodLibrary':
-        'Düzeltmeden sonra sonuç yok. Daha fazlasını indirmek için gıda kataloğunu açın.',
+    'openFoodLibrary': 'Düzeltmeden sonra sonuç yok. Gıda kataloğunu açın.',
     'mealPhoto': 'Öğün fotoğrafı',
     'voiceInput': 'Sesli giriş',
     'barcode': 'Barkod',

@@ -2,8 +2,16 @@
 
 ## Release truth
 
-- Health Connect and HealthKit request only steps, active energy, workouts and
-  weight for reading. Weight writing is a separate explicit permission.
+- Health Connect and HealthKit expose the same fitness/wellness read contract:
+  steps, distance, active energy, workouts, sleep, weight, body fat, lean mass,
+  heart rate, resting heart rate, HRV, hydration, energy and selected nutrient
+  values. Clinical categories remain excluded. Health Connect can export
+  reviewed weight and nutrition; HealthKit exports reviewed weight only, with
+  write access requested separately from reading.
+- Both native bridges use a bounded 365-day initial window when authorized.
+  Health Connect requests its separate history grant only on provider versions
+  that support it and falls back to the platform's ordinary 30-day window when
+  that grant is unavailable or declined.
 - Imported records retain provider, source/device, record identity, UTC time,
   original time-zone identifier, canonical unit and confidence.
 - Native record IDs and BLE sample IDs are deduplicated locally. Manual records

@@ -43,39 +43,96 @@ void main() {
     SharedPreferences.setMockInitialValues({});
   });
 
-  testWidgets(
-    'Videos is first of four tabs and every section exposes exactly one first preview',
-    (tester) async {
-      await tester.binding.setSurfaceSize(const Size(430, 1050));
-      addTearDown(() => tester.binding.setSurfaceSize(null));
-      final cache = _NoTransferMediaCache();
+  test('discovery wall canonicalizes every exact video payload', () {
+    final canonical = canonicalWorkoutVideoPayloads(discovery);
+    final payloads = canonical
+        .map((item) => item.videoMedia?.sha256)
+        .whereType<String>()
+        .toSet();
 
-      await tester.pumpWidget(_app(discovery, plan, cache));
-      await tester.pumpAndSettle();
+    expect(
+      canonical,
+      hasLength(WorkoutReleaseCatalogRepository.uniquePayloadCount),
+    );
+    expect(payloads, hasLength(canonical.length));
+    final sidePlank = canonical.where(
+      (item) => item.id == 'core-stability-side-plank-technique',
+    );
+    expect(sidePlank, hasLength(1));
+    expect(sidePlank.single.releaseBundleId, 'gym-six-month');
+  });
 
-      final tabs = tester.widgetList<Tab>(find.byType(Tab)).toList();
-      expect(tabs.map((tab) => tab.text), [
-        'Videos',
-        'Gym',
-        'Home',
-        'My plans',
+  test(
+    'section distribution claims each payload globally and omits empty sections',
+    () {
+      final byPayload = <String, List<WellnessContentItem>>{};
+      for (final item in discovery) {
+        byPayload
+            .putIfAbsent(workoutVideoPayloadIdentity(item), () => [])
+            .add(item);
+      }
+      final duplicate = byPayload.values.firstWhere(
+        (items) => items.length > 1,
+      );
+      final unique = discovery.firstWhere(
+        (item) =>
+            workoutVideoPayloadIdentity(item) !=
+            workoutVideoPayloadIdentity(duplicate.first),
+      );
+      final identityOnly = _identityOnlyWorkout('identity-only');
+
+      final distributed = distributeUniqueWorkoutVideoPayloads([
+        [duplicate.first, identityOnly],
+        [duplicate.last],
+        [unique],
       ]);
-      expect(find.byKey(const ValueKey('workout-videos-wall')), findsOneWidget);
-      expect(_visibleSectionLists(tester).length, lessThan(23));
-      expect(cache.posterOnlineResolutions, inInclusiveRange(1, 15));
-      await _expectEveryLazySectionPreviewContract(tester);
-      expect(cache.videoOnlineResolutions, 0);
+
+      expect(distributed.map((entry) => entry.sourceIndex), [0, 2]);
+      expect(distributed.first.items, [duplicate.first, identityOnly]);
+      expect(distributed.last.items, [unique]);
+      final visibleIdentities = distributed
+          .expand((entry) => entry.items)
+          .map(workoutVideoPayloadIdentity)
+          .toList();
+      expect(visibleIdentities.toSet(), hasLength(visibleIdentities.length));
+      expect(
+        workoutVideoPayloadIdentity(identityOnly),
+        'identity:identity-only',
+      );
     },
   );
+
+  testWidgets('Videos is first and visible unique sections stay safely gated', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(430, 1050));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final cache = _NoTransferMediaCache();
+
+    await tester.pumpWidget(_app(discovery, plan, cache));
+    await tester.pumpAndSettle();
+
+    final tabs = tester.widgetList<Tab>(find.byType(Tab)).toList();
+    expect(tabs.map((tab) => tab.text), ['Videos', 'Gym', 'Home', 'My plans']);
+    expect(find.byKey(const ValueKey('workout-videos-wall')), findsOneWidget);
+    expect(_visibleSectionLists(tester).length, lessThan(23));
+    expect(cache.posterOnlineResolutions, inInclusiveRange(1, 15));
+    _expectSectionPreviewContract(
+      tester,
+      expectedSections: null,
+      allowNoFreePreview: true,
+    );
+    expect(cache.videoOnlineResolutions, 0);
+  });
 
   testWidgets(
     'paid-only search remains stable and does not invent a free card',
     (tester) async {
       await tester.binding.setSurfaceSize(const Size(430, 1050));
       addTearDown(() => tester.binding.setSurfaceSize(null));
-      final paid = discovery.firstWhere(
-        (item) => !WorkoutFreePreviewPolicy.isPreview(item),
-      );
+      final paid = canonicalWorkoutVideoPayloads(
+        discovery,
+      ).firstWhere((item) => !WorkoutFreePreviewPolicy.isPreview(item));
 
       await tester.pumpWidget(_app(discovery, plan, _NoTransferMediaCache()));
       await tester.pumpAndSettle();
@@ -84,10 +141,11 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text(paid.title), findsWidgets);
+      final matchingGates = find.byKey(
+        ValueKey('workout-premium-gate-${paid.stableId}'),
+      );
       final gates = tester
-          .widgetList<PremiumCollectionItemGate>(
-            find.byType(PremiumCollectionItemGate),
-          )
+          .widgetList<PremiumCollectionItemGate>(matchingGates)
           .toList();
       expect(gates, isNotEmpty);
       expect(gates.every((gate) => gate.locked), isTrue);
@@ -236,64 +294,14 @@ List<ListView> _visibleSectionLists(WidgetTester tester) =>
           key.value.startsWith('workout-category-');
     }).toList();
 
-Future<void> _expectEveryLazySectionPreviewContract(WidgetTester tester) async {
-  const sectionIds = <String>[
-    'month-1',
-    'month-2',
-    'month-3',
-    'month-4',
-    'month-5',
-    'month-6',
-    'warm-up-mobility',
-    'gym-muscle-pair-split',
-    'gym-upper-lower',
-    'gym-full-body',
-    'gym-arnold-split',
-    'gym-powerbuilding',
-    'gym-exercise-technique',
-    'home-resistance-upper-body',
-    'home-resistance-lower-body',
-    'home-resistance-full-body',
-    'home-cardio-conditioning',
-    'home-cardio-low-impact',
-    'home-home-bodyweight',
-    'home-core-stability',
-    'home-mobility-flexibility',
-    'home-recovery-beginner',
-    'home-balance-coordination',
-  ];
-  final verticalScrollable = find
-      .descendant(
-        of: find.byKey(const ValueKey('workout-library-tab-0')),
-        matching: find.byType(Scrollable),
-      )
-      .first;
-  for (final sectionId in sectionIds) {
-    final section = find.byKey(ValueKey('workout-video-section-$sectionId'));
-    await tester.scrollUntilVisible(
-      section,
-      360,
-      scrollable: verticalScrollable,
-      maxScrolls: 30,
-    );
-    final gates = tester
-        .widgetList<PremiumCollectionItemGate>(
-          find.descendant(
-            of: section,
-            matching: find.byType(PremiumCollectionItemGate),
-          ),
-        )
-        .toList();
-    expect(gates, isNotEmpty, reason: sectionId);
-    expect(
-      gates.indexed.where((entry) => !entry.$2.locked).map((entry) => entry.$1),
-      [0],
-      reason: sectionId,
-    );
-    expect(
-      find.descendant(of: section, matching: find.byType(PremiumLabelBadge)),
-      findsOneWidget,
-      reason: sectionId,
-    );
-  }
-}
+WellnessContentItem _identityOnlyWorkout(String id) => WellnessContentItem(
+  id: id,
+  type: WellnessContentType.workouts,
+  locale: 'en',
+  title: id,
+  description: 'Identity fallback contract item.',
+  publisher: 'BIL Health',
+  sourceUrl: Uri.parse('https://bilhealth.com/workouts/$id'),
+  licenseName: 'BIL licensed original',
+  verified: true,
+);

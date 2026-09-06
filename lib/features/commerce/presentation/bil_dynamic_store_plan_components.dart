@@ -359,47 +359,45 @@ class _StoreOfferTile extends StatelessWidget {
                           decorationThickness: 1.5,
                         ),
                       ),
-                      if (storeDerivedAnnualDiscount)
-                        Container(
-                          key: ValueKey('annual-savings-${offer.productId}'),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFFFE49A), Color(0xFFF2BF43)],
-                            ),
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(color: const Color(0x66B77B00)),
-                          ),
-                          child: Text(
-                            '$saveLabel ${annualComparison!.savingsPercent}%',
-                            style: Theme.of(context).textTheme.labelSmall
-                                ?.copyWith(
-                                  color: const Color(0xFF5B3B00),
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: .1,
-                                ),
-                          ),
-                        ),
                     ],
                   ),
                   const SizedBox(height: 5),
                 ],
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: AlignmentDirectional.centerStart,
-                  child: Text(
-                    offer.localizedPrice,
-                    key: ValueKey('store-offer-price-${offer.productId}'),
-                    maxLines: 1,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: dark ? scheme.onSurface : const Color(0xFF171717),
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -.2,
+                Row(
+                  children: [
+                    Expanded(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          offer.localizedPrice,
+                          key: ValueKey('store-offer-price-${offer.productId}'),
+                          maxLines: 1,
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                color: dark
+                                    ? scheme.onSurface
+                                    : const Color(0xFF171717),
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -.2,
+                              ),
+                        ),
+                      ),
                     ),
-                  ),
+                    if (storeDerivedAnnualDiscount) ...[
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: _StoreSavingsBadge(
+                            key: ValueKey('annual-savings-${offer.productId}'),
+                            label:
+                                '$saveLabel ${annualComparison!.savingsPercent}%',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 if (monthly || annual) ...[
                   const SizedBox(height: 6),
@@ -477,5 +475,34 @@ class _StoreOfferTile extends StatelessWidget {
     } on Object {
       return '${offer.currencyCode} ${amount.toStringAsFixed(2)}';
     }
+  }
+}
+
+class _StoreSavingsBadge extends StatelessWidget {
+  const _StoreSavingsBadge({required this.label, super.key});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFE49A), Color(0xFFF2BF43)],
+        ),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0x66B77B00)),
+      ),
+      child: Text(
+        label,
+        maxLines: 1,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: const Color(0xFF5B3B00),
+          fontWeight: FontWeight.w900,
+          letterSpacing: .1,
+        ),
+      ),
+    );
   }
 }

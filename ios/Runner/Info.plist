@@ -62,6 +62,9 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<!-- app_links is the single owner of native callback delivery. -->
+	<key>FlutterDeepLinkingEnabled</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSBluetoothAlwaysUsageDescription</key>
@@ -69,7 +72,7 @@
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.</string>
+	<string>BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—for your private on-device fitness timeline and insights. Only when you enable Personalized Intelligence and ask BIL Coach a question may the minimum relevant data be securely processed by cloud AI to answer it.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>BIL writes weight records only after you separately approve Health write access.</string>
 	<key>NSMicrophoneUsageDescription</key>
@@ -99,8 +102,6 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>UIBackgroundModes</key>
-	<array><string>remote-notification</string></array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

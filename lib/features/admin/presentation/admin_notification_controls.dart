@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/runtime_copy_admin_notifications.dart';
 import '../services/ai_coach_admin_service.dart';
+import 'admin_notification_presets.dart';
 
 /// Admin-only notification controls.
 ///
@@ -42,6 +43,9 @@ class _AdminNotificationControlsState
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final locale = Localizations.localeOf(context);
+    final presets = AdminNotificationPresetCatalog.ready(locale);
+    final customPreset = AdminNotificationPresetCatalog.blankCustom(locale);
     return Card(
       key: const Key('admin-notification-controls'),
       clipBehavior: Clip.antiAlias,
@@ -81,71 +85,26 @@ class _AdminNotificationControlsState
               ),
             ),
             const SizedBox(height: 16),
-            _NotificationActionButton(
-              key: const Key('admin-notification-compensation'),
-              icon: Icons.favorite_rounded,
-              color: const Color(0xFF1C6E8C),
-              title: _copy(
-                'Compensation message',
-                ar: 'رسالة تعويض',
-                fr: 'Message de compensation',
-                es: 'Mensaje de compensación',
-                tr: 'Telafi mesajı',
+            for (final preset in presets) ...[
+              _NotificationActionButton(
+                key: Key('admin-notification-${preset.id}'),
+                icon: preset.icon,
+                color: preset.color,
+                title: preset.title,
+                subtitle: preset.body,
+                enabled: !_sending,
+                onPressed: () => _compose(preset),
               ),
-              subtitle: _copy(
-                'A considerate message that values the member’s trust.',
-                ar: 'صياغة لبقة تقدّر ثقة المستخدم واهتمامه.',
-                fr: 'Un message attentionné qui valorise la confiance du membre.',
-                es: 'Un mensaje considerado que valora la confianza del miembro.',
-                tr: 'Üyenin güvenine değer veren düşünceli bir mesaj.',
-              ),
-              enabled: !_sending,
-              onPressed: () =>
-                  _compose(AiCoachAdminNotificationKind.compensation),
-            ),
-            const SizedBox(height: 10),
-            _NotificationActionButton(
-              key: const Key('admin-notification-gift'),
-              icon: Icons.card_giftcard_rounded,
-              color: const Color(0xFF8A5A00),
-              title: _copy(
-                'Gift message',
-                ar: 'رسالة هدية',
-                fr: 'Message cadeau',
-                es: 'Mensaje de regalo',
-                tr: 'Hediye mesajı',
-              ),
-              subtitle: _copy(
-                'A warm BIL gift announcement with a premium tone.',
-                ar: 'إعلان هدية دافئ من BIL بصياغة فخمة.',
-                fr: 'Une annonce cadeau chaleureuse avec un ton haut de gamme.',
-                es: 'Un anuncio de regalo cálido con un tono premium.',
-                tr: 'Seçkin bir üslupla sıcak bir BIL hediye duyurusu.',
-              ),
-              enabled: !_sending,
-              onPressed: () => _compose(AiCoachAdminNotificationKind.gift),
-            ),
-            const SizedBox(height: 10),
+              const SizedBox(height: 10),
+            ],
             _NotificationActionButton(
               key: const Key('admin-notification-custom'),
-              icon: Icons.edit_notifications_rounded,
+              icon: customPreset.icon,
               color: colors.primary,
-              title: _copy(
-                'Write a custom message',
-                ar: 'كتابة رسالة مخصصة',
-                fr: 'Rédiger un message personnalisé',
-                es: 'Escribir un mensaje personalizado',
-                tr: 'Özel bir mesaj yaz',
-              ),
-              subtitle: _copy(
-                'Writing the message is required before sending is enabled.',
-                ar: 'كتابة النص إلزامية قبل تفعيل الإرسال.',
-                fr: 'Le texte est obligatoire avant d’activer l’envoi.',
-                es: 'El texto es obligatorio antes de habilitar el envío.',
-                tr: 'Gönderim etkinleşmeden önce mesaj yazılması zorunludur.',
-              ),
+              title: customPreset.title,
+              subtitle: customPreset.body,
               enabled: !_sending,
-              onPressed: () => _compose(AiCoachAdminNotificationKind.custom),
+              onPressed: () => _compose(customPreset),
             ),
             if (_sending) ...[
               const SizedBox(height: 14),
@@ -159,14 +118,14 @@ class _AdminNotificationControlsState
     );
   }
 
-  Future<void> _compose(AiCoachAdminNotificationKind kind) async {
+  Future<void> _compose(AdminNotificationPreset preset) async {
     if (_sending) return;
     final request = await showModalBottomSheet<_AdminNotificationRequest>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,
-      builder: (_) => _AdminNotificationComposer(kind: kind),
+      builder: (_) => _AdminNotificationComposer(preset: preset),
     );
     if (request == null || !mounted) return;
     final confirmed = await _confirm(request);
@@ -217,10 +176,10 @@ class _AdminNotificationControlsState
               key: const Key('admin-notification-confirm-target'),
               style: const TextStyle(fontWeight: FontWeight.w800),
             ),
-            if (request.message != null) ...[
+            if (request.previewMessage.isNotEmpty) ...[
               const SizedBox(height: 14),
               Text(
-                request.message!,
+                request.previewMessage,
                 key: const Key('admin-notification-confirm-message'),
               ),
             ],
@@ -393,9 +352,9 @@ class _NotificationActionButton extends StatelessWidget {
 }
 
 class _AdminNotificationComposer extends StatefulWidget {
-  const _AdminNotificationComposer({required this.kind});
+  const _AdminNotificationComposer({required this.preset});
 
-  final AiCoachAdminNotificationKind kind;
+  final AdminNotificationPreset preset;
 
   @override
   State<_AdminNotificationComposer> createState() =>
@@ -406,13 +365,23 @@ class _AdminNotificationComposerState
     extends State<_AdminNotificationComposer> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  final _messageController = TextEditingController();
+  late final TextEditingController _messageController;
   AiCoachAdminNotificationAudience _audience =
       AiCoachAdminNotificationAudience.all;
 
   bool get _customReady =>
-      widget.kind != AiCoachAdminNotificationKind.custom ||
+      widget.preset.kind != AiCoachAdminNotificationKind.custom ||
       _messageController.text.trim().isNotEmpty;
+
+  @override
+  void initState() {
+    super.initState();
+    _messageController = TextEditingController(
+      text: widget.preset.serverLocalized || widget.preset.id == 'custom'
+          ? ''
+          : widget.preset.body,
+    );
+  }
 
   String _copy(
     String en, {
@@ -429,7 +398,7 @@ class _AdminNotificationComposerState
 
   @override
   Widget build(BuildContext context) {
-    final custom = widget.kind == AiCoachAdminNotificationKind.custom;
+    final custom = widget.preset.kind == AiCoachAdminNotificationKind.custom;
     return Padding(
       padding: EdgeInsets.fromLTRB(
         20,
@@ -451,12 +420,28 @@ class _AdminNotificationComposerState
               ),
               const SizedBox(height: 8),
               Text(_description),
+              if (widget.preset.serverLocalized) ...[
+                const SizedBox(height: 12),
+                DecoratedBox(
+                  key: const Key('admin-notification-server-preview'),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(widget.preset.body),
+                  ),
+                ),
+              ],
               const SizedBox(height: 18),
               ...[
                 TextFormField(
                   key: const Key('admin-notification-custom-message'),
                   controller: _messageController,
-                  autofocus: true,
+                  autofocus: widget.preset.id == 'custom',
                   minLines: 3,
                   maxLines: 5,
                   maxLength: 180,
@@ -601,65 +586,58 @@ class _AdminNotificationComposerState
     );
   }
 
-  String get _title => switch (widget.kind) {
-    AiCoachAdminNotificationKind.compensation => _copy(
-      'Compensation message',
-      ar: 'رسالة تعويض',
-      fr: 'Message de compensation',
-      es: 'Mensaje de compensación',
-      tr: 'Telafi mesajı',
-    ),
-    AiCoachAdminNotificationKind.gift => _copy(
-      'Gift message',
-      ar: 'رسالة هدية',
-      fr: 'Message cadeau',
-      es: 'Mensaje de regalo',
-      tr: 'Hediye mesajı',
-    ),
-    AiCoachAdminNotificationKind.custom => _copy(
-      'Custom notification',
-      ar: 'إشعار مخصص',
-      fr: 'Notification personnalisée',
-      es: 'Notificación personalizada',
-      tr: 'Özel bildirim',
-    ),
-  };
+  String get _title => widget.preset.title;
 
-  String get _description => switch (widget.kind) {
-    AiCoachAdminNotificationKind.compensation => _copy(
-      'BIL will use its reviewed compensation copy. Choose who receives it.',
-      ar: 'ستستخدم BIL صياغة التعويض المعتمدة. اختر من سيستلمها.',
-      fr: 'BIL utilisera son texte de compensation validé. Choisissez les destinataires.',
-      es: 'BIL usará su texto de compensación revisado. Elige quién lo recibirá.',
-      tr: 'BIL onaylı telafi metnini kullanacak. Kimin alacağını seçin.',
-    ),
-    AiCoachAdminNotificationKind.gift => _copy(
-      'BIL will use its reviewed gift copy. Choose who receives it.',
-      ar: 'ستستخدم BIL صياغة الهدية المعتمدة. اختر من سيستلمها.',
-      fr: 'BIL utilisera son texte cadeau validé. Choisissez les destinataires.',
-      es: 'BIL usará su texto de regalo revisado. Elige quién lo recibirá.',
-      tr: 'BIL onaylı hediye metnini kullanacak. Kimin alacağını seçin.',
-    ),
-    AiCoachAdminNotificationKind.custom => _copy(
-      'Write the text first, then choose everyone or one exact email.',
-      ar: 'اكتب النص أولًا، ثم اختر الجميع أو بريدًا محددًا.',
-      fr: 'Rédigez d’abord le texte, puis choisissez tous les comptes ou un e-mail précis.',
-      es: 'Escribe primero el texto y luego elige todos o un correo concreto.',
-      tr: 'Önce metni yazın, ardından herkesi veya belirli bir e-postayı seçin.',
-    ),
-  };
+  String get _description {
+    if (widget.preset.kind == AiCoachAdminNotificationKind.custom &&
+        widget.preset.id != 'custom') {
+      return _copy(
+        'Review before sending',
+        ar: 'مراجعة قبل الإرسال',
+        fr: 'Vérifier avant l’envoi',
+        es: 'Revisar antes de enviar',
+        tr: 'Göndermeden önce incele',
+      );
+    }
+    return switch (widget.preset.kind) {
+      AiCoachAdminNotificationKind.compensation => _copy(
+        'BIL will use its reviewed compensation copy. Choose who receives it.',
+        ar: 'ستستخدم BIL صياغة التعويض المعتمدة. اختر من سيستلمها.',
+        fr: 'BIL utilisera son texte de compensation validé. Choisissez les destinataires.',
+        es: 'BIL usará su texto de compensación revisado. Elige quién lo recibirá.',
+        tr: 'BIL onaylı telafi metnini kullanacak. Kimin alacağını seçin.',
+      ),
+      AiCoachAdminNotificationKind.gift => _copy(
+        'BIL will use its reviewed gift copy. Choose who receives it.',
+        ar: 'ستستخدم BIL صياغة الهدية المعتمدة. اختر من سيستلمها.',
+        fr: 'BIL utilisera son texte cadeau validé. Choisissez les destinataires.',
+        es: 'BIL usará su texto de regalo revisado. Elige quién lo recibirá.',
+        tr: 'BIL onaylı hediye metnini kullanacak. Kimin alacağını seçin.',
+      ),
+      AiCoachAdminNotificationKind.custom => _copy(
+        'Write the text first, then choose everyone or one exact email.',
+        ar: 'اكتب النص أولًا، ثم اختر الجميع أو بريدًا محددًا.',
+        fr: 'Rédigez d’abord le texte, puis choisissez tous les comptes ou un e-mail précis.',
+        es: 'Escribe primero el texto y luego elige todos o un correo concreto.',
+        tr: 'Önce metni yazın, ardından herkesi veya belirli bir e-postayı seçin.',
+      ),
+    };
+  }
 
   void _review() {
     if (_formKey.currentState?.validate() != true) return;
     Navigator.of(context).pop(
       _AdminNotificationRequest(
-        kind: widget.kind,
+        kind: widget.preset.kind,
         audience: _audience,
         email: _audience == AiCoachAdminNotificationAudience.email
             ? _emailController.text.trim().toLowerCase()
             : null,
         message: _messageController.text.trim().isEmpty
             ? null
+            : _messageController.text.trim(),
+        previewMessage: _messageController.text.trim().isEmpty
+            ? widget.preset.body
             : _messageController.text.trim(),
       ),
     );
@@ -679,10 +657,12 @@ class _AdminNotificationRequest {
     required this.audience,
     required this.email,
     required this.message,
+    required this.previewMessage,
   });
 
   final AiCoachAdminNotificationKind kind;
   final AiCoachAdminNotificationAudience audience;
   final String? email;
   final String? message;
+  final String previewMessage;
 }

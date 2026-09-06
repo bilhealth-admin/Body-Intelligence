@@ -9,6 +9,7 @@ void main() {
     ).readAsStringSync();
     for (final permission in [
       'READ_STEPS',
+      'READ_DISTANCE',
       'READ_ACTIVE_CALORIES_BURNED',
       'READ_EXERCISE',
       'READ_SLEEP',
@@ -17,6 +18,12 @@ void main() {
       'READ_HEART_RATE_VARIABILITY',
       'READ_WEIGHT',
       'WRITE_WEIGHT',
+      'READ_BODY_FAT',
+      'READ_LEAN_BODY_MASS',
+      'READ_HYDRATION',
+      'READ_NUTRITION',
+      'WRITE_NUTRITION',
+      'READ_HEALTH_DATA_HISTORY',
     ]) {
       expect(manifest, contains('android.permission.health.$permission'));
     }
@@ -51,6 +58,12 @@ void main() {
 
       expect(android, contains('HealthConnectClient.getSdkStatus'));
       expect(android, contains('revokeAllPermissions'));
+      expect(
+        android,
+        contains('metadata.dataOrigin.packageName == activity.packageName'),
+      );
+      expect(android, contains('Device.TYPE_WATCH'));
+      expect(android, contains('"wearableKind"] = "wear_os_watch"'));
       for (final excludedRecord in <String>[
         'BloodGlucoseRecord',
         'BloodPressureRecord',
@@ -62,9 +75,35 @@ void main() {
       }
       expect(ios, contains('HKHealthStore.isHealthDataAvailable'));
       expect(ios, contains('requiresSystemSettings'));
+      expect(
+        ios,
+        contains('source.bundleIdentifier == Bundle.main.bundleIdentifier'),
+      );
       expect(plist, contains('NSHealthShareUsageDescription'));
       expect(plist, contains('NSHealthUpdateUsageDescription'));
       expect(entitlements, contains('com.apple.developer.healthkit'));
+    },
+  );
+
+  test(
+    'HealthKit backfill and channel pages are bounded without losing anchors',
+    () {
+      final ios = File(
+        'ios/Runner/BILGlobalHealthBridge.swift',
+      ).readAsStringSync();
+      final readStart = ios.indexOf('private func readChanges(');
+      final readEnd = ios.indexOf('private func write(', readStart);
+      final readChanges = ios.substring(readStart, readEnd);
+
+      expect(ios, contains('private static let initialHistoryDays = 365'));
+      expect(ios, contains('private static let readPageLimit = 500'));
+      expect(readChanges, contains('withStart: historyStart'));
+      expect(readChanges, contains('anchor: anchors[name]'));
+      expect(readChanges, contains('limit: Self.readPageLimit'));
+      expect(readChanges, contains('nextAnchors[name] = newAnchor'));
+      expect(readChanges, contains('"hasMore": pageHasMore'));
+      expect(readChanges, isNot(contains('withStart: nil')));
+      expect(readChanges, isNot(contains('HKObjectQueryNoLimit')));
     },
   );
 
@@ -81,8 +120,45 @@ void main() {
     );
     final initialRead = android.substring(initialStart, initialEnd);
 
+    expect(android, contains(') 365L else 30L'));
+    expect(
+      android,
+      contains('HealthConnectFeatures.FEATURE_READ_HEALTH_DATA_HISTORY'),
+    );
+    expect(
+      android,
+      contains('HealthPermission.PERMISSION_READ_HEALTH_DATA_HISTORY'),
+    );
+    expect(android, contains('HISTORY_PERMISSION_SCOPE_MARKER'));
+    expect(android, contains('TimeRangeFilter.between('));
+    expect(android, contains('val asOf = call.argument<String>("asOf")'));
+    expect(
+      android.indexOf('getChangesToken(ChangesTokenRequest(classes))'),
+      lessThan(android.indexOf('suspend fun <T : Record> readInitial')),
+      reason:
+          'The incremental boundary must be created before history is read.',
+    );
+    expect(android, isNot(contains('366L')));
     expect(initialRead, contains('pageToken = pageToken'));
     expect(initialRead, contains('pageToken = page.pageToken'));
-    expect(initialRead, contains('while (pageToken != null)'));
+    expect(initialRead, contains('while (!pageToken.isNullOrEmpty())'));
+    expect(
+      android,
+      contains('"changesTokenExpired" to response.changesTokenExpired'),
+      reason:
+          'Expired Health Connect tokens must be surfaced instead of saving '
+          'their unusable next token.',
+    );
+    expect(
+      android,
+      contains('record.samples.mapIndexed'),
+      reason: 'Every sample in a HeartRateRecord series must be imported.',
+    );
+    expect(android, contains('"parentRecordId" to metadata.id'));
+    expect(
+      android,
+      contains(r'#heartRate#${sample.time.toEpochMilli()}#$index'),
+      reason: 'Heart-rate child identities must be stable across retries.',
+    );
   });
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy_release_polish.dart';
 import '../../../app/localization/runtime_copy_release_actions.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 
 class PremiumLoggingIntroPage extends StatelessWidget {
   const PremiumLoggingIntroPage({super.key});
@@ -45,21 +46,21 @@ class PremiumLoggingIntroPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               _FeatureRow(
-                icon: Icons.qr_code_scanner_rounded,
+                kind: BilSemanticIconKind.barcode,
                 title: copy('Scan a barcode'),
                 body: copy(
                   'Identify packaged products and review their nutrition before saving.',
                 ),
               ),
               _FeatureRow(
-                icon: Icons.mic_rounded,
+                kind: BilSemanticIconKind.voice,
                 title: copy('Log with your voice'),
                 body: copy(
                   'Describe a meal naturally, then confirm every item before it is added.',
                 ),
               ),
               _FeatureRow(
-                icon: Icons.add_a_photo_rounded,
+                kind: BilSemanticIconKind.mealPhoto,
                 title: copy('Analyze a meal photo'),
                 body: copy(
                   'Use a photo as a starting point and review portions and evidence.',
@@ -130,11 +131,11 @@ class _HeroIcon extends StatelessWidget {
 
 class _FeatureRow extends StatelessWidget {
   const _FeatureRow({
-    required this.icon,
+    required this.kind,
     required this.title,
     required this.body,
   });
-  final IconData icon;
+  final BilSemanticIconKind kind;
   final String title;
   final String body;
 
@@ -144,10 +145,7 @@ class _FeatureRow extends StatelessWidget {
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CircleAvatar(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          child: Icon(icon, color: Theme.of(context).colorScheme.primary),
-        ),
+        BilSemanticIconBadge(kind: kind, size: 40, iconSize: 22),
         const SizedBox(width: 14),
         Expanded(
           child: Column(

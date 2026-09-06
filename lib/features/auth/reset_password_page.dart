@@ -10,7 +10,22 @@ import 'auth_error_localizer.dart';
 import 'auth_five_locale_copy.dart';
 
 class ResetPasswordPage extends StatefulWidget {
-  const ResetPasswordPage({super.key});
+  const ResetPasswordPage({
+    super.key,
+    this.initiallyFailed = false,
+    this.initiallyVerified = false,
+    this.onRetry,
+    this.recoverySessionEvents,
+    this.recoveryTimeout = const Duration(seconds: 10),
+    this.cloudConfiguredOverride,
+  });
+
+  final bool initiallyFailed;
+  final bool initiallyVerified;
+  final Future<bool> Function()? onRetry;
+  final Stream<bool>? recoverySessionEvents;
+  final Duration recoveryTimeout;
+  final bool? cloudConfiguredOverride;
 
   @override
   State<ResetPasswordPage> createState() => _ResetPasswordPageState();
@@ -20,8 +35,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final formKey = GlobalKey<FormState>();
   final password = TextEditingController();
   final confirmation = TextEditingController();
-  StreamSubscription<AuthState>? authSubscription;
+  StreamSubscription<bool>? authSubscription;
+  Timer? recoveryTimer;
   bool recoverySessionReady = false;
+  bool recoveryFailed = false;
+  bool retryingRecovery = false;
   bool loading = false;
   bool obscure = true;
   String? status;
@@ -29,23 +47,106 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   @override
   void initState() {
     super.initState();
-    if (!AppEnvironment.cloudConfigured) return;
-    authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((
-      state,
-    ) {
-      if (!mounted) return;
-      // A normal signed-in session must never authorize password recovery.
-      // Supabase emits this dedicated event only after validating the recovery
-      // callback and installing its short-lived recovery session.
-      if (state.event == AuthChangeEvent.passwordRecovery &&
-          state.session != null) {
-        setState(() => recoverySessionReady = true);
-      }
+    recoverySessionReady = widget.initiallyVerified;
+    recoveryFailed = widget.initiallyFailed && !recoverySessionReady;
+    if (_cloudConfigured && !recoveryFailed && !recoverySessionReady) {
+      _beginRecoveryWait();
+    }
+  }
+
+  bool get _cloudConfigured =>
+      widget.cloudConfiguredOverride ?? AppEnvironment.cloudConfigured;
+
+  Stream<bool> _recoveryEvents() =>
+      widget.recoverySessionEvents ??
+      Supabase.instance.client.auth.onAuthStateChange.map(
+        (state) =>
+            state.event == AuthChangeEvent.passwordRecovery &&
+            state.session != null,
+      );
+
+  void _beginRecoveryWait() {
+    recoveryTimer?.cancel();
+    unawaited(authSubscription?.cancel());
+    authSubscription = _recoveryEvents().listen((ready) {
+      if (!ready || !mounted) return;
+      recoveryTimer?.cancel();
+      setState(() {
+        recoverySessionReady = true;
+        recoveryFailed = false;
+        retryingRecovery = false;
+      });
+    }, onError: (Object _, StackTrace _) => _showRecoveryFailure());
+    recoveryTimer = Timer(widget.recoveryTimeout, _showRecoveryFailure);
+  }
+
+  void _showRecoveryFailure() {
+    if (!mounted || recoverySessionReady) return;
+    recoveryTimer?.cancel();
+    unawaited(authSubscription?.cancel());
+    authSubscription = null;
+    setState(() {
+      recoveryFailed = true;
+      retryingRecovery = false;
     });
+  }
+
+  Future<void> _retryRecovery() async {
+    if (retryingRecovery || recoverySessionReady) return;
+    recoveryTimer?.cancel();
+    await authSubscription?.cancel();
+    authSubscription = null;
+    if (!mounted) return;
+
+    setState(() {
+      recoveryFailed = false;
+      retryingRecovery = true;
+      status = null;
+    });
+    _beginRecoveryWait();
+
+    var exchanged = false;
+    try {
+      exchanged = await widget.onRetry?.call() ?? false;
+    } catch (_) {
+      exchanged = false;
+    }
+    if (!mounted || recoverySessionReady) return;
+    if (!exchanged) {
+      _showRecoveryFailure();
+    } else {
+      setState(() => retryingRecovery = false);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ResetPasswordPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.initiallyVerified &&
+        widget.initiallyVerified &&
+        !recoverySessionReady) {
+      recoveryTimer?.cancel();
+      unawaited(authSubscription?.cancel());
+      authSubscription = null;
+      recoverySessionReady = true;
+      recoveryFailed = false;
+      retryingRecovery = false;
+      return;
+    }
+    if (!oldWidget.initiallyFailed &&
+        widget.initiallyFailed &&
+        !recoverySessionReady) {
+      recoveryTimer?.cancel();
+      unawaited(authSubscription?.cancel());
+      authSubscription = null;
+      recoveryFailed = true;
+      retryingRecovery = false;
+    }
   }
 
   @override
   void dispose() {
+    recoveryTimer?.cancel();
     unawaited(authSubscription?.cancel());
     password.dispose();
     confirmation.dispose();
@@ -87,7 +188,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   @override
   Widget build(BuildContext context) {
     String tr(String en, String ar) => authFiveLocaleText(en, ar);
-    final cloudConfigured = AppEnvironment.cloudConfigured;
+    final cloudConfigured = _cloudConfigured;
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFD),
       appBar: AppBar(
@@ -129,18 +230,78 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     if (!recoverySessionReady)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 18),
-                        child: Text(
-                          cloudConfigured
-                              ? tr(
-                                  'Checking the recovery link…',
-                                  'جارٍ التحقق من رابط الاستعادة…',
-                                )
-                              : tr(
+                        child: !cloudConfigured
+                            ? Text(
+                                tr(
                                   'Cloud account recovery is not enabled in this build.',
                                   'استعادة الحساب السحابي غير مفعّلة في هذا الإصدار.',
                                 ),
-                          textAlign: TextAlign.center,
-                        ),
+                                textAlign: TextAlign.center,
+                              )
+                            : recoveryFailed
+                            ? Column(
+                                key: const Key(
+                                  'reset-password-callback-failed',
+                                ),
+                                children: [
+                                  const Icon(
+                                    Icons.link_off_rounded,
+                                    color: Color(0xFFB42318),
+                                    size: 36,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    tr(
+                                      'The recovery link could not be verified. Try it again, or request a new link.',
+                                      'تعذّر التحقق من رابط الاستعادة. حاول مرة أخرى أو اطلب رابطًا جديدًا.',
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Color(0xFFB42318),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 14),
+                                  FilledButton.tonalIcon(
+                                    key: const Key(
+                                      'reset-password-callback-retry',
+                                    ),
+                                    onPressed: retryingRecovery
+                                        ? null
+                                        : _retryRecovery,
+                                    icon: const Icon(Icons.refresh_rounded),
+                                    label: Text(
+                                      tr('Try again', 'حاول مرة أخرى'),
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => context.go('/login'),
+                                    child: Text(
+                                      tr('Request a new link', 'طلب رابط جديد'),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const SizedBox.square(
+                                    dimension: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Flexible(
+                                    child: Text(
+                                      tr(
+                                        'Checking the recovery link…',
+                                        'جارٍ التحقق من رابط الاستعادة…',
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ],
+                              ),
                       ),
                     TextFormField(
                       controller: password,

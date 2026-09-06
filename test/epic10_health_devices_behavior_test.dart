@@ -10,6 +10,7 @@ final class _ManagedBridge implements ManagedBleFitnessBridge {
   bool connected = true;
   bool forgotten = false;
   bool disconnected = false;
+  bool failReads = false;
 
   @override
   Future<void> requestPermissions() async {}
@@ -56,36 +57,41 @@ final class _ManagedBridge implements ManagedBleFitnessBridge {
   Future<List<Map<String, Object?>>> readMeasurements({
     required BlePeripheral peripheral,
     required DateTime asOf,
-  }) async => [
-    {
-      'sampleId': '${peripheral.id}:valid',
-      'kind': 'weight',
-      'value': 220.46226218,
-      'unit': 'lb',
-      'observedAt': asOf.subtract(const Duration(minutes: 1)).toIso8601String(),
-    },
-    {
-      'sampleId': '${peripheral.id}:stale',
-      'kind': 'weight',
-      'value': 80,
-      'unit': 'kg',
-      'observedAt': asOf.subtract(const Duration(days: 8)).toIso8601String(),
-    },
-    {
-      'sampleId': '${peripheral.id}:bad-unit',
-      'kind': 'weight',
-      'value': 80,
-      'unit': 'stone',
-      'observedAt': asOf.toIso8601String(),
-    },
-    {
-      'sampleId': '${peripheral.id}:regulated',
-      'kind': 'oxygen',
-      'value': 98,
-      'unit': '%',
-      'observedAt': asOf.toIso8601String(),
-    },
-  ];
+  }) async {
+    if (failReads) throw StateError('gatt_disconnected');
+    return [
+      {
+        'sampleId': '${peripheral.id}:valid',
+        'kind': 'weight',
+        'value': 220.46226218,
+        'unit': 'lb',
+        'observedAt': asOf
+            .subtract(const Duration(minutes: 1))
+            .toIso8601String(),
+      },
+      {
+        'sampleId': '${peripheral.id}:stale',
+        'kind': 'weight',
+        'value': 80,
+        'unit': 'kg',
+        'observedAt': asOf.subtract(const Duration(days: 8)).toIso8601String(),
+      },
+      {
+        'sampleId': '${peripheral.id}:bad-unit',
+        'kind': 'weight',
+        'value': 80,
+        'unit': 'stone',
+        'observedAt': asOf.toIso8601String(),
+      },
+      {
+        'sampleId': '${peripheral.id}:regulated',
+        'kind': 'oxygen',
+        'value': 98,
+        'unit': '%',
+        'observedAt': asOf.toIso8601String(),
+      },
+    ];
+  }
 }
 
 final class _HealthBridge implements NativeHealthBridge {
@@ -124,6 +130,7 @@ final class _CapabilityBridge
   bool available;
   double value = 80;
   int backgroundRequests = 0;
+  bool emitDeletion = false;
 
   @override
   String get id => 'capability-health';
@@ -160,21 +167,23 @@ final class _CapabilityBridge
     required DateTime asOf,
     required Set<String> types,
   }) async => NativeHealthPage(
-    records: [
-      NativeHealthRecord(
-        id: 'weight-1',
-        type: HealthDataType.weight,
-        value: value,
-        unit: 'kg',
-        observedAt: asOf.subtract(const Duration(minutes: 1)),
-        sourceId: 'scale',
-        deviceId: 'scale-1',
-        confidence: .95,
-        providerId: id,
-        timeZoneId: 'Africa/Cairo',
-      ),
-    ],
-    deletedIds: const [],
+    records: emitDeletion
+        ? const <NativeHealthRecord>[]
+        : [
+            NativeHealthRecord(
+              id: 'weight-1',
+              type: HealthDataType.weight,
+              value: value,
+              unit: 'kg',
+              observedAt: asOf.subtract(const Duration(minutes: 1)),
+              sourceId: 'scale',
+              deviceId: 'scale-1',
+              confidence: .95,
+              providerId: id,
+              timeZoneId: 'Africa/Cairo',
+            ),
+          ],
+    deletedIds: emitDeletion ? const ['weight-1'] : const [],
     nextAnchor: 'anchor',
     hasMore: false,
   );
@@ -337,6 +346,41 @@ void main() {
   );
 
   test(
+    'anchored health deletions remove persisted signals and fingerprints',
+    () async {
+      final bridge = _CapabilityBridge(available: true);
+      final store = InMemoryGlobalStore();
+      final runtime = UnifiedHealthDataRuntime(
+        bridges: [bridge],
+        store: store,
+        audit: InMemoryGlobalAuditSink(),
+      );
+      final at = DateTime.utc(2026, 9, 4);
+      final consent = GlobalConsentGrant(
+        scope: 'health_read',
+        state: GlobalConsentState.granted,
+        updatedAt: at,
+      );
+
+      expect(
+        await runtime.synchronize(asOf: at, consent: consent),
+        hasLength(1),
+      );
+      expect(await store.list('health_signals'), hasLength(1));
+      expect(await store.list('health_seen'), hasLength(1));
+
+      bridge.emitDeletion = true;
+      expect(await runtime.synchronize(asOf: at, consent: consent), isEmpty);
+      expect(await store.list('health_signals'), isEmpty);
+      expect(await store.list('health_seen'), isEmpty);
+      expect(
+        await store.get('health_tombstones', '${bridge.id}:weight-1'),
+        isNotNull,
+      );
+    },
+  );
+
+  test(
     'BLE rejects stale and unknown-unit data, deduplicates, and forgets',
     () async {
       debugDefaultTargetPlatformOverride = TargetPlatform.android;
@@ -391,6 +435,28 @@ void main() {
     );
   });
 
+  test('BLE refresh failure clears the verified connected state', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final bridge = _ManagedBridge();
+    final store = InMemoryGlobalStore();
+    final controller = FitnessDeviceController(bridge, store: store);
+
+    await controller.scan();
+    await controller.connect(controller.state.devices.single);
+    expect(controller.state.status, FitnessDeviceConnectionStatus.connected);
+
+    bridge.failReads = true;
+    await controller.refreshMeasurements();
+
+    expect(controller.state.status, FitnessDeviceConnectionStatus.failed);
+    expect(controller.state.connectedDeviceId, isNull);
+    expect(controller.state.failureCode, 'gatt_disconnected');
+    expect(
+      await store.get('connected_fitness_device_state', 'scale-1'),
+      containsPair('connected', false),
+    );
+  });
+
   test('compatibility matrix never claims physical-device verification', () {
     expect(BilDeviceCompatibilityMatrix.entries, isNotEmpty);
     expect(
@@ -402,4 +468,30 @@ void main() {
       isTrue,
     );
   });
+
+  test(
+    'compatibility matrix is platform-specific and uses full native scope',
+    () {
+      final ios = BilDeviceCompatibilityMatrix.forTargetPlatform(
+        TargetPlatform.iOS,
+      );
+      final android = BilDeviceCompatibilityMatrix.forTargetPlatform(
+        TargetPlatform.android,
+      );
+
+      expect(ios.map((entry) => entry.id), [
+        'apple-healthkit',
+        'bluetooth-sig-health-profiles',
+      ]);
+      expect(android.map((entry) => entry.id), [
+        'android-health-connect',
+        'bluetooth-sig-health-profiles',
+      ]);
+      expect(ios.first.dataTypes, BilHealthScope.appleHealthReadTypeNames);
+      expect(
+        android.first.dataTypes,
+        BilHealthScope.healthConnectReadTypeNames,
+      );
+    },
+  );
 }

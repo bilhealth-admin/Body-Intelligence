@@ -138,55 +138,57 @@ abstract final class AiAccessRuntimeCopy {
       'uk':
           'Підписка Premium AI Coach активна, але доступні AI-токени вичерпано. Повідомлення не було списано. Додайте токени AI Boost, щоб продовжити зараз.',
     },
-    'A gift from BIL 🎁 Your AI Coach usage has been fully reset. You can use your allowance again until the end of your current cycle.': {
+    'A gift from BIL 🎁 Your current-period AI Coach usage was reset, and 2,500 non-expiring AI Boost tokens were added.': {
       'ar':
-          'هدية من BIL 🎁 تمت إعادة ضبط استخدام AI Coach بالكامل، ويمكنك الاستفادة من حصتك مجددًا حتى نهاية دورتك الحالية.',
+          'هدية من BIL 🎁 تمت إعادة ضبط استخدام AI Coach في فترتك الحالية، وأُضيف 2,500 توكين AI Boost غير منتهية.',
       'en':
-          'A gift from BIL 🎁 Your AI Coach usage has been fully reset. You can use your allowance again until the end of your current cycle.',
+          'A gift from BIL 🎁 Your current-period AI Coach usage was reset, and 2,500 non-expiring AI Boost tokens were added.',
       'fr':
-          'Un cadeau de BIL 🎁 L’utilisation d’AI Coach a été entièrement réinitialisée. Profitez de nouveau de votre quota jusqu’à la fin de votre cycle actuel.',
+          'Un cadeau de BIL 🎁 L’utilisation d’AI Coach de votre période actuelle a été réinitialisée et 2 500 jetons AI Boost sans expiration ont été ajoutés.',
       'es':
-          'Un regalo de BIL 🎁 El uso de AI Coach se restableció por completo. Puedes volver a usar tu cuota hasta el final de tu ciclo actual.',
+          'Un regalo de BIL 🎁 Se restableció tu uso de AI Coach del período actual y se añadieron 2.500 tokens AI Boost sin vencimiento.',
       'tr':
-          'BIL’den bir hediye 🎁 AI Coach kullanımınız tamamen sıfırlandı. Mevcut döneminiz bitene kadar kotanızı yeniden kullanabilirsiniz.',
+          'BIL’den bir hediye 🎁 Mevcut dönemdeki AI Coach kullanımınız sıfırlandı ve süresiz 2.500 AI Boost jetonu eklendi.',
       'de':
-          'Ein Geschenk von BIL 🎁 Deine AI-Coach-Nutzung wurde vollständig zurückgesetzt. Nutze dein Kontingent bis zum Ende deines aktuellen Zyklus erneut.',
+          'Ein Geschenk von BIL 🎁 Deine AI-Coach-Nutzung im aktuellen Zeitraum wurde zurückgesetzt und 2.500 nicht ablaufende AI-Boost-Token wurden hinzugefügt.',
       'it':
-          'Un regalo da BIL 🎁 L’utilizzo di AI Coach è stato azzerato. Puoi usare di nuovo la tua quota fino alla fine del ciclo attuale.',
+          'Un regalo da BIL 🎁 L’utilizzo di AI Coach del periodo corrente è stato azzerato e sono stati aggiunti 2.500 token AI Boost senza scadenza.',
       'pt-BR':
-          'Um presente da BIL 🎁 O uso do AI Coach foi totalmente zerado. Você pode usar sua cota novamente até o fim do ciclo atual.',
+          'Um presente da BIL 🎁 O uso do AI Coach no período atual foi zerado e 2.500 tokens AI Boost sem validade foram adicionados.',
       'pt-PT':
-          'Um presente da BIL 🎁 A utilização do AI Coach foi totalmente reposta. Pode voltar a usar a sua quota até ao fim do ciclo atual.',
+          'Um presente da BIL 🎁 A utilização do AI Coach no período atual foi reposta e foram adicionados 2.500 tokens AI Boost sem validade.',
       'ur':
-          'BIL کی طرف سے تحفہ 🎁 AI Coach کا استعمال مکمل طور پر ری سیٹ ہو گیا ہے۔ موجودہ دور کے اختتام تک اپنا کوٹہ دوبارہ استعمال کریں۔',
+          'BIL کی طرف سے تحفہ 🎁 موجودہ مدت کا AI Coach استعمال ری سیٹ ہو گیا اور 2,500 غیر ختم ہونے والے AI Boost ٹوکن شامل کیے گئے۔',
       'fa':
-          'هدیه‌ای از BIL 🎁 میزان استفاده از AI Coach کاملاً بازنشانی شد. تا پایان دوره فعلی دوباره از سهمیه خود استفاده کنید.',
+          'هدیه‌ای از BIL 🎁 مصرف AI Coach در دوره فعلی بازنشانی شد و ۲٬۵۰۰ توکن AI Boost بدون انقضا اضافه شد.',
       'hi':
-          'BIL की ओर से उपहार 🎁 AI Coach का उपयोग पूरी तरह रीसेट हो गया है। मौजूदा अवधि के अंत तक अपना कोटा फिर से इस्तेमाल करें।',
+          'BIL की ओर से उपहार 🎁 मौजूदा अवधि का AI Coach उपयोग रीसेट कर दिया गया और 2,500 कभी न समाप्त होने वाले AI Boost टोकन जोड़े गए।',
       'id':
-          'Hadiah dari BIL 🎁 Penggunaan AI Coach telah direset sepenuhnya. Gunakan kembali kuota Anda hingga siklus saat ini berakhir.',
+          'Hadiah dari BIL 🎁 Penggunaan AI Coach periode berjalan telah direset dan 2.500 token AI Boost tanpa kedaluwarsa ditambahkan.',
       'ms':
-          'Hadiah daripada BIL 🎁 Penggunaan AI Coach telah ditetapkan semula sepenuhnya. Gunakan semula kuota anda hingga kitaran semasa berakhir.',
+          'Hadiah daripada BIL 🎁 Penggunaan AI Coach bagi tempoh semasa telah ditetapkan semula dan 2,500 token AI Boost tanpa tamat tempoh ditambah.',
       'ja':
-          'BILからのプレゼントです🎁 AI Coachの利用回数を完全にリセットしました。現在のサイクル終了まで、割り当てを再び利用できます。',
+          'BILからのプレゼントです🎁 現在期間のAI Coach利用量をリセットし、有効期限のないAI Boostトークン2,500個を追加しました。',
       'ko':
-          'BIL의 선물입니다 🎁 AI Coach 사용량이 완전히 초기화되었습니다. 현재 주기가 끝날 때까지 할당량을 다시 이용하세요.',
-      'zh-Hans': '来自 BIL 的礼物 🎁 AI Coach 使用量已全部重置。你可以在当前周期结束前再次使用配额。',
-      'zh-Hant': '來自 BIL 的禮物 🎁 AI Coach 使用量已全部重設。你可以在目前週期結束前再次使用配額。',
+          'BIL의 선물입니다 🎁 현재 기간의 AI Coach 사용량이 초기화되었고 만료되지 않는 AI Boost 토큰 2,500개가 추가되었습니다.',
+      'zh-Hans':
+          '来自 BIL 的礼物 🎁 当前周期的 AI Coach 使用量已重置，并已添加 2,500 个永不过期的 AI Boost 令牌。',
+      'zh-Hant':
+          '來自 BIL 的禮物 🎁 目前週期的 AI Coach 使用量已重設，並已新增 2,500 個永不過期的 AI Boost 權杖。',
       'ru':
-          'Подарок от BIL 🎁 Использование AI Coach полностью сброшено. Снова используйте свою квоту до конца текущего цикла.',
+          'Подарок от BIL 🎁 Использование AI Coach за текущий период сброшено, и добавлено 2 500 бессрочных токенов AI Boost.',
       'bn':
-          'BIL-এর পক্ষ থেকে উপহার 🎁 AI Coach-এর ব্যবহার পুরোপুরি রিসেট হয়েছে। বর্তমান চক্র শেষ হওয়া পর্যন্ত আবার আপনার কোটা ব্যবহার করুন।',
+          'BIL-এর পক্ষ থেকে উপহার 🎁 বর্তমান সময়ের AI Coach ব্যবহার রিসেট করা হয়েছে এবং মেয়াদহীন 2,500টি AI Boost টোকেন যোগ করা হয়েছে।',
       'vi':
-          'Quà tặng từ BIL 🎁 Mức sử dụng AI Coach đã được đặt lại hoàn toàn. Bạn có thể dùng lại hạn mức đến hết chu kỳ hiện tại.',
+          'Quà tặng từ BIL 🎁 Mức sử dụng AI Coach trong kỳ hiện tại đã được đặt lại và 2.500 token AI Boost không hết hạn đã được thêm.',
       'th':
-          'ของขวัญจาก BIL 🎁 รีเซ็ตการใช้งาน AI Coach ทั้งหมดแล้ว คุณใช้โควตาได้อีกครั้งจนกว่ารอบปัจจุบันจะสิ้นสุด',
+          'ของขวัญจาก BIL 🎁 รีเซ็ตการใช้งาน AI Coach ในรอบปัจจุบันแล้ว และเพิ่มโทเคน AI Boost ที่ไม่มีวันหมดอายุ 2,500 โทเคน',
       'pl':
-          'Prezent od BIL 🎁 Użycie AI Coach zostało całkowicie wyzerowane. Możesz ponownie korzystać z limitu do końca bieżącego cyklu.',
+          'Prezent od BIL 🎁 Użycie AI Coach w bieżącym okresie zostało wyzerowane i dodano 2500 niewygasających tokenów AI Boost.',
       'nl':
-          'Een cadeau van BIL 🎁 Je AI Coach-gebruik is volledig gereset. Je kunt je tegoed opnieuw gebruiken tot het einde van je huidige cyclus.',
+          'Een cadeau van BIL 🎁 Je AI Coach-gebruik in de huidige periode is gereset en er zijn 2.500 AI Boost-tokens zonder vervaldatum toegevoegd.',
       'uk':
-          'Подарунок від BIL 🎁 Використання AI Coach повністю скинуто. Знову користуйтеся своєю квотою до кінця поточного циклу.',
+          'Подарунок від BIL 🎁 Використання AI Coach за поточний період скинуто й додано 2 500 безстрокових токенів AI Boost.',
     },
     'Open AI Coach': {
       'ar': 'افتح AI Coach',

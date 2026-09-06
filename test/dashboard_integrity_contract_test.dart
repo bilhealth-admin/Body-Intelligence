@@ -53,7 +53,7 @@ void main() {
     }
   });
 
-  test('connected health is additive and Personal Health AI stays intact', () {
+  test('unified dashboard preserves every supplied intelligence surface', () {
     final dashboard = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
@@ -70,12 +70,26 @@ void main() {
     expect(benchmark, contains('this.connectedHealth'));
     expect(benchmark, contains('final Widget? personalHealthAi;'));
     expect(benchmark, contains('final Widget? connectedHealth;'));
-    expect(benchmark, contains('personalHealthAi!'));
-    expect(benchmark, contains('connectedHealth!'));
+    expect(benchmark, contains('hero: hero'));
+    expect(benchmark, contains('aiCoach: aiCoach'));
+    expect(benchmark, contains('dailyIntelligence: dailyIntelligence'));
+    expect(benchmark, contains('personalHealthAi: personalHealthAi'));
+    expect(benchmark, contains('connectedHealth: connectedHealth'));
 
-    final personalIndex = benchmark.indexOf('personalHealthAi!');
-    final connectedIndex = benchmark.indexOf('connectedHealth!');
-    expect(personalIndex, greaterThanOrEqualTo(0));
-    expect(connectedIndex, greaterThan(personalIndex));
+    final current = File(
+      'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
+    ).readAsStringSync();
+    for (final key in const <String>[
+      'dashboard-ai-coach-slot',
+      'dashboard-daily-intelligence-slot',
+      'dashboard-secondary-ai-coach-slot',
+      'dashboard-personal-health-ai-slot',
+      'dashboard-mobile-summary-card',
+    ]) {
+      expect(current, contains(key), reason: 'Missing unified surface: $key');
+    }
+    expect(current, contains('connectedHealth!,'));
+    expect(current, contains('child: personalHealthAi!'));
+    expect(current, contains('child: progressSection!'));
   });
 }

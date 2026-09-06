@@ -10,10 +10,11 @@ expose, rotate, or create a credential.
 
 ## Candidate identity and build state
 
-- Source metadata: `1.0.0+5`.
+- Historical source metadata at this audit: `1.0.0+5`; the current release
+  source was advanced to `1.0.0+8` on 2026-09-05 because build 7 now exists.
 - Android application ID and Apple bundle ID:
   `com.bilhealth.bodyintelligencelog`.
-- Both signed workflows require an explicit numeric build number of at least 5,
+- Both signed workflows now require an explicit numeric build number of at least 8,
   pin Flutter `3.44.6`, pass the same reviewed production Dart defines, verify
   signing/entitlements and SHA-256, and mark physical-device validation as a
   separate required gate.
@@ -133,7 +134,7 @@ external BLE peripherals when the cloud device cannot pair that hardware.
 ## Exact stop points before any public submission
 
 1. Finish QA, obtain a clean full-suite result, and freeze one source commit.
-2. Build signed Android and iOS candidates from that exact commit with build 5
+2. Build signed Android and iOS candidates from that exact commit with build 8
    or a higher unused build number; verify hashes and signing evidence.
 3. Complete the real-phone and hardware gates against those exact hashes.
 4. Upload the final store screenshots and attach the final iOS build.

@@ -12,8 +12,9 @@ extension BilNotificationPlatformInitialization on BilNotificationService {
     } on tz.LocationNotFoundException {
       tz.setLocalLocation(tz.UTC);
     }
-    final isAndroid =
-        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+    final platform = defaultTargetPlatform;
+    final supportsNotificationNavigation =
+        !kIsWeb && BilNotificationNavigation.supportsPlatform(platform);
     await _plugin.initialize(
       settings: const InitializationSettings(
         android: AndroidInitializationSettings('ic_stat_bil_notification'),
@@ -28,16 +29,21 @@ extension BilNotificationPlatformInitialization on BilNotificationService {
           requestSoundPermission: false,
         ),
       ),
-      onDidReceiveNotificationResponse: isAndroid
-          ? (response) =>
-                BilNotificationNavigation.handlePayload(response.payload)
+      onDidReceiveNotificationResponse: supportsNotificationNavigation
+          ? (response) {
+              if (response.notificationResponseType ==
+                  NotificationResponseType.notificationDismissed) {
+                return;
+              }
+              BilNotificationNavigation.handlePayload(response.payload);
+            }
           : null,
     );
     _initialized = true;
-    if (!isAndroid || BilNotificationService._androidLaunchDetailsHandled) {
+    if (!supportsNotificationNavigation ||
+        !BilNotificationService._launchDetailsHandledPlatforms.add(platform)) {
       return;
     }
-    BilNotificationService._androidLaunchDetailsHandled = true;
     try {
       final launch = await _plugin.getNotificationAppLaunchDetails();
       if (launch?.didNotificationLaunchApp ?? false) {
@@ -46,7 +52,9 @@ extension BilNotificationPlatformInitialization on BilNotificationService {
         );
       }
     } on Object {
-      // Scheduling remains usable if Android cannot report launch metadata.
+      // Scheduling remains usable if the native platform cannot report launch
+      // metadata. A later service instance may retry the one-time lookup.
+      BilNotificationService._launchDetailsHandledPlatforms.remove(platform);
     }
   }
 }
@@ -90,12 +98,12 @@ extension BilDailyNotificationGrouping on BilNotificationService {
 
     await _plugin.zonedSchedule(
       id: _dailyGroupSummaryNotificationId,
-      title: 'BIL',
+      title: '🔔 BIL',
       body: body,
       scheduledDate: occurrences.first,
       notificationDetails: NotificationDetails(
         android: BilAndroidNotificationPresentation.dailySummary(
-          title: 'BIL',
+          title: '🔔 BIL',
           body: body,
           lines: lines,
         ),

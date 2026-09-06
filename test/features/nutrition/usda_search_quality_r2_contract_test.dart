@@ -25,8 +25,11 @@ void main() {
     expect(repository, contains('FoodNutrient.fiber'));
     expect(materializer, contains('incomingEvidenceMask'));
     expect(materializer, contains('hasNewEvidence'));
-    expect(materializer, contains('incomingCalories ?? byUuid.calories'));
-    expect(materializer, contains('incomingProtein ?? byUuid.protein'));
+    // The materializer can now merge an authoritative barcode result into an
+    // older row with a different UUID, so the preserved values come from the
+    // resolved `existing` row rather than only UUID lookup alone.
+    expect(materializer, contains('incomingCalories ?? existing.calories'));
+    expect(materializer, contains('incomingProtein ?? existing.protein'));
     expect(authority, contains('_mergeCommunity'));
     expect(authority, contains('_sameFoodIdentity'));
     expect(authority, contains('FoodSearchNormalizer.normalize(a.name)'));

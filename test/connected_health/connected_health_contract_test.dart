@@ -4,8 +4,12 @@ import 'dart:async';
 import 'package:body_intelligence_log/features/connected_health/connected_health_model.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_extended.dart';
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_page.dart';
 import 'package:body_intelligence_log/features/connected_health/providers/connected_health_provider.dart';
+import 'package:body_intelligence_log/features/global_platform/health_data/unified_health_data_integration.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -37,6 +41,86 @@ void main() {
     },
   );
 
+  test(
+    'permission completion performs the first health import immediately',
+    () async {
+      final gateway = _PermissionGateway();
+      final controller = ConnectedHealthController(gateway);
+      await Future<void>.delayed(Duration.zero);
+
+      final request = controller.requestPermissions();
+      gateway.permissionRequest.complete(_authorizationRequestedSnapshot);
+      await request;
+
+      expect(gateway.permissionCalls, 1);
+      expect(gateway.syncCalls, 1);
+      expect(
+        controller.state.value?.status,
+        ConnectedHealthStatus.synchronized,
+      );
+      controller.dispose();
+    },
+  );
+
+  test(
+    'permission tap waits for constructor refresh instead of being lost',
+    () async {
+      final gateway = _DelayedLoadGateway();
+      final controller = ConnectedHealthController(gateway);
+
+      final request = controller.requestPermissions();
+      expect(gateway.permissionCalls, 0);
+
+      gateway.loadRequest.complete(_permissionRequiredSnapshot);
+      await Future<void>.delayed(Duration.zero);
+      expect(gateway.permissionCalls, 1);
+
+      gateway.permissionRequest.complete(_permissionRequiredSnapshot);
+      await request;
+      expect(
+        controller.state.value?.status,
+        ConnectedHealthStatus.permissionRequired,
+      );
+      controller.dispose();
+    },
+  );
+
+  test(
+    'refresh imports new records for an already synchronized source',
+    () async {
+      final gateway = _SynchronizedGateway();
+      final controller = ConnectedHealthController(gateway);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(gateway.loadCalls, 1);
+      expect(gateway.syncCalls, 1);
+
+      await controller.refresh();
+      expect(gateway.loadCalls, 2);
+      expect(gateway.syncCalls, 2);
+      controller.dispose();
+    },
+  );
+
+  test('foreground refresh keeps the current snapshot visible', () async {
+    final gateway = _DelayedRefreshGateway();
+    final controller = ConnectedHealthController(gateway);
+    await Future<void>.delayed(Duration.zero);
+    expect(controller.state, isA<AsyncData<ConnectedHealthSnapshot>>());
+
+    final refresh = controller.refresh();
+    expect(controller.state, isA<AsyncData<ConnectedHealthSnapshot>>());
+    expect(
+      controller.state.value?.status,
+      ConnectedHealthStatus.permissionDenied,
+    );
+
+    gateway.refreshLoad.complete(_permissionDeniedSnapshot);
+    await refresh;
+    expect(controller.state, isA<AsyncData<ConnectedHealthSnapshot>>());
+    controller.dispose();
+  });
+
   test('permission action is hidden for an unsupported platform', () {
     expect(
       connectedHealthCanRequestPermissions(ConnectedHealthStatus.unavailable),
@@ -54,6 +138,170 @@ void main() {
       ),
       isTrue,
     );
+  });
+
+  test('native read and write scopes stay platform-specific', () {
+    expect(
+      BilHealthScope.healthConnectReadTypeNames,
+      BilHealthScope.appleHealthReadTypeNames,
+      reason:
+          'The two native bridges now implement the same canonical read scope.',
+    );
+    expect(
+      connectedHealthReadTypesForPlatform(
+        TargetPlatform.iOS,
+      ).map((type) => type.name).toSet(),
+      BilHealthScope.appleHealthReadTypeNames,
+    );
+    expect(
+      connectedHealthReadTypesForPlatform(
+        TargetPlatform.android,
+      ).map((type) => type.name).toSet(),
+      BilHealthScope.healthConnectReadTypeNames,
+    );
+    expect(
+      connectedHealthWriteTypeNamesForPlatform(TargetPlatform.iOS),
+      const <String>{'weight'},
+    );
+    expect(
+      connectedHealthWriteTypeNamesForPlatform(TargetPlatform.android),
+      const <String>{'weight', 'nutrition'},
+    );
+    expect(
+      connectedHealthReadTypesForPlatform(TargetPlatform.windows),
+      isEmpty,
+    );
+    expect(
+      connectedHealthWriteTypeNamesForPlatform(TargetPlatform.windows),
+      isEmpty,
+    );
+  });
+
+  test('iOS never calls an empty HealthKit read synchronized', () {
+    expect(
+      connectedHealthStatusAfterSynchronization(
+        platform: TargetPlatform.iOS,
+        hasVerifiedNativeEvidence: false,
+      ),
+      ConnectedHealthStatus.authorizationRequested,
+    );
+    expect(
+      connectedHealthStatusAfterSynchronization(
+        platform: TargetPlatform.iOS,
+        hasVerifiedNativeEvidence: true,
+      ),
+      ConnectedHealthStatus.synchronized,
+    );
+    expect(
+      connectedHealthStatusAfterSynchronization(
+        platform: TargetPlatform.android,
+        hasVerifiedNativeEvidence: false,
+      ),
+      ConnectedHealthStatus.synchronized,
+    );
+  });
+
+  test('watch presentation requires wearable provenance', () {
+    final observedAt = DateTime.utc(2026, 9, 4);
+    final manual = ConnectedHealthSignalView(
+      key: 'weight',
+      value: 80,
+      unit: 'kg',
+      source: 'iPhone',
+      observedAt: observedAt,
+      confidence: 1,
+    );
+    final watch = ConnectedHealthSignalView(
+      key: 'heartRate',
+      value: 70,
+      unit: 'count/min',
+      source: 'Apple Health',
+      observedAt: observedAt,
+      confidence: 1,
+      attributes: <String, Object?>{'wearableKind': 'apple_watch'},
+    );
+
+    expect(connectedHealthSignalHasWearableProvenance(manual), isFalse);
+    expect(connectedHealthSignalHasWearableProvenance(watch), isTrue);
+  });
+
+  testWidgets(
+    'nested gateway override reaches the controller and the page settles',
+    (tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      try {
+        final gateway = _PermissionGateway();
+
+        await tester.pumpWidget(
+          ProviderScope(
+            child: ProviderScope(
+              overrides: [
+                connectedHealthGatewayProvider.overrideWithValue(gateway),
+              ],
+              child: const MaterialApp(home: ConnectedHealthPage()),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle(
+          const Duration(milliseconds: 20),
+          EnginePhase.sendSemanticsUpdate,
+          const Duration(seconds: 1),
+        );
+
+        expect(gateway.loadCalls, 1);
+        expect(find.byKey(const Key('connected-health-source-card')), findsOne);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
+
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      } finally {
+        debugDefaultTargetPlatformOverride = null;
+      }
+    },
+  );
+
+  testWidgets('returning from system settings refreshes native health status', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    try {
+      final gateway = _SettingsGateway();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            connectedHealthGatewayProvider.overrideWithValue(gateway),
+            verifiedSubscriptionStateProvider.overrideWithValue(
+              const AsyncLoading(),
+            ),
+          ],
+          child: const MaterialApp(home: ConnectedHealthPage()),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(gateway.loadCalls, 1);
+      await tester.tap(find.text('Open system settings'));
+      await tester.pump();
+      expect(gateway.openSettingsCalls, 1);
+
+      final observer =
+          tester.state(find.byType(ConnectedHealthPage))
+              as WidgetsBindingObserver;
+      observer.didChangeAppLifecycleState(AppLifecycleState.paused);
+      await tester.pump();
+      expect(gateway.loadCalls, 1);
+
+      observer.didChangeAppLifecycleState(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(gateway.loadCalls, 2);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 1));
+      await tester.pump(const Duration(milliseconds: 1));
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 
   test('connected health card is independent from personal health AI', () {
@@ -76,9 +324,10 @@ void main() {
   });
 
   test('connected health uses existing global platform runtimes', () {
-    final provider = File(
+    final provider = <String>[
       'lib/features/connected_health/providers/connected_health_provider.dart',
-    ).readAsStringSync();
+      'lib/features/connected_health/providers/connected_health_gateway_helpers.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
 
     expect(provider, contains('globalProductFlowsProvider'));
     expect(provider, contains('_flows.appleHealth.integration.synchronize'));
@@ -89,13 +338,15 @@ void main() {
   });
 
   test('device verification requires persisted native evidence', () {
-    final provider = File(
+    final provider = <String>[
       'lib/features/connected_health/providers/connected_health_provider.dart',
-    ).readAsStringSync();
+      'lib/features/connected_health/providers/connected_health_gateway_helpers.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
 
     expect(provider, isNot(contains('deviceVerified: true')));
     expect(provider, contains('signal.provenance.providerId == _bridge.id'));
-    expect(provider, contains('selected.any(_isEvidenceFromNativeBridge)'));
+    expect(provider, contains('selected.any('));
+    expect(provider, contains('_isEvidenceFromNativeBridge'));
   });
 
   test('management route is registered', () {
@@ -154,7 +405,11 @@ void main() {
         reason: 'The Dashboard must not retain a blood-pressure side card.',
       );
       expect(page, contains("Key('fitness-devices-premium-gate')"));
-      expect(page, contains("Key('connected-health-live-watch-card')"));
+      expect(page, contains("'connected-health-live-watch-card'"));
+      expect(page, contains("'connected-health-source-card'"));
+      expect(page, contains("'connected-health-signals-card'"));
+      expect(page, contains('connectedHealthSnapshotHasWearableEvidence('));
+      expect(page, contains('defaultTargetPlatform == TargetPlatform.android'));
       expect(page, contains('child: const _FitnessDeviceSection()'));
       expect(card, contains('LiveHealthWatch('));
       expect(card, contains("Key('dashboard-live-fitness-watch-slot')"));
@@ -209,9 +464,48 @@ final class _PermissionGateway implements ConnectedHealthGateway {
   Completer<ConnectedHealthSnapshot> permissionRequest =
       Completer<ConnectedHealthSnapshot>();
   int permissionCalls = 0;
+  int loadCalls = 0;
+  int syncCalls = 0;
 
   @override
-  Future<ConnectedHealthSnapshot> load() async => _permissionRequiredSnapshot;
+  Future<ConnectedHealthSnapshot> load() async {
+    loadCalls += 1;
+    return _permissionRequiredSnapshot;
+  }
+
+  @override
+  Future<ConnectedHealthSnapshot> requestPermissions() {
+    permissionCalls += 1;
+    return permissionRequest.future;
+  }
+
+  @override
+  Future<void> openSystemSettings() async {}
+
+  @override
+  Future<ConnectedHealthSnapshot> requestWeightWritePermission() async =>
+      _permissionRequiredSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> revokePermissions() async =>
+      _permissionRequiredSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> synchronize() async {
+    syncCalls += 1;
+    return _synchronizedSnapshot;
+  }
+}
+
+final class _DelayedLoadGateway implements ConnectedHealthGateway {
+  final Completer<ConnectedHealthSnapshot> loadRequest =
+      Completer<ConnectedHealthSnapshot>();
+  final Completer<ConnectedHealthSnapshot> permissionRequest =
+      Completer<ConnectedHealthSnapshot>();
+  int permissionCalls = 0;
+
+  @override
+  Future<ConnectedHealthSnapshot> load() => loadRequest.future;
 
   @override
   Future<ConnectedHealthSnapshot> requestPermissions() {
@@ -235,6 +529,103 @@ final class _PermissionGateway implements ConnectedHealthGateway {
       _permissionRequiredSnapshot;
 }
 
+final class _DelayedRefreshGateway implements ConnectedHealthGateway {
+  final Completer<ConnectedHealthSnapshot> refreshLoad =
+      Completer<ConnectedHealthSnapshot>();
+  int loadCalls = 0;
+
+  @override
+  Future<ConnectedHealthSnapshot> load() {
+    loadCalls += 1;
+    return loadCalls == 1
+        ? Future<ConnectedHealthSnapshot>.value(_permissionDeniedSnapshot)
+        : refreshLoad.future;
+  }
+
+  @override
+  Future<void> openSystemSettings() async {}
+
+  @override
+  Future<ConnectedHealthSnapshot> requestPermissions() async =>
+      _permissionDeniedSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> requestWeightWritePermission() async =>
+      _permissionDeniedSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> revokePermissions() async =>
+      _permissionDeniedSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> synchronize() async =>
+      _permissionDeniedSnapshot;
+}
+
+final class _SettingsGateway implements ConnectedHealthGateway {
+  int loadCalls = 0;
+  int openSettingsCalls = 0;
+
+  @override
+  Future<ConnectedHealthSnapshot> load() async {
+    loadCalls += 1;
+    return _permissionDeniedSnapshot;
+  }
+
+  @override
+  Future<void> openSystemSettings() async {
+    openSettingsCalls += 1;
+  }
+
+  @override
+  Future<ConnectedHealthSnapshot> requestPermissions() async =>
+      _permissionDeniedSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> requestWeightWritePermission() async =>
+      _permissionDeniedSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> revokePermissions() async =>
+      _permissionDeniedSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> synchronize() async =>
+      _permissionDeniedSnapshot;
+}
+
+final class _SynchronizedGateway implements ConnectedHealthGateway {
+  int loadCalls = 0;
+  int syncCalls = 0;
+
+  @override
+  Future<ConnectedHealthSnapshot> load() async {
+    loadCalls += 1;
+    return _synchronizedSnapshot;
+  }
+
+  @override
+  Future<void> openSystemSettings() async {}
+
+  @override
+  Future<ConnectedHealthSnapshot> requestPermissions() async =>
+      _synchronizedSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> requestWeightWritePermission() async =>
+      _synchronizedSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> revokePermissions() async =>
+      _permissionRequiredSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> synchronize() async {
+    syncCalls += 1;
+    return _synchronizedSnapshot;
+  }
+}
+
 const _permissionRequiredSnapshot = ConnectedHealthSnapshot(
   status: ConnectedHealthStatus.permissionRequired,
   platformSource: 'Health Connect',
@@ -242,5 +633,35 @@ const _permissionRequiredSnapshot = ConnectedHealthSnapshot(
   signals: <ConnectedHealthSignalView>[],
   importedCount: 0,
   lastSyncAt: null,
+  failureCode: null,
+);
+
+const _authorizationRequestedSnapshot = ConnectedHealthSnapshot(
+  status: ConnectedHealthStatus.authorizationRequested,
+  platformSource: 'Apple Health',
+  availableSources: <String>['Apple Health'],
+  signals: <ConnectedHealthSignalView>[],
+  importedCount: 0,
+  lastSyncAt: null,
+  failureCode: null,
+);
+
+const _permissionDeniedSnapshot = ConnectedHealthSnapshot(
+  status: ConnectedHealthStatus.permissionDenied,
+  platformSource: 'Health Connect',
+  availableSources: <String>[],
+  signals: <ConnectedHealthSignalView>[],
+  importedCount: 0,
+  lastSyncAt: null,
+  failureCode: null,
+);
+
+final _synchronizedSnapshot = ConnectedHealthSnapshot(
+  status: ConnectedHealthStatus.synchronized,
+  platformSource: 'Apple Health',
+  availableSources: const <String>['Apple Health'],
+  signals: const <ConnectedHealthSignalView>[],
+  importedCount: 0,
+  lastSyncAt: DateTime.utc(2026, 9, 4),
   failureCode: null,
 );

@@ -1,6 +1,9 @@
 import 'dart:io';
 
+import 'package:body_intelligence_log/features/auth/supabase_auth_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
   test('premium login exposes guarded OAuth and required privacy access', () {
@@ -19,7 +22,19 @@ void main() {
     expect(page, contains("context.push('/legal/privacy')"));
     expect(page, contains('AuthEntryCopyKey.privacyPolicy'));
     expect(service, contains('client.auth.signInWithOAuth'));
-    expect(service, contains("'bil://auth-callback'"));
+    expect(service, contains('client.auth.getOAuthSignInUrl'));
+    expect(service, contains('facebookOAuthLauncher.open'));
+    expect(service, contains('signInWithAppleNative'));
+    expect(service, contains('client.auth.signInWithIdToken'));
+    expect(service, contains('client.auth.generateRawNonce'));
+    expect(page, contains('defaultTargetPlatform == TargetPlatform.iOS'));
+    expect(page, isNot(contains('TargetPlatform.macOS')));
+    expect(page, contains('authService.signInWithAppleNative()'));
+    expect(page, contains("context.go('/startup')"));
+    expect(page, contains('SignInWithAppleButton('));
+    expect(page, contains('SignInWithAppleButtonStyle.black'));
+    expect(page, contains('SignInWithAppleButtonStyle.white'));
+    expect(service, contains("'https://www.bilhealth.com/auth/callback'"));
     expect(service, contains('redirectTo: oauthRedirectUri'));
 
     for (final removed in [
@@ -45,6 +60,53 @@ void main() {
     expect(
       environment,
       contains("'BIL_USE_SUPABASE',\n    defaultValue: true"),
+    );
+  });
+
+  test('Facebook OAuth selects the audited browser path per platform', () {
+    expect(
+      SupabaseAuthService.oauthLaunchModeFor(OAuthProvider.facebook),
+      LaunchMode.inAppBrowserView,
+    );
+    expect(
+      SupabaseAuthService.oauthLaunchModeFor(OAuthProvider.google),
+      LaunchMode.externalApplication,
+    );
+    expect(
+      SupabaseAuthService.oauthLaunchModeFor(OAuthProvider.apple),
+      LaunchMode.externalApplication,
+    );
+    expect(
+      SupabaseAuthService.usesNativeAndroidFacebookLauncher(
+        OAuthProvider.facebook,
+        isWeb: false,
+        platform: TargetPlatform.android,
+      ),
+      isTrue,
+    );
+    expect(
+      SupabaseAuthService.usesNativeAndroidFacebookLauncher(
+        OAuthProvider.facebook,
+        isWeb: false,
+        platform: TargetPlatform.iOS,
+      ),
+      isFalse,
+    );
+    expect(
+      SupabaseAuthService.usesNativeAndroidFacebookLauncher(
+        OAuthProvider.google,
+        isWeb: false,
+        platform: TargetPlatform.android,
+      ),
+      isFalse,
+    );
+    expect(
+      SupabaseAuthService.usesNativeAndroidFacebookLauncher(
+        OAuthProvider.facebook,
+        isWeb: true,
+        platform: TargetPlatform.android,
+      ),
+      isFalse,
     );
   });
 

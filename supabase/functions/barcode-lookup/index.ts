@@ -9,7 +9,10 @@ const env = (name: string) => Deno.env.get(name)?.trim() ?? '';
 const text = (value: unknown) => String(value ?? '').trim();
 const number = (value: unknown) => {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
-  const parsed = Number(value);
+  if (typeof value !== 'string' && typeof value !== 'number') return null;
+  const raw = typeof value === 'string' ? value.trim() : value;
+  if (raw === '') return null;
+  const parsed = Number(raw);
   return Number.isFinite(parsed) ? parsed : null;
 };
 
@@ -76,6 +79,19 @@ function normalizedOpenFacts(
     return { name, unit, amount: amount === null ? null : amount * multiplier };
   };
 
+  // A number of regional OFF records publish only kJ (or the generic
+  // `energy_100g`) even though the product is nutrition-complete. Prefer the
+  // explicit kcal field, then convert the provider's kJ value without
+  // inventing any other nutrient.
+  const energyKcal = (() => {
+    const kcal = number(nutriments['energy-kcal_100g']);
+    if (kcal !== null) return kcal;
+    const generic = number(nutriments['energy_100g']);
+    if (generic !== null) return generic / 4.184;
+    const kj = number(nutriments['energy-kj_100g']);
+    return kj === null ? null : kj / 4.184;
+  })();
+
   return {
     provider: 'open_facts',
     product_type: text(product.product_type) || 'product',
@@ -92,7 +108,7 @@ function normalizedOpenFacts(
     serving_unit: 'g',
     nutrition_basis: '100g',
     nutrients: [
-      nutrient('Energy', 'energy-kcal', 'kcal'),
+      { name: 'Energy', unit: 'kcal', amount: energyKcal },
       nutrient('Protein', 'proteins', 'g'),
       nutrient('Carbohydrate, by difference', 'carbohydrates', 'g'),
       nutrient('Total lipid (fat)', 'fat', 'g'),

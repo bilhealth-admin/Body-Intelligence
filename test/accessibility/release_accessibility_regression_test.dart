@@ -34,8 +34,8 @@ void main() {
       source('lib/features/history/history_page.dart'),
       contains("tooltip: context.strings.text('Delete')"),
     );
-    final workout = source(
-      'lib/features/wellness/presentation/bil_workout_routine_media.dart',
+    final workout = librarySource(
+      'lib/features/wellness/presentation/bil_workout_routines_page.dart',
     );
     expect(workout, contains("'Play video'"));
     expect(workout, contains("'Pause video'"));

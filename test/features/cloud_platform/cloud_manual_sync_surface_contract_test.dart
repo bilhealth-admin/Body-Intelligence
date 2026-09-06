@@ -7,6 +7,9 @@ void main() {
     final settings = File(
       'lib/features/settings/sharing_privacy_settings_page.dart',
     ).readAsStringSync();
+    final more = File(
+      'lib/features/settings/settings_page.dart',
+    ).readAsStringSync();
     final providers = File(
       'lib/features/cloud_platform/providers/cloud_sync_providers.dart',
     ).readAsStringSync();
@@ -29,6 +32,18 @@ void main() {
     expect(settings, contains('encrypted-cloud-sync-now'));
     expect(settings, contains('cloudManualSyncStatusProvider'));
     expect(settings, contains('.runOnce()'));
+    final moreSync = more.substring(more.indexOf('class _CloudSyncRow'));
+    expect(moreSync, contains('.runOnce()'));
+    expect(
+      moreSync,
+      isNot(contains("context.push('/settings/sharing-privacy')")),
+    );
+    expect(more, contains("copy('Sharing & Privacy')"));
+    expect(more, contains("label: copy('Sync now')"));
+    expect(
+      more.indexOf("label: copy('Sync now')"),
+      greaterThan(more.indexOf("copy('Delete account')")),
+    );
 
     expect(providers, contains('cloudManualSyncServiceProvider'));
     expect(
@@ -40,10 +55,17 @@ void main() {
     expect(startup, contains('startupCloudProfileRestoreServiceProvider'));
     expect(startupReader, contains(".from('bil_cloud_records')"));
     expect(startupReader, contains(".eq('owner_id', owner)"));
-    expect(
-      startupReader,
-      contains(".eq('entity_kind', CloudEntityKind.profile.name)"),
-    );
+    expect(startupReader, contains(".inFilter("));
+    expect(startupReader, contains("'entity_kind',"));
+    expect(startupReader, contains('startupCloudRestoreEntityKinds'));
+    expect(startupReader, contains('.map((kind) => kind.name)'));
+    for (final selectivelyRestoredKind in const <String>[
+      'CloudEntityKind.profile',
+      'CloudEntityKind.weight',
+      'CloudEntityKind.hydration',
+    ]) {
+      expect(startupReader, contains(selectivelyRestoredKind));
+    }
     expect(startupReader, contains('resolveExisting(owner)'));
     expect(
       keyRepository,

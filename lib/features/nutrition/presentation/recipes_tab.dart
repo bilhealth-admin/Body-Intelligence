@@ -12,13 +12,13 @@ class _RecipesTab extends ConsumerWidget {
         Row(
           children: [
             for (final action in [
-              (Icons.add_rounded, 'Create recipe'),
-              (Icons.explore_outlined, 'Discover'),
-              (Icons.file_download_outlined, 'Import'),
+              (BilSemanticIconKind.recipes, 'Create recipe'),
+              (BilSemanticIconKind.learn, 'Discover'),
+              (BilSemanticIconKind.export, 'Import'),
             ]) ...[
               Expanded(
                 child: _ActionCard(
-                  icon: action.$1,
+                  kind: action.$1,
                   label: _c(context, action.$2),
                   onTap: () => action.$2 == 'Discover'
                       ? context.push('/wellness/recipes')
@@ -44,10 +44,8 @@ class _RecipesTab extends ConsumerWidget {
         for (final savedRecipe in saved.value ?? const [])
           Card(
             child: ListTile(
-              leading: Icon(
-                savedRecipe.recipe.nutrition == null
-                    ? Icons.menu_book_outlined
-                    : Icons.calculate_outlined,
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.recipes,
               ),
               title: Text(savedRecipe.recipe.name),
               subtitle: Text(
@@ -161,7 +159,7 @@ class _RecipesTab extends ConsumerWidget {
                 const SizedBox(height: 18),
                 _RecipeChoiceTile(
                   key: const Key('import-recipe-from-web'),
-                  icon: Icons.language_rounded,
+                  kind: BilSemanticIconKind.export,
                   title: _recipeChoiceCopy(sheetContext, 'webTitle'),
                   subtitle: _recipeChoiceCopy(sheetContext, 'webBody'),
                   onTap: () {
@@ -172,7 +170,7 @@ class _RecipesTab extends ConsumerWidget {
                 const SizedBox(height: 12),
                 _RecipeChoiceTile(
                   key: const Key('enter-recipe-manually'),
-                  icon: Icons.edit_note_rounded,
+                  kind: BilSemanticIconKind.recipes,
                   title: _recipeChoiceCopy(sheetContext, 'manualTitle'),
                   subtitle: _recipeChoiceCopy(sheetContext, 'manualBody'),
                   onTap: () {

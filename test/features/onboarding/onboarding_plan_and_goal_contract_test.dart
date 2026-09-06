@@ -42,6 +42,22 @@ void main() {
     expect(slower.targetDate!.isAfter(DateTime(2026, 8, 30)), isTrue);
   });
 
+  test(
+    'loss planning offers one kilogram per week when it is within the cap',
+    () {
+      final draft = valid().copyWith(currentWeightKg: 100, targetWeightKg: 90);
+
+      expect(OnboardingPlanCalculator.maxSafePaceKg(draft), 1);
+      expect(OnboardingPlanCalculator.paceOptions(draft), contains(1));
+      expect(
+        OnboardingPlanCalculator.validate(
+          draft.copyWith(weeklyPaceKg: 1),
+        ).isValid,
+        isTrue,
+      );
+    },
+  );
+
   test('unsafe pace and contradictory target never produce fake plan', () {
     expect(
       OnboardingPlanCalculator.validate(valid(pace: 5)).code,

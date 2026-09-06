@@ -9,7 +9,10 @@ void main() {
             'intelligence_center_widgets.dart',
             'intelligence_center_message_widgets.dart',
             'intelligence_center_voice_widgets.dart',
+            'intelligence_conversation_persistence.dart',
+            'intelligence_conversation_history.dart',
             'intelligence_conversation_voice.dart',
+            'intelligence_vision_flow.dart',
             'intelligence_query_flow.dart',
             'intelligence_action_flow.dart',
           ]
@@ -30,7 +33,13 @@ void main() {
     expect(page, contains("Key('ai-coach-voice-button')"));
     expect(page, contains("Key('ai-coach-send-button')"));
     expect(page, contains("Key('ai-coach-food-image-button')"));
-    expect(page, contains('const source = ImageSource.camera'));
+    expect(page, contains("Key('ai-coach-conversation-history-button')"));
+    expect(page, contains("part 'intelligence_conversation_history.dart'"));
+    expect(page, contains("'intelligenceConversationHistoryV1'"));
+    expect(page, contains("selection == '__new__'"));
+    // Camera capture is an in-app route; using ImagePicker.camera here would
+    // background BIL and hand control to the operating-system camera.
+    expect(page, contains('BilCameraCapturePage'));
     expect(page, contains('_showVoiceUnavailable()'));
     expect(page, contains("String pendingVoiceTranscript = ''"));
     expect(page, contains('pendingVoiceTranscript = transcript'));
@@ -39,7 +48,7 @@ void main() {
     expect(page, contains('_LiveVoiceTranscript'));
     expect(page, contains('Writing your words'));
     expect(page, contains('Live call transcript'));
-    expect(page, contains('Duration(seconds: 2)'));
+    expect(page, contains('Duration(milliseconds: 3500)'));
     expect(page, contains('_submitVoiceTranscript()'));
   });
 
@@ -57,6 +66,32 @@ void main() {
     expect(page, contains('await _startVoiceCapture();'));
     expect(page, contains('CoachVoiceEntryPoint.composerDictation'));
     expect(page, contains('CoachVoiceEntryPoint.liveCall'));
+    expect(page, contains('coachContextSnapshotProvider.future'));
+    expect(page, contains('coachContext: coachContext'));
+    expect(page, contains('inputChannel: inputChannel'));
+  });
+
+  test('compact hero and composer keep the requested one-line contract', () {
+    expect(page, contains("'Your BIL Coach'"));
+    expect(page, contains("'Speak your language'"));
+    expect(page, contains('final coachName = intelligenceText'));
+    expect(page, contains('final voiceTagline = intelligenceText'));
+    expect(page, contains('size: 32'));
+    expect(page, contains("Key('ai-coach-hero-start')"));
+    expect(page, contains('Icons.mic_none_rounded'));
+    expect(page, contains('minLines: 1'));
+    expect(page, contains('maxLines: 1'));
+    expect(page, contains('TextAlignVertical.center'));
+    expect(page, contains('scrollPadding: const EdgeInsets.symmetric'));
+  });
+
+  test('voice opening and ending cues stay restrained and non-blocking', () {
+    expect(page, contains('HapticFeedback.lightImpact()'));
+    expect(page, contains('BilMicSound.playOpen()'));
+    expect(page, contains('HapticFeedback.selectionClick()'));
+    expect(page, contains('BilMicSound.playEnd()'));
+    expect(page, contains('Voice starts even on devices'));
+    expect(page, contains('Ending voice never depends'));
   });
 
   test('slow and failed replies remain visible and actionable', () {
@@ -65,7 +100,7 @@ void main() {
     expect(page, contains("Key('ai-coach-cancel-request')"));
     expect(page, contains("Key('ai-coach-retry')"));
     expect(page, contains('Searching your BIL context'));
-    expect(page, contains('timeout(const Duration(seconds: 50))'));
+    expect(page, contains('timeout(const Duration(seconds: 30))'));
   });
 
   test('typed and voice turns have separate presentation contracts', () {
@@ -80,7 +115,7 @@ void main() {
     expect(page, contains('onSpeak:'));
     expect(page, contains(': null,'));
     expect(page, contains('final String text;'));
-    expect(page, contains('final visibleMessages = messages.toList'));
+    expect(page, contains('final visibleMessages = messages'));
   });
 
   test('session greeting and day-one decision remain visible', () {
@@ -94,7 +129,7 @@ void main() {
     expect(page, isNot(contains('BilAccountAvatar(')));
     expect(page, isNot(contains('profilePhotoProvider')));
     expect(page, contains('colors: [Color(0xFF12394E), Color(0xFF071923)]'));
-    expect(page, contains("tr('Ready', 'جاهز')"));
+    expect(page, contains(": '';"));
     expect(page, contains('Thinking with your BIL data'));
     expect(page, contains('final visibleMessages = messages'));
     expect(
@@ -154,8 +189,9 @@ void main() {
   test('premium chat removes fixed prompt strips and nested answer cards', () {
     expect(page, isNot(contains('class _QuickQuestions')));
     expect(page, isNot(contains('ExpansionTile(')));
-    expect(page, contains('_showMessageDetails(context, message)'));
-    expect(page, contains('showModalBottomSheet<void>'));
+    expect(page, isNot(contains("'Why this answer'")));
+    expect(page, contains('reportedMessages.contains(message.id)'));
+    expect(page, contains('reported ? Icons.flag_rounded'));
     expect(page, contains('_messageTextDirection(message.text)'));
   });
 

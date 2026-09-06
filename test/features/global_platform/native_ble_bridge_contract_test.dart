@@ -75,6 +75,67 @@ void main() {
     expect(kotlin, contains('connectedSessions[id] === active'));
   });
 
+  test('iOS BLE discovery returns only peripherals seen by the current scan', () {
+    final swift = File(
+      'ios/Runner/BILFitnessBleBridge.swift',
+    ).readAsStringSync();
+    final discoverStart = swift.indexOf('case "discover":');
+    final discoverEnd = swift.indexOf('case "pair":', discoverStart);
+    final discover = swift.substring(discoverStart, discoverEnd);
+
+    expect(swift, contains('private var currentDiscoveryIds = Set<UUID>()'));
+    expect(discover, contains('currentDiscoveryIds.removeAll()'));
+    expect(discover, contains('self.currentDiscoveryIds'));
+    expect(
+      swift,
+      contains(
+        'if discoveryResult != nil { currentDiscoveryIds.insert(peripheral.identifier) }',
+      ),
+    );
+    expect(discover, isNot(contains('self.peripherals.values.map')));
+  });
+
+  test(
+    'Android BLE discovery is session-scoped and permission-revocation safe',
+    () {
+      final kotlin = File(
+        'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILFitnessBleBridge.kt',
+      ).readAsStringSync();
+      final discoverStart = kotlin.indexOf('private fun discover(');
+      final discoverEnd = kotlin.indexOf('private fun pair(', discoverStart);
+      final discover = kotlin.substring(discoverStart, discoverEnd);
+
+      expect(discover, contains('val discoveredIds ='));
+      expect(discover, contains('discoveredIds += address'));
+      expect(
+        discover,
+        contains('discoveredIds.mapNotNull(devices::get).map(::describe)'),
+      );
+      expect(discover, isNot(contains('devices.values.map')));
+
+      expect(kotlin, contains('private fun closeGattSafely('));
+      expect(kotlin, contains('catch (_: SecurityException)'));
+      expect(kotlin, contains('catch (_: IllegalStateException)'));
+      expect(
+        'BluetoothDevice.PHY_LE_1M_MASK'.allMatches(kotlin).length,
+        equals(2),
+      );
+      expect(kotlin, contains('val seenPackets = mutableSetOf<String>()'));
+      expect(kotlin, isNot(contains('private val seen =')));
+      expect(
+        'if (replied.get() || sessions[address] !== gatt)'
+            .allMatches(kotlin)
+            .length,
+        greaterThanOrEqualTo(5),
+      );
+      expect(kotlin, contains('gatt?.let { closeGattSafely(it) }'));
+      expect(
+        kotlin,
+        contains('sessions.values.toSet().forEach { closeGattSafely(it) }'),
+      );
+    },
+  );
+
   test('native BLE permission gates run before adapter state checks', () {
     final swift = File(
       'ios/Runner/BILFitnessBleBridge.swift',
@@ -93,9 +154,7 @@ void main() {
     final androidPermissionGate = kotlinHandler.indexOf(
       'if (!hasPermission())',
     );
-    final androidAdapter = kotlinHandler.indexOf(
-      'val adapter = manager.adapter',
-    );
+    final androidAdapter = kotlinHandler.indexOf('manager.adapter');
     expect(androidRequest, greaterThanOrEqualTo(0));
     expect(androidPermissionGate, greaterThan(androidRequest));
     expect(androidAdapter, greaterThan(androidPermissionGate));

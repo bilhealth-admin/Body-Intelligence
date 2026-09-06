@@ -1,8 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/localization/runtime_copy.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 
 String _localized(BuildContext context, Map<String, String> values) {
   final locale = Localizations.localeOf(context);
@@ -76,127 +78,158 @@ class HelpCenterPage extends StatelessWidget {
   Widget build(BuildContext context) {
     String t(String en, String ar, String fr, String es, String tr) =>
         _localized(context, {'en': en, 'ar': ar, 'fr': fr, 'es': es, 'tr': tr});
-    final rows = <({String title, IconData icon, VoidCallback action})>[
-      (
-        title: t(
-          'About BIL',
-          'حول BIL',
-          'À propos de BIL',
-          'Acerca de BIL',
-          'BIL Hakkında',
-        ),
-        icon: Icons.info_outline_rounded,
-        action: () => _show(
-          context,
-          'Body Intelligence Log™',
-          t(
-            'Private body intelligence for nutrition, movement, recovery and progress. BIL keeps evidence and user control visible.',
-            'ذكاء صحي شخصي وخاص للتغذية والحركة والتعافي والتقدم، مع إبقاء الأدلة وتحكم المستخدم واضحين.',
-            'Une intelligence corporelle privée pour la nutrition, le mouvement, la récupération et le progrès.',
-            'Inteligencia corporal privada para nutrición, movimiento, recuperación y progreso.',
-            'Beslenme, hareket, toparlanma ve ilerleme için özel beden zekâsı.',
+    final rows =
+        <
+          ({
+            String id,
+            String title,
+            BilSemanticIconKind kind,
+            IconData? iconOverride,
+            IconData? appleIconOverride,
+            VoidCallback action,
+          })
+        >[
+          (
+            id: 'about',
+            title: t(
+              'About BIL',
+              'حول BIL',
+              'À propos de BIL',
+              'Acerca de BIL',
+              'BIL Hakkında',
+            ),
+            kind: BilSemanticIconKind.support,
+            iconOverride: Icons.info_outline_rounded,
+            appleIconOverride: CupertinoIcons.info_circle,
+            action: () => _show(
+              context,
+              'Body Intelligence Log™',
+              t(
+                'Private body intelligence for nutrition, movement, recovery and progress. BIL keeps evidence and user control visible.',
+                'ذكاء صحي شخصي وخاص للتغذية والحركة والتعافي والتقدم، مع إبقاء الأدلة وتحكم المستخدم واضحين.',
+                'Une intelligence corporelle privée pour la nutrition, le mouvement, la récupération et le progrès.',
+                'Inteligencia corporal privada para nutrición, movimiento, recuperación y progreso.',
+                'Beslenme, hareket, toparlanma ve ilerleme için özel beden zekâsı.',
+              ),
+            ),
           ),
-        ),
-      ),
-      (
-        title: t(
-          'Frequently Asked Questions',
-          'الأسئلة الشائعة',
-          'Questions fréquentes',
-          'Preguntas frecuentes',
-          'Sık Sorulan Sorular',
-        ),
-        icon: Icons.quiz_outlined,
-        action: () => context.push('/help/faq'),
-      ),
-      (
-        title: t(
-          'Contact Support',
-          'تواصل مع الدعم',
-          'Contacter le support',
-          'Contactar con soporte',
-          'Destekle İletişim',
-        ),
-        icon: Icons.support_agent_rounded,
-        action: () => _email(context, 'BIL support request'),
-      ),
-      (
-        title: t(
-          'Terms of Service',
-          'شروط الاستخدام',
-          'Conditions d’utilisation',
-          'Términos del servicio',
-          'Hizmet Koşulları',
-        ),
-        icon: Icons.description_outlined,
-        action: () => context.push('/legal/terms'),
-      ),
-      (
-        title: t(
-          'Troubleshooting',
-          'حل المشكلات',
-          'Dépannage',
-          'Solución de problemas',
-          'Sorun Giderme',
-        ),
-        icon: Icons.build_outlined,
-        action: () => _show(
-          context,
-          t(
-            'Troubleshooting',
-            'حل المشكلات',
-            'Dépannage',
-            'Solución de problemas',
-            'Sorun Giderme',
+          (
+            id: 'faq',
+            title: t(
+              'Frequently Asked Questions',
+              'الأسئلة الشائعة',
+              'Questions fréquentes',
+              'Preguntas frecuentes',
+              'Sık Sorulan Sorular',
+            ),
+            kind: BilSemanticIconKind.support,
+            iconOverride: Icons.quiz_outlined,
+            appleIconOverride: CupertinoIcons.question_circle,
+            action: () => context.push('/help/faq'),
           ),
-          t(
-            'Check connectivity and permissions, restart BIL, then try again. Your saved local data is not removed.',
-            'تحقق من الاتصال والصلاحيات، ثم أعد تشغيل BIL وحاول مجددًا. لن تُحذف بياناتك المحلية المحفوظة.',
-            'Vérifiez la connexion et les autorisations, redémarrez BIL puis réessayez. Vos données locales sont conservées.',
-            'Comprueba la conexión y los permisos, reinicia BIL y vuelve a intentarlo. Tus datos locales se conservan.',
-            'Bağlantı ve izinleri kontrol edin, BIL’i yeniden başlatıp tekrar deneyin. Yerel verileriniz korunur.',
+          (
+            id: 'contact-support',
+            title: t(
+              'Contact Support',
+              'تواصل مع الدعم',
+              'Contacter le support',
+              'Contactar con soporte',
+              'Destekle İletişim',
+            ),
+            kind: BilSemanticIconKind.support,
+            iconOverride: null,
+            appleIconOverride: null,
+            action: () => _email(context, 'BIL support request'),
           ),
-        ),
-      ),
-      (
-        title: t(
-          'Delete Account',
-          'حذف الحساب',
-          'Supprimer le compte',
-          'Eliminar cuenta',
-          'Hesabı Sil',
-        ),
-        icon: Icons.person_remove_outlined,
-        action: () => context.push('/help/delete-account'),
-      ),
-      (
-        title: t(
-          'Service Status',
-          'حالة الخدمة',
-          'État du service',
-          'Estado del servicio',
-          'Hizmet Durumu',
-        ),
-        icon: Icons.monitor_heart_outlined,
-        action: () => _show(
-          context,
-          t(
-            'Service Status',
-            'حالة الخدمة',
-            'État du service',
-            'Estado del servicio',
-            'Hizmet Durumu',
+          (
+            id: 'terms',
+            title: t(
+              'Terms of Service',
+              'شروط الاستخدام',
+              'Conditions d’utilisation',
+              'Términos del servicio',
+              'Hizmet Koşulları',
+            ),
+            kind: BilSemanticIconKind.legal,
+            iconOverride: null,
+            appleIconOverride: null,
+            action: () => context.push('/legal/terms'),
           ),
-          t(
-            'Core local logging is available. Connected integrations show their current state and permissions on Apps & Devices.',
-            'التسجيل المحلي الأساسي متاح. تعرض التكاملات المتصلة حالتها وصلاحياتها الحالية في التطبيقات والأجهزة.',
-            'Le suivi local est disponible. Les intégrations affichent leur état et leurs autorisations dans Applications et appareils.',
-            'El registro local está disponible. Las integraciones muestran su estado y permisos en Aplicaciones y dispositivos.',
-            'Yerel kayıt kullanılabilir. Bağlı entegrasyonlar durumlarını ve izinlerini Uygulamalar ve Cihazlar bölümünde gösterir.',
+          (
+            id: 'troubleshooting',
+            title: t(
+              'Troubleshooting',
+              'حل المشكلات',
+              'Dépannage',
+              'Solución de problemas',
+              'Sorun Giderme',
+            ),
+            kind: BilSemanticIconKind.preferences,
+            iconOverride: Icons.build_outlined,
+            appleIconOverride: CupertinoIcons.wrench,
+            action: () => _show(
+              context,
+              t(
+                'Troubleshooting',
+                'حل المشكلات',
+                'Dépannage',
+                'Solución de problemas',
+                'Sorun Giderme',
+              ),
+              t(
+                'Check connectivity and permissions, restart BIL, then try again. Your saved local data is not removed.',
+                'تحقق من الاتصال والصلاحيات، ثم أعد تشغيل BIL وحاول مجددًا. لن تُحذف بياناتك المحلية المحفوظة.',
+                'Vérifiez la connexion et les autorisations, redémarrez BIL puis réessayez. Vos données locales sont conservées.',
+                'Comprueba la conexión y los permisos, reinicia BIL y vuelve a intentarlo. Tus datos locales se conservan.',
+                'Bağlantı ve izinleri kontrol edin, BIL’i yeniden başlatıp tekrar deneyin. Yerel verileriniz korunur.',
+              ),
+            ),
           ),
-        ),
-      ),
-    ];
+          (
+            id: 'delete-account',
+            title: t(
+              'Delete Account',
+              'حذف الحساب',
+              'Supprimer le compte',
+              'Eliminar cuenta',
+              'Hesabı Sil',
+            ),
+            kind: BilSemanticIconKind.accountDeletion,
+            iconOverride: null,
+            appleIconOverride: null,
+            action: () => context.push('/help/delete-account'),
+          ),
+          (
+            id: 'service-status',
+            title: t(
+              'Service Status',
+              'حالة الخدمة',
+              'État du service',
+              'Estado del servicio',
+              'Hizmet Durumu',
+            ),
+            kind: BilSemanticIconKind.health,
+            iconOverride: Icons.monitor_heart_outlined,
+            appleIconOverride: CupertinoIcons.waveform_path_ecg,
+            action: () => _show(
+              context,
+              t(
+                'Service Status',
+                'حالة الخدمة',
+                'État du service',
+                'Estado del servicio',
+                'Hizmet Durumu',
+              ),
+              t(
+                'Core local logging is available. Connected integrations show their current state and permissions on Apps & Devices.',
+                'التسجيل المحلي الأساسي متاح. تعرض التكاملات المتصلة حالتها وصلاحياتها الحالية في التطبيقات والأجهزة.',
+                'Le suivi local est disponible. Les intégrations affichent leur état et leurs autorisations dans Applications et appareils.',
+                'El registro local está disponible. Las integraciones muestran su estado y permisos en Aplicaciones y dispositivos.',
+                'Yerel kayıt kullanılabilir. Bağlı entegrasyonlar durumlarını ve izinlerini Uygulamalar ve Cihazlar bölümünde gösterir.',
+              ),
+            ),
+          ),
+        ];
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -211,27 +244,15 @@ class HelpCenterPage extends StatelessWidget {
         separatorBuilder: (_, _) => const Divider(height: 1),
         itemBuilder: (context, index) {
           final row = rows[index];
-          const colors = [
-            Color(0xFF1976D2),
-            Color(0xFF7B61FF),
-            Color(0xFF00897B),
-            Color(0xFF455A64),
-            Color(0xFFF57C00),
-            Color(0xFFD32F2F),
-            Color(0xFF2E7D32),
-          ];
-          final color = colors[index];
           return ListTile(
             minTileHeight: 72,
-            leading: Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: .12),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              alignment: Alignment.center,
-              child: Icon(row.icon, color: color),
+            leading: BilSemanticIconBadge(
+              key: Key('help-center-icon-${row.id}'),
+              kind: row.kind,
+              size: 42,
+              iconOverride: row.iconOverride,
+              appleIconOverride: row.appleIconOverride,
+              shape: BoxShape.rectangle,
             ),
             title: Text(row.title),
             trailing: const Icon(Icons.chevron_right_rounded),

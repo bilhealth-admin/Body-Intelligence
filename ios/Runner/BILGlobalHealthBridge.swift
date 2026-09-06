@@ -6,6 +6,14 @@ import UIKit
 /// device certification remains an external release gate because HealthKit is
 /// unavailable in a host-only Flutter test process.
 final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
+  // A first foreground import must not ask HealthKit for an account's entire
+  // lifetime in one unbounded query. One year still preserves useful Apple
+  // Watch history (sleep, workouts, heart rate and daily activity), while the
+  // per-type page limit keeps each platform-channel reply bounded. The
+  // existing per-type HKQueryAnchor continues each page and later incremental
+  // refreshes without restarting the backfill.
+  private static let initialHistoryDays = 365
+  private static let readPageLimit = 500
   private let store: HKHealthStore
   private let channelName: String
 
@@ -110,13 +118,29 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     var records: [[String: Any]] = []
     var deleted: [String] = []
     var nextAnchors = anchors
+    var pageHasMore = false
     var firstError: Error?
+    let historyStart = asOf.addingTimeInterval(
+      -TimeInterval(Self.initialHistoryDays * 24 * 60 * 60)
+    )
 
     for name in names {
       guard let type = sampleType(name) else { continue }
       group.enter()
-      let predicate = HKQuery.predicateForSamples(withStart: nil, end: asOf, options: [])
-      let query = HKAnchoredObjectQuery(type: type, predicate: predicate, anchor: anchors[name], limit: HKObjectQueryNoLimit) {
+      // Keep the same bounded historical window while an anchored page is
+      // being drained. Moving `asOf` forward on later syncs never resets the
+      // anchor; it only admits newly observed samples into the query scope.
+      let predicate = HKQuery.predicateForSamples(
+        withStart: historyStart,
+        end: asOf,
+        options: []
+      )
+      let query = HKAnchoredObjectQuery(
+        type: type,
+        predicate: predicate,
+        anchor: anchors[name],
+        limit: Self.readPageLimit
+      ) {
         [weak self] _, samples, deletedObjects, newAnchor, queryError in
         defer { group.leave() }
         guard let self else { return }
@@ -124,6 +148,9 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
         if let queryError { firstError = firstError ?? queryError; return }
         records.append(contentsOf: (samples ?? []).compactMap { self.serialize(sample: $0, logicalType: name) })
         deleted.append(contentsOf: (deletedObjects ?? []).map { $0.uuid.uuidString })
+        if (samples?.count ?? 0) + (deletedObjects?.count ?? 0) >= Self.readPageLimit {
+          pageHasMore = true
+        }
         if let newAnchor { nextAnchors[name] = newAnchor }
       }
       store.execute(query)
@@ -135,7 +162,7 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
         "records": records,
         "deletedIds": deleted,
         "nextAnchor": self.encodeAnchors(nextAnchors),
-        "hasMore": false,
+        "hasMore": pageHasMore,
       ])
     }
   }
@@ -184,6 +211,10 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
 
   private func serialize(sample: HKSample, logicalType: String) -> [String: Any]? {
     let source = sample.sourceRevision.source
+    // HealthKit always lets an app read samples that app wrote itself. Those
+    // rows are not proof that Apple Health/Watch read access is connected and
+    // importing them again would create an echo loop in the local timeline.
+    if source.bundleIdentifier == Bundle.main.bundleIdentifier { return nil }
     var value = 1.0; var unit = "count"
     if let quantity = sample as? HKQuantitySample, let preferred = preferredUnit(logicalType) {
       value = quantity.quantity.doubleValue(for: preferred); unit = unitName(logicalType)
@@ -194,9 +225,28 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       unit = "h"
     }
     var attributes: [String: Any] = [:]
+    let rawDeviceName = sample.device?.name
+    let deviceModel = sample.device?.model
+    let deviceManufacturer = sample.device?.manufacturer
+    if let rawDeviceName { attributes["deviceName"] = rawDeviceName }
+    if let deviceModel { attributes["deviceModel"] = deviceModel }
+    if let deviceManufacturer { attributes["deviceManufacturer"] = deviceManufacturer }
+    let normalizedDevice = [rawDeviceName, deviceModel, deviceManufacturer]
+      .compactMap { $0?.lowercased() }
+      .joined(separator: " ")
+    if normalizedDevice.contains("apple watch") ||
+       (normalizedDevice.contains("apple") && normalizedDevice.contains("watch")) {
+      attributes["wearableKind"] = "apple_watch"
+    }
     if let sleep = sample as? HKCategorySample, logicalType == "sleep" {
       attributes["sleepStage"] = sleepStage(sleep.value)
       attributes["endedAt"] = ISO8601DateFormatter().string(from: sleep.endDate)
+    }
+    let deviceName: Any
+    if let rawDeviceName {
+      deviceName = rawDeviceName
+    } else {
+      deviceName = NSNull()
     }
     return [
       "id": sample.uuid.uuidString,
@@ -205,7 +255,12 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       "unit": unit,
       "observedAt": ISO8601DateFormatter().string(from: sample.startDate),
       "sourceId": source.bundleIdentifier,
-      "deviceId": sample.device?.name as Any,
+      // HealthKit does not guarantee a device for every sample (for example,
+      // manually entered weight or imported sleep).  Never bridge a Swift
+      // Optional as `Any`: Flutter's standard codec cannot serialize
+      // `Optional.none` and would terminate the process before Dart receives
+      // the remaining records.  NSNull is decoded as Dart null safely.
+      "deviceId": deviceName,
       "confidence": 1.0,
       "timeZoneId": sample.metadata?[HKMetadataKeyTimeZone] as? String ?? TimeZone.current.identifier,
       "deleted": false,

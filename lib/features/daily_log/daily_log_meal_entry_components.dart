@@ -3,12 +3,12 @@ part of 'daily_log_page.dart';
 class _DiaryActionButton extends StatelessWidget {
   const _DiaryActionButton({
     super.key,
-    required this.icon,
+    required this.kind,
     required this.label,
     required this.onPressed,
   });
 
-  final IconData icon;
+  final BilSemanticIconKind kind;
   final String label;
   final VoidCallback? onPressed;
 
@@ -28,7 +28,7 @@ class _DiaryActionButton extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: scheme.primary, size: 23),
+                BilSemanticIconBadge(kind: kind, size: 34, iconSize: 19),
                 const SizedBox(height: 2),
                 Text(
                   label,
@@ -66,7 +66,7 @@ class _FoodMacroValue extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          '${value.toStringAsFixed(1)} g',
+          '${value.round()} g',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(

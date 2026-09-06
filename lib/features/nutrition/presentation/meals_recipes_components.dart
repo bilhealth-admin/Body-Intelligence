@@ -3,13 +3,13 @@ part of 'meals_recipes_foods_page.dart';
 class _RecipeChoiceTile extends StatelessWidget {
   const _RecipeChoiceTile({
     super.key,
-    required this.icon,
+    required this.kind,
     required this.title,
     required this.subtitle,
     required this.onTap,
   });
 
-  final IconData icon;
+  final BilSemanticIconKind kind;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
@@ -19,7 +19,7 @@ class _RecipeChoiceTile extends StatelessWidget {
     margin: EdgeInsets.zero,
     child: ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-      leading: Icon(icon, size: 30),
+      leading: BilSemanticIconBadge(kind: kind, size: 44, iconSize: 24),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
       subtitle: Padding(
         padding: const EdgeInsets.only(top: 5),
@@ -84,11 +84,13 @@ String _recipeChoiceCopy(BuildContext context, String key) {
 
 class _ActionCard extends StatelessWidget {
   const _ActionCard({
-    required this.icon,
+    required this.kind,
     required this.label,
     required this.onTap,
+    this.iconOverride,
   });
-  final IconData icon;
+  final BilSemanticIconKind kind;
+  final IconData? iconOverride;
   final String label;
   final VoidCallback? onTap;
   @override
@@ -100,7 +102,13 @@ class _ActionCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 18),
         child: Column(
           children: [
-            Icon(icon),
+            BilSemanticIconBadge(
+              kind: kind,
+              size: 40,
+              iconSize: 22,
+              iconOverride: iconOverride,
+              appleIconOverride: iconOverride,
+            ),
             const SizedBox(height: 8),
             Text(label, textAlign: TextAlign.center),
           ],

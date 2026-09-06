@@ -21,17 +21,10 @@ void main() {
     ).readAsStringSync();
     final foodPage = _librarySource('lib/features/nutrition/food_page.dart');
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
-    final coach =
-        [
-              'intelligence_center_page.dart',
-              'intelligence_conversation_voice.dart',
-            ]
-            .map(
-              (name) => File(
-                'lib/features/intelligence_center/presentation/$name',
-              ).readAsStringSync(),
-            )
-            .join('\n');
+    final coach = _librarySource(
+      'lib/features/intelligence_center/presentation/'
+      'intelligence_center_page.dart',
+    );
     final vision = File(
       'lib/features/nutrition/services/meal_image_analysis_service.dart',
     ).readAsStringSync();

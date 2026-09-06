@@ -10,6 +10,39 @@ import '../../global_platform/product/global_product_coordinators.dart';
 import '../../global_platform/runtime/global_product_composition_root.dart';
 import '../connected_health_model.dart';
 
+part 'connected_health_gateway_helpers.dart';
+
+@visibleForTesting
+Set<HealthDataType> connectedHealthReadTypesForPlatform(
+  TargetPlatform platform,
+) {
+  if (platform == TargetPlatform.iOS) return BilHealthScope.read;
+  if (platform == TargetPlatform.android) {
+    return Set<HealthDataType>.unmodifiable(
+      BilHealthScope.read.where(
+        (type) => BilHealthScope.healthConnectReadTypeNames.contains(type.name),
+      ),
+    );
+  }
+  return const <HealthDataType>{};
+}
+
+@visibleForTesting
+Set<String> connectedHealthWriteTypeNamesForPlatform(TargetPlatform platform) =>
+    switch (platform) {
+      TargetPlatform.iOS => BilHealthScope.appleHealthWriteTypeNames,
+      TargetPlatform.android => BilHealthScope.healthConnectWriteTypeNames,
+      _ => const <String>{},
+    };
+
+@visibleForTesting
+ConnectedHealthStatus connectedHealthStatusAfterSynchronization({
+  required TargetPlatform platform,
+  required bool hasVerifiedNativeEvidence,
+}) => platform == TargetPlatform.iOS && !hasVerifiedNativeEvidence
+    ? ConnectedHealthStatus.authorizationRequested
+    : ConnectedHealthStatus.synchronized;
+
 /// Converts HealthKit's overlapping in-bed/awake/stage samples into one
 /// measured asleep duration per source/night. Android SleepSessionRecord rows
 /// already carry a session total with nested stages and pass through unchanged.
@@ -140,9 +173,12 @@ final class DeferredConnectedHealthGateway implements ConnectedHealthGateway {
 
   @override
   Future<ConnectedHealthSnapshot> load() async {
-    final flows = GlobalNativeIntegrationHost.instance.productFlows;
-    if (flows == null) return const ConnectedHealthSnapshot.unavailable();
-    return NativeConnectedHealthGateway(flows).load();
+    // The health page is the explicit entry point for the optional native
+    // runtime. Initialising it here prevents a first visit from being falsely
+    // rendered as "Unsupported platform" while the host is still deferred.
+    // This does not run during app launch; this gateway is only read by the
+    // connected-health provider when its page is opened.
+    return (await _native()).load();
   }
 
   @override
@@ -174,7 +210,7 @@ final connectedHealthProvider =
       return ConnectedHealthController(
         ref.read(connectedHealthGatewayProvider),
       );
-    });
+    }, dependencies: [connectedHealthGatewayProvider]);
 
 final class ConnectedHealthController
     extends StateNotifier<AsyncValue<ConnectedHealthSnapshot>> {
@@ -183,39 +219,112 @@ final class ConnectedHealthController
   }
 
   final ConnectedHealthGateway _gateway;
-  bool _mutationInFlight = false;
+  Future<void>? _mutationTask;
+  Future<void>? _refreshTask;
 
   Future<void> _runMutation(
-    Future<ConnectedHealthSnapshot> Function() operation,
-  ) async {
-    if (_mutationInFlight) return;
-    _mutationInFlight = true;
-    state = const AsyncValue.loading();
+    Future<ConnectedHealthSnapshot> Function() operation, {
+    ConnectedHealthSnapshot Function(ConnectedHealthSnapshot current)?
+    transition,
+  }) {
+    final existing = _mutationTask;
+    if (existing != null) return existing;
+    final task = _performMutation(operation, transition: transition);
+    _mutationTask = task;
+    return task;
+  }
+
+  Future<void> _performMutation(
+    Future<ConnectedHealthSnapshot> Function() operation, {
+    ConnectedHealthSnapshot Function(ConnectedHealthSnapshot current)?
+    transition,
+  }) async {
     try {
+      // The constructor starts a refresh immediately. A user action must wait
+      // for it rather than being silently discarded when the screen is opened
+      // and the permission button is tapped quickly.
+      final activeRefresh = _refreshTask;
+      if (activeRefresh != null) await activeRefresh;
+
+      final current = state.value;
+      if (transition != null && current != null) {
+        state = AsyncValue.data(transition(current));
+      } else {
+        state = const AsyncValue.loading();
+      }
       state = await AsyncValue.guard(operation);
     } finally {
-      _mutationInFlight = false;
+      _mutationTask = null;
     }
   }
 
-  Future<void> refresh() async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(_gateway.load);
+  Future<void> refresh() {
+    final existing = _refreshTask;
+    if (existing != null) return existing;
+    final task = _performRefresh();
+    _refreshTask = task;
+    return task;
   }
 
-  Future<void> synchronize() async {
-    final current = state.value ?? const ConnectedHealthSnapshot.unavailable();
-    state = AsyncValue.data(
-      current.copyWith(
-        status: ConnectedHealthStatus.syncing,
-        clearFailure: true,
-      ),
-    );
-    state = await AsyncValue.guard(_gateway.synchronize);
+  Future<void> _performRefresh() async {
+    try {
+      // Foreground/resume refreshes can arrive while a permission sheet or
+      // another explicit action is completing. Queue the refresh so neither
+      // operation is lost.
+      final activeMutation = _mutationTask;
+      if (activeMutation != null) await activeMutation;
+
+      final previous = state.value;
+      if (previous == null) state = const AsyncValue.loading();
+      try {
+        final loaded = await _gateway.load();
+        // This is a foreground-only integration. Refreshing a connected source
+        // must read native changes as well as reload the cached permission
+        // snapshot, otherwise new Watch/Health Connect records remain stale.
+        final shouldSynchronize =
+            loaded.status == ConnectedHealthStatus.authorizationRequested ||
+            loaded.status == ConnectedHealthStatus.ready ||
+            loaded.status == ConnectedHealthStatus.synchronized;
+        state = AsyncValue.data(
+          shouldSynchronize ? await _gateway.synchronize() : loaded,
+        );
+      } catch (error, stackTrace) {
+        // A lifecycle notification must not replace useful cached content with
+        // a transient blank/error screen.
+        state = previous == null
+            ? AsyncValue.error(error, stackTrace)
+            : AsyncValue.data(
+                previous.copyWith(
+                  status: ConnectedHealthStatus.degraded,
+                  failureCode: 'health_refresh_failed_offline_cache_preserved',
+                ),
+              );
+      }
+    } finally {
+      _refreshTask = null;
+    }
   }
+
+  Future<void> synchronize() => _runMutation(
+    _gateway.synchronize,
+    transition: (current) => current.copyWith(
+      status: ConnectedHealthStatus.syncing,
+      clearFailure: true,
+    ),
+  );
 
   Future<void> requestPermissions() async {
-    await _runMutation(_gateway.requestPermissions);
+    await _runMutation(() async {
+      final requested = await _gateway.requestPermissions();
+      final firstReadPending =
+          requested.status == ConnectedHealthStatus.authorizationRequested ||
+          (requested.status == ConnectedHealthStatus.ready &&
+              requested.lastSyncAt == null);
+      // The native permission sheet has already completed at this point.
+      // Import immediately so an Apple Watch/Health Connect user does not
+      // need to leave and reopen this screen before seeing available data.
+      return firstReadPending ? await _gateway.synchronize() : requested;
+    });
   }
 
   Future<void> requestWeightWritePermission() async {
@@ -227,18 +336,10 @@ final class ConnectedHealthController
   }
 
   Future<void> openSystemSettings() async {
-    if (_mutationInFlight) return;
-    _mutationInFlight = true;
-    final previous = state.value;
-    state = const AsyncValue.loading();
-    try {
+    await _runMutation(() async {
       await _gateway.openSystemSettings();
-      if (previous != null) state = AsyncValue.data(previous);
-    } catch (error, stackTrace) {
-      state = AsyncValue.error(error, stackTrace);
-    } finally {
-      _mutationInFlight = false;
-    }
+      return state.value ?? const ConnectedHealthSnapshot.unavailable();
+    }, transition: (current) => current);
   }
 }
 
@@ -304,7 +405,8 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
         final signal = GlobalHealthSignal.fromMap(
           Map<String, Object?>.from(raw! as Map),
         );
-        if (BilHealthScope.excludesKey(signal.key)) {
+        if (BilHealthScope.excludesKey(signal.key) ||
+            await _isTombstoned(signal)) {
           removedLegacyClinicalSignal = true;
           continue;
         }
@@ -373,7 +475,9 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
     }
     try {
       await _bridge.request(
-        BilHealthScope.read.map((type) => type.name).toSet(),
+        connectedHealthReadTypesForPlatform(
+          defaultTargetPlatform,
+        ).map((type) => type.name).toSet(),
         write: false,
       );
       await _flows.store
@@ -381,6 +485,10 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
             'readRequested': true,
             'updatedAt': DateTime.now().toUtc().toIso8601String(),
           });
+      // A pre-consent probe can create an empty HealthKit anchor. Reset it
+      // after the user completes consent so the first authorized foreground
+      // sync reads existing Apple Watch history, not only future changes.
+      await _flows.store.remove('health_anchor', _bridge.id);
       final loaded = await load();
       return !_isIos &&
               loaded.status == ConnectedHealthStatus.permissionRequired
@@ -410,7 +518,7 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
     }
     try {
       await _bridge.request(
-        BilHealthScope.write.map((type) => type.name).toSet(),
+        connectedHealthWriteTypeNamesForPlatform(defaultTargetPlatform),
         write: true,
       );
       final current =
@@ -499,6 +607,17 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
 
     try {
       final now = DateTime.now();
+      if (_isIos && consentState?['historicalReadResetAt'] == null) {
+        // Older builds could create a HealthKit anchor before the user
+        // granted read access. Clear that one-time probe so existing Watch
+        // records are included in the first authorized sync.
+        await _flows.store.remove('health_anchor', _bridge.id);
+        await _flows.store
+            .put('connected_health_consent', source, <String, Object?>{
+              ...(consentState ?? const <String, Object?>{}),
+              'historicalReadResetAt': now.toUtc().toIso8601String(),
+            });
+      }
       final consent = GlobalConsentGrant(
         scope: _isIos ? 'apple_health_read' : 'health_connect_read',
         state: GlobalConsentState.granted,
@@ -508,20 +627,22 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
           ? await _flows.appleHealth.integration.synchronize(
               asOf: now,
               consent: consent,
-              types: BilHealthScope.read,
+              types: connectedHealthReadTypesForPlatform(defaultTargetPlatform),
             )
           : await _flows.healthConnect.integration.synchronize(
               asOf: now,
               consent: consent,
-              types: BilHealthScope.read,
+              types: connectedHealthReadTypesForPlatform(defaultTargetPlatform),
             );
       final persistedRows = await _flows.store.list('health_signals');
       final persisted = <GlobalHealthSignal>[];
       for (final row in persistedRows) {
         try {
           final signal = GlobalHealthSignal.fromMap(row);
-          if (BilHealthScope.excludesKey(signal.key)) {
+          if (BilHealthScope.excludesKey(signal.key) ||
+              await _isTombstoned(signal)) {
             await _flows.store.remove('health_signals', signal.identity);
+            await _flows.store.remove('health_seen', signal.identity);
             continue;
           }
           persisted.add(signal);
@@ -538,6 +659,9 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
           (a, b) => b.provenance.observedAt.compareTo(a.provenance.observedAt),
         );
       final selected = _selectRepresentativeSignals(ordered);
+      final hasVerifiedNativeEvidence = selected.any(
+        _isEvidenceFromNativeBridge,
+      );
       await _flows.store
           .put('connected_health_evidence', 'latest', <String, Object?>{
             'selectedIds': graph.nodes
@@ -560,7 +684,13 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
         },
       );
       return ConnectedHealthSnapshot(
-        status: ConnectedHealthStatus.synchronized,
+        // HealthKit intentionally makes read denial indistinguishable from an
+        // empty store. Do not claim a connected/synchronized Apple source
+        // until at least one native record provides affirmative evidence.
+        status: connectedHealthStatusAfterSynchronization(
+          platform: defaultTargetPlatform,
+          hasVerifiedNativeEvidence: hasVerifiedNativeEvidence,
+        ),
         platformSource: source,
         availableSources: <String>[source],
         signals: <ConnectedHealthSignalView>[
@@ -570,7 +700,7 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
         importedCount: records.length,
         lastSyncAt: now,
         failureCode: null,
-        deviceVerified: selected.any(_isEvidenceFromNativeBridge),
+        deviceVerified: hasVerifiedNativeEvidence,
       );
     } catch (_) {
       final cached = await load();
@@ -579,42 +709,5 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
         failureCode: 'health_sync_failed_offline_cache_preserved',
       );
     }
-  }
-
-  NativeHealthBridge get _bridge =>
-      _isIos ? _flows.appleHealth.bridge : _flows.healthConnect.bridge;
-
-  bool _isEvidenceFromNativeBridge(GlobalHealthSignal signal) =>
-      signal.provenance.providerId == _bridge.id;
-
-  List<GlobalHealthSignal> _selectRepresentativeSignals(
-    List<GlobalHealthSignal> records,
-  ) {
-    const priority = <String>[
-      'steps',
-      'sleep',
-      'heartRate',
-      'restingHeartRate',
-      'activeEnergy',
-      'weight',
-    ];
-    final byKey = <String, GlobalHealthSignal>{};
-    for (final signal in records) {
-      if (BilHealthScope.excludesKey(signal.key)) continue;
-      byKey.update(
-        signal.key,
-        (current) => HealthSignalConflictResolver.prefer(current, signal),
-        ifAbsent: () => signal,
-      );
-    }
-    final selected = <GlobalHealthSignal>[];
-    for (final key in priority) {
-      final signal = byKey[key];
-      if (signal != null) selected.add(signal);
-    }
-    for (final entry in byKey.entries) {
-      if (!priority.contains(entry.key)) selected.add(entry.value);
-    }
-    return selected.take(8).toList(growable: false);
   }
 }

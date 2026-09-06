@@ -82,7 +82,7 @@ class _FoodAddActionSheet extends StatelessWidget {
                 children: [
                   _FoodAddActionTile(
                     actionKey: const Key('food-add-scan-barcode'),
-                    icon: Icons.qr_code_scanner_rounded,
+                    kind: BilSemanticIconKind.barcode,
                     label: nutritionText(
                       context,
                       'Scan barcode',
@@ -93,7 +93,8 @@ class _FoodAddActionSheet extends StatelessWidget {
                   ),
                   _FoodAddActionTile(
                     actionKey: const Key('food-add-manual-barcode'),
-                    icon: Icons.dialpad_rounded,
+                    kind: BilSemanticIconKind.barcode,
+                    iconOverride: Icons.dialpad_rounded,
                     label: t('Enter barcode manually'),
                     onTap: () =>
                         Navigator.pop(context, _FoodAddMethod.manualBarcode),
@@ -103,7 +104,7 @@ class _FoodAddActionSheet extends StatelessWidget {
             ),
             _FoodAddActionTile(
               actionKey: const Key('food-add-meal-photo'),
-              icon: Icons.center_focus_strong_rounded,
+              kind: BilSemanticIconKind.mealPhoto,
               label: nutritionText(
                 context,
                 'Analyze meal photo',
@@ -113,7 +114,7 @@ class _FoodAddActionSheet extends StatelessWidget {
             ),
             _FoodAddActionTile(
               actionKey: const Key('food-add-custom-food'),
-              icon: Icons.edit_note_rounded,
+              kind: BilSemanticIconKind.notes,
               label: customFoodText(context, 'Create custom food'),
               onTap: () => Navigator.pop(context, _FoodAddMethod.customFood),
             ),
@@ -127,34 +128,33 @@ class _FoodAddActionSheet extends StatelessWidget {
 class _FoodAddActionTile extends StatelessWidget {
   const _FoodAddActionTile({
     required this.actionKey,
-    required this.icon,
+    required this.kind,
     required this.label,
     required this.onTap,
+    this.iconOverride,
   });
 
   final Key actionKey;
-  final IconData icon;
+  final BilSemanticIconKind kind;
+  final IconData? iconOverride;
   final String label;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 58),
       child: ListTile(
         key: actionKey,
         contentPadding: const EdgeInsets.symmetric(horizontal: 8),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        leading: DecoratedBox(
-          decoration: BoxDecoration(
-            color: scheme.primaryContainer,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Icon(icon, color: scheme.onPrimaryContainer),
-          ),
+        leading: BilSemanticIconBadge(
+          kind: kind,
+          size: 44,
+          iconSize: 24,
+          shape: BoxShape.rectangle,
+          iconOverride: iconOverride,
+          appleIconOverride: iconOverride,
         ),
         title: Text(
           label,
@@ -260,19 +260,22 @@ class _NutritionQuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final actions = <(IconData, String, VoidCallback)>[
+    final actions = <(BilSemanticIconKind, IconData?, String, VoidCallback)>[
       (
-        Icons.qr_code_scanner_rounded,
+        BilSemanticIconKind.barcode,
+        null,
         nutritionTextForLanguage(languageCode, 'Scan', 'مسح المنتج'),
         onScan,
       ),
       (
+        BilSemanticIconKind.barcode,
         Icons.dialpad_rounded,
         nutritionTextForLanguage(languageCode, 'Barcode', 'الباركود'),
         onManualBarcode,
       ),
       (
-        Icons.add_circle_outline_rounded,
+        BilSemanticIconKind.notes,
+        null,
         nutritionTextForLanguage(languageCode, 'Custom', 'طعام مخصص'),
         onCustomFood,
       ),
@@ -291,9 +294,10 @@ class _NutritionQuickActions extends StatelessWidget {
                   if (index > 0) const SizedBox(width: 8),
                   Expanded(
                     child: _NutritionAction(
-                      icon: actions[index].$1,
-                      label: actions[index].$2,
-                      onTap: actions[index].$3,
+                      kind: actions[index].$1,
+                      iconOverride: actions[index].$2,
+                      label: actions[index].$3,
+                      onTap: actions[index].$4,
                     ),
                   ),
                 ],
@@ -304,9 +308,10 @@ class _NutritionQuickActions extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: _NutritionAction(
-            icon: actions[2].$1,
-            label: actions[2].$2,
-            onTap: actions[2].$3,
+            kind: actions[2].$1,
+            iconOverride: actions[2].$2,
+            label: actions[2].$3,
+            onTap: actions[2].$4,
           ),
         ),
       ],
@@ -316,12 +321,14 @@ class _NutritionQuickActions extends StatelessWidget {
 
 class _NutritionAction extends StatelessWidget {
   const _NutritionAction({
-    required this.icon,
+    required this.kind,
     required this.label,
     required this.onTap,
+    this.iconOverride,
   });
 
-  final IconData icon;
+  final BilSemanticIconKind kind;
+  final IconData? iconOverride;
   final String label;
   final VoidCallback onTap;
 
@@ -340,7 +347,13 @@ class _NutritionAction extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
           child: Column(
             children: [
-              Icon(icon, color: BilFlagshipTokens.cyan500),
+              BilSemanticIconBadge(
+                kind: kind,
+                size: 36,
+                iconSize: 20,
+                iconOverride: iconOverride,
+                appleIconOverride: iconOverride,
+              ),
               const SizedBox(height: 7),
               Text(
                 label,

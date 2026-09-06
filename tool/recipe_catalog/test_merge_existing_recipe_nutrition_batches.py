@@ -37,7 +37,18 @@ class MergeExistingRecipeNutritionBatchesTest(unittest.TestCase):
     def write(self):
         self.a.write_text(json.dumps({"batch": "A", "records": self.records[:9]}), encoding="utf-8")
         self.b.write_text(json.dumps({"batch": "B", "records": self.records[9:]}), encoding="utf-8")
-        self.seeds.write_text(json.dumps({"records": [{"canonicalId": f"recipe-{i}"} for i in range(1, 19)]}), encoding="utf-8")
+        self.seeds.write_text(
+            json.dumps({
+                "records": [
+                    {
+                        "canonicalId": row["canonicalId"],
+                        "contentFingerprint": row["contentFingerprint"],
+                    }
+                    for row in self.records
+                ]
+            }),
+            encoding="utf-8",
+        )
 
     def test_merges_exact_18_in_seed_order(self):
         result = MODULE.merge(self.a, self.b, self.seeds)
@@ -55,6 +66,14 @@ class MergeExistingRecipeNutritionBatchesTest(unittest.TestCase):
         self.records[1]["timing"]["totalMinutes"] = 99
         self.write()
         with self.assertRaises(MODULE.MergeError):
+            MODULE.merge(self.a, self.b, self.seeds)
+
+    def test_rejects_record_that_does_not_match_its_seed_fingerprint(self):
+        self.write()
+        seed_document = json.loads(self.seeds.read_text(encoding="utf-8"))
+        seed_document["records"][0]["contentFingerprint"] = f"{999:064x}"
+        self.seeds.write_text(json.dumps(seed_document), encoding="utf-8")
+        with self.assertRaisesRegex(MODULE.MergeError, "seed_content_fingerprint_mismatch:recipe-1"):
             MODULE.merge(self.a, self.b, self.seeds)
 
 

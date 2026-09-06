@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+5
+version: 1.0.0+8
 
 environment:
   sdk: ^3.12.2
@@ -49,6 +49,7 @@ dependencies:
   pdf: ^3.11.3
   supabase_flutter: ^2.16.0
   supabase: ^2.14.0
+  sign_in_with_apple: 8.2.0
   flutter_svg: ^2.2.0
   share_plus: ^13.2.1
   flutter_localizations:
@@ -86,6 +87,8 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   path_provider_platform_interface: ^2.0.0
+  # Inject the existing player interface in lifecycle/network widget tests.
+  video_player_platform_interface: ^6.9.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -99,7 +102,7 @@ dev_dependencies:
   change_app_package_name: ^1.5.0
 
 # Keep Supabase deep links on the audited current release. Its Android module
-# uses AGP 9.2, matching the app toolchain configured under android/.
+# consumes the host app's audited AGP toolchain configured under android/.
 dependency_overrides:
   app_links:
     path: tool/vendor_app_links
@@ -121,9 +124,12 @@ dependency_overrides:
 
 # The following section is specific to Flutter packages.
 flutter:
+  # Keep Darwin plugin resolution reproducible in local and CI builds. In
+  # particular, permission_handler_apple 9.4.10+ derives its SwiftPM C
+  # permission definitions from Runner/Info.plist at package-resolution time.
+  config:
+    enable-swift-package-manager: true
   assets:
-    - assets/branding/bil_wordmark_registered_blue.svg
-    - assets/branding/bil_wordmark_registered_white.svg
     - assets/branding/bil_splash_identity.png
     - assets/branding/bil_splash_motion.mp4
     - assets/branding/google_g.svg

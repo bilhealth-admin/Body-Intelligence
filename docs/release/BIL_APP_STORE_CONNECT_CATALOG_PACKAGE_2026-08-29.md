@@ -47,7 +47,7 @@ remain held and are not in launch availability.
 ## Runtime authority
 
 The later migration
-`supabase/migrations/20260829233000_canonical_store_market_pricing_policy.sql`
+`supabase/migrations/20260830180011_canonical_store_market_pricing_policy.sql`
 supersedes the older market assignment without rewriting migration history. It
 fails closed for unknown/held storefronts and accepts both ISO-2 and ISO-3
 storefront codes.

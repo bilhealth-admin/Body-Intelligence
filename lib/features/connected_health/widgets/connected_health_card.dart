@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -46,7 +48,10 @@ ConnectedHealthSnapshot dashboardWatchSnapshot(
       source: 'ble:${fitnessDevices.connectedDeviceId}',
       observedAt: observedAt.toUtc(),
       confidence: 1,
-      attributes: const <String, Object?>{'transport': 'ble'},
+      attributes: const <String, Object?>{
+        'transport': 'ble',
+        'wearableKind': 'ble_fitness_sensor',
+      },
     );
     if (latestHeartRate == null ||
         candidate.observedAt.isAfter(latestHeartRate.observedAt)) {
@@ -89,7 +94,7 @@ ConnectedHealthSnapshot dashboardWatchSnapshot(
   );
 }
 
-class ConnectedHealthCard extends ConsumerWidget {
+class ConnectedHealthCard extends ConsumerStatefulWidget {
   const ConnectedHealthCard({
     super.key,
     required this.languageCode,
@@ -101,11 +106,48 @@ class ConnectedHealthCard extends ConsumerWidget {
   final bool compact;
   final bool dashboardCompact;
 
+  @override
+  ConsumerState<ConnectedHealthCard> createState() =>
+      _ConnectedHealthCardState();
+}
+
+class _ConnectedHealthCardState extends ConsumerState<ConnectedHealthCard>
+    with WidgetsBindingObserver {
+  bool _refreshOnResume = false;
+
   String tr(String en, String ar) =>
-      connectedHealthTextForLanguage(languageCode, en, ar);
+      connectedHealthTextForLanguage(widget.languageCode, en, ar);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      _refreshOnResume = true;
+      return;
+    }
+    if (state != AppLifecycleState.resumed || !_refreshOnResume) return;
+    _refreshOnResume = false;
+    // HealthKit/Health Connect remain the source of truth. One coalesced read
+    // when the app returns to the foreground is enough; there is no background
+    // timer or battery-heavy polling loop.
+    unawaited(ref.read(connectedHealthProvider.notifier).refresh());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(connectedHealthProvider);
     final fitnessDevices = ref.watch(fitnessDeviceProvider);
     return Semantics(
@@ -114,21 +156,21 @@ class ConnectedHealthCard extends ConsumerWidget {
       child: PremiumSurface(
         key: const Key('connected-health-card'),
         dashboardGlass: true,
-        padding: compact
+        padding: widget.compact
             ? const EdgeInsets.all(PremiumDesignTokens.spaceSm)
             : PremiumDesignTokens.cardPaddingLarge,
         child: state.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (_, _) => ConnectedHealthErrorContent(
-            languageCode: languageCode,
+            languageCode: widget.languageCode,
             onRetry: () => ref.read(connectedHealthProvider.notifier).refresh(),
           ),
           data: (snapshot) => _ConnectedHealthContent(
             snapshot: snapshot,
             fitnessDevices: fitnessDevices,
-            languageCode: languageCode,
-            compact: compact,
-            dashboardCompact: dashboardCompact,
+            languageCode: widget.languageCode,
+            compact: widget.compact,
+            dashboardCompact: widget.dashboardCompact,
             onManage: () => context.push('/connected-health'),
             onSync: snapshot.status == ConnectedHealthStatus.syncing
                 ? null
@@ -187,12 +229,13 @@ class _ConnectedHealthContent extends StatelessWidget {
       connectedHealthTextForLanguage(languageCode, en, ar);
 
   bool get _hasConnectedSource =>
-      snapshot.availableSources.isNotEmpty ||
+      snapshot.deviceVerified ||
       snapshot.signals.isNotEmpty ||
       snapshot.status == ConnectedHealthStatus.ready ||
       snapshot.status == ConnectedHealthStatus.syncing ||
       snapshot.status == ConnectedHealthStatus.synchronized ||
-      snapshot.status == ConnectedHealthStatus.degraded;
+      (snapshot.status == ConnectedHealthStatus.degraded &&
+          snapshot.lastSyncAt != null);
 
   @override
   Widget build(BuildContext context) {
@@ -324,6 +367,7 @@ class _ConnectedHealthContent extends StatelessWidget {
       final nutritionSignal = signal.key.startsWith('nutrition');
       pages.add(
         _connectedSignalSlide(
+          context,
           signal,
           showPremiumLabel: nutritionSignal && premiumLabelAvailable,
         ),
@@ -334,11 +378,12 @@ class _ConnectedHealthContent extends StatelessWidget {
   }
 
   Widget _connectedSignalSlide(
+    BuildContext context,
     ConnectedHealthSignalView signal, {
     required bool showPremiumLabel,
   }) {
     final slide = HealthSlide(
-      title: _signalTitle(signal.key),
+      title: connectedHealthDataTypeText(context, signal.key),
       result: '${_formatValue(signal.value)} ${signal.unit}',
       explanation: tr(
         'Measured health signal with ${(signal.confidence * 100).round()}% source confidence.',
@@ -425,29 +470,6 @@ class _ConnectedHealthContent extends StatelessWidget {
       'The native health source could not be reached. Existing local data remains intact.',
       'تعذر الوصول إلى مصدر الصحة الأصلي. تبقى البيانات المحلية الحالية سليمة.',
     ),
-  };
-
-  String _signalTitle(String key) => switch (key) {
-    'steps' => tr('Steps', 'الخطوات'),
-    'distance' => tr('Distance', 'المسافة'),
-    'sleep' => tr('Sleep', 'النوم'),
-    'heartRate' => tr('Heart rate', 'معدل القلب'),
-    'restingHeartRate' => tr('Resting heart rate', 'نبض الراحة'),
-    'activeEnergy' => tr('Active energy', 'الطاقة النشطة'),
-    'weight' => tr('Weight', 'الوزن'),
-    'bodyFat' => tr('Body fat', 'دهون الجسم'),
-    'leanMass' => tr('Lean mass', 'الكتلة الخالية من الدهون'),
-    'hrv' => tr('Heart-rate variability', 'تباين معدل القلب'),
-    'water' => tr('Water', 'الماء'),
-    'nutrition' => tr('Dietary energy', 'الطاقة الغذائية'),
-    'nutritionProtein' => tr('Protein', 'البروتين'),
-    'nutritionCarbohydrates' => tr('Carbohydrates', 'الكربوهيدرات'),
-    'nutritionFat' => tr('Total fat', 'إجمالي الدهون'),
-    'nutritionFiber' => tr('Fiber', 'الألياف'),
-    'nutritionSugar' => tr('Sugar', 'السكر الغذائي'),
-    'nutritionSodium' => tr('Sodium', 'الصوديوم'),
-    'nutritionPotassium' => tr('Potassium', 'البوتاسيوم'),
-    _ => key,
   };
 
   IconData _signalIcon(String key) => switch (key) {

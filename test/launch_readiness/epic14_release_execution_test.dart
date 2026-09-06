@@ -69,7 +69,9 @@ void main() {
     );
     expect(entitlements, contains('<key>aps-environment</key>'));
     expect(entitlements, contains('<key>com.apple.developer.healthkit</key>'));
-    expect(debugEntitlements, isNot(contains('aps-environment')));
+    expect(debugEntitlements, contains('<key>aps-environment</key>'));
+    expect(debugEntitlements, contains('<string>development</string>'));
+    expect(debugEntitlements, isNot(contains('<string>production</string>')));
     expect(coverage, contains('OWNER_INPUT_REQUIRED'));
     expect(coverage, contains('EXTERNAL_REQUIRED_NOT_CLAIMED'));
     expect(coverage, contains('No placeholder URL'));

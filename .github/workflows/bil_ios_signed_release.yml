@@ -9,20 +9,47 @@ on:
         default: false
         type: boolean
       build_number:
-        description: App Store build number; use a value greater than every uploaded build
+        description: Exact App Store build number for this frozen candidate; must be 8
         required: true
         type: string
+      run_native_crypto_checks:
+        description: Run the optional iOS Simulator AES-GCM runtime check
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
 
 jobs:
   signed-ios-release:
-    runs-on: macos-latest
+    runs-on: macos-26
     timeout-minutes: 75
     steps:
       - name: Checkout accepted source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Verify selected Xcode 26+ and iOS SDK 26+
+        id: apple_toolchain_gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Do not guess or switch Xcode installations. The runner-selected
+          # toolchain itself must satisfy the store gate.
+          python3 tool/release/verify_apple_release_toolchain.py \
+            --text-evidence BIL-apple-release-toolchain.txt \
+            --json-evidence BIL-apple-release-toolchain.json
+
+      - name: Upload Apple toolchain version evidence
+        if: ${{ always() && steps.apple_toolchain_gate.outcome != 'skipped' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bil-ios-toolchain-evidence-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            BIL-apple-release-toolchain.txt
+            BIL-apple-release-toolchain.json
 
       - name: Install Flutter stable
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2
@@ -41,8 +68,8 @@ jobs:
             echo 'build_number must be a positive integer.' >&2
             exit 1
           }
-          (( BUILD_NUMBER >= 5 )) || {
-            echo 'build_number must be at least 5 to keep both stores on one release identity.' >&2
+          (( BUILD_NUMBER == 8 )) || {
+            echo 'build_number must be exactly 8 for the audited +8 candidate; build 7 must never be selected.' >&2
             exit 1
           }
           test -n "${APPLE_TEAM_ID:-}" || {
@@ -65,6 +92,7 @@ jobs:
           ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           ASC_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+          MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
         run: |
           set -euo pipefail
           test -n "${CERTIFICATE_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APPLE_DISTRIBUTION_CERTIFICATE_BASE64'; exit 1; }
@@ -74,6 +102,7 @@ jobs:
           test -n "${ASC_KEY_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_KEY_ID'; exit 1; }
           test -n "${ASC_ISSUER_ID:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_ISSUER_ID'; exit 1; }
           test -n "${ASC_PRIVATE_KEY_BASE64:-}" || { echo 'OWNER_INPUT_REQUIRED: APP_STORE_CONNECT_PRIVATE_KEY_BASE64'; exit 1; }
+          [[ "${MOBILE_INTEGRITY_BACKEND_RELEASE_ID:-}" =~ [^[:space:]] ]] || { echo 'OWNER_INPUT_REQUIRED: BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID (set only after the migration, app-attest/play-integrity functions, guarded functions, and production server configuration are verified)'; exit 1; }
 
       - name: Import distribution certificate
         uses: apple-actions/import-codesign-certs@63fff01cd422d4b7b855d40ca1e9d34d2de9427d
@@ -120,8 +149,43 @@ jobs:
               raise SystemExit('Provisioning profile does not authorize HealthKit.')
           if 'Default' not in entitlements.get('com.apple.developer.applesignin', []):
               raise SystemExit('Provisioning profile does not authorize Sign in with Apple.')
+          associated_domains = entitlements.get(
+              'com.apple.developer.associated-domains',
+              [],
+          )
+          if isinstance(associated_domains, str):
+              associated_domain_values = {associated_domains}
+          elif isinstance(associated_domains, list):
+              associated_domain_values = {
+                  value for value in associated_domains if isinstance(value, str)
+              }
+          else:
+              associated_domain_values = set()
+          if not (
+              '*' in associated_domain_values
+              or 'applinks:www.bilhealth.com' in associated_domain_values
+          ):
+              raise SystemExit(
+                  'Provisioning profile does not authorize '
+                  'applinks:www.bilhealth.com.'
+              )
           if entitlements.get('aps-environment') != 'production':
               raise SystemExit('Provisioning profile does not authorize production push.')
+          app_attest = entitlements.get(
+              'com.apple.developer.devicecheck.appattest-environment'
+          )
+          if isinstance(app_attest, str):
+              app_attest_environments = {app_attest}
+          elif isinstance(app_attest, list):
+              app_attest_environments = {
+                  value for value in app_attest if isinstance(value, str)
+              }
+          else:
+              app_attest_environments = set()
+          if 'production' not in app_attest_environments:
+              raise SystemExit(
+                  'Provisioning profile does not authorize production App Attest.'
+              )
           if entitlements.get('get-task-allow', False) is not False:
               raise SystemExit('Provisioning profile unexpectedly enables get-task-allow.')
           expiry = profile.get('ExpirationDate')
@@ -132,9 +196,31 @@ jobs:
           PY
 
       - name: Resolve and validate source
+        env:
+          BIL_RELEASE_PRODUCTION: true
+          BIL_RELEASE_PLATFORM: ios
+          BIL_RELEASE_APPLICATION_ID: com.bilhealth.bodyintelligencelog
+          BIL_USE_SUPABASE: true
+          SUPABASE_URL: https://tgmanzhqulksykhslrzb.supabase.co
+          SUPABASE_ANON_KEY: sb_publishable_eMoUVfgwfU0RpQOwPJr-yw_ZgtStgld
+          BIL_RECEIPT_SERVER_URL: https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/verify-store-purchase
+          BIL_PAYMENTS_ENABLED: true
+          BIL_STORE_CONFIGURED: true
+          BIL_FACEBOOK_REQUIRED: true
+          BIL_FACEBOOK_LOGIN_ENABLED: true
+          BIL_FACEBOOK_LOGIN_READY: true
+          BIL_PUSH_ENABLED: false
+          BIL_PUSH_PROVIDER_READY: false
+          BIL_MOBILE_INTEGRITY_REQUIRED: true
+          BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
+          BIL_SOURCE_COMMIT: ${{ github.sha }}
+          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_PLUS8_AUDITED_SOURCE_SHA }}
+          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_PLUS8_FROZEN_SOURCE_MANIFEST_2026-09-06.md
+          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_PLUS8_STAGING_MANIFEST_SHA256 }}
         run: |
           flutter pub get
           flutter analyze --no-pub
+          dart run tool/release/validate_release_configuration.dart
           python3 tool/release/run_portable_release_tests.py
           flutter test --no-pub \
             test/launch_readiness/system_crypto_export_compliance_contract_test.dart \
@@ -146,6 +232,7 @@ jobs:
 
       - name: Boot iOS Simulator for the system-crypto release gate
         id: crypto_simulator
+        if: ${{ inputs.run_native_crypto_checks }}
         shell: bash
         run: |
           set -euo pipefail
@@ -160,6 +247,8 @@ jobs:
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
 
       - name: Run native AES-GCM gate on iOS Simulator
+        id: native_crypto_runtime_gate
+        if: ${{ inputs.run_native_crypto_checks }}
         shell: bash
         run: >-
           flutter test --no-pub
@@ -174,6 +263,24 @@ jobs:
           UDID: ${{ steps.crypto_simulator.outputs.udid }}
         run: |
           xcrun simctl shutdown "$UDID" 2>/dev/null || true
+
+      - name: Record native crypto runtime gate decision
+        if: ${{ always() }}
+        shell: bash
+        env:
+          RUN_NATIVE_CRYPTO_CHECKS: ${{ inputs.run_native_crypto_checks }}
+          NATIVE_CRYPTO_OUTCOME: ${{ steps.native_crypto_runtime_gate.outcome }}
+        run: |
+          set -euo pipefail
+          if [[ "$RUN_NATIVE_CRYPTO_CHECKS" == 'true' ]]; then
+            printf '%s\n' \
+              "NATIVE_CRYPTO_RUNTIME_GATE=${NATIVE_CRYPTO_OUTCOME^^}" \
+              'NATIVE_CRYPTO_RUNTIME_OWNER_WAIVER=NOT_USED'
+          else
+            printf '%s\n' \
+              'NATIVE_CRYPTO_RUNTIME_GATE=NOT_RUN_OWNER_WAIVED' \
+              'NATIVE_CRYPTO_RUNTIME_OWNER_WAIVER=EXPLICIT_WORKFLOW_INPUT'
+          fi | tee BIL-ios-native-crypto-gate.txt
 
       - name: Exclude dev-only native plugins from iOS release
         run: dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios
@@ -257,14 +364,15 @@ jobs:
             --export-options-plist "$RUNNER_TEMP/BIL-export-options.plist" \
             --build-number "$BUILD_NUMBER" \
             --dart-define=BIL_ENVIRONMENT=production \
+            --dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true \
             --dart-define=BIL_PAYMENTS_ENABLED=true \
             --dart-define=BIL_TERMS_URL=https://www.bilhealth.com/terms \
             --dart-define=BIL_PRIVACY_URL=https://www.bilhealth.com/privacy \
             --dart-define=BIL_MEAL_VISION_ENDPOINT=https://tgmanzhqulksykhslrzb.supabase.co/functions/v1/analyze-meal \
             --dart-define=BIL_WELLNESS_MANIFEST_URL=https://workouts.bilhealth.com/v2/manifest/wellness-workouts-v2-af6082ff28856f9154216067f16fe6a7147548c9a29f8e205b43bb81bc34efe8.json \
             --dart-define=BIL_RECIPE_IMAGE_DELIVERY_ENABLED=true \
-            --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=false \
-            --dart-define=BIL_FACEBOOK_LOGIN_READY=false \
+            --dart-define=BIL_FACEBOOK_LOGIN_ENABLED=true \
+            --dart-define=BIL_FACEBOOK_LOGIN_READY=true \
             --dart-define=BIL_ADS_ENABLED=false \
             --dart-define=BIL_AD_PROVIDER_READY=false \
             --dart-define=BIL_ENABLE_CATALOG_TEST_ACCESS=false
@@ -278,13 +386,40 @@ jobs:
           set -euo pipefail
           IPA="$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)"
           test -s "$IPA"
-          codesign -dv --verbose=4 build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app 2> BIL-ios-codesign.txt
+
+          SIGNED_IPA_DIR="$(mktemp -d "$RUNNER_TEMP/bil-final-signed-ipa.XXXXXX")"
+          unzip -qq "$IPA" -d "$SIGNED_IPA_DIR"
+          SIGNED_APP_COUNT="$(find "$SIGNED_IPA_DIR/Payload" \
+            -mindepth 1 -maxdepth 1 -type d -name '*.app' | wc -l | tr -d '[:space:]')"
+          test "$SIGNED_APP_COUNT" = 1 || {
+            echo "Expected exactly one application in final IPA Payload; found $SIGNED_APP_COUNT." >&2
+            exit 1
+          }
+          SIGNED_APP="$(find "$SIGNED_IPA_DIR/Payload" \
+            -mindepth 1 -maxdepth 1 -type d -name '*.app' -print -quit)"
+          test -d "$SIGNED_APP"
+
+          codesign --verify --deep --strict --verbose=4 "$SIGNED_APP" \
+            2>&1 | tee BIL-ios-codesign-verify.txt
+          printf '%s\n' 'SIGNED_IPA_CODESIGN_GATE=PASS' \
+            | tee -a BIL-ios-codesign-verify.txt
+          codesign -dv --verbose=4 "$SIGNED_APP" 2> BIL-ios-codesign.txt
           codesign --display --entitlements - --xml \
-            build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app \
+            "$SIGNED_APP" \
             | plutil -convert xml1 -o BIL-ios-entitlements.plist -
           test -s BIL-ios-entitlements.plist
+
+          EMBEDDED_PROFILE="$SIGNED_APP/embedded.mobileprovision"
+          test -s "$EMBEDDED_PROFILE" || {
+            echo 'Final IPA app has no embedded provisioning profile.' >&2
+            exit 1
+          }
+          security cms -D -i "$EMBEDDED_PROFILE" \
+            > BIL-ios-embedded-profile.plist
+          plutil -lint BIL-ios-embedded-profile.plist
           python3 tool/release/verify_signed_ios_entitlements.py \
             --entitlements BIL-ios-entitlements.plist \
+            --embedded-profile BIL-ios-embedded-profile.plist \
             --team-id "$APPLE_TEAM_ID" \
             --bundle-id com.bilhealth.bodyintelligencelog
           shasum -a 256 "$IPA" | tee BIL-ios-ipa.sha256
@@ -315,8 +450,12 @@ jobs:
         run: |
           printf '%s\n' \
             'CODE_GATE=PASS' \
+            'FACEBOOK_LOGIN_COMPILED_GATE=ENABLED_AND_READY' \
+            'FACEBOOK_LOGIN_SIGNED_DEVICE_GATE=REQUIRED' \
+            'MOBILE_INTEGRITY_CLIENT_GATE=ENABLED' \
+            'MOBILE_INTEGRITY_BACKEND_GATE=OWNER_EVIDENCE_PRESENT_NOT_LIVE_VERIFIED' \
             'PHYSICAL_DEVICE_GATE=REQUIRED' \
-            'PHYSICAL_DEVICE_SCOPE=HealthKit,Apple Watch via HealthKit,fitness BLE,StoreKit sandbox' \
+            'PHYSICAL_DEVICE_SCOPE=Facebook OAuth via Supabase SFSafariViewController,App Attest JIT registration/assertion/replay denial,HealthKit,Apple Watch via HealthKit,fitness BLE,StoreKit sandbox' \
             > BIL-ios-gate-status.txt
 
       - name: Validate candidate with App Store Connect
@@ -362,7 +501,7 @@ jobs:
             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
 
       - name: Upload signed IPA and validation evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: bil-ios-signed-ipa-${{ github.sha }}
           if-no-files-found: error
@@ -370,13 +509,18 @@ jobs:
           path: |
             build/ios/ipa/*.ipa
             BIL-ios-codesign.txt
+            BIL-ios-codesign-verify.txt
             BIL-ios-entitlements.plist
+            BIL-ios-embedded-profile.plist
             BIL-ios-ipa.sha256
             BIL-ios-ipa.size
             BIL-ios-crypto-scan.txt
+            BIL-ios-native-crypto-gate.txt
             BIL-ios-gate-status.txt
             BIL-build-number.txt
             BIL-source-head.txt
+            BIL-apple-release-toolchain.txt
+            BIL-apple-release-toolchain.json
 
       - name: Remove App Store Connect private key
         if: always()

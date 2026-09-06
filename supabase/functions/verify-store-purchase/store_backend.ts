@@ -8,6 +8,10 @@ import {
 } from "npm:jose@6.1.0";
 import { X509Certificate } from "node:crypto";
 import {
+  MobileIntegrityFailure,
+  requireMobileIntegrityGrant,
+} from "../_shared/mobile_integrity.ts";
+import {
   appleServerStatusLifecycle,
   appleTransactionLifecycle,
 } from "./apple_subscription_lifecycle.ts";
@@ -158,6 +162,11 @@ function clients(authorization?: string) {
     admin: createClient(url, service),
   };
 }
+
+export type StoreBackendHandlerDependencies = {
+  clients?: typeof clients;
+  requireIntegrity?: typeof requireMobileIntegrityGrant;
+};
 
 async function googleAccessToken() {
   const raw = googlePlayServiceAccountJson();
@@ -475,17 +484,33 @@ async function persistVerified(
   return active;
 }
 
-async function authenticatedUser(request: Request) {
+async function authenticatedUser(
+  request: Request,
+  createClients: typeof clients,
+) {
   const authorization = request.headers.get("authorization") ?? "";
   if (!authorization) throw new Error("authentication_required");
-  const { auth, admin } = clients(authorization);
+  const { auth, admin } = createClients(authorization);
   const { data, error } = await auth.auth.getUser();
   if (error || !data.user) throw new Error("invalid_session");
   return { user: data.user, auth, admin };
 }
 
-async function verifyPurchase(request: Request, body: Record<string, unknown>) {
-  const { user, auth, admin } = await authenticatedUser(request);
+async function verifyPurchase(
+  request: Request,
+  body: Record<string, unknown>,
+  dependencies: StoreBackendHandlerDependencies,
+) {
+  const { user, auth, admin } = await authenticatedUser(
+    request,
+    dependencies.clients ?? clients,
+  );
+  body = await (dependencies.requireIntegrity ?? requireMobileIntegrityGrant)({
+    admin: admin as never,
+    ownerId: user.id,
+    action: "store.verify_purchase",
+    body,
+  });
   const { error: rateError } = await auth.rpc("bil_consume_rate_limit", {
     p_action: "store_purchase_verification",
     p_limit: 20,
@@ -529,8 +554,21 @@ async function verifyPurchase(request: Request, body: Record<string, unknown>) {
   });
 }
 
-async function verifyAiBoost(request: Request, body: Record<string, unknown>) {
-  const { user, auth, admin } = await authenticatedUser(request);
+async function verifyAiBoost(
+  request: Request,
+  body: Record<string, unknown>,
+  dependencies: StoreBackendHandlerDependencies,
+) {
+  const { user, auth, admin } = await authenticatedUser(
+    request,
+    dependencies.clients ?? clients,
+  );
+  body = await (dependencies.requireIntegrity ?? requireMobileIntegrityGrant)({
+    admin: admin as never,
+    ownerId: user.id,
+    action: "store.verify_ai_boost",
+    body,
+  });
   const { error: rateError } = await auth.rpc("bil_consume_rate_limit", {
     p_action: "ai_boost_purchase_verification",
     p_limit: 20,
@@ -845,7 +883,10 @@ async function reconcile(request: Request) {
   return json({ reconciled, examined: subscriptions?.length ?? 0 });
 }
 
-export async function handler(request: Request): Promise<Response> {
+export async function handler(
+  request: Request,
+  dependencies: StoreBackendHandlerDependencies = {},
+): Promise<Response> {
   if (request.method !== "POST") {
     return json({ error: "method_not_allowed" }, 405);
   }
@@ -855,10 +896,10 @@ export async function handler(request: Request): Promise<Response> {
     if (body.signedPayload) return await verifyAppleNotification(body);
     if (body.message) return await verifyGooglePush(request, body);
     if (body.action === "verify_purchase") {
-      return await verifyPurchase(request, body);
+      return await verifyPurchase(request, body, dependencies);
     }
     if (body.action === "verify_ai_boost") {
-      return await verifyAiBoost(request, body);
+      return await verifyAiBoost(request, body, dependencies);
     }
     return json({ error: "invalid_action" }, 400);
   } catch (error) {
@@ -877,7 +918,9 @@ export async function handler(request: Request): Promise<Response> {
     ]);
     return json(
       { error: code, verified: false, entitlement_active: false },
-      code === "authentication_required" || code === "invalid_session"
+      error instanceof MobileIntegrityFailure
+        ? error.status
+        : code === "authentication_required" || code === "invalid_session"
         ? 401
         : clientCodes.has(code)
         ? 400

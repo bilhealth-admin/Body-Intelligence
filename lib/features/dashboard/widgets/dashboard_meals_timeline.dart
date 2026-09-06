@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../data/repositories/meal_repository.dart';
 
@@ -19,6 +20,13 @@ IconData dashboardMealIcon(String type, DateTime? recordedAt) {
     _ => Icons.schedule_rounded,
   };
 }
+
+BilSemanticIconKind dashboardMealSemanticKind(String type) => switch (type) {
+  'breakfast' => BilSemanticIconKind.breakfast,
+  'lunch' => BilSemanticIconKind.lunch,
+  'dinner' => BilSemanticIconKind.dinner,
+  _ => BilSemanticIconKind.snack,
+};
 
 class DashboardMealsTimeline extends StatelessWidget {
   const DashboardMealsTimeline({
@@ -179,7 +187,13 @@ class _MealTimelineEntry extends StatelessWidget {
             width: 54,
             child: Column(
               children: [
-                CircleAvatar(radius: 18, child: Icon(icon, size: 19)),
+                BilSemanticIconBadge(
+                  kind: dashboardMealSemanticKind(type),
+                  size: 40,
+                  iconSize: 20,
+                  iconOverride: icon,
+                  appleIconOverride: icon,
+                ),
                 if (!last)
                   Expanded(
                     child: Container(

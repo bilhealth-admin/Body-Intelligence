@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-08-29",
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-05",
   "mode": "release-catalog-preparation-only",
   "app": {
     "name": "Body Intelligence Log",
@@ -14,11 +14,11 @@
   "authoritativeSources": {
     "productBindings": "lib/features/commerce/domain/store_catalog_configuration.dart",
     "commerceContract": "docs/architecture/BIL_V1_EPIC13_COMMERCE_CLOSURE.md",
-    "marketPolicy": "supabase/migrations/20260829233000_canonical_store_market_pricing_policy.sql",
-    "canonicalPricing": "tool/apple_store_connect/canonical_store_pricing_2026-08-29.json"
+    "marketPolicy": "supabase/migrations/20260905170000_owner_store_market_policy_nigeria_alignment.sql",
+    "canonicalPricing": "tool/apple_store_connect/canonical_store_pricing_2026-09-05.json"
   },
   "availability": {
-    "premiumOnlyIso2": ["EG", "IN", "PK", "TR"],
+    "premiumOnlyIso2": ["EG", "NG", "PK", "TR"],
     "heldIso2": ["BY", "CN", "RU"],
     "expectedAppleLaunchCount": 172,
     "expectedPremiumOnlyCount": 4,

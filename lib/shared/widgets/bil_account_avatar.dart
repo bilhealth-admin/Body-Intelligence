@@ -13,12 +13,16 @@ class BilAccountAvatar extends StatelessWidget {
     this.photoBytes,
     this.networkUrl,
     this.borderColor,
+    this.backgroundColor,
+    this.placeholderColor,
   });
 
   final double radius;
   final Uint8List? photoBytes;
   final String? networkUrl;
   final Color? borderColor;
+  final Color? backgroundColor;
+  final Color? placeholderColor;
 
   ImageProvider<Object>? get _backgroundImage {
     final bytes = photoBytes;
@@ -37,6 +41,7 @@ class BilAccountAvatar extends StatelessWidget {
     final background = _backgroundImage;
     final avatar = CircleAvatar(
       radius: radius,
+      backgroundColor: backgroundColor,
       // The cloud URL is authoritative across devices. Local bytes remain a
       // resilient offline fallback. The coach identity is never an account
       // placeholder.
@@ -44,7 +49,11 @@ class BilAccountAvatar extends StatelessWidget {
       onForegroundImageError: foreground == null ? null : (_, _) {},
       backgroundImage: background,
       child: foreground == null && background == null
-          ? Icon(Icons.person_rounded, size: radius, color: Colors.white)
+          ? Icon(
+              Icons.person_rounded,
+              size: radius,
+              color: placeholderColor ?? Colors.white,
+            )
           : null,
     );
     final border = borderColor;

@@ -1788,10 +1788,31 @@ void main() {
   }
 
   testWidgets('sleep production page capture', (tester) async {
-    await capture(tester, page: const SleepTrackerPage(), name: 'sleep_phone');
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    await SharedPreferences.getInstance();
+    await capture(
+      tester,
+      page: const SleepTrackerPage(),
+      name: 'sleep_phone',
+      interact: (tester) async {
+        expect(
+          tester
+              .widget<SwitchListTile>(
+                find.byKey(const Key('sleep-schedule-toggle')),
+              )
+              .onChanged,
+          isNotNull,
+        );
+        final bedtime = find.widgetWithText(ListTile, 'Bedtime');
+        expect(tester.widget<ListTile>(bedtime).horizontalTitleGap, 12);
+        expect(tester.widget<ListTile>(bedtime).enabled, isTrue);
+      },
+    );
   });
 
   testWidgets('sleep production saved record capture', (tester) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    await SharedPreferences.getInstance();
     await capture(
       tester,
       page: const SleepTrackerPage(),
@@ -1806,6 +1827,17 @@ void main() {
       },
       interact: (tester) async {
         expect(find.textContaining('Recorded today: 7.5 h'), findsOneWidget);
+        expect(
+          tester
+              .widget<SwitchListTile>(
+                find.byKey(const Key('sleep-schedule-toggle')),
+              )
+              .onChanged,
+          isNotNull,
+        );
+        final bedtime = find.widgetWithText(ListTile, 'Bedtime');
+        expect(tester.widget<ListTile>(bedtime).horizontalTitleGap, 12);
+        expect(tester.widget<ListTile>(bedtime).enabled, isTrue);
       },
     );
   });

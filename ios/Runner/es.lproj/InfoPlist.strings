@@ -1,7 +1,7 @@
-"NSHealthShareUsageDescription" = "BIL reads only the Health categories you choose—activity, sleep, body measurements, heart metrics, hydration, and nutrition—to show a private on-device fitness timeline and insights.";
+"NSHealthShareUsageDescription" = "BIL solo lee las categorías de Salud que eliges —actividad, sueño, medidas corporales, métricas cardíacas, hidratación y nutrición— para mostrar en tu dispositivo una cronología privada de actividad física e información útil. Solo cuando activas la inteligencia personalizada (Personalized Intelligence) y haces una pregunta a BIL Coach, la IA en la nube puede procesar de forma segura el mínimo de datos pertinentes para responderla.";
 "NSHealthUpdateUsageDescription" = "BIL escribe registros de peso solo después de que autorices por separado el acceso de escritura a Salud.";
-"NSBluetoothAlwaysUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
-"NSBluetoothPeripheralUsageDescription" = "BIL connects only to fitness devices you explicitly pair so measurements can be imported locally.";
+"NSBluetoothAlwaysUsageDescription" = "BIL solo se conecta a los dispositivos de fitness que emparejas de forma explícita para importar las mediciones localmente.";
+"NSBluetoothPeripheralUsageDescription" = "BIL solo se conecta a los dispositivos de fitness que emparejas de forma explícita para importar las mediciones localmente.";
 "NSCameraUsageDescription" = "Usa la cámara solo cuando elijas escanear un código, revisar una foto de comida o añadir una foto privada de perfil o progreso.";
 "NSPhotoLibraryUsageDescription" = "BIL accede solo a una foto que elijas para una comida, perfil, progreso, publicación de la comunidad o aporte de alimentos, para que la revises antes de guardarla o subirla.";
 "NSMicrophoneUsageDescription" = "BIL usa el micrófono solo cuando eliges registrar el peso o una comida con la voz, o hablar directamente con BIL AI Coach.";

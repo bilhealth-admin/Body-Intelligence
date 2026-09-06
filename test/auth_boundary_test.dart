@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/auth/login_page.dart';
 import 'package:body_intelligence_log/features/auth/register_page.dart';
@@ -7,15 +9,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('store reviewer password path accepts only its dedicated account', () {
+  test('store reviewer identity is never compiled into the client', () {
+    final source = File('lib/features/auth/login_page.dart').readAsStringSync();
+
+    expect(source, isNot(contains('reviewerEmail')));
+    expect(source, isNot(contains('acceptsReviewerEmail')));
     expect(
-      StoreReviewerLoginPage.acceptsReviewerEmail(
-        ' PLAY-REVIEW@BILHEALTH.COM ',
-      ),
-      isTrue,
-    );
-    expect(
-      StoreReviewerLoginPage.acceptsReviewerEmail('person@example.com'),
+      RegExp(
+        r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}",
+      ).hasMatch(source),
       isFalse,
     );
   });
@@ -130,22 +132,11 @@ void main() {
     expect(find.byKey(const Key('open-register')), findsNothing);
     expect(find.text('Continue privately on this device'), findsNothing);
 
-    await tester.enterText(
+    final emailField = tester.widget<TextFormField>(
       find.byKey(const Key('login-email')),
-      'person@example.com',
     );
-    await tester.enterText(
-      find.byKey(const Key('login-password')),
-      'not-a-reviewer-password',
-    );
-    await tester.tap(find.byKey(const Key('login-submit')));
-    await tester.pump();
+    expect(emailField.controller?.text, isEmpty);
 
-    expect(
-      find.text(
-        'Use only the dedicated credentials supplied in the store review notes.',
-      ),
-      findsAtLeastNWidgets(1),
-    );
+    expect(emailField.validator?.call('invalid'), 'Enter a valid email.');
   });
 }

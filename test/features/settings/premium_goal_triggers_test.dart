@@ -77,7 +77,7 @@ void main() {
     expect(valid.startingDate, '2026-08-14');
   });
 
-  testWidgets('free crowns route to plans rather than pretending to activate', (
+  testWidgets('free premium goal rows route to plans with a simple chevron', (
     tester,
   ) async {
     final database = AppDatabase.forTesting(NativeDatabase.memory());
@@ -95,16 +95,15 @@ void main() {
       find.byKey(const Key('goals-meal-calories-entitlement-state')),
       520,
     );
-    final freeTile = tester.widget<ListTile>(
-      find.ancestor(
-        of: find.text('Calorie Goals By Meal'),
-        matching: find.byType(ListTile),
-      ),
+    final freeRow = find.ancestor(
+      of: find.text('Calorie Goals By Meal'),
+      matching: find.byType(ListTile),
     );
+    final freeTile = tester.widget<ListTile>(freeRow);
     expect(
       find.descendant(
-        of: find.byKey(const Key('goals-meal-calories-entitlement-state')),
-        matching: find.byIcon(Icons.lock_outline_rounded),
+        of: freeRow,
+        matching: find.byIcon(Icons.chevron_right_rounded),
       ),
       findsOneWidget,
     );
@@ -226,7 +225,7 @@ void main() {
   });
 
   testWidgets(
-    'Health Goal updates one durable row and the signed summary card',
+    'Health Goal updates one durable row and the unsigned summary card',
     (tester) async {
       final database = AppDatabase.forTesting(NativeDatabase.memory());
       await _seedProfile(database);
@@ -257,7 +256,9 @@ void main() {
       await tester.pumpAndSettle();
       await _pumpPage(tester, database, const SettingsPage(), _premium());
       expect(find.text('93.4 kg'), findsOneWidget);
-      expect(find.text('+13.4 kg'), findsOneWidget);
+      expect(find.text('13.4 kg'), findsOneWidget);
+      expect(find.text('+13.4 kg'), findsNothing);
+      expect(find.text('-13.4 kg'), findsNothing);
       expect(find.text('80.0 kg'), findsOneWidget);
 
       await tester.pumpWidget(const SizedBox.shrink());

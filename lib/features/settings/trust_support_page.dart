@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/localization/runtime_copy.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 
 const _trustPolicyRevision = 'BIL-TRUST-2026-08-R1';
 
@@ -145,7 +146,7 @@ class TrustSupportPage extends StatelessWidget {
           const _TrustHero(),
           const SizedBox(height: 18),
           _TrustSection(
-            icon: Icons.privacy_tip_outlined,
+            kind: BilSemanticIconKind.privacy,
             title: tr('Privacy by design', 'خصوصية من التصميم'),
             body: tr(
               'Your profile, meals, water, weight and preferences remain in the local database unless you explicitly enable and authorize a connected service.',
@@ -153,7 +154,7 @@ class TrustSupportPage extends StatelessWidget {
             ),
           ),
           _TrustSection(
-            icon: Icons.health_and_safety_outlined,
+            kind: BilSemanticIconKind.health,
             title: tr('Health responsibility', 'المسؤولية الصحية'),
             body: tr(
               'BIL supports tracking and cautious personal hypotheses. It does not diagnose, prescribe treatment, or replace a qualified health professional. Seek urgent care for emergency symptoms.',
@@ -161,7 +162,7 @@ class TrustSupportPage extends StatelessWidget {
             ),
           ),
           _TrustSection(
-            icon: Icons.psychology_alt_outlined,
+            kind: BilSemanticIconKind.aiCoach,
             title: tr('How BIL intelligence answers', 'كيف يجيب ذكاء BIL'),
             body: tr(
               'BIL is designed to distinguish recorded facts from interpretation, show confidence and missing data, and ask for consent before changing a plan.',
@@ -172,7 +173,12 @@ class TrustSupportPage extends StatelessWidget {
           ListTile(
             minLeadingWidth: 32,
             horizontalTitleGap: 20,
-            leading: const Icon(Icons.devices_other_outlined),
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.devices,
+              size: 38,
+              iconSize: 21,
+              shape: BoxShape.rectangle,
+            ),
             title: Text(tr('Connected health sources', 'مصادر الصحة المتصلة')),
             subtitle: Text(
               tr(
@@ -186,7 +192,12 @@ class TrustSupportPage extends StatelessWidget {
           ListTile(
             minLeadingWidth: 32,
             horizontalTitleGap: 20,
-            leading: const Icon(Icons.copy_all_outlined),
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.export,
+              size: 38,
+              iconSize: 21,
+              shape: BoxShape.rectangle,
+            ),
             title: Text(tr('Export local data', 'تصدير البيانات المحلية')),
             subtitle: Text(
               tr(
@@ -200,7 +211,12 @@ class TrustSupportPage extends StatelessWidget {
           ListTile(
             minLeadingWidth: 32,
             horizontalTitleGap: 20,
-            leading: const Icon(Icons.delete_outline_rounded),
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.accountDeletion,
+              size: 38,
+              iconSize: 21,
+              shape: BoxShape.rectangle,
+            ),
             title: Text(
               tr('Request cloud-account deletion', 'طلب حذف الحساب السحابي'),
             ),
@@ -216,7 +232,12 @@ class TrustSupportPage extends StatelessWidget {
           ListTile(
             minLeadingWidth: 32,
             horizontalTitleGap: 20,
-            leading: const Icon(Icons.privacy_tip_outlined),
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.privacy,
+              size: 38,
+              iconSize: 21,
+              shape: BoxShape.rectangle,
+            ),
             title: Text(tr('Privacy Policy', 'سياسة الخصوصية')),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/legal/privacy'),
@@ -224,7 +245,12 @@ class TrustSupportPage extends StatelessWidget {
           ListTile(
             minLeadingWidth: 32,
             horizontalTitleGap: 20,
-            leading: const Icon(Icons.gavel_outlined),
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.legal,
+              size: 38,
+              iconSize: 21,
+              shape: BoxShape.rectangle,
+            ),
             title: Text(tr('Terms of Service', 'شروط الخدمة')),
             trailing: const Icon(Icons.chevron_right_rounded),
             onTap: () => context.push('/legal/terms'),
@@ -345,12 +371,12 @@ class _TrustHero extends StatelessWidget {
 
 class _TrustSection extends StatelessWidget {
   const _TrustSection({
-    required this.icon,
+    required this.kind,
     required this.title,
     required this.body,
   });
 
-  final IconData icon;
+  final BilSemanticIconKind kind;
   final String title;
   final String body;
 
@@ -363,7 +389,12 @@ class _TrustSection extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: Theme.of(context).colorScheme.primary),
+            BilSemanticIconBadge(
+              kind: kind,
+              size: 40,
+              iconSize: 22,
+              shape: BoxShape.rectangle,
+            ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(

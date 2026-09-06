@@ -80,4 +80,89 @@ void main() {
 
     expect(issues, isEmpty);
   });
+
+  test('frozen Android production configuration passes every release gate', () {
+    final issues = ReleaseConfigurationValidator.validate(
+      ReleaseConfiguration(
+        production: true,
+        applicationId: 'com.bilhealth.bodyintelligencelog',
+        cloudEnabled: true,
+        supabaseUrl: 'https://project.supabase.co',
+        supabaseAnonKey: 'public-anonymous-key',
+        serverUrl: 'https://project.supabase.co/functions/v1/verify',
+        paymentsEnabled: true,
+        storeConfigured: true,
+        platform: 'android',
+        facebookRequired: true,
+        facebookLoginEnabled: true,
+        facebookLoginReady: true,
+        pushEnabled: false,
+        pushProviderReady: false,
+        mobileIntegrityRequired: true,
+        mobileIntegrityBackendReleaseId: 'reviewed-backend-release',
+        playIntegrityProjectNumber: '1041595138122',
+        sourceCommit: List.filled(40, 'a').join(),
+        auditedSourceCommit: List.filled(40, 'a').join(),
+        freezeManifestSha256: List.filled(64, 'b').join(),
+        auditedFreezeManifestSha256: List.filled(64, 'b').join(),
+        stagingManifestComplete: true,
+        candidateFrozenOrAccepted: true,
+        unresolvedReviewCount: 0,
+        manifestReleaseVersion: '1.0.0',
+        manifestReleaseBuildNumber: 8,
+      ),
+    );
+
+    expect(issues, isEmpty);
+  });
+
+  test('production rejects mismatched feature integrity and freeze gates', () {
+    final codes = ReleaseConfigurationValidator.validate(
+      ReleaseConfiguration(
+        production: true,
+        applicationId: 'com.bilhealth.bodyintelligencelog',
+        cloudEnabled: true,
+        supabaseUrl: 'https://project.supabase.co',
+        supabaseAnonKey: 'public-anonymous-key',
+        serverUrl: 'https://project.supabase.co/functions/v1/verify',
+        paymentsEnabled: true,
+        storeConfigured: true,
+        platform: 'android',
+        facebookRequired: true,
+        facebookLoginEnabled: true,
+        facebookLoginReady: false,
+        pushEnabled: true,
+        pushProviderReady: false,
+        mobileIntegrityRequired: false,
+        mobileIntegrityBackendReleaseId: '',
+        playIntegrityProjectNumber: 'invalid',
+        sourceCommit: List.filled(40, 'a').join(),
+        auditedSourceCommit: List.filled(40, 'c').join(),
+        freezeManifestSha256: List.filled(64, 'b').join(),
+        auditedFreezeManifestSha256: List.filled(64, 'd').join(),
+        stagingManifestComplete: false,
+        candidateFrozenOrAccepted: false,
+        unresolvedReviewCount: 172,
+        manifestReleaseVersion: '1.0.0',
+        manifestReleaseBuildNumber: 7,
+      ),
+    ).map((issue) => issue.code);
+
+    expect(
+      codes,
+      containsAll(<String>[
+        'required_facebook_not_ready',
+        'push_gate_mismatch',
+        'mobile_integrity_not_required',
+        'missing_mobile_integrity_backend_release',
+        'invalid_play_integrity_project',
+        'unaudited_source_commit',
+        'unapproved_freeze_manifest',
+        'incomplete_release_manifest',
+        'release_candidate_not_accepted',
+        'unresolved_release_review_items',
+        'wrong_frozen_release_version',
+      ]),
+    );
+  });
 }

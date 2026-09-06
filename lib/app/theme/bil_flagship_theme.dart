@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import 'bil_flagship_tokens.dart';
@@ -105,7 +106,12 @@ abstract final class BilFlagshipTheme {
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
-          TargetPlatform.iOS: FadeForwardsPageTransitionsBuilder(),
+          // Preserve the native horizontal push/pop choreography and the
+          // interactive edge-swipe back gesture on iPhone and iPad. Using the
+          // Android U fade transition here made iOS navigation feel and behave
+          // like Android even though Flutter can provide the native route
+          // transition for MaterialPageRoute.
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
           TargetPlatform.windows: FadeForwardsPageTransitionsBuilder(),
           TargetPlatform.macOS: FadeForwardsPageTransitionsBuilder(),
           TargetPlatform.linux: FadeForwardsPageTransitionsBuilder(),

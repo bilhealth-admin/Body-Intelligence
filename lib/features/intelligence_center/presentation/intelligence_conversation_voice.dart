@@ -1,18 +1,63 @@
 part of 'intelligence_center_page.dart';
 
 @visibleForTesting
-String coachGreetingKeyForHour(int hour) {
-  if (hour < 0 || hour > 23) {
-    throw ArgumentError.value(hour, 'hour', 'must be from 0 through 23');
-  }
-  if (hour < 12) return 'Good morning';
-  if (hour < 18) return 'Good afternoon';
-  return 'Good evening';
-}
+List<BilRuntimeCapability> coachRuntimePermissionSequence({
+  required BilRuntimeCapability capability,
+  required bool includeSpeechRecognition,
+  required TargetPlatform platform,
+}) =>
+    capability == BilRuntimeCapability.microphone &&
+        includeSpeechRecognition &&
+        platform == TargetPlatform.iOS
+    ? const [
+        BilRuntimeCapability.microphone,
+        BilRuntimeCapability.speechRecognition,
+      ]
+    : [capability];
 
 @visibleForTesting
-String coachGreetingSeparator({required bool arabic}) =>
-    arabic ? '\u060C' : ',';
+({
+  String englishName,
+  String arabicName,
+  String englishRationale,
+  String arabicRationale,
+})
+coachRuntimePermissionPresentation(
+  BilRuntimeCapability capability,
+) => switch (capability) {
+  BilRuntimeCapability.camera => (
+    englishName: 'camera',
+    arabicName: 'الكاميرا',
+    englishRationale:
+        'BIL opens the camera only for the food photo you selected and never at startup.',
+    arabicRationale:
+        'يفتح BIL الكاميرا فقط لصورة الطعام التي اخترتها وليس عند بدء التطبيق.',
+  ),
+  BilRuntimeCapability.microphone => (
+    englishName: 'microphone',
+    arabicName: 'الميكروفون',
+    englishRationale:
+        'BIL starts listening only after you press the voice button. On iPhone, speech recognition may ask separately.',
+    arabicRationale:
+        'يبدأ BIL الاستماع فقط بعد الضغط على زر الصوت. قد يطلب iPhone إذن التعرف على الكلام بشكل منفصل.',
+  ),
+  BilRuntimeCapability.speechRecognition => (
+    englishName: 'speech recognition',
+    arabicName: 'التعرف على الكلام',
+    englishRationale:
+        'BIL uses speech recognition only after you start voice input, and you can review the text before sending.',
+    arabicRationale:
+        'يستخدم BIL التعرف على الكلام فقط بعد بدء الإدخال الصوتي، ويمكنك مراجعة النص قبل الإرسال.',
+  ),
+  BilRuntimeCapability.notifications => (
+    englishName: 'notifications',
+    arabicName: 'الإشعارات',
+    englishRationale:
+        'BIL asks for notifications only when you choose to receive timely updates.',
+    arabicRationale:
+        'يطلب BIL إذن الإشعارات فقط عندما تختار تلقي التحديثات في وقتها.',
+  ),
+};
 
 extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
   Future<bool> _ensureCoachRuntimePermission(
@@ -20,25 +65,33 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     bool includeSpeechRecognition = false,
   }) async {
     const policy = BilRuntimePermissionPolicy();
-    var effectiveCapability = capability;
+    final permissionSequence = coachRuntimePermissionSequence(
+      capability: capability,
+      includeSpeechRecognition: includeSpeechRecognition,
+      platform: defaultTargetPlatform,
+    );
+    var effectiveCapability = permissionSequence.first;
     var current = await policy.status(effectiveCapability);
-    if (includeSpeechRecognition &&
-        capability == BilRuntimeCapability.microphone &&
+    if (permissionSequence.length > 1 &&
         current == BilRuntimePermissionState.granted &&
-        defaultTargetPlatform == TargetPlatform.iOS) {
-      effectiveCapability = BilRuntimeCapability.speechRecognition;
+        effectiveCapability == BilRuntimeCapability.microphone) {
+      effectiveCapability = permissionSequence.last;
       current = await policy.status(effectiveCapability);
     }
     if (current == BilRuntimePermissionState.granted) return true;
     if (!mounted) return false;
-    final capabilityName = capability == BilRuntimeCapability.camera
-        ? tr('camera', 'الكاميرا')
-        : tr('microphone', 'الميكروفون');
+    final presentation = coachRuntimePermissionPresentation(
+      effectiveCapability,
+    );
+    final capabilityName = tr(
+      presentation.englishName,
+      presentation.arabicName,
+    );
     if (current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted) {
       final open = await showDialog<bool>(
         context: context,
-        builder: (dialogContext) => AlertDialog(
+        builder: (dialogContext) => AlertDialog.adaptive(
           title: Text(tr('Access is off', 'الوصول متوقف')),
           content: Text(
             tr(
@@ -63,7 +116,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     }
     final continueRequest = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
+      builder: (dialogContext) => AlertDialog.adaptive(
         title: Text(
           tr(
             'Allow $capabilityName for this action?',
@@ -71,15 +124,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
           ),
         ),
         content: Text(
-          capability == BilRuntimeCapability.microphone
-              ? tr(
-                  'BIL starts listening only after you press the voice button. On iPhone, speech recognition may ask separately.',
-                  'يبدأ BIL الاستماع فقط بعد الضغط على زر الصوت. قد يطلب iPhone إذن التعرف على الكلام بشكل منفصل.',
-                )
-              : tr(
-                  'BIL opens the camera only for the food photo you selected and never at startup.',
-                  'يفتح BIL الكاميرا فقط لصورة الطعام التي اخترتها وليس عند بدء التطبيق.',
-                ),
+          tr(presentation.englishRationale, presentation.arabicRationale),
         ),
         actions: [
           TextButton(
@@ -97,174 +142,15 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     final granted =
         await policy.request(effectiveCapability) ==
         BilRuntimePermissionState.granted;
-    if (!granted || effectiveCapability != BilRuntimeCapability.microphone) {
-      return granted;
+    if (!granted) return false;
+    if (effectiveCapability != BilRuntimeCapability.microphone ||
+        permissionSequence.length == 1) {
+      return true;
     }
-    if (defaultTargetPlatform != TargetPlatform.iOS) return true;
     return _ensureCoachRuntimePermission(
       capability,
       includeSpeechRecognition: includeSpeechRecognition,
     );
-  }
-
-  Future<void> _loadConversation() async {
-    final preferences = ref.read(preferencesRepositoryProvider);
-    final stored = await preferences.get('intelligenceConversationV1');
-    final storedContextFingerprint = await preferences.get(
-      'intelligenceConversationContextV1',
-    );
-    final contextRevision = await _coachContextRevision();
-    if (!mounted) return;
-    final restored = <IntelligenceMessage>[];
-    final contextFingerprintChanged = storedContextFingerprint == null
-        ? contextRevision.hasContext
-        : storedContextFingerprint != contextRevision.fingerprint;
-    var removedStaleContextTurns = contextFingerprintChanged;
-    if (!contextFingerprintChanged && stored != null && stored.isNotEmpty) {
-      try {
-        final decoded = jsonDecode(stored) as List<Object?>;
-        for (final value in decoded.whereType<Map>()) {
-          final message = _presentationSafeMessage(
-            IntelligenceMessage.fromJson(Map<String, Object?>.from(value)),
-          );
-          if (_isStaleAccessLock(message)) continue;
-          if (contextRevision.changedAt != null &&
-              message.createdAt.isBefore(contextRevision.changedAt!)) {
-            removedStaleContextTurns = true;
-            continue;
-          }
-          restored.add(message);
-        }
-      } catch (_) {
-        restored.clear();
-      }
-    }
-    final displayName = await _resolvedCoachDisplayName();
-    if (!mounted) return;
-    final now = ref.read(intelligenceConversationClockProvider)();
-    final welcome = _sessionWelcome(displayName, at: now);
-    _updateState(() {
-      introVisible = true;
-      messages
-        ..clear()
-        ..addAll(restored.where((message) => !message.id.startsWith('welcome')))
-        ..add(
-          IntelligenceMessage(
-            id: 'welcome-session-${now.microsecondsSinceEpoch}',
-            role: IntelligenceMessageRole.bil,
-            kind: IntelligenceMessageKind.coach,
-            text: welcome,
-            createdAt: now,
-            modality: IntelligenceMessageModality.system,
-          ),
-        );
-    });
-    if (removedStaleContextTurns) await _saveConversation();
-    _scrollToLatest(jump: true);
-  }
-
-  Future<({DateTime? changedAt, String fingerprint, bool hasContext})>
-  _coachContextRevision() async {
-    DateTime? latest;
-    var weightCount = 0;
-    var dailyLogCount = 0;
-    String? oldestWeightDay;
-    String? latestWeightDay;
-    try {
-      final weights = await ref.read(weightRepositoryProvider).getAll();
-      weightCount = weights.length;
-      for (final entry in weights) {
-        if (latest == null || entry.updatedAt.isAfter(latest)) {
-          latest = entry.updatedAt;
-        }
-        final day = entry.dayKey;
-        if (day != null) {
-          if (oldestWeightDay == null || day.compareTo(oldestWeightDay) < 0) {
-            oldestWeightDay = day;
-          }
-          if (latestWeightDay == null || day.compareTo(latestWeightDay) > 0) {
-            latestWeightDay = day;
-          }
-        }
-      }
-    } on Object {
-      // Conversation restore must remain available if one local source fails.
-    }
-    try {
-      final logs = await ref.read(dailyLogRepositoryProvider).getAll();
-      dailyLogCount = logs.length;
-      for (final log in logs) {
-        if (latest == null || log.updatedAt.isAfter(latest)) {
-          latest = log.updatedAt;
-        }
-      }
-    } on Object {
-      // The available source still provides a safe lower-bound cutoff.
-    }
-    final fingerprint = <String>[
-      'w:$weightCount',
-      'wo:${oldestWeightDay ?? '-'}',
-      'wl:${latestWeightDay ?? '-'}',
-      'd:$dailyLogCount',
-      'u:${latest?.toUtc().microsecondsSinceEpoch ?? 0}',
-    ].join('|');
-    return (
-      changedAt: latest,
-      fingerprint: fingerprint,
-      hasContext: weightCount > 0 || dailyLogCount > 0,
-    );
-  }
-
-  bool _isStaleAccessLock(IntelligenceMessage message) {
-    if (message.role != IntelligenceMessageRole.bil) return false;
-    final normalized = message.text.toLowerCase();
-    return normalized.contains('personalized ai is off') ||
-        normalized.contains('enable remote ai consent') ||
-        normalized.contains('ai consent required') ||
-        normalized.contains('الذكاء الاصطناعي المخصص متوقف') ||
-        normalized.contains('موافقة الذكاء الاصطناعي البعيد');
-  }
-
-  String _sessionWelcome(String? displayName, {required DateTime at}) {
-    final hour = at.hour;
-    final greeting = switch (coachGreetingKeyForHour(hour)) {
-      'Good morning' => tr('Good morning', 'صباح الخير'),
-      'Good afternoon' => tr('Good afternoon', 'مساء الخير'),
-      _ => tr('Good evening', 'مساء الخير'),
-    };
-    final name = displayName?.trim();
-    final memberName = name == null || name.isEmpty
-        ? tr('BIL member', 'عضو BIL')
-        : name;
-    final next = tr(
-      'I’m ready for your next useful decision.',
-      'أنا جاهز لقرارك المفيد التالي.',
-    );
-    final separator = coachGreetingSeparator(arabic: arabic);
-    return '$greeting$separator $memberName. $next';
-  }
-
-  Future<String?> _resolvedCoachDisplayName() async {
-    final localName =
-        (await ref.read(preferencesRepositoryProvider).get('displayName'))
-            ?.trim();
-    if (localName?.isNotEmpty == true) return localName;
-    try {
-      final user = Supabase.instance.client.auth.currentUser;
-      final metadata = user?.userMetadata;
-      final emailLocalPart = user?.email?.trim().split('@').first.toLowerCase();
-      for (final key in const ['display_name', 'full_name', 'name']) {
-        final value = metadata?[key]?.toString().trim();
-        if (value?.isNotEmpty == true &&
-            !value!.contains('@') &&
-            value.toLowerCase() != emailLocalPart) {
-          return value;
-        }
-      }
-    } on Object {
-      // A greeting never depends on cloud availability.
-    }
-    return null;
   }
 
   Future<BilCoachVoiceGender> _preferredCoachVoice() async {
@@ -296,89 +182,6 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     }
   }
 
-  void _scrollToLatest({bool jump = false}) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !conversationScroll.hasClients) return;
-      // The chat is rendered in reverse, so offset zero is always the newest
-      // turn regardless of how tall or lazily built the restored history is.
-      final target = conversationScroll.position.minScrollExtent;
-      if (jump) {
-        conversationScroll.jumpTo(target);
-      } else {
-        conversationScroll.animateTo(
-          target,
-          duration: const Duration(milliseconds: 280),
-          curve: Curves.easeOutCubic,
-        );
-      }
-    });
-  }
-
-  Future<void> _saveConversation() async {
-    try {
-      final contextRevision = await _coachContextRevision();
-      final persistentMessages = messages.where(
-        (message) => !message.id.startsWith('welcome'),
-      );
-      final preferences = ref.read(preferencesRepositoryProvider);
-      await preferences.set(
-        'intelligenceConversationV1',
-        jsonEncode(persistentMessages.map((item) => item.toJson()).toList()),
-      );
-      await preferences.set(
-        'intelligenceConversationContextV1',
-        contextRevision.fingerprint,
-      );
-    } on Object {
-      // Conversation persistence is best-effort. A local storage failure must
-      // not escape an unawaited save and terminate an otherwise valid reply.
-    }
-  }
-
-  Future<void> _clearConversation() async {
-    try {
-      await ref
-          .read(preferencesRepositoryProvider)
-          .remove('intelligenceConversationV1');
-      await ref
-          .read(preferencesRepositoryProvider)
-          .remove('intelligenceConversationContextV1');
-    } on Object {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            tr(
-              'The local conversation could not be cleared. Your data was unchanged.',
-              'تعذر مسح المحادثة المحلية. لم تتغير بياناتك.',
-            ),
-          ),
-        ),
-      );
-      return;
-    }
-    if (!mounted) return;
-    final displayName = await _resolvedCoachDisplayName();
-    if (!mounted) return;
-    final now = ref.read(intelligenceConversationClockProvider)();
-    final welcome = _sessionWelcome(displayName, at: now);
-    _updateState(() {
-      messages
-        ..clear()
-        ..add(
-          IntelligenceMessage(
-            id: 'welcome-${now.microsecondsSinceEpoch}',
-            role: IntelligenceMessageRole.bil,
-            kind: IntelligenceMessageKind.coach,
-            text: welcome,
-            createdAt: now,
-            modality: IntelligenceMessageModality.system,
-          ),
-        );
-    });
-    unawaited(_saveConversation());
-  }
-
   Future<void> _toggleDictation() async {
     if (sending || voiceMode == _CoachVoiceMode.liveCall) return;
     if (listening) {
@@ -387,6 +190,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     }
     voiceMode = _CoachVoiceMode.dictation;
     liveCallPaused = false;
+    voiceTransientRestarts = 0;
     await _startVoiceCapture();
   }
 
@@ -394,8 +198,10 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     if (voiceMode == _CoachVoiceMode.liveCall) {
       if (liveCallPaused) {
         liveCallPaused = false;
+        liveCallNoSpeechRestarts = 0;
+        voiceTransientRestarts = 0;
         if (mounted) _updateState(() {});
-        await _startVoiceCapture();
+        await _startVoiceCapture(playCue: true);
       } else {
         await _pauseLiveCall();
       }
@@ -404,13 +210,16 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     if (sending) return;
     voiceMode = _CoachVoiceMode.liveCall;
     liveCallPaused = false;
-    await _startVoiceCapture();
+    liveCallNoSpeechRestarts = 0;
+    voiceTransientRestarts = 0;
+    await _startVoiceCapture(playCue: true);
   }
 
   Future<void> _pauseLiveCall() async {
     liveCallPaused = true;
     voiceSilenceTimer?.cancel();
     await _stopVoiceCapture(resetMode: false);
+    await _playVoiceDeactivationCue();
     try {
       await const BilTextToSpeech().stop();
     } on Object {
@@ -421,9 +230,11 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
 
   Future<void> _stopLiveCall() async {
     liveCallPaused = false;
+    liveCallNoSpeechRestarts = 0;
     requestGeneration += 1;
     replyDelayTimer?.cancel();
     await _stopVoiceCapture(resetMode: true);
+    await _playVoiceDeactivationCue();
     try {
       await const BilTextToSpeech().stop();
     } on Object {
@@ -438,7 +249,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     }
   }
 
-  Future<void> _startVoiceCapture() async {
+  Future<void> _startVoiceCapture({bool playCue = true}) async {
     final permissionGranted = await _ensureCoachRuntimePermission(
       BilRuntimeCapability.microphone,
       includeSpeechRecognition: true,
@@ -456,7 +267,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
       return;
     }
     _updateState(() => introVisible = false);
-    unawaited(_playVoiceActivationCue());
+    if (playCue) await _playVoiceActivationCue();
     // Both microphones use the OS recognizer. Only its resulting text can
     // cross the AI boundary; raw microphone bytes never enter a model request.
     if (await _startNativeVoiceCapture()) return;
@@ -466,9 +277,26 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
   Future<void> _playVoiceActivationCue() async {
     try {
       await HapticFeedback.lightImpact();
-      await SystemSound.play(SystemSoundType.click);
+      await BilMicSound.playOpen();
     } on Object {
-      // Voice starts even on devices that do not expose a system cue channel.
+      try {
+        await SystemSound.play(SystemSoundType.click);
+      } on Object {
+        // Voice starts even on devices that do not expose a sound channel.
+      }
+    }
+  }
+
+  Future<void> _playVoiceDeactivationCue() async {
+    try {
+      await HapticFeedback.selectionClick();
+      await BilMicSound.playEnd();
+    } on Object {
+      try {
+        await SystemSound.play(SystemSoundType.click);
+      } on Object {
+        // Ending voice never depends on a sound or haptics channel.
+      }
     }
   }
 
@@ -501,6 +329,8 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
             voiceLanguageHint = result.localeId!.trim();
           }
           pendingVoiceTranscript = transcript;
+          liveCallNoSpeechRestarts = 0;
+          voiceTransientRestarts = 0;
           _updateState(() {
             listening = true;
             question.value = TextEditingValue(
@@ -513,14 +343,21 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
           voiceSilenceTimer = Timer(
             result.isFinal
                 ? const Duration(milliseconds: 900)
-                : const Duration(seconds: 2),
+                // Match the native recognizer's silence window. A shorter
+                // Dart timer submitted the first partial phrase while the
+                // user was still speaking, especially on Android devices
+                // that emit a partial result immediately after route setup.
+                : const Duration(milliseconds: 3500),
             () => unawaited(_submitVoiceTranscript()),
           );
         },
         listenOptions: SpeechListenOptions(
           localeId: null,
           listenFor: const Duration(seconds: 45),
-          pauseFor: const Duration(seconds: 2),
+          // Give Android's recognizer time to open its audio route and let a
+          // user begin speaking. Two seconds was short enough to produce an
+          // immediate timeout on slower OEM speech services.
+          pauseFor: const Duration(milliseconds: 3500),
           listenMode: ListenMode.confirmation,
           partialResults: true,
           cancelOnError: true,
@@ -553,6 +390,9 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     final transcript = pendingVoiceTranscript.trim();
     if (transcript.isEmpty) {
       await _stopVoiceCapture();
+      if (voiceMode == _CoachVoiceMode.dictation) {
+        await _playVoiceDeactivationCue();
+      }
       return;
     }
     voiceSubmitPending = true;
@@ -563,6 +403,9 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
       await speech.stop();
     } on Object {
       // The recognized text is already in the composer and remains usable.
+    }
+    if (voiceMode == _CoachVoiceMode.dictation) {
+      await _playVoiceDeactivationCue();
     }
     if (mounted) _updateState(() => listening = false);
     final autoSpeakReply = _IntelligenceCenterPageState._voiceTurnPolicy
@@ -597,7 +440,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
         sending) {
       return;
     }
-    await _startVoiceCapture();
+    await _startVoiceCapture(playCue: false);
   }
 
   Future<void> _stopVoiceCapture({bool resetMode = false}) async {
@@ -623,17 +466,64 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     }
     await _stopVoiceCapture();
     if (!mounted) return;
-    if (voiceMode == _CoachVoiceMode.liveCall) {
-      _updateState(() => liveCallPaused = true);
+    final errorCode = error?.errorMsg;
+    final transient =
+        errorCode == 'recognizer_error_5' ||
+        errorCode == 'speech_recognizer_busy' ||
+        errorCode == 'speech_start_failed' ||
+        errorCode == 'audio_input_unavailable' ||
+        errorCode == 'audio_session_unavailable';
+    if (transient &&
+        !sending &&
+        voiceMode != _CoachVoiceMode.idle &&
+        voiceTransientRestarts < 1) {
+      // Android speech services can return ERROR_CLIENT while the audio
+      // route is still being released. Recreate the recognizer once so the
+      // user's first deliberate tap does not look like an immediate stop.
+      voiceTransientRestarts += 1;
+      await Future<void>.delayed(const Duration(milliseconds: 450));
+      if (mounted && !sending && voiceMode != _CoachVoiceMode.idle) {
+        await _startVoiceCapture(playCue: false);
+      }
+      return;
     }
-    if (error?.errorMsg case 'speech_timeout' || 'speech_no_match') {
+    if (errorCode case 'speech_timeout' || 'speech_no_match') {
+      // A live call should keep its listening session alive when the OS
+      // recognizer times out before any words arrive. Retry a couple of times
+      // silently; only then pause and show an actionable message. Dictation
+      // remains a deliberate one-shot action and keeps the existing prompt.
+      if (voiceMode == _CoachVoiceMode.liveCall &&
+          !liveCallPaused &&
+          !sending &&
+          liveCallNoSpeechRestarts < 2) {
+        liveCallNoSpeechRestarts += 1;
+        await Future<void>.delayed(const Duration(milliseconds: 350));
+        if (mounted &&
+            voiceMode == _CoachVoiceMode.liveCall &&
+            !liveCallPaused &&
+            !sending) {
+          await _startVoiceCapture(playCue: false);
+        }
+        return;
+      }
+      if (voiceMode == _CoachVoiceMode.liveCall) {
+        _updateState(() => liveCallPaused = true);
+      }
+      await _playVoiceDeactivationCue();
       _showActionCompleted(
         tr(
-          'I didn’t catch that. Tap the microphone and try again.',
-          'لم ألتقط كلامًا واضحًا. اضغط الميكروفون وحاول مرة أخرى.',
+          voiceMode == _CoachVoiceMode.liveCall
+              ? 'I did not hear a clear sentence. Tap the call icon to listen again.'
+              : 'I didn’t catch that. Tap the microphone and try again.',
+          voiceMode == _CoachVoiceMode.liveCall
+              ? 'لم أسمع جملة واضحة. اضغط أيقونة المكالمة للاستماع مجددًا.'
+              : 'لم ألتقط كلامًا واضحًا. اضغط الميكروفون وحاول مرة أخرى.',
         ),
       );
       return;
+    }
+    if (voiceMode == _CoachVoiceMode.liveCall) {
+      _updateState(() => liveCallPaused = true);
     }
     _showVoiceUnavailable();
   }

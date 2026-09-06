@@ -9,9 +9,11 @@ verification without their external evidence.
 - Android application/namespace: `com.bilhealth.bodyintelligencelog`.
 - Apple bundle identifier: `com.bilhealth.bodyintelligencelog`.
 - Store name: `BIL - Body Intelligence Log` on Android and `BIL` on Apple.
-- Release version: `1.0.0+1`. Future uploads increment the build number; semantic
+- Release version: `1.0.0+8`. Build 7 already exists in App Store Connect, so
+  both signed workflows reject build numbers below 8. Future uploads increment the build number; semantic
   marketing versions change only for an intended product release.
-- Android: min API 26, compile/target API 36, Java 17, AGP 9.2.1, Gradle 9.4.1.
+- Android: min API 26, compile/target API 36, Java 17, AGP 9.0.1,
+  Gradle 9.1.0, and Kotlin Gradle Plugin 2.3.20 (the Flutter 3.44 stable matrix).
 - Apple: iOS 15 minimum. The final Xcode/SDK version is proven only by the macOS
   workflow artifact.
 
@@ -53,11 +55,12 @@ verification without their external evidence.
   APNs entitlement is confined to Profile/Release distribution builds.
 - Camera, photo selection, microphone, speech, BLE, HealthKit and notification
   background usage have purpose-specific descriptions or entitlements.
-- The app privacy manifest explicitly declares no tracking. App-level required
-  reason entries remain empty because BIL production code does not directly call
-  a covered required-reason API; dependency manifests are merged at build time.
-- Universal Links/Associated Domains are not declared until the verified owner
-  domain is supplied and its `apple-app-site-association` file is live.
+- The app privacy manifest explicitly declares no tracking and declares the
+  `CA92.1` reason for BIL's app-scoped `UserDefaults` access. Dependency privacy
+  manifests are merged at build time.
+- Universal Links/Associated Domains are declared for `www.bilhealth.com`. On
+  2026-09-05 the production AASA was deployed with Team ID `43F9Y5Y96K` and
+  read back byte-for-byte as JSON both directly and through Apple's CDN.
 - The unsigned macOS workflow proves compilation without claiming distribution.
   The signed workflow fails closed until the Apple membership, team, certificate
   and provisioning profile secrets are supplied.
@@ -66,12 +69,12 @@ verification without their external evidence.
 
 | Status | Required evidence |
 |---|---|
-| `OWNER_INPUT_REQUIRED` | Verified official domain and live support/privacy/terms/account-deletion URLs. |
+| `VERIFIED_2026_09_05` | Official domain and live support/privacy/terms/account-deletion URLs. |
 | `OWNER_INPUT_REQUIRED` | Google Play product IDs and closed-track purchase/restore evidence. |
-| `OWNER_INPUT_REQUIRED` | Android upload-key offline backup confirmation and Play App Signing enrollment. |
-| `OWNER_INPUT_REQUIRED` | Apple Developer membership acceptance, Team ID, distribution certificate and provisioning profile. |
+| `PARTIAL_EXTERNAL` | Play App Signing enrollment and production certificate were verified through the Android Publisher API; upload-key offline backup confirmation remains owner-held. |
+| `PARTIAL_EXTERNAL` | Apple Team ID and associated-domain publication are verified; distribution certificate and provisioning profile still require the signed workflow. |
 | `OWNER_INPUT_REQUIRED` | App Store Connect product IDs, subscription group and sandbox purchase/restore evidence. |
-| `OWNER_INPUT_REQUIRED` | APNs/FCM production credentials and live deep-link association files. |
+| `PARTIAL_EXTERNAL` | Both live deep-link association files are verified; APNs/FCM production credentials remain required. |
 | `EXTERNAL_REQUIRED_NOT_CLAIMED` | Physical Android/iPhone, Health Connect/HealthKit and BIL BLE hardware validation. |
 
 No placeholder URL, product ID, credential, certificate, keystore, or successful

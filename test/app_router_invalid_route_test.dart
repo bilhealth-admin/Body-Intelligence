@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/router/invalid_route_page.dart';
+import 'package:body_intelligence_log/app/router/responsive_app_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,9 +19,12 @@ void main() {
 
   test('daily return route accepts only bounded internal destinations', () {
     final source = File('lib/app/router/app_router.dart').readAsStringSync();
+    for (final path in ResponsiveAppShell.paths) {
+      expect(ResponsiveAppShell.safeQuickAddReturnPath(path), path);
+    }
     expect(
-      source,
-      contains("const {'/dashboard', '/daily-log'}.contains(value)"),
+      ResponsiveAppShell.safeQuickAddReturnPath('/admin/ai-coach'),
+      isNull,
     );
     expect(
       RegExp(
@@ -29,7 +33,9 @@ void main() {
       isFalse,
     );
     expect(
-      RegExp(r'returnPath:\s*_safeDailyReturnPath\(').allMatches(source).length,
+      RegExp(
+        r'returnPath:\s*ResponsiveAppShell\.safeQuickAddReturnPath\(',
+      ).allMatches(source).length,
       3,
     );
   });

@@ -14,7 +14,11 @@ enum NutrientDashboardPreset {
   };
 
   List<TrackedNutrient> get evidenceMetrics => switch (this) {
-    heartHealthy => const [TrackedNutrient.sodium, TrackedNutrient.fiber],
+    heartHealthy => const [
+      TrackedNutrient.sodium,
+      TrackedNutrient.fiber,
+      TrackedNutrient.potassium,
+    ],
     carbConscious || custom => const [
       TrackedNutrient.carbohydrates,
       TrackedNutrient.sugar,
@@ -24,13 +28,7 @@ enum NutrientDashboardPreset {
   };
 }
 
-enum NutrientDashboardMetric {
-  saturatedFat,
-  sodium,
-  fiber,
-  carbohydrates,
-  sugar,
-}
+enum NutrientDashboardMetric { sodium, fiber, potassium, carbohydrates, sugar }
 
 class NutrientDashboardSample {
   const NutrientDashboardSample({
@@ -70,13 +68,13 @@ abstract final class NutrientDashboardEvidence {
 
 class NutrientDashboardGoalSet {
   const NutrientDashboardGoalSet({
-    required this.saturatedFatG,
     required this.sodiumMg,
     required this.fiberG,
+    required this.potassiumMg,
     required this.carbohydratesG,
     required this.sugarG,
   });
-  final double? saturatedFatG, sodiumMg, fiberG, carbohydratesG, sugarG;
+  final double? sodiumMg, fiberG, potassiumMg, carbohydratesG, sugarG;
 }
 
 enum NutrientProgressState { unknown, below, near, reached, exceeded }

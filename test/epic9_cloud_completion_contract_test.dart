@@ -96,6 +96,9 @@ void main() {
       final androidBridge = source(
         'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILPushProvider.kt',
       );
+      final androidActivity = source(
+        'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/MainActivity.kt',
+      );
       final android = source('android/app/src/main/AndroidManifest.xml');
       final ios = source('ios/Runner/Info.plist');
       final deepLinks = source(
@@ -111,8 +114,15 @@ void main() {
       expect(dispatch, contains('You have a new private update.'));
       expect(dispatch, contains('sensitive_preview_allowed'));
       expect(dispatch, contains('deep_link'));
+      expect(dispatch, contains('data: {'));
+      expect(dispatch, contains('deep_link: event.deep_link'));
       expect(androidBridge, contains('BILPushProvider'));
       expect(androidBridge, contains('push_provider_not_configured'));
+      expect(androidBridge, contains('fun status(): Map<String, Any>'));
+      expect(androidActivity, contains('"providerStatus"'));
+      expect(androidActivity, contains('"takeInitialPayload"'));
+      expect(androidActivity, contains('override fun onNewIntent'));
+      expect(service, contains('!await _androidProviderReady()'));
       expect(android, contains('android:scheme="bil"'));
       expect(ios, contains('bil'));
       expect(deepLinks, contains("uri.scheme.toLowerCase() != 'bil'"));

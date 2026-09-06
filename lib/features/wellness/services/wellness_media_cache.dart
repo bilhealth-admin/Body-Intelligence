@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../domain/wellness_content_pack.dart';
 import 'wellness_access_token.dart';
+import 'wellness_video_stream.dart';
 
 enum WellnessMediaCacheStatus { ready, unavailableOffline }
 
@@ -34,28 +35,66 @@ class WellnessMediaCacheResult {
   bool get isReady => status == WellnessMediaCacheStatus.ready;
 }
 
+/// Digest-verifying media resolution surface.
+///
+/// Consumers depend on this narrow contract so their selection/fallback logic
+/// can be tested independently from filesystem and HTTP implementations.
+abstract interface class WellnessMediaResolver {
+  Future<WellnessMediaCacheResult> resolve(
+    WellnessMediaAsset asset, {
+    required bool online,
+  });
+}
+
 /// Verifies licensed wellness media before exposing a local playback file.
 ///
 /// Cache names are content-addressed SHA-256 digests plus a MIME-derived safe
 /// extension required by native media players. Downloads remain in a sibling
 /// temporary file until HTTPS transfer, exact length, and digest have passed;
 /// corrupt cache entries fail closed and are removed.
-class WellnessMediaCache {
+class WellnessMediaCache implements WellnessMediaResolver {
   WellnessMediaCache({
     HttpClient? client,
     Directory? directory,
     WellnessAccessTokenLoader? accessTokenLoader,
+    this.idleTimeout = const Duration(seconds: 30),
   }) : _client = client ?? HttpClient(),
        _ownsClient = client == null,
        _injectedDirectory = directory,
-       _accessTokenLoader = accessTokenLoader ?? loadCurrentWellnessAccessToken;
+       _accessTokenLoader =
+           accessTokenLoader ?? loadCurrentWellnessAccessToken {
+    if (idleTimeout <= Duration.zero) {
+      throw ArgumentError.value(idleTimeout, 'idleTimeout', 'Must be positive');
+    }
+    if (_ownsClient) _client.connectionTimeout = idleTimeout;
+  }
 
+  /// Bounds silence, not total video duration: a progressing slow download is
+  /// allowed to finish, while a stalled connection cannot strand Play/Retry.
+  final Duration idleTimeout;
   final HttpClient _client;
   final bool _ownsClient;
   final Directory? _injectedDirectory;
   final WellnessAccessTokenLoader _accessTokenLoader;
   final Map<String, Future<WellnessMediaCacheResult>> _inFlight = {};
 
+  /// An online playback ticket is not an offline, digest-verified cache file.
+  /// The stream resolver restricts delivery to BIL's canonical HTTPS runtime
+  /// and pins the object's strong ETag for the native player's range requests.
+  Future<WellnessVideoStream?> resolveStream(
+    WellnessMediaAsset asset, {
+    required bool online,
+  }) {
+    _validateAsset(asset);
+    if (!online) return Future.value(null);
+    return WellnessVideoStreamResolver(
+      client: _client,
+      accessTokenLoader: _accessTokenLoader,
+      idleTimeout: idleTimeout,
+    ).resolve(asset);
+  }
+
+  @override
   Future<WellnessMediaCacheResult> resolve(
     WellnessMediaAsset asset, {
     required bool online,
@@ -84,11 +123,22 @@ class WellnessMediaCache {
     await _safeDelete(temporary, directory);
     if (!online) return const WellnessMediaCacheResult.unavailableOffline();
 
+    HttpClientRequest? activeRequest;
+    var abandoned = false;
     try {
-      final request = await _client.getUrl(asset.url);
+      final request = await _client
+          .getUrl(asset.url)
+          .then((request) {
+            // Future.timeout cannot cancel getUrl. Abort a late connection too,
+            // so an expired attempt cannot survive behind a user-triggered retry.
+            if (abandoned) _abort(request);
+            return request;
+          })
+          .timeout(idleTimeout);
+      activeRequest = request;
       request.followRedirects = false;
       applyWellnessBearer(request, _accessTokenLoader, asset.url);
-      final response = await request.close();
+      final response = await request.close().timeout(idleTimeout);
       if (response.statusCode != HttpStatus.ok) {
         throw HttpException(
           'Wellness media returned ${response.statusCode}.',
@@ -102,7 +152,11 @@ class WellnessMediaCache {
           );
         }
       }
-      await _writeExact(response, temporary, asset.sizeBytes);
+      await _writeExact(
+        response.timeout(idleTimeout),
+        temporary,
+        asset.sizeBytes,
+      );
       if (!await _isVerified(temporary, asset)) {
         throw const FormatException(
           'Wellness media integrity verification failed.',
@@ -116,9 +170,19 @@ class WellnessMediaCache {
       }
       return WellnessMediaCacheResult.ready(target, fromCache: false);
     } catch (_) {
+      abandoned = true;
+      if (activeRequest != null) _abort(activeRequest);
       await _safeDelete(temporary, directory);
       await _safeDelete(target, directory);
       rethrow;
+    }
+  }
+
+  static void _abort(HttpClientRequest request) {
+    try {
+      request.abort();
+    } catch (_) {
+      // Best-effort transport cleanup must not mask the original failure.
     }
   }
 

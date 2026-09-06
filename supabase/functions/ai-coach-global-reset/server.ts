@@ -1,4 +1,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2.112.3";
+import {
+  MobileIntegrityFailure,
+  requireMobileIntegrityGrant,
+} from "../_shared/mobile_integrity.ts";
 
 const corsHeaders = {
   "access-control-allow-origin": "*",
@@ -41,6 +45,7 @@ function clients(authorization: string) {
 
 export type GlobalResetHandlerDependencies = {
   clients?: typeof clients;
+  requireIntegrity?: typeof requireMobileIntegrityGrant;
 };
 
 const validIdempotencyKey = (value: string) =>
@@ -52,6 +57,10 @@ const validEmail = (value: string) =>
   value.length >= 3 &&
   value.length <= 254 &&
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+const validUuid = (value: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    .test(value);
 
 const notificationKinds = new Set(["compensation", "gift", "custom"]);
 const notificationAudiences = new Set(["all", "email"]);
@@ -66,7 +75,18 @@ const containsControlCharacter = (value: string) => {
 };
 
 const deniedByDatabase = (message: unknown) =>
-  String(message ?? "").includes("ai_coach_admin_required");
+  ["ai_coach_admin_required", "administrator_required"].some((code) =>
+    String(message ?? "").includes(code)
+  );
+
+const hasResetGiftReceipt = (value: unknown) => {
+  if (value == null || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+  const receipt = value as Record<string, unknown>;
+  return receipt.boost_tokens_per_recipient === 2500 &&
+    receipt.custom_message_applied === true;
+};
 
 async function consumeRateLimit(
   auth: ReturnType<typeof clients>["auth"],
@@ -148,12 +168,344 @@ export async function handler(
       return json({ error: "invalid_request" }, 400);
     }
     const operation = String(body.operation ?? "global").trim();
+    const integrityAction = operation === "global"
+      ? "admin.ai_coach.global_reset"
+      : operation === "individual"
+      ? "admin.ai_coach.individual_reset"
+      : operation === "notification"
+      ? "admin.ai_coach.notification"
+      : operation === "moderator_list"
+      ? "admin.community.moderators.list"
+      : operation === "moderator_add"
+      ? "admin.community.moderators.add"
+      : operation === "moderator_remove"
+      ? "admin.community.moderators.remove"
+      : operation === "community_member_list"
+      ? "admin.community.members.list"
+      : operation === "community_member_suspend"
+      ? "admin.community.members.suspend"
+      : operation === "community_member_reinstate"
+      ? "admin.community.members.reinstate"
+      : "";
+    if (!integrityAction) return json({ error: "invalid_operation" }, 400);
+    // Replacing the client boundary must never implicitly disable integrity.
+    // Tests that need a controlled guard inject requireIntegrity explicitly.
+    const requireIntegrity = dependencies.requireIntegrity ??
+      requireMobileIntegrityGrant;
+    body = await requireIntegrity({
+      admin: c.admin as never,
+      ownerId: authResult.data.user.id,
+      action: integrityAction,
+      body,
+    });
     const idempotencyKey = String(body.idempotency_key ?? "").trim();
     if (!validIdempotencyKey(idempotencyKey)) {
       return json({ error: "invalid_idempotency_key" }, 400);
     }
 
+    if (operation === "moderator_list") {
+      const rateResponse = await consumeRateLimit(
+        c.auth,
+        "admin_community_moderator_list",
+        120,
+      );
+      if (rateResponse != null) return rateResponse;
+
+      const listed = await c.admin.rpc(
+        "bil_list_community_moderators_for_admin",
+        { p_actor_id: authResult.data.user.id },
+      );
+      if (listed.error) {
+        const denied = deniedByDatabase(listed.error.message);
+        return json(
+          { error: denied ? "not_found" : "moderator_admin_failed" },
+          denied ? 404 : 500,
+        );
+      }
+      if (!Array.isArray(listed.data)) {
+        return json({ error: "moderator_admin_failed" }, 500);
+      }
+      const safeRows: Array<Record<string, unknown>> = [];
+      for (const candidate of listed.data) {
+        if (candidate == null || typeof candidate !== "object") {
+          return json({ error: "moderator_admin_failed" }, 500);
+        }
+        const row = candidate as Record<string, unknown>;
+        const userId = typeof row.user_id === "string" ? row.user_id : "";
+        const email = typeof row.email === "string"
+          ? row.email.trim().toLowerCase()
+          : "";
+        const createdAt = typeof row.created_at === "string"
+          ? row.created_at
+          : "";
+        if (
+          !validUuid(userId) || !validEmail(email) ||
+          !Number.isFinite(Date.parse(createdAt)) ||
+          typeof row.protected_administrator !== "boolean"
+        ) {
+          return json({ error: "moderator_admin_failed" }, 500);
+        }
+        safeRows.push({
+          user_id: userId,
+          email,
+          created_at: createdAt,
+          protected_administrator: row.protected_administrator,
+        });
+      }
+      return json(safeRows);
+    }
+
+    if (operation === "moderator_add") {
+      const normalizedEmail = String(body.email ?? "").trim().toLowerCase();
+      if (!validEmail(normalizedEmail)) {
+        return json({ error: "invalid_target" }, 400);
+      }
+      const rateResponse = await consumeRateLimit(
+        c.auth,
+        "admin_community_moderator_add",
+        30,
+      );
+      if (rateResponse != null) return rateResponse;
+
+      const added = await resetWithConcurrencyRetry(
+        c.admin,
+        "bil_add_community_moderator_by_email",
+        {
+          p_actor_id: authResult.data.user.id,
+          p_email: normalizedEmail,
+          p_idempotency_key: idempotencyKey,
+        },
+      );
+      if (added.error) {
+        if (
+          String(added.error.message ?? "").includes(
+            "suspended_member_cannot_be_moderator",
+          )
+        ) {
+          return json({ error: "suspended_member" }, 409);
+        }
+        const denied = deniedByDatabase(added.error.message);
+        return json(
+          { error: denied ? "not_found" : "moderator_admin_failed" },
+          denied ? 404 : 500,
+        );
+      }
+      const data = added.data != null && typeof added.data === "object" &&
+          !Array.isArray(added.data)
+        ? added.data as Record<string, unknown>
+        : null;
+      if (
+        data == null || typeof data.matched !== "boolean" ||
+        typeof data.added !== "boolean" ||
+        (data.matched === false && data.added === true)
+      ) {
+        return json({ error: "moderator_admin_failed" }, 500);
+      }
+      return json({ matched: data.matched, added: data.added });
+    }
+
+    if (operation === "moderator_remove") {
+      const userId = String(body.user_id ?? "").trim();
+      if (!validUuid(userId)) {
+        return json({ error: "invalid_target" }, 400);
+      }
+      const rateResponse = await consumeRateLimit(
+        c.auth,
+        "admin_community_moderator_remove",
+        30,
+      );
+      if (rateResponse != null) return rateResponse;
+
+      const removed = await resetWithConcurrencyRetry(
+        c.admin,
+        "bil_remove_community_moderator",
+        {
+          p_actor_id: authResult.data.user.id,
+          p_user_id: userId,
+          p_idempotency_key: idempotencyKey,
+        },
+      );
+      if (removed.error) {
+        const denied = deniedByDatabase(removed.error.message);
+        return json(
+          { error: denied ? "not_found" : "moderator_admin_failed" },
+          denied ? 404 : 500,
+        );
+      }
+      if (typeof removed.data !== "boolean") {
+        return json({ error: "moderator_admin_failed" }, 500);
+      }
+      return json({ removed: removed.data });
+    }
+
+    if (operation === "community_member_list") {
+      const rateResponse = await consumeRateLimit(
+        c.auth,
+        "admin_community_member_list",
+        120,
+      );
+      if (rateResponse != null) return rateResponse;
+
+      const listed = await c.admin.rpc(
+        "bil_list_suspended_community_members_for_admin",
+        { p_actor_id: authResult.data.user.id },
+      );
+      if (listed.error) {
+        const denied = deniedByDatabase(listed.error.message);
+        return json(
+          { error: denied ? "not_found" : "community_member_admin_failed" },
+          denied ? 404 : 500,
+        );
+      }
+      if (!Array.isArray(listed.data)) {
+        return json({ error: "community_member_admin_failed" }, 500);
+      }
+      const safeRows: Array<Record<string, unknown>> = [];
+      for (const candidate of listed.data) {
+        if (candidate == null || typeof candidate !== "object") {
+          return json({ error: "community_member_admin_failed" }, 500);
+        }
+        const row = candidate as Record<string, unknown>;
+        const userId = typeof row.user_id === "string" ? row.user_id : "";
+        const email = typeof row.email === "string"
+          ? row.email.trim().toLowerCase()
+          : "";
+        const reason = typeof row.reason === "string" ? row.reason.trim() : "";
+        const suspendedAt = typeof row.suspended_at === "string"
+          ? row.suspended_at
+          : "";
+        if (
+          !validUuid(userId) || !validEmail(email) || reason.length < 2 ||
+          characterLength(reason) > 160 || containsControlCharacter(reason) ||
+          !Number.isFinite(Date.parse(suspendedAt))
+        ) {
+          return json({ error: "community_member_admin_failed" }, 500);
+        }
+        safeRows.push({
+          user_id: userId,
+          email,
+          reason,
+          suspended_at: suspendedAt,
+        });
+      }
+      return json(safeRows);
+    }
+
+    if (operation === "community_member_suspend") {
+      const normalizedEmail = String(body.email ?? "").trim().toLowerCase();
+      const reason = String(body.reason ?? "").trim();
+      if (!validEmail(normalizedEmail)) {
+        return json({ error: "invalid_target" }, 400);
+      }
+      if (
+        reason.length < 2 || characterLength(reason) > 160 ||
+        containsControlCharacter(reason)
+      ) {
+        return json({ error: "invalid_suspension_reason" }, 400);
+      }
+      const rateResponse = await consumeRateLimit(
+        c.auth,
+        "admin_community_member_suspend",
+        30,
+      );
+      if (rateResponse != null) return rateResponse;
+
+      const suspended = await resetWithConcurrencyRetry(
+        c.admin,
+        "bil_suspend_community_member_by_email",
+        {
+          p_actor_id: authResult.data.user.id,
+          p_email: normalizedEmail,
+          p_reason: reason,
+          p_idempotency_key: idempotencyKey,
+        },
+      );
+      if (suspended.error) {
+        if (
+          String(suspended.error.message ?? "").includes(
+            "protected_administrator_member",
+          )
+        ) {
+          return json({ error: "protected_administrator" }, 409);
+        }
+        const denied = deniedByDatabase(suspended.error.message);
+        return json(
+          { error: denied ? "not_found" : "community_member_admin_failed" },
+          denied ? 404 : 500,
+        );
+      }
+      const data = suspended.data != null &&
+          typeof suspended.data === "object" &&
+          !Array.isArray(suspended.data)
+        ? suspended.data as Record<string, unknown>
+        : null;
+      if (
+        data == null || typeof data.matched !== "boolean" ||
+        typeof data.active !== "boolean" || typeof data.changed !== "boolean" ||
+        typeof data.moderator_removed !== "boolean" ||
+        (data.matched === false &&
+          (data.active === true || data.changed === true ||
+            data.moderator_removed === true))
+      ) {
+        return json({ error: "community_member_admin_failed" }, 500);
+      }
+      return json({
+        matched: data.matched,
+        active: data.active,
+        changed: data.changed,
+        moderator_removed: data.moderator_removed,
+      });
+    }
+
+    if (operation === "community_member_reinstate") {
+      const userId = String(body.user_id ?? "").trim();
+      if (!validUuid(userId)) {
+        return json({ error: "invalid_target" }, 400);
+      }
+      const rateResponse = await consumeRateLimit(
+        c.auth,
+        "admin_community_member_reinstate",
+        30,
+      );
+      if (rateResponse != null) return rateResponse;
+
+      const reinstated = await resetWithConcurrencyRetry(
+        c.admin,
+        "bil_reinstate_community_member",
+        {
+          p_actor_id: authResult.data.user.id,
+          p_user_id: userId,
+          p_idempotency_key: idempotencyKey,
+        },
+      );
+      if (reinstated.error) {
+        const denied = deniedByDatabase(reinstated.error.message);
+        return json(
+          { error: denied ? "not_found" : "community_member_admin_failed" },
+          denied ? 404 : 500,
+        );
+      }
+      const data = reinstated.data != null &&
+          typeof reinstated.data === "object" &&
+          !Array.isArray(reinstated.data)
+        ? reinstated.data as Record<string, unknown>
+        : null;
+      if (data == null || typeof data.reinstated !== "boolean") {
+        return json({ error: "community_member_admin_failed" }, 500);
+      }
+      return json({ reinstated: data.reinstated });
+    }
+
     if (operation === "global") {
+      const message = typeof body.message === "string"
+        ? body.message.trim()
+        : "";
+      if (
+        message.length < 1 || characterLength(message) > 180 ||
+        containsControlCharacter(message)
+      ) {
+        return json({ error: "invalid_reset_message" }, 400);
+      }
       const rateResponse = await consumeRateLimit(
         c.auth,
         "admin_ai_coach_global_reset",
@@ -167,6 +519,7 @@ export async function handler(
         {
           p_actor_id: authResult.data.user.id,
           p_idempotency_key: idempotencyKey,
+          p_message: message,
         },
       );
       if (reset.error) {
@@ -176,12 +529,18 @@ export async function handler(
           denied ? 404 : 500,
         );
       }
+      if (!hasResetGiftReceipt(reset.data)) {
+        return json({ error: "reset_failed" }, 500);
+      }
       return json(reset.data);
     }
 
     if (operation === "individual") {
       const normalizedEmail = String(body.email ?? "").trim().toLowerCase();
       const reason = String(body.reason ?? "").trim();
+      const message = typeof body.message === "string"
+        ? body.message.trim()
+        : "";
       if (!validEmail(normalizedEmail)) {
         return json({ error: "invalid_target" }, 400);
       }
@@ -191,6 +550,12 @@ export async function handler(
         containsControlCharacter(reason)
       ) {
         return json({ error: "invalid_reason" }, 400);
+      }
+      if (
+        message.length < 1 || characterLength(message) > 180 ||
+        containsControlCharacter(message)
+      ) {
+        return json({ error: "invalid_reset_message" }, 400);
       }
 
       const rateResponse = await consumeRateLimit(
@@ -227,6 +592,7 @@ export async function handler(
           p_target_id: targetId,
           p_reason: reason.length === 0 ? null : reason,
           p_idempotency_key: idempotencyKey,
+          p_message: message,
         },
       );
       if (reset.error) {
@@ -235,6 +601,9 @@ export async function handler(
           { error: denied ? "not_found" : "reset_failed" },
           denied ? 404 : 500,
         );
+      }
+      if (!hasResetGiftReceipt(reset.data)) {
+        return json({ error: "reset_failed" }, 500);
       }
 
       // An authorized administrator learns only whether the submitted address
@@ -367,7 +736,10 @@ export async function handler(
     }
 
     return json({ error: "invalid_operation" }, 400);
-  } catch {
+  } catch (error) {
+    if (error instanceof MobileIntegrityFailure) {
+      return json({ error: error.code }, error.status);
+    }
     return json({ error: "reset_failed" }, 500);
   }
 }

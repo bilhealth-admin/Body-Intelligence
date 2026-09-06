@@ -133,12 +133,18 @@ class DailyLogSnapshot extends StatelessWidget {
     required this.meals,
     required this.water,
     this.calorieGoal,
+    this.carbsGoal,
+    this.proteinGoal,
+    this.fatGoal,
   });
 
   final bool arabic;
   final List<MealWithItems> meals;
   final List<WaterEntry> water;
   final double? calorieGoal;
+  final double? carbsGoal;
+  final double? proteinGoal;
+  final double? fatGoal;
 
   @override
   Widget build(BuildContext context) {
@@ -153,10 +159,6 @@ class DailyLogSnapshot extends StatelessWidget {
     );
     final carbs = items.fold<double>(0, (total, item) => total + item.carbs);
     final fat = items.fold<double>(0, (total, item) => total + item.fats);
-    final macroEnergy = protein * 4 + carbs * 4 + fat * 9;
-    final carbsPercent = macroEnergy == 0 ? 0.0 : carbs * 400 / macroEnergy;
-    final fatPercent = macroEnergy == 0 ? 0.0 : fat * 900 / macroEnergy;
-    final proteinPercent = macroEnergy == 0 ? 0.0 : protein * 400 / macroEnergy;
     final scheme = Theme.of(context).colorScheme;
     return Container(
       key: const Key('daily-log-compact-summary'),
@@ -180,25 +182,28 @@ class DailyLogSnapshot extends StatelessWidget {
             children: [
               Expanded(
                 child: _MacroMetric(
+                  metricKey: 'carbs',
                   color: const Color(0xFF0A8F88),
-                  percent: carbsPercent,
                   grams: carbs,
+                  goalGrams: carbsGoal,
                   label: _summaryText(context, 'carbs'),
                 ),
               ),
               Expanded(
                 child: _MacroMetric(
+                  metricKey: 'fat',
                   color: const Color(0xFF6F1096),
-                  percent: fatPercent,
                   grams: fat,
+                  goalGrams: fatGoal,
                   label: _summaryText(context, 'fat'),
                 ),
               ),
               Expanded(
                 child: _MacroMetric(
+                  metricKey: 'protein',
                   color: const Color(0xFFC56A00),
-                  percent: proteinPercent,
                   grams: protein,
+                  goalGrams: proteinGoal,
                   label: _summaryText(context, 'proteinShort'),
                 ),
               ),
@@ -234,10 +239,16 @@ class DailyMealDetailSummary extends StatelessWidget {
     super.key,
     required this.meal,
     this.calorieGoal,
+    this.carbsGoal,
+    this.proteinGoal,
+    this.fatGoal,
   });
 
   final MealWithItems? meal;
   final double? calorieGoal;
+  final double? carbsGoal;
+  final double? proteinGoal;
+  final double? fatGoal;
 
   @override
   Widget build(BuildContext context) {
@@ -252,10 +263,10 @@ class DailyMealDetailSummary extends StatelessWidget {
     );
     final carbs = items.fold<double>(0, (total, item) => total + item.carbs);
     final fat = items.fold<double>(0, (total, item) => total + item.fats);
-    final macroEnergy = protein * 4 + carbs * 4 + fat * 9;
-    double ratio(double energy) => macroEnergy <= 0
+    double targetProgress(double consumed, double? goal) =>
+        goal == null || !goal.isFinite || goal <= 0
         ? 0
-        : (energy / macroEnergy).clamp(0.0, 1.0).toDouble();
+        : (consumed / goal).clamp(0.0, 1.0).toDouble();
     final sodium = knownNutrientTotal(
       items,
       TrackedNutrient.sodium,
@@ -296,7 +307,8 @@ class DailyMealDetailSummary extends StatelessWidget {
                 child: _MealMacroDial(
                   label: _summaryText(context, 'carbs'),
                   grams: carbs,
-                  progress: ratio(carbs * 4),
+                  goalGrams: carbsGoal,
+                  progress: targetProgress(carbs, carbsGoal),
                   color: const Color(0xFF0A8F88),
                 ),
               ),
@@ -304,7 +316,8 @@ class DailyMealDetailSummary extends StatelessWidget {
                 child: _MealMacroDial(
                   label: _summaryText(context, 'fat'),
                   grams: fat,
-                  progress: ratio(fat * 9),
+                  goalGrams: fatGoal,
+                  progress: targetProgress(fat, fatGoal),
                   color: const Color(0xFF6F1096),
                 ),
               ),
@@ -312,7 +325,8 @@ class DailyMealDetailSummary extends StatelessWidget {
                 child: _MealMacroDial(
                   label: _summaryText(context, 'proteinShort'),
                   grams: protein,
-                  progress: ratio(protein * 4),
+                  goalGrams: proteinGoal,
+                  progress: targetProgress(protein, proteinGoal),
                   color: const Color(0xFFC56A00),
                 ),
               ),
@@ -370,62 +384,70 @@ class _MealMacroDial extends StatelessWidget {
   const _MealMacroDial({
     required this.label,
     required this.grams,
+    required this.goalGrams,
     required this.progress,
     required this.color,
   });
 
   final String label;
   final double grams;
+  final double? goalGrams;
   final double progress;
   final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox.square(
-            dimension: 62,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                CircularProgressIndicator(
-                  value: progress,
-                  strokeWidth: 6,
-                  color: color,
-                  backgroundColor: color.withValues(alpha: .13),
-                  strokeCap: StrokeCap.round,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(9),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      '${formatDiaryMacroGrams(grams)} g',
-                      maxLines: 1,
-                      textDirection: TextDirection.ltr,
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w900,
+    final hasGoal = goalGrams != null && goalGrams!.isFinite && goalGrams! > 0;
+    return Semantics(
+      value: hasGoal
+          ? '${formatDiaryMacroGrams(grams)} / ${formatDiaryMacroGrams(goalGrams!)} g'
+          : '${formatDiaryMacroGrams(grams)} g',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox.square(
+              dimension: 62,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    value: progress,
+                    strokeWidth: 6,
+                    color: color,
+                    backgroundColor: color.withValues(alpha: .13),
+                    strokeCap: StrokeCap.round,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(9),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        '${formatDiaryMacroGrams(grams)} g',
+                        maxLines: 1,
+                        textDirection: TextDirection.ltr,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: Theme.of(
-              context,
-            ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
-          ),
-        ],
+            const SizedBox(height: 5),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -557,36 +579,47 @@ class _MacroRingPainter extends CustomPainter {
 
 class _MacroMetric extends StatelessWidget {
   const _MacroMetric({
+    required this.metricKey,
     required this.color,
-    required this.percent,
     required this.grams,
+    required this.goalGrams,
     required this.label,
   });
 
+  final String metricKey;
   final Color color;
-  final double percent;
   final double grams;
+  final double? goalGrams;
   final String label;
 
   @override
   Widget build(BuildContext context) {
+    final hasGoal = goalGrams != null && goalGrams!.isFinite && goalGrams! > 0;
+    final percent = hasGoal ? grams / goalGrams! * 100 : null;
+    final gramsText = hasGoal
+        ? '${formatDiaryMacroGrams(grams)} / ${formatDiaryMacroGrams(goalGrams!)} g'
+        : '${formatDiaryMacroGrams(grams)} g';
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          '${percent.round()}%',
-          textDirection: TextDirection.ltr,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontSize: 13,
-            color: color,
-            fontWeight: FontWeight.w700,
+        KeyedSubtree(
+          key: Key('daily-summary-$metricKey-percent'),
+          child: Text(
+            percent == null ? '—' : '${percent.round()}%',
+            textDirection: TextDirection.ltr,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+              fontSize: 13,
+              color: color,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
         const SizedBox(height: 3),
         FittedBox(
+          key: Key('daily-summary-$metricKey-grams'),
           fit: BoxFit.scaleDown,
           child: Text(
-            '${formatDiaryMacroGrams(grams)} g',
+            gramsText,
             maxLines: 1,
             textDirection: TextDirection.ltr,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -645,8 +678,8 @@ class NutrientMetric extends StatelessWidget {
             Flexible(
               child: Text(
                 value == null
-                    ? '${context.strings.text(label)}: ${context.strings.text('Unavailable')}'
-                    : '${context.strings.text(label)} ${value!.toStringAsFixed(1)} $localizedUnit',
+                    ? '$label: ${context.strings.text('Unavailable')}'
+                    : '$label ${value!.toStringAsFixed(1)} $localizedUnit',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

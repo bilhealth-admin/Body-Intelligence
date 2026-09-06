@@ -116,7 +116,10 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
           Card(
             key: const Key('sleep-connected-source'),
             child: ListTile(
-              leading: const Icon(Icons.watch_rounded),
+              horizontalTitleGap: 12,
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.devices,
+              ),
               title: Text(
                 '${connectedSleep.signal.value.toStringAsFixed(1)} ${tr('hours', 'ساعة')}',
               ),
@@ -125,15 +128,6 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
                 '${tr('Last sync', 'آخر مزامنة')} ${MaterialLocalizations.of(context).formatShortDate(connectedSleep.lastSyncAt)}',
               ),
               trailing: const Icon(Icons.verified_rounded, color: Colors.green),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text(
-              tr(
-                'Connected sleep is the source for this night. Manual entry remains a fallback when no measured record is available.',
-                'النوم المتصل هو مصدر هذه الليلة. يبقى الإدخال اليدوي بديلًا عند غياب سجل مقاس.',
-              ),
             ),
           ),
           if (connectedSleep.measuredStages.isNotEmpty) ...[
@@ -157,13 +151,6 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
                         for (final stage in connectedSleep.measuredStages)
                           Chip(label: Text(stage)),
                       ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      tr(
-                        'Sleep stages appear only when a connected device supplies measured stage records.',
-                        'تظهر مراحل النوم فقط عندما يرسل جهاز متصل سجلات مراحل مقاسة.',
-                      ),
                     ),
                   ],
                 ),
@@ -206,7 +193,10 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
           Card(
             key: const Key('sleep-manual-source'),
             child: ListTile(
-              leading: const Icon(Icons.edit_note_rounded),
+              horizontalTitleGap: 12,
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.notes,
+              ),
               title: Text('${tr('Source', 'المصدر')}: ${tr('Manual', 'يدوي')}'),
               subtitle: Text(
                 manualUpdatedAt == null
@@ -232,15 +222,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
                   : tr('Save sleep', 'حفظ النوم'),
             ),
           ),
-        const SizedBox(height: 18),
         _sleepScheduleCard(),
-        const SizedBox(height: 18),
-        _SafetyNote(
-          text: tr(
-            'Sleep duration is a personal log, not a medical measurement or diagnosis.',
-            'مدة النوم سجل شخصي وليست قياسًا طبيًا أو تشخيصًا.',
-          ),
-        ),
       ],
     );
   }
@@ -342,7 +324,10 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
         children: [
           SwitchListTile.adaptive(
             key: const Key('sleep-schedule-toggle'),
-            secondary: const Icon(Icons.notifications_active_outlined),
+            horizontalTitleGap: 12,
+            secondary: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.notifications,
+            ),
             title: Text(
               '${tr('Sleep', 'النوم')} · ${tr('Daily reminders', 'التذكيرات اليومية')}',
             ),
@@ -354,7 +339,10 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
           const Divider(height: 1),
           ListTile(
             enabled: !scheduleLoading && !scheduleSaving,
-            leading: const Icon(Icons.bedtime_outlined),
+            horizontalTitleGap: 12,
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.sleep,
+            ),
             title: Text(scheduleLabels.$1),
             trailing: Text(
               formatTime(sleepSchedule.bedHour, sleepSchedule.bedMinute),
@@ -363,7 +351,8 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
           ),
           ListTile(
             enabled: !scheduleLoading && !scheduleSaving,
-            leading: const Icon(Icons.wb_sunny_outlined),
+            horizontalTitleGap: 12,
+            leading: const BilSemanticIconBadge(kind: BilSemanticIconKind.time),
             title: Text(scheduleLabels.$2),
             trailing: Text(
               formatTime(sleepSchedule.wakeHour, sleepSchedule.wakeMinute),
@@ -371,7 +360,10 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
             onTap: () => _chooseSleepTime(wake: true),
           ),
           ListTile(
-            leading: const Icon(Icons.flag_outlined),
+            horizontalTitleGap: 12,
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.goals,
+            ),
             title: Text('${tr('Sleep', 'النوم')} · ${tr('Goal', 'الهدف')}'),
             subtitle: Text(
               '${goalHours.toStringAsFixed(goalHours % 1 == 0 ? 0 : 1)} ${tr('hours', 'ساعة')}',
@@ -394,7 +386,10 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.nights_stay_outlined),
+            horizontalTitleGap: 12,
+            leading: const BilSemanticIconBadge(
+              kind: BilSemanticIconKind.notifications,
+            ),
             title: Text('${tr('Sleep', 'النوم')} · ${tr('Reminder', 'تذكير')}'),
             subtitle: Text(
               tr(
@@ -491,107 +486,73 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 142,
-                        height: 142,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            const SizedBox.expand(
-                              child: CircularProgressIndicator(
-                                value: 1,
-                                strokeWidth: 12,
-                              ),
+                  Center(
+                    child: SizedBox(
+                      width: 142,
+                      height: 142,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          const SizedBox.expand(
+                            child: CircularProgressIndicator(
+                              value: 1,
+                              strokeWidth: 12,
                             ),
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(Icons.bedtime_outlined),
-                                Text(
-                                  latest == null
-                                      ? 'N/A'
-                                      : '${latest.sleepHours!.floor()}h ${((latest.sleepHours! % 1) * 60).round()}m',
-                                  style: Theme.of(context).textTheme.titleLarge
-                                      ?.copyWith(fontWeight: FontWeight.w800),
-                                ),
-                                Text(tr('Total sleep', 'إجمالي النوم')),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: Text(
-                          tr(
-                            'Sleep stages appear only when a connected device supplies measured stage records.',
-                            'تظهر مراحل النوم فقط عندما يرسل جهاز متصل سجلات مراحل مقاسة.',
                           ),
-                        ),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.bedtime_outlined),
+                              Text(
+                                latest == null
+                                    ? 'N/A'
+                                    : '${latest.sleepHours!.floor()}h ${((latest.sleepHours! % 1) * 60).round()}m',
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(fontWeight: FontWeight.w800),
+                              ),
+                              Text(tr('Total sleep', 'إجمالي النوم')),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                   const SizedBox(height: 16),
-                  Container(
+                  SizedBox(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF17178C), Color(0xFF4747F0)],
+                    child: FilledButton.icon(
+                      key: const Key('sleep-connect-health'),
+                      onPressed: () => context.push('/connected-health'),
+                      icon: const BilSemanticIconBadge(
+                        kind: BilSemanticIconKind.devices,
+                        size: 32,
+                        iconSize: 18,
                       ),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          tr('Psst… are you awake?', 'هل ما زلت مستيقظًا؟'),
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                              ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          tr(
-                            'Connect a supported health source to import measured sleep stages. BIL never invents them.',
-                            'اربط مصدرًا صحيًا مدعومًا لاستيراد مراحل النوم المقاسة. لا يخترعها BIL.',
-                          ),
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        TextButton(
-                          onPressed: () => context.push('/connected-health'),
-                          child: Text(
-                            tr('Connect health data', 'ربط البيانات الصحية'),
-                            style: const TextStyle(color: Color(0xFFFFD55C)),
-                          ),
-                        ),
-                      ],
+                      label: Text(
+                        tr('Connect health data', 'ربط البيانات الصحية'),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
                   ListTile(
+                    key: const Key('sleep-review-meals'),
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.menu_book_outlined),
+                    leading: const BilSemanticIconBadge(
+                      kind: BilSemanticIconKind.meal,
+                    ),
                     title: Text(
                       tr(
                         'Review meals alongside sleep',
                         'راجع الوجبات بجانب النوم',
                       ),
                     ),
-                    subtitle: Text(
-                      tr(
-                        'Open Daily Log to review meal timing alongside saved sleep. This does not establish causation.',
-                        'افتح السجل اليومي لمراجعة توقيت الوجبات بجانب النوم المحفوظ. هذا لا يثبت السببية.',
-                      ),
-                    ),
-                    trailing: IconButton(
-                      onPressed: () => context.push('/daily-log'),
-                      icon: const Icon(Icons.add_circle_outline_rounded),
-                    ),
+                    // Sleep is a top-level route while Daily Log belongs to
+                    // the shell. Replace the route instead of stacking a
+                    // shell on top of the wellness page; this avoids the
+                    // blank child/white shell seen after returning via the
+                    // bottom navigation.
+                    onTap: () => context.go('/daily-log'),
+                    trailing: const Icon(Icons.chevron_right_rounded),
                   ),
                 ],
               ),

@@ -118,20 +118,23 @@ void main() {
     },
   );
 
-  test('community search cannot inject a food unrelated to the query', () async {
-    final authority = FoodRuntimeSearchAuthority(
-      foods,
-      catalogResolver: () async => null,
-      communitySearchResolver: (query, {limit = 10}) async => <UnifiedFood>[
-        _communityFood(name: 'Apple juice with added vitamin C'),
-      ],
-    );
+  test(
+    'community search cannot inject a food unrelated to the query',
+    () async {
+      final authority = FoodRuntimeSearchAuthority(
+        foods,
+        catalogResolver: () async => null,
+        communitySearchResolver: (query, {limit = 10}) async => <UnifiedFood>[
+          _communityFood(name: 'Apple juice with added vitamin C'),
+        ],
+      );
 
-    final result = await authority.searchDetailed('chicken');
+      final result = await authority.searchDetailed('chicken');
 
-    expect(result.foods, isEmpty);
-    expect(result.source, FoodRuntimeSearchSource.localOnly);
-  });
+      expect(result.foods, isEmpty);
+      expect(result.source, FoodRuntimeSearchSource.localOnly);
+    },
+  );
 
   test('migration exposes authenticated upsert, withdraw and search RPCs', () {
     final sql = File(

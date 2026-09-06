@@ -19,6 +19,7 @@ void main() {
     expect(NutrientDashboardPreset.heartHealthy.evidenceMetrics, [
       TrackedNutrient.sodium,
       TrackedNutrient.fiber,
+      TrackedNutrient.potassium,
     ]);
     expect(NutrientDashboardPreset.carbConscious.evidenceMetrics, [
       TrackedNutrient.carbohydrates,

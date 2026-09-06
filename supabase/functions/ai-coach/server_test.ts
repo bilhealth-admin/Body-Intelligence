@@ -1,12 +1,17 @@
 import {
   assertEquals,
+  assertRejects,
   assertThrows,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
   boundedMessages,
   boundedVoiceAudio,
   extractModelText,
+  geminiAttemptTimeoutMs,
+  geminiCall,
   handler,
+  isRetryableGeminiError,
+  isRetryableGeminiStatus,
   parseModelJson,
   responseLanguage,
   spokenWithinComfortableTurn,
@@ -182,6 +187,140 @@ Deno.test("HTTP boundary rejects unsupported methods and missing auth", async ()
   assertEquals(await response.json(), { error: "authentication_required" });
 });
 
+async function withGeminiTestKey<T>(run: () => Promise<T>) {
+  const previous = Deno.env.get("BIL_GEMINI_API_KEY");
+  Deno.env.set("BIL_GEMINI_API_KEY", "test-gemini-key");
+  try {
+    return await run();
+  } finally {
+    if (previous == null) Deno.env.delete("BIL_GEMINI_API_KEY");
+    else Deno.env.set("BIL_GEMINI_API_KEY", previous);
+  }
+}
+
+function providerSuccess() {
+  return new Response(JSON.stringify({ candidates: [] }), { status: 200 });
+}
+
+Deno.test("Gemini retry policy bounds each attempt and retries only transient failures", async () => {
+  assertEquals(geminiAttemptTimeoutMs, 12_000);
+  assertEquals(isRetryableGeminiStatus(429), true);
+  assertEquals(isRetryableGeminiStatus(503), true);
+  assertEquals(isRetryableGeminiStatus(400), false);
+  assertEquals(isRetryableGeminiError(new TypeError("network")), true);
+  assertEquals(
+    isRetryableGeminiError(new DOMException("timed out", "TimeoutError")),
+    true,
+  );
+  assertEquals(isRetryableGeminiError(new Error("malformed JSON")), false);
+
+  await withGeminiTestKey(async () => {
+    let rateLimitedCalls = 0;
+    const recovered = await geminiCall(
+      "gemini-test",
+      [],
+      "test",
+      32,
+      false,
+      "LOW",
+      async (_url, _init) => {
+        rateLimitedCalls += 1;
+        return rateLimitedCalls === 1
+          ? new Response(
+            JSON.stringify({ error: { status: "RESOURCE_EXHAUSTED" } }),
+            { status: 429 },
+          )
+          : providerSuccess();
+      },
+    );
+    assertEquals(recovered.attempts, 2);
+    assertEquals(rateLimitedCalls, 2);
+
+    let networkCalls = 0;
+    const networkRecovered = await geminiCall(
+      "gemini-test",
+      [],
+      "test",
+      32,
+      false,
+      "LOW",
+      async (_url, _init) => {
+        networkCalls += 1;
+        if (networkCalls === 1) throw new TypeError("network unavailable");
+        return providerSuccess();
+      },
+    );
+    assertEquals(networkRecovered.attempts, 2);
+    assertEquals(networkCalls, 2);
+  });
+});
+
+Deno.test("Gemini retry policy does not repeat client or parse errors", async () => {
+  await withGeminiTestKey(async () => {
+    let clientErrorCalls = 0;
+    await assertRejects(
+      () =>
+        geminiCall(
+          "gemini-test",
+          [],
+          "test",
+          32,
+          false,
+          "LOW",
+          async (_url, _init) => {
+            clientErrorCalls += 1;
+            return new Response(
+              JSON.stringify({ error: { status: "INVALID_ARGUMENT" } }),
+              { status: 400 },
+            );
+          },
+        ),
+      Error,
+      "provider_http_400_invalid_argument",
+    );
+    assertEquals(clientErrorCalls, 1);
+
+    let serverErrorCalls = 0;
+    await assertRejects(
+      () =>
+        geminiCall(
+          "gemini-test",
+          [],
+          "test",
+          32,
+          false,
+          "LOW",
+          async (_url, _init) => {
+            serverErrorCalls += 1;
+            return new Response("temporary", { status: 503 });
+          },
+        ),
+      Error,
+      "provider_http_503",
+    );
+    assertEquals(serverErrorCalls, 2);
+
+    let parseCalls = 0;
+    await assertRejects(
+      () =>
+        geminiCall(
+          "gemini-test",
+          [],
+          "test",
+          32,
+          false,
+          "LOW",
+          async (_url, _init) => {
+            parseCalls += 1;
+            return new Response("not-json", { status: 200 });
+          },
+        ),
+      Error,
+    );
+    assertEquals(parseCalls, 1);
+  });
+});
+
 function requestBody(requestId = "coach-test-request-0001") {
   return new Request("https://example.test", {
     method: "POST",
@@ -249,6 +388,44 @@ Deno.test("provider timeout refunds exactly one established reservation", async 
   assertEquals(response.status, 503);
   assertEquals(fake.settlements.length, 1);
   assertEquals(fake.settlements[0].p_succeeded, false);
+});
+
+Deno.test("settlement outage does not hide the original provider failure", async () => {
+  let settlementCalls = 0;
+  const response = await handler(requestBody("coach-test-settlement-outage"), {
+    clients: ((_authorization: string) => ({
+      auth: {
+        auth: {
+          getUser: async () => ({
+            data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
+            error: null,
+          }),
+        },
+      },
+      admin: {
+        rpc: async (name: string) => {
+          if (name === "bil_has_remote_ai_consent") {
+            return { data: true, error: null };
+          }
+          if (name === "bil_reserve_ai_usage") {
+            return {
+              data: { duplicate: false, state: "reserved" },
+              error: null,
+            };
+          }
+          settlementCalls += 1;
+          throw new Error("database unavailable");
+        },
+      },
+    })) as never,
+    geminiCall: async () => {
+      throw new Error("provider_timeout");
+    },
+  });
+
+  assertEquals(response.status, 503);
+  assertEquals((await response.json()).error, "provider_timeout");
+  assertEquals(settlementCalls, 1);
 });
 
 Deno.test("successful response exposes the metered request id for feedback correlation", async () => {
@@ -398,11 +575,13 @@ Deno.test("exhausted total fails closed with a distinguishable Boost route code"
 });
 
 Deno.test("quota aliases cannot masquerade as exhausted AI credit", async () => {
-  for (const message of [
-    "not_ai_usage_exhausted",
-    "ai_usage_exhausted_alias",
-    "AI_USAGE_EXHAUSTED",
-  ]) {
+  for (
+    const message of [
+      "not_ai_usage_exhausted",
+      "ai_usage_exhausted_alias",
+      "AI_USAGE_EXHAUSTED",
+    ]
+  ) {
     let providerCalls = 0;
     const response = await handler(requestBody(`coach-test-${message}`), {
       clients: ((_authorization: string) => ({

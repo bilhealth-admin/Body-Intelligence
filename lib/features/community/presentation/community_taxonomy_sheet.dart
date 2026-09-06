@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import 'community_taxonomy_locale_copy.dart';
 
 class CommunityTaxonomySheet extends StatelessWidget {
@@ -137,7 +138,11 @@ class CommunityTaxonomySheet extends StatelessWidget {
               Card(
                 margin: const EdgeInsets.only(bottom: 8),
                 child: ListTile(
-                  leading: Icon(category.$1),
+                  leading: BilSemanticIconBadge(
+                    kind: BilSemanticIconKind.community,
+                    iconOverride: category.$1,
+                    appleIconOverride: category.$1,
+                  ),
                   title: Text(category.$2),
                   subtitle: copy.detailed ? Text(category.$3) : null,
                   trailing: const Icon(Icons.tag_rounded),

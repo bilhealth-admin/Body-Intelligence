@@ -4,6 +4,7 @@ import 'package:body_intelligence_log/features/commerce/domain/store_catalog_con
 import 'package:body_intelligence_log/features/commerce/domain/store_offer_metadata.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/ai_boost_coach_artwork.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_dynamic_store_offers.dart';
+import 'package:body_intelligence_log/features/commerce/presentation/premium_crown_emblem.dart';
 import 'package:body_intelligence_log/shared/widgets/bil_coach_identity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -70,6 +71,50 @@ void main() {
     final asset = (image.image as ResizeImage).imageProvider;
     expect(asset, isA<AssetImage>());
     expect((asset as AssetImage).assetName, bilAiBoostCoachArtworkAsset);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Premium AI Coach keeps the shared Premium crown artwork', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 800));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    const subscription = BilStoreOfferMetadata(
+      productId: StoreCatalogConfiguration.premiumAiCoachMonthly,
+      kind: BilStoreProductKind.premiumAiCoachSubscription,
+      localizedTitle: 'Premium + AI Coach',
+      localizedPrice: 'Store price',
+      currencyCode: 'TST',
+      priceMicros: 0,
+      billingPeriodIso8601: 'P1M',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BilDynamicStoreOffers(
+          locale: 'en',
+          offers: const [subscription],
+          onPurchaseRequested: (_) {},
+          onRestore: () {},
+          onManage: () {},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final tier = find.byKey(
+      const ValueKey('store-tier-premiumAiCoachSubscription'),
+    );
+    expect(tier, findsOneWidget);
+    expect(
+      find.descendant(of: tier, matching: find.byType(PremiumCrownEmblem)),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: tier, matching: find.byType(BilAiBoostCoachArtwork)),
+      findsNothing,
+    );
     expect(tester.takeException(), isNull);
   });
 

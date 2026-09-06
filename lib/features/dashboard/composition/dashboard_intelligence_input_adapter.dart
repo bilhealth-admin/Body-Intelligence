@@ -79,24 +79,9 @@ final class DashboardIntelligenceInputAdapter {
       planOverrides: dailyNutritionTarget != null
           ? PlanOverrides(
               calories: dailyNutritionTarget.calories.round(),
-              protein:
-                  (dailyNutritionTarget.calories *
-                          dailyNutritionTarget.proteinPercent /
-                          100 /
-                          4)
-                      .round(),
-              carbs:
-                  (dailyNutritionTarget.calories *
-                          dailyNutritionTarget.carbsPercent /
-                          100 /
-                          4)
-                      .round(),
-              fats:
-                  (dailyNutritionTarget.calories *
-                          dailyNutritionTarget.fatPercent /
-                          100 /
-                          9)
-                      .round(),
+              protein: dailyNutritionTarget.proteinGrams.round(),
+              carbs: dailyNutritionTarget.carbsGrams.round(),
+              fats: dailyNutritionTarget.fatGrams.round(),
               fiber: planSetting?.overrideFiber,
               water: planSetting?.overrideWater,
             )

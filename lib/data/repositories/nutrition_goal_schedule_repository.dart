@@ -4,6 +4,16 @@ import 'preferences_repository.dart';
 
 const nutritionGoalSchedulePreferenceKey = 'goals.nutritionSchedule.v1';
 
+const defaultNutritionGoalPreferenceKeys = <String>[
+  'goal.calories',
+  'goal.carbsPercent',
+  'goal.proteinPercent',
+  'goal.fatPercent',
+  'goal.carbsGrams',
+  'goal.proteinGrams',
+  'goal.fatGrams',
+];
+
 class NutritionGoalTarget {
   const NutritionGoalTarget({
     required this.calories,
@@ -17,18 +27,70 @@ class NutritionGoalTarget {
   final double proteinPercent;
   final double fatPercent;
 
+  /// Builds a target from the units shown to users in the schedule editor.
+  /// Macro energy must agree with [calories] so the stored target cannot drift
+  /// between the schedule, dashboard, and meal rows.
+  factory NutritionGoalTarget.fromGrams({
+    required double calories,
+    required double carbsGrams,
+    required double proteinGrams,
+    required double fatGrams,
+  }) {
+    final values = [calories, carbsGrams, proteinGrams, fatGrams];
+    if (!values.every((value) => value.isFinite && value >= 0) ||
+        calories <= 0) {
+      throw ArgumentError('Calories and macro grams must be valid.');
+    }
+    final macroCalories = carbsGrams * 4 + proteinGrams * 4 + fatGrams * 9;
+    if (macroCalories <= 0 || (macroCalories - calories).abs() > 0.5) {
+      throw ArgumentError(
+        'Macro grams must provide the selected calorie goal.',
+      );
+    }
+    return NutritionGoalTarget(
+      calories: calories,
+      carbsPercent: carbsGrams * 4 / calories * 100,
+      proteinPercent: proteinGrams * 4 / calories * 100,
+      fatPercent: fatGrams * 9 / calories * 100,
+    );
+  }
+
+  double get carbsGrams => calories * carbsPercent / 400;
+  double get proteinGrams => calories * proteinPercent / 400;
+  double get fatGrams => calories * fatPercent / 900;
+
   Map<String, Object> toJson() => {
     'calories': calories,
     'carbsPercent': carbsPercent,
     'proteinPercent': proteinPercent,
     'fatPercent': fatPercent,
+    'carbsGrams': carbsGrams,
+    'proteinGrams': proteinGrams,
+    'fatGrams': fatGrams,
   };
 
   static NutritionGoalTarget? fromJson(Object? value) {
     if (value is! Map) return null;
     double? number(String key) => (value[key] as num?)?.toDouble();
+    final calories = number('calories') ?? 0;
+    final carbsGrams = number('carbsGrams');
+    final proteinGrams = number('proteinGrams');
+    final fatGrams = number('fatGrams');
+    if (carbsGrams != null && proteinGrams != null && fatGrams != null) {
+      try {
+        final target = NutritionGoalTarget.fromGrams(
+          calories: calories,
+          carbsGrams: carbsGrams,
+          proteinGrams: proteinGrams,
+          fatGrams: fatGrams,
+        );
+        if (target.isValid) return target;
+      } on ArgumentError {
+        // Fall through to the legacy percentage representation.
+      }
+    }
     final target = NutritionGoalTarget(
-      calories: number('calories') ?? 0,
+      calories: calories,
       carbsPercent: number('carbsPercent') ?? 0,
       proteinPercent: number('proteinPercent') ?? 0,
       fatPercent: number('fatPercent') ?? 0,
@@ -46,6 +108,47 @@ class NutritionGoalTarget {
       proteinPercent >= 0 &&
       fatPercent >= 0 &&
       (carbsPercent + proteinPercent + fatPercent - 100).abs() < 0.01;
+}
+
+/// Rebuilds the user's default target from the atomic preference snapshot.
+///
+/// Gram values are authoritative when all three are present and agree with
+/// calories. Older installs that only persisted percentages remain supported.
+NutritionGoalTarget? defaultNutritionGoalTargetFromPreferences(
+  Map<String, String?> values,
+) {
+  double? number(String key) {
+    final parsed = double.tryParse(values[key]?.trim() ?? '');
+    return parsed != null && parsed.isFinite && parsed >= 0 ? parsed : null;
+  }
+
+  final calories = number('goal.calories');
+  if (calories == null || calories <= 0) return null;
+
+  final carbsGrams = number('goal.carbsGrams');
+  final proteinGrams = number('goal.proteinGrams');
+  final fatGrams = number('goal.fatGrams');
+  if (carbsGrams != null && proteinGrams != null && fatGrams != null) {
+    try {
+      return NutritionGoalTarget.fromGrams(
+        calories: calories,
+        carbsGrams: carbsGrams,
+        proteinGrams: proteinGrams,
+        fatGrams: fatGrams,
+      );
+    } on ArgumentError {
+      // A stale or partially migrated gram snapshot must not hide a valid
+      // legacy percentage target below.
+    }
+  }
+
+  final target = NutritionGoalTarget(
+    calories: calories,
+    carbsPercent: number('goal.carbsPercent') ?? double.nan,
+    proteinPercent: number('goal.proteinPercent') ?? double.nan,
+    fatPercent: number('goal.fatPercent') ?? double.nan,
+  );
+  return target.isValid ? target : null;
 }
 
 class NutritionGoalSchedule {
@@ -97,6 +200,12 @@ class NutritionGoalSchedule {
     }
   }
 }
+
+NutritionGoalTarget? resolveDailyNutritionGoal({
+  required NutritionGoalSchedule schedule,
+  required DateTime date,
+  required NutritionGoalTarget? defaultGoal,
+}) => schedule.targetFor(date) ?? defaultGoal;
 
 const _mealTypes = {'breakfast', 'lunch', 'dinner', 'snack'};
 

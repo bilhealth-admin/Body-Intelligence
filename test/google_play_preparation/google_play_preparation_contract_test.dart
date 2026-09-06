@@ -55,7 +55,7 @@ void main() {
     expect(gradle, isNot(contains('signingConfigs.getByName("debug")')));
     expect(manifest, contains('android:usesCleartextTraffic="false"'));
     expect(manifest, contains('ACTION_SHOW_PERMISSIONS_RATIONALE'));
-    expect(settings, contains("copy('Privacy')"));
+    expect(settings, contains("copy('Sharing & Privacy')"));
     expect(onboarding, contains('not medical advice'));
   });
 

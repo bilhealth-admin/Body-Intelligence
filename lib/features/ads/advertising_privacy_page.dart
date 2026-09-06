@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/localization/runtime_copy.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 import 'domain/ad_policy.dart';
 import 'providers/ad_providers.dart';
 import 'services/admob_ump_consent_gate.dart';
@@ -423,7 +424,9 @@ class _AdvertisingPrivacyPageState
           Card(
             child: ListTile(
               key: const Key('advertising-contextual-policy'),
-              leading: const Icon(Icons.ads_click_outlined),
+              leading: const BilSemanticIconBadge(
+                kind: BilSemanticIconKind.privacy,
+              ),
               title: Text(copy.contextualTitle),
               subtitle: Text(copy.contextualBody),
             ),
@@ -432,7 +435,9 @@ class _AdvertisingPrivacyPageState
             Card(
               child: ListTile(
                 key: const Key('advertising-google-privacy-options'),
-                leading: const Icon(Icons.privacy_tip_outlined),
+                leading: const BilSemanticIconBadge(
+                  kind: BilSemanticIconKind.privacy,
+                ),
                 title: Text(umpCopy.title),
                 subtitle: Text(umpCopy.body),
                 trailing: _umpBusy

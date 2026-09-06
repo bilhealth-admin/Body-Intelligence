@@ -170,7 +170,7 @@ class _WorkoutSegmentVideoPage extends StatelessWidget {
     body: ListView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       children: [
-        _VerifiedCachedVideo(
+        BilVerifiedWorkoutVideo(
           asset: segment.videoMedia,
           poster: segment.imageMedia,
           mediaCache: mediaCache,
@@ -267,7 +267,7 @@ class _WorkoutHeroMedia extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (item.videoMedia != null) {
-      return _VerifiedCachedVideo(
+      return BilVerifiedWorkoutVideo(
         asset: item.videoMedia!,
         poster: item.imageMedia,
         mediaCache: mediaCache,
@@ -321,8 +321,11 @@ class _WorkoutHeroMedia extends StatelessWidget {
   }
 }
 
-class _VerifiedCachedVideo extends StatefulWidget {
-  const _VerifiedCachedVideo({
+/// Shared explicit-play/download surface for trusted wellness catalog videos.
+/// Every library entry uses the same full-screen, retryable playback route.
+class BilVerifiedWorkoutVideo extends StatefulWidget {
+  const BilVerifiedWorkoutVideo({
+    super.key,
     required this.asset,
     this.poster,
     required this.mediaCache,
@@ -336,11 +339,10 @@ class _VerifiedCachedVideo extends StatefulWidget {
   final String unavailableText;
 
   @override
-  State<_VerifiedCachedVideo> createState() => _VerifiedCachedVideoState();
+  State<BilVerifiedWorkoutVideo> createState() => _VerifiedCachedVideoState();
 }
 
-class _VerifiedCachedVideoState extends State<_VerifiedCachedVideo> {
-  VideoPlayerController? _controller;
+class _VerifiedCachedVideoState extends State<BilVerifiedWorkoutVideo> {
   WellnessMediaCacheResult? _cached;
   bool _checkingCache = true;
   bool _busy = false;
@@ -355,13 +357,11 @@ class _VerifiedCachedVideoState extends State<_VerifiedCachedVideo> {
   }
 
   @override
-  void didUpdateWidget(covariant _VerifiedCachedVideo oldWidget) {
+  void didUpdateWidget(covariant BilVerifiedWorkoutVideo oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.mediaCache, widget.mediaCache) ||
         !_sameMediaAsset(oldWidget.asset, widget.asset)) {
       _generation += 1;
-      _controller?.dispose();
-      _controller = null;
       _cached = null;
       _checkingCache = true;
       _busy = false;
@@ -402,25 +402,84 @@ class _VerifiedCachedVideoState extends State<_VerifiedCachedVideo> {
   @override
   void dispose() {
     _generation += 1;
-    _controller?.dispose();
     super.dispose();
   }
 
   Future<void> _play() async {
-    final controller = _controller;
-    if (controller != null && controller.value.isInitialized) {
-      controller.value.isPlaying
-          ? await controller.pause()
-          : await controller.play();
-      if (mounted) setState(() {});
-      return;
+    if (_busy || !_workoutVideoPlaybackSupported) return;
+    final generation = _generation;
+    final asset = widget.asset;
+    final cache = widget.mediaCache;
+    final online = widget.online;
+    var position = Duration.zero;
+    setState(() => _busy = true);
+    try {
+      position = await WellnessVideoResume.load(asset.sha256);
+      if (!mounted || generation != _generation) return;
+      // Show a dismissible route before any network operation. Initialization
+      // and a stalled stream are handled by the player's bounded retry UI.
+      await Navigator.of(context, rootNavigator: true).push<void>(
+        MaterialPageRoute<void>(
+          fullscreenDialog: true,
+          builder: (_) => _FullscreenWorkoutVideoPage(
+            controllerFactory: () =>
+                _createPlaybackController(asset, cache, online, generation),
+            initialPosition: position,
+            onPositionChanged: (updated) => position = updated,
+          ),
+        ),
+      );
+    } finally {
+      if (mounted && generation == _generation) {
+        setState(() => _busy = false);
+      }
+      // Optional resume persistence must not keep the library's Play button
+      // spinning after the user already dismissed the player.
+      unawaited(WellnessVideoResume.save(asset.sha256, position));
     }
-    await _resolveExplicitly(play: true);
   }
 
-  Future<void> _download() => _resolveExplicitly(play: false);
+  Future<VideoPlayerController> _createPlaybackController(
+    WellnessMediaAsset asset,
+    WellnessMediaCache cache,
+    bool online,
+    int generation,
+  ) async {
+    if (!mounted || generation != _generation) {
+      throw StateError('Workout playback was dismissed.');
+    }
+    final cached = _cached;
+    if (cached?.isReady == true && cached?.file != null) {
+      return VideoPlayerController.file(cached!.file!);
+    }
+    final stream = await cache.resolveStream(asset, online: online);
+    if (!mounted || generation != _generation) {
+      throw StateError('Workout playback was dismissed.');
+    }
+    if (stream != null) {
+      return VideoPlayerController.networkUrl(
+        stream.uri,
+        httpHeaders: stream.httpHeaders,
+        videoPlayerOptions: VideoPlayerOptions(allowBackgroundPlayback: false),
+      );
+    }
+    // Other licensed origins still require a complete SHA-256 verified file.
+    final result = await cache.resolve(asset, online: online);
+    if (!mounted || generation != _generation) {
+      throw StateError('Workout playback was dismissed.');
+    }
+    if (!result.isReady || result.file == null) {
+      throw const FileSystemException(
+        'Workout video is not available offline.',
+      );
+    }
+    _cached = result;
+    return VideoPlayerController.file(result.file!);
+  }
 
-  Future<void> _resolveExplicitly({required bool play}) async {
+  Future<void> _download() => _resolveExplicitly();
+
+  Future<void> _resolveExplicitly() async {
     if (_busy || !_workoutVideoPlaybackSupported) return;
     final generation = _generation;
     setState(() {
@@ -445,13 +504,6 @@ class _VerifiedCachedVideoState extends State<_VerifiedCachedVideo> {
         return;
       }
       _cached = result;
-      if (!play) return;
-      await Navigator.of(context).push<void>(
-        MaterialPageRoute<void>(
-          fullscreenDialog: true,
-          builder: (_) => _FullscreenWorkoutVideoPage(file: result.file!),
-        ),
-      );
     } on Object catch (error) {
       if (mounted && generation == _generation) _error = error;
     } finally {
@@ -469,9 +521,6 @@ class _VerifiedCachedVideoState extends State<_VerifiedCachedVideo> {
       _error = null;
     });
     try {
-      final controller = _controller;
-      _controller = null;
-      if (controller != null) await controller.dispose();
       await widget.mediaCache.remove(widget.asset);
       if (!mounted || generation != _generation) return;
       _cached = null;
@@ -496,49 +545,6 @@ class _VerifiedCachedVideoState extends State<_VerifiedCachedVideo> {
             'Verified workout video playback is available on Android and iOS.',
             'تشغيل فيديو التمرين الموثق متاح على Android وiOS.',
           ),
-        ),
-      );
-    }
-    final controller = _controller;
-    if (controller != null && controller.value.isInitialized) {
-      return AspectRatio(
-        aspectRatio: 16 / 9,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            ColoredBox(
-              color: Colors.black,
-              child: Center(
-                child: AspectRatio(
-                  aspectRatio: controller.value.aspectRatio,
-                  child: VideoPlayer(controller),
-                ),
-              ),
-            ),
-            IconButton.filled(
-              key: const ValueKey('workout-video-playback'),
-              tooltip: controller.value.isPlaying
-                  ? wellnessWorkoutVideoAction(context, 'Pause video')
-                  : wellnessWorkoutVideoAction(context, 'Play video'),
-              onPressed: _busy ? null : _play,
-              iconSize: 34,
-              icon: Icon(
-                controller.value.isPlaying
-                    ? Icons.pause_rounded
-                    : Icons.play_arrow_rounded,
-              ),
-            ),
-            PositionedDirectional(
-              end: 10,
-              bottom: 10,
-              child: IconButton.filledTonal(
-                key: const ValueKey('workout-video-remove'),
-                tooltip: wellnessWorkoutVideoAction(context, 'Remove download'),
-                onPressed: _busy ? null : _removeDownload,
-                icon: const Icon(Icons.delete_outline_rounded),
-              ),
-            ),
-          ],
         ),
       );
     }

@@ -7,9 +7,11 @@ import 'package:go_router/go_router.dart';
 
 import '../localization/app_localizations.dart';
 import '../theme/premium_motion_tokens.dart';
-import '../theme/bil_semantic_icons.dart';
+import '../theme/bil_navigation_icons.dart';
 import '../../shared/widgets/bil_wordmark.dart';
 import 'bil_quick_add_sheet.dart';
+
+part 'responsive_app_shell_top_navigation.dart';
 
 class ResponsiveAppShell extends StatelessWidget {
   const ResponsiveAppShell({super.key, required this.child});
@@ -24,6 +26,12 @@ class ResponsiveAppShell extends StatelessWidget {
     '/analytics',
     '/settings',
   ];
+
+  /// Accept only exact shell roots as a post-Quick-Add return destination.
+  /// This preserves Discover, Progress, Insights, and More without allowing a
+  /// caller-controlled URL or an arbitrary internal route to become a redirect.
+  static String? safeQuickAddReturnPath(String? value) =>
+      paths.contains(value) ? value : null;
 
   int selectedIndex(BuildContext context) {
     return selectedIndexForUri(GoRouterState.of(context).uri);
@@ -46,43 +54,54 @@ class ResponsiveAppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentPath = GoRouterState.of(context).uri.path;
-    final index = selectedIndex(context);
+    // A ShellRoute widget can inherit the shell page's GoRouterState instead
+    // of the active child route. Read the delegate's complete configuration so
+    // root-back and selected-navigation behavior follow the route the user is
+    // actually viewing on phones and wide layouts alike.
+    final currentUri = GoRouter.of(
+      context,
+    ).routerDelegate.currentConfiguration.uri;
+    final currentPath = currentUri.path;
+    final index = selectedIndexForUri(currentUri);
     final isDashboard =
         currentPath == '/dashboard' || currentPath.startsWith('/dashboard/');
+    final isDashboardRoot = currentPath == '/dashboard';
+    final hasRouteHistory = context.canPop();
     final immersiveCoach = currentPath == '/intelligence-center';
     final wide = MediaQuery.sizeOf(context).width >= 900;
+    final platform = Theme.of(context).platform;
+    ({IconData icon, IconData selected, String label}) navigationItem(
+      BilNavigationDestination destination,
+      String label,
+    ) {
+      final icons = BilNavigationIcons.forDestination(destination, platform);
+      return (icon: icons.icon, selected: icons.selected, label: label);
+    }
 
     final items = <({IconData icon, IconData selected, String label})>[
-      (
-        icon: BilSemanticIcons.today,
-        selected: BilSemanticIcons.todaySelected,
-        label: context.strings.text('Today'),
+      navigationItem(
+        BilNavigationDestination.today,
+        context.strings.text('Today'),
       ),
-      (
-        icon: BilSemanticIcons.diary,
-        selected: BilSemanticIcons.diarySelected,
-        label: context.strings.text('Diary'),
+      navigationItem(
+        BilNavigationDestination.diary,
+        context.strings.text('Diary'),
       ),
-      (
-        icon: BilSemanticIcons.discover,
-        selected: BilSemanticIcons.discoverSelected,
-        label: context.strings.text('Discover'),
+      navigationItem(
+        BilNavigationDestination.discover,
+        context.strings.text('Discover'),
       ),
-      (
-        icon: BilSemanticIcons.progress,
-        selected: BilSemanticIcons.progressSelected,
-        label: context.strings.text('Progress'),
+      navigationItem(
+        BilNavigationDestination.progress,
+        context.strings.text('Progress'),
       ),
-      (
-        icon: BilSemanticIcons.insights,
-        selected: BilSemanticIcons.insightsSelected,
-        label: context.strings.text('Insights'),
+      navigationItem(
+        BilNavigationDestination.insights,
+        context.strings.text('Insights'),
       ),
-      (
-        icon: BilSemanticIcons.more,
-        selected: BilSemanticIcons.moreSelected,
-        label: context.strings.text('More'),
+      navigationItem(
+        BilNavigationDestination.more,
+        context.strings.text('More'),
       ),
     ];
 
@@ -95,59 +114,88 @@ class ResponsiveAppShell extends StatelessWidget {
       context.go(paths[next]);
     }
 
-    void quickAdd() => showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      sheetAnimationStyle: AnimationStyle(
-        duration: PremiumMotionTokens.durationFor(
-          context,
-          PremiumMotionTokens.navigationDuration,
+    Future<void> quickAdd() async {
+      final action = await showModalBottomSheet<String>(
+        context: context,
+        // Keep the sheet dismissible from the dimmed area and draggable from
+        // the handle/content on both iOS and Android. The custom sheet owns
+        // its visual handle, so the framework handle is intentionally
+        // disabled.
+        isDismissible: true,
+        enableDrag: true,
+        showDragHandle: false,
+        isScrollControlled: true,
+        useSafeArea: true,
+        backgroundColor: Colors.transparent,
+        sheetAnimationStyle: AnimationStyle(
+          duration: PremiumMotionTokens.durationFor(
+            context,
+            PremiumMotionTokens.navigationDuration,
+          ),
+          reverseDuration: PremiumMotionTokens.durationFor(
+            context,
+            PremiumMotionTokens.stateChangeDuration,
+          ),
         ),
-        reverseDuration: PremiumMotionTokens.durationFor(
-          context,
-          PremiumMotionTokens.stateChangeDuration,
-        ),
-      ),
-      builder: (sheetContext) => BilQuickAddSheet(
-        photoAsset:
-            'assets/images/onboarding_2026/bil_onboarding_meal_quick_add_photo_v1.webp',
-        onFood: () {
-          Navigator.pop(sheetContext);
-          final origin = Uri.encodeComponent(paths[index]);
+        builder: (sheetContext) {
+          return BilQuickAddSheet(
+            photoAsset:
+                'assets/images/onboarding_2026/bil_onboarding_meal_quick_add_photo_v1.webp',
+            onFood: () {
+              Navigator.of(sheetContext).pop('food');
+            },
+            onBarcode: () {
+              Navigator.of(sheetContext).pop('barcode');
+            },
+            onVoice: () {
+              Navigator.of(sheetContext).pop('voice');
+            },
+            onPhoto: () {
+              Navigator.of(sheetContext).pop('photo');
+            },
+            onExercise: () {
+              Navigator.of(sheetContext).pop('exercise');
+            },
+            onNotes: () {
+              Navigator.of(sheetContext).pop('notes');
+            },
+            onSearch: () {
+              Navigator.of(sheetContext).pop('search');
+            },
+          );
+        },
+      );
+
+      // Navigate only after showModalBottomSheet has completed its reverse
+      // animation. Starting a shell route from inside the sheet can race its
+      // teardown on iOS and leave a blank child, which also prevents Quick Add
+      // barcode/photo actions from opening their capture surfaces.
+      if (!context.mounted || action == null) return;
+      final origin = Uri.encodeComponent(paths[index]);
+      switch (action) {
+        case 'food':
           context.go('/daily-log?focus=meal&from=$origin');
-        },
-        onBarcode: () {
-          Navigator.pop(sheetContext);
-          final origin = Uri.encodeComponent(paths[index]);
+          break;
+        case 'barcode':
           context.go('/daily-log?action=barcode&from=$origin');
-        },
-        onVoice: () {
-          Navigator.pop(sheetContext);
-          final origin = Uri.encodeComponent(paths[index]);
+          break;
+        case 'voice':
           context.go('/daily-log?action=voice&from=$origin');
-        },
-        onPhoto: () {
-          Navigator.pop(sheetContext);
-          final origin = Uri.encodeComponent(paths[index]);
+          break;
+        case 'photo':
           context.go('/daily-log?action=photo&from=$origin');
-        },
-        onExercise: () {
-          Navigator.pop(sheetContext);
+          break;
+        case 'exercise':
           context.push('/wellness/workouts');
-        },
-        onNotes: () {
-          Navigator.pop(sheetContext);
-          final origin = Uri.encodeComponent(paths[index]);
+          break;
+        case 'notes':
           context.go('/daily-log/body-context?from=$origin');
-        },
-        onSearch: () {
-          Navigator.pop(sheetContext);
-          context.go('/nutrition');
-        },
-      ),
-    );
+          break;
+        case 'search':
+          if (currentPath != '/nutrition') context.push('/nutrition');
+          break;
+      }
+    }
 
     final quickButton = _GlassQuickAdd(
       key: const Key('shell-quick-add'),
@@ -155,12 +203,26 @@ class ResponsiveAppShell extends StatelessWidget {
       size: wide ? 62 : 56,
     );
 
+    void handleSystemBack(bool didPop) {
+      if (didPop || kIsWeb) return;
+      // Bottom-navigation destinations are reached with `go`, so they may not
+      // have a route beneath them. Android back from such a destination must
+      // return to Today before a second back exits the app. The iOS root has
+      // no system-back action and therefore remains in place.
+      if (!isDashboardRoot) {
+        context.go('/dashboard');
+        return;
+      }
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        SystemNavigator.pop();
+      }
+    }
+
     if (!wide) {
       final mobileItems = [
-        (
-          icon: BilSemanticIcons.today,
-          selected: BilSemanticIcons.todaySelected,
-          label: context.strings.get('dashboard'),
+        navigationItem(
+          BilNavigationDestination.today,
+          context.strings.get('dashboard'),
         ),
         items[5],
       ];
@@ -170,13 +232,9 @@ class ResponsiveAppShell extends StatelessWidget {
         _ => null,
       };
       return PopScope(
-        canPop: !isDashboard,
-        onPopInvokedWithResult: (didPop, _) {
-          if (didPop || !isDashboard || kIsWeb) return;
-          if (defaultTargetPlatform == TargetPlatform.android) {
-            SystemNavigator.pop();
-          }
-        },
+        key: const Key('responsive-app-shell-pop-scope'),
+        canPop: hasRouteHistory,
+        onPopInvokedWithResult: (didPop, _) => handleSystemBack(didPop),
         child: Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           // The dock owns real layout space, so the centered action never covers
@@ -201,184 +259,39 @@ class ResponsiveAppShell extends StatelessWidget {
       );
     }
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      // Quick Add belongs to the Today dashboard. Keeping it mounted on every
-      // wide route lets it cover page-owned controls such as the AI Coach
-      // composer, even though the compact shell already scopes it correctly.
-      floatingActionButton: isDashboard ? quickButton : null,
-      body: immersiveCoach
-          ? child
-          : Column(
-              children: [
-                Semantics(
-                  label: context.strings.get('primary_navigation'),
-                  child: _GlassTopNavigation(
-                    key: const Key('glass-top-navigation'),
-                    selectedIndex: index,
-                    items: items,
-                    onSelected: navigate,
-                    onProfile: () => context.push('/profile-settings'),
-                    profileLabel: AppLocalizations.of(context).get('profile'),
-                  ),
-                ),
-                Expanded(child: child),
-              ],
-            ),
-    );
-  }
-}
-
-class _GlassTopNavigation extends StatelessWidget {
-  const _GlassTopNavigation({
-    super.key,
-    required this.selectedIndex,
-    required this.items,
-    required this.onSelected,
-    required this.onProfile,
-    required this.profileLabel,
-  });
-
-  final int selectedIndex;
-  final List<({IconData icon, IconData selected, String label})> items;
-  final ValueChanged<int> onSelected;
-  final VoidCallback onProfile;
-  final String profileLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-        child: Container(
-          height: 76,
-          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.white.withValues(alpha: .075),
-                const Color(0xFF52D9FF).withValues(alpha: .025),
-                const Color(0xFF775FFF).withValues(alpha: .022),
-                Colors.white.withValues(alpha: .012),
-              ],
-            ),
-          ),
-          child: Row(
-            children: [
-              const BilFullWordmark(
-                height: 28,
-                alignment: AlignmentDirectional.centerStart,
-              ),
-              const SizedBox(width: 26),
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    for (var i = 0; i < items.length; i++) ...[
-                      Flexible(
-                        child: _TopNavigationItem(
-                          item: items[i],
-                          selected: i == selectedIndex,
-                          onTap: () => onSelected(i),
-                        ),
-                      ),
-                      if (i != items.length - 1) const SizedBox(width: 4),
-                    ],
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: _TopNavigationItem(
-                        key: const Key('shell-profile-control'),
-                        item: (
-                          icon: Icons.account_circle_outlined,
-                          selected: Icons.account_circle_rounded,
-                          label: profileLabel,
-                        ),
-                        selected: false,
-                        onTap: onProfile,
-                      ),
+    return PopScope(
+      key: const Key('responsive-app-shell-pop-scope'),
+      // Android's root-back contract must not disappear merely because a
+      // phone rotates or a tablet crosses the wide-layout breakpoint.
+      canPop: hasRouteHistory,
+      onPopInvokedWithResult: (didPop, _) => handleSystemBack(didPop),
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        // Quick Add belongs to the Today dashboard. Mounting it on every wide
+        // route could cover page-owned controls such as the AI Coach composer.
+        floatingActionButton: isDashboard ? quickButton : null,
+        body: immersiveCoach
+            ? child
+            : Column(
+                children: [
+                  Semantics(
+                    container: true,
+                    label: context.strings.get('primary_navigation'),
+                    child: _GlassTopNavigation(
+                      key: const Key('glass-top-navigation'),
+                      selectedIndex: index,
+                      items: items,
+                      onSelected: navigate,
+                      onProfile: () => context.push('/profile-settings'),
+                      profileLabel: AppLocalizations.of(context).get('profile'),
                     ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TopNavigationItem extends StatelessWidget {
-  const _TopNavigationItem({
-    super.key,
-    required this.item,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final ({IconData icon, IconData selected, String label}) item;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: item.label,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: selected
-                ? LinearGradient(
-                    colors: [
-                      Colors.white.withValues(alpha: .14),
-                      const Color(0xFF54D9FF).withValues(alpha: .07),
-                      const Color(0xFF765FFF).withValues(alpha: .06),
-                    ],
-                  )
-                : null,
-            boxShadow: selected
-                ? const [
-                    BoxShadow(
-                      color: Color(0x354CD9FF),
-                      blurRadius: 22,
-                      spreadRadius: -8,
-                    ),
-                  ]
-                : null,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                selected ? item.selected : item.icon,
-                color: selected
-                    ? const Color(0xFFF0F4F7)
-                    : const Color(0xFF91A1B1),
-              ),
-              const SizedBox(width: 6),
-              Flexible(
-                child: Text(
-                  item.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: selected
-                        ? const Color(0xFFE2E9EF)
-                        : const Color(0xFF91A1B1),
-                    fontSize: 10,
-                    fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
                   ),
-                ),
+                  // Keep the nested Navigator's route-level BlockSemantics
+                  // inside its own boundary, so it cannot hide the tab bar
+                  // painted earlier in this Column from screen readers.
+                  Expanded(child: Semantics(container: true, child: child)),
+                ],
               ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -495,9 +408,11 @@ class _GlassBottomDestination extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final foreground = selected ? colors.primary : colors.onSurfaceVariant;
     return Semantics(
+      container: true,
       button: true,
       selected: selected,
       label: item.label,
+      onTap: onTap,
       child: ExcludeSemantics(
         child: Material(
           type: MaterialType.transparency,
@@ -617,7 +532,7 @@ class _GlassQuickAdd extends StatelessWidget {
         tooltip: context.strings.text('Quick Add'),
         onPressed: onTap,
         icon: Icon(
-          Icons.add_rounded,
+          BilNavigationIcons.quickAdd(Theme.of(context).platform),
           color: Colors.white,
           size: size >= 60 ? 30 : 28,
         ),

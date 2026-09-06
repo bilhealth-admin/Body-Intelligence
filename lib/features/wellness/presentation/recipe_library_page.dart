@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -22,6 +24,7 @@ import 'wellness_copy.dart';
 
 part 'recipe_library_helpers.dart';
 part 'recipe_library_card.dart';
+part 'recipe_image_request_cache.dart';
 
 class RecipeLibraryPage extends ConsumerStatefulWidget {
   const RecipeLibraryPage({
@@ -30,6 +33,7 @@ class RecipeLibraryPage extends ConsumerStatefulWidget {
     this.initialCardFacts = const {},
     this.repository,
     this.imageClient,
+    this.detailImageClient,
     this.remoteImageDeliveryEnabled = const bool.fromEnvironment(
       'BIL_RECIPE_IMAGE_DELIVERY_ENABLED',
       // The digest-pinned Cloudflare route passed staging and production
@@ -44,6 +48,7 @@ class RecipeLibraryPage extends ConsumerStatefulWidget {
   final Map<String, RecipeCatalogCardFacts> initialCardFacts;
   final RecipeReleaseRepository? repository;
   final RecipeImageResolver? imageClient;
+  final RecipeDetailImageResolver? detailImageClient;
   final bool remoteImageDeliveryEnabled;
   final String? initialRecipeId;
 
@@ -57,6 +62,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
 
   late final RecipeReleaseRepository _repository;
   RecipeImageResolver? _imageClient;
+  RecipeDetailImageResolver? _detailImageClient;
   RecipeImageDeliveryClient? _ownedImageClient;
   final _search = TextEditingController();
   late Future<List<RecipeCatalogSummary>> _catalog;
@@ -68,7 +74,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
   String _cuisine = 'all';
   int _visibleLimit = _filteredPageSize;
   final Map<String, Future<RecipeCatalogCardFacts>> _cardFacts = {};
-  final Map<String, Future<WellnessMediaCacheResult>> _recipeImages = {};
+  final RecipeImageRequestCache _recipeImages = RecipeImageRequestCache();
   bool _initialRecipeHandled = false;
 
   @override
@@ -81,6 +87,11 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
         _ownedImageClient = RecipeImageDeliveryClient(repository: _repository);
         _imageClient = _ownedImageClient;
       }
+      _detailImageClient =
+          widget.detailImageClient ??
+          (_imageClient is RecipeDetailImageResolver
+              ? _imageClient as RecipeDetailImageResolver
+              : null);
     }
     _catalog = widget.initialCatalog == null
         ? _repository.loadIndex()
@@ -278,6 +289,11 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
         homeDisplayOrder[index].id: index,
     };
     final pagedVisible = visible.take(_visibleLimit).toList(growable: false);
+    final imagePrefetchOrder = groupedHome ? homeDisplayOrder : pagedVisible;
+    // Start only the first screenful of remote thumbnail futures. Detail
+    // surfaces have a separate request identity and load the original v3
+    // pixels only after the user opens a recipe.
+    _prefetchVisibleImages(imagePrefetchOrder);
 
     Widget recipeCard(RecipeCatalogSummary recipe, int displayIndex) {
       final resolvedTitle = recipe.resolveTitle(locale);
@@ -522,10 +538,31 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
         bundledRecipeImageAssets.containsKey(recipe.id)) {
       return null;
     }
-    return _recipeImages.putIfAbsent(
-      recipe.id,
-      () => _imageClient!.resolve(recipe.id, online: true),
-    );
+    return _recipeImages.resolve(recipe.id, _imageClient!);
+  }
+
+  Future<WellnessMediaCacheResult>? _detailImageResultFor(
+    RecipeCatalogSummary recipe,
+  ) {
+    if (!widget.remoteImageDeliveryEnabled ||
+        bundledRecipeImageAssets.containsKey(recipe.id) ||
+        _detailImageClient == null) {
+      return null;
+    }
+    return _recipeImages.resolveDetail(recipe.id, _detailImageClient!);
+  }
+
+  void _prefetchVisibleImages(Iterable<RecipeCatalogSummary> recipes) {
+    for (final recipe in recipes.take(8)) {
+      final future = _imageResultFor(recipe);
+      if (future == null) continue;
+      // The card may be below the first viewport even though it is part of the
+      // initial display order. Attach a sink so a prefetch failure cannot
+      // become an unhandled future while the card remains unbuilt.
+      unawaited(
+        future.then<void>((_) {}, onError: (Object _, StackTrace _) {}),
+      );
+    }
   }
 
   Future<void> _open(RecipeCatalogSummary summary) async {
@@ -559,7 +596,7 @@ class _RecipeLibraryPageState extends ConsumerState<RecipeLibraryPage> {
           }
           return _RecipeDetails(
             detail: snapshot.requireData,
-            imageResult: _imageResultFor(summary),
+            imageResult: _detailImageResultFor(summary),
           );
         },
       ),
@@ -646,6 +683,7 @@ class _RecipeDetails extends StatelessWidget {
                 recipe: detail.summary,
                 title: displayTitle.text,
                 imageResult: imageResult,
+                useOriginalDecodeSize: true,
               ),
             ),
           ),

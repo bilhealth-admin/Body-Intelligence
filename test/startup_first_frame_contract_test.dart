@@ -13,18 +13,10 @@ void main() {
     expect(mainBody, contains('runApp(const ProviderScope'));
     expect(mainBody, isNot(contains('BilPlayIntegrityService.instance')));
 
-    final readyIndex = source.indexOf('setState(() => ready = true);');
-    final postFrameIndex = source.indexOf(
-      'WidgetsBinding.instance.addPostFrameCallback',
-      readyIndex,
-    );
-    final integrityIndex = source.indexOf(
-      'BilPlayIntegrityService.instance.observe',
-      readyIndex,
-    );
-    expect(readyIndex, greaterThan(-1));
-    expect(postFrameIndex, greaterThan(readyIndex));
-    expect(integrityIndex, greaterThan(postFrameIndex));
+    // Integrity verdicts are request-bound and just-in-time. Startup may not
+    // request or claim a verdict, even asynchronously after the first frame.
+    expect(source, isNot(contains('BilPlayIntegrityService')));
+    expect(source, isNot(contains('session.bootstrap')));
   });
 
   test('cloud plugins start only after the first Flutter frame', () {

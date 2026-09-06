@@ -28,6 +28,11 @@ async function dispatch(request: Request): Promise<Response> {
 const smallestImage = recipeImageObjectsForContract().reduce((smallest, image) =>
   image.sizeBytes < smallest.sizeBytes ? image : smallest,
 );
+const cacheTestImage = recipeImageObjectsForContract()
+  .filter((image) => image !== smallestImage)
+  .reduce((smallest, image) =>
+    image.sizeBytes < smallest.sizeBytes ? image : smallest,
+  );
 
 describe("recipe image delivery manifest", () => {
   it("is an exact immutable 1500-object canonical allowlist", () => {
@@ -129,6 +134,30 @@ describe("recipe image Worker route", () => {
     );
     expect(conditionalHead.status).toBe(304);
     expect((await conditionalHead.arrayBuffer()).byteLength).toBe(0);
+  });
+
+  it("caches an exact full public image response at the edge", async () => {
+    const path = recipeImageDeliveryPath(cacheTestImage);
+    const cacheKey = incoming(path);
+    await caches.default.delete(cacheKey);
+    await env.RECIPES.put(
+      cacheTestImage.objectKey,
+      new Uint8Array(cacheTestImage.sizeBytes),
+      { httpMetadata: { contentType: cacheTestImage.mimeType } },
+    );
+
+    const miss = await dispatch(incoming(`${path}?ignored=cache-key-normalized`));
+    expect(miss.status).toBe(200);
+    expect(miss.headers.get("x-bil-edge-cache")).toBe("MISS");
+    expect((await miss.arrayBuffer()).byteLength).toBe(cacheTestImage.sizeBytes);
+
+    await env.RECIPES.delete(cacheTestImage.objectKey);
+    const hit = await dispatch(incoming(path));
+    expect(hit.status).toBe(200);
+    expect(hit.headers.get("x-bil-edge-cache")).toBe("HIT");
+    expect(hit.headers.get("x-bil-content-sha256")).toBe(cacheTestImage.sha256);
+    expect((await hit.arrayBuffer()).byteLength).toBe(cacheTestImage.sizeBytes);
+    await caches.default.delete(cacheKey);
   });
 
   it("fails closed when R2 metadata differs from the signed mapping", async () => {

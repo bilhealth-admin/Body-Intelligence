@@ -7,7 +7,7 @@ complete and the physical-device soak finishes.
 ## Installed Android release candidate
 
 - Package: `com.bilhealth.bodyintelligencelog`
-- Version: `1.0.0+5`
+- Version: `1.0.0+8`
 - Minimum / target SDK: 26 / 36
 - APK: `build/app/outputs/flutter-apk/app-release.apk`
 - APK SHA-256: `38477CCCF40B3D89EAA10C4DD0287E4BB13FF630882352817317C395816CF1D9`

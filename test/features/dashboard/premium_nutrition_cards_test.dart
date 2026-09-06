@@ -47,6 +47,8 @@ void main() {
               fiberGoal: 30,
               sodiumEvidenceValue: 800,
               sodiumGoal: 2300,
+              potassiumEvidenceValue: 1200,
+              potassiumGoal: 3500,
               nutrientDashboardPreset: 'Heart healthy',
               visibleSections: const {
                 DashboardSectionIds.calories,
@@ -90,9 +92,14 @@ void main() {
       Color(0xFF7656C9),
       Color(0xFF38A66B),
     ]);
-    expect(find.text('Saturated fat'), findsOneWidget);
+    expect(find.text('Potassium'), findsOneWidget);
     expect(find.text('Sodium'), findsOneWidget);
     expect(find.text('Fiber'), findsOneWidget);
+    expect(find.descendant(of: heart, matching: find.text('—')), findsNothing);
+    expect(
+      find.descendant(of: heart, matching: find.text('2300')),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('dashboard-premium-lock')), findsNothing);
   });
 

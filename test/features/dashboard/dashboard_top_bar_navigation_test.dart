@@ -122,7 +122,12 @@ void main() {
                 matching: find.text('BODY INTELLIGENCE LOG'),
               ),
             );
-            expect(brandText.style?.color, const Color(0xFF050505));
+            expect(
+              brandText.style?.color,
+              themeMode == ThemeMode.dark
+                  ? const Color(0xFFF7FAFC)
+                  : const Color(0xFF050505),
+            );
             expect(tester.takeException(), isNull);
             semantics.dispose();
           });

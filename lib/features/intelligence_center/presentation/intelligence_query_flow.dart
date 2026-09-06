@@ -9,7 +9,8 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     bool autoSpeakReply = false,
   }) async {
     final text = (textOverride ?? question.text).trim();
-    if (text.isEmpty || sending) return;
+    if (!conversationReady || text.isEmpty || sending) return;
+    if (addUserMessage) _beginConversationForUserAction();
     final localeCode = BilLocalePolicy.canonicalTag(
       Localizations.localeOf(context),
     );
@@ -74,6 +75,26 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       unawaited(_speakCoachText(acknowledgement, questionLocale));
     }
     try {
+      final pendingAction = _latestPendingGoalAction();
+      final pendingDecision = coachPendingActionDecision(text);
+      if (pendingAction != null &&
+          pendingDecision != CoachPendingActionDecision.none) {
+        if (pendingDecision == CoachPendingActionDecision.confirm) {
+          await _executeAction(
+            pendingAction,
+            confirmationAlreadyProvided: true,
+          );
+        } else {
+          await _retireDurableAction(pendingAction);
+          _appendToolReceipt(
+            tr(
+              'The pending goal change was cancelled. Your goal was not changed.',
+              'تم إلغاء تغيير الهدف المعلّق. لم يتغير هدفك.',
+            ),
+          );
+        }
+        return;
+      }
       final catalogAnswer = await catalogGrounding.answer(
         question: text,
         locale: questionLocale,
@@ -108,7 +129,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         final fastEngine = immediateEngine.isGreetingQuestion(text)
             ? IntelligenceCenterEngine(
                 localApi: ModelBackedLocalCoachApi(
-                  gateway: createLocalModelGateway(),
+                  gateway: ref.read(intelligenceCenterModelGatewayProvider),
                   context: CoachContextSnapshot.empty(),
                 ),
               )
@@ -132,7 +153,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
               inputChannel: inputChannel,
               conversation: conversation,
             )
-            .timeout(const Duration(seconds: 50));
+            .timeout(const Duration(seconds: 30));
       } else {
         // Both snapshots are independent. Starting both reads before awaiting
         // either removes a full local-database pass from perceived latency.
@@ -140,7 +161,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           try {
             return await ref
                 .read(intelligenceHealthContextProvider.future)
-                .timeout(const Duration(seconds: 12));
+                .timeout(const Duration(seconds: 8));
           } on Object {
             return null;
           }
@@ -149,7 +170,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           try {
             return await ref
                 .read(coachContextSnapshotProvider.future)
-                .timeout(const Duration(seconds: 12));
+                .timeout(const Duration(seconds: 8));
           } on Object {
             return CoachContextSnapshot.empty();
           }
@@ -159,7 +180,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         if (!mounted || generation != requestGeneration) return;
         final activeEngine = IntelligenceCenterEngine(
           localApi: ModelBackedLocalCoachApi(
-            gateway: createLocalModelGateway(),
+            gateway: ref.read(intelligenceCenterModelGatewayProvider),
             context: coachContext,
           ),
         );
@@ -185,7 +206,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
               inputChannel: inputChannel,
               conversation: conversation,
             )
-            .timeout(const Duration(seconds: 50));
+            .timeout(const Duration(seconds: 30));
       }
       if (!mounted || generation != requestGeneration) return;
       if (reply.serviceStatus == CoachServiceStatus.consentRequired) {
@@ -227,7 +248,35 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           hasVerifiedAiSubscription(
             ref.read(verifiedSubscriptionStateProvider).value,
           );
+      final availableActions = activeAiSubscription
+          ? reply.actions
+                .where(
+                  (action) =>
+                      action.type !=
+                      IntelligenceActionType.openAiCoachSubscription,
+                )
+                .toList(growable: false)
+          : reply.actions;
       final safeMessage = _presentationSafeMessage(reply.message);
+      final persistedActions = <String, IntelligenceMessageAction>{
+        for (final action in safeMessage.actionLinks)
+          if (action.isTrusted) '${action.type.name}:${action.id}': action,
+      };
+      final transientActions = <IntelligenceAction>[];
+      for (final action in availableActions) {
+        final persisted = IntelligenceMessageAction.fromAction(action);
+        if (persisted == null) {
+          transientActions.add(action);
+        } else {
+          persistedActions['${persisted.type.name}:${persisted.id}'] =
+              persisted;
+          if (action.type == IntelligenceActionType.updateGoal) {
+            // Present confirmation immediately, while retaining the bounded
+            // proposal as a message chip if the sheet is dismissed.
+            transientActions.add(action);
+          }
+        }
+      }
       final presented = safeMessage.copyWith(
         text: activeAiSubscription
             ? tr(
@@ -238,6 +287,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         modality: autoSpeakReply
             ? IntelligenceMessageModality.voice
             : IntelligenceMessageModality.text,
+        actionLinks: persistedActions.values.toList(growable: false),
       );
       final repeatedServiceNotice =
           reply.serviceStatus != CoachServiceStatus.ready &&
@@ -281,21 +331,15 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         await _speakCoachText(spokenReply, spokenLocale);
         await _resumeLiveCallIfNeeded(generation);
       }
-      final availableActions = activeAiSubscription
-          ? reply.actions
-                .where(
-                  (action) =>
-                      action.type !=
-                      IntelligenceActionType.openAiCoachSubscription,
-                )
-                .toList(growable: false)
-          : reply.actions;
-      if (availableActions.isNotEmpty && mounted) {
+      // Safe navigation/read actions remain as replayable chips. A validated,
+      // expiring goal proposal also remains until it succeeds or is cancelled;
+      // every other write and every destructive action stays transient.
+      if (transientActions.isNotEmpty && mounted) {
         await showModalBottomSheet<void>(
           context: context,
           showDragHandle: true,
           builder: (context) =>
-              _ActionSheet(actions: availableActions, onAction: _executeAction),
+              _ActionSheet(actions: transientActions, onAction: _executeAction),
         );
       }
     } on Object {
@@ -351,6 +395,18 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         }
       }
     }
+  }
+
+  IntelligenceAction? _latestPendingGoalAction() {
+    for (final message in messages.reversed) {
+      for (final action in message.actionLinks.reversed) {
+        if (action.type == IntelligenceActionType.updateGoal &&
+            action.isTrusted) {
+          return action.toAction();
+        }
+      }
+    }
+    return null;
   }
 
   void _cancelCurrentCoachRequest() {
@@ -411,8 +467,8 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
                   const SizedBox(height: 14),
                   Text(
                     tr(
-                      'Let BIL understand your full context?',
-                      'هل تسمح لـBIL بفهم سياقك الكامل؟',
+                      'Use your selected context with BIL?',
+                      'هل تسمح لـBIL باستخدام السياق الذي اخترته؟',
                     ),
                     textAlign: TextAlign.center,
                     style: Theme.of(sheetContext).textTheme.titleLarge
@@ -421,8 +477,8 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
                   const SizedBox(height: 9),
                   Text(
                     tr(
-                      'Only the bounded records needed for your question and the recognized text are sent to BIL’s Gemini service. Microphone audio stays with your device’s speech recognizer.',
-                      'تُرسل فقط السجلات المحدودة اللازمة لسؤالك والنص الذي تعرّف عليه الجهاز إلى خدمة Gemini التابعة لـBIL. يبقى صوت الميكروفون داخل خدمة التعرّف على الكلام في جهازك.',
+                      'Only relevant records from the categories you selected, recent turns needed for continuity, and the text you submit are sent through BIL’s secure gateway to Gemini. Raw microphone audio is not sent to BIL or Gemini; your device or platform speech service may process it under its settings.',
+                      'تُرسل عبر بوابة BIL الآمنة إلى Gemini فقط السجلات ذات الصلة من الفئات التي اخترتها، والرسائل الحديثة اللازمة لاستمرار المحادثة، والنص الذي ترسله. لا يُرسل صوت الميكروفون الخام إلى BIL أو Gemini، وقد تعالجه خدمة الكلام في الجهاز أو المنصة وفق إعداداتها.',
                     ),
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -505,4 +561,43 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       modality: message.modality,
     );
   }
+}
+
+enum CoachPendingActionDecision { none, confirm, cancel }
+
+@visibleForTesting
+CoachPendingActionDecision coachPendingActionDecision(String input) {
+  final normalized = input
+      .trim()
+      .toLowerCase()
+      .replaceAll(RegExp(r'[.!?؟،,]+$'), '')
+      .trim();
+  if (const <String>{
+    'confirm',
+    'confirmed',
+    'yes confirm',
+    'yes, confirm',
+    'proceed',
+    'تأكيد',
+    'تاكيد',
+    'نعم',
+    'نعم تأكيد',
+    'نعم تاكيد',
+    'موافق',
+  }.contains(normalized)) {
+    return CoachPendingActionDecision.confirm;
+  }
+  if (const <String>{
+    'cancel',
+    'cancel it',
+    'do not change it',
+    "don't change it",
+    'إلغاء',
+    'الغاء',
+    'لا تغيره',
+    'لا تغيّره',
+  }.contains(normalized)) {
+    return CoachPendingActionDecision.cancel;
+  }
+  return CoachPendingActionDecision.none;
 }

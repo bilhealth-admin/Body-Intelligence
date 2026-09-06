@@ -10,7 +10,10 @@ void main() {
 
     expect(
       service,
-      contains("static const oauthRedirectUri = 'bil://auth-callback';"),
+      contains(
+        "static const oauthRedirectUri = "
+        "'https://www.bilhealth.com/auth/callback';",
+      ),
     );
     expect(
       service,

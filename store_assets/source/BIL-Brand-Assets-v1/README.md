@@ -1,19 +1,18 @@
-# BIL Brand Assets v1
+# Retired BIL Brand Assets v1
 
-Original generated visual assets for **Body Intelligence Log (BIL)**.
+The owner explicitly rejected every image formerly stored in this directory on
+2026-09-06. The six raster files were removed from the working tree and must
+not be restored, shipped, uploaded to a store, or used as a source for new
+derivatives.
 
-## Files
+The historical archive remains recoverable from Git and from the pinned archive
+SHA-256 in `docs/release/BIL_EPIC15_CONTENT_RIGHTS.json`; this directory is a
+tombstone, not an approved asset source.
 
-- `01-bil-app-icon.png` — master square app icon.
-- `02-bil-splash.png` — portrait splash artwork for iPhone and Android.
-- `03-bil-horizontal-logo.png` — horizontal brand lockup.
-- `04-bil-onboarding-hero.png` — onboarding hero artwork.
-- `05-bil-store-feature-graphic.png` — landscape store promotional artwork.
-- `06-bil-free-plus-pro.png` — Free, Plus and Pro plans artwork.
+Current identity authority:
 
-## Production notes
-
-- Derive platform-specific sizes from the master assets; do not regenerate a different logo per size.
-- Validate iOS AppIcon opacity, Android adaptive-icon safe zones, splash cropping and text legibility before release.
-- Preserve these originals and export optimized derivatives into the Flutter project.
-- These images are original AI-generated assets created specifically for BIL. Keep this note in the content-rights ledger.
+- App icon: `assets/branding/bil_app_icon.png`, pinned by SHA-256 in the rights
+  ledger and release test.
+- Full wordmark: `BilFullWordmark` in
+  `lib/shared/widgets/bil_wordmark.dart`.
+- Native splash derivatives may use only the same full wordmark identity.

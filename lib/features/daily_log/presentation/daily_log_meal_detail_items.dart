@@ -78,6 +78,8 @@ class _DiaryFoodRow extends StatelessWidget {
     required this.onEdit,
     required this.onActions,
     this.showLoggedTime = false,
+    this.showFoodInsights = false,
+    this.useNetCarbs = false,
   });
 
   final MealItem item;
@@ -85,6 +87,8 @@ class _DiaryFoodRow extends StatelessWidget {
   final Future<void> Function(MealItem item, Food food) onEdit;
   final Future<void> Function(MealItem item, Food? food) onActions;
   final bool showLoggedTime;
+  final bool showFoodInsights;
+  final bool useNetCarbs;
 
   @override
   Widget build(BuildContext context) {
@@ -113,6 +117,20 @@ class _DiaryFoodRow extends StatelessWidget {
     final detail = showLoggedTime
         ? '$serving  ·  ${_mealListText(context, 'loggedAt')} $localTime'
         : serving;
+    final hasFiberEvidence = NutrientEvidenceMask.contains(
+      item.nutrientEvidenceMask,
+      TrackedNutrient.fiber,
+    );
+    final displayedCarbs = useNetCarbs
+        ? hasFiberEvidence
+              ? (item.carbs - item.fiber).clamp(0, double.infinity).toDouble()
+              : null
+        : item.carbs;
+    final carbLabel = useNetCarbs ? 'NC' : 'C';
+    final insight =
+        '$carbLabel ${displayedCarbs == null ? '—' : '${formatDiaryMacroGrams(displayedCarbs)} g'}  '
+        'P ${formatDiaryMacroGrams(item.protein)} g  '
+        'F ${formatDiaryMacroGrams(item.fats)} g';
     return Semantics(
       button: food != null && food?.deletedAt == null,
       hint: _mealListText(context, 'itemActions'),
@@ -152,17 +170,51 @@ class _DiaryFoodRow extends StatelessWidget {
                         color: scheme.onSurfaceVariant,
                       ),
                     ),
+                    if (showFoodInsights) ...[
+                      const SizedBox(height: 3),
+                      KeyedSubtree(
+                        key: Key('daily-food-insights-${item.id}'),
+                        child: Text(
+                          insight,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textDirection: TextDirection.ltr,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: scheme.primary,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
               const SizedBox(width: 12),
-              Text(
-                item.calories.round().toString(),
-                textDirection: TextDirection.ltr,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    item.calories.round().toString(),
+                    textDirection: TextDirection.ltr,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  IconButton(
+                    key: Key('daily-food-actions-${item.id}'),
+                    tooltip: _mealListText(context, 'moreActions'),
+                    visualDensity: VisualDensity.compact,
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
+                    padding: EdgeInsets.zero,
+                    onPressed: () => onActions(item, food),
+                    icon: const Icon(Icons.more_horiz_rounded, size: 21),
+                  ),
+                ],
               ),
             ],
           ),
@@ -211,27 +263,13 @@ class _DiaryEmptyMeals extends StatelessWidget {
   }
 }
 
-({
-  double protein,
-  double carbs,
-  double fat,
-  double proteinPercent,
-  double carbsPercent,
-  double fatPercent,
-})
-_macroSummary(List<MealItem> items) {
+({double protein, double carbs, double fat}) _macroSummary(
+  List<MealItem> items,
+) {
   final protein = items.fold<double>(0, (sum, item) => sum + item.protein);
   final carbs = items.fold<double>(0, (sum, item) => sum + item.carbs);
   final fat = items.fold<double>(0, (sum, item) => sum + item.fats);
-  final energy = protein * 4 + carbs * 4 + fat * 9;
-  return (
-    protein: protein,
-    carbs: carbs,
-    fat: fat,
-    proteinPercent: energy > 0 ? protein * 400 / energy : 0,
-    carbsPercent: energy > 0 ? carbs * 400 / energy : 0,
-    fatPercent: energy > 0 ? fat * 900 / energy : 0,
-  );
+  return (protein: protein, carbs: carbs, fat: fat);
 }
 
 String _mealListText(BuildContext context, String key) {
@@ -246,6 +284,7 @@ const _mealListCopy = <String, Map<String, String>>{
     'loggedAt': 'Logged at',
     'mealGoal': 'Meal goal',
     'itemActions': 'Tap to edit. Touch and hold for more actions.',
+    'moreActions': 'More actions',
     'logFood': 'Plan meal',
     'logMore': 'Open meal',
     'foodsInMeal': 'Foods in this meal',
@@ -256,6 +295,7 @@ const _mealListCopy = <String, Map<String, String>>{
     'loggedAt': 'سُجّل في',
     'mealGoal': 'هدف الوجبة',
     'itemActions': 'اضغط للتعديل، واضغط مطولًا للمزيد من الإجراءات.',
+    'moreActions': 'مزيد من الإجراءات',
     'logFood': 'خطّط للوجبة',
     'logMore': 'افتح الوجبة',
     'foodsInMeal': 'أطعمة هذه الوجبة',

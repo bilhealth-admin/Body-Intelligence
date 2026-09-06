@@ -342,9 +342,9 @@ class IntelligenceCenterEngine {
           'It comes from the explicit protein goal saved in Nutrition Goals.',
           'مصدره هدف البروتين الصريح المحفوظ في أهداف التغذية.',
         ),
-        'scheduled_percentage_goal' => tr(
-          "It is derived from today's scheduled calories and protein percentage.",
-          'وهو مشتق من سعرات اليوم المجدولة ونسبة البروتين المحددة لها.',
+        'scheduled_gram_goal' => tr(
+          "It comes from today's scheduled protein goal in grams.",
+          'مصدره هدف بروتين اليوم المجدول بالغرام.',
         ),
         'saved_percentage_goal' => tr(
           'It is derived from your saved calorie and protein-percentage goals.',

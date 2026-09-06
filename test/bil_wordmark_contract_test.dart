@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets(
-    'canonical full wordmark stays black on its light identity surface',
+    'canonical full wordmark honors color without adding a card surface',
     (tester) async {
       final semantics = tester.ensureSemantics();
       await tester.pumpWidget(
@@ -24,13 +24,40 @@ void main() {
       expect(find.text('BODY INTELLIGENCE LOG'), findsOneWidget);
       expect(
         tester.widget<Text>(find.text('BODY INTELLIGENCE LOG')).style?.color,
-        const Color(0xFF050505),
+        Colors.blue,
       );
-      final surface = tester.widget<Container>(
-        find.descendant(of: mark, matching: find.byType(Container)).first,
+      expect(
+        find.descendant(of: mark, matching: find.byType(Container)),
+        findsNothing,
       );
-      expect((surface.decoration as BoxDecoration).color, Colors.white);
       semantics.dispose();
     },
   );
+
+  testWidgets('default wordmark follows light and dark theme contrast', (
+    tester,
+  ) async {
+    Future<Color?> render(Brightness brightness) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData.light(),
+          darkTheme: ThemeData.dark(),
+          themeMode: brightness == Brightness.dark
+              ? ThemeMode.dark
+              : ThemeMode.light,
+          home: Scaffold(
+            body: BilFullWordmark(key: ValueKey<Brightness>(brightness)),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return tester
+          .widget<Text>(find.text('BODY INTELLIGENCE LOG'))
+          .style
+          ?.color;
+    }
+
+    expect(await render(Brightness.light), const Color(0xFF050505));
+    expect(await render(Brightness.dark), const Color(0xFFF7FAFC));
+  });
 }

@@ -15,7 +15,9 @@ function Invoke-DbQuery([string]$Sql) {
   $old = $ErrorActionPreference
   $ErrorActionPreference = 'Continue'
   try {
-    $raw = (& npx --yes supabase@latest db query --project-ref $ProjectRef $Sql 2>$null) -join "`n"
+    # Pipe SQL over stdin so PowerShell cannot split a query containing spaces
+    # into multiple native-process arguments on Windows.
+    $raw = ($Sql | & npx --yes supabase@latest db query --linked --project-ref $ProjectRef 2>$null) -join "`n"
     $code = $LASTEXITCODE
   }
   finally {

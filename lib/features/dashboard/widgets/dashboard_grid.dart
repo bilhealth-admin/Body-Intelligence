@@ -59,7 +59,15 @@ class DashboardGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
     String tr(String en, String ar) => dashboardFiveLocaleText(en, ar);
-    String localized(String value) => AppLocalizations.of(context).text(value);
+    String localized(String value) {
+      // Some evidence engines already return reviewed Arabic nutrient labels.
+      // Feeding those labels back into the English-key runtime translator
+      // produces a false "missing translation" warning and can expose the
+      // fallback path. Preserve already-localized Arabic copy as-is.
+      if (arabic && RegExp(r'[\u0600-\u06FF]').hasMatch(value)) return value;
+      return AppLocalizations.of(context).text(value);
+    }
+
     String localizedList(List<String> values) =>
         values.map(localized).join(' · ');
     final profileAsync = ref.watch(userProfileProvider);
@@ -201,21 +209,11 @@ class DashboardGrid extends ConsumerWidget {
         NutrientDashboardEvidence.total(nutrientSamples, nutrient).value;
     final persistedSodiumGoal = nutrientGoals[DashboardNutrientGoalIds.sodium];
     final persistedFiberGoal = nutrientGoals[DashboardNutrientGoalIds.fiber];
+    final persistedPotassiumGoal =
+        nutrientGoals[DashboardNutrientGoalIds.potassium];
     final carbohydrates = todayMealItems.fold<double>(
       0,
       (sum, item) => sum + item.carbs,
-    );
-    final dashboardFiber = todayMealItems.fold<double>(
-      0,
-      (sum, item) => sum + item.fiber,
-    );
-    final dashboardSugar = todayMealItems.fold<double>(
-      0,
-      (sum, item) => sum + item.sugar,
-    );
-    final dashboardSodium = todayMealItems.fold<double>(
-      0,
-      (sum, item) => sum + item.sodium,
     );
     final waterRows = waterAsync.value ?? const [];
     final allMeals = allMealsAsync.value ?? const [];
@@ -258,7 +256,11 @@ class DashboardGrid extends ConsumerWidget {
     final savedMacroGramGoals = ref.watch(dashboardMacroGramGoalsProvider);
     final macroGramGoals = scheduledTarget == null
         ? savedMacroGramGoals
-        : const MacroGramGoals();
+        : MacroGramGoals(
+            carbohydrates: scheduledTarget.carbsGrams,
+            protein: scheduledTarget.proteinGrams,
+            fat: scheduledTarget.fatGrams,
+          );
     final savedPercentageGoals = ref.watch(
       dashboardPercentageNutritionGoalsProvider,
     );
@@ -619,17 +621,16 @@ class DashboardGrid extends ConsumerWidget {
             carbohydratesGoal: exerciseAdjustedTargets.carbohydrateGoal.round(),
             fatConsumed: fats.round(),
             fatGoal: exerciseAdjustedTargets.fatGoal.round(),
-            fiberConsumed: dashboardFiber.round(),
-            sugarConsumed: dashboardSugar.round(),
-            sodiumConsumed: dashboardSodium.round(),
             carbohydratesEvidenceValue: evidenced(
               TrackedNutrient.carbohydrates,
             ),
             fiberEvidenceValue: evidenced(TrackedNutrient.fiber),
             sugarEvidenceValue: evidenced(TrackedNutrient.sugar),
             sodiumEvidenceValue: evidenced(TrackedNutrient.sodium),
+            potassiumEvidenceValue: evidenced(TrackedNutrient.potassium),
             fiberGoal: persistedFiberGoal?.round(),
             sodiumGoal: persistedSodiumGoal?.round(),
+            potassiumGoal: persistedPotassiumGoal?.round(),
             nutrientDashboardPreset:
                 nutrientDashboardPreset ?? 'Calories and macros',
             weightTrendValues: weights

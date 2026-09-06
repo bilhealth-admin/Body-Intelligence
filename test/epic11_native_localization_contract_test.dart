@@ -37,6 +37,11 @@ void main() {
     'NSMicrophoneUsageDescription',
     'NSSpeechRecognitionUsageDescription',
   };
+  const permissionKeysRequiringLocaleCopy = <String>{
+    'NSHealthShareUsageDescription',
+    'NSBluetoothAlwaysUsageDescription',
+    'NSBluetoothPeripheralUsageDescription',
+  };
 
   test('iOS permission copy is complete and bundled in all 25 locales', () {
     final project = File(
@@ -51,6 +56,10 @@ void main() {
     final english = File(
       'ios/Runner/en.lproj/InfoPlist.strings',
     ).readAsStringSync();
+    final englishPermissionValues = <String, String>{
+      for (final key in permissionKeysRequiringLocaleCopy)
+        key: _infoPlistValue(english, key),
+    };
     for (final locale in iosLocales) {
       final file = File('ios/Runner/$locale.lproj/InfoPlist.strings');
       expect(file.existsSync(), isTrue, reason: locale);
@@ -59,6 +68,24 @@ void main() {
       for (final key in iosKeys) {
         expect(copy, contains('"$key"'), reason: '$locale:$key');
       }
+      final permissionValues = <String, String>{
+        for (final key in permissionKeysRequiringLocaleCopy)
+          key: _infoPlistValue(copy, key),
+      };
+      if (locale != 'en') {
+        for (final key in permissionKeysRequiringLocaleCopy) {
+          expect(
+            permissionValues[key],
+            isNot(equals(englishPermissionValues[key])),
+            reason: '$locale:$key must not match the English permission copy',
+          );
+        }
+      }
+      expect(
+        permissionValues['NSBluetoothAlwaysUsageDescription'],
+        permissionValues['NSBluetoothPeripheralUsageDescription'],
+        reason: '$locale Bluetooth permission descriptions must match',
+      );
       final coachName = switch (locale) {
         'ar' => 'مدرب BIL الذكي',
         'fa' => 'مربی هوشمند BIL',
@@ -169,4 +196,13 @@ void main() {
       contains('android:label="@string/app_name"'),
     );
   });
+}
+
+String _infoPlistValue(String copy, String key) {
+  final match = RegExp(
+    '^"${RegExp.escape(key)}" = "(.*)";\\r?\$',
+    multiLine: true,
+  ).firstMatch(copy);
+  expect(match, isNotNull, reason: 'Missing InfoPlist value for $key');
+  return match!.group(1)!;
 }

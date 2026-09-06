@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
 import '../domain/community_models.dart';
@@ -26,8 +27,26 @@ class CommunityHubPage extends StatefulWidget {
 }
 
 class _CommunityHubPageState extends State<CommunityHubPage> {
-  CommunityRepository? get _repository {
-    if (widget.repository != null) return widget.repository;
+  CommunityRepository? _repository;
+  Future<bool>? _moderatorAccess;
+
+  @override
+  void initState() {
+    super.initState();
+    _repository = widget.repository ?? _productionRepository();
+    _moderatorAccess = _repository?.isCommunityModerator();
+  }
+
+  @override
+  void didUpdateWidget(covariant CommunityHubPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository)) {
+      _repository = widget.repository ?? _productionRepository();
+      _moderatorAccess = _repository?.isCommunityModerator();
+    }
+  }
+
+  CommunityRepository? _productionRepository() {
     if (!AppEnvironment.cloudConfigured) return null;
     try {
       final supabase = Supabase.instance;
@@ -61,53 +80,58 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
               ),
               icon: const Icon(Icons.notifications_none_rounded),
             ),
-            PopupMenuButton<String>(
-              enabled: repository != null,
-              position: PopupMenuPosition.under,
-              tooltip: communityText(
-                context,
-                'Community actions',
-                'إجراءات المجتمع',
+            FutureBuilder<bool>(
+              future: _moderatorAccess,
+              builder: (context, moderatorSnapshot) => PopupMenuButton<String>(
+                enabled: repository != null,
+                position: PopupMenuPosition.under,
+                tooltip: communityText(
+                  context,
+                  'Community actions',
+                  'إجراءات المجتمع',
+                ),
+                icon: const Icon(Icons.more_vert_rounded),
+                onSelected: (route) => context.push(route),
+                itemBuilder: (context) => [
+                  if (moderatorSnapshot.data == true)
+                    _communityAction(
+                      context,
+                      '/community/moderation',
+                      'Community moderation',
+                      'مراجعة المجتمع',
+                    ),
+                  _communityAction(
+                    context,
+                    '/community/safety',
+                    'Safety and policy',
+                    'الأمان والسياسة',
+                  ),
+                  _communityAction(
+                    context,
+                    '/community/profile',
+                    'Community profile',
+                    'ملف المجتمع',
+                  ),
+                  _communityAction(
+                    context,
+                    '/community/connections',
+                    'Friends and requests',
+                    'الأصدقاء والطلبات',
+                  ),
+                  _communityAction(
+                    context,
+                    '/community/food-review',
+                    'Review foods',
+                    'مراجعة الأغذية',
+                  ),
+                  _communityAction(
+                    context,
+                    '/community/people',
+                    'Find people',
+                    'البحث عن أصدقاء',
+                  ),
+                ],
               ),
-              icon: const Icon(Icons.more_vert_rounded),
-              onSelected: (route) => context.push(route),
-              itemBuilder: (context) => [
-                _communityAction(
-                  context,
-                  '/community/safety',
-                  Icons.shield_outlined,
-                  'Safety and policy',
-                  'الأمان والسياسة',
-                ),
-                _communityAction(
-                  context,
-                  '/community/profile',
-                  Icons.account_circle_outlined,
-                  'Community profile',
-                  'ملف المجتمع',
-                ),
-                _communityAction(
-                  context,
-                  '/community/connections',
-                  Icons.group_outlined,
-                  'Friends and requests',
-                  'الأصدقاء والطلبات',
-                ),
-                _communityAction(
-                  context,
-                  '/community/food-review',
-                  Icons.fact_check_outlined,
-                  'Review foods',
-                  'مراجعة الأغذية',
-                ),
-                _communityAction(
-                  context,
-                  '/community/people',
-                  Icons.person_search_rounded,
-                  'Find people',
-                  'البحث عن أصدقاء',
-                ),
-              ],
             ),
           ],
           title: Text(communityText(context, 'BIL Community', 'مجتمع BIL')),
@@ -142,14 +166,18 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
 PopupMenuItem<String> _communityAction(
   BuildContext context,
   String route,
-  IconData icon,
   String english,
   String arabic,
 ) => PopupMenuItem<String>(
   value: route,
   child: Row(
     children: [
-      Icon(icon, color: Theme.of(context).colorScheme.primary),
+      BilSemanticIconBadge(
+        kind: BilSemanticIcons.kindForRoute(route)!,
+        size: 34,
+        iconSize: 19,
+        shape: BoxShape.rectangle,
+      ),
       const SizedBox(width: 12),
       Expanded(child: Text(communityText(context, english, arabic))),
     ],

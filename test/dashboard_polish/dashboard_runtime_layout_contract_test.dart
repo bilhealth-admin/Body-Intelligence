@@ -12,6 +12,9 @@ void main() {
     final benchmark = File(
       'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
     ).readAsStringSync();
+    final current = File(
+      'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
+    ).readAsStringSync();
     final shell = File(
       'lib/features/dashboard/widgets/dashboard_twin_deck_shell.dart',
     ).readAsStringSync();
@@ -26,9 +29,11 @@ void main() {
     expect(health, contains('SizedBox.square'));
     expect(health, contains("Key('bil-live-health-watch')"));
     expect(benchmark, isNot(contains('IntrinsicHeight(')));
-    expect(benchmark, contains('height: twinHeight'));
-    expect(benchmark, contains("Key('dashboard-summary-and-bio-rail')"));
-    expect(benchmark, contains('BilPremiumResponsiveLayout.twinBaseHeight('));
+    expect(current, contains('height: height'));
+    expect(current, contains("Key('dashboard-personal-health-ai-slot')"));
+    expect(current, contains("Key('dashboard-mobile-summary-card')"));
+    expect(current, contains('BilPremiumResponsiveLayout.twinBaseHeight('));
+    expect(benchmark, contains('BoxConstraints(maxWidth: 840)'));
     expect(shell, contains('.clamp(0.0, constraints.maxHeight)'));
     expect(shell, contains('height: deckHeight'));
     expect(grid, isNot(contains('DashboardAnalyticsCenter(')));

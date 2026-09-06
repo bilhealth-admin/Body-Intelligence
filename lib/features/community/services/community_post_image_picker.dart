@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 
+import '../../../app/services/recoverable_image_picker.dart';
+
 const communityPostImageMaxBytes = 5 * 1024 * 1024;
 const communityPostImageMaxDimension = 8192;
 const communityPostImageMaxPixels = 40000000;
@@ -43,14 +45,21 @@ abstract interface class CommunityPostImagePickerContract {
 }
 
 class CommunityPostImagePicker implements CommunityPostImagePickerContract {
-  CommunityPostImagePicker({ImagePicker? picker})
-    : _picker = picker ?? ImagePicker();
+  CommunityPostImagePicker({
+    ImagePicker? picker,
+    BilRecoverableImagePicker? recoverablePicker,
+  }) : _picker =
+           recoverablePicker ??
+           (picker == null
+               ? BilRecoverableImagePicker.instance
+               : BilRecoverableImagePicker(picker: picker));
 
-  final ImagePicker _picker;
+  final BilRecoverableImagePicker _picker;
 
   @override
   Future<CommunityPostImageDraft?> pick() async {
     final file = await _picker.pickImage(
+      purpose: BilImagePickerPurpose.communityPost,
       source: ImageSource.gallery,
       requestFullMetadata: false,
     );

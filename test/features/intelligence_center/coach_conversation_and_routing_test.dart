@@ -1,13 +1,156 @@
+import 'dart:io';
+
+import 'package:body_intelligence_log/app/services/runtime_permission_policy.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/intelligence_action.dart';
+import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/local_coach_api.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_intent_normalizer.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/local_coach_command_parser.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/local_model_gateway.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/intelligence_center_engine.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('typed confirmation resolves only an exact pending-action decision', () {
+    expect(
+      coachPendingActionDecision('تأكيد'),
+      CoachPendingActionDecision.confirm,
+    );
+    expect(
+      coachPendingActionDecision('نعم؟'),
+      CoachPendingActionDecision.confirm,
+    );
+    expect(
+      coachPendingActionDecision('cancel it'),
+      CoachPendingActionDecision.cancel,
+    );
+    expect(
+      coachPendingActionDecision('نعم اشرح لي الخطة'),
+      CoachPendingActionDecision.none,
+    );
+  });
+
+  test('iOS voice permission recovery identifies the exact permission', () {
+    expect(
+      coachRuntimePermissionSequence(
+        capability: BilRuntimeCapability.microphone,
+        includeSpeechRecognition: true,
+        platform: TargetPlatform.iOS,
+      ),
+      const [
+        BilRuntimeCapability.microphone,
+        BilRuntimeCapability.speechRecognition,
+      ],
+    );
+    expect(
+      coachRuntimePermissionSequence(
+        capability: BilRuntimeCapability.microphone,
+        includeSpeechRecognition: true,
+        platform: TargetPlatform.android,
+      ),
+      const [BilRuntimeCapability.microphone],
+    );
+
+    final speech = coachRuntimePermissionPresentation(
+      BilRuntimeCapability.speechRecognition,
+    );
+    expect(speech.englishName, 'speech recognition');
+    expect(speech.arabicName, 'التعرف على الكلام');
+    expect(speech.englishRationale, contains('review the text'));
+    expect(speech.englishRationale, isNot(contains('camera')));
+  });
+
+  test('local and cloud prompts publish the same goal argument contract', () {
+    final localPrompt = File(
+      'lib/features/intelligence_center/services/local_model_gateway_io.dart',
+    ).readAsStringSync();
+    final cloudPrompt = File(
+      'supabase/functions/ai-coach/server.ts',
+    ).readAsStringSync();
+
+    for (final source in [localPrompt, cloudPrompt]) {
+      expect(
+        source,
+        contains(
+          'update_goal {"targetWeightKg":number,"targetDate"?:"YYYY-MM-DD"}',
+        ),
+      );
+      expect(source, contains('because BIL presents the confirmation UI'));
+    }
+    expect(cloudPrompt, contains(r'${toolArgumentContract} ${systemCore}'));
+  });
+
+  test('stale conversation saves cannot replace a selected chat', () {
+    expect(
+      coachConversationSaveIsCurrent(
+        saveEpoch: 3,
+        currentEpoch: 4,
+        saveConversationId: 'old-chat',
+        activeConversationId: 'new-chat',
+      ),
+      isFalse,
+    );
+    expect(
+      coachConversationSaveIsCurrent(
+        saveEpoch: 4,
+        currentEpoch: 4,
+        saveConversationId: 'old-chat',
+        activeConversationId: 'new-chat',
+      ),
+      isFalse,
+    );
+    expect(
+      coachConversationSaveIsCurrent(
+        saveEpoch: 4,
+        currentEpoch: 4,
+        saveConversationId: 'new-chat',
+        activeConversationId: 'new-chat',
+      ),
+      isTrue,
+    );
+  });
+
+  test(
+    'conversation history updates a stable chat instead of duplicating it',
+    () {
+      final history = <Map<String, Object?>>[
+        {
+          'id': 'conversation-1',
+          'title': 'Original title',
+          'createdAt': '2026-09-01T10:00:00.000Z',
+          'messages': const <Object?>[
+            {'role': 'user', 'text': 'Old turn'},
+          ],
+        },
+        {
+          'id': 'conversation-2',
+          'title': 'Other chat',
+          'createdAt': '2026-09-02T10:00:00.000Z',
+          'messages': const <Object?>[],
+        },
+      ];
+
+      final updated = upsertCoachConversationHistory(
+        history: history,
+        id: 'conversation-1',
+        title: 'Updated title',
+        createdAt: '2026-09-04T10:00:00.000Z',
+        messages: const <Object?>[
+          {'role': 'user', 'text': 'Old turn'},
+          {'role': 'bil', 'text': 'New reply'},
+        ],
+      );
+
+      expect(updated, hasLength(2));
+      expect(updated.first['id'], 'conversation-1');
+      expect(updated.first['title'], 'Updated title');
+      expect(updated.first['createdAt'], '2026-09-01T10:00:00.000Z');
+      expect(updated.first['messages'], hasLength(2));
+    },
+  );
+
   test(
     'only exact AI credit exhaustion maps to the purchase-required state',
     () {
@@ -49,6 +192,29 @@ void main() {
     expect(parser.parse('Open workouts', locale: 'en'), isNotEmpty);
   });
 
+  test('local target-goal commands are explicit, bounded, and confirmed', () {
+    const parser = LocalCoachCommandParser();
+
+    final english = parser.parse('Set my target weight to 82 kg', locale: 'en');
+    expect(english, hasLength(1));
+    expect(english.single.type, IntelligenceActionType.updateGoal);
+    expect(english.single.requiresConfirmation, isTrue);
+    expect(english.single.payload['targetWeightKg'], 82);
+
+    final arabic = parser.parse('اجعل هدفي ٧٨ كيلو', locale: 'ar');
+    expect(arabic.single.type, IntelligenceActionType.updateGoal);
+    expect(arabic.single.payload['targetWeightKg'], 78);
+
+    expect(
+      parser.parse('Set my target weight to 19 kg', locale: 'en'),
+      isEmpty,
+    );
+    expect(
+      parser.parse('Set my target weight to 501 kg', locale: 'en'),
+      isEmpty,
+    );
+  });
+
   test(
     'model receives bounded multi-turn conversation and metadata returns',
     () async {
@@ -82,6 +248,29 @@ void main() {
       expect(result.confidence, .9);
       expect(result.evidence, ['canonicalIntelligence.plateauRisk']);
       expect(result.responseId, 'coach-correlated-request-01');
+    },
+  );
+
+  test(
+    'model goal tool accepts the exact targetWeightKg argument contract',
+    () async {
+      final result =
+          await ModelBackedLocalCoachApi(
+            gateway: const _GoalActionGateway(),
+            context: CoachContextSnapshot.empty(),
+          ).understand(
+            const LocalCoachRequest(
+              // Keep this follow-up free of a number so the model-selected action,
+              // rather than the deterministic command parser, is under test.
+              text: 'Yes, apply the goal we just discussed',
+              locale: 'en',
+            ),
+          );
+
+      expect(result.actions, hasLength(1));
+      expect(result.actions.single.type, IntelligenceActionType.updateGoal);
+      expect(result.actions.single.payload, {'targetWeightKg': 79});
+      expect(result.actions.single.requiresConfirmation, isTrue);
     },
   );
 
@@ -225,6 +414,28 @@ class _RecordingGateway implements LocalModelGateway {
       ),
     );
   }
+}
+
+class _GoalActionGateway implements LocalModelGateway {
+  const _GoalActionGateway();
+
+  @override
+  Future<LocalModelResult> answer({
+    required String question,
+    required String locale,
+    required CoachContextSnapshot context,
+    bool languageDetected = false,
+    List<CoachConversationTurn> conversation = const [],
+  }) async => const LocalModelResult.answer(
+    LocalModelAnswer(
+      text: 'I can update that after your in-app confirmation.',
+      action: {
+        'name': 'update_goal',
+        'arguments': {'targetWeightKg': 79},
+      },
+      processedOnDevice: false,
+    ),
+  );
 }
 
 class _CreditsRequiredApi implements LocalCoachApi {

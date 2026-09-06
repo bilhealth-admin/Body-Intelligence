@@ -83,6 +83,11 @@ void main() {
       expect(diary, contains('widget.initialAction != action'));
       expect(diary, contains('WidgetsBinding.instance.addPostFrameCallback('));
       expect(diary, contains('(_) => _applyInitialAction(),'));
+      expect(diary, contains("path: '/daily-log'"));
+      expect(diary, contains("'barcode',"));
+      expect(diary, contains("'voice',"));
+      expect(diary, contains("'photo',"));
+      expect(diary, contains('context.go(cleanLocation)'));
     },
   );
 

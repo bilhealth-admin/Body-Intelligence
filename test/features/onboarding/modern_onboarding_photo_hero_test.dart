@@ -38,9 +38,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('shows the complete photo without a card or tint frame', (
-    tester,
-  ) async {
+  testWidgets('fills the hero without a card or tint frame', (tester) async {
     await pumpScaffold(tester);
 
     final photo = find.byKey(const Key('photo'));
@@ -50,7 +48,7 @@ void main() {
     );
     final image = tester.widget<Image>(imageFinder);
 
-    expect(image.fit, BoxFit.contain);
+    expect(image.fit, BoxFit.cover);
     expect(tester.getSize(photo).height, 120);
     expect(
       find.descendant(of: photo, matching: find.byType(DecoratedBox)),
@@ -78,7 +76,7 @@ void main() {
   testWidgets('remains compact at accessibility text scale', (tester) async {
     await pumpScaffold(tester, textScale: 2);
 
-    expect(tester.getSize(find.byKey(const Key('photo'))).height, 80);
+    expect(tester.getSize(find.byKey(const Key('photo'))).height, 112);
     expect(tester.takeException(), isNull);
   });
 }

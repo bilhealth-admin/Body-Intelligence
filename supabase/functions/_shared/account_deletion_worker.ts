@@ -1,6 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 import { deleteBilUserStorage } from "./account_deletion_storage.ts";
+import {
+  type AppleTokenRpcClient,
+  revokeAppleCredentialForDeletion,
+} from "./apple_sign_in_token_lifecycle.ts";
 
 type DeletionRequest = { id: string; user_id: string };
 
@@ -107,6 +111,22 @@ async function processRequest(
   if (!claimed) return { status: "skipped" as const, removed: 0 };
 
   let removed = 0;
+  try {
+    // Apple requires the provider grant to be revoked while its refresh token
+    // is still available. Legacy/non-Apple accounts have no custody row and
+    // continue through the same storage-first deletion path.
+    await revokeAppleCredentialForDeletion(
+      client as unknown as AppleTokenRpcClient,
+      claimed.user_id,
+    );
+  } catch (_error) {
+    await resetRequest(client, claimed.id, "apple_token_revocation_failed");
+    return {
+      status: "failed" as const,
+      failure: "apple_token_revocation_failed",
+    };
+  }
+
   try {
     // Supabase requires Storage API deletion before Auth deletion. Direct SQL
     // deletion of storage.objects would orphan the underlying object bytes.

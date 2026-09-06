@@ -22,21 +22,28 @@ void main() {
     expect(BilPremiumResponsiveLayout.pairsDaySections(1400), isTrue);
   });
 
-  test('dashboard delegates responsive decisions to one policy', () {
+  test('dashboard keeps one complete adaptive tree at every width', () {
     final source = File(
       'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
     ).readAsStringSync();
+    final current = File(
+      'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
+    ).readAsStringSync();
 
     for (final contract in <String>[
-      'BilPremiumResponsiveLayout.isPhone(',
-      'BilPremiumResponsiveLayout.sectionGap(',
-      'BilPremiumResponsiveLayout.twinBaseHeight(',
-      'BilPremiumResponsiveLayout.usesSplitHero(',
-      'BilPremiumResponsiveLayout.pairsDaySections(',
+      "Key('dashboard-unified-adaptive-layout')",
+      "Key('dashboard-current-content-rail')",
+      'constraints: const BoxConstraints(maxWidth: 840)',
     ]) {
       expect(source, contains(contract), reason: contract);
     }
 
+    expect(current, contains('BilPremiumResponsiveLayout.twinBaseHeight('));
+    expect(current, contains("Key('dashboard-ai-coach-slot')"));
+    expect(current, contains("Key('dashboard-daily-intelligence-slot')"));
+    expect(current, contains("Key('dashboard-personal-health-ai-slot')"));
+    expect(current, contains("Key('dashboard-mobile-summary-card')"));
+    expect(source, isNot(contains('if (constraints.maxWidth >= 600)')));
     expect(source, isNot(contains('constraints.maxWidth < 1180')));
     expect(source, isNot(contains('constraints.maxWidth >= 1400')));
   });

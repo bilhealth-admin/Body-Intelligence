@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
+import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_admin_notifications.dart';
+import 'package:body_intelligence_log/features/admin/presentation/admin_notification_presets.dart';
 import 'package:body_intelligence_log/features/admin/presentation/ai_coach_admin_page.dart';
 import 'package:body_intelligence_log/features/admin/services/ai_coach_admin_service.dart';
 import 'package:body_intelligence_log/features/notifications/presentation/ai_coach_reset_notice_coordinator.dart';
@@ -12,6 +14,59 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('catalog exposes ten reviewed presets plus one blank custom choice', () {
+    final ids = <String>{};
+    final englishBodies = <String, String>{
+      for (final preset in AdminNotificationPresetCatalog.ready(
+        const Locale('en'),
+      ))
+        preset.id: preset.body,
+    };
+    for (final locale in AppLocalizations.supportedLocales) {
+      final presets = AdminNotificationPresetCatalog.ready(locale);
+      expect(presets, hasLength(AdminNotificationPresetCatalog.readyCount));
+      expect(presets.map((preset) => preset.id).toSet(), hasLength(10));
+      expect(presets.where((preset) => preset.serverLocalized), hasLength(2));
+      for (final preset in presets) {
+        expect(preset.title.trim(), isNotEmpty);
+        expect(preset.body.trim(), isNotEmpty);
+        expect(preset.body.characters.length, lessThanOrEqualTo(180));
+        if (locale.languageCode != 'en') {
+          expect(preset.body, isNot(englishBodies[preset.id]));
+        }
+        ids.add(preset.id);
+      }
+
+      final blank = AdminNotificationPresetCatalog.blankCustom(locale);
+      expect(blank.id, 'custom');
+      expect(blank.kind, AiCoachAdminNotificationKind.custom);
+      expect(blank.serverLocalized, isFalse);
+    }
+    expect(ids, hasLength(10));
+    expect(ids, isNot(contains('custom')));
+    expect(englishBodies.values.toSet(), hasLength(10));
+  });
+
+  test('service-managed previews mirror every localized SQL body', () {
+    final sql = File(
+      'supabase/migrations/20260831192412_admin_notification_controls.sql',
+    ).readAsStringSync();
+    for (final locale in AppLocalizations.supportedLocales) {
+      final tag = BilLocalePolicy.canonicalTag(locale);
+      for (final kind in <AiCoachAdminNotificationKind>[
+        AiCoachAdminNotificationKind.compensation,
+        AiCoachAdminNotificationKind.gift,
+      ]) {
+        final preview = AdminNotificationPresetCatalog.serverBody(kind, tag);
+        expect(
+          sql,
+          contains(preview.replaceAll("'", "''")),
+          reason: '$tag/$kind',
+        );
+      }
+    }
+  });
+
   test('admin notification copy is complete across all 25 locales', () {
     expect(AdminNotificationRuntimeCopy.supported, hasLength(25));
     expect(AdminNotificationRuntimeCopy.balanced, isTrue);
@@ -37,7 +92,10 @@ void main() {
       dotAll: true,
     ).allMatches(source).map((match) => match.group(1)!).toSet();
     expect(authored, isNotEmpty);
-    expect(authored, AdminNotificationRuntimeCopy.values.keys.toSet());
+    expect(
+      AdminNotificationRuntimeCopy.values.keys.toSet(),
+      containsAll(authored),
+    );
   });
 
   testWidgets('non-admin cannot discover notification controls', (
@@ -59,7 +117,12 @@ void main() {
     final gateway = _FakeAdminGateway(allowed: true);
     await _pumpAdmin(tester, gateway, allowed: true);
     final action = find.byKey(const Key('admin-notification-compensation'));
-    await tester.ensureVisible(action);
+    await tester.scrollUntilVisible(
+      action,
+      700,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(action);
     await tester.pumpAndSettle();
 
@@ -77,6 +140,15 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('person@example.com'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('admin-notification-confirmation')),
+        matching: find.text(
+          'A courtesy from BIL 💛 We’re sorry for the inconvenience and truly value your trust. Thank you for giving us the chance to improve your experience.',
+        ),
+      ),
+      findsOneWidget,
+    );
     expect(gateway.sendCalls, 0);
 
     await tester.tap(find.byKey(const Key('admin-notification-confirm-send')));
@@ -89,13 +161,97 @@ void main() {
     expect(gateway.lastIdempotencyKey, startsWith('notification:'));
   });
 
+  testWidgets(
+    'ten message cards show content and a ready card stays editable',
+    (tester) async {
+      final gateway = _FakeAdminGateway(allowed: true);
+      await _pumpAdmin(tester, gateway, allowed: true);
+
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('admin-notification-controls')),
+        700,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+
+      const readyIds = <String>[
+        'compensation',
+        'gift',
+        'welcome',
+        'progress',
+        'weekly-report',
+        'connected-health',
+        'community',
+        'ai-coach',
+        'privacy',
+        'update',
+      ];
+      for (final id in readyIds) {
+        expect(find.byKey(Key('admin-notification-$id')), findsOneWidget);
+      }
+      expect(
+        find.byKey(const Key('admin-notification-custom')),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Keep logging each day for a clearer progress picture.'),
+        findsOneWidget,
+      );
+
+      final welcome = find.byKey(const Key('admin-notification-welcome'));
+      await tester.scrollUntilVisible(
+        welcome,
+        700,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(welcome);
+      await tester.pumpAndSettle();
+      final messageField = find.byKey(
+        const Key('admin-notification-custom-message'),
+      );
+      expect(
+        tester.widget<TextFormField>(messageField).controller?.text,
+        'Your private starting point is ready',
+      );
+      await tester.enterText(
+        messageField,
+        'Welcome — your BIL space is ready.',
+      );
+      await tester.tap(find.text('Specific email'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('admin-notification-email')),
+        'WELCOME@EXAMPLE.COM',
+      );
+      await tester.tap(find.byKey(const Key('admin-notification-review')));
+      await tester.pumpAndSettle();
+      expect(find.text('Welcome — your BIL space is ready.'), findsOneWidget);
+      await tester.tap(
+        find.byKey(const Key('admin-notification-confirm-send')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(gateway.sendCalls, 1);
+      expect(gateway.lastKind, AiCoachAdminNotificationKind.custom);
+      expect(gateway.lastAudience, AiCoachAdminNotificationAudience.email);
+      expect(gateway.lastEmail, 'welcome@example.com');
+      expect(gateway.lastMessage, 'Welcome — your BIL space is ready.');
+    },
+  );
+
   testWidgets('custom notification requires text and strips controls', (
     tester,
   ) async {
     final gateway = _FakeAdminGateway(allowed: true);
     await _pumpAdmin(tester, gateway, allowed: true);
     final action = find.byKey(const Key('admin-notification-custom'));
-    await tester.ensureVisible(action);
+    await tester.scrollUntilVisible(
+      action,
+      700,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(action);
     await tester.pumpAndSettle();
 
@@ -140,7 +296,12 @@ void main() {
     final gateway = _FakeAdminGateway(allowed: true, matched: false);
     await _pumpAdmin(tester, gateway, allowed: true);
     final action = find.byKey(const Key('admin-notification-gift'));
-    await tester.ensureVisible(action);
+    await tester.scrollUntilVisible(
+      action,
+      700,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     await tester.tap(action);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Specific email'));
@@ -253,7 +414,10 @@ final class _FakeAdminGateway implements AiCoachAdminGateway {
       Stream.value(allowed ? 'admin-1' : 'ordinary-1');
 
   @override
-  Future<AiCoachGlobalResetResult> globalReset(String idempotencyKey) {
+  Future<AiCoachGlobalResetResult> globalReset({
+    required String message,
+    required String idempotencyKey,
+  }) {
     throw UnimplementedError();
   }
 
@@ -261,6 +425,7 @@ final class _FakeAdminGateway implements AiCoachAdminGateway {
   Future<bool> individualReset({
     required String email,
     required String reason,
+    required String message,
     required String idempotencyKey,
   }) {
     throw UnimplementedError();

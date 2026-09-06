@@ -82,6 +82,21 @@ void main() {
         contains('entitlements.get("com.apple.developer.applesignin")'),
       );
       expect(verifier, contains('entitlements.get("aps-environment")'));
+      expect(
+        verifier,
+        contains('"com.apple.developer.devicecheck.appattest-environment"'),
+      );
+      expect(
+        source,
+        contains(
+          'Provisioning profile does not authorize production App Attest',
+        ),
+      );
+      expect(
+        source,
+        contains('--dart-define=BIL_MOBILE_INTEGRITY_REQUIRED=true'),
+      );
+      expect(source, contains('BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID'));
       expect(verifier, contains('entitlements.get("get-task-allow", False)'));
       expect(verifier, contains('SIGNED_IPA_ENTITLEMENTS_GATE=PASS'));
       expect(

@@ -177,6 +177,7 @@ class _StoreTierCard extends StatelessWidget {
     required this.loading,
     required this.selectedOfferIdentity,
     required this.onOfferSelected,
+    required this.onRetry,
   });
 
   final BilStoreProductKind kind;
@@ -206,14 +207,14 @@ class _StoreTierCard extends StatelessWidget {
   final bool loading;
   final String selectedOfferIdentity;
   final ValueChanged<BilStoreOfferMetadata> onOfferSelected;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final dark = scheme.brightness == Brightness.dark;
     final boost = kind == BilStoreProductKind.aiBoostConsumable;
-    final coachArtwork =
-        boost || kind == BilStoreProductKind.premiumAiCoachSubscription;
+    final coachArtwork = boost;
     final accent = boost ? const Color(0xFF59E2EF) : const Color(0xFFFFD66B);
     const offerAccent = Color(0xFFE6AD2F);
     return Container(
@@ -256,11 +257,7 @@ class _StoreTierCard extends StatelessWidget {
                   children: [
                     if (coachArtwork)
                       BilAiBoostCoachArtwork(
-                        key: ValueKey(
-                          boost
-                              ? 'store-ai-boost-coach-artwork'
-                              : 'store-premium-ai-coach-artwork',
-                        ),
+                        key: const ValueKey('store-ai-boost-coach-artwork'),
                         size: artworkSize,
                         semanticLabel: title,
                       )
@@ -335,56 +332,72 @@ class _StoreTierCard extends StatelessWidget {
             ),
             const SizedBox(height: 15),
             if (offers.isEmpty)
-              Container(
-                key: ValueKey('store-placeholder-$title'),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 13,
-                ),
-                decoration: BoxDecoration(
-                  color: dark
-                      ? scheme.surfaceContainerHighest
-                      : const Color(0xFFF7F7FA),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: dark
-                        ? scheme.outlineVariant
-                        : const Color(0xFFE5E5EA),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    if (loading)
-                      const Padding(
-                        padding: EdgeInsetsDirectional.only(end: 10),
-                        child: SizedBox.square(
-                          dimension: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 1.8,
-                            color: Color(0xFFFFD66B),
-                          ),
-                        ),
-                      )
-                    else
-                      const Padding(
-                        padding: EdgeInsetsDirectional.only(end: 9),
-                        child: Icon(
-                          Icons.storefront_outlined,
-                          size: 18,
-                          color: Color(0xFF727984),
+              Semantics(
+                button: !loading && onRetry != null,
+                enabled: !loading && onRetry != null,
+                label: loading
+                    ? loadingLabel
+                    : '$unavailableLabel. ${MaterialLocalizations.of(context).refreshIndicatorSemanticLabel}',
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    key: ValueKey('store-price-retry-${kind.name}'),
+                    onTap: loading ? null : onRetry,
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      key: ValueKey('store-placeholder-$title'),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 13,
+                      ),
+                      decoration: BoxDecoration(
+                        color: dark
+                            ? scheme.surfaceContainerHighest
+                            : const Color(0xFFF7F7FA),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: dark
+                              ? scheme.outlineVariant
+                              : const Color(0xFFE5E5EA),
                         ),
                       ),
-                    Expanded(
-                      child: Text(
-                        loading ? loadingLabel : unavailableLabel,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: dark
-                              ? scheme.onSurfaceVariant
-                              : const Color(0xFF626973),
-                        ),
+                      child: Row(
+                        children: [
+                          if (loading)
+                            const Padding(
+                              padding: EdgeInsetsDirectional.only(end: 10),
+                              child: SizedBox.square(
+                                dimension: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.8,
+                                  color: Color(0xFFFFD66B),
+                                ),
+                              ),
+                            )
+                          else
+                            const Padding(
+                              padding: EdgeInsetsDirectional.only(end: 9),
+                              child: Icon(
+                                Icons.refresh_rounded,
+                                size: 18,
+                                color: Color(0xFF727984),
+                              ),
+                            ),
+                          Expanded(
+                            child: Text(
+                              loading ? loadingLabel : unavailableLabel,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: dark
+                                        ? scheme.onSurfaceVariant
+                                        : const Color(0xFF626973),
+                                  ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               )
             else

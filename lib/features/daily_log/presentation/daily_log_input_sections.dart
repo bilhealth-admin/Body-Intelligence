@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../app/theme/premium_design_tokens.dart';
 import '../../../data/database/app_database.dart';
 import '../../../shared/widgets/actionable_error_state.dart';
@@ -28,7 +29,12 @@ class DailyExerciseSection extends StatelessWidget {
     final largeText = MediaQuery.textScalerOf(context).scale(1) >= 1.35;
     final exerciseTitle = Row(
       children: [
-        const Icon(Icons.fitness_center_rounded),
+        BilSemanticIconBadge(
+          kind: BilSemanticIconKind.exercise,
+          size: 36,
+          iconSize: 20,
+          shape: BoxShape.rectangle,
+        ),
         const SizedBox(width: 10),
         Expanded(
           child: Text(
@@ -138,7 +144,11 @@ class DailyWaterSection extends StatelessWidget {
               dimension: 18,
               child: CircularProgressIndicator(strokeWidth: 2),
             )
-          : const Icon(Icons.water_drop_outlined),
+          : Icon(
+              BilSemanticIcons.spec(
+                BilSemanticIconKind.water,
+              ).iconFor(Theme.of(context).platform),
+            ),
       label: Text(tr('Add water', 'إضافة ماء')),
     );
     return PremiumSurface(
@@ -175,7 +185,12 @@ class DailyWaterSection extends StatelessWidget {
                   side: BorderSide(
                     color: Theme.of(context).colorScheme.outlineVariant,
                   ),
-                  avatar: const Icon(Icons.water_drop_outlined, size: 18),
+                  avatar: Icon(
+                    BilSemanticIcons.spec(
+                      BilSemanticIconKind.water,
+                    ).iconFor(Theme.of(context).platform),
+                    size: 18,
+                  ),
                   label: Text('+$amount $unit'),
                   onPressed: saving ? null : () => onAdd(amount),
                 ),
@@ -193,7 +208,11 @@ class DailyWaterSection extends StatelessWidget {
                   ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
-                    leading: const Icon(Icons.water_drop_outlined),
+                    leading: BilSemanticIconBadge(
+                      kind: BilSemanticIconKind.water,
+                      size: 34,
+                      iconSize: 19,
+                    ),
                     title: Text('${entry.amountMl} $unit'),
                     subtitle: Text(
                       '${entry.occurredAt.hour.toString().padLeft(2, '0')}:${entry.occurredAt.minute.toString().padLeft(2, '0')}',
@@ -248,7 +267,13 @@ class DailyWaterShortcut extends StatelessWidget {
       child: ListTile(
         minTileHeight: 82,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        leading: const Icon(Icons.water_drop_outlined),
+        horizontalTitleGap: 12,
+        leading: BilSemanticIconBadge(
+          kind: BilSemanticIconKind.water,
+          size: 40,
+          iconSize: 22,
+          shape: BoxShape.rectangle,
+        ),
         title: Text(
           _inputText('Water', 'الماء'),
           style: Theme.of(

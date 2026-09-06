@@ -279,14 +279,21 @@ final class FitnessDeviceController
         'measurements': accepted,
       });
     } catch (error) {
+      final failureCode = _bleFailureCode(error);
+      // A failed measurement operation no longer provides evidence of a live
+      // GATT connection. Never leave the device green/connected on stale data.
+      await _store?.put('connected_fitness_device_state', id, <String, Object?>{
+        'connected': false,
+        'disconnectedAt': DateTime.now().toUtc().toIso8601String(),
+        'failureCode': failureCode,
+      });
       state = FitnessDeviceSnapshot(
-        status: FitnessDeviceConnectionStatus.connected,
+        status: FitnessDeviceConnectionStatus.failed,
         devices: state.devices,
-        connectedDeviceId: id,
         measurements: state.measurements,
         lastMeasurementAt: state.lastMeasurementAt,
         batteryPercent: state.batteryPercent,
-        failureCode: _bleFailureCode(error),
+        failureCode: failureCode,
       );
     }
   }

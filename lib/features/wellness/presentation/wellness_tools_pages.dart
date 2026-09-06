@@ -7,6 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../data/database/app_database.dart';
 import '../../connected_health/connected_health_model.dart';
 import '../../connected_health/providers/connected_health_provider.dart';

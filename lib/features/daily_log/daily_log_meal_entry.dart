@@ -378,9 +378,8 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 12,
                       ),
-                      leading: Icon(
-                        Icons.fact_check_outlined,
-                        color: scheme.primary,
+                      leading: const BilSemanticIconBadge(
+                        kind: BilSemanticIconKind.verifiedFood,
                       ),
                       title: Text(
                         FoodPresentationLocalizer.label(

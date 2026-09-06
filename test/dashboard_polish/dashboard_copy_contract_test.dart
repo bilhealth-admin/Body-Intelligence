@@ -7,8 +7,11 @@ void main() {
     final personalAi = File(
       'lib/features/dashboard/widgets/personal_health_ai_panel.dart',
     ).readAsStringSync();
-    final insights = File(
+    final benchmark = File(
       'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
+    ).readAsStringSync();
+    final current = File(
+      'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
     ).readAsStringSync();
     final dailyPath = File(
       'lib/features/dashboard/widgets/daily_return_card.dart',
@@ -25,7 +28,9 @@ void main() {
     ).readAsStringSync();
 
     expect(personalAi, contains("tr('Bio Intelligence', 'الذكاء الحيوي')"));
-    expect(insights, contains("tr('Today Summary', 'ملخص اليوم')"));
+    expect(benchmark, contains('progressSection: progressSection'));
+    expect(current, contains("Key('dashboard-mobile-summary-card')"));
+    expect(current, contains('child: progressSection!'));
     expect(dailyPath, contains("label: tr('Your Path Today', 'مسارك اليوم')"));
     expect(summary, contains("tr('Daily Summary', 'ملخص اليوم')"));
     expect(bodyProfile, contains("tr('Body Identity', 'هوية الجسم')"));
@@ -38,6 +43,7 @@ void main() {
       final files = <String>[
         'lib/features/dashboard/widgets/personal_health_ai_panel.dart',
         'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
+        'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
         'lib/features/dashboard/widgets/daily_return_card.dart',
         'lib/features/dashboard/widgets/dashboard_grid.dart',
         'lib/features/dashboard/widgets/dashboard_body_profile_snapshot.dart',

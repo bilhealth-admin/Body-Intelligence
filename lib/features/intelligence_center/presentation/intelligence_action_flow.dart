@@ -1,9 +1,20 @@
 part of 'intelligence_center_page.dart';
 
 extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
-  Future<void> _executeAction(IntelligenceAction action) async {
+  Future<void> _executeAction(
+    IntelligenceAction action, {
+    bool confirmationAlreadyProvided = false,
+  }) async {
+    final executionKey = '${action.type.name}:${action.id}';
+    if (!executingActionKeys.add(executionKey)) return;
     try {
-      if (action.requiresConfirmation && !await _confirmAction(action)) {
+      final acceptsTypedConfirmation =
+          confirmationAlreadyProvided &&
+          action.type == IntelligenceActionType.updateGoal &&
+          !action.destructive;
+      if (action.requiresConfirmation &&
+          !acceptsTypedConfirmation &&
+          !await _confirmAction(action)) {
         return;
       }
       if (!mounted) return;
@@ -76,6 +87,13 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
             refreshTargets: const {'dailyWater', 'dashboard', 'coachContext'},
           );
           if (mounted && receipt.verified) {
+            ref.invalidate(coachContextSnapshotProvider);
+            _appendToolReceipt(
+              tr(
+                'Logged $amount ml of water.',
+                'تم تسجيل $amount مل من الماء.',
+              ),
+            );
             _showActionCompleted(
               tr('Water logged locally.', 'تم تسجيل الماء محليًا.'),
             );
@@ -112,6 +130,13 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
             },
           );
           if (mounted && receipt.verified) {
+            ref.invalidate(coachContextSnapshotProvider);
+            _appendToolReceipt(
+              tr(
+                'Logged weight: ${value.toStringAsFixed(1)} kg.',
+                'تم تسجيل الوزن: ${value.toStringAsFixed(1)} كغ.',
+              ),
+            );
             _showActionCompleted(
               tr('Weight logged locally.', 'تم تسجيل الوزن محليًا.'),
             );
@@ -140,6 +165,9 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           if (!const {'dark', 'light', 'system'}.contains(mode)) return;
           await ref.read(appSettingsProvider.notifier).setThemeMode(mode!);
           if (mounted) {
+            _appendToolReceipt(
+              tr('App appearance updated.', 'تم تحديث مظهر التطبيق.'),
+            );
             _showActionCompleted(tr('Appearance updated.', 'تم تحديث المظهر.'));
           }
         case IntelligenceActionType.setLanguage:
@@ -149,59 +177,88 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           if (locale == null) return;
           await ref.read(appSettingsProvider.notifier).setLocale(locale);
           if (mounted) {
+            _appendToolReceipt(
+              tr('App language updated.', 'تم تحديث لغة التطبيق.'),
+            );
             _showActionCompleted(tr('Language updated.', 'تم تحديث اللغة.'));
           }
         case IntelligenceActionType.updateGoal:
           final target = action.payload['targetWeightKg'];
           if (target is! num) return;
-          final profile = await ref.read(userProfileProvider.future);
-          if (profile == null) return;
-          final existing = await ref.read(activeGoalProvider.future);
-          final currentWeight =
-              ref.read(effectiveCurrentWeightProvider) ?? profile.currentWeight;
-          final targetDate = action.payload['targetDate'] == null
+          final requestedTargetDate = action.payload['targetDate'];
+          final targetDate = requestedTargetDate == null
               ? null
-              : DateTime.tryParse(action.payload['targetDate'].toString());
-          final type = target < currentWeight
-              ? 'lose'
-              : target > currentWeight
-              ? 'gain'
-              : 'maintain';
-          final entityId = await ref.read(databaseProvider).transaction(
-            () async {
-              await ref
-                  .read(userProfileRepositoryProvider)
-                  .save(
-                    gender: profile.gender,
-                    age: profile.age,
-                    height: profile.height,
-                    currentWeight: currentWeight,
-                    targetWeight: target.toDouble(),
-                    activityLevel: profile.activityLevel,
-                    exercises: profile.exercises,
-                    medicalConditions: profile.medicalConditions,
-                    waist: profile.waist,
-                    neck: profile.neck,
-                    chest: profile.chest,
-                    arm: profile.arm,
-                    thigh: profile.thigh,
-                  );
-              return ref
-                  .read(goalRepositoryProvider)
-                  .save(
-                    uuid: existing?.uuid,
-                    profileUuid: profile.uuid,
-                    type: type,
-                    targetWeight: target.toDouble(),
-                    targetDate: targetDate,
-                  );
-            },
-          );
+              : DateTime.tryParse(requestedTargetDate.toString());
+          if (requestedTargetDate != null && targetDate == null) {
+            throw ArgumentError.value(requestedTargetDate, 'targetDate');
+          }
+          // Capture every provider-owned dependency before the first await.
+          // The confirmed transaction is allowed to finish after this route
+          // is disposed, without touching WidgetRef again.
+          final database = ref.read(databaseProvider);
+          final profileRepository = ref.read(userProfileRepositoryProvider);
+          final goalRepository = ref.read(goalRepositoryProvider);
+          final weightRepository = ref.read(weightRepositoryProvider);
+          await database.transaction(() async {
+            // Reads and writes belong to one snapshot. In particular, do not
+            // classify the goal from StreamProvider.value: it can still hold
+            // the profile fallback while the latest weight query is loading.
+            final profile = await profileRepository.getProfile();
+            if (profile == null) throw StateError('goal_profile_missing');
+            final existing = await goalRepository.getActive();
+            final weights = await weightRepository.getAll();
+            final currentWeight = weights.isEmpty
+                ? profile.currentWeight
+                : weights.first.weight;
+            final type = target < currentWeight
+                ? 'lose'
+                : target > currentWeight
+                ? 'gain'
+                : 'maintain';
+            await profileRepository.save(
+              gender: profile.gender,
+              age: profile.age,
+              height: profile.height,
+              currentWeight: currentWeight,
+              targetWeight: target.toDouble(),
+              activityLevel: profile.activityLevel,
+              exercises: profile.exercises,
+              medicalConditions: profile.medicalConditions,
+              waist: profile.waist,
+              neck: profile.neck,
+              chest: profile.chest,
+              arm: profile.arm,
+              thigh: profile.thigh,
+            );
+            final goalId = await goalRepository.save(
+              uuid: existing?.uuid,
+              profileUuid: profile.uuid,
+              type: type,
+              targetWeight: target.toDouble(),
+              targetDate: targetDate,
+            );
+            if (goalId <= 0) {
+              // Throw inside the transaction so the preceding profile write
+              // is rolled back together with a failed goal commit.
+              throw StateError('goal_update_not_committed');
+            }
+            return goalId;
+          });
+          // Remove the durable proposal before any mounted-only refresh. This
+          // save is queued after dispose's snapshot too, so a completed write
+          // cannot reappear as a replayable action when Coach is reopened.
+          await _retireDurableAction(action);
+          if (!mounted) return;
           ref.invalidate(userProfileProvider);
           ref.invalidate(activeGoalProvider);
-          if (mounted && entityId > 0) {
-            _showActionCompleted(tr('Goal updated.', 'تم تحديث الهدف.'));
-          }
+          ref.invalidate(coachContextSnapshotProvider);
+          _appendToolReceipt(
+            tr(
+              'Target weight updated to ${target.toStringAsFixed(1)} kg.',
+              'تم تحديث الوزن المستهدف إلى ${target.toStringAsFixed(1)} كغ.',
+            ),
+          );
+          _showActionCompleted(tr('Goal updated.', 'تم تحديث الهدف.'));
         case IntelligenceActionType.saveMeasurements:
           double? measurement(String key) =>
               (action.payload[key] as num?)?.toDouble();
@@ -220,14 +277,20 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
                 chestCm: measurement('chestCm'),
                 armCm: measurement('armCm'),
                 thighCm: measurement('thighCm'),
+                preserveExistingValues: true,
               );
+          if (!mounted) return;
           ref.invalidate(bodyMeasurementHistoryProvider);
           ref.invalidate(coachContextSnapshotProvider);
-          if (mounted) {
-            _showActionCompleted(
-              tr('Measurements updated.', 'تم تحديث القياسات.'),
-            );
-          }
+          _appendToolReceipt(
+            tr(
+              'Body measurements saved for ${_coachDateLabel(date)}.',
+              'تم حفظ قياسات الجسم لتاريخ ${_coachDateLabel(date)}.',
+            ),
+          );
+          _showActionCompleted(
+            tr('Measurements updated.', 'تم تحديث القياسات.'),
+          );
         case IntelligenceActionType.quickAddMacros:
           final date = action.payload['date'] == null
               ? DateTime.now()
@@ -248,9 +311,18 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
                 carbohydratesKnown: true,
                 fatKnown: true,
               );
+          if (!mounted) return;
           ref.invalidate(dailyMealsProvider);
           ref.invalidate(coachContextSnapshotProvider);
-          if (mounted && entityId > 0) {
+          if (entityId > 0) {
+            _appendToolReceipt(
+              tr(
+                'Quick macros added to ${action.payload['mealType']}: '
+                    '${(action.payload['calories']! as num).round()} kcal.',
+                'تمت إضافة المغذيات السريعة إلى ${action.payload['mealType']}: '
+                    '${(action.payload['calories']! as num).round()} سعرة.',
+              ),
+            );
             _showActionCompleted(tr('Meal updated.', 'تم تحديث الوجبة.'));
           }
         case IntelligenceActionType.updateMealItem:
@@ -260,24 +332,34 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
                 id: action.payload['itemId']! as int,
                 quantity: (action.payload['quantityGrams']! as num).toDouble(),
               );
+          if (!mounted) return;
           ref.invalidate(dailyMealsProvider);
           ref.invalidate(coachContextSnapshotProvider);
-          if (mounted) {
-            _showActionCompleted(
-              tr('Meal item updated.', 'تم تحديث عنصر الوجبة.'),
-            );
-          }
+          _appendToolReceipt(
+            tr(
+              'Meal item ${action.payload['itemId']} updated to '
+                  '${(action.payload['quantityGrams']! as num).toStringAsFixed(1)} g.',
+              'تم تحديث عنصر الوجبة ${action.payload['itemId']} إلى '
+                  '${(action.payload['quantityGrams']! as num).toStringAsFixed(1)} غ.',
+            ),
+          );
+          _showActionCompleted(
+            tr('Meal item updated.', 'تم تحديث عنصر الوجبة.'),
+          );
         case IntelligenceActionType.deleteMealItem:
           await ref
               .read(mealRepositoryProvider)
               .deleteMealItem(action.payload['itemId']! as int);
+          if (!mounted) return;
           ref.invalidate(dailyMealsProvider);
           ref.invalidate(coachContextSnapshotProvider);
-          if (mounted) {
-            _showActionCompleted(
-              tr('Meal item deleted.', 'تم حذف عنصر الوجبة.'),
-            );
-          }
+          _appendToolReceipt(
+            tr(
+              'Meal item ${action.payload['itemId']} deleted.',
+              'تم حذف عنصر الوجبة ${action.payload['itemId']}.',
+            ),
+          );
+          _showActionCompleted(tr('Meal item deleted.', 'تم حذف عنصر الوجبة.'));
         case IntelligenceActionType.moveMealItem:
           await ref
               .read(mealRepositoryProvider)
@@ -285,13 +367,20 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
                 id: action.payload['itemId']! as int,
                 mealType: action.payload['mealType']!.toString(),
               );
+          if (!mounted) return;
           ref.invalidate(dailyMealsProvider);
           ref.invalidate(coachContextSnapshotProvider);
-          if (mounted) {
-            _showActionCompleted(tr('Meal item moved.', 'تم نقل عنصر الوجبة.'));
-          }
+          _appendToolReceipt(
+            tr(
+              'Meal item ${action.payload['itemId']} moved to '
+                  '${action.payload['mealType']}.',
+              'تم نقل عنصر الوجبة ${action.payload['itemId']} إلى '
+                  '${action.payload['mealType']}.',
+            ),
+          );
+          _showActionCompleted(tr('Meal item moved.', 'تم نقل عنصر الوجبة.'));
         case IntelligenceActionType.requestAccountDeletion:
-          context.push('/community/profile');
+          context.push('/help/delete-account');
         case IntelligenceActionType.saveMemory:
           final value = action.payload['text']?.toString().trim() ?? '';
           if (value.isEmpty || value.length > 500) return;
@@ -301,15 +390,14 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
             text: value,
             kind: action.payload['kind']?.toString() ?? 'user_fact',
           );
+          if (!mounted) return;
           ref.invalidate(coachContextSnapshotProvider);
-          if (mounted) {
-            _appendToolReceipt(
-              tr(
-                'BIL will remember this. You can review or remove it any time.',
-                'سيتذكر BIL هذه المعلومة. يمكنك مراجعتها أو حذفها في أي وقت.',
-              ),
-            );
-          }
+          _appendToolReceipt(
+            tr(
+              'BIL will remember this. You can review or remove it any time.',
+              'سيتذكر BIL هذه المعلومة. يمكنك مراجعتها أو حذفها في أي وقت.',
+            ),
+          );
       }
     } on Object {
       if (!mounted) return;
@@ -323,7 +411,37 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
           ),
         ),
       );
+    } finally {
+      executingActionKeys.remove(executionKey);
     }
+  }
+
+  Future<void> _retireDurableAction(IntelligenceAction action) async {
+    var changed = false;
+    void retire() {
+      for (var index = 0; index < messages.length; index += 1) {
+        final message = messages[index];
+        final retained = message.actionLinks
+            .where(
+              (candidate) =>
+                  candidate.type != action.type || candidate.id != action.id,
+            )
+            .toList(growable: false);
+        if (retained.length == message.actionLinks.length) continue;
+        messages[index] = message.copyWith(actionLinks: retained);
+        changed = true;
+      }
+    }
+
+    if (mounted) {
+      _updateState(retire);
+    } else {
+      // The state object and its captured repositories remain valid while an
+      // already-started commit finishes. Avoid setState/WidgetRef, but queue a
+      // newer action-free snapshot after dispose's best-effort save.
+      retire();
+    }
+    if (changed) await _saveConversation();
   }
 
   Future<bool> _confirmAction(IntelligenceAction action) async {
@@ -419,6 +537,11 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
   }
 
+  String _coachDateLabel(DateTime value) =>
+      '${value.year.toString().padLeft(4, '0')}-'
+      '${value.month.toString().padLeft(2, '0')}-'
+      '${value.day.toString().padLeft(2, '0')}';
+
   void _appendToolReceipt(String text) {
     if (!mounted) return;
     _updateState(() {
@@ -444,7 +567,14 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
     String? reason,
   }) async {
     final previous = messageFeedback[message.id];
-    _updateState(() => messageFeedback[message.id] = helpful);
+    final wasReported = reportedMessages.contains(message.id);
+    _updateState(() {
+      if (reason == 'unsafe') {
+        reportedMessages.add(message.id);
+      } else {
+        messageFeedback[message.id] = helpful;
+      }
+    });
     try {
       await const AiCoachFeedbackService().record(
         responseId: message.id,
@@ -469,10 +599,14 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
     } on Object {
       if (!mounted) return;
       _updateState(() {
-        if (previous == null) {
-          messageFeedback.remove(message.id);
+        if (reason == 'unsafe') {
+          if (!wasReported) reportedMessages.remove(message.id);
         } else {
-          messageFeedback[message.id] = previous;
+          if (previous == null) {
+            messageFeedback.remove(message.id);
+          } else {
+            messageFeedback[message.id] = previous;
+          }
         }
       });
       _showActionCompleted(

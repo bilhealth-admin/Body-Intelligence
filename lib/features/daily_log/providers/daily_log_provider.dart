@@ -5,6 +5,7 @@ import '../../../data/database/app_database.dart';
 import '../../../data/database/database_provider.dart';
 import '../../../data/repositories/daily_log_repository.dart';
 import '../../../data/repositories/meal_repository.dart';
+import '../../../data/repositories/nutrition_goal_schedule_repository.dart';
 import '../../../data/repositories/water_repository.dart';
 import '../../foods/providers/food_provider.dart';
 import '../../profile/providers/user_profile_provider.dart';
@@ -75,6 +76,24 @@ final dailyLogPreferenceProvider = StreamProvider.family<bool, String>((
         (value) =>
             value == null ? enabledByDefault.contains(key) : value == 'true',
       );
+});
+
+final dailyNutritionGoalPreferenceProvider =
+    StreamProvider.family<String?, String>((ref, key) {
+      return ref.watch(preferencesRepositoryProvider).watch(key);
+    });
+
+/// The default target stored by Calorie and macro goals.
+///
+/// Daily Log deliberately owns this adapter so Today, scheduled days, and
+/// meal cards resolve the same target without depending on Dashboard widgets.
+final defaultNutritionGoalTargetProvider = Provider<NutritionGoalTarget?>((
+  ref,
+) {
+  return defaultNutritionGoalTargetFromPreferences({
+    for (final key in defaultNutritionGoalPreferenceKeys)
+      key: ref.watch(dailyNutritionGoalPreferenceProvider(key)).value,
+  });
 });
 
 final diaryMealNamesProvider = StreamProvider<List<String?>>((ref) {

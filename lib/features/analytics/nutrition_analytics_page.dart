@@ -62,9 +62,9 @@ class NutritionAnalyticsPage extends ConsumerWidget {
       'goal.carbsPercent',
       'goal.proteinPercent',
       'goal.fatPercent',
-      'goal.saturatedFat',
       'goal.sodium',
       'goal.fiber',
+      'goal.potassium',
       'goal.sugar',
     ];
     final goalStates = {
@@ -104,9 +104,9 @@ class NutritionAnalyticsPage extends ConsumerWidget {
             proteinPercent: proteinPercent,
             fatPercent: fatPercent,
           );
-    final saturatedFatGoal = storedGoal('goal.saturatedFat');
     final sodiumGoal = storedGoal('goal.sodium');
     final fiberGoal = storedGoal('goal.fiber');
+    final potassiumGoal = storedGoal('goal.potassium');
     final sugarGoal = storedGoal('goal.sugar');
     final planState = profile == null
         ? const AsyncValue<PlanSetting?>.data(null)
@@ -150,24 +150,26 @@ class NutritionAnalyticsPage extends ConsumerWidget {
     final selectedDayTarget = goalSchedule.targetFor(
       ref.watch(selectedLogDateProvider),
     );
-    final scheduledGoals = selectedDayTarget == null
+    final scheduledTargets = selectedDayTarget == null
         ? null
-        : PercentageNutritionGoals.resolve(
-            calories: selectedDayTarget.calories,
-            carbohydratesPercent: selectedDayTarget.carbsPercent,
-            proteinPercent: selectedDayTarget.proteinPercent,
-            fatPercent: selectedDayTarget.fatPercent,
-          );
-    final effectivePercentageGoals = scheduledGoals ?? percentageGoals;
-    final targets = effectivePercentageGoals == null
-        ? planTargets
         : _NutritionTargets(
-            calories: effectivePercentageGoals.calories,
-            protein: effectivePercentageGoals.proteinGrams,
-            carbs: effectivePercentageGoals.carbohydratesGrams,
-            fats: effectivePercentageGoals.fatGrams,
+            calories: selectedDayTarget.calories,
+            protein: selectedDayTarget.proteinGrams,
+            carbs: selectedDayTarget.carbsGrams,
+            fats: selectedDayTarget.fatGrams,
             fiber: planTargets.fiber,
           );
+    final targets =
+        scheduledTargets ??
+        (percentageGoals == null
+            ? planTargets
+            : _NutritionTargets(
+                calories: percentageGoals.calories,
+                protein: percentageGoals.proteinGrams,
+                carbs: percentageGoals.carbohydratesGrams,
+                fats: percentageGoals.fatGrams,
+                fiber: planTargets.fiber,
+              ));
     return DefaultTabController(
       length: 4,
       initialIndex: initialTab.clamp(0, 3),
@@ -233,9 +235,9 @@ class NutritionAnalyticsPage extends ConsumerWidget {
                         preset: nutrientPreset,
                         evidence: evidence,
                         goals: NutrientDashboardGoalSet(
-                          saturatedFatG: saturatedFatGoal,
                           sodiumMg: sodiumGoal,
                           fiberG: fiberGoal,
+                          potassiumMg: potassiumGoal,
                           carbohydratesG: targets.carbs,
                           sugarG: sugarGoal,
                         ),

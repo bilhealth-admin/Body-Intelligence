@@ -1,0 +1,13 @@
+# Every dependency is an exact immutable wheel URL with its SHA-256 digest.
+# Keep --no-deps and --require-hashes in the workflow so this is the complete
+# executable dependency closure for fb-idb 1.1.7.
+fb-idb @ https://files.pythonhosted.org/packages/70/85/a03bc4f35f7d5c1a87d762229a9884fdd6b7207e5af552fdf7091c5dec1b/fb_idb-1.1.7-py3-none-any.whl#sha256=b3c8842de097e43ea660bda828995d5bbfbc231093a4b94a17cadacad0bd1664
+aiofiles @ https://files.pythonhosted.org/packages/ca/e4/b78d049f7cc7ed053ddbfdd59b2dcc7bd387458e2c2869b602975685d65e/aiofiles-0.8.0-py3-none-any.whl#sha256=7a973fc22b29e9962d0897805ace5856e6a566ab1f0c8e5c91ff6c866519c937
+grpclib @ https://files.pythonhosted.org/packages/5c/90/b0cbbd9efcc82816c58f31a34963071aa19fb792a212a5d9caf8e0fc3097/grpclib-0.4.9-py3-none-any.whl#sha256=7762ec1c8ed94dfad597475152dd35cbd11aecaaca2f243e29702435ca24cf0e
+protobuf @ https://files.pythonhosted.org/packages/8d/14/619e24a4c70df2901e1f4dbc50a6291eb63a759172558df326347dce1f0d/protobuf-3.20.3-py2.py3-none-any.whl#sha256=a7ca6d488aa8ff7f329d4c545b2dbad8ac31464f1d8b1c87ad1346717731e4db
+treelib @ https://files.pythonhosted.org/packages/2e/24/32361f5d0e2eff7ff1881ac6833b6b090cfe34515b1ee9082636cbe69442/treelib-1.8.0-py3-none-any.whl#sha256=5235d1ebf988c5026f26ce6e5e0cd470007f16d4978185f5c9b3eee8a25aef81
+h2 @ https://files.pythonhosted.org/packages/2a/e5/db6d438da759efbb488c4f3fbdab7764492ff3c3f953132efa6b9f0e9e53/h2-4.1.0-py3-none-any.whl#sha256=03a46bcf682256c95b5fd9e9a99c1323584c3eec6440d379b9903d709476bc6d
+hpack @ https://files.pythonhosted.org/packages/d5/34/e8b383f35b77c402d28563d2b8f83159319b509bc5f760b15d60b0abf165/hpack-4.0.0-py3-none-any.whl#sha256=84a076fad3dc9a9f8063ccb8041ef100867b1878b25ef0ee63847a5d53818a6c
+hyperframe @ https://files.pythonhosted.org/packages/d7/de/85a784bcc4a3779d1753a7ec2dee5de90e18c7bcf402e71b51fcf150b129/hyperframe-6.0.1-py3-none-any.whl#sha256=0ec6bafd80d8ad2195c4f03aacba3a8265e57bc4cff261e802bf39970ed02a15
+multidict @ https://files.pythonhosted.org/packages/fa/a2/17e1e23c6be0a916219c5292f509360c345b5fa6beeb50d743203c27532c/multidict-6.0.5-py3-none-any.whl#sha256=0d63c74e3d7ab26de115c49bffc92cc77ed23395303d496eae515d4204a625e7
+six @ https://files.pythonhosted.org/packages/d9/5a/e7c31adbe875f2abbb91bd84cf2dc52d792b5a01506781dbcf25c91daf11/six-1.16.0-py2.py3-none-any.whl#sha256=8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254

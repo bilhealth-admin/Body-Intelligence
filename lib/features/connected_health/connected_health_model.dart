@@ -45,6 +45,29 @@ final class ConnectedHealthSignalView {
   final Map<String, Object?> attributes;
 }
 
+bool connectedHealthSignalHasWearableProvenance(
+  ConnectedHealthSignalView signal,
+) {
+  final explicitKind = signal.attributes['wearableKind']
+      ?.toString()
+      .trim()
+      .toLowerCase();
+  if (explicitKind == 'apple_watch' ||
+      explicitKind == 'wear_os_watch' ||
+      explicitKind == 'watch' ||
+      explicitKind == 'ble_fitness_sensor') {
+    return true;
+  }
+  // Backward-compatible evidence for records imported before native bridges
+  // started attaching an explicit wearable kind.
+  final source = signal.source.trim().toLowerCase();
+  return source.contains('watch') || source.contains('wearable');
+}
+
+bool connectedHealthSnapshotHasWearableEvidence(
+  ConnectedHealthSnapshot snapshot,
+) => snapshot.signals.any(connectedHealthSignalHasWearableProvenance);
+
 final class ConnectedHealthSnapshot {
   const ConnectedHealthSnapshot({
     required this.status,

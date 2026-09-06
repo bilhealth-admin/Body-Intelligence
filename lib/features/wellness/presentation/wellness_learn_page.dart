@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/app_localizations.dart';
+import '../../../app/theme/bil_semantic_icons.dart';
 import 'wellness_copy.dart';
 
 class WellnessLearnPage extends StatefulWidget {
@@ -179,7 +180,7 @@ class _WellnessLearnPageState extends State<WellnessLearnPage> {
             ),
             const SizedBox(height: 12),
             _LearnDestination(
-              icon: Icons.restaurant_menu_rounded,
+              kind: BilSemanticIconKind.nutrition,
               title: _learnText(
                 context,
                 'Nutrition education',
@@ -199,7 +200,7 @@ class _WellnessLearnPageState extends State<WellnessLearnPage> {
               onTap: () => context.push('/nutrition-plans'),
             ),
             _LearnDestination(
-              icon: Icons.eco_outlined,
+              kind: BilSemanticIconKind.health,
               title: _learnText(
                 context,
                 'Nutrients',
@@ -219,7 +220,7 @@ class _WellnessLearnPageState extends State<WellnessLearnPage> {
               onTap: () => context.push('/analytics/nutrition'),
             ),
             _LearnDestination(
-              icon: Icons.auto_stories_outlined,
+              kind: BilSemanticIconKind.progress,
               title: _learnText(
                 context,
                 'Your progress history',
@@ -239,7 +240,7 @@ class _WellnessLearnPageState extends State<WellnessLearnPage> {
               onTap: () => context.push('/history'),
             ),
             _LearnDestination(
-              icon: Icons.soup_kitchen_outlined,
+              kind: BilSemanticIconKind.recipes,
               title: _learnText(
                 context,
                 'Recipe library',
@@ -259,7 +260,7 @@ class _WellnessLearnPageState extends State<WellnessLearnPage> {
               onTap: () => context.push('/wellness/recipes'),
             ),
             _LearnDestination(
-              icon: Icons.quiz_outlined,
+              kind: BilSemanticIconKind.learn,
               title: _learnText(
                 context,
                 'Wellness tools',
@@ -280,7 +281,7 @@ class _WellnessLearnPageState extends State<WellnessLearnPage> {
             ),
             if (AppEnvironment.communityConfigured)
               _LearnDestination(
-                icon: Icons.groups_2_outlined,
+                kind: BilSemanticIconKind.community,
                 title: _learnText(
                   context,
                   'Community discussions',
@@ -354,13 +355,13 @@ String _learnText(
 
 class _LearnDestination extends StatelessWidget {
   const _LearnDestination({
-    required this.icon,
+    required this.kind,
     required this.title,
     required this.subtitle,
     required this.onTap,
   });
 
-  final IconData icon;
+  final BilSemanticIconKind kind;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
@@ -370,10 +371,12 @@ class _LearnDestination extends StatelessWidget {
     margin: const EdgeInsets.only(bottom: 10),
     child: ListTile(
       minTileHeight: 82,
-      leading: CircleAvatar(
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-        child: Icon(icon),
+      leading: BilSemanticIconBadge(
+        key: Key('learn-destination-${kind.name}-icon'),
+        kind: kind,
+        size: 44,
+        iconSize: 23,
+        shape: BoxShape.rectangle,
       ),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
       subtitle: Text(subtitle),

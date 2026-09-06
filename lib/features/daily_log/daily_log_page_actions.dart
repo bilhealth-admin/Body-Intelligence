@@ -141,7 +141,9 @@ extension _DailyLogPageActions on _DailyLogPageState {
                         ),
                       ListTile(
                         contentPadding: EdgeInsets.zero,
-                        leading: const Icon(Icons.schedule_rounded),
+                        leading: const BilSemanticIconBadge(
+                          kind: BilSemanticIconKind.time,
+                        ),
                         title: Text(_tr('Time', 'الوقت')),
                         trailing: Text(time.format(context)),
                         enabled: !saving,

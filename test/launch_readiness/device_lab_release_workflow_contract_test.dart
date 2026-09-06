@@ -29,6 +29,46 @@ void main() {
     expect(source, contains('ANDROID_UPLOAD_CERTIFICATE_SHA256=MATCH'));
   });
 
+  test('Android native crypto runtime gate is explicit and owner-waivable', () {
+    final source = _read('.github/workflows/bil_android_release_candidate.yml');
+    final inputStart = source.indexOf('      run_native_crypto_checks:');
+    final permissionsStart = source.indexOf('\npermissions:', inputStart);
+    expect(inputStart, greaterThanOrEqualTo(0));
+    expect(permissionsStart, greaterThan(inputStart));
+    final input = source.substring(inputStart, permissionsStart);
+
+    expect(input, contains('type: boolean'));
+    expect(input, contains('default: false'));
+    expect(
+      RegExp(
+        r'^\s*if: \$\{\{ inputs\.run_native_crypto_checks \}\}\s*$',
+        multiLine: true,
+      ).allMatches(source),
+      hasLength(2),
+    );
+    expect(
+      source,
+      contains(
+        r'RUN_NATIVE_CRYPTO_CHECKS: ${{ inputs.run_native_crypto_checks }}',
+      ),
+    );
+    expect(
+      source,
+      contains("if [[ \"\$RUN_NATIVE_CRYPTO_CHECKS\" == 'true' ]]"),
+    );
+    expect(source, contains("NATIVE_CRYPTO_GATE_STATUS='PASS'"));
+    expect(
+      source,
+      contains("NATIVE_CRYPTO_GATE_STATUS='NOT_RUN_OWNER_WAIVED'"),
+    );
+    expect(
+      source,
+      contains('"NATIVE_CRYPTO_GATE=\$NATIVE_CRYPTO_GATE_STATUS"'),
+    );
+    expect(source, isNot(contains("'NATIVE_CRYPTO_GATE=PASS'")));
+    expect(source, contains('PHYSICAL_DEVICE_GATE=REQUIRED'));
+  });
+
   test(
     'iOS candidate fails closed on team profile and signed entitlements',
     () {

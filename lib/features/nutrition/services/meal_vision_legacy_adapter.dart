@@ -29,7 +29,8 @@ MealVisionResult adaptLegacyMealImageAnalysis(
                 confidence: alternative.confidence,
               ),
           ],
-          uncertainty: candidate.uncertainty ??
+          uncertainty:
+              candidate.uncertainty ??
               (candidate.evidence.trim().isEmpty
                   ? 'amount-and-unit-unresolved'
                   : candidate.evidence.trim()),

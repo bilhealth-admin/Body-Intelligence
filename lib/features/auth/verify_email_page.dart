@@ -187,7 +187,7 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                             const BilFullWordmark(
                               key: Key('verify-email-wordmark'),
                               height: 38,
-                              alignment: AlignmentDirectional.centerStart,
+                              alignment: Alignment.center,
                             ),
                             SizedBox(height: compact ? 18 : 24),
                             Text(

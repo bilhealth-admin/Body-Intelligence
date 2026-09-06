@@ -8,6 +8,9 @@ import 'package:body_intelligence_log/app/localization/runtime_copy_food_actions
 import 'package:body_intelligence_log/app/localization/runtime_copy_daily_log_actions.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_fitness_watch.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_connected_health.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_platform_conversation.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_community_moderation.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_admin_notifications.dart';
 
 const extendedLocaleTags = <String>{
   'de',
@@ -115,6 +118,9 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     ...DailyLogActionRuntimeCopy.sources,
     ...FitnessWatchRuntimeCopy.sources,
     ...ConnectedHealthRuntimeCopy.sources,
+    ...PlatformConversationRuntimeCopy.sources,
+    ...CommunityModerationRuntimeCopy.sources,
+    ...AdminNotificationRuntimeCopy.values.keys,
   };
   final required = await _requiredRuntimeSources();
   final missing =

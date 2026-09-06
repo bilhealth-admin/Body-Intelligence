@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../app/environment/app_environment.dart';
-import '../../shared/widgets/bil_wordmark.dart';
 import '../startup/premium_splash_experience.dart';
 import 'auth_entry_locale_copy.dart';
 import 'auth_language_selector.dart';
@@ -14,11 +13,6 @@ export 'premium_login_page.dart' show LoginPage;
 
 class StoreReviewerLoginPage extends StatefulWidget {
   const StoreReviewerLoginPage({super.key});
-
-  static const reviewerEmail = 'play-review@bilhealth.com';
-
-  static bool acceptsReviewerEmail(String value) =>
-      value.trim().toLowerCase() == reviewerEmail;
 
   @override
   State<StoreReviewerLoginPage> createState() => _StoreReviewerLoginPageState();
@@ -38,7 +32,6 @@ class _StoreReviewerLoginPageState extends State<StoreReviewerLoginPage> {
     if (loading || !AppEnvironment.cloudConfigured) return;
     if (formKey.currentState?.validate() != true) return;
     final normalized = email.text.trim().toLowerCase();
-    if (!StoreReviewerLoginPage.acceptsReviewerEmail(normalized)) return;
     setState(() {
       loading = true;
       status = null;
@@ -138,8 +131,6 @@ class _StoreReviewerLoginPageState extends State<StoreReviewerLoginPage> {
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              const Center(child: BilFullWordmark(height: 48)),
-                              const SizedBox(height: 12),
                               Text(
                                 tr(
                                   'Store reviewer access',
@@ -194,14 +185,6 @@ class _StoreReviewerLoginPageState extends State<StoreReviewerLoginPage> {
                                     return authEntryText(
                                       context,
                                       AuthEntryCopyKey.invalidEmail,
-                                    );
-                                  }
-                                  if (!StoreReviewerLoginPage.acceptsReviewerEmail(
-                                    value!,
-                                  )) {
-                                    return tr(
-                                      'Use only the dedicated credentials supplied in the store review notes.',
-                                      'استخدم فقط بيانات المراجع المخصصة والموجودة في ملاحظات مراجعة المتجر.',
                                     );
                                   }
                                   return null;

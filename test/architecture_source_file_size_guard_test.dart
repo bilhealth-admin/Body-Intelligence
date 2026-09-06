@@ -15,6 +15,10 @@ void main() {
       // resolver is intentionally kept beside the audited catalog so missing
       // locales and placeholders remain reviewable as one complete contract.
       'lib/app/localization/runtime_copy_admin_notifications.dart': 875,
+      // Data-only 25-locale moderation matrix. Keeping the status placeholder
+      // and every reviewed translation together makes fallback auditing
+      // mechanical; moderation behavior and widgets live in separate files.
+      'lib/app/localization/runtime_copy_community_moderation.dart': 775,
       'lib/features/profile/profile_locale_copy.dart': 875,
       // This part owns one cohesive phone composition. Its reusable cards,
       // goal controls, and discover sections already live in sibling parts;
@@ -31,10 +35,25 @@ void main() {
       // remain in the same State extension to preserve ordering guarantees.
       'lib/features/intelligence_center/presentation/intelligence_conversation_voice.dart':
           750,
+      // The route gate is one cohesive entitlement state machine and visual
+      // boundary. Subscription/credit verification, fail-closed retry, the
+      // protected glass veil, and its CTA must remain reviewed together so a
+      // transient provider error can never accidentally expose a paywall.
+      'lib/features/commerce/presentation/premium_route_glass_gate.dart': 800,
+      // Daily Log already delegates capture, mutation, search, navigation,
+      // copy, entry, and component responsibilities to part files. The root
+      // retains the single state lifecycle and Today-goal resolution only.
+      'lib/features/daily_log/daily_log_page.dart': 725,
+      // Render-only AI Coach widgets are separated from persistence, query,
+      // voice, actions, and controller state. Keep a narrow review margin for
+      // this cohesive visual component family.
+      'lib/features/intelligence_center/presentation/intelligence_center_widgets.dart':
+          725,
       // This source is a data-only 25-locale food/serving lookup; splitting
       // it would obscure the audited completeness matrix without reducing
-      // runtime responsibility.
-      'lib/features/nutrition/services/food_presentation_localizer.dart': 1250,
+      // runtime responsibility. The extra room covers the audited
+      // query-language and barcode-serving closure added for iOS parity.
+      'lib/features/nutrition/services/food_presentation_localizer.dart': 1350,
       // Cohesive visual component libraries, already separated from state,
       // repositories, and domain logic. Allow only a small review margin.
       'lib/features/nutrition_plans/presentation/diet_plan_editor_components.dart':
@@ -46,7 +65,12 @@ void main() {
       // The reference goal file is a render-only family whose private
       // calorie and macro value objects share one layout contract.
       'lib/features/dashboard/widgets/dashboard_reference_goal_components.dart':
-          750,
+          775,
+      // Connected-health lifecycle, provenance filtering, foreground
+      // coalescing, and platform capability truth share one provider state
+      // machine. Native bridges and repositories remain separate.
+      'lib/features/connected_health/providers/connected_health_provider.dart':
+          725,
       // These stateful surfaces each coordinate one guarded form lifecycle;
       // persistence, permission probing, repositories, and locale copy are
       // already separate. Splitting the State across extensions would hide
@@ -57,8 +81,13 @@ void main() {
       'lib/features/wellness/presentation/fasting_timer_page.dart': 800,
       'lib/features/wellness/presentation/sleep_tracker_experience.dart': 900,
       // Notification delivery is one platform scheduling coordinator;
-      // permissions, copy, preferences, and UI remain in sibling files.
-      'lib/features/notifications/services/bil_notification_service.dart': 925,
+      // permissions, category copy, preferences, and UI remain in sibling
+      // files. The margin covers the audited iOS category-action setup.
+      'lib/features/notifications/services/bil_notification_service.dart': 975,
+      // These preference pages are presentation-only and share the same
+      // guarded save-and-return contract. Persistence and domain rules live
+      // outside this file; keep only a narrow review margin.
+      'lib/features/settings/reference_preferences_pages.dart': 725,
       // These are render-only catalog libraries. Data, verification,
       // entitlement, cache, manifests, and content management are separate.
       'lib/features/wellness/presentation/bil_workout_routines_list.dart': 725,

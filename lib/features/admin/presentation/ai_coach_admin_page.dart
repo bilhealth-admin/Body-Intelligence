@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/router/invalid_route_page.dart';
 import '../services/ai_coach_admin_service.dart';
 import 'admin_notification_controls.dart';
+import 'community_member_access_admin_panel.dart';
+import 'community_moderator_admin_panel.dart';
 
 class AiCoachAdminPage extends ConsumerStatefulWidget {
   const AiCoachAdminPage({super.key});
@@ -15,12 +18,16 @@ class AiCoachAdminPage extends ConsumerStatefulWidget {
 }
 
 class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
+  final _globalFormKey = GlobalKey<FormState>();
   final _individualFormKey = GlobalKey<FormState>();
+  final _globalMessageController = TextEditingController();
   final _emailController = TextEditingController();
   final _reasonController = TextEditingController();
+  final _individualMessageController = TextEditingController();
   bool _resetting = false;
   bool _individualResetting = false;
   String? _pendingIdempotencyKey;
+  String? _pendingGlobalFingerprint;
   String? _pendingIndividualIdempotencyKey;
   String? _pendingIndividualFingerprint;
 
@@ -38,6 +45,51 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
       'tr' => tr,
       _ => context.strings.text(en),
     };
+  }
+
+  Widget _resetMessageField({
+    required Key key,
+    required TextEditingController controller,
+  }) {
+    return TextFormField(
+      key: key,
+      controller: controller,
+      enabled: !_resetting && !_individualResetting,
+      maxLength: 180,
+      maxLines: 3,
+      inputFormatters: [
+        FilteringTextInputFormatter.deny(RegExp(r'[\u0000-\u001F\u007F]')),
+      ],
+      decoration: InputDecoration(
+        labelText: _copy(
+          'Message delivered with the 2,500-token gift',
+          ar: 'الرسالة المرسلة مع هدية 2,500 توكين',
+          fr: 'Message envoyé avec le cadeau de 2 500 jetons',
+          es: 'Mensaje enviado con el regalo de 2.500 tokens',
+          tr: '2.500 token hediyesiyle gönderilecek mesaj',
+        ),
+        hintText: _copy(
+          'Write the exact message members will see',
+          ar: 'اكتب النص الذي سيراه المستخدمون بالضبط',
+          fr: 'Rédigez le message exact que verront les membres',
+          es: 'Escribe el mensaje exacto que verán los miembros',
+          tr: 'Üyelerin göreceği tam mesajı yazın',
+        ),
+      ),
+      validator: (value) {
+        final message = value?.trim() ?? '';
+        if (message.isEmpty) {
+          return _copy(
+            'Write a message before resetting.',
+            ar: 'اكتب رسالة قبل إعادة الضبط.',
+            fr: 'Rédigez un message avant la réinitialisation.',
+            es: 'Escribe un mensaje antes de restablecer.',
+            tr: 'Sıfırlamadan önce bir mesaj yazın.',
+          );
+        }
+        return null;
+      },
+    );
   }
 
   @override
@@ -72,53 +124,61 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
           Card(
             child: Padding(
               padding: const EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.auto_awesome_rounded),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          'AI Coach',
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.w800),
+              child: Form(
+                key: _globalFormKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.auto_awesome_rounded),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'AI Coach',
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      _copy(
+                        'Reset every user’s consumed current-period allowance and grant each account 2,500 non-expiring AI Boost tokens. Period dates, limits, plans, and subscriptions stay unchanged.',
+                        ar: 'صفّر الاستخدام المستهلك في الفترة الحالية لكل المستخدمين وامنح كل حساب 2,500 توكين AI Boost غير منتهية. تبقى تواريخ الفترات والحدود والخطط والاشتراكات دون تغيير.',
+                        fr: 'Réinitialise l’utilisation consommée de la période actuelle et accorde à chaque compte 2 500 jetons AI Boost sans expiration. Les dates, limites, forfaits et abonnements restent inchangés.',
+                        es: 'Restablece el uso consumido del periodo actual y concede a cada cuenta 2.500 tokens AI Boost sin caducidad. Las fechas, límites, planes y suscripciones no cambian.',
+                        tr: 'Herkesin mevcut dönem kullanımını sıfırlar ve her hesaba süresiz 2.500 AI Boost tokeni verir. Dönem tarihleri, limitler, planlar ve abonelikler değişmez.',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _resetMessageField(
+                      key: const Key('admin-ai-coach-global-message'),
+                      controller: _globalMessageController,
+                    ),
+                    const SizedBox(height: 18),
+                    FilledButton.icon(
+                      key: const Key('admin-ai-coach-global-reset'),
+                      onPressed: _resetting ? null : _confirmAndReset,
+                      icon: _resetting
+                          ? const SizedBox.square(
+                              dimension: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.restart_alt_rounded),
+                      label: Text(
+                        _copy(
+                          'Global AI Coach Reset',
+                          ar: 'إعادة ضبط AI Coach للجميع',
+                          fr: 'Réinitialisation globale d’AI Coach',
+                          es: 'Restablecimiento global de AI Coach',
+                          tr: 'Genel AI Coach sıfırlaması',
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    _copy(
-                      'Reset every user’s consumed AI Coach allowance in the current weekly and monthly periods. Period dates, limits, plans, subscriptions, and AI Boost balances stay unchanged.',
-                      ar: 'صفّر استخدام AI Coach المستهلك لكل المستخدمين داخل الفترتين الأسبوعية والشهرية الحاليتين. تبقى تواريخ الفترات والحدود والخطط والاشتراكات وأرصدة AI Boost دون تغيير.',
-                      fr: 'Réinitialise l’utilisation consommée d’AI Coach dans les périodes hebdomadaire et mensuelle actuelles, sans modifier dates, limites, forfaits, abonnements ni soldes AI Boost.',
-                      es: 'Restablece el uso consumido de AI Coach en los periodos semanal y mensual actuales sin cambiar fechas, límites, planes, suscripciones ni saldos de AI Boost.',
-                      tr: 'Her kullanıcının tüketilmiş AI Coach kullanımını mevcut haftalık ve aylık dönemlerde sıfırlar; tarihler, limitler, planlar, abonelikler ve AI Boost bakiyeleri değişmez.',
                     ),
-                  ),
-                  const SizedBox(height: 18),
-                  FilledButton.icon(
-                    key: const Key('admin-ai-coach-global-reset'),
-                    onPressed: _resetting ? null : _confirmAndReset,
-                    icon: _resetting
-                        ? const SizedBox.square(
-                            dimension: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.restart_alt_rounded),
-                    label: Text(
-                      _copy(
-                        'Global AI Coach Reset',
-                        ar: 'إعادة ضبط AI Coach للجميع',
-                        fr: 'Réinitialisation globale d’AI Coach',
-                        es: 'Restablecimiento global de AI Coach',
-                        tr: 'Genel AI Coach sıfırlaması',
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -153,11 +213,11 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
                     const SizedBox(height: 10),
                     Text(
                       _copy(
-                        'Reset only the matching account’s consumed weekly and monthly allowances. The server searches securely, never exposes a UUID or account data, and reports only whether a match was found.',
-                        ar: 'صفّر الاستخدام المستهلك الأسبوعي والشهري للحساب المطابق فقط. يبحث الخادم بأمان، ولا يعرض UUID أو بيانات الحساب، ويخبرك فقط إن وُجد تطابق.',
-                        fr: 'Réinitialise uniquement les quotas hebdomadaire et mensuel consommés du compte correspondant. Le serveur recherche en sécurité, sans exposer d’UUID ni de données, et indique seulement si une correspondance existe.',
-                        es: 'Restablece solo las cuotas semanal y mensual consumidas de la cuenta coincidente. El servidor busca de forma segura, no expone UUID ni datos y solo informa si hubo coincidencia.',
-                        tr: 'Yalnızca eşleşen hesabın tüketilmiş haftalık ve aylık kotalarını sıfırlar. Sunucu güvenle arar, UUID veya hesap verisi göstermez ve yalnızca eşleşme olup olmadığını bildirir.',
+                        'Reset only the matching account’s consumed current-period allowance and grant it 2,500 non-expiring AI Boost tokens. The server returns only whether a match was found.',
+                        ar: 'صفّر الاستخدام المستهلك في الفترة الحالية للحساب المطابق فقط وامنحه 2,500 توكين AI Boost غير منتهية. يعرض الخادم فقط ما إذا وُجد تطابق.',
+                        fr: 'Réinitialise uniquement l’utilisation de la période actuelle du compte correspondant et lui accorde 2 500 jetons AI Boost sans expiration. Le serveur indique seulement si une correspondance existe.',
+                        es: 'Restablece solo el uso del periodo actual de la cuenta coincidente y le concede 2.500 tokens AI Boost sin caducidad. El servidor solo informa si hubo coincidencia.',
+                        tr: 'Yalnızca eşleşen hesabın mevcut dönem kullanımını sıfırlar ve 2.500 süresiz AI Boost tokeni verir. Sunucu yalnızca eşleşme durumunu bildirir.',
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -219,6 +279,10 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
                         return null;
                       },
                     ),
+                    _resetMessageField(
+                      key: const Key('admin-ai-coach-individual-message'),
+                      controller: _individualMessageController,
+                    ),
                     const SizedBox(height: 4),
                     FilledButton.icon(
                       key: const Key('admin-ai-coach-individual-reset'),
@@ -247,6 +311,10 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
             ),
           ),
           const SizedBox(height: 16),
+          const CommunityModeratorAdminPanel(),
+          const SizedBox(height: 16),
+          const CommunityMemberAccessAdminPanel(),
+          const SizedBox(height: 16),
           const AdminNotificationControls(),
         ],
       ),
@@ -257,6 +325,7 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
     if (_individualFormKey.currentState?.validate() != true) return;
     final email = _emailController.text.trim().toLowerCase();
     final reason = _reasonController.text.trim();
+    final message = _individualMessageController.text.trim();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -276,11 +345,11 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
           children: [
             Text(
               _copy(
-                'If a matching account is found, its consumed weekly and monthly AI Coach allowances will reset inside the same current periods and it will receive one gift notice. Only match status is returned.',
-                ar: 'إذا وُجد حساب مطابق، فسيُصفّر استخدام AI Coach الأسبوعي والشهري داخل الفترات الحالية نفسها، وسيصله إشعار هدية واحد. لن يظهر سوى حالة التطابق.',
-                fr: 'Si un compte correspond, ses quotas AI Coach hebdomadaire et mensuel consommés seront remis à zéro dans les mêmes périodes et il recevra un avis cadeau. Seul le statut de correspondance est renvoyé.',
-                es: 'Si se encuentra una cuenta coincidente, sus cuotas semanal y mensual consumidas se restablecerán en los mismos periodos y recibirá un aviso de regalo. Solo se devuelve el estado de coincidencia.',
-                tr: 'Eşleşen bir hesap bulunursa tüketilmiş haftalık ve aylık AI Coach kotaları aynı dönemlerde sıfırlanır ve tek hediye bildirimi gönderilir. Yalnızca eşleşme durumu döner.',
+                'If a matching account is found, its current usage resets and it receives 2,500 non-expiring AI Boost tokens with this message:',
+                ar: 'إذا وُجد حساب مطابق، فسيُصفّر استخدامه الحالي وسيحصل على 2,500 توكين AI Boost غير منتهية مع هذه الرسالة:',
+                fr: 'Si un compte correspond, son utilisation actuelle est réinitialisée et il reçoit 2 500 jetons AI Boost sans expiration avec ce message :',
+                es: 'Si se encuentra una cuenta, se restablece su uso actual y recibe 2.500 tokens AI Boost sin caducidad con este mensaje:',
+                tr: 'Eşleşen hesap bulunursa mevcut kullanımı sıfırlanır ve bu mesajla süresiz 2.500 AI Boost tokeni alır:',
               ),
             ),
             const SizedBox(height: 14),
@@ -289,6 +358,8 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
               key: const Key('admin-ai-coach-individual-confirm-email'),
               style: const TextStyle(fontWeight: FontWeight.w800),
             ),
+            const SizedBox(height: 10),
+            Text(message, key: const Key('admin-ai-coach-confirm-message')),
           ],
         ),
         actions: [
@@ -314,7 +385,7 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
     );
     if (confirmed != true || !mounted || _individualResetting) return;
 
-    final fingerprint = '$email\n$reason';
+    final fingerprint = '$email\n$reason\n$message';
     if (_pendingIndividualFingerprint != fingerprint) {
       _pendingIndividualFingerprint = fingerprint;
       _pendingIndividualIdempotencyKey = 'individual:${const Uuid().v4()}';
@@ -326,6 +397,7 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
           .individualReset(
             email: email,
             reason: reason,
+            message: message,
             idempotencyKey: _pendingIndividualIdempotencyKey!,
           );
       _pendingIndividualIdempotencyKey = null;
@@ -333,6 +405,7 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
       if (matched) {
         _emailController.clear();
         _reasonController.clear();
+        _individualMessageController.clear();
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -344,8 +417,12 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
           ),
           content: Text(
             matched
-                ? context.strings.text(
-                    'The account’s current AI Coach usage was reset safely and one gift notice was sent.',
+                ? _copy(
+                    'The account’s current AI Coach usage was reset safely, 2,500 non-expiring AI Boost tokens were granted, and the message was sent.',
+                    ar: 'تمت إعادة ضبط استخدام AI Coach الحالي للحساب بأمان، ومُنح 2,500 توكين AI Boost غير منتهية، وأُرسلت الرسالة.',
+                    fr: 'L’utilisation actuelle d’AI Coach du compte a été réinitialisée en toute sécurité, 2 500 jetons AI Boost sans expiration ont été accordés et le message a été envoyé.',
+                    es: 'El uso actual de AI Coach de la cuenta se restableció de forma segura, se concedieron 2.500 tokens AI Boost sin vencimiento y se envió el mensaje.',
+                    tr: 'Hesabın mevcut AI Coach kullanımı güvenle sıfırlandı, süresiz 2.500 AI Boost jetonu verildi ve mesaj gönderildi.',
                   )
                 : _copy(
                     'No matching BIL account was found. Nothing was changed.',
@@ -374,6 +451,8 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
   }
 
   Future<void> _confirmAndReset() async {
+    if (_globalFormKey.currentState?.validate() != true) return;
+    final message = _globalMessageController.text.trim();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -387,14 +466,22 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
             tr: 'Genel sıfırlamayı onayla',
           ),
         ),
-        content: Text(
-          _copy(
-            'This immediately restores the consumed weekly and monthly AI Coach allowances for every user inside the same periods and sends one gift notice to each account.',
-            ar: 'سيُعاد فورًا الاستخدام المستهلك الأسبوعي والشهري لـAI Coach لكل مستخدم داخل الفترات نفسها، وسيُرسل إشعار هدية واحد إلى كل حساب.',
-            fr: 'Cette action restaure immédiatement les quotas AI Coach hebdomadaire et mensuel consommés dans les mêmes périodes et envoie un avis cadeau à chaque compte.',
-            es: 'Esta acción restaura de inmediato las cuotas semanal y mensual consumidas en los mismos periodos y envía un aviso de regalo a cada cuenta.',
-            tr: 'Bu işlem tüketilmiş haftalık ve aylık AI Coach kotalarını aynı dönemlerde hemen yeniler ve her hesaba bir hediye bildirimi gönderir.',
-          ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _copy(
+                'This resets current consumed usage, grants every account 2,500 non-expiring AI Boost tokens, and sends this message:',
+                ar: 'سيُصفّر هذا الاستخدام الحالي ويمنح كل حساب 2,500 توكين AI Boost غير منتهية ويرسل هذه الرسالة:',
+                fr: 'Cette action réinitialise l’utilisation actuelle, accorde à chaque compte 2 500 jetons AI Boost sans expiration et envoie ce message :',
+                es: 'Esta acción restablece el uso actual, concede a cada cuenta 2.500 tokens AI Boost sin caducidad y envía este mensaje:',
+                tr: 'Bu işlem mevcut kullanımı sıfırlar, her hesaba süresiz 2.500 AI Boost tokeni verir ve şu mesajı gönderir:',
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(message, key: const Key('admin-ai-coach-confirm-message')),
+          ],
         ),
         actions: [
           TextButton(
@@ -427,24 +514,32 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
     );
     if (confirmed != true || !mounted || _resetting) return;
 
+    if (_pendingGlobalFingerprint != message) {
+      _pendingGlobalFingerprint = message;
+      _pendingIdempotencyKey = 'admin:${const Uuid().v4()}';
+    }
     setState(() => _resetting = true);
-    _pendingIdempotencyKey ??= 'admin:${const Uuid().v4()}';
     try {
       final result = await ref
           .read(aiCoachAdminGatewayProvider)
-          .globalReset(_pendingIdempotencyKey!);
+          .globalReset(
+            message: message,
+            idempotencyKey: _pendingIdempotencyKey!,
+          );
       _pendingIdempotencyKey = null;
+      _pendingGlobalFingerprint = null;
+      _globalMessageController.clear();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           key: const Key('admin-ai-coach-reset-success'),
           content: Text(
             _copy(
-              'AI Coach was reset safely. ${result.usersNotified} users were notified.',
-              ar: 'تمت إعادة ضبط AI Coach بأمان، وإشعار ${result.usersNotified} مستخدمًا.',
-              fr: 'AI Coach a été réinitialisé en toute sécurité. ${result.usersNotified} utilisateurs ont été notifiés.',
-              es: 'AI Coach se restableció de forma segura. Se notificó a ${result.usersNotified} usuarios.',
-              tr: 'AI Coach güvenle sıfırlandı. ${result.usersNotified} kullanıcı bilgilendirildi.',
+              'AI Coach was reset safely. ${result.usersNotified} users received 2,500 tokens and the message.',
+              ar: 'تمت إعادة ضبط AI Coach بأمان، وتلقى ${result.usersNotified} مستخدمًا 2,500 توكين والرسالة.',
+              fr: 'AI Coach a été réinitialisé en toute sécurité. ${result.usersNotified} utilisateurs ont reçu 2 500 jetons et le message.',
+              es: 'AI Coach se restableció de forma segura. ${result.usersNotified} usuarios recibieron 2.500 tokens y el mensaje.',
+              tr: 'AI Coach güvenle sıfırlandı. ${result.usersNotified} kullanıcı 2.500 tokeni ve mesajı aldı.',
             ),
           ),
         ),
@@ -471,8 +566,10 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
 
   @override
   void dispose() {
+    _globalMessageController.dispose();
     _emailController.dispose();
     _reasonController.dispose();
+    _individualMessageController.dispose();
     super.dispose();
   }
 }

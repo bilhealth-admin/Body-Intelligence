@@ -65,6 +65,12 @@ Future<void> _loadRobotoIntoTestFamily() async {
     ..addFont(bytes(projectArabicBold));
   final icons = FontLoader('MaterialIcons')
     ..addFont(bytes(File('${fontDirectory.path}/materialicons-regular.otf')));
+  // Platform-aware production glyphs need their real font too; without this,
+  // an iOS-themed golden can silently capture fallback/tofu instead of icons.
+  final cupertinoIcons = FontLoader('packages/cupertino_icons/CupertinoIcons')
+    ..addFont(
+      rootBundle.load('packages/cupertino_icons/assets/CupertinoIcons.ttf'),
+    );
   final arabic = FontLoader('NotoArabicEvidence')
     ..addFont(bytes(projectArabicRegular))
     ..addFont(bytes(projectArabicBold));
@@ -88,6 +94,7 @@ Future<void> _loadRobotoIntoTestFamily() async {
     productionArabic.load(),
     bilDisplay.load(),
     icons.load(),
+    cupertinoIcons.load(),
   ]);
 }
 

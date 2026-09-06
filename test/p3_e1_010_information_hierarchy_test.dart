@@ -43,7 +43,10 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       final database = AppDatabase.forTesting(NativeDatabase.memory());
-      addTearDown(database.close);
+      var databaseClosed = false;
+      addTearDown(() async {
+        if (!databaseClosed) await database.close();
+      });
 
       final initialDate = DateTime(2026, 7, 18);
       final dailyLog = DailyLog(
@@ -132,6 +135,18 @@ void main() {
         find.byKey(const Key('daily_log_save_primary_action')),
         findsOneWidget,
       );
+
+      // Unmount Riverpod before the binding verifies timer invariants. Drift
+      // closes each watched query through a zero-duration timer when its
+      // provider is disposed, so cleanup pumps are required to drain those
+      // deterministic cleanup callbacks.
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+      await tester.pump(Duration.zero);
+      await tester.idle();
+      await database.close();
+      databaseClosed = true;
+      await tester.pump();
     },
   );
 

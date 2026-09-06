@@ -5,6 +5,10 @@ The complete visual/evidence suite remains in the repository and in verify.yml.
 Signed release jobs use this runner because the files below either compare
 platform-specific raster output or require local, untracked audit artifacts.
 Every other Flutter test is still executed.
+
+The performance budget runs first in its own serial invocation so concurrent
+test workers cannot distort its timing measurements. Its budgets are unchanged,
+and any failure stops the release suite without retries.
 """
 
 from __future__ import annotations
@@ -53,6 +57,8 @@ EXCLUDED_TESTS = frozenset(
     }
 )
 
+PERFORMANCE_BUDGET_TEST = "test/performance_budget_test.dart"
+
 
 def discover_tests() -> tuple[list[str], list[str]]:
     all_tests = sorted(
@@ -74,35 +80,70 @@ def discover_tests() -> tuple[list[str], list[str]]:
     return all_tests, portable
 
 
-def main() -> int:
+def partition_tests(portable: list[str]) -> tuple[list[str], list[str]]:
+    if len(portable) != len(set(portable)):
+        raise SystemExit("Portable release test discovery returned duplicate paths.")
+    if PERFORMANCE_BUDGET_TEST not in portable:
+        raise SystemExit("Portable release performance budget test is missing.")
+    return [PERFORMANCE_BUDGET_TEST], [
+        path for path in portable if path != PERFORMANCE_BUDGET_TEST
+    ]
+
+
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--list-only",
         action="store_true",
         help="validate and print suite counts without invoking Flutter",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     all_tests, portable = discover_tests()
-    print(f"PORTABLE_RELEASE_ALL_TEST_FILES={len(all_tests)}")
-    print(f"PORTABLE_RELEASE_EXCLUDED_TEST_FILES={len(EXCLUDED_TESTS)}")
-    print(f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={len(portable)}")
+    performance_tests, remaining_tests = partition_tests(portable)
+    print(f"PORTABLE_RELEASE_ALL_TEST_FILES={len(all_tests)}", flush=True)
+    print(f"PORTABLE_RELEASE_EXCLUDED_TEST_FILES={len(EXCLUDED_TESTS)}", flush=True)
+    print(f"PORTABLE_RELEASE_SCHEDULED_TEST_FILES={len(portable)}", flush=True)
+    print(
+        f"PORTABLE_RELEASE_PERFORMANCE_SCHEDULED_TEST_FILES={len(performance_tests)}",
+        flush=True,
+    )
+    print(
+        f"PORTABLE_RELEASE_REMAINING_SCHEDULED_TEST_FILES={len(remaining_tests)}",
+        flush=True,
+    )
 
     if args.list_only:
+        print("PORTABLE_RELEASE_EXECUTED_TEST_FILES=0", flush=True)
         return 0
 
-    completed = subprocess.run(
-        [
-            "flutter",
-            "test",
-            "--no-pub",
-            "--timeout",
-            "30s",
-            *portable,
-        ],
+    command = [
+        "flutter",
+        "test",
+        "--no-pub",
+        "--timeout",
+        "30s",
+    ]
+    print("PORTABLE_RELEASE_PHASE=performance_serial", flush=True)
+    performance = subprocess.run(
+        [*command, "--concurrency", "1", *performance_tests],
         cwd=REPOSITORY_ROOT,
         check=False,
     )
+    if performance.returncode != 0 or not remaining_tests:
+        print(
+            f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={len(performance_tests)}",
+            flush=True,
+        )
+        return performance.returncode
+
+    print("PORTABLE_RELEASE_PHASE=remaining_portable", flush=True)
+    completed = subprocess.run(
+        [*command, *remaining_tests],
+        cwd=REPOSITORY_ROOT,
+        check=False,
+    )
+    print(f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={len(portable)}", flush=True)
     return completed.returncode
 
 

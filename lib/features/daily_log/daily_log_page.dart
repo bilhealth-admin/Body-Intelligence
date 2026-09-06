@@ -16,10 +16,13 @@ import '../../data/repositories/nutrition_goal_schedule_repository.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/localization/bil_locale_policy.dart';
 import '../../app/localization/runtime_copy.dart';
+import '../../app/theme/bil_semantic_icons.dart';
 import '../../app/theme/premium_design_tokens.dart';
 import '../../app/services/runtime_permission_policy.dart';
+import '../../app/services/recoverable_image_picker.dart';
 import '../../app/services/store_review_prompt_service.dart';
 import '../../shared/widgets/actionable_error_state.dart';
+import '../../shared/widgets/bil_camera_capture_page.dart';
 import '../../shared/widgets/premium_surface.dart';
 import '../foods/providers/food_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
@@ -30,7 +33,6 @@ import '../commerce/presentation/premium_nutrition_glass.dart';
 import '../ads/presentation/safe_free_ad_anchor.dart';
 import '../settings/premium_meal_features_page.dart';
 import '../community/presentation/product_review_submission_dialog.dart';
-import '../nutrition/presentation/food_barcode_scanner_page.dart';
 import '../nutrition/presentation/product_identity_copy.dart';
 import '../nutrition/presentation/barcode_food_review_dialog.dart';
 import '../nutrition/presentation/barcode_runtime_copy.dart';
@@ -44,6 +46,7 @@ import '../nutrition/services/bil_speech_to_text.dart';
 import '../connected_health/food_name_health_sync_policy.dart';
 import '../global_platform/core/global_platform_core.dart';
 import '../global_platform/runtime/global_product_composition_root.dart';
+import 'daily_log_capture_providers.dart';
 import 'providers/daily_log_provider.dart';
 import 'presentation/daily_log_summary_widgets.dart';
 import 'presentation/daily_log_input_sections.dart';
@@ -144,31 +147,6 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     }
   }
 
-  void _focusMealEntry() {
-    final mealContext = mealEntryKey.currentContext;
-    if (!mounted || mealContext == null) return;
-    mealFocusApplied = true;
-    Scrollable.ensureVisible(
-      mealContext,
-      alignment: 0,
-      duration: MediaQuery.disableAnimationsOf(context)
-          ? Duration.zero
-          : const Duration(milliseconds: 280),
-      curve: Curves.easeOutCubic,
-    );
-  }
-
-  void _leaveMealDetail() {
-    if (widget.focusMealEntry) {
-      context.go(widget.returnPath ?? '/daily-log');
-      return;
-    }
-    _updateState(() {
-      selectedFood = null;
-      mealSearchActive = false;
-    });
-  }
-
   @override
   void dispose() {
     notes.dispose();
@@ -177,15 +155,6 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     foodSearch.dispose();
     scrollController.dispose();
     super.dispose();
-  }
-
-  bool get _arabic =>
-      Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
-
-  String _tr(String en, String ar) {
-    final locale = Localizations.localeOf(context).languageCode.toLowerCase();
-    if (locale == 'ar') return ar;
-    return _dailyLogCopy[en]?[locale] ?? context.strings.text(en);
   }
 
   @override
@@ -198,6 +167,11 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
     final goalSchedule =
         ref.watch(nutritionGoalScheduleProvider).value ??
         const NutritionGoalSchedule();
+    final dailyGoal = resolveDailyNutritionGoal(
+      schedule: goalSchedule,
+      date: date,
+      defaultGoal: ref.watch(defaultNutritionGoalTargetProvider),
+    );
     final verifiedSubscription = ref.watch(verifiedSubscriptionStateProvider);
     final premiumMealFeatures =
         verifiedSubscription.value?.grants(
@@ -406,7 +380,19 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                         const SizedBox(height: 12),
                         DailyMealDetailSummary(
                           meal: focusedMeal,
-                          calorieGoal: mealCalorieGoals[mealType],
+                          calorieGoal:
+                              goalSchedule.mealTargets[mealType]?.calories ??
+                              mealCalorieGoals[mealType] ??
+                              dailyGoal?.calories,
+                          carbsGoal:
+                              (goalSchedule.mealTargets[mealType] ?? dailyGoal)
+                                  ?.carbsGrams,
+                          proteinGoal:
+                              (goalSchedule.mealTargets[mealType] ?? dailyGoal)
+                                  ?.proteinGrams,
+                          fatGoal:
+                              (goalSchedule.mealTargets[mealType] ?? dailyGoal)
+                                  ?.fatGrams,
                         ),
                         const SizedBox(height: 12),
                         DailyMealDetailItems(
@@ -487,7 +473,10 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                           arabic: _arabic,
                           meals: meals.value ?? const [],
                           water: waterEntries.value ?? const [],
-                          calorieGoal: goalSchedule.targetFor(date)?.calories,
+                          calorieGoal: dailyGoal?.calories,
+                          carbsGoal: dailyGoal?.carbsGrams,
+                          proteinGoal: dailyGoal?.proteinGrams,
+                          fatGoal: dailyGoal?.fatGrams,
                         ),
                         const SizedBox(height: 12),
                         Row(
@@ -498,7 +487,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                 key: const Key('daily-log-copy-previous-day'),
                                 child: _DiaryActionButton(
                                   key: const Key('daily-log-action-copy'),
-                                  icon: Icons.copy_all_rounded,
+                                  kind: BilSemanticIconKind.calendar,
                                   label: _tr('Copy from', 'نسخ من'),
                                   onPressed: mutationBusy
                                       ? null
@@ -512,7 +501,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                                 key: const Key('daily-log-edit-settings'),
                                 child: _DiaryActionButton(
                                   key: const Key('daily-log-action-edit'),
-                                  icon: Icons.edit_outlined,
+                                  kind: BilSemanticIconKind.preferences,
                                   label: _tr('Edit', 'تعديل'),
                                   onPressed: mutationBusy
                                       ? null
@@ -554,7 +543,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                         showFoodInsights: showFoodInsights,
                         showFoodTimestamps: showFoodTimestamps,
                         useNetCarbs: useNetCarbs,
-                        dailyGoal: goalSchedule.targetFor(date),
+                        dailyGoal: dailyGoal,
                         mealGoals: goalSchedule.mealTargets,
                         mealCalorieGoals: mealCalorieGoals,
                         mealMacroDisplay: mealMacroDisplay,
@@ -593,7 +582,12 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                         padding: EdgeInsets.zero,
                         child: ListTile(
                           contentPadding: PremiumDesignTokens.cardPaddingLarge,
-                          leading: const Icon(Icons.accessibility_new_rounded),
+                          leading: BilSemanticIconBadge(
+                            kind: BilSemanticIconKind.health,
+                            size: 40,
+                            iconSize: 22,
+                            shape: BoxShape.rectangle,
+                          ),
                           title: Text(_tr('Body context', 'سياق الجسم')),
                           subtitle: Text(
                             _tr(

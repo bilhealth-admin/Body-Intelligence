@@ -31,12 +31,8 @@ void main() {
     for (final excluded in const ['awake', 'inBed', 'unknown', 'unspecified']) {
       expect(page, contains("'$excluded'"));
     }
-    expect(
-      page,
-      contains(
-        'Sleep stages appear only when a connected device supplies measured stage records.',
-      ),
-    );
+    expect(page, isNot(contains('Sleep stages appear only when')));
+    expect(page, contains("Key('sleep-connect-health')"));
   });
 
   test('connected signal view preserves native stage evidence', () {

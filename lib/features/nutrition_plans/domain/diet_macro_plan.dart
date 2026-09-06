@@ -8,6 +8,12 @@ enum DietFatLevel { lighter, medium, richer }
 /// and rebalances the other two macros inside the fixed calorie target.
 enum DietMacroComponent { carbs, protein, fat }
 
+/// User-facing diet-plan grams are intentionally shown as whole numbers.
+///
+/// Allocation and persistence continue to use the original [double] values so
+/// rounding the UI never introduces calorie drift into the saved plan.
+int roundedDietMacroGrams(double grams) => grams.round();
+
 extension DietFatLevelAllocation on DietFatLevel {
   /// Share of the non-carbohydrate calories assigned to fat.
   /// The balance is assigned to protein so total energy remains fixed.

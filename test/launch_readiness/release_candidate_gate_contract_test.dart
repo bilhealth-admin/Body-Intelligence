@@ -5,13 +5,17 @@ import 'package:flutter_test/flutter_test.dart';
 String read(String path) => File(path).readAsStringSync();
 
 void main() {
-  test('release candidate identity and version are frozen', () {
+  test('build-8 identity is exact while current candidate is not accepted', () {
     final pubspec = read('pubspec.yaml');
     final android = read('android/app/build.gradle.kts');
     final apple = read('ios/Runner.xcodeproj/project.pbxproj');
     final gate = read('docs/launch_readiness/BIL_RELEASE_CANDIDATE_GATE.md');
+    final androidWorkflow = read(
+      '.github/workflows/bil_android_release_candidate.yml',
+    );
+    final iosWorkflow = read('.github/workflows/bil_ios_signed_release.yml');
 
-    expect(pubspec, contains('version: 1.0.0+5'));
+    expect(pubspec, contains('version: 1.0.0+8'));
     expect(
       android,
       contains('applicationId = "com.bilhealth.bodyintelligencelog"'),
@@ -24,7 +28,12 @@ void main() {
         'PRODUCT_BUNDLE_IDENTIFIER = com.bilhealth.bodyintelligencelog;',
       ),
     );
-    expect(gate, contains('71bea9c806b08a1dd40df6a342fc46afe6b7d565'));
+    expect(gate, contains('CURRENT_PLUS8_CANDIDATE_ACCEPTED: FALSE'));
+    expect(gate, isNot(contains('## Accepted parent')));
+    expect(androidWorkflow, contains('(( BUILD_NUMBER == 8 ))'));
+    expect(iosWorkflow, contains('(( BUILD_NUMBER == 8 ))'));
+    expect(androidWorkflow, contains('build 7 must never be promoted'));
+    expect(iosWorkflow, contains('build 7 must never be selected'));
   });
 
   test('all accepted launch boundaries remain present', () {
@@ -55,5 +64,19 @@ void main() {
     expect(gate, contains('SHA-256'));
     expect(gate, contains('not an authorized upload artifact'));
     expect(gate, contains('Passing this gate does not claim public launch'));
+  });
+
+  test('owner runtime waiver preserves source and signed-artifact gates', () {
+    final gate = read('docs/launch_readiness/BIL_RELEASE_CANDIDATE_GATE.md');
+    expect(gate, contains('NOT_RUN_OWNER_WAIVED'));
+    expect(gate, contains('exclusions are not passes'));
+    expect(gate, contains('tool/release/run_portable_release_tests.py'));
+    expect(gate, contains('signing, entitlements, and store requirements'));
+    expect(
+      gate,
+      isNot(contains('four platform/form-factor\nruntime reports exist')),
+    );
+    expect(gate, contains('Source-only freeze acceptance'));
+    expect(gate, contains('actual signed-artifact verification'));
   });
 }

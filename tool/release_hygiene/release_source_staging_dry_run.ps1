@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [string]$OutputPath = 'artifacts/release/source_hygiene/2026-08-31/release-source-manifest.json',
-    [switch]$NoWrite
+    [switch]$NoWrite,
+    [switch]$RunSecretScannerContract
 )
 
 $ErrorActionPreference = 'Stop'
@@ -25,6 +26,48 @@ function Normalize-StatusPath {
 
 function Classify-Path {
     param([Parameter(Mandatory)][string]$Path)
+
+    if ($Path -in @(
+            '.gitignore',
+            '.gitattributes',
+            'wrangler.site.jsonc'
+        )) {
+        return [ordered]@{
+            decision = 'INCLUDE'
+            category = 'release_repository_control'
+            reason = 'Exact reviewed repository control required by the release contracts; no broader root-file allowlist is permitted.'
+        }
+    }
+
+    if ($Path -in @(
+            'artifacts/brand/bil_launch_badge.svg',
+            'artifacts/brand/bil_splash_preview_1080x2400.png',
+            'store_assets/evidence/asset_evidence_matrix.csv',
+            'store_assets/evidence/asset_evidence_matrix.json',
+            'store_assets/evidence/preview_index.html',
+            'store_assets/evidence/sha256_manifest.txt',
+            'store_assets/evidence/store_asset_inventory.csv',
+            'store_assets/graphics/brand/bil_emblem_master.png',
+            'store_assets/graphics/brand/bil_horizontal_dark.png',
+            'store_assets/graphics/brand/bil_horizontal_light.png',
+            'store_assets/graphics/google_play/feature_graphic.png',
+            'store_assets/graphics/plans/free.png',
+            'store_assets/graphics/plans/plus.png',
+            'store_assets/graphics/plans/pro.png',
+            'store_assets/source/BIL-Brand-Assets-v1/01-bil-app-icon.png',
+            'store_assets/source/BIL-Brand-Assets-v1/02-bil-splash.png',
+            'store_assets/source/BIL-Brand-Assets-v1/03-bil-horizontal-logo.png',
+            'store_assets/source/BIL-Brand-Assets-v1/04-bil-onboarding-hero.png',
+            'store_assets/source/BIL-Brand-Assets-v1/05-bil-store-feature-graphic.png',
+            'store_assets/source/BIL-Brand-Assets-v1/06-bil-free-plus-pro.png',
+            'store_assets/source/BIL-Brand-Assets-v1/README.md'
+        )) {
+        return [ordered]@{
+            decision = 'INCLUDE'
+            category = 'owner_controlled_brand_evidence_delta'
+            reason = 'Exact already-dirty owner-controlled brand/store evidence delta; classification neither changes assets nor allowlists either parent directory.'
+        }
+    }
 
     if ($Path -in @(
             'artifacts/release/epic14/commit_epic14.ps1',
@@ -57,6 +100,20 @@ function Classify-Path {
             reason = 'Local Codex skills and lock metadata are workstation tooling, not application release source.'
         }
     }
+    if ($Path -match '^\.codex_supabase_fetch_probe_20260901_2320/') {
+        return [ordered]@{
+            decision = 'EXCLUDE'
+            category = 'local_supabase_fetch_probe'
+            reason = 'Exact local schema-fetch probe root is diagnostic evidence, not canonical Supabase migration source.'
+        }
+    }
+    if ($Path -eq 'macos/Flutter/GeneratedPluginRegistrant.swift') {
+        return [ordered]@{
+            decision = 'EXCLUDE'
+            category = 'generated_out_of_scope_platform_file'
+            reason = 'Generated macOS plugin registration is outside the iOS and Android +8 release candidate.'
+        }
+    }
     if ($Path -match '^test/emulator_qa/') {
         return [ordered]@{
             decision = 'EXCLUDE'
@@ -71,11 +128,42 @@ function Classify-Path {
             reason = 'Generated test failure images and diagnostics are local evidence, not approved golden baselines.'
         }
     }
+    if ($Path -in @(
+            'videos/bil-splash-motion/index.html',
+            'videos/bil-splash-motion/render-manifest.json'
+        )) {
+        return [ordered]@{
+            decision = 'INCLUDE'
+            category = 'splash_runtime_contract_input'
+            reason = 'Exact composition identity and pinned render manifest consumed by the tracked splash release contract.'
+        }
+    }
     if ($Path -match '^videos/bil-splash-motion/') {
         return [ordered]@{
             decision = 'EXCLUDE'
             category = 'media_authoring_archive'
             reason = 'Splash authoring project and render proofs; the reviewed runtime MP4 is assets/branding/bil_splash_motion.mp4.'
+        }
+    }
+    if ($Path -match '^videos/bil-product-launch/') {
+        return [ordered]@{
+            decision = 'EXCLUDE'
+            category = 'product_launch_media_authoring_archive'
+            reason = 'The exact product-launch authoring workspace is incomplete local media evidence and is not consumed by the app candidate.'
+        }
+    }
+
+    if ($Path -in @(
+            'tool/bil_mic_end_preview.wav',
+            'tool/bil_mic_end_vibration_preview.wav',
+            'tool/bil_mic_open_preview.wav',
+            'tool/bil_mic_open_vibration_preview.wav',
+            'tool/bil_mic_tap_preview.wav'
+        )) {
+        return [ordered]@{
+            decision = 'EXCLUDE'
+            category = 'local_audio_preview'
+            reason = 'Exact workstation-only audio preview; release sounds live under the Android and iOS platform trees.'
         }
     }
 
@@ -193,6 +281,100 @@ function Get-HeadBlobMetadata {
     }
 }
 
+function Test-IsExactPemDelimiterValidationLiteral {
+    param(
+        [Parameter(Mandatory)][string]$Text,
+        [Parameter(Mandatory)][System.Text.RegularExpressions.Match]$Match
+    )
+
+    if ($Match.Value -notmatch '^-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----$' -and
+        $Match.Value -notmatch '^-----END (?:RSA |EC |OPENSSH )?PRIVATE KEY-----$') {
+        return $false
+    }
+    if ($Match.Index -lt 1) {
+        return $false
+    }
+
+    $openingQuote = $Text[$Match.Index - 1]
+    if ($openingQuote -ne '"' -and $openingQuote -ne "'") {
+        return $false
+    }
+    $closingQuoteIndex = $Match.Index + $Match.Length
+    if ($closingQuoteIndex -ge $Text.Length -or $Text[$closingQuoteIndex] -ne $openingQuote) {
+        return $false
+    }
+
+    $prefixLength = $Match.Index - 1
+    $prefixStart = [Math]::Max(0, $prefixLength - 96)
+    $prefix = $Text.Substring($prefixStart, $prefixLength - $prefixStart)
+    $validationMethod = if ($Match.Value.StartsWith('-----BEGIN ')) {
+        'startsWith'
+    } else {
+        'endsWith'
+    }
+    $validationPattern = '\.' + [regex]::Escape($validationMethod) + '\(\s*$'
+    if ($prefix -notmatch $validationPattern) {
+        return $false
+    }
+
+    $suffixStart = $closingQuoteIndex + 1
+    $suffixLength = [Math]::Min(32, $Text.Length - $suffixStart)
+    $suffix = $Text.Substring($suffixStart, $suffixLength)
+    return $suffix -match '^\s*\)'
+}
+
+function Get-TextSecretFinding {
+    param([Parameter(Mandatory)][AllowEmptyString()][string]$Text)
+
+    $findings = [System.Collections.Generic.List[string]]::new()
+    $privateKeyDelimiterPattern = '-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----'
+    foreach ($match in [regex]::Matches($Text, $privateKeyDelimiterPattern)) {
+        if (!(Test-IsExactPemDelimiterValidationLiteral -Text $Text -Match $match)) {
+            $findings.Add('private_key')
+            break
+        }
+    }
+
+    if (!$findings.Contains('private_key')) {
+        $concatenatedStringExpressionPattern = @'
+(?:"[^"\r\n]*"|'[^'\r\n]*')(?:\s*\+\s*(?:"[^"\r\n]*"|'[^'\r\n]*'))+
+'@.Trim()
+        $quotedStringPattern = @'
+"(?<double>[^"\r\n]*)"|'(?<single>[^'\r\n]*)'
+'@.Trim()
+        foreach ($expression in [regex]::Matches($Text, $concatenatedStringExpressionPattern)) {
+            $joinedBuilder = [Text.StringBuilder]::new()
+            foreach ($literal in [regex]::Matches($expression.Value, $quotedStringPattern)) {
+                if ($literal.Groups['double'].Success) {
+                    [void]$joinedBuilder.Append($literal.Groups['double'].Value)
+                } else {
+                    [void]$joinedBuilder.Append($literal.Groups['single'].Value)
+                }
+            }
+            $joined = $joinedBuilder.ToString()
+            if ($joined -match $privateKeyDelimiterPattern) {
+                $findings.Add('private_key')
+                break
+            }
+        }
+    }
+
+    $patterns = [ordered]@{
+        google_api_key = 'AIza[0-9A-Za-z_-]{30,}'
+        github_token = 'gh[pousr]_[0-9A-Za-z]{30,}'
+        openai_style_key = 'sk-(?:proj-)?[0-9A-Za-z_-]{24,}'
+        supabase_access_token = 'sbp_[0-9A-Za-z]{30,}'
+        jwt_like_secret = 'eyJ[0-9A-Za-z_-]{20,}\.[0-9A-Za-z_-]{20,}\.[0-9A-Za-z_-]{20,}'
+        uuid_colon_secret = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9a-fA-F]{24,}'
+    }
+    foreach ($entry in $patterns.GetEnumerator()) {
+        if ($text -match $entry.Value) {
+            $findings.Add($entry.Key)
+        }
+    }
+    return @($findings)
+}
+
 function Get-ContentSecretFinding {
     param([Parameter(Mandatory)][string]$Path)
 
@@ -213,22 +395,45 @@ function Get-ContentSecretFinding {
     }
 
     $text = [IO.File]::ReadAllText($file.FullName)
-    $findings = [System.Collections.Generic.List[string]]::new()
-    $patterns = [ordered]@{
-        private_key = '-----BEGIN (RSA |EC |OPENSSH |PRIVATE )?PRIVATE KEY-----'
-        google_api_key = 'AIza[0-9A-Za-z_-]{30,}'
-        github_token = 'gh[pousr]_[0-9A-Za-z]{30,}'
-        openai_style_key = 'sk-(?:proj-)?[0-9A-Za-z_-]{24,}'
-        supabase_access_token = 'sbp_[0-9A-Za-z]{30,}'
-        jwt_like_secret = 'eyJ[0-9A-Za-z_-]{20,}\.[0-9A-Za-z_-]{20,}\.[0-9A-Za-z_-]{20,}'
-        uuid_colon_secret = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}:[0-9a-fA-F]{24,}'
+    return @(Get-TextSecretFinding -Text $text)
+}
+
+function Invoke-SecretScannerContract {
+    param([Parameter(Mandatory)][string]$FixturePath)
+
+    $fixture = Get-Content -Raw -LiteralPath $FixturePath | ConvertFrom-Json
+    if ($fixture.schema_version -ne 1) {
+        throw 'SECRET_SCANNER_CONTRACT_FAILED: unsupported fixture schema.'
     }
-    foreach ($entry in $patterns.GetEnumerator()) {
-        if ($text -match $entry.Value) {
-            $findings.Add($entry.Key)
+    $cases = @($fixture.cases)
+    if ($cases.Count -lt 9) {
+        throw 'SECRET_SCANNER_CONTRACT_FAILED: expected positive and negative fixtures.'
+    }
+
+    foreach ($case in $cases) {
+        $name = [string]$case.name
+        try {
+            $text = [Text.Encoding]::UTF8.GetString(
+                [Convert]::FromBase64String([string]$case.text_base64)
+            )
+        } catch {
+            throw "SECRET_SCANNER_CONTRACT_FAILED: invalid fixture encoding: $name"
+        }
+        $actual = @(Get-TextSecretFinding -Text $text | Sort-Object -Unique)
+        $expected = @($case.expected_findings | ForEach-Object { [string]$_ } | Sort-Object -Unique)
+        if (($actual -join ',') -ne ($expected -join ',')) {
+            throw "SECRET_SCANNER_CONTRACT_FAILED: $name expected=$($expected -join ',') actual=$($actual -join ',')"
         }
     }
-    return @($findings)
+
+    Write-Host "SECRET_SCANNER_CONTRACT_CASES=$($cases.Count)"
+    Write-Host 'SECRET_SCANNER_CONTRACT=PASS'
+}
+
+if ($RunSecretScannerContract) {
+    $fixturePath = Join-Path $repositoryRoot 'test/fixtures/release/source_hygiene_secret_scanner_contract.json'
+    Invoke-SecretScannerContract -FixturePath $fixturePath
+    return
 }
 
 try {

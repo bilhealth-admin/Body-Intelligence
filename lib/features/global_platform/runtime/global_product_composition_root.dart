@@ -82,6 +82,10 @@ final class GlobalNativeIntegrationHost {
 
     final store = SqliteGlobalPlatformStore(opened);
     _store = store;
+    final isIos = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+    final isAndroid =
+        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+    final isMobileNative = isIos || isAndroid;
     appleHealth = AppleHealthRuntime.methodChannel(store: store, audit: audit);
     healthConnect = HealthConnectRuntime.methodChannel(
       store: store,
@@ -93,20 +97,22 @@ final class GlobalNativeIntegrationHost {
     );
     const nativeCredentials = NativeWearableCredentialBroker();
     final nativeWearables = <WearableProvider>[
-      ProviderWearableAdapter(
-        vendor: WearableVendor.appleWatch,
-        credentials: nativeCredentials,
-        api: AppleWatchWearableApi(platformTransport),
-        store: store,
-        audit: audit,
-      ),
-      ProviderWearableAdapter(
-        vendor: WearableVendor.wearOs,
-        credentials: nativeCredentials,
-        api: WearOsWearableApi(platformTransport),
-        store: store,
-        audit: audit,
-      ),
+      if (isIos)
+        ProviderWearableAdapter(
+          vendor: WearableVendor.appleWatch,
+          credentials: nativeCredentials,
+          api: AppleWatchWearableApi(platformTransport),
+          store: store,
+          audit: audit,
+        ),
+      if (isAndroid)
+        ProviderWearableAdapter(
+          vendor: WearableVendor.wearOs,
+          credentials: nativeCredentials,
+          api: WearOsWearableApi(platformTransport),
+          store: store,
+          audit: audit,
+        ),
       ...configuration.additionalWearableProviders,
     ];
 
@@ -193,11 +199,6 @@ final class GlobalNativeIntegrationHost {
     final boldFont = (await rootBundle.load(
       'assets/fonts/NotoNaskhArabic-Bold.ttf',
     )).buffer.asUint8List();
-
-    final isIos = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
-    final isAndroid =
-        !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
-    final isMobileNative = isIos || isAndroid;
 
     productFlows = GlobalProductFlows(
       appleHealth: appleHealth!,

@@ -15,12 +15,14 @@ import 'app/analytics/bil_launch_event.dart';
 import 'app/localization/app_localizations.dart';
 import 'app/localization/bil_locale_policy.dart';
 import 'app/router/app_router.dart';
-import 'app/security/bil_play_integrity_service.dart';
 import 'app/services/app_switcher_privacy_shield.dart';
 import 'app/services/app_observability.dart';
 import 'app/services/app_settings_provider.dart';
+import 'app/services/recoverable_image_picker.dart';
 import 'features/ads/presentation/ad_runtime_bootstrap.dart';
+import 'features/auth/apple_credential_lifecycle.dart';
 import 'features/auth/bil_auth_callback_controller.dart';
+import 'features/auth/oauth_browser_return.dart';
 import 'features/notifications/services/inactivity_reminder_coordinator.dart';
 import 'features/notifications/presentation/ai_coach_reset_notice_coordinator.dart';
 import 'features/startup/premium_splash_experience.dart';
@@ -53,6 +55,7 @@ Future<void> main() async {
   // best-effort fallback and therefore belongs after the first frame.
   WidgetsBinding.instance.addPostFrameCallback((_) {
     unawaited(_predecodeLaunchWordmark());
+    unawaited(BilRecoverableImagePicker.instance.recoverAtStartup());
   });
   runApp(const ProviderScope(child: _BILBootstrap()));
 }
@@ -130,19 +133,6 @@ class _BILBootstrapState extends State<_BILBootstrap> {
     if (mounted) setState(() => ready = true);
     try {
       await cloudInitialization;
-      if (Supabase.instance.client.auth.currentSession != null) {
-        // Play Integrity may bind Google Play services on Android's main
-        // thread. Defer that optional observation until BIL has painted its
-        // first real app frame so the native launch screen can disappear.
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          unawaited(
-            BilPlayIntegrityService.instance.observe(
-              action: 'session.bootstrap',
-              payload: const <String, Object?>{'phase': 'closed_testing'},
-            ),
-          );
-        });
-      }
     } catch (error, stack) {
       AppObservability.crashes.record(error, stack);
       // Local data, onboarding and the dashboard remain usable. Cloud actions
@@ -229,6 +219,7 @@ class _BILLinkBootstrap extends StatefulWidget {
 class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
   late final BilIncomingLinkController _controller;
   late final BilAuthCallbackController _authController;
+  late final BilSerialUriDispatcher _uriDispatcher;
   StreamSubscription<Uri>? _linkSubscription;
 
   @override
@@ -241,6 +232,7 @@ class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
     );
     _authController = BilAuthCallbackController(
       resolve: (uri) async {
+        await dismissIosOAuthBrowserAfterCallback();
         await Supabase.instance.client.auth.getSessionFromUrl(uri);
       },
       navigate: AppRouter.router.go,
@@ -252,15 +244,34 @@ class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
         );
       },
     );
-    unawaited(_bind());
+    _uriDispatcher = BilSerialUriDispatcher(
+      handle: _handleIncomingUri,
+      onError: (error, _) {
+        AppObservability.logger.record(
+          AppLogLevel.warning,
+          'incoming_link_handler_failed',
+          attributes: {'errorType': error.runtimeType.toString()},
+        );
+      },
+    );
+    AppRouter.nativeAuthCallbackRetry = _authController.retryLastFailed;
+    _bind();
   }
 
-  Future<void> _bind() async {
+  void _bind() {
     final appLinks = AppLinks();
-    final initial = await appLinks.getInitialLink();
-    if (initial != null) await _handleIncomingUri(initial);
+    // app_links replays the cold-start URI when the event listener attaches.
+    // Subscribe synchronously so a return from native consent/browser UI
+    // cannot arrive in the gap created by awaiting getInitialLink first.
     _linkSubscription = appLinks.uriLinkStream.listen(
-      (uri) => unawaited(_handleIncomingUri(uri)),
+      _uriDispatcher.add,
+      onError: (Object error, StackTrace _) {
+        AppObservability.logger.record(
+          AppLogLevel.warning,
+          'incoming_link_stream_failed',
+          attributes: {'errorType': error.runtimeType.toString()},
+        );
+      },
     );
   }
 
@@ -272,7 +283,9 @@ class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
   @override
   void dispose() {
     unawaited(_linkSubscription?.cancel());
+    unawaited(_uriDispatcher.dispose());
     unawaited(_controller.dispose());
+    AppRouter.nativeAuthCallbackRetry = null;
     super.dispose();
   }
 
@@ -354,13 +367,28 @@ class BILApp extends ConsumerWidget {
                 child: child ?? const SizedBox.shrink(),
               )
             : child ?? const SizedBox.shrink();
-        return AiCoachResetNoticeCoordinator(
-          child: InactivityReminderCoordinator(
-            child: AppSwitcherPrivacyShield(
-              child: Semantics(
-                container: true,
-                label: AppLocalizations.of(context).get('app_title'),
-                child: content,
+        return GestureDetector(
+          key: const Key('app-keyboard-dismiss-region'),
+          behavior: HitTestBehavior.translucent,
+          onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+          child: NotificationListener<ScrollStartNotification>(
+            onNotification: (notification) {
+              if (notification.dragDetails != null) {
+                FocusManager.instance.primaryFocus?.unfocus();
+              }
+              return false;
+            },
+            child: AiCoachResetNoticeCoordinator(
+              child: InactivityReminderCoordinator(
+                child: BilAppleCredentialLifecycleCoordinator(
+                  child: AppSwitcherPrivacyShield(
+                    child: Semantics(
+                      container: true,
+                      label: AppLocalizations.of(context).get('app_title'),
+                      child: content,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

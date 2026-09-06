@@ -45,13 +45,13 @@ export function extractTerritoryPolicy(sqlText) {
   const arrays = [...sqlText.matchAll(/array\[((?:\s*'[A-Z]{2,3}'\s*,?)+)\]::text\[\]/g)]
     .map((match) => isoValues(match[1]));
   const premium2 = arrays.find((values) =>
-    values.length === 4 && values.join(',') === 'EG,IN,PK,TR');
+    values.length === 4 && values.join(',') === 'EG,NG,PK,TR');
   const premium3 = arrays.find((values) =>
-    values.length === 4 && values.join(',') === 'EGY,IND,PAK,TUR');
+    values.length === 4 && values.join(',') === 'EGY,NGA,PAK,TUR');
   const ai2 = arrays.find((values) =>
-    values.length === 168 && values[0]?.length === 2 && values.includes('NG') && !values.includes('IN'));
+    values.length === 168 && values[0]?.length === 2 && values.includes('IN') && !values.includes('NG'));
   const ai3 = arrays.find((values) =>
-    values.length === 168 && values[0]?.length === 3 && values.includes('NGA') && !values.includes('IND'));
+    values.length === 168 && values[0]?.length === 3 && values.includes('IND') && !values.includes('NGA'));
   assert.ok(premium2, 'Missing canonical four-market ISO-2 policy array');
   assert.ok(premium3, 'Missing canonical four-market ISO-3 policy array');
   assert.ok(ai2, 'Missing canonical 168-market ISO-2 policy array');
@@ -185,8 +185,11 @@ export function validateCatalog(catalog) {
     'Active pricing source must be explicitly canonical');
   check(canonicalPricing.pricingAuthority === 'device_store_localized_metadata',
     'Localized prices must remain device-store authoritative');
-  check(canonicalPricing.displayPolicy?.annualBadgeText === '30% OFF',
-    'Canonical annual campaign badge must be exactly 30% OFF');
+  check(canonicalPricing.displayPolicy?.annualSavingsBadgePolicy ===
+      'rounded_percent_from_annual_vs_monthly_times_12',
+    'Annual savings must be derived from current store prices');
+  check(canonicalPricing.displayPolicy?.pricesMustBeStoreDerived === true,
+    'Customer-facing prices must remain store-derived');
   check(canonicalPricing.displayPolicy?.hardcodedFlutterPricesAllowed === false,
     'Canonical policy must forbid hardcoded Flutter prices');
   check(split.allLaunchIso2.length === p.availability.expectedAppleLaunchCount,
@@ -510,7 +513,8 @@ function createReport(catalog, validation, { includeTargets = false, live = null
     canonicalPricing: {
       effectiveDate: catalog.canonicalPricing.effectiveDate,
       pricingAuthority: catalog.canonicalPricing.pricingAuthority,
-      annualBadgeText: catalog.canonicalPricing.displayPolicy.annualBadgeText,
+      annualSavingsBadgePolicy:
+        catalog.canonicalPricing.displayPolicy.annualSavingsBadgePolicy,
     },
     trialPolicy: catalog.policy.trialPolicy,
     marketSplit: {

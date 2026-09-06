@@ -196,7 +196,7 @@ Widget _app({required dynamic overrides, bool disableAnimations = false}) {
           data: MediaQuery.of(
             context,
           ).copyWith(disableAnimations: disableAnimations),
-          child: const StartupPage(),
+          child: StartupPage(imagePickerResumeResolver: (_) async => null),
         ),
       ),
       GoRoute(

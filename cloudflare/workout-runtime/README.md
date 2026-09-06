@@ -1,9 +1,10 @@
 # BIL wellness media runtime
 
-This directory contains the local, not-yet-deployed Cloudflare delivery layer
+This directory contains the source for the deployed Cloudflare delivery layer
 for the reviewed Home Training (200 movements), Gym Programs (102 movements),
-and 1,500 canonical recipe preview images. One Worker keeps the two private R2
-buckets behind separate `WORKOUTS` and `RECIPES` bindings.
+and 1,500 canonical recipe preview images plus 1,500 additive, compact WebP
+thumbnails. One Worker keeps the two private R2 buckets behind separate
+`WORKOUTS` and `RECIPES` bindings.
 
 The 302 logical MP4 records already belong to the existing R2 release. This
 runtime never copies or re-uploads them. The deterministic builder verifies the
@@ -19,16 +20,20 @@ objects. Its combined storage projection is below the configured 9.5 GB safety
 ceiling. A separate generated 606-key allowlist contains exactly the 302
 existing videos, 302 posters, and two packs that the Worker may serve.
 
-Recipe delivery does not create or mutate an R2 object. The Worker imports the
+The v3 recipe source release is never mutated. The Worker imports the
 release-pinned `recipe-images.json` contract (SHA-256
 `e1568e8df82503d9dbf856f425e0d7f2f43c2c17033879b196642b0d9ab166f3`)
 and converts its 1,500 unique canonical IDs into a fixed in-bundle allowlist.
 Every entry pins the private object key, SHA-256, byte length, MIME type, and
-dimensions.
+dimensions. The additive `recipe-thumbnails-v4.json` contract (SHA-256
+`24055bdfa731250fcac4aa55e3ab691fe2fc01a84733a8086ca2accf232a9029`)
+maps the same 1,500 source IDs and source digests to content-addressed 512px
+WebP objects. It totals 73,802,850 bytes instead of 3,811,262,661 bytes for the
+originals; no mutable alias or dynamic paid image service is involved.
 
 ## Runtime boundary
 
-The Worker exposes three routes:
+The Worker exposes four routes:
 
 - `GET|HEAD /v2/manifest/<exact-sha-pinned-name>.json` is public. No alias or
   mutable `latest.json` route exists.
@@ -48,11 +53,20 @@ The Worker exposes three routes:
   media upload plan and remain visible beneath the existing premium glass;
   ingredients, instructions, nutrition actions, and paid interaction are not
   served by this route.
+- `GET|HEAD /v4/recipes/thumbnails/<canonical-id>/<sha256>.webp` is the compact
+  public discovery path. Both the v4 entry and its v3 source digest must match
+  the bundled manifests. The R2 object must match the signed WebP MIME and byte
+  length before any bytes are served. v3 remains available as the fallback for
+  old clients and for a verified v4 fetch failure.
 
 Objects are streamed directly from their R2 binding. Byte ranges, ETags,
 conditional requests, MIME metadata, exact-origin CORS, and the appropriate
 private/public cache directives are preserved. Recipe responses additionally
 fail closed unless the R2 byte length and MIME agree with the signed mapping.
+Full unauthenticated recipe-image `GET` responses are also stored in the
+custom-domain data-center cache without changing a byte of the signed object.
+Range, conditional, authorized, and browser-origin requests bypass that cache,
+and any cache failure falls back to the authoritative R2 response.
 Flutter receives no bucket/key and verifies the exact SHA-256 before promoting
 a preview into its content-addressed media cache. Its Supabase Bearer allowlist
 continues to cover protected workout paths only, so public recipe requests
@@ -64,8 +78,10 @@ From the repository root:
 
 ```powershell
 python .\tool\wellness_content\build_cloudflare_workout_runtime.py --poster-workers 4
+python .\tool\cloudflare_media\build_recipe_thumbnails_v4.py --workers 8
 python -m unittest tool.wellness_content.test_build_cloudflare_workout_runtime tool.wellness_content.test_publish_wellness_catalog
 & .\cloudflare\workout-runtime\scripts\Publish-RuntimeObjects.ps1
+& .\cloudflare\workout-runtime\scripts\Publish-RecipeThumbnailsV4.ps1
 ```
 
 The first command always regenerates all posters so an existing file can never
@@ -86,8 +102,13 @@ npm run dry-run
 `Publish-RuntimeObjects.ps1` is validation-only unless `-Execute` is supplied.
 The validation checks every local size and SHA-256 and rejects any plan that
 contains an MP4 before invoking Wrangler.
+`Publish-RecipeThumbnailsV4.ps1` is also validation-only by default. It verifies
+all 1,500 generated files against the v4 manifest, requires the exact v3 source
+pin, enforces the 9.5 GB project storage guard, and uploads only the
+`recipes/v4/thumbnails/512/` prefix when `-Execute` is supplied. It has no delete
+operation and cannot address a v3 key.
 
-## Exact deployment plan (not executed)
+## Exact deployment workflow
 
 Deployment requires explicit release approval. Once approved:
 
@@ -110,6 +131,15 @@ Deployment requires explicit release approval. Once approved:
 
    The script creates the 305 content-pinned JSON/WebP objects. It cannot upload
    any `.mp4` object and does not delete or overwrite a mutable alias.
+   Publish the additive recipe thumbnails only after their separate validator
+   reports exactly 1,500 entries and the projected storage guard passes:
+
+   ```powershell
+   & .\cloudflare\workout-runtime\scripts\Publish-RecipeThumbnailsV4.ps1 -Execute
+   ```
+
+   This command can only address content-addressed v4 WebP keys; the v3 prefix
+   remains outside its upload contract.
 4. Return to `cloudflare/workout-runtime`, run `npm run dry-run:staging`, review
    the bundle, then run `npm run deploy:staging`. This creates a separate
    workers.dev staging Worker with no production custom-domain route.
@@ -163,5 +193,64 @@ Deployment requires explicit release approval. Once approved:
    confirm cached poster/video reads still pass exact size and SHA-256 checks.
    Only after that validation should the mobile release be promoted.
 
-No command with `-Execute` or `npm run deploy` was run while preparing this
-runtime.
+The complete public thumbnail inventory can be checked without trusting lagging
+bucket aggregate counters:
+
+```powershell
+node .\cloudflare\workout-runtime\scripts\verify-recipe-thumbnails-v4.mjs https://workouts.bilhealth.com/
+```
+
+This performs exact HEAD metadata checks for all 1,500 objects, followed by
+full SHA-256 and byte-length readbacks for first/middle/last entries.
+
+### 2026-09-04 code-only deployment record
+
+The recipe-image edge-cache change was deployed first to
+`bil-workout-runtime-staging` (version
+`6435e3fd-64d8-41d3-9876-ffda3da792c0`) and then to the production custom
+domain (version `55433b52-2450-45e9-8a37-12fc452b1b8c`). Before promotion,
+TypeScript/type checks, 19 Worker tests, staging and production dry-runs, and
+the 305-object local SHA/size plan validation passed. Production smoke checks
+then proved the exact manifest and free previews return `200`, a protected
+video without a token returns `401`, recipe byte ranges return `206`, an
+incorrect recipe digest returns `404`, and an allowed/disallowed CORS preflight
+returns `204`/`403`. A full recipe image returned `MISS` then `HIT` while its
+downloaded byte length and SHA-256 remained identical to the release manifest.
+
+No R2 object upload or deletion was performed. Post-deployment bucket counts
+remained 607 workout objects and 1,500 recipe objects.
+
+### 2026-09-04 additive v4 thumbnail deployment record
+
+Pillow 12.3.0 with libwebp 1.6.0 generated the deterministic 512px, quality-78
+WebP release in the ignored `.tmp` workspace. The 1,500 thumbnails total
+73,802,850 bytes (49,202-byte average, 64,848-byte p95) versus 3,811,262,661
+bytes (2,540,842-byte average) for v3, a 98.06% aggregate payload reduction.
+The exact manifest is 899,684 bytes with SHA-256
+`24055bdfa731250fcac4aa55e3ab691fe2fc01a84733a8086ca2accf232a9029`.
+
+Only `recipes/v4/thumbnails/512/` content-addressed keys were uploaded. The
+uploader has no delete command and cannot address the v3 prefix. Cloudflare's
+aggregate `bucket info` counter had not refreshed immediately after upload, so
+release verification did not mistake that lag for object loss: direct R2
+first/middle/last readbacks matched exact SHA/length, then the remote verifier
+proved all 1,500 v4 routes on both staging and production and downloaded three
+complete bodies from each. The original v3 route also returned its unchanged
+2,715,891-byte source with the exact original SHA.
+
+The staging Worker version is
+`fc404161-c7af-4fa1-87cd-84817c739f44`; the promoted production version is
+`59cd581f-28a4-4433-af16-a75adcbc548c`. Before promotion, 23 Worker tests,
+TypeScript/type checks, both deployment dry-runs, all 1,500 remote metadata
+checks, exact body readbacks, range/invalid-path/CORS tests, and workout access
+regressions passed. A like-for-like uncached production sample fell from
+2,715,891 bytes in 6.316 seconds (v3) to 62,204 bytes in 0.326 seconds (v4).
+The v4 edge-cache probe returned `MISS` in 0.264 seconds and then `HIT` in
+0.235 seconds without changing its SHA.
+
+Flutter uses v4 only for recipe cards/lists. The 16:9 detail view explicitly
+requests the original v3 media, and every v4 manifest/download/hash/offline
+failure also falls back to v3. Rolling the Worker back to production version
+`55433b52-2450-45e9-8a37-12fc452b1b8c` therefore restores the previous route
+set immediately; the additive v4 R2 objects remain inert and no v3 data needs
+restoration. No paid Cloudflare Images feature was enabled.
