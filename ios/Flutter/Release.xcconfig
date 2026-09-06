@@ -1,2 +1,4 @@
 #include "Generated.xcconfig"
 BIL_ADMOB_IOS_APP_ID=ca-app-pub-0000000000000000~0000000000
+// CI writes this ignored override only after the production AdMob gate passes.
+#include? "ReleaseAdMob.xcconfig"

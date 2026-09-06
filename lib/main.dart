@@ -155,7 +155,7 @@ class _BILBootstrapState extends State<_BILBootstrap> {
   @override
   Widget build(BuildContext context) {
     if (ready) {
-      return const BilAndroidUmpBootstrap(
+      return const BilMobileUmpBootstrap(
         child: _BILLinkBootstrap(child: BILApp()),
       );
     }

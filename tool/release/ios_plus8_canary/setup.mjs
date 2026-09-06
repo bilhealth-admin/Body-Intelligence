@@ -22,6 +22,7 @@ import {
   createDisposableAccount,
   initializeDisposableState,
 } from './disposable_account.mjs';
+import { validateReviewerPremiumAiPreflight } from './reviewer_entitlement.mjs';
 
 export async function bootstrap() {
   const ownerEmail = requiredEnv('OWNER_EMAIL');
@@ -103,37 +104,31 @@ export async function bootstrap() {
     select(reviewer.accessToken, 'bil_ai_closed_test_grants', {
       select: 'owner_id,active,expires_at',
       owner_id: `eq.${reviewer.userId}`,
-      active: 'eq.true',
     }),
     select(reviewer.accessToken, 'bil_entitlements', {
-      select: 'owner_id,entitlement_id,active,expires_at',
+      select: 'owner_id,entitlement_id,product_id,provider,active,starts_at,expires_at,server_updated_at',
       owner_id: `eq.${reviewer.userId}`,
-      entitlement_id: 'eq.plan:premium_ai_coach',
-      active: 'eq.true',
     }),
     select(reviewer.accessToken, 'bil_subscriptions', {
-      select: 'owner_id,plan_id,lifecycle,expires_at',
+      select: 'owner_id,provider,product_id,plan_id,lifecycle,started_at,expires_at,grace_period_ends_at,verified_at',
       owner_id: `eq.${reviewer.userId}`,
-      plan_id: 'eq.premium_ai_coach',
-      lifecycle: 'in.(active,grace_period,trial)',
     }),
     rpc(reviewer.accessToken, 'bil_get_ai_usage_status'),
   ]);
   const now = Date.now();
-  const unexpired = (value) => {
-    const expires = Date.parse(String(value ?? ''));
-    return Number.isFinite(expires) && expires > now;
-  };
-  const usable = Number(reviewerUsage?.credits?.total_remaining ?? -1);
-  if (
-    reviewerGrant.length !== 1 || !unexpired(reviewerGrant[0].expires_at) ||
-    reviewerEntitlement.length !== 1 ||
-    (reviewerEntitlement[0].expires_at != null &&
-      !unexpired(reviewerEntitlement[0].expires_at)) ||
-    reviewerSubscription.length !== 1 ||
-    !unexpired(reviewerSubscription[0].expires_at) ||
-    reviewerUsage?.plan !== 'ai_coach' || !Number.isFinite(usable) || usable < 2500
-  ) throw new Error('reviewer_premium_ai_entitlement_preflight_failed');
+  const reviewerAccess = validateReviewerPremiumAiPreflight({
+    expectedOwnerId: reviewer.userId,
+    grantRows: reviewerGrant,
+    entitlementRows: reviewerEntitlement,
+    subscriptionRows: reviewerSubscription,
+    usage: reviewerUsage,
+    now,
+  });
+  if (!reviewerAccess.ok) {
+    throw new Error(
+      `reviewer_premium_ai_entitlement_preflight_failed:${reviewerAccess.reason}`,
+    );
+  }
   const state = {
     schema: 2,
     runId: crypto.randomUUID(),
@@ -215,6 +210,7 @@ export async function bootstrap() {
     'APPLE_REVIEWER_ACTIVE_CLOSED_TEST_GRANT=PASS',
     'APPLE_REVIEWER_PREMIUM_AI_ENTITLEMENT=PASS',
     'APPLE_REVIEWER_ACTIVE_SUBSCRIPTION=PASS',
+    `APPLE_REVIEWER_PREMIUM_AI_REPRESENTATION=${reviewerAccess.representation}`,
     'APPLE_REVIEWER_USABLE_AI_TOKENS_AT_LEAST_2500=PASS',
     'COMMUNITY_POLICY_PRECONDITION=PASS',
   ]);

@@ -28,6 +28,98 @@ SubscriptionState _subscription(CommercePlan plan) => SubscriptionState(
 );
 
 void main() {
+  setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized()
+        .handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+  });
+
+  testWidgets(
+    'consent revoked between native completion and hand-off is safe',
+    (tester) async {
+      final pending = Completer<ContextualBannerHandle?>();
+      final gateway = _RecordingBannerGateway()..pending = pending;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            verifiedEntitlementOwnerProvider.overrideWith(
+              (_) => Stream.value('free-a'),
+            ),
+            verifiedSubscriptionStateProvider.overrideWith(
+              (_) async => _subscription(CommercePlan.free),
+            ),
+            contextualAdGatewayProvider.overrideWithValue(gateway),
+            adOnlineProvider.overrideWith((_) => Stream.value(true)),
+            adAgeEligibilityProvider.overrideWith(
+              (_) => AdAgeEligibility.adult,
+            ),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: SafeFreeAdAnchor(surface: SafeFreeAdSurface.more),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(gateway.loadCalls, 1);
+      final stale = _RecordingBannerHandle();
+      pending.complete(stale);
+      gateway.setConsent(false);
+      await tester.pumpAndSettle();
+      expect(stale.disposed, isTrue);
+      expect(find.byKey(const Key('fake-contextual-banner')), findsNothing);
+      _expectCollapsedSlot(tester);
+      expect(gateway.loadCalls, 1);
+      gateway.pending = null;
+      gateway.setConsent(true);
+      await tester.pumpAndSettle();
+      expect(gateway.loadCalls, 2);
+      expect(find.byKey(const Key('fake-contextual-banner')), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+      gateway.dispose();
+    },
+  );
+
+  testWidgets(
+    'withdrawing privacy removes the banner and a new grant retries',
+    (tester) async {
+      final gateway = _RecordingBannerGateway();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            verifiedEntitlementOwnerProvider.overrideWith(
+              (_) => Stream.value('free-a'),
+            ),
+            verifiedSubscriptionStateProvider.overrideWith(
+              (_) async => _subscription(CommercePlan.free),
+            ),
+            contextualAdGatewayProvider.overrideWithValue(gateway),
+            adOnlineProvider.overrideWith((_) => Stream.value(true)),
+            adAgeEligibilityProvider.overrideWith(
+              (_) => AdAgeEligibility.adult,
+            ),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(
+              body: SafeFreeAdAnchor(surface: SafeFreeAdSurface.more),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(gateway.loadCalls, 1);
+      gateway.setConsent(false);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('fake-contextual-banner')), findsNothing);
+      expect(gateway.handles.single.disposed, isTrue);
+      expect(gateway.loadCalls, 1);
+      gateway.setConsent(true);
+      await tester.pumpAndSettle();
+      expect(gateway.loadCalls, 2);
+      expect(find.byKey(const Key('fake-contextual-banner')), findsOneWidget);
+    },
+  );
+
   testWidgets('banner collapses immediately for Premium and Premium AI Coach', (
     tester,
   ) async {
@@ -195,8 +287,18 @@ void _expectCollapsedSlot(WidgetTester tester) {
   expect(shrink.height, 0);
 }
 
-final class _RecordingBannerGateway implements ContextualBannerGateway {
+final class _RecordingBannerGateway extends ChangeNotifier
+    implements ContextualBannerGateway, ContextualAdPrivacyBoundary {
+  @override
+  bool mayDisplayAd = true;
+
+  void setConsent(bool value) {
+    mayDisplayAd = value;
+    notifyListeners();
+  }
+
   int loadCalls = 0;
+  Completer<ContextualBannerHandle?>? pending;
   final List<_RecordingBannerHandle> handles = [];
   final List<AdPlacement> placements = [];
 
@@ -207,6 +309,7 @@ final class _RecordingBannerGateway implements ContextualBannerGateway {
   Future<ContextualBannerHandle?> loadBanner(AdPlacement placement) async {
     loadCalls++;
     placements.add(placement);
+    if (pending case final operation?) return operation.future;
     final handle = _RecordingBannerHandle();
     handles.add(handle);
     return handle;

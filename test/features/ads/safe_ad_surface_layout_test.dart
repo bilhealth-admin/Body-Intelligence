@@ -11,6 +11,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized()
+        .handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+  });
+
   testWidgets('390x844 Wellness keeps a loaded banner below carousel dots', (
     tester,
   ) async {

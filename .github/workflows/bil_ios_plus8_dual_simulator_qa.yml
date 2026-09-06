@@ -126,6 +126,7 @@ jobs:
           flutter analyze --no-pub
           dart run tool/release/validate_release_configuration.dart
           node tool/release/ios_plus8_canary_runtime_test.mjs
+          node --test tool/release/ios_plus8_reviewer_entitlement_test.mjs
           bash tool/release/ios_plus8_secret_scope_test.sh
           flutter test --no-pub \
             test/responsive_shell_test.dart \

@@ -93,6 +93,8 @@ jobs:
           BIL_FACEBOOK_REQUIRED: true
           BIL_FACEBOOK_LOGIN_ENABLED: true
           BIL_FACEBOOK_LOGIN_READY: true
+          BIL_ADS_ENABLED: false
+          BIL_AD_PROVIDER_READY: false
           BIL_PUSH_ENABLED: false
           BIL_PUSH_PROVIDER_READY: false
           BIL_MOBILE_INTEGRITY_REQUIRED: true
@@ -140,6 +142,15 @@ jobs:
 
       - name: Exclude dev-only native plugins from Android release
         run: dart run tool/release/sanitize_flutter_release_plugins.dart --platform=android
+
+      - name: Apply owner-deferred AdMob source configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/release/test_configure_deferred_admob.py
+          python3 tool/release/configure_deferred_admob.py \
+            --prepare-android-source-manifest android/app/src/main/AndroidManifest.xml \
+            | tee BIL-android-deferred-admob-source.txt
 
       - name: Build signed Android App Bundle
         id: android_aab_build
@@ -201,6 +212,9 @@ jobs:
             --bundle="$AAB" \
             --module=base \
             > "$EVIDENCE_DIR/BIL-android-base-manifest.xml"
+          python3 tool/release/configure_deferred_admob.py \
+            --verify-android-merged-manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml" \
+            | tee "$EVIDENCE_DIR/BIL-android-deferred-admob.txt"
           python3 tool/release/verify_android_target_sdk.py \
             --manifest "$EVIDENCE_DIR/BIL-android-base-manifest.xml" \
             --text-evidence "$EVIDENCE_DIR/BIL-android-target-sdk.txt" \
@@ -226,6 +240,7 @@ jobs:
           path: |
             BIL-android-16k-evidence/BIL-android-bundletool-install.txt
             BIL-android-16k-evidence/BIL-android-base-manifest.xml
+            BIL-android-16k-evidence/BIL-android-deferred-admob.txt
             BIL-android-16k-evidence/BIL-android-target-sdk.txt
             BIL-android-16k-evidence/BIL-android-target-sdk.json
             BIL-android-16k-evidence/BIL-android-optional-hardware.txt
@@ -295,6 +310,9 @@ jobs:
             "NATIVE_CRYPTO_GATE=$NATIVE_CRYPTO_GATE_STATUS" \
             'FACEBOOK_LOGIN_COMPILED_GATE=ENABLED_AND_READY' \
             'FACEBOOK_LOGIN_SIGNED_DEVICE_GATE=REQUIRED' \
+            'ADS_COMPILED_GATE=DISABLED_OWNER_DEFERRED' \
+            'ADMOB_ANDROID_PRODUCTION_CONFIGURATION_GATE=DEFERRED_NOT_CONFIGURED' \
+            'ADMOB_ANDROID_DEFERRED_NATIVE_CONFIGURATION_GATE=PASS' \
             'MOBILE_INTEGRITY_CLIENT_GATE=ENABLED' \
             'MOBILE_INTEGRITY_BACKEND_GATE=OWNER_EVIDENCE_PRESENT_NOT_LIVE_VERIFIED' \
             'PHYSICAL_DEVICE_GATE=REQUIRED' \
@@ -316,6 +334,7 @@ jobs:
             BIL-android-aab.size
             BIL-android-crypto-scan.txt
             BIL-android-upload-certificate.txt
+            BIL-android-deferred-admob-source.txt
             BIL-android-gate-status.txt
             BIL-build-number.txt
             BIL-source-head.txt

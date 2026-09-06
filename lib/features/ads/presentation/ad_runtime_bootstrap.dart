@@ -7,7 +7,7 @@ import '../../commerce/providers/commerce_providers.dart';
 import '../providers/ad_providers.dart';
 import '../services/admob_ump_consent_gate.dart';
 
-/// Starts Google's Android UMP flow automatically for the current eligible
+/// Starts Google's mobile UMP flow automatically for the current eligible
 /// account after Flutter's first frame.
 ///
 /// BIL does not persist a second advertising opt-in or age confirmation. The
@@ -15,8 +15,8 @@ import '../services/admob_ump_consent_gate.dart';
 /// Guest never enter UMP for ad delivery. Account identity is part of the
 /// refresh signature so a logout or account switch cannot carry eligibility
 /// from the previous session.
-class BilAndroidUmpBootstrap extends ConsumerStatefulWidget {
-  const BilAndroidUmpBootstrap({
+class BilMobileUmpBootstrap extends ConsumerStatefulWidget {
+  const BilMobileUmpBootstrap({
     required this.child,
     super.key,
     this.coordinator,
@@ -38,12 +38,11 @@ class BilAndroidUmpBootstrap extends ConsumerStatefulWidget {
   final String? accountKey;
 
   @override
-  ConsumerState<BilAndroidUmpBootstrap> createState() =>
-      _BilAndroidUmpBootstrapState();
+  ConsumerState<BilMobileUmpBootstrap> createState() =>
+      _BilMobileUmpBootstrapState();
 }
 
-class _BilAndroidUmpBootstrapState
-    extends ConsumerState<BilAndroidUmpBootstrap> {
+class _BilMobileUmpBootstrapState extends ConsumerState<BilMobileUmpBootstrap> {
   String? _lastSignature;
   int _generation = 0;
 

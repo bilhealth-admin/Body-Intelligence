@@ -209,6 +209,8 @@ jobs:
           BIL_FACEBOOK_REQUIRED: true
           BIL_FACEBOOK_LOGIN_ENABLED: true
           BIL_FACEBOOK_LOGIN_READY: true
+          BIL_ADS_ENABLED: false
+          BIL_AD_PROVIDER_READY: false
           BIL_PUSH_ENABLED: false
           BIL_PUSH_PROVIDER_READY: false
           BIL_MOBILE_INTEGRITY_REQUIRED: true
@@ -284,6 +286,15 @@ jobs:
 
       - name: Exclude dev-only native plugins from iOS release
         run: dart run tool/release/sanitize_flutter_release_plugins.dart --platform=ios
+
+      - name: Apply owner-deferred AdMob source configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/release/test_configure_deferred_admob.py
+          python3 tool/release/configure_deferred_admob.py \
+            --prepare-ios-source-plist ios/Runner/Info.plist \
+            | tee BIL-ios-deferred-admob-source.txt
 
       - name: Configure manual App Store distribution signing
         shell: bash
@@ -399,6 +410,10 @@ jobs:
             -mindepth 1 -maxdepth 1 -type d -name '*.app' -print -quit)"
           test -d "$SIGNED_APP"
 
+          python3 tool/release/configure_deferred_admob.py \
+            --verify-ios-final-plist "$SIGNED_APP/Info.plist" \
+            | tee BIL-ios-deferred-admob.txt
+
           codesign --verify --deep --strict --verbose=4 "$SIGNED_APP" \
             2>&1 | tee BIL-ios-codesign-verify.txt
           printf '%s\n' 'SIGNED_IPA_CODESIGN_GATE=PASS' \
@@ -452,6 +467,9 @@ jobs:
             'CODE_GATE=PASS' \
             'FACEBOOK_LOGIN_COMPILED_GATE=ENABLED_AND_READY' \
             'FACEBOOK_LOGIN_SIGNED_DEVICE_GATE=REQUIRED' \
+            'ADS_COMPILED_GATE=DISABLED_OWNER_DEFERRED' \
+            'ADMOB_IOS_PRODUCTION_CONFIGURATION_GATE=DEFERRED_NOT_CONFIGURED' \
+            'ADMOB_IOS_DEFERRED_NATIVE_CONFIGURATION_GATE=PASS' \
             'MOBILE_INTEGRITY_CLIENT_GATE=ENABLED' \
             'MOBILE_INTEGRITY_BACKEND_GATE=OWNER_EVIDENCE_PRESENT_NOT_LIVE_VERIFIED' \
             'PHYSICAL_DEVICE_GATE=REQUIRED' \
@@ -516,15 +534,18 @@ jobs:
             BIL-ios-ipa.size
             BIL-ios-crypto-scan.txt
             BIL-ios-native-crypto-gate.txt
+            BIL-ios-deferred-admob-source.txt
+            BIL-ios-deferred-admob.txt
             BIL-ios-gate-status.txt
             BIL-build-number.txt
             BIL-source-head.txt
             BIL-apple-release-toolchain.txt
             BIL-apple-release-toolchain.json
 
-      - name: Remove App Store Connect private key
+      - name: Remove ephemeral release inputs
         if: always()
         shell: bash
         env:
           ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
-        run: rm -f "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+        run: |
+          rm -f "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"

@@ -20,6 +20,12 @@ abstract interface class ContextualBannerGateway
   Future<ContextualBannerHandle?> loadBanner(AdPlacement placement);
 }
 
+/// Optional live privacy signal for an already displayed native banner.
+/// Consent withdrawal removes it immediately; a new grant permits a retry.
+abstract interface class ContextualAdPrivacyBoundary implements Listenable {
+  bool get mayDisplayAd;
+}
+
 /// Safe production default until a reviewed store-compliant adapter is wired.
 /// It performs no network call, renders no test ad, and records no user data.
 final class DisabledContextualAdGateway implements ContextualAdGateway {

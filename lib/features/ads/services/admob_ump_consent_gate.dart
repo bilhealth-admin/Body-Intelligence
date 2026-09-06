@@ -57,14 +57,20 @@ abstract interface class UmpPlatformBridge {
   Future<void> showPrivacyOptionsForm();
 }
 
-/// Android-only, fail-closed gate around Google's User Messaging Platform.
+/// Mobile, fail-closed gate around Google's User Messaging Platform.
 ///
 /// UMP is BIL's sole advertising-consent authority. Product eligibility
 /// (registered adult Free versus Premium or Guest) is evaluated separately;
 /// no publisher-created preference can substitute for this certified flow.
 final class AdMobUmpConsentGate extends ChangeNotifier
     implements UmpConsentCoordinator {
-  AdMobUmpConsentGate({required this.platform, required this.isApplicable});
+  AdMobUmpConsentGate({
+    required this.platform,
+    required this.isApplicable,
+    this.consentInfoTimeout = const Duration(seconds: 30),
+    this.machineReadTimeout = const Duration(seconds: 10),
+  }) : assert(consentInfoTimeout > Duration.zero),
+       assert(machineReadTimeout > Duration.zero);
 
   static AdMobUmpConsentGate? _instance;
 
@@ -74,16 +80,29 @@ final class AdMobUmpConsentGate extends ChangeNotifier
     platform: const GoogleMobileAdsUmpPlatformBridge(
       tagForUnderAgeOfConsent: false,
     ),
-    isApplicable: !kIsWeb && defaultTargetPlatform == TargetPlatform.android,
+    isApplicable: supportsPlatform(defaultTargetPlatform, isWeb: kIsWeb),
   );
+
+  static bool supportsPlatform(TargetPlatform platform, {bool isWeb = false}) =>
+      !isWeb &&
+      (platform == TargetPlatform.android || platform == TargetPlatform.iOS);
 
   final UmpPlatformBridge platform;
 
   @override
   final bool isApplicable;
 
+  /// Bounds the SDK callback used to refresh machine-owned consent metadata.
+  /// The human consent form that may follow is deliberately not timed out.
+  final Duration consentInfoTimeout;
+
+  /// Bounds non-interactive UMP state reads. Human-owned forms remain awaited.
+  final Duration machineReadTimeout;
+
   UmpConsentSnapshot _snapshot = const UmpConsentSnapshot.uninitialized();
   Future<UmpConsentSnapshot>? _inFlight;
+  int _operationGeneration = 0;
+  int _verificationGeneration = 0;
 
   @override
   UmpConsentSnapshot get snapshot => _snapshot;
@@ -106,9 +125,10 @@ final class AdMobUmpConsentGate extends ChangeNotifier
     }
     final inFlight = _inFlight;
     if (inFlight != null) return inFlight;
-    if (!force &&
-        (_snapshot.phase == UmpConsentPhase.ready ||
-            _snapshot.phase == UmpConsentPhase.blocked)) {
+    // Ready includes the legitimate user-denied state (`canRequestAds=false`),
+    // so it remains cached. Blocked represents a transient machine failure and
+    // must be retryable on the next eligible request without a settings detour.
+    if (!force && _snapshot.phase == UmpConsentPhase.ready) {
       return Future.value(_snapshot);
     }
     final operation = _refresh();
@@ -119,6 +139,7 @@ final class AdMobUmpConsentGate extends ChangeNotifier
   }
 
   Future<UmpConsentSnapshot> _refresh() async {
+    _operationGeneration++;
     _publish(
       const UmpConsentSnapshot(
         phase: UmpConsentPhase.updating,
@@ -129,10 +150,24 @@ final class AdMobUmpConsentGate extends ChangeNotifier
     try {
       // Google's guidance requires a fresh update once per process launch;
       // cached consent strings are never used as BIL's source of truth.
-      await platform.requestConsentInfoUpdate();
+      await _machineCall(
+        platform.requestConsentInfoUpdate(),
+        operation: 'requestConsentInfoUpdate',
+        timeout: consentInfoTimeout,
+      );
+      // Never time out an interactive consent form. While it is visible,
+      // `_inFlight` remains occupied so no refresh or privacy form can overlap.
       await platform.loadAndShowConsentFormIfRequired();
-      final privacyOptions = await platform.getPrivacyOptionsRequirement();
-      final canRequest = await platform.canRequestAds();
+      final privacyOptions = await _machineCall(
+        platform.getPrivacyOptionsRequirement(),
+        operation: 'getPrivacyOptionsRequirement',
+        timeout: machineReadTimeout,
+      );
+      final canRequest = await _machineCall(
+        platform.canRequestAds(),
+        operation: 'canRequestAds',
+        timeout: machineReadTimeout,
+      );
       final value = UmpConsentSnapshot(
         phase: UmpConsentPhase.ready,
         canRequestAds: canRequest,
@@ -154,12 +189,24 @@ final class AdMobUmpConsentGate extends ChangeNotifier
 
   @override
   Future<UmpConsentSnapshot> verifyCanRequestAds() async {
+    final verificationGeneration = ++_verificationGeneration;
     final current = await refresh();
     if (!isApplicable || current.phase != UmpConsentPhase.ready) {
       return current;
     }
+    final generation = _operationGeneration;
     try {
-      final canRequest = await platform.canRequestAds();
+      final canRequest = await _machineCall(
+        platform.canRequestAds(),
+        operation: 'canRequestAds',
+        timeout: machineReadTimeout,
+      );
+      if (generation != _operationGeneration) {
+        return _supersedingOperationOrSnapshot();
+      }
+      if (verificationGeneration != _verificationGeneration) {
+        return _staleVerificationSnapshot();
+      }
       final value = UmpConsentSnapshot(
         phase: UmpConsentPhase.ready,
         canRequestAds: canRequest,
@@ -168,6 +215,12 @@ final class AdMobUmpConsentGate extends ChangeNotifier
       _publish(value);
       return value;
     } on Object catch (error) {
+      if (generation != _operationGeneration) {
+        return _supersedingOperationOrSnapshot();
+      }
+      if (verificationGeneration != _verificationGeneration) {
+        return _staleVerificationSnapshot();
+      }
       final value = UmpConsentSnapshot(
         phase: UmpConsentPhase.blocked,
         canRequestAds: false,
@@ -180,8 +233,21 @@ final class AdMobUmpConsentGate extends ChangeNotifier
   }
 
   @override
-  Future<UmpConsentSnapshot> showPrivacyOptions() async {
-    if (!isApplicable || !_snapshot.privacyOptionsRequired) return _snapshot;
+  Future<UmpConsentSnapshot> showPrivacyOptions() {
+    final inFlight = _inFlight;
+    if (inFlight != null) return inFlight;
+    if (!isApplicable || !_snapshot.privacyOptionsRequired) {
+      return Future.value(_snapshot);
+    }
+    final operation = _showPrivacyOptions();
+    _inFlight = operation;
+    return operation.whenComplete(() {
+      if (identical(_inFlight, operation)) _inFlight = null;
+    });
+  }
+
+  Future<UmpConsentSnapshot> _showPrivacyOptions() async {
+    _operationGeneration++;
     _publish(
       UmpConsentSnapshot(
         phase: UmpConsentPhase.updating,
@@ -190,9 +256,19 @@ final class AdMobUmpConsentGate extends ChangeNotifier
       ),
     );
     try {
+      // This form belongs to the user and must remain open for as long as the
+      // user needs. Machine read limits apply only after the form completes.
       await platform.showPrivacyOptionsForm();
-      final privacyOptions = await platform.getPrivacyOptionsRequirement();
-      final canRequest = await platform.canRequestAds();
+      final privacyOptions = await _machineCall(
+        platform.getPrivacyOptionsRequirement(),
+        operation: 'getPrivacyOptionsRequirement',
+        timeout: machineReadTimeout,
+      );
+      final canRequest = await _machineCall(
+        platform.canRequestAds(),
+        operation: 'canRequestAds',
+        timeout: machineReadTimeout,
+      );
       final value = UmpConsentSnapshot(
         phase: UmpConsentPhase.ready,
         canRequestAds: canRequest,
@@ -210,6 +286,36 @@ final class AdMobUmpConsentGate extends ChangeNotifier
       _publish(value);
       return value;
     }
+  }
+
+  Future<T> _machineCall<T>(
+    Future<T> future, {
+    required String operation,
+    required Duration timeout,
+  }) => future.timeout(
+    timeout,
+    onTimeout: () => throw TimeoutException(
+      'UMP machine operation timed out: $operation',
+      timeout,
+    ),
+  );
+
+  Future<UmpConsentSnapshot> _supersedingOperationOrSnapshot() {
+    final inFlight = _inFlight;
+    return inFlight ?? Future.value(_snapshot);
+  }
+
+  UmpConsentSnapshot _staleVerificationSnapshot() {
+    final current = _snapshot;
+    if (!current.canRequestAds) return current;
+    // A newer live verification is authoritative. Until it publishes, an older
+    // caller must not inherit the previously cached grant and start an ad load.
+    return UmpConsentSnapshot(
+      phase: current.phase,
+      canRequestAds: false,
+      privacyOptionsRequirement: current.privacyOptionsRequirement,
+      failure: current.failure,
+    );
   }
 }
 

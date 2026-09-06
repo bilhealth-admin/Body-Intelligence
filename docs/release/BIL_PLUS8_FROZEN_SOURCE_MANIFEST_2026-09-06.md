@@ -14,7 +14,56 @@
 
 ## Current disposition
 
-The `1.0.0+8` source candidate is frozen and accepted for signed CI builds.
+The reopened source is accepted for the owner's latest explicit instruction:
+upload signed `1.0.0+8` with AdMob deferred, accepting a later application update.
+The ordinary paid owner/reviewer Premium + AI Coach policy is preserved. Both
+release workflows compile advertising/provider readiness false, inject no ad
+IDs, suppress eager Android initialization before building, and remove the iOS
+application-ID metadata before signing. Final artifact absence is independently
+verified in CI. Real AdMob activation remains incomplete, not a release pass.
+
+The post-correction whole-project run invoked all 895 Flutter test files. Its
+4,280 passing cases do not erase the 84 failing completions: one was this
+intentionally reopened manifest sentinel; 83 belong to the existing historical
+CI exclusions (69 legacy golden differences and 14 missing excluded artifact
+prerequisites). These are explicitly retained in the automated preflight report,
+not relabeled as successes. The old visual baselines, exclusion policy, source
+test assertions and performance budgets are unchanged. One opt-in live check
+was separately rerun with the correct compile-time switch and passed.
+
+The final deferred delta passed 96/96 ads/workflow/commerce tests, 35/35 signing
+and platform contracts, 14/14 native-helper tests, and the 3/3 disabled-runtime
+plus live-video range rerun. Final whole-source analysis found no issues (20.5s)
+and formatting checked 1,978 files with zero changes before removal of one
+redundant test-only import. Python 72/72, Node 71/71, and canonical offline Deno
+132/132 also passed; Deno's missing test-only lock entries were pinned.
+See `BIL_PLUS8_AUTOMATED_PREFLIGHT_2026-09-06.md` for failures, fixes and evidence.
+Native v4 remains historical test-banner proof, not final signed-device proof.
+
+### Reviewed post-reopen delta freeze
+
+Base: `db11f3b18f3f9cfb15db6d08d8e815e18f0909d2` on
+`release/plus8-clean-20260906`. The current classifier accepts exactly 40 INCLUDE
+paths and protects eight EXCLUDE paths. The latter are generated workout golden
+failure PNGs retained locally for diagnosis; they must NOT be staged. Their
+base blobs remain unchanged in the final commit. No original preserve-only path
+other than those diagnostic outputs intersects the new delta. All 22 previously
+retired asset paths remain absent. Secret-scanner contracts pass 9/9, with no
+secret/unclassified/oversized finding. CR-aware whitespace validation passes.
+
+Only the exact reviewed INCLUDE path set may be staged (not `git add -A`). Its
+sorted newline-delimited path-set SHA-256 is
+`dea5a579bc19061d674ac0a2cf9b21eb774ac6ac8edc78a31e97e9e52cf34764`.
+The final index is checked against that set, including zero staged diagnostics.
+After commit, bind its exact SHA and this file's final digest externally before
+dispatching both workflows. The old db11 runs were cancelled and produced no
+eligible AAB/IPA; neither those bindings nor older successful artifacts may be
+reused. The committed source/CI checkout is clean even though unstaged generated
+diagnostic evidence remains preserved in this local working directory.
+
+Historical pre-correction acceptance follows; it does not certify the reopened
+advertising changes or claim that production AdMob exists.
+
 The full isolated worktree passed PreFinalization transfer verification:
 4,798 files, 863 exact INCLUDE changes, and 1,275 excluded changes protected.
 This accepts source, not an unbuilt IPA/AAB, an unperformed native test, or a
@@ -85,7 +134,7 @@ backend parity for the client paths and the production App Attest build-8
 allowlist. Remote push remains explicitly disabled. Native simulator runs are
 owner-waived and must remain `NOT_RUN_OWNER_WAIVED`, not relabeled as passed.
 
-## Finalization and immutable binding contract
+## Historical transfer finalization and current immutable binding contract
 
 All source writers stopped before the verified transfer. The fields above are
 recorded from the read-only preparation plan, including:
@@ -100,7 +149,8 @@ recorded from the read-only preparation plan, including:
 - the final whole-source analysis and automated-test evidence selected by the
   release owner.
 
-The first two markers are now `YES`. This document must not
+The current first two markers are `YES` following the renewed source acceptance
+above; the original transfer hashes below/above remain historical. This document must not
 embed the candidate commit SHA or its own file SHA-256: the final commit is
 bound externally by `BIL_PLUS8_AUDITED_SOURCE_SHA`, and this file's post-commit
 digest is bound externally by `BIL_PLUS8_STAGING_MANIFEST_SHA256`. Keeping
@@ -111,13 +161,14 @@ authorized merely by editing these markers. The signed build workflows remain
 separate gates and must select build `+8`, never build `+7`.
 
 The owner's explicit instruction authorizes signed builds and subsequent
-publication after verification. Run PostFinalization full-tree verification
-before staging; bind this exact finalized file and the resulting commit in the
+publication after verification. The original PostFinalization transfer check
+applies to its original transfer plan, not this later delta. Verify the exact
+reviewed delta index before committing; bind this finalized file and commit in the
 two external GitHub variables before dispatch. Both CI jobs rerun source tests
 and verify real signatures, capabilities, and artifact identities. Apple
 public release remains manual; Google production access is under review.
 
-## Verified CI follow-up to the initial frozen candidate
+## Historical CI follow-up to the initial frozen candidate
 
 The initial accepted commit `1888807bd2011f1970f16eee5effdeb882aff639`
 reached the full portable suite on both GitHub platforms. Android run
