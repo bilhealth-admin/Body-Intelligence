@@ -298,6 +298,15 @@ jobs:
             --prepare-ios-source-plist ios/Runner/Info.plist \
             | tee BIL-ios-deferred-admob-source.txt
 
+      - name: Sanitize retained Swift graph before Xcode dependency resolution
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tool/release/test_sanitize_ios_deferred_ads_swift_package.py
+          python3 tool/release/sanitize_ios_deferred_ads_swift_package.py --project-root .
+          python3 tool/release/verify_ios_deferred_ads_plugin_graph.py --project-root . \
+            | tee BIL-ios-deferred-admob-plugin-graph-before-archive.txt
+
       - name: Configure manual App Store distribution signing
         shell: bash
         env:
@@ -552,6 +561,7 @@ jobs:
             BIL-ios-deferred-admob.txt
             BIL-ios-deferred-admob-native-artifact.txt
             BIL-ios-deferred-admob-plugin-graph.txt
+            BIL-ios-deferred-admob-plugin-graph-before-archive.txt
             BIL-ios-gate-status.txt
             BIL-build-number.txt
             BIL-source-head.txt

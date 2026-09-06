@@ -7,7 +7,9 @@ import tempfile
 import unittest
 import zipfile
 
-from verify_ios_deferred_ads_artifact import ArtifactError, verify_app, verify_ipa
+from verify_ios_deferred_ads_artifact import (
+    ArtifactError, DART_SNAPSHOT_MARKERS, verify_app, verify_ipa,
+)
 
 
 class ArtifactTests(unittest.TestCase):
@@ -35,6 +37,46 @@ class ArtifactTests(unittest.TestCase):
     def test_absent_native_sdk_accepts_app_and_ipa(self):
         self.assertEqual(verify_app(self.app, expected_build="9"), 1)
         self.assertEqual(verify_ipa(self.make_ipa(), expected_build="9"), 1)
+
+    def write_aot(self, suffix=b"", *, exports=True):
+        image = self.app / "Frameworks/App.framework/App"
+        image.parent.mkdir(parents=True, exist_ok=True)
+        image.write_bytes(bytes.fromhex("cffaedfe") +
+                          (b"\0".join(DART_SNAPSHOT_MARKERS) if exports else b"") +
+                          b"\0package:google_mobile_ads/src/ad_instance_manager.dart\0"
+                          b"GoogleMobileAds UserMessagingPlatform" + suffix)
+
+    def test_verified_dart_aot_api_names_are_not_native_sdk_linkage(self):
+        self.write_aot()
+        self.assertEqual(verify_app(self.app), 2)
+        self.assertEqual(verify_ipa(self.make_ipa()), 2)
+
+    def test_aot_name_without_snapshot_exports_cannot_get_exception(self):
+        self.write_aot(exports=False)
+        with self.assertRaisesRegex(ArtifactError, "not an identified Dart AOT"):
+            verify_app(self.app)
+
+    def test_native_sdk_symbols_remain_forbidden_inside_verified_aot(self):
+        for marker in (b"FLTGoogleMobileAdsPlugin", b"GADMobileAds",
+                       b"GADApplicationVerifyPublisherInitializedCorrectly",
+                       b"_OBJC_CLASS_$_GADRequest", b"_OBJC_METACLASS_$_UMPConsentForm"):
+            with self.subTest(marker=marker):
+                self.write_aot(b"\0" + marker)
+                with self.assertRaisesRegex(ArtifactError, "native ads code"):
+                    verify_ipa(self.make_ipa())
+
+    def test_runner_never_gets_dart_api_name_exception(self):
+        for marker in (b"google_mobile_ads", b"GoogleMobileAds", b"UserMessagingPlatform"):
+            with self.subTest(marker=marker):
+                (self.app / "Runner").write_bytes(bytes.fromhex("cffaedfe") +
+                    b"\0".join(DART_SNAPSHOT_MARKERS) + marker)
+                with self.assertRaisesRegex(ArtifactError, "native ads code"):
+                    verify_app(self.app)
+
+    def test_generic_aot_names_do_not_hide_later_native_sdk_symbols(self):
+        self.write_aot(b"x" * (1024 * 1024) + b"_OBJC_CLASS_$_UMPConsentInformation")
+        with self.assertRaisesRegex(ArtifactError, "native ads code"):
+            verify_ipa(self.make_ipa())
 
     def test_missing_id_does_not_make_static_linked_sdk_safe(self):
         with (self.app / "Runner").open("ab") as handle:

@@ -36,6 +36,15 @@ FORBIDDEN_NATIVE_MARKERS = (
     b"GoogleMobileAds",
     b"google_mobile_ads",
     b"UserMessagingPlatform",
+    b"_OBJC_CLASS_$_GAD",
+    b"_OBJC_METACLASS_$_GAD",
+    b"_OBJC_CLASS_$_UMP",
+    b"_OBJC_METACLASS_$_UMP",
+)
+DART_API_NAMES = frozenset((b"GoogleMobileAds", b"google_mobile_ads", b"UserMessagingPlatform"))
+DART_SNAPSHOT_MARKERS = (
+    b"_kDartVmSnapshotData", b"_kDartVmSnapshotInstructions",
+    b"_kDartIsolateSnapshotData", b"_kDartIsolateSnapshotInstructions",
 )
 
 
@@ -50,10 +59,22 @@ def _safe_relative(name: str) -> pathlib.PurePosixPath:
     return path
 
 
-def _scan_native(stream: BinaryIO) -> tuple[bool, str | None]:
+def _scan_native(stream: BinaryIO, *, flutter_aot: bool = False) -> tuple[bool, str | None]:
     first = stream.read(4)
     if first not in MACHO_MAGICS:
         return False, None
+    if flutter_aot:
+        # The exact Flutter AOT image retains Dart source URIs/channel names even
+        # when its platform plugin is absent. These are not Objective-C linkage.
+        # Require all snapshot markers, and still reject native SDK classes and
+        # bootstrap symbols here. All other binaries keep the full marker set.
+        data = first + stream.read()
+        if not all(marker in data for marker in DART_SNAPSHOT_MARKERS):
+            raise ArtifactError("Flutter App.framework is not an identified Dart AOT image.")
+        for marker in FORBIDDEN_NATIVE_MARKERS:
+            if marker not in DART_API_NAMES and marker in data:
+                return True, marker.decode("ascii")
+        return True, None
     carry = first
     overlap = max(map(len, FORBIDDEN_NATIVE_MARKERS)) - 1
     while chunk := stream.read(1024 * 1024):
@@ -105,7 +126,9 @@ def _verify_files(
     runner_native = False
     for name in names:
         with open_file(name) as handle:
-            native, marker = _scan_native(handle)
+            native, marker = _scan_native(
+                handle, flutter_aot=name == "Frameworks/App.framework/App"
+            )
         if marker:
             raise ArtifactError(f"Deferred artifact retains native ads code in {name}: {marker}")
         native_count += int(native)

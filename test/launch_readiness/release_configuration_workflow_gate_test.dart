@@ -5,6 +5,34 @@ import 'package:flutter_test/flutter_test.dart';
 String _read(String path) => File(path).readAsStringSync();
 
 void main() {
+  test('iOS no-pub archive cannot consume a stale native ads Swift graph', () {
+    final ios = _read('.github/workflows/bil_ios_signed_release.yml');
+    final prepare = ios.indexOf('- name: Sanitize retained Swift graph');
+    final signing = ios.indexOf('- name: Configure manual App Store');
+    final archive = ios.indexOf('- name: Build signed archive');
+    final postArchive = ios.indexOf(
+      '- name: Verify regenerated iOS native plugin graph',
+    );
+    expect(prepare, greaterThanOrEqualTo(0));
+    expect(signing, greaterThan(prepare));
+    expect(archive, greaterThan(signing));
+    expect(postArchive, greaterThan(archive));
+    final beforeArchive = ios.substring(prepare, signing);
+    expect(
+      beforeArchive,
+      contains('test_sanitize_ios_deferred_ads_swift_package.py'),
+    );
+    expect(
+      beforeArchive,
+      contains('sanitize_ios_deferred_ads_swift_package.py --project-root .'),
+    );
+    expect(
+      beforeArchive,
+      contains('verify_ios_deferred_ads_plugin_graph.py --project-root .'),
+    );
+    expect(ios, contains('verify_ios_deferred_ads_artifact.py'));
+  });
+
   const workflows = <String>[
     '.github/workflows/bil_android_release_candidate.yml',
     '.github/workflows/bil_ios_signed_release.yml',
