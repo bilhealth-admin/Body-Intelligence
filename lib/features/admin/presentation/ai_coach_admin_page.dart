@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/router/invalid_route_page.dart';
+import '../services/admin_operation_error.dart';
 import '../services/ai_coach_admin_service.dart';
 import 'admin_notification_controls.dart';
 import 'community_member_access_admin_panel.dart';
@@ -434,13 +435,14 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
           ),
         ),
       );
-    } on Object {
+    } on Object catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            context.strings.text(
-              'The request could not be completed. No partial change was kept. Try again.',
+            _adminFailureCopy(
+              classifyAdminOperationFailure(error),
+              individual: true,
             ),
           ),
         ),
@@ -544,17 +546,14 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
           ),
         ),
       );
-    } on Object {
+    } on Object catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _copy(
-              'The reset was not completed. No partial change was kept. Try again.',
-              ar: 'لم تكتمل إعادة الضبط، ولم يُحفظ أي تغيير جزئي. حاول مجددًا.',
-              fr: 'La réinitialisation n’a pas abouti. Aucun changement partiel n’a été conservé. Réessayez.',
-              es: 'El restablecimiento no se completó. No se conservó ningún cambio parcial. Inténtalo de nuevo.',
-              tr: 'Sıfırlama tamamlanmadı. Kısmi bir değişiklik kaydedilmedi. Yeniden deneyin.',
+            _adminFailureCopy(
+              classifyAdminOperationFailure(error),
+              individual: false,
             ),
           ),
         ),
@@ -563,6 +562,52 @@ class _AiCoachAdminPageState extends ConsumerState<AiCoachAdminPage> {
       if (mounted) setState(() => _resetting = false);
     }
   }
+
+  String _adminFailureCopy(
+    AdminOperationFailureKind kind, {
+    required bool individual,
+  }) => switch (kind) {
+    AdminOperationFailureKind.timedOut => _copy(
+      'The admin operation timed out. Check that the Edge Function is deployed, then try again.',
+      ar: 'انتهت مهلة عملية الإدارة. تأكد من نشر Edge Function ثم حاول مجددًا.',
+      fr: 'L’opération d’administration a expiré. Vérifiez le déploiement de l’Edge Function, puis réessayez.',
+      es: 'La operación de administración agotó el tiempo. Comprueba que Edge Function esté desplegada y vuelve a intentarlo.',
+      tr: 'Yönetici işlemi zaman aşımına uğradı. Edge Function dağıtımını kontrol edip yeniden deneyin.',
+    ),
+    AdminOperationFailureKind.serviceUnavailable => _copy(
+      'The admin service is not available. Deploy the current Edge Function and migrations, then try again.',
+      ar: 'خدمة الإدارة غير متاحة. انشر Edge Function والترحيلات الحالية ثم حاول مجددًا.',
+      fr: 'Le service d’administration est indisponible. Déployez l’Edge Function et les migrations actuelles, puis réessayez.',
+      es: 'El servicio de administración no está disponible. Despliega Edge Function y las migraciones actuales y vuelve a intentarlo.',
+      tr: 'Yönetici hizmeti kullanılamıyor. Güncel Edge Function ve migration’ları dağıtıp yeniden deneyin.',
+    ),
+    AdminOperationFailureKind.authorization => _copy(
+      'This account is not authorized for the admin operation, or the deployed service is using an older admin roster.',
+      ar: 'هذا الحساب غير مخول بعملية الإدارة، أو أن الخدمة المنشورة تستخدم قائمة أدمن قديمة.',
+      fr: 'Ce compte n’est pas autorisé ou le service déployé utilise une ancienne liste d’administrateurs.',
+      es: 'Esta cuenta no está autorizada o el servicio desplegado usa una lista de administradores antigua.',
+      tr: 'Bu hesap yetkili değil veya dağıtılan hizmet eski yönetici listesini kullanıyor.',
+    ),
+    AdminOperationFailureKind.integrity => _copy(
+      'Mobile integrity verification blocked the operation. Use a signed build or keep the server canary in off mode during QA.',
+      ar: 'تحقق سلامة التطبيق منع العملية. استخدم نسخة موقعة أو أبقِ وضع الاختبار في الخادم على off أثناء QA.',
+      fr: 'La vérification d’intégrité mobile a bloqué l’opération. Utilisez une version signée ou gardez le canary serveur sur off pendant la QA.',
+      es: 'La verificación de integridad móvil bloqueó la operación. Usa una compilación firmada o mantén el canary del servidor en off durante QA.',
+      tr: 'Mobil bütünlük doğrulaması işlemi engelledi. İmzalı derleme kullanın veya QA sırasında sunucu canary’sini off tutun.',
+    ),
+    AdminOperationFailureKind.rejected ||
+    AdminOperationFailureKind.unknown => _copy(
+      individual
+          ? 'The individual reset was not completed. No partial change was kept. Try again.'
+          : 'The reset was not completed. No partial change was kept. Try again.',
+      ar: individual
+          ? 'لم تكتمل إعادة الضبط الفردية، ولم يُحفظ أي تغيير جزئي. حاول مجددًا.'
+          : 'لم تكتمل إعادة الضبط، ولم يُحفظ أي تغيير جزئي. حاول مجددًا.',
+      fr: 'L’opération n’a pas abouti. Aucun changement partiel n’a été conservé. Réessayez.',
+      es: 'La operación no se completó. No se conservó ningún cambio parcial. Inténtalo de nuevo.',
+      tr: 'İşlem tamamlanmadı. Kısmi bir değişiklik kaydedilmedi. Yeniden deneyin.',
+    ),
+  };
 
   @override
   void dispose() {

@@ -57,10 +57,10 @@ void main() {
 
     final android = _read(workflows.first);
     final ios = _read(workflows.last);
-    expect(android, contains('BIL_PLUS8_AUDITED_SOURCE_SHA'));
-    expect(android, contains('BIL_PLUS8_STAGING_MANIFEST_SHA256'));
-    expect(ios, contains('BIL_IOS_PLUS9_AUDITED_SOURCE_SHA'));
-    expect(ios, contains('BIL_IOS_PLUS9_STAGING_MANIFEST_SHA256'));
+    expect(android, contains('BIL_ANDROID_V9_AUDITED_SOURCE_SHA'));
+    expect(android, contains('BIL_ANDROID_V9_STAGING_MANIFEST_SHA256'));
+    expect(ios, contains('BIL_IOS_V10_AUDITED_SOURCE_SHA'));
+    expect(ios, contains('BIL_IOS_V10_STAGING_MANIFEST_SHA256'));
     expect(ios, isNot(contains('BIL_PLUS8_AUDITED_SOURCE_SHA')));
     expect(ios, isNot(contains('BIL_PLUS8_STAGING_MANIFEST_SHA256')));
   });
@@ -71,7 +71,7 @@ void main() {
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_PLUS8_FROZEN_SOURCE_MANIFEST_2026-09-06.md',
+        'docs/release/BIL_ANDROID_V9_FROZEN_SOURCE_MANIFEST_2026-09-06.md',
       ),
     );
     expect(
@@ -85,13 +85,13 @@ void main() {
     );
   });
 
-  test('iOS validator consumes only the build 9 hotfix manifest', () {
+  test('iOS validator consumes only the build 10 release manifest', () {
     final source = _read(workflows.last);
     expect(
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_IOS_PLUS9_FROZEN_SOURCE_MANIFEST_2026-09-06.md',
+        'docs/release/BIL_IOS_V10_FROZEN_SOURCE_MANIFEST_2026-09-06.md',
       ),
     );
     expect(
@@ -103,8 +103,8 @@ void main() {
         ),
       ),
     );
-    expect(source, contains('(( BUILD_NUMBER == 9 ))'));
-    expect(source, isNot(contains('(( BUILD_NUMBER == 8 ))')));
+    expect(source, contains('(( BUILD_NUMBER == 10 ))'));
+    expect(source, isNot(contains('(( BUILD_NUMBER == 9 ))')));
   });
 
   test('signed workflows pin actions and stable runner families', () {

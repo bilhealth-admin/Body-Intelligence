@@ -100,11 +100,43 @@ final cloudSyncConsentRepositoryProvider = Provider<CloudSyncConsentRepository>(
   },
 );
 
+/// Emits the authenticated owner so account switching invalidates all
+/// account-scoped cloud state. Without this stream, a dashboard that stayed
+/// mounted after a new email signed in could retain the previous user's
+/// consent result and never show the new account's first-choice notice.
+final cloudAuthOwnerIdProvider = StreamProvider.autoDispose<String?>((ref) {
+  if (!AppEnvironment.supabaseRuntimeReady) return Stream<String?>.value(null);
+  final client = Supabase.instance.client;
+  return _watchCloudAuthOwnerIds(client);
+});
+
+Stream<String?> _watchCloudAuthOwnerIds(SupabaseClient client) async* {
+  var previous = client.auth.currentUser?.id;
+  yield previous;
+  await for (final event in client.auth.onAuthStateChange) {
+    final ownerId = event.session?.user.id;
+    if (ownerId == previous) continue;
+    previous = ownerId;
+    yield ownerId;
+  }
+}
+
 final cloudSyncConsentStateProvider =
     FutureProvider.autoDispose<CloudSyncConsentState>((ref) async {
       if (!AppEnvironment.supabaseRuntimeReady) {
         return const CloudSyncConsentState(
           availability: CloudSyncConsentAvailability.unavailable,
+        );
+      }
+      final authOwner = ref.watch(cloudAuthOwnerIdProvider);
+      if (authOwner.isLoading) {
+        return const CloudSyncConsentState(
+          availability: CloudSyncConsentAvailability.unavailable,
+        );
+      }
+      if (authOwner.value == null) {
+        return const CloudSyncConsentState(
+          availability: CloudSyncConsentAvailability.signedOut,
         );
       }
       return ref.watch(cloudSyncConsentRepositoryProvider).read();

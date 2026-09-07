@@ -31,6 +31,7 @@ class BilDynamicStoreOffers extends StatefulWidget {
     required this.onManage,
     this.onRetry,
     this.loading = false,
+    this.purchaseInProgress = false,
     this.restoreInProgress = false,
     this.currentPlan = CommercePlan.free,
     this.initialFocus,
@@ -44,6 +45,7 @@ class BilDynamicStoreOffers extends StatefulWidget {
   final VoidCallback? onManage;
   final VoidCallback? onRetry;
   final bool loading;
+  final bool purchaseInProgress;
   final bool restoreInProgress;
   final CommercePlan currentPlan;
   final String? initialFocus;
@@ -138,6 +140,7 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
           ];
 
     final selectedOffer = _selectedOffer;
+    final controlsLocked = widget.loading || widget.purchaseInProgress;
     return Stack(
       children: [
         Positioned.fill(
@@ -221,6 +224,7 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                           viewAllFeaturesLabel: _copy('view_all_features'),
                           showFewerFeaturesLabel: _copy('show_fewer_features'),
                           loading: widget.loading,
+                          interactionLocked: controlsLocked,
                           selectedOfferIdentity: _offerIdentity(selectedOffer),
                           onOfferSelected: (offer) =>
                               setState(() => _selectedOffer = offer),
@@ -298,7 +302,7 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
             child: _StickyPurchaseBar(
               label: _copy('continue'),
               price: selectedOffer.localizedPrice,
-              loading: widget.loading,
+              loading: controlsLocked,
               onPressed: () => widget.onPurchaseRequested(selectedOffer),
             ),
           ),

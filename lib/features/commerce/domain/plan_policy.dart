@@ -44,7 +44,10 @@ final class PlanPolicyCatalog {
       plan: CommercePlan.free,
       exposure: StoreExposure.includedFree,
       limits: const PlanUsageLimits(
-        cloudSync: false,
+        // Core encrypted account continuity is included in Free. Premium
+        // gates advanced intelligence and paid programs, not recovery of a
+        // user's own profile, weight, and hydration data.
+        cloudSync: true,
         advancedIntelligence: false,
         professionalWorkspace: false,
         catalogTier: CommercePlan.free,

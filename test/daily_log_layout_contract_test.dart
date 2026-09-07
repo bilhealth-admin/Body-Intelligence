@@ -178,7 +178,7 @@ void main() {
       expect('$search\n$detail', isNot(contains("'myFoods'")));
       expect('$search\n$detail', isNot(contains("'all'")));
 
-      expect(meals, contains("Key('daily-meal-macros-\$type')"));
+      expect(meals, isNot(contains("Key('daily-meal-macros-\$type')")));
       expect(meals, contains("Key('daily-food-row-\${item.id}')"));
       expect(row, contains('item.calories.round().toString()'));
       expect(row, contains('FoodPresentationLocalizer.servingText('));

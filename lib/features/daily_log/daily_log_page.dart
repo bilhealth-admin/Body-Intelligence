@@ -393,12 +393,16 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                           fatGoal:
                               (goalSchedule.mealTargets[mealType] ?? dailyGoal)
                                   ?.fatGrams,
+                          macroDisplay: mealMacroDisplay,
                         ),
                         const SizedBox(height: 12),
                         DailyMealDetailItems(
                           meal: focusedMeal,
                           onEdit: _editMealItem,
                           onActions: _showItemActions,
+                          showFoodTimestamps: showFoodTimestamps,
+                          showFoodInsights: showFoodInsights,
+                          useNetCarbs: useNetCarbs,
                         ),
                       ],
                     );
@@ -537,16 +541,8 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                           ),
                         ),
                       DailyMealsList(
-                        arabic: _arabic,
                         meals: meals,
                         showEmptyMealSlots: showAllMeals,
-                        showFoodInsights: showFoodInsights,
-                        showFoodTimestamps: showFoodTimestamps,
-                        useNetCarbs: useNetCarbs,
-                        dailyGoal: dailyGoal,
-                        mealGoals: goalSchedule.mealTargets,
-                        mealCalorieGoals: mealCalorieGoals,
-                        mealMacroDisplay: mealMacroDisplay,
                         onAdd: (type) {
                           _updateState(() {
                             mealType = type;
@@ -555,8 +551,6 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                           });
                           _openFoodSearchAfterBuild();
                         },
-                        onEdit: _editMealItem,
-                        onActions: _showItemActions,
                       ),
                       const SizedBox(height: PremiumDesignTokens.spaceSm),
                       if (alwaysShowWater ||

@@ -13,6 +13,7 @@ import '../../../engine/data_honesty_engine.dart';
 import '../../../engine/one_best_action_engine.dart';
 import '../../connected_health/widgets/connected_health_card.dart';
 import '../../connected_health/providers/connected_health_provider.dart';
+import '../../connected_health/connected_health_model.dart';
 import '../../commerce/domain/commerce_plan.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../exercise_calorie_controls/domain/exercise_calorie_policy.dart';
@@ -29,6 +30,7 @@ import '../composition/dashboard_command_coordinator.dart';
 import '../composition/dashboard_intelligence_input_adapter.dart';
 import '../domain/dashboard_intelligence_composer.dart';
 import '../domain/dashboard_decision_explanation.dart';
+import '../domain/dashboard_heart_health_policy.dart';
 import '../domain/dashboard_trusted_body_twin_adapter.dart';
 import '../domain/dashboard_runtime_state.dart';
 import '../domain/nutrient_dashboard.dart';
@@ -49,6 +51,8 @@ import 'personal_health_ai_panel.dart';
 part 'dashboard_unprofiled_reference.dart';
 
 part 'dashboard_nutrient_goal_cards.dart';
+
+part 'dashboard_grid_actions.dart';
 
 class DashboardGrid extends ConsumerWidget {
   const DashboardGrid({super.key, this.hero});
@@ -211,6 +215,14 @@ class DashboardGrid extends ConsumerWidget {
     final persistedFiberGoal = nutrientGoals[DashboardNutrientGoalIds.fiber];
     final persistedPotassiumGoal =
         nutrientGoals[DashboardNutrientGoalIds.potassium];
+    final sodiumGoal =
+        persistedSodiumGoal?.round() ??
+        DashboardHeartHealthPolicy.sodiumMaximumMg;
+    final fiberGoal =
+        persistedFiberGoal?.round() ?? DashboardHeartHealthPolicy.fiberMaximumG;
+    final potassiumGoal =
+        persistedPotassiumGoal?.round() ??
+        DashboardHeartHealthPolicy.potassiumMaximumMg;
     final carbohydrates = todayMealItems.fold<double>(
       0,
       (sum, item) => sum + item.carbs,
@@ -221,6 +233,21 @@ class DashboardGrid extends ConsumerWidget {
     final dailyLogs = dailyLogsAsync.value ?? const [];
     final allContexts = allContextsAsync.value ?? const [];
     final now = clock();
+    final connectedHealthSnapshot = ref.watch(connectedHealthProvider).value;
+    final localStepTrendValues = dailyLogs
+        .where((entry) => entry.steps != null)
+        .take(30)
+        .map((entry) => entry.steps!.toDouble())
+        .toList(growable: false)
+        .reversed
+        .toList(growable: false);
+    final connectedStepTrendValues = connectedHealthStepTrendValues(
+      connectedHealthSnapshot,
+      now,
+    );
+    final stepTrendValues = connectedStepTrendValues.any((value) => value > 0)
+        ? connectedStepTrendValues
+        : localStepTrendValues;
     final canonicalIntelligence = ref.watch(productIntelligenceOutputProvider);
     final goalSchedule =
         ref.watch(nutritionGoalScheduleProvider).value ??
@@ -285,7 +312,7 @@ class DashboardGrid extends ConsumerWidget {
         ref.watch(exerciseCaloriePreferencesProvider).value ??
         const ExerciseCaloriePreferences();
     final exerciseEnergy = authoritativeExerciseEnergyForDay(
-      ref.watch(connectedHealthProvider).value,
+      connectedHealthSnapshot,
       now,
     );
     final exerciseAdjustedTargets = ExerciseCaloriePolicy.calculate(
@@ -408,41 +435,6 @@ class DashboardGrid extends ConsumerWidget {
       tr: tr,
     );
 
-    Future<void> addWater(int amountMl) async {
-      await hydrationCommand.addWater(amountMl);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              tr(
-                '$amountMl ml added to today.',
-                'تمت إضافة $amountMl مل إلى اليوم.',
-              ),
-            ),
-          ),
-        );
-      }
-    }
-
-    void openCanonicalAction() {
-      switch (canonicalAction?.id) {
-        case 'continue-plan':
-          context.push('/plan?origin=dashboard');
-        case 'increase-protein':
-        case 'rebalance-electrolytes':
-          context.go('/daily-log?meal=breakfast&focus=meal&from=%2Fdashboard');
-        case 'protect-sleep':
-        case 'increase-activity':
-          context.go('/daily-log?from=%2Fdashboard');
-        case 'audit-plateau-inputs':
-          context.go('/analytics');
-        case null:
-          break;
-        default:
-          context.push('/intelligence-center');
-      }
-    }
-
     final healthAi = dashboardSnapshot.personalHealthAi;
     final personalHealthAiPanel = PersonalHealthAiPanel(
       snapshot: healthAi,
@@ -501,7 +493,12 @@ class DashboardGrid extends ConsumerWidget {
               extra: decisionExplanation,
             ),
             onAction: canonicalOutput != null
-                ? (canonicalAction == null ? null : openCanonicalAction)
+                ? (canonicalAction == null
+                      ? null
+                      : () => _openDashboardCanonicalAction(
+                          context,
+                          canonicalAction.id,
+                        ))
                 : dailyReturn.hasPrimaryAction
                 ? () {
                     switch (bestAction.type) {
@@ -513,7 +510,12 @@ class DashboardGrid extends ConsumerWidget {
                           '/daily-log?meal=breakfast&focus=meal&from=%2Fdashboard',
                         );
                       case BestActionType.hydration:
-                        addWater(250);
+                        _addDashboardWater(
+                          context: context,
+                          command: hydrationCommand,
+                          tr: tr,
+                          amountMl: 250,
+                        );
                       case BestActionType.holdPlan:
                       case BestActionType.none:
                         break;
@@ -539,8 +541,12 @@ class DashboardGrid extends ConsumerWidget {
               onMealsTap: () => context.go(
                 '/daily-log?meal=breakfast&focus=meal&from=%2Fdashboard',
               ),
-              onWaterTap: () => context.go('/daily-log?from=%2Fdashboard'),
+              onWaterTap: () =>
+                  context.go('/daily-log/water?from=%2Fdashboard'),
             ),
+            // These two cards remain computed for their standalone widgets,
+            // but are intentionally not mounted on the owner-approved
+            // dashboard surface.
             progressSection: progressSection,
             personalHealthAi: personalHealthAiPanel,
             connectedHealth: ConnectedHealthCard(
@@ -628,9 +634,9 @@ class DashboardGrid extends ConsumerWidget {
             sugarEvidenceValue: evidenced(TrackedNutrient.sugar),
             sodiumEvidenceValue: evidenced(TrackedNutrient.sodium),
             potassiumEvidenceValue: evidenced(TrackedNutrient.potassium),
-            fiberGoal: persistedFiberGoal?.round(),
-            sodiumGoal: persistedSodiumGoal?.round(),
-            potassiumGoal: persistedPotassiumGoal?.round(),
+            fiberGoal: fiberGoal,
+            sodiumGoal: sodiumGoal,
+            potassiumGoal: potassiumGoal,
             nutrientDashboardPreset:
                 nutrientDashboardPreset ?? 'Calories and macros',
             weightTrendValues: weights
@@ -641,13 +647,7 @@ class DashboardGrid extends ConsumerWidget {
                 .toList(growable: false)
                 .reversed
                 .toList(growable: false),
-            stepTrendValues: dailyLogs
-                .where((entry) => entry.steps != null)
-                .take(30)
-                .map((entry) => entry.steps!.toDouble())
-                .toList(growable: false)
-                .reversed
-                .toList(growable: false),
+            stepTrendValues: stepTrendValues,
             weightUnit: UnitConverter.weightUnit(system),
             visibleSections: visibleSections,
             premiumUnlocked: premiumUnlocked,

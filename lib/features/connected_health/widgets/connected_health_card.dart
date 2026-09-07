@@ -250,7 +250,6 @@ class _ConnectedHealthContent extends StatelessWidget {
             snapshot: snapshot,
             fitnessDevices: fitnessDevices,
             languageCode: languageCode,
-            onManage: onManage,
           ),
         ),
       );
@@ -503,13 +502,11 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
     required this.snapshot,
     required this.fitnessDevices,
     required this.languageCode,
-    required this.onManage,
   });
 
   final ConnectedHealthSnapshot snapshot;
   final FitnessDeviceSnapshot fitnessDevices;
   final String languageCode;
-  final VoidCallback onManage;
 
   String tr(String en, String ar) =>
       connectedHealthTextForLanguage(languageCode, en, ar);
@@ -524,7 +521,6 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
         liveHealthWatchCanShowMetrics(watchSnapshot) &&
         watchSnapshot.lastSyncAt != null;
     final hasData = hasMeasuredData || showLastSync;
-    final hasConnectedSource = liveHealthWatchCanShowMetrics(watchSnapshot);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -575,31 +571,6 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
             ],
           ),
         ],
-        const SizedBox(height: 10),
-        Align(
-          alignment: Alignment.center,
-          child: hasConnectedSource
-              ? OutlinedButton.icon(
-                  key: const Key('dashboard-fitness-link-action'),
-                  onPressed: onManage,
-                  icon: const Icon(Icons.link_rounded, size: 18),
-                  label: Text(
-                    tr('Manage fitness sources', 'إدارة مصادر اللياقة'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                )
-              : Semantics(
-                  label: tr('Link a fitness source', 'ربط مصدر لياقة'),
-                  button: true,
-                  child: IconButton.outlined(
-                    key: const Key('dashboard-fitness-link-action'),
-                    onPressed: onManage,
-                    tooltip: tr('Link fitness', 'ربط اللياقة'),
-                    icon: const Icon(Icons.link_rounded),
-                  ),
-                ),
-        ),
       ],
     );
   }

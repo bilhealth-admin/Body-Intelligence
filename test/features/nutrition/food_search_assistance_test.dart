@@ -14,6 +14,10 @@ void main() {
     expect(assistance.expand('chiken'), contains('chicken'));
   });
 
+  test('keeps known concepts searchable inside a longer phrase', () {
+    expect(assistance.expand('بطيخ الكيوي'), contains('watermelon'));
+  });
+
   test('generates useful Arabic names', () {
     expect(assistance.arabicNameFor('Chicken, ground, raw'), contains('دجاج'));
     expect(assistance.arabicNameFor('APPLES, FUJI'), 'تفاح فوجي');

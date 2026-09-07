@@ -129,6 +129,7 @@ class FoodSearchAssistance {
         "كمثرى": <String>["pear"],
         "رمان": <String>["pomegranate"],
         "بطيخ": <String>["watermelon"],
+        "بطيخ الكيوي": <String>["watermelon"],
         "شمام": <String>["melon"],
         "تمر": <String>["dates"],
         "لوز": <String>["almond"],
@@ -319,6 +320,11 @@ class FoodSearchAssistance {
       if (values == null || values.isEmpty) {
         translated.add(token);
       } else {
+        // Keep each authored concept available as a bounded fallback for a
+        // phrase that contains an extra/unknown word (for example
+        // "بطيخ الكيوي"). The full translated phrase remains in the set and
+        // is still preferred whenever the catalog has an exact match.
+        expanded.addAll(values);
         translated.add(values.first);
         changed = true;
       }

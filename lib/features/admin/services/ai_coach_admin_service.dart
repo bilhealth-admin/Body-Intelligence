@@ -83,14 +83,12 @@ final class SupabaseAiCoachAdminGateway implements AiCoachAdminGateway {
       'message': message.trim(),
       'idempotency_key': idempotencyKey,
     };
-    final protectedBody = await BilMobileIntegrityService.instance.protect(
-      action: 'admin.ai_coach.global_reset',
-      payload: body,
-    );
-    final response = await _client.functions.invoke(
-      'ai-coach-global-reset',
-      body: protectedBody,
-    );
+    final protectedBody = await BilMobileIntegrityService.instance
+        .protect(action: 'admin.ai_coach.global_reset', payload: body)
+        .timeout(const Duration(seconds: 12));
+    final response = await _client.functions
+        .invoke('ai-coach-global-reset', body: protectedBody)
+        .timeout(const Duration(seconds: 20));
     if (response.status != 200 || response.data is! Map) {
       throw StateError('ai_coach_global_reset_failed');
     }
@@ -113,14 +111,12 @@ final class SupabaseAiCoachAdminGateway implements AiCoachAdminGateway {
       'message': message.trim(),
       'idempotency_key': idempotencyKey,
     };
-    final protectedBody = await BilMobileIntegrityService.instance.protect(
-      action: 'admin.ai_coach.individual_reset',
-      payload: body,
-    );
-    final response = await _client.functions.invoke(
-      'ai-coach-global-reset',
-      body: protectedBody,
-    );
+    final protectedBody = await BilMobileIntegrityService.instance
+        .protect(action: 'admin.ai_coach.individual_reset', payload: body)
+        .timeout(const Duration(seconds: 12));
+    final response = await _client.functions
+        .invoke('ai-coach-global-reset', body: protectedBody)
+        .timeout(const Duration(seconds: 20));
     if (response.status != 200 || response.data is! Map) {
       throw StateError('ai_coach_individual_reset_failed');
     }
@@ -149,14 +145,12 @@ final class SupabaseAiCoachAdminGateway implements AiCoachAdminGateway {
       if (message?.trim().isNotEmpty == true) 'message': message!.trim(),
       'idempotency_key': idempotencyKey,
     };
-    final protectedBody = await BilMobileIntegrityService.instance.protect(
-      action: 'admin.ai_coach.notification',
-      payload: body,
-    );
-    final response = await _client.functions.invoke(
-      'ai-coach-global-reset',
-      body: protectedBody,
-    );
+    final protectedBody = await BilMobileIntegrityService.instance
+        .protect(action: 'admin.ai_coach.notification', payload: body)
+        .timeout(const Duration(seconds: 12));
+    final response = await _client.functions
+        .invoke('ai-coach-global-reset', body: protectedBody)
+        .timeout(const Duration(seconds: 20));
     if (response.status != 200 || response.data is! Map) {
       throw StateError('ai_coach_admin_notification_failed');
     }

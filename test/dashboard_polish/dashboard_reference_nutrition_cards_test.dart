@@ -140,6 +140,40 @@ void main() {
         expect(remainingValue.textSpan?.toPlainText(), '1460');
         expect(remainingValue.textDirection, TextDirection.ltr);
 
+        final todayAction = find.byKey(
+          const Key('dashboard-reference-calories-edit'),
+        );
+        expect(todayAction, findsOneWidget);
+        expect(
+          find.descendant(of: calories, matching: find.byType(TextButton)),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: calories, matching: find.byType(IconButton)),
+          findsNothing,
+        );
+        if (locale.languageCode == 'en') {
+          expect(find.text('Calories'), findsOneWidget);
+          expect(find.text('Today'), findsOneWidget);
+          final caloriesTitle = tester.widget<Text>(
+            find.descendant(of: calories, matching: find.text('Calories')),
+          );
+          final todayLabel = tester.widget<Text>(
+            find.descendant(of: calories, matching: find.text('Today')),
+          );
+          expect(todayLabel.style?.fontSize, caloriesTitle.style?.fontSize);
+          expect(todayLabel.style?.fontWeight, caloriesTitle.style?.fontWeight);
+          expect(
+            todayLabel.style?.letterSpacing,
+            caloriesTitle.style?.letterSpacing,
+          );
+          await tester.tap(todayAction);
+          await tester.pumpAndSettle();
+          expect(router.routeInformationProvider.value.uri.path, '/daily-log');
+          router.go('/');
+          await tester.pumpAndSettle();
+        }
+
         final carousel = find.byKey(
           const Key('dashboard-calories-macros-horizontal'),
         );

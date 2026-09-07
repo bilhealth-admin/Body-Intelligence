@@ -24,7 +24,10 @@ void main() {
     expect(benchmark, isNot(contains('DashboardTwinDeckShell(')));
     expect(benchmark, isNot(contains('class _KeyInsightsDeck')));
     expect(current, contains('_OverviewCardsCarousel('));
-    expect(current, contains("Key('dashboard-personal-health-ai-slot')"));
+    expect(
+      current,
+      isNot(contains("Key('dashboard-personal-health-ai-slot')")),
+    );
 
     expect(shell, contains("Key('dashboard-twin-header-slot')"));
     expect(

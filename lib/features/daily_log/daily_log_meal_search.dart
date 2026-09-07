@@ -15,9 +15,25 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     effectiveQuery = controller.text.trim();
     if (effectiveQuery.isEmpty) return const <Widget>[];
 
-    var results = await ref
-        .read(foodRuntimeSearchAuthorityProvider)
-        .search(effectiveQuery, limit: 20);
+    final authority = ref.read(foodRuntimeSearchAuthorityProvider);
+    var results = await authority.search(effectiveQuery, limit: 20);
+    if (results.isEmpty) {
+      // A phrase can contain a reviewed food concept plus an extra word that
+      // USDA does not index as part of the food name (for example
+      // "بطيخ الكيوي"). Retry once with the first reviewed Latin concept so
+      // the daily-log picker can still show the authoritative food row.
+      final fallbackQuery = _DailyLogPageState._searchAssistance
+          .expand(effectiveQuery)
+          .firstWhere(
+            (candidate) =>
+                candidate != effectiveQuery &&
+                RegExp(r'^[A-Za-z0-9]').hasMatch(candidate),
+            orElse: () => '',
+          );
+      if (fallbackQuery.isNotEmpty) {
+        results = await authority.search(fallbackQuery, limit: 20);
+      }
+    }
     for (var refresh = 0; refresh < 3; refresh++) {
       final latestQuery = controller.text.trim();
       if (latestQuery == effectiveQuery) break;
@@ -70,15 +86,10 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     final uniqueResults = <Food>[];
     final identities = <String>{};
     for (final food in results) {
-      if (!FoodPresentationLocalizer.hasLocalizedBrowseName(
-        name: food.name,
-        arabicName: food.arabicName,
-        localeTag: resultLocale,
-        isCustom: food.isCustom,
-        source: food.source,
-      )) {
-        continue;
-      }
+      // This is an explicit search, not an anonymous/popular browse list.
+      // Preserve an authoritative result even when its name has no reviewed
+      // translation; foodName() will use the reviewed translation when one
+      // exists and otherwise keep the source name instead of hiding it.
       final displayName = _displayFoodName(food, resultLocale);
       final identity = _mealFoodDisplayIdentity(food, displayName);
       if (identities.add(identity)) uniqueResults.add(food);

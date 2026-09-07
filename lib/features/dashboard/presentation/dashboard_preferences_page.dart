@@ -63,10 +63,12 @@ class _DashboardPreferencesPageState
         body: ListView(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
           children: [
-            if (_saving) ...[
-              const LinearProgressIndicator(),
-              const SizedBox(height: 12),
-            ],
+            SizedBox(
+              height: 12,
+              child: _saving
+                  ? const LinearProgressIndicator()
+                  : const SizedBox.shrink(),
+            ),
             Text(
               _sectionCopy(
                 context,

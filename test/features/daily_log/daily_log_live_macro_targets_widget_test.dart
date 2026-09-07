@@ -6,7 +6,6 @@ import 'package:body_intelligence_log/data/repositories/nutrition_goal_schedule_
 import 'package:body_intelligence_log/features/daily_log/presentation/daily_log_meals_list.dart';
 import 'package:body_intelligence_log/features/daily_log/presentation/daily_log_summary_widgets.dart';
 import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
-import 'package:body_intelligence_log/features/settings/premium_meal_features_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -90,48 +89,60 @@ void main() {
   );
 
   testWidgets(
-    'live meal card renders food and honors grams, net carbs, time, insights, and callbacks',
+    'Today meal card stays compact and opens its dedicated meal page',
     (tester) async {
       final meal = _mealFixture(carbs: 50, fiber: 10);
-      final mealGoal = NutritionGoalTarget.fromGrams(
-        calories: 745,
-        carbsGrams: 80,
-        proteinGrams: 50,
-        fatGrams: 25,
-      );
-      MealItem? editedItem;
-      MealItem? actionItem;
+      var opened = false;
 
-      await _pumpMealList(
-        tester,
-        meal: meal,
-        mealGoal: mealGoal,
-        macroDisplay: const MealMacroDisplay(
-          enabled: true,
-          mode: MealMacroDisplayMode.grams,
-        ),
-        showFoodInsights: true,
-        showFoodTimestamps: true,
-        useNetCarbs: true,
-        onEdit: (item, _) async => editedItem = item,
-        onActions: (item, _) async => actionItem = item,
-      );
+      await _pumpMealList(tester, meal: meal, onAdd: (_) => opened = true);
 
       expect(
         find.byKey(const Key('daily-meal-card-breakfast')),
         findsOneWidget,
       );
+      expect(find.byKey(const Key('daily-food-row-7')), findsNothing);
+      expect(find.text('Evidence yogurt'), findsNothing);
+      expect(
+        find.byKey(const Key('daily-meal-totals-breakfast')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const Key('daily-meal-macros-breakfast')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const Key('daily-meal-macro-goal-breakfast')),
+        findsNothing,
+      );
+      expect(find.text('Open meal'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('daily-meal-log-breakfast')));
+      await tester.pump();
+      expect(opened, isTrue);
+    },
+  );
+
+  testWidgets(
+    'dedicated meal detail owns food, time, net carbs, and callbacks',
+    (tester) async {
+      final meal = _mealFixture(carbs: 50, fiber: 10);
+      MealItem? editedItem;
+      MealItem? actionItem;
+
+      await _pumpMealDetail(
+        tester,
+        meal: meal,
+        onEdit: (item, _) async => editedItem = item,
+        onActions: (item, _) async => actionItem = item,
+      );
+
       expect(find.byKey(const Key('daily-food-row-7')), findsOneWidget);
       expect(find.text('Evidence yogurt'), findsOneWidget);
       expect(find.textContaining('Logged at'), findsOneWidget);
       expect(find.byKey(const Key('daily-food-insights-7')), findsOneWidget);
       expect(
-        _textBelow(tester, const Key('daily-meal-macros-breakfast')),
-        allOf(
-          contains('C 40 / 80 g'),
-          contains('P 25 / 50 g'),
-          contains('F 10 / 25 g'),
-        ),
+        _textBelow(tester, const Key('daily-food-insights-7')),
+        contains('NC 40 g'),
       );
 
       await tester.tap(find.byKey(const Key('daily-food-row-7')));
@@ -143,62 +154,6 @@ void main() {
       expect(actionItem?.id, 7);
     },
   );
-
-  testWidgets(
-    'live meal card honors percent mode and hides disabled optional details',
-    (tester) async {
-      final meal = _mealFixture(carbs: 50, fiber: 10);
-      final mealGoal = NutritionGoalTarget.fromGrams(
-        calories: 745,
-        carbsGrams: 80,
-        proteinGrams: 50,
-        fatGrams: 25,
-      );
-
-      await _pumpMealList(
-        tester,
-        meal: meal,
-        mealGoal: mealGoal,
-        macroDisplay: const MealMacroDisplay(
-          enabled: true,
-          mode: MealMacroDisplayMode.percent,
-        ),
-        showFoodInsights: false,
-        showFoodTimestamps: false,
-        useNetCarbs: false,
-        includeMealGoal: false,
-      );
-
-      expect(find.byKey(const Key('daily-food-row-7')), findsOneWidget);
-      expect(find.textContaining('Logged at'), findsNothing);
-      expect(find.byKey(const Key('daily-food-insights-7')), findsNothing);
-      expect(
-        _textBelow(tester, const Key('daily-meal-macros-breakfast')),
-        allOf(contains('C 63%'), contains('P 50%'), contains('F 40%')),
-      );
-    },
-  );
-
-  testWidgets('disabled per-meal macro display removes the macro surface', (
-    tester,
-  ) async {
-    await _pumpMealList(
-      tester,
-      meal: _mealFixture(carbs: 50, fiber: 10),
-      mealGoal: NutritionGoalTarget.fromGrams(
-        calories: 745,
-        carbsGrams: 80,
-        proteinGrams: 50,
-        fatGrams: 25,
-      ),
-      macroDisplay: const MealMacroDisplay(
-        enabled: false,
-        mode: MealMacroDisplayMode.grams,
-      ),
-    );
-
-    expect(find.byKey(const Key('daily-meal-macros-breakfast')), findsNothing);
-  });
 
   testWidgets('Today snapshot reports consumed grams against resolved goals', (
     tester,
@@ -250,14 +205,7 @@ void main() {
 Future<void> _pumpMealList(
   WidgetTester tester, {
   required MealWithItems meal,
-  required NutritionGoalTarget mealGoal,
-  required MealMacroDisplay macroDisplay,
-  bool showFoodInsights = true,
-  bool showFoodTimestamps = false,
-  bool useNetCarbs = false,
-  bool includeMealGoal = true,
-  Future<void> Function(MealItem item, Food food)? onEdit,
-  Future<void> Function(MealItem item, Food? food)? onActions,
+  required ValueChanged<String> onAdd,
 }) async {
   tester.view.physicalSize = const Size(600, 900);
   tester.view.devicePixelRatio = 1;
@@ -274,21 +222,40 @@ Future<void> _pumpMealList(
         Scaffold(
           body: SingleChildScrollView(
             child: DailyMealsList(
-              arabic: false,
               meals: AsyncData(<MealWithItems>[meal]),
               showEmptyMealSlots: false,
-              showFoodInsights: showFoodInsights,
-              showFoodTimestamps: showFoodTimestamps,
-              useNetCarbs: useNetCarbs,
-              dailyGoal: mealGoal,
-              mealGoals: includeMealGoal
-                  ? <String, NutritionGoalTarget>{'breakfast': mealGoal}
-                  : const <String, NutritionGoalTarget>{},
-              mealMacroDisplay: macroDisplay,
-              onAdd: (_) {},
-              onEdit: onEdit ?? (_, _) async {},
-              onActions: onActions ?? (_, _) async {},
+              onAdd: onAdd,
             ),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pump();
+  expect(tester.takeException(), isNull);
+}
+
+Future<void> _pumpMealDetail(
+  WidgetTester tester, {
+  required MealWithItems meal,
+  required Future<void> Function(MealItem item, Food food) onEdit,
+  required Future<void> Function(MealItem item, Food? food) onActions,
+}) async {
+  tester.view.physicalSize = const Size(600, 900);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.reset);
+
+  await tester.pumpWidget(
+    _localizedApp(
+      Scaffold(
+        body: SingleChildScrollView(
+          child: DailyMealDetailItems(
+            meal: meal,
+            onEdit: onEdit,
+            onActions: onActions,
+            showFoodTimestamps: true,
+            showFoodInsights: true,
+            useNetCarbs: true,
           ),
         ),
       ),

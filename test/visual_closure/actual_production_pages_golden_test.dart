@@ -42,7 +42,6 @@ import 'package:body_intelligence_log/features/wellness/presentation/professiona
 import 'package:body_intelligence_log/features/wellness/presentation/recipe_library_page.dart';
 import 'package:body_intelligence_log/features/wellness/repositories/recipe_release_repository.dart';
 import 'package:body_intelligence_log/features/wellness/presentation/wellness_library_page.dart';
-import 'package:body_intelligence_log/features/wellness/presentation/wellness_learn_page.dart';
 import 'package:body_intelligence_log/features/wellness/presentation/wellness_tools_pages.dart';
 import 'package:body_intelligence_log/features/wellness/services/wellness_content_pack_manager.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
@@ -1863,39 +1862,6 @@ void main() {
     );
   });
 
-  for (final state in const [
-    (page: 1, swipes: 0, title: 'How does food affect your sleep?'),
-    (page: 2, swipes: 1, title: "Find out what's keeping you awake"),
-    (page: 3, swipes: 2, title: 'Time your meals for the best rest'),
-  ]) {
-    testWidgets('sleep education production page ${state.page} capture', (
-      tester,
-    ) async {
-      await capture(
-        tester,
-        page: const SleepTrackerPage(),
-        name: state.page == 1
-            ? 'sleep_learn_phone'
-            : 'sleep_learn_phone_${state.page}',
-        interact: (tester) async {
-          await tester.tap(find.text('Learn'));
-          await tester.pumpAndSettle();
-          final carousel = find.byKey(const Key('sleep-education-carousel'));
-          for (var swipe = 0; swipe < state.swipes; swipe++) {
-            await tester.drag(carousel, const Offset(-320, 0));
-            await tester.pumpAndSettle();
-          }
-          expect(
-            find
-                .descendant(of: carousel, matching: find.text(state.title))
-                .hitTestable(),
-            findsOneWidget,
-          );
-        },
-      );
-    });
-  }
-
   testWidgets('fasting production page capture', (tester) async {
     SharedPreferences.setMockInitialValues({});
     await capture(
@@ -1912,99 +1878,6 @@ void main() {
       name: 'wellness_library_phone',
     );
   });
-
-  testWidgets('wellness learn production page capture', (tester) async {
-    await capture(
-      tester,
-      page: const WellnessLearnPage(),
-      name: 'wellness_learn_phone',
-    );
-  });
-
-  testWidgets('wellness learn filtered search capture', (tester) async {
-    await capture(
-      tester,
-      page: const WellnessLearnPage(),
-      name: 'wellness_learn_search_phone',
-      interact: (tester) async {
-        final search = find.byType(SearchBar);
-        expect(search, findsOneWidget);
-        await tester.tap(search);
-        await tester.enterText(search, 'sleep');
-        await tester.pumpAndSettle();
-        expect(
-          find.text('Why one night cannot explain your sleep'),
-          findsOneWidget,
-        );
-        expect(find.text('Educational highlights'), findsNothing);
-      },
-    );
-  });
-
-  for (final topic in const ['Nutrition', 'Movement', 'Sleep', 'Privacy']) {
-    testWidgets('wellness learn $topic topic capture', (tester) async {
-      await capture(
-        tester,
-        page: const WellnessLearnPage(),
-        name: 'wellness_learn_${topic.toLowerCase()}_phone',
-        interact: (tester) async {
-          final target = find.text(topic);
-          await tester.ensureVisible(target);
-          await tester.pumpAndSettle();
-          await tester.tap(target);
-          await tester.pumpAndSettle();
-          final chip = tester.widget<ChoiceChip>(
-            find.widgetWithText(ChoiceChip, topic),
-          );
-          expect(chip.selected, isTrue);
-        },
-      );
-    });
-  }
-
-  const learnArticles = <(String, String)>[
-    ('nutrition', 'How to read your food log without judgment'),
-    ('movement', 'Consistency matters more than a perfect day'),
-    ('sleep', 'Why one night cannot explain your sleep'),
-    ('privacy', 'Your health data stays under your control'),
-  ];
-  for (final article in learnArticles) {
-    testWidgets('wellness learn ${article.$1} article capture', (tester) async {
-      await capture(
-        tester,
-        page: const WellnessLearnPage(),
-        name: 'wellness_learn_article_${article.$1}_phone',
-        captureOverlay: true,
-        interact: (tester) async {
-          final target = find.text(article.$2);
-          await tester.scrollUntilVisible(
-            target,
-            400,
-            scrollable: find.byType(Scrollable).first,
-          );
-          await tester.tap(target.first);
-          await tester.pumpAndSettle();
-          expect(find.byType(BottomSheet), findsOneWidget);
-        },
-      );
-    });
-  }
-
-  for (var page = 2; page <= 4; page++) {
-    testWidgets('wellness learn production page $page capture', (tester) async {
-      await capture(
-        tester,
-        page: const WellnessLearnPage(),
-        name: 'wellness_learn_phone_$page',
-        interact: (tester) async {
-          for (var step = 1; step < page; step++) {
-            await tester.drag(find.byType(ListView), const Offset(0, -420));
-            await tester.pumpAndSettle();
-          }
-        },
-      );
-    });
-  }
 
   testWidgets('notification settings production page capture', (tester) async {
     SharedPreferences.setMockInitialValues({});

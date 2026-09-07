@@ -302,8 +302,8 @@ extension _FoodPageActions on _FoodPageState {
       case _FoodAddMethod.mealPhoto:
         final origin = widget.embedded ? '/nutrition' : '/foods';
         final route = Uri(
-          path: '/daily-log',
-          queryParameters: {'action': 'photo', 'from': origin},
+          path: '/intelligence-center',
+          queryParameters: {'vision': 'capture', 'from': origin},
         ).toString();
         await context.push(route);
         return;

@@ -9,9 +9,14 @@ void main() {
     final analytics = readDartLibrarySource(
       'lib/features/analytics/analytics_page.dart',
     );
-    final dashboard = File(
-      'lib/features/dashboard/widgets/dashboard_grid.dart',
-    ).readAsStringSync();
+    final dashboard = <String>[
+      File(
+        'lib/features/dashboard/widgets/dashboard_grid.dart',
+      ).readAsStringSync(),
+      File(
+        'lib/features/dashboard/widgets/dashboard_grid_actions.dart',
+      ).readAsStringSync(),
+    ].join('\n');
 
     expect(
       'class AnalyticsWeightJourneyCard'.allMatches(analytics),
@@ -26,6 +31,8 @@ void main() {
     expect(dashboard, isNot(contains('AnalyticsWeightJourneyCard(')));
     expect(dashboard, isNot(contains('AnalyticsWeeklyProgressCard(')));
     expect(dashboard, contains("context.go('/analytics')"));
+    expect(analytics, contains('showDashboardBack'));
+    expect(analytics, contains("context.go('/dashboard')"));
     expect(dashboard, isNot(contains('WeightTrendChart(')));
     expect(
       RegExp(r'^\s*WeeklyProgressCard\(', multiLine: true).hasMatch(dashboard),

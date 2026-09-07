@@ -38,9 +38,11 @@ import '../services/coach_speech_policy.dart';
 import '../services/coach_voice_turn_policy.dart';
 import '../services/coach_daily_brief.dart';
 import '../services/coach_memory_repository.dart';
+import '../services/coach_voice_transcript_normalizer.dart';
 import '../services/intelligence_health_context_provider.dart';
 import '../services/coach_context_provider.dart';
 import '../services/local_coach_api.dart';
+
 import '../services/local_model_gateway.dart';
 import '../services/coach_catalog_grounding.dart';
 import '../services/ai_coach_feedback_service.dart';
@@ -50,6 +52,7 @@ import '../../nutrition/services/meal_image_analysis_service.dart';
 import '../../nutrition/presentation/meal_image_review_dialog.dart';
 import '../intelligence_locale_copy.dart';
 
+part 'intelligence_center_page_message.dart';
 part 'intelligence_center_widgets.dart';
 part 'intelligence_center_message_widgets.dart';
 part 'intelligence_center_voice_widgets.dart';
@@ -126,7 +129,7 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   int voiceTransientRestarts = 0;
   bool analyzingFoodImage = false;
   bool consentPromptVisible = false;
-  bool welcomeSeeded = false;
+  IntelligenceMessage? sessionWelcomeMessage;
   bool introVisible = true;
   bool conversationReady = false;
   String? activeConversationId;
@@ -172,18 +175,19 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (welcomeSeeded) return;
-    welcomeSeeded = true;
+    // Keep one stable, non-persistent introduction visible while local
+    // storage is being read. The restored transcript replaces only the
+    // session object after the read; it never merges a provisional turn into
+    // the user-owned history.
+    if (sessionWelcomeMessage != null) return;
     final now = ref.read(intelligenceConversationClockProvider)();
-    messages.add(
-      IntelligenceMessage(
-        id: 'welcome-immediate-${now.microsecondsSinceEpoch}',
-        role: IntelligenceMessageRole.bil,
-        kind: IntelligenceMessageKind.coach,
-        text: _sessionWelcome(null, at: now),
-        createdAt: now,
-        modality: IntelligenceMessageModality.system,
-      ),
+    sessionWelcomeMessage = IntelligenceMessage(
+      id: 'welcome-loading-${now.microsecondsSinceEpoch}',
+      role: IntelligenceMessageRole.bil,
+      kind: IntelligenceMessageKind.coach,
+      text: _sessionWelcome(null, at: now),
+      createdAt: now,
+      modality: IntelligenceMessageModality.system,
     );
   }
 
@@ -289,8 +293,10 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   @override
   void didChangeMetrics() {
     // Opening or closing the keyboard changes the conversation viewport after
-    // the current frame. Re-pin the chat to its newest message once that new
-    // viewport has been laid out.
+    // the current frame. Only re-pin during an active turn; otherwise the
+    // first metrics notification while opening a restored chat would move the
+    // user away from the session introduction.
+    if (!conversationReady || (!sending && !listening)) return;
     _scrollToLatest();
   }
 
@@ -419,14 +425,41 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                     Expanded(
                       child: AbsorbPointer(
                         absorbing: !conversationReady,
-                        child: visibleMessages.isEmpty
+                        child: !conversationReady
+                            ? ListView(
+                                key: const ValueKey(
+                                  'ai-coach-conversation-restoring-body',
+                                ),
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  18,
+                                  16,
+                                  12,
+                                ),
+                                children: [
+                                  if (sessionWelcomeMessage != null)
+                                    _buildMessage(
+                                      sessionWelcomeMessage!,
+                                      messageFeedback,
+                                    ),
+                                  const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.only(top: 12),
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : visibleMessages.isEmpty &&
+                                  sessionWelcomeMessage == null &&
+                                  !showIntroBrief
                             ? _CoachEmptyState(
                                 onVoice: _toggleLiveCall,
                                 onCamera: _analyzeFoodImageInChat,
                               )
                             : ListView.builder(
                                 controller: conversationScroll,
-                                reverse: true,
+                                reverse: false,
                                 keyboardDismissBehavior:
                                     ScrollViewKeyboardDismissBehavior.onDrag,
                                 padding: const EdgeInsets.fromLTRB(
@@ -437,42 +470,20 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                                 ),
                                 itemCount:
                                     visibleMessages.length +
+                                    (sessionWelcomeMessage == null ? 0 : 1) +
+                                    (showIntroBrief ? 1 : 0) +
                                     (showLiveVoiceDraft ? 1 : 0) +
-                                    (showReplyProgress ? 1 : 0) +
-                                    (showIntroBrief ? 1 : 0),
+                                    (showReplyProgress ? 1 : 0),
                                 itemBuilder: (context, index) {
-                                  if (showReplyProgress && index == 0) {
-                                    return _CoachReplyProgress(
-                                      phase: replyPhase,
-                                      onCancel: _cancelCurrentCoachRequest,
-                                      onRetry: failedRequest == null
-                                          ? null
-                                          : _retryFailedCoachRequest,
-                                    );
-                                  }
-                                  final progressOffset = showReplyProgress
-                                      ? 1
-                                      : 0;
-                                  if (showLiveVoiceDraft &&
-                                      index == progressOffset) {
-                                    return _LiveVoiceTranscript(
-                                      text: pendingVoiceTranscript.trim(),
-                                      liveCall:
-                                          voiceMode == _CoachVoiceMode.liveCall,
-                                    );
-                                  }
-                                  var cursor =
-                                      index -
-                                      progressOffset -
-                                      (showLiveVoiceDraft ? 1 : 0);
-                                  if (cursor == 0 &&
-                                      visibleMessages.isNotEmpty) {
+                                  var cursor = index;
+                                  if (sessionWelcomeMessage != null &&
+                                      cursor == 0) {
                                     return _buildMessage(
-                                      visibleMessages.last,
+                                      sessionWelcomeMessage!,
                                       messageFeedback,
                                     );
                                   }
-                                  cursor -= 1;
+                                  if (sessionWelcomeMessage != null) cursor--;
                                   if (showIntroBrief && cursor == 0) {
                                     return _InlineCoachDecision(
                                       brief: dailyBrief,
@@ -487,13 +498,30 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                                     );
                                   }
                                   if (showIntroBrief) cursor -= 1;
-                                  final messageIndex =
-                                      visibleMessages.length - 2 - cursor;
-                                  final message = visibleMessages[messageIndex];
-                                  return _buildMessage(
-                                    message,
-                                    messageFeedback,
-                                  );
+                                  if (cursor < visibleMessages.length) {
+                                    return _buildMessage(
+                                      visibleMessages[cursor],
+                                      messageFeedback,
+                                    );
+                                  }
+                                  cursor -= visibleMessages.length;
+                                  if (showLiveVoiceDraft && cursor == 0) {
+                                    return _LiveVoiceTranscript(
+                                      text: pendingVoiceTranscript.trim(),
+                                      liveCall:
+                                          voiceMode == _CoachVoiceMode.liveCall,
+                                    );
+                                  }
+                                  if (showReplyProgress) {
+                                    return _CoachReplyProgress(
+                                      phase: replyPhase,
+                                      onCancel: _cancelCurrentCoachRequest,
+                                      onRetry: failedRequest == null
+                                          ? null
+                                          : _retryFailedCoachRequest,
+                                    );
+                                  }
+                                  return const SizedBox.shrink();
                                 },
                               ),
                       ),
@@ -639,43 +667,6 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildMessage(
-    IntelligenceMessage message,
-    Map<String, bool> feedback,
-  ) {
-    final canRate =
-        message.role == IntelligenceMessageRole.bil &&
-        !message.id.startsWith('welcome') &&
-        !message.id.startsWith('tool-');
-    return _MessageBubble(
-      message: message,
-      feedbackValue: feedback[message.id],
-      reported: reportedMessages.contains(message.id),
-      onSpeak:
-          message.role == IntelligenceMessageRole.bil &&
-              message.modality == IntelligenceMessageModality.voice
-          ? () {
-              final language = const CoachLanguageResolver()
-                  .resolve(
-                    input: message.text,
-                    uiLocale: Localizations.localeOf(context).toLanguageTag(),
-                  )
-                  .languageTag;
-              unawaited(
-                _speakCoachText(message.text, language, showFailure: true),
-              );
-            }
-          : null,
-      onFeedback: canRate
-          ? (helpful) => _recordFeedback(message, helpful)
-          : null,
-      onReport: canRate
-          ? (reason) => _recordFeedback(message, false, reason: reason)
-          : null,
-      onAction: (action) => unawaited(_executeAction(action)),
     );
   }
 }

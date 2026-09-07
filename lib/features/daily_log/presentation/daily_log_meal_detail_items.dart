@@ -6,11 +6,17 @@ class DailyMealDetailItems extends StatelessWidget {
     required this.meal,
     required this.onEdit,
     required this.onActions,
+    this.showFoodTimestamps = true,
+    this.showFoodInsights = true,
+    this.useNetCarbs = false,
   });
 
   final MealWithItems? meal;
   final Future<void> Function(MealItem item, Food food) onEdit;
   final Future<void> Function(MealItem item, Food? food) onActions;
+  final bool showFoodTimestamps;
+  final bool showFoodInsights;
+  final bool useNetCarbs;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +64,9 @@ class DailyMealDetailItems extends StatelessWidget {
                   food: meal?.foodsById[items[index].foodId],
                   onEdit: onEdit,
                   onActions: onActions,
-                  showLoggedTime: true,
+                  showLoggedTime: showFoodTimestamps,
+                  showFoodInsights: showFoodInsights,
+                  useNetCarbs: useNetCarbs,
                 ),
                 if (index != items.length - 1)
                   Divider(height: 1, color: scheme.outlineVariant),
@@ -261,15 +269,6 @@ class _DiaryEmptyMeals extends StatelessWidget {
       ),
     );
   }
-}
-
-({double protein, double carbs, double fat}) _macroSummary(
-  List<MealItem> items,
-) {
-  final protein = items.fold<double>(0, (sum, item) => sum + item.protein);
-  final carbs = items.fold<double>(0, (sum, item) => sum + item.carbs);
-  final fat = items.fold<double>(0, (sum, item) => sum + item.fats);
-  return (protein: protein, carbs: carbs, fat: fat);
 }
 
 String _mealListText(BuildContext context, String key) {

@@ -20,6 +20,15 @@ void main() {
       daily,
       contains('No result after correction. Open the food catalog.'),
     );
+    final search = File(
+      'lib/features/daily_log/daily_log_meal_search.dart',
+    ).readAsStringSync();
+    expect(
+      search,
+      isNot(contains('hasLocalizedBrowseName(')),
+      reason:
+          'Explicit meal search must not hide authoritative names without a reviewed translation.',
+    );
     for (final label in const [
       'Sodium',
       'Potassium',

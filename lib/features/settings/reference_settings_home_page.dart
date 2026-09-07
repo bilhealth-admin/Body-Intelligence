@@ -46,7 +46,6 @@ class ReferenceSettingsHomePage extends ConsumerWidget {
           children: [
             _SettingsGroup(
               title: copy('Account & profile'),
-              kind: BilSemanticIconKind.profile,
               children: [
                 _SettingsRow(copy('Profile'), '/profile-settings'),
                 _SettingsRow(copy('App Appearance'), '/settings/appearance'),
@@ -55,14 +54,12 @@ class ReferenceSettingsHomePage extends ConsumerWidget {
             ),
             _SettingsGroup(
               title: copy('Diary & goals'),
-              kind: BilSemanticIconKind.goals,
               children: [
                 _SettingsRow(copy('Diary Settings'), '/settings/diary'),
               ],
             ),
             _SettingsGroup(
               title: copy('Privacy & notifications'),
-              kind: BilSemanticIconKind.privacy,
               children: [
                 _SettingsRow(
                   copy('Sharing & Privacy'),
@@ -72,7 +69,6 @@ class ReferenceSettingsHomePage extends ConsumerWidget {
             ),
             _SettingsGroup(
               title: copy('Health preferences'),
-              kind: BilSemanticIconKind.health,
               children: [
                 _SettingsRow(copy('My Exercises'), '/wellness/workouts/log'),
                 _SettingsRow(
@@ -181,13 +177,8 @@ class ReferenceSettingsHomePage extends ConsumerWidget {
 }
 
 class _SettingsGroup extends StatelessWidget {
-  const _SettingsGroup({
-    required this.title,
-    required this.kind,
-    required this.children,
-  });
+  const _SettingsGroup({required this.title, required this.children});
   final String title;
-  final BilSemanticIconKind kind;
   final List<Widget> children;
 
   @override
@@ -196,28 +187,18 @@ class _SettingsGroup extends StatelessWidget {
     child: CupertinoListSection.insetGrouped(
       margin: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 8),
       backgroundColor: Colors.transparent,
-      header: Row(
-        children: [
-          BilSemanticIconBadge(
-            kind: kind,
-            size: 26,
-            iconSize: 15,
-            shape: BoxShape.rectangle,
+      header: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: Text(
+          title,
+          style: TextStyle(
+            color: CupertinoColors.label
+                .resolveFrom(context)
+                .withValues(alpha: .82),
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                color: CupertinoColors.label
-                    .resolveFrom(context)
-                    .withValues(alpha: .82),
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
       children: children,
     ),

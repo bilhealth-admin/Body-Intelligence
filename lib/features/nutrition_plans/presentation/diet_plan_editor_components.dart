@@ -154,7 +154,7 @@ class _MacroEditingNotice extends StatelessWidget {
             nutritionText(
               context,
               'Calories and macros balanced for you',
-              'تبقى السعرات ثابتة. عدّل الكربوهيدرات أو البروتين أو الدهون وسيوازن BIL القيمتين الأخريين ليبقى 4ك + 4ب + 9د مساويًا لهدفك.',
+              'تبقى السعرات ثابتة. القيم التي تدخلها تبقى محفوظة، ويعدّل BIL قيمة واحدة غير مقفلة ليبقى 4ك + 4ب + 9د مساويًا لهدفك.',
             ),
             style: const TextStyle(height: 1.4, color: Color(0xFF344054)),
           ),

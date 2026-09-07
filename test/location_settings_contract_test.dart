@@ -29,6 +29,9 @@ void main() {
     expect(source, contains("key: const Key('location-city-field')"));
     expect(source, contains("key: const Key('location-timezone-field')"));
     expect(source, contains("context.go('/settings')"));
+    expect(source, contains('SecondaryPageAppBar('));
+    expect(source, contains("'title': 'الموقع والمنطقة الزمنية'"));
+    expect(source, isNot(contains('0xFF01050D')));
   });
 
   test('country selection is complete and city entry has honest fallback', () {

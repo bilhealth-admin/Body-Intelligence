@@ -1,4 +1,4 @@
-name: BIL iOS signed release candidate
+name: BIL iOS signed release candidate (build 10)
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
         default: false
         type: boolean
       build_number:
-        description: Exact App Store build number for the iOS startup hotfix; must be 9
+        description: Exact App Store build number for this candidate; must be 10
         required: true
         type: string
       run_native_crypto_checks:
@@ -68,8 +68,8 @@ jobs:
             echo 'build_number must be a positive integer.' >&2
             exit 1
           }
-          (( BUILD_NUMBER == 9 )) || {
-            echo 'build_number must be exactly 9 for the audited iOS startup hotfix; crashing build 8 and build 7 must never be selected.' >&2
+          (( BUILD_NUMBER == 10 )) || {
+            echo 'build_number must be exactly 10 for the iOS release candidate; build 9 and earlier must never be selected.' >&2
             exit 1
           }
           test -n "${APPLE_TEAM_ID:-}" || {
@@ -216,9 +216,9 @@ jobs:
           BIL_MOBILE_INTEGRITY_REQUIRED: true
           BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
           BIL_SOURCE_COMMIT: ${{ github.sha }}
-          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_PLUS9_AUDITED_SOURCE_SHA }}
-          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_PLUS9_FROZEN_SOURCE_MANIFEST_2026-09-06.md
-          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_IOS_PLUS9_STAGING_MANIFEST_SHA256 }}
+          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_IOS_V10_AUDITED_SOURCE_SHA }}
+          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_IOS_V10_FROZEN_SOURCE_MANIFEST_2026-09-06.md
+          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_IOS_V10_STAGING_MANIFEST_SHA256 }}
         run: |
           flutter pub get
           flutter analyze --no-pub

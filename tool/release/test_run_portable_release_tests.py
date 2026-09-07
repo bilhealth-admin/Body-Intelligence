@@ -62,9 +62,25 @@ class PortableReleaseSchedulingTest(unittest.TestCase):
             with self.subTest(paths=paths), self.assertRaises(SystemExit):
                 runner.partition_tests(paths)
 
+    def test_command_batches_preserve_every_test_once(self):
+        tests = ["test/a_test.dart", "test/b_test.dart", "test/c_test.dart"]
+        batches = runner.partition_test_batches(
+            ["flutter", "test"],
+            tests,
+            command_line_limit=48,
+        )
+        self.assertGreater(len(batches), 1)
+        self.assertEqual([path for batch in batches for path in batch], tests)
+
     def test_performance_runs_serial_first_then_every_other_file_once(self):
         code, calls, output = self.run_main([0, 0])
-        prefix = ["flutter", "test", "--no-pub", "--timeout", "30s"]
+        prefix = [
+            runner.resolve_flutter_executable(),
+            "test",
+            "--no-pub",
+            "--timeout",
+            "30s",
+        ]
         self.assertEqual(code, 0)
         self.assertEqual(
             calls,

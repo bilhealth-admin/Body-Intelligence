@@ -67,6 +67,11 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   int reportCalls = 0;
   String? reportedTargetKind;
   String? reportedTargetId;
+  int foodSubmissionCalls = 0;
+  CommunityFoodDraft? submittedFood;
+  bool failFoodSubmission = false;
+  int sentMessageCalls = 0;
+  String? sentMessageBody;
 
   @override
   String get currentUserId => currentId;
@@ -196,6 +201,18 @@ final class _CommunityInteractionRepository extends CommunityRepository {
     reportedTargetId = targetId;
   }
 
+  @override
+  Future<List<Map<String, dynamic>>> loadMyFoodSubmissions() async => const [];
+
+  @override
+  Future<void> submitFood(CommunityFoodDraft draft) async {
+    foodSubmissionCalls++;
+    submittedFood = draft;
+    if (failFoodSubmission) {
+      throw StateError('injected food submission failure');
+    }
+  }
+
   Map<String, dynamic> _message(bool incoming) => {
     'id': incoming
         ? '44444444-4444-4444-8444-444444444444'
@@ -257,6 +274,13 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   Future<void> markConversationRead(String otherUserId) async {
     expect(otherUserId, otherId);
     conversationReadCalls++;
+  }
+
+  @override
+  Future<void> sendMessage(String recipientId, String body) async {
+    expect(recipientId, otherId);
+    sentMessageCalls++;
+    sentMessageBody = body;
   }
 
   @override
@@ -593,6 +617,108 @@ void main() {
     await tester.tap(find.text('Community profile'));
     await tester.pumpAndSettle();
     expect(find.text('Profile destination'), findsOneWidget);
+  });
+
+  testWidgets('empty community share does not show a validation error', (
+    tester,
+  ) async {
+    final repository = _CommunityInteractionRepository();
+    await tester.pumpWidget(_app(CommunityHubPage(repository: repository)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('community-post-publish')));
+    await tester.pumpAndSettle();
+
+    expect(repository.publishCalls, 0);
+    expect(find.text('Complete all required values.'), findsNothing);
+    expect(find.text('أكمل القيم المطلوبة.'), findsNothing);
+  });
+
+  testWidgets('community food submission accepts Arabic digits and succeeds', (
+    tester,
+  ) async {
+    final repository = _CommunityInteractionRepository();
+    await tester.pumpWidget(_app(CommunityHubPage(repository: repository)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Verified food'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Submit food'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('community-food-name')), 'خبز');
+    await tester.enterText(
+      find.byKey(const Key('community-food-serving')),
+      '١٠٠',
+    );
+    await tester.enterText(
+      find.byKey(const Key('community-food-calories')),
+      '٢٥٠',
+    );
+    await tester.enterText(
+      find.byKey(const Key('community-food-protein')),
+      '١٠',
+    );
+    await tester.enterText(find.byKey(const Key('community-food-carbs')), '٤٠');
+    await tester.enterText(find.byKey(const Key('community-food-fat')), '٥');
+    await tester.tap(find.byKey(const Key('community-food-submit')));
+    await tester.pumpAndSettle();
+
+    expect(repository.foodSubmissionCalls, 1);
+    expect(repository.submittedFood?.servingGrams, 100);
+    expect(repository.submittedFood?.calories, 250);
+    expect(find.textContaining('Food submitted for review.'), findsOneWidget);
+  });
+
+  testWidgets('community food submission failure keeps the form open', (
+    tester,
+  ) async {
+    final repository = _CommunityInteractionRepository()
+      ..failFoodSubmission = true;
+    await tester.pumpWidget(_app(CommunityHubPage(repository: repository)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Verified food'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Submit food'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('community-food-name')), 'خبز');
+    for (final entry in const {
+      'community-food-serving': '100',
+      'community-food-calories': '250',
+      'community-food-protein': '10',
+      'community-food-carbs': '40',
+      'community-food-fat': '5',
+    }.entries) {
+      await tester.enterText(find.byKey(Key(entry.key)), entry.value);
+    }
+    await tester.tap(find.byKey(const Key('community-food-submit')));
+    await tester.pumpAndSettle();
+
+    expect(repository.foodSubmissionCalls, 1);
+    expect(find.byKey(const Key('community-food-submit')), findsOneWidget);
+    expect(
+      find.text('Could not complete that action safely. Try again.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('friend chat sends the visible composer text', (tester) async {
+    final repository = _CommunityInteractionRepository();
+    await tester.pumpWidget(
+      _app(
+        CommunityChatPage(
+          userId: _CommunityInteractionRepository.otherId,
+          displayName: 'BIL QA Partner',
+          repository: repository,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'رسالة واضحة');
+    await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pumpAndSettle();
+
+    expect(repository.sentMessageCalls, 1);
+    expect(repository.sentMessageBody, 'رسالة واضحة');
   });
 
   testWidgets('feed publish failure retains draft for retry', (tester) async {

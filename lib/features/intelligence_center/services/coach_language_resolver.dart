@@ -133,6 +133,17 @@ class CoachLanguageResolver {
     ).hasMatch(compact)) {
       return 'ar';
     }
+    if (const {
+      'hi',
+      'hello',
+      'hey',
+      'howareyou',
+      'goodmorning',
+      'goodafternoon',
+      'goodevening',
+    }.contains(compact)) {
+      return 'en';
+    }
     final words = input
         .toLowerCase()
         .split(RegExp(r'[^\p{L}]+', unicode: true))

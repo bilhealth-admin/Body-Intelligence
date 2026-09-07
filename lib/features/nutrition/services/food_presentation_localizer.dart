@@ -45,15 +45,19 @@ abstract final class FoodPresentationLocalizer {
     if (original.isEmpty) return original;
     if (localeTag == 'en') return original;
     if (!isCustom && !_isBranded(source) && localeTag == 'ar') {
-      if (arabicName?.trim().isNotEmpty == true) {
-        return arabicName!.trim();
-      }
       // Translate only when the reviewed lexicon preserves most of the
       // authoritative food identity. Partial labels are deliberately rejected.
       final reviewedArabic = const FoodSearchAssistance().arabicNameFor(
         original,
       );
       if (reviewedArabic != null) return reviewedArabic;
+      // A catalog can contain a stale or machine-generated Arabic field. Use
+      // it only when the authoritative English identity has no reviewed
+      // translation; this keeps Android search rows from showing malformed
+      // labels such as a broken translation of a bread variant.
+      if (arabicName?.trim().isNotEmpty == true) {
+        return arabicName!.trim();
+      }
     }
     if (isCustom || _isBranded(source)) return original;
     final normalized = _normalize(original);

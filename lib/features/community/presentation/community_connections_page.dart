@@ -10,6 +10,7 @@ import '../../../shared/widgets/bil_account_avatar.dart';
 import '../../commerce/domain/commerce_entitlement.dart';
 import '../../commerce/domain/subscription_state.dart';
 import '../../commerce/providers/commerce_providers.dart';
+import '../../admin/services/ai_coach_admin_service.dart';
 import '../data/community_repository.dart';
 
 part 'community_connections_copy.dart';
@@ -133,9 +134,13 @@ class _CommunityConnectionsPageState
   Widget build(BuildContext context) {
     final copy = _ConnectionsCopy.of(context);
     final subscription = ref.watch(verifiedSubscriptionStateProvider).value;
+    final adminAccess =
+        ref.watch(aiCoachAdminAccessProvider).asData?.value ?? false;
     final friendsUnlocked =
-        subscription?.authority == EntitlementAuthority.verifiedServer &&
-        (subscription?.grants(CommerceEntitlement.communityFriends) ?? false);
+        adminAccess ||
+        (subscription?.authority == EntitlementAuthority.verifiedServer &&
+            (subscription?.grants(CommerceEntitlement.communityFriends) ??
+                false));
     return Scaffold(
       appBar: AppBar(
         title: Text(copy.title),

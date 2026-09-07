@@ -9,6 +9,7 @@ void main() {
       'lib/features/settings/reference_preferences_controls.dart',
       'lib/features/settings/reference_preferences_numeric.dart',
       'lib/features/settings/reference_preferences_macros.dart',
+      'lib/features/settings/reference_preferences_email.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
     final settings = File(
@@ -46,10 +47,11 @@ void main() {
     expect(pages, contains('preferencesRepositoryProvider'));
     expect(
       pages,
-      contains('Email delivery is not configured yet.'),
-      reason: 'email controls must not imply an inactive server delivery path',
+      contains('Your email choices are saved now.'),
+      reason:
+          'email controls must persist choices without pretending delivery is live',
     );
-    expect(pages, isNot(contains("'email.weeklyDigest'")));
+    expect(pages, contains("'email.weeklyDigest'"));
     expect(pages, isNot(contains("'email.friendRequest'")));
     expect(settings, contains("'/settings/diary'"));
     expect(settings, contains("'/settings/appearance'"));
@@ -59,6 +61,12 @@ void main() {
     expect(sharingPrivacy, contains("context.push('/settings/email')"));
     expect(sharingPrivacy, contains("context.push('/community/profile')"));
     expect(sharingPrivacy, contains("context.push('/community/connections')"));
+    expect(
+      sharingPrivacy,
+      isNot(contains('privacy-change-password')),
+      reason:
+          'the normal auth journey is passwordless; keep the legacy route hidden',
+    );
     expect(sharingPrivacy, isNot(contains('_UnavailableCloudPrivacyTile')));
     expect(sharingPrivacy, isNot(contains("'privacy.profile'")));
     expect(sharingPrivacy, isNot(contains("'privacy.search'")));

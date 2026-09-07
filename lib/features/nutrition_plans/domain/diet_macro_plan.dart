@@ -160,6 +160,76 @@ abstract final class DietMacroAllocator {
     return target.isValid ? target : null;
   }
 
+  /// Reconciles an edit while keeping the requested macro components fixed.
+  /// The editor passes the current and immediately previous fields here, so
+  /// one remaining macro is always available to absorb the calorie delta.
+  static DietMacroTarget? rebalancePreserving({
+    required DietMacroTarget current,
+    required DietMacroComponent edited,
+    required double grams,
+    required Set<DietMacroComponent> locked,
+    required DietFatLevel fallbackFatLevel,
+  }) {
+    if (!current.isValid || !grams.isFinite || grams <= 0) return null;
+
+    final preserved = {...locked, edited};
+    if (preserved.length == 1) {
+      return rebalance(
+        current: current,
+        edited: edited,
+        grams: grams,
+        fallbackFatLevel: fallbackFatLevel,
+      );
+    }
+
+    final factor = <DietMacroComponent, double>{
+      DietMacroComponent.carbs: 4,
+      DietMacroComponent.protein: 4,
+      DietMacroComponent.fat: 9,
+    };
+    final values = <DietMacroComponent, double>{
+      DietMacroComponent.carbs: current.carbsGrams,
+      DietMacroComponent.protein: current.proteinGrams,
+      DietMacroComponent.fat: current.fatGrams,
+    };
+    values[edited] = grams;
+
+    final unlocked = DietMacroComponent.values
+        .where((component) => !preserved.contains(component))
+        .toList(growable: false);
+    if (unlocked.length != 1) {
+      final total = values.entries.fold<double>(
+        0,
+        (sum, entry) => sum + entry.value * factor[entry.key]!,
+      );
+      return (unlocked.isEmpty && (total - current.calories).abs() < .0001)
+          ? DietMacroTarget(
+              calories: current.calories,
+              carbsGrams: values[DietMacroComponent.carbs]!,
+              proteinGrams: values[DietMacroComponent.protein]!,
+              fatGrams: values[DietMacroComponent.fat]!,
+            )
+          : null;
+    }
+
+    final unlockedComponent = unlocked.single;
+    final lockedEnergy = preserved.fold<double>(
+      0,
+      (sum, component) => sum + values[component]! * factor[component]!,
+    );
+    final remainingEnergy = current.calories - lockedEnergy;
+    if (remainingEnergy <= 0) return null;
+    values[unlockedComponent] = remainingEnergy / factor[unlockedComponent]!;
+
+    final target = DietMacroTarget(
+      calories: current.calories,
+      carbsGrams: values[DietMacroComponent.carbs]!,
+      proteinGrams: values[DietMacroComponent.protein]!,
+      fatGrams: values[DietMacroComponent.fat]!,
+    );
+    return target.isValid ? target : null;
+  }
+
   /// Keeps the user's current distribution when the fixed calorie target is
   /// changed. There is deliberately no artificial calorie floor or ceiling;
   /// any finite positive target can be represented by the macro equation.

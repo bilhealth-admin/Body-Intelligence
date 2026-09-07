@@ -30,8 +30,6 @@ class _ReferenceDashboardPhone extends StatelessWidget {
     required this.hero,
     required this.aiCoach,
     required this.dailyIntelligence,
-    required this.progressSection,
-    required this.personalHealthAi,
     required this.connectedHealth,
     required this.bodyTwinSummary,
     required this.actionTitle,
@@ -71,8 +69,6 @@ class _ReferenceDashboardPhone extends StatelessWidget {
   final Widget? hero;
   final Widget? aiCoach;
   final Widget dailyIntelligence;
-  final Widget? progressSection;
-  final Widget? personalHealthAi;
   final Widget? connectedHealth;
   final String bodyTwinSummary;
   final String actionTitle;
@@ -186,6 +182,10 @@ class _ReferenceDashboardPhone extends StatelessWidget {
                     'بيانات الهدف أو التغذية غير متاحة',
                   )
                 : null,
+            referenceText: tr(
+              'Color = recorded ÷ reference maximum, capped at 100%.',
+              'اللون = المسجل ÷ الحد المرجعي، وبحد أقصى 100٪.',
+            ),
             rings: [
               _MacroProgress(
                 label: tr('Potassium', 'البوتاسيوم'),
@@ -193,6 +193,7 @@ class _ReferenceDashboardPhone extends StatelessWidget {
                 goal: potassiumGoal,
                 unit: 'mg',
                 color: const Color(0xFFF2B632),
+                showRemaining: false,
               ),
               _MacroProgress(
                 label: tr('Sodium', 'الصوديوم'),
@@ -200,12 +201,14 @@ class _ReferenceDashboardPhone extends StatelessWidget {
                 goal: sodiumGoal,
                 unit: 'mg',
                 color: const Color(0xFF7656C9),
+                showRemaining: false,
               ),
               _MacroProgress(
                 label: tr('Fiber', 'الألياف'),
                 value: fiberEvidenceValue?.round(),
                 goal: fiberGoal,
                 color: const Color(0xFF38A66B),
+                showRemaining: false,
               ),
             ],
           ),
@@ -253,27 +256,6 @@ class _ReferenceDashboardPhone extends StatelessWidget {
             child: aiCoach!,
           ),
         ],
-        if (personalHealthAi != null) ...[
-          const SizedBox(height: 12),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final baseHeight = BilPremiumResponsiveLayout.twinBaseHeight(
-                constraints.maxWidth,
-              );
-              final height = MediaQuery.textScalerOf(context)
-                  .scale(baseHeight)
-                  .clamp(
-                    baseHeight,
-                    BilPremiumResponsiveLayout.maximumTwinHeight,
-                  );
-              return SizedBox(
-                key: const Key('dashboard-personal-health-ai-slot'),
-                height: height,
-                child: personalHealthAi!,
-              );
-            },
-          ),
-        ],
         const SizedBox(height: 12),
         if (overviewCards.isNotEmpty)
           _OverviewCardsCarousel(
@@ -313,7 +295,8 @@ class _ReferenceDashboardPhone extends StatelessWidget {
                     kind: BilSemanticIconKind.water,
                     label: tr('Water', 'الماء'),
                     recorded: water?.recorded ?? false,
-                    onTap: () => context.go('/daily-log?action=water'),
+                    onTap: () =>
+                        context.go('/daily-log/water?from=%2Fdashboard'),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -339,14 +322,6 @@ class _ReferenceDashboardPhone extends StatelessWidget {
             onAction: onAction,
             onExplain: onExplain,
           ),
-        if (visibleSections.contains(DashboardSectionIds.progress) &&
-            progressSection != null) ...[
-          const SizedBox(height: 12),
-          KeyedSubtree(
-            key: const Key('dashboard-mobile-summary-card'),
-            child: progressSection!,
-          ),
-        ],
         const SizedBox(height: 12),
         if (visibleSections.contains(DashboardSectionIds.bodyTwin))
           _BodyTwinImageCard(
@@ -412,6 +387,30 @@ const _referencePhoneCopy = <String, Map<String, String>>{
     'fr': 'Objectifs personnalisés pour le cœur, le sodium et les fibres',
     'es': 'Objetivos personalizados de corazón, sodio y fibra',
     'tr': 'Kalp, sodyum, lif ve özel hedefler',
+  },
+  'Color = recorded ÷ reference maximum, capped at 100%.': {
+    'fr': 'Couleur = enregistré ÷ maximum de référence, plafonnée à 100 %.',
+    'es': 'Color = registrado ÷ máximo de referencia, limitado al 100 %.',
+    'tr': 'Renk = kaydedilen ÷ referans maksimumu; en fazla %100.',
+    'de': 'Farbe = erfasst ÷ Referenzmaximum, begrenzt auf 100 %.',
+    'it': 'Colore = registrato ÷ massimo di riferimento, limitato al 100%.',
+    'pt': 'Cor = registado ÷ máximo de referência, limitada a 100%.',
+    'ur':
+        'رنگ = درج شدہ مقدار ÷ حوالہ جاتی زیادہ سے زیادہ حد، زیادہ سے زیادہ 100٪۔',
+    'fa': 'رنگ = مقدار ثبت‌شده ÷ حداکثر مرجع، با سقف ۱۰۰٪.',
+    'hi': 'रंग = दर्ज मान ÷ संदर्भ अधिकतम, 100% तक सीमित।',
+    'id': 'Warna = tercatat ÷ maksimum acuan, dibatasi hingga 100%.',
+    'ms': 'Warna = direkodkan ÷ maksimum rujukan, dihadkan kepada 100%.',
+    'ja': '色 = 記録値 ÷ 基準最大値（上限 100%）。',
+    'ko': '색상 = 기록값 ÷ 기준 최대값, 최대 100%로 제한됩니다.',
+    'zh': '颜色 = 已记录值 ÷ 参考最大值，上限为 100%。',
+    'ru': 'Цвет = записанное значение ÷ эталонный максимум, не более 100%.',
+    'bn': 'রং = রেকর্ড করা মান ÷ রেফারেন্স সর্বোচ্চ মান, সর্বোচ্চ ১০০%।',
+    'vi': 'Màu = giá trị đã ghi ÷ mức tối đa tham chiếu, giới hạn ở 100%.',
+    'th': 'สี = ค่าที่บันทึก ÷ ค่าสูงสุดอ้างอิง จำกัดไม่เกิน 100%',
+    'pl': 'Kolor = zarejestrowana wartość ÷ maksimum referencyjne, maks. 100%.',
+    'nl': 'Kleur = geregistreerd ÷ referentiemaximum, begrensd op 100%.',
+    'uk': 'Колір = записане значення ÷ еталонний максимум, не більше 100%.',
   },
   'Custom macro goals': {
     'fr': 'Objectifs macro personnalisés',

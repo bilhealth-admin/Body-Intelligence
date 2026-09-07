@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/localization/app_localizations.dart';
+import '../services/admin_operation_error.dart';
 import '../services/community_moderator_admin_service.dart';
 
 class CommunityModeratorAdminPanel extends ConsumerStatefulWidget {
@@ -245,8 +246,8 @@ class _CommunityModeratorAdminPanelState
         _emailController.clear();
         ref.invalidate(communityModeratorAdminListProvider);
       }
-    } on Object {
-      if (mounted) _showFailure();
+    } on Object catch (error) {
+      if (mounted) _showFailure(error);
     } finally {
       if (mounted) setState(() => _mutating = false);
     }
@@ -288,26 +289,60 @@ class _CommunityModeratorAdminPanelState
           .removeModerator(entry.userId);
       if (!mounted) return;
       if (!removed) {
-        _showFailure();
+        _showFailure(StateError('community_moderator_remove_rejected'));
       } else {
         ref.invalidate(communityModeratorAdminListProvider);
       }
-    } on Object {
-      if (mounted) _showFailure();
+    } on Object catch (error) {
+      if (mounted) _showFailure(error);
     } finally {
       if (mounted) setState(() => _mutating = false);
     }
   }
 
-  void _showFailure() {
+  void _showFailure(Object error) {
+    final kind = classifyAdminOperationFailure(error);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          context.strings.text(
-            'The request could not be completed. No partial change was kept. Try again.',
+          _copy(
+            _moderatorFailureEnglish(kind),
+            ar: _moderatorFailureArabic(kind),
+            fr: _moderatorFailureEnglish(kind),
+            es: _moderatorFailureEnglish(kind),
+            tr: _moderatorFailureEnglish(kind),
           ),
         ),
       ),
     );
   }
+
+  String _moderatorFailureEnglish(
+    AdminOperationFailureKind kind,
+  ) => switch (kind) {
+    AdminOperationFailureKind.timedOut =>
+      'The admin operation timed out. Check that the Edge Function is deployed, then try again.',
+    AdminOperationFailureKind.serviceUnavailable =>
+      'The admin service is not available. Deploy the current Edge Function and migrations, then try again.',
+    AdminOperationFailureKind.authorization =>
+      'This account is not authorized for the admin operation, or the deployed service is using an older admin roster.',
+    AdminOperationFailureKind.integrity =>
+      'Mobile integrity verification blocked the operation. Use a signed build or keep the server canary in off mode during QA.',
+    _ =>
+      'The request could not be completed. No partial change was kept. Try again.',
+  };
+
+  String _moderatorFailureArabic(
+    AdminOperationFailureKind kind,
+  ) => switch (kind) {
+    AdminOperationFailureKind.timedOut =>
+      'انتهت مهلة عملية الإدارة. تأكد من نشر Edge Function ثم حاول مجددًا.',
+    AdminOperationFailureKind.serviceUnavailable =>
+      'خدمة الإدارة غير متاحة. انشر Edge Function والترحيلات الحالية ثم حاول مجددًا.',
+    AdminOperationFailureKind.authorization =>
+      'هذا الحساب غير مخول بعملية الإدارة، أو أن الخدمة المنشورة تستخدم قائمة أدمن قديمة.',
+    AdminOperationFailureKind.integrity =>
+      'تحقق سلامة التطبيق منع العملية. استخدم نسخة موقعة أو أبقِ وضع الاختبار في الخادم على off أثناء QA.',
+    _ => 'تعذر إكمال الطلب، ولم يُحفظ أي تغيير جزئي. حاول مجددًا.',
+  };
 }

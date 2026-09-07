@@ -23,6 +23,9 @@ void main() {
 
   test('DashboardGrid delegates every extracted presentation boundary', () {
     final grid = source('lib/features/dashboard/widgets/dashboard_grid.dart');
+    final actions = source(
+      'lib/features/dashboard/widgets/dashboard_grid_actions.dart',
+    );
 
     for (final boundary in const [
       'PremiumDashboardBenchmark(',
@@ -33,7 +36,8 @@ void main() {
 
     expect(grid, isNot(contains('DashboardBodyProfileSnapshot(')));
     expect(grid, isNot(contains('DashboardAnalyticsCenter(')));
-    expect(grid, contains("context.go('/analytics')"));
+    expect(grid, contains("part 'dashboard_grid_actions.dart';"));
+    expect(actions, contains("context.go('/analytics')"));
 
     expect(grid, isNot(contains('Visibility(')));
     expect(grid, isNot(contains('DashboardWaterCard(')));
@@ -54,6 +58,7 @@ void main() {
       'lib/features/dashboard/widgets/dashboard_body_profile_snapshot.dart',
       'lib/features/dashboard/widgets/dashboard_nutrition_details.dart',
       'lib/features/dashboard/widgets/dashboard_analytics_center.dart',
+      'lib/features/dashboard/widgets/dashboard_grid_actions.dart',
       'docs/architecture/BIL_DASHBOARD_HIDDEN_SURFACE_RETIREMENT.md',
     ];
 

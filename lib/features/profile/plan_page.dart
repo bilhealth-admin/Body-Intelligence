@@ -550,13 +550,42 @@ class _PlanPageState extends ConsumerState<PlanPage> {
 
   String _localizedAssumption(BuildContext context, String value) {
     if (value.startsWith('Activity factor:')) {
-      return '${profileLocaleText(context, 'Activity factor', 'معامل النشاط')}: ${value.split(':').last.trim()}';
+      final raw = value.split(':').last.trim();
+      final activity = switch (raw) {
+        'sedentary' => profileLocaleText(context, 'Sedentary', 'قليل الحركة'),
+        'light' => profileLocaleText(context, 'Lightly active', 'نشاط خفيف'),
+        'moderate' => profileLocaleText(
+          context,
+          'Moderately active',
+          'نشاط متوسط',
+        ),
+        'active' => profileLocaleText(context, 'Active', 'نشاط مرتفع'),
+        'very_active' => profileLocaleText(context, 'Very active', 'نشاط مكثف'),
+        _ => raw,
+      };
+      return '${profileLocaleText(context, 'Activity factor', 'معامل النشاط')}: $activity';
     }
     if (value.startsWith('Goal direction:')) {
-      return '${profileLocaleText(context, 'Goal direction', 'اتجاه الهدف')}: ${value.split(':').last.trim()}';
+      final raw = value.split(':').last.trim();
+      final direction = switch (raw) {
+        'lose' => profileLocaleText(context, 'loss', 'نزول'),
+        'gain' => profileLocaleText(context, 'gain', 'زيادة'),
+        'maintain' => profileLocaleText(context, 'maintain', 'ثبات'),
+        _ => raw,
+      };
+      return '${profileLocaleText(context, 'Goal direction', 'اتجاه الهدف')}: $direction';
+    }
+    if (value.startsWith('Dietary approach:')) {
+      final raw = value
+          .substring('Dietary approach:'.length)
+          .split(';')
+          .first
+          .trim();
+      final approach = dietaryApproachLabel(context, raw);
+      return '${profileLocaleText(context, 'Dietary approach', 'النهج الغذائي')}: $approach · ${profileLocaleText(context, 'Food selection does not change nutrient requirements', 'لا يغيّر اختيار الطعام الاحتياجات الغذائية')}';
     }
     return switch (value) {
-      'Mifflin–St Jeor BMR using the saved age, sex, height, and current weight' =>
+      'Mifflin-St Jeor BMR using the saved age, sex, height, and current weight' =>
         profileLocaleText(
           context,
           value,

@@ -23,6 +23,7 @@ import 'widgets/food_name_health_sync_card.dart';
 import 'widgets/live_health_watch.dart';
 
 part 'connected_health_components.dart';
+part 'connected_health_page_search.dart';
 
 @visibleForTesting
 bool connectedHealthCanRequestPermissions(ConnectedHealthStatus status) =>
@@ -250,6 +251,9 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                                         languageCode: Localizations.localeOf(
                                           context,
                                         ).languageCode,
+                                        // Keep the same compact watch face used
+                                        // by the external dashboard preview.
+                                        compact: true,
                                       ),
                                     ),
                                   ),
@@ -339,126 +343,233 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                                     height: PremiumDesignTokens.spaceSm,
                                   ),
                                 ],
-                                Wrap(
-                                  spacing: PremiumDesignTokens.spaceSm,
-                                  runSpacing: PremiumDesignTokens.spaceSm,
-                                  children: [
-                                    if (connectedHealthCanRequestPermissions(
-                                      snapshot.status,
-                                    ))
-                                      FilledButton.icon(
-                                        onPressed: () => ref
-                                            .read(
-                                              connectedHealthProvider.notifier,
-                                            )
-                                            .requestPermissions(),
-                                        icon: const Icon(
-                                          Icons.verified_user_outlined,
-                                        ),
-                                        label: Text(
-                                          tr(
-                                            'Grant health access',
-                                            'منح إذن الصحة',
-                                          ),
-                                        ),
-                                      ),
-                                    if (snapshot.status ==
-                                            ConnectedHealthStatus
-                                                .updateRequired ||
-                                        snapshot.status ==
-                                            ConnectedHealthStatus
-                                                .permissionDenied ||
-                                        snapshot.failureCode ==
-                                            'revoke_in_system_settings_required')
-                                      OutlinedButton.icon(
-                                        onPressed: _openSystemSettings,
-                                        icon: const Icon(
-                                          Icons.settings_outlined,
-                                        ),
-                                        label: Text(
-                                          tr(
-                                            'Open system settings',
-                                            'فتح إعدادات النظام',
-                                          ),
-                                        ),
-                                      ),
-                                    if (snapshot.deviceVerified)
-                                      OutlinedButton.icon(
-                                        onPressed: () => ref
-                                            .read(
-                                              connectedHealthProvider.notifier,
-                                            )
-                                            .requestWeightWritePermission(),
-                                        icon: const Icon(
-                                          Icons.monitor_weight_outlined,
-                                        ),
-                                        label: Text(
-                                          tr(
-                                            defaultTargetPlatform ==
-                                                    TargetPlatform.iOS
-                                                ? 'Allow weight export'
-                                                : 'Allow weight and nutrition export',
-                                            defaultTargetPlatform ==
-                                                    TargetPlatform.iOS
-                                                ? 'السماح بتصدير الوزن'
-                                                : 'السماح بتصدير الوزن والتغذية',
-                                          ),
-                                        ),
-                                      ),
-                                    if (snapshot.deviceVerified)
-                                      TextButton.icon(
-                                        onPressed: () => ref
-                                            .read(
-                                              connectedHealthProvider.notifier,
-                                            )
-                                            .revokePermissions(),
-                                        icon: const Icon(
-                                          Icons.link_off_rounded,
-                                        ),
-                                        label: Text(
-                                          tr(
-                                            'Disconnect health source',
-                                            'فصل مصدر الصحة',
-                                          ),
-                                        ),
-                                      ),
-                                    if (snapshot.status ==
-                                            ConnectedHealthStatus.ready ||
-                                        snapshot.status ==
-                                            ConnectedHealthStatus
-                                                .synchronized ||
-                                        snapshot.status ==
-                                            ConnectedHealthStatus
-                                                .authorizationRequested ||
-                                        snapshot.status ==
-                                            ConnectedHealthStatus.degraded)
-                                      FilledButton.icon(
-                                        onPressed: () => ref
-                                            .read(
-                                              connectedHealthProvider.notifier,
-                                            )
-                                            .synchronize(),
-                                        icon: const Icon(Icons.sync_rounded),
-                                        label: Text(
-                                          tr('Sync now', 'مزامنة الآن'),
-                                        ),
-                                      ),
-                                    OutlinedButton.icon(
-                                      onPressed: () => ref
-                                          .read(
-                                            connectedHealthProvider.notifier,
+                                if (connectedHealthCanRequestPermissions(
+                                  snapshot.status,
+                                ))
+                                  FilledButton.icon(
+                                    onPressed: snapshot.isBusy
+                                        ? null
+                                        : () => ref
+                                              .read(
+                                                connectedHealthProvider
+                                                    .notifier,
+                                              )
+                                              .requestPermissions(),
+                                    icon: snapshot.isBusy
+                                        ? const SizedBox.square(
+                                            dimension: 18,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
                                           )
-                                          .refresh(),
-                                      icon: const Icon(Icons.refresh_rounded),
+                                        : const Icon(
+                                            Icons.verified_user_outlined,
+                                          ),
+                                    label: Text(
+                                      tr(
+                                        'Grant health access',
+                                        'منح إذن الصحة',
+                                      ),
+                                    ),
+                                  ),
+                                if (snapshot.status ==
+                                        ConnectedHealthStatus.updateRequired ||
+                                    snapshot.status ==
+                                        ConnectedHealthStatus
+                                            .permissionDenied ||
+                                    snapshot.failureCode ==
+                                        'revoke_in_system_settings_required')
+                                  OutlinedButton.icon(
+                                    onPressed: snapshot.isBusy
+                                        ? null
+                                        : _openSystemSettings,
+                                    icon: const Icon(Icons.settings_outlined),
+                                    label: Text(
+                                      tr(
+                                        'Open system settings',
+                                        'فتح إعدادات النظام',
+                                      ),
+                                    ),
+                                  ),
+                                if (snapshot.deviceVerified)
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: OutlinedButton.icon(
+                                          key: const Key(
+                                            'connected-health-weight-export',
+                                          ),
+                                          onPressed: snapshot.isBusy
+                                              ? null
+                                              : () => ref
+                                                    .read(
+                                                      connectedHealthProvider
+                                                          .notifier,
+                                                    )
+                                                    .requestWeightWritePermission(),
+                                          icon: snapshot.isBusy
+                                              ? const SizedBox.square(
+                                                  dimension: 18,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                      ),
+                                                )
+                                              : const Icon(
+                                                  Icons.monitor_weight_outlined,
+                                                ),
+                                          label: Text(
+                                            tr(
+                                              defaultTargetPlatform ==
+                                                      TargetPlatform.iOS
+                                                  ? 'Allow weight export'
+                                                  : 'Allow weight and nutrition export',
+                                              defaultTargetPlatform ==
+                                                      TargetPlatform.iOS
+                                                  ? 'السماح بتصدير الوزن'
+                                                  : 'السماح بتصدير الوزن والتغذية',
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        width: PremiumDesignTokens.spaceSm,
+                                      ),
+                                      Expanded(
+                                        child: OutlinedButton.icon(
+                                          key: const Key(
+                                            'connected-health-refresh-status',
+                                          ),
+                                          onPressed: snapshot.isBusy
+                                              ? null
+                                              : () => ref
+                                                    .read(
+                                                      connectedHealthProvider
+                                                          .notifier,
+                                                    )
+                                                    .refresh(),
+                                          icon: snapshot.isBusy
+                                              ? const SizedBox.square(
+                                                  dimension: 18,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                      ),
+                                                )
+                                              : const Icon(
+                                                  Icons.refresh_rounded,
+                                                ),
+                                          label: Text(
+                                            tr(
+                                              'Refresh status',
+                                              'تحديث الحالة',
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                else
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: OutlinedButton.icon(
+                                      key: const Key(
+                                        'connected-health-refresh-status',
+                                      ),
+                                      onPressed: snapshot.isBusy
+                                          ? null
+                                          : () => ref
+                                                .read(
+                                                  connectedHealthProvider
+                                                      .notifier,
+                                                )
+                                                .refresh(),
+                                      icon: snapshot.isBusy
+                                          ? const SizedBox.square(
+                                              dimension: 18,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                              ),
+                                            )
+                                          : const Icon(Icons.refresh_rounded),
                                       label: Text(
                                         tr('Refresh status', 'تحديث الحالة'),
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                if (snapshot.deviceVerified)
+                                  Align(
+                                    alignment: AlignmentDirectional.centerEnd,
+                                    child: TextButton.icon(
+                                      onPressed: snapshot.isBusy
+                                          ? null
+                                          : () => ref
+                                                .read(
+                                                  connectedHealthProvider
+                                                      .notifier,
+                                                )
+                                                .revokePermissions(),
+                                      icon: const Icon(Icons.link_off_rounded),
+                                      label: Text(
+                                        tr(
+                                          'Disconnect health source',
+                                          'فصل مصدر الصحة',
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
                           ),
+                          if (snapshot.status == ConnectedHealthStatus.ready ||
+                              snapshot.status ==
+                                  ConnectedHealthStatus.syncing ||
+                              snapshot.status ==
+                                  ConnectedHealthStatus.synchronized ||
+                              snapshot.status ==
+                                  ConnectedHealthStatus
+                                      .authorizationRequested ||
+                              snapshot.status ==
+                                  ConnectedHealthStatus.degraded) ...[
+                            const SizedBox(height: PremiumDesignTokens.spaceSm),
+                            Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 280,
+                                ),
+                                child: FilledButton.icon(
+                                  key: const Key('connected-health-sync-now'),
+                                  onPressed: snapshot.isBusy
+                                      ? null
+                                      : () => ref
+                                            .read(
+                                              connectedHealthProvider.notifier,
+                                            )
+                                            .synchronize(),
+                                  icon: snapshot.isBusy
+                                      ? const SizedBox.square(
+                                          dimension: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : const Icon(Icons.sync_rounded),
+                                  label: Text(
+                                    snapshot.status ==
+                                            ConnectedHealthStatus.syncing
+                                        ? tr('Synchronizing…', 'تتم المزامنة…')
+                                        : tr('Sync now', 'مزامنة الآن'),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: PremiumDesignTokens.spaceMd),
                           PremiumDashboardCardLock(
                             key: const Key('fitness-devices-premium-gate'),
@@ -569,113 +680,6 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                 ),
               ),
             ),
-    );
-  }
-
-  Future<void> _showConnectionSearch(BuildContext context) async {
-    final nativeSource = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS
-        ? 'Apple Health'
-        : !kIsWeb && defaultTargetPlatform == TargetPlatform.android
-        ? 'Health Connect'
-        : connectedHealthText(context, 'Health source', 'مصدر صحي');
-    await showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                connectedHealthText(
-                  context,
-                  'Available connections',
-                  'الاتصالات المتاحة',
-                ),
-                style: Theme.of(
-                  context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(height: 12),
-              ListTile(
-                leading: BilSemanticIconBadge(
-                  kind: BilSemanticIconKind.health,
-                  size: 38,
-                  iconSize: 21,
-                  shape: BoxShape.rectangle,
-                ),
-                title: Text(nativeSource),
-              ),
-              ListTile(
-                leading: BilSemanticIconBadge(
-                  kind: BilSemanticIconKind.devices,
-                  iconOverride: Icons.bluetooth_rounded,
-                  appleIconOverride: CupertinoIcons.bluetooth,
-                  size: 38,
-                  iconSize: 21,
-                  shape: BoxShape.rectangle,
-                ),
-                title: Text(
-                  connectedHealthText(
-                    context,
-                    'Bluetooth fitness devices',
-                    'أجهزة اللياقة عبر البلوتوث',
-                  ),
-                ),
-              ),
-              ListTile(
-                key: const Key('available-connections-capabilities-link'),
-                leading: BilSemanticIconBadge(
-                  kind: BilSemanticIconKind.verifiedFood,
-                  iconOverride: Icons.fact_check_outlined,
-                  appleIconOverride: CupertinoIcons.checkmark_seal,
-                  size: 38,
-                  iconSize: 21,
-                  shape: BoxShape.rectangle,
-                ),
-                title: Text(
-                  connectedHealthText(
-                    context,
-                    'Connection capabilities',
-                    'قدرات الاتصال',
-                  ),
-                ),
-                onTap: () {
-                  Navigator.of(sheetContext).pop();
-                  context.push('/connected-health/capabilities');
-                },
-              ),
-              Text(
-                connectedHealthText(
-                  context,
-                  'Only integrations implemented and verified by BIL are listed.',
-                  'تظهر فقط الاتصالات المنفذة والمتحقق منها داخل BIL.',
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _platformSourceTitle(
-    BuildContext context,
-    ConnectedHealthSnapshot snapshot,
-  ) {
-    if (snapshot.platformSource != null) return snapshot.platformSource!;
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
-      return connectedHealthText(context, 'Apple Health', 'Apple Health');
-    }
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      return connectedHealthText(context, 'Health Connect', 'Health Connect');
-    }
-    return connectedHealthText(
-      context,
-      'Unsupported platform',
-      'منصة غير مدعومة',
     );
   }
 }

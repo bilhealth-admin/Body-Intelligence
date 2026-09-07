@@ -110,30 +110,36 @@ void main() {
     },
   );
 
-  test('validator targets the current non-self-referential +8 manifest', () {
-    const currentManifestPath =
-        'docs/release/BIL_PLUS8_FROZEN_SOURCE_MANIFEST_2026-09-06.md';
-    final validator = File(
-      'tool/release/validate_release_configuration.dart',
-    ).readAsStringSync();
-    final manifestSource = File(currentManifestPath).readAsStringSync();
-    final metadata = ReleaseManifestMetadata.parse(manifestSource);
+  test(
+    'validator targets the current non-self-referential Android 9 manifest',
+    () {
+      const currentManifestPath =
+          'docs/release/BIL_ANDROID_V9_FROZEN_SOURCE_MANIFEST_2026-09-06.md';
+      final validator = File(
+        'tool/release/validate_release_configuration.dart',
+      ).readAsStringSync();
+      final manifestSource = File(currentManifestPath).readAsStringSync();
+      final metadata = ReleaseManifestMetadata.parse(manifestSource);
 
-    expect(validator, contains(currentManifestPath));
-    expect(
-      validator,
-      isNot(contains('BIL_PLUS8_STAGING_MANIFEST_2026-09-05.md')),
-    );
-    expect(metadata.unresolvedReviewCount, 0);
-    expect(metadata.releaseVersion, '1.0.0');
-    expect(metadata.releaseBuildNumber, 8);
-    expect(
-      metadata.stagingManifestComplete,
-      metadata.candidateFrozenOrAccepted,
-      reason: 'The current manifest must transition from NO/NO to YES/YES.',
-    );
-    expect(manifestSource, contains('BIL_PLUS8_AUDITED_SOURCE_SHA'));
-    expect(manifestSource, contains('BIL_PLUS8_STAGING_MANIFEST_SHA256'));
-    expect(manifestSource, contains('avoids a self-referential hash'));
-  });
+      expect(validator, contains(currentManifestPath));
+      expect(
+        validator,
+        isNot(contains('BIL_PLUS8_STAGING_MANIFEST_2026-09-05.md')),
+      );
+      expect(metadata.unresolvedReviewCount, 0);
+      expect(metadata.releaseVersion, '1.0.0');
+      expect(metadata.releaseBuildNumber, 9);
+      expect(
+        metadata.stagingManifestComplete,
+        metadata.candidateFrozenOrAccepted,
+        reason: 'The current manifest must transition from NO/NO to YES/YES.',
+      );
+      expect(manifestSource, contains('BIL_ANDROID_V9_AUDITED_SOURCE_SHA'));
+      expect(
+        manifestSource,
+        contains('BIL_ANDROID_V9_STAGING_MANIFEST_SHA256'),
+      );
+      expect(manifestSource, contains('not self-referential'));
+    },
+  );
 }

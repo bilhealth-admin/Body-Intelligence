@@ -6,12 +6,15 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../shared/widgets/bil_coach_identity.dart';
+import '../../admin/services/ai_coach_admin_service.dart';
 import '../domain/commerce_entitlement.dart';
 import '../domain/commerce_plan.dart';
 import '../domain/subscription_state.dart';
 import '../providers/commerce_providers.dart';
 import 'bil_store_copy.dart';
 import 'premium_crown_emblem.dart';
+
+part 'premium_route_glass_gate_components.dart';
 
 enum PremiumGateFeature {
   premium,
@@ -33,6 +36,20 @@ enum PremiumGateFeature {
   community,
 }
 
+void _handlePremiumRouteBack(
+  BuildContext context, {
+  required bool returnToDashboard,
+}) {
+  // Preserve the real entry point (Dashboard, More, or another caller) when
+  // the gate was pushed. Direct/deep links have no route to pop, so they use
+  // the safe Dashboard fallback.
+  if (context.canPop()) {
+    context.pop();
+  } else {
+    context.go('/dashboard');
+  }
+}
+
 /// Lets people inspect a paid route while preventing interaction until a
 /// server-verified entitlement is active.
 class PremiumRouteGlassGate extends ConsumerWidget {
@@ -52,6 +69,10 @@ class PremiumRouteGlassGate extends ConsumerWidget {
     final state = subscription.asData?.value;
     final isAiCoach = feature == PremiumGateFeature.aiCoach;
     final isNutritionPrograms = feature == PremiumGateFeature.nutritionPrograms;
+    final isCommunity = feature == PremiumGateFeature.community;
+    final adminAccess = isCommunity
+        ? ref.watch(aiCoachAdminAccessProvider)
+        : const AsyncValue<bool>.data(false);
     final creditSnapshot = isAiCoach
         ? ref.watch(aiCoachCreditAccessProvider)
         : const AsyncValue<bool>.data(false);
@@ -59,18 +80,35 @@ class PremiumRouteGlassGate extends ConsumerWidget {
     final activeAiSubscription = hasVerifiedAiSubscription(state);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     if (subscription.isLoading) {
-      return _PremiumRouteAccessChecking(isDark: isDark, child: child);
+      return _PremiumRouteAccessChecking(
+        isDark: isDark,
+        returnToDashboard: isAiCoach,
+      );
     }
+    if (isCommunity &&
+        state?.plan == CommercePlan.free &&
+        adminAccess.isLoading) {
+      return _PremiumRouteAccessChecking(
+        isDark: isDark,
+        returnToDashboard: false,
+      );
+    }
+    final communityAdminCheckFailed =
+        isCommunity && state?.plan == CommercePlan.free && adminAccess.hasError;
     final verificationUnavailable =
-        subscription.hasError || (isAiCoach && creditSnapshot.hasError);
+        subscription.hasError ||
+        (isAiCoach && creditSnapshot.hasError) ||
+        communityAdminCheckFailed;
     if (verificationUnavailable) {
       return _PremiumRouteAccessUnavailable(
         isDark: isDark,
-        child: child,
+        returnToDashboard: isAiCoach,
         onRetry: () {
           ref.invalidate(verifiedSubscriptionStateProvider);
           if (isAiCoach) ref.invalidate(aiCoachCreditAccessProvider);
+          if (isCommunity) ref.invalidate(aiCoachAdminAccessProvider);
         },
+        child: child,
       );
     }
     final loading = isAiCoach && creditSnapshot.isLoading;
@@ -78,13 +116,18 @@ class PremiumRouteGlassGate extends ConsumerWidget {
     // member's entitlement. This avoids the brief (and confusing) paywall
     // flash reported when an active AI subscription is opened from More.
     if (loading) {
-      return _PremiumRouteAccessChecking(isDark: isDark, child: child);
+      return _PremiumRouteAccessChecking(
+        isDark: isDark,
+        returnToDashboard: isAiCoach,
+      );
     }
     final hasAccess = isAiCoach
         ? creditAccess
         : isNutritionPrograms
         ? state?.authority == EntitlementAuthority.verifiedServer &&
               (state?.grants(CommerceEntitlement.premiumPrograms) ?? false)
+        : isCommunity && adminAccess.asData?.value == true
+        ? true
         : state != null && state.plan != CommercePlan.free;
     if (hasAccess) return child;
 
@@ -117,9 +160,12 @@ class PremiumRouteGlassGate extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.all(12),
               child: IconButton(
+                key: const ValueKey('premium-route-back'),
                 tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-                onPressed: () =>
-                    context.canPop() ? context.pop() : context.go('/dashboard'),
+                onPressed: () => _handlePremiumRouteBack(
+                  context,
+                  returnToDashboard: isAiCoach,
+                ),
                 style: IconButton.styleFrom(
                   backgroundColor: isDark
                       ? const Color(0x99141414)
@@ -177,64 +223,17 @@ class PremiumRouteGlassGate extends ConsumerWidget {
   }
 }
 
-class _PremiumRouteAccessChecking extends StatelessWidget {
-  const _PremiumRouteAccessChecking({
-    required this.child,
-    required this.isDark,
-  });
-
-  final Widget child;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) => Stack(
-    fit: StackFit.expand,
-    children: [
-      AbsorbPointer(child: ExcludeSemantics(child: child)),
-      ColoredBox(
-        color: isDark ? const Color(0x14000000) : const Color(0x08000000),
-        child: const Center(
-          child: SizedBox.square(
-            key: ValueKey('premium-route-access-checking'),
-            dimension: 24,
-            child: CircularProgressIndicator(strokeWidth: 2.5),
-          ),
-        ),
-      ),
-      SafeArea(
-        child: Align(
-          alignment: AlignmentDirectional.topStart,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: IconButton(
-              key: const ValueKey('premium-route-loading-back'),
-              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-              onPressed: () =>
-                  context.canPop() ? context.pop() : context.go('/dashboard'),
-              style: IconButton.styleFrom(
-                backgroundColor: isDark
-                    ? const Color(0x99141414)
-                    : const Color(0xB8FFFFFF),
-                foregroundColor: isDark ? Colors.white : Colors.black87,
-              ),
-              icon: const BackButtonIcon(),
-            ),
-          ),
-        ),
-      ),
-    ],
-  );
-}
-
 class _PremiumRouteAccessUnavailable extends StatelessWidget {
   const _PremiumRouteAccessUnavailable({
     required this.child,
     required this.isDark,
+    required this.returnToDashboard,
     required this.onRetry,
   });
 
   final Widget child;
   final bool isDark;
+  final bool returnToDashboard;
   final VoidCallback onRetry;
 
   @override
@@ -259,8 +258,11 @@ class _PremiumRouteAccessUnavailable extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               child: IconButton(
                 tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-                onPressed: () =>
-                    context.canPop() ? context.pop() : context.go('/dashboard'),
+                onPressed: () => _handlePremiumRouteBack(
+                  context,
+                  returnToDashboard: returnToDashboard,
+                ),
+                key: const ValueKey('premium-route-back'),
                 icon: const BackButtonIcon(),
               ),
             ),
@@ -669,113 +671,6 @@ class _PremiumGateCard extends StatelessWidget {
                 ],
               ],
             ),
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-class _BenefitPill extends StatelessWidget {
-  const _BenefitPill({required this.label, required this.isDark});
-  final String label;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-    decoration: BoxDecoration(
-      color: isDark ? const Color(0x1FFFFFFF) : const Color(0x24000000),
-      borderRadius: BorderRadius.circular(99),
-      border: Border.all(color: const Color(0x20FFFFFF)),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        const Icon(Icons.check_rounded, size: 15, color: Color(0xFFFFDA77)),
-        const SizedBox(width: 5),
-        Flexible(
-          child: Text(
-            label,
-            softWrap: true,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: isDark ? const Color(0xFFF1F1F1) : const Color(0xFF272117),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-class _GoldActionButton extends StatelessWidget {
-  const _GoldActionButton({
-    required this.label,
-    required this.loading,
-    required this.onPressed,
-  });
-
-  final String label;
-  final bool loading;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(18),
-      gradient: const LinearGradient(
-        colors: [Color(0xFFFFE89E), Color(0xFFF5C654), Color(0xFFD99B26)],
-      ),
-      boxShadow: const [
-        BoxShadow(
-          color: Color(0x55E9B33C),
-          blurRadius: 22,
-          offset: Offset(0, 9),
-        ),
-      ],
-    ),
-    child: Material(
-      color: Colors.transparent,
-      child: InkWell(
-        key: const ValueKey('premium-route-upgrade-cta'),
-        onTap: loading ? null : onPressed,
-        borderRadius: BorderRadius.circular(18),
-        child: SizedBox(
-          height: 54,
-          child: Center(
-            child: loading
-                ? const SizedBox.square(
-                    dimension: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Color(0xFF07121E),
-                    ),
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          label,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(
-                                color: const Color(0xFF08131F),
-                                fontWeight: FontWeight.w800,
-                              ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      const Icon(
-                        Icons.arrow_forward_rounded,
-                        size: 20,
-                        color: Color(0xFF08131F),
-                      ),
-                    ],
-                  ),
           ),
         ),
       ),

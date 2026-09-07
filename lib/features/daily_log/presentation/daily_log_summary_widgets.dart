@@ -7,6 +7,7 @@ import '../../../data/database/app_database.dart';
 import '../../../data/database/nutrient_evidence.dart';
 import '../../../data/repositories/meal_repository.dart';
 import '../../commerce/presentation/premium_nutrition_glass.dart';
+import '../../settings/premium_meal_features_page.dart';
 import 'macro_value_formatter.dart';
 
 part 'daily_log_summary_locale_copy.dart';
@@ -242,6 +243,7 @@ class DailyMealDetailSummary extends StatelessWidget {
     this.carbsGoal,
     this.proteinGoal,
     this.fatGoal,
+    this.macroDisplay,
   });
 
   final MealWithItems? meal;
@@ -249,6 +251,7 @@ class DailyMealDetailSummary extends StatelessWidget {
   final double? carbsGoal;
   final double? proteinGoal;
   final double? fatGoal;
+  final MealMacroDisplay? macroDisplay;
 
   @override
   Widget build(BuildContext context) {
@@ -309,6 +312,8 @@ class DailyMealDetailSummary extends StatelessWidget {
                   grams: carbs,
                   goalGrams: carbsGoal,
                   progress: targetProgress(carbs, carbsGoal),
+                  displayPercent:
+                      macroDisplay?.mode == MealMacroDisplayMode.percent,
                   color: const Color(0xFF0A8F88),
                 ),
               ),
@@ -318,6 +323,8 @@ class DailyMealDetailSummary extends StatelessWidget {
                   grams: fat,
                   goalGrams: fatGoal,
                   progress: targetProgress(fat, fatGoal),
+                  displayPercent:
+                      macroDisplay?.mode == MealMacroDisplayMode.percent,
                   color: const Color(0xFF6F1096),
                 ),
               ),
@@ -327,6 +334,8 @@ class DailyMealDetailSummary extends StatelessWidget {
                   grams: protein,
                   goalGrams: proteinGoal,
                   progress: targetProgress(protein, proteinGoal),
+                  displayPercent:
+                      macroDisplay?.mode == MealMacroDisplayMode.percent,
                   color: const Color(0xFFC56A00),
                 ),
               ),
@@ -362,7 +371,13 @@ class DailyMealDetailSummary extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Column(
-                children: [macroDials, const SizedBox(height: 14), minerals],
+                children: [
+                  if (macroDisplay?.enabled ?? true) ...[
+                    macroDials,
+                    const SizedBox(height: 14),
+                  ],
+                  minerals,
+                ],
               ),
             ),
           );
@@ -387,6 +402,7 @@ class _MealMacroDial extends StatelessWidget {
     required this.goalGrams,
     required this.progress,
     required this.color,
+    required this.displayPercent,
   });
 
   final String label;
@@ -394,12 +410,20 @@ class _MealMacroDial extends StatelessWidget {
   final double? goalGrams;
   final double progress;
   final Color color;
+  final bool displayPercent;
 
   @override
   Widget build(BuildContext context) {
     final hasGoal = goalGrams != null && goalGrams!.isFinite && goalGrams! > 0;
+    final displayValue = displayPercent
+        ? hasGoal
+              ? '${(grams / goalGrams! * 100).round()}%'
+              : '—'
+        : '${formatDiaryMacroGrams(grams)} g';
     return Semantics(
-      value: hasGoal
+      value: displayPercent
+          ? displayValue
+          : hasGoal
           ? '${formatDiaryMacroGrams(grams)} / ${formatDiaryMacroGrams(goalGrams!)} g'
           : '${formatDiaryMacroGrams(grams)} g',
       child: Padding(
@@ -424,7 +448,7 @@ class _MealMacroDial extends StatelessWidget {
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
-                        '${formatDiaryMacroGrams(grams)} g',
+                        displayValue,
                         maxLines: 1,
                         textDirection: TextDirection.ltr,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(

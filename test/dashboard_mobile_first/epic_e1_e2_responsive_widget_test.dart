@@ -81,7 +81,7 @@ void main() {
     });
   }
 
-  testWidgets('phone exposes Body Twin without duplicating workout entry', (
+  testWidgets('phone keeps retired intelligence cards out of the dashboard', (
     tester,
   ) async {
     await setViewport(tester, width: 390, height: 2200);
@@ -90,7 +90,7 @@ void main() {
 
     expect(
       find.byKey(const Key('dashboard-mobile-summary-card')),
-      findsOneWidget,
+      findsNothing,
     );
     expect(
       find.byKey(const Key('dashboard-mobile-workout-library-card')),
@@ -119,10 +119,10 @@ void main() {
     );
     expect(
       find.byKey(const Key('dashboard-personal-health-ai-slot')),
-      findsOneWidget,
+      findsNothing,
     );
-    expect(find.text('Personal Health AI test panel'), findsOneWidget);
-    expect(find.text('Today Summary test panel'), findsOneWidget);
+    expect(find.text('Personal Health AI test panel'), findsNothing);
+    expect(find.text('Today Summary test panel'), findsNothing);
     expect(find.textContaining('Current weight 93.4 kg'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -168,14 +168,14 @@ void main() {
     );
     expect(
       find.byKey(const Key('dashboard-mobile-summary-card')),
-      findsOneWidget,
+      findsNothing,
     );
     expect(
       find.byKey(const Key('dashboard-mobile-body-twin-snapshot')),
       findsOneWidget,
     );
-    expect(find.text('Personal Health AI test panel'), findsOneWidget);
-    expect(find.text('Today Summary test panel'), findsOneWidget);
+    expect(find.text('Personal Health AI test panel'), findsNothing);
+    expect(find.text('Today Summary test panel'), findsNothing);
     expect(
       find.byKey(const Key('dashboard-mobile-workout-library-card')),
       findsNothing,
@@ -236,8 +236,8 @@ void main() {
       find.byKey(const Key('dashboard-mobile-body-twin-snapshot')),
       findsOneWidget,
     );
-    expect(find.text('Personal Health AI test panel'), findsOneWidget);
-    expect(find.text('Today Summary test panel'), findsOneWidget);
+    expect(find.text('Personal Health AI test panel'), findsNothing);
+    expect(find.text('Today Summary test panel'), findsNothing);
     final rail = tester.widget<ConstrainedBox>(
       find.byKey(const Key('dashboard-current-content-rail')),
     );
@@ -279,7 +279,7 @@ void main() {
     );
     expect(
       find.byKey(const Key('dashboard-personal-health-ai-slot')),
-      findsOneWidget,
+      findsNothing,
     );
     expect(tester.takeException(), isNull);
   });

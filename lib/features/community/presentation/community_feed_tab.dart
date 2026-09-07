@@ -65,17 +65,22 @@ class _FeedTabState extends State<_FeedTab> {
           ),
         ),
       );
-    } catch (_) {
+    } catch (error) {
       if (!mounted) return;
+      final moderationUnavailable = _isModerationUnavailable(error);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             communityText(
               context,
-              _selectedImage == null
+              moderationUnavailable
+                  ? 'Community publishing is temporarily paused while human review is being prepared.'
+                  : _selectedImage == null
                   ? 'Could not publish now. Your text is kept so you can retry.'
                   : 'Could not publish now. Your text and photo are kept so you can retry.',
-              _selectedImage == null
+              moderationUnavailable
+                  ? 'توقف نشر المجتمع مؤقتًا حتى تكتمل تهيئة المراجعة البشرية.'
+                  : _selectedImage == null
                   ? 'تعذر نشر المشاركة الآن. احتفظنا بالنص لتعيد المحاولة.'
                   : 'تعذر النشر الآن. احتفظنا بالنص والصورة لتعيد المحاولة.',
             ),
@@ -85,6 +90,14 @@ class _FeedTabState extends State<_FeedTab> {
     } finally {
       if (mounted) setState(() => _publishing = false);
     }
+  }
+
+  bool _isModerationUnavailable(Object error) {
+    if (error is PostgrestException) {
+      final message = '${error.message} ${error.details}';
+      return message.contains('community_moderation_unavailable');
+    }
+    return '$error'.contains('community_moderation_unavailable');
   }
 
   Future<void> _pickImage() async {

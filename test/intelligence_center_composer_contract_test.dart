@@ -6,6 +6,7 @@ void main() {
   final page =
       [
             'intelligence_center_page.dart',
+            'intelligence_center_page_message.dart',
             'intelligence_center_widgets.dart',
             'intelligence_center_message_widgets.dart',
             'intelligence_center_voice_widgets.dart',
@@ -147,8 +148,10 @@ void main() {
     expect(page, contains('with WidgetsBindingObserver'));
     expect(page, contains('void didChangeMetrics()'));
     expect(page, contains('_scrollToLatest();'));
-    expect(page, contains('reverse: true'));
-    expect(page, contains('conversationScroll.position.minScrollExtent'));
+    expect(page, contains('reverse: false'));
+    expect(page, contains('conversationScroll.position.maxScrollExtent'));
+    expect(page, contains("'ai-coach-conversation-restoring-body'"));
+    expect(page, contains('sessionWelcomeMessage'));
   });
 
   test('technical runtime diagnostics are not presented as chat copy', () {

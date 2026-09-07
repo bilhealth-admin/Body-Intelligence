@@ -317,6 +317,8 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
       // Supplying the UI locale here makes Android lock recognition to that
       // language before its language-switch model gets a chance to run.
       if (!mounted) return false;
+      final speechLocaleAllowList = await _coachSpeechLocaleAllowList();
+      if (!mounted) return false;
       _updateState(() {
         listening = true;
       });
@@ -364,9 +366,11 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
           // Android 14+ detects and switches the recognition model to the
           // language being spoken, independently from the BIL interface.
           autoDetectLanguage: true,
-          // Do not restrict speech to the 25 interface locales. Android may
-          // report any supported BCP-47 language for this conversation.
-          allowedLocaleIds: const <String>[],
+          // Restrict Android's language switcher to the BIL release languages
+          // that the platform actually exposes. This is a speech allow-list,
+          // not the interface locale, and it is empty only when the platform
+          // gives us no locale inventory to filter safely.
+          allowedLocaleIds: speechLocaleAllowList,
         ),
       );
       return true;
@@ -382,6 +386,20 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
         });
       }
       return false;
+    }
+  }
+
+  Future<List<String>> _coachSpeechLocaleAllowList() async {
+    try {
+      final available = (await speech.locales())
+          .map((locale) => locale.localeId.trim())
+          .where((locale) => locale.isNotEmpty)
+          .toList(growable: false);
+      return _matchCoachSpeechLocales(available);
+    } on Object {
+      // Recognition remains usable on platforms with an empty/unavailable
+      // locale inventory; the native bridge will use its normal fallback.
+      return const <String>[];
     }
   }
 
@@ -540,4 +558,57 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
       ),
     );
   }
+}
+
+List<String> _matchCoachSpeechLocales(List<String> available) {
+  final candidates = available
+      .map((value) => value.replaceAll('_', '-'))
+      .where((value) => value.isNotEmpty)
+      .toSet()
+      .toList(growable: false);
+  if (candidates.isEmpty) return const <String>[];
+  final orderedCandidates = candidates.toList()..sort();
+  final orderedTargets = BilLocalePolicy.productionTags.toList()..sort();
+  final selected = <String>[];
+  for (final target in orderedTargets) {
+    final normalizedTarget = target.toLowerCase();
+    String? match;
+    for (final candidate in orderedCandidates) {
+      if (candidate.toLowerCase() == normalizedTarget) {
+        match = candidate;
+        break;
+      }
+    }
+    if (match == null) {
+      final language = normalizedTarget.split('-').first;
+      final languageMatches = orderedCandidates.where(
+        (candidate) => candidate.toLowerCase().split('-').first == language,
+      );
+      final preferredVariant = switch (normalizedTarget) {
+        'zh-hans' =>
+          (String value) =>
+              value.endsWith('-cn') ||
+              value.endsWith('-sg') ||
+              value.endsWith('-hans'),
+        'zh-hant' =>
+          (String value) =>
+              value.endsWith('-tw') ||
+              value.endsWith('-hk') ||
+              value.endsWith('-mo') ||
+              value.endsWith('-hant'),
+        'pt-br' => (String value) => value.endsWith('-br'),
+        'pt-pt' => (String value) => value.endsWith('-pt'),
+        _ => (String value) => false,
+      };
+      for (final candidate in languageMatches) {
+        if (preferredVariant(candidate.toLowerCase())) {
+          match = candidate;
+          break;
+        }
+      }
+      match ??= languageMatches.isEmpty ? null : languageMatches.first;
+    }
+    if (match != null && !selected.contains(match)) selected.add(match);
+  }
+  return selected;
 }

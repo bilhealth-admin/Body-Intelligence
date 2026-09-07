@@ -8,7 +8,10 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     bool addUserMessage = true,
     bool autoSpeakReply = false,
   }) async {
-    final text = (textOverride ?? question.text).trim();
+    final rawText = (textOverride ?? question.text).trim();
+    final text = inputChannel == CoachInputChannel.voice
+        ? normalizeCoachVoiceTranscript(rawText)
+        : rawText;
     if (!conversationReady || text.isEmpty || sending) return;
     if (addUserMessage) _beginConversationForUserAction();
     final localeCode = BilLocalePolicy.canonicalTag(
@@ -95,10 +98,16 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         }
         return;
       }
-      final catalogAnswer = await catalogGrounding.answer(
-        question: text,
-        locale: questionLocale,
-      );
+      final immediateEngine = const IntelligenceCenterEngine();
+      final voiceGreeting =
+          inputChannel == CoachInputChannel.voice &&
+          immediateEngine.isGreetingQuestion(text);
+      final catalogAnswer = voiceGreeting
+          ? null
+          : await catalogGrounding.answer(
+              question: text,
+              locale: questionLocale,
+            );
       if (!mounted || generation != requestGeneration) return;
       if (catalogAnswer != null) {
         final message = IntelligenceMessage(
@@ -123,10 +132,10 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         }
         return;
       }
-      final immediateEngine = const IntelligenceCenterEngine();
       late final IntelligenceCenterReply reply;
       if (immediateEngine.canAnswerWithoutPersonalContext(text)) {
-        final fastEngine = immediateEngine.isGreetingQuestion(text)
+        final fastEngine =
+            immediateEngine.isGreetingQuestion(text) && !voiceGreeting
             ? IntelligenceCenterEngine(
                 localApi: ModelBackedLocalCoachApi(
                   gateway: ref.read(intelligenceCenterModelGatewayProvider),

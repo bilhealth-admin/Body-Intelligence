@@ -6,7 +6,7 @@ import 'package:body_intelligence_log/app/environment/release_manifest_metadata.
 import 'package:crypto/crypto.dart';
 
 const _defaultManifest =
-    'docs/release/BIL_PLUS8_FROZEN_SOURCE_MANIFEST_2026-09-06.md';
+    'docs/release/BIL_ANDROID_V9_FROZEN_SOURCE_MANIFEST_2026-09-06.md';
 
 bool _boolEnvironment(Map<String, String> environment, String name) {
   final value = environment[name]?.trim().toLowerCase();
@@ -15,6 +15,16 @@ bool _boolEnvironment(Map<String, String> environment, String name) {
     'false' || null || '' => false,
     _ => throw FormatException('$name must be true or false.'),
   };
+}
+
+int? _optionalPositiveInt(Map<String, String> environment, String name) {
+  final raw = environment[name]?.trim();
+  if (raw == null || raw.isEmpty) return null;
+  final value = int.tryParse(raw);
+  if (value == null || value <= 0) {
+    throw FormatException('$name must be a positive integer.');
+  }
+  return value;
 }
 
 Future<({String digest, ReleaseManifestMetadata metadata})> _readManifest(
@@ -85,6 +95,10 @@ Future<void> main() async {
         unresolvedReviewCount: manifest.metadata.unresolvedReviewCount,
         manifestReleaseVersion: manifest.metadata.releaseVersion,
         manifestReleaseBuildNumber: manifest.metadata.releaseBuildNumber,
+        expectedReleaseBuildNumber: _optionalPositiveInt(
+          environment,
+          'BIL_RELEASE_EXPECTED_BUILD_NUMBER',
+        ),
       ),
     );
 

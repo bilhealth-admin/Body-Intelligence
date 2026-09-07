@@ -726,14 +726,9 @@ void main() {
       isNot(contains("Key('daily-log-nutrition-facts-glass')")),
     );
     expect(mealSummary, contains("Key('daily-meal-detail-premium-group')"));
-    expect(
-      mealList,
-      matches(
-        RegExp(
-          r"Key\('daily-meal-macros-\$type'\),\s*compact: true,\s*showLabel: false",
-        ),
-      ),
-    );
+    expect(mealList, isNot(contains("Key('daily-meal-macros-\$type')")));
+    expect(mealList, isNot(contains('_DiaryFoodRow(')));
+    expect(mealList, isNot(contains('PremiumNutritionGlass(')));
     expect(dashboard, isNot(contains("tr('Premium nutrient goals'")));
     expect(dashboard, isNot(contains("tr('Premium heart health'")));
     expect(dashboard, contains("Key('dashboard-premium-page-label')"));
@@ -759,7 +754,7 @@ void main() {
     expect(referenceSettings, isNot(contains("copy('Explore Premium')")));
     expect(
       RegExp("_text\\(context, 'Premium'\\)").allMatches(quickAdd).length,
-      1,
+      0,
     );
     expect(
       RegExp(

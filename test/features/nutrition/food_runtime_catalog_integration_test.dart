@@ -230,6 +230,23 @@ void main() {
     },
   );
 
+  test('trusted cloud result survives client-side Arabic rechecking', () async {
+    final network = _FakeNetworkSearchResolver(<UnifiedFood>[
+      _food(id: 'usda:watermelon', name: 'Watermelon, raw'),
+    ]);
+    final authority = FoodRuntimeSearchAuthority(
+      local,
+      catalogResolver: () async => _FakeCatalog(const []),
+      networkSearchResolver: network,
+    );
+
+    final outcome = await authority.searchDetailed('بطيخ الكيوي');
+
+    expect(network.calls, 1);
+    expect(outcome.foods.single.uuid, 'usda:watermelon');
+    expect(outcome.foods.single.name, 'Watermelon, raw');
+  });
+
   test('local search hit suppresses trusted network enrichment', () async {
     await local.addFood(
       name: 'Local oats',

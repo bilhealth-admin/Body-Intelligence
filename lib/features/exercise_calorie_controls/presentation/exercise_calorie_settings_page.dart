@@ -121,18 +121,16 @@ class _ExerciseCaloriePreferencesBodyState
                   key: const Key('exercise-calories-include-switch'),
                   title: Text(copy.includeTitle),
                   subtitle: Text(copy.includeBody),
-                  // Keep an unavailable health source visibly fail-closed.
-                  // The saved preference is retained and becomes effective
-                  // again only after verified energy is available, but the UI
-                  // must not imply that an unverified value is being applied.
-                  value: energy != null && preferences.includeInRemainingGoal,
-                  onChanged: saving || energy == null
+                  // The preference is valid even when today's evidence is
+                  // unavailable. Saving it here lets the setting take effect
+                  // automatically as soon as a verified source is synced.
+                  value: preferences.includeInRemainingGoal,
+                  onChanged: saving
                       ? null
                       : (value) => save(
                           ExerciseCaloriePreferences(
                             includeInRemainingGoal: value,
-                            adjustMacroGoals:
-                                value && preferences.adjustMacroGoals,
+                            adjustMacroGoals: preferences.adjustMacroGoals,
                           ),
                         ),
                 ),
@@ -141,21 +139,16 @@ class _ExerciseCaloriePreferencesBodyState
                   key: const Key('exercise-calories-macros-switch'),
                   title: Text(copy.macrosTitle),
                   subtitle: Text(copy.macrosBody),
-                  value:
-                      energy != null &&
-                      preferences.includeInRemainingGoal &&
-                      preferences.adjustMacroGoals,
-                  onChanged:
-                      energy != null &&
-                          preferences.includeInRemainingGoal &&
-                          !saving
-                      ? (value) => save(
+                  value: preferences.adjustMacroGoals,
+                  onChanged: saving
+                      ? null
+                      : (value) => save(
                           ExerciseCaloriePreferences(
-                            includeInRemainingGoal: true,
+                            includeInRemainingGoal:
+                                preferences.includeInRemainingGoal,
                             adjustMacroGoals: value,
                           ),
-                        )
-                      : null,
+                        ),
                 ),
               ],
             ),

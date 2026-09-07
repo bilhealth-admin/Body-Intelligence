@@ -63,11 +63,16 @@ void main() {
     final performanceRun = source.indexOf('performance = subprocess.run(');
     final failureCheck = source.indexOf('if performance.returncode != 0');
     final failureReturn = source.indexOf('return performance.returncode');
-    final remainingRun = source.indexOf('[*command, *remaining_tests]');
+    final remainingRun = source.indexOf('[*command, *batch]');
     expect(performanceRun, greaterThan(-1));
     expect(failureCheck, greaterThan(performanceRun));
     expect(failureReturn, greaterThan(failureCheck));
     expect(remainingRun, greaterThan(failureReturn));
+    expect(
+      source,
+      contains('partition_test_batches(command, remaining_tests)'),
+    );
+    expect(source, contains('PORTABLE_RELEASE_REMAINING_BATCHES'));
     expect(source, contains('PORTABLE_RELEASE_SCHEDULED_TEST_FILES'));
     expect(
       source,

@@ -19,6 +19,7 @@ import 'data/diary_sharing_support_repository.dart';
 part 'reference_preferences_controls.dart';
 part 'reference_preferences_numeric.dart';
 part 'reference_preferences_macros.dart';
+part 'reference_preferences_email.dart';
 
 class ReferenceDiarySettingsPage extends ConsumerWidget {
   const ReferenceDiarySettingsPage({super.key});
@@ -38,7 +39,11 @@ class ReferenceDiarySettingsPage extends ConsumerWidget {
           'Show all meals in diary tabs',
           true,
         ),
-        _UnavailablePreference('Use multi-add by default'),
+        _StoredSwitch(
+          'diary.multiAddByDefault',
+          'Use multi-add by default',
+          false,
+        ),
         _StoredSwitch('diary.foodInsights', 'Show diary food insights', true),
         _StoredSwitch(
           'diary.alwaysShowWater',
@@ -65,19 +70,6 @@ class ReferenceDiarySettingsPage extends ConsumerWidget {
   }
 }
 
-class _UnavailablePreference extends StatelessWidget {
-  const _UnavailablePreference(this.label);
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => ListTile(
-    enabled: false,
-    title: Text(_diaryText(context, label)),
-    subtitle: Text(context.strings.text('Unavailable')),
-    trailing: const Icon(Icons.lock_outline_rounded),
-  );
-}
-
 class _PreferenceRoute extends StatelessWidget {
   const _PreferenceRoute(this.label, this.route);
   final String label, route;
@@ -86,67 +78,6 @@ class _PreferenceRoute extends StatelessWidget {
     title: Text(_diaryText(context, label)),
     trailing: const Icon(Icons.chevron_right_rounded),
     onTap: () => context.push(route),
-  );
-}
-
-class ReferenceEmailSettingsPage extends ConsumerWidget {
-  const ReferenceEmailSettingsPage({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return _PreferenceListPage(
-      title: context.strings.text('Email settings'),
-      children: const [
-        _EmailDeliveryNotice(),
-        _UnavailableEmailPreference('New feature announcements'),
-        _UnavailableEmailPreference('Healthy living tips'),
-        _UnavailableEmailPreference('Healthy recipes'),
-        _UnavailableEmailPreference('Workout recommendations'),
-        _UnavailableEmailPreference('Gear recommendations and offers'),
-        _UnavailableEmailPreference('Weekly digest'),
-        _UnavailableEmailPreference('People can find me by email address'),
-        _SectionLabel('Send me an email when'),
-        _UnavailableEmailPreference('Someone sends me a message'),
-        _UnavailableEmailPreference('Someone sends me a friend request'),
-        _UnavailableEmailPreference('Someone invites me to a group'),
-        _UnavailableEmailPreference('Someone accepts my friend request'),
-        _UnavailableEmailPreference('Someone accepts my group invitation'),
-        SizedBox(height: 96),
-      ],
-    );
-  }
-}
-
-class _EmailDeliveryNotice extends StatelessWidget {
-  const _EmailDeliveryNotice();
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
-    child: Text(
-      context.strings.text(
-        'Email delivery is not configured yet. These controls stay off until BIL can verify server delivery.',
-      ),
-      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-        height: 1.4,
-      ),
-    ),
-  );
-}
-
-class _UnavailableEmailPreference extends StatelessWidget {
-  const _UnavailableEmailPreference(this.label);
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => SwitchListTile(
-    minTileHeight: 58,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 18),
-    title: Text(_diaryText(context, label)),
-    subtitle: Text(context.strings.text('Unavailable')),
-    value: false,
-    onChanged: null,
   );
 }
 

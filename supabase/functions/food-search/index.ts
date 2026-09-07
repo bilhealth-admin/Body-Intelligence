@@ -10,10 +10,31 @@ const json = (body: unknown, status = 200) =>
     { status, headers: { "content-type": "application/json" } },
   );
 const env = (name: string) => Deno.env.get(name)?.trim() ?? "";
+const firstEnv = (...names: string[]) => {
+  for (const name of names) {
+    const value = env(name);
+    if (value) return value;
+  }
+  return "";
+};
 const text = (value: unknown) => String(value ?? "").trim();
 const finite = (value: unknown) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+};
+const isSafeSearchHint = (value: string) =>
+  /^[A-Za-z0-9][A-Za-z0-9 ,.'"&()\/-]{1,119}$/.test(value);
+const reviewedSearchHints = new Map<string, string>([
+  ["بطيخ", "watermelon"],
+]);
+
+const reviewedHintForQuery = (value: string) => {
+  const words = value.toLowerCase().split(/\s+/).filter(Boolean);
+  for (const word of words) {
+    const hint = reviewedSearchHints.get(word);
+    if (hint) return hint;
+  }
+  return "";
 };
 
 type QuotaResult = "allowed" | "rate_limited" | "unavailable";
@@ -26,10 +47,17 @@ type AccessResult =
     status: 401 | 503;
   };
 
+type TranslationFunction = (
+  value: string,
+  sourceLocale: string,
+  targetLocale: string,
+) => Promise<string | null>;
+
 export interface FoodSearchRuntime {
   authorize(request: Request): Promise<AccessResult>;
   apiKey(): string;
   fetch: typeof fetch;
+  translate?: TranslationFunction;
 }
 
 type BoundedJsonResult =
@@ -83,10 +111,13 @@ async function productionAuthorize(request: Request): Promise<AccessResult> {
   const token = authorization.replace(/^Bearer\s+/i, "").trim();
   if (!token) return { ok: false, error: "invalid_session", status: 401 };
 
+  // Pass the token explicitly to GoTrue as well as keeping it on the client
+  // headers. This removes any dependency on header propagation inside the
+  // Edge runtime and keeps the same member identity for auth and RPC calls.
   const auth = createClient(url, anon, {
-    global: { headers: { Authorization: authorization } },
+    global: { headers: { Authorization: `Bearer ${token}` } },
   });
-  const { data, error } = await auth.auth.getUser();
+  const { data, error } = await auth.auth.getUser(token);
   if (error || !data.user) {
     return { ok: false, error: "invalid_session", status: 401 };
   }
@@ -119,8 +150,18 @@ async function productionAuthorize(request: Request): Promise<AccessResult> {
 
 const productionRuntime: FoodSearchRuntime = {
   authorize: productionAuthorize,
-  apiKey: () => env("BIL_USDA_API_KEY"),
+  // Keep the canonical BIL names while accepting the shorter names already
+  // used by the deployed project. Secret values never leave the Edge
+  // Function, and this prevents a naming-only configuration outage.
+  apiKey: () => firstEnv("BIL_USDA_API_KEY", "USDA"),
   fetch,
+  translate: (value, sourceLocale, targetLocale) =>
+    translateWithGoogle(
+      value,
+      sourceLocale,
+      targetLocale,
+      fetch,
+    ),
 };
 
 const supportedLocales = new Set([
@@ -172,6 +213,65 @@ function normalizedUsda(food: Record<string, unknown>) {
   };
 }
 
+/// Translates only the user's search phrase. USDA remains the nutrition
+/// authority and its stored food name is never replaced by an unreviewed
+/// translation. This keeps the search multilingual without pretending that a
+/// machine translation is a canonical food identity.
+async function translateWithGoogle(
+  value: string,
+  sourceLocale: string,
+  targetLocale: string,
+  fetcher: typeof fetch,
+): Promise<string | null> {
+  const key = firstEnv("BIL_TRANSLATION_API_KEY", "Translation");
+  if (!key || !value.trim() || sourceLocale === targetLocale) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 2500);
+  try {
+    const response = await fetcher(
+      `https://translation.googleapis.com/language/translate/v2?key=${
+        encodeURIComponent(key)
+      }`,
+      {
+        method: "POST",
+        signal: controller.signal,
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          q: [value],
+          source: sourceLocale,
+          target: targetLocale,
+          format: "text",
+        }),
+      },
+    );
+    if (!response.ok) return null;
+    const root = await response.json() as Record<string, unknown>;
+    const data = root.data;
+    if (data == null || typeof data !== "object" || Array.isArray(data)) {
+      return null;
+    }
+    const translations = (data as Record<string, unknown>).translations;
+    if (!Array.isArray(translations) || translations.length === 0) return null;
+    const first = translations[0];
+    if (first == null || typeof first !== "object" || Array.isArray(first)) {
+      return null;
+    }
+    const translated = text(
+      (first as Record<string, unknown>).translatedText,
+    );
+    return translated.length >= 2 && translated.length <= 120
+      ? translated
+      : null;
+  } catch {
+    // Search must still be able to use the reviewed offline aliases or the
+    // original query when the optional translation provider is unavailable.
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function handleFoodSearchRequest(
   request: Request,
   runtime: FoodSearchRuntime = productionRuntime,
@@ -210,6 +310,29 @@ export async function handleFoodSearchRequest(
   if (quota === "rate_limited") return json({ error: "rate_limited" }, 429);
   if (quota !== "allowed") return json({ error: "quota_unavailable" }, 503);
 
+  // The mobile app already expands the reviewed offline lexicon. This server
+  // step closes the remaining gap for arbitrary food phrases in any supported
+  // language before USDA's English-centric catalog is queried. If the optional
+  // provider is not configured, keep the old deterministic USDA request.
+  const searchHint = text(body.search_hint);
+  // The mobile app may provide a reviewed English concept for a known
+  // multilingual food term (for example Arabic "بطيخ" -> "watermelon").
+  // It is bounded and syntax-checked here, then used as the authoritative
+  // USDA query so a compound phrase cannot make a known food disappear when
+  // the optional translation provider is unavailable.
+  const serverReviewedHint = reviewedHintForQuery(query);
+  const translatedQuery = locale === "en"
+    ? isSafeSearchHint(searchHint)
+      ? searchHint
+      : isSafeSearchHint(serverReviewedHint)
+      ? serverReviewedHint
+      : query
+    : isSafeSearchHint(searchHint)
+    ? searchHint
+    : isSafeSearchHint(serverReviewedHint)
+    ? serverReviewedHint
+    : ((await runtime.translate?.(query, locale, "en"))?.trim() || query);
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 8000);
   try {
@@ -225,7 +348,7 @@ export async function handleFoodSearchRequest(
           "accept-language": locale,
         },
         body: JSON.stringify({
-          query,
+          query: translatedQuery,
           pageSize: limit,
           pageNumber: 1,
           requireAllWords: true,
@@ -245,6 +368,7 @@ export async function handleFoodSearchRequest(
       status: foods.length === 0 ? "unresolved" : "found",
       source: "usda",
       query,
+      search_query: translatedQuery,
       locale,
       foods,
     }, foods.length === 0 ? 404 : 200);

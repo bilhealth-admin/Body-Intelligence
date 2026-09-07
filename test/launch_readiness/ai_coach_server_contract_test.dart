@@ -85,7 +85,7 @@ void main() {
     expect(page, contains('await speech.stop();'));
     expect(page, contains('_speakCoachText(spokenReply, spokenLocale)'));
     expect(page, contains('speechPlan != CoachSpeechPlan.directAnswer'));
-    expect(page, contains('allowedLocaleIds: const <String>[]'));
+    expect(page, contains('allowedLocaleIds: speechLocaleAllowList'));
     expect(page, contains('detectedLanguageTag: detectedLanguageTag'));
     expect(bridge, contains('onLanguageDetection'));
     expect(bridge, contains('SpeechRecognizer.DETECTED_LANGUAGE'));

@@ -104,6 +104,10 @@ void main() {
     });
 
     test('Premium grants every free capability plus sync and intelligence', () {
+      expect(
+        PlanPolicyCatalog.policies[CommercePlan.free]!.limits.cloudSync,
+        isTrue,
+      );
       final free = PlanPolicyCatalog.policies[CommercePlan.free]!.entitlements;
       final premium =
           PlanPolicyCatalog.policies[CommercePlan.premium]!.entitlements;

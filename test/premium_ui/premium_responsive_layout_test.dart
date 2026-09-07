@@ -38,11 +38,13 @@ void main() {
       expect(source, contains(contract), reason: contract);
     }
 
-    expect(current, contains('BilPremiumResponsiveLayout.twinBaseHeight('));
     expect(current, contains("Key('dashboard-ai-coach-slot')"));
     expect(current, contains("Key('dashboard-daily-intelligence-slot')"));
-    expect(current, contains("Key('dashboard-personal-health-ai-slot')"));
-    expect(current, contains("Key('dashboard-mobile-summary-card')"));
+    expect(
+      current,
+      isNot(contains("Key('dashboard-personal-health-ai-slot')")),
+    );
+    expect(current, isNot(contains("Key('dashboard-mobile-summary-card')")));
     expect(source, isNot(contains('if (constraints.maxWidth >= 600)')));
     expect(source, isNot(contains('constraints.maxWidth < 1180')));
     expect(source, isNot(contains('constraints.maxWidth >= 1400')));

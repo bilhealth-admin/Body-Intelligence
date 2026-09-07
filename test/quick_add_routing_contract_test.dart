@@ -27,12 +27,14 @@ void main() {
       );
       expect(shell, contains('switch (action)'));
 
-      for (final action in const ['barcode', 'voice', 'photo']) {
+      for (final action in const ['barcode', 'voice']) {
         expect(shell, contains('action=$action'));
         expect(diary, contains("case '$action':"));
       }
+      expect(shell, contains('vision=capture&from=\$origin'));
+      expect(diary, contains("case 'photo':"));
 
-      expect(shell, contains("context.go('/daily-log?focus=meal&from="));
+      expect(shell, contains("context.go('/daily-log?focus=meal&meal="));
       expect(shell, contains('/daily-log/body-context?from='));
       expect(diary, contains("case 'notes':"));
       expect(shell, contains("context.push('/wellness/workouts')"));

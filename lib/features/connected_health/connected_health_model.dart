@@ -79,6 +79,8 @@ final class ConnectedHealthSnapshot {
     required this.failureCode,
     this.availabilityStatus,
     this.deviceVerified = false,
+    this.isBusy = false,
+    this.stepHistory = const <ConnectedHealthSignalView>[],
   });
 
   const ConnectedHealthSnapshot.unavailable()
@@ -90,7 +92,9 @@ final class ConnectedHealthSnapshot {
       lastSyncAt = null,
       failureCode = null,
       availabilityStatus = null,
-      deviceVerified = false;
+      deviceVerified = false,
+      isBusy = false,
+      stepHistory = const <ConnectedHealthSignalView>[];
 
   final ConnectedHealthStatus status;
   final String? platformSource;
@@ -105,6 +109,16 @@ final class ConnectedHealthSnapshot {
   /// simulator must never set this flag.
   final bool deviceVerified;
 
+  /// Keeps the last usable snapshot rendered while a native operation is in
+  /// flight. This prevents permission/sync actions from replacing the whole
+  /// page with a blank loading state and makes the action's progress explicit.
+  final bool isBusy;
+
+  /// Daily step totals imported from the connected source. [signals] remains
+  /// the latest representative snapshot for the live card; this separate
+  /// history is what powers the dashboard trend.
+  final List<ConnectedHealthSignalView> stepHistory;
+
   ConnectedHealthSnapshot copyWith({
     ConnectedHealthStatus? status,
     String? platformSource,
@@ -116,6 +130,8 @@ final class ConnectedHealthSnapshot {
     bool clearFailure = false,
     String? availabilityStatus,
     bool? deviceVerified,
+    bool? isBusy,
+    List<ConnectedHealthSignalView>? stepHistory,
   }) => ConnectedHealthSnapshot(
     status: status ?? this.status,
     platformSource: platformSource ?? this.platformSource,
@@ -126,5 +142,43 @@ final class ConnectedHealthSnapshot {
     failureCode: clearFailure ? null : failureCode ?? this.failureCode,
     availabilityStatus: availabilityStatus ?? this.availabilityStatus,
     deviceVerified: deviceVerified ?? this.deviceVerified,
+    isBusy: isBusy ?? this.isBusy,
+    stepHistory: stepHistory ?? this.stepHistory,
+  );
+}
+
+/// Returns one value for each of the last 30 local calendar days.
+///
+/// The dashboard chart consumes these totals as bars; it is not a Cartesian
+/// line chart. Missing days are represented by zero so the time axis remains
+/// honest and stable.
+List<double> connectedHealthStepTrendValues(
+  ConnectedHealthSnapshot? snapshot,
+  DateTime now,
+) {
+  final source = snapshot == null
+      ? const <ConnectedHealthSignalView>[]
+      : snapshot.stepHistory.isNotEmpty
+      ? snapshot.stepHistory
+      : snapshot.signals;
+  final today = DateTime(now.year, now.month, now.day);
+  final first = today.subtract(const Duration(days: 29));
+  final totals = <DateTime, double>{};
+  for (final signal in source) {
+    if (signal.key != 'steps' || signal.unit != 'count') continue;
+    if (!signal.value.isFinite || signal.value < 0) continue;
+    final observed = signal.observedAt.toLocal();
+    final day = DateTime(observed.year, observed.month, observed.day);
+    if (day.isBefore(first) || day.isAfter(today)) continue;
+    totals.update(
+      day,
+      (current) => current + signal.value,
+      ifAbsent: () => signal.value,
+    );
+  }
+  return List<double>.generate(
+    30,
+    (index) => totals[first.add(Duration(days: index))] ?? 0,
+    growable: false,
   );
 }

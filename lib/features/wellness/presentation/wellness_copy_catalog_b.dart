@@ -304,7 +304,6 @@ const _wellnessSecondaryB = <String, Map<String, String>>{
   },
   'Log': {'fr': 'Journal', 'es': 'Registro', 'tr': 'Kayıt'},
   'Insights': {'fr': 'Analyses', 'es': 'Perspectivas', 'tr': 'İçgörüler'},
-  'Learn': {'fr': 'Apprendre', 'es': 'Aprender', 'tr': 'Öğren'},
   'Illustration only': {
     'fr': 'Illustration uniquement',
     'es': 'Solo ilustración',

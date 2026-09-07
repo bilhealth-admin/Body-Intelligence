@@ -113,6 +113,7 @@ public_site/.well-known/assetlinks.json
 
 # Generated golden-test failure diagnostics are not release evidence.
 test/visual_closure/failures/
+test/features/wellness/failures/
 
 # Historical/raw audit captures stay local. Only curated release evidence,
 # approved references, and final proof packs are eligible for review.

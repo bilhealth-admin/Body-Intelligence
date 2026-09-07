@@ -12,6 +12,7 @@ import 'local_coach_api.dart';
 import 'local_model_gateway.dart';
 
 part 'intelligence_center_reply.dart';
+part 'intelligence_center_engine_intents.dart';
 
 class IntelligenceCenterEngine {
   const IntelligenceCenterEngine({
@@ -133,15 +134,21 @@ class IntelligenceCenterEngine {
     if (weight != null) return weight;
     final target = _answerDailyTarget(normalized, replyLocale, coachContext);
     if (target != null) return target;
-    final local = await localApi.understand(
-      LocalCoachRequest(
-        text: question,
-        locale: coachLanguage.languageTag,
-        languageDetected: coachLanguage.detected,
-        channel: inputChannel,
-        conversation: conversation,
-      ),
-    );
+    // A short voice greeting is fully local. This prevents a transient cloud
+    // outage from turning a simple spoken "كيفك"/"good evening" into a 30s
+    // service error while leaving typed greetings on the consented model path.
+    final local =
+        inputChannel == CoachInputChannel.voice && _isGreeting(normalized)
+        ? const LocalCoachResult(actions: [], processedOnDevice: true)
+        : await localApi.understand(
+            LocalCoachRequest(
+              text: question,
+              locale: coachLanguage.languageTag,
+              languageDetected: coachLanguage.detected,
+              channel: inputChannel,
+              conversation: conversation,
+            ),
+          );
     if (local.actions.isNotEmpty) {
       return _reply(
         tr(
@@ -536,164 +543,4 @@ class IntelligenceCenterEngine {
       runtime: CoachAnswerRuntime.localFallback,
     );
   }
-
-  bool _has(String value, List<String> markers) => markers.any(value.contains);
-  bool _isGreeting(String v) => _has(v, const [
-    'مرحبا',
-    'مرحبًا',
-    'أهلا',
-    'أهلًا',
-    'السلام عليكم',
-    'صباح الخير',
-    'مساء الخير',
-    'hi',
-    'hello',
-    'hey',
-    'how are you',
-    'assalamualaikum',
-    'assalamu alaikum',
-    'as-salamu alaykum',
-    'salamualaikum',
-    'salaam alaikum',
-  ]);
-  bool _isPlanRequest(String v) => _has(v, const [
-    'خطة',
-    'برنامج',
-    'رتب لي',
-    'اعمل لي',
-    'أعمل لي',
-    'plan',
-    'program',
-  ]);
-  bool _looksLikeLogging(String v) => _has(v, const [
-    'أكلت',
-    'شربت',
-    'تمرنت',
-    'وزني',
-    'i ate',
-    'i drank',
-    'i trained',
-    'my weight',
-  ]);
-  bool _looksPersonal(String v) => _has(v, const [
-    'جسمي',
-    'وزني',
-    'أكلي',
-    'وجباتي',
-    'بروتين',
-    'سعرات',
-    'تقدمي',
-    'الماء',
-    'ثبات',
-    'هدف',
-    'بياناتي',
-    'لماذا',
-    'my body',
-    'my weight',
-    'my food',
-    'protein',
-    'calories',
-    'progress',
-    'water',
-    'hydration',
-    'hydrate',
-    'dehydration',
-    'plateau',
-    'goal',
-    'my data',
-    'why',
-  ]);
-  bool _looksLikeDiagnosis(String v) => _has(v, const [
-    'شخصني',
-    'تشخيص',
-    'هل عندي',
-    'هل مصاب',
-    'مرض',
-    'دواء',
-    'جرعة',
-    'diagnose',
-    'diagnosis',
-    'do i have',
-    'disease',
-    'medication',
-    'dose',
-  ]);
-  bool _looksUrgent(String v) => _has(v, const [
-    'ألم صدر',
-    'لا أستطيع التنفس',
-    'صعوبة تنفس',
-    'إغماء',
-    'نزيف شديد',
-    'أفكر بالانتحار',
-    'chest pain',
-    "can't breathe",
-    'difficulty breathing',
-    'fainted',
-    'severe bleeding',
-    'suicide',
-  ]);
-  bool _isAllowedScope(String v) => _has(v, const [
-    'صحة',
-    'جسم',
-    'وزن',
-    'أكل',
-    'غذاء',
-    'وجبة',
-    'بروتين',
-    'سعرات',
-    'ماء',
-    'نوم',
-    'نشاط',
-    'رياضة',
-    'تمرين',
-    'خطوات',
-    'دهون',
-    'عضلات',
-    'قياس',
-    'هدف',
-    'تقدم',
-    'خطة',
-    'دواء',
-    'مرض',
-    'أعراض',
-    'ألم',
-    'bil',
-    'توأم',
-    'البرنامج',
-    'التطبيق',
-    'التسجيل',
-    'coach',
-    'health',
-    'body',
-    'weight',
-    'food',
-    'meal',
-    'nutrition',
-    'protein',
-    'calories',
-    'water',
-    'hydration',
-    'hydrate',
-    'dehydration',
-    'sleep',
-    'activity',
-    'exercise',
-    'steps',
-    'fat',
-    'muscle',
-    'measurement',
-    'goal',
-    'progress',
-    'plan',
-    'medicine',
-    'symptom',
-    'pain',
-    'app',
-    'log',
-  ]);
-
-  String _legacyLocale(bool arabic) => switch (arabic) {
-    true => 'ar',
-    false => 'en',
-  };
 }

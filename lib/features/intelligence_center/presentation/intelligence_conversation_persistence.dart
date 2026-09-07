@@ -112,20 +112,18 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
         activeConversationId = resolvedConversationId;
         introVisible = true;
         conversationReady = true;
+        sessionWelcomeMessage = IntelligenceMessage(
+          id: 'welcome-session-${now.microsecondsSinceEpoch}',
+          role: IntelligenceMessageRole.bil,
+          kind: IntelligenceMessageKind.coach,
+          text: welcome,
+          createdAt: now,
+          modality: IntelligenceMessageModality.system,
+        );
         messages
           ..clear()
           ..addAll(
             restored.where((message) => !message.id.startsWith('welcome')),
-          )
-          ..add(
-            IntelligenceMessage(
-              id: 'welcome-session-${now.microsecondsSinceEpoch}',
-              role: IntelligenceMessageRole.bil,
-              kind: IntelligenceMessageKind.coach,
-              text: welcome,
-              createdAt: now,
-              modality: IntelligenceMessageModality.system,
-            ),
           );
       });
       // Keep the fingerprint for diagnostics/migrations, but never rewrite the
@@ -149,12 +147,27 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
           // already present in memory and remains user-owned content.
         }
       }
-      _scrollToLatest(jump: true);
+      // Keep the session welcome at the beginning of the chronological list.
+      // New user turns and replies call _scrollToLatest themselves, so opening
+      // a restored chat never jumps past the primary introduction.
     } on Object {
-      // A local read failure must not leave Coach permanently disabled. Keep
-      // the already-seeded in-memory welcome, but never merge a partial
-      // restore over a user turn.
-      if (mounted) _updateState(() => conversationReady = true);
+      // A local read failure must not leave Coach permanently disabled. Show a
+      // fresh session welcome, but never merge a partial restore over a user
+      // turn.
+      if (mounted) {
+        final now = ref.read(intelligenceConversationClockProvider)();
+        _updateState(() {
+          sessionWelcomeMessage ??= IntelligenceMessage(
+            id: 'welcome-session-${now.microsecondsSinceEpoch}',
+            role: IntelligenceMessageRole.bil,
+            kind: IntelligenceMessageKind.coach,
+            text: _sessionWelcome(null, at: now),
+            createdAt: now,
+            modality: IntelligenceMessageModality.system,
+          );
+          conversationReady = true;
+        });
+      }
     }
   }
 
@@ -264,9 +277,10 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
   void _scrollToLatest({bool jump = false}) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !conversationScroll.hasClients) return;
-      // The chat is rendered in reverse, so offset zero is always the newest
-      // turn regardless of how tall or lazily built the restored history is.
-      final target = conversationScroll.position.minScrollExtent;
+      // The conversation is chronological. The maximum extent is the newest
+      // turn, which also keeps a short new conversation anchored at the top
+      // instead of leaving a large blank area above the first message.
+      final target = conversationScroll.position.maxScrollExtent;
       if (jump) {
         conversationScroll.jumpTo(target);
       } else {
@@ -412,18 +426,15 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
     final now = ref.read(intelligenceConversationClockProvider)();
     final welcome = _sessionWelcome(displayName, at: now);
     _updateState(() {
-      messages
-        ..clear()
-        ..add(
-          IntelligenceMessage(
-            id: 'welcome-${now.microsecondsSinceEpoch}',
-            role: IntelligenceMessageRole.bil,
-            kind: IntelligenceMessageKind.coach,
-            text: welcome,
-            createdAt: now,
-            modality: IntelligenceMessageModality.system,
-          ),
-        );
+      sessionWelcomeMessage = IntelligenceMessage(
+        id: 'welcome-${now.microsecondsSinceEpoch}',
+        role: IntelligenceMessageRole.bil,
+        kind: IntelligenceMessageKind.coach,
+        text: welcome,
+        createdAt: now,
+        modality: IntelligenceMessageModality.system,
+      );
+      messages.clear();
     });
     unawaited(_saveConversation());
   }

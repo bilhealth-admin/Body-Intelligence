@@ -79,10 +79,14 @@ void main() {
     final swift = File(
       'ios/Runner/BILFitnessBleBridge.swift',
     ).readAsStringSync();
-    final discoverStart = swift.indexOf('case "discover":');
-    final discoverEnd = swift.indexOf('case "pair":', discoverStart);
+    final discoverStart = swift.indexOf('private func startDiscovery(');
+    final discoverEnd = swift.indexOf(
+      'private func requestBluetoothPermission(',
+      discoverStart,
+    );
     final discover = swift.substring(discoverStart, discoverEnd);
 
+    expect(swift, contains('if call.method == "discover"'));
     expect(swift, contains('private var currentDiscoveryIds = Set<UUID>()'));
     expect(discover, contains('currentDiscoveryIds.removeAll()'));
     expect(discover, contains('self.currentDiscoveryIds'));

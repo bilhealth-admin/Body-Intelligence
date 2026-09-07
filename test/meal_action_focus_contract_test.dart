@@ -18,9 +18,14 @@ String _librarySource(String path) {
 
 void main() {
   test('complete-meal action requests meal-focused diary context', () {
-    final dashboard = File(
-      'lib/features/dashboard/widgets/dashboard_grid.dart',
-    ).readAsStringSync();
+    final dashboard = <String>[
+      File(
+        'lib/features/dashboard/widgets/dashboard_grid.dart',
+      ).readAsStringSync(),
+      File(
+        'lib/features/dashboard/widgets/dashboard_grid_actions.dart',
+      ).readAsStringSync(),
+    ].join('\n');
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
     final diary = _librarySource('lib/features/daily_log/daily_log_page.dart');
     final mealEntry = File(

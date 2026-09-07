@@ -42,6 +42,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
   bool _loading = true;
   bool _loadInFlight = false;
   bool _restoring = false;
+  bool _purchaseRequestInFlight = false;
   VerifiedStoreState? _lastStoreState;
 
   @override
@@ -82,6 +83,23 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     }
     _lastStoreState = store.state;
     setState(() {});
+  }
+
+  bool get _purchaseInProgress =>
+      _purchaseRequestInFlight || (widget.store ?? _ownedStore)?.busy == true;
+
+  void _requestPurchase(BilStoreOfferMetadata offer) {
+    if (_purchaseInProgress) return;
+    setState(() => _purchaseRequestInFlight = true);
+    unawaited(_finishPurchaseRequest(offer));
+  }
+
+  Future<void> _finishPurchaseRequest(BilStoreOfferMetadata offer) async {
+    try {
+      await _catalog?.requestPurchase(offer);
+    } finally {
+      if (mounted) setState(() => _purchaseRequestInFlight = false);
+    }
   }
 
   Future<void> _load() async {
@@ -208,13 +226,11 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         locale: locale,
         offers: _offers,
         loading: _loading,
+        purchaseInProgress: _purchaseInProgress,
         restoreInProgress: _restoring,
         currentPlan: currentPlan,
         initialFocus: widget.initialFocus,
-        onPurchaseRequested: (offer) async {
-          await _catalog?.requestPurchase(offer);
-          if (mounted) setState(() {});
-        },
+        onPurchaseRequested: _requestPurchase,
         onRestore: _catalog == null ? null : _restorePurchases,
         onManage: _catalog == null
             ? null

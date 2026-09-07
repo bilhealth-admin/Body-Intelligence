@@ -20,6 +20,15 @@ void main() {
 
   test('iOS permission and camera lifecycle operations are race safe', () {
     final speech = File('ios/Runner/BILSpeechBridge.swift').readAsStringSync();
+    final exceptionCatcher = File(
+      'ios/Runner/BILObjCExceptionCatcher.h',
+    ).readAsStringSync();
+    final bridgingHeader = File(
+      'ios/Runner/Runner-Bridging-Header.h',
+    ).readAsStringSync();
+    final xcodeProject = File(
+      'ios/Runner.xcodeproj/project.pbxproj',
+    ).readAsStringSync();
     final camera = File(
       'lib/shared/widgets/bil_camera_capture_page.dart',
     ).readAsStringSync();
@@ -37,6 +46,11 @@ void main() {
     expect(speech, isNot(contains('authorizationStatus() != .restricted')));
     expect(speech, contains('session.isInputAvailable'));
     expect(speech, contains('format.sampleRate > 0'));
+    expect(speech, contains('BILPerformObjCExceptionCatching'));
+    expect(speech, contains('format: nil'));
+    expect(exceptionCatcher, contains('BILPerformObjCExceptionCatching'));
+    expect(bridgingHeader, contains('BILObjCExceptionCatcher.h'));
+    expect(xcodeProject, contains('BILObjCExceptionCatcher.m in Sources'));
     expect(camera, contains('_serializeCameraOperation'));
     expect(camera, contains('_cameraShouldRun = false'));
     // Permission sheets temporarily make iOS inactive. Stopping the camera

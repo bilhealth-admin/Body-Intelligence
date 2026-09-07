@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/localization/runtime_copy_admin_notifications.dart';
+import '../services/admin_operation_error.dart';
 import '../services/ai_coach_admin_service.dart';
 import 'admin_notification_presets.dart';
 
@@ -266,19 +267,13 @@ class _AdminNotificationControlsState
           ),
         ),
       );
-    } on Object {
+    } on Object catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           key: const Key('admin-notification-error'),
           content: Text(
-            _copy(
-              'The notification was not sent. Review the details and try again.',
-              ar: 'لم يُرسل الإشعار. راجع التفاصيل وحاول مجددًا.',
-              fr: 'La notification n’a pas été envoyée. Vérifiez les détails et réessayez.',
-              es: 'La notificación no se envió. Revisa los datos e inténtalo de nuevo.',
-              tr: 'Bildirim gönderilmedi. Bilgileri kontrol edip yeniden deneyin.',
-            ),
+            _notificationFailureCopy(classifyAdminOperationFailure(error)),
           ),
         ),
       );
@@ -286,6 +281,42 @@ class _AdminNotificationControlsState
       if (mounted) setState(() => _sending = false);
     }
   }
+
+  String _notificationFailureCopy(AdminOperationFailureKind kind) => _copy(
+    _notificationFailureEnglish(kind),
+    ar: _notificationFailureArabic(kind),
+    fr: _notificationFailureEnglish(kind),
+    es: _notificationFailureEnglish(kind),
+    tr: _notificationFailureEnglish(kind),
+  );
+
+  String _notificationFailureEnglish(
+    AdminOperationFailureKind kind,
+  ) => switch (kind) {
+    AdminOperationFailureKind.timedOut =>
+      'The admin operation timed out. Check that the Edge Function is deployed, then try again.',
+    AdminOperationFailureKind.serviceUnavailable =>
+      'The admin service is not available. Deploy the current Edge Function and migrations, then try again.',
+    AdminOperationFailureKind.authorization =>
+      'This account is not authorized for the admin operation, or the deployed service is using an older admin roster.',
+    AdminOperationFailureKind.integrity =>
+      'Mobile integrity verification blocked the operation. Use a signed build or keep the server canary in off mode during QA.',
+    _ => 'The notification was not sent. Review the details and try again.',
+  };
+
+  String _notificationFailureArabic(
+    AdminOperationFailureKind kind,
+  ) => switch (kind) {
+    AdminOperationFailureKind.timedOut =>
+      'انتهت مهلة عملية الإدارة. تأكد من نشر Edge Function ثم حاول مجددًا.',
+    AdminOperationFailureKind.serviceUnavailable =>
+      'خدمة الإدارة غير متاحة. انشر Edge Function والترحيلات الحالية ثم حاول مجددًا.',
+    AdminOperationFailureKind.authorization =>
+      'هذا الحساب غير مخول بعملية الإدارة، أو أن الخدمة المنشورة تستخدم قائمة أدمن قديمة.',
+    AdminOperationFailureKind.integrity =>
+      'تحقق سلامة التطبيق منع العملية. استخدم نسخة موقعة أو أبقِ وضع الاختبار في الخادم على off أثناء QA.',
+    _ => 'لم يُرسل الإشعار. راجع التفاصيل وحاول مجددًا.',
+  };
 }
 
 class _NotificationActionButton extends StatelessWidget {

@@ -23,7 +23,8 @@ void main() {
 
       final first = controller.requestPermissions();
       final duplicate = controller.requestPermissions();
-      expect(controller.state, isA<AsyncLoading<ConnectedHealthSnapshot>>());
+      expect(controller.state, isA<AsyncData<ConnectedHealthSnapshot>>());
+      expect(controller.state.value?.isBusy, isTrue);
       expect(gateway.permissionCalls, 1);
 
       gateway.permissionRequest.completeError(StateError('denied'));
@@ -114,10 +115,12 @@ void main() {
       controller.state.value?.status,
       ConnectedHealthStatus.permissionDenied,
     );
+    expect(controller.state.value?.isBusy, isTrue);
 
     gateway.refreshLoad.complete(_permissionDeniedSnapshot);
     await refresh;
     expect(controller.state, isA<AsyncData<ConnectedHealthSnapshot>>());
+    expect(controller.state.value?.isBusy, isFalse);
     controller.dispose();
   });
 
@@ -393,7 +396,7 @@ void main() {
       ).readAsStringSync();
       final page = File(
         'lib/features/connected_health/connected_health_page.dart',
-      ).readAsStringSync();
+      ).readAsStringSync().replaceAll(RegExp(r'\s+'), ' ');
       final card = File(
         'lib/features/connected_health/widgets/connected_health_card.dart',
       ).readAsStringSync();
@@ -413,7 +416,12 @@ void main() {
       expect(page, contains('child: const _FitnessDeviceSection()'));
       expect(card, contains('LiveHealthWatch('));
       expect(card, contains("Key('dashboard-live-fitness-watch-slot')"));
-      expect(card, contains("Key('dashboard-fitness-link-action')"));
+      expect(card, contains("Key('dashboard-compact-health-hub')"));
+      expect(
+        card,
+        isNot(contains("'Manage fitness sources'")),
+        reason: 'the compact dashboard card itself is the navigation target',
+      );
       expect(card, contains("Key('dashboard-fitness-last-sync')"));
       expect(card, isNot(contains('HealthDevicePager(')));
       expect(card, contains("context.push('/connected-health')"));

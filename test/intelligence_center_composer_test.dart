@@ -77,7 +77,7 @@ Widget _app(
 void main() {
   Future<void> revealOlderMessage(WidgetTester tester, Finder target) async {
     for (var attempt = 0; attempt < 6 && target.evaluate().isEmpty; attempt++) {
-      await tester.drag(find.byType(ListView).last, const Offset(0, 320));
+      await tester.drag(find.byType(ListView).last, const Offset(0, -320));
       await tester.pumpAndSettle();
     }
   }

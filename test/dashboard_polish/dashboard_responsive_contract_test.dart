@@ -7,6 +7,9 @@ void main() {
     final grid = File(
       'lib/features/dashboard/widgets/dashboard_grid.dart',
     ).readAsStringSync();
+    final actions = File(
+      'lib/features/dashboard/widgets/dashboard_grid_actions.dart',
+    ).readAsStringSync();
     final summaryFactory = File(
       'lib/features/dashboard/widgets/dashboard_summary_factory.dart',
     ).readAsStringSync();
@@ -23,7 +26,7 @@ void main() {
     expect(summaryFactory, contains('DashboardDailySummarySection('));
     expect(grid, isNot(contains('DashboardBodyProfileSnapshot(')));
     expect(grid, isNot(contains('DashboardAnalyticsCenter(')));
-    expect(grid, contains("context.go('/analytics')"));
+    expect(actions, contains("context.go('/analytics')"));
     expect(daily, contains('LayoutBuilder('));
     expect(profile, contains('LayoutBuilder('));
     expect(analytics, contains('LayoutBuilder('));

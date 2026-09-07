@@ -21,6 +21,7 @@ void main() {
     expect(router, contains("path: '/analytics/nutrition'"));
     expect(router, contains('NutritionAnalyticsPage('));
     expect(router, contains("'nutrients' => 1"));
+    expect(router, contains("path: '/foods'"));
     expect(router, contains('const FoodPage()'));
     expect(analytics, contains("Key('open-nutrition-analytics')"));
   });

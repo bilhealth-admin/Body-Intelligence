@@ -84,10 +84,6 @@ void main() {
       // permissions, category copy, preferences, and UI remain in sibling
       // files. The margin covers the audited iOS category-action setup.
       'lib/features/notifications/services/bil_notification_service.dart': 975,
-      // These preference pages are presentation-only and share the same
-      // guarded save-and-return contract. Persistence and domain rules live
-      // outside this file; keep only a narrow review margin.
-      'lib/features/settings/reference_preferences_pages.dart': 725,
       // These are render-only catalog libraries. Data, verification,
       // entitlement, cache, manifests, and content management are separate.
       'lib/features/wellness/presentation/bil_workout_routines_list.dart': 725,

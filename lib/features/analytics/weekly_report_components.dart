@@ -918,13 +918,28 @@ String _weeklyDayLabel(BuildContext context, String dayKey) {
 }
 
 class _Message extends StatelessWidget {
-  const _Message(this.value);
+  const _Message(this.value, {this.onRetry});
   final String value;
+  final VoidCallback? onRetry;
   @override
   Widget build(BuildContext context) => Center(
     child: Padding(
       padding: const EdgeInsets.all(32),
-      child: Text(value, textAlign: TextAlign.center),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(value, textAlign: TextAlign.center),
+          if (onRetry != null) ...[
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              key: const Key('weekly-report-retry'),
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text(_t(context, 'Try again')),
+            ),
+          ],
+        ],
+      ),
     ),
   );
 }

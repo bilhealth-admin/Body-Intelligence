@@ -15,6 +15,26 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
   final _protein = TextEditingController();
   final _carbs = TextEditingController();
   final _fat = TextEditingController();
+  bool _submitting = false;
+
+  double? _parseNumber(String source) {
+    final normalized = source
+        .trim()
+        .replaceAll('،', '.')
+        .replaceAll('٫', '.')
+        .replaceAllMapped(RegExp(r'[٠-٩۰-۹０-９]'), (match) {
+          const arabic = '٠١٢٣٤٥٦٧٨٩';
+          const persian = '۰۱۲۳۴۵۶۷۸۹';
+          const fullWidth = '０１２３４５６７８９';
+          final value = match.group(0)!;
+          final arabicIndex = arabic.indexOf(value);
+          if (arabicIndex >= 0) return '$arabicIndex';
+          final persianIndex = persian.indexOf(value);
+          if (persianIndex >= 0) return '$persianIndex';
+          return '${fullWidth.indexOf(value)}';
+        });
+    return double.tryParse(normalized);
+  }
 
   @override
   void dispose() {
@@ -32,10 +52,14 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
   }
 
   Future<void> _submit() async {
+    if (_submitting) return;
     final values = [_serving, _calories, _protein, _carbs, _fat]
-        .map((controller) => double.tryParse(controller.text.trim()))
+        .map((controller) => _parseNumber(controller.text))
         .toList(growable: false);
-    if (_name.text.trim().length < 2 || values.any((value) => value == null)) {
+    if (_name.text.trim().length < 2 ||
+        values.any((value) => value == null || !value.isFinite) ||
+        values[0]! <= 0 ||
+        values.skip(1).any((value) => value! < 0)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -49,6 +73,7 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
       );
       return;
     }
+    setState(() => _submitting = true);
     try {
       await widget.repository.submitFood(
         CommunityFoodDraft(
@@ -72,6 +97,22 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
         ),
       );
       return;
+    } on Object {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            communityText(
+              context,
+              'Could not complete that action safely. Try again.',
+              'تعذر إكمال هذا الإجراء بأمان. حاول مجددًا.',
+            ),
+          ),
+        ),
+      );
+      return;
+    } finally {
+      if (mounted) setState(() => _submitting = false);
     }
     if (!mounted) return;
     Navigator.pop(context);
@@ -113,12 +154,14 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
               ),
               const SizedBox(height: 16),
               TextField(
+                key: const Key('community-food-name'),
                 controller: _name,
                 decoration: InputDecoration(
                   labelText: communityText(context, 'Name', 'الاسم'),
                 ),
               ),
               TextField(
+                key: const Key('community-food-serving'),
                 controller: _serving,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
@@ -130,6 +173,7 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
                 ),
               ),
               TextField(
+                key: const Key('community-food-calories'),
                 controller: _calories,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
@@ -137,6 +181,7 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
                 ),
               ),
               TextField(
+                key: const Key('community-food-protein'),
                 controller: _protein,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
@@ -144,6 +189,7 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
                 ),
               ),
               TextField(
+                key: const Key('community-food-carbs'),
                 controller: _carbs,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
@@ -155,6 +201,7 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
                 ),
               ),
               TextField(
+                key: const Key('community-food-fat'),
                 controller: _fat,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
@@ -163,7 +210,8 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
               ),
               const SizedBox(height: 16),
               FilledButton.icon(
-                onPressed: _submit,
+                key: const Key('community-food-submit'),
+                onPressed: _submitting ? null : _submit,
                 icon: const Icon(Icons.fact_check_outlined),
                 label: Text(
                   communityText(context, 'Send for review', 'إرسال للمراجعة'),

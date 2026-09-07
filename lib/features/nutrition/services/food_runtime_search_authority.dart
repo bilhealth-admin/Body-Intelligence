@@ -140,6 +140,13 @@ class FoodRuntimeSearchAuthority {
       );
     }
 
+    // Non-Latin food queries must reach the authenticated BIL gateway before
+    // the offline catalog decides whether the phrase is understood. This is
+    // the production path for Arabic and other multilingual searches; local
+    // catalog rows remain a resilient fallback when the network is unavailable.
+    final networkFirst = _isMultilingualQuery(query)
+        ? await _loadTrustedNetwork(query, limit: limit)
+        : const <Food>[];
     final local = await _searchLocal(query, limit: limit);
     final community = await _loadCommunity(query, limit: limit);
 
@@ -147,7 +154,9 @@ class FoodRuntimeSearchAuthority {
     try {
       catalog = await _catalogResolver();
     } catch (_) {
-      final network = local.isEmpty && community.isEmpty
+      final network = networkFirst.isNotEmpty
+          ? networkFirst
+          : local.isEmpty && community.isEmpty
           ? await _loadTrustedNetwork(query, limit: limit)
           : const <Food>[];
       return FoodRuntimeSearchResult(
@@ -165,7 +174,9 @@ class FoodRuntimeSearchAuthority {
     }
 
     if (catalog == null) {
-      final network = local.isEmpty && community.isEmpty
+      final network = networkFirst.isNotEmpty
+          ? networkFirst
+          : local.isEmpty && community.isEmpty
           ? await _loadTrustedNetwork(query, limit: limit)
           : const <Food>[];
       return FoodRuntimeSearchResult(
@@ -212,7 +223,9 @@ class FoodRuntimeSearchAuthority {
         query: query,
         limit: limit,
       );
-      final network = current.isEmpty
+      final network = networkFirst.isNotEmpty
+          ? networkFirst
+          : current.isEmpty
           ? await _loadTrustedNetwork(query, limit: limit)
           : const <Food>[];
       return FoodRuntimeSearchResult(
@@ -265,7 +278,11 @@ class FoodRuntimeSearchAuthority {
         limit: limit < 20 ? limit : 20,
       );
       final foods = <Food>[];
-      for (final food in _rankUnifiedFoods(unified, query)) {
+      // The authenticated food-search function has already searched USDA
+      // using its translated/reviewed query. Re-matching those rows against
+      // the original Arabic phrase here would discard valid cloud results
+      // such as an English USDA name returned for an Arabic search.
+      for (final food in unified) {
         foods.add(await _localRepository.materializeUnifiedFood(food));
         if (foods.length >= limit) break;
       }
@@ -305,6 +322,12 @@ class FoodRuntimeSearchAuthority {
     // the same strict token contract as catalog/community results.
     final all = await _localRepository.getFoods();
     return _rankLocalFoods(all, query).take(limit).toList(growable: false);
+  }
+
+  bool _isMultilingualQuery(String query) {
+    final normalized = query.trim();
+    return normalized.length >= 3 &&
+        normalized.runes.any((rune) => rune > 0x7f);
   }
 
   List<Food> _mergeCommunity(

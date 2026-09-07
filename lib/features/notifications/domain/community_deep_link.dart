@@ -23,7 +23,6 @@ class CommunityDeepLink {
     'advertising-privacy': '/advertising-privacy',
     'notification-settings': '/notification-settings',
     'intelligence-center': '/intelligence-center',
-    'wellness/learn': '/wellness/learn',
     'wellness/sleep': '/wellness/sleep',
     'wellness/workouts': '/wellness/workouts',
     'workouts': '/wellness/workouts',

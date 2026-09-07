@@ -15,6 +15,7 @@ import '../../nutrition/community_catalog/data/supabase_community_food_catalog.d
 import '../../nutrition/community_catalog/services/community_food_sync_service.dart';
 import '../../nutrition/services/active_mobile_catalog_resolver.dart';
 import '../../nutrition/services/food_runtime_search_authority.dart';
+import '../../nutrition/services/trusted_food_network_search_resolver.dart';
 
 final foodRepositoryProvider = Provider<FoodRepository>((ref) {
   final database = ref.watch(databaseProvider);
@@ -61,6 +62,10 @@ final foodRuntimeSearchAuthorityProvider = Provider<FoodRuntimeSearchAuthority>(
     return FoodRuntimeSearchAuthority(
       ref.watch(foodRepositoryProvider),
       catalogResolver: catalogResolver.openIfAvailable,
+      // Keep USDA enrichment wired into the production authority. The edge
+      // function owns the USDA key and translates non-English queries before
+      // asking FoodData Central, so local catalog misses remain recoverable.
+      networkSearchResolver: const TrustedFoodNetworkSearchResolver(),
       communitySearchResolver: communityCloud == null
           ? null
           : (query, {limit = 10}) async {

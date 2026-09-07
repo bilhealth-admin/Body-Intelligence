@@ -14,9 +14,15 @@ void main() {
     ).readAsStringSync();
 
     expect(backend, contains('BIL_USDA_API_KEY'));
+    expect(backend, contains('firstEnv("BIL_USDA_API_KEY", "USDA")'));
+    expect(backend, contains('BIL_TRANSLATION_API_KEY'));
+    expect(
+      backend,
+      contains('firstEnv("BIL_TRANSLATION_API_KEY", "Translation")'),
+    );
     expect(backend, contains('SUPABASE_ANON_KEY'));
-    expect(backend, contains('auth.auth.getUser()'));
-    expect(backend, contains('Authorization: authorization'));
+    expect(backend, contains('auth.auth.getUser(token)'));
+    expect(backend, contains(r'Authorization: `Bearer ${token}`'));
     expect(backend, isNot(contains('SUPABASE_SERVICE_ROLE_KEY')));
     expect(backend, contains('request.body.getReader()'));
     expect(backend, contains('total > maxRequestBytes'));
@@ -28,8 +34,12 @@ void main() {
       lessThan(backend.indexOf('await runtime.fetch(')),
     );
     expect(backend, contains('requireAllWords: true'));
+    expect(backend, contains('translatedQuery'));
+    expect(backend, contains('search_query: translatedQuery'));
     expect(backend, contains('Math.min(requestedLimit, 20)'));
     expect(client, contains("'food-search'"));
+    expect(client, contains("'search_hint': searchHint"));
+    expect(client, contains('FoodSearchAssistance'));
     expect(client, isNot(contains('BIL_USDA_API_KEY')));
     expect(client, isNot(contains('api.nal.usda.gov')));
   });
@@ -56,5 +66,12 @@ void main() {
     expect(food.knownValue(FoodNutrient.calories), 400);
     expect(food.knownValue(FoodNutrient.protein), 12);
     expect(food.sourceLabel, 'USDA FoodData Central — verified');
+  });
+
+  test('known Arabic food phrases provide a bounded USDA search hint', () {
+    final resolver = TrustedFoodNetworkSearchResolver();
+
+    expect(resolver.searchHintForTesting('بطيخ الكيوي'), 'watermelon');
+    expect(resolver.searchHintForTesting('طبق منزلي غير معروف'), isNull);
   });
 }

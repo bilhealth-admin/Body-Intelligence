@@ -48,7 +48,10 @@ final class BILSpeechBridge: NSObject, FlutterStreamHandler {
       startInFlight = true
       pendingStartResult = result
       let arguments = call.arguments as? [String: Any]
-      authorizeAndStart(localeId: arguments?["localeId"] as? String, result: result)
+      authorizeAndStart(
+        localeId: arguments?["localeId"] as? String,
+        result: result
+      )
     case "stop":
       // A permission prompt can outlive the Flutter route. Mark the pending
       // start as cancelled before tearing down audio so its completion block
@@ -98,7 +101,8 @@ final class BILSpeechBridge: NSObject, FlutterStreamHandler {
 
   private func start(localeId: String?, result: @escaping FlutterResult) {
     stop(cancel: true)
-    let locale = localeId.flatMap(Locale.init(identifier:)) ?? .current
+    let requestedLocale = localeId.flatMap(Locale.init(identifier:))
+    let locale = requestedLocale ?? .current
     guard let recognizer = SFSpeechRecognizer(locale: locale), recognizer.isAvailable else {
       fail("speech_unavailable", result: result)
       return
@@ -141,21 +145,44 @@ final class BILSpeechBridge: NSObject, FlutterStreamHandler {
     }
 
     let input = engine.inputNode
-    let format = input.outputFormat(forBus: 0)
-    guard format.sampleRate > 0, format.channelCount > 0 else {
+    var format: AVAudioFormat?
+    let formatReadSucceeded = BILPerformObjCExceptionCatching {
+      format = input.outputFormat(forBus: 0)
+    }
+    guard formatReadSucceeded,
+          let format,
+          format.sampleRate > 0,
+          format.channelCount > 0 else {
       stop(cancel: true)
       fail("audio_input_unavailable", result: result)
       return
     }
-    input.installTap(onBus: 0, bufferSize: 1_024, format: format) { buffer, _ in
-      request.append(buffer)
+    // Passing nil lets AVAudioEngine use the active hardware format. Passing
+    // the format read above can race a Bluetooth/route change and trigger an
+    // Objective-C assertion when the hardware sample rate changes between
+    // the read and installTap call.
+    let tapInstalled = BILPerformObjCExceptionCatching {
+      input.installTap(onBus: 0, bufferSize: 1_024, format: nil) { buffer, _ in
+        request.append(buffer)
+      }
+    }
+    guard tapInstalled else {
+      stop(cancel: true)
+      fail("audio_input_unavailable", result: result)
+      return
     }
     inputTapInstalled = true
 
-    do {
+    var engineStartError: Error?
+    let engineStarted = BILPerformObjCExceptionCatching {
       engine.prepare()
-      try engine.start()
-    } catch {
+      do {
+        try engine.start()
+      } catch {
+        engineStartError = error
+      }
+    }
+    if !engineStarted || engineStartError != nil {
       stop(cancel: true)
       fail("audio_session_unavailable", result: result)
       return
@@ -168,12 +195,19 @@ final class BILSpeechBridge: NSObject, FlutterStreamHandler {
       DispatchQueue.main.async { [weak self] in
         guard let self, self.recognitionRequest === request else { return }
         if let response {
-          self.eventSink?([
+          var event: [String: Any] = [
             "type": "result",
             "words": response.bestTranscription.formattedString,
             "final": response.isFinal,
-            "localeId": locale.identifier,
-          ])
+          ]
+          // `SFSpeechRecognizer` must be created with one locale on iOS. When
+          // BIL asks for automatic capture, its `.current` seed is only a
+          // recognizer fallback, not evidence of the language spoken. Do not
+          // feed that fallback back into the multilingual reply resolver.
+          if let requestedLocale {
+            event["localeId"] = requestedLocale.identifier
+          }
+          self.eventSink?(event)
           if response.isFinal {
             self.stop(cancel: false)
             return

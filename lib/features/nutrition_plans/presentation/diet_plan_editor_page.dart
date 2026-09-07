@@ -41,6 +41,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
   };
   final _resolvedTargets = <int, DietMacroTarget>{};
   final _invalidMacroDays = <int>{};
+  final _lastEditedMacroComponent = <int, DietMacroComponent>{};
   DietFatLevel _fatLevel = DietFatLevel.medium;
   int _trimester = 1;
   bool _clinicianAcknowledged = false;
@@ -90,6 +91,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     final week = draft.resolveWeek();
     _resolvedTargets.clear();
     _invalidMacroDays.clear();
+    _lastEditedMacroComponent.clear();
     for (var day = 1; day <= 7; day += 1) {
       final target = week?[day];
       if (target == null) continue;
@@ -98,7 +100,26 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     }
   }
 
-  double? get _baseCalories => double.tryParse(_calories.text.trim());
+  double? get _baseCalories => _parseNumber(_calories.text);
+
+  double? _parseNumber(String source) {
+    final normalized = source
+        .trim()
+        .replaceAll('،', '.')
+        .replaceAll('٫', '.')
+        .replaceAllMapped(RegExp(r'[٠-٩۰-۹０-９]'), (match) {
+          const arabic = '٠١٢٣٤٥٦٧٨٩';
+          const persian = '۰۱۲۳۴۵۶۷۸۹';
+          const fullWidth = '０１２３４５６７８９';
+          final value = match.group(0)!;
+          final index = arabic.indexOf(value);
+          if (index >= 0) return '$index';
+          final persianIndex = persian.indexOf(value);
+          if (persianIndex >= 0) return '$persianIndex';
+          return '${fullWidth.indexOf(value)}';
+        });
+    return double.tryParse(normalized);
+  }
 
   double? get _effectiveCalories {
     final base = _baseCalories;
@@ -161,6 +182,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
       setState(() {});
       return;
     }
+    _lastEditedMacroComponent.clear();
     for (var day = 1; day <= 7; day += 1) {
       final current = _resolvedTargets[day];
       if (current == null) continue;
@@ -176,17 +198,20 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
   }
 
   void _onMacroChanged(int day, DietMacroComponent component, String source) {
-    final grams = double.tryParse(source.trim());
+    final grams = _parseNumber(source);
     final current = _resolvedTargets[day];
     if (grams == null || current == null) {
       _invalidMacroDays.add(day);
       setState(() {});
       return;
     }
-    final target = DietMacroAllocator.rebalance(
+    final previous = _lastEditedMacroComponent[day];
+    final locked = <DietMacroComponent>{?previous, component};
+    final target = DietMacroAllocator.rebalancePreserving(
       current: current,
       edited: component,
       grams: grams,
+      locked: locked,
       fallbackFatLevel: _fatLevel,
     );
     if (target == null) {
@@ -196,6 +221,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     }
     _invalidMacroDays.remove(day);
     _resolvedTargets[day] = target;
+    _lastEditedMacroComponent[day] = component;
     _writeTarget(day, target, preserve: component);
     setState(() {});
   }
@@ -371,6 +397,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
         : 0.0;
     final editableCalories = math.max(.01, target.calories - extra);
     _calories.text = editableCalories.round().toString();
+    _lastEditedMacroComponent.clear();
     final macroTarget = DietMacroTarget(
       calories: target.calories,
       carbsGrams: target.calories * target.carbsPercent / 100 / 4,

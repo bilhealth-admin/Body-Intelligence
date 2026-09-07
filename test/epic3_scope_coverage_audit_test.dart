@@ -54,7 +54,6 @@ void main() {
     '/legal/health-disclaimer': 'privacy',
     '/help': 'settings',
     '/wellness-library': 'wellness',
-    '/wellness/learn': 'wellness',
     '/wellness/sleep': 'wellness',
     '/wellness/workouts': 'wellness',
     '/wellness/workouts/routines': 'wellness',

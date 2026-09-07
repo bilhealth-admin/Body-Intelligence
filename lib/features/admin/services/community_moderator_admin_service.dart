@@ -92,14 +92,12 @@ final class SupabaseCommunityModeratorAdminGateway
       'idempotency_key': _uuid.v4(),
       ...fields,
     };
-    final protectedBody = await BilMobileIntegrityService.instance.protect(
-      action: integrityAction,
-      payload: body,
-    );
-    final response = await _client.functions.invoke(
-      'ai-coach-global-reset',
-      body: protectedBody,
-    );
+    final protectedBody = await BilMobileIntegrityService.instance
+        .protect(action: integrityAction, payload: body)
+        .timeout(const Duration(seconds: 12));
+    final response = await _client.functions
+        .invoke('ai-coach-global-reset', body: protectedBody)
+        .timeout(const Duration(seconds: 20));
     if (response.status != 200) {
       throw StateError('community_moderator_admin_failed');
     }

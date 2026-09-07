@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:body_intelligence_log/app/localization/runtime_copy_release_closure.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_profile.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_release_polish.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_release_actions.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_food_actions.dart';
@@ -111,6 +112,7 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     ...RegExp(r"^    '((?:\\.|[^'])*)': \{$", multiLine: true)
         .allMatches(catalogSource)
         .map((match) => _unescapeDartSingle(match.group(1)!)),
+    ...ProfileRuntimeCopy.values.keys,
     ...ReleaseClosureRuntimeCopy.sources,
     ...ReleasePolishRuntimeCopy.sources,
     ...ReleaseActionRuntimeCopy.sources,
@@ -131,7 +133,6 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     'lib/features/analytics/analytics_locale_copy.dart',
     'lib/features/commerce/presentation/commerce_paywall.dart',
     'lib/features/wellness/presentation/professional_content_library_page.dart',
-    'lib/features/wellness/presentation/wellness_learn_page.dart',
     'lib/features/intelligence_center/presentation/ai_coach_settings_page.dart',
   ]) {
     final source = await File(path).readAsString();
@@ -264,10 +265,6 @@ Future<Set<String>> _requiredRuntimeSources() async {
       r"_localized\(\s*context,\s*'(?:\\.|[^'])*',\s*'((?:\\.|[^'])*)'",
       multiLine: true,
     ),
-  );
-  addMatches(
-    await read('lib/features/wellness/presentation/wellness_learn_page.dart'),
-    RegExp(r"_learnText\(\s*context,\s*'((?:\\.|[^'])*)'", multiLine: true),
   );
   addMatches(
     await read(

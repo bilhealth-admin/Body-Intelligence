@@ -97,7 +97,7 @@ void main() {
     expect(find.text('Fiber'), findsOneWidget);
     expect(find.descendant(of: heart, matching: find.text('—')), findsNothing);
     expect(
-      find.descendant(of: heart, matching: find.text('2300')),
+      find.descendant(of: heart, matching: find.text('800')),
       findsOneWidget,
     );
     expect(find.byKey(const Key('dashboard-premium-lock')), findsNothing);

@@ -30,12 +30,23 @@ void main() {
 
       for (final source in [people, connections]) {
         expect(source, contains('verifiedSubscriptionStateProvider'));
+        expect(source, contains('aiCoachAdminAccessProvider'));
         expect(source, contains('EntitlementAuthority.verifiedServer'));
         expect(source, contains('CommerceEntitlement.communityFriends'));
         expect(source, contains("'/plans?focus=subscription'"));
       }
     },
   );
+
+  test('protected owner can use friendships without weakening customer gate', () {
+    final migration = File(
+      'supabase/migrations/20260906110000_admin_community_friendship_access.sql',
+    ).readAsStringSync();
+    expect(migration, contains('private.bil_ai_coach_admins'));
+    expect(migration, contains('administrator.active'));
+    expect(migration, contains('not public.bil_has_active_premium'));
+    expect(migration, contains("raise exception 'premium_required'"));
+  });
 
   test(
     'customer community routes use Premium while moderation stays role-gated',
@@ -46,6 +57,7 @@ void main() {
       ).readAsStringSync();
 
       expect(gate, contains('PremiumGateFeature.community'));
+      expect(gate, contains('aiCoachAdminAccessProvider'));
       expect(gate, contains("t('Friends and requests')"));
       expect(gate, contains("t('Messages')"));
       expect(

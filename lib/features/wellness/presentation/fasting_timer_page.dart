@@ -257,16 +257,6 @@ class _FastingTimerPageState extends ConsumerState<FastingTimerPage>
                             ),
                           ),
                           const SizedBox(height: 8),
-                          TextButton.icon(
-                            onPressed: () => context.push('/wellness/learn'),
-                            icon: const Icon(Icons.help_outline_rounded),
-                            label: Text(
-                              tr(
-                                'What is intermittent fasting, and is it right for you?',
-                                'ما الصيام المتقطع، وهل يناسبك؟',
-                              ),
-                            ),
-                          ),
                           const Divider(height: 28),
                           Text(
                             tr(

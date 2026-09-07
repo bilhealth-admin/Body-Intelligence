@@ -764,7 +764,6 @@ Future<Set<String>> _additionalSources() async {
       "  'fr': {",
     ),
   );
-  values.addAll(await _wellnessLearnEnglishValues());
   values.addAll(
     await _authoredMapKeys(
       'lib/features/wellness/presentation/wellness_copy_catalog_a.dart',
@@ -1654,26 +1653,6 @@ Future<Set<String>> _notificationSettingsEnglishValues() async {
   values.addAll(
     RegExp(
       r"_ui\(\s*'((?:\\.|[^'])*)'\s*,",
-      multiLine: true,
-    ).allMatches(source).map((match) => _unescapeDartSingle(match.group(1)!)),
-  );
-  return values;
-}
-
-Future<Set<String>> _wellnessLearnEnglishValues() async {
-  final source = await File(
-    'lib/features/wellness/presentation/wellness_learn_page.dart',
-  ).readAsString();
-  final values = <String>{};
-  values.addAll(
-    RegExp(
-      r"wellnessCopy\(\s*context,\s*'((?:\\.|[^'])*)'",
-      multiLine: true,
-    ).allMatches(source).map((match) => _unescapeDartSingle(match.group(1)!)),
-  );
-  values.addAll(
-    RegExp(
-      r"_learnText\(\s*context,\s*'((?:\\.|[^'])*)'",
       multiLine: true,
     ).allMatches(source).map((match) => _unescapeDartSingle(match.group(1)!)),
   );

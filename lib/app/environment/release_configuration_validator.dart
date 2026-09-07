@@ -26,6 +26,7 @@ class ReleaseConfiguration {
     this.unresolvedReviewCount,
     this.manifestReleaseVersion = '',
     this.manifestReleaseBuildNumber,
+    this.expectedReleaseBuildNumber,
   });
 
   final bool production;
@@ -54,6 +55,7 @@ class ReleaseConfiguration {
   final int? unresolvedReviewCount;
   final String manifestReleaseVersion;
   final int? manifestReleaseBuildNumber;
+  final int? expectedReleaseBuildNumber;
 }
 
 class ReleaseConfigurationIssue {
@@ -68,8 +70,8 @@ class ReleaseConfigurationValidator {
 
   static const approvedApplicationId = 'com.bilhealth.bodyintelligencelog';
   static const approvedReleaseVersion = '1.0.0';
-  static const androidReleaseBuildNumber = 8;
-  static const iosReleaseBuildNumber = 9;
+  static const androidReleaseBuildNumber = 9;
+  static const iosReleaseBuildNumber = 10;
 
   static List<ReleaseConfigurationIssue> validate(
     ReleaseConfiguration configuration,
@@ -261,11 +263,13 @@ class ReleaseConfigurationValidator {
       );
     }
 
-    final expectedManifestBuildNumber = switch (platform) {
-      'android' => androidReleaseBuildNumber,
-      'ios' => iosReleaseBuildNumber,
-      _ => null,
-    };
+    final expectedManifestBuildNumber =
+        configuration.expectedReleaseBuildNumber ??
+        switch (platform) {
+          'android' => androidReleaseBuildNumber,
+          'ios' => iosReleaseBuildNumber,
+          _ => null,
+        };
     if (configuration.production &&
         (configuration.manifestReleaseVersion != approvedReleaseVersion ||
             configuration.manifestReleaseBuildNumber !=

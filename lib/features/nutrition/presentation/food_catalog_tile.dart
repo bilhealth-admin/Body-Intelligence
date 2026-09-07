@@ -162,7 +162,20 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
   Widget build(BuildContext context) {
     final t = context.strings.text;
     final food = widget.food;
-    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    final localeTag = Localizations.localeOf(context).toLanguageTag();
+    final displayName = FoodPresentationLocalizer.foodName(
+      name: food.name,
+      arabicName: food.arabicName,
+      localeTag: localeTag,
+      isCustom: food.isCustom,
+      source: food.source,
+    );
+    final arabic = localeTag == 'ar';
+    final servingText = FoodPresentationLocalizer.browseServingText(
+      amount: food.servingSize.toStringAsFixed(0),
+      unit: food.servingUnit,
+      localeTag: localeTag,
+    );
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: ListTile(
@@ -189,10 +202,10 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      food.name,
+                      displayName,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    if (food.arabicName != null) Text(food.arabicName!),
+                    if (displayName != food.name && !arabic) Text(food.name),
                     const SizedBox(height: 12),
                     // Provenance labels are authoritative identifiers, not UI
                     // copy. Translating them can alter the cited dataset and
@@ -204,7 +217,7 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
                           : t('Not independently verified'),
                     ),
                     Text(
-                      '${t('Normalized serving')}: ${food.servingSize.toStringAsFixed(0)} ${food.servingUnit}',
+                      '${t('Normalized serving')}: ${servingText ?? food.servingSize.toStringAsFixed(0)}',
                     ),
                     Text(
                       '${t('Updated locally')}: ${food.updatedAt.toLocal()}',
@@ -246,9 +259,7 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
           ),
         ),
         title: Text(
-          arabic && food.arabicName?.trim().isNotEmpty == true
-              ? food.arabicName!.trim()
-              : food.name,
+          displayName,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontWeight: FontWeight.w700),
@@ -256,7 +267,7 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (arabic && food.arabicName?.trim().isNotEmpty == true)
+            if (displayName != food.name && !arabic)
               Directionality(
                 textDirection: TextDirection.ltr,
                 child: Text(food.name),
@@ -267,7 +278,7 @@ class _FoodTileState extends ConsumerState<_FoodTile> {
             Directionality(
               textDirection: TextDirection.ltr,
               child: Text(
-                '${food.servingSize.toStringAsFixed(0)} ${food.servingUnit} · '
+                '${servingText ?? '${food.servingSize.toStringAsFixed(0)} ${food.servingUnit}'} · '
                 '${food.source} · '
                 '${t(food.verified ? 'verified' : 'unverified')}',
                 maxLines: 1,

@@ -113,7 +113,10 @@ void main() {
         }
         expect(shell, contains("'/daily-log?action=barcode&from=\$origin'"));
         expect(shell, contains("'/daily-log?action=voice&from=\$origin'"));
-        expect(shell, contains("'/daily-log?action=photo&from=\$origin'"));
+        expect(
+          shell,
+          contains("'/intelligence-center?vision=capture&from=\$origin'"),
+        );
         expect(diary, contains("case 'barcode':"));
         expect(diary, contains('await _scanBarcode();'));
         expect(diary, contains("case 'voice':"));
@@ -231,9 +234,13 @@ void main() {
     });
 
     test('route glass paints real content, blurs it, and blocks its input', () {
-      final glass = source(
-        'lib/features/commerce/presentation/premium_route_glass_gate.dart',
-      );
+      final glass =
+          source(
+            'lib/features/commerce/presentation/premium_route_glass_gate.dart',
+          ) +
+          source(
+            'lib/features/commerce/presentation/premium_route_glass_gate_components.dart',
+          );
 
       expect(glass, contains('AbsorbPointer('));
       expect(glass, contains('BackdropFilter('));

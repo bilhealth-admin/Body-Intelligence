@@ -358,4 +358,16 @@ void main() {
       isNot(contains('Chicken')),
     );
   });
+
+  test('reviewed Arabic source wins over a malformed stored translation', () {
+    expect(
+      FoodPresentationLocalizer.foodName(
+        name: 'Bread, white, commercially prepared',
+        arabicName: 'خبز جبين',
+        localeTag: 'ar',
+        source: 'USDA FoodData Central',
+      ),
+      'خبز أبيض محضر',
+    );
+  });
 }

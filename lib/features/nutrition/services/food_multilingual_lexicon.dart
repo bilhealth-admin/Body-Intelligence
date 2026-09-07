@@ -21,6 +21,7 @@ class FoodMultilingualLexicon {
     for (final token in normalized.split(' ')) {
       final canonical = _byAlias[token]?.firstOrNull;
       translatedTokens.add(canonical ?? token);
+      if (canonical != null) result.add(canonical);
       changed |= canonical != null;
     }
     if (changed) result.add(translatedTokens.join(' '));

@@ -30,7 +30,7 @@ void main() {
       contains("tr('Daily Summary', 'ملخص اليوم')"),
       reason: 'Today Summary must use the approved Arabic title.',
     );
-    expect(current, contains("Key('dashboard-mobile-summary-card')"));
+    expect(current, isNot(contains("Key('dashboard-mobile-summary-card')")));
 
     expect(profile, contains("tr('Daily energy plan', 'خطة الطاقة اليومية')"));
     expect(profile, contains("tr('Daily metabolism', 'معدل الأيض اليومي')"));

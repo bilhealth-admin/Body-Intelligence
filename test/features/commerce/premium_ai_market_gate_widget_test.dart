@@ -12,6 +12,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../visual_closure/visual_evidence_font.dart';
 
@@ -350,6 +351,61 @@ void main() {
     expect(find.text('BIL PREMIUM AI COACH'), findsOneWidget);
     expect(find.text('Start 7-day free trial'), findsNothing);
     expect(find.textContaining('non-expiring'), findsWidgets);
+  });
+
+  testWidgets('free AI Coach gate back action returns to the dashboard', (
+    tester,
+  ) async {
+    final router = GoRouter(
+      initialLocation: '/intelligence-center',
+      routes: [
+        GoRoute(
+          path: '/dashboard',
+          builder: (_, _) =>
+              const Scaffold(body: Text('Dashboard destination')),
+        ),
+        GoRoute(
+          path: '/intelligence-center',
+          builder: (_, _) => const PremiumRouteGlassGate(
+            feature: PremiumGateFeature.aiCoach,
+            child: ColoredBox(color: Colors.white),
+          ),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          verifiedSubscriptionStateProvider.overrideWith(
+            (_) async => FreePlan.createState(),
+          ),
+          storefrontTargetPlanProvider.overrideWith(
+            (_) async => CommercePlan.premiumAiCoach,
+          ),
+          aiCoachCreditAccessProvider.overrideWith((_) async => false),
+        ],
+        child: MaterialApp.router(
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          routerConfig: router,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('premium-route-back')), findsOneWidget);
+    expect(find.text('Continue'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('premium-route-back')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Dashboard destination'), findsOneWidget);
+    expect(find.text('Continue'), findsNothing);
   });
 
   testWidgets('token storefront still routes both exact AI choices', (

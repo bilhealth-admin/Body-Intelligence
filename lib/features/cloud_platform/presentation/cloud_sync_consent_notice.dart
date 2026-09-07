@@ -25,17 +25,34 @@ class _CloudSyncConsentNoticeState
     extends ConsumerState<CloudSyncConsentNotice> {
   bool _scheduled = false;
   bool _saving = false;
+  String? _observedOwnerId;
+  String? _autoSyncedOwnerId;
 
   @override
   Widget build(BuildContext context) {
     final consent = ref.watch(cloudSyncConsentStateProvider);
     consent.whenData((state) {
+      if (_observedOwnerId != state.ownerId) {
+        _observedOwnerId = state.ownerId;
+        _scheduled = false;
+        _autoSyncedOwnerId = null;
+      }
       final needsChoice =
           state.availability == CloudSyncConsentAvailability.available &&
           state.recordedAt == null;
       if (needsChoice && !_scheduled && !_saving) {
         _scheduled = true;
         WidgetsBinding.instance.addPostFrameCallback((_) => _presentChoice());
+      }
+      final hasPriorConsent =
+          state.availability == CloudSyncConsentAvailability.available &&
+          state.granted &&
+          state.ownerId != null;
+      if (hasPriorConsent && _autoSyncedOwnerId != state.ownerId && !_saving) {
+        _autoSyncedOwnerId = state.ownerId;
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) => _runPreviouslyConsentedSync(state.ownerId!),
+        );
       }
     });
     return const SizedBox.shrink();
@@ -126,6 +143,9 @@ class _CloudSyncConsentNoticeState
       ref.invalidate(cloudSyncConsentStateProvider);
       ref.invalidate(cloudRuntimePreparationProvider);
       if (enable) {
+        // The explicit choice below already starts the first sync. Mark this
+        // owner so the post-invalidation build does not start a duplicate.
+        _autoSyncedOwnerId = _observedOwnerId;
         final result = await ref
             .read(cloudManualSyncStatusProvider.notifier)
             .runOnce();
@@ -156,6 +176,16 @@ class _CloudSyncConsentNoticeState
       }
     } finally {
       if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _runPreviouslyConsentedSync(String ownerId) async {
+    if (!mounted || _saving || _observedOwnerId != ownerId) return;
+    try {
+      await ref.read(cloudManualSyncStatusProvider.notifier).runOnce();
+    } on Object {
+      // Existing consent must never make the dashboard unusable. The manual
+      // Sync now row remains the explicit recovery path for a failed retry.
     }
   }
 }

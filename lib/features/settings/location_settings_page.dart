@@ -7,6 +7,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/theme/bil_semantic_icons.dart';
+import '../../shared/widgets/secondary_page_app_bar.dart';
 import '../../shared/widgets/premium_surface.dart';
 import '../profile/providers/user_profile_provider.dart';
 import 'location_catalog.dart';
@@ -363,16 +364,12 @@ class _LocationSettingsPageState extends ConsumerState<LocationSettingsPage> {
     ].join(' · ');
 
     return Scaffold(
-      backgroundColor: const Color(0xFF01050D),
-      appBar: AppBar(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: SecondaryPageAppBar(
         title: Text(l('title')),
-        leading: IconButton(
-          key: const Key('location-settings-back'),
-          tooltip: l('back'),
-          onPressed: () =>
-              context.canPop() ? context.pop() : context.go('/settings'),
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
+        showDashboardAction: false,
+        onBack: () =>
+            context.canPop() ? context.pop() : context.go('/settings'),
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
@@ -486,7 +483,7 @@ const _locationCopy = <String, Map<String, String>>{
     'searchTimezone': 'Search country, city, or timezone',
     'saved': 'Location settings were saved locally.',
     'saveFailed': 'Location settings could not be saved. Please try again.',
-    'title': 'Location & local time',
+    'title': 'Location & time zone',
     'back': 'Back to settings',
     'heading': 'Smart, private local setup',
     'description':
@@ -511,7 +508,7 @@ const _locationCopy = <String, Map<String, String>>{
     'searchTimezone': 'ابحث بالدولة أو المدينة أو المنطقة الزمنية',
     'saved': 'تم حفظ إعداد الموقع محليًا.',
     'saveFailed': 'تعذّر حفظ إعدادات الموقع. حاول مرة أخرى.',
-    'title': 'الموقع والوقت المحلي',
+    'title': 'الموقع والمنطقة الزمنية',
     'back': 'العودة إلى الإعدادات',
     'heading': 'إعداد محلي ذكي وآمن',
     'description':
@@ -538,7 +535,7 @@ const _locationCopy = <String, Map<String, String>>{
     'saved': 'Les paramètres de localisation ont été enregistrés localement.',
     'saveFailed':
         'Impossible d’enregistrer les paramètres de localisation. Réessayez.',
-    'title': 'Localisation et heure locale',
+    'title': 'Localisation et fuseau horaire',
     'back': 'Retour aux paramètres',
     'heading': 'Configuration locale intelligente et privée',
     'description':
@@ -567,7 +564,7 @@ const _locationCopy = <String, Map<String, String>>{
     'saved': 'La configuración de ubicación se guardó localmente.',
     'saveFailed':
         'No se pudo guardar la configuración de ubicación. Inténtalo de nuevo.',
-    'title': 'Ubicación y hora local',
+    'title': 'Ubicación y zona horaria',
     'back': 'Volver a ajustes',
     'heading': 'Configuración local inteligente y privada',
     'description':
@@ -592,7 +589,7 @@ const _locationCopy = <String, Map<String, String>>{
     'searchTimezone': 'Ülke, şehir veya saat dilimi ara',
     'saved': 'Konum ayarları yerel olarak kaydedildi.',
     'saveFailed': 'Konum ayarları kaydedilemedi. Lütfen tekrar deneyin.',
-    'title': 'Konum ve yerel saat',
+    'title': 'Konum ve saat dilimi',
     'back': 'Ayarlara dön',
     'heading': 'Akıllı ve özel yerel kurulum',
     'description':

@@ -58,7 +58,8 @@ void main() {
     ).readAsStringSync();
     final router = File('lib/app/router/app_router.dart').readAsStringSync();
     expect(gateway, contains("'ai-coach-global-reset'"));
-    expect(gateway, contains('BilMobileIntegrityService.instance.protect'));
+    expect(gateway, contains('BilMobileIntegrityService.instance'));
+    expect(gateway, contains('.protect('));
     expect(gateway, isNot(contains("_client.rpc('bil_list_community")));
     expect(gateway, isNot(contains('.whereType<Map>()')));
     expect(gateway, contains('if (row is! Map)'));
@@ -79,6 +80,25 @@ void main() {
         ),
       ),
     );
+  });
+
+  test('owner-approved second administrator is enrolled by auth identity', () {
+    final sql = File(
+      'supabase/migrations/20260906120000_owner_approved_second_administrator.sql',
+    ).readAsStringSync();
+
+    expect(sql, contains("lower('bilhealth.app@gmail.com')"));
+    expect(
+      sql,
+      contains(
+        'drop index if exists private.bil_ai_coach_single_active_admin_uidx',
+      ),
+    );
+    expect(sql, contains('insert into private.bil_ai_coach_admins'));
+    expect(sql, contains('insert into public.bil_community_moderators'));
+    expect(sql, contains('owner_approved_secondary_administrator'));
+    expect(sql, contains('v_owner_id'));
+    expect(sql, contains('v_secondary_id'));
   });
 
   testWidgets('administrator can add and remove roster entries by account', (

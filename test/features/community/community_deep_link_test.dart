@@ -79,7 +79,6 @@ void main() {
       '/advertising-privacy',
       '/notification-settings',
       '/intelligence-center',
-      '/wellness/learn',
       '/wellness/sleep',
       '/settings/appearance',
       '/settings/diary',

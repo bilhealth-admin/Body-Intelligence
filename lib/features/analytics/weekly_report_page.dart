@@ -60,6 +60,13 @@ const _copy = <String, Map<String, String>>{
     'es': 'No se pudieron leer los registros. Tus datos no se han perdido.',
     'tr': 'Kayıtlar okunamadı. Verileriniz kaybolmadı; tekrar deneyin.',
   },
+  'Try again': {
+    'ar': 'حاول مرة أخرى',
+    'en': 'Try again',
+    'fr': 'Réessayer',
+    'es': 'Intentar de nuevo',
+    'tr': 'Tekrar dene',
+  },
   'subscription_check_unavailable': {
     'ar': 'تعذر التحقق من الاشتراك.',
     'en': 'Subscription check unavailable',
@@ -515,7 +522,10 @@ class WeeklyReportPage extends ConsumerWidget {
           skipLoadingOnRefresh: true,
           skipLoadingOnReload: true,
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, _) => _Message(_t(context, 'read_error')),
+          error: (_, _) => _Message(
+            _t(context, 'read_error'),
+            onRetry: () => ref.invalidate(weeklyReportProvider),
+          ),
           data: (report) => _Body(report: report),
         ),
   );

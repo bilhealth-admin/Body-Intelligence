@@ -28,9 +28,12 @@ void main() {
     ).readAsStringSync();
 
     expect(personalAi, contains("tr('Bio Intelligence', 'الذكاء الحيوي')"));
-    expect(benchmark, contains('progressSection: progressSection'));
-    expect(current, contains("Key('dashboard-mobile-summary-card')"));
-    expect(current, contains('child: progressSection!'));
+    expect(
+      benchmark,
+      contains('Owner-retired cards are intentionally not forwarded'),
+    );
+    expect(current, isNot(contains("Key('dashboard-mobile-summary-card')")));
+    expect(current, isNot(contains('child: progressSection!')));
     expect(dailyPath, contains("label: tr('Your Path Today', 'مسارك اليوم')"));
     expect(summary, contains("tr('Daily Summary', 'ملخص اليوم')"));
     expect(bodyProfile, contains("tr('Body Identity', 'هوية الجسم')"));

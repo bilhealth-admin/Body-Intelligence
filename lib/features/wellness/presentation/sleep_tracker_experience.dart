@@ -20,19 +20,16 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
   bool saving = false;
   bool recordLoading = true;
   Object? recordError;
-  int educationPage = 0;
   int insightsRevision = 0;
   late final DateTime recordDate;
   late final TabController tabController;
   late Stream<List<DailyLog>> insightsStream;
 
-  void _updateState(VoidCallback update) => setState(update);
-
   @override
   void initState() {
     super.initState();
     recordDate = ref.read(sleepNowProvider)();
-    tabController = TabController(length: 3, vsync: this);
+    tabController = TabController(length: 2, vsync: this);
     insightsStream = ref.read(dailyLogRepositoryProvider).watchAll();
     sleepScheduleStore = SleepScheduleStore();
     Future<void>.microtask(_loadRecord);
@@ -71,11 +68,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
               if (saving) tabController.index = 0;
             },
             tabs: [
-              for (final label in [
-                tr('Log', 'تسجيل'),
-                tr('Insights', 'الرؤى'),
-                tr('Learn', 'تعلّم'),
-              ])
+              for (final label in [tr('Log', 'تسجيل'), tr('Insights', 'الرؤى')])
                 Tab(
                   child: FittedBox(
                     fit: BoxFit.scaleDown,
@@ -88,7 +81,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
         body: TabBarView(
           controller: tabController,
           physics: saving ? const NeverScrollableScrollPhysics() : null,
-          children: [_recordTab(today), _insightsTab(), _educationTab()],
+          children: [_recordTab(today), _insightsTab()],
         ),
       ),
     );
@@ -818,6 +811,35 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
       if (mounted) setState(() => saving = false);
     }
   }
+
+  Widget _sleepState(
+    IconData icon,
+    String title,
+    String body, {
+    VoidCallback? onRetry,
+  }) => Center(
+    child: Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 48),
+          const SizedBox(height: 14),
+          Text(title, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          Text(body, textAlign: TextAlign.center),
+          if (onRetry != null) ...[
+            const SizedBox(height: 14),
+            OutlinedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text(tr('Retry', 'إعادة المحاولة')),
+            ),
+          ],
+        ],
+      ),
+    ),
+  );
 }
 
 final class _ConnectedSleepEvidence {

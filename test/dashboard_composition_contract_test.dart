@@ -38,6 +38,7 @@ void main() {
     expect(source, contains('((index * 3) ~/ values.length).clamp(0, 2)'));
     expect(source, isNot(contains('canvas.drawPath(')));
     expect(grid, contains('weightTrendValues: weights'));
-    expect(grid, contains('stepTrendValues: dailyLogs'));
+    expect(grid, contains('final localStepTrendValues = dailyLogs'));
+    expect(grid, contains('stepTrendValues: stepTrendValues'));
   });
 }

@@ -38,9 +38,14 @@ final analyticsClockProvider = Provider<DateTime Function()>(
 );
 
 class AnalyticsPage extends ConsumerStatefulWidget {
-  const AnalyticsPage({super.key, this.showSettingsBack = false});
+  const AnalyticsPage({
+    super.key,
+    this.showSettingsBack = false,
+    this.showDashboardBack = false,
+  });
 
   final bool showSettingsBack;
+  final bool showDashboardBack;
 
   @override
   ConsumerState<AnalyticsPage> createState() => _AnalyticsPageState();
@@ -83,7 +88,8 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
   }
 
   PreferredSizeWidget? _settingsAppBar(BuildContext context) {
-    if (!widget.showSettingsBack) return null;
+    if (!widget.showSettingsBack && !widget.showDashboardBack) return null;
+    final dashboardBack = widget.showDashboardBack;
     return AppBar(
       title: Text(analyticsText(context, 'Analytics', 'التحليلات')),
       actions: [
@@ -98,13 +104,21 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage> {
         ),
       ],
       leading: IconButton(
-        key: const Key('analytics-back-to-settings'),
+        key: Key(
+          dashboardBack
+              ? 'analytics-back-to-dashboard'
+              : 'analytics-back-to-settings',
+        ),
         tooltip: analyticsText(
           context,
-          'Back to settings',
-          'العودة إلى الإعدادات',
+          dashboardBack ? 'Back to dashboard' : 'Back to settings',
+          dashboardBack ? 'العودة إلى لوحة القيادة' : 'العودة إلى الإعدادات',
         ),
         onPressed: () {
+          if (dashboardBack) {
+            context.go('/dashboard');
+            return;
+          }
           if (context.canPop()) {
             context.pop();
           } else {

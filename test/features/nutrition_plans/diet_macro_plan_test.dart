@@ -171,6 +171,81 @@ void main() {
       expect(rescaled.calories, 1000);
       expect(rescaled.calculatedCalories, closeTo(1000, .000001));
     });
+
+    test('keeps earlier edits fixed and moves only the remaining macro', () {
+      final initial = DietMacroAllocator.allocate(
+        calories: 1000,
+        carbsGrams: 100,
+        fatLevel: DietFatLevel.medium,
+      )!;
+
+      final carbsFirst = DietMacroAllocator.rebalancePreserving(
+        current: initial,
+        edited: DietMacroComponent.carbs,
+        grams: 120,
+        locked: const {},
+        fallbackFatLevel: DietFatLevel.medium,
+      )!;
+      final carbsThenProtein = DietMacroAllocator.rebalancePreserving(
+        current: carbsFirst,
+        edited: DietMacroComponent.protein,
+        grams: 100,
+        locked: const {DietMacroComponent.carbs},
+        fallbackFatLevel: DietFatLevel.medium,
+      )!;
+      expect(carbsThenProtein.carbsGrams, closeTo(120, .000001));
+      expect(carbsThenProtein.proteinGrams, closeTo(100, .000001));
+      expect(carbsThenProtein.fatGrams, closeTo(120 / 9, .000001));
+      expect(carbsThenProtein.calculatedCalories, closeTo(1000, .000001));
+
+      final fatAfterProtein = DietMacroAllocator.rebalancePreserving(
+        current: carbsThenProtein,
+        edited: DietMacroComponent.fat,
+        grams: 30,
+        locked: const {DietMacroComponent.protein},
+        fallbackFatLevel: DietFatLevel.medium,
+      )!;
+      expect(fatAfterProtein.proteinGrams, closeTo(100, .000001));
+      expect(fatAfterProtein.fatGrams, closeTo(30, .000001));
+      expect(fatAfterProtein.carbsGrams, closeTo(82.5, .000001));
+      expect(fatAfterProtein.calculatedCalories, closeTo(1000, .000001));
+
+      final fatFirst = DietMacroAllocator.rebalancePreserving(
+        current: initial,
+        edited: DietMacroComponent.fat,
+        grams: 40,
+        locked: const {},
+        fallbackFatLevel: DietFatLevel.medium,
+      )!;
+      final fatThenCarbs = DietMacroAllocator.rebalancePreserving(
+        current: fatFirst,
+        edited: DietMacroComponent.carbs,
+        grams: 120,
+        locked: const {DietMacroComponent.fat},
+        fallbackFatLevel: DietFatLevel.medium,
+      )!;
+      expect(fatThenCarbs.fatGrams, closeTo(40, .000001));
+      expect(fatThenCarbs.carbsGrams, closeTo(120, .000001));
+      expect(fatThenCarbs.proteinGrams, closeTo(40, .000001));
+
+      final proteinFirst = DietMacroAllocator.rebalancePreserving(
+        current: initial,
+        edited: DietMacroComponent.protein,
+        grams: 100,
+        locked: const {},
+        fallbackFatLevel: DietFatLevel.medium,
+      )!;
+      final proteinThenCarbs = DietMacroAllocator.rebalancePreserving(
+        current: proteinFirst,
+        edited: DietMacroComponent.carbs,
+        grams: 120,
+        locked: const {DietMacroComponent.protein},
+        fallbackFatLevel: DietFatLevel.medium,
+      )!;
+      expect(proteinThenCarbs.proteinGrams, closeTo(100, .000001));
+      expect(proteinThenCarbs.carbsGrams, closeTo(120, .000001));
+      expect(proteinThenCarbs.fatGrams, closeTo(120 / 9, .000001));
+    });
   });
 
   test('all editable systems resolve a complete seven-day week', () {

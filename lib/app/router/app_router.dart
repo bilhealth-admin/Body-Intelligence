@@ -61,7 +61,6 @@ import '../../features/meal_planner/presentation/meal_planner_page.dart';
 import '../../features/notifications/presentation/notification_settings_page.dart';
 import '../../features/notifications/domain/community_deep_link.dart';
 import '../../features/wellness/presentation/wellness_library_page.dart';
-import '../../features/wellness/presentation/wellness_learn_page.dart';
 import '../../features/wellness/presentation/wellness_content_packs_page.dart';
 import '../../features/wellness/presentation/bil_workout_routines_page.dart';
 import '../../features/wellness/presentation/wellness_tools_pages.dart';
@@ -117,7 +116,10 @@ class AppRouter {
       return deepLinkRoute;
     },
     routes: [
-      GoRoute(path: '/startup', builder: (_, _) => const StartupPage()),
+      GoRoute(
+        path: '/startup',
+        pageBuilder: (_, _) => const NoTransitionPage(child: StartupPage()),
+      ),
       GoRoute(path: '/login', builder: (_, _) => const LoginPage()),
       GoRoute(
         path: '/reviewer-login',
@@ -393,10 +395,6 @@ class AppRouter {
         builder: (_, _) => const WellnessLibraryPage(),
       ),
       GoRoute(
-        path: '/wellness/learn',
-        builder: (_, _) => const WellnessLearnPage(),
-      ),
-      GoRoute(
         path: '/wellness/sleep',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.sleep,
@@ -579,9 +577,17 @@ class AppRouter {
         builder: (_, _) => const AiCoachAdminPage(),
       ),
       ShellRoute(
-        builder: (_, _, child) => ResponsiveAppShell(child: child),
+        // Startup is a full-screen gate. Entering the product must replace it
+        // atomically; a platform page transition would expose the blue splash
+        // beside the dashboard for a frame, especially in RTL on iOS.
+        pageBuilder: (_, _, child) =>
+            NoTransitionPage(child: ResponsiveAppShell(child: child)),
         routes: [
-          GoRoute(path: '/dashboard', builder: (_, _) => const DashboardPage()),
+          GoRoute(
+            path: '/dashboard',
+            pageBuilder: (_, _) =>
+                const NoTransitionPage(child: DashboardPage()),
+          ),
           GoRoute(
             path: '/dashboard/decision-explanation',
             builder: (_, state) => DashboardDecisionExplanationPage(
@@ -642,7 +648,10 @@ class AppRouter {
             path: '/weight-history',
             builder: (_, _) => const HistoryPage(),
           ),
-          GoRoute(path: '/analytics', builder: (_, _) => const AnalyticsPage()),
+          GoRoute(
+            path: '/analytics',
+            builder: (_, _) => const AnalyticsPage(showDashboardBack: true),
+          ),
           GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),
         ],
       ),

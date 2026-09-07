@@ -70,6 +70,13 @@ class ResponsiveAppShell extends StatelessWidget {
     final immersiveCoach = currentPath == '/intelligence-center';
     final wide = MediaQuery.sizeOf(context).width >= 900;
     final platform = Theme.of(context).platform;
+    final systemUiOverlayStyle = SystemUiOverlayStyle.dark.copyWith(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+      systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    );
     ({IconData icon, IconData selected, String label}) navigationItem(
       BilNavigationDestination destination,
       String label,
@@ -174,7 +181,15 @@ class ResponsiveAppShell extends StatelessWidget {
       final origin = Uri.encodeComponent(paths[index]);
       switch (action) {
         case 'food':
-          context.go('/daily-log?focus=meal&from=$origin');
+          final hour = DateTime.now().hour;
+          final meal = hour < 11
+              ? 'breakfast'
+              : hour < 16
+              ? 'lunch'
+              : hour < 21
+              ? 'dinner'
+              : 'snack';
+          context.go('/daily-log?focus=meal&meal=$meal&from=$origin');
           break;
         case 'barcode':
           context.go('/daily-log?action=barcode&from=$origin');
@@ -183,7 +198,7 @@ class ResponsiveAppShell extends StatelessWidget {
           context.go('/daily-log?action=voice&from=$origin');
           break;
         case 'photo':
-          context.go('/daily-log?action=photo&from=$origin');
+          context.push('/intelligence-center?vision=capture&from=$origin');
           break;
         case 'exercise':
           context.push('/wellness/workouts');
@@ -231,67 +246,75 @@ class ResponsiveAppShell extends StatelessWidget {
         5 => 1,
         _ => null,
       };
-      return PopScope(
-        key: const Key('responsive-app-shell-pop-scope'),
-        canPop: hasRouteHistory,
-        onPopInvokedWithResult: (didPop, _) => handleSystemBack(didPop),
-        child: Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          // The dock owns real layout space, so the centered action never covers
-          // a page-owned control or the final row of a compact screen.
-          extendBody: false,
-          body: child,
-          bottomNavigationBar: immersiveCoach
-              ? null
-              : Semantics(
-                  label: context.strings.get('primary_navigation'),
-                  child: _GlassBottomNavigation(
-                    key: const Key('glass-bottom-navigation'),
-                    selectedIndex: mobileIndex,
-                    items: mobileItems,
-                    quickAdd: quickButton,
-                    onSelected: (next) {
-                      context.go(next == 0 ? paths[0] : paths[5]);
-                    },
+      return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: systemUiOverlayStyle,
+        child: PopScope(
+          key: const Key('responsive-app-shell-pop-scope'),
+          canPop: hasRouteHistory,
+          onPopInvokedWithResult: (didPop, _) => handleSystemBack(didPop),
+          child: Scaffold(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            // The dock owns real layout space, so the centered action never covers
+            // a page-owned control or the final row of a compact screen.
+            extendBody: false,
+            body: child,
+            bottomNavigationBar: immersiveCoach
+                ? null
+                : Semantics(
+                    label: context.strings.get('primary_navigation'),
+                    child: _GlassBottomNavigation(
+                      key: const Key('glass-bottom-navigation'),
+                      selectedIndex: mobileIndex,
+                      items: mobileItems,
+                      quickAdd: quickButton,
+                      onSelected: (next) {
+                        context.go(next == 0 ? paths[0] : paths[5]);
+                      },
+                    ),
                   ),
-                ),
+          ),
         ),
       );
     }
 
-    return PopScope(
-      key: const Key('responsive-app-shell-pop-scope'),
-      // Android's root-back contract must not disappear merely because a
-      // phone rotates or a tablet crosses the wide-layout breakpoint.
-      canPop: hasRouteHistory,
-      onPopInvokedWithResult: (didPop, _) => handleSystemBack(didPop),
-      child: Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        // Quick Add belongs to the Today dashboard. Mounting it on every wide
-        // route could cover page-owned controls such as the AI Coach composer.
-        floatingActionButton: isDashboard ? quickButton : null,
-        body: immersiveCoach
-            ? child
-            : Column(
-                children: [
-                  Semantics(
-                    container: true,
-                    label: context.strings.get('primary_navigation'),
-                    child: _GlassTopNavigation(
-                      key: const Key('glass-top-navigation'),
-                      selectedIndex: index,
-                      items: items,
-                      onSelected: navigate,
-                      onProfile: () => context.push('/profile-settings'),
-                      profileLabel: AppLocalizations.of(context).get('profile'),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: systemUiOverlayStyle,
+      child: PopScope(
+        key: const Key('responsive-app-shell-pop-scope'),
+        // Android's root-back contract must not disappear merely because a
+        // phone rotates or a tablet crosses the wide-layout breakpoint.
+        canPop: hasRouteHistory,
+        onPopInvokedWithResult: (didPop, _) => handleSystemBack(didPop),
+        child: Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          // Quick Add belongs to the Today dashboard. Mounting it on every wide
+          // route could cover page-owned controls such as the AI Coach composer.
+          floatingActionButton: isDashboard ? quickButton : null,
+          body: immersiveCoach
+              ? child
+              : Column(
+                  children: [
+                    Semantics(
+                      container: true,
+                      label: context.strings.get('primary_navigation'),
+                      child: _GlassTopNavigation(
+                        key: const Key('glass-top-navigation'),
+                        selectedIndex: index,
+                        items: items,
+                        onSelected: navigate,
+                        onProfile: () => context.push('/profile-settings'),
+                        profileLabel: AppLocalizations.of(
+                          context,
+                        ).get('profile'),
+                      ),
                     ),
-                  ),
-                  // Keep the nested Navigator's route-level BlockSemantics
-                  // inside its own boundary, so it cannot hide the tab bar
-                  // painted earlier in this Column from screen readers.
-                  Expanded(child: Semantics(container: true, child: child)),
-                ],
-              ),
+                    // Keep the nested Navigator's route-level BlockSemantics
+                    // inside its own boundary, so it cannot hide the tab bar
+                    // painted earlier in this Column from screen readers.
+                    Expanded(child: Semantics(container: true, child: child)),
+                  ],
+                ),
+        ),
       ),
     );
   }

@@ -45,7 +45,7 @@ class DashboardTopBar extends StatelessWidget {
       textDirection: TextDirection.ltr,
       child: BilFullWordmark(
         key: Key('dashboard-wordmark'),
-        height: 38,
+        height: 44,
         alignment: Alignment.center,
       ),
     );

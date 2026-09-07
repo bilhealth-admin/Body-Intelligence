@@ -53,43 +53,37 @@ void main() {
     }
   });
 
-  test('unified dashboard preserves every supplied intelligence surface', () {
-    final dashboard = File(
-      'lib/features/dashboard/widgets/dashboard_grid.dart',
-    ).readAsStringSync();
-    final benchmark = File(
-      'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
-    ).readAsStringSync();
+  test(
+    'unified dashboard keeps retired intelligence cards out of active UI',
+    () {
+      final dashboard = File(
+        'lib/features/dashboard/widgets/dashboard_grid.dart',
+      ).readAsStringSync();
+      final benchmark = File(
+        'lib/features/dashboard/widgets/premium_dashboard_benchmark.dart',
+      ).readAsStringSync();
 
-    expect(dashboard, contains('PersonalHealthAiPanel('));
-    expect(dashboard, contains('ConnectedHealthCard('));
-    expect(dashboard, contains('personalHealthAi: personalHealthAiPanel'));
-    expect(dashboard, contains('connectedHealth: ConnectedHealthCard('));
+      expect(dashboard, contains('ConnectedHealthCard('));
+      expect(dashboard, contains('connectedHealth: ConnectedHealthCard('));
 
-    expect(benchmark, contains('this.personalHealthAi'));
-    expect(benchmark, contains('this.connectedHealth'));
-    expect(benchmark, contains('final Widget? personalHealthAi;'));
-    expect(benchmark, contains('final Widget? connectedHealth;'));
-    expect(benchmark, contains('hero: hero'));
-    expect(benchmark, contains('aiCoach: aiCoach'));
-    expect(benchmark, contains('dailyIntelligence: dailyIntelligence'));
-    expect(benchmark, contains('personalHealthAi: personalHealthAi'));
-    expect(benchmark, contains('connectedHealth: connectedHealth'));
+      expect(benchmark, contains('this.personalHealthAi'));
+      expect(benchmark, contains('this.connectedHealth'));
+      expect(benchmark, contains('final Widget? personalHealthAi;'));
+      expect(benchmark, contains('final Widget? connectedHealth;'));
+      expect(benchmark, contains('hero: hero'));
+      expect(benchmark, contains('aiCoach: aiCoach'));
+      expect(benchmark, contains('dailyIntelligence: dailyIntelligence'));
+      expect(benchmark, contains('connectedHealth: connectedHealth'));
 
-    final current = File(
-      'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
-    ).readAsStringSync();
-    for (final key in const <String>[
-      'dashboard-ai-coach-slot',
-      'dashboard-daily-intelligence-slot',
-      'dashboard-secondary-ai-coach-slot',
-      'dashboard-personal-health-ai-slot',
-      'dashboard-mobile-summary-card',
-    ]) {
-      expect(current, contains(key), reason: 'Missing unified surface: $key');
-    }
-    expect(current, contains('connectedHealth!,'));
-    expect(current, contains('child: personalHealthAi!'));
-    expect(current, contains('child: progressSection!'));
-  });
+      final current = File(
+        'lib/features/dashboard/widgets/dashboard_reference_phone.dart',
+      ).readAsStringSync();
+      expect(current, contains('dashboard-ai-coach-slot'));
+      expect(current, contains('dashboard-daily-intelligence-slot'));
+      expect(current, contains('dashboard-secondary-ai-coach-slot'));
+      expect(current, isNot(contains('dashboard-personal-health-ai-slot')));
+      expect(current, isNot(contains('dashboard-mobile-summary-card')));
+      expect(current, contains('connectedHealth!,'));
+    },
+  );
 }

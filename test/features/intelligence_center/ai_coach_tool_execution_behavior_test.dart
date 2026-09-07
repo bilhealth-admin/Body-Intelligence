@@ -159,7 +159,16 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Logged weight: 82.4 kg.'), findsOneWidget);
+      final restoredWeightReceipt = find.text('Logged weight: 82.4 kg.');
+      for (
+        var attempt = 0;
+        attempt < 12 && restoredWeightReceipt.evaluate().isEmpty;
+        attempt += 1
+      ) {
+        await tester.drag(find.byType(ListView).last, const Offset(0, -240));
+        await tester.pumpAndSettle();
+      }
+      expect(restoredWeightReceipt, findsOneWidget);
       expect(await WaterRepository(database).totalForDay(DateTime.now()), 375);
       expect(await WeightRepository(database).getAll(), hasLength(1));
       expect(gateway.calls, 2, reason: 'restoring receipts must be read-only');

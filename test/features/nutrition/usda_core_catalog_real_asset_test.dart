@@ -151,6 +151,47 @@ void main() {
     }
   });
 
+  test('Arabic watermelon query reaches the bundled USDA food row', () async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final authority = FoodRuntimeSearchAuthority(
+      FoodRepository(database),
+      catalogResolver: () async => UsdaCoreCatalogRepository.open(
+        'assets/catalogs/bil_food_core.sqlite',
+      ),
+    );
+
+    final result = await authority.searchDetailed('بطيخ', limit: 5);
+
+    expect(result.foods, isNotEmpty);
+    expect(
+      result.foods.any(
+        (food) => food.name.toLowerCase().contains('watermelon'),
+      ),
+      isTrue,
+    );
+  });
+
+  test('Arabic compound query still finds an authored food concept', () async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final authority = FoodRuntimeSearchAuthority(
+      FoodRepository(database),
+      catalogResolver: () async => UsdaCoreCatalogRepository.open(
+        'assets/catalogs/bil_food_core.sqlite',
+      ),
+    );
+
+    final result = await authority.searchDetailed('بطيخ الكيوي', limit: 5);
+
+    expect(
+      result.foods.any(
+        (food) => food.name.toLowerCase().contains('watermelon'),
+      ),
+      isTrue,
+    );
+  });
+
   test(
     'real catalog never collapses duck rows to one lossy Arabic word',
     () async {

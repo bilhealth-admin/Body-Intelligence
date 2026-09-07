@@ -12,136 +12,7 @@ import '../connected_health_model.dart';
 
 part 'connected_health_gateway_helpers.dart';
 
-@visibleForTesting
-Set<HealthDataType> connectedHealthReadTypesForPlatform(
-  TargetPlatform platform,
-) {
-  if (platform == TargetPlatform.iOS) return BilHealthScope.read;
-  if (platform == TargetPlatform.android) {
-    return Set<HealthDataType>.unmodifiable(
-      BilHealthScope.read.where(
-        (type) => BilHealthScope.healthConnectReadTypeNames.contains(type.name),
-      ),
-    );
-  }
-  return const <HealthDataType>{};
-}
-
-@visibleForTesting
-Set<String> connectedHealthWriteTypeNamesForPlatform(TargetPlatform platform) =>
-    switch (platform) {
-      TargetPlatform.iOS => BilHealthScope.appleHealthWriteTypeNames,
-      TargetPlatform.android => BilHealthScope.healthConnectWriteTypeNames,
-      _ => const <String>{},
-    };
-
-@visibleForTesting
-ConnectedHealthStatus connectedHealthStatusAfterSynchronization({
-  required TargetPlatform platform,
-  required bool hasVerifiedNativeEvidence,
-}) => platform == TargetPlatform.iOS && !hasVerifiedNativeEvidence
-    ? ConnectedHealthStatus.authorizationRequested
-    : ConnectedHealthStatus.synchronized;
-
-/// Converts HealthKit's overlapping in-bed/awake/stage samples into one
-/// measured asleep duration per source/night. Android SleepSessionRecord rows
-/// already carry a session total with nested stages and pass through unchanged.
-/// No stage percentages or missing edges are fabricated.
-@visibleForTesting
-List<GlobalHealthSignal> aggregateConnectedSleepSignals(
-  List<GlobalHealthSignal> records,
-) {
-  final output = <GlobalHealthSignal>[];
-  final stagedByNight = <String, List<GlobalHealthSignal>>{};
-  for (final signal in records) {
-    if (signal.key != 'sleep') {
-      output.add(signal);
-      continue;
-    }
-    final stage = signal.attributes['sleepStage']?.toString();
-    if (stage == null || signal.attributes['stages'] is List) {
-      output.add(signal);
-      continue;
-    }
-    if (stage == 'inBed' || stage == 'awake' || stage == 'unknown') {
-      // These records describe the bed window or wake time, not sleep.
-      continue;
-    }
-    final endedAt = DateTime.tryParse(
-      signal.attributes['endedAt']?.toString() ?? '',
-    );
-    if (endedAt == null || !endedAt.isAfter(signal.provenance.observedAt)) {
-      continue;
-    }
-    final localEnd = endedAt.toLocal();
-    final night =
-        '${localEnd.year.toString().padLeft(4, '0')}-'
-        '${localEnd.month.toString().padLeft(2, '0')}-'
-        '${localEnd.day.toString().padLeft(2, '0')}';
-    final key =
-        '${signal.provenance.providerId}|${signal.provenance.sourceId}|$night';
-    stagedByNight.putIfAbsent(key, () => <GlobalHealthSignal>[]).add(signal);
-  }
-
-  for (final entry in stagedByNight.entries) {
-    final rows = entry.value
-      ..sort(
-        (a, b) => a.provenance.observedAt.compareTo(b.provenance.observedAt),
-      );
-    final intervals = <({DateTime start, DateTime end})>[];
-    for (final row in rows) {
-      final end = DateTime.parse(row.attributes['endedAt']!.toString()).toUtc();
-      final start = row.provenance.observedAt.toUtc();
-      if (intervals.isEmpty || start.isAfter(intervals.last.end)) {
-        intervals.add((start: start, end: end));
-      } else if (end.isAfter(intervals.last.end)) {
-        intervals[intervals.length - 1] = (
-          start: intervals.last.start,
-          end: end,
-        );
-      }
-    }
-    final hours = intervals.fold<double>(
-      0,
-      (sum, interval) =>
-          sum + interval.end.difference(interval.start).inSeconds / 3600,
-    );
-    if (!hours.isFinite || hours <= 0 || hours > 24) continue;
-    final template = rows.reduce(
-      (a, b) =>
-          a.provenance.observedAt.isAfter(b.provenance.observedAt) ? a : b,
-    );
-    final first = intervals.first.start;
-    final last = intervals.last.end;
-    output.add(
-      GlobalHealthSignal(
-        key: 'sleep',
-        canonicalValue: hours,
-        canonicalUnit: 'h',
-        provenance: GlobalProvenance(
-          providerId: template.provenance.providerId,
-          sourceId: template.provenance.sourceId,
-          recordId:
-              'sleep-night:${entry.key}:${first.microsecondsSinceEpoch}:${last.microsecondsSinceEpoch}',
-          observedAt: first,
-          confidence: rows
-              .map((row) => row.provenance.confidence)
-              .reduce((a, b) => a < b ? a : b),
-          deviceId: template.provenance.deviceId,
-          timeZoneId: template.provenance.timeZoneId,
-        ),
-        attributes: <String, Object?>{
-          'endedAt': last.toIso8601String(),
-          'sourceSessionIds': [for (final row in rows) row.provenance.recordId],
-          'measuredStages': [
-            for (final row in rows) row.attributes['sleepStage'],
-          ],
-        },
-      ),
-    );
-  }
-  return List<GlobalHealthSignal>.unmodifiable(output);
-}
+part 'connected_health_aggregations.dart';
 
 abstract interface class ConnectedHealthGateway {
   Future<ConnectedHealthSnapshot> load();
@@ -247,12 +118,23 @@ final class ConnectedHealthController
       if (activeRefresh != null) await activeRefresh;
 
       final current = state.value;
-      if (transition != null && current != null) {
-        state = AsyncValue.data(transition(current));
+      if (current != null) {
+        final transitioned = transition?.call(current) ?? current;
+        // Mutations must retain the rendered snapshot. The old AsyncLoading
+        // transition caused the Apple Health controls to flash out of the
+        // tree while the native permission sheet/write request completed.
+        state = AsyncValue.data(transitioned.copyWith(isBusy: true));
       } else {
         state = const AsyncValue.loading();
       }
-      state = await AsyncValue.guard(operation);
+      final result = await AsyncValue.guard(operation);
+      state = result.when(
+        data: (snapshot) => AsyncValue.data(snapshot.copyWith(isBusy: false)),
+        error: (error, stackTrace) => AsyncValue.error(error, stackTrace),
+        loading: () => current == null
+            ? const AsyncValue.loading()
+            : AsyncValue.data(current.copyWith(isBusy: false)),
+      );
     } finally {
       _mutationTask = null;
     }
@@ -275,7 +157,14 @@ final class ConnectedHealthController
       if (activeMutation != null) await activeMutation;
 
       final previous = state.value;
-      if (previous == null) state = const AsyncValue.loading();
+      if (previous == null) {
+        state = const AsyncValue.loading();
+      } else {
+        // Keep the existing page mounted while native HealthKit/Health
+        // Connect work is in flight. Replacing it with AsyncLoading makes the
+        // list blink and briefly stops scrolling on a user-initiated refresh.
+        state = AsyncValue.data(previous.copyWith(isBusy: true));
+      }
       try {
         final loaded = await _gateway.load();
         // This is a foreground-only integration. Refreshing a connected source
@@ -285,9 +174,10 @@ final class ConnectedHealthController
             loaded.status == ConnectedHealthStatus.authorizationRequested ||
             loaded.status == ConnectedHealthStatus.ready ||
             loaded.status == ConnectedHealthStatus.synchronized;
-        state = AsyncValue.data(
-          shouldSynchronize ? await _gateway.synchronize() : loaded,
-        );
+        final refreshed = shouldSynchronize
+            ? await _gateway.synchronize()
+            : loaded;
+        state = AsyncValue.data(refreshed.copyWith(isBusy: false));
       } catch (error, stackTrace) {
         // A lifecycle notification must not replace useful cached content with
         // a transient blank/error screen.
@@ -297,6 +187,7 @@ final class ConnectedHealthController
                 previous.copyWith(
                   status: ConnectedHealthStatus.degraded,
                   failureCode: 'health_refresh_failed_offline_cache_preserved',
+                  isBusy: false,
                 ),
               );
       }
@@ -398,7 +289,9 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
       );
       final stored = await _flows.store.get('connected_health_ui', 'snapshot');
       final signals = <ConnectedHealthSignalView>[];
+      final stepHistory = <ConnectedHealthSignalView>[];
       final retainedSignalMaps = <Map<String, Object?>>[];
+      final retainedStepHistoryMaps = <Map<String, Object?>>[];
       var hasVerifiedNativeEvidence = false;
       var removedLegacyClinicalSignal = false;
       for (final raw in stored?['signals'] as List<Object?>? ?? const []) {
@@ -415,11 +308,32 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
         hasVerifiedNativeEvidence =
             hasVerifiedNativeEvidence || _isEvidenceFromNativeBridge(signal);
       }
+      for (final raw in stored?['stepHistory'] as List<Object?>? ?? const []) {
+        if (raw is! Map) continue;
+        try {
+          final signal = GlobalHealthSignal.fromMap(
+            Map<String, Object?>.from(raw),
+          );
+          if (signal.key != 'steps' ||
+              signal.deleted ||
+              await _isTombstoned(signal)) {
+            continue;
+          }
+          retainedStepHistoryMaps.add(signal.toMap());
+          stepHistory.add(ConnectedHealthSignalView.fromSignal(signal));
+        } on Object {
+          // A corrupt projection must not hide the latest valid snapshot.
+        }
+      }
+      if (stepHistory.isEmpty) {
+        stepHistory.addAll(signals.where((signal) => signal.key == 'steps'));
+      }
       if (removedLegacyClinicalSignal && stored != null) {
         await _flows.store
             .put('connected_health_ui', 'snapshot', <String, Object?>{
               ...stored,
               'signals': retainedSignalMaps,
+              'stepHistory': retainedStepHistoryMaps,
               'importedCount': retainedSignalMaps.length,
             });
       }
@@ -453,6 +367,7 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
         failureCode: null,
         availabilityStatus: availability['status']?.toString(),
         deviceVerified: hasVerifiedNativeEvidence,
+        stepHistory: List<ConnectedHealthSignalView>.unmodifiable(stepHistory),
       );
     } catch (_) {
       return ConnectedHealthSnapshot(
@@ -556,7 +471,11 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
       await _flows.store.put(
         'connected_health_ui',
         'snapshot',
-        <String, Object?>{'importedCount': 0, 'signals': <Object?>[]},
+        <String, Object?>{
+          'importedCount': 0,
+          'signals': <Object?>[],
+          'stepHistory': <Object?>[],
+        },
       );
       return ConnectedHealthSnapshot(
         status: ConnectedHealthStatus.permissionRequired,
@@ -659,6 +578,9 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
           (a, b) => b.provenance.observedAt.compareTo(a.provenance.observedAt),
         );
       final selected = _selectRepresentativeSignals(ordered);
+      final stepHistorySignals = aggregateConnectedStepSignals(
+        graph.selectedSignals,
+      );
       final hasVerifiedNativeEvidence = selected.any(
         _isEvidenceFromNativeBridge,
       );
@@ -681,6 +603,9 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
           'signals': <Map<String, Object?>>[
             for (final signal in selected) signal.toMap(),
           ],
+          'stepHistory': <Map<String, Object?>>[
+            for (final signal in stepHistorySignals) signal.toMap(),
+          ],
         },
       );
       return ConnectedHealthSnapshot(
@@ -701,6 +626,10 @@ final class NativeConnectedHealthGateway implements ConnectedHealthGateway {
         lastSyncAt: now,
         failureCode: null,
         deviceVerified: hasVerifiedNativeEvidence,
+        stepHistory: <ConnectedHealthSignalView>[
+          for (final signal in stepHistorySignals)
+            ConnectedHealthSignalView.fromSignal(signal),
+        ],
       );
     } catch (_) {
       final cached = await load();

@@ -365,17 +365,6 @@ class SharingPrivacySettingsPage extends ConsumerWidget {
             onTap: () => context.push('/settings/email'),
           ),
           ListTile(
-            key: const Key('privacy-change-password'),
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.privacy,
-              iconOverride: Icons.lock_outline_rounded,
-              appleIconOverride: Icons.lock_outline_rounded,
-            ),
-            title: Text(_privacyText(context, 'Change password')),
-            trailing: const Icon(Icons.chevron_right_rounded),
-            onTap: () => context.push('/settings/account-password'),
-          ),
-          ListTile(
             leading: const BilSemanticIconBadge(
               kind: BilSemanticIconKind.support,
             ),

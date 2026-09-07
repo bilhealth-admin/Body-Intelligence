@@ -141,7 +141,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.byKey(const Key('dashboard-fitness-link-action')),
+      find.byKey(const Key('dashboard-compact-health-hub')),
       findsOneWidget,
     );
     expect(find.byKey(const Key('dashboard-fitness-last-sync')), findsNothing);
@@ -173,7 +173,7 @@ void main() {
         expect(tester.takeException(), isNull, reason: locale.toLanguageTag());
 
         expect(
-          find.byKey(const Key('dashboard-fitness-link-action')),
+          find.byKey(const Key('dashboard-compact-health-hub')),
           findsOneWidget,
           reason: locale.toLanguageTag(),
         );
@@ -263,7 +263,7 @@ void main() {
         );
         expect(find.byKey(const Key('watch-metric-sleep')), findsOneWidget);
         expect(
-          find.byKey(const Key('dashboard-fitness-link-action')),
+          find.byKey(const Key('dashboard-compact-health-hub')),
           findsOneWidget,
         );
         expect(find.text('Connected'), findsNothing);

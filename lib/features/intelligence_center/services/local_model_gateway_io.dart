@@ -60,11 +60,32 @@ class _SupabaseCoachCloudAccess implements CoachCloudAccess {
   bool get hasAuthenticatedSession => client.auth.currentSession != null;
 
   @override
-  Future<Object?> readRemoteAiConsent() =>
-      client.rpc('bil_get_remote_ai_consent');
+  Future<Object?> readRemoteAiConsent() async {
+    await _refreshIfExpired();
+    try {
+      return await client.rpc('bil_get_remote_ai_consent');
+    } on PostgrestException catch (error) {
+      if (!_isExpiredTokenError(error)) rethrow;
+      await _refreshSession();
+      return client.rpc('bil_get_remote_ai_consent');
+    }
+  }
 
   @override
   Future<CoachCloudFunctionResponse> invokeCoach(
+    Map<String, Object?> body,
+  ) async {
+    await _refreshIfExpired();
+    try {
+      return await _invokeCoach(body);
+    } on FunctionException catch (error) {
+      if (error.status != 401) rethrow;
+      await _refreshSession();
+      return _invokeCoach(body);
+    }
+  }
+
+  Future<CoachCloudFunctionResponse> _invokeCoach(
     Map<String, Object?> body,
   ) async {
     final protectedBody = await BilMobileIntegrityService.instance.protect(
@@ -80,6 +101,24 @@ class _SupabaseCoachCloudAccess implements CoachCloudAccess {
       data: response.data,
     );
   }
+
+  Future<void> _refreshIfExpired() async {
+    final session = client.auth.currentSession;
+    if (session == null) {
+      throw const AuthException('authentication_required');
+    }
+    if (session.isExpired) await _refreshSession();
+  }
+
+  Future<void> _refreshSession() async {
+    final response = await client.auth.refreshSession();
+    if (response.session == null) {
+      throw const AuthException('session_refresh_failed');
+    }
+  }
+
+  bool _isExpiredTokenError(PostgrestException error) =>
+      error.code == 'PGRST301' || error.code == '401';
 }
 
 class LlamaCppLocalGateway implements LocalModelGateway {

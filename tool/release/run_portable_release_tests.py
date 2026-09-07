@@ -14,6 +14,7 @@ and any failure stops the release suite without retries.
 from __future__ import annotations
 
 import argparse
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -58,6 +59,44 @@ EXCLUDED_TESTS = frozenset(
 )
 
 PERFORMANCE_BUDGET_TEST = "test/performance_budget_test.dart"
+WINDOWS_COMMAND_LINE_LIMIT = 6_000
+PORTABLE_COMMAND_LINE_LIMIT = 120_000
+
+
+def resolve_flutter_executable() -> str:
+    candidates = ("flutter.bat", "flutter") if sys.platform == "win32" else ("flutter",)
+    for candidate in candidates:
+        resolved = shutil.which(candidate)
+        if resolved:
+            return resolved
+    raise SystemExit("Flutter executable was not found on PATH.")
+
+
+def partition_test_batches(
+    command: list[str],
+    tests: list[str],
+    *,
+    command_line_limit: int | None = None,
+) -> list[list[str]]:
+    limit = command_line_limit or (
+        WINDOWS_COMMAND_LINE_LIMIT
+        if sys.platform == "win32"
+        else PORTABLE_COMMAND_LINE_LIMIT
+    )
+    batches: list[list[str]] = []
+    current: list[str] = []
+    for test_path in tests:
+        candidate = [*command, *current, test_path]
+        if current and len(subprocess.list2cmdline(candidate)) > limit:
+            batches.append(current)
+            current = [test_path]
+        else:
+            current.append(test_path)
+        if len(subprocess.list2cmdline([*command, *current])) > limit:
+            raise SystemExit(f"Test path exceeds the command-line limit: {test_path}")
+    if current:
+        batches.append(current)
+    return batches
 
 
 def discover_tests() -> tuple[list[str], list[str]]:
@@ -118,7 +157,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     command = [
-        "flutter",
+        resolve_flutter_executable(),
         "test",
         "--no-pub",
         "--timeout",
@@ -138,13 +177,24 @@ def main(argv: list[str] | None = None) -> int:
         return performance.returncode
 
     print("PORTABLE_RELEASE_PHASE=remaining_portable", flush=True)
-    completed = subprocess.run(
-        [*command, *remaining_tests],
-        cwd=REPOSITORY_ROOT,
-        check=False,
-    )
-    print(f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={len(portable)}", flush=True)
-    return completed.returncode
+    executed_test_files = len(performance_tests)
+    batches = partition_test_batches(command, remaining_tests)
+    print(f"PORTABLE_RELEASE_REMAINING_BATCHES={len(batches)}", flush=True)
+    for batch in batches:
+        completed = subprocess.run(
+            [*command, *batch],
+            cwd=REPOSITORY_ROOT,
+            check=False,
+        )
+        executed_test_files += len(batch)
+        if completed.returncode != 0:
+            print(
+                f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={executed_test_files}",
+                flush=True,
+            )
+            return completed.returncode
+    print(f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={executed_test_files}", flush=True)
+    return 0
 
 
 if __name__ == "__main__":

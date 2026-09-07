@@ -536,6 +536,18 @@ class CommunityRepository {
   }
 
   Future<void> submitFood(CommunityFoodDraft draft) async {
+    if (!draft.servingGrams.isFinite ||
+        draft.servingGrams <= 0 ||
+        !draft.calories.isFinite ||
+        draft.calories < 0 ||
+        !draft.protein.isFinite ||
+        draft.protein < 0 ||
+        !draft.carbohydrate.isFinite ||
+        draft.carbohydrate < 0 ||
+        !draft.fat.isFinite ||
+        draft.fat < 0) {
+      throw const FormatException('Invalid community food values');
+    }
     CommunityTextPolicy.enforce(
       draft.name,
       surface: CommunityTextSurface.foodName,

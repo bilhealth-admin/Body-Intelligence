@@ -317,7 +317,11 @@ void main() {
     for (final source in DailyLogActionRuntimeCopy.sources) {
       expect(dailyNavigation, contains(source));
     }
-    for (final source in FitnessWatchRuntimeCopy.sources) {
+    for (final source in FitnessWatchRuntimeCopy.sources.where(
+      (source) =>
+          source != FitnessWatchRuntimeCopy.manageSources &&
+          source != FitnessWatchRuntimeCopy.linkSource,
+    )) {
       expect('$watch\n$healthCard', contains(source));
     }
     expect(communityChat, contains('RuntimeCopy.resolve(en, localeTag)'));

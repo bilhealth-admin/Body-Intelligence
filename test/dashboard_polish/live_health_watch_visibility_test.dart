@@ -310,16 +310,15 @@ void main() {
     expect(merged.signals, isEmpty);
   });
 
-  test('dashboard CTA and status follow aggregate connection truth', () {
+  test('dashboard snapshot and status follow aggregate connection truth', () {
     final card = File(
       'lib/features/connected_health/widgets/connected_health_card.dart',
     ).readAsStringSync();
 
-    expect(
-      card,
-      contains('final hasConnectedSource = liveHealthWatchCanShowMetrics'),
-    );
-    expect(card, contains('child: hasConnectedSource'));
+    expect(card, contains('final hasMeasuredData ='));
+    expect(card, contains('liveHealthWatchCanShowMetrics(watchSnapshot)'));
+    expect(card, contains('final showLastSync ='));
+    expect(card, contains('child: _DashboardHealthDeviceSection('));
     expect(
       card,
       contains('ConnectedHealthStatusDot(status: watchSnapshot.status)'),
