@@ -413,6 +413,32 @@ void main() {
       isNotNull,
     );
 
+    await tester.enterText(find.byKey(const Key('diet-fat-1')), '30');
+    await tester.pump();
+    expect(value('diet-protein-1'), 100);
+    expect(value('diet-fat-1'), 30);
+    expect(value('diet-carbs-1'), 83);
+
+    await tester.enterText(find.byKey(const Key('diet-carbs-1')), '120');
+    await tester.pump();
+    expect(value('diet-fat-1'), 30);
+    expect(value('diet-carbs-1'), 120);
+    expect(value('diet-protein-1'), 63);
+
+    await tester.enterText(find.byKey(const Key('diet-protein-1')), '300');
+    await tester.pump();
+    expect(
+      find.byKey(const Key('diet-macro-energy-warning-1')),
+      findsOneWidget,
+    );
+    expect(value('diet-carbs-1'), 120);
+    expect(value('diet-fat-1'), 30);
+    expect(value('diet-protein-1'), 300);
+
+    await tester.enterText(find.byKey(const Key('diet-protein-1')), '63');
+    await tester.pump();
+    expect(find.byKey(const Key('diet-macro-energy-warning-1')), findsNothing);
+
     await tester.tap(find.byKey(const Key('diet-plan-activate')));
     await tester.pumpAndSettle();
     expect(

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../data/repositories/nutrition_goal_schedule_repository.dart';
@@ -465,8 +466,6 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     final localeTag = BilLocalePolicy.canonicalTag(
       Localizations.localeOf(context),
     );
-    final draft = _draft();
-    final week = draft?.resolveWeek();
     final restricted = pathway.safety != NutritionPathwaySafety.standard;
     final medicallyLocked =
         pathway.safety == NutritionPathwaySafety.medicalSupervision;
@@ -475,6 +474,22 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
+        leading: IconButton(
+          key: const Key('diet-plan-back'),
+          tooltip: nutritionText(
+            context,
+            'Back to pathways',
+            'العودة للمسارات',
+          ),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/nutrition-plans');
+            }
+          },
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
         title: Text(nutritionPathwayTitle(pathway, localeTag)),
         centerTitle: true,
         surfaceTintColor: Colors.transparent,
@@ -589,7 +604,12 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
                       carbController: _carbs[day]!,
                       proteinController: _protein[day]!,
                       fatController: _fat[day]!,
-                      target: week?[day],
+                      // Keep the last valid allocation visible when a single
+                      // edited field is impossible. `week` is deliberately
+                      // null while saving is blocked, but that must not erase
+                      // the other six days or the user's prior values.
+                      target: _resolvedTargets[day],
+                      invalidMacro: _invalidMacroDays.contains(day),
                       enabled: editable,
                       onCarbsChanged: (value) =>
                           _onMacroChanged(day, DietMacroComponent.carbs, value),

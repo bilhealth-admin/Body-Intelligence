@@ -95,7 +95,9 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     final code = store.messageCode;
     final key = switch (code) {
       'purchase_pending' => 'purchase_in_progress',
-      'purchase_cancelled' => 'purchase_error',
+      // Cancelling the native sheet is an intentional choice, not an error.
+      // Keep the catalog actionable so another term can be selected at once.
+      'purchase_cancelled' => null,
       'purchase_not_started' => 'purchase_error',
       'purchase_unavailable' || 'authentication_required' => 'purchase_error',
       'verification_failed' => 'purchase_error',
@@ -103,7 +105,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       'subscription_verified' || 'ai_boost_verified' => 'purchase_verified',
       _ => switch (store.state) {
         VerifiedStoreState.purchasePending => 'purchase_in_progress',
-        VerifiedStoreState.cancelled => 'purchase_error',
+        VerifiedStoreState.cancelled => null,
         VerifiedStoreState.failed => 'purchase_error',
         _ => null,
       },

@@ -86,12 +86,18 @@ class ConnectedHealthPage extends ConsumerStatefulWidget {
 class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
     with WidgetsBindingObserver {
   bool _connectedOnly = false;
-  bool _refreshOnResume = false;
+  bool _refreshAfterSystemSettings = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Apps & Devices is the explicit entry point for native health status.
+    // Do not construct the dashboard/coach with a HealthKit read in flight.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(ref.read(connectedHealthProvider.notifier).refresh());
+    });
   }
 
   @override
@@ -102,19 +108,15 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.hidden ||
-        state == AppLifecycleState.paused ||
-        state == AppLifecycleState.detached) {
-      _refreshOnResume = true;
+    if (state != AppLifecycleState.resumed || !_refreshAfterSystemSettings) {
       return;
     }
-    if (state != AppLifecycleState.resumed || !_refreshOnResume) return;
-    _refreshOnResume = false;
+    _refreshAfterSystemSettings = false;
     unawaited(ref.read(connectedHealthProvider.notifier).refresh());
   }
 
   Future<void> _openSystemSettings() async {
-    _refreshOnResume = true;
+    _refreshAfterSystemSettings = true;
     await ref.read(connectedHealthProvider.notifier).openSystemSettings();
   }
 
@@ -334,7 +336,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                                   Text(
                                     tr(
                                       'Apple Health does not reveal read permission status. Open the Health app, check BIL under Apps, then return and tap Sync now. Only records actually provided by Apple Health will appear.',
-                                      'لا تكشف Apple Health حالة إذن القراءة. افتح تطبيق الصحة، تحقق من BIL ضمن التطبيقات، ثم عد واضغط «مزامنة الآن». ستظهر فقط السجلات التي يوفرها Apple Health فعليًا.',
+                                      'لا تكشف Apple Health حالة إذن القراءة. افتح تطبيق الصحة، تحقق من BIL ضمن التطبيقات، ثم عد واضغط «تحديث الساعة». ستظهر فقط السجلات التي يوفرها Apple Health فعليًا.',
                                     ),
                                     style: Theme.of(context).textTheme.bodySmall
                                         ?.copyWith(height: 1.35),
@@ -463,10 +465,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                                                   Icons.refresh_rounded,
                                                 ),
                                           label: Text(
-                                            tr(
-                                              'Refresh status',
-                                              'تحديث الحالة',
-                                            ),
+                                            tr('Refresh status', 'فحص الاتصال'),
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
                                             textAlign: TextAlign.center,
@@ -499,7 +498,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                                             )
                                           : const Icon(Icons.refresh_rounded),
                                       label: Text(
-                                        tr('Refresh status', 'تحديث الحالة'),
+                                        tr('Refresh status', 'فحص الاتصال'),
                                       ),
                                     ),
                                   ),
@@ -564,7 +563,7 @@ class _ConnectedHealthPageState extends ConsumerState<ConnectedHealthPage>
                                     snapshot.status ==
                                             ConnectedHealthStatus.syncing
                                         ? tr('Synchronizing…', 'تتم المزامنة…')
-                                        : tr('Sync now', 'مزامنة الآن'),
+                                        : tr('Sync now', 'تحديث الساعة'),
                                   ),
                                 ),
                               ),

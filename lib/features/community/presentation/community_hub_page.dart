@@ -85,6 +85,18 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
         appBar: AppBar(
           actions: [
             IconButton(
+              key: const Key('community-my-bil-code'),
+              onPressed: repository == null
+                  ? null
+                  : () => context.push('/community/code'),
+              tooltip: communityText(
+                context,
+                'My BIL Code',
+                'رمز BIL الخاص بي',
+              ),
+              icon: const Icon(Icons.qr_code_2_rounded),
+            ),
+            IconButton(
               key: const Key('community-find-people'),
               onPressed: repository == null
                   ? null
@@ -202,7 +214,12 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
             isScrollable: true,
             tabAlignment: TabAlignment.start,
             tabs: [
-              Tab(text: communityText(context, 'Community', 'المجتمع')),
+              Tab(
+                key: const Key('community-public-feed-tab'),
+                icon: const Icon(Icons.public_outlined, size: 18),
+                iconMargin: EdgeInsets.zero,
+                text: communityText(context, 'Community', 'المجتمع'),
+              ),
               Tab(text: communityText(context, 'Friends', 'الأصدقاء')),
               Tab(text: communityText(context, 'Verified food', 'غذاء موثّق')),
             ],

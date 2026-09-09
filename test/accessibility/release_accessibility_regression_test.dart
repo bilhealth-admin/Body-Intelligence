@@ -28,7 +28,7 @@ void main() {
     expect(
       RegExp(r'return Tooltip\(\s*message: tooltip,').hasMatch(dashboardTopBar),
       isTrue,
-      reason: 'The Today action must retain its localized accessible name.',
+      reason: 'The Edit action must retain its localized accessible name.',
     );
     expect(dashboardTopBar, contains("key: const Key('dashboard-edit-today')"));
     expect(

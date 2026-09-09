@@ -13,6 +13,7 @@ import 'package:body_intelligence_log/features/intelligence_center/presentation/
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/intelligence_health_context_provider.dart';
+import 'package:body_intelligence_log/features/intelligence_center/services/local_model_gateway.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
 import 'package:body_intelligence_log/features/weight/providers/weight_provider.dart';
 import 'package:drift/native.dart';
@@ -28,6 +29,7 @@ Widget _app(
   EdgeInsets viewInsets = EdgeInsets.zero,
   PreferencesRepository? preferences,
   WeightRepository? weightRepository,
+  LocalModelGateway? gateway,
 }) {
   return ProviderScope(
     overrides: [
@@ -36,6 +38,8 @@ Widget _app(
         preferencesRepositoryProvider.overrideWithValue(preferences),
       if (weightRepository != null)
         weightRepositoryProvider.overrideWithValue(weightRepository),
+      if (gateway != null)
+        intelligenceCenterModelGatewayProvider.overrideWithValue(gateway),
       coachContextSnapshotProvider.overrideWith(
         (ref) async => CoachContextSnapshot.empty(),
       ),
@@ -112,6 +116,38 @@ void main() {
     expect(find.textContaining('I am ready').hitTestable(), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
+  });
+
+  testWidgets('a slow reply stays cancelable without a context-search banner', (
+    tester,
+  ) async {
+    final db = await database(tester);
+    final gateway = _BlockingGateway();
+    await tester.pumpWidget(_app(db, gateway: gateway));
+    await tester.pumpAndSettle();
+
+    final field = find.byKey(const Key('ai-coach-question-field'));
+    await tester.enterText(field, 'Help me plan tomorrow');
+    await tester.testTextInput.receiveAction(TextInputAction.send);
+    for (
+      var attempt = 0;
+      attempt < 20 && !gateway.entered.isCompleted;
+      attempt++
+    ) {
+      await tester.pump(const Duration(milliseconds: 20));
+    }
+    expect(gateway.entered.isCompleted, isTrue);
+    await tester.pump(const Duration(milliseconds: 1200));
+
+    expect(find.text('Searching your BIL context…'), findsNothing);
+    final cancel = tester.widget<IconButton>(
+      find.byKey(const Key('ai-coach-cancel-request')),
+    );
+    expect(cancel.onPressed, isNotNull);
+    await tester.tap(find.byKey(const Key('ai-coach-cancel-request')));
+    gateway.release();
+    await tester.pump(const Duration(milliseconds: 80));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets(
@@ -683,5 +719,29 @@ final class _DelayedWeightRepository extends WeightRepository {
       await gate.future;
     }
     return super.getAll();
+  }
+}
+
+final class _BlockingGateway implements LocalModelGateway {
+  final entered = Completer<void>();
+  final _release = Completer<void>();
+
+  void release() {
+    if (!_release.isCompleted) _release.complete();
+  }
+
+  @override
+  Future<LocalModelResult> answer({
+    required String question,
+    required String locale,
+    required CoachContextSnapshot context,
+    bool languageDetected = false,
+    List<CoachConversationTurn> conversation = const [],
+  }) async {
+    if (!entered.isCompleted) entered.complete();
+    await _release.future;
+    return const LocalModelResult.answer(
+      LocalModelAnswer(text: 'Delayed fixture reply.', action: null),
+    );
   }
 }

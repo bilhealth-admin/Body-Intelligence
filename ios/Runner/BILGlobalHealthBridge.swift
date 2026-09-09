@@ -228,14 +228,27 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     let rawDeviceName = sample.device?.name
     let deviceModel = sample.device?.model
     let deviceManufacturer = sample.device?.manufacturer
+    let sourceName = source.name
+    let sourceProductType = sample.sourceRevision.productType
     if let rawDeviceName { attributes["deviceName"] = rawDeviceName }
     if let deviceModel { attributes["deviceModel"] = deviceModel }
     if let deviceManufacturer { attributes["deviceManufacturer"] = deviceManufacturer }
+    if !sourceName.isEmpty { attributes["sourceName"] = sourceName }
+    if let sourceProductType, !sourceProductType.isEmpty {
+      attributes["sourceProductType"] = sourceProductType
+    }
     let normalizedDevice = [rawDeviceName, deviceModel, deviceManufacturer]
       .compactMap { $0?.lowercased() }
       .joined(separator: " ")
+    // HealthKit can omit HKDevice for Apple Watch activity samples. The source
+    // revision's product type is still explicit device evidence (for example,
+    // Watch6,2), so keep that provenance rather than dropping valid steps.
+    let normalizedSourceName = sourceName.lowercased()
+    let normalizedProductType = sourceProductType?.lowercased() ?? ""
     if normalizedDevice.contains("apple watch") ||
-       (normalizedDevice.contains("apple") && normalizedDevice.contains("watch")) {
+       (normalizedDevice.contains("apple") && normalizedDevice.contains("watch")) ||
+       normalizedSourceName.contains("apple watch") ||
+       normalizedProductType.hasPrefix("watch") {
       attributes["wearableKind"] = "apple_watch"
     }
     if let sleep = sample as? HKCategorySample, logicalType == "sleep" {

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:body_intelligence_log/features/commerce/domain/store_offer_metadata.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_plans_page.dart';
+import 'package:body_intelligence_log/features/commerce/services/verified_store_purchase_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -202,6 +203,41 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.widget<InkWell>(cta).onTap, isNotNull);
   });
+
+  testWidgets(
+    'a cancelled native sheet clears feedback and permits a lower term',
+    (tester) async {
+      final store = _CancellationReadyStore();
+      final catalog = _RecordingCatalog(const [_monthlyOffer, _annualOffer]);
+      addTearDown(store.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BilStorePlansPage(
+            store: store,
+            catalog: catalog,
+            productIds: const {'premium.monthly', 'premium.annual'},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      store.reportCancelled();
+      await tester.pump();
+
+      final cta = find.byKey(const ValueKey('store-purchase-cta'));
+      expect(find.byKey(const ValueKey('store-purchase-status')), findsNothing);
+      expect(tester.widget<InkWell>(cta).onTap, isNotNull);
+
+      final monthly = find.byKey(const ValueKey('store-offer-premium.monthly'));
+      await tester.ensureVisible(monthly);
+      await tester.tap(monthly);
+      await tester.pump();
+      await tester.tap(cta);
+      await tester.pump();
+
+      expect(catalog.requested, <BilStoreOfferMetadata>[_monthlyOffer]);
+    },
+  );
 }
 
 const _monthlyOffer = BilStoreOfferMetadata(
@@ -212,6 +248,16 @@ const _monthlyOffer = BilStoreOfferMetadata(
   currencyCode: 'EGP',
   priceMicros: 129990000,
   billingPeriodIso8601: 'P1M',
+);
+
+const _annualOffer = BilStoreOfferMetadata(
+  productId: 'premium.annual',
+  kind: BilStoreProductKind.premiumSubscription,
+  localizedTitle: 'Annual',
+  localizedPrice: 'EGP 999.99',
+  currencyCode: 'EGP',
+  priceMicros: 999990000,
+  billingPeriodIso8601: 'P1Y',
 );
 
 final class _SequencedCatalog implements BilStoreCatalogGateway {
@@ -280,6 +326,43 @@ final class _DeferredPurchaseCatalog implements BilStoreCatalogGateway {
 
   @override
   Future<void> openManageSubscriptions() async {}
+
+  @override
+  Future<void> restorePurchases() async {}
+}
+
+final class _CancellationReadyStore extends VerifiedStorePurchaseService {
+  @override
+  bool get canStartPurchase => true;
+
+  @override
+  bool get busy => false;
+
+  void reportCancelled() {
+    state = VerifiedStoreState.cancelled;
+    messageCode = 'purchase_cancelled';
+    notifyListeners();
+  }
+}
+
+final class _RecordingCatalog implements BilStoreCatalogGateway {
+  _RecordingCatalog(this.offers);
+
+  final List<BilStoreOfferMetadata> offers;
+  final List<BilStoreOfferMetadata> requested = [];
+
+  @override
+  Future<List<BilStoreOfferMetadata>> loadOffers(
+    Set<String> productIds,
+  ) async => offers;
+
+  @override
+  Future<void> openManageSubscriptions() async {}
+
+  @override
+  Future<void> requestPurchase(BilStoreOfferMetadata offer) async {
+    requested.add(offer);
+  }
 
   @override
   Future<void> restorePurchases() async {}

@@ -182,15 +182,11 @@ class _ReferenceDashboardPhone extends StatelessWidget {
                     'بيانات الهدف أو التغذية غير متاحة',
                   )
                 : null,
-            referenceText: tr(
-              'Color = recorded ÷ reference maximum, capped at 100%.',
-              'اللون = المسجل ÷ الحد المرجعي، وبحد أقصى 100٪.',
-            ),
             rings: [
               _MacroProgress(
                 label: tr('Potassium', 'البوتاسيوم'),
                 value: potassiumEvidenceValue?.round(),
-                goal: potassiumGoal,
+                goal: DashboardHeartHealthPolicy.potassiumGoal(potassiumGoal),
                 unit: 'mg',
                 color: const Color(0xFFF2B632),
                 showRemaining: false,
@@ -198,7 +194,7 @@ class _ReferenceDashboardPhone extends StatelessWidget {
               _MacroProgress(
                 label: tr('Sodium', 'الصوديوم'),
                 value: sodiumEvidenceValue?.round(),
-                goal: sodiumGoal,
+                goal: DashboardHeartHealthPolicy.sodiumGoal(sodiumGoal),
                 unit: 'mg',
                 color: const Color(0xFF7656C9),
                 showRemaining: false,
@@ -206,7 +202,7 @@ class _ReferenceDashboardPhone extends StatelessWidget {
               _MacroProgress(
                 label: tr('Fiber', 'الألياف'),
                 value: fiberEvidenceValue?.round(),
-                goal: fiberGoal,
+                goal: DashboardHeartHealthPolicy.fiberGoal(fiberGoal),
                 color: const Color(0xFF38A66B),
                 showRemaining: false,
               ),
@@ -387,30 +383,6 @@ const _referencePhoneCopy = <String, Map<String, String>>{
     'fr': 'Objectifs personnalisés pour le cœur, le sodium et les fibres',
     'es': 'Objetivos personalizados de corazón, sodio y fibra',
     'tr': 'Kalp, sodyum, lif ve özel hedefler',
-  },
-  'Color = recorded ÷ reference maximum, capped at 100%.': {
-    'fr': 'Couleur = enregistré ÷ maximum de référence, plafonnée à 100 %.',
-    'es': 'Color = registrado ÷ máximo de referencia, limitado al 100 %.',
-    'tr': 'Renk = kaydedilen ÷ referans maksimumu; en fazla %100.',
-    'de': 'Farbe = erfasst ÷ Referenzmaximum, begrenzt auf 100 %.',
-    'it': 'Colore = registrato ÷ massimo di riferimento, limitato al 100%.',
-    'pt': 'Cor = registado ÷ máximo de referência, limitada a 100%.',
-    'ur':
-        'رنگ = درج شدہ مقدار ÷ حوالہ جاتی زیادہ سے زیادہ حد، زیادہ سے زیادہ 100٪۔',
-    'fa': 'رنگ = مقدار ثبت‌شده ÷ حداکثر مرجع، با سقف ۱۰۰٪.',
-    'hi': 'रंग = दर्ज मान ÷ संदर्भ अधिकतम, 100% तक सीमित।',
-    'id': 'Warna = tercatat ÷ maksimum acuan, dibatasi hingga 100%.',
-    'ms': 'Warna = direkodkan ÷ maksimum rujukan, dihadkan kepada 100%.',
-    'ja': '色 = 記録値 ÷ 基準最大値（上限 100%）。',
-    'ko': '색상 = 기록값 ÷ 기준 최대값, 최대 100%로 제한됩니다.',
-    'zh': '颜色 = 已记录值 ÷ 参考最大值，上限为 100%。',
-    'ru': 'Цвет = записанное значение ÷ эталонный максимум, не более 100%.',
-    'bn': 'রং = রেকর্ড করা মান ÷ রেফারেন্স সর্বোচ্চ মান, সর্বোচ্চ ১০০%।',
-    'vi': 'Màu = giá trị đã ghi ÷ mức tối đa tham chiếu, giới hạn ở 100%.',
-    'th': 'สี = ค่าที่บันทึก ÷ ค่าสูงสุดอ้างอิง จำกัดไม่เกิน 100%',
-    'pl': 'Kolor = zarejestrowana wartość ÷ maksimum referencyjne, maks. 100%.',
-    'nl': 'Kleur = geregistreerd ÷ referentiemaximum, begrensd op 100%.',
-    'uk': 'Колір = записане значення ÷ еталонний максимум, не більше 100%.',
   },
   'Custom macro goals': {
     'fr': 'Objectifs macro personnalisés',

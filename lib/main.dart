@@ -389,8 +389,13 @@ class BILApp extends ConsumerWidget {
                           .routerDelegate
                           .currentConfiguration
                           .uri;
-                      if (current.path != '/dashboard') {
-                        AppRouter.router.go('/dashboard');
+                      // A long locked/backgrounded session can retain stale
+                      // iOS window metrics (narrow layout / enlarged text) on
+                      // the previously mounted route. Re-enter through the
+                      // startup boundary instead of repainting that stale
+                      // page, while short app switches preserve user input.
+                      if (current.path != '/startup') {
+                        AppRouter.router.go('/startup');
                       }
                     },
                     child: AppSwitcherPrivacyShield(

@@ -66,7 +66,9 @@ bool connectedHealthSignalHasWearableProvenance(
 
 bool connectedHealthSnapshotHasWearableEvidence(
   ConnectedHealthSnapshot snapshot,
-) => snapshot.signals.any(connectedHealthSignalHasWearableProvenance);
+) =>
+    snapshot.signals.any(connectedHealthSignalHasWearableProvenance) ||
+    snapshot.stepHistory.any(connectedHealthSignalHasWearableProvenance);
 
 final class ConnectedHealthSnapshot {
   const ConnectedHealthSnapshot({

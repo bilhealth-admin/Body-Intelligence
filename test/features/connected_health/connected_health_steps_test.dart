@@ -4,7 +4,12 @@ import 'package:body_intelligence_log/features/connected_health/connected_health
 import 'package:body_intelligence_log/features/connected_health/providers/connected_health_provider.dart';
 import 'package:body_intelligence_log/features/global_platform/core/global_platform_core.dart';
 
-GlobalHealthSignal _step(double value, DateTime observedAt, String id) {
+GlobalHealthSignal _step(
+  double value,
+  DateTime observedAt,
+  String id, {
+  Map<String, Object?> attributes = const <String, Object?>{},
+}) {
   return GlobalHealthSignal(
     key: 'steps',
     canonicalValue: value,
@@ -16,6 +21,7 @@ GlobalHealthSignal _step(double value, DateTime observedAt, String id) {
       observedAt: observedAt,
       confidence: .9,
     ),
+    attributes: attributes,
   );
 }
 
@@ -23,13 +29,19 @@ void main() {
   test('connected step samples become one daily total', () {
     final totals = aggregateConnectedStepSignals([
       _step(1200, DateTime(2026, 9, 1, 8), 'a'),
-      _step(800, DateTime(2026, 9, 1, 18), 'b'),
+      _step(
+        800,
+        DateTime(2026, 9, 1, 18),
+        'b',
+        attributes: const {'wearableKind': 'apple_watch'},
+      ),
       _step(4500, DateTime(2026, 9, 2, 12), 'c'),
     ]);
 
     expect(totals, hasLength(2));
     expect(totals[0].canonicalValue, 2000);
     expect(totals[0].attributes['aggregation'], 'daily');
+    expect(totals[0].attributes['wearableKind'], 'apple_watch');
     expect(totals[1].canonicalValue, 4500);
   });
 

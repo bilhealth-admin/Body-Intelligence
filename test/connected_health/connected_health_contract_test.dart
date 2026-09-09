@@ -19,7 +19,6 @@ void main() {
     () async {
       final gateway = _PermissionGateway();
       final controller = ConnectedHealthController(gateway);
-      await Future<void>.delayed(Duration.zero);
 
       final first = controller.requestPermissions();
       final duplicate = controller.requestPermissions();
@@ -43,38 +42,34 @@ void main() {
   );
 
   test(
-    'permission completion performs the first health import immediately',
+    'permission completion waits for an explicit watch update before import',
     () async {
       final gateway = _PermissionGateway();
       final controller = ConnectedHealthController(gateway);
-      await Future<void>.delayed(Duration.zero);
 
       final request = controller.requestPermissions();
       gateway.permissionRequest.complete(_authorizationRequestedSnapshot);
       await request;
 
       expect(gateway.permissionCalls, 1);
-      expect(gateway.syncCalls, 1);
+      expect(gateway.syncCalls, 0);
       expect(
         controller.state.value?.status,
-        ConnectedHealthStatus.synchronized,
+        ConnectedHealthStatus.authorizationRequested,
       );
       controller.dispose();
     },
   );
 
   test(
-    'permission tap waits for constructor refresh instead of being lost',
+    'permission tap does not wait for a passive native status read',
     () async {
       final gateway = _DelayedLoadGateway();
       final controller = ConnectedHealthController(gateway);
 
       final request = controller.requestPermissions();
-      expect(gateway.permissionCalls, 0);
-
-      gateway.loadRequest.complete(_permissionRequiredSnapshot);
-      await Future<void>.delayed(Duration.zero);
       expect(gateway.permissionCalls, 1);
+      expect(gateway.loadRequest.isCompleted, isFalse);
 
       gateway.permissionRequest.complete(_permissionRequiredSnapshot);
       await request;
@@ -87,18 +82,20 @@ void main() {
   );
 
   test(
-    'refresh imports new records for an already synchronized source',
+    'status refresh does not import native records without an explicit sync',
     () async {
       final gateway = _SynchronizedGateway();
       final controller = ConnectedHealthController(gateway);
-      await Future<void>.delayed(Duration.zero);
 
-      expect(gateway.loadCalls, 1);
-      expect(gateway.syncCalls, 1);
+      expect(gateway.loadCalls, 0);
+      expect(gateway.syncCalls, 0);
 
       await controller.refresh();
-      expect(gateway.loadCalls, 2);
-      expect(gateway.syncCalls, 2);
+      expect(gateway.loadCalls, 1);
+      expect(gateway.syncCalls, 0);
+
+      await controller.synchronize();
+      expect(gateway.syncCalls, 1);
       controller.dispose();
     },
   );
@@ -106,7 +103,7 @@ void main() {
   test('foreground refresh keeps the current snapshot visible', () async {
     final gateway = _DelayedRefreshGateway();
     final controller = ConnectedHealthController(gateway);
-    await Future<void>.delayed(Duration.zero);
+    await controller.refresh();
     expect(controller.state, isA<AsyncData<ConnectedHealthSnapshot>>());
 
     final refresh = controller.refresh();
@@ -123,6 +120,26 @@ void main() {
     expect(controller.state.value?.isBusy, isFalse);
     controller.dispose();
   });
+
+  test(
+    'a stalled watch update exits busy state with a truthful timeout',
+    () async {
+      final gateway = _HangingSynchronizationGateway();
+      final controller = ConnectedHealthController(
+        gateway,
+        synchronizationTimeout: Duration.zero,
+      );
+
+      await controller.synchronize();
+
+      expect(gateway.syncCalls, 1);
+      expect(controller.state, isA<AsyncData<ConnectedHealthSnapshot>>());
+      expect(controller.state.value?.status, ConnectedHealthStatus.degraded);
+      expect(controller.state.value?.isBusy, isFalse);
+      expect(controller.state.value?.failureCode, 'health_sync_timed_out');
+      controller.dispose();
+    },
+  );
 
   test('permission action is hidden for an unsupported platform', () {
     expect(
@@ -632,6 +649,36 @@ final class _SynchronizedGateway implements ConnectedHealthGateway {
   Future<ConnectedHealthSnapshot> synchronize() async {
     syncCalls += 1;
     return _synchronizedSnapshot;
+  }
+}
+
+final class _HangingSynchronizationGateway implements ConnectedHealthGateway {
+  int syncCalls = 0;
+  final Completer<ConnectedHealthSnapshot> syncRequest =
+      Completer<ConnectedHealthSnapshot>();
+
+  @override
+  Future<ConnectedHealthSnapshot> load() async => _synchronizedSnapshot;
+
+  @override
+  Future<void> openSystemSettings() async {}
+
+  @override
+  Future<ConnectedHealthSnapshot> requestPermissions() async =>
+      _synchronizedSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> requestWeightWritePermission() async =>
+      _synchronizedSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> revokePermissions() async =>
+      _permissionRequiredSnapshot;
+
+  @override
+  Future<ConnectedHealthSnapshot> synchronize() {
+    syncCalls += 1;
+    return syncRequest.future;
   }
 }
 

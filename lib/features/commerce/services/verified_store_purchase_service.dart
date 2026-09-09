@@ -364,8 +364,14 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
           messageCode = 'purchase_failed';
           notifyListeners();
         case PurchaseStatus.canceled:
-          state = VerifiedStoreState.cancelled;
-          messageCode = 'purchase_cancelled';
+          // A StoreKit/Play cancellation is neither a failed receipt nor an
+          // entitlement. Return to the already loaded catalog immediately so
+          // the member can choose another term (for example annual -> monthly)
+          // without reopening the Plans route or being told that access failed.
+          state = products.isEmpty
+              ? VerifiedStoreState.unavailable
+              : VerifiedStoreState.ready;
+          messageCode = null;
           notifyListeners();
         case PurchaseStatus.purchased:
         case PurchaseStatus.restored:

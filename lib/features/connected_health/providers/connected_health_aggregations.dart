@@ -86,6 +86,10 @@ List<GlobalHealthSignal> aggregateConnectedStepSignals(
           timeZoneId: template.provenance.timeZoneId,
         ),
         attributes: <String, Object?>{
+          // Daily totals still need the source evidence carried by the native
+          // sample. Without it, a valid Apple Watch/Wear OS step total is
+          // incorrectly hidden from the watch preview after aggregation.
+          ...template.attributes,
           'aggregation': 'daily',
           'date': entry.key,
           'sampleCount': rows.length,

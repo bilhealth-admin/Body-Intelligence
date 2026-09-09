@@ -109,11 +109,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    // The restored action is above the newest session greeting. Use a real
+    // drag so the reversed chat stops following the newest message exactly as
+    // it does for a person reading earlier messages.
+    await tester.drag(find.byType(ListView), const Offset(0, 420));
+    await tester.pumpAndSettle();
+
     for (final action in actions) {
       final finder = find.byKey(
         Key('ai-coach-action-${action.type.name}-${action.id}'),
       );
-      await Scrollable.ensureVisible(tester.element(finder), alignment: .5);
       await tester.tap(finder);
       await tester.pump();
     }

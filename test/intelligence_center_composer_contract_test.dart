@@ -101,7 +101,9 @@ void main() {
     expect(page, contains("Key('ai-coach-reply-progress')"));
     expect(page, contains("Key('ai-coach-cancel-request')"));
     expect(page, contains("Key('ai-coach-retry')"));
-    expect(page, contains('Searching your BIL context'));
+    // The transient "Searching your BIL context" banner was removed from the
+    // Coach surface so a provider delay cannot freeze or clutter the chat.
+    expect(page, isNot(contains('Searching your BIL context')));
     expect(page, contains('timeout(const Duration(seconds: 30))'));
   });
 

@@ -357,9 +357,10 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
         : messages.toList(growable: false);
     final showLiveVoiceDraft =
         listening && pendingVoiceTranscript.trim().isNotEmpty;
-    final showReplyProgress =
-        replyPhase == _CoachReplyPhase.searching ||
-        replyPhase == _CoachReplyPhase.failed;
+    // The compact header already signals an active answer. Do not add a
+    // second, technical-looking "context search" row beneath the latest
+    // message; reserve this space for a real failure with a retry action.
+    final showReplyProgress = replyPhase == _CoachReplyPhase.failed;
     final showIntroBrief = introVisible && dailyBrief != null;
     final coachStatus = !conversationReady
         ? tr('Restoring conversation', 'جارٍ استعادة المحادثة')
@@ -459,9 +460,8 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                                       (showIntroBrief ? 1 : 0),
                                   itemBuilder: (context, index) {
                                     if (showReplyProgress && index == 0) {
-                                      return _CoachReplyProgress(
-                                        phase: replyPhase,
-                                        onCancel: _cancelCurrentCoachRequest,
+                                      return _CoachReplyFailure(
+                                        onDismiss: _cancelCurrentCoachRequest,
                                         onRetry: failedRequest == null
                                             ? null
                                             : _retryFailedCoachRequest,
@@ -609,13 +609,27 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                                     ),
                             ),
                             const SizedBox(width: 4),
-                            if (question.text.trim().isEmpty || listening)
+                            if (sending)
+                              IconButton.filled(
+                                key: const Key('ai-coach-cancel-request'),
+                                tooltip: tr('Cancel waiting', 'إلغاء الانتظار'),
+                                onPressed: conversationReady
+                                    ? _cancelCurrentCoachRequest
+                                    : null,
+                                style: IconButton.styleFrom(
+                                  backgroundColor: scheme.errorContainer,
+                                  foregroundColor: scheme.onErrorContainer,
+                                  minimumSize: const Size.square(46),
+                                ),
+                                icon: const Icon(Icons.close_rounded),
+                              )
+                            else if (question.text.trim().isEmpty || listening)
                               IconButton.filled(
                                 key: const Key('ai-coach-voice-button'),
                                 tooltip: listening
                                     ? tr('Stop listening', 'إيقاف الاستماع')
                                     : tr('Talk to BIL', 'تحدث مع BIL'),
-                                onPressed: !conversationReady || sending
+                                onPressed: !conversationReady
                                     ? null
                                     : _toggleDictation,
                                 style: IconButton.styleFrom(
@@ -634,21 +648,11 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                               IconButton.filled(
                                 key: const Key('ai-coach-send-button'),
                                 tooltip: tr('Send', 'إرسال'),
-                                onPressed: !conversationReady || sending
-                                    ? null
-                                    : ask,
+                                onPressed: !conversationReady ? null : ask,
                                 style: IconButton.styleFrom(
                                   minimumSize: const Size.square(46),
                                 ),
-                                icon: sending
-                                    ? const SizedBox.square(
-                                        dimension: 19,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : const Icon(Icons.arrow_upward_rounded),
+                                icon: const Icon(Icons.arrow_upward_rounded),
                               ),
                           ],
                         ),

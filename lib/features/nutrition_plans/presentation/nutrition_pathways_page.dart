@@ -25,6 +25,22 @@ class NutritionPathwaysPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          key: const Key('nutrition-pathways-back'),
+          tooltip: nutritionText(
+            context,
+            'Back to dashboard',
+            'العودة للوحة التحكم',
+          ),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/dashboard');
+            }
+          },
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
         title: Text(
           nutritionText(context, 'Nutrition pathways', 'المسارات الغذائية'),
         ),

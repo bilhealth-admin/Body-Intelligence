@@ -243,6 +243,21 @@ Widget _app(CommunityRepository repository) => MaterialApp(
 );
 
 void main() {
+  testWidgets(
+    'Community exposes the public feed and member BIL Code from its first screen',
+    (tester) async {
+      await tester.pumpWidget(_app(_SocialV2Repository()));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('community-my-bil-code')), findsOneWidget);
+      expect(
+        find.byKey(const Key('community-public-feed-tab')),
+        findsOneWidget,
+      );
+      expect(find.byIcon(Icons.public_outlined), findsOneWidget);
+    },
+  );
+
   testWidgets('save action is authoritative and saved collection is private', (
     tester,
   ) async {

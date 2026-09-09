@@ -127,7 +127,7 @@ class _ReferenceTrendRail extends StatelessWidget {
             onTap: () => context.push('/weight-history'),
           ),
           _ReferenceTrendCard(
-            title: tr('Steps', 'الخطوات'),
+            title: tr('Today steps', 'خطوات اليوم'),
             period: tr('Last 30 days', 'آخر 30 يومًا'),
             values: stepValues,
             unit: tr('steps', 'خطوة'),
@@ -279,12 +279,19 @@ class _ReferenceTrendPainter extends CustomPainter {
     );
     canvas.drawLine(const Offset(0, 0), Offset(0, chartBottom), axis);
 
-    final minValue = values.reduce((a, b) => a < b ? a : b);
-    final maxValue = values.reduce((a, b) => a > b ? a : b);
+    final populatedValues = values
+        .where((value) => value > 0)
+        .toList(growable: false);
+    if (populatedValues.isEmpty) return;
+    final minValue = populatedValues.reduce((a, b) => a < b ? a : b);
+    final maxValue = populatedValues.reduce((a, b) => a > b ? a : b);
     final spread = (maxValue - minValue).abs();
     final slotWidth = size.width / values.length;
     final barWidth = (slotWidth * .62).clamp(3.0, 14.0);
     for (var index = 0; index < values.length; index++) {
+      // An absent day remains visually absent; the card reports the actual
+      // latest-day value rather than an invented baseline.
+      if (values[index] <= 0) continue;
       final normalized = spread == 0
           ? .52
           : (values[index] - minValue) / spread;

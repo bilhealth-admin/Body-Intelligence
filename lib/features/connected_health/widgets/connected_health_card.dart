@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -91,6 +89,9 @@ ConnectedHealthSnapshot dashboardWatchSnapshot(
     failureCode: null,
     availabilityStatus: null,
     deviceVerified: true,
+    stepHistory: baseUsable
+        ? snapshot.stepHistory
+        : const <ConnectedHealthSignalView>[],
   );
 }
 
@@ -113,40 +114,9 @@ class ConnectedHealthCard extends ConsumerStatefulWidget {
       _ConnectedHealthCardState();
 }
 
-class _ConnectedHealthCardState extends ConsumerState<ConnectedHealthCard>
-    with WidgetsBindingObserver {
-  bool _refreshOnResume = false;
-
+class _ConnectedHealthCardState extends ConsumerState<ConnectedHealthCard> {
   String tr(String en, String ar) =>
       connectedHealthTextForLanguage(widget.languageCode, en, ar);
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.hidden ||
-        state == AppLifecycleState.paused ||
-        state == AppLifecycleState.detached) {
-      _refreshOnResume = true;
-      return;
-    }
-    if (state != AppLifecycleState.resumed || !_refreshOnResume) return;
-    _refreshOnResume = false;
-    // HealthKit/Health Connect remain the source of truth. One coalesced read
-    // when the app returns to the foreground is enough; there is no background
-    // timer or battery-heavy polling loop.
-    unawaited(ref.read(connectedHealthProvider.notifier).refresh());
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -322,7 +292,7 @@ class _ConnectedHealthContent extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: onSync,
                   icon: const Icon(Icons.sync_rounded),
-                  label: Text(tr('Sync now', 'مزامنة الآن')),
+                  label: Text(tr('Sync now', 'تحديث الساعة')),
                 ),
               FilledButton.tonalIcon(
                 onPressed: onManage,
@@ -525,7 +495,10 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
     final watchSnapshot = dashboardWatchSnapshot(snapshot, fitnessDevices);
     final hasMeasuredData =
         liveHealthWatchCanShowMetrics(watchSnapshot) &&
-        watchSnapshot.signals.any(liveHealthWatchSignalIsActual);
+        <ConnectedHealthSignalView>[
+          ...watchSnapshot.signals,
+          ...watchSnapshot.stepHistory,
+        ].any(liveHealthWatchSignalIsActual);
     final showLastSync =
         liveHealthWatchCanShowMetrics(watchSnapshot) &&
         watchSnapshot.lastSyncAt != null;

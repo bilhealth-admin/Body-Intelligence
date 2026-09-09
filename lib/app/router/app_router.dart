@@ -96,9 +96,22 @@ import 'responsive_app_shell.dart';
 class AppRouter {
   static Future<bool> Function()? nativeAuthCallbackRetry;
 
+  /// A billing surface is an overlay journey, not a destination that should
+  /// grow the back stack. StoreKit may return control to Flutter more than
+  /// once for a single cancelled transaction, so a second request for the
+  /// already-visible Plans route must be ignored.
+  static bool blocksDuplicatePlansNavigation(Uri current, Uri next) =>
+      current.path == '/plans' && next.path == '/plans';
+
   static final router = GoRouter(
     initialLocation: '/startup',
     errorBuilder: (_, _) => const InvalidRoutePage(),
+    onEnter: (_, currentState, nextState, _) {
+      if (blocksDuplicatePlansNavigation(currentState.uri, nextState.uri)) {
+        return const Block.stop();
+      }
+      return const Allow();
+    },
     redirect: (_, state) {
       if (BilAuthCallbackController.isSupportedCallbackLocation(state.uri)) {
         if (!AppEnvironment.cloudConfigured) return '/login';

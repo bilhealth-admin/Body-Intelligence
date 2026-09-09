@@ -29,12 +29,14 @@ ConnectedHealthSnapshot _snapshot({
   required ConnectedHealthStatus status,
   required bool verified,
   required List<ConnectedHealthSignalView> signals,
+  List<ConnectedHealthSignalView> stepHistory = const [],
   String? source = 'Health Connect',
 }) => ConnectedHealthSnapshot(
   status: status,
   platformSource: source,
   availableSources: source == null ? const [] : [source],
   signals: signals,
+  stepHistory: stepHistory,
   importedCount: signals.length,
   lastSyncAt: DateTime.utc(2026, 8, 31, 12),
   failureCode: null,
@@ -118,6 +120,31 @@ void main() {
     );
     semantics.dispose();
   });
+
+  testWidgets(
+    'Apple Health uses its selected phone step total with verified watch data',
+    (tester) async {
+      await tester.pumpWidget(
+        _subject(
+          _snapshot(
+            status: ConnectedHealthStatus.synchronized,
+            verified: true,
+            source: 'Apple Health',
+            signals: [_signal('heartRate', 71, 'bpm', source: 'Apple Watch')],
+            stepHistory: [_signal('steps', 4321, 'count', source: 'iPhone')],
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byKey(const Key('watch-metric-steps')), findsOneWidget);
+      expect(find.text('4321'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp(r'Steps, 4321 steps')),
+        findsOneWidget,
+      );
+    },
+  );
 
   for (final status in const [
     ConnectedHealthStatus.unavailable,

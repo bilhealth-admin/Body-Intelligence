@@ -41,16 +41,16 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('header keeps the Today action while omitting duplicate date', (
+  testWidgets('header keeps the Edit action while omitting duplicate date', (
     tester,
   ) async {
     await pumpDashboard(tester);
 
     expect(find.byTooltip('Notifications'), findsOneWidget);
-    expect(find.text('Today'), findsOneWidget);
+    expect(find.text('Today'), findsNothing);
     expect(find.text('Aug 6, 2026'), findsNothing);
     expect(find.text('Welcome'), findsNothing);
-    expect(find.text('Edit'), findsNothing);
+    expect(find.text('Edit'), findsOneWidget);
   });
 
   testWidgets('profile uses a neutral account avatar by default', (
@@ -65,12 +65,12 @@ void main() {
     );
   });
 
-  testWidgets('Today opens dashboard customization without a settings icon', (
+  testWidgets('Edit opens dashboard customization without a settings icon', (
     tester,
   ) async {
     await pumpDashboard(tester);
 
-    expect(find.text('Today'), findsOneWidget);
+    expect(find.text('Edit'), findsOneWidget);
     expect(find.byIcon(Icons.dashboard_customize_rounded), findsNothing);
 
     await tester.tap(find.byKey(const Key('dashboard-edit-today')));
@@ -193,7 +193,7 @@ void main() {
             find.byKey(const Key('dashboard-edit-today')),
           );
           expect(
-            find.text(AppLocalizations.of(context).text('Today')),
+            find.text(AppLocalizations.of(context).text('Edit')),
             findsOneWidget,
           );
           expect(tester.takeException(), isNull);

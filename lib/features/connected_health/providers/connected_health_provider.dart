@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -84,11 +86,15 @@ final connectedHealthProvider =
 
 final class ConnectedHealthController
     extends StateNotifier<AsyncValue<ConnectedHealthSnapshot>> {
-  ConnectedHealthController(this._gateway) : super(const AsyncValue.loading()) {
-    refresh();
-  }
+  static const Duration _defaultSynchronizationTimeout = Duration(seconds: 25);
+
+  ConnectedHealthController(this._gateway, {Duration? synchronizationTimeout})
+    : _synchronizationTimeout =
+          synchronizationTimeout ?? _defaultSynchronizationTimeout,
+      super(const AsyncValue.data(ConnectedHealthSnapshot.unavailable()));
 
   final ConnectedHealthGateway _gateway;
+  final Duration _synchronizationTimeout;
   Future<void>? _mutationTask;
   Future<void>? _refreshTask;
 
@@ -110,9 +116,8 @@ final class ConnectedHealthController
     transition,
   }) async {
     try {
-      // The constructor starts a refresh immediately. A user action must wait
-      // for it rather than being silently discarded when the screen is opened
-      // and the permission button is tapped quickly.
+      // A status read may already be running because the Apps & Devices page
+      // was opened. Queue an explicit mutation behind it so it is never lost.
       final activeRefresh = _refreshTask;
       if (activeRefresh != null) await activeRefresh;
 
@@ -165,30 +170,34 @@ final class ConnectedHealthController
         state = AsyncValue.data(previous.copyWith(isBusy: true));
       }
       try {
+        // A passive screen paint or a generic foreground event must never
+        // trigger an import from HealthKit/Health Connect. That import can
+        // enumerate a large native history and was blocking unrelated routes.
+        // `synchronize` remains an explicit action from Apps & Devices (or
+        // immediately after a user grants permission).
         final loaded = await _gateway.load();
-        // This is a foreground-only integration. Refreshing a connected source
-        // must read native changes as well as reload the cached permission
-        // snapshot, otherwise new Watch/Health Connect records remain stale.
-        final shouldSynchronize =
-            loaded.status == ConnectedHealthStatus.authorizationRequested ||
-            loaded.status == ConnectedHealthStatus.ready ||
-            loaded.status == ConnectedHealthStatus.synchronized;
-        final refreshed = shouldSynchronize
-            ? await _gateway.synchronize()
-            : loaded;
-        state = AsyncValue.data(refreshed.copyWith(isBusy: false));
+        state = AsyncValue.data(loaded.copyWith(isBusy: false));
       } catch (error, stackTrace) {
         // A lifecycle notification must not replace useful cached content with
         // a transient blank/error screen.
-        state = previous == null
-            ? AsyncValue.error(error, stackTrace)
-            : AsyncValue.data(
+        // An empty initial state is not useful cached content. Preserve a real
+        // prior snapshot, but expose the failed first status check so pages
+        // can offer an honest retry instead of implying that no device exists.
+        final hasUsableCachedSnapshot =
+            previous != null &&
+            (previous.deviceVerified ||
+                previous.lastSyncAt != null ||
+                previous.signals.isNotEmpty ||
+                previous.stepHistory.isNotEmpty);
+        state = hasUsableCachedSnapshot
+            ? AsyncValue.data(
                 previous.copyWith(
                   status: ConnectedHealthStatus.degraded,
                   failureCode: 'health_refresh_failed_offline_cache_preserved',
                   isBusy: false,
                 ),
-              );
+              )
+            : AsyncValue.error(error, stackTrace);
       }
     } finally {
       _refreshTask = null;
@@ -196,7 +205,20 @@ final class ConnectedHealthController
   }
 
   Future<void> synchronize() => _runMutation(
-    _gateway.synchronize,
+    () async {
+      try {
+        return await _gateway.synchronize().timeout(_synchronizationTimeout);
+      } on TimeoutException {
+        // Native reads cannot be cancelled safely once handed to HealthKit or
+        // Health Connect. End the visible wait honestly instead of trapping
+        // the whole Apps & Devices surface in a permanent busy state.
+        return (state.value ?? const ConnectedHealthSnapshot.unavailable())
+            .copyWith(
+              status: ConnectedHealthStatus.degraded,
+              failureCode: 'health_sync_timed_out',
+            );
+      }
+    },
     transition: (current) => current.copyWith(
       status: ConnectedHealthStatus.syncing,
       clearFailure: true,
@@ -205,15 +227,9 @@ final class ConnectedHealthController
 
   Future<void> requestPermissions() async {
     await _runMutation(() async {
-      final requested = await _gateway.requestPermissions();
-      final firstReadPending =
-          requested.status == ConnectedHealthStatus.authorizationRequested ||
-          (requested.status == ConnectedHealthStatus.ready &&
-              requested.lastSyncAt == null);
-      // The native permission sheet has already completed at this point.
-      // Import immediately so an Apple Watch/Health Connect user does not
-      // need to leave and reopen this screen before seeing available data.
-      return firstReadPending ? await _gateway.synchronize() : requested;
+      // Granting permission changes access only. Importing a native history is
+      // intentionally deferred until the user presses Update watch.
+      return _gateway.requestPermissions();
     });
   }
 

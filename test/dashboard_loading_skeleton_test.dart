@@ -69,29 +69,40 @@ void main() {
     },
   );
 
-  test('pull to refresh awaits providers and handles both outcomes', () {
-    final source = File(
-      'lib/features/dashboard/dashboard_page.dart',
-    ).readAsStringSync();
+  test(
+    'pull to refresh settles sources independently without false errors',
+    () {
+      final source = File(
+        'lib/features/dashboard/dashboard_page.dart',
+      ).readAsStringSync();
 
-    expect(
-      source,
-      contains(
-        'Future<void> refresh(BuildContext context, WidgetRef ref) async',
-      ),
-    );
-    expect(source, contains('await Future.wait(['));
-    expect(source, contains('.timeout(const Duration(seconds: 6))'));
-    expect(source, contains("context.strings.text('Today is up to date.')"));
-    expect(source, contains("'Some local Today data could not be refreshed.'"));
-    expect(source, contains('if (context.mounted)'));
-    expect(source, contains('onRefresh: () => refresh(context, ref)'));
-    expect(source, contains('await Future.any<void>(['));
-    expect(
-      dashboardRefreshIndicatorMaximum,
-      lessThanOrEqualTo(const Duration(seconds: 1)),
-    );
-  });
+      expect(
+        source,
+        contains(
+          'Future<void> refresh(BuildContext context, WidgetRef ref) async',
+        ),
+      );
+      expect(source, contains('await Future.wait<bool>(['));
+      expect(source, contains('_settleDashboardRefresh'));
+      expect(source, contains('dashboardSourceRefreshMaximum'));
+      expect(source, contains('refreshed.every((succeeded) => !succeeded)'));
+      expect(
+        source,
+        isNot(contains("context.strings.text('Today is up to date.')")),
+      );
+      expect(
+        source,
+        contains("'Some local Today data could not be refreshed.'"),
+      );
+      expect(source, contains('if (context.mounted)'));
+      expect(source, contains('onRefresh: () => refresh(context, ref)'));
+      expect(source, contains('await Future.any<void>(['));
+      expect(
+        dashboardRefreshIndicatorMaximum,
+        lessThanOrEqualTo(const Duration(seconds: 1)),
+      );
+    },
+  );
 
   testWidgets('dashboard refresh gesture updates without spinner chrome', (
     tester,

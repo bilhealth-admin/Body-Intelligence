@@ -562,14 +562,12 @@ class _CircularNutrientCard extends StatelessWidget {
     required this.rings,
     this.onTap,
     this.emptyMessage,
-    this.referenceText,
   });
 
   final String title;
   final List<Widget> rings;
   final VoidCallback? onTap;
   final String? emptyMessage;
-  final String? referenceText;
 
   @override
   Widget build(BuildContext context) => _ReferenceCard(
@@ -605,16 +603,6 @@ class _CircularNutrientCard extends StatelessWidget {
             emptyMessage!,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-        if (referenceText != null) ...[
-          const SizedBox(height: 6),
-          Text(
-            referenceText!,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),

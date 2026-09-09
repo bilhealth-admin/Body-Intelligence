@@ -45,7 +45,7 @@ class DashboardTopBar extends StatelessWidget {
       icon: const Icon(Icons.notifications_none_rounded),
     );
     final edit = _DashboardEditButton(
-      label: copy['today']!,
+      label: copy['action']!,
       tooltip: copy['edit']!,
     );
     const brand = Directionality(
@@ -207,30 +207,35 @@ const _dashboardTopBarCopy = <String, Map<String, String>>{
     'profile': 'الملف الشخصي',
     'notifications': 'الإشعارات',
     'edit': 'تخصيص الداشبورد',
+    'action': 'تعديل',
     'today': 'اليوم',
   },
   'en': {
     'profile': 'Profile',
     'notifications': 'Notifications',
     'edit': 'Customize dashboard',
+    'action': 'Edit',
     'today': 'Today',
   },
   'fr': {
     'profile': 'Profil',
     'notifications': 'Notifications',
     'edit': 'Personnaliser le tableau de bord',
+    'action': 'Modifier',
     'today': "Aujourd’hui",
   },
   'es': {
     'profile': 'Perfil',
     'notifications': 'Notificaciones',
     'edit': 'Personalizar el panel',
+    'action': 'Editar',
     'today': 'Hoy',
   },
   'tr': {
     'profile': 'Profil',
     'notifications': 'Bildirimler',
     'edit': 'Paneli özelleştir',
+    'action': 'Düzenle',
     'today': 'Bugün',
   },
 };

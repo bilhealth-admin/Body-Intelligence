@@ -128,6 +128,14 @@ Widget _subject({
   );
 }
 
+Future<void> _loadReadableHealthSnapshot(WidgetTester tester) async {
+  final container = ProviderScope.containerOf(
+    tester.element(find.byType(MaterialApp)),
+  );
+  await container.read(connectedHealthProvider.notifier).refresh();
+  await tester.pumpAndSettle();
+}
+
 void main() {
   testWidgets('empty dashboard widget shows only the external link control', (
     tester,
@@ -163,8 +171,7 @@ void main() {
 
       for (final locale in AppLocalizations.supportedLocales) {
         await tester.pumpWidget(_subject(locale: locale, textScale: 1.6));
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 350));
+        await _loadReadableHealthSnapshot(tester);
         expect(
           find.byKey(const Key('dashboard-live-fitness-watch-slot')),
           findsOneWidget,
@@ -222,8 +229,7 @@ void main() {
             textScale: configuration.scale,
           ),
         );
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 350));
+        await _loadReadableHealthSnapshot(tester);
 
         final watchSlot = find.byKey(
           const Key('dashboard-live-fitness-watch-slot'),

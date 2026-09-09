@@ -11,6 +11,9 @@ void main() {
     expect(swift, contains('sample.device?.name'));
     expect(swift, contains('sample.device?.model'));
     expect(swift, contains('sample.device?.manufacturer'));
+    expect(swift, contains('sample.sourceRevision.productType'));
+    expect(swift, contains('normalizedProductType.hasPrefix("watch")'));
+    expect(swift, contains('sourceName'));
     expect(swift, contains('normalizedDevice.contains("apple watch")'));
     expect(swift, contains('attributes["wearableKind"] = "apple_watch"'));
   });

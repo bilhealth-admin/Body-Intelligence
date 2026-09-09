@@ -21,6 +21,11 @@ const _watchMetricKeys = <String>{
 /// Metrics are visible only while a real, authorized source is currently in a
 /// usable state. Stale readings retained after disconnect/revocation never
 /// make the watch look connected.
+///
+/// HealthKit and Health Connect select the authoritative source for each
+/// metric. Once a native wearable is verified, this face intentionally shows
+/// that connected-health total whether its selected record came from the phone
+/// or the watch; source provenance remains visible in Apps & Devices.
 bool liveHealthWatchCanShowMetrics(ConnectedHealthSnapshot snapshot) {
   final usableStatus = switch (snapshot.status) {
     ConnectedHealthStatus.ready ||
@@ -118,12 +123,26 @@ class _LiveHealthWatchState extends ConsumerState<LiveHealthWatch>
 
   ConnectedHealthSignalView? _signal(String key) {
     if (!liveHealthWatchCanShowMetrics(widget.snapshot)) return null;
+    final signals = key == 'steps' && widget.snapshot.stepHistory.isNotEmpty
+        ? widget.snapshot.stepHistory
+        : widget.snapshot.signals;
+    final today = DateTime(_now.year, _now.month, _now.day);
     ConnectedHealthSignalView? latest;
-    for (final signal in widget.snapshot.signals) {
-      if (signal.key != key ||
-          !liveHealthWatchSignalIsActual(signal) ||
-          !connectedHealthSignalHasWearableProvenance(signal)) {
+    for (final signal in signals) {
+      if (signal.key != key || !liveHealthWatchSignalIsActual(signal)) {
         continue;
+      }
+      // Step history is a per-day total, not a live sample. Showing an older
+      // day as today's watch reading would be misleading, so use today's
+      // aggregate only.
+      if (key == 'steps') {
+        final observed = signal.observedAt.toLocal();
+        final observedDay = DateTime(
+          observed.year,
+          observed.month,
+          observed.day,
+        );
+        if (observedDay != today) continue;
       }
       if (latest == null || signal.observedAt.isAfter(latest.observedAt)) {
         latest = signal;
