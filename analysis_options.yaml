@@ -16,6 +16,9 @@ analyzer:
     # of the project, making the release gate unnecessarily slow.
     - .bil-package-backups/**
     - .bil-package-evidence/**
+    # Preserved diagnostic bundle is a separate, incomplete Flutter snapshot.
+    # It is release evidence, not an application source root.
+    - ai_coach_debug_bundle/**
     - artifacts/**
     - build/**
 

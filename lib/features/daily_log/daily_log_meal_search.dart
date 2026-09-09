@@ -86,10 +86,11 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
     final uniqueResults = <Food>[];
     final identities = <String>{};
     for (final food in results) {
-      // This is an explicit search, not an anonymous/popular browse list.
-      // Preserve an authoritative result even when its name has no reviewed
-      // translation; foodName() will use the reviewed translation when one
-      // exists and otherwise keep the source name instead of hiding it.
+      // This is an explicit typed search, not the anonymous/popular browse
+      // surface. A trusted USDA hit must remain selectable even when BIL has
+      // no reviewed native display alias yet; hiding it turns a real cloud
+      // answer into a false "no result" state. The canonical provider name is
+      // preserved by [foodName] until a reviewed localization exists.
       final displayName = _displayFoodName(food, resultLocale);
       final identity = _mealFoodDisplayIdentity(food, displayName);
       if (identities.add(identity)) uniqueResults.add(food);
@@ -348,6 +349,7 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
   }
 
   void _selectFood(Food food, SearchController controller, String displayName) {
+    final returnQuery = controller.text.trim();
     _updateState(() {
       selectedFood = food;
       final sourceGrams = dailyLogAmountInGrams(
@@ -360,7 +362,10 @@ extension _DailyLogMealSearchPresentation on _DailyLogPageState {
         amount == amount.roundToDouble() ? 0 : 1,
       );
     });
-    controller.closeView(displayName);
+    // Keep the user's query authoritative so both the visible Back button and
+    // the platform back gesture can reopen the same result set. The selected
+    // food name is only a fallback for non-text entry points.
+    controller.closeView(returnQuery.isEmpty ? displayName : returnQuery);
     WidgetsBinding.instance.addPostFrameCallback((_) => _focusMealEntry());
   }
 

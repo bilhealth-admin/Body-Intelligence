@@ -161,6 +161,33 @@ export async function verifyPost(markerKey, expectedStatus) {
   ]);
 }
 
+export async function verifyDisposablePolicyAndPost() {
+  const state = readState();
+  const policies = await select(state.disposable.accessToken, 'bil_content_policies', {
+    select: 'version', active: 'eq.true', order: 'effective_at.desc', limit: '2',
+  });
+  if (policies.length !== 1) {
+    throw new Error('community_policy_active_version_precondition_failed');
+  }
+  const accepted = await select(
+    state.disposable.accessToken,
+    'bil_content_policy_acceptances',
+    {
+      select: 'policy_version',
+      user_id: `eq.${state.disposable.userId}`,
+      policy_version: `eq.${String(policies[0].version ?? '')}`,
+    },
+  );
+  if (accepted.length !== 1) {
+    throw new Error('disposable_policy_was_not_accepted_in_app');
+  }
+  await verifyPost('approvedPost', 'pending');
+  appendEvidence('cross-account-status.txt', [
+    'DISPOSABLE_POLICY_ACCEPTANCE_IN_APP_UI=PASS',
+    'DISPOSABLE_PENDING_POST_IN_APP_UI=PASS',
+  ]);
+}
+
 export async function verifyBlock() {
   const state = readState();
   const [blockRows, friendRows] = await Promise.all([

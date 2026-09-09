@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets(
-    'exercise controls stay editable without verified energy and apply no calories',
+    'exercise controls are visibly off and disabled without verified energy',
     (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -35,10 +35,10 @@ void main() {
       final macros = tester.widget<SwitchListTile>(
         find.byKey(const Key('exercise-calories-macros-switch')),
       );
-      expect(include.value, isTrue);
-      expect(include.onChanged, isNotNull);
-      expect(macros.value, isTrue);
-      expect(macros.onChanged, isNotNull);
+      expect(include.value, isFalse);
+      expect(include.onChanged, isNull);
+      expect(macros.value, isFalse);
+      expect(macros.onChanged, isNull);
       expect(
         find.byKey(const Key('exercise-energy-evidence-state')),
         findsOneWidget,

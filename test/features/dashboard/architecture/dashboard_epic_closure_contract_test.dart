@@ -27,12 +27,12 @@ void main() {
       'lib/features/dashboard/widgets/dashboard_grid_actions.dart',
     );
 
-    for (final boundary in const [
-      'PremiumDashboardBenchmark(',
-      'DashboardSummaryFactory.build(',
-    ]) {
+    for (final boundary in const ['PremiumDashboardBenchmark(']) {
       expect(grid, contains(boundary), reason: 'Missing boundary: $boundary');
     }
+
+    expect(grid, isNot(contains('DashboardSummaryFactory.build(')));
+    expect(grid, isNot(contains('PersonalHealthAiPanel(')));
 
     expect(grid, isNot(contains('DashboardBodyProfileSnapshot(')));
     expect(grid, isNot(contains('DashboardAnalyticsCenter(')));

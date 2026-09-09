@@ -2,7 +2,9 @@ import 'package:flutter/widgets.dart';
 
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy_community_moderation.dart';
+import '../../../app/localization/runtime_copy_community_social.dart';
 import '../../../app/localization/runtime_copy_extended.dart';
+import 'community_form_copy.dart';
 import 'community_media_locale_copy.dart';
 import 'community_safety_locale_copy.dart';
 
@@ -17,14 +19,21 @@ String communityTextForLanguage(String languageCode, String en, String ar) {
   final canonical =
       BilLocalePolicy.canonicalSupportedTag(languageCode) ?? languageCode;
   final code = canonical.toLowerCase();
-  if (code == 'ar') return ar;
   if (code == 'en') return en;
   final baseLanguage = code.split('-').first;
-  return CommunityModerationRuntimeCopy.resolve(en, canonical) ??
-      communityMediaText(canonical, en) ??
-      _communityCopy[baseLanguage]?[en] ??
-      communitySafetyText(canonical, en) ??
-      ExtendedRuntimeCopy.values[en]?[canonical] ??
+  final catalogEnglish = switch (en) {
+    'Read policy' => 'Review policy',
+    'Check again' => 'Retry',
+    _ => en,
+  };
+  return CommunitySocialRuntimeCopy.resolve(catalogEnglish, canonical) ??
+      (code == 'ar' ? ar : null) ??
+      CommunityFormCopy.resolve(catalogEnglish, canonical) ??
+      CommunityModerationRuntimeCopy.resolve(catalogEnglish, canonical) ??
+      communityMediaText(canonical, catalogEnglish) ??
+      _communityCopy[baseLanguage]?[catalogEnglish] ??
+      communitySafetyText(canonical, catalogEnglish) ??
+      ExtendedRuntimeCopy.values[catalogEnglish]?[canonical] ??
       en;
 }
 
@@ -97,6 +106,60 @@ const _communityCopy = <String, Map<String, String>>{
     'Abuse prevention': 'Prévention des abus',
     'Rate limits, human moderation, and metadata-only audit trails protect the community.':
         'Les limites de débit, la modération humaine et les journaux limités aux métadonnées protègent la communauté.',
+    'Retry': 'Réessayer',
+    'The policy could not be opened. Try again before accepting.':
+        'La politique n’a pas pu être ouverte. Réessayez avant de l’accepter.',
+    'Publishing, comments, and messages stay locked until you review and accept this version.':
+        'La publication, les commentaires et les messages restent verrouillés jusqu’à ce que vous examiniez et acceptiez cette version.',
+    'I have read and agree to this policy version.':
+        'J’ai lu et j’accepte cette version de la politique.',
+    'Checking Community policy…':
+        'Vérification de la politique de la communauté…',
+    'Publishing, comments, and messages stay locked until verification finishes.':
+        'La publication, les commentaires et les messages restent verrouillés jusqu’à la fin de la vérification.',
+    'Community policy could not be verified':
+        'Impossible de vérifier la politique de la communauté',
+    'Publishing, comments, and messages remain locked. Check your connection and retry.':
+        'La publication, les commentaires et les messages restent verrouillés. Vérifiez votre connexion et réessayez.',
+    'No active Community policy is available':
+        'Aucune politique de communauté active n’est disponible',
+    'Publishing, comments, and messages are locked until BIL publishes a production policy. No acceptance has been recorded.':
+        'La publication, les commentaires et les messages sont verrouillés jusqu’à ce que BIL publie une politique de production. Aucun consentement n’a été enregistré.',
+    'Community publishing is locked because no active policy is available.':
+        'La publication dans la communauté est verrouillée, car aucune politique active n’est disponible.',
+    'Community messages are locked because no active policy is available.':
+        'Les messages de la communauté sont verrouillés, car aucune politique active n’est disponible.',
+    'Review and accept the active Community policy before publishing.':
+        'Examinez et acceptez la politique active de la communauté avant de publier.',
+    'Review and accept the active Community policy before messaging.':
+        'Examinez et acceptez la politique active de la communauté avant d’envoyer des messages.',
+    'BIL could not verify your policy acceptance. Publishing remains locked.':
+        'BIL n’a pas pu vérifier votre acceptation de la politique. La publication reste verrouillée.',
+    'BIL could not verify your policy acceptance. Messaging remains locked.':
+        'BIL n’a pas pu vérifier votre acceptation de la politique. La messagerie reste verrouillée.',
+    'Your Community access is suspended. Publishing remains locked.':
+        'Votre accès à la communauté est suspendu. La publication reste verrouillée.',
+    'Your Community access is suspended. Messaging remains locked.':
+        'Votre accès à la communauté est suspendu. La messagerie reste verrouillée.',
+    'This Community action is unavailable because the relationship is blocked.':
+        'Cette action de la communauté est indisponible, car la relation est bloquée.',
+    'Messaging is unavailable because the relationship is blocked.':
+        'La messagerie est indisponible, car la relation est bloquée.',
+    'Posting and messages stay locked until verification finishes.':
+        'Les publications et les messages restent verrouillés jusqu’à la fin de la vérification.',
+    'Posting and messages remain locked. Check your connection and retry.':
+        'Les publications et les messages restent verrouillés. Vérifiez votre connexion et réessayez.',
+    'Community publishing is unavailable':
+        'La publication dans la communauté est indisponible',
+    'No active production policy could be verified. No acceptance has been recorded.':
+        'Aucune politique de production active n’a pu être vérifiée. Aucun consentement n’a été enregistré.',
+    'Review safety': 'Examiner la sécurité',
+    'Review the active Community policy':
+        'Examiner la politique active de la communauté',
+    'Posting and messages stay locked until you accept the active version.':
+        'Les publications et les messages restent verrouillés jusqu’à ce que vous acceptiez la version active.',
+    'Posting and messages stay locked until you accept {version}.':
+        'Les publications et les messages restent verrouillés jusqu’à ce que vous acceptiez {version}.',
     'Community is unavailable in this build and remains hidden until secure cloud configuration is complete.':
         'La communauté est indisponible dans cette version et reste masquée jusqu’à la fin de la configuration sécurisée du cloud.',
     'Who can see my profile': 'Qui peut voir mon profil',
@@ -238,6 +301,59 @@ const _communityCopy = <String, Map<String, String>>{
     'Abuse prevention': 'Prevención de abusos',
     'Rate limits, human moderation, and metadata-only audit trails protect the community.':
         'Los límites de uso, la moderación humana y los registros solo de metadatos protegen a la comunidad.',
+    'Retry': 'Reintentar',
+    'The policy could not be opened. Try again before accepting.':
+        'No se pudo abrir la política. Inténtalo de nuevo antes de aceptarla.',
+    'Publishing, comments, and messages stay locked until you review and accept this version.':
+        'Las publicaciones, los comentarios y los mensajes permanecen bloqueados hasta que revises y aceptes esta versión.',
+    'I have read and agree to this policy version.':
+        'He leído y acepto esta versión de la política.',
+    'Checking Community policy…': 'Comprobando la política de la comunidad…',
+    'Publishing, comments, and messages stay locked until verification finishes.':
+        'Las publicaciones, los comentarios y los mensajes permanecen bloqueados hasta que finalice la verificación.',
+    'Community policy could not be verified':
+        'No se pudo verificar la política de la comunidad',
+    'Publishing, comments, and messages remain locked. Check your connection and retry.':
+        'Las publicaciones, los comentarios y los mensajes permanecen bloqueados. Comprueba la conexión y vuelve a intentarlo.',
+    'No active Community policy is available':
+        'No hay una política de comunidad activa disponible',
+    'Publishing, comments, and messages are locked until BIL publishes a production policy. No acceptance has been recorded.':
+        'Las publicaciones, los comentarios y los mensajes están bloqueados hasta que BIL publique una política de producción. No se ha registrado ninguna aceptación.',
+    'Community publishing is locked because no active policy is available.':
+        'La publicación en la comunidad está bloqueada porque no hay una política activa disponible.',
+    'Community messages are locked because no active policy is available.':
+        'Los mensajes de la comunidad están bloqueados porque no hay una política activa disponible.',
+    'Review and accept the active Community policy before publishing.':
+        'Revisa y acepta la política activa de la comunidad antes de publicar.',
+    'Review and accept the active Community policy before messaging.':
+        'Revisa y acepta la política activa de la comunidad antes de enviar mensajes.',
+    'BIL could not verify your policy acceptance. Publishing remains locked.':
+        'BIL no pudo verificar que aceptaste la política. La publicación permanece bloqueada.',
+    'BIL could not verify your policy acceptance. Messaging remains locked.':
+        'BIL no pudo verificar que aceptaste la política. La mensajería permanece bloqueada.',
+    'Your Community access is suspended. Publishing remains locked.':
+        'Tu acceso a la comunidad está suspendido. La publicación permanece bloqueada.',
+    'Your Community access is suspended. Messaging remains locked.':
+        'Tu acceso a la comunidad está suspendido. La mensajería permanece bloqueada.',
+    'This Community action is unavailable because the relationship is blocked.':
+        'Esta acción de la comunidad no está disponible porque la relación está bloqueada.',
+    'Messaging is unavailable because the relationship is blocked.':
+        'La mensajería no está disponible porque la relación está bloqueada.',
+    'Posting and messages stay locked until verification finishes.':
+        'Las publicaciones y los mensajes permanecen bloqueados hasta que finalice la verificación.',
+    'Posting and messages remain locked. Check your connection and retry.':
+        'Las publicaciones y los mensajes permanecen bloqueados. Comprueba la conexión y vuelve a intentarlo.',
+    'Community publishing is unavailable':
+        'La publicación en la comunidad no está disponible',
+    'No active production policy could be verified. No acceptance has been recorded.':
+        'No se pudo verificar una política de producción activa. No se ha registrado ninguna aceptación.',
+    'Review safety': 'Revisar la seguridad',
+    'Review the active Community policy':
+        'Revisar la política activa de la comunidad',
+    'Posting and messages stay locked until you accept the active version.':
+        'Las publicaciones y los mensajes permanecen bloqueados hasta que aceptes la versión activa.',
+    'Posting and messages stay locked until you accept {version}.':
+        'Las publicaciones y los mensajes permanecen bloqueados hasta que aceptes {version}.',
     'Community is unavailable in this build and remains hidden until secure cloud configuration is complete.':
         'La comunidad no está disponible en esta versión y seguirá oculta hasta completar la configuración segura de la nube.',
     'Who can see my profile': 'Quién puede ver mi perfil',
@@ -377,6 +493,58 @@ const _communityCopy = <String, Map<String, String>>{
     'Abuse prevention': 'Kötüye kullanımı önleme',
     'Rate limits, human moderation, and metadata-only audit trails protect the community.':
         'İstek sınırları, insan moderasyonu ve yalnızca meta veri içeren denetim kayıtları topluluğu korur.',
+    'Retry': 'Tekrar dene',
+    'The policy could not be opened. Try again before accepting.':
+        'Politika açılamadı. Kabul etmeden önce tekrar deneyin.',
+    'Publishing, comments, and messages stay locked until you review and accept this version.':
+        'Bu sürümü inceleyip kabul edene kadar yayınlama, yorumlar ve mesajlar kilitli kalır.',
+    'I have read and agree to this policy version.':
+        'Bu politika sürümünü okudum ve kabul ediyorum.',
+    'Checking Community policy…': 'Topluluk politikası kontrol ediliyor…',
+    'Publishing, comments, and messages stay locked until verification finishes.':
+        'Doğrulama tamamlanana kadar yayınlama, yorumlar ve mesajlar kilitli kalır.',
+    'Community policy could not be verified':
+        'Topluluk politikası doğrulanamadı',
+    'Publishing, comments, and messages remain locked. Check your connection and retry.':
+        'Yayınlama, yorumlar ve mesajlar kilitli kalır. Bağlantınızı kontrol edip tekrar deneyin.',
+    'No active Community policy is available':
+        'Etkin bir Topluluk politikası mevcut değil',
+    'Publishing, comments, and messages are locked until BIL publishes a production policy. No acceptance has been recorded.':
+        'BIL bir üretim politikası yayınlayana kadar yayınlama, yorumlar ve mesajlar kilitlidir. Hiçbir kabul kaydedilmedi.',
+    'Community publishing is locked because no active policy is available.':
+        'Etkin bir politika olmadığı için Toplulukta yayınlama kilitlidir.',
+    'Community messages are locked because no active policy is available.':
+        'Etkin bir politika olmadığı için Topluluk mesajları kilitlidir.',
+    'Review and accept the active Community policy before publishing.':
+        'Yayınlamadan önce etkin Topluluk politikasını inceleyip kabul edin.',
+    'Review and accept the active Community policy before messaging.':
+        'Mesaj göndermeden önce etkin Topluluk politikasını inceleyip kabul edin.',
+    'BIL could not verify your policy acceptance. Publishing remains locked.':
+        'BIL politika kabulünüzü doğrulayamadı. Yayınlama kilitli kalır.',
+    'BIL could not verify your policy acceptance. Messaging remains locked.':
+        'BIL politika kabulünüzü doğrulayamadı. Mesajlaşma kilitli kalır.',
+    'Your Community access is suspended. Publishing remains locked.':
+        'Topluluk erişiminiz askıya alındı. Yayınlama kilitli kalır.',
+    'Your Community access is suspended. Messaging remains locked.':
+        'Topluluk erişiminiz askıya alındı. Mesajlaşma kilitli kalır.',
+    'This Community action is unavailable because the relationship is blocked.':
+        'İlişki engellendiği için bu Topluluk işlemi kullanılamıyor.',
+    'Messaging is unavailable because the relationship is blocked.':
+        'İlişki engellendiği için mesajlaşma kullanılamıyor.',
+    'Posting and messages stay locked until verification finishes.':
+        'Doğrulama tamamlanana kadar gönderiler ve mesajlar kilitli kalır.',
+    'Posting and messages remain locked. Check your connection and retry.':
+        'Gönderiler ve mesajlar kilitli kalır. Bağlantınızı kontrol edip tekrar deneyin.',
+    'Community publishing is unavailable':
+        'Toplulukta yayınlama kullanılamıyor',
+    'No active production policy could be verified. No acceptance has been recorded.':
+        'Etkin bir üretim politikası doğrulanamadı. Hiçbir kabul kaydedilmedi.',
+    'Review safety': 'Güvenliği incele',
+    'Review the active Community policy': 'Etkin Topluluk politikasını incele',
+    'Posting and messages stay locked until you accept the active version.':
+        'Etkin sürümü kabul edene kadar gönderiler ve mesajlar kilitli kalır.',
+    'Posting and messages stay locked until you accept {version}.':
+        '{version} sürümünü kabul edene kadar gönderiler ve mesajlar kilitli kalır.',
     'Community is unavailable in this build and remains hidden until secure cloud configuration is complete.':
         'Topluluk bu sürümde kullanılamaz ve güvenli bulut yapılandırması tamamlanana kadar gizli kalır.',
     'Who can see my profile': 'Profilimi kim görebilir',

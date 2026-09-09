@@ -13,6 +13,7 @@ import {
   verifyFriendRequest,
   verifyMessage,
   verifyPost,
+  verifyDisposablePolicyAndPost,
   verifyWriteDenied,
 } from './ios_plus8_canary/community.mjs';
 import {
@@ -47,6 +48,7 @@ const operations = {
   'verify-moderator-added': () => verifyModerator(true),
   'verify-moderator-removed': () => verifyModerator(false),
   'verify-approved-pending': () => verifyPost('approvedPost', 'pending'),
+  'verify-disposable-policy-and-post': verifyDisposablePolicyAndPost,
   'verify-approved': () => verifyPost('approvedPost', 'approved'),
   'verify-rejected-pending': () => verifyPost('rejectedPost', 'pending'),
   'verify-rejected': () => verifyPost('rejectedPost', 'rejected'),

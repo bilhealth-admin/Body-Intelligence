@@ -2,6 +2,14 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum SleepScheduleIssue {
+  invalidClock,
+  invalidGoal,
+  invalidWindDown,
+  emptyWindow,
+  goalExceedsWindow,
+}
+
 /// User-owned sleep schedule. Clock fields are local wall-clock values so
 /// recurring reminders follow timezone and DST changes instead of preserving
 /// a stale UTC offset.
@@ -32,6 +40,62 @@ final class SleepSchedule {
   final int wakeMinute;
   final int goalMinutes;
   final int windDownMinutes;
+
+  /// Nominal local-wall-clock window, including schedules that cross
+  /// midnight. The operating system owns timezone/DST adjustment for the
+  /// recurring reminder; this value is intentionally not a UTC duration.
+  int get scheduledWindowMinutes {
+    final bed = bedHour * 60 + bedMinute;
+    final wake = wakeHour * 60 + wakeMinute;
+    return (wake - bed) % Duration.minutesPerDay;
+  }
+
+  SleepScheduleIssue? get issue {
+    if (bedHour < 0 ||
+        bedHour > 23 ||
+        bedMinute < 0 ||
+        bedMinute > 59 ||
+        wakeHour < 0 ||
+        wakeHour > 23 ||
+        wakeMinute < 0 ||
+        wakeMinute > 59) {
+      return SleepScheduleIssue.invalidClock;
+    }
+    // BIL is an adult (18+) product. Planning goals start at the current
+    // evidence-based adult floor of seven hours. This does not censor or
+    // reinterpret a shorter actual sleep record.
+    if (goalMinutes < 7 * 60 || goalMinutes > 12 * 60) {
+      return SleepScheduleIssue.invalidGoal;
+    }
+    if (windDownMinutes < 0 || windDownMinutes > 120) {
+      return SleepScheduleIssue.invalidWindDown;
+    }
+    if (scheduledWindowMinutes == 0) return SleepScheduleIssue.emptyWindow;
+    if (goalMinutes > scheduledWindowMinutes) {
+      return SleepScheduleIssue.goalExceedsWindow;
+    }
+    return null;
+  }
+
+  /// Whether the value is structurally safe to preserve in the v1 store.
+  ///
+  /// Earlier BIL releases allowed planning goals down to four hours and did
+  /// not compare the goal with the scheduled window. Keeping that historical
+  /// shape readable prevents a stricter planning rule from silently replacing
+  /// an existing user schedule with defaults. New saves still use [isValid].
+  bool get isStorable =>
+      bedHour >= 0 &&
+      bedHour <= 23 &&
+      bedMinute >= 0 &&
+      bedMinute <= 59 &&
+      wakeHour >= 0 &&
+      wakeHour <= 23 &&
+      wakeMinute >= 0 &&
+      wakeMinute <= 59 &&
+      goalMinutes >= 4 * 60 &&
+      goalMinutes <= 12 * 60 &&
+      windDownMinutes >= 0 &&
+      windDownMinutes <= 120;
 
   SleepSchedule copyWith({
     bool? enabled,
@@ -74,25 +138,13 @@ final class SleepSchedule {
         goalMinutes: value['goalMinutes'] as int,
         windDownMinutes: value['windDownMinutes'] as int,
       );
-      return schedule.isValid ? schedule : null;
+      return schedule.isStorable ? schedule : null;
     } on Object {
       return null;
     }
   }
 
-  bool get isValid =>
-      bedHour >= 0 &&
-      bedHour <= 23 &&
-      bedMinute >= 0 &&
-      bedMinute <= 59 &&
-      wakeHour >= 0 &&
-      wakeHour <= 23 &&
-      wakeMinute >= 0 &&
-      wakeMinute <= 59 &&
-      goalMinutes >= 4 * 60 &&
-      goalMinutes <= 12 * 60 &&
-      windDownMinutes >= 0 &&
-      windDownMinutes <= 120;
+  bool get isValid => issue == null;
 }
 
 class SleepScheduleStore {

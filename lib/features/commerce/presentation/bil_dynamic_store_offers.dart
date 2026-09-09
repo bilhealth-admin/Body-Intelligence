@@ -33,6 +33,9 @@ class BilDynamicStoreOffers extends StatefulWidget {
     this.loading = false,
     this.purchaseInProgress = false,
     this.restoreInProgress = false,
+    this.purchaseEnabled = true,
+    this.purchaseStatusMessage,
+    this.purchaseStatusIsError = false,
     this.currentPlan = CommercePlan.free,
     this.initialFocus,
     super.key,
@@ -47,6 +50,16 @@ class BilDynamicStoreOffers extends StatefulWidget {
   final bool loading;
   final bool purchaseInProgress;
   final bool restoreInProgress;
+
+  /// The verified store service owns this gate. The display surface never
+  /// guesses that a stale product can be purchased.
+  final bool purchaseEnabled;
+
+  /// Plain-language feedback from the verified purchase boundary. This is
+  /// deliberately separate from entitlement state: a local callback grants
+  /// no access until the server verifies the receipt.
+  final String? purchaseStatusMessage;
+  final bool purchaseStatusIsError;
   final CommercePlan currentPlan;
   final String? initialFocus;
 
@@ -303,6 +316,9 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
               label: _copy('continue'),
               price: selectedOffer.localizedPrice,
               loading: controlsLocked,
+              enabled: widget.purchaseEnabled,
+              statusMessage: widget.purchaseStatusMessage,
+              statusIsError: widget.purchaseStatusIsError,
               onPressed: () => widget.onPurchaseRequested(selectedOffer),
             ),
           ),

@@ -3,6 +3,10 @@ import 'dart:async';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/repositories/food_repository.dart';
+import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
+import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/foods/providers/food_provider.dart';
 import 'package:body_intelligence_log/features/nutrition/food_page.dart';
 import 'package:body_intelligence_log/features/nutrition/services/food_runtime_search_authority.dart';
@@ -48,6 +52,17 @@ void main() {
             foodsProvider.overrideWith((ref) => Stream.value(const [])),
             favoriteFoodsProvider.overrideWith((ref) => Stream.value(const [])),
             recentFoodsProvider.overrideWith((ref) => Stream.value(const [])),
+            verifiedSubscriptionStateProvider.overrideWithValue(
+              AsyncData(
+                SubscriptionState(
+                  plan: CommercePlan.free,
+                  entitlements: FreePlan.entitlements,
+                  authority: EntitlementAuthority.verifiedServer,
+                  isPurchasable: true,
+                  canRestorePurchases: true,
+                ),
+              ),
+            ),
           ],
           child: const MaterialApp(
             localizationsDelegates: [

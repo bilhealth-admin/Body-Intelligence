@@ -39,6 +39,17 @@ void main() {
     expect(value.mealTargets['breakfast']?.proteinPercent, 35);
   });
 
+  test('concurrent day and meal saves retain both updates', () async {
+    await Future.wait([
+      repository.saveDay(DateTime.monday, weekday),
+      repository.saveMeal('breakfast', breakfast),
+    ]);
+
+    final value = await repository.read();
+    expect(value.dayTargets[DateTime.monday]?.calories, 2200);
+    expect(value.mealTargets['breakfast']?.calories, 500);
+  });
+
   test('removes overrides and rejects invalid macro totals', () async {
     await repository.saveDay(DateTime.monday, weekday);
     await repository.saveDay(DateTime.monday, null);

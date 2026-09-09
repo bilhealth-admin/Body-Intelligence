@@ -2,9 +2,11 @@ class CoachLanguageResolution {
   const CoachLanguageResolution({
     required this.languageTag,
     required this.detected,
+    this.usedPreviousInput = false,
   });
   final String languageTag;
   final bool detected;
+  final bool usedPreviousInput;
 }
 
 /// Selects response language independently from the UI locale. It does not
@@ -16,12 +18,28 @@ class CoachLanguageResolver {
     required String input,
     required String uiLocale,
     String? detectedLanguageTag,
+    String? previousClearLanguageTag,
   }) {
     final value = input.trim();
     final uiTag = _canonicalTag(uiLocale);
     final spokenTag = _supportedLanguageHint(detectedLanguageTag);
     if (spokenTag != null) {
       return CoachLanguageResolution(languageTag: spokenTag, detected: true);
+    }
+    final arabicLetterCount = RegExp(
+      r'[\u0600-\u06ff]',
+    ).allMatches(value).length;
+    final latinLetterCount = RegExp(
+      r'[A-Za-z\u00c0-\u024f]',
+    ).allMatches(value).length;
+    if (arabicLetterCount > 0 && latinLetterCount > arabicLetterCount * 2) {
+      final dominantLatin = _resolveLatin(value);
+      if (dominantLatin != null) {
+        return CoachLanguageResolution(
+          languageTag: dominantLatin,
+          detected: true,
+        );
+      }
     }
     if (RegExp(r'[\u0600-\u06ff]').hasMatch(value)) {
       if (RegExp(
@@ -97,6 +115,14 @@ class CoachLanguageResolver {
           : latin;
       return CoachLanguageResolution(languageTag: resolved, detected: true);
     }
+    final previousTag = _supportedLanguageHint(previousClearLanguageTag);
+    if (previousTag != null) {
+      return CoachLanguageResolution(
+        languageTag: previousTag,
+        detected: true,
+        usedPreviousInput: true,
+      );
+    }
     return CoachLanguageResolution(languageTag: uiTag, detected: false);
   }
 
@@ -128,6 +154,7 @@ class CoachLanguageResolver {
 
   String? _resolveLatin(String input) {
     final compact = input.toLowerCase().replaceAll(RegExp(r'[^a-z]'), '');
+    if (const {'hi', 'hello', 'hey'}.contains(compact)) return 'en';
     if (RegExp(
       r'^(?:ass?alamu?a?la[yi]kum|sala?muala[yi]kum|waala[yi]kumu?s?s?ala?m)$',
     ).hasMatch(compact)) {
@@ -151,6 +178,16 @@ class CoachLanguageResolver {
         .toSet();
     const markers = <String, Set<String>>{
       'en': {
+        'can',
+        'you',
+        'please',
+        'open',
+        'show',
+        'view',
+        'explain',
+        'answer',
+        'plan',
+        'workout',
         'how',
         'many',
         'calories',

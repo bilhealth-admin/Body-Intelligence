@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "status": "VERIFIED_LIVE_HTTP_200_LOCAL_CONTENT_SHA256_MATCH",
+  "verification_scope": "PUBLIC_ENDPOINT_AVAILABILITY_AND_DEPLOYED_STATIC_ASSET_BYTE_IDENTITY",
+  "legal_approval": "NOT_CLAIMED",
+  "method": "GET_ONLY_NO_STORE_OR_SITE_MUTATION",
+  "verified_at_utc": "2026-09-09T00:39:15Z",
+  "domain": "bilhealth.com",
+  "local_asset": {
+    "path": "public_site/app.js",
+    "bytes": 86324,
+    "sha256": "3cf6a9c0fd621628d6b43be5a17da1526893875c3a2b0700d1628549d279332a"
+  },
+  "remote_asset": {
+    "url": "https://www.bilhealth.com/app.js",
+    "final_url": "https://www.bilhealth.com/app.js",
+    "http_status": 200,
+    "content_type": "text/javascript",
+    "bytes": 86324,
+    "sha256": "3cf6a9c0fd621628d6b43be5a17da1526893875c3a2b0700d1628549d279332a",
+    "byte_identical_to_local": true
+  },
+  "routes": [
+    {
+      "name": "privacy",
+      "path": "/privacy",
+      "url": "https://www.bilhealth.com/privacy",
+      "final_url": "https://www.bilhealth.com/privacy",
+      "http_status": 200,
+      "redirected": false,
+      "content_type": "text/html",
+      "bytes": 3211,
+      "response_sha256": "3f70112767bd73fbf69bf1f5d1613e122d4cb601d05b195cebcf9c552ec6a8aa"
+    },
+    {
+      "name": "terms",
+      "path": "/terms",
+      "url": "https://www.bilhealth.com/terms",
+      "final_url": "https://www.bilhealth.com/terms",
+      "http_status": 200,
+      "redirected": false,
+      "content_type": "text/html",
+      "bytes": 3211,
+      "response_sha256": "3f70112767bd73fbf69bf1f5d1613e122d4cb601d05b195cebcf9c552ec6a8aa"
+    },
+    {
+      "name": "support",
+      "path": "/support",
+      "url": "https://www.bilhealth.com/support",
+      "final_url": "https://www.bilhealth.com/support",
+      "http_status": 200,
+      "redirected": false,
+      "content_type": "text/html",
+      "bytes": 3211,
+      "response_sha256": "3f70112767bd73fbf69bf1f5d1613e122d4cb601d05b195cebcf9c552ec6a8aa"
+    },
+    {
+      "name": "account_deletion",
+      "path": "/account-deletion",
+      "url": "https://www.bilhealth.com/account-deletion",
+      "final_url": "https://www.bilhealth.com/account-deletion",
+      "http_status": 200,
+      "redirected": false,
+      "content_type": "text/html",
+      "bytes": 3211,
+      "response_sha256": "3f70112767bd73fbf69bf1f5d1613e122d4cb601d05b195cebcf9c552ec6a8aa"
+    }
+  ],
+  "content_assertions": {
+    "privacy_en_adults_only": "BIL is intended only for adults aged 18 or older",
+    "privacy_ar_adults_only": "التطبيق مخصص فقط للبالغين بعمر 18 عامًا فأكثر",
+    "terms_en_minimum_age": "You must be at least 18 years old",
+    "terms_ar_minimum_age": "يجب أن يكون عمرك 18 عامًا على الأقل"
+  },
+  "evidence_report": "docs/release/BIL_STORE_BRAND_LIVE_READONLY_AUDIT_2026-09-08.md"
+}

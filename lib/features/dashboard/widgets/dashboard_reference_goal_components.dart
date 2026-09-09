@@ -535,14 +535,6 @@ class _ReferenceMacroColumn extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  TextSpan(
-                    text: ' / ${hasGoal ? macro.goal : '—'}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
                 ],
               ),
             ),

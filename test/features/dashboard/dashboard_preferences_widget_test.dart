@@ -66,8 +66,12 @@ void main() {
 
     expect(find.text('Macros'), findsOneWidget);
     expect(find.byKey(const Key('dashboard-preferences-done')), findsOneWidget);
-    expect(DashboardSectionIds.all, hasLength(10));
+    expect(DashboardSectionIds.all, hasLength(9));
     expect(DashboardSectionIds.all, isNot(contains('daily_intelligence')));
+    expect(
+      DashboardSectionIds.all,
+      isNot(contains(DashboardSectionIds.progress)),
+    );
     for (final section in DashboardSectionIds.all) {
       final sectionFinder = find.byKey(Key('dashboard-section-$section'));
       expect(sectionFinder, findsOneWidget);
@@ -218,7 +222,6 @@ void main() {
           'Quick log',
           'Discover',
           'Personal intelligence',
-          'Progress',
           'Connected health',
           'Body Twin',
           'A private conversation with your health intelligence',

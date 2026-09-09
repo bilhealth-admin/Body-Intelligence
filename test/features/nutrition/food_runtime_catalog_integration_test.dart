@@ -247,6 +247,26 @@ void main() {
     expect(outcome.foods.single.name, 'Watermelon, raw');
   });
 
+  test(
+    'trusted translated search keeps the canonical USDA result identity',
+    () async {
+      final network = _FakeNetworkSearchResolver(<UnifiedFood>[
+        _food(id: 'usda:172672', name: 'Teff, cooked'),
+      ]);
+      final authority = FoodRuntimeSearchAuthority(
+        local,
+        catalogResolver: () async => _FakeCatalog(const []),
+        networkSearchResolver: network,
+      );
+
+      final outcome = await authority.searchDetailed('تيف مطبوخ');
+
+      expect(network.calls, 1);
+      expect(outcome.foods.single.name, 'Teff, cooked');
+      expect(outcome.foods.single.uuid, 'usda:172672');
+    },
+  );
+
   test('local search hit suppresses trusted network enrichment', () async {
     await local.addFood(
       name: 'Local oats',
@@ -271,6 +291,32 @@ void main() {
 
     expect(network.calls, 0);
     expect(outcome.foods.single.name, 'Local oats');
+  });
+
+  test('valid rise query is not hijacked by a local rice row', () async {
+    await local.addFood(
+      name: 'Rice, cooked',
+      category: 'food',
+      calories: 130,
+      protein: 2.7,
+      carbs: 28,
+      fats: .3,
+      servingSize: 100,
+      servingUnit: 'g',
+    );
+    final network = _FakeNetworkSearchResolver(<UnifiedFood>[
+      _food(id: 'usda:rise-bar', name: 'RISE protein bar'),
+    ]);
+    final authority = FoodRuntimeSearchAuthority(
+      local,
+      catalogResolver: () async => _FakeCatalog(const []),
+      networkSearchResolver: network,
+    );
+
+    final outcome = await authority.searchDetailed('rise');
+
+    expect(network.calls, 1);
+    expect(outcome.foods.map((food) => food.name), ['RISE protein bar']);
   });
 
   test('trusted network outage keeps the offline miss non-fatal', () async {

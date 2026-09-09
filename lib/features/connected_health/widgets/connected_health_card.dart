@@ -100,11 +100,13 @@ class ConnectedHealthCard extends ConsumerStatefulWidget {
     required this.languageCode,
     this.compact = false,
     this.dashboardCompact = false,
+    this.hiddenSignalKeys = const <String>{},
   });
 
   final String languageCode;
   final bool compact;
   final bool dashboardCompact;
+  final Set<String> hiddenSignalKeys;
 
   @override
   ConsumerState<ConnectedHealthCard> createState() =>
@@ -171,6 +173,7 @@ class _ConnectedHealthCardState extends ConsumerState<ConnectedHealthCard>
             languageCode: widget.languageCode,
             compact: widget.compact,
             dashboardCompact: widget.dashboardCompact,
+            hiddenSignalKeys: widget.hiddenSignalKeys,
             onManage: () => context.push('/connected-health'),
             onSync: snapshot.status == ConnectedHealthStatus.syncing
                 ? null
@@ -213,6 +216,7 @@ class _ConnectedHealthContent extends StatelessWidget {
     required this.languageCode,
     required this.compact,
     required this.dashboardCompact,
+    required this.hiddenSignalKeys,
     required this.onManage,
     required this.onSync,
   });
@@ -222,6 +226,7 @@ class _ConnectedHealthContent extends StatelessWidget {
   final String languageCode;
   final bool compact;
   final bool dashboardCompact;
+  final Set<String> hiddenSignalKeys;
   final VoidCallback onManage;
   final VoidCallback? onSync;
 
@@ -361,7 +366,11 @@ class _ConnectedHealthContent extends StatelessWidget {
     var premiumLabelAvailable = true;
     for (final signal
         in snapshot.signals
-            .where((signal) => !BilHealthScope.excludesKey(signal.key))
+            .where(
+              (signal) =>
+                  !BilHealthScope.excludesKey(signal.key) &&
+                  !hiddenSignalKeys.contains(signal.key),
+            )
             .take(4)) {
       final nutritionSignal = signal.key.startsWith('nutrition');
       pages.add(

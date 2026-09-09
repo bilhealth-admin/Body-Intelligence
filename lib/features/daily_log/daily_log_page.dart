@@ -234,9 +234,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       onPopInvokedWithResult: (didPop, _) {
         if (didPop || mutationBusy) return;
         if (selectedFood != null) {
-          _updateState(() {
-            selectedFood = null;
-          });
+          _returnFromSelectedFoodToSearch();
           return;
         }
         if (mealSearchActive || widget.focusMealEntry) {
@@ -303,10 +301,7 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                             child: BackButton(
                               onPressed: mutationBusy
                                   ? null
-                                  : () {
-                                      _updateState(() => selectedFood = null);
-                                      _openFoodSearchAfterBuild();
-                                    },
+                                  : _returnFromSelectedFoodToSearch,
                             ),
                           ),
                         ),

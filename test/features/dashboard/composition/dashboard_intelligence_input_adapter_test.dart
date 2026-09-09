@@ -89,6 +89,37 @@ void main() {
       expect(input.insightContexts, isEmpty);
     });
 
+    test(
+      'ignores prior-day rows in today inputs but retains history',
+      () {
+        final priorDay = DateTime(2026, 7, 31, 23, 59);
+        final now = DateTime(2026, 8, 1, 0, 1);
+        final priorMeal = _meal(priorDay);
+        final priorWater = _water(priorDay);
+
+        final input = const DashboardIntelligenceInputAdapter().adapt(
+          now: now,
+          profile: _profile(now),
+          weights: const [],
+          todayMeals: [priorMeal],
+          todayWater: [priorWater],
+          allMeals: [priorMeal],
+          allWater: [priorWater],
+          dailyLogs: const [],
+          todayContexts: const [],
+          allContexts: const [],
+          memories: const [],
+          skippedWeightToday: false,
+          planSetting: null,
+        );
+
+        expect(input.todayMeals, isEmpty);
+        expect(input.todayWater, isEmpty);
+        expect(input.allMeals.single.dayKey, '2026-07-31');
+        expect(input.allWater.single.dayKey, '2026-07-31');
+      },
+    );
+
     test('bridges private diary tags without exposing free-text notes', () {
       final at = DateTime(2026, 7, 31, 8, 30);
       final input = const DashboardIntelligenceInputAdapter().adapt(

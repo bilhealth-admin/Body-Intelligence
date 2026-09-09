@@ -1,3 +1,17 @@
+// Assertion interoperability fix: assertion-compat-v2.
+// Corrects AT-flag handling and verifies the App Attest nonce signature.
+// Keeps cert-runtime-v1, authdata-compat-v1, and the existing legacy policy.
+// App Attest authenticator-format compatibility: authdata-compat-v1.
+// Cumulative: retains cert-runtime-v1 and all signature, nonce, identity,
+// environment, challenge, replay, authentication, quota and grant checks.
+// IMPORTANT POLICY CHANGE (explicit opt-in): BIL_APP_ATTEST_ALLOW_LEGACY=true
+// permits cryptographically valid legacy attestations with no extension map.
+// Such attestations DO NOT prove a bundle version / launch category. Store the
+// literal marker "legacy-unreported", never a guessed or client-supplied version.
+// Extended attestations still require an allowed version and app category.
+// Certificate runtime compatibility patch: cert-runtime-v1.
+// Preserve every existing trust check; only replace an unsupported primitive.
+import { p256, p384, p521 } from "npm:@noble/curves@1.9.7/nist.js";
 import { createClient } from "npm:@supabase/supabase-js@2.112.3";
 import {
   createPublicKey,
@@ -346,19 +360,78 @@ async function verifyCertificateSignature(
     fixedDerInteger(derSignature.children[0], coordinateBytes),
     fixedDerInteger(derSignature.children[1], coordinateBytes),
   );
-  const key = await crypto.subtle.importKey(
-    "jwk",
-    issuerPublicKey as JsonWebKey,
-    { name: "ECDSA", namedCurve: curve },
-    false,
-    ["verify"],
-  );
-  return await crypto.subtle.verify(
-    { name: "ECDSA", hash: signatureHash },
-    key,
-    rawSignature,
-    tbs.encoded as BufferSource,
-  );
+  try {
+    const key = await crypto.subtle.importKey(
+      "jwk",
+      issuerPublicKey as JsonWebKey,
+      { name: "ECDSA", namedCurve: curve },
+      false,
+      ["verify"],
+    );
+    // A false signature result remains false. Never retry a failed signature
+    // as though it were an unsupported runtime operation.
+    return await crypto.subtle.verify(
+      { name: "ECDSA", hash: signatureHash },
+      key,
+      rawSignature,
+      tbs.encoded as BufferSource,
+    );
+  } catch (error) {
+    // Some Deno versions reject valid ECDSA curve/hash combinations (for
+    // example P-384 with SHA-256) with NotSupportedError. This is a runtime
+    // limitation, not permission to skip signature verification.
+    const isUnsupported = error !== null && typeof error === "object" &&
+      "name" in error && error.name === "NotSupportedError";
+    if (!isUnsupported) throw error;
+
+    const verifier = curve === "P-256" ? p256 : curve === "P-384" ? p384 : p521;
+    let issuerPoint: Uint8Array;
+    try {
+      // SEC1 uncompressed public key, with the exact coordinate width.
+      issuerPoint = concatBytes(
+        Uint8Array.of(0x04),
+        fromBase64Url(text(issuerPublicKey.x), coordinateBytes),
+        fromBase64Url(text(issuerPublicKey.y), coordinateBytes),
+      );
+    } catch {
+      throw new AppAttestFailure("invalid_certificate_issuer_key", 403);
+    }
+
+    // Hash EXACTLY once using the certificate's declared hash, not the
+    // default hash of the signing curve. The OID and DER checks above remain.
+    const digest = new Uint8Array(
+      await crypto.subtle.digest(
+        signatureHash,
+        tbs.encoded as BufferSource,
+      ),
+    );
+    let valid = false;
+    try {
+      valid = verifier.verify(rawSignature, digest, issuerPoint, {
+        prehash: false,
+        lowS: false, // X.509 permits both valid ECDSA S values (like OpenSSL).
+        format: "compact",
+      }) === true;
+    } catch {
+      // An invalid point, scalar or signature never becomes a trusted key.
+      throw new AppAttestFailure("invalid_certificate_signature", 403);
+    }
+    try {
+      // Public algorithm metadata only. No certificates, keys or requests.
+      console.info(
+        "BIL_APP_ATTEST_CERT_FALLBACK " + JSON.stringify({
+          patch: "cert-runtime-v1",
+          verifier: "noble-curves-1.9.7",
+          curve,
+          hash: signatureHash,
+          signature_valid: valid,
+        }),
+      );
+    } catch {
+      // Logging must not change the verification result.
+    }
+    return valid;
+  }
 }
 
 const APP_ATTEST_NONCE_OID = Uint8Array.from([
@@ -417,6 +490,135 @@ function nonceExtension(certificate: Uint8Array): Uint8Array {
   return octets[0];
 }
 
+const LEGACY_BUNDLE_VERSION = "legacy-unreported";
+
+function logAuthDataShape(
+  operation: "register" | "assert",
+  stage: "credential_key" | "extensions",
+  authData: Uint8Array,
+  offset: number,
+  error: unknown,
+): void {
+  try {
+    console.error(
+      "BIL_APP_ATTEST_AUTHDATA_DETAIL " + JSON.stringify({
+        patch: "authdata-compat-v1",
+        operation,
+        stage,
+        length: authData.length,
+        flags: authData.length > 32 ? authData[32] : null,
+        offset,
+        bytes_remaining: Math.max(0, authData.length - offset),
+        code: error instanceof AppAttestFailure
+          ? error.code
+          : "parse_exception",
+      }),
+    );
+  } catch { /* Logging must never change validation. */ }
+}
+
+/**
+ * Legacy data ends immediately after the credential key (registration), or
+ * after the 37-byte header (assertion). Never read CBOR beyond that end.
+ * Apple's published extended example includes a map with ED clear. Therefore
+ * parse an actually present, single trailing map as well as ED-marked data.
+ * Missing data with ED set, non-map data, duplicates and trailing bytes fail.
+ * The complete bytes remain covered by the nonce/signature checks below.
+ */
+function readAuthenticatorExtensions(
+  authData: Uint8Array,
+  offset: number,
+  operation: "register" | "assert",
+): Map<CborValue, CborValue> | null {
+  try {
+    if (
+      !Number.isSafeInteger(offset) || offset < 37 || offset > authData.length
+    ) {
+      throw new AppAttestFailure("invalid_authenticator_extensions", 403);
+    }
+    if (offset === authData.length) {
+      if ((authData[32] & 0x80) !== 0) {
+        throw new AppAttestFailure("authenticator_extensions_missing", 403);
+      }
+      return null;
+    }
+    const extensions = decodeCbor(authData.slice(offset));
+    if (
+      !(extensions instanceof Map) || extensions.size === 0 ||
+      [...extensions.keys()].some((key) => typeof key !== "string")
+    ) {
+      throw new AppAttestFailure("invalid_authenticator_extensions", 403);
+    }
+    return extensions;
+  } catch (error) {
+    logAuthDataShape(operation, "extensions", authData, offset, error);
+    if (error instanceof AppAttestFailure) throw error;
+    throw new AppAttestFailure("invalid_authenticator_extensions", 403);
+  }
+}
+
+/** Distribution category is NOT a generic pass/fail flag.
+ * Apple's categories: 2=TestFlight, 3=development signing, 4=App Store.
+ * 1 is an OS executable, not a third-party BIL app. Other categories fail.
+ */
+function verifyAppExtensions(
+  extensions: Map<CborValue, CborValue> | null,
+  environment: "development" | "production",
+  allowedBundleVersions: Set<string>,
+  allowLegacy: boolean,
+  requireExtensions = false,
+): { bundleVersion: string; validationCategory: number | null } {
+  if (extensions === null) {
+    if (requireExtensions) {
+      throw new AppAttestFailure("authenticator_extensions_downgrade", 403);
+    }
+    if (!allowLegacy) {
+      throw new AppAttestFailure("legacy_attestation_not_enabled", 403);
+    }
+    return { bundleVersion: LEGACY_BUNDLE_VERSION, validationCategory: null };
+  }
+  const value = extensions.get("apple_validation_category_01");
+  const category = value instanceof Uint8Array && value.length === 4
+    ? new DataView(value.buffer, value.byteOffset, value.byteLength).getUint32(
+      0,
+      true,
+    )
+    : value;
+  const allowedCategories = environment === "production" ? [2, 4] : [3];
+  if (
+    typeof category !== "number" || !Number.isInteger(category) ||
+    !allowedCategories.includes(category)
+  ) {
+    throw new AppAttestFailure("invalid_validation_category", 403);
+  }
+  const bundleVersion = extensions.get("apple_bundle_version_01");
+  if (
+    typeof bundleVersion !== "string" || bundleVersion.length === 0 ||
+    bundleVersion === LEGACY_BUNDLE_VERSION ||
+    !allowedBundleVersions.has(bundleVersion)
+  ) {
+    throw new AppAttestFailure("bundle_version_mismatch", 403);
+  }
+  return { bundleVersion, validationCategory: category };
+}
+
+function logVerifiedAuthData(
+  operation: "register" | "assert",
+  legacy: boolean,
+): void {
+  try {
+    console.info(
+      "BIL_APP_ATTEST_AUTHDATA_VERIFIED " + JSON.stringify({
+        patch: "authdata-compat-v1",
+        operation,
+        format: legacy ? "legacy_without_extensions" : "with_extensions",
+        // This describes the proof, not a supplied version or a successful DB write.
+        extension_checks_available: !legacy,
+      }),
+    );
+  } catch { /* Never alter a verification result for logging. */ }
+}
+
 function configuration() {
   const appId = env("BIL_APP_ATTEST_APP_ID");
   const environments = new Set(
@@ -438,7 +640,104 @@ function configuration() {
   ) {
     throw new AppAttestFailure("app_attest_server_not_configured", 503);
   }
-  return { appId, environments, bundleVersions };
+  const legacySetting = env("BIL_APP_ATTEST_ALLOW_LEGACY");
+  if (
+    legacySetting !== "" && legacySetting !== "true" &&
+    legacySetting !== "false"
+  ) {
+    throw new AppAttestFailure("invalid_legacy_attestation_configuration", 503);
+  }
+  return {
+    appId,
+    environments,
+    bundleVersions,
+    allowLegacy: legacySetting === "true",
+  };
+}
+
+// Diagnostic v2: bounded, allow-listed metadata only. Never log a raw error,
+// certificate, public/private key, request, header, token, user ID, or secret.
+function logCertificateDiagnostic(stage: string, error: unknown): void {
+  try {
+    const value = error as
+      | { name?: unknown; code?: unknown; message?: unknown }
+      | null;
+    const allowedNames = new Set([
+      "Error",
+      "TypeError",
+      "RangeError",
+      "SyntaxError",
+      "DataError",
+      "InvalidAccessError",
+      "NotSupportedError",
+      "OperationError",
+      "InvalidCharacterError",
+      "NotImplemented",
+    ]);
+    const allowedCodes = new Set([
+      "ERR_NOT_IMPLEMENTED",
+      "ERR_METHOD_NOT_IMPLEMENTED",
+      "ERR_INVALID_ARG_TYPE",
+      "ERR_INVALID_ARG_VALUE",
+      "ERR_CRYPTO_INVALID_JWK",
+      "ERR_CRYPTO_UNSUPPORTED_OPERATION",
+      "ERR_CRYPTO_INVALID_KEY_OBJECT_TYPE",
+      "ERR_CRYPTO_INVALID_KEYTYPE",
+      "ERR_OSSL_UNSUPPORTED",
+      "ERR_OSSL_EVP_UNSUPPORTED",
+      "ERR_OSSL_ASN1_TOO_LONG",
+      "ERR_OSSL_ASN1_HEADER_TOO_LONG",
+      "ERR_OSSL_ASN1_NESTED_ASN1_ERROR",
+      "ERR_OSSL_ASN1_WRONG_TAG",
+      "ERR_OSSL_ASN1_NOT_ENOUGH_DATA",
+      "ERR_OSSL_PEM_NO_START_LINE",
+      "invalid_certificate",
+      "invalid_der",
+      "invalid_certificate_signature",
+      "unsupported_certificate_signature",
+      "invalid_certificate_issuer_key",
+      "certificate_signature_algorithm_mismatch",
+    ]);
+    const name = typeof value?.name === "string" ? value.name : "";
+    const nativeCode = typeof value?.code === "string" ? value.code : "";
+    // Read the message only to classify it. Never emit the message itself.
+    const message = typeof value?.message === "string"
+      ? value.message.toLowerCase()
+      : "";
+    let reason = "unclassified_exception";
+    if (error instanceof AppAttestFailure) {
+      reason = "verification_rule_rejected";
+    } else if (/not implemented|not supported|unsupported/.test(message)) {
+      reason = "runtime_unsupported_operation";
+    } else if (/jwk|key_ops|extractable|invalid key/.test(message)) {
+      reason = "key_format_or_usage_error";
+    } else if (
+      /asn1|asn\.1|pem|der|x509|x\.509|certificate|parsing|parse|decode/.test(
+        message,
+      )
+    ) {
+      reason = "certificate_or_encoding_error";
+    } else if (/curve|elliptic|ecdsa/.test(message)) {
+      reason = "elliptic_curve_error";
+    }
+    const runtimeVersion = typeof Deno !== "undefined" &&
+        typeof Deno.version?.deno === "string" &&
+        /^[0-9A-Za-z.+-]{1,40}$/.test(Deno.version.deno)
+      ? Deno.version.deno
+      : "unknown";
+    console.error(
+      "BIL_APP_ATTEST_CERT_DETAIL " + JSON.stringify({
+        diagnostic_version: 2,
+        stage,
+        error_name: allowedNames.has(name) ? name : "Other",
+        native_code: allowedCodes.has(nativeCode) ? nativeCode : "unlisted",
+        reason,
+        deno_version: runtimeVersion,
+      }),
+    );
+  } catch {
+    // A logging error must never change the original verification outcome.
+  }
 }
 
 function certificateIsCurrent(certificate: X509Certificate, now: number) {
@@ -460,6 +759,7 @@ export async function verifyAttestation({
   appId,
   allowedEnvironments,
   allowedBundleVersions,
+  allowLegacy = false,
   now = Date.now(),
 }: {
   attestationObject: Uint8Array;
@@ -468,6 +768,7 @@ export async function verifyAttestation({
   appId: string;
   allowedEnvironments: Set<string>;
   allowedBundleVersions: Set<string>;
+  allowLegacy?: boolean;
   now?: number;
 }): Promise<VerifiedAttestation> {
   const decoded = decodeCbor(attestationObject);
@@ -488,20 +789,41 @@ export async function verifyAttestation({
   let intermediate: X509Certificate;
   let root: X509Certificate;
   let certificateChainValid = false;
+  let certificateStage = "parse_leaf_certificate";
   try {
     leaf = new X509Certificate(leafBytes);
+    certificateStage = "parse_intermediate_certificate";
     intermediate = new X509Certificate(intermediateBytes);
+    certificateStage = "parse_root_certificate";
     root = new X509Certificate(APPLE_APP_ATTEST_ROOT);
-    const leafIssuer = intermediate.publicKey.export({
+    certificateStage = "read_intermediate_public_key";
+    const leafIssuerKey = intermediate.publicKey;
+    certificateStage = "export_intermediate_public_key";
+    const leafIssuer = leafIssuerKey.export({
       format: "jwk",
     }) as JsonObject;
-    const intermediateIssuer = root.publicKey.export({
+    certificateStage = "read_root_public_key";
+    const intermediateIssuerKey = root.publicKey;
+    certificateStage = "export_root_public_key";
+    const intermediateIssuer = intermediateIssuerKey.export({
       format: "jwk",
     }) as JsonObject;
-    certificateChainValid =
-      await verifyCertificateSignature(leafBytes, leafIssuer) &&
-      await verifyCertificateSignature(intermediateBytes, intermediateIssuer);
+    certificateStage = "verify_leaf_signature";
+    certificateChainValid = await verifyCertificateSignature(
+      leafBytes,
+      leafIssuer,
+    );
+    // Preserve the original short-circuit: do not verify the intermediate if
+    // the leaf signature is false.
+    if (certificateChainValid) {
+      certificateStage = "verify_intermediate_signature";
+      certificateChainValid = await verifyCertificateSignature(
+        intermediateBytes,
+        intermediateIssuer,
+      );
+    }
   } catch (error) {
+    logCertificateDiagnostic(certificateStage, error);
     if (error instanceof AppAttestFailure) throw error;
     throw new AppAttestFailure("invalid_certificate", 403);
   }
@@ -566,18 +888,27 @@ export async function verifyAttestation({
   }
 
   const credentialDecoder = new CborDecoder(authData, credentialEnd);
-  const credentialKey = credentialDecoder.read();
-  const extensionsDecoder = new CborDecoder(
+  let credentialKey: CborValue;
+  try {
+    credentialKey = credentialDecoder.read();
+    if (!(credentialKey instanceof Map)) {
+      throw new AppAttestFailure("invalid_credential_public_key", 403);
+    }
+  } catch (error) {
+    logAuthDataShape(
+      "register",
+      "credential_key",
+      authData,
+      credentialEnd,
+      error,
+    );
+    throw error;
+  }
+  const extensions = readAuthenticatorExtensions(
     authData,
     credentialDecoder.position,
+    "register",
   );
-  const extensions = extensionsDecoder.read();
-  if (
-    extensionsDecoder.position !== authData.length ||
-    !(credentialKey instanceof Map) || !(extensions instanceof Map)
-  ) {
-    throw new AppAttestFailure("invalid_authenticator_extensions", 403);
-  }
   if (
     mapValue(credentialKey, 1) !== 2 || mapValue(credentialKey, 3) !== -7 ||
     mapValue(credentialKey, -1) !== 1
@@ -589,28 +920,12 @@ export async function verifyAttestation({
   if (coseX.length !== 32 || coseY.length !== 32) {
     throw new AppAttestFailure("invalid_credential_public_key", 403);
   }
-  const validationCategory = mapValue(
+  const { bundleVersion } = verifyAppExtensions(
     extensions,
-    "apple_validation_category_01",
+    environment,
+    allowedBundleVersions,
+    allowLegacy,
   );
-  const validationCategoryValue = validationCategory instanceof Uint8Array &&
-      validationCategory.length === 4
-    ? new DataView(
-      validationCategory.buffer,
-      validationCategory.byteOffset,
-      validationCategory.byteLength,
-    ).getUint32(0, true)
-    : validationCategory;
-  if (validationCategoryValue !== 1) {
-    throw new AppAttestFailure("invalid_validation_category", 403);
-  }
-  const bundleVersion = mapValue(extensions, "apple_bundle_version_01");
-  if (
-    typeof bundleVersion !== "string" ||
-    !allowedBundleVersions.has(bundleVersion)
-  ) {
-    throw new AppAttestFailure("bundle_version_mismatch", 403);
-  }
 
   const expectedNonce = await sha256(concatBytes(authData, clientDataHash));
   if (!equalBytes(nonceExtension(leafBytes), expectedNonce)) {
@@ -640,6 +955,7 @@ export async function verifyAttestation({
     throw new AppAttestFailure("key_id_mismatch", 403);
   }
 
+  logVerifiedAuthData("register", extensions === null);
   return {
     publicKeyJwk,
     receiptBase64: base64(receipt),
@@ -654,12 +970,20 @@ export async function verifyAssertion({
   previousCounter,
   appId,
   clientData,
+  environment = "production",
+  allowedBundleVersions = new Set<string>(),
+  allowLegacy = false,
+  requireExtensions = false,
 }: {
   assertion: Uint8Array;
   publicKeyJwk: JsonObject;
   previousCounter: number;
   appId: string;
   clientData: Uint8Array;
+  environment?: "development" | "production";
+  allowedBundleVersions?: Set<string>;
+  allowLegacy?: boolean;
+  requireExtensions?: boolean;
 }): Promise<number> {
   const decoded = decodeCbor(assertion);
   const signature = asBytes(
@@ -671,10 +995,24 @@ export async function verifyAssertion({
     "invalid_assertion",
   );
   if (
-    authData.length !== 37 || signature.length < 64 || signature.length > 80
+    authData.length < 37 || authData.length > 12_288 ||
+    signature.length < 64 || signature.length > 80
   ) {
     throw new AppAttestFailure("invalid_assertion", 403);
   }
+  // App Attest assertions use a 37-byte header, optionally followed by Apple's
+  // extension map. Actual Apple assertions may retain AT (0x40) with no
+  // attested-credential section. Do NOT reject or skip bytes because of AT.
+  // readAuthenticatorExtensions below still rejects malformed/trailing data;
+  // the signature covers the complete ORIGINAL bytes, including the flags.
+  const extensions = readAuthenticatorExtensions(authData, 37, "assert");
+  verifyAppExtensions(
+    extensions,
+    environment,
+    allowedBundleVersions,
+    allowLegacy,
+    requireExtensions,
+  );
   if (!equalBytes(authData.slice(0, 32), await sha256(encoder.encode(appId)))) {
     throw new AppAttestFailure("app_id_mismatch", 403);
   }
@@ -687,12 +1025,17 @@ export async function verifyAssertion({
     throw new AppAttestFailure("assertion_counter_replay", 403);
   }
   const clientDataHash = await sha256(clientData);
+  // Apple signs the nonce as an ECDSA/SHA-256 message. First reconstruct nonce
+  // = SHA256(authenticatorData || SHA256(clientData)), then verify the signature
+  // over that nonce. node:crypto.verify("sha256", ...) applies the signing hash.
+  // Do not accept the old single-hash construction as an alternate scheme.
+  const nonce = await sha256(concatBytes(authData, clientDataHash));
   try {
     const publicKey = createPublicKey({ key: publicKeyJwk, format: "jwk" });
     if (
       !verifySignature(
         "sha256",
-        concatBytes(authData, clientDataHash),
+        nonce,
         publicKey,
         signature,
       )
@@ -703,6 +1046,20 @@ export async function verifyAssertion({
     if (error instanceof AppAttestFailure) throw error;
     throw new AppAttestFailure("invalid_assertion_public_key", 403);
   }
+  logVerifiedAuthData("assert", extensions === null);
+  try {
+    // Proof verification only, not a database-commit or AI-provider success log.
+    // Structural metadata only; no request, key, signature, token or user ID.
+    console.info(
+      "BIL_APP_ATTEST_ASSERTION_VERIFIED " + JSON.stringify({
+        patch: "assertion-compat-v2",
+        auth_data_bytes: authData.length,
+        flags: authData[32],
+        extensions_present: extensions !== null,
+        signed_message: "nonce",
+      }),
+    );
+  } catch { /* Logging must not change the verification outcome. */ }
   return counter;
 }
 
@@ -897,6 +1254,7 @@ async function registerOperation(
     appId: config.appId,
     allowedEnvironments: config.environments,
     allowedBundleVersions: config.bundleVersions,
+    allowLegacy: config.allowLegacy,
   });
   const { error } = await admin.from("bil_app_attest_keys").insert({
     owner_id: ownerId,
@@ -939,13 +1297,22 @@ async function assertionOperation(
     throw new AppAttestFailure("challenge_key_mismatch", 403);
   }
   const { data: key, error: keyError } = await admin.from("bil_app_attest_keys")
-    .select("public_key_jwk,sign_count,active")
+    .select("public_key_jwk,sign_count,active,bundle_version,environment")
     .eq("owner_id", ownerId)
     .eq("key_id", keyId)
     .eq("active", true)
     .maybeSingle();
   if (keyError) throw new AppAttestFailure("app_attest_key_lookup_failed", 503);
   if (!key) throw new AppAttestFailure("app_attest_key_not_registered", 403);
+  const keyEnvironment = key.environment;
+  if (
+    (keyEnvironment !== "production" && keyEnvironment !== "development") ||
+    !config.environments.has(keyEnvironment)
+  ) {
+    throw new AppAttestFailure("app_attest_environment_mismatch", 403);
+  }
+  // Only a key explicitly recorded as legacy may issue extension-less assertions.
+  const keyRequiresExtensions = key.bundle_version !== LEGACY_BUNDLE_VERSION;
   const clientData = encoder.encode(
     `bil-app-attest-v1\n${challenge.id}\n${challenge.action}\n${challenge.payload_digest}\n${challenge.challenge}`,
   );
@@ -955,6 +1322,10 @@ async function assertionOperation(
     previousCounter: Number(key.sign_count),
     appId: config.appId,
     clientData,
+    environment: keyEnvironment,
+    allowedBundleVersions: config.bundleVersions,
+    allowLegacy: config.allowLegacy,
+    requireExtensions: keyRequiresExtensions,
   });
   const { data: updated, error: updateError } = await admin.from(
     "bil_app_attest_keys",
@@ -986,9 +1357,15 @@ export async function handler(
   if (request.method !== "POST") {
     return json({ error: "method_not_allowed" }, 405);
   }
+  let diagnosticOperation = "unparsed";
   try {
     const body = await request.json() as JsonObject;
     const operation = text(body.operation);
+    diagnosticOperation =
+      operation === "challenge" || operation === "register" ||
+        operation === "assert"
+        ? operation
+        : "invalid";
     const authenticate = dependencies.authenticate ?? authenticated;
     if (operation === "challenge") {
       return await challengeOperation(body, request, authenticate);
@@ -1004,6 +1381,19 @@ export async function handler(
     const failure = error instanceof AppAttestFailure
       ? error
       : new AppAttestFailure("app_attest_verification_failed", 403);
+    // Diagnostic only: log static error codes and an allow-listed operation.
+    // Never log request bodies, headers, tokens, keys, or raw exceptions.
+    try {
+      console.error(
+        "BIL_APP_ATTEST_FAILURE " + JSON.stringify({
+          operation: diagnosticOperation,
+          code: failure.code,
+          status: failure.status,
+        }),
+      );
+    } catch {
+      // A logging failure must not change the original verification response.
+    }
     return json(
       { allowed: false, trustworthy: false, error: failure.code },
       failure.status,

@@ -39,7 +39,10 @@ import 'package:body_intelligence_log/features/history/progress_page.dart';
 import 'package:body_intelligence_log/features/profile/premium_profile_page.dart';
 import 'package:body_intelligence_log/features/profile/profile_summary_page.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
+import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_lifecycle.dart';
+import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:body_intelligence_log/features/settings/settings_page.dart';
 import 'package:body_intelligence_log/features/settings/local_export_range_page.dart';
@@ -60,6 +63,15 @@ import 'visual_evidence_font.dart';
 
 const _skipVisualPixelComparison = bool.fromEnvironment(
   'BIL_SKIP_VISUAL_PIXELS',
+);
+
+final _visualVerifiedFreeSubscription = SubscriptionState(
+  plan: CommercePlan.free,
+  entitlements: FreePlan.entitlements,
+  authority: EntitlementAuthority.verifiedServer,
+  lifecycle: SubscriptionLifecycle.inactive,
+  isPurchasable: true,
+  canRestorePurchases: true,
 );
 
 final class _UnavailableHealthGateway implements ConnectedHealthGateway {
@@ -224,6 +236,13 @@ void main() {
           ),
           mealVisionUsageProvider.overrideWithValue(
             const AsyncData(MealVisionUsageSnapshot.unavailable()),
+          ),
+          // Golden captures must describe a deterministic, server-verified
+          // Free account. Falling through to the live verifier turns every
+          // protected preview into a transient Retry state and records an
+          // infrastructure failure as the product's intended UI.
+          verifiedSubscriptionStateProvider.overrideWithValue(
+            AsyncData(_visualVerifiedFreeSubscription),
           ),
           liveHealthNowProvider.overrideWithValue(
             () => DateTime(2026, 8, 5, 9, 41, 12),

@@ -59,9 +59,12 @@ void main() {
   test(
     'authenticated repository covers privacy social safety and moderation loops',
     () {
-      final repository = source(
-        'lib/features/community/data/community_repository.dart',
-      );
+      final repository = <String>[
+        source('lib/features/community/data/community_repository.dart'),
+        source(
+          'lib/features/community/data/community_social_repository_mixin.dart',
+        ),
+      ].join('\n');
       for (final method in <String>[
         'searchProfiles',
         'saveMyProfile',

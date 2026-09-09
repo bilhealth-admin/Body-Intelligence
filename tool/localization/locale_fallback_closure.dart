@@ -11,7 +11,11 @@ import 'package:body_intelligence_log/app/localization/runtime_copy_fitness_watc
 import 'package:body_intelligence_log/app/localization/runtime_copy_connected_health.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_platform_conversation.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_moderation.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_community_social.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_admin_notifications.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_sleep_schedule.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_form_copy.dart';
+import 'package:body_intelligence_log/features/community/presentation/community_safety_locale_copy.dart';
 
 const extendedLocaleTags = <String>{
   'de',
@@ -122,7 +126,12 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     ...ConnectedHealthRuntimeCopy.sources,
     ...PlatformConversationRuntimeCopy.sources,
     ...CommunityModerationRuntimeCopy.sources,
+    ...CommunitySocialRuntimeCopy.sources,
     ...AdminNotificationRuntimeCopy.values.keys,
+    ...SleepScheduleRuntimeCopy.sources,
+    ...CommunityFormCopy.catalogSources,
+    ...communitySafetyEnglishKeys,
+    ...communityPolicyEnglishKeys,
   };
   final required = await _requiredRuntimeSources();
   final missing =

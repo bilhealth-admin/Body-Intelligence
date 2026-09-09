@@ -76,9 +76,9 @@
     "terms_path": "/terms",
     "support_path": "/support",
     "account_deletion_path": "/account-deletion",
-    "status": "LIVE_HTTP_200_LOCAL_CONTENT_SHA256_MATCH_VERIFIED_2026_09_06_LEGAL_APPROVAL_NOT_CLAIMED",
+    "status": "LIVE_HTTP_200_LOCAL_CONTENT_SHA256_MATCH_VERIFIED_2026_09_08_LEGAL_APPROVAL_NOT_CLAIMED",
     "legal_approval": "NOT_CLAIMED",
-    "publication_verification_evidence": "docs/release/BIL_EPIC15_PUBLICATION_VERIFICATION_2026-09-06.json"
+    "publication_verification_evidence": "docs/release/BIL_EPIC15_PUBLICATION_VERIFICATION_2026-09-08.json"
   },
   "subscriptions": {
     "group": "OWNER_INPUT_REQUIRED_APPLE_SUBSCRIPTION_GROUP",

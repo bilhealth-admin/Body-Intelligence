@@ -15,6 +15,7 @@ import 'app/analytics/bil_launch_event.dart';
 import 'app/localization/app_localizations.dart';
 import 'app/localization/bil_locale_policy.dart';
 import 'app/router/app_router.dart';
+import 'app/services/app_resume_dashboard_coordinator.dart';
 import 'app/services/app_switcher_privacy_shield.dart';
 import 'app/services/app_observability.dart';
 import 'app/services/app_settings_provider.dart';
@@ -381,11 +382,23 @@ class BILApp extends ConsumerWidget {
             child: AiCoachResetNoticeCoordinator(
               child: InactivityReminderCoordinator(
                 child: BilAppleCredentialLifecycleCoordinator(
-                  child: AppSwitcherPrivacyShield(
-                    child: Semantics(
-                      container: true,
-                      label: AppLocalizations.of(context).get('app_title'),
-                      child: content,
+                  child: AppResumeDashboardCoordinator(
+                    onMeaningfulResume: () {
+                      final current = AppRouter
+                          .router
+                          .routerDelegate
+                          .currentConfiguration
+                          .uri;
+                      if (current.path != '/dashboard') {
+                        AppRouter.router.go('/dashboard');
+                      }
+                    },
+                    child: AppSwitcherPrivacyShield(
+                      child: Semantics(
+                        container: true,
+                        label: AppLocalizations.of(context).get('app_title'),
+                        child: content,
+                      ),
                     ),
                   ),
                 ),

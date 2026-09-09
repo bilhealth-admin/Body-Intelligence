@@ -180,6 +180,7 @@ class LocalCoachCommandParser {
       'kg',
       'وزني',
       'وزن',
+      'اوزان',
       'كغ',
       'كيلو',
       'poids',
@@ -206,18 +207,41 @@ class LocalCoachCommandParser {
           ),
         ];
       }
-      final hasWeightActionIntent = _contains(value, const [
+      final hasWeightHistoryIntent = _contains(value, const [
+        'open weight',
+        'open my weight',
+        'view weight history',
+        'view my weight history',
+        'show weight history',
+        'show my weight history',
+        'افتح سجل الوزن',
+        'استعرض سجل وزني',
+        'استعرض سجل اوزاني',
+        'اعرض سجل وزني',
+        'اعرض سجل اوزاني',
+        'تاريخ وزني',
+        'تاريخ اوزاني',
+      ]);
+      if (hasWeightHistoryIntent) {
+        return [
+          IntelligenceAction(
+            id: 'open-weight-history',
+            type: IntelligenceActionType.navigate,
+            label: tr('Open weight history', 'فتح سجل الأوزان'),
+            requiresConfirmation: false,
+            payload: const {'target': 'weight_history'},
+          ),
+        ];
+      }
+      final hasWeightCheckInIntent = _contains(value, const [
         'log weight',
         'record weight',
         'add weight',
-        'open weight',
-        'open my weight',
         'weight check-in',
         'سجل الوزن',
         'اضف الوزن',
-        'افتح سجل الوزن',
       ]);
-      if (hasWeightActionIntent) {
+      if (hasWeightCheckInIntent) {
         return [
           IntelligenceAction(
             id: 'review-weight',

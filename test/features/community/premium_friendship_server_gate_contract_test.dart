@@ -64,8 +64,22 @@ void main() {
         RegExp(
           r"path: '/community(?:/[^']*)?'[\s\S]{0,260}PremiumGateFeature\.community",
         ).allMatches(router).length,
-        10,
+        13,
       );
+      for (final route in <String>[
+        '/community/code',
+        '/community/code/scan',
+        '/community/member/:code',
+      ]) {
+        expect(
+          router,
+          matches(
+            RegExp(
+              "path: '$route'[\\s\\S]{0,260}PremiumGateFeature\\.community",
+            ),
+          ),
+        );
+      }
       expect(
         router,
         matches(

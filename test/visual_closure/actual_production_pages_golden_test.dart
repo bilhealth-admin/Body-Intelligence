@@ -21,6 +21,7 @@ import 'package:body_intelligence_log/features/community/presentation/community_
 import 'package:body_intelligence_log/features/community/presentation/community_messages_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_notifications_page.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
+import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_model.dart';
 import 'package:body_intelligence_log/features/connected_health/connected_health_page.dart';
@@ -64,6 +65,13 @@ const _skipVisualPixelComparison = bool.fromEnvironment(
 );
 
 final _visualNow = DateTime(2026, 8, 14, 9, 41, 12);
+
+final _visualAcceptedCommunityPolicy = CommunityContentPolicy.fromJson({
+  'version': 'community-policy-v1',
+  'locale_code': 'en',
+  'document_url': 'https://www.bilhealth.com/community-guidelines',
+  'effective_at': '2026-09-08T00:00:00Z',
+});
 
 Future<void> _settleRecipeCardFacts(WidgetTester tester) async {
   Finder pendingFacts() => find.byWidgetPredicate(
@@ -174,6 +182,22 @@ final class _VisualCommunityRepository extends CommunityRepository {
   Future<CommunityProfile?> loadMyProfile() async => profile;
 
   @override
+  Future<CommunitySocialIdentity> loadSocialIdentity() async =>
+      const CommunitySocialIdentity(
+        handle: 'bil_qa_member',
+        chosen: true,
+        discoverable: true,
+      );
+
+  @override
+  Future<CommunityPolicyState> loadCommunityPolicyState({
+    required String localeCode,
+  }) async => CommunityPolicyState.accepted(
+    _visualAcceptedCommunityPolicy,
+    acceptedVersion: _visualAcceptedCommunityPolicy.version,
+  );
+
+  @override
   Future<void> saveMyProfile({
     required String displayName,
     required String localeCode,
@@ -224,14 +248,16 @@ final class _VisualCommunityRepository extends CommunityRepository {
     {
       'user_id': otherId,
       'display_name': 'BIL QA Partner',
+      'handle': 'bil_qa_partner',
       'bio': 'Non-personal community search fixture',
       'avatar_url': null,
     },
   ];
 
   @override
-  Future<void> requestFriend(String addresseeId) async {
+  Future<CommunityFriendRequestStatus> requestFriend(String addresseeId) async {
     if (addresseeId != otherId) throw StateError('Unknown visual profile');
+    return CommunityFriendRequestStatus.pending;
   }
 
   @override
@@ -1638,7 +1664,6 @@ void main() {
     ('quick_log', 'Quick log'),
     ('discover', 'Discover'),
     ('best_action', 'Personal intelligence'),
-    ('progress', 'Progress'),
     ('connected_health', 'Connected health'),
     ('body_twin', 'Body Twin'),
   ];

@@ -1,5 +1,6 @@
 part of 'intelligence_center_engine.dart';
 
+// Pure scope classifiers extracted unchanged from the engine coordinator.
 bool _has(String value, List<String> markers) => markers.any(value.contains);
 bool _isGreeting(String v) => _has(v, const [
   'مرحبا',
@@ -160,8 +161,3 @@ bool _isAllowedScope(String v) => _has(v, const [
   'app',
   'log',
 ]);
-
-String _legacyLocale(bool arabic) => switch (arabic) {
-  true => 'ar',
-  false => 'en',
-};

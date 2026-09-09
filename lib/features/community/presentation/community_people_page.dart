@@ -9,19 +9,25 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/bil_locale_policy.dart';
+import '../../../app/localization/bil_written_language_resolver.dart';
 import '../../../app/localization/runtime_copy.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
+import '../../../shared/widgets/chat_history_viewport.dart';
 import '../../commerce/domain/commerce_entitlement.dart';
 import '../../commerce/domain/subscription_state.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../admin/services/ai_coach_admin_service.dart';
 import '../data/community_repository.dart';
+import '../domain/community_content_policy.dart';
 import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
 import '../services/contact_picker_service.dart';
+import 'community_chat_runtime_copy.dart';
+import 'community_copy.dart';
 import 'community_invite_copy.dart';
 
 part 'community_chat_page.dart';
+part 'community_people_widgets.dart';
 
 class CommunityPeoplePage extends ConsumerStatefulWidget {
   const CommunityPeoplePage({this.repository, super.key});
@@ -38,6 +44,7 @@ class _CommunityPeoplePageState extends ConsumerState<CommunityPeoplePage> {
   Future<List<Map<String, dynamic>>> _results = Future.value(const []);
   final Set<String> _pendingRequests = <String>{};
   final Set<String> _sendingRequests = <String>{};
+  final Map<String, CommunityFriendRequestStatus> _relationshipStates = {};
   bool _pickingContact = false;
   String _lastQuery = '';
 
@@ -217,13 +224,18 @@ class _CommunityPeoplePageState extends ConsumerState<CommunityPeoplePage> {
     }
     setState(() => _sendingRequests.add(userId));
     try {
-      await repository.requestFriend(userId);
+      final status = await repository.requestFriend(userId);
       if (!mounted) return;
-      setState(() => _pendingRequests.add(userId));
+      setState(() {
+        _relationshipStates[userId] = status;
+        if (status == CommunityFriendRequestStatus.pending) {
+          _pendingRequests.add(userId);
+        }
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            _copy(
+          content: Text(switch (status) {
+            CommunityFriendRequestStatus.pending => _copy(
               context,
               'تم إرسال الطلب.',
               'Request sent.',
@@ -231,7 +243,31 @@ class _CommunityPeoplePageState extends ConsumerState<CommunityPeoplePage> {
               'Solicitud enviada.',
               'İstek gönderildi.',
             ),
-          ),
+            CommunityFriendRequestStatus.incoming => _copy(
+              context,
+              'أرسل لك هذا العضو طلبًا بالفعل. راجعه في الطلبات.',
+              'This member already sent you a request. Review it in Requests.',
+              'Ce membre vous a déjà envoyé une demande. Consultez-la dans Demandes.',
+              'Este miembro ya te envió una solicitud. Revísala en Solicitudes.',
+              'Bu üye size zaten istek gönderdi. İstekler bölümünde inceleyin.',
+            ),
+            CommunityFriendRequestStatus.accepted => _copy(
+              context,
+              'أنتما صديقان بالفعل.',
+              'You are already friends.',
+              'Vous êtes déjà amis.',
+              'Ya sois amigos.',
+              'Zaten arkadaşsınız.',
+            ),
+            CommunityFriendRequestStatus.declined => _copy(
+              context,
+              'لا يمكن إعادة هذا الطلب الآن.',
+              'This request cannot be reopened right now.',
+              'Cette demande ne peut pas être rouverte maintenant.',
+              'Esta solicitud no se puede reabrir ahora.',
+              'Bu istek şu anda yeniden açılamaz.',
+            ),
+          }),
         ),
       );
     } catch (_) {
@@ -307,6 +343,21 @@ class _CommunityPeoplePageState extends ConsumerState<CommunityPeoplePage> {
             'Kişileri bul',
           ),
         ),
+        actions: [
+          IconButton(
+            key: const Key('community-scan-friend-code'),
+            onPressed: () => context.push('/community/code/scan'),
+            tooltip: _copy(
+              context,
+              'مسح رمز صديق',
+              'Scan Friend Code',
+              'Scanner un code ami',
+              'Escanear código de amigo',
+              'Arkadaş kodunu tara',
+            ),
+            icon: const Icon(Icons.qr_code_scanner_rounded),
+          ),
+        ],
       ),
       body: _repository == null
           ? Center(
@@ -343,11 +394,11 @@ class _CommunityPeoplePageState extends ConsumerState<CommunityPeoplePage> {
                             label: Text(
                               _copy(
                                 context,
-                                'اسم BIL',
-                                'BIL name',
-                                'Nom BIL',
-                                'Nombre BIL',
-                                'BIL adı',
+                                'اسم مستخدم BIL',
+                                'BIL username',
+                                'Identifiant BIL',
+                                'Usuario BIL',
+                                'BIL kullanıcı adı',
                               ),
                             ),
                           ),
@@ -409,11 +460,11 @@ class _CommunityPeoplePageState extends ConsumerState<CommunityPeoplePage> {
                           label: Text(
                             _copy(
                               context,
-                              'اسم BIL',
-                              'BIL name',
-                              'Nom BIL',
-                              'Nombre BIL',
-                              'BIL adı',
+                              'اسم مستخدم BIL',
+                              'BIL username',
+                              'Identifiant BIL',
+                              'Usuario BIL',
+                              'BIL kullanıcı adı',
                             ),
                           ),
                         ),
@@ -432,11 +483,11 @@ class _CommunityPeoplePageState extends ConsumerState<CommunityPeoplePage> {
                       prefixIcon: const Icon(Icons.search_rounded),
                       hintText: _copy(
                         context,
-                        'الاسم',
-                        'Display name',
-                        'Nom',
-                        'Nombre',
-                        'Ad',
+                        'اسم المستخدم',
+                        'Username',
+                        'Identifiant',
+                        'Usuario',
+                        'Kullanıcı adı',
                       ),
                     ),
                   ),
@@ -508,64 +559,109 @@ class _CommunityPeoplePageState extends ConsumerState<CommunityPeoplePage> {
                               networkUrl: row['avatar_url'] as String?,
                             ),
                             title: Text(row['display_name'] as String),
-                            subtitle: row['bio'] == null
-                                ? null
-                                : Text(
-                                    row['bio'] as String,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                            subtitle: Text(
+                              '@${row['handle']}',
+                              textDirection: TextDirection.ltr,
+                              maxLines: 1,
+                              softWrap: false,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                             trailing: friendsUnlocked
-                                ? IconButton.filledTonal(
-                                    tooltip:
-                                        _pendingRequests.contains(
-                                          row['user_id'],
-                                        )
-                                        ? _copy(
-                                            context,
-                                            'قيد الانتظار',
-                                            'Pending',
-                                            'En attente',
-                                            'Pendiente',
-                                            'Beklemede',
-                                          )
-                                        : _copy(
-                                            context,
-                                            'إرسال طلب',
-                                            'Send request',
-                                            'Envoyer',
-                                            'Enviar',
-                                            'İstek gönder',
+                                ? _relationshipStates[row['user_id']] ==
+                                          CommunityFriendRequestStatus.incoming
+                                      ? FilledButton.tonal(
+                                          onPressed: () => context.push(
+                                            '/community/connections',
                                           ),
-                                    icon:
-                                        _pendingRequests.contains(
-                                          row['user_id'],
-                                        )
-                                        ? const Icon(Icons.schedule_rounded)
-                                        : _sendingRequests.contains(
-                                            row['user_id'],
-                                          )
-                                        ? const SizedBox.square(
-                                            dimension: 18,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
+                                          child: Text(
+                                            _copy(
+                                              context,
+                                              'مراجعة',
+                                              'Review',
+                                              'Voir',
+                                              'Revisar',
+                                              'İncele',
                                             ),
-                                          )
-                                        : const Icon(
-                                            Icons.person_add_alt_1_rounded,
                                           ),
-                                    onPressed:
-                                        _pendingRequests.contains(
-                                              row['user_id'],
-                                            ) ||
-                                            _sendingRequests.contains(
-                                              row['user_id'],
-                                            )
-                                        ? null
-                                        : () => _requestFriend(
-                                            row['user_id'] as String,
-                                          ),
-                                  )
+                                        )
+                                      : IconButton.filledTonal(
+                                          tooltip:
+                                              switch (_relationshipStates[row['user_id']]) {
+                                                CommunityFriendRequestStatus
+                                                    .pending =>
+                                                  _copy(
+                                                    context,
+                                                    'قيد الانتظار',
+                                                    'Pending',
+                                                    'En attente',
+                                                    'Pendiente',
+                                                    'Beklemede',
+                                                  ),
+                                                CommunityFriendRequestStatus
+                                                    .accepted =>
+                                                  _copy(
+                                                    context,
+                                                    'صديق',
+                                                    'Friend',
+                                                    'Ami',
+                                                    'Amigo',
+                                                    'Arkadaş',
+                                                  ),
+                                                CommunityFriendRequestStatus
+                                                    .declined =>
+                                                  _copy(
+                                                    context,
+                                                    'غير متاح',
+                                                    'Unavailable',
+                                                    'Indisponible',
+                                                    'No disponible',
+                                                    'Kullanılamıyor',
+                                                  ),
+                                                _ => _copy(
+                                                  context,
+                                                  'إرسال طلب',
+                                                  'Send request',
+                                                  'Envoyer',
+                                                  'Enviar',
+                                                  'İstek gönder',
+                                                ),
+                                              },
+                                          icon:
+                                              _relationshipStates[row['user_id']] ==
+                                                  CommunityFriendRequestStatus
+                                                      .pending
+                                              ? const Icon(
+                                                  Icons.schedule_rounded,
+                                                )
+                                              : _relationshipStates[row['user_id']] ==
+                                                    CommunityFriendRequestStatus
+                                                        .accepted
+                                              ? const Icon(Icons.people_rounded)
+                                              : _sendingRequests.contains(
+                                                  row['user_id'],
+                                                )
+                                              ? const SizedBox.square(
+                                                  dimension: 18,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                      ),
+                                                )
+                                              : const Icon(
+                                                  Icons
+                                                      .person_add_alt_1_rounded,
+                                                ),
+                                          onPressed:
+                                              _relationshipStates[row['user_id']] !=
+                                                      null ||
+                                                  _sendingRequests.contains(
+                                                    row['user_id'],
+                                                  )
+                                              ? null
+                                              : () => _requestFriend(
+                                                  row['user_id'] as String,
+                                                ),
+                                        )
                                 : FilledButton.tonal(
                                     key: ValueKey(
                                       'community-premium-add-${row['user_id']}',
@@ -594,35 +690,4 @@ class _CommunityPeoplePageState extends ConsumerState<CommunityPeoplePage> {
             ),
     );
   }
-}
-
-class _StoreMark extends StatelessWidget {
-  const _StoreMark({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 9),
-    decoration: BoxDecoration(
-      color: const Color(0xFF101828),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, color: Colors.white, size: 20),
-        const SizedBox(width: 7),
-        Text(
-          label,
-          textDirection: TextDirection.ltr,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ],
-    ),
-  );
 }

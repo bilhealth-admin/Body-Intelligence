@@ -211,6 +211,34 @@ String wellnessCopy(BuildContext context, String english, String arabic) {
         .text('Original · {language}')
         .replaceFirst('{language}', originalLanguage.group(1)!);
   }
+  final scheduledHours = RegExp(r'^(\d+) h$').firstMatch(english);
+  if (scheduledHours != null) {
+    return context.strings
+        .text('{hours} h')
+        .replaceFirst('{hours}', scheduledHours.group(1)!);
+  }
+  final scheduledHoursMinutes = RegExp(
+    r'^(\d+) h (\d+) min$',
+  ).firstMatch(english);
+  if (scheduledHoursMinutes != null) {
+    return context.strings
+        .text('{hours} h {minutes} min')
+        .replaceFirst('{hours}', scheduledHoursMinutes.group(1)!)
+        .replaceFirst('{minutes}', scheduledHoursMinutes.group(2)!);
+  }
+  const localTimeSuffix =
+      ' · local time; the phone adjusts reminders for timezone and daylight-saving changes.';
+  if (english.endsWith(localTimeSuffix)) {
+    final window = english.substring(
+      0,
+      english.length - localTimeSuffix.length,
+    );
+    return context.strings
+        .text(
+          '{window} · local time; the phone adjusts reminders for timezone and daylight-saving changes.',
+        )
+        .replaceFirst('{window}', window);
+  }
 
   String dynamicCopy(String prefix, String suffix) => switch (code) {
     'fr' => '$prefix$suffix',

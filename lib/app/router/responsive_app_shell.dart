@@ -181,15 +181,7 @@ class ResponsiveAppShell extends StatelessWidget {
       final origin = Uri.encodeComponent(paths[index]);
       switch (action) {
         case 'food':
-          final hour = DateTime.now().hour;
-          final meal = hour < 11
-              ? 'breakfast'
-              : hour < 16
-              ? 'lunch'
-              : hour < 21
-              ? 'dinner'
-              : 'snack';
-          context.go('/daily-log?focus=meal&meal=$meal&from=$origin');
+          context.go('/daily-log?focus=meal&from=$origin');
           break;
         case 'barcode':
           context.go('/daily-log?action=barcode&from=$origin');
@@ -268,7 +260,14 @@ class ResponsiveAppShell extends StatelessWidget {
                       items: mobileItems,
                       quickAdd: quickButton,
                       onSelected: (next) {
-                        context.go(next == 0 ? paths[0] : paths[5]);
+                        final target = next == 0 ? paths[0] : paths[5];
+                        // Re-selecting the mounted tab used to rebuild a heavy
+                        // Dashboard route and produced a visible blink. A real
+                        // tab change uses a replacement push so both Dashboard
+                        // and More share the native forward slide without
+                        // growing a bottom-navigation history stack.
+                        if (currentPath == target) return;
+                        context.pushReplacement(target);
                       },
                     ),
                   ),

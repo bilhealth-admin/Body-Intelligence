@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
+import 'package:body_intelligence_log/features/community/domain/community_content_policy.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_copy.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_hub_page.dart';
@@ -15,6 +16,13 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+final _acceptedPolicy = CommunityContentPolicy.fromJson({
+  'version': 'community-policy-v1',
+  'locale_code': 'en',
+  'document_url': 'https://www.bilhealth.com/community-guidelines',
+  'effective_at': '2026-09-08T00:00:00Z',
+});
 
 final class _FakePostImagePicker implements CommunityPostImagePickerContract {
   const _FakePostImagePicker(this.image);
@@ -45,6 +53,14 @@ final class _PostImageRepository extends CommunityRepository {
 
   @override
   String get currentUserId => userId;
+
+  @override
+  Future<CommunityPolicyState> loadCommunityPolicyState({
+    required String localeCode,
+  }) async => CommunityPolicyState.accepted(
+    _acceptedPolicy,
+    acceptedVersion: _acceptedPolicy.version,
+  );
 
   @override
   Future<List<CommunityPost>> loadFeed({int limit = 40}) async =>
@@ -273,6 +289,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      await tester.tap(find.byKey(const Key('community-create-post')));
+      await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('community-post-add-photo')));
       await tester.pumpAndSettle();
       expect(
@@ -318,6 +336,8 @@ void main() {
         picker: _FakePostImagePicker(image),
       ),
     );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('community-create-post')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community-post-add-photo')));
     await tester.pumpAndSettle();
@@ -390,12 +410,18 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('community-create-post')));
+      await tester.pumpAndSettle();
       expect(
         find.byKey(const Key('community-post-add-photo')),
         findsOneWidget,
         reason: tag,
       );
       expect(tester.takeException(), isNull, reason: tag);
+      // Community uses a Material route in this harness; pageBack() only
+      // targets CupertinoNavigationBarBackButton and would fail spuriously.
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
     }
   });
 }

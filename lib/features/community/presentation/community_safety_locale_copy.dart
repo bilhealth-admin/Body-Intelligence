@@ -1,3 +1,5 @@
+part 'community_policy_locale_copy.dart';
+
 /// Reviewed Community Safety copy for locales that are not part of the
 /// original five-language launch catalogue.
 ///
@@ -303,10 +305,11 @@ const communitySafetyLocaleCopy = <String, List<String>>{
 
 String? communitySafetyText(String localeTag, String english) {
   final index = communitySafetyEnglishKeys.indexOf(english);
-  if (index < 0) return null;
-  final values = communitySafetyLocaleCopy[localeTag];
-  if (values == null || values.length != communitySafetyEnglishKeys.length) {
-    return null;
+  if (index >= 0) {
+    final values = communitySafetyLocaleCopy[localeTag];
+    if (values != null && values.length == communitySafetyEnglishKeys.length) {
+      return values[index];
+    }
   }
-  return values[index];
+  return communityPolicyText(localeTag, english);
 }

@@ -17,13 +17,24 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     final localeCode = BilLocalePolicy.canonicalTag(
       Localizations.localeOf(context),
     );
-    final questionLocale = const CoachLanguageResolver()
-        .resolve(
-          input: text,
-          uiLocale: localeCode,
-          detectedLanguageTag: detectedLanguageTag,
-        )
-        .languageTag;
+    final languageResolution = const CoachLanguageResolver().resolve(
+      input: text,
+      uiLocale: localeCode,
+      detectedLanguageTag: detectedLanguageTag,
+      previousClearLanguageTag: inputChannel == CoachInputChannel.text
+          ? lastClearWritingLanguageTag
+          : null,
+    );
+    final questionLocale = languageResolution.languageTag;
+    final effectiveLanguageHint = languageResolution.detected
+        ? languageResolution.languageTag
+        : detectedLanguageTag;
+    if (inputChannel == CoachInputChannel.text &&
+        languageResolution.detected &&
+        !languageResolution.usedPreviousInput &&
+        detectedLanguageTag == null) {
+      lastClearWritingLanguageTag = languageResolution.languageTag;
+    }
     final speechPlan = _IntelligenceCenterPageState._speechPolicy.planFor(text);
     final generation = ++requestGeneration;
     replyDelayTimer?.cancel();
@@ -54,7 +65,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       if (!mounted || generation != requestGeneration || !sending) return;
       _updateState(() => replyPhase = _CoachReplyPhase.searching);
     });
-    _scrollToLatest();
+    _scrollToLatest(force: true);
     unawaited(_saveConversation());
     if (autoSpeakReply && speechPlan != CoachSpeechPlan.directAnswer) {
       final acknowledgement = switch (speechPlan) {
@@ -78,6 +89,14 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       unawaited(_speakCoachText(acknowledgement, questionLocale));
     }
     try {
+      const actionPresentation = CoachActionPresentationPolicy();
+      if (actionPresentation.isContextualOpenFollowUp(text)) {
+        final contextualNavigation = _latestSafeNavigationAction();
+        if (contextualNavigation != null) {
+          await _executeAction(contextualNavigation);
+          return;
+        }
+      }
       final pendingAction = _latestPendingGoalAction();
       final pendingDecision = coachPendingActionDecision(text);
       if (pendingAction != null &&
@@ -158,7 +177,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
               question: text,
               arabic: arabic,
               localeCode: localeCode,
-              detectedLanguageTag: detectedLanguageTag,
+              detectedLanguageTag: effectiveLanguageHint,
               inputChannel: inputChannel,
               conversation: conversation,
             )
@@ -209,7 +228,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
               question: text,
               arabic: arabic,
               localeCode: localeCode,
-              detectedLanguageTag: detectedLanguageTag,
+              detectedLanguageTag: effectiveLanguageHint,
               healthContext: healthContext,
               coachContext: coachContext,
               inputChannel: inputChannel,
@@ -225,7 +244,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           _updateState(() => sending = false);
           await ask(
             inputChannel: inputChannel,
-            detectedLanguageTag: detectedLanguageTag,
+            detectedLanguageTag: effectiveLanguageHint,
             textOverride: text,
             addUserMessage: false,
             autoSpeakReply: autoSpeakReply,
@@ -267,6 +286,15 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
                 .toList(growable: false)
           : reply.actions;
       final safeMessage = _presentationSafeMessage(reply.message);
+      IntelligenceAction? directNavigationAction;
+      if (reply.serviceStatus == CoachServiceStatus.ready) {
+        for (final action in availableActions) {
+          if (actionPresentation.isDirectNavigationRequest(text, action)) {
+            directNavigationAction = action;
+            break;
+          }
+        }
+      }
       final persistedActions = <String, IntelligenceMessageAction>{
         for (final action in safeMessage.actionLinks)
           if (action.isTrusted) '${action.type.name}:${action.id}': action,
@@ -286,14 +314,22 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           }
         }
       }
+      final allowAutomaticSpeech =
+          autoSpeakReply &&
+          coachServiceStatusAllowsAutomaticSpeech(reply.serviceStatus);
       final presented = safeMessage.copyWith(
         text: activeAiSubscription
             ? tr(
                 'Your Premium AI Coach subscription is active, but its available AI tokens are exhausted. No message was charged. Add AI Boost tokens to continue now.',
                 'اشتراك Premium AI Coach لديك فعّال، لكن توكينات AI المتاحة نفدت. لم تُحتسب الرسالة. أضف توكينات AI Boost للمتابعة الآن.',
               )
-            : safeMessage.text,
-        modality: autoSpeakReply
+            : directNavigationAction == null
+            ? safeMessage.text
+            : AiCoachChatCopy.resolve(
+                questionLocale,
+                AiCoachChatCopy.navigationReady,
+              ),
+        modality: allowAutomaticSpeech
             ? IntelligenceMessageModality.voice
             : IntelligenceMessageModality.text,
         actionLinks: persistedActions.values.toList(growable: false),
@@ -310,11 +346,11 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         if (!repeatedServiceNotice) messages.add(presented);
         lastServiceStatus = reply.serviceStatus;
         lastRuntime = reply.runtime;
-        if (reply.serviceStatus == CoachServiceStatus.temporarilyUnavailable) {
+        if (coachServiceStatusAllowsSameRequestRetry(reply.serviceStatus)) {
           replyPhase = _CoachReplyPhase.failed;
           failedRequest = (
             text: text,
-            detectedLanguageTag: detectedLanguageTag,
+            detectedLanguageTag: effectiveLanguageHint,
             autoSpeak: autoSpeakReply,
             channel: inputChannel,
           );
@@ -326,15 +362,19 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       _scrollToLatest();
       unawaited(_saveConversation());
       if (repeatedServiceNotice) return;
+      if (directNavigationAction != null) {
+        await _executeAction(directNavigationAction);
+        return;
+      }
       final spokenReply = reply.spokenText?.trim().isNotEmpty == true
           ? reply.spokenText!.trim()
           : _compactSpokenCoachReply(presented.text);
-      if (autoSpeakReply) {
+      if (allowAutomaticSpeech) {
         final spokenLocale = const CoachLanguageResolver()
             .resolve(
               input: text,
               uiLocale: localeCode,
-              detectedLanguageTag: detectedLanguageTag,
+              detectedLanguageTag: effectiveLanguageHint,
             )
             .languageTag;
         await _speakCoachText(spokenReply, spokenLocale);
@@ -357,7 +397,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         replyPhase = _CoachReplyPhase.failed;
         failedRequest = (
           text: text,
-          detectedLanguageTag: detectedLanguageTag,
+          detectedLanguageTag: effectiveLanguageHint,
           autoSpeak: autoSpeakReply,
           channel: inputChannel,
         );
@@ -414,6 +454,23 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           return action.toAction();
         }
       }
+    }
+    return null;
+  }
+
+  IntelligenceAction? _latestSafeNavigationAction() {
+    const policy = CoachActionPresentationPolicy();
+    for (final message in messages.reversed) {
+      if (message.role != IntelligenceMessageRole.bil) continue;
+      if (message.modality == IntelligenceMessageModality.system) continue;
+      for (final action in message.actionLinks.reversed) {
+        if (!action.isTrusted) continue;
+        final candidate = action.toAction();
+        if (policy.isNavigation(candidate)) return candidate;
+      }
+      // Pronouns such as "open it" may only bind to the immediately previous
+      // Coach response. Never replay an older screen action by accident.
+      return null;
     }
     return null;
   }

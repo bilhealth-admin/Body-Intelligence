@@ -37,6 +37,16 @@ Google rules. Community content must follow the published content policy and
 may be reported, removed or moderated. The final terms require the owner’s
 legal entity, governing law, effective date and contact before publication.
 
+## `/community-guidelines`
+
+The live canonical Community policy is `community-policy-v1`, effective
+`2026-09-08T00:00:00Z`, at
+`https://www.bilhealth.com/community-guidelines`. English is the versioned
+authority and the route provides a complete Arabic view. The latest live
+database readback shows exactly one active policy row and zero user
+acceptances. Web publication and browser rendering are not signed-device
+evidence of the in-app acceptance or publishing flow.
+
 ## `/support`
 
 Support topics: account access, data export/deletion, food logging, catalog

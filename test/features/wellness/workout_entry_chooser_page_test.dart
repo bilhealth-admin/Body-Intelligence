@@ -108,10 +108,16 @@ void main() {
   ) async {
     await tester.binding.setSurfaceSize(const Size(430, 900));
     addTearDown(() => tester.binding.setSurfaceSize(null));
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    var databaseClosed = false;
+    addTearDown(() async {
+      if (!databaseClosed) await database.close();
+    });
 
     await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(
+      ProviderScope(
+        overrides: [databaseProvider.overrideWithValue(database)],
+        child: const MaterialApp(
           localizationsDelegates: [
             AppLocalizations.delegate,
             ...GlobalMaterialLocalizations.delegates,
@@ -133,6 +139,10 @@ void main() {
     expect(find.text('Brisk walk'), findsNothing);
     expect(find.text('Full-body strength'), findsNWidgets(2));
     expect(find.text('Yoga'), findsNothing);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+    await database.close();
+    databaseClosed = true;
   });
 
   testWidgets(

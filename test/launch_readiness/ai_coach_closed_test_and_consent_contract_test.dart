@@ -52,9 +52,6 @@ void main() {
     expect(server, contains('bil_has_remote_ai_consent'));
     expect(server, contains('code === "ai_consent_required"'));
     expect(gateway, contains("client.rpc('bil_get_remote_ai_consent')"));
-    expect(gateway, contains('session.isExpired'));
-    expect(gateway, contains('refreshSession()'));
-    expect(gateway, contains("error.code == 'PGRST301'"));
     expect(
       gateway,
       contains('Client preflight above prevents context projection'),

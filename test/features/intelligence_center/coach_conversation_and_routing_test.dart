@@ -176,6 +176,44 @@ void main() {
     },
   );
 
+  test('only exact safety block envelope disables speech and retry', () {
+    expect(
+      coachServiceStatusForFunctionError(422, 'ai_safety_blocked'),
+      CoachServiceStatus.safetyBlocked,
+    );
+    for (final code in <String?>[
+      null,
+      'AI_SAFETY_BLOCKED',
+      'ai_safety_blocked ',
+      'provider_safety_blocked',
+    ]) {
+      expect(
+        coachServiceStatusForFunctionError(422, code),
+        CoachServiceStatus.temporarilyUnavailable,
+      );
+    }
+    expect(
+      coachServiceStatusForFunctionError(503, 'ai_safety_blocked'),
+      CoachServiceStatus.temporarilyUnavailable,
+    );
+    expect(
+      coachServiceStatusAllowsAutomaticSpeech(CoachServiceStatus.safetyBlocked),
+      isFalse,
+    );
+    expect(
+      coachServiceStatusAllowsSameRequestRetry(
+        CoachServiceStatus.safetyBlocked,
+      ),
+      isFalse,
+    );
+    expect(
+      coachServiceStatusAllowsSameRequestRetry(
+        CoachServiceStatus.temporarilyUnavailable,
+      ),
+      isTrue,
+    );
+  });
+
   test('analysis questions are not hijacked by logging navigation', () {
     const parser = LocalCoachCommandParser();
     expect(parser.parse('Analyze my weight plateau', locale: 'en'), isEmpty);
@@ -186,7 +224,14 @@ void main() {
     );
     expect(parser.parse('حلل ثبات وزني هذا الأسبوع', locale: 'ar'), isEmpty);
 
-    expect(parser.parse('Open my weight log', locale: 'en'), isNotEmpty);
+    final weightHistory = parser.parse('Open my weight log', locale: 'en');
+    expect(weightHistory, hasLength(1));
+    expect(weightHistory.single.type, IntelligenceActionType.navigate);
+    expect(weightHistory.single.payload['target'], 'weight_history');
+    final arabicWeightHistory = parser.parse('استعرض سجل أوزاني', locale: 'ar');
+    expect(arabicWeightHistory, hasLength(1));
+    expect(arabicWeightHistory.single.type, IntelligenceActionType.navigate);
+    expect(arabicWeightHistory.single.payload['target'], 'weight_history');
     expect(parser.parse('Log weight 82 kg', locale: 'en'), isNotEmpty);
     expect(parser.parse('I ate chicken and rice', locale: 'en'), isNotEmpty);
     expect(parser.parse('Open workouts', locale: 'en'), isNotEmpty);

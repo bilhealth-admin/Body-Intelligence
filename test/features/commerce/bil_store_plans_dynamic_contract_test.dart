@@ -174,6 +174,34 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('EGP 129.99'), findsWidgets);
   });
+
+  testWidgets('Continue dispatches exactly one selected store offer', (
+    tester,
+  ) async {
+    final catalog = _DeferredPurchaseCatalog();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BilStorePlansPage(
+          catalog: catalog,
+          productIds: const {'premium.monthly'},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final cta = find.byKey(const ValueKey('store-purchase-cta'));
+    expect(cta, findsOneWidget);
+    await tester.tap(cta);
+    await tester.pump();
+
+    expect(catalog.requested, <BilStoreOfferMetadata>[_monthlyOffer]);
+    expect(find.text('Opening secure purchase…'), findsOneWidget);
+    expect(tester.widget<InkWell>(cta).onTap, isNull);
+
+    catalog.completePurchase();
+    await tester.pumpAndSettle();
+    expect(tester.widget<InkWell>(cta).onTap, isNotNull);
+  });
 }
 
 const _monthlyOffer = BilStoreOfferMetadata(
@@ -228,6 +256,30 @@ final class _DeferredCatalog implements BilStoreCatalogGateway {
 
   @override
   Future<void> requestPurchase(BilStoreOfferMetadata offer) async {}
+
+  @override
+  Future<void> restorePurchases() async {}
+}
+
+final class _DeferredPurchaseCatalog implements BilStoreCatalogGateway {
+  final Completer<void> _purchase = Completer<void>();
+  final List<BilStoreOfferMetadata> requested = [];
+
+  void completePurchase() => _purchase.complete();
+
+  @override
+  Future<List<BilStoreOfferMetadata>> loadOffers(
+    Set<String> productIds,
+  ) async => const [_monthlyOffer];
+
+  @override
+  Future<void> requestPurchase(BilStoreOfferMetadata offer) {
+    requested.add(offer);
+    return _purchase.future;
+  }
+
+  @override
+  Future<void> openManageSubscriptions() async {}
 
   @override
   Future<void> restorePurchases() async {}

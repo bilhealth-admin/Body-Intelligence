@@ -30,6 +30,14 @@ void main() {
       'lib/features/community/presentation/community_connections_page.dart':
           725,
       'lib/features/community/presentation/community_messages_page.dart': 725,
+      // The repository is the single typed boundary for the already-deployed
+      // Social v2 RPC/table surface. It keeps auth identity, profile/search,
+      // feed, messaging, policy acceptance, moderation, and food-review calls
+      // together so every write can pass through the same validation/error
+      // mapping. The underlying cloud store, models, and policy rules are
+      // separate; retain a narrow reviewed margin until the next repository
+      // boundary split is planned.
+      'lib/features/community/data/community_repository.dart': 750,
       // Voice capture is one seek-safe conversation lifecycle. Recognition,
       // silence detection, placeholder reconciliation, and cancellation must
       // remain in the same State extension to preserve ordering guarantees.
@@ -84,6 +92,10 @@ void main() {
       // permissions, category copy, preferences, and UI remain in sibling
       // files. The margin covers the audited iOS category-action setup.
       'lib/features/notifications/services/bil_notification_service.dart': 975,
+      // These preference pages are presentation-only and share the same
+      // guarded save-and-return contract. Persistence and domain rules live
+      // outside this file; keep only a narrow review margin.
+      'lib/features/settings/reference_preferences_pages.dart': 725,
       // These are render-only catalog libraries. Data, verification,
       // entitlement, cache, manifests, and content management are separate.
       'lib/features/wellness/presentation/bil_workout_routines_list.dart': 725,

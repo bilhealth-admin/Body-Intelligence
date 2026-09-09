@@ -26,8 +26,10 @@ import 'runtime_copy_fitness_watch.dart';
 import 'runtime_copy_connected_health.dart';
 import 'runtime_copy_platform_conversation.dart';
 import 'runtime_copy_community_moderation.dart';
+import 'runtime_copy_community_social.dart';
 import 'runtime_copy_admin_notifications.dart';
 import 'runtime_copy_meal_voice.dart';
+import 'runtime_copy_sleep_schedule.dart';
 
 /// Reviewed runtime copy used by legacy call-sites that still pass an English
 /// sentence instead of a typed key. Every entry is complete in the five
@@ -56,6 +58,13 @@ abstract final class RuntimeCopy {
 
   static String? resolve(String english, String localeTag) {
     final normalized = localeTag.replaceAll('_', '-').toLowerCase();
+    final sleepSchedule = SleepScheduleRuntimeCopy.resolve(english, localeTag);
+    if (sleepSchedule != null) return sleepSchedule;
+    final communitySocial = CommunitySocialRuntimeCopy.resolve(
+      english,
+      localeTag,
+    );
+    if (communitySocial != null) return communitySocial;
     final communityModeration = CommunityModerationRuntimeCopy.resolve(
       english,
       localeTag,
@@ -184,9 +193,11 @@ abstract final class RuntimeCopy {
         DailyLogActionRuntimeCopy.balanced &&
         FitnessWatchRuntimeCopy.balanced &&
         PlatformConversationRuntimeCopy.balanced &&
+        CommunitySocialRuntimeCopy.balanced &&
         CommunityModerationRuntimeCopy.balanced &&
         AdminNotificationRuntimeCopy.balanced &&
         MealVoiceRuntimeCopy.balanced &&
+        SleepScheduleRuntimeCopy.balanced &&
         ReleaseClosureRuntimeCopy.balanced &&
         ProfileRuntimeCopy.balanced &&
         ExtendedRuntimeCopy.values.values.every(

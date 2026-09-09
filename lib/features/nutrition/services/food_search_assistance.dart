@@ -169,7 +169,6 @@ class FoodSearchAssistance {
         "aple": <String>["apple"],
         "appel": <String>["apple"],
         "bnana": <String>["banana"],
-        "rise": <String>["rice"],
         "oet": <String>["oat"],
         "yogort": <String>["yogurt"],
         "potatoe": <String>["potato"],

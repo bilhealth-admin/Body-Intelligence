@@ -108,22 +108,40 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
       if (!mounted) return;
       final now = ref.read(intelligenceConversationClockProvider)();
       final welcome = _sessionWelcome(displayName, at: now);
+      String? restoredWritingLanguage;
+      for (final message in restored.reversed) {
+        if (message.role != IntelligenceMessageRole.user ||
+            message.modality != IntelligenceMessageModality.text) {
+          continue;
+        }
+        final candidate = const CoachLanguageResolver().resolve(
+          input: message.text,
+          uiLocale: 'en',
+        );
+        if (candidate.detected && !candidate.usedPreviousInput) {
+          restoredWritingLanguage = candidate.languageTag;
+          break;
+        }
+      }
       _updateState(() {
         activeConversationId = resolvedConversationId;
+        lastClearWritingLanguageTag = restoredWritingLanguage;
         introVisible = true;
         conversationReady = true;
-        sessionWelcomeMessage = IntelligenceMessage(
-          id: 'welcome-session-${now.microsecondsSinceEpoch}',
-          role: IntelligenceMessageRole.bil,
-          kind: IntelligenceMessageKind.coach,
-          text: welcome,
-          createdAt: now,
-          modality: IntelligenceMessageModality.system,
-        );
         messages
           ..clear()
           ..addAll(
             restored.where((message) => !message.id.startsWith('welcome')),
+          )
+          ..add(
+            IntelligenceMessage(
+              id: 'welcome-session-${now.microsecondsSinceEpoch}',
+              role: IntelligenceMessageRole.bil,
+              kind: IntelligenceMessageKind.coach,
+              text: welcome,
+              createdAt: now,
+              modality: IntelligenceMessageModality.system,
+            ),
           );
       });
       // Keep the fingerprint for diagnostics/migrations, but never rewrite the
@@ -147,27 +165,12 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
           // already present in memory and remains user-owned content.
         }
       }
-      // Keep the session welcome at the beginning of the chronological list.
-      // New user turns and replies call _scrollToLatest themselves, so opening
-      // a restored chat never jumps past the primary introduction.
+      _scrollToLatest(jump: true);
     } on Object {
-      // A local read failure must not leave Coach permanently disabled. Show a
-      // fresh session welcome, but never merge a partial restore over a user
-      // turn.
-      if (mounted) {
-        final now = ref.read(intelligenceConversationClockProvider)();
-        _updateState(() {
-          sessionWelcomeMessage ??= IntelligenceMessage(
-            id: 'welcome-session-${now.microsecondsSinceEpoch}',
-            role: IntelligenceMessageRole.bil,
-            kind: IntelligenceMessageKind.coach,
-            text: _sessionWelcome(null, at: now),
-            createdAt: now,
-            modality: IntelligenceMessageModality.system,
-          );
-          conversationReady = true;
-        });
-      }
+      // A local read failure must not leave Coach permanently disabled. Keep
+      // the already-seeded in-memory welcome, but never merge a partial
+      // restore over a user turn.
+      if (mounted) _updateState(() => conversationReady = true);
     }
   }
 
@@ -274,13 +277,34 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
     return null;
   }
 
-  void _scrollToLatest({bool jump = false}) {
+  void _scrollToLatest({bool jump = false, bool force = false}) {
+    final shouldFollow =
+        jump ||
+        force ||
+        !conversationScroll.hasClients ||
+        conversationScroll.position.pixels -
+                conversationScroll.position.minScrollExtent <=
+            72;
+    if (!shouldFollow) {
+      return;
+    }
+    final conversationId = activeConversationId;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !conversationScroll.hasClients) return;
-      // The conversation is chronological. The maximum extent is the newest
-      // turn, which also keeps a short new conversation anchored at the top
-      // instead of leaving a large blank area above the first message.
-      final target = conversationScroll.position.maxScrollExtent;
+      if (!mounted ||
+          !conversationScroll.hasClients ||
+          conversationId != activeConversationId) {
+        return;
+      }
+      if (!jump &&
+          !force &&
+          conversationScroll.position.pixels -
+                  conversationScroll.position.minScrollExtent >
+              72) {
+        return;
+      }
+      // The chat is rendered in reverse, so offset zero is always the newest
+      // turn regardless of how tall or lazily built the restored history is.
+      final target = conversationScroll.position.minScrollExtent;
       if (jump) {
         conversationScroll.jumpTo(target);
       } else {
@@ -426,15 +450,18 @@ extension _IntelligenceConversationPersistence on _IntelligenceCenterPageState {
     final now = ref.read(intelligenceConversationClockProvider)();
     final welcome = _sessionWelcome(displayName, at: now);
     _updateState(() {
-      sessionWelcomeMessage = IntelligenceMessage(
-        id: 'welcome-${now.microsecondsSinceEpoch}',
-        role: IntelligenceMessageRole.bil,
-        kind: IntelligenceMessageKind.coach,
-        text: welcome,
-        createdAt: now,
-        modality: IntelligenceMessageModality.system,
-      );
-      messages.clear();
+      messages
+        ..clear()
+        ..add(
+          IntelligenceMessage(
+            id: 'welcome-${now.microsecondsSinceEpoch}',
+            role: IntelligenceMessageRole.bil,
+            kind: IntelligenceMessageKind.coach,
+            text: welcome,
+            createdAt: now,
+            modality: IntelligenceMessageModality.system,
+          ),
+        );
     });
     unawaited(_saveConversation());
   }

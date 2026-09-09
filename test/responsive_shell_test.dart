@@ -300,6 +300,63 @@ void main() {
     expect(find.text('settings'), findsOneWidget);
   });
 
+  testWidgets('reselecting Dashboard does not rebuild or flash its child', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(600, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var dashboardBuilds = 0;
+    await tester.pumpWidget(
+      shellApp(
+        dashboardChild: Builder(
+          builder: (context) {
+            dashboardBuilds += 1;
+            return const Center(child: Text('stable-dashboard'));
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final buildsBeforeTap = dashboardBuilds;
+
+    await tester.tap(find.byKey(const Key('shell-dashboard-destination')));
+    await tester.pumpAndSettle();
+
+    expect(dashboardBuilds, buildsBeforeTap);
+    expect(find.text('stable-dashboard'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'compact tab replacement slides Dashboard in without a blank frame',
+    (tester) async {
+      tester.view.physicalSize = const Size(600, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        shellApp(
+          initialLocation: '/settings',
+          theme: ThemeData(platform: TargetPlatform.iOS),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('shell-dashboard-destination')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 80));
+      expect(find.text('dashboard'), findsOneWidget);
+      expect(tester.getTopLeft(find.text('dashboard')).dx, greaterThan(0));
+
+      await tester.pumpAndSettle();
+      expect(find.text('dashboard'), findsOneWidget);
+      expect(find.text('settings'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('system back from a root tab returns to Today first', (
     tester,
   ) async {

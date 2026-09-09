@@ -162,10 +162,11 @@ class FoodRuntimeSearchAuthority {
       return FoodRuntimeSearchResult(
         foods: _mergeCommunity(
           local,
-          network,
+          const <Food>[],
           community,
           query: query,
           limit: limit,
+          trusted: network,
         ),
         source: network.isNotEmpty || community.isNotEmpty
             ? FoodRuntimeSearchSource.catalogAndLocal
@@ -182,10 +183,11 @@ class FoodRuntimeSearchAuthority {
       return FoodRuntimeSearchResult(
         foods: _mergeCommunity(
           local,
-          network,
+          const <Food>[],
           community,
           query: query,
           limit: limit,
+          trusted: network,
         ),
         source: network.isNotEmpty || community.isNotEmpty
             ? FoodRuntimeSearchSource.catalogAndLocal
@@ -232,11 +234,12 @@ class FoodRuntimeSearchAuthority {
         foods: network.isEmpty
             ? current
             : _mergeCommunity(
-                network,
                 current,
+                const <Food>[],
                 community,
                 query: query,
                 limit: limit,
+                trusted: network,
               ),
         source: FoodRuntimeSearchSource.catalogAndLocal,
       );
@@ -247,10 +250,11 @@ class FoodRuntimeSearchAuthority {
       return FoodRuntimeSearchResult(
         foods: _mergeCommunity(
           local,
-          network,
+          const <Food>[],
           community,
           query: query,
           limit: limit,
+          trusted: network,
         ),
         source: network.isNotEmpty || community.isNotEmpty
             ? FoodRuntimeSearchSource.catalogAndLocal
@@ -278,10 +282,14 @@ class FoodRuntimeSearchAuthority {
         limit: limit < 20 ? limit : 20,
       );
       final foods = <Food>[];
-      // The authenticated food-search function has already searched USDA
-      // using its translated/reviewed query. Re-matching those rows against
-      // the original Arabic phrase here would discard valid cloud results
-      // such as an English USDA name returned for an Arabic search.
+      // The trusted Edge gateway may translate the typed phrase before asking
+      // USDA, while USDA correctly returns its canonical English identity.
+      // Re-matching that canonical name against the original non-English text
+      // discards a valid server answer (for example "تيف مطبوخ" ->
+      // "Teff, cooked"). The gateway already binds every response to this
+      // authenticated request and USDA's requireAllWords query, so preserve
+      // its bounded order here instead of applying the offline text matcher a
+      // second time with a different language.
       for (final food in unified) {
         foods.add(await _localRepository.materializeUnifiedFood(food));
         if (foods.length >= limit) break;
@@ -336,9 +344,11 @@ class FoodRuntimeSearchAuthority {
     Iterable<Food> community, {
     required String query,
     required int limit,
+    Iterable<Food> trusted = const <Food>[],
   }) {
     if (limit <= 0) return const <Food>[];
     final communityRows = community.toList(growable: false);
+    final trustedRows = trusted.toList(growable: false);
     final reserve = communityRows.isEmpty ? 0 : (limit >= 10 ? 10 : 1);
     final nonCommunity = <Food>[];
     for (final candidate in <Food>[...primary, ...fallback]) {
@@ -353,6 +363,13 @@ class FoodRuntimeSearchAuthority {
       nonCommunity,
       query,
     ).take(limit - reserve).toList(growable: true);
+    for (final candidate in trustedRows) {
+      if (result.any((existing) => _sameFoodIdentity(existing, candidate))) {
+        continue;
+      }
+      result.add(candidate);
+      if (result.length >= limit - reserve) break;
+    }
     for (final candidate in _rankLocalFoods(communityRows, query)) {
       if (result.any((existing) => _sameFoodIdentity(existing, candidate))) {
         continue;
@@ -360,7 +377,12 @@ class FoodRuntimeSearchAuthority {
       result.add(candidate);
       if (result.length >= limit) break;
     }
-    return _rankLocalFoods(result, query).take(limit).toList(growable: false);
+    // Trusted results can own a translated query whose canonical USDA name no
+    // longer matches the original script. All other rows still pass the local
+    // matcher above; preserve the authenticated gateway rows when present.
+    return trustedRows.isEmpty
+        ? _rankLocalFoods(result, query).take(limit).toList(growable: false)
+        : result.take(limit).toList(growable: false);
   }
 
   bool _sameFoodIdentity(Food a, Food b) {

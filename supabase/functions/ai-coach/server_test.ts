@@ -4,18 +4,29 @@ import {
   assertThrows,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import {
+  actionExecutionContract,
   boundedMessages,
   boundedVoiceAudio,
   extractModelText,
   geminiAttemptTimeoutMs,
   geminiCall,
+  geminiSafetySettings,
   handler,
   isRetryableGeminiError,
   isRetryableGeminiStatus,
   parseModelJson,
+  requireSafeGeminiCandidate,
   responseLanguage,
   spokenWithinComfortableTurn,
 } from "./server.ts";
+
+Deno.test("model prompt separates proposed actions from execution receipts", () => {
+  assertEquals(
+    actionExecutionContract.includes("not an execution receipt"),
+    true,
+  );
+  assertEquals(actionExecutionContract.includes("never say"), true);
+});
 
 Deno.test("structured response ignores thought parts and joins visible text", () => {
   assertEquals(
@@ -109,6 +120,44 @@ Deno.test("response language is independent from interface locale", () => {
     ], "en"),
     "auto",
   );
+  assertEquals(
+    responseLanguage(
+      [{ role: "user", content: "hi" }],
+      "ar",
+      "en",
+    ),
+    "en",
+  );
+  assertEquals(
+    responseLanguage(
+      [{ role: "user", content: "protein 30 g" }],
+      "tr",
+      "ar",
+    ),
+    "ar",
+  );
+});
+
+Deno.test("weight history stays a proposed client action, not a receipt", () => {
+  const parsed = parseModelJson(JSON.stringify({
+    reply: "Use the action below to open weight history.",
+    spoken_reply: "Use the action below to open weight history.",
+    reason: "The user requested a read-only screen.",
+    confidence: 0.95,
+    evidence: [],
+    missing_data: [],
+    proposed_actions: [{
+      type: "open_weight_log",
+      arguments: {},
+      requires_confirmation: false,
+    }],
+  }));
+  assertEquals(parsed.proposed_actions, [{
+    type: "open_weight_log",
+    arguments: {},
+    requires_confirmation: true,
+  }]);
+  assertEquals(parsed.reply.includes("opened"), false);
 });
 
 Deno.test("model actions are allow-listed and confirmation-gated", () => {
@@ -321,6 +370,95 @@ Deno.test("Gemini retry policy does not repeat client or parse errors", async ()
   });
 });
 
+Deno.test("Gemini request always carries the four explicit conservative safety settings", async () => {
+  assertEquals(geminiSafetySettings, [
+    {
+      category: "HARM_CATEGORY_HARASSMENT",
+      threshold: "BLOCK_ONLY_HIGH",
+    },
+    {
+      category: "HARM_CATEGORY_HATE_SPEECH",
+      threshold: "BLOCK_ONLY_HIGH",
+    },
+    {
+      category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+      threshold: "BLOCK_ONLY_HIGH",
+    },
+    {
+      category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+      threshold: "BLOCK_ONLY_HIGH",
+    },
+  ]);
+
+  await withGeminiTestKey(async () => {
+    let sentBody: Record<string, unknown> = {};
+    await geminiCall(
+      "gemini-test",
+      [],
+      "test",
+      32,
+      false,
+      "LOW",
+      async (_url, init) => {
+        sentBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
+        return providerSuccess();
+      },
+    );
+    assertEquals(sentBody.safetySettings, geminiSafetySettings);
+    assertEquals(
+      (sentBody.generationConfig as Record<string, unknown>).safetySettings,
+      undefined,
+    );
+  });
+});
+
+Deno.test("Gemini prompt and candidate safety metadata fail closed", async () => {
+  await assertRejects(
+    () =>
+      Promise.resolve().then(() =>
+        requireSafeGeminiCandidate({
+          promptFeedback: { blockReason: "SAFETY" },
+          candidates: [],
+        })
+      ),
+    Error,
+    "ai_safety_blocked",
+  );
+  for (
+    const candidate of [
+      { finishReason: "SAFETY" },
+      { finishReason: "STOP", safetyRatings: [{ blocked: true }] },
+    ]
+  ) {
+    await assertRejects(
+      () =>
+        Promise.resolve().then(() =>
+          requireSafeGeminiCandidate({ candidates: [candidate] })
+        ),
+      Error,
+      "ai_safety_blocked",
+    );
+  }
+  for (const finishReason of [undefined, "MAX_TOKENS", "FUTURE_REASON"]) {
+    await assertRejects(
+      () =>
+        Promise.resolve().then(() =>
+          requireSafeGeminiCandidate({ candidates: [{ finishReason }] })
+        ),
+      Error,
+      "provider_incomplete_response",
+    );
+  }
+  const safe = { finishReason: "STOP", safetyRatings: [{ blocked: false }] };
+  assertEquals(
+    requireSafeGeminiCandidate({
+      promptFeedback: { safetyRatings: [{ blocked: false }] },
+      candidates: [safe],
+    }),
+    safe,
+  );
+});
+
 function requestBody(requestId = "coach-test-request-0001") {
   return new Request("https://example.test", {
     method: "POST",
@@ -428,6 +566,33 @@ Deno.test("settlement outage does not hide the original provider failure", async
   assertEquals(settlementCalls, 1);
 });
 
+Deno.test("prompt safety block returns only the stable 422 code and refunds once", async () => {
+  const fake = fakeClients([{ duplicate: false, state: "reserved" }]);
+  let providerCalls = 0;
+  const response = await handler(requestBody("coach-test-safety-block"), {
+    clients: fake.create as never,
+    geminiCall: async () => {
+      providerCalls += 1;
+      return {
+        attempts: 1,
+        data: {
+          promptFeedback: {
+            blockReason: "SAFETY",
+            blockReasonMessage: "provider-private-detail",
+          },
+          candidates: [],
+        },
+      };
+    },
+  });
+
+  assertEquals(response.status, 422);
+  assertEquals(await response.json(), { error: "ai_safety_blocked" });
+  assertEquals(providerCalls, 1);
+  assertEquals(fake.settlements.length, 1);
+  assertEquals(fake.settlements[0].p_succeeded, false);
+});
+
 Deno.test("successful response exposes the metered request id for feedback correlation", async () => {
   const requestId = "coach-test-feedback-correlation";
   const fake = fakeClients([{ duplicate: false, state: "reserved" }]);
@@ -437,6 +602,7 @@ Deno.test("successful response exposes the metered request id for feedback corre
       attempts: 1,
       data: {
         candidates: [{
+          finishReason: "STOP",
           content: {
             parts: [{
               text: JSON.stringify({
@@ -478,6 +644,7 @@ Deno.test("malformed provider JSON refunds rather than charging", async () => {
       attempts: 1,
       data: {
         candidates: [{
+          finishReason: "STOP",
           content: { parts: [{ text: '{"reply":"missing spoken"}' }] },
         }],
       },
@@ -715,6 +882,7 @@ Deno.test("voice uses v2 consent and one voice-seconds reservation", async () =>
         attempts: 1,
         data: {
           candidates: [{
+            finishReason: "STOP",
             content: {
               parts: [{
                 text: JSON.stringify({

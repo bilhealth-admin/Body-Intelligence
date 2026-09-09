@@ -2,6 +2,7 @@ import '../../ai_platform/domain/ai_coach_response.dart';
 import '../domain/coach_context_snapshot.dart';
 import '../domain/intelligence_action.dart';
 import '../domain/intelligence_message.dart';
+import '../ai_coach_safety_copy.dart';
 import '../intelligence_locale_copy.dart';
 import 'external_knowledge_provider.dart';
 import 'intelligence_health_context_provider.dart';
@@ -12,7 +13,7 @@ import 'local_coach_api.dart';
 import 'local_model_gateway.dart';
 
 part 'intelligence_center_reply.dart';
-part 'intelligence_center_engine_intents.dart';
+part 'intelligence_scope_classifiers.dart';
 
 class IntelligenceCenterEngine {
   const IntelligenceCenterEngine({
@@ -149,7 +150,26 @@ class IntelligenceCenterEngine {
               conversation: conversation,
             ),
           );
-    if (local.actions.isNotEmpty) {
+    if (local.serviceStatus != CoachServiceStatus.ready) {
+      if (local.serviceStatus != CoachServiceStatus.safetyBlocked &&
+          _isGreeting(normalized)) {
+        return _reply(
+          tr(
+            'I am ready. Ask about your weight, food, progress, or request a plan and I will explain what is needed before building it.',
+            'أنا جاهز معك. اسألني عن وزنك أو أكلك أو تقدمك، أو اطلب خطة وسأوضح ما أحتاجه قبل بنائها.',
+          ),
+          serviceStatus: local.serviceStatus,
+          runtime: CoachAnswerRuntime.localFallback,
+        );
+      }
+      return _serviceStatusReply(replyLocale, local.serviceStatus);
+    }
+    // A model answer may include an action. Preserve the answer and its
+    // provenance; an action must not replace it with local-command copy. The
+    // service-status gate above ensures rejected provider payloads can never
+    // leak an answer, speech, or action into the conversation.
+    final hasAnswer = local.answer?.trim().isNotEmpty == true;
+    if (local.actions.isNotEmpty && !hasAnswer) {
       return _reply(
         tr(
           'I understood your request locally. Review the action below; I will not write data or perform a sensitive action without your confirmation.',
@@ -161,9 +181,12 @@ class IntelligenceCenterEngine {
         actions: local.actions,
       );
     }
-    if (local.answer?.trim().isNotEmpty == true) {
+    if (hasAnswer) {
       return _reply(
         local.answer!.trim(),
+        kind: local.actions.isEmpty
+            ? IntelligenceMessageKind.freeQuestion
+            : IntelligenceMessageKind.action,
         evidence: local.evidence.isEmpty
             ? const ['BIL user context']
             : local.evidence,
@@ -174,20 +197,8 @@ class IntelligenceCenterEngine {
         serviceStatus: local.serviceStatus,
         runtime: local.runtime,
         responseId: local.responseId,
+        actions: local.actions,
       );
-    }
-    if (local.serviceStatus != CoachServiceStatus.ready) {
-      if (_isGreeting(normalized)) {
-        return _reply(
-          tr(
-            'I am ready. Ask about your weight, food, progress, or request a plan and I will explain what is needed before building it.',
-            'أنا جاهز معك. اسألني عن وزنك أو أكلك أو تقدمك، أو اطلب خطة وسأوضح ما أحتاجه قبل بنائها.',
-          ),
-          serviceStatus: local.serviceStatus,
-          runtime: CoachAnswerRuntime.localFallback,
-        );
-      }
-      return _serviceStatusReply(replyLocale, local.serviceStatus);
     }
     if (_isGreeting(normalized)) {
       return _plain(
@@ -509,6 +520,7 @@ class IntelligenceCenterEngine {
         'Your available AI tokens are exhausted. No message was charged. Reactivate the smart coach with Premium AI Coach or add AI Boost tokens.',
         'نفدت توكنات AI المتاحة. لم تُحتسب الرسالة. أعد تفعيل المدرب الذكي عبر Premium AI Coach أو أضف توكنات AI Boost.',
       ),
+      CoachServiceStatus.safetyBlocked => AiCoachSafetyCopy.resolve(locale),
       CoachServiceStatus.temporarilyUnavailable => tr(
         'The personalized AI Coach is temporarily unavailable. No message was charged; try again shortly.',
         'المدرب الذكي المخصص غير متاح مؤقتًا. لم تُحتسب الرسالة؛ حاول مجددًا بعد قليل.',
@@ -543,4 +555,9 @@ class IntelligenceCenterEngine {
       runtime: CoachAnswerRuntime.localFallback,
     );
   }
+
+  String _legacyLocale(bool arabic) => switch (arabic) {
+    true => 'ar',
+    false => 'en',
+  };
 }

@@ -105,8 +105,13 @@ function concat(...values: Uint8Array[]) {
 
 function cborText(value: string) {
   const bytes = encoder.encode(value);
-  if (bytes.length >= 24) throw new Error("fixture text too long");
-  return concat(Uint8Array.of(0x60 + bytes.length), bytes);
+  if (bytes.length < 24) {
+    return concat(Uint8Array.of(0x60 + bytes.length), bytes);
+  }
+  if (bytes.length <= 0xff) {
+    return concat(Uint8Array.of(0x78, bytes.length), bytes);
+  }
+  throw new Error("fixture text too long");
 }
 
 function cborBytes(value: Uint8Array) {
@@ -129,28 +134,55 @@ function assertionObject(signature: Uint8Array, authData: Uint8Array) {
   );
 }
 
-Deno.test("Apple's published App Attest object passes the complete trust validation", async () => {
+function appExtensions(bundleVersion: string, validationCategory: number) {
+  const category = new Uint8Array(4);
+  new DataView(category.buffer).setUint32(0, validationCategory, true);
+  return concat(
+    Uint8Array.of(0xa2),
+    cborText("apple_bundle_version_01"),
+    cborText(bundleVersion),
+    cborText("apple_validation_category_01"),
+    cborBytes(category),
+  );
+}
+
+async function assertionNonce(
+  authData: Uint8Array<ArrayBuffer>,
+  clientData: Uint8Array<ArrayBuffer>,
+) {
+  const clientHash = new Uint8Array(
+    await crypto.subtle.digest("SHA-256", clientData),
+  );
+  return new Uint8Array(
+    await crypto.subtle.digest("SHA-256", concat(authData, clientHash)),
+  );
+}
+
+Deno.test("Apple's published OS-executable sample is rejected for a third-party app", async () => {
   const attestationObject = Uint8Array.from(
     atob(appleAttestationValidationSample),
     (character) => character.charCodeAt(0),
   );
-  const verified = await verifyAttestation({
-    attestationObject,
-    keyId: "zgSY9YSD+7TaDXssY6WlOPVS1K3Lmk+pFhlcSWE+ZV0=",
-    // Apple's sample uses this supplied client-data value directly. The live
-    // handler passes SHA256(server challenge), matching the production client.
-    clientDataHash: encoder.encode("example_server_challenge"),
-    appId: "1234567890.com.example.myapp",
-    allowedEnvironments: new Set(["production"]),
-    allowedBundleVersions: new Set(["1"]),
-    now: Date.parse("2026-04-21T18:13:12Z"),
-  });
-
-  assertEquals(verified.environment, "production");
-  assertEquals(verified.bundleVersion, "1");
-  assertEquals(verified.publicKeyJwk.kty, "EC");
-  assertEquals(verified.publicKeyJwk.crv, "P-256");
-  assertEquals(verified.receiptBase64.length > 0, true);
+  // Apple's current validation guide intentionally publishes category 1,
+  // which means an operating-system executable, and bundle version "1.0".
+  // BIL is a third-party app and must accept only TestFlight (2), development
+  // signing (3), or App Store (4), depending on the attestation environment.
+  await assertRejects(
+    () =>
+      verifyAttestation({
+        attestationObject,
+        keyId: "zgSY9YSD+7TaDXssY6WlOPVS1K3Lmk+pFhlcSWE+ZV0=",
+        // Apple's sample uses this supplied client-data value directly. The live
+        // handler passes SHA256(server challenge), matching the production client.
+        clientDataHash: encoder.encode("example_server_challenge"),
+        appId: "1234567890.com.example.myapp",
+        allowedEnvironments: new Set(["production"]),
+        allowedBundleVersions: new Set(["1.0"]),
+        now: Date.parse("2026-04-21T18:13:12Z"),
+      }),
+    Error,
+    "invalid_validation_category",
+  );
 });
 
 Deno.test("App Attest assertion verifies request hash and increasing counter", async () => {
@@ -159,21 +191,24 @@ Deno.test("App Attest assertion verifies request hash and increasing counter", a
     "bil-app-attest-v1\n00000000-0000-4000-8000-000000000001\n" +
       "ai_coach.request\n" + "a".repeat(64) + "\nchallenge",
   );
-  const authData = new Uint8Array(37);
+  const authData = new Uint8Array(37 + appExtensions("42", 4).length);
   authData.set(
     new Uint8Array(
       await crypto.subtle.digest("SHA-256", encoder.encode(appId)),
     ),
     0,
   );
+  authData[32] = 0x80;
   new DataView(authData.buffer).setUint32(33, 7, false);
-  const clientHash = new Uint8Array(
-    await crypto.subtle.digest("SHA-256", clientData),
-  );
+  authData.set(appExtensions("42", 4), 37);
   const { publicKey, privateKey } = generateKeyPairSync("ec", {
     namedCurve: "prime256v1",
   });
-  const signature = sign("sha256", concat(authData, clientHash), privateKey);
+  const signature = sign(
+    "sha256",
+    await assertionNonce(authData, clientData),
+    privateKey,
+  );
   const assertion = assertionObject(signature, authData);
 
   assertEquals(
@@ -186,6 +221,7 @@ Deno.test("App Attest assertion verifies request hash and increasing counter", a
       previousCounter: 6,
       appId,
       clientData,
+      allowedBundleVersions: new Set(["42"]),
     }),
     7,
   );
@@ -200,6 +236,7 @@ Deno.test("App Attest assertion verifies request hash and increasing counter", a
         previousCounter: 7,
         appId,
         clientData,
+        allowedBundleVersions: new Set(["42"]),
       }),
     Error,
     "assertion_counter_replay",
@@ -209,21 +246,24 @@ Deno.test("App Attest assertion verifies request hash and increasing counter", a
 Deno.test("App Attest assertion rejects a request-binding mismatch", async () => {
   const appId = "1234567890.com.example.bodylog";
   const signedClientData = encoder.encode("signed request");
-  const authData = new Uint8Array(37);
+  const authData = new Uint8Array(37 + appExtensions("42", 4).length);
   authData.set(
     new Uint8Array(
       await crypto.subtle.digest("SHA-256", encoder.encode(appId)),
     ),
     0,
   );
+  authData[32] = 0x80;
   new DataView(authData.buffer).setUint32(33, 1, false);
-  const signedHash = new Uint8Array(
-    await crypto.subtle.digest("SHA-256", signedClientData),
-  );
+  authData.set(appExtensions("42", 4), 37);
   const { publicKey, privateKey } = generateKeyPairSync("ec", {
     namedCurve: "prime256v1",
   });
-  const signature = sign("sha256", concat(authData, signedHash), privateKey);
+  const signature = sign(
+    "sha256",
+    await assertionNonce(authData, signedClientData),
+    privateKey,
+  );
 
   await assertRejects(
     () =>
@@ -236,9 +276,60 @@ Deno.test("App Attest assertion rejects a request-binding mismatch", async () =>
         previousCounter: 0,
         appId,
         clientData: encoder.encode("different request"),
+        allowedBundleVersions: new Set(["42"]),
       }),
     Error,
     "invalid_assertion_signature",
+  );
+});
+
+Deno.test("legacy assertion fixtures require an explicit compatibility opt-in", async () => {
+  const appId = "1234567890.com.example.bodylog";
+  const clientData = encoder.encode("legacy signed request");
+  const authData = new Uint8Array(37);
+  authData.set(
+    new Uint8Array(
+      await crypto.subtle.digest("SHA-256", encoder.encode(appId)),
+    ),
+    0,
+  );
+  new DataView(authData.buffer).setUint32(33, 1, false);
+  const { publicKey, privateKey } = generateKeyPairSync("ec", {
+    namedCurve: "prime256v1",
+  });
+  const signature = sign(
+    "sha256",
+    await assertionNonce(authData, clientData),
+    privateKey,
+  );
+  const assertion = assertionObject(signature, authData);
+  const publicKeyJwk = publicKey.export({ format: "jwk" }) as Record<
+    string,
+    unknown
+  >;
+
+  await assertRejects(
+    () =>
+      verifyAssertion({
+        assertion,
+        publicKeyJwk,
+        previousCounter: 0,
+        appId,
+        clientData,
+      }),
+    Error,
+    "legacy_attestation_not_enabled",
+  );
+  assertEquals(
+    await verifyAssertion({
+      assertion,
+      publicKeyJwk,
+      previousCounter: 0,
+      appId,
+      clientData,
+      allowLegacy: true,
+    }),
+    1,
   );
 });
 

@@ -9,6 +9,7 @@ class _MessageBubble extends StatelessWidget {
     this.onReport,
     this.onSpeak,
     this.onAction,
+    this.actionPhases = const <String, _CoachActionExecutionPhase>{},
   });
   final IntelligenceMessage message;
   final bool? feedbackValue;
@@ -17,6 +18,7 @@ class _MessageBubble extends StatelessWidget {
   final ValueChanged<String>? onReport;
   final VoidCallback? onSpeak;
   final ValueChanged<IntelligenceAction>? onAction;
+  final Map<String, _CoachActionExecutionPhase> actionPhases;
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +40,11 @@ class _MessageBubble extends StatelessWidget {
               bottomRight: Radius.circular(6),
             ),
           ),
-          child: Text(
-            message.text,
+          child: CoachMessageText(
+            key: ValueKey('coach-message-text-${message.id}'),
+            text: message.text,
+            createdAt: message.createdAt,
+            alignEnd: true,
             textDirection: _messageTextDirection(message.text),
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.4),
           ),
@@ -64,8 +69,10 @@ class _MessageBubble extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  message.text,
+                CoachMessageText(
+                  key: ValueKey('coach-message-text-${message.id}'),
+                  text: message.text,
+                  createdAt: message.createdAt,
                   textDirection: _messageTextDirection(message.text),
                   style: Theme.of(
                     context,
@@ -106,17 +113,11 @@ class _MessageBubble extends StatelessWidget {
                     runSpacing: 8,
                     children: [
                       for (final action in trustedActions)
-                        ActionChip(
-                          key: Key(
-                            'ai-coach-action-${action.type.name}-${action.id}',
-                          ),
-                          avatar: Icon(_iconForAction(action.type), size: 18),
-                          label: Text(action.label),
-                          tooltip: intelligenceText(
-                            context,
-                            'Open {label}',
-                            'افتح {label}',
-                          ).replaceAll('{label}', action.label),
+                        _CoachMessageActionControl(
+                          action: action,
+                          phase:
+                              actionPhases['${action.type.name}:${action.id}'] ??
+                              _CoachActionExecutionPhase.idle,
                           onPressed: onAction == null
                               ? null
                               : () => onAction!(action.toAction()),
@@ -182,6 +183,77 @@ class _MessageBubble extends StatelessWidget {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CoachMessageActionControl extends StatelessWidget {
+  const _CoachMessageActionControl({
+    required this.action,
+    required this.phase,
+    required this.onPressed,
+  });
+
+  final IntelligenceMessageAction action;
+  final _CoachActionExecutionPhase phase;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = BilLocalePolicy.canonicalTag(
+      Localizations.localeOf(context),
+    );
+    final running = phase == _CoachActionExecutionPhase.running;
+    final failed = phase == _CoachActionExecutionPhase.failed;
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 320),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ActionChip(
+            key: Key('ai-coach-action-${action.type.name}-${action.id}'),
+            avatar: running
+                ? const SizedBox.square(
+                    dimension: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Icon(_iconForAction(action.type), size: 18),
+            label: Text(
+              running
+                  ? AiCoachChatCopy.resolve(locale, AiCoachChatCopy.opening)
+                  : action.label,
+            ),
+            tooltip: action.label,
+            onPressed: running ? null : onPressed,
+          ),
+          if (failed) ...[
+            const SizedBox(height: 4),
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                AiCoachChatCopy.resolve(
+                  locale,
+                  AiCoachChatCopy.navigationFailed,
+                ),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ),
+            TextButton.icon(
+              key: Key(
+                'ai-coach-action-retry-${action.type.name}-${action.id}',
+              ),
+              onPressed: onPressed,
+              icon: const Icon(Icons.refresh_rounded, size: 17),
+              label: Text(
+                AiCoachChatCopy.resolve(locale, AiCoachChatCopy.retry),
+              ),
+            ),
+          ],
         ],
       ),
     );

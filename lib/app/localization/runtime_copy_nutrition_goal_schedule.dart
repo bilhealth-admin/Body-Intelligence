@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 import 'bil_locale_policy.dart';
 
@@ -625,15 +626,25 @@ abstract final class NutritionGoalScheduleRuntimeCopy {
 
   static String formatGoalSummary({
     required Locale locale,
-    required String calories,
-    required String carbs,
-    required String protein,
-    required String fat,
+    required num calories,
+    required num carbs,
+    required num protein,
+    required num fat,
   }) => text(goalSummary, locale)
-      .replaceAll('{calories}', calories)
-      .replaceAll('{carbs}', carbs)
-      .replaceAll('{protein}', protein)
-      .replaceAll('{fat}', fat);
+      .replaceAll('{calories}', formatNumber(calories, locale, maxDigits: 0))
+      .replaceAll('{carbs}', formatNumber(carbs, locale))
+      .replaceAll('{protein}', formatNumber(protein, locale))
+      .replaceAll('{fat}', formatNumber(fat, locale));
+
+  static String formatNumber(num value, Locale locale, {int maxDigits = 1}) {
+    final digits = maxDigits == 0 || (value - value.round()).abs() < 0.05
+        ? 0
+        : maxDigits;
+    return NumberFormat.decimalPatternDigits(
+      locale: BilLocalePolicy.canonicalTag(locale),
+      decimalDigits: digits,
+    ).format(value);
+  }
 
   static bool get balanced =>
       supported.length == 25 &&

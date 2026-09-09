@@ -10,7 +10,6 @@ import {
   ownerAdmin,
   params,
   readState,
-  request,
   requiredEnv,
   signIn,
   uuid,
@@ -45,6 +44,7 @@ export function initializeDisposableState(state) {
   state.disposable = {
     email,
     displayName,
+    password: null,
     created: false,
     userId: null,
     accessToken: null,
@@ -74,6 +74,7 @@ export async function createDisposableAccount(state) {
   }
   const password = `${letters(24)}7a!`;
   mask(password);
+  state.disposable.password = password;
   const created = await serviceRequest({
     method: 'POST',
     route: '/auth/v1/admin/users',
@@ -120,52 +121,26 @@ export async function createDisposableAccount(state) {
     allow_friend_requests: true,
     allow_messages_from: 'friends',
   }, params({ on_conflict: 'user_id' }));
-  const policies = await serviceSelect('bil_content_policies', {
-    select: 'version', active: 'eq.true', order: 'effective_at.desc', limit: '1',
-  });
-  if (policies.length === 1) {
-    await insertReturning('bil_content_policy_acceptances', {
-      user_id: userId,
-      policy_version: policies[0].version,
-    }, params({ on_conflict: 'user_id,policy_version' }));
-  }
   const friendship = await insertReturning('bil_friendships', {
     requester_id: userId,
     addressee_id: state.owner.userId,
     status: 'accepted',
     responded_at: new Date().toISOString(),
   });
-  const post = await request({
-    method: 'POST',
-    route: '/rest/v1/bil_community_posts',
-    token: session.accessToken,
-    body: {
-      author_id: userId,
-      body: state.markers.approvedPost,
-      visibility: 'community',
-      moderation_status: 'pending',
-    },
-    allowed: [201],
-    prefer: 'return=representation',
-  });
-  if (!Array.isArray(post.data) || post.data.length !== 1 || !uuid(post.data[0]?.id)) {
-    throw new Error('disposable_pending_post_seed_failed');
-  }
   state.records.disposable.seededFriendshipId = friendship.id;
-  state.records.disposable.approvedPostId = post.data[0].id;
   state.records.disposable.initialCredits = await creditBalance(
     session.accessToken,
     userId,
   );
-  mask(friendship.id, post.data[0].id);
+  mask(friendship.id);
   atomicWriteState(state);
   appendEvidence('cross-account-status.txt', [
     'DISPOSABLE_ACCOUNT_CREATED=PASS',
     'DISPOSABLE_EPHEMERAL_PREMIUM_GRANT=PASS',
-    'DISPOSABLE_PROFILE_AND_POLICY=PASS',
+    'DISPOSABLE_PROFILE_CREATED=PASS',
+    'DISPOSABLE_POLICY_ACCEPTANCE_SEEDED=false',
     'DISPOSABLE_ACCEPTED_CONNECTION_SEEDED=PASS',
     `DISPOSABLE_ACCOUNT_SHA256=${digest(userId)}`,
-    `DISPOSABLE_PENDING_POST_SHA256=${digest(post.data[0].id)}`,
   ]);
 }
 

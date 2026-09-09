@@ -54,7 +54,7 @@ void main() {
   });
 
   test(
-    'unified dashboard keeps retired intelligence cards out of active UI',
+    'production dashboard omits retired summary and Bio Intelligence cards',
     () {
       final dashboard = File(
         'lib/features/dashboard/widgets/dashboard_grid.dart',
@@ -65,7 +65,14 @@ void main() {
 
       expect(dashboard, contains('ConnectedHealthCard('));
       expect(dashboard, contains('connectedHealth: ConnectedHealthCard('));
+      expect(dashboard, isNot(contains('PersonalHealthAiPanel(')));
+      expect(dashboard, isNot(contains('DashboardSummaryFactory.build(')));
+      expect(dashboard, isNot(contains('personalHealthAi:')));
+      expect(dashboard, isNot(contains('progressSection:')));
 
+      // The generic benchmark keeps its optional slots for isolated previews and
+      // backwards-compatible component tests; DashboardGrid no longer supplies
+      // either retired card in production.
       expect(benchmark, contains('this.personalHealthAi'));
       expect(benchmark, contains('this.connectedHealth'));
       expect(benchmark, contains('final Widget? personalHealthAi;'));

@@ -90,6 +90,11 @@ class CommunityDeepLink {
       if (segments.length == 2 && segments[1] == 'moderation') {
         return '/community/moderation';
       }
+      if (segments.length == 3 && segments[1] == 'member') {
+        final code = segments[2].toLowerCase();
+        if (!RegExp(r'^[a-f0-9]{32}$').hasMatch(code)) return null;
+        return '/community/member/$code';
+      }
       if (segments.length == 3 &&
           segments[1] == 'messages' &&
           segments[2] == 'new') {

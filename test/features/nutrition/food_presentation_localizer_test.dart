@@ -85,6 +85,36 @@ void main() {
     }
   });
 
+  test('rare trusted USDA identities have bounded 25-locale names', () {
+    for (final tag in tags) {
+      for (final food in const ['Teff, cooked', 'Cloud ear mushroom, dried']) {
+        final localized = FoodPresentationLocalizer.foodName(
+          name: food,
+          localeTag: tag,
+          source: 'USDA FoodData Central',
+        );
+        expect(localized.trim(), isNotEmpty, reason: '$tag / $food');
+        expect(
+          FoodPresentationLocalizer.hasLocalizedBrowseName(
+            name: food,
+            localeTag: tag,
+            source: 'USDA FoodData Central',
+          ),
+          isTrue,
+          reason: '$tag / $food',
+        );
+      }
+    }
+    expect(
+      FoodPresentationLocalizer.foodName(
+        name: 'Cloud ear mushroom, dried',
+        localeTag: 'ar',
+        source: 'USDA FoodData Central',
+      ),
+      'فطر أذن الخشب',
+    );
+  });
+
   test(
     'brand, custom, and unknown scientific identities are never invented',
     () {
@@ -239,6 +269,14 @@ void main() {
         interfaceLocaleTag: 'zh-TW',
       ),
       'zh-Hant',
+    );
+    expect(
+      FoodPresentationLocalizer.resultLocaleForQuery(
+        query: 'Теф',
+        interfaceLocaleTag: 'en',
+      ),
+      'en',
+      reason: 'The same reviewed spelling exists in Russian and Ukrainian.',
     );
   });
 

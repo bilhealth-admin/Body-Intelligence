@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/units/measurement_units.dart';
 import '../../../data/database/nutrient_evidence.dart';
 import '../../../data/repositories/nutrition_goal_schedule_repository.dart';
-import '../../../engine/body_composition_engine.dart';
 import '../../../engine/data_honesty_engine.dart';
 import '../../../engine/one_best_action_engine.dart';
 import '../../connected_health/widgets/connected_health_card.dart';
@@ -30,7 +29,6 @@ import '../composition/dashboard_command_coordinator.dart';
 import '../composition/dashboard_intelligence_input_adapter.dart';
 import '../domain/dashboard_intelligence_composer.dart';
 import '../domain/dashboard_decision_explanation.dart';
-import '../domain/dashboard_heart_health_policy.dart';
 import '../domain/dashboard_trusted_body_twin_adapter.dart';
 import '../domain/dashboard_runtime_state.dart';
 import '../domain/nutrient_dashboard.dart';
@@ -43,10 +41,8 @@ import 'dashboard_data_gate.dart';
 import 'dashboard_loading_skeleton.dart';
 import 'dashboard_motion_reveal.dart';
 import 'dashboard_profile_required_card.dart';
-import 'dashboard_summary_factory.dart';
 import 'daily_return_card.dart';
 import 'premium_dashboard_benchmark.dart';
-import 'personal_health_ai_panel.dart';
 
 part 'dashboard_unprofiled_reference.dart';
 
@@ -215,14 +211,6 @@ class DashboardGrid extends ConsumerWidget {
     final persistedFiberGoal = nutrientGoals[DashboardNutrientGoalIds.fiber];
     final persistedPotassiumGoal =
         nutrientGoals[DashboardNutrientGoalIds.potassium];
-    final sodiumGoal =
-        persistedSodiumGoal?.round() ??
-        DashboardHeartHealthPolicy.sodiumMaximumMg;
-    final fiberGoal =
-        persistedFiberGoal?.round() ?? DashboardHeartHealthPolicy.fiberMaximumG;
-    final potassiumGoal =
-        persistedPotassiumGoal?.round() ??
-        DashboardHeartHealthPolicy.potassiumMaximumMg;
     final carbohydrates = todayMealItems.fold<double>(
       0,
       (sum, item) => sum + item.carbs,
@@ -275,10 +263,6 @@ class DashboardGrid extends ConsumerWidget {
     final calories = dashboardSnapshot.calories;
     final protein = dashboardSnapshot.protein;
     final fats = dashboardSnapshot.fats;
-    final currentWeight = dashboardSnapshot.currentWeightKg;
-    final fiberEvidence = dashboardSnapshot.fiberEvidence;
-    final bil = dashboardSnapshot.bil;
-    final bodyComposition = dashboardSnapshot.bodyComposition;
     final effectiveTargets = dashboardSnapshot.effectiveTargets;
     final savedMacroGramGoals = ref.watch(dashboardMacroGramGoalsProvider);
     final macroGramGoals = scheduledTarget == null
@@ -333,7 +317,6 @@ class DashboardGrid extends ConsumerWidget {
       ),
       energy: exerciseEnergy,
     );
-    final loggingStreak = dashboardSnapshot.loggingStreak;
     final intelligence = dashboardSnapshot.intelligence;
     final honesty = dashboardSnapshot.honesty;
     final bestAction = dashboardSnapshot.bestAction;
@@ -373,10 +356,6 @@ class DashboardGrid extends ConsumerWidget {
     ).forLocale(BilLocalePolicy.canonicalTag(Localizations.localeOf(context)));
     final firstBodyTwinReading =
         trustedTwin.canExposeBodyTwin && chronologicalWeights.length == 1;
-    String compositionValue(
-      BodyCompositionMetric metric, {
-      required String unit,
-    }) => localizer.compositionValue(metric, unit: unit);
     final canonicalOutput = canonicalIntelligence.value;
     final canonicalAction = canonicalOutput?.brainResult.selectedAction;
     final localizedBestTitle = canonicalOutput == null
@@ -435,36 +414,6 @@ class DashboardGrid extends ConsumerWidget {
       tr: tr,
     );
 
-    final healthAi = dashboardSnapshot.personalHealthAi;
-    final personalHealthAiPanel = PersonalHealthAiPanel(
-      snapshot: healthAi,
-      arabic: arabic,
-      todayHasMeals: meals.isNotEmpty,
-      decisionCount: memoriesAsync.value?.length ?? 0,
-      compact: MediaQuery.sizeOf(context).width < 600,
-    );
-    final progressSection = DashboardSummaryFactory.build(
-      tr: tr,
-      arabic: arabic,
-      loggingStreak: loggingStreak,
-      mealsEmpty: meals.isEmpty,
-      calories: calories.round(),
-      protein: protein.round(),
-      fats: fats.round(),
-      fiber: fiberEvidence.total,
-      dailyRequirement: bil.tdee.round(),
-      weight: UnitConverter.weightFromKg(
-        currentWeight,
-        system,
-      ).toStringAsFixed(1),
-      weightUnit: UnitConverter.weightUnit(system),
-      bodyFat: compositionValue(bodyComposition.bodyFatPercentage, unit: ''),
-      bodyFatUnit: bodyComposition.bodyFatPercentage.isAvailable ? '%' : '',
-      fatFreeMass: bodyComposition.fatFreeMassKg.isAvailable
-          ? '${UnitConverter.weightFromKg(bodyComposition.fatFreeMassKg.value!, system).toStringAsFixed(1)} '
-                '${UnitConverter.weightUnit(system)}'
-          : '—',
-    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -544,15 +493,14 @@ class DashboardGrid extends ConsumerWidget {
               onWaterTap: () =>
                   context.go('/daily-log/water?from=%2Fdashboard'),
             ),
-            // These two cards remain computed for their standalone widgets,
-            // but are intentionally not mounted on the owner-approved
-            // dashboard surface.
-            progressSection: progressSection,
-            personalHealthAi: personalHealthAiPanel,
             connectedHealth: ConnectedHealthCard(
               languageCode: Localizations.localeOf(context).languageCode,
               compact: MediaQuery.sizeOf(context).width < 600,
               dashboardCompact: MediaQuery.sizeOf(context).width < 600,
+              // These owner-retired body-composition metrics remain available
+              // in Connected Health, but never surface inside Dashboard on
+              // either phone or wide tablet/iPad layouts.
+              hiddenSignalKeys: const <String>{'bodyFat', 'leanMass'},
             ),
             bodyTwinSummary: twinCopy.summary,
             bodyTwinEvidence: twinCopy.evidence,
@@ -634,9 +582,9 @@ class DashboardGrid extends ConsumerWidget {
             sugarEvidenceValue: evidenced(TrackedNutrient.sugar),
             sodiumEvidenceValue: evidenced(TrackedNutrient.sodium),
             potassiumEvidenceValue: evidenced(TrackedNutrient.potassium),
-            fiberGoal: fiberGoal,
-            sodiumGoal: sodiumGoal,
-            potassiumGoal: potassiumGoal,
+            fiberGoal: persistedFiberGoal?.round(),
+            sodiumGoal: persistedSodiumGoal?.round(),
+            potassiumGoal: persistedPotassiumGoal?.round(),
             nutrientDashboardPreset:
                 nutrientDashboardPreset ?? 'Calories and macros',
             weightTrendValues: weights

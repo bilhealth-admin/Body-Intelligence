@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/dashboard/dashboard_page.dart';
@@ -121,6 +122,39 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsNothing);
     await tester.pumpAndSettle();
     expect(refreshes, 1);
+  });
+
+  testWidgets('a slow refresh never pins the dashboard below its top edge', (
+    tester,
+  ) async {
+    final refresh = Completer<void>();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: DashboardShell(
+          onRefresh: () => refresh.future,
+          child: const SizedBox(height: 1200),
+        ),
+      ),
+    );
+
+    await tester.drag(
+      find.byKey(const Key('dashboard-scroll-view')),
+      const Offset(0, 420),
+    );
+    await tester.pumpAndSettle();
+
+    final scrollable = tester.state<ScrollableState>(
+      find.descendant(
+        of: find.byKey(const Key('dashboard-scroll-view')),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    expect(scrollable.position.pixels, closeTo(0, 0.5));
+    expect(refresh.isCompleted, isFalse);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+
+    refresh.complete();
+    await tester.pumpAndSettle();
   });
 
   test('dashboard editor exposes current cards only', () {

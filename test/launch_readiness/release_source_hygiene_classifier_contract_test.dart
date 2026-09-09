@@ -45,9 +45,29 @@ void main() {
       expect(source, contains("category = 'local_codex_agent_configuration'"));
       expect(source, contains("category = 'local_test_failure_diagnostic'"));
       expect(source, contains(r"$Path -match '^\.agents/'"));
+      expect(
+        source,
+        contains(r"$Path -match '^\.codex_server_reconciliation/'"),
+      );
+      expect(source, contains(r"$Path -match '^ai_coach_debug_bundle/'"));
+      expect(
+        source,
+        contains("category = 'local_server_reconciliation_snapshot'"),
+      );
+      expect(source, contains("category = 'local_ai_coach_debug_bundle'"));
       expect(source, contains(r"$Path -match '^test/(?:.+/)?failures/'"));
       expect(source, contains(r"$Path -match '^cloudflare/workout-runtime/'"));
       expect(source, contains("category = 'workout_runtime_edge_source'"));
+      expect(
+        source,
+        contains("'scripts/release/dispatch_bil_release_workflows.ps1'"),
+      );
+      expect(source, contains("category = 'exact_release_dispatch_guard'"));
+      expect(
+        source,
+        isNot(contains(r"$Path -match '^scripts/release/'")),
+        reason: 'Release scripts must remain exact-allowlisted.',
+      );
 
       const runtimeInputs = <String>{
         'artifacts/workout_media/workout_discovery_catalog_v1.json',
@@ -57,6 +77,55 @@ void main() {
       for (final path in runtimeInputs) {
         expect(source, contains("'$path'"), reason: path);
       }
+    },
+  );
+
+  test(
+    'release blockers inspect INCLUDE paths, not preserved EXCLUDE paths',
+    () {
+      final source = File(
+        'tool/release_hygiene/release_source_staging_dry_run.ps1',
+      ).readAsStringSync();
+      final includeGate = source.indexOf(
+        r"if ($classification.decision -eq 'INCLUDE') {",
+      );
+      final entryAppend = source.indexOf(r'$entries.Add', includeGate);
+
+      expect(includeGate, greaterThanOrEqualTo(0));
+      expect(entryAppend, greaterThan(includeGate));
+      final gatedChecks = source.substring(includeGate, entryAppend);
+      expect(gatedChecks, contains(r'$bytes -gt $githubHardFileLimitBytes'));
+      expect(gatedChecks, contains('Get-ContentSecretFinding -Path \$path'));
+      expect(gatedChecks, contains(r'$secretFindings.Add'));
+    },
+  );
+
+  test(
+    'candidate transfer is explicit, three-way, and never stages globally',
+    () {
+      final source = File(
+        'tool/release_hygiene/apply_classified_source_to_candidate.ps1',
+      ).readAsStringSync();
+
+      expect(source, contains('[switch]\$Apply'));
+      expect(
+        source,
+        contains('candidate worktree is not clean before transfer'),
+      );
+      expect(source, contains(r'$env:GIT_INDEX_FILE = $temporaryIndex'));
+      expect(source, contains('--literal-pathspecs add -f -A'));
+      expect(source, contains('--pathspec-from-file='));
+      expect(source, contains('commit-tree \$classifiedTree -p \$sourceHead'));
+      expect(source, contains('merge-tree --write-tree --name-only --no-messages'));
+      expect(source, contains('read-tree --reset -u \$mergedTree'));
+      expect(source, contains('merge-tree conflicts='));
+      expect(source, contains('merged tree changed outside INCLUDE'));
+      expect(source, contains('candidate changed outside INCLUDE'));
+      expect(source, isNot(contains(' --ours')));
+      expect(source, isNot(contains(' --theirs')));
+      expect(source, isNot(contains('git add .')));
+      expect(source, isNot(contains('git add -A')));
+      expect(source, isNot(contains('git commit')));
     },
   );
 

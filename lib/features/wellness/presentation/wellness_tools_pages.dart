@@ -24,6 +24,7 @@ import 'wellness_copy.dart';
 
 part 'sleep_tracker_page.dart';
 part 'sleep_tracker_experience.dart';
+part 'sleep_tracker_schedule.dart';
 part 'workout_library_page.dart';
 part 'fasting_timer_page.dart';
 part 'fasting_timer_components.dart';

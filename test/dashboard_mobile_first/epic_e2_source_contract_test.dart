@@ -41,9 +41,12 @@ void main() {
       final analytics = File(
         'lib/features/dashboard/widgets/dashboard_analytics_center.dart',
       ).readAsStringSync();
+      final actions = File(
+        'lib/features/dashboard/widgets/dashboard_grid_actions.dart',
+      ).readAsStringSync();
 
       expect(grid, isNot(contains('DashboardAnalyticsCenter(')));
-      expect(current, contains("context.go('/analytics')"));
+      expect(actions, contains("context.go('/analytics')"));
       expect(analytics, contains('final phone = layout.isPhone'));
       expect(analytics, contains('if (!phone) ...['));
       expect(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../app/localization/app_localizations.dart';
 import '../domain/commerce_entitlement.dart';
 import '../domain/subscription_state.dart';
 import '../providers/commerce_providers.dart';
@@ -29,10 +30,26 @@ class PremiumNutritionGlass extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final subscription = ref.watch(verifiedSubscriptionStateProvider);
+    if (subscription.isLoading || subscription.hasError) {
+      return _PremiumNutritionStatusGlass(
+        borderRadius: borderRadius,
+        loading: subscription.isLoading,
+        onRetry: subscription.hasError
+            ? () => ref.invalidate(verifiedSubscriptionStateProvider)
+            : null,
+        child: child,
+      );
+    }
     final state = subscription.value;
-    final unlocked =
-        state?.authority == EntitlementAuthority.verifiedServer &&
-        (state?.grants(CommerceEntitlement.advancedIntelligence) ?? false);
+    if (state?.authority != EntitlementAuthority.verifiedServer) {
+      return _PremiumNutritionStatusGlass(
+        borderRadius: borderRadius,
+        loading: false,
+        onRetry: () => ref.invalidate(verifiedSubscriptionStateProvider),
+        child: child,
+      );
+    }
+    final unlocked = state!.grants(CommerceEntitlement.advancedIntelligence);
     if (unlocked) return child;
 
     final light = Theme.of(context).brightness == Brightness.light;
@@ -113,6 +130,73 @@ class PremiumNutritionGlass extends ConsumerWidget {
                           button: true,
                           child: const SizedBox.expand(),
                         ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PremiumNutritionStatusGlass extends StatelessWidget {
+  const _PremiumNutritionStatusGlass({
+    required this.child,
+    required this.borderRadius,
+    required this.loading,
+    this.onRetry,
+  });
+
+  final Widget child;
+  final double borderRadius;
+  final bool loading;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final light = Theme.of(context).brightness == Brightness.light;
+    final label = context.strings.text(
+      loading ? 'Checking subscription' : 'Subscription check unavailable',
+    );
+    return Stack(
+      fit: StackFit.passthrough,
+      children: [
+        ExcludeSemantics(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(borderRadius),
+            child: IgnorePointer(child: child),
+          ),
+        ),
+        Positioned.fill(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(borderRadius),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+              child: Material(
+                color: light
+                    ? const Color(0x24FFFFFF)
+                    : const Color(0x29000000),
+                child: Semantics(
+                  container: true,
+                  liveRegion: true,
+                  label: label,
+                  child: Center(
+                    child: loading
+                        ? const SizedBox.square(
+                            key: Key('premium-nutrition-checking'),
+                            dimension: 22,
+                            child: CircularProgressIndicator(strokeWidth: 2.5),
+                          )
+                        : FilledButton.tonalIcon(
+                            key: const Key(
+                              'premium-nutrition-entitlement-retry',
+                            ),
+                            onPressed: onRetry,
+                            icon: const Icon(Icons.refresh_rounded),
+                            label: Text(context.strings.text('Retry')),
+                          ),
+                  ),
                 ),
               ),
             ),

@@ -9,6 +9,7 @@ enum CoachServiceStatus {
   consentRequired,
   quotaExhausted,
   creditsRequired,
+  safetyBlocked,
   temporarilyUnavailable,
 }
 
@@ -28,8 +29,17 @@ CoachServiceStatus coachServiceStatusForFunctionError(
   (403, 'voice_ai_consent_required') => CoachServiceStatus.consentRequired,
   (402, 'ai_usage_exhausted') => CoachServiceStatus.creditsRequired,
   (402, _) => CoachServiceStatus.quotaExhausted,
+  (422, 'ai_safety_blocked') => CoachServiceStatus.safetyBlocked,
   _ => CoachServiceStatus.temporarilyUnavailable,
 };
+
+/// Safety-blocked provider output is text-only and cannot be replayed by
+/// resubmitting the same request. A changed user question starts a new request.
+bool coachServiceStatusAllowsAutomaticSpeech(CoachServiceStatus status) =>
+    status != CoachServiceStatus.safetyBlocked;
+
+bool coachServiceStatusAllowsSameRequestRetry(CoachServiceStatus status) =>
+    status == CoachServiceStatus.temporarilyUnavailable;
 
 class CoachConversationTurn {
   const CoachConversationTurn({required this.role, required this.content});

@@ -215,9 +215,10 @@ void main() {
   });
 
   test('localized nutrient labels are not translated a second time', () {
-    final summary = File(
+    final summary = <String>[
       'lib/features/daily_log/presentation/daily_log_summary_widgets.dart',
-    ).readAsStringSync();
+      'lib/features/daily_log/presentation/daily_log_summary_metrics.dart',
+    ].map((path) => File(path).readAsStringSync()).join('\n');
 
     expect(summary, isNot(contains('context.strings.text(label)')));
     expect(

@@ -176,10 +176,6 @@ void main() {
     );
     expect(find.text('Personal Health AI test panel'), findsNothing);
     expect(find.text('Today Summary test panel'), findsNothing);
-    expect(
-      find.byKey(const Key('dashboard-mobile-workout-library-card')),
-      findsNothing,
-    );
     expect(tester.takeException(), isNull);
   });
 
@@ -205,6 +201,8 @@ void main() {
       find.byKey(const Key('dashboard-mobile-body-twin-snapshot')),
       findsOneWidget,
     );
+    expect(find.text('Personal Health AI test panel'), findsNothing);
+    expect(find.text('Today Summary test panel'), findsNothing);
     expect(
       find.byKey(const Key('dashboard-mobile-workout-library-card')),
       findsNothing,

@@ -34,13 +34,16 @@ void main() {
     'client search uses the bounded discovery rpc rather than table RLS',
     () {
       final source = File(
-        'lib/features/community/data/community_repository.dart',
+        'lib/features/community/data/community_social_repository_mixin.dart',
       ).readAsStringSync();
 
       final methodStart = source.indexOf('searchProfiles(String query)');
-      final nextMethod = source.indexOf('User get _user', methodStart);
+      final nextMethod = source.indexOf(
+        'Future<CommunitySocialIdentity> loadSocialIdentity',
+        methodStart,
+      );
       final method = source.substring(methodStart, nextMethod);
-      expect(method, contains("'bil_search_community_profiles'"));
+      expect(method, contains("'bil_social_search_handles_v2'"));
       expect(method, isNot(contains("from('bil_public_profiles')")));
       expect(method, isNot(contains("row['bio']")));
     },

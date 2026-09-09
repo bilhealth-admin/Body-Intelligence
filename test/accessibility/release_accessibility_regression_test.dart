@@ -22,10 +22,15 @@ void main() {
       source('lib/features/auth/login_page.dart'),
       contains("'Show password'"),
     );
-    expect(
-      source('lib/features/dashboard/widgets/dashboard_top_bar.dart'),
-      contains('tooltip: tooltip'),
+    final dashboardTopBar = source(
+      'lib/features/dashboard/widgets/dashboard_top_bar.dart',
     );
+    expect(
+      RegExp(r'return Tooltip\(\s*message: tooltip,').hasMatch(dashboardTopBar),
+      isTrue,
+      reason: 'The Today action must retain its localized accessible name.',
+    );
+    expect(dashboardTopBar, contains("key: const Key('dashboard-edit-today')"));
     expect(
       source('lib/features/community/presentation/community_chat_page.dart'),
       contains("'Send message'"),

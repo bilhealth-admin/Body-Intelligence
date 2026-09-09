@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
@@ -27,6 +28,7 @@ class CommunityProfilePage extends ConsumerStatefulWidget {
 class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
   CommunityRepository? _repository;
   final _name = TextEditingController();
+  final _handle = TextEditingController();
   final _bio = TextEditingController();
   late Future<void> _loading;
   bool _discoverable = true;
@@ -37,6 +39,7 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
   bool _saving = false;
   bool _photoBusy = false;
   String? _avatarUrl;
+  CommunitySocialIdentity? _identity;
 
   @override
   void initState() {
@@ -80,6 +83,9 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
     if (profile == null) {
       return;
     }
+    final identity = await _repository!.loadSocialIdentity();
+    _identity = identity;
+    _handle.text = identity.chosen ? identity.handle : '';
     _bio.text = profile.bio ?? '';
     _avatarUrl = profile.avatarUrl;
     _discoverable = profile.discoverable;
@@ -105,6 +111,15 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
       ).showSnackBar(SnackBar(content: Text(copy.invalidName)));
       return;
     }
+    final requestedHandle = _handle.text.trim();
+    if (_identity?.chosen != true &&
+        requestedHandle.isNotEmpty &&
+        !CommunitySocialIdentity.isValidCandidate(requestedHandle)) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(copy.invalidUsername)));
+      return;
+    }
     setState(() => _saving = true);
     try {
       final localeCode = BilLocalePolicy.canonicalTag(
@@ -120,6 +135,11 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
         allowFollows: _allowFollows,
         allowMessagesFrom: _messages,
       );
+      final identity = _identity?.chosen == true
+          ? _identity!
+          : requestedHandle.isEmpty
+          ? await _repository!.loadSocialIdentity()
+          : await _repository!.claimSocialHandle(requestedHandle);
       if (widget.repository == null) {
         await ref
             .read(preferencesRepositoryProvider)
@@ -132,6 +152,10 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
         }
       }
       if (!mounted) return;
+      setState(() {
+        _identity = identity;
+        if (identity.chosen) _handle.text = identity.handle;
+      });
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(copy.saved)));
@@ -195,6 +219,7 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
   @override
   void dispose() {
     _name.dispose();
+    _handle.dispose();
     _bio.dispose();
     super.dispose();
   }
@@ -296,6 +321,32 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
                         decoration: InputDecoration(
                           labelText: copy.displayName,
                         ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        key: const Key('community-profile-username'),
+                        enabled: !_saving && _identity?.chosen != true,
+                        controller: _handle,
+                        maxLength: 30,
+                        autocorrect: false,
+                        enableSuggestions: false,
+                        textCapitalization: TextCapitalization.none,
+                        textDirection: TextDirection.ltr,
+                        decoration: InputDecoration(
+                          labelText: copy.username,
+                          prefixText: '@',
+                          helperText: _identity?.chosen == true
+                              ? copy.usernameLocked
+                              : copy.usernameHelp,
+                        ),
+                      ),
+                      OutlinedButton.icon(
+                        key: const Key('community-profile-bil-code'),
+                        onPressed: _saving
+                            ? null
+                            : () => context.push('/community/code'),
+                        icon: const Icon(Icons.qr_code_2_rounded),
+                        label: Text(copy.myBilCode),
                       ),
                       const SizedBox(height: 12),
                       TextField(
@@ -599,6 +650,20 @@ extension _CommunityPrivacyCopy on _CommunityProfileCopy {
       _t('Who can see my profile', 'من يمكنه رؤية ملفي');
   String get allowFriendRequests =>
       _t('Allow friend requests', 'السماح بطلبات الصداقة');
+  String get username => _t('Unique BIL username', 'اسم مستخدم BIL الفريد');
+  String get myBilCode => _t('My BIL Code', 'رمز BIL الخاص بي');
+  String get usernameHelp => _t(
+    'Choose 3–30 lowercase letters, numbers, or underscores. It can be claimed once.',
+    'اختر من 3 إلى 30 حرفًا إنجليزيًا صغيرًا أو رقمًا أو شرطة سفلية. يمكن حجزه مرة واحدة.',
+  );
+  String get usernameLocked => _t(
+    'This username is your permanent public Community identity.',
+    'اسم المستخدم هذا هو هويتك العامة الدائمة في المجتمع.',
+  );
+  String get invalidUsername => _t(
+    'Use 3–30 lowercase letters, numbers, or underscores, beginning with a letter. Reserved names are unavailable.',
+    'استخدم من 3 إلى 30 حرفًا إنجليزيًا صغيرًا أو رقمًا أو شرطة سفلية مع البدء بحرف. الأسماء المحجوزة غير متاحة.',
+  );
   String get allowFollows => _t('Allow follows', 'السماح بالمتابعة');
   String get messagePermission => _t('Who can message me', 'من يمكنه مراسلتي');
   String get deleteAccount =>

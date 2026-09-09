@@ -319,7 +319,8 @@ void main() {
     ).readAsStringSync();
 
     expect(grid, contains('ConnectedHealthCard('));
-    expect(grid, contains('personalHealthAi: personalHealthAiPanel'));
+    expect(grid, isNot(contains('PersonalHealthAiPanel(')));
+    expect(grid, isNot(contains('personalHealthAi:')));
     expect(personal, isNot(contains('ConnectedHealth')));
     expect(connected, contains('PremiumSurface('));
     expect(connected, contains('DashboardCarousel('));

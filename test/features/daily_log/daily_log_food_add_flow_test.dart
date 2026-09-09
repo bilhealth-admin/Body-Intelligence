@@ -42,12 +42,10 @@ void main() {
     'repository food selection saves one reviewed snapshot and survives reload',
     (tester) async {
       final database = AppDatabase.forTesting(NativeDatabase.memory());
-      addTearDown(
-        () => database.close().timeout(
-          const Duration(seconds: 2),
-          onTimeout: () {},
-        ),
-      );
+      var databaseClosed = false;
+      addTearDown(() async {
+        if (!databaseClosed) await database.close();
+      });
       final foods = FoodRepository(database);
       final foodId = await foods.addFood(
         name: 'Plain Greek yogurt',
@@ -226,6 +224,25 @@ void main() {
         findsNothing,
       );
       expect(find.byKey(const Key('daily-log-water-shortcut')), findsNothing);
+
+      // The platform back gesture must behave like the visible Back button:
+      // reopen SearchAnchor with the exact query and its results intact.
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      final reopenedSearchBars = tester.widgetList<SearchBar>(
+        find.byType(SearchBar),
+      );
+      expect(reopenedSearchBars, isNotEmpty);
+      expect(reopenedSearchBars.last.controller?.text, 'Plain Greek');
+      expect(find.text('Plain Greek yogurt'), findsOneWidget);
+      await tester.tap(find.text('Plain Greek yogurt'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(
+        find.byKey(const Key('daily-log-focused-food-detail')),
+        findsOneWidget,
+      );
+
       final save = find.widgetWithText(FilledButton, 'Save meal');
       expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
       await tester.ensureVisible(save);
@@ -271,6 +288,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 50));
       final reopenedItems = await database.select(database.mealItems).get();
       expect(reopenedItems.single.foodId, foodId);
+      await database.close();
+      databaseClosed = true;
     },
   );
 

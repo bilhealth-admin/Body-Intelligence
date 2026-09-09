@@ -12,6 +12,7 @@ import 'weekly_report_provider.dart';
 part 'weekly_report_body.dart';
 part 'weekly_report_food.dart';
 part 'weekly_report_components.dart';
+part 'weekly_report_message.dart';
 part 'weekly_report_locale_copy.dart';
 
 String _t(BuildContext context, String key) {

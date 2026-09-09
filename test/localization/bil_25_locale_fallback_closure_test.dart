@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:body_intelligence_log/app/localization/bil_locale_policy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_moderation.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_community_social.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_platform_conversation.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_release_closure.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_sleep_schedule.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../tool/localization/locale_fallback_closure.dart';
@@ -11,7 +15,7 @@ void main() {
   test('all tracked 25-locale surfaces close English fallback paths', () async {
     final result = await auditLocaleFallbackClosure();
     expect(result.requiredSourceCount, greaterThanOrEqualTo(578));
-    expect(result.missingSources, isEmpty);
+    expect(result.missingSources, isEmpty, reason: jsonEncode(result.toJson()));
     expect(result.directFallbackFiles, isEmpty);
     expect(result.androidFailures, isEmpty);
     expect(result.passed, isTrue);
@@ -148,6 +152,42 @@ void main() {
     }
   });
 
+  test('community social copy is native and placeholder-safe', () {
+    expect(CommunitySocialRuntimeCopy.balanced, isTrue);
+    expect(
+      CommunitySocialRuntimeCopy.supported,
+      BilLocalePolicy.productionTags.toSet(),
+    );
+
+    for (final tag in BilLocalePolicy.productionTags) {
+      for (final source in CommunitySocialRuntimeCopy.sources) {
+        final translated = CommunitySocialRuntimeCopy.resolve(source, tag);
+        expect(translated, isNotNull, reason: '$tag: $source');
+        expect(translated!.trim(), isNotEmpty, reason: '$tag: $source');
+        expect(RuntimeCopy.resolve(source, tag), translated);
+        if (tag != 'en') {
+          expect(translated, isNot(source), reason: '$tag: $source');
+        }
+        final sourcePlaceholders = RegExp(
+          r'\{[^}]+\}',
+        ).allMatches(source).map((match) => match.group(0)).toList();
+        final translatedPlaceholders = RegExp(
+          r'\{[^}]+\}',
+        ).allMatches(translated).map((match) => match.group(0)).toList();
+        expect(
+          translatedPlaceholders,
+          sourcePlaceholders,
+          reason: '$tag: $source',
+        );
+        for (final term in const ['BIL', 'iOS', 'Android']) {
+          if (source.contains(term)) {
+            expect(translated, contains(term), reason: '$tag: $source');
+          }
+        }
+      }
+    }
+  });
+
   test('accessibility and wellness labels never fall back to English', () {
     for (final source in const [
       'Read answer aloud',
@@ -164,6 +204,31 @@ void main() {
         for (final marker in const ['Ã', 'Â', '�']) {
           expect(translated, isNot(contains(marker)), reason: '$tag: $source');
         }
+      }
+    }
+  });
+
+  test('sleep schedule copy is complete and placeholder-safe', () {
+    expect(SleepScheduleRuntimeCopy.balanced, isTrue);
+    for (final source in SleepScheduleRuntimeCopy.sources) {
+      final expectedPlaceholders = RegExp(
+        r'\{[^}]+\}',
+      ).allMatches(source).map((match) => match.group(0)).toList();
+      for (final tag in BilLocalePolicy.productionTags) {
+        final translated = SleepScheduleRuntimeCopy.resolve(source, tag);
+        expect(translated, isNotNull, reason: '$tag: $source');
+        expect(translated!.trim(), isNotEmpty, reason: '$tag: $source');
+        if (tag != 'en') {
+          expect(translated, isNot(source), reason: '$tag: $source');
+        }
+        final actualPlaceholders = RegExp(
+          r'\{[^}]+\}',
+        ).allMatches(translated).map((match) => match.group(0)).toList();
+        expect(
+          actualPlaceholders,
+          expectedPlaceholders,
+          reason: '$tag: $source',
+        );
       }
     }
   });

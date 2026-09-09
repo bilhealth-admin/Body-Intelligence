@@ -52,4 +52,63 @@ void main() {
       isNull,
     );
   });
+
+  test('overnight window is calculated from local wall-clock values', () {
+    const schedule = SleepSchedule(
+      enabled: true,
+      bedHour: 22,
+      bedMinute: 30,
+      wakeHour: 7,
+      wakeMinute: 0,
+      goalMinutes: 8 * 60,
+      windDownMinutes: 30,
+    );
+
+    expect(schedule.scheduledWindowMinutes, 8 * 60 + 30);
+    expect(schedule.issue, isNull);
+  });
+
+  test(
+    'adult planning goal starts at seven hours without changing actuals',
+    () {
+      final sixHourGoal = const SleepSchedule.defaults().copyWith(
+        goalMinutes: 6 * 60,
+      );
+
+      expect(sixHourGoal.issue, SleepScheduleIssue.invalidGoal);
+      expect(sixHourGoal.isValid, isFalse);
+    },
+  );
+
+  test(
+    'legacy planning goal remains readable without becoming newly valid',
+    () {
+      final legacy = SleepSchedule.tryParse(
+        '{"enabled":true,"bedHour":23,"bedMinute":0,'
+        '"wakeHour":7,"wakeMinute":0,"goalMinutes":360,'
+        '"windDownMinutes":30}',
+      );
+
+      expect(legacy, isNotNull);
+      expect(legacy!.goalMinutes, 6 * 60);
+      expect(legacy.isStorable, isTrue);
+      expect(legacy.issue, SleepScheduleIssue.invalidGoal);
+      expect(legacy.isValid, isFalse);
+    },
+  );
+
+  test('same clock time and a goal longer than its window are explicit', () {
+    final emptyWindow = const SleepSchedule.defaults().copyWith(
+      bedHour: 7,
+      bedMinute: 0,
+    );
+    final shortWindow = const SleepSchedule.defaults().copyWith(
+      wakeHour: 5,
+      wakeMinute: 30,
+    );
+
+    expect(emptyWindow.issue, SleepScheduleIssue.emptyWindow);
+    expect(shortWindow.scheduledWindowMinutes, 7 * 60);
+    expect(shortWindow.issue, SleepScheduleIssue.goalExceedsWindow);
+  });
 }

@@ -18,6 +18,11 @@ void main() {
     expect(assistance.expand('بطيخ الكيوي'), contains('watermelon'));
   });
 
+  test('does not rewrite the valid food or brand term rise as rice', () {
+    expect(assistance.expand('rise'), isNot(contains('rice')));
+    expect(assistance.explicitCorrectionFor('rise'), isNull);
+  });
+
   test('generates useful Arabic names', () {
     expect(assistance.arabicNameFor('Chicken, ground, raw'), contains('دجاج'));
     expect(assistance.arabicNameFor('APPLES, FUJI'), 'تفاح فوجي');

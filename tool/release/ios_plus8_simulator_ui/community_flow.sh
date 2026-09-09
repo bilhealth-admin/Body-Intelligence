@@ -1,5 +1,30 @@
 #!/usr/bin/env bash
 
+prepare_disposable_policy_and_post() {
+  # The disposable QA member records consent only through the same in-app
+  # flow available to every signed-in user. Backend bootstrap never fabricates
+  # a policy receipt with service-role authority.
+  login "$IPAD_UDID" "$DISPOSABLE_EMAIL" "$DISPOSABLE_PASSWORD"
+  open_link "$IPAD_UDID" 'bil://community/safety'
+  wait_marker "$IPAD_UDID" 'Content policy'
+  tap_marker "$IPAD_UDID" 'I have read and agree to this policy version.'
+  tap_marker "$IPAD_UDID" 'Accept policy'
+  sleep 4
+  wait_marker "$IPAD_UDID" 'Accepted'
+  open_link "$IPAD_UDID" 'bil://community'
+  wait_marker "$IPAD_UDID" 'Share an experience or win'
+  tap_marker "$IPAD_UDID" 'Share an experience or win'
+  idb ui text --udid "$IPAD_UDID" "$APPROVED_POST"
+  tap_marker "$IPAD_UDID" 'Publish'
+  sleep 5
+  wait_marker "$IPAD_UDID" "$APPROVED_POST"
+  backend_canary verify-disposable-policy-and-post
+  open_link "$IPAD_UDID" 'bil://settings/preferences'
+  wait_marker "$IPAD_UDID" 'Logout'
+  tap_marker "$IPAD_UDID" 'Logout'
+  sleep 5
+}
+
 run_cross_account_community_flow() {
   open_link "$IPAD_UDID" 'bil://intelligence-center'
   wait_marker "$IPAD_UDID" 'Your BIL Coach'
@@ -64,8 +89,9 @@ run_cross_account_community_flow() {
   wait_marker "$IPAD_UDID" "$REJECTED_POST"
   backend_canary verify-rejected-pending
 
-  # The approved post belongs to the disposable account. Its reward vanishes
-  # with that account, while reviewer balance remains byte-for-byte unchanged.
+  # The approved post was created by the disposable member through the app
+  # only after that account explicitly accepted the active policy in the UI.
+  # Its reward vanishes with that account, while reviewer balance is unchanged.
   backend_canary verify-approved-pending
   open_link "$IPHONE_UDID" 'bil://community/moderation'
   scroll_until_marker "$IPHONE_UDID" "$APPROVED_POST" 20

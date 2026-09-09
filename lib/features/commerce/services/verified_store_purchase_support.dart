@@ -11,6 +11,34 @@ enum VerifiedStoreState {
   failed,
 }
 
+/// Whether another explicit user tap may open the native billing flow.
+///
+/// Store catalog availability and the last transaction outcome are separate
+/// concerns. A verified subscriber can still change plans, and a cancelled or
+/// pre-launch failure can be retried while the already-loaded store product is
+/// valid. Pending and post-purchase verification failures stay fail-closed so
+/// duplicate billing cannot be used to work around an unfinished transaction.
+bool canStartStorePurchase({
+  required VerifiedStoreState state,
+  required bool productAvailable,
+  String? messageCode,
+}) {
+  if (!productAvailable) return false;
+  return switch (state) {
+    VerifiedStoreState.ready ||
+    VerifiedStoreState.verified ||
+    VerifiedStoreState.cancelled => true,
+    VerifiedStoreState.failed => const {
+      'purchase_failed',
+      'purchase_not_started',
+    }.contains(messageCode),
+    VerifiedStoreState.loading ||
+    VerifiedStoreState.unavailable ||
+    VerifiedStoreState.offline ||
+    VerifiedStoreState.purchasePending => false,
+  };
+}
+
 /// Produces an opaque, deterministic StoreKit account token while preserving
 /// the existing Google Play account hash byte-for-byte.
 String storeAccountIdentifier({

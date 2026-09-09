@@ -17,6 +17,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
   late final SleepScheduleStore sleepScheduleStore;
   bool scheduleLoading = true;
   bool scheduleSaving = false;
+  String? scheduleError;
   bool saving = false;
   bool recordLoading = true;
   Object? recordError;
@@ -302,118 +303,6 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
       ),
     ),
   );
-
-  Widget _sleepScheduleCard() {
-    final material = MaterialLocalizations.of(context);
-    final scheduleLabels = bilSleepScheduleLabels(
-      Localizations.localeOf(context).toLanguageTag(),
-    );
-    String formatTime(int hour, int minute) =>
-        material.formatTimeOfDay(TimeOfDay(hour: hour, minute: minute));
-    final goalHours = sleepSchedule.goalMinutes / 60;
-    return Card(
-      key: const Key('sleep-schedule-card'),
-      child: Column(
-        children: [
-          SwitchListTile.adaptive(
-            key: const Key('sleep-schedule-toggle'),
-            horizontalTitleGap: 12,
-            secondary: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.notifications,
-            ),
-            title: Text(
-              '${tr('Sleep', 'النوم')} · ${tr('Daily reminders', 'التذكيرات اليومية')}',
-            ),
-            value: sleepSchedule.enabled,
-            onChanged: scheduleLoading || scheduleSaving
-                ? null
-                : _setSleepScheduleEnabled,
-          ),
-          const Divider(height: 1),
-          ListTile(
-            enabled: !scheduleLoading && !scheduleSaving,
-            horizontalTitleGap: 12,
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.sleep,
-            ),
-            title: Text(scheduleLabels.$1),
-            trailing: Text(
-              formatTime(sleepSchedule.bedHour, sleepSchedule.bedMinute),
-            ),
-            onTap: () => _chooseSleepTime(wake: false),
-          ),
-          ListTile(
-            enabled: !scheduleLoading && !scheduleSaving,
-            horizontalTitleGap: 12,
-            leading: const BilSemanticIconBadge(kind: BilSemanticIconKind.time),
-            title: Text(scheduleLabels.$2),
-            trailing: Text(
-              formatTime(sleepSchedule.wakeHour, sleepSchedule.wakeMinute),
-            ),
-            onTap: () => _chooseSleepTime(wake: true),
-          ),
-          ListTile(
-            horizontalTitleGap: 12,
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.goals,
-            ),
-            title: Text('${tr('Sleep', 'النوم')} · ${tr('Goal', 'الهدف')}'),
-            subtitle: Text(
-              '${goalHours.toStringAsFixed(goalHours % 1 == 0 ? 0 : 1)} ${tr('hours', 'ساعة')}',
-            ),
-            trailing: PopupMenuButton<int>(
-              enabled: !scheduleLoading && !scheduleSaving,
-              tooltip: tr('Goal', 'الهدف'),
-              onSelected: (minutes) => _saveSleepSchedule(
-                sleepSchedule.copyWith(goalMinutes: minutes),
-              ),
-              itemBuilder: (_) => [
-                for (final minutes in const [360, 420, 450, 480, 540])
-                  PopupMenuItem(
-                    value: minutes,
-                    child: Text(
-                      '${(minutes / 60).toStringAsFixed(minutes % 60 == 0 ? 0 : 1)} ${tr('hours', 'ساعة')}',
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          ListTile(
-            horizontalTitleGap: 12,
-            leading: const BilSemanticIconBadge(
-              kind: BilSemanticIconKind.notifications,
-            ),
-            title: Text('${tr('Sleep', 'النوم')} · ${tr('Reminder', 'تذكير')}'),
-            subtitle: Text(
-              tr(
-                '${sleepSchedule.windDownMinutes} min',
-                '${sleepSchedule.windDownMinutes} د',
-              ),
-            ),
-            trailing: PopupMenuButton<int>(
-              enabled: !scheduleLoading && !scheduleSaving,
-              tooltip: tr('Time', 'الوقت'),
-              onSelected: (minutes) => _saveSleepSchedule(
-                sleepSchedule.copyWith(windDownMinutes: minutes),
-              ),
-              itemBuilder: (_) => [
-                for (final minutes in const [15, 30, 45, 60])
-                  PopupMenuItem(
-                    value: minutes,
-                    child: Text(tr('$minutes min', '$minutes د')),
-                  ),
-              ],
-            ),
-          ),
-          if (scheduleSaving)
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: LinearProgressIndicator(),
-            ),
-        ],
-      ),
-    );
-  }
 
   Widget _insightsTab() => StreamBuilder<List<DailyLog>>(
     key: ValueKey(insightsRevision),
@@ -708,8 +597,36 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
 
   Future<void> _saveSleepSchedule(SleepSchedule value) async {
     if (scheduleSaving) return;
+    final issue = value.issue;
+    if (issue != null) {
+      setState(
+        () => scheduleError = switch (issue) {
+          SleepScheduleIssue.goalExceedsWindow => tr(
+            'The scheduled window must be at least as long as the sleep goal. Adjust bedtime, wake time, or the goal.',
+            'يجب ألا تقل نافذة النوم المجدولة عن هدف النوم. عدّل وقت النوم أو الاستيقاظ أو الهدف.',
+          ),
+          SleepScheduleIssue.emptyWindow => tr(
+            'Bedtime and wake time cannot be the same.',
+            'لا يمكن أن يتطابق وقت النوم ووقت الاستيقاظ.',
+          ),
+          SleepScheduleIssue.invalidGoal => tr(
+            'Choose an adult sleep goal from 7 to 12 hours.',
+            'اختر هدف نوم للبالغين من 7 إلى 12 ساعة.',
+          ),
+          SleepScheduleIssue.invalidClock ||
+          SleepScheduleIssue.invalidWindDown => tr(
+            'Check the schedule values and try again.',
+            'راجع قيم الجدول وحاول مجددًا.',
+          ),
+        },
+      );
+      return;
+    }
     final languageCode = Localizations.localeOf(context).languageCode;
-    setState(() => scheduleSaving = true);
+    setState(() {
+      scheduleError = null;
+      scheduleSaving = true;
+    });
     try {
       await sleepScheduleStore.save(value);
       final notifications = ref.read(fastingNotificationServiceProvider);
@@ -726,7 +643,10 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
         await notifications.cancelSleepSchedule();
       }
       if (!mounted) return;
-      setState(() => sleepSchedule = value);
+      setState(() {
+        sleepSchedule = value;
+        scheduleError = null;
+      });
     } on Object {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

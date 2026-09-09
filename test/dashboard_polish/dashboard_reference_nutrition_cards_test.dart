@@ -207,9 +207,12 @@ void main() {
           ),
           findsNothing,
         );
-        expect(find.text('85 g / 260'), findsOneWidget);
-        expect(find.text('28 g / 70'), findsOneWidget);
-        expect(find.text('62 g / 135'), findsOneWidget);
+        expect(find.text('85 g'), findsOneWidget);
+        expect(find.text('28 g'), findsOneWidget);
+        expect(find.text('62 g'), findsOneWidget);
+        expect(find.textContaining('/ 260', findRichText: true), findsNothing);
+        expect(find.textContaining('/ 70', findRichText: true), findsNothing);
+        expect(find.textContaining('/ 135', findRichText: true), findsNothing);
         if (!const {
           'ar',
           'en',

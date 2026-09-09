@@ -34,7 +34,10 @@ extension on _IntelligenceCenterPageState {
       onReport: canRate
           ? (reason) => _recordFeedback(message, false, reason: reason)
           : null,
-      onAction: (action) => unawaited(_executeAction(action)),
+      actionPhases: actionExecutionPhases,
+      onAction: (action) {
+        unawaited(_executeAction(action).then<void>((_) {}));
+      },
     );
   }
 }

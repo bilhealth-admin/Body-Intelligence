@@ -51,6 +51,13 @@ abstract final class CorePagesRuntimeCopy {
       "es": "Comprobando suscripción",
       "tr": "Abonelik kontrol ediliyor",
     },
+    "Subscription check unavailable": {
+      'en': "Subscription check unavailable",
+      "ar": "تعذّر التحقق من الاشتراك",
+      "fr": "Vérification de l'abonnement indisponible",
+      "es": "Comprobación de suscripción no disponible",
+      "tr": "Abonelik kontrolü kullanılamıyor",
+    },
     "Coach controls": {
       'en': "Coach controls",
       "ar": "أدوات تحكم المدرب",

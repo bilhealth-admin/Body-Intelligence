@@ -1,18 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../app/environment/app_environment.dart';
+import '../../../app/localization/bil_written_language_resolver.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
+import '../domain/community_content_policy.dart';
 import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
 import '../services/community_post_image_picker.dart';
 import 'community_copy.dart';
+import 'community_food_submission_sheet.dart';
+import 'community_policy_notice.dart';
+import 'community_safety_page.dart';
 import 'community_taxonomy_sheet.dart';
 
 part 'community_feed_tab.dart';
+part 'community_feed_pagination.dart';
+part 'community_post_composer_page.dart';
+part 'community_post_detail_page.dart';
+part 'community_post_detail_comment_tile.dart';
+part 'community_post_widgets.dart';
+part 'community_saved_posts_page.dart';
 part 'community_friends_tab.dart';
 part 'community_food_tab.dart';
 
@@ -47,7 +61,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
   }
 
   CommunityRepository? _productionRepository() {
-    if (!AppEnvironment.cloudConfigured) return null;
+    if (!AppEnvironment.communityConfigured) return null;
     try {
       final supabase = Supabase.instance;
       if (!supabase.isInitialized || supabase.client.auth.currentUser == null) {
@@ -69,6 +83,31 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
       child: Scaffold(
         appBar: AppBar(
           actions: [
+            IconButton(
+              key: const Key('community-find-people'),
+              onPressed: repository == null
+                  ? null
+                  : () => context.push('/community/people'),
+              tooltip: communityText(context, 'Find people', 'البحث عن أصدقاء'),
+              icon: const Icon(Icons.person_search_outlined),
+            ),
+            IconButton(
+              key: const Key('community-saved-posts'),
+              onPressed: repository == null
+                  ? null
+                  : () => Navigator.of(context).push<void>(
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            CommunitySavedPostsPage(repository: repository),
+                      ),
+                    ),
+              tooltip: communityText(
+                context,
+                'Saved posts',
+                'المنشورات المحفوظة',
+              ),
+              icon: const Icon(Icons.bookmarks_outlined),
+            ),
             IconButton(
               onPressed: repository == null
                   ? null
@@ -150,6 +189,7 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
             : TabBarView(
                 children: [
                   _FeedTab(
+                    key: ObjectKey(repository),
                     repository: repository,
                     imagePicker:
                         widget.postImagePicker ?? CommunityPostImagePicker(),

@@ -73,6 +73,7 @@ OWNER_NAME="$(backend_canary get owner_name)"
 REVIEWER_NAME="$(backend_canary get reviewer_name)"
 DISPOSABLE_NAME="$(backend_canary get disposable_name)"
 DISPOSABLE_EMAIL="$(backend_canary get disposable_email)"
+DISPOSABLE_PASSWORD="$(backend_canary get disposable_password)"
 REVIEWER_MESSAGE="$(backend_canary get reviewer_message)"
 OWNER_MESSAGE="$(backend_canary get owner_message)"
 APPROVED_POST="$(backend_canary get approved_post)"
@@ -80,6 +81,9 @@ REJECTED_POST="$(backend_canary get rejected_post)"
 INDIVIDUAL_REASON="$(backend_canary get individual_reason)"
 INDIVIDUAL_MESSAGE="$(backend_canary get individual_message)"
 TARGET_NOTIFICATION="$(backend_canary get target_notification)"
+
+prepare_disposable_policy_and_post
+unset DISPOSABLE_PASSWORD
 
 login "$IPHONE_UDID" "$owner_email_secret" "$owner_password_secret"
 login "$IPAD_UDID" "$reviewer_email_secret" "$reviewer_password_secret"

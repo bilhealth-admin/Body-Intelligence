@@ -9,6 +9,7 @@ import 'package:body_intelligence_log/data/repositories/preferences_repository.d
 import 'package:body_intelligence_log/data/repositories/user_profile_repository.dart';
 import 'package:body_intelligence_log/data/repositories/weight_repository.dart';
 import 'package:body_intelligence_log/features/intelligence_center/presentation/intelligence_center_page.dart';
+import 'package:body_intelligence_log/features/intelligence_center/presentation/coach_message_text.dart';
 import 'package:body_intelligence_log/features/intelligence_center/domain/coach_context_snapshot.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/coach_context_provider.dart';
 import 'package:body_intelligence_log/features/intelligence_center/services/intelligence_health_context_provider.dart';
@@ -77,7 +78,9 @@ Widget _app(
 void main() {
   Future<void> revealOlderMessage(WidgetTester tester, Finder target) async {
     for (var attempt = 0; attempt < 6 && target.evaluate().isEmpty; attempt++) {
-      await tester.drag(find.byType(ListView).last, const Offset(0, -320));
+      // The transcript is reversed so offset zero stays at the newest turn.
+      // Dragging down moves toward lazily built, older messages.
+      await tester.drag(find.byType(ListView).last, const Offset(0, 320));
       await tester.pumpAndSettle();
     }
   }
@@ -478,16 +481,20 @@ void main() {
 
     await revealOlderMessage(tester, find.text('assalamualaikum'));
 
-    expect(find.text('assalamualaikum'), findsOneWidget);
-    expect(find.text('وعليكم السلام. كيف أساعدك اليوم؟'), findsOneWidget);
+    final userMessageFinder = find.byKey(
+      const ValueKey('coach-message-text-voice-user'),
+    );
+    final coachMessageFinder = find.byKey(
+      const ValueKey('coach-message-text-voice-coach'),
+    );
+    expect(userMessageFinder, findsOneWidget);
+    expect(coachMessageFinder, findsOneWidget);
     expect(
-      tester.widget<Text>(find.text('assalamualaikum')).textDirection,
+      tester.widget<CoachMessageText>(userMessageFinder).textDirection,
       TextDirection.ltr,
     );
     expect(
-      tester
-          .widget<Text>(find.text('وعليكم السلام. كيف أساعدك اليوم؟'))
-          .textDirection,
+      tester.widget<CoachMessageText>(coachMessageFinder).textDirection,
       TextDirection.rtl,
     );
     expect(find.byIcon(Icons.volume_up_rounded), findsOneWidget);

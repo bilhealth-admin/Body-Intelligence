@@ -8,9 +8,11 @@ void main() {
   test(
     'community repository exposes the complete authenticated social loop',
     () {
-      final repository = source(
+      final repository = [
         'lib/features/community/data/community_repository.dart',
-      );
+        'lib/features/community/data/community_feed_repository_mixin.dart',
+        'lib/features/community/data/community_social_repository_mixin.dart',
+      ].map(source).join('\n');
       for (final contract in <String>[
         'loadMyProfile',
         'saveMyProfile',

@@ -3,232 +3,61 @@ part of 'community_hub_page.dart';
 class _CommunityFoodTab extends StatefulWidget {
   const _CommunityFoodTab({required this.repository});
   final CommunityRepository repository;
-
   @override
   State<_CommunityFoodTab> createState() => _CommunityFoodTabState();
 }
 
 class _CommunityFoodTabState extends State<_CommunityFoodTab> {
-  final _name = TextEditingController();
-  final _serving = TextEditingController();
-  final _calories = TextEditingController();
-  final _protein = TextEditingController();
-  final _carbs = TextEditingController();
-  final _fat = TextEditingController();
-  bool _submitting = false;
+  late Future<List<Map<String, dynamic>>> _submissions;
+  bool _formOpen = false;
+  bool _submitted = false;
 
-  double? _parseNumber(String source) {
-    final normalized = source
-        .trim()
-        .replaceAll('،', '.')
-        .replaceAll('٫', '.')
-        .replaceAllMapped(RegExp(r'[٠-٩۰-۹０-９]'), (match) {
-          const arabic = '٠١٢٣٤٥٦٧٨٩';
-          const persian = '۰۱۲۳۴۵۶۷۸۹';
-          const fullWidth = '０１２３４５６７８９';
-          final value = match.group(0)!;
-          final arabicIndex = arabic.indexOf(value);
-          if (arabicIndex >= 0) return '$arabicIndex';
-          final persianIndex = persian.indexOf(value);
-          if (persianIndex >= 0) return '$persianIndex';
-          return '${fullWidth.indexOf(value)}';
-        });
-    return double.tryParse(normalized);
+  @override
+  void initState() {
+    super.initState();
+    _reload();
   }
 
   @override
-  void dispose() {
-    for (final controller in [
-      _name,
-      _serving,
-      _calories,
-      _protein,
-      _carbs,
-      _fat,
-    ]) {
-      controller.dispose();
-    }
-    super.dispose();
+  void didUpdateWidget(covariant _CommunityFoodTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.repository, widget.repository)) _reload();
   }
 
-  Future<void> _submit() async {
-    if (_submitting) return;
-    final values = [_serving, _calories, _protein, _carbs, _fat]
-        .map((controller) => _parseNumber(controller.text))
-        .toList(growable: false);
-    if (_name.text.trim().length < 2 ||
-        values.any((value) => value == null || !value.isFinite) ||
-        values[0]! <= 0 ||
-        values.skip(1).any((value) => value! < 0)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            communityText(
-              context,
-              'Complete all required values.',
-              'أكمل القيم المطلوبة.',
-            ),
-          ),
-        ),
-      );
-      return;
-    }
-    setState(() => _submitting = true);
+  void _reload() {
+    _submissions = widget.repository.loadMyFoodSubmissions();
+  }
+
+  Future<void> _openForm() async {
+    if (_formOpen) return;
+    setState(() => _formOpen = true);
     try {
-      await widget.repository.submitFood(
-        CommunityFoodDraft(
-          name: _name.text,
-          servingGrams: values[0]!,
-          calories: values[1]!,
-          protein: values[2]!,
-          carbohydrate: values[3]!,
-          fat: values[4]!,
+      final submitted = await showModalBottomSheet<bool>(
+        context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
+        isDismissible: false,
+        enableDrag: false,
+        builder: (_) => CommunityFoodSubmissionSheet(
+          onSubmit: widget.repository.submitFood,
         ),
       );
-    } on CommunityTextPolicyException catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            error.localizedMessage(
-              Localizations.localeOf(context).toLanguageTag(),
-            ),
-          ),
-        ),
-      );
-      return;
-    } on Object {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            communityText(
-              context,
-              'Could not complete that action safely. Try again.',
-              'تعذر إكمال هذا الإجراء بأمان. حاول مجددًا.',
-            ),
-          ),
-        ),
-      );
-      return;
+      setState(() {
+        if (submitted == true) _submitted = true;
+        // Also refresh after cancellation: a timed-out request may have saved.
+        _reload();
+      });
     } finally {
-      if (mounted) setState(() => _submitting = false);
+      if (mounted) setState(() => _formOpen = false);
     }
-    if (!mounted) return;
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          communityText(
-            context,
-            'Food submitted for review. It will not appear as verified before validation.',
-            'أُرسل الغذاء للمراجعة. لن يظهر كموثّق قبل التحقق.',
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _openForm() {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          20,
-          20,
-          20,
-          MediaQuery.viewInsetsOf(context).bottom + 20,
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                communityText(
-                  context,
-                  'Submit community food',
-                  'إضافة غذاء مجتمعي',
-                ),
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                key: const Key('community-food-name'),
-                controller: _name,
-                decoration: InputDecoration(
-                  labelText: communityText(context, 'Name', 'الاسم'),
-                ),
-              ),
-              TextField(
-                key: const Key('community-food-serving'),
-                controller: _serving,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: communityText(
-                    context,
-                    'Serving grams',
-                    'الحصة بالغرام',
-                  ),
-                ),
-              ),
-              TextField(
-                key: const Key('community-food-calories'),
-                controller: _calories,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: communityText(context, 'Calories', 'السعرات'),
-                ),
-              ),
-              TextField(
-                key: const Key('community-food-protein'),
-                controller: _protein,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: communityText(context, 'Protein', 'البروتين'),
-                ),
-              ),
-              TextField(
-                key: const Key('community-food-carbs'),
-                controller: _carbs,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: communityText(
-                    context,
-                    'Carbohydrate',
-                    'الكربوهيدرات',
-                  ),
-                ),
-              ),
-              TextField(
-                key: const Key('community-food-fat'),
-                controller: _fat,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: communityText(context, 'Fat', 'الدهون'),
-                ),
-              ),
-              const SizedBox(height: 16),
-              FilledButton.icon(
-                key: const Key('community-food-submit'),
-                onPressed: _submitting ? null : _submit,
-                icon: const Icon(Icons.fact_check_outlined),
-                label: Text(
-                  communityText(context, 'Send for review', 'إرسال للمراجعة'),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   @override
   Widget build(
     BuildContext context,
   ) => FutureBuilder<List<Map<String, dynamic>>>(
-    future: widget.repository.loadMyFoodSubmissions(),
+    future: _submissions,
     builder: (context, snapshot) => ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -241,17 +70,38 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
         ),
         const SizedBox(height: 12),
         FilledButton.icon(
-          onPressed: _openForm,
+          onPressed: _formOpen ? null : _openForm,
           icon: const Icon(Icons.add_rounded),
           label: Text(communityText(context, 'Submit food', 'إضافة غذاء')),
         ),
+        if (_submitted) ...[
+          const SizedBox(height: 12),
+          Semantics(
+            liveRegion: true,
+            child: Text(
+              communityText(
+                context,
+                'Food submitted for review. It will not appear as verified before validation.',
+                'أُرسل الغذاء للمراجعة. لن يظهر كموثّق قبل التحقق.',
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: 16),
+        if (snapshot.connectionState != ConnectionState.done &&
+            !snapshot.hasData)
+          const Center(child: CircularProgressIndicator()),
+        if (snapshot.hasError) _InlineError(onRetry: () => setState(_reload)),
         for (final row in snapshot.data ?? const <Map<String, dynamic>>[])
           Card(
             child: ListTile(
               title: Text(row['canonical_name'] as String),
               subtitle: Text(row['status'] as String),
-              trailing: const Icon(Icons.verified_outlined),
+              trailing: Icon(
+                row['status'] == 'approved'
+                    ? Icons.verified_outlined
+                    : Icons.hourglass_top_rounded,
+              ),
             ),
           ),
       ],

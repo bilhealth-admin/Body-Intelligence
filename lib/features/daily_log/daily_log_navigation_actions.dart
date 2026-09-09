@@ -1,6 +1,15 @@
 part of 'daily_log_page.dart';
 
 extension _DailyLogNavigationActions on _DailyLogPageState {
+  void _returnFromSelectedFoodToSearch() {
+    if (selectedFood == null) return;
+    _updateState(() {
+      selectedFood = null;
+      mealSearchActive = true;
+    });
+    _openFoodSearchAfterBuild();
+  }
+
   void _focusMealEntry() {
     final mealContext = mealEntryKey.currentContext;
     if (!mounted || mealContext == null) return;

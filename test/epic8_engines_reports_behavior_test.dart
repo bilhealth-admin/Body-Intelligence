@@ -181,6 +181,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.textContaining('could not be read'), findsOneWidget);
       expect(find.textContaining('private database detail'), findsNothing);
+      expect(find.byKey(const Key('weekly-report-retry')), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
     for (final locale in const [Locale('en'), Locale('ar')]) {

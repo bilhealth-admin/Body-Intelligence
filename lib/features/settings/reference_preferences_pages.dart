@@ -21,6 +21,11 @@ part 'reference_preferences_numeric.dart';
 part 'reference_preferences_macros.dart';
 part 'reference_preferences_email.dart';
 
+bool diarySharingAccessKeyLengthIsValid(String key) {
+  final characterCount = key.runes.length;
+  return characterCount >= 16 && characterCount <= 128;
+}
+
 class ReferenceDiarySettingsPage extends ConsumerWidget {
   const ReferenceDiarySettingsPage({super.key});
 
@@ -341,6 +346,9 @@ class _DiarySharingState extends ConsumerState<ReferenceDiarySharingPage> {
           content: TextField(
             controller: controller,
             obscureText: true,
+            autocorrect: false,
+            enableSuggestions: false,
+            maxLength: 128,
             decoration: InputDecoration(
               labelText: _diaryText(context, 'Access key'),
             ),
@@ -359,12 +367,12 @@ class _DiarySharingState extends ConsumerState<ReferenceDiarySharingPage> {
         ),
       );
       controller.dispose();
-      if (key == null || key.length < 6) {
+      if (key == null || !diarySharingAccessKeyLengthIsValid(key)) {
         if (mounted && key != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                _diaryText(context, 'Key must contain at least 6 characters'),
+                _diaryText(context, 'Key must contain 16 to 128 characters'),
               ),
             ),
           );

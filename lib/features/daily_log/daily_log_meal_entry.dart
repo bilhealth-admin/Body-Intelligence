@@ -114,7 +114,7 @@ extension _DailyLogMealEntryPresentation on _DailyLogPageState {
                       tooltip: context.strings.text('Close'),
                       onPressed: mealSaving
                           ? null
-                          : () => _updateState(() => selectedFood = null),
+                          : _returnFromSelectedFoodToSearch,
                       icon: const Icon(Icons.close),
                     ),
                   ],

@@ -1,5 +1,6 @@
 enum CommunityTextSurface {
   post,
+  comment,
   message,
   profileDisplayName,
   profileBio,

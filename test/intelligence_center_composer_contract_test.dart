@@ -16,6 +16,7 @@ void main() {
             'intelligence_vision_flow.dart',
             'intelligence_query_flow.dart',
             'intelligence_action_flow.dart',
+            'intelligence_action_runtime.dart',
           ]
           .map(
             (name) => File(
@@ -148,9 +149,9 @@ void main() {
     expect(page, contains('with WidgetsBindingObserver'));
     expect(page, contains('void didChangeMetrics()'));
     expect(page, contains('_scrollToLatest();'));
-    expect(page, contains('reverse: false'));
-    expect(page, contains('conversationScroll.position.maxScrollExtent'));
-    expect(page, contains("'ai-coach-conversation-restoring-body'"));
+    expect(page, contains('reverse: true'));
+    expect(page, contains('conversationScroll.position.minScrollExtent'));
+    expect(page, contains("'ai-coach-conversation-restoring'"));
     expect(page, contains('sessionWelcomeMessage'));
   });
 

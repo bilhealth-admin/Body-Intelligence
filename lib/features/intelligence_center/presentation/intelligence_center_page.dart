@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,6 +19,7 @@ import '../../../data/repositories/daily_log_repository.dart';
 import '../../../data/repositories/preferences_repository.dart';
 import '../../../data/repositories/weight_repository.dart';
 import '../../../shared/widgets/bil_coach_identity.dart';
+import '../../../shared/widgets/chat_history_viewport.dart';
 import '../../../shared/widgets/bil_camera_capture_page.dart';
 import '../../daily_log/providers/daily_log_provider.dart';
 import '../../commerce/providers/commerce_providers.dart';
@@ -45,12 +47,15 @@ import '../services/local_coach_api.dart';
 
 import '../services/local_model_gateway.dart';
 import '../services/coach_catalog_grounding.dart';
+import '../services/coach_action_presentation_policy.dart';
 import '../services/ai_coach_feedback_service.dart';
 import '../../nutrition/domain/barcode_identity.dart';
 import '../../nutrition/services/bil_speech_to_text.dart';
 import '../../nutrition/services/meal_image_analysis_service.dart';
 import '../../nutrition/presentation/meal_image_review_dialog.dart';
 import '../intelligence_locale_copy.dart';
+import '../ai_coach_chat_copy.dart';
+import 'coach_message_text.dart';
 
 part 'intelligence_center_page_message.dart';
 part 'intelligence_center_widgets.dart';
@@ -62,6 +67,7 @@ part 'intelligence_conversation_voice.dart';
 part 'intelligence_vision_flow.dart';
 part 'intelligence_query_flow.dart';
 part 'intelligence_action_flow.dart';
+part 'intelligence_action_runtime.dart';
 
 /// Single injectable wall clock for conversation copy and seeded messages.
 ///
@@ -79,10 +85,6 @@ final intelligenceConversationClockProvider = Provider<DateTime Function()>(
 final intelligenceCenterModelGatewayProvider = Provider<LocalModelGateway>(
   (ref) => createLocalModelGateway(),
 );
-
-enum _CoachVoiceMode { idle, dictation, liveCall }
-
-enum _CoachReplyPhase { idle, preparing, searching, failed }
 
 class IntelligenceCenterPage extends ConsumerStatefulWidget {
   const IntelligenceCenterPage({
@@ -107,6 +109,8 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
   final catalogGrounding = CoachCatalogGrounding();
   final messages = <IntelligenceMessage>[];
   final executingActionKeys = <String>{};
+  final actionExecutionPhases = <String, _CoachActionExecutionPhase>{};
+  String? lastClearWritingLanguageTag;
   Timer? voiceSilenceTimer;
   Timer? replyDelayTimer;
   String? voiceLanguageHint;
@@ -348,7 +352,9 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
               Localizations.localeOf(context),
             ),
           );
-    final visibleMessages = messages.toList(growable: false);
+    final visibleMessages = messages.isEmpty && sessionWelcomeMessage != null
+        ? <IntelligenceMessage>[sessionWelcomeMessage!]
+        : messages.toList(growable: false);
     final showLiveVoiceDraft =
         listening && pendingVoiceTranscript.trim().isNotEmpty;
     final showReplyProgress =
@@ -423,107 +429,95 @@ class _IntelligenceCenterPageState extends ConsumerState<IntelligenceCenterPage>
                         minHeight: 2,
                       ),
                     Expanded(
-                      child: AbsorbPointer(
-                        absorbing: !conversationReady,
-                        child: !conversationReady
-                            ? ListView(
-                                key: const ValueKey(
-                                  'ai-coach-conversation-restoring-body',
-                                ),
-                                padding: const EdgeInsets.fromLTRB(
-                                  16,
-                                  18,
-                                  16,
-                                  12,
-                                ),
-                                children: [
-                                  if (sessionWelcomeMessage != null)
-                                    _buildMessage(
-                                      sessionWelcomeMessage!,
-                                      messageFeedback,
-                                    ),
-                                  const Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.only(top: 12),
-                                      child: CircularProgressIndicator(),
-                                    ),
+                      child: ChatHistoryViewport(
+                        controller: conversationScroll,
+                        latestMessageId: visibleMessages.isEmpty
+                            ? null
+                            : visibleMessages.last.id,
+                        child: AbsorbPointer(
+                          absorbing: !conversationReady,
+                          child: visibleMessages.isEmpty
+                              ? _CoachEmptyState(
+                                  onVoice: _toggleLiveCall,
+                                  onCamera: _analyzeFoodImageInChat,
+                                )
+                              : ListView.builder(
+                                  controller: conversationScroll,
+                                  reverse: true,
+                                  keyboardDismissBehavior:
+                                      ScrollViewKeyboardDismissBehavior.onDrag,
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    18,
+                                    16,
+                                    12,
                                   ),
-                                ],
-                              )
-                            : visibleMessages.isEmpty &&
-                                  sessionWelcomeMessage == null &&
-                                  !showIntroBrief
-                            ? _CoachEmptyState(
-                                onVoice: _toggleLiveCall,
-                                onCamera: _analyzeFoodImageInChat,
-                              )
-                            : ListView.builder(
-                                controller: conversationScroll,
-                                reverse: false,
-                                keyboardDismissBehavior:
-                                    ScrollViewKeyboardDismissBehavior.onDrag,
-                                padding: const EdgeInsets.fromLTRB(
-                                  16,
-                                  18,
-                                  16,
-                                  12,
+                                  itemCount:
+                                      visibleMessages.length +
+                                      (showLiveVoiceDraft ? 1 : 0) +
+                                      (showReplyProgress ? 1 : 0) +
+                                      (showIntroBrief ? 1 : 0),
+                                  itemBuilder: (context, index) {
+                                    if (showReplyProgress && index == 0) {
+                                      return _CoachReplyProgress(
+                                        phase: replyPhase,
+                                        onCancel: _cancelCurrentCoachRequest,
+                                        onRetry: failedRequest == null
+                                            ? null
+                                            : _retryFailedCoachRequest,
+                                      );
+                                    }
+                                    final progressOffset = showReplyProgress
+                                        ? 1
+                                        : 0;
+                                    if (showLiveVoiceDraft &&
+                                        index == progressOffset) {
+                                      return _LiveVoiceTranscript(
+                                        text: pendingVoiceTranscript.trim(),
+                                        liveCall:
+                                            voiceMode ==
+                                            _CoachVoiceMode.liveCall,
+                                      );
+                                    }
+                                    var cursor =
+                                        index -
+                                        progressOffset -
+                                        (showLiveVoiceDraft ? 1 : 0);
+                                    if (cursor == 0 &&
+                                        visibleMessages.isNotEmpty) {
+                                      return _buildMessage(
+                                        visibleMessages.last,
+                                        messageFeedback,
+                                      );
+                                    }
+                                    cursor -= 1;
+                                    if (showIntroBrief && cursor == 0) {
+                                      return _InlineCoachDecision(
+                                        brief: dailyBrief,
+                                        onAction: () {
+                                          if (dailyBrief.kind ==
+                                              CoachDailyBriefKind.experiment) {
+                                            context.push('/experiments');
+                                          } else {
+                                            usePrompt(
+                                              dailyBrief.suggestedPrompt,
+                                            );
+                                          }
+                                        },
+                                      );
+                                    }
+                                    if (showIntroBrief) cursor -= 1;
+                                    final messageIndex =
+                                        visibleMessages.length - 2 - cursor;
+                                    final message =
+                                        visibleMessages[messageIndex];
+                                    return _buildMessage(
+                                      message,
+                                      messageFeedback,
+                                    );
+                                  },
                                 ),
-                                itemCount:
-                                    visibleMessages.length +
-                                    (sessionWelcomeMessage == null ? 0 : 1) +
-                                    (showIntroBrief ? 1 : 0) +
-                                    (showLiveVoiceDraft ? 1 : 0) +
-                                    (showReplyProgress ? 1 : 0),
-                                itemBuilder: (context, index) {
-                                  var cursor = index;
-                                  if (sessionWelcomeMessage != null &&
-                                      cursor == 0) {
-                                    return _buildMessage(
-                                      sessionWelcomeMessage!,
-                                      messageFeedback,
-                                    );
-                                  }
-                                  if (sessionWelcomeMessage != null) cursor--;
-                                  if (showIntroBrief && cursor == 0) {
-                                    return _InlineCoachDecision(
-                                      brief: dailyBrief,
-                                      onAction: () {
-                                        if (dailyBrief.kind ==
-                                            CoachDailyBriefKind.experiment) {
-                                          context.push('/experiments');
-                                        } else {
-                                          usePrompt(dailyBrief.suggestedPrompt);
-                                        }
-                                      },
-                                    );
-                                  }
-                                  if (showIntroBrief) cursor -= 1;
-                                  if (cursor < visibleMessages.length) {
-                                    return _buildMessage(
-                                      visibleMessages[cursor],
-                                      messageFeedback,
-                                    );
-                                  }
-                                  cursor -= visibleMessages.length;
-                                  if (showLiveVoiceDraft && cursor == 0) {
-                                    return _LiveVoiceTranscript(
-                                      text: pendingVoiceTranscript.trim(),
-                                      liveCall:
-                                          voiceMode == _CoachVoiceMode.liveCall,
-                                    );
-                                  }
-                                  if (showReplyProgress) {
-                                    return _CoachReplyProgress(
-                                      phase: replyPhase,
-                                      onCancel: _cancelCurrentCoachRequest,
-                                      onRetry: failedRequest == null
-                                          ? null
-                                          : _retryFailedCoachRequest,
-                                    );
-                                  }
-                                  return const SizedBox.shrink();
-                                },
-                              ),
+                        ),
                       ),
                     ),
                     SafeArea(

@@ -34,6 +34,11 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
 
   bool get configured => AppEnvironment.commerceConfigured;
   bool get busy => state == VerifiedStoreState.purchasePending;
+  bool get canStartPurchase => canStartStorePurchase(
+    state: state,
+    productAvailable: products.isNotEmpty,
+    messageCode: messageCode,
+  );
 
   Future<void> initialize() async {
     state = VerifiedStoreState.loading;
@@ -116,9 +121,19 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     GooglePlayPurchaseDetails? replacesGooglePurchase,
     bool downgradeAtRenewal = false,
   }) async {
+    // The button and service both guard this boundary. Keeping the service
+    // idempotent prevents a second UI event from overwriting the truthful
+    // pending state while the native sheet is opening.
+    if (busy) return;
     final user = Supabase.instance.client.auth.currentUser;
     final product = productFor(plan, term: term);
-    if (user == null || product == null || state != VerifiedStoreState.ready) {
+    if (user == null ||
+        product == null ||
+        !canStartStorePurchase(
+          state: state,
+          productAvailable: true,
+          messageCode: messageCode,
+        )) {
       messageCode = 'purchase_unavailable';
       notifyListeners();
       return;
@@ -175,9 +190,16 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   }
 
   Future<void> purchaseBoost({String? offerToken}) async {
+    if (busy) return;
     final user = Supabase.instance.client.auth.currentUser;
     final product = products[StoreCatalogConfiguration.aiBoost];
-    if (user == null || product == null || state != VerifiedStoreState.ready) {
+    if (user == null ||
+        product == null ||
+        !canStartStorePurchase(
+          state: state,
+          productAvailable: true,
+          messageCode: messageCode,
+        )) {
       messageCode = 'purchase_unavailable';
       notifyListeners();
       return;

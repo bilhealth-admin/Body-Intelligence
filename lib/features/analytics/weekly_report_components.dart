@@ -916,30 +916,3 @@ String _weeklyDayLabel(BuildContext context, String dayKey) {
   if (date == null) return '·';
   return MaterialLocalizations.of(context).narrowWeekdays[date.weekday % 7];
 }
-
-class _Message extends StatelessWidget {
-  const _Message(this.value, {this.onRetry});
-  final String value;
-  final VoidCallback? onRetry;
-  @override
-  Widget build(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(value, textAlign: TextAlign.center),
-          if (onRetry != null) ...[
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              key: const Key('weekly-report-retry'),
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: Text(_t(context, 'Try again')),
-            ),
-          ],
-        ],
-      ),
-    ),
-  );
-}

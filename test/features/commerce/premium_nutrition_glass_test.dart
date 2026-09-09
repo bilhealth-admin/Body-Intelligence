@@ -1,9 +1,11 @@
+import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_entitlement.dart';
 import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
 import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/premium_nutrition_glass.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -41,9 +43,68 @@ void main() {
     );
     semantics.dispose();
   });
+
+  testWidgets('subscription loading never flashes an upgrade action', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(_appWithSubscription(const AsyncLoading()));
+    await tester.pump();
+
+    expect(find.byKey(const Key('premium-nutrition-checking')), findsOneWidget);
+    expect(find.byKey(const Key('premium-nutrition-glass')), findsNothing);
+    expect(find.text('Premium'), findsNothing);
+    expect(find.bySemanticsLabel('private macro values'), findsNothing);
+    semantics.dispose();
+  });
+
+  testWidgets(
+    'subscription error stays protected and offers retry, not upsell',
+    (tester) async {
+      await tester.pumpWidget(
+        _appWithSubscription(
+          AsyncError<SubscriptionState>(
+            StateError('verification unavailable'),
+            StackTrace.empty,
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        find.byKey(const Key('premium-nutrition-entitlement-retry')),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('premium-nutrition-glass')), findsNothing);
+      expect(find.text('Premium'), findsNothing);
+    },
+  );
+
+  testWidgets('unverified local default never impersonates verified Free', (
+    tester,
+  ) async {
+    final localDefault = SubscriptionState(
+      plan: CommercePlan.free,
+      entitlements: const <CommerceEntitlement>{},
+      authority: EntitlementAuthority.localDefault,
+      isPurchasable: false,
+      canRestorePurchases: false,
+    );
+    await tester.pumpWidget(_app(localDefault));
+    await tester.pump();
+
+    expect(
+      find.byKey(const Key('premium-nutrition-entitlement-retry')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('premium-nutrition-glass')), findsNothing);
+    expect(find.text('Premium'), findsNothing);
+  });
 }
 
-Widget _app(SubscriptionState state) {
+Widget _app(SubscriptionState state) => _appWithSubscription(AsyncData(state));
+
+Widget _appWithSubscription(AsyncValue<SubscriptionState> subscription) {
   final router = GoRouter(
     routes: [
       GoRoute(
@@ -65,9 +126,18 @@ Widget _app(SubscriptionState state) {
   );
   return ProviderScope(
     overrides: [
-      verifiedSubscriptionStateProvider.overrideWithValue(AsyncData(state)),
+      verifiedSubscriptionStateProvider.overrideWithValue(subscription),
     ],
-    child: MaterialApp.router(routerConfig: router),
+    child: MaterialApp.router(
+      routerConfig: router,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+    ),
   );
 }
 

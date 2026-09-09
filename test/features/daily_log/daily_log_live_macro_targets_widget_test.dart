@@ -187,18 +187,12 @@ void main() {
       '50%',
     );
     expect(_textBelow(tester, const Key('daily-summary-fat-percent')), '40%');
-    expect(
-      _textBelow(tester, const Key('daily-summary-carbs-grams')),
-      '40 / 80 g',
-    );
+    expect(_textBelow(tester, const Key('daily-summary-carbs-grams')), '40 g');
     expect(
       _textBelow(tester, const Key('daily-summary-protein-grams')),
-      '25 / 50 g',
+      '25 g',
     );
-    expect(
-      _textBelow(tester, const Key('daily-summary-fat-grams')),
-      '10 / 25 g',
-    );
+    expect(_textBelow(tester, const Key('daily-summary-fat-grams')), '10 g');
   });
 }
 

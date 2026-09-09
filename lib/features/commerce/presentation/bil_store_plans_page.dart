@@ -43,6 +43,8 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
   bool _loadInFlight = false;
   bool _restoring = false;
   bool _purchaseRequestInFlight = false;
+  String? _purchaseFeedbackKey;
+  bool _purchaseFeedbackIsError = false;
   VerifiedStoreState? _lastStoreState;
 
   @override
@@ -82,25 +84,36 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       ref.invalidate(aiCoachCreditAccessProvider);
     }
     _lastStoreState = store.state;
-    setState(() {});
+    final feedback = _purchaseFeedbackFor(store);
+    setState(() {
+      _purchaseFeedbackKey = feedback.$1;
+      _purchaseFeedbackIsError = feedback.$2;
+    });
+  }
+
+  (String?, bool) _purchaseFeedbackFor(VerifiedStorePurchaseService store) {
+    final code = store.messageCode;
+    final key = switch (code) {
+      'purchase_pending' => 'purchase_in_progress',
+      'purchase_cancelled' => 'purchase_error',
+      'purchase_not_started' => 'purchase_error',
+      'purchase_unavailable' || 'authentication_required' => 'purchase_error',
+      'verification_failed' => 'purchase_error',
+      'purchase_failed' || 'store_stream_failed' => 'purchase_error',
+      'subscription_verified' || 'ai_boost_verified' => 'purchase_verified',
+      _ => switch (store.state) {
+        VerifiedStoreState.purchasePending => 'purchase_in_progress',
+        VerifiedStoreState.cancelled => 'purchase_error',
+        VerifiedStoreState.failed => 'purchase_error',
+        _ => null,
+      },
+    };
+    final isError = const {'purchase_error'}.contains(key);
+    return (key, isError);
   }
 
   bool get _purchaseInProgress =>
       _purchaseRequestInFlight || (widget.store ?? _ownedStore)?.busy == true;
-
-  void _requestPurchase(BilStoreOfferMetadata offer) {
-    if (_purchaseInProgress) return;
-    setState(() => _purchaseRequestInFlight = true);
-    unawaited(_finishPurchaseRequest(offer));
-  }
-
-  Future<void> _finishPurchaseRequest(BilStoreOfferMetadata offer) async {
-    try {
-      await _catalog?.requestPurchase(offer);
-    } finally {
-      if (mounted) setState(() => _purchaseRequestInFlight = false);
-    }
-  }
 
   Future<void> _load() async {
     if (_loadInFlight) return;
@@ -172,6 +185,40 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
       );
   }
 
+  Future<void> _requestPurchase(BilStoreOfferMetadata offer) async {
+    final catalog = _catalog;
+    final store = widget.store ?? _ownedStore;
+    if (catalog == null || _purchaseRequestInFlight || store?.busy == true) {
+      return;
+    }
+    setState(() {
+      _purchaseRequestInFlight = true;
+      _purchaseFeedbackKey = 'purchase_in_progress';
+      _purchaseFeedbackIsError = false;
+    });
+    try {
+      await catalog.requestPurchase(offer);
+    } on Object {
+      if (mounted) {
+        setState(() {
+          _purchaseFeedbackKey = 'purchase_failed';
+          _purchaseFeedbackIsError = true;
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _purchaseRequestInFlight = false;
+          // Injected preview/test catalogs have no native purchase stream.
+          // Their completed callback must not leave a fictional pending sale.
+          if (store == null && _purchaseFeedbackKey == 'purchase_in_progress') {
+            _purchaseFeedbackKey = null;
+          }
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -200,6 +247,8 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     } on StateError {
       currentPlan = CommercePlan.free;
     }
+    final store = widget.store ?? _ownedStore;
+    final purchaseFeedbackKey = _purchaseFeedbackKey;
     return Scaffold(
       backgroundColor: pageBackground,
       appBar: AppBar(
@@ -228,6 +277,11 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         loading: _loading,
         purchaseInProgress: _purchaseInProgress,
         restoreInProgress: _restoring,
+        purchaseEnabled: store?.canStartPurchase ?? true,
+        purchaseStatusMessage: purchaseFeedbackKey == null
+            ? null
+            : BilStoreCopy.text(locale, purchaseFeedbackKey),
+        purchaseStatusIsError: _purchaseFeedbackIsError,
         currentPlan: currentPlan,
         initialFocus: widget.initialFocus,
         onPurchaseRequested: _requestPurchase,

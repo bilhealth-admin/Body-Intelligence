@@ -26,17 +26,28 @@ void main() {
       ],
     );
     addTearDown(router.dispose);
-    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.pumpWidget(
+      MaterialApp.router(
+        routerConfig: router,
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+      ),
+    );
     await tester.pumpAndSettle();
   }
 
-  testWidgets('header keeps full controls while omitting Today and date', (
+  testWidgets('header keeps the Today action while omitting duplicate date', (
     tester,
   ) async {
     await pumpDashboard(tester);
 
     expect(find.byTooltip('Notifications'), findsOneWidget);
-    expect(find.text('Today'), findsNothing);
+    expect(find.text('Today'), findsOneWidget);
     expect(find.text('Aug 6, 2026'), findsNothing);
     expect(find.text('Welcome'), findsNothing);
     expect(find.text('Edit'), findsNothing);
@@ -54,10 +65,13 @@ void main() {
     );
   });
 
-  testWidgets('Edit opens dashboard customization', (tester) async {
+  testWidgets('Today opens dashboard customization without a settings icon', (
+    tester,
+  ) async {
     await pumpDashboard(tester);
 
-    expect(find.byIcon(Icons.dashboard_customize_rounded), findsOneWidget);
+    expect(find.text('Today'), findsOneWidget);
+    expect(find.byIcon(Icons.dashboard_customize_rounded), findsNothing);
 
     await tester.tap(find.byKey(const Key('dashboard-edit-today')));
     await tester.pumpAndSettle();
@@ -91,6 +105,7 @@ void main() {
                 darkTheme: ThemeData.dark(),
                 supportedLocales: const [Locale('en'), Locale('ar')],
                 localizationsDelegates: const [
+                  AppLocalizations.delegate,
                   GlobalMaterialLocalizations.delegate,
                   GlobalWidgetsLocalizations.delegate,
                   GlobalCupertinoLocalizations.delegate,
@@ -174,6 +189,13 @@ void main() {
           expect(wordmark, findsOneWidget);
           expect(tester.getSemantics(wordmark).label, 'Body Intelligence Log');
           expect(find.byKey(const Key('dashboard-edit-today')), findsOneWidget);
+          final context = tester.element(
+            find.byKey(const Key('dashboard-edit-today')),
+          );
+          expect(
+            find.text(AppLocalizations.of(context).text('Today')),
+            findsOneWidget,
+          );
           expect(tester.takeException(), isNull);
           semantics.dispose();
         },

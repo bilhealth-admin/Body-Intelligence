@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'dashboard_layout_metrics.dart';
@@ -7,7 +9,7 @@ import 'dashboard_layout_metrics.dart';
 ///
 /// This widget deliberately knows nothing about weight, nutrition, hydration,
 /// providers, routes, or scientific calculations.
-class DashboardShell extends StatelessWidget {
+class DashboardShell extends StatefulWidget {
   const DashboardShell({
     super.key,
     required this.child,
@@ -16,6 +18,19 @@ class DashboardShell extends StatelessWidget {
 
   final Widget child;
   final RefreshCallback onRefresh;
+
+  @override
+  State<DashboardShell> createState() => _DashboardShellState();
+}
+
+class _DashboardShellState extends State<DashboardShell> {
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,9 +114,10 @@ class DashboardShell extends StatelessWidget {
             // Keep the familiar pull gesture without covering cached Today
             // content with loading chrome. The provider refresh continues in
             // the background and reports its final outcome from DashboardPage.
-            child: RefreshIndicator.noSpinner(
+            child: _ElasticDashboardRefresh(
               key: const Key('dashboard-background-refresh'),
-              onRefresh: onRefresh,
+              controller: _scrollController,
+              onRefresh: widget.onRefresh,
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final metrics = DashboardLayoutMetrics.resolve(
@@ -114,7 +130,10 @@ class DashboardShell extends StatelessWidget {
 
                   return SingleChildScrollView(
                     key: const Key('dashboard-scroll-view'),
-                    physics: const AlwaysScrollableScrollPhysics(),
+                    controller: _scrollController,
+                    physics: const BouncingScrollPhysics(
+                      parent: AlwaysScrollableScrollPhysics(),
+                    ),
                     padding: EdgeInsets.fromLTRB(
                       metrics.horizontalPadding,
                       16,
@@ -122,7 +141,7 @@ class DashboardShell extends StatelessWidget {
                       constraints.maxWidth < 600 ? 176 : 132,
                     ),
                     child: Center(
-                      child: SizedBox(width: contentWidth, child: child),
+                      child: SizedBox(width: contentWidth, child: widget.child),
                     ),
                   );
                 },
@@ -130,6 +149,102 @@ class DashboardShell extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Starts refresh after an elastic top pull without holding the scroll view at
+/// RefreshIndicator's armed displacement while provider work is in flight.
+class _ElasticDashboardRefresh extends StatefulWidget {
+  const _ElasticDashboardRefresh({
+    super.key,
+    required this.controller,
+    required this.onRefresh,
+    required this.child,
+  });
+
+  static const triggerExtent = 72.0;
+
+  final ScrollController controller;
+  final RefreshCallback onRefresh;
+  final Widget child;
+
+  @override
+  State<_ElasticDashboardRefresh> createState() =>
+      _ElasticDashboardRefreshState();
+}
+
+class _ElasticDashboardRefreshState extends State<_ElasticDashboardRefresh> {
+  double _pullExtent = 0;
+  bool _refreshing = false;
+
+  bool _trackScroll(ScrollNotification notification) {
+    if (notification.depth != 0 || notification.metrics.axis != Axis.vertical) {
+      return false;
+    }
+    if (notification is ScrollStartNotification &&
+        notification.dragDetails != null) {
+      _pullExtent = 0;
+    }
+    if (notification is ScrollUpdateNotification &&
+        notification.dragDetails != null) {
+      if (notification.metrics.pixels < 0) {
+        final visiblePull = -notification.metrics.pixels;
+        if (visiblePull > _pullExtent) _pullExtent = visiblePull;
+      }
+    }
+    if (notification is OverscrollNotification &&
+        notification.dragDetails != null &&
+        notification.metrics.extentBefore == 0 &&
+        notification.overscroll < 0) {
+      _pullExtent += -notification.overscroll;
+    }
+    return false;
+  }
+
+  void _finishPull() {
+    final shouldRefresh =
+        _pullExtent >= _ElasticDashboardRefresh.triggerExtent && !_refreshing;
+    _pullExtent = 0;
+    if (widget.controller.hasClients) {
+      final position = widget.controller.position;
+      if (position.hasContentDimensions &&
+          position.pixels < position.minScrollExtent) {
+        unawaited(
+          widget.controller.animateTo(
+            position.minScrollExtent,
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+          ),
+        );
+      }
+    }
+    if (!shouldRefresh) return;
+    _refreshing = true;
+    unawaited(_runRefresh());
+  }
+
+  Future<void> _runRefresh() async {
+    try {
+      await widget.onRefresh();
+    } on Object {
+      // DashboardPage owns the user-facing result. The gesture layer only
+      // guarantees that an implementation error cannot leave refresh armed.
+    } finally {
+      _refreshing = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerUp: (_) => _finishPull(),
+      onPointerCancel: (_) => _pullExtent = 0,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _trackScroll,
+        child: widget.child,
       ),
     );
   }

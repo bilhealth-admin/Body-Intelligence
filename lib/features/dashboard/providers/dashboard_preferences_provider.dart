@@ -13,6 +13,9 @@ abstract final class DashboardSectionIds {
   static const quickLog = 'quick_log';
   static const discover = 'discover';
   static const bestAction = 'best_action';
+  // Retained only so older saved presets and isolated component previews can
+  // still be decoded. The Daily Summary card is no longer part of the
+  // production Dashboard and this id is intentionally absent from [all].
   static const progress = 'progress';
   static const connectedHealth = 'connected_health';
   static const bodyTwin = 'body_twin';
@@ -25,7 +28,6 @@ abstract final class DashboardSectionIds {
     quickLog,
     discover,
     bestAction,
-    progress,
     connectedHealth,
     bodyTwin,
     aiCoach,

@@ -53,8 +53,14 @@ void main() {
       'lib/features/commerce/presentation/bil_dynamic_store_offers.dart',
     ).readAsStringSync();
 
-    expect(actions, contains("context.push('/plans?focus=ai-coach')"));
-    expect(actions, contains("context.push('/plans?focus=boost')"));
+    expect(
+      actions,
+      contains("_openCoachRoute('/plans?focus=ai-coach', push: true)"),
+    );
+    expect(
+      actions,
+      contains("_openCoachRoute('/plans?focus=boost', push: true)"),
+    );
     expect(offers, contains("widget.initialFocus == 'ai-coach'"));
     expect(offers, contains("widget.initialFocus == 'boost'"));
     expect(offers, contains('do not silently select ordinary Premium'));

@@ -4,12 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "npm run types:check && tsc --noEmit",
+    "check": "npm run types:check && tsc --noEmit && npm run test:staging-isolation",
+    "check:staging-isolation": "node scripts/verify-staging-isolation.mjs wrangler.jsonc",
     "deploy": "wrangler deploy --env=\"\"",
-    "deploy:staging": "wrangler deploy --env staging",
+    "deploy:staging": "npm run check:staging-isolation && wrangler deploy --env staging",
     "dry-run": "wrangler deploy --env=\"\" --dry-run --outdir dist/dry-run",
-    "dry-run:staging": "wrangler deploy --env staging --dry-run --outdir dist/dry-run-staging",
+    "dry-run:staging": "npm run check:staging-isolation && wrangler deploy --env staging --dry-run --outdir dist/dry-run-staging",
     "test": "vitest run",
+    "test:staging-isolation": "node --test scripts/verify-staging-isolation.test.mjs",
     "types": "wrangler types",
     "types:check": "wrangler types --check"
   },

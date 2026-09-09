@@ -100,6 +100,20 @@ function Classify-Path {
             reason = 'Local Codex skills and lock metadata are workstation tooling, not application release source.'
         }
     }
+    if ($Path -match '^\.codex_server_reconciliation/') {
+        return [ordered]@{
+            decision = 'EXCLUDE'
+            category = 'local_server_reconciliation_snapshot'
+            reason = 'Downloaded live-source comparison snapshots are local audit evidence, not canonical release source.'
+        }
+    }
+    if ($Path -match '^ai_coach_debug_bundle/') {
+        return [ordered]@{
+            decision = 'EXCLUDE'
+            category = 'local_ai_coach_debug_bundle'
+            reason = 'The diagnostic bundle duplicates repository content and runtime evidence; preserve it locally but never stage it as release source.'
+        }
+    }
     if ($Path -match '^\.codex_supabase_fetch_probe_20260901_2320/') {
         return [ordered]@{
             decision = 'EXCLUDE'
@@ -209,6 +223,13 @@ function Classify-Path {
             decision = 'INCLUDE'
             category = 'release_tool_or_local_dependency'
             reason = 'Release automation, audit source, or pub dependency override required to reproduce and verify the release.'
+        }
+    }
+    if ($Path -eq 'scripts/release/dispatch_bil_release_workflows.ps1') {
+        return [ordered]@{
+            decision = 'INCLUDE'
+            category = 'exact_release_dispatch_guard'
+            reason = 'Exact reviewed release dispatcher; the parent directory remains deny-by-default and is not broadly allowlisted.'
         }
     }
     if ($Path -match '^docs/') {
@@ -484,19 +505,25 @@ try {
             }
         }
 
-        if ($bytes -gt $githubHardFileLimitBytes) {
-            $oversized.Add($path)
-        }
+        # Only material that can enter the release is a release blocker. Large
+        # diagnostic/vendor trees are explicitly excluded above and must not
+        # make a clean-source freeze impossible merely because they remain
+        # preserved in the owner's working tree.
+        if ($classification.decision -eq 'INCLUDE') {
+            if ($bytes -gt $githubHardFileLimitBytes) {
+                $oversized.Add($path)
+            }
 
-        $dangerousPath = $path -match '(?i)(^|/)(\.env(?:\.|$)|key\.properties$|[^/]*(?:credentials|service[-_]?account)[^/]*\.json$)' -or
-            $path -match '(?i)\.(p8|p12|jks|keystore|mobileprovision|pem|key)$'
-        $contentFindings = @(Get-ContentSecretFinding -Path $path)
-        if ($dangerousPath -or $contentFindings.Count -gt 0) {
-            $secretFindings.Add([pscustomobject][ordered]@{
-                    path = $path
-                    dangerous_path = $dangerousPath
-                    content_patterns = @($contentFindings)
-                })
+            $dangerousPath = $path -match '(?i)(^|/)(\.env(?:\.|$)|key\.properties$|[^/]*(?:credentials|service[-_]?account)[^/]*\.json$)' -or
+                $path -match '(?i)\.(p8|p12|jks|keystore|mobileprovision|pem|key)$'
+            $contentFindings = @(Get-ContentSecretFinding -Path $path)
+            if ($dangerousPath -or $contentFindings.Count -gt 0) {
+                $secretFindings.Add([pscustomobject][ordered]@{
+                        path = $path
+                        dangerous_path = $dangerousPath
+                        content_patterns = @($contentFindings)
+                    })
+            }
         }
 
         $entries.Add([pscustomobject][ordered]@{

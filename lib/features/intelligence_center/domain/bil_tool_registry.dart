@@ -230,7 +230,7 @@ class BilToolRegistry {
     ),
     'open_weight_log': BilToolDescriptor(
       name: 'open_weight_log',
-      type: IntelligenceActionType.addWeight,
+      type: IntelligenceActionType.navigate,
       risk: BilToolRisk.lowRisk,
       trustBoundary: BilToolTrustBoundary.clientNavigation,
     ),
@@ -397,9 +397,11 @@ class BilToolRegistry {
     if (descriptor == null) return null;
     final validated = descriptor.validateArguments(arguments);
     if (validated == null) return null;
-    final payload = name == 'open_meals_yesterday'
-        ? const <String, Object?>{'dayOffset': -1}
-        : validated;
+    final payload = switch (name) {
+      'open_meals_yesterday' => const <String, Object?>{'dayOffset': -1},
+      'open_weight_log' => const <String, Object?>{'target': 'weight_history'},
+      _ => validated,
+    };
     return IntelligenceAction(
       id: name,
       type: descriptor.type,

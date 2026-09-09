@@ -140,9 +140,14 @@ Deployment requires explicit release approval. Once approved:
 
    This command can only address content-addressed v4 WebP keys; the v3 prefix
    remains outside its upload contract.
-4. Return to `cloudflare/workout-runtime`, run `npm run dry-run:staging`, review
-   the bundle, then run `npm run deploy:staging`. This creates a separate
-   workers.dev staging Worker with no production custom-domain route.
+4. Provision genuinely isolated staging Supabase and R2 resources, replace the
+   staging bindings in `wrangler.jsonc`, then run
+   `npm run check:staging-isolation`. The check deliberately fails while any
+   staging Supabase URL/key or R2 bucket matches production, or while a
+   placeholder/custom-domain route remains. Only after it passes, run
+   `npm run dry-run:staging`, review the bundle, then run
+   `npm run deploy:staging`. This creates a separate workers.dev staging Worker
+   with no production custom-domain route.
 5. Put an entitled staging user's short-lived access token in the process-only
    `BIL_STAGING_BEARER` environment variable. The inventory check verifies the
    byte length of all 302 existing videos without downloading them, and streams

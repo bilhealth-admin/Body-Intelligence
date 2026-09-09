@@ -334,7 +334,8 @@ const _diaryCopy = <String, Map<String, String>>{
         'قد تكشف مشاركة اليوميات وزنك وعاداتك الغذائية للأشخاص الذين تختارهم. اختر نطاقًا مناسبًا.',
     'Create access key': 'إنشاء مفتاح وصول',
     'Access key': 'مفتاح الوصول',
-    'Key must contain at least 6 characters': 'يجب ألا يقل المفتاح عن 6 أحرف',
+    'Key must contain 16 to 128 characters':
+        'يجب أن يتكوّن المفتاح من 16 إلى 128 حرفًا',
     'meal_names_hint': 'اكتب حتى ستة أسماء. تُخفى الخانات الفارغة من اليوميات.',
     'meal_names_hint_four':
         'خصّص أسماء الوجبات الأربع. تُخفى الخانات الفارغة من اليوميات.',
@@ -404,8 +405,8 @@ const _diaryCopy = <String, Map<String, String>>{
         'Le partage peut révéler votre poids et vos habitudes alimentaires aux personnes choisies.',
     'Create access key': 'Créer une clé d’accès',
     'Access key': 'Clé d’accès',
-    'Key must contain at least 6 characters':
-        'La clé doit contenir au moins 6 caractères',
+    'Key must contain 16 to 128 characters':
+        'La clé doit contenir entre 16 et 128 caractères',
     'meal_names_hint':
         'Saisissez jusqu’à six noms. Les champs vides sont masqués dans le journal.',
     'Meal': 'Repas',
@@ -470,8 +471,8 @@ const _diaryCopy = <String, Map<String, String>>{
         'Compartir puede mostrar tu peso y hábitos alimentarios a las personas elegidas.',
     'Create access key': 'Crear clave de acceso',
     'Access key': 'Clave de acceso',
-    'Key must contain at least 6 characters':
-        'La clave debe tener al menos 6 caracteres',
+    'Key must contain 16 to 128 characters':
+        'La clave debe tener entre 16 y 128 caracteres',
     'meal_names_hint':
         'Escribe hasta seis nombres. Los campos vacíos se ocultan en el diario.',
     'Meal': 'Comida',
@@ -536,8 +537,8 @@ const _diaryCopy = <String, Map<String, String>>{
         'Günlüğü paylaşmak kilonuzu ve yeme alışkanlıklarınızı seçtiğiniz kişilere gösterebilir.',
     'Create access key': 'Erişim anahtarı oluştur',
     'Access key': 'Erişim anahtarı',
-    'Key must contain at least 6 characters':
-        'Anahtar en az 6 karakter olmalıdır',
+    'Key must contain 16 to 128 characters':
+        'Anahtar 16 ile 128 karakter arasında olmalıdır',
     'meal_names_hint': 'En fazla altı ad yazın. Boş alanlar günlükte gizlenir.',
     'Meal': 'Öğün',
     'Save': 'Kaydet',

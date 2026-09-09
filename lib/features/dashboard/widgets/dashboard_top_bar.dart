@@ -22,10 +22,14 @@ class DashboardTopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final language = Localizations.localeOf(context).languageCode.toLowerCase();
+    final localizations = Localizations.of<AppLocalizations>(
+      context,
+      AppLocalizations,
+    );
     final copy =
         _dashboardTopBarCopy[language] ??
         _dashboardTopBarCopy['en']!.map(
-          (key, value) => MapEntry(key, context.strings.text(value)),
+          (key, value) => MapEntry(key, localizations?.text(value) ?? value),
         );
 
     final profile = _RoundProfileButton(
@@ -40,12 +44,15 @@ class DashboardTopBar extends StatelessWidget {
       onPressed: () => context.push('/notification-settings'),
       icon: const Icon(Icons.notifications_none_rounded),
     );
-    final edit = _DashboardEditButton(tooltip: copy['edit']!);
+    final edit = _DashboardEditButton(
+      label: copy['today']!,
+      tooltip: copy['edit']!,
+    );
     const brand = Directionality(
       textDirection: TextDirection.ltr,
       child: BilFullWordmark(
         key: Key('dashboard-wordmark'),
-        height: 44,
+        height: 48,
         alignment: Alignment.center,
       ),
     );
@@ -54,20 +61,52 @@ class DashboardTopBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(2, 0, 2, 2),
       child: LayoutBuilder(
         builder: (context, constraints) {
+          final compact = constraints.maxWidth < 600;
+          if (compact) {
+            // A full-width identity row gives the long BIL lockup enough room
+            // on phones. Keeping the controls on their own row avoids making
+            // the centered mark tiny or letting either physical rail overlap
+            // it in RTL and at large text scales.
+            return SizedBox(
+              key: const Key('dashboard-identity-header'),
+              height: 102,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: brand,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 48,
+                    child: Row(
+                      textDirection: TextDirection.ltr,
+                      children: [profile, const Spacer(), notifications, edit],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
           // Keep equal physical rails around the wordmark. Centering the mark
           // in the space left by a Row would shift it toward Profile because
           // the notifications/edit cluster is wider. The symmetric rails
           // make the identity's centre equal the viewport/content centre on
           // phones, tablets and both text directions.
-          // The right controls occupy 96dp. The extra 2dp per rail keeps the
-          // rendered lockup from visually touching them on 320dp devices.
-          const sideRailWidth = 98.0;
+          // The right controls occupy the notification button plus the Today
+          // action. Equal rails keep the wordmark centred despite that wider
+          // text action; narrower windows use the two-row branch above.
+          const sideRailWidth = 152.0;
           final brandWidth = (constraints.maxWidth - sideRailWidth * 2)
               .clamp(0.0, double.infinity)
               .toDouble();
           return SizedBox(
             key: const Key('dashboard-identity-header'),
-            height: 48,
+            height: 56,
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -95,40 +134,54 @@ class DashboardTopBar extends StatelessWidget {
 }
 
 class _DashboardEditButton extends StatelessWidget {
-  const _DashboardEditButton({required this.tooltip});
+  const _DashboardEditButton({required this.label, required this.tooltip});
 
+  final String label;
   final String tooltip;
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF12394E), Color(0xFF2563EB)],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF12394E).withValues(alpha: .18),
-            blurRadius: 16,
-            offset: const Offset(0, 7),
+    return Tooltip(
+      message: tooltip,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF12394E), Color(0xFF2563EB)],
           ),
-        ],
-      ),
-      child: IconButton(
-        key: const Key('dashboard-edit-today'),
-        tooltip: tooltip,
-        onPressed: () => context.push('/dashboard/preferences'),
-        style: IconButton.styleFrom(
-          minimumSize: const Size.square(48),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF12394E).withValues(alpha: .18),
+              blurRadius: 16,
+              offset: const Offset(0, 7),
+            ),
+          ],
         ),
-        icon: const Icon(
-          Icons.dashboard_customize_rounded,
-          color: Colors.white,
-          size: 20,
+        child: SizedBox(
+          width: 96,
+          height: 48,
+          child: TextButton(
+            key: const Key('dashboard-edit-today'),
+            onPressed: () => context.push('/dashboard/preferences'),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              minimumSize: const Size(96, 48),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              shape: const StadiumBorder(),
+            ),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                softWrap: false,
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -143,7 +196,7 @@ class DashboardBrand extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BilFullWordmark(
-      height: compact ? 38 : 46,
+      height: compact ? 42 : 50,
       alignment: Alignment.center,
     );
   }
@@ -154,26 +207,31 @@ const _dashboardTopBarCopy = <String, Map<String, String>>{
     'profile': 'الملف الشخصي',
     'notifications': 'الإشعارات',
     'edit': 'تخصيص الداشبورد',
+    'today': 'اليوم',
   },
   'en': {
     'profile': 'Profile',
     'notifications': 'Notifications',
     'edit': 'Customize dashboard',
+    'today': 'Today',
   },
   'fr': {
     'profile': 'Profil',
     'notifications': 'Notifications',
     'edit': 'Personnaliser le tableau de bord',
+    'today': "Aujourd’hui",
   },
   'es': {
     'profile': 'Perfil',
     'notifications': 'Notificaciones',
     'edit': 'Personalizar el panel',
+    'today': 'Hoy',
   },
   'tr': {
     'profile': 'Profil',
     'notifications': 'Bildirimler',
     'edit': 'Paneli özelleştir',
+    'today': 'Bugün',
   },
 };
 

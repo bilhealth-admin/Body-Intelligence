@@ -56,6 +56,55 @@ void main() {
     expect(result.detected, isFalse);
   });
 
+  test('short English greeting is not mistaken for the interface language', () {
+    final result = resolver.resolve(input: 'hi', uiLocale: 'ar');
+    expect(result.languageTag, 'en');
+    expect(result.detected, isTrue);
+    expect(result.usedPreviousInput, isFalse);
+  });
+
+  test(
+    'ambiguous typing prefers the last clearly detected writing language',
+    () {
+      final result = resolver.resolve(
+        input: 'protein 30 g',
+        uiLocale: 'tr',
+        previousClearLanguageTag: 'ar',
+      );
+      expect(result.languageTag, 'ar');
+      expect(result.detected, isTrue);
+      expect(result.usedPreviousInput, isTrue);
+    },
+  );
+
+  test('clear current text overrides previous writing language', () {
+    expect(
+      resolver
+          .resolve(
+            input: 'How many calories remain today?',
+            uiLocale: 'ar',
+            previousClearLanguageTag: 'ar',
+          )
+          .languageTag,
+      'en',
+    );
+  });
+
+  test('mixed Arabic and English follows the dominant clear wording', () {
+    expect(
+      resolver
+          .resolve(input: 'افتح سجل وزني please', uiLocale: 'en')
+          .languageTag,
+      'ar',
+    );
+    expect(
+      resolver
+          .resolve(input: 'Can you explain هذا plan please?', uiLocale: 'ar')
+          .languageTag,
+      'en',
+    );
+  });
+
   test(
     'romanized speech and native speech hints override interface locale',
     () {

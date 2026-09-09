@@ -18,7 +18,9 @@ void main() {
     final watch = read(
       'lib/features/connected_health/widgets/live_health_watch.dart',
     );
-    final grid = read('lib/features/dashboard/widgets/dashboard_grid.dart');
+    final dashboard = readDartLibrarySource(
+      'lib/features/dashboard/widgets/dashboard_grid.dart',
+    );
     final analytics = <String>[
       'lib/features/analytics/analytics_page.dart',
       'lib/features/analytics/widgets/analytics_weight_trend_chart.dart',
@@ -53,13 +55,15 @@ void main() {
     expect(watch, isNot(contains('BilWordmark')));
     expect(watch, isNot(contains("bil_wordmark.dart")));
 
-    expect(grid, isNot(contains("'kcal/day'")));
-    // The public dashboard is fitness-only: it must not restore the retired
-    // BMI label while keeping unit-aware weight and body-composition values.
-    expect(grid, isNot(contains("? 'BMI' : ''")));
-    expect(grid, contains('bodyFatUnit:'));
-    expect(grid, contains('fatFreeMass:'));
-    expect(grid, contains('weightUnit: UnitConverter.weightUnit(system)'));
+    expect(dashboard, isNot(contains("'kcal/day'")));
+    // The approved public dashboard keeps weight trends unit-aware but omits
+    // the retired BMR, TDEE, BMI, body-fat, and fat-free-mass presentation.
+    expect(dashboard, isNot(contains("? 'BMI' : ''")));
+    expect(dashboard, isNot(contains('DashboardBodyProfileSnapshot(')));
+    expect(dashboard, isNot(contains('bodyFatUnit:')));
+    expect(dashboard, isNot(contains('fatFreeMass:')));
+    expect(dashboard, isNot(contains('dailyMetabolism:')));
+    expect(dashboard, contains('weightUnit: UnitConverter.weightUnit(system)'));
     expect(analyticsCenter, contains('textDirection: TextDirection.ltr'));
     expect(profile, contains('mainAxisAlignment: MainAxisAlignment.center'));
     expect(profile, contains('textAlign: TextAlign.center'));

@@ -11,7 +11,6 @@ import '../../global_platform/runtime/global_product_composition_root.dart';
 import '../connected_health_model.dart';
 
 part 'connected_health_gateway_helpers.dart';
-
 part 'connected_health_aggregations.dart';
 
 abstract interface class ConnectedHealthGateway {

@@ -497,12 +497,18 @@ class _StickyPurchaseBar extends StatelessWidget {
     required this.label,
     required this.price,
     required this.loading,
+    required this.enabled,
+    required this.statusMessage,
+    required this.statusIsError,
     required this.onPressed,
   });
 
   final String label;
   final String price;
   final bool loading;
+  final bool enabled;
+  final String? statusMessage;
+  final bool statusIsError;
   final VoidCallback onPressed;
 
   @override
@@ -530,74 +536,106 @@ class _StickyPurchaseBar extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        minimum: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+        minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 720),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(19),
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFFFFE99C),
-                    Color(0xFFF4C34F),
-                    Color(0xFFD99B27),
-                  ],
-                ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x44E4AE38),
-                    blurRadius: 20,
-                    offset: Offset(0, 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (statusMessage != null) ...[
+                  Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      statusMessage!,
+                      key: const ValueKey('store-purchase-status'),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: statusIsError
+                            ? Theme.of(context).colorScheme.error
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
+                  const SizedBox(height: 8),
                 ],
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  key: const ValueKey('store-purchase-cta'),
-                  onTap: loading ? null : onPressed,
-                  borderRadius: BorderRadius.circular(19),
-                  child: SizedBox(
-                    height: 56,
-                    child: Center(
-                      child: loading
-                          ? const SizedBox.square(
-                              dimension: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Color(0xFF06121D),
-                              ),
-                            )
-                          : Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Flexible(
-                                  child: Text(
-                                    '$label · $price',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelLarge
-                                        ?.copyWith(
-                                          color: const Color(0xFF06121D),
-                                          fontWeight: FontWeight.w900,
+                Opacity(
+                  opacity: enabled || loading ? 1 : .55,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(19),
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFFFFE99C),
+                          Color(0xFFF4C34F),
+                          Color(0xFFD99B27),
+                        ],
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0x44E4AE38),
+                          blurRadius: 20,
+                          offset: Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Semantics(
+                        button: true,
+                        enabled: enabled && !loading,
+                        child: InkWell(
+                          key: const ValueKey('store-purchase-cta'),
+                          onTap: loading || !enabled ? null : onPressed,
+                          borderRadius: BorderRadius.circular(19),
+                          child: SizedBox(
+                            height: 56,
+                            child: Center(
+                              child: loading
+                                  ? const SizedBox.square(
+                                      dimension: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Color(0xFF06121D),
+                                      ),
+                                    )
+                                  : Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            '$label · $price',
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .labelLarge
+                                                ?.copyWith(
+                                                  color: const Color(
+                                                    0xFF06121D,
+                                                  ),
+                                                  fontWeight: FontWeight.w900,
+                                                ),
+                                          ),
                                         ),
-                                  ),
-                                ),
-                                const SizedBox(width: 9),
-                                const Icon(
-                                  Icons.arrow_forward_rounded,
-                                  color: Color(0xFF06121D),
-                                  size: 20,
-                                ),
-                              ],
+                                        const SizedBox(width: 9),
+                                        const Icon(
+                                          Icons.arrow_forward_rounded,
+                                          color: Color(0xFF06121D),
+                                          size: 20,
+                                        ),
+                                      ],
+                                    ),
                             ),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ),

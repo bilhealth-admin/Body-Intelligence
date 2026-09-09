@@ -80,19 +80,24 @@ void main() {
             (wordmarkRect.center.dx - expectedCenter).abs(),
             lessThanOrEqualTo(1),
           );
-          expect(tester.getRect(profile).right, lessThan(wordmarkRect.left));
+          expect(tester.getRect(profile).overlaps(wordmarkRect), isFalse);
+          expect(tester.getRect(notifications).overlaps(wordmarkRect), isFalse);
+          expect(tester.getRect(edit).overlaps(wordmarkRect), isFalse);
           expect(
-            tester.getRect(notifications).left,
-            greaterThan(wordmarkRect.right),
+            wordmarkRect.width,
+            greaterThan(size.width < 480 ? size.width * .85 : 300),
           );
-          expect(tester.getRect(edit).left, greaterThan(wordmarkRect.right));
+          expect(
+            wordmarkRect.height,
+            greaterThanOrEqualTo(size.width < 480 ? 13 : 20),
+          );
           expect(tester.getSize(profile), const Size.square(48));
           expect(tester.getSize(notifications).width, greaterThanOrEqualTo(48));
           expect(
             tester.getSize(notifications).height,
             greaterThanOrEqualTo(48),
           );
-          expect(tester.getSize(edit), const Size.square(48));
+          expect(tester.getSize(edit), const Size(96, 48));
 
           // The canonical mark itself and its Dashboard header path stay
           // transparent: no legacy white card, border or rounded container.

@@ -9,11 +9,11 @@ function expectEqual(actual: unknown, expected: unknown, label: string) {
 function runtime({
   quota = "allowed",
   fetchImpl,
-  translateImpl,
+  translate,
 }: {
   quota?: "allowed" | "rate_limited" | "unavailable";
   fetchImpl?: typeof fetch;
-  translateImpl?: FoodSearchRuntime["translate"];
+  translate?: FoodSearchRuntime["translate"];
 } = {}): FoodSearchRuntime {
   return {
     authorize: async () => ({
@@ -24,7 +24,7 @@ function runtime({
     fetch: fetchImpl ?? (async () => {
       throw new Error("Unexpected USDA request");
     }) as typeof fetch,
-    translate: translateImpl,
+    translate,
   };
 }
 
@@ -127,56 +127,30 @@ Deno.test("quota is consumed before one bounded USDA search", async () => {
   expectEqual(events.join(","), "quota,fetch", "event order");
 });
 
-Deno.test("translates a non-English query before the USDA request", async () => {
-  let requestBody: Record<string, unknown> | null = null;
-  const response = await handleFoodSearchRequest(
-    new Request("https://example.test/food-search", {
-      method: "POST",
-      body: JSON.stringify({ query: "تفاح", locale: "ar", limit: 10 }),
-    }),
-    runtime({
-      translateImpl: async (value, source, target) => {
-        expectEqual(value, "تفاح", "translation input");
-        expectEqual(source, "ar", "translation source");
-        expectEqual(target, "en", "translation target");
-        return "apple";
-      },
-      fetchImpl: (async (_url, init) => {
-        requestBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
-        return new Response(
-          JSON.stringify({ foods: [{ fdcId: 1, description: "Apple" }] }),
-          { status: 200 },
-        );
-      }) as typeof fetch,
-    }),
-  );
-
-  expectEqual(response.status, 200, "status");
-  expectEqual(requestBody?.query, "apple", "USDA translated query");
-  expectEqual((await response.json()).search_query, "apple", "response query");
-});
-
-Deno.test("uses a reviewed mobile search hint for a known non-English food", async () => {
-  let translated = false;
-  let requestBody: Record<string, unknown> | null = null;
+Deno.test("translated query reaches USDA while canonical identity is preserved", async () => {
+  let usdaQuery = "";
+  let translationCall = "";
   const response = await handleFoodSearchRequest(
     new Request("https://example.test/food-search", {
       method: "POST",
       body: JSON.stringify({
-        query: "بطيخ الكيوي",
+        query: "تيف مطبوخ",
         locale: "ar",
-        search_hint: "watermelon",
+        limit: 5,
       }),
     }),
     runtime({
-      translateImpl: async () => {
-        translated = true;
-        return "should not be used";
+      translate: async (value, source, target) => {
+        translationCall = `${value}|${source}|${target}`;
+        return "teff cooked";
       },
-      fetchImpl: (async (_url, init) => {
-        requestBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      fetchImpl: (async (_input, init) => {
+        const body = JSON.parse(String(init?.body)) as { query?: string };
+        usdaQuery = String(body.query ?? "");
         return new Response(
-          JSON.stringify({ foods: [{ fdcId: 1, description: "Watermelon" }] }),
+          JSON.stringify({
+            foods: [{ fdcId: 172672, description: "Teff, cooked" }],
+          }),
           { status: 200 },
         );
       }) as typeof fetch,
@@ -184,28 +158,33 @@ Deno.test("uses a reviewed mobile search hint for a known non-English food", asy
   );
 
   expectEqual(response.status, 200, "status");
-  expectEqual(translated, false, "translation call");
-  expectEqual(requestBody?.query, "watermelon", "USDA hinted query");
+  expectEqual(translationCall, "تيف مطبوخ|ar|en", "translation call");
+  expectEqual(usdaQuery, "teff cooked", "USDA query");
+  const body = await response.json() as Record<string, unknown>;
+  expectEqual(body.search_query, "teff cooked", "response search query");
+  const foods = body.foods as Array<Record<string, unknown>>;
+  expectEqual(foods[0].name, "Teff, cooked", "canonical USDA name");
 });
 
-Deno.test("keeps the watermelon fallback when the mobile hint is absent", async () => {
-  let requestBody: Record<string, unknown> | null = null;
+Deno.test("unsafe client search hint cannot replace the typed query", async () => {
+  let usdaQuery = "";
   const response = await handleFoodSearchRequest(
     new Request("https://example.test/food-search", {
       method: "POST",
       body: JSON.stringify({
-        query: "بطيخ الكيوي",
-        locale: "ar",
+        query: "rise",
+        search_hint: "<script>alert(1)</script>",
+        locale: "en",
       }),
     }),
     runtime({
-      translateImpl: async () => {
-        throw new Error("translation should not be required");
-      },
-      fetchImpl: (async (_url, init) => {
-        requestBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      fetchImpl: (async (_input, init) => {
+        const body = JSON.parse(String(init?.body)) as { query?: string };
+        usdaQuery = String(body.query ?? "");
         return new Response(
-          JSON.stringify({ foods: [{ fdcId: 1, description: "Watermelon" }] }),
+          JSON.stringify({
+            foods: [{ fdcId: 1, description: "RISE protein bar" }],
+          }),
           { status: 200 },
         );
       }) as typeof fetch,
@@ -213,29 +192,5 @@ Deno.test("keeps the watermelon fallback when the mobile hint is absent", async 
   );
 
   expectEqual(response.status, 200, "status");
-  expectEqual(requestBody?.query, "watermelon", "USDA server fallback query");
-});
-
-Deno.test("does not invoke translation for an English query", async () => {
-  let translated = false;
-  const response = await handleFoodSearchRequest(
-    new Request("https://example.test/food-search", {
-      method: "POST",
-      body: JSON.stringify({ query: "apple", locale: "en" }),
-    }),
-    runtime({
-      translateImpl: async () => {
-        translated = true;
-        return "تفاح";
-      },
-      fetchImpl: (async () =>
-        new Response(
-          JSON.stringify({ foods: [{ fdcId: 1, description: "Apple" }] }),
-          { status: 200 },
-        )) as typeof fetch,
-    }),
-  );
-
-  expectEqual(response.status, 200, "status");
-  expectEqual(translated, false, "English translation call");
+  expectEqual(usdaQuery, "rise", "USDA query");
 });

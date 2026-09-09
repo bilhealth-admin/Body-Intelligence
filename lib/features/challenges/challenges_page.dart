@@ -116,22 +116,21 @@ class ChallengesPage extends ConsumerWidget {
               ),
             for (final challenge in items) _ChallengeTile(challenge: challenge),
             const SizedBox(height: 16),
-            Text(
-              t('Shared challenges'),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            for (final audience in const [
-              'Friends',
-              'Community',
-              'Coach-created',
-              'Team',
-            ])
-              _LockedSharedChallengeTile(
-                title: _audienceLabel(context, audience),
-                reason: t(
-                  'Requires authenticated identity, a secure sharing service, and explicit consent.',
-                ),
+            _SharedChallengesUnavailableCard(
+              title: t('Shared challenges'),
+              audiences: [
+                for (final audience in const [
+                  'Friends',
+                  'Community',
+                  'Coach-created',
+                  'Team',
+                ])
+                  _audienceLabel(context, audience),
+              ],
+              reason: t(
+                'Requires authenticated identity, a secure sharing service, and explicit consent.',
               ),
+            ),
             const SizedBox(height: 80),
           ],
         ),
@@ -219,69 +218,65 @@ class ChallengesPage extends ConsumerWidget {
   };
 }
 
-class _LockedSharedChallengeTile extends StatelessWidget {
-  const _LockedSharedChallengeTile({required this.title, required this.reason});
+class _SharedChallengesUnavailableCard extends StatelessWidget {
+  const _SharedChallengesUnavailableCard({
+    required this.title,
+    required this.audiences,
+    required this.reason,
+  });
 
   final String title;
+  final List<String> audiences;
   final String reason;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return Semantics(
-      label: '$title. $reason',
-      enabled: false,
-      child: Container(
+      key: const Key('shared-challenges-unavailable'),
+      container: true,
+      label: '$title. ${audiences.join(', ')}. $reason',
+      child: Card(
         margin: const EdgeInsets.only(top: 10),
-        decoration: BoxDecoration(
-          color: colors.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: colors.outlineVariant.withValues(alpha: .7),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: colors.shadow.withValues(alpha: .06),
-              blurRadius: 18,
-              offset: const Offset(0, 7),
-            ),
-          ],
-        ),
-        child: ListTile(
-          enabled: false,
-          minVerticalPadding: 14,
-          leading: Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  colors.onSurface.withValues(alpha: .13),
-                  colors.onSurface.withValues(alpha: .045),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(
-                color: colors.onSurface.withValues(alpha: .16),
-              ),
-            ),
-            child: Icon(
-              Icons.lock_outline_rounded,
-              color: colors.onSurfaceVariant,
-              size: 23,
-            ),
-          ),
-          title: Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
-          ),
-          subtitle: Padding(
-            padding: const EdgeInsets.only(top: 5),
-            child: Text(
-              reason,
-              style: const TextStyle(fontSize: 15, height: 1.3),
+        color: colors.surfaceContainerLow,
+        child: ExcludeSemantics(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.lock_clock_outlined,
+                      color: colors.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(reason),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final audience in audiences)
+                      Chip(
+                        avatar: const Icon(Icons.people_outline, size: 16),
+                        label: Text(audience),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),

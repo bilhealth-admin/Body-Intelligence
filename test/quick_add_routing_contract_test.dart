@@ -31,10 +31,21 @@ void main() {
         expect(shell, contains('action=$action'));
         expect(diary, contains("case '$action':"));
       }
+      // Photo Quick Add enters the AI Coach vision capture flow. The diary
+      // photo action remains supported for existing deep links, but it is not
+      // the global Quick Add destination.
       expect(shell, contains('vision=capture&from=\$origin'));
       expect(diary, contains("case 'photo':"));
 
-      expect(shell, contains("context.go('/daily-log?focus=meal&meal="));
+      expect(shell, contains("context.go('/daily-log?focus=meal&from="));
+      // Quick Add's general food flow must not smuggle a Dinner context into
+      // the route. The focused page exposes the meal selector after a food is
+      // chosen, so the user can deliberately keep or change the context.
+      expect(shell, isNot(contains("focus=meal&meal=dinner")));
+      expect(
+        File('lib/features/daily_log/daily_log_page.dart').readAsStringSync(),
+        contains("String mealType = 'breakfast';"),
+      );
       expect(shell, contains('/daily-log/body-context?from='));
       expect(diary, contains("case 'notes':"));
       expect(shell, contains("context.push('/wellness/workouts')"));

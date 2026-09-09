@@ -90,6 +90,18 @@ void main() {
     expect(registry.lookup('request_account_deletion')!.confirmationStages, 2);
   });
 
+  test('open weight log is read-only navigation to weight history', () {
+    final action = registry.createAction(
+      name: 'open_weight_log',
+      arguments: const <String, Object?>{},
+      label: 'Open weight history',
+    );
+    expect(action, isNotNull);
+    expect(action!.type, IntelligenceActionType.navigate);
+    expect(action.requiresConfirmation, isFalse);
+    expect(action.payload, const <String, Object?>{'target': 'weight_history'});
+  });
+
   test('registry is the finite model-visible allow-list', () {
     expect(BilToolRegistry.tools, hasLength(22));
     expect(BilToolRegistry.tools, contains('save_memory'));

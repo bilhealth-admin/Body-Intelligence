@@ -100,6 +100,30 @@ void main() {
       find.descendant(of: heart, matching: find.text('800')),
       findsOneWidget,
     );
+    expect(
+      find.descendant(of: heart, matching: find.text('2300')),
+      findsNothing,
+    );
+    await tester.drag(
+      find.byKey(const Key('dashboard-calories-macros-horizontal')),
+      const Offset(320, 0),
+    );
+    await tester.pumpAndSettle();
+    final macros = find.byKey(const Key('dashboard-reference-macros-card'));
+    expect(
+      find.descendant(
+        of: macros,
+        matching: find.text('40 g', findRichText: true),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: macros,
+        matching: find.textContaining('/ 100', findRichText: true),
+      ),
+      findsNothing,
+    );
     expect(find.byKey(const Key('dashboard-premium-lock')), findsNothing);
   });
 

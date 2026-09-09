@@ -165,7 +165,7 @@ export async function bootstrap() {
       select: 'version',
       active: 'eq.true',
       order: 'effective_at.desc',
-      limit: '1',
+      limit: '2',
     }),
   ]);
   if (friendRows.length !== 0) {
@@ -177,17 +177,18 @@ export async function bootstrap() {
   if (suspended.some((row) => row?.user_id === reviewer.userId)) {
     throw new Error('reviewer_was_already_suspended');
   }
-  if (activePolicies.length === 1) {
-    const version = String(activePolicies[0].version ?? '');
-    for (const account of [owner, reviewer]) {
-      const accepted = await select(account.accessToken, 'bil_content_policy_acceptances', {
-        select: 'policy_version',
-        user_id: `eq.${account.userId}`,
-        policy_version: `eq.${version}`,
-      });
-      if (accepted.length !== 1) {
-        throw new Error('community_policy_acceptance_precondition_failed');
-      }
+  if (activePolicies.length !== 1) {
+    throw new Error('community_policy_active_version_precondition_failed');
+  }
+  const version = String(activePolicies[0].version ?? '');
+  for (const account of [owner, reviewer]) {
+    const accepted = await select(account.accessToken, 'bil_content_policy_acceptances', {
+      select: 'policy_version',
+      user_id: `eq.${account.userId}`,
+      policy_version: `eq.${version}`,
+    });
+    if (accepted.length !== 1) {
+      throw new Error('community_policy_acceptance_precondition_failed');
     }
   }
 

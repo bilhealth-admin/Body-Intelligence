@@ -5,7 +5,35 @@ import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
 import '../services/community_post_image_picker.dart';
 
-final class CommunityPostCloudStore {
+abstract interface class CommunityPostStoreContract {
+  Future<List<CommunityPost>> loadFeed({int limit = 40});
+
+  Future<List<CommunityPost>> loadModerationQueue({int limit = 100});
+
+  Future<void> publishText(String body);
+
+  Future<void> publishWithImage(String body, CommunityPostImageDraft image);
+
+  Future<void> delete(String postId);
+}
+
+abstract interface class CommunityPostLookupContract {
+  Future<List<CommunityPost>> loadPostsByIds(List<String> postIds);
+}
+
+abstract interface class CommunityPostPaginationContract {
+  Future<CommunityFeedBatch> loadFeedPage({
+    DateTime? before,
+    String? beforeId,
+    int limit = 40,
+  });
+}
+
+final class CommunityPostCloudStore
+    implements
+        CommunityPostStoreContract,
+        CommunityPostLookupContract,
+        CommunityPostPaginationContract {
   CommunityPostCloudStore(this._client, this._user);
 
   final SupabaseClient _client;
@@ -18,15 +46,69 @@ final class CommunityPostCloudStore {
     r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$',
   );
   static final _unsafeText = RegExp(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]');
+  static const _postSelection =
+      'id,author_id,body,created_at,media_object_path,media_mime_type,'
+      'media_bytes,media_width,media_height,moderation_status,reviewed_at';
 
-  Future<List<CommunityPost>> loadFeed({int limit = 40}) async {
+  @override
+  Future<List<CommunityPost>> loadFeed({int limit = 40}) async =>
+      (await loadFeedPage(limit: limit)).posts;
+
+  @override
+  Future<CommunityFeedBatch> loadFeedPage({
+    DateTime? before,
+    String? beforeId,
+    int limit = 40,
+  }) async {
+    if ((before == null) != (beforeId == null) ||
+        (beforeId != null && !_uuid.hasMatch(beforeId))) {
+      throw ArgumentError('Invalid Community feed cursor');
+    }
+    final boundedLimit = limit.clamp(1, 100);
+    final selection = _client
+        .from('bil_community_posts')
+        .select(_postSelection);
+    final filtered = before == null
+        ? selection
+        : selection.or(
+            'created_at.lt.${before.toUtc().toIso8601String()},'
+            'and(created_at.eq.${before.toUtc().toIso8601String()},id.lt.$beforeId)',
+          );
+    final rows = await filtered
+        .order('created_at', ascending: false)
+        .order('id', ascending: false)
+        .limit(boundedLimit);
+    final posts = await _hydrateVisibleRows(rows);
+    final cursor = posts.isEmpty ? null : posts.last;
+    return CommunityFeedBatch(
+      posts: posts,
+      hasMore: rows.length == boundedLimit,
+      nextBefore: cursor?.createdAt,
+      nextBeforeId: cursor?.id,
+    );
+  }
+
+  @override
+  Future<List<CommunityPost>> loadPostsByIds(List<String> postIds) async {
+    if (postIds.isEmpty) return const [];
+    if (postIds.length > 100 || postIds.any((id) => !_uuid.hasMatch(id))) {
+      throw ArgumentError.value(postIds, 'postIds');
+    }
     final rows = await _client
         .from('bil_community_posts')
-        .select(
-          'id,author_id,body,created_at,media_object_path,media_mime_type,media_bytes,media_width,media_height,moderation_status,reviewed_at',
-        )
-        .order('created_at', ascending: false)
-        .limit(limit.clamp(1, 100));
+        .select(_postSelection)
+        .inFilter('id', postIds);
+    final hydrated = await _hydrateVisibleRows(rows);
+    final byId = {for (final post in hydrated) post.id: post};
+    return postIds
+        .map((id) => byId[id])
+        .whereType<CommunityPost>()
+        .toList(growable: false);
+  }
+
+  Future<List<CommunityPost>> _hydrateVisibleRows(
+    List<Map<String, dynamic>> rows,
+  ) async {
     final validRows = rows.where(_validPostRow).toList(growable: false);
     if (validRows.isEmpty) return const [];
     final authorIds = validRows
@@ -72,6 +154,7 @@ final class CommunityPostCloudStore {
         .toList(growable: false);
   }
 
+  @override
   Future<List<CommunityPost>> loadModerationQueue({int limit = 100}) async {
     final response = await _client.rpc(
       'bil_list_pending_community_posts',
@@ -122,6 +205,7 @@ final class CommunityPostCloudStore {
     return urls;
   }
 
+  @override
   Future<void> publishText(String body) async {
     final text = _validatedBody(body);
     if (text == null) return;
@@ -133,6 +217,7 @@ final class CommunityPostCloudStore {
     });
   }
 
+  @override
   Future<void> publishWithImage(
     String body,
     CommunityPostImageDraft image,
@@ -178,6 +263,7 @@ final class CommunityPostCloudStore {
     }
   }
 
+  @override
   Future<void> delete(String postId) async {
     if (!_uuid.hasMatch(postId)) throw ArgumentError.value(postId, 'postId');
     final row = await _client

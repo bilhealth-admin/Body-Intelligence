@@ -71,7 +71,13 @@ class NutritionGoalTarget {
 
   static NutritionGoalTarget? fromJson(Object? value) {
     if (value is! Map) return null;
-    double? number(String key) => (value[key] as num?)?.toDouble();
+    double? number(String key) {
+      final raw = value[key];
+      if (raw is num) return raw.toDouble();
+      if (raw is String) return double.tryParse(raw.trim());
+      return null;
+    }
+
     final calories = number('calories') ?? 0;
     final carbsGrams = number('carbsGrams');
     final proteinGrams = number('proteinGrams');
@@ -160,7 +166,14 @@ class NutritionGoalSchedule {
   final Map<int, NutritionGoalTarget> dayTargets;
   final Map<String, NutritionGoalTarget> mealTargets;
 
-  NutritionGoalTarget? targetFor(DateTime date) => dayTargets[date.weekday];
+  /// Resolves a weekly target for the caller's local civil day.
+  ///
+  /// Callers intentionally pass the local day used by their UI rather than a
+  /// UTC instant. This keeps Sunday/Monday and daylight-saving boundaries
+  /// deterministic without storing a device time-zone assumption in the
+  /// schedule itself.
+  NutritionGoalTarget? targetFor(DateTime localDay) =>
+      dayTargets[localDay.weekday];
 
   Map<String, Object> toJson() => {
     'days': dayTargets.map((key, value) => MapEntry('$key', value.toJson())),
@@ -225,23 +238,27 @@ class NutritionGoalScheduleRepository {
   Future<void> saveDay(int weekday, NutritionGoalTarget? target) async {
     if (weekday < 1 || weekday > 7) throw ArgumentError.value(weekday);
     if (target != null && !target.isValid) throw ArgumentError.value(target);
-    final current = await read();
-    final days = Map<int, NutritionGoalTarget>.of(current.dayTargets);
-    target == null ? days.remove(weekday) : days[weekday] = target;
-    await _write(
-      NutritionGoalSchedule(dayTargets: days, mealTargets: current.mealTargets),
-    );
+    await _mutate((current) {
+      final days = Map<int, NutritionGoalTarget>.of(current.dayTargets);
+      target == null ? days.remove(weekday) : days[weekday] = target;
+      return NutritionGoalSchedule(
+        dayTargets: days,
+        mealTargets: current.mealTargets,
+      );
+    });
   }
 
   Future<void> saveMeal(String mealType, NutritionGoalTarget? target) async {
     if (!_mealTypes.contains(mealType)) throw ArgumentError.value(mealType);
     if (target != null && !target.isValid) throw ArgumentError.value(target);
-    final current = await read();
-    final meals = Map<String, NutritionGoalTarget>.of(current.mealTargets);
-    target == null ? meals.remove(mealType) : meals[mealType] = target;
-    await _write(
-      NutritionGoalSchedule(dayTargets: current.dayTargets, mealTargets: meals),
-    );
+    await _mutate((current) {
+      final meals = Map<String, NutritionGoalTarget>.of(current.mealTargets);
+      target == null ? meals.remove(mealType) : meals[mealType] = target;
+      return NutritionGoalSchedule(
+        dayTargets: current.dayTargets,
+        mealTargets: meals,
+      );
+    });
   }
 
   Future<void> replaceDayTargets(Map<int, NutritionGoalTarget> targets) async {
@@ -249,17 +266,20 @@ class NutritionGoalScheduleRepository {
         targets.values.any((target) => !target.isValid)) {
       throw ArgumentError.value(targets);
     }
-    final current = await read();
-    await _write(
-      NutritionGoalSchedule(
+    await _mutate(
+      (current) => NutritionGoalSchedule(
         dayTargets: Map<int, NutritionGoalTarget>.of(targets),
         mealTargets: current.mealTargets,
       ),
     );
   }
 
-  Future<void> _write(NutritionGoalSchedule value) => _preferences.set(
-    nutritionGoalSchedulePreferenceKey,
-    jsonEncode(value.toJson()),
-  );
+  Future<void> _mutate(
+    NutritionGoalSchedule Function(NutritionGoalSchedule current) derive,
+  ) async {
+    await _preferences.update(nutritionGoalSchedulePreferenceKey, (source) {
+      final next = derive(NutritionGoalSchedule.decode(source));
+      return jsonEncode(next.toJson());
+    });
+  }
 }

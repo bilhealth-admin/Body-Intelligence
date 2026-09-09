@@ -216,6 +216,22 @@ void main() {
     expect(backendOracle, contains('TARGET_NOTIFICATION_ID_SHA256='));
   });
 
+  test('community policy canary fails closed and never seeds consent', () {
+    expect(backendOracle, contains('activePolicies.length !== 1'));
+    expect(
+      backendOracle,
+      contains('community_policy_active_version_precondition_failed'),
+    );
+    expect(
+      backendOracle,
+      isNot(contains("insertReturning('bil_content_policy_acceptances'")),
+    );
+    expect(backendOracle, contains('DISPOSABLE_POLICY_ACCEPTANCE_SEEDED=false'));
+    expect(uiDriver, contains("'bil://community/safety'"));
+    expect(uiDriver, contains('verify-disposable-policy-and-post'));
+    expect(backendOracle, contains('disposable_policy_was_not_accepted_in_app'));
+  });
+
   test(
     'owner authority, reviewer denial, and mutation boundaries are explicit',
     () {
