@@ -6,7 +6,7 @@ import 'package:body_intelligence_log/app/environment/release_manifest_metadata.
 import 'package:crypto/crypto.dart';
 
 const _defaultManifest =
-    'docs/release/BIL_ANDROID_V9_FROZEN_SOURCE_MANIFEST_2026-09-06.md';
+    'docs/release/BIL_ANDROID_V11_FROZEN_SOURCE_MANIFEST_2026-09-09.md';
 
 bool _boolEnvironment(Map<String, String> environment, String name) {
   final value = environment[name]?.trim().toLowerCase();

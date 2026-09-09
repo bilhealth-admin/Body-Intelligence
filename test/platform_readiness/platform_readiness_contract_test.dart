@@ -109,14 +109,48 @@ void main() {
         candidateFrozenOrAccepted: true,
         unresolvedReviewCount: 0,
         manifestReleaseVersion: '1.0.0',
-        manifestReleaseBuildNumber: 9,
+        manifestReleaseBuildNumber: 11,
       ),
     );
 
     expect(issues, isEmpty);
   });
 
-  test('frozen iOS release configuration requires build 11', () {
+  test('frozen iOS release configuration requires build 12', () {
+    final issues = ReleaseConfigurationValidator.validate(
+      ReleaseConfiguration(
+        production: true,
+        applicationId: 'com.bilhealth.bodyintelligencelog',
+        cloudEnabled: true,
+        supabaseUrl: 'https://project.supabase.co',
+        supabaseAnonKey: 'public-anonymous-key',
+        serverUrl: 'https://project.supabase.co/functions/v1/verify',
+        paymentsEnabled: true,
+        storeConfigured: true,
+        platform: 'ios',
+        facebookRequired: true,
+        facebookLoginEnabled: true,
+        facebookLoginReady: true,
+        pushEnabled: false,
+        pushProviderReady: false,
+        mobileIntegrityRequired: true,
+        mobileIntegrityBackendReleaseId: 'reviewed-backend-release',
+        sourceCommit: List.filled(40, 'a').join(),
+        auditedSourceCommit: List.filled(40, 'a').join(),
+        freezeManifestSha256: List.filled(64, 'b').join(),
+        auditedFreezeManifestSha256: List.filled(64, 'b').join(),
+        stagingManifestComplete: true,
+        candidateFrozenOrAccepted: true,
+        unresolvedReviewCount: 0,
+        manifestReleaseVersion: '1.0.0',
+        manifestReleaseBuildNumber: 12,
+      ),
+    );
+
+    expect(issues, isEmpty);
+  });
+
+  test('iOS rejects the previous build 11 frozen manifest', () {
     final issues = ReleaseConfigurationValidator.validate(
       ReleaseConfiguration(
         production: true,
@@ -147,44 +181,10 @@ void main() {
       ),
     );
 
-    expect(issues, isEmpty);
-  });
-
-  test('iOS rejects the previous build 9 frozen manifest', () {
-    final issues = ReleaseConfigurationValidator.validate(
-      ReleaseConfiguration(
-        production: true,
-        applicationId: 'com.bilhealth.bodyintelligencelog',
-        cloudEnabled: true,
-        supabaseUrl: 'https://project.supabase.co',
-        supabaseAnonKey: 'public-anonymous-key',
-        serverUrl: 'https://project.supabase.co/functions/v1/verify',
-        paymentsEnabled: true,
-        storeConfigured: true,
-        platform: 'ios',
-        facebookRequired: true,
-        facebookLoginEnabled: true,
-        facebookLoginReady: true,
-        pushEnabled: false,
-        pushProviderReady: false,
-        mobileIntegrityRequired: true,
-        mobileIntegrityBackendReleaseId: 'reviewed-backend-release',
-        sourceCommit: List.filled(40, 'a').join(),
-        auditedSourceCommit: List.filled(40, 'a').join(),
-        freezeManifestSha256: List.filled(64, 'b').join(),
-        auditedFreezeManifestSha256: List.filled(64, 'b').join(),
-        stagingManifestComplete: true,
-        candidateFrozenOrAccepted: true,
-        unresolvedReviewCount: 0,
-        manifestReleaseVersion: '1.0.0',
-        manifestReleaseBuildNumber: 9,
-      ),
-    );
-
     final releaseIssue = issues.singleWhere(
       (issue) => issue.code == 'wrong_frozen_release_version',
     );
-    expect(releaseIssue.message, contains('build 11 for ios'));
+    expect(releaseIssue.message, contains('build 12 for ios'));
   });
 
   test('production rejects mismatched feature integrity and freeze gates', () {
