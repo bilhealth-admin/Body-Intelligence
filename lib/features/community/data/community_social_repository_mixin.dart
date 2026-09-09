@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
+import 'community_public_code_failure.dart';
 
 /// Typed Flutter boundary for the deployed Community Social v2 RPC surface.
 ///
@@ -285,23 +286,31 @@ mixin CommunitySocialRepositoryMixin {
   }
 
   Future<CommunityPublicCode> loadPublicCode() async {
-    final response = await communitySocialClient.rpc(
-      'bil_social_public_code_v2',
-    );
-    if (response is! Map) {
-      throw const FormatException('Invalid Community public code');
+    try {
+      final response = await communitySocialClient.rpc(
+        'bil_social_public_code_v2',
+      );
+      if (response is! Map) {
+        throw const FormatException('Invalid Community public code');
+      }
+      return CommunityPublicCode.fromJson(Map<String, dynamic>.from(response));
+    } catch (error) {
+      throw CommunityPublicCodeFailure.fromError(error);
     }
-    return CommunityPublicCode.fromJson(Map<String, dynamic>.from(response));
   }
 
   Future<CommunityPublicCode> rotatePublicCode() async {
-    final response = await runCommunitySocialMutation(
-      () => communitySocialClient.rpc('bil_social_rotate_public_code_v2'),
-    );
-    if (response is! Map) {
-      throw const FormatException('Invalid Community public code');
+    try {
+      final response = await runCommunitySocialMutation(
+        () => communitySocialClient.rpc('bil_social_rotate_public_code_v2'),
+      );
+      if (response is! Map) {
+        throw const FormatException('Invalid Community public code');
+      }
+      return CommunityPublicCode.fromJson(Map<String, dynamic>.from(response));
+    } catch (error) {
+      throw CommunityPublicCodeFailure.fromError(error);
     }
-    return CommunityPublicCode.fromJson(Map<String, dynamic>.from(response));
   }
 
   Future<CommunityResolvedMember?> resolvePublicCode(String value) async {

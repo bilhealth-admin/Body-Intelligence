@@ -8,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
+import '../data/community_public_code_failure.dart';
 import '../data/community_repository.dart';
 import '../domain/community_models.dart';
 import 'community_copy.dart';
@@ -122,7 +123,11 @@ class _CommunityBilCodePageState extends State<CommunityBilCodePage> {
       title: Text(communityText(context, 'My BIL Code', 'رمز BIL الخاص بي')),
     ),
     body: _repository == null || _code == null
-        ? _CodeUnavailable(onRetry: null)
+        ? const _CodeUnavailable(
+            failure: CommunityPublicCodeFailure.authenticationRequired(),
+            onRetry: null,
+            forOwnCode: true,
+          )
         : FutureBuilder<CommunityPublicCode>(
             future: _code,
             builder: (context, snapshot) {
@@ -131,7 +136,16 @@ class _CommunityBilCodePageState extends State<CommunityBilCodePage> {
               }
               final code = snapshot.data;
               if (snapshot.hasError || code == null) {
-                return _CodeUnavailable(onRetry: _retry);
+                final error = snapshot.error;
+                final failure = error is Object
+                    ? CommunityPublicCodeFailure.fromError(error)
+                    : const CommunityPublicCodeFailure.unavailable();
+                return _CodeUnavailable(
+                  failure: failure,
+                  onRetry: _retry,
+                  forOwnCode: true,
+                  onOpenProfile: () => context.push('/community/profile'),
+                );
               }
               return ListView(
                 padding: const EdgeInsets.all(24),
@@ -398,14 +412,24 @@ class _CommunityMemberCodePageState extends State<CommunityMemberCodePage> {
       title: Text(communityText(context, 'BIL member', 'عضو BIL')),
     ),
     body: _repository == null || _member == null
-        ? _CodeUnavailable(onRetry: null)
+        ? const _CodeUnavailable(
+            failure: CommunityPublicCodeFailure.unavailable(),
+            onRetry: null,
+          )
         : FutureBuilder<CommunityResolvedMember?>(
             future: _member,
             builder: (context, snapshot) {
               if (snapshot.connectionState != ConnectionState.done) {
                 return const Center(child: CircularProgressIndicator());
               }
-              if (snapshot.hasError) return _CodeUnavailable(onRetry: _retry);
+              if (snapshot.hasError) {
+                return _CodeUnavailable(
+                  failure: CommunityPublicCodeFailure.fromError(
+                    snapshot.error!,
+                  ),
+                  onRetry: _retry,
+                );
+              }
               final member = snapshot.data;
               if (member == null) return const _MemberCodeUnavailable();
               final relationship = _relationship ?? member.relationship;
@@ -495,9 +519,49 @@ class _MemberRelationshipAction extends StatelessWidget {
 }
 
 class _CodeUnavailable extends StatelessWidget {
-  const _CodeUnavailable({required this.onRetry});
+  const _CodeUnavailable({
+    required this.failure,
+    required this.onRetry,
+    this.forOwnCode = false,
+    this.onOpenProfile,
+  });
 
+  final CommunityPublicCodeFailure failure;
   final VoidCallback? onRetry;
+  final bool forOwnCode;
+  final VoidCallback? onOpenProfile;
+
+  String _message(BuildContext context) {
+    if (!forOwnCode) {
+      return communityText(
+        context,
+        'This BIL Code is unavailable right now. Try again.',
+        'رمز BIL هذا غير متاح الآن. حاول مجددًا.',
+      );
+    }
+    return switch (failure.kind) {
+      CommunityPublicCodeFailureKind.authenticationRequired => communityText(
+        context,
+        'Sign in to create and share your BIL Code.',
+        'سجّل الدخول لإنشاء رمز BIL ومشاركته.',
+      ),
+      CommunityPublicCodeFailureKind.profileRequired => communityText(
+        context,
+        'Save your Community profile first. Your BIL Code is then created automatically; you do not need to add a friend first.',
+        'احفظ ملف المجتمع أولًا. بعدها يُنشأ رمز BIL تلقائيًا ولا تحتاج إلى إضافة صديق أولًا.',
+      ),
+      CommunityPublicCodeFailureKind.communityUnavailable => communityText(
+        context,
+        'Community access is unavailable for this account, so a BIL Code cannot be created yet.',
+        'الوصول إلى المجتمع غير متاح لهذا الحساب، لذلك لا يمكن إنشاء رمز BIL الآن.',
+      ),
+      CommunityPublicCodeFailureKind.unavailable => communityText(
+        context,
+        'Your BIL Code could not be created right now. Try again.',
+        'تعذر إنشاء رمز BIL الآن. حاول مجددًا.',
+      ),
+    };
+  }
 
   @override
   Widget build(BuildContext context) => Center(
@@ -508,17 +572,27 @@ class _CodeUnavailable extends StatelessWidget {
         children: [
           const Icon(Icons.qr_code_2_rounded, size: 52),
           const SizedBox(height: 14),
-          Text(
-            communityText(
-              context,
-              'Your BIL Code is unavailable. Sign in, complete your Community profile, and try again.',
-              'رمز BIL غير متاح. سجّل الدخول وأكمل ملف المجتمع ثم حاول مجددًا.',
-            ),
-            textAlign: TextAlign.center,
-          ),
-          if (onRetry != null) ...[
+          Text(_message(context), textAlign: TextAlign.center),
+          if (forOwnCode &&
+              failure.kind == CommunityPublicCodeFailureKind.profileRequired &&
+              onOpenProfile != null) ...[
             const SizedBox(height: 16),
             FilledButton.icon(
+              key: const Key('community-bil-code-open-profile'),
+              onPressed: onOpenProfile,
+              icon: const Icon(Icons.person_outline_rounded),
+              label: Text(
+                communityText(
+                  context,
+                  'Open Community profile',
+                  'فتح ملف المجتمع',
+                ),
+              ),
+            ),
+          ],
+          if (onRetry != null) ...[
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),
               label: Text(communityText(context, 'Retry', 'إعادة المحاولة')),

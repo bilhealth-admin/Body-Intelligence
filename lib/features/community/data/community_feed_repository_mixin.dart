@@ -43,6 +43,25 @@ mixin CommunityFeedRepositoryMixin {
     );
   }
 
+  Future<CommunityFeedBatch> loadMyPosts({
+    DateTime? before,
+    String? beforeId,
+    int limit = 40,
+  }) async {
+    final store = communityPostStore;
+    if (store is! CommunityPostAuthorPaginationContract) {
+      throw StateError('Community authored-post paging is unavailable');
+    }
+    final page = await (store as CommunityPostAuthorPaginationContract)
+        .loadMyPostsPage(before: before, beforeId: beforeId, limit: limit);
+    return CommunityFeedBatch(
+      posts: await _hydrateSocialPosts(page.posts),
+      hasMore: page.hasMore,
+      nextBefore: page.nextBefore,
+      nextBeforeId: page.nextBeforeId,
+    );
+  }
+
   Future<CommunitySavedPostBatch> loadSavedPosts({
     DateTime? before,
     String? beforeId,

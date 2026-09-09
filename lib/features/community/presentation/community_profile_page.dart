@@ -40,6 +40,7 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
   bool _photoBusy = false;
   String? _avatarUrl;
   CommunitySocialIdentity? _identity;
+  bool _profileSaved = false;
 
   @override
   void initState() {
@@ -64,6 +65,7 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
 
   Future<void> _load() async {
     final profile = await _repository!.loadMyProfile();
+    _profileSaved = profile != null;
     String? myProfileDisplayName;
     if (widget.repository == null &&
         (profile == null || profile.displayName.trim().isEmpty)) {
@@ -102,14 +104,14 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
     });
   }
 
-  Future<void> _save() async {
-    if (_saving) return;
+  Future<bool> _save() async {
+    if (_saving) return false;
     final copy = _CommunityProfileCopy.of(context);
     if (_name.text.trim().length < 2) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(copy.invalidName)));
-      return;
+      return false;
     }
     final requestedHandle = _handle.text.trim();
     if (_identity?.chosen != true &&
@@ -118,9 +120,10 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(copy.invalidUsername)));
-      return;
+      return false;
     }
     setState(() => _saving = true);
+    var saved = false;
     try {
       final localeCode = BilLocalePolicy.canonicalTag(
         Localizations.localeOf(context),
@@ -151,16 +154,18 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
           _avatarUrl = photoResult!.publicUrl;
         }
       }
-      if (!mounted) return;
+      if (!mounted) return false;
       setState(() {
         _identity = identity;
+        _profileSaved = true;
         if (identity.chosen) _handle.text = identity.handle;
       });
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(copy.saved)));
+      saved = true;
     } on CommunityTextPolicyException catch (error) {
-      if (!mounted) return;
+      if (!mounted) return false;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -171,13 +176,19 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
         ),
       );
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted) return false;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(copy.saveFailed)));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+    return saved;
+  }
+
+  Future<void> _saveAndOpenBilCode() async {
+    if (!await _save() || !mounted) return;
+    context.push('/community/code');
   }
 
   Future<void> _pickPhoto() async {
@@ -340,13 +351,24 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
                               : copy.usernameHelp,
                         ),
                       ),
+                      const SizedBox(height: 8),
+                      Text(
+                        copy.bilCodeHelp,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
                       OutlinedButton.icon(
                         key: const Key('community-profile-bil-code'),
                         onPressed: _saving
                             ? null
-                            : () => context.push('/community/code'),
+                            : _profileSaved
+                            ? () => context.push('/community/code')
+                            : _saveAndOpenBilCode,
                         icon: const Icon(Icons.qr_code_2_rounded),
-                        label: Text(copy.myBilCode),
+                        label: Text(
+                          _profileSaved
+                              ? copy.myBilCode
+                              : copy.saveProfileAndCreateBilCode,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       TextField(
@@ -650,12 +672,19 @@ extension _CommunityPrivacyCopy on _CommunityProfileCopy {
       _t('Who can see my profile', 'من يمكنه رؤية ملفي');
   String get allowFriendRequests =>
       _t('Allow friend requests', 'السماح بطلبات الصداقة');
-  String get username => _t('Unique BIL username', 'اسم مستخدم BIL الفريد');
+  String get username =>
+      _t('BIL username (optional)', 'اسم مستخدم BIL (اختياري)');
   String get myBilCode => _t('My BIL Code', 'رمز BIL الخاص بي');
   String get usernameHelp => _t(
-    'Choose 3–30 lowercase letters, numbers, or underscores. It can be claimed once.',
-    'اختر من 3 إلى 30 حرفًا إنجليزيًا صغيرًا أو رقمًا أو شرطة سفلية. يمكن حجزه مرة واحدة.',
+    'Optional. If left blank, BIL creates a temporary handle for your code. A username can be chosen once later.',
+    'اختياري. إذا تركته فارغًا، ينشئ BIL اسمًا مؤقتًا لرمزك. ويمكنك اختيار اسم مستخدم دائم مرة واحدة لاحقًا.',
   );
+  String get bilCodeHelp => _t(
+    'A BIL Code is created after your profile is saved. It does not require adding a friend first.',
+    'يُنشأ رمز BIL بعد حفظ ملفك. ولا يتطلب إضافة صديق أولًا.',
+  );
+  String get saveProfileAndCreateBilCode =>
+      _t('Save profile and create BIL Code', 'احفظ الملف وأنشئ رمز BIL');
   String get usernameLocked => _t(
     'This username is your permanent public Community identity.',
     'اسم المستخدم هذا هو هويتك العامة الدائمة في المجتمع.',

@@ -27,6 +27,7 @@ part 'community_post_detail_page.dart';
 part 'community_post_detail_comment_tile.dart';
 part 'community_post_widgets.dart';
 part 'community_saved_posts_page.dart';
+part 'community_my_posts_page.dart';
 part 'community_friends_tab.dart';
 part 'community_food_tab.dart';
 
@@ -130,7 +131,20 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                   'إجراءات المجتمع',
                 ),
                 icon: const Icon(Icons.more_vert_rounded),
-                onSelected: (route) => context.push(route),
+                onSelected: (route) {
+                  if (route == 'my-posts') {
+                    final activeRepository = repository;
+                    if (activeRepository == null) return;
+                    Navigator.of(context).push<void>(
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            CommunityMyPostsPage(repository: activeRepository),
+                      ),
+                    );
+                    return;
+                  }
+                  context.push(route);
+                },
                 itemBuilder: (context) => [
                   if (moderatorSnapshot.data == true)
                     _communityAction(
@@ -150,6 +164,16 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
                     '/community/profile',
                     'Community profile',
                     'ملف المجتمع',
+                  ),
+                  PopupMenuItem<String>(
+                    value: 'my-posts',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.article_outlined),
+                        const SizedBox(width: 12),
+                        Text(communityText(context, 'My posts', 'منشوراتي')),
+                      ],
+                    ),
                   ),
                   _communityAction(
                     context,

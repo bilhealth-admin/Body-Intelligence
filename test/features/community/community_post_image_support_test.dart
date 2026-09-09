@@ -158,6 +158,31 @@ void main() {
       expect((webp.mimeType, webp.extension), ('image/webp', 'webp'));
     });
 
+    test(
+      're-encodes a large valid selection before it reaches the upload',
+      () async {
+        // A valid image followed by excess transport bytes represents the same
+        // client boundary as a camera original over the Storage limit. The
+        // decoder reads the image and the new preparation path owns the size
+        // reduction instead of making the member convert it manually.
+        final original = _testImage().bytes;
+        final oversized = Uint8List(communityPostImageMaxBytes + 1)
+          ..setRange(0, original.length, original);
+
+        final prepared = await prepareCommunityPostImageAsync(oversized);
+
+        expect(prepared.mimeType, 'image/jpeg');
+        expect(
+          prepared.byteLength,
+          lessThanOrEqualTo(communityPostImageTargetBytes),
+        );
+        expect(
+          prepared.byteLength,
+          lessThanOrEqualTo(communityPostImageMaxBytes),
+        );
+      },
+    );
+
     test('rejects unsupported, corrupt, oversized, and unsafe dimensions', () {
       expect(
         () => validateCommunityPostImage(Uint8List.fromList([1, 2, 3, 4])),

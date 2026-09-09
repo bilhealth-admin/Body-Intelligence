@@ -112,12 +112,22 @@ class _FeedTabState extends State<_FeedTab>
               'تم إرسال المنشور للمراجعة البشرية. لن يراه سواك حتى يتم اعتماده.',
             ),
           ),
+          action: SnackBarAction(
+            label: communityText(context, 'My posts', 'منشوراتي'),
+            onPressed: _openMyPosts,
+          ),
         ),
       );
     } finally {
       if (mounted) setState(() => _openingComposer = false);
     }
   }
+
+  Future<void> _openMyPosts() => Navigator.of(context).push<void>(
+    MaterialPageRoute<void>(
+      builder: (_) => CommunityMyPostsPage(repository: widget.repository),
+    ),
+  );
 
   Future<void> _managePost(CommunityPost post, String action) async {
     if (_openingComposer || _managingPost) return;
@@ -424,6 +434,10 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
   late bool _saved = widget.post.saved;
   bool _saving = false;
 
+  bool get _socialActionsAvailable =>
+      widget.actionsEnabled &&
+      widget.post.moderationStatus == CommunityPostModerationStatus.approved;
+
   @override
   void didUpdateWidget(covariant _CommunityPostCard oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -443,7 +457,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
   }
 
   Future<void> _toggleLike() async {
-    if (_liking || !widget.actionsEnabled) return;
+    if (_liking || !_socialActionsAvailable) return;
     setState(() => _liking = true);
     try {
       final stats = await widget.repository.setPostLiked(
@@ -470,7 +484,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
   }
 
   Future<void> _toggleSaved() async {
-    if (_saving || !widget.actionsEnabled) return;
+    if (_saving || !_socialActionsAvailable) return;
     setState(() => _saving = true);
     try {
       final result = await widget.repository.setPostSaved(
@@ -514,7 +528,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
   }
 
   Future<void> _openDetail() async {
-    if (!widget.actionsEnabled) return;
+    if (!_socialActionsAvailable) return;
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
         builder: (_) => _CommunityPostDetailPage(
@@ -562,8 +576,10 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _NaturalCommunityText(
-                      widget.post.authorName ??
-                          communityText(context, 'BIL member', 'عضو BIL'),
+                      widget.post.authorId == widget.currentUserId
+                          ? communityText(context, 'You', 'أنت')
+                          : widget.post.authorName ??
+                                communityText(context, 'BIL member', 'عضو BIL'),
                     ),
                     if (widget.post.authorHandle != null)
                       Text(
@@ -632,7 +648,7 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
             children: [
               TextButton.icon(
                 key: Key('community-post-like-${widget.post.id}'),
-                onPressed: widget.actionsEnabled && !_liking
+                onPressed: _socialActionsAvailable && !_liking
                     ? _toggleLike
                     : null,
                 icon: _liking
@@ -649,14 +665,14 @@ class _CommunityPostCardState extends State<_CommunityPostCard> {
               ),
               TextButton.icon(
                 key: Key('community-post-comments-${widget.post.id}'),
-                onPressed: widget.actionsEnabled ? _openDetail : null,
+                onPressed: _socialActionsAvailable ? _openDetail : null,
                 icon: const Icon(Icons.mode_comment_outlined),
                 label: Text('${_stats.commentCount}'),
               ),
               const Spacer(),
               IconButton(
                 key: Key('community-post-save-${widget.post.id}'),
-                onPressed: widget.actionsEnabled && !_saving
+                onPressed: _socialActionsAvailable && !_saving
                     ? _toggleSaved
                     : null,
                 tooltip: _saved

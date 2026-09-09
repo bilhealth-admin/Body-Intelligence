@@ -48,28 +48,42 @@ extension MealRepositoryQueries on MealRepository {
                 ..where((row) => row.deletedAt.isNull())
                 ..orderBy([(row) => OrderingTerm.asc(row.date)]))
               .get();
-      final rows = <MealWithItems>[];
-      for (final meal in meals) {
-        final items =
-            await (_database.select(_database.mealItems)
-                  ..where(
-                    (row) =>
-                        row.mealId.equals(meal.id) & row.deletedAt.isNull(),
-                  )
-                  ..orderBy([
-                    (item) => OrderingTerm.asc(item.position),
-                    (item) => OrderingTerm.asc(item.id),
-                  ]))
-                .get();
-        rows.add(
+      if (meals.isEmpty) return const <MealWithItems>[];
+
+      // The dashboard and analytics pages subscribe to this stream together.
+      // The old implementation issued two extra queries per meal (items then
+      // foods), which made a large diary block the UI while the first frame
+      // was being assembled. Fetch the same data in three bounded queries and
+      // rebuild the exact model shape in memory.
+      final mealIds = meals.map((meal) => meal.id).toList(growable: false);
+      final items =
+          await (_database.select(_database.mealItems)
+                ..where(
+                  (row) => row.mealId.isIn(mealIds) & row.deletedAt.isNull(),
+                )
+                ..orderBy([
+                  (item) => OrderingTerm.asc(item.mealId),
+                  (item) => OrderingTerm.asc(item.position),
+                  (item) => OrderingTerm.asc(item.id),
+                ]))
+              .get();
+      final foodsById = await _foodsForItems(items);
+      final itemsByMeal = <int, List<MealItem>>{};
+      for (final item in items) {
+        itemsByMeal.putIfAbsent(item.mealId, () => <MealItem>[]).add(item);
+      }
+      return [
+        for (final meal in meals)
           MealWithItems(
             meal: meal,
-            items: items,
-            foodsById: await _foodsForItems(items),
+            items: itemsByMeal[meal.id] ?? const <MealItem>[],
+            foodsById: {
+              for (final item in itemsByMeal[meal.id] ?? const <MealItem>[])
+                if (foodsById.containsKey(item.foodId))
+                  item.foodId: foodsById[item.foodId]!,
+            },
           ),
-        );
-      }
-      return rows;
+      ];
     });
   }
 

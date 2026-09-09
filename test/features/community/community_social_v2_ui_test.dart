@@ -26,6 +26,7 @@ final class _SocialV2Repository extends CommunityRepository {
   static const currentId = '11111111-1111-4111-8111-111111111111';
   static const authorId = '22222222-2222-4222-8222-222222222222';
   static const postId = '33333333-3333-4333-8333-333333333333';
+  static const myPostId = '66666666-6666-4666-8666-666666666666';
   static const rootId = '44444444-4444-4444-8444-444444444444';
   static const replyId = '55555555-5555-4555-8555-555555555555';
 
@@ -57,6 +58,15 @@ final class _SocialV2Repository extends CommunityRepository {
     authorHandle: 'training_partner',
     authorRelationship: CommunityRelationshipStatus.none,
     authorCanRequest: true,
+  );
+
+  CommunityPost get myPost => CommunityPost(
+    id: myPostId,
+    authorId: currentId,
+    authorName: 'BIL Tester',
+    body: 'My pending Community post',
+    createdAt: DateTime.utc(2026, 9, 8, 12),
+    moderationStatus: CommunityPostModerationStatus.pending,
   );
 
   CommunityPostStats get stats => CommunityPostStats(
@@ -105,6 +115,13 @@ final class _SocialV2Repository extends CommunityRepository {
 
   @override
   Future<List<CommunityPost>> loadFeed({int limit = 40}) async => [post];
+
+  @override
+  Future<CommunityFeedBatch> loadMyPosts({
+    DateTime? before,
+    String? beforeId,
+    int limit = 40,
+  }) async => CommunityFeedBatch(posts: [myPost], hasMore: false);
 
   @override
   Future<List<Map<String, dynamic>>> loadFriendshipsWithProfiles() async => [];
@@ -271,6 +288,38 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets(
+    'My posts exposes pending posts privately and does not offer invalid social actions',
+    (tester) async {
+      final repository = _SocialV2Repository();
+      await tester.pumpWidget(
+        MaterialApp(home: CommunityMyPostsPage(repository: repository)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('My posts'), findsOneWidget);
+      expect(find.text('My pending Community post'), findsOneWidget);
+      expect(
+        find.byKey(
+          const Key('community-post-status-${_SocialV2Repository.myPostId}'),
+        ),
+        findsOneWidget,
+      );
+      final like = tester.widget<TextButton>(
+        find.byKey(
+          const Key('community-post-like-${_SocialV2Repository.myPostId}'),
+        ),
+      );
+      final comments = tester.widget<TextButton>(
+        find.byKey(
+          const Key('community-post-comments-${_SocialV2Repository.myPostId}'),
+        ),
+      );
+      expect(like.onPressed, isNull);
+      expect(comments.onPressed, isNull);
+    },
+  );
 
   testWidgets(
     'post detail supports likes, one-level replies, reports, and retry-safe comments',

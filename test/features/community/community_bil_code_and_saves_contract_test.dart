@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:body_intelligence_log/features/community/data/community_public_code_failure.dart';
 import 'package:body_intelligence_log/features/community/data/community_repository.dart';
 import 'package:body_intelligence_log/features/community/domain/community_models.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_bil_code_page.dart';
@@ -25,6 +26,7 @@ final class _CodeRepository extends CommunityRepository {
   int resolutions = 0;
   int friendRequests = 0;
   bool unavailable = false;
+  CommunityPublicCodeFailure? publicCodeFailure;
 
   CommunityPublicCode code(String value) => CommunityPublicCode.fromJson({
     'code': value,
@@ -33,7 +35,11 @@ final class _CodeRepository extends CommunityRepository {
   });
 
   @override
-  Future<CommunityPublicCode> loadPublicCode() async => code(firstCode);
+  Future<CommunityPublicCode> loadPublicCode() async {
+    final failure = publicCodeFailure;
+    if (failure != null) throw failure;
+    return code(firstCode);
+  }
 
   @override
   Future<CommunityPublicCode> rotatePublicCode() async {
@@ -180,6 +186,31 @@ void main() {
     expect(repository.rotations, 1);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'BIL Code explains a missing profile without claiming a friend is required',
+    (tester) async {
+      final repository = _CodeRepository()
+        ..publicCodeFailure =
+            const CommunityPublicCodeFailure.profileRequired();
+      await tester.pumpWidget(
+        MaterialApp(home: CommunityBilCodePage(repository: repository)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text(
+          'Save your Community profile first. Your BIL Code is then created automatically; you do not need to add a friend first.',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('community-bil-code-open-profile')),
+        findsOneWidget,
+      );
+      expect(find.textContaining('add a friend first'), findsOneWidget);
+    },
+  );
 
   testWidgets('resolved code requires an explicit Add Friend action', (
     tester,

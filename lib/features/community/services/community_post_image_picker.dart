@@ -5,6 +5,10 @@ import 'package:image_picker/image_picker.dart';
 import '../../../app/services/recoverable_image_picker.dart';
 
 const communityPostImageMaxBytes = 5 * 1024 * 1024;
+// Keep a safety margin below the Storage/RPC 5 MiB contract. Users should be
+// able to choose the camera's original image; the app owns this conversion.
+const communityPostImageTargetBytes = 4 * 1024 * 1024;
+const communityPostImageProcessingMaxDimension = 2048;
 const communityPostImageMaxDimension = 8192;
 const communityPostImageMaxPixels = 40000000;
 
@@ -61,6 +65,11 @@ class CommunityPostImagePicker implements CommunityPostImagePickerContract {
     final file = await _picker.pickImage(
       purpose: BilImagePickerPurpose.communityPost,
       source: ImageSource.gallery,
+      // Ask the native picker to do the cheap first pass. The Dart fallback
+      // below still handles PNGs and platforms that ignore imageQuality.
+      maxWidth: communityPostImageProcessingMaxDimension.toDouble(),
+      maxHeight: communityPostImageProcessingMaxDimension.toDouble(),
+      imageQuality: 85,
       requestFullMetadata: false,
     );
     if (file == null) return null;
@@ -70,13 +79,68 @@ class CommunityPostImagePicker implements CommunityPostImagePickerContract {
         CommunityPostImageFailure.invalidImage,
       );
     }
-    if (bytes.lengthInBytes > communityPostImageMaxBytes) {
-      throw const CommunityPostImageException(
-        CommunityPostImageFailure.tooLarge,
-      );
-    }
+    return prepareCommunityPostImageAsync(bytes);
+  }
+}
+
+/// Validates an image selected from the device, transparently re-encoding a
+/// large original instead of making the user learn an image-conversion tool.
+Future<CommunityPostImageDraft> prepareCommunityPostImageAsync(
+  Uint8List bytes,
+) async {
+  if (bytes.isEmpty) {
+    throw const CommunityPostImageException(
+      CommunityPostImageFailure.invalidImage,
+    );
+  }
+  if (bytes.lengthInBytes <= communityPostImageMaxBytes) {
     return validateCommunityPostImageAsync(bytes);
   }
+
+  try {
+    final compressed = await compute(
+      _compressOversizedCommunityPostImage,
+      bytes,
+    );
+    if (compressed.isEmpty ||
+        compressed.lengthInBytes > communityPostImageMaxBytes) {
+      throw const FormatException('community_image_compression_limit');
+    }
+    return validateCommunityPostImageAsync(compressed);
+  } on CommunityPostImageException {
+    rethrow;
+  } on Object {
+    throw const CommunityPostImageException(CommunityPostImageFailure.tooLarge);
+  }
+}
+
+Uint8List _compressOversizedCommunityPostImage(Uint8List bytes) {
+  final decoded = img.decodeImage(bytes);
+  if (decoded == null) throw const FormatException('invalid_image');
+  final oriented = img.bakeOrientation(decoded);
+  final longest = oriented.width > oriented.height
+      ? oriented.width
+      : oriented.height;
+  Uint8List? last;
+
+  // Most phone photos fit at 2048px/quality 84. Noisy camera images get a
+  // second, still-readable pass at a smaller dimension before failing closed.
+  for (final dimension in <int>[2048, 1600, 1280]) {
+    final scale = longest > dimension ? dimension / longest : 1.0;
+    final resized = scale < 1
+        ? img.copyResize(
+            oriented,
+            width: (oriented.width * scale).round(),
+            height: (oriented.height * scale).round(),
+            interpolation: img.Interpolation.linear,
+          )
+        : oriented;
+    for (final quality in <int>[84, 76, 68, 60]) {
+      last = Uint8List.fromList(img.encodeJpg(resized, quality: quality));
+      if (last.lengthInBytes <= communityPostImageTargetBytes) return last;
+    }
+  }
+  return last ?? Uint8List(0);
 }
 
 CommunityPostImageDraft validateCommunityPostImage(Uint8List bytes) {

@@ -29,11 +29,23 @@ abstract interface class CommunityPostPaginationContract {
   });
 }
 
+/// Page through the signed-in member's posts, including pending or rejected
+/// posts. It relies on the existing owner-only RLS policy and never creates a
+/// second public feed surface.
+abstract interface class CommunityPostAuthorPaginationContract {
+  Future<CommunityFeedBatch> loadMyPostsPage({
+    DateTime? before,
+    String? beforeId,
+    int limit = 40,
+  });
+}
+
 final class CommunityPostCloudStore
     implements
         CommunityPostStoreContract,
         CommunityPostLookupContract,
-        CommunityPostPaginationContract {
+        CommunityPostPaginationContract,
+        CommunityPostAuthorPaginationContract {
   CommunityPostCloudStore(this._client, this._user);
 
   final SupabaseClient _client;
@@ -68,6 +80,42 @@ final class CommunityPostCloudStore
     final selection = _client
         .from('bil_community_posts')
         .select(_postSelection);
+    final filtered = before == null
+        ? selection
+        : selection.or(
+            'created_at.lt.${before.toUtc().toIso8601String()},'
+            'and(created_at.eq.${before.toUtc().toIso8601String()},id.lt.$beforeId)',
+          );
+    final rows = await filtered
+        .order('created_at', ascending: false)
+        .order('id', ascending: false)
+        .limit(boundedLimit);
+    final posts = await _hydrateVisibleRows(rows);
+    final cursor = posts.isEmpty ? null : posts.last;
+    return CommunityFeedBatch(
+      posts: posts,
+      hasMore: rows.length == boundedLimit,
+      nextBefore: cursor?.createdAt,
+      nextBeforeId: cursor?.id,
+    );
+  }
+
+  @override
+  Future<CommunityFeedBatch> loadMyPostsPage({
+    DateTime? before,
+    String? beforeId,
+    int limit = 40,
+  }) async {
+    if ((before == null) != (beforeId == null) ||
+        (beforeId != null && !_uuid.hasMatch(beforeId))) {
+      throw ArgumentError('Invalid Community authored-post cursor');
+    }
+    final boundedLimit = limit.clamp(1, 100);
+    final selection = _client
+        .from('bil_community_posts')
+        .select(_postSelection)
+        .eq('author_id', _user.id)
+        .isFilter('deleted_at', null);
     final filtered = before == null
         ? selection
         : selection.or(
