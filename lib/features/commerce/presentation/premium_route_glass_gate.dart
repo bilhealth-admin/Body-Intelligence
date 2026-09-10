@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/localization/app_localizations.dart';
 import '../../../shared/widgets/bil_coach_identity.dart';
-import '../../admin/services/ai_coach_admin_service.dart';
 import '../domain/commerce_entitlement.dart';
 import '../domain/commerce_plan.dart';
 import '../domain/subscription_state.dart';
@@ -64,6 +63,10 @@ class PremiumRouteGlassGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Keep existing route callers compatible, without consulting billing or
+    // admin state for a Free feature. Community owns sign-in, policy consent,
+    // suspension, relationship permissions and moderation on the server.
+    if (feature == PremiumGateFeature.community) return child;
     if (feature != PremiumGateFeature.aiCoach) {
       return _PremiumRouteGateContents(feature: feature, child: child);
     }
@@ -148,10 +151,6 @@ class _PremiumRouteGateContents extends ConsumerWidget {
         : ref.watch(storefrontTargetPlanProvider).value;
     final state = subscription.asData?.value;
     final isNutritionPrograms = feature == PremiumGateFeature.nutritionPrograms;
-    final isCommunity = feature == PremiumGateFeature.community;
-    final adminAccess = isCommunity
-        ? ref.watch(aiCoachAdminAccessProvider)
-        : const AsyncValue<bool>.data(false);
     final creditSnapshot = isAiCoach
         ? ref.watch(aiCoachCreditAccessProvider)
         : const AsyncValue<bool>.data(false);
@@ -163,20 +162,8 @@ class _PremiumRouteGateContents extends ConsumerWidget {
         returnToDashboard: isAiCoach,
       );
     }
-    if (isCommunity &&
-        state?.plan == CommercePlan.free &&
-        adminAccess.isLoading) {
-      return _PremiumRouteAccessChecking(
-        isDark: isDark,
-        returnToDashboard: false,
-      );
-    }
-    final communityAdminCheckFailed =
-        isCommunity && state?.plan == CommercePlan.free && adminAccess.hasError;
     final verificationUnavailable =
-        subscription.hasError ||
-        (isAiCoach && creditSnapshot.hasError) ||
-        communityAdminCheckFailed;
+        subscription.hasError || (isAiCoach && creditSnapshot.hasError);
     if (verificationUnavailable) {
       return _PremiumRouteAccessUnavailable(
         isDark: isDark,
@@ -187,7 +174,6 @@ class _PremiumRouteGateContents extends ConsumerWidget {
           } else {
             ref.invalidate(verifiedSubscriptionStateProvider);
           }
-          if (isCommunity) ref.invalidate(aiCoachAdminAccessProvider);
         },
         child: child,
       );
@@ -207,8 +193,6 @@ class _PremiumRouteGateContents extends ConsumerWidget {
         : isNutritionPrograms
         ? state?.authority == EntitlementAuthority.verifiedServer &&
               (state?.grants(CommerceEntitlement.premiumPrograms) ?? false)
-        : isCommunity && adminAccess.asData?.value == true
-        ? true
         : state != null && state.plan != CommercePlan.free;
     if (hasAccess) return child;
 

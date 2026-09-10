@@ -82,7 +82,8 @@ final class SleepSchedule {
   /// Earlier BIL releases allowed planning goals down to four hours and did
   /// not compare the goal with the scheduled window. Keeping that historical
   /// shape readable prevents a stricter planning rule from silently replacing
-  /// an existing user schedule with defaults. New saves still use [isValid].
+  /// an existing user schedule with defaults. Enabling still requires
+  /// [isValid]; disabling must not be blocked by an older planning goal.
   bool get isStorable =>
       bedHour >= 0 &&
       bedHour <= 23 &&
@@ -165,7 +166,9 @@ class SleepScheduleStore {
   }
 
   Future<void> save(SleepSchedule value) async {
-    if (!value.isValid) throw ArgumentError.value(value, 'value');
+    if (!value.isStorable || (value.enabled && !value.isValid)) {
+      throw ArgumentError.value(value, 'value');
+    }
     final prefs = await _preferences;
     final saved = await prefs.setString(storageKey, jsonEncode(value.toJson()));
     if (!saved) throw StateError('sleep_schedule_not_saved');

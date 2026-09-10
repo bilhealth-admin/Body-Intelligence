@@ -22,7 +22,7 @@ class DashboardRuntimeState {
     Iterable<AsyncValue<Object?>> requiredInputs,
   ) {
     final inputs = requiredInputs.toList(growable: false);
-    if (inputs.any((value) => value.isLoading)) {
+    if (inputs.any((value) => value.isLoading && !value.hasValue)) {
       return const DashboardRuntimeState.loading();
     }
     if (inputs.any((value) => value.hasError)) {

@@ -31,6 +31,19 @@ synchronization adapter is enabled.
 | Community profiles, friends and posts | Authenticated Supabase RPCs, RLS, policy and moderation | Owner-scoped repositories; request results cannot be reused for another owner |
 | Connected-health evidence | Native permission-bounded readings and local aggregation | Dashboard charts consume dated evidence, not decorative histories |
 
+Community, friendships and private messaging are Free account features. Their
+routes and friend actions do not depend on subscription, storefront, Boost or
+administrator status. Server identity, relationship consent, blocks, suspension,
+policy acceptance, moderation and rate limits still apply. This access never
+creates a Premium entitlement or alters any paid subscription or AI balance.
+
+Display-name edits from Profile, onboarding, the account gateway and Community
+atomically persist the local name and a pending-sync marker. Owner-scoped
+`DisplayNameSync` serializes cloud writes and clears that marker only after an
+acknowledged write whose local snapshot is still current. Remote hydration
+cannot overwrite a pending or newer edit. Offline failures retain the local
+name; changing a private profile does not create a discoverable Community row.
+
 The reset trigger tops up remaining Boost to 2,500, not by 2,500. Higher balances,
 paid purchases and reservations are preserved. Administrative subscription
 grants, token top-ups and paid subscriptions are deliberately different ledgers.

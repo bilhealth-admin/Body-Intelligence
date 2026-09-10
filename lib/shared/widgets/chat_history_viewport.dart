@@ -23,6 +23,7 @@ class _ChatHistoryViewportState extends State<ChatHistoryViewport>
     with WidgetsBindingObserver {
   static const _threshold = 72.0;
   bool _followingLatest = true;
+  bool _userScrollActive = false;
   bool _pinQueued = false;
   bool _disposed = false;
   int _interactionGeneration = 0;
@@ -52,6 +53,7 @@ class _ChatHistoryViewportState extends State<ChatHistoryViewport>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
       _followingLatest = true;
+      _userScrollActive = false;
       _interactionGeneration++;
     }
     if (_followingLatest &&
@@ -95,11 +97,18 @@ class _ChatHistoryViewportState extends State<ChatHistoryViewport>
     if (notification is ScrollStartNotification &&
         notification.dragDetails != null) {
       _interactionGeneration++;
+      _userScrollActive = true;
+      _followingLatest = false;
     }
-    if (notification is UserScrollNotification ||
-        notification is ScrollEndNotification ||
-        (notification is ScrollUpdateNotification &&
-            notification.dragDetails != null)) {
+    // A slow drag is still within the latest-end threshold for its first few
+    // frames. Re-enabling following there lets a metrics notification queue a
+    // jumpTo, which cancels the active drag and leaves the transcript stuck.
+    // Hand scrolling back to auto-follow only after the gesture and momentum
+    // have ended, never during a user's scroll update.
+    if (notification is ScrollEndNotification) {
+      _userScrollActive = false;
+      _followingLatest = _nearLatest;
+    } else if (!_userScrollActive && notification is UserScrollNotification) {
       _followingLatest = _nearLatest;
     }
     return false;

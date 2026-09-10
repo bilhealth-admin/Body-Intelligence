@@ -106,6 +106,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("phase", choices=["baseline", "final"])
     parser.add_argument("--list-only", action="store_true")
+    parser.add_argument("--fail-fast", action="store_true",
+                        help="Stop after the first failing group, preserving its evidence")
     parser.add_argument("--resume-baseline", action="store_true",
                         help="Keep completed baseline evidence; never reuse it for the final gate")
     args = parser.parse_args()
@@ -153,22 +155,36 @@ def main() -> int:
     # unrelated baseline static scans finish before this latency measurement.
     batches = [*portable.partition_test_batches(command, ordinary)]
     results = []
+    suffix = "_resume" if args.resume_baseline else ""
+    summary_path = EVIDENCE / f"{args.phase}_flutter{suffix}_summary.json"
+
+    def stop_after_failure() -> bool:
+        if not args.fail_fast or results[-1]["exit_code"] == 0:
+            return False
+        summary_path.write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
+        print(f"STOPPED_AFTER_FAILED_GROUP={results[-1]['gate']}; remaining groups NOT RUN",
+              flush=True)
+        return True
+
     for index, batch in enumerate(batches):
         suffix = "resume_" if args.resume_baseline else ""
         name = f"{args.phase}_flutter_{suffix}{index:02d}"
         code = run_gate(name, [*command, *batch])
         results.append({"gate": name, "exit_code": code, "files": batch})
+        if stop_after_failure():
+            return 1
     for index, (path, pattern) in enumerate(MIXED_NAMES.items()):
         if path in completed:
             continue
         name = f"{args.phase}_flutter_mixed_{index:02d}"
         code = run_gate(name, [*command, path, "--name", pattern])
         results.append({"gate": name, "exit_code": code, "files": [path], "name": pattern})
+        if stop_after_failure():
+            return 1
     name = f"{args.phase}_flutter_performance"
     code = run_gate(name, [*command, performance])
     results.append({"gate": name, "exit_code": code, "files": [performance]})
-    suffix = "_resume" if args.resume_baseline else ""
-    (EVIDENCE / f"{args.phase}_flutter{suffix}_summary.json").write_text(
+    summary_path.write_text(
         json.dumps(results, indent=2) + "\n", encoding="utf-8")
     return int(any(r["exit_code"] != 0 for r in results))
 

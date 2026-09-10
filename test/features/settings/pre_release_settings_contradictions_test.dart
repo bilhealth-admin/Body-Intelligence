@@ -106,7 +106,7 @@ void main() {
     expect(legal, isNot(contains('Embedded draft')));
   });
 
-  test('shared account identity is cloud authoritative and offline safe', () {
+  test('shared account identity syncs edits and stays offline safe', () {
     final provider = File(
       'lib/features/profile/providers/user_profile_provider.dart',
     ).readAsStringSync();
@@ -120,7 +120,13 @@ void main() {
     expect(provider, contains("from('bil_public_profiles')"));
     expect(
       provider,
-      contains("await preferences.set('displayName', remoteName)"),
+      contains('final sync = ref.watch(displayNameSyncProvider)'),
+    );
+    expect(provider, contains('unawaited(sync.synchronize())'));
+    expect(
+      provider,
+      isNot(contains("await preferences.set('displayName', remoteName)")),
+      reason: 'Remote names must pass the pending-edit and ownership guards',
     );
     expect(
       provider,

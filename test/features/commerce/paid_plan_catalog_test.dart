@@ -22,6 +22,24 @@ void main() {
       expect(ranks, orderedEquals(<int>[10, 20, 30, 40, 50, 60, 80, 90]));
     });
 
+    test(
+      'friendships belong to Free and are inherited without a paid add-on',
+      () {
+        for (final plan in CommercePlan.values) {
+          expect(
+            PaidPlanCatalog.composedEntitlementsFor(plan),
+            contains(CommerceEntitlement.communityFriends),
+            reason:
+                '${plan.name} must include the same Free friendship access.',
+          );
+        }
+        expect(
+          PaidPlanCatalog.entryFor(CommercePlan.premium).addedEntitlements,
+          isNot(contains(CommerceEntitlement.communityFriends)),
+        );
+      },
+    );
+
     test('composes individual tiers without duplicate entitlement logic', () {
       final premium = PaidPlanCatalog.composedEntitlementsFor(
         CommercePlan.premium,

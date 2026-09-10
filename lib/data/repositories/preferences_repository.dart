@@ -126,4 +126,18 @@ class PreferencesRepository {
         .watchSingleOrNull()
         .map((row) => row?.value);
   }
+
+  /// Commits a remote result only if no local edit replaced its input snapshot.
+  Future<bool> mutateIfUnchanged({
+    required Map<String, String?> expected,
+    Map<String, String> set = const {},
+    Iterable<String> remove = const [],
+  }) => _database.transaction(() async {
+    for (final entry in expected.entries) {
+      if (await get(entry.key) != entry.value) return false;
+    }
+    await setManyInCurrentTransaction(set);
+    await removeManyInCurrentTransaction(remove.toSet()..removeAll(set.keys));
+    return true;
+  });
 }

@@ -30,7 +30,7 @@ extension _SleepTrackerScheduleCard on _SleepTrackerPageState {
             title: Text(
               '${tr('Sleep', 'النوم')} · ${tr('Daily reminders', 'التذكيرات اليومية')}',
             ),
-            value: sleepSchedule.enabled,
+            value: pendingScheduleEnabled ?? sleepSchedule.enabled,
             onChanged: scheduleLoading || scheduleSaving
                 ? null
                 : _setSleepScheduleEnabled,
@@ -144,11 +144,13 @@ extension _SleepTrackerScheduleCard on _SleepTrackerPageState {
                 ),
               ),
             ),
-          if (scheduleSaving)
-            const Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: LinearProgressIndicator(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: SizedBox(
+              height: 4,
+              child: scheduleSaving ? const LinearProgressIndicator() : null,
             ),
+          ),
         ],
       ),
     );

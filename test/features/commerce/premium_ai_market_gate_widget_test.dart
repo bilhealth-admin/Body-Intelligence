@@ -457,7 +457,9 @@ void main() {
     );
   });
 
-  testWidgets('Free previews community behind glass', (tester) async {
+  testWidgets('Free opens community without a membership offer', (
+    tester,
+  ) async {
     await pumpGate(
       tester,
       storefrontPlan: CommercePlan.premium,
@@ -474,11 +476,11 @@ void main() {
     );
     expect(
       find.byKey(const ValueKey('premium-route-glass-blur')),
-      findsOneWidget,
+      findsNothing,
     );
-    expect(find.text('Friends and requests'), findsOneWidget);
+    expect(find.text('Friends and requests'), findsNothing);
     expect(find.text('Start 7-day free trial'), findsNothing);
-    expect(find.text('Plans'), findsOneWidget);
+    expect(find.text('Plans'), findsNothing);
   });
 
   testWidgets('glass gate shows at most one Premium label per route', (
@@ -518,15 +520,15 @@ void main() {
       tester,
       storefrontPlan: CommercePlan.premiumAiCoach,
       creditAccess: true,
-      feature: PremiumGateFeature.community,
+      feature: PremiumGateFeature.weeklyReport,
       child: const ColoredBox(
-        key: ValueKey('boost-cannot-unlock-community'),
+        key: ValueKey('boost-cannot-unlock-weekly-report'),
         color: Colors.white,
       ),
     );
 
     expect(
-      find.byKey(const ValueKey('boost-cannot-unlock-community')),
+      find.byKey(const ValueKey('boost-cannot-unlock-weekly-report')),
       findsOneWidget,
     );
     expect(

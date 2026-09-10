@@ -22,7 +22,6 @@ final class PaidPlanCatalog {
         CommerceEntitlement.mealPlanning,
         CommerceEntitlement.connectedHealth,
         CommerceEntitlement.premiumPrograms,
-        CommerceEntitlement.communityFriends,
         CommerceEntitlement.customGoals,
         CommerceEntitlement.advancedIntelligence,
       },

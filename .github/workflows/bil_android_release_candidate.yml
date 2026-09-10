@@ -1,10 +1,10 @@
-name: BIL Android signed release candidate (build 12)
+name: BIL Android signed release candidate (build 13)
 
 on:
   workflow_dispatch:
     inputs:
       build_number:
-        description: Exact Google Play build number for this candidate; must be 12
+        description: Exact Google Play build number for this candidate; must be 13
         required: true
         type: string
       run_native_crypto_checks:
@@ -40,8 +40,8 @@ jobs:
             echo 'build_number must be a positive integer.' >&2
             exit 1
           }
-          (( BUILD_NUMBER == 12 )) || {
-            echo 'build_number must be exactly 12 for the Android release candidate; build 11 and earlier must never be promoted.' >&2
+          (( BUILD_NUMBER == 13 )) || {
+            echo 'build_number must be exactly 13 for the Android release candidate; build 12 and earlier must never be promoted.' >&2
             exit 1
           }
 
@@ -101,9 +101,9 @@ jobs:
           BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID: ${{ secrets.BIL_MOBILE_INTEGRITY_BACKEND_RELEASE_ID }}
           BIL_PLAY_INTEGRITY_PROJECT_NUMBER: ${{ vars.BIL_PLAY_INTEGRITY_PROJECT_NUMBER }}
           BIL_SOURCE_COMMIT: ${{ github.sha }}
-          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V12_AUDITED_SOURCE_SHA }}
-          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_ANDROID_V12_FROZEN_SOURCE_MANIFEST_2026-09-10.md
-          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_ANDROID_V12_STAGING_MANIFEST_SHA256 }}
+          BIL_AUDITED_SOURCE_COMMIT: ${{ vars.BIL_ANDROID_V13_AUDITED_SOURCE_SHA }}
+          BIL_RELEASE_MANIFEST_PATH: docs/release/BIL_ANDROID_V13_FROZEN_SOURCE_MANIFEST_2026-09-10.md
+          BIL_AUDITED_FREEZE_MANIFEST_SHA256: ${{ vars.BIL_ANDROID_V13_STAGING_MANIFEST_SHA256 }}
           BIL_RELEASE_EXPECTED_BUILD_NUMBER: ${{ inputs.build_number }}
         run: dart run tool/release/validate_release_configuration.dart
 

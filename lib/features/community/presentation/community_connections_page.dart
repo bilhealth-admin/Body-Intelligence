@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -7,10 +6,6 @@ import '../../../app/environment/app_environment.dart';
 import '../../../app/localization/app_localizations.dart';
 import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
-import '../../commerce/domain/commerce_entitlement.dart';
-import '../../commerce/domain/subscription_state.dart';
-import '../../commerce/providers/commerce_providers.dart';
-import '../../admin/services/ai_coach_admin_service.dart';
 import '../data/community_repository.dart';
 
 part 'community_connections_copy.dart';
@@ -27,18 +22,17 @@ SupabaseClient? _initializedConnectionsClient() {
   }
 }
 
-class CommunityConnectionsPage extends ConsumerStatefulWidget {
+class CommunityConnectionsPage extends StatefulWidget {
   const CommunityConnectionsPage({this.repository, super.key});
 
   final CommunityRepository? repository;
 
   @override
-  ConsumerState<CommunityConnectionsPage> createState() =>
+  State<CommunityConnectionsPage> createState() =>
       _CommunityConnectionsPageState();
 }
 
-class _CommunityConnectionsPageState
-    extends ConsumerState<CommunityConnectionsPage> {
+class _CommunityConnectionsPageState extends State<CommunityConnectionsPage> {
   CommunityRepository? _repository;
   Future<List<Map<String, dynamic>>> _connections = Future.value(const []);
   int _tab = 0;
@@ -133,14 +127,6 @@ class _CommunityConnectionsPageState
   @override
   Widget build(BuildContext context) {
     final copy = _ConnectionsCopy.of(context);
-    final subscription = ref.watch(verifiedSubscriptionStateProvider).value;
-    final adminAccess =
-        ref.watch(aiCoachAdminAccessProvider).asData?.value ?? false;
-    final friendsUnlocked =
-        adminAccess ||
-        (subscription?.authority == EntitlementAuthority.verifiedServer &&
-            (subscription?.grants(CommerceEntitlement.communityFriends) ??
-                false));
     return Scaffold(
       appBar: AppBar(
         title: Text(copy.title),
@@ -229,17 +215,6 @@ class _CommunityConnectionsPageState
                       final name = row.displayName ?? copy.member;
                       final avatar = row.avatarUrl;
                       final busy = _busyConnections.contains(row.id);
-                      if (status == 'pending' && incoming && !friendsUnlocked) {
-                        return _LockedIncomingConnectionCard(
-                          rowId: row.id,
-                          name: name,
-                          avatarUrl: avatar,
-                          status: copy.status(status, incoming: incoming),
-                          declineLabel: copy.decline,
-                          busy: busy,
-                          onDecline: () => _respond(row.id, accept: false),
-                        );
-                      }
                       return Card(
                         child: ListTile(
                           leading: BilAccountAvatar(
@@ -332,85 +307,6 @@ class _CommunityConnectionsPageState
                 );
               },
             ),
-    );
-  }
-}
-
-class _LockedIncomingConnectionCard extends StatelessWidget {
-  const _LockedIncomingConnectionCard({
-    required this.rowId,
-    required this.name,
-    required this.avatarUrl,
-    required this.status,
-    required this.declineLabel,
-    required this.busy,
-    required this.onDecline,
-  });
-
-  final String rowId;
-  final String name;
-  final String? avatarUrl;
-  final String status;
-  final String declineLabel;
-  final bool busy;
-  final VoidCallback onDecline;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                BilAccountAvatar(radius: 20, networkUrl: avatarUrl),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        status,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              alignment: WrapAlignment.end,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                TextButton.icon(
-                  onPressed: busy ? null : onDecline,
-                  icon: const Icon(Icons.close_rounded),
-                  label: Text(declineLabel),
-                ),
-                FilledButton.tonal(
-                  key: ValueKey('community-premium-accept-$rowId'),
-                  onPressed: () => context.push('/plans?focus=subscription'),
-                  child: Text(
-                    context.strings.text('View membership plans'),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

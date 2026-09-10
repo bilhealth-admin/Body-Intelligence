@@ -484,6 +484,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         drafts: ref.read(onboardingDraftRepositoryProvider),
       );
       await service.commit(draft: _draft);
+      unawaited(ref.read(displayNameSyncProvider).synchronize());
       ref.invalidate(userProfileProvider);
       ref.invalidate(activeGoalProvider);
       ref.invalidate(coachContextSnapshotProvider);

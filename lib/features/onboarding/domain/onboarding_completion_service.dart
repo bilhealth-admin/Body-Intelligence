@@ -9,6 +9,7 @@ import '../../../data/repositories/user_profile_repository.dart';
 import '../../../data/repositories/weight_repository.dart';
 import '../../intelligence_center/domain/coach_context_preferences.dart';
 import '../../nutrition/repositories/dietary_preferences_repository.dart';
+import '../../profile/services/display_name_sync.dart';
 import '../models/onboarding_draft.dart';
 import 'adult_eligibility.dart';
 import 'onboarding_goal_bindings.dart';
@@ -148,7 +149,7 @@ final class OnboardingCompletionService {
         focuses: Set.unmodifiable(draft.aiFocuses),
       );
       await preferences.setManyInCurrentTransaction({
-        'displayName': draft.preferredName.trim(),
+        ...DisplayNameSync.localEdit(draft.preferredName),
         'units': draft.system.name,
         'countryRegion': draft.countryRegion.trim(),
         'locale': draft.localeTag,

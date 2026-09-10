@@ -11,9 +11,7 @@ import 'package:body_intelligence_log/features/community/presentation/community_
 import 'package:body_intelligence_log/features/community/presentation/community_people_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_notifications_page.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_profile_page.dart';
-import 'package:body_intelligence_log/features/commerce/domain/commerce_plan.dart';
-import 'package:body_intelligence_log/features/commerce/domain/paid_plan_catalog.dart';
-import 'package:body_intelligence_log/features/commerce/domain/subscription_state.dart';
+import 'package:body_intelligence_log/features/commerce/domain/free_plan.dart';
 import 'package:body_intelligence_log/features/commerce/providers/commerce_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -320,18 +318,10 @@ final class _CommunityInteractionRepository extends CommunityRepository {
   ];
 }
 
-final _verifiedPremium = SubscriptionState(
-  plan: CommercePlan.premium,
-  entitlements: PaidPlanCatalog.composedEntitlementsFor(CommercePlan.premium),
-  authority: EntitlementAuthority.verifiedServer,
-  isPurchasable: true,
-  canRestorePurchases: true,
-);
-
 Widget _app(Widget home) => ProviderScope(
   overrides: [
     verifiedSubscriptionStateProvider.overrideWithValue(
-      AsyncData(_verifiedPremium),
+      AsyncData(FreePlan.createState()),
     ),
   ],
   child: MaterialApp(
@@ -348,24 +338,25 @@ Widget _app(Widget home) => ProviderScope(
 );
 
 void main() {
-  testWidgets('incoming friendship accept reloads the authoritative All tab', (
-    tester,
-  ) async {
-    final repository = _CommunityInteractionRepository();
-    await tester.pumpWidget(
-      _app(CommunityConnectionsPage(repository: repository)),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Requests'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Accept'));
-    await tester.pumpAndSettle();
-    expect(repository.responseCalls, 1);
-    expect(repository.friendshipStatus, 'accepted');
-    await tester.tap(find.text('All'));
-    await tester.pumpAndSettle();
-    expect(find.text('Friend'), findsOneWidget);
-  });
+  testWidgets(
+    'Free member accepts a request and reloads the authoritative All tab',
+    (tester) async {
+      final repository = _CommunityInteractionRepository();
+      await tester.pumpWidget(
+        _app(CommunityConnectionsPage(repository: repository)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Requests'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('Accept'));
+      await tester.pumpAndSettle();
+      expect(repository.responseCalls, 1);
+      expect(repository.friendshipStatus, 'accepted');
+      await tester.tap(find.text('All'));
+      await tester.pumpAndSettle();
+      expect(find.text('Friend'), findsOneWidget);
+    },
+  );
 
   testWidgets('accepted connection exposes a working report-user action', (
     tester,
@@ -522,7 +513,9 @@ void main() {
     expect(repository.conversationSubscriptionCancelled, isTrue);
   });
 
-  testWidgets('people search dispatches one friend request', (tester) async {
+  testWidgets('Free member search dispatches one friend request', (
+    tester,
+  ) async {
     final repository = _CommunityInteractionRepository();
     await tester.pumpWidget(_app(CommunityPeoplePage(repository: repository)));
     await tester.pumpAndSettle();

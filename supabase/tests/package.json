@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "cd ../.. && node supabase/tests/admin_subscription_grants_test.mjs && node supabase/tests/ai_coach_reset_top_up_test.mjs"
+    "test": "cd ../.. && node supabase/tests/admin_subscription_grants_test.mjs && node supabase/tests/ai_coach_reset_top_up_test.mjs && node supabase/tests/community_free_access_test.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8"

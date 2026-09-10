@@ -211,7 +211,8 @@ extension _ProfileSettingsActions on _ProfileSettingsPageState {
               excludedIngredients: dietaryExcludedIngredients,
             ),
           );
-      await preferences.set('displayName', displayName.text.trim());
+      await preferences.setMany(DisplayNameSync.localEdit(displayName.text));
+      unawaited(ref.read(displayNameSyncProvider).synchronize());
       ref.invalidate(userProfileProvider);
       ref.invalidate(activeGoalProvider);
       if (!mounted) return;

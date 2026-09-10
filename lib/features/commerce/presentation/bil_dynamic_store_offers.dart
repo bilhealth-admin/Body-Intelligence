@@ -250,6 +250,8 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
                         benefits: [
                           for (var index = 1; index <= 5; index++)
                             _copy('free_benefit_$index'),
+                          _copy('premium_benefit_community'),
+                          _copy('premium_benefit_messages'),
                         ],
                         currentLabel: widget.currentPlan == CommercePlan.free
                             ? _copy('current_plan')
@@ -350,8 +352,6 @@ class _BilDynamicStoreOffersState extends State<BilDynamicStoreOffers> {
     'premium_benefit_body',
     'premium_benefit_4',
     'premium_benefit_fitness_devices',
-    'premium_benefit_community',
-    'premium_benefit_messages',
     'premium_benefit_5',
   ];
 

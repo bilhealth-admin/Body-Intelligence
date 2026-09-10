@@ -3,6 +3,79 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
+    testWidgets('metrics and new rows cannot cancel a slow drag $platform', (
+      tester,
+    ) async {
+      final scroll = ScrollController();
+      addTearDown(scroll.dispose);
+      var count = 30;
+      var height = 360.0;
+      late StateSetter rebuild;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) {
+                rebuild = setState;
+                return SizedBox(
+                  height: height,
+                  child: ChatHistoryViewport(
+                    controller: scroll,
+                    latestMessageId: 'message-$count',
+                    child: ListView.builder(
+                      controller: scroll,
+                      reverse: true,
+                      itemCount: count,
+                      itemExtent: 80,
+                      itemBuilder: (context, index) => Text('message-$index'),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byType(ChatHistoryViewport)),
+      );
+      for (var i = 0; i < 8; i++) {
+        await gesture.moveBy(const Offset(0, 6));
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      final before = scroll.offset;
+      expect(before, inExclusiveRange(0, 72));
+      rebuild(() {
+        count++;
+        height = 320;
+      });
+      await tester.pump();
+      await tester.pump();
+      expect(scroll.offset, closeTo(before, .5));
+      expect(scroll.position.isScrollingNotifier.value, isTrue);
+      for (var i = 0; i < 24; i++) {
+        await gesture.moveBy(const Offset(0, 6));
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(scroll.offset, greaterThan(100));
+      final jump = find.byKey(const Key('chat-jump-to-latest'));
+      expect(jump.hitTestable(), findsOneWidget);
+      await tester.tap(jump);
+      await tester.pumpAndSettle();
+      expect(scroll.offset, closeTo(0, .5));
+      rebuild(() => count++);
+      await tester.pumpAndSettle();
+      expect(scroll.offset, closeTo(0, .5));
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
+
   testWidgets(
     'latest end is stable and reading history is not forcibly interrupted',
     (tester) async {

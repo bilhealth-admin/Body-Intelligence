@@ -168,6 +168,53 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
+    testWidgets('$platform: reversing a pull does not refresh on release', (
+      tester,
+    ) async {
+      var refreshes = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: platform),
+          home: DashboardShell(
+            onRefresh: () async {
+              refreshes++;
+            },
+            child: const SizedBox(height: 2000),
+          ),
+        ),
+      );
+      final target = find.byKey(const Key('dashboard-scroll-view'));
+      final gesture = await tester.startGesture(tester.getCenter(target));
+      await gesture.moveBy(const Offset(0, 300));
+      await tester.pump();
+      await gesture.moveBy(const Offset(0, -400));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(refreshes, 0);
+
+      final position = tester
+          .state<ScrollableState>(
+            find.descendant(of: target, matching: find.byType(Scrollable)),
+          )
+          .position;
+      var bounces = false;
+      for (
+        ScrollPhysics? physics = position.physics;
+        physics != null;
+        physics = physics.parent
+      ) {
+        bounces |= physics is BouncingScrollPhysics;
+      }
+      expect(
+        bounces,
+        platform == TargetPlatform.iOS,
+        reason: 'Use the same native platform physics as More',
+      );
+    });
+  }
+
   test('dashboard editor exposes current cards only', () {
     final provider = File(
       'lib/features/dashboard/providers/dashboard_preferences_provider.dart',

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -69,19 +71,22 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
     final profile = await _repository!.loadMyProfile();
     _profileSaved = profile != null;
     String? myProfileDisplayName;
-    if (widget.repository == null &&
-        (profile == null || profile.displayName.trim().isEmpty)) {
+    String? pendingName;
+    if (widget.repository == null) {
       try {
-        myProfileDisplayName = await ref
-            .read(preferencesRepositoryProvider)
-            .get('displayName');
+        final preferences = ref.read(preferencesRepositoryProvider);
+        myProfileDisplayName = await preferences.get('displayName');
+        pendingName = await preferences.get(DisplayNameSync.pendingKey);
+        if (pendingName != null) {
+          unawaited(ref.read(displayNameSyncProvider).synchronize());
+        }
       } on Object {
         // Community remains usable with the privacy-safe BIL alias when the
         // device-local profile store is temporarily unavailable.
       }
     }
     _name.text = CommunityIdentityProjection.resolveDisplayName(
-      communityDisplayName: profile?.displayName,
+      communityDisplayName: pendingName ?? profile?.displayName,
       myProfileDisplayName: myProfileDisplayName,
     );
     if (profile == null) {
@@ -148,7 +153,8 @@ class _CommunityProfilePageState extends ConsumerState<CommunityProfilePage> {
       if (widget.repository == null) {
         await ref
             .read(preferencesRepositoryProvider)
-            .mutate(set: {'displayName': _name.text.trim()});
+            .setMany(DisplayNameSync.localEdit(_name.text));
+        unawaited(ref.read(displayNameSyncProvider).synchronize());
         final photoResult = await ref
             .read(profilePhotoServiceProvider)
             .syncStoredPhotoToCommunity();

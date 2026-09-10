@@ -32,6 +32,7 @@ const home = {
       ['◎', 'Body trends', 'See calories, nutrients, weight, and wellness signals with honest empty, offline, and confidence states.'],
       ['✦', 'BIL AI Coach', 'Ask naturally in the language you speak. Remote AI is used only after consent and never executes actions without approval.'],
       ['⌁', 'Connected health', 'Import supported records only after platform permission, with clear source and connection status.'],
+      ['◇', 'Free Community, friends and messages', 'Coming with the next BIL app update: Community, friends and private messages are included in BIL Free for signed-in adults. Privacy controls and Community Guidelines still apply.'],
     ],
     trustTitle: 'Intelligence deserves restraint.',
     trust: ['Health data is never sold.', 'Free-tier ads never use health context.', 'AI answers are guidance, not diagnosis.', 'Cloud features remain off until consent.', 'Store prices come from Apple or Google.', 'Account deletion is available in-app and online.'],
@@ -53,6 +54,7 @@ const home = {
       ['◎', 'اتجاهات الجسم', 'شاهد السعرات والمغذيات والوزن وإشارات العافية مع حالات صادقة للثقة وعدم الاتصال ونقص البيانات.'],
       ['✦', 'مدرب BIL الذكي', 'اسأل بطبيعتك وباللغة التي تتحدثها. لا يُستخدم الذكاء البعيد إلا بعد الموافقة ولا ينفذ إجراءً دون إذنك.'],
       ['⌁', 'الصحة المتصلة', 'استورد السجلات المدعومة فقط بعد إذن النظام، مع إظهار المصدر وحالة الاتصال بوضوح.'],
+      ['◇', 'المجتمع والأصدقاء والرسائل مجانًا', 'مع تحديث تطبيق BIL القادم: المجتمع والأصدقاء والرسائل الخاصة ضمن BIL Free للبالغين المسجلين. تبقى ضوابط الخصوصية وإرشادات المجتمع سارية.'],
     ],
     trustTitle: 'الذكاء الحقيقي يعرف حدوده.',
     trust: ['لا نبيع البيانات الصحية.', 'إعلانات الخطة المجانية لا تستخدم السياق الصحي.', 'إجابات الذكاء إرشاد وليست تشخيصًا.', 'تبقى السحابة متوقفة حتى توافق.', 'الأسعار مصدرها Apple أو Google.', 'حذف الحساب متاح داخل التطبيق وعبر الويب.'],
@@ -131,8 +133,10 @@ const legal = {
     },
     '/subscription-terms': {
       eyebrow: 'COMMERCE', title: 'Subscription terms', intro: 'BIL displays only plans and prices returned by the user’s verified Apple or Google storefront. Website text does not override the store checkout screen.',
+      updated: '10 September 2026',
       sections: [
         ['plans', 'Plans and regional availability', '<p>BIL may offer Free, BIL Premium, BIL Premium AI Coach, and BIL AI Boost. Availability differs by country and storefront economics. In some regions AI usage is offered through token-based Boost rather than an AI-inclusive subscription.</p>'],
+        ['community', 'Community is part of BIL Free', '<p>With the next BIL app update, Community, friends and private messages are included in BIL Free for signed-in adults. No Premium subscription or AI Boost purchase is required for these features. Community Guidelines, consent, privacy controls, blocking, reporting, and moderation continue to apply. Older app builds may still show a Premium prompt until they are updated. This change does not cancel or reprice an existing subscription, change other paid features, or alter AI token balances.</p>'],
         ['billing', 'Billing and renewal', '<p>The store shows the final localized price, currency, tax, billing interval, and any introductory offer before confirmation. Auto-renewable subscriptions renew unless cancelled at least as required by the store. BIL does not independently charge a card.</p>'],
         ['ai', 'AI allowances and Boost', '<p>AI-inclusive plans may have documented weekly and monthly token allowances. AI Boost is a separate consumable or non-expiring balance only where the store and server verify it. An unanswered or rejected request must not be represented as a paid AI response.</p>'],
         ['cancel', 'Cancellation and refunds', '<p>Manage or cancel through Apple App Store or Google Play using the same store account used to purchase. Cancellation normally stops future renewal while access continues through the paid period. Refund eligibility and processing follow store policy and applicable law.</p>'],
@@ -235,8 +239,9 @@ legal.ar = {
     ['ads','اختيارات الإعلانات','<p>لا تعرض الخطط المدفوعة إعلانات. إعلانات المجاني عند تفعيلها سياقية وغير مخصصة، ولا تستلم الصحة أو اليوميات أو أسئلة الذكاء أو قياسات الجسم.</p>'],
     ['request','اطلب المساعدة',`<p>راسل <a href="mailto:${PRIVACY_EMAIL}">${PRIVACY_EMAIL}</a> من بريد الحساب وحدد الفئة دون إرفاق بيانات حساسة.</p>`],
   ]},
-  '/subscription-terms': { eyebrow: 'التجارة', title: 'شروط الاشتراكات', intro: 'يعرض BIL الخطط والأسعار التي يعيدها متجر Apple أو Google الموثق للمستخدم. شاشة المتجر هي المرجع النهائي.', sections: [
+  '/subscription-terms': { eyebrow: 'التجارة', title: 'شروط الاشتراكات', intro: 'يعرض BIL الخطط والأسعار التي يعيدها متجر Apple أو Google الموثق للمستخدم. شاشة المتجر هي المرجع النهائي.', updated: '10 سبتمبر 2026', sections: [
     ['plans','الخطط والتوفر الإقليمي','<p>قد تتوفر Free وBIL Premium وBIL Premium AI Coach وBIL AI Boost. يختلف التوفر حسب البلد واقتصاد المتجر، وقد يتوفر الذكاء بنظام التوكينات بدل اشتراك شامل.</p>'],
+    ['community','المجتمع ضمن BIL Free','<p>مع تحديث تطبيق BIL القادم، يصبح المجتمع والأصدقاء والرسائل الخاصة ضمن BIL Free للبالغين المسجلين. لا تتطلب هذه الميزات اشتراك Premium أو شراء AI Boost. تبقى إرشادات المجتمع والموافقة وضوابط الخصوصية والحظر والإبلاغ والإشراف سارية. قد تعرض الإصدارات الأقدم طلب Premium حتى تحديثها. لا يلغي هذا التغيير أي اشتراك قائم أو يغير سعره، ولا يغير الميزات المدفوعة الأخرى أو أرصدة توكينات الذكاء الاصطناعي.</p>'],
     ['billing','الفوترة والتجديد','<p>يعرض المتجر السعر النهائي والعملة والضريبة والفترة والعرض قبل التأكيد. تتجدد الاشتراكات تلقائيًا ما لم تُلغَ وفق مهلة المتجر. لا يخصم BIL من البطاقة مباشرة.</p>'],
     ['ai','حصص الذكاء وBoost','<p>قد تتضمن الخطط حصة أسبوعية وشهرية موضحة. لا يضاف Boost إلا بعد تحقق المتجر والخادم، ولا يُحسب طلب مرفوض أو بلا جواب كإجابة مدفوعة.</p>'],
     ['cancel','الإلغاء والاسترداد','<p>أدر أو ألغِ من Apple أو Google بالحساب نفسه. يوقف الإلغاء التجديد عادة مع بقاء الوصول حتى نهاية الفترة. يخضع الاسترداد للمتجر والقانون.</p>'],

@@ -414,7 +414,7 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
         await ref
             .read(preferencesRepositoryProvider)
             .setManyInCurrentTransaction({
-              'displayName': snapshot.name,
+              ...DisplayNameSync.localEdit(snapshot.name),
               'profileLocation': snapshot.location,
               'profilePostalCode': snapshot.postalCode,
               'profileTimeZone': snapshot.timeZone,
@@ -424,6 +424,7 @@ extension _PremiumProfileActions on _PremiumProfilePageState {
                   snapshot.dateOfBirth?.toIso8601String() ?? '',
             });
       });
+      unawaited(ref.read(displayNameSyncProvider).synchronize());
       ref.invalidate(userProfileProvider);
       ref.invalidate(activeGoalProvider);
       ref.invalidate(latestWeightProvider);

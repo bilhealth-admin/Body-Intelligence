@@ -98,6 +98,32 @@ void main() {
     );
   });
 
+  test('changed local asset length invalidates stored publication proof', () {
+    expect(
+      () => validateLegalPublicationVerification(
+        metadata: metadata,
+        proof: proof,
+        readBytes: (path) => [...File(path).readAsBytesSync(), 32],
+      ),
+      throwsA(_invalidWith('checked-in local asset byte count mismatch')),
+    );
+  });
+
+  test('same-length local asset changes invalidate stored proof', () {
+    expect(
+      () => validateLegalPublicationVerification(
+        metadata: metadata,
+        proof: proof,
+        readBytes: (path) {
+          final changed = File(path).readAsBytesSync();
+          changed[0] ^= 1;
+          return changed;
+        },
+      ),
+      throwsA(_invalidWith('checked-in local asset SHA-256 mismatch')),
+    );
+  });
+
   test('missing route and non-200 route fail closed', () {
     final missing = _copy(proof);
     final missingRoutes = missing['routes'] as List<Object?>;

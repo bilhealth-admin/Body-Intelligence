@@ -131,9 +131,7 @@ class _DashboardShellState extends State<DashboardShell> {
                   return SingleChildScrollView(
                     key: const Key('dashboard-scroll-view'),
                     controller: _scrollController,
-                    physics: const BouncingScrollPhysics(
-                      parent: AlwaysScrollableScrollPhysics(),
-                    ),
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: EdgeInsets.fromLTRB(
                       metrics.horizontalPadding,
                       16,
@@ -189,10 +187,9 @@ class _ElasticDashboardRefreshState extends State<_ElasticDashboardRefresh> {
     }
     if (notification is ScrollUpdateNotification &&
         notification.dragDetails != null) {
-      if (notification.metrics.pixels < 0) {
-        final visiblePull = -notification.metrics.pixels;
-        if (visiblePull > _pullExtent) _pullExtent = visiblePull;
-      }
+      _pullExtent =
+          (notification.metrics.minScrollExtent - notification.metrics.pixels)
+              .clamp(0.0, double.infinity);
     }
     if (notification is OverscrollNotification &&
         notification.dragDetails != null &&
@@ -207,19 +204,8 @@ class _ElasticDashboardRefreshState extends State<_ElasticDashboardRefresh> {
     final shouldRefresh =
         _pullExtent >= _ElasticDashboardRefresh.triggerExtent && !_refreshing;
     _pullExtent = 0;
-    if (widget.controller.hasClients) {
-      final position = widget.controller.position;
-      if (position.hasContentDimensions &&
-          position.pixels < position.minScrollExtent) {
-        unawaited(
-          widget.controller.animateTo(
-            position.minScrollExtent,
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOutCubic,
-          ),
-        );
-      }
-    }
+    // Native scroll physics own rebound, as on More. Starting another animation
+    // here races the scrollable's pointer-up ballistic activity.
     if (!shouldRefresh) return;
     _refreshing = true;
     unawaited(_runRefresh());

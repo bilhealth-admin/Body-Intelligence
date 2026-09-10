@@ -147,8 +147,11 @@ class DashboardGrid extends ConsumerWidget {
         onRetry: () => DashboardRetry.invalidate(ref),
       );
     }
-    if (nutrientGoalCardsAsync.isLoading ||
-        nutrientGoalStates.values.any((state) => state.isLoading)) {
+    if ((nutrientGoalCardsAsync.isLoading &&
+            !nutrientGoalCardsAsync.hasValue) ||
+        nutrientGoalStates.values.any(
+          (state) => state.isLoading && !state.hasValue,
+        )) {
       return const DashboardLoadingSkeleton();
     }
     if (nutrientGoalCardsAsync.hasError ||
@@ -181,7 +184,7 @@ class DashboardGrid extends ConsumerWidget {
       );
     }
     final planAsync = ref.watch(planSettingProvider(profile.uuid));
-    if (planAsync.isLoading) {
+    if (planAsync.isLoading && !planAsync.hasValue) {
       return const DashboardLoadingSkeleton();
     }
     final weights = weightsAsync.value ?? const [];

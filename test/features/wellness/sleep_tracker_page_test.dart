@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/app/router/responsive_app_shell.dart';
@@ -6,16 +7,22 @@ import 'package:body_intelligence_log/data/database/app_database.dart';
 import 'package:body_intelligence_log/data/database/database_provider.dart';
 import 'package:body_intelligence_log/data/repositories/daily_log_repository.dart';
 import 'package:body_intelligence_log/features/profile/providers/user_profile_provider.dart';
+import 'package:body_intelligence_log/features/notifications/services/bil_notification_service.dart';
+import 'package:body_intelligence_log/features/wellness/domain/sleep_schedule.dart';
 import 'package:body_intelligence_log/features/wellness/presentation/wellness_tools_pages.dart';
 import 'package:body_intelligence_log/features/daily_log/providers/daily_log_provider.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
+
   testWidgets('sleep starts unset and saves an explicit repository value', (
     tester,
   ) async {
@@ -263,31 +270,293 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+
+  for (final platform in [TargetPlatform.iOS, TargetPlatform.android]) {
+    testWidgets(
+      'legacy reminders stay quiet and can be disabled on $platform',
+      (tester) async {
+        final legacy = const SleepSchedule.defaults().copyWith(
+          enabled: true,
+          bedHour: 12,
+          bedMinute: 30,
+          wakeHour: 5,
+          goalMinutes: 360,
+          windDownMinutes: 15,
+        );
+        SharedPreferences.setMockInitialValues({
+          SleepScheduleStore.storageKey: jsonEncode(legacy.toJson()),
+        });
+        final database = AppDatabase.forTesting(NativeDatabase.memory());
+        addTearDown(database.close);
+        final repository = _ControlledDailyLogRepository(database);
+        final notifications = _ControlledSleepNotifications();
+        await _pumpSleep(
+          tester,
+          database,
+          repository,
+          notifications: notifications,
+          platform: platform,
+        );
+        await _showSleepSchedule(tester);
+        for (var tick = 0; tick < 3; tick++) {
+          await tester.pump(const Duration(seconds: 1));
+          expect(_sleepToggle(tester).value, isTrue);
+          expect(find.byKey(const Key('sleep-schedule-error')), findsNothing);
+        }
+        expect(notifications.permissionCalls, 0);
+        expect(notifications.scheduleCalls, 0);
+        expect(notifications.cancelCalls, 0);
+        expect(tester.binding.hasScheduledFrame, isFalse);
+
+        await tester.tap(find.byKey(const Key('sleep-schedule-toggle')));
+        await tester.pumpAndSettle();
+        expect(_sleepToggle(tester).value, isFalse);
+        expect(_sleepToggle(tester).onChanged, isNotNull);
+        expect(find.byKey(const Key('sleep-schedule-error')), findsNothing);
+        expect(notifications.permissionCalls, 0);
+        expect(notifications.scheduleCalls, 0);
+        expect(notifications.cancelCalls, 1);
+        expect(repository.writeCalls, 0);
+        final saved = await SleepScheduleStore().load();
+        expect(saved.toJson(), legacy.copyWith(enabled: false).toJson());
+
+        await tester.pumpWidget(const SizedBox.shrink());
+        await _pumpSleep(
+          tester,
+          database,
+          repository,
+          notifications: notifications,
+          platform: platform,
+        );
+        await _showSleepSchedule(tester);
+        expect(_sleepToggle(tester).value, isFalse);
+        expect(find.byKey(const Key('sleep-schedule-error')), findsNothing);
+        expect(notifications.cancelCalls, 1);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets('permission wait holds one stable switch and one save attempt', (
+    tester,
+  ) async {
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final repository = _ControlledDailyLogRepository(database);
+    final notifications = _ControlledSleepNotifications()
+      ..pendingPermission = Completer<bool>();
+    await _pumpSleep(
+      tester,
+      database,
+      repository,
+      notifications: notifications,
+      platform: TargetPlatform.iOS,
+    );
+    await _showSleepSchedule(tester);
+    final originalCard = tester.element(
+      find.byKey(const Key('sleep-schedule-card')),
+    );
+    final staleCallback = _sleepToggle(tester).onChanged!;
+    await tester.tap(find.byKey(const Key('sleep-schedule-toggle')));
+    staleCallback(true);
+    await tester.pump();
+    for (var tick = 0; tick < 5; tick++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(_sleepToggle(tester).value, isTrue);
+      expect(_sleepToggle(tester).onChanged, isNull);
+      expect(
+        tester.element(find.byKey(const Key('sleep-schedule-card'))),
+        same(originalCard),
+      );
+    }
+    expect(notifications.permissionCalls, 1);
+    expect(notifications.scheduleCalls, 0);
+    expect((await SleepScheduleStore().load()).enabled, isFalse);
+    notifications.pendingPermission!.complete(true);
+    await tester.pumpAndSettle();
+    expect(_sleepToggle(tester).value, isTrue);
+    expect(_sleepToggle(tester).onChanged, isNotNull);
+    expect((await SleepScheduleStore().load()).enabled, isTrue);
+    expect(notifications.permissionCalls, 1);
+    expect(notifications.scheduleCalls, 1);
+    expect(notifications.cancelCalls, 0);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'permission denial leaves reminders off without retrying itself',
+    (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      final notifications = _ControlledSleepNotifications()
+        ..permissionAllowed = false;
+      await _pumpSleep(
+        tester,
+        database,
+        _ControlledDailyLogRepository(database),
+        notifications: notifications,
+      );
+      await _showSleepSchedule(tester);
+      await tester.tap(find.byKey(const Key('sleep-schedule-toggle')));
+      await tester.pumpAndSettle();
+      expect(_sleepToggle(tester).value, isFalse);
+      expect(_sleepToggle(tester).onChanged, isNotNull);
+      expect(
+        find.textContaining('Notification permission is off.'),
+        findsOneWidget,
+      );
+      await tester.pump(const Duration(seconds: 2));
+      expect(notifications.permissionCalls, 1);
+      expect(notifications.scheduleCalls, 0);
+      expect(notifications.cancelCalls, 0);
+      expect((await SleepScheduleStore().load()).enabled, isFalse);
+    },
+  );
+
+  testWidgets(
+    'native scheduling failure cannot persist a false enabled state',
+    (tester) async {
+      final database = AppDatabase.forTesting(NativeDatabase.memory());
+      addTearDown(database.close);
+      final notifications = _ControlledSleepNotifications()
+        ..failSchedule = true;
+      await _pumpSleep(
+        tester,
+        database,
+        _ControlledDailyLogRepository(database),
+        notifications: notifications,
+      );
+      await _showSleepSchedule(tester);
+      await tester.tap(find.byKey(const Key('sleep-schedule-toggle')));
+      await tester.pumpAndSettle();
+      expect(_sleepToggle(tester).value, isFalse);
+      expect(_sleepToggle(tester).onChanged, isNotNull);
+      expect((await SleepScheduleStore().load()).enabled, isFalse);
+      expect(notifications.permissionCalls, 1);
+      expect(notifications.scheduleCalls, 1);
+      expect(notifications.cancelCalls, 1);
+      expect(
+        find.text('The notification preference could not be saved.'),
+        findsOneWidget,
+      );
+    },
+  );
+
+  testWidgets('legacy goal validation happens only on explicit enable', (
+    tester,
+  ) async {
+    final legacy = const SleepSchedule.defaults().copyWith(goalMinutes: 360);
+    SharedPreferences.setMockInitialValues({
+      SleepScheduleStore.storageKey: jsonEncode(legacy.toJson()),
+    });
+    final database = AppDatabase.forTesting(NativeDatabase.memory());
+    addTearDown(database.close);
+    final notifications = _ControlledSleepNotifications();
+    await _pumpSleep(
+      tester,
+      database,
+      _ControlledDailyLogRepository(database),
+      notifications: notifications,
+    );
+    await _showSleepSchedule(tester);
+    _sleepToggle(tester).onChanged!(false);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('sleep-schedule-error')), findsNothing);
+    await tester.tap(find.byKey(const Key('sleep-schedule-toggle')));
+    await tester.pumpAndSettle();
+    expect(_sleepToggle(tester).value, isFalse);
+    expect(
+      find.text('Choose an adult sleep goal from 7 to 12 hours.'),
+      findsOneWidget,
+    );
+    expect(notifications.permissionCalls, 0);
+    expect(notifications.scheduleCalls, 0);
+    expect(notifications.cancelCalls, 0);
+    expect((await SleepScheduleStore().load()).toJson(), legacy.toJson());
+  });
 }
 
 Future<void> _pumpSleep(
   WidgetTester tester,
   AppDatabase database,
-  DailyLogRepository repository,
-) => tester.pumpWidget(
+  DailyLogRepository repository, {
+  BilNotificationService? notifications,
+  TargetPlatform platform = TargetPlatform.android,
+}) => tester.pumpWidget(
   ProviderScope(
     overrides: [
       databaseProvider.overrideWithValue(database),
       dailyLogRepositoryProvider.overrideWithValue(repository),
+      if (notifications != null)
+        fastingNotificationServiceProvider.overrideWithValue(notifications),
     ],
-    child: const MaterialApp(
-      locale: Locale('en'),
+    child: MaterialApp(
+      theme: ThemeData(platform: platform),
+      locale: const Locale('en'),
       supportedLocales: AppLocalizations.supportedLocales,
-      localizationsDelegates: [
+      localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: SleepTrackerPage(),
+      home: const SleepTrackerPage(),
     ),
   ),
 );
+
+SwitchListTile _sleepToggle(WidgetTester tester) => tester
+    .widget<SwitchListTile>(find.byKey(const Key('sleep-schedule-toggle')));
+
+Future<void> _showSleepSchedule(WidgetTester tester) async {
+  await tester.pumpAndSettle();
+  await tester.scrollUntilVisible(
+    find.byKey(const Key('sleep-schedule-toggle')),
+    220,
+    scrollable: find
+        .descendant(
+          of: find.byKey(const Key('sleep-log-tab')),
+          matching: find.byType(Scrollable),
+        )
+        .first,
+  );
+  await tester.pumpAndSettle();
+}
+
+class _ControlledSleepNotifications extends BilNotificationService {
+  _ControlledSleepNotifications() : super(FlutterLocalNotificationsPlugin());
+
+  int permissionCalls = 0;
+  int scheduleCalls = 0;
+  int cancelCalls = 0;
+  bool permissionAllowed = true;
+  bool failSchedule = false;
+  Completer<bool>? pendingPermission;
+
+  @override
+  Future<bool> requestPermission() {
+    permissionCalls++;
+    return pendingPermission?.future ?? Future.value(permissionAllowed);
+  }
+
+  @override
+  Future<void> scheduleSleepSchedule({
+    required int bedHour,
+    required int bedMinute,
+    required int wakeHour,
+    required int wakeMinute,
+    required int windDownMinutes,
+    required String languageCode,
+  }) async {
+    scheduleCalls++;
+    if (failSchedule) throw StateError('native schedule failed');
+  }
+
+  @override
+  Future<void> cancelSleepSchedule() async {
+    cancelCalls++;
+  }
+}
 
 final class _ControlledDailyLogRepository extends DailyLogRepository {
   _ControlledDailyLogRepository(super.database);

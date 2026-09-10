@@ -31,6 +31,7 @@ import 'package:go_router/go_router.dart';
 part 'support/coach_page_accessibility_cases.dart';
 part 'support/coach_page_voice_cases.dart';
 part 'support/coach_page_request_cases.dart';
+part 'support/coach_page_scroll_cases.dart';
 
 class _HeldGateway implements LocalModelGateway {
   final replies = <Completer<LocalModelResult>>[];
@@ -239,6 +240,7 @@ void main() {
   registerCoachAccessibilityCases();
   registerCoachVoiceCases();
   registerCoachRequestCases();
+  registerCoachScrollCases();
   testWidgets(
     'successful reply must preserve coach state and unsent draft through valid credit refresh',
     (tester) async {

@@ -17,6 +17,7 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
   late final SleepScheduleStore sleepScheduleStore;
   bool scheduleLoading = true;
   bool scheduleSaving = false;
+  bool? pendingScheduleEnabled;
   String? scheduleError;
   bool saving = false;
   bool recordLoading = true;
@@ -528,46 +529,8 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
   }
 
   Future<void> _setSleepScheduleEnabled(bool enabled) async {
-    if (scheduleSaving) return;
-    if (enabled) {
-      try {
-        final allowed = await ref
-            .read(fastingNotificationServiceProvider)
-            .requestPermission();
-        if (!mounted) return;
-        if (!allowed) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                tr(
-                  'Notification permission is off. You can enable it in phone settings.',
-                  'إذن الإشعارات متوقف. يمكنك تفعيله من إعدادات الهاتف.',
-                ),
-              ),
-              action: SnackBarAction(
-                label: tr('Settings', 'الإعدادات'),
-                onPressed: () => ref
-                    .read(fastingNotificationServiceProvider)
-                    .openSystemSettings(),
-              ),
-            ),
-          );
-          return;
-        }
-      } on Object {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              tr(
-                'Notification permission is off. You can enable it in phone settings.',
-                'إذن الإشعارات متوقف. يمكنك تفعيله من إعدادات الهاتف.',
-              ),
-            ),
-          ),
-        );
-        return;
-      }
+    if (scheduleLoading || scheduleSaving || enabled == sleepSchedule.enabled) {
+      return;
     }
     await _saveSleepSchedule(sleepSchedule.copyWith(enabled: enabled));
   }
@@ -596,8 +559,10 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
   }
 
   Future<void> _saveSleepSchedule(SleepSchedule value) async {
-    if (scheduleSaving) return;
-    final issue = value.issue;
+    if (scheduleLoading || scheduleSaving) return;
+    // A legacy goal may need correction before enabling, never before opting
+    // out. Preserve the user's stored clock/goal values when cancelling.
+    final issue = value.enabled ? value.issue : null;
     if (issue != null) {
       setState(
         () => scheduleError = switch (issue) {
@@ -623,31 +588,72 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
       return;
     }
     final languageCode = Localizations.localeOf(context).languageCode;
-    setState(() {
-      scheduleError = null;
-      scheduleSaving = true;
-    });
-    try {
-      await sleepScheduleStore.save(value);
-      final notifications = ref.read(fastingNotificationServiceProvider);
-      if (value.enabled) {
+    final notifications = ref.read(fastingNotificationServiceProvider);
+    final previous = sleepSchedule;
+    Future<void> applyNotifications(SleepSchedule schedule) async {
+      if (schedule.enabled) {
         await notifications.scheduleSleepSchedule(
-          bedHour: value.bedHour,
-          bedMinute: value.bedMinute,
-          wakeHour: value.wakeHour,
-          wakeMinute: value.wakeMinute,
-          windDownMinutes: value.windDownMinutes,
+          bedHour: schedule.bedHour,
+          bedMinute: schedule.bedMinute,
+          wakeHour: schedule.wakeHour,
+          wakeMinute: schedule.wakeMinute,
+          windDownMinutes: schedule.windDownMinutes,
           languageCode: languageCode,
         );
       } else {
         await notifications.cancelSleepSchedule();
       }
+    }
+
+    setState(() {
+      scheduleError = null;
+      scheduleSaving = true;
+      // Acknowledge the gesture immediately; the disabled switch stays in
+      // this pending position until the single permission/save attempt ends.
+      pendingScheduleEnabled = value.enabled;
+    });
+    var notificationChangeAttempted = false;
+    try {
+      if (value.enabled && !previous.enabled) {
+        final allowed = await notifications.requestPermission();
+        if (!mounted) return;
+        if (!allowed) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                tr(
+                  'Notification permission is off. You can enable it in phone settings.',
+                  'إذن الإشعارات متوقف. يمكنك تفعيله من إعدادات الهاتف.',
+                ),
+              ),
+              action: SnackBarAction(
+                label: tr('Settings', 'الإعدادات'),
+                onPressed: notifications.openSystemSettings,
+              ),
+            ),
+          );
+          return;
+        }
+      }
+      notificationChangeAttempted = true;
+      await applyNotifications(value);
+      // Do not persist success before the native operation succeeds. A failed
+      // schedule/cancellation must not disagree with the switch after reopen.
+      await sleepScheduleStore.save(value);
       if (!mounted) return;
       setState(() {
         sleepSchedule = value;
         scheduleError = null;
       });
     } on Object {
+      if (notificationChangeAttempted) {
+        try {
+          await applyNotifications(previous);
+        } on Object {
+          // Keep the last persisted preference and report the failed update
+          // below, including when native rollback cannot complete.
+        }
+      }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -660,7 +666,12 @@ class _SleepTrackerPageState extends ConsumerState<SleepTrackerPage>
         ),
       );
     } finally {
-      if (mounted) setState(() => scheduleSaving = false);
+      if (mounted) {
+        setState(() {
+          pendingScheduleEnabled = null;
+          scheduleSaving = false;
+        });
+      }
     }
   }
 

@@ -111,4 +111,52 @@ void main() {
     expect(shortWindow.scheduledWindowMinutes, 7 * 60);
     expect(shortWindow.issue, SleepScheduleIssue.goalExceedsWindow);
   });
+
+  test('legacy reminders can be disabled without rewriting the goal', () async {
+    const encoded =
+        '{"enabled":true,"bedHour":12,"bedMinute":30,'
+        '"wakeHour":5,"wakeMinute":0,"goalMinutes":360,'
+        '"windDownMinutes":15}';
+    SharedPreferences.setMockInitialValues({
+      SleepScheduleStore.storageKey: encoded,
+    });
+    final store = SleepScheduleStore();
+    final legacy = await store.load();
+    await store.save(legacy.copyWith(enabled: false));
+    final saved = await store.load();
+    expect(saved.enabled, isFalse);
+    expect(saved.goalMinutes, 360);
+    expect(saved.bedHour, 12);
+    expect(saved.bedMinute, 30);
+    expect(saved.wakeHour, 5);
+    expect(saved.windDownMinutes, 15);
+    expect(saved.issue, SleepScheduleIssue.invalidGoal);
+    await expectLater(
+      store.save(saved.copyWith(enabled: true)),
+      throwsArgumentError,
+    );
+    expect((await store.load()).enabled, isFalse);
+  });
+
+  test(
+    'opting out does not require correcting an empty legacy window',
+    () async {
+      final disabled = const SleepSchedule.defaults().copyWith(
+        bedHour: 7,
+        bedMinute: 0,
+      );
+      final store = SleepScheduleStore();
+      await store.save(disabled);
+      expect((await store.load()).enabled, isFalse);
+      expect((await store.load()).issue, SleepScheduleIssue.emptyWindow);
+      await expectLater(
+        store.save(disabled.copyWith(enabled: true)),
+        throwsArgumentError,
+      );
+      await expectLater(
+        store.save(disabled.copyWith(bedHour: 25)),
+        throwsArgumentError,
+      );
+    },
+  );
 }

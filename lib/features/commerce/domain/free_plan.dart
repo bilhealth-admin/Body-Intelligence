@@ -17,6 +17,8 @@ final class FreePlan {
     // profile, weight, and hydration recoverable across reinstalls is not a
     // paid insight and must not disappear when a user is on Free.
     CommerceEntitlement.cloudSync,
+    // Community remains authenticated and server-authorized, but never paid.
+    CommerceEntitlement.communityFriends,
   };
 
   static SubscriptionState createState() => SubscriptionState(
