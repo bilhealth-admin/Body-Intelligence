@@ -143,6 +143,30 @@ class PortableReleaseSchedulingTest(unittest.TestCase):
         self.assertIn("test/premium_splash_experience_test.dart", policy.MIXED_NAMES)
         self.assertIn(runner.PERFORMANCE_BUDGET_TEST, selected)
 
+    def test_code_only_real_policy_keeps_every_invocation_serial(self):
+        code, calls, output = self.run_main([0, 0], ["--code-only"])
+        self.assertEqual(code, 0)
+        self.assertEqual(len(calls), 2)
+        for call in calls:
+            command = call.args[0]
+            self.assertEqual(command.count("--concurrency"), 1)
+            self.assertEqual(command[command.index("--concurrency") + 1], "1")
+            self.assertFalse(command[0].endswith(".bat"))
+            self.assertTrue(command[1].endswith("flutter_tools.snapshot"))
+            self.assertIn("--dart-define=BIL_CAPTURE_COMMUNITY_REVIEW=false", command)
+            self.assertIn("--dart-define=BIL_CAPTURE_HEALTH_REVIEW=false", command)
+        self.assertEqual(calls[0].args[0][-1], runner.PERFORMANCE_BUDGET_TEST)
+        self.assertEqual(calls[1].args[0][-2:], ["test/a_test.dart", "test/z_test.dart"])
+        self.assertTrue(output.endswith("PORTABLE_RELEASE_EXECUTED_TEST_FILES=3\n"))
+
+    def test_code_only_real_policy_preserves_performance_failure(self):
+        code, calls, output = self.run_main([7], ["--code-only"])
+        self.assertEqual(code, 7)
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(calls[0].args[0][-1], runner.PERFORMANCE_BUDGET_TEST)
+        self.assertNotIn("PORTABLE_RELEASE_PHASE=remaining_portable", output)
+        self.assertTrue(output.endswith("PORTABLE_RELEASE_EXECUTED_TEST_FILES=1\n"))
+
     def test_code_only_mixed_files_are_filtered_and_never_use_batch_shell(self):
         policy = SimpleNamespace(
             discover=mock.Mock(), NOT_RUN={"test/z_test.dart": "image data"},

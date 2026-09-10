@@ -54,7 +54,21 @@ void main() {
     );
     expect(
       source,
-      contains('[*command, "--concurrency", "1", *performance_tests]'),
+      contains(
+        '[*command, *(["--concurrency", "1"] if policy is None else []), '
+        '*performance_tests]',
+      ),
+    );
+    expect(
+      source,
+      contains('*policy.flutter_test_command(resolve_flutter_executable())'),
+    );
+    expect(
+      File('tool/prebuild/run_code_tests.py').readAsStringSync(),
+      contains("'test', '--no-pub', '--concurrency', '1'"),
+      reason:
+          'Code-only mode inherits the same serial worker limit from the '
+          'shared shell-free command; the default mode adds it explicitly.',
     );
     expect(
       source,
