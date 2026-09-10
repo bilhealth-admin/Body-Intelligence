@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'bil_semantic_icons.dart';
+import '../../shared/widgets/bil_native_symbols.dart';
 
 /// Navigation uses the selected-state palette, while its glyphs follow the
 /// platform. Functional entry tiles use [BilSemanticIcons] instead.
@@ -13,6 +14,44 @@ enum BilNavigationDestination {
   insights,
   more,
   profile,
+}
+
+class BilNativeNavigationGlyph extends StatelessWidget {
+  const BilNativeNavigationGlyph({
+    required this.destination,
+    required this.selected,
+    this.color,
+    this.size = 24,
+    super.key,
+  });
+  final BilNavigationDestination destination;
+  final bool selected;
+  final Color? color;
+  final double size;
+  @override
+  Widget build(BuildContext context) {
+    final pair = BilNavigationIcons.forDestination(
+      destination,
+      Theme.of(context).platform,
+    );
+    return BilNativeSymbolGlyph(
+      symbol: switch (destination) {
+        BilNavigationDestination.today => BilSettingsSymbol.dashboard,
+        BilNavigationDestination.diary => BilSettingsSymbol.diary,
+        BilNavigationDestination.discover => BilSettingsSymbol.discover,
+        BilNavigationDestination.progress => BilSettingsSymbol.progress,
+        BilNavigationDestination.insights => BilSettingsSymbol.aiCoach,
+        BilNavigationDestination.more => BilSettingsSymbol.more,
+        BilNavigationDestination.profile => BilSettingsSymbol.profile,
+      },
+      fallback: selected ? pair.selected : pair.icon,
+      color:
+          color ??
+          IconTheme.of(context).color ??
+          Theme.of(context).colorScheme.onSurface,
+      size: size,
+    );
+  }
 }
 
 abstract final class BilNavigationIcons {

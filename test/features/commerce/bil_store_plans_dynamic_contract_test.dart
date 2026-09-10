@@ -3,11 +3,81 @@ import 'dart:io';
 
 import 'package:body_intelligence_log/features/commerce/domain/store_offer_metadata.dart';
 import 'package:body_intelligence_log/features/commerce/presentation/bil_store_plans_page.dart';
+import 'package:body_intelligence_log/features/commerce/presentation/bil_store_copy.dart';
 import 'package:body_intelligence_log/features/commerce/services/verified_store_purchase_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets(
+    'unconfirmed receipt shows calm recovery guidance, not loss of access',
+    (tester) async {
+      final store = _CancellationReadyStore();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BilStorePlansPage(
+            store: store,
+            catalog: _RecordingCatalog(const [_monthlyOffer]),
+            productIds: const {'premium.monthly'},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      store.reportFeedback(VerifiedStoreState.failed, 'verification_failed');
+      await tester.pumpAndSettle();
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_verification_unavailable')),
+        findsOneWidget,
+      );
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_error')),
+        findsNothing,
+      );
+      store.reportFeedback(
+        VerifiedStoreState.purchasePending,
+        'purchase_pending',
+      );
+      await tester.pump();
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_awaiting_approval')),
+        findsOneWidget,
+      );
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_in_progress')),
+        findsNothing,
+      );
+      store.reportCancelled();
+      await tester.pumpAndSettle();
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_awaiting_approval')),
+        findsNothing,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+      store.dispose();
+    },
+  );
+
+  testWidgets(
+    'thrown purchase request resolves localized feedback, never raw code',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BilStorePlansPage(
+            catalog: _ThrowingCatalog(),
+            productIds: const {'premium.monthly'},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('store-purchase-cta')));
+      await tester.pumpAndSettle();
+      expect(find.text('purchase_failed'), findsNothing);
+      expect(
+        find.text(BilStoreCopy.text('en', 'purchase_error')),
+        findsOneWidget,
+      );
+    },
+  );
   testWidgets('plan route is fail-closed when owner store IDs are absent', (
     tester,
   ) async {
@@ -332,6 +402,12 @@ final class _DeferredPurchaseCatalog implements BilStoreCatalogGateway {
 }
 
 final class _CancellationReadyStore extends VerifiedStorePurchaseService {
+  void reportFeedback(VerifiedStoreState nextState, String code) {
+    state = nextState;
+    messageCode = code;
+    notifyListeners();
+  }
+
   @override
   bool get canStartPurchase => true;
 
@@ -366,4 +442,13 @@ final class _RecordingCatalog implements BilStoreCatalogGateway {
 
   @override
   Future<void> restorePurchases() async {}
+}
+
+final class _ThrowingCatalog extends _RecordingCatalog {
+  _ThrowingCatalog() : super(const [_monthlyOffer]);
+
+  @override
+  Future<void> requestPurchase(BilStoreOfferMetadata offer) async {
+    throw StateError('native sheet unavailable');
+  }
 }

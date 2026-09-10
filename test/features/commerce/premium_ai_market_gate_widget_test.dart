@@ -264,33 +264,21 @@ void main() {
     },
   );
 
-  testWidgets('subscription lookup error never falls through to purchase UI', (
+  testWidgets('verified Boost does not depend on a subscription lookup', (
     tester,
   ) async {
-    var subscriptionLookupFails = true;
     var subscriptionLookupAttempts = 0;
-    final activeSubscription = SubscriptionState(
-      plan: CommercePlan.premiumAiCoach,
-      entitlements: const {},
-      authority: EntitlementAuthority.verifiedServer,
-      currentPeriodEndsAt: DateTime.now().toUtc().add(const Duration(days: 30)),
-      isPurchasable: true,
-      canRestorePurchases: true,
-    );
     await tester.pumpWidget(
       ProviderScope(
         retry: (_, _) => null,
         overrides: [
           verifiedSubscriptionStateProvider.overrideWith((_) async {
             subscriptionLookupAttempts += 1;
-            if (subscriptionLookupFails) {
-              throw StateError('subscription unavailable');
-            }
-            return activeSubscription;
+            throw StateError('subscription unavailable');
           }),
-          storefrontTargetPlanProvider.overrideWith(
-            (_) async => CommercePlan.premiumAiCoach,
-          ),
+          storefrontTargetPlanProvider.overrideWith((_) async {
+            throw StateError('storefront unavailable');
+          }),
           aiCoachCreditAccessProvider.overrideWith((_) async => true),
         ],
         child: const MaterialApp(
@@ -311,26 +299,9 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
-    await tester.pump();
-
-    expect(
-      find.byKey(const ValueKey('premium-route-access-unavailable')),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey('premium-route-glass-blur')),
-      findsNothing,
-    );
-    expect(find.text('Continue'), findsNothing);
-    expect(find.text('Get AI Boost'), findsNothing);
-    expect(subscriptionLookupAttempts, 1);
-
-    subscriptionLookupFails = false;
-    await tester.tap(find.byKey(const ValueKey('premium-route-access-retry')));
     await tester.pumpAndSettle();
 
-    expect(subscriptionLookupAttempts, 2);
+    expect(subscriptionLookupAttempts, 0);
     expect(
       find.byKey(const ValueKey('subscription-error-protected-content')),
       findsOneWidget,
@@ -339,16 +310,22 @@ void main() {
       find.byKey(const ValueKey('premium-route-access-unavailable')),
       findsNothing,
     );
+    expect(
+      find.byKey(const ValueKey('premium-route-glass-blur')),
+      findsNothing,
+    );
+    expect(find.text('Get AI Boost'), findsNothing);
   });
 
-  testWidgets('no AI subscription offers AI subscription and AI Boost', (
+  testWidgets('no tokens offers Boost without requiring any subscription', (
     tester,
   ) async {
     await pumpGate(tester, storefrontPlan: CommercePlan.premiumAiCoach);
 
     expect(find.text('Get AI Boost'), findsOneWidget);
-    expect(find.text('Continue'), findsOneWidget);
-    expect(find.text('BIL PREMIUM AI COACH'), findsOneWidget);
+    expect(find.text('Continue'), findsNothing);
+    expect(find.text('BIL AI BOOST'), findsOneWidget);
+    expect(find.text('BIL PREMIUM AI COACH'), findsNothing);
     expect(find.text('Start 7-day free trial'), findsNothing);
     expect(find.textContaining('non-expiring'), findsWidgets);
   });
@@ -400,7 +377,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('premium-route-back')), findsOneWidget);
-    expect(find.text('Continue'), findsOneWidget);
+    expect(find.text('Get AI Boost'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('premium-route-back')));
     await tester.pumpAndSettle();
 
@@ -408,13 +385,13 @@ void main() {
     expect(find.text('Continue'), findsNothing);
   });
 
-  testWidgets('token storefront still routes both exact AI choices', (
+  testWidgets('token storefront offers Boost at an exhausted balance', (
     tester,
   ) async {
     await pumpGate(tester, storefrontPlan: CommercePlan.premium);
 
     expect(find.text('Get AI Boost'), findsOneWidget);
-    expect(find.text('Continue'), findsOneWidget);
+    expect(find.text('Continue'), findsNothing);
     expect(find.text('Start 7-day free trial'), findsNothing);
     expect(find.text('Global multilingual voice'), findsOneWidget);
   });
@@ -517,7 +494,7 @@ void main() {
           .where(
             (widget) => (widget.data ?? '').toLowerCase().contains('premium'),
           );
-      expect(labels, hasLength(1));
+      expect(labels, hasLength(feature == PremiumGateFeature.aiCoach ? 0 : 1));
     }
 
     await expectSinglePremiumLabel(
@@ -609,7 +586,8 @@ void main() {
     );
     expect(find.text('Get AI Boost'), findsOneWidget);
     expect(find.text('Premium AI Coach'), findsNothing);
-    expect(find.textContaining('Current'), findsOneWidget);
+    expect(find.text('BIL AI BOOST'), findsOneWidget);
+    expect(find.textContaining('Current'), findsNothing);
   });
 
   testWidgets('server AI grant opens coach in profitable storefront', (

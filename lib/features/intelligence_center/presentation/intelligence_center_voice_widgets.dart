@@ -67,19 +67,26 @@ class _LiveVoiceTranscript extends StatelessWidget {
 }
 
 class _CoachReplyFailure extends StatelessWidget {
-  const _CoachReplyFailure({required this.onDismiss, required this.onRetry});
+  const _CoachReplyFailure({
+    required this.onDismiss,
+    required this.onRetry,
+    this.labelOverride,
+  });
 
   final VoidCallback onDismiss;
   final VoidCallback? onRetry;
+  final String? labelOverride;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final label = intelligenceText(
-      context,
-      'The reply did not complete. Try again.',
-      'لم يكتمل الرد. حاول مرة أخرى.',
-    );
+    final label =
+        labelOverride ??
+        intelligenceText(
+          context,
+          'The reply did not complete. Try again.',
+          'لم يكتمل الرد. حاول مرة أخرى.',
+        );
     return Semantics(
       liveRegion: true,
       label: label,

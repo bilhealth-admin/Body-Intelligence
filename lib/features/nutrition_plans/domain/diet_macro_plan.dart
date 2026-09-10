@@ -4,9 +4,25 @@ import '../../../data/repositories/nutrition_goal_schedule_repository.dart';
 
 enum DietFatLevel { lighter, medium, richer }
 
-/// The macro the user most recently chose. The allocator preserves this value
-/// and rebalances the other two macros inside the fixed calorie target.
+/// A macro that can be selected explicitly or used to balance fixed calories.
 enum DietMacroComponent { carbs, protein, fat }
+
+/// Recency belongs to distinct fields, not individual keyboard events.
+/// Preserve the current field and the most recently edited *other* field;
+/// the untouched (or oldest) field remains available for the calorie balance.
+class DietMacroEditHistory {
+  final _recent = <DietMacroComponent>[];
+
+  Set<DietMacroComponent> lockedFor(DietMacroComponent edited) {
+    final other = _recent.where((component) => component != edited);
+    return {edited, if (other.isNotEmpty) other.first};
+  }
+
+  void accept(DietMacroComponent edited) {
+    _recent.remove(edited);
+    _recent.insert(0, edited);
+  }
+}
 
 /// User-facing diet-plan grams are intentionally shown as whole numbers.
 ///

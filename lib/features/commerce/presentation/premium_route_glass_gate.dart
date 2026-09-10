@@ -64,10 +64,89 @@ class PremiumRouteGlassGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final subscription = ref.watch(verifiedSubscriptionStateProvider);
-    final storefrontPlan = ref.watch(storefrontTargetPlanProvider).value;
-    final state = subscription.asData?.value;
+    if (feature != PremiumGateFeature.aiCoach) {
+      return _PremiumRouteGateContents(feature: feature, child: child);
+    }
+    return _RetainedAiCoachSurface(
+      // Never retain a previous member's screen across an account change.
+      key: ValueKey(ref.watch(verifiedEntitlementOwnerProvider).asData?.value),
+      child: child,
+    );
+  }
+}
+
+class _RetainedAiCoachSurface extends ConsumerStatefulWidget {
+  const _RetainedAiCoachSurface({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  ConsumerState<_RetainedAiCoachSurface> createState() =>
+      _RetainedAiCoachSurfaceState();
+}
+
+class _RetainedAiCoachSurfaceState
+    extends ConsumerState<_RetainedAiCoachSurface> {
+  bool _contentMounted = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final credits = ref.watch(aiCoachCreditAccessProvider);
+    final unavailable = credits.hasError;
+    // A refresh retains the last verified result, not a locally inferred
+    // entitlement. Every request is still authorized by the server. Errors,
+    // an exhausted balance and a new account all fail closed.
+    final allowed = !unavailable && credits.asData?.value == true;
+    if (allowed || unavailable || (!unavailable && !credits.isLoading)) {
+      _contentMounted = true;
+    }
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Keep the same element position even when the gate is shown. Credit
+        // settlement must not discard a draft, scroll position or transcript.
+        if (_contentMounted)
+          KeyedSubtree(
+            key: const ValueKey('ai-coach-retained-content'),
+            child: ExcludeFocus(
+              excluding: !allowed,
+              child: AbsorbPointer(
+                absorbing: !allowed,
+                child: ExcludeSemantics(
+                  excluding: !allowed,
+                  child: widget.child,
+                ),
+              ),
+            ),
+          ),
+        if (!allowed)
+          const _PremiumRouteGateContents(
+            feature: PremiumGateFeature.aiCoach,
+            child: SizedBox.shrink(),
+          ),
+      ],
+    );
+  }
+}
+
+class _PremiumRouteGateContents extends ConsumerWidget {
+  const _PremiumRouteGateContents({required this.feature, required this.child});
+
+  final PremiumGateFeature feature;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final isAiCoach = feature == PremiumGateFeature.aiCoach;
+    // Boost belongs to the account, not its membership tier. A subscription
+    // lookup (including its loading/error state) must not block verified credit.
+    final subscription = isAiCoach
+        ? const AsyncValue<SubscriptionState?>.data(null)
+        : ref.watch(verifiedSubscriptionStateProvider);
+    final storefrontPlan = isAiCoach
+        ? null
+        : ref.watch(storefrontTargetPlanProvider).value;
+    final state = subscription.asData?.value;
     final isNutritionPrograms = feature == PremiumGateFeature.nutritionPrograms;
     final isCommunity = feature == PremiumGateFeature.community;
     final adminAccess = isCommunity
@@ -77,7 +156,6 @@ class PremiumRouteGlassGate extends ConsumerWidget {
         ? ref.watch(aiCoachCreditAccessProvider)
         : const AsyncValue<bool>.data(false);
     final creditAccess = creditSnapshot.asData?.value ?? false;
-    final activeAiSubscription = hasVerifiedAiSubscription(state);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     if (subscription.isLoading) {
       return _PremiumRouteAccessChecking(
@@ -104,8 +182,11 @@ class PremiumRouteGlassGate extends ConsumerWidget {
         isDark: isDark,
         returnToDashboard: isAiCoach,
         onRetry: () {
-          ref.invalidate(verifiedSubscriptionStateProvider);
-          if (isAiCoach) ref.invalidate(aiCoachCreditAccessProvider);
+          if (isAiCoach) {
+            ref.invalidate(aiCoachCreditAccessProvider);
+          } else {
+            ref.invalidate(verifiedSubscriptionStateProvider);
+          }
           if (isCommunity) ref.invalidate(aiCoachAdminAccessProvider);
         },
         child: child,
@@ -137,9 +218,7 @@ class PremiumRouteGlassGate extends ConsumerWidget {
     // billing storefront. Unknown storefronts fail closed to Premium; an
     // underpriced AI-inclusive membership is never advertised by locale/IP.
     final tier = isAiCoach
-        ? activeAiSubscription
-              ? 'BIL PREMIUM AI COACH · ${context.strings.text('Current')}'
-              : 'BIL PREMIUM AI COACH'
+        ? 'BIL AI BOOST'
         : storefrontPlan == CommercePlan.premiumAiCoach
         ? 'BIL PREMIUM AI COACH'
         : 'BIL PREMIUM';
@@ -191,27 +270,19 @@ class PremiumRouteGlassGate extends ConsumerWidget {
                     body: content.body,
                     benefits: content.benefits,
                     action: isAiCoach
-                        ? activeAiSubscription
-                              ? context.strings.text('Get AI Boost')
-                              : BilStoreCopy.text(storeLocale, 'continue')
-                        : BilStoreCopy.text(storeLocale, 'plans'),
-                    secondaryAction: isAiCoach && !activeAiSubscription
                         ? context.strings.text('Get AI Boost')
-                        : null,
+                        : BilStoreCopy.text(storeLocale, 'plans'),
+                    secondaryAction: null,
                     loading: loading,
                     compact: compact,
                     isDark: isDark,
                     showCoach: isAiCoach,
                     onPressed: () => context.push(
                       isAiCoach
-                          ? activeAiSubscription
-                                ? '/plans?focus=boost'
-                                : '/plans?focus=ai-coach'
+                          ? '/plans?focus=boost'
                           : '/plans?focus=subscription',
                     ),
-                    onSecondaryPressed: isAiCoach && !activeAiSubscription
-                        ? () => context.push('/plans?focus=boost')
-                        : null,
+                    onSecondaryPressed: null,
                   ),
                 ),
               );

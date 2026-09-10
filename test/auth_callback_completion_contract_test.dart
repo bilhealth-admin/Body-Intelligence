@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/dart_library_source.dart';
+
 void main() {
   test(
     'native OAuth callback waits for a Supabase session then uses startup',
     () {
-      final router = File('lib/app/router/app_router.dart').readAsStringSync();
+      final router = readDartLibrarySource('lib/app/router/app_router.dart');
       final page = File(
         'lib/features/auth/auth_callback_page.dart',
       ).readAsStringSync();

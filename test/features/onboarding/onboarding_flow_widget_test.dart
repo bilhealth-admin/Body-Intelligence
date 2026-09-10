@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:body_intelligence_log/app/localization/app_localizations.dart';
 import 'package:body_intelligence_log/core/units/measurement_units.dart';
 import 'package:body_intelligence_log/data/database/app_database.dart';
@@ -146,6 +148,97 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 80));
   }
+
+  testWidgets('one kilogram option is visible and saved below 100 kilograms', (
+    tester,
+  ) async {
+    await pump(tester, valid(step: 'pace'));
+    final choice = find.text('1 kg / 7d');
+    await tester.ensureVisible(choice);
+    await tester.tap(choice);
+    await tester.tap(find.byKey(const Key('onboarding-next')));
+    await tester.pumpAndSettle();
+    expect((await drafts.load())!.weeklyPaceKg, 1);
+    expect((await drafts.load())!.stepId, 'waist');
+  });
+
+  testWidgets(
+    'Health review keeps the button mounted and opens real guidance',
+    (tester) async {
+      final health = _ReviewHealthGateway();
+      await pump(
+        tester,
+        valid(
+          step: 'integrations',
+        ).copyWith(healthPermission: OnboardingPermissionStatus.granted),
+        health: health,
+      );
+      final card = find.byKey(const Key('onboarding-health-permission'));
+      final button = find.descendant(
+        of: card,
+        matching: find.byType(OutlinedButton),
+      );
+      expect(
+        find.descendant(of: card, matching: find.text('Allowed')),
+        findsNothing,
+      );
+      await tester.ensureVisible(button);
+      await tester.pumpAndSettle();
+      final height = tester.getSize(card).height;
+      await tester.tap(button);
+      await tester.pump();
+      expect(button, findsOneWidget);
+      expect(tester.widget<OutlinedButton>(button).onPressed, isNull);
+      expect(tester.getSize(card).height, height);
+      health.pending.complete(
+        const ConnectedHealthSnapshot.unavailable().copyWith(
+          status: ConnectedHealthStatus.authorizationRequested,
+          platformSource: 'Apple Health',
+          failureCode: 'health_permissions_review_required',
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('apple-health-permission-review')),
+        findsOneWidget,
+      );
+      expect(health.requests, 1);
+      expect(
+        (await drafts.load())!.healthPermission,
+        OnboardingPermissionStatus.requested,
+      );
+      await tester.tap(find.byKey(const Key('apple-health-open-settings')));
+      await tester.pumpAndSettle();
+      expect(health.settingsOpened, 1);
+      expect(
+        find.byKey(const Key('apple-health-permission-review')),
+        findsNothing,
+      );
+      expect(tester.takeException(), isNull);
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+  );
+
+  testWidgets(
+    'one kilogram never advances with an unsupported calorie target',
+    (tester) async {
+      await pump(
+        tester,
+        valid(step: 'pace').copyWith(
+          currentWeightKg: 55,
+          targetWeightKg: 50,
+          activity: 'sedentary',
+        ),
+      );
+      final choice = find.text('1 kg / 7d');
+      await tester.ensureVisible(choice);
+      await tester.tap(choice);
+      await tester.tap(find.byKey(const Key('onboarding-next')));
+      await tester.pumpAndSettle();
+      expect(find.text('BIL could not calculate a safe plan.'), findsOneWidget);
+      expect((await drafts.load())!.stepId, 'pace');
+    },
+  );
 
   testWidgets(
     'waist and neck are separate optional pages and female receives hip page',
@@ -615,4 +708,30 @@ final class _HealthGateway implements ConnectedHealthGateway {
 
   @override
   Future<ConnectedHealthSnapshot> synchronize() => load();
+}
+
+final class _ReviewHealthGateway implements ConnectedHealthGateway {
+  final pending = Completer<ConnectedHealthSnapshot>();
+  int requests = 0;
+  int settingsOpened = 0;
+  @override
+  Future<ConnectedHealthSnapshot> requestPermissions() {
+    requests++;
+    return pending.future;
+  }
+
+  @override
+  Future<void> openSystemSettings() async {
+    settingsOpened++;
+  }
+
+  @override
+  Future<ConnectedHealthSnapshot> load() async =>
+      const ConnectedHealthSnapshot.unavailable();
+  @override
+  Future<ConnectedHealthSnapshot> synchronize() => load();
+  @override
+  Future<ConnectedHealthSnapshot> requestWeightWritePermission() => load();
+  @override
+  Future<ConnectedHealthSnapshot> revokePermissions() => load();
 }

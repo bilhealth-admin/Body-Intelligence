@@ -18,6 +18,11 @@
   "dependencies": {
     "jose": "6.2.10"
   },
+  "overrides": {
+    "miniflare": {
+      "sharp": "0.35.4"
+    }
+  },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "1.0.0",
     "@cloudflare/workers-types": "5.20260823.1",

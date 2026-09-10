@@ -143,7 +143,7 @@ void main() {
       'ur': 'values-ur',
       'fa': 'values-fa',
       'hi': 'values-hi',
-      'id': 'values-id',
+      'id': 'values-in',
       'ms': 'values-ms',
       'ja': 'values-ja',
       'ko': 'values-ko',

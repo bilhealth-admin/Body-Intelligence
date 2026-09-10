@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/read_push_dispatcher.dart';
 
 const _migrationPath =
     'supabase/migrations/20260831192412_admin_notification_controls.sql';
@@ -163,7 +164,7 @@ void main() {
       'supabase/functions/community-push-dispatch/index.ts',
       'supabase/functions/community_push_dispatch.ts',
     ]) {
-      final source = File(path).readAsStringSync();
+      final source = readPushDispatcherImplementation(path);
       final safeSetStart = source.indexOf('const safeVisibleCopyKeys');
       final safeSetEnd = source.indexOf(']);', safeSetStart);
       final safeSet = source.substring(safeSetStart, safeSetEnd);

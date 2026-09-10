@@ -62,7 +62,9 @@ class _CommunityPostModerationPageState
     await refreshed;
   }
 
-  void _reload() => setState(() => _queue = _load());
+  void _reload() => setState(() {
+    _queue = _load();
+  });
 
   Future<bool> _confirmPostDecision(
     CommunityPostModerationDecision decision,

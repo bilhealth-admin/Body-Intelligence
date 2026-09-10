@@ -121,13 +121,21 @@ final class BleGattMeasurementParser {
   }) {
     final packet = row['packet'];
     if (packet is! String) return const <Map<String, Object?>>[];
-    final bytes = base64Decode(packet);
+    final Uint8List bytes;
+    try {
+      bytes = base64Decode(packet);
+    } on FormatException {
+      return const <Map<String, Object?>>[];
+    }
     final characteristic = _shortUuid(row['characteristic'] as String? ?? '');
     final peripheralId = row['peripheralId'] as String? ?? 'unknown';
     final observedAt =
         DateTime.tryParse(row['receivedAt'] as String? ?? '')?.toUtc() ??
         asOf.toUtc();
-    final samplePrefix = '$peripheralId:$characteristic:${base64Encode(bytes)}';
+    // Identical measurements at different times are distinct observations.
+    // Deduplicate callbacks within one read, not equal pulses across all reads.
+    final samplePrefix =
+        '$peripheralId:$characteristic:${observedAt.microsecondsSinceEpoch}:${base64Encode(bytes)}';
 
     return switch (characteristic) {
       '2A9D' => _weight(bytes, samplePrefix, observedAt),

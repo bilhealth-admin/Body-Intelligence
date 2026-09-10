@@ -7,17 +7,61 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../app/localization/app_localizations.dart';
 import '../../app/environment/app_environment.dart';
 import '../../app/theme/bil_semantic_icons.dart';
+import '../../shared/widgets/bil_native_settings_icon.dart';
 import '../commerce/domain/commerce_plan.dart';
 import '../commerce/providers/commerce_providers.dart';
+import '../profile/providers/profile_auth_identity_provider.dart';
 import 'reference_settings_copy.dart';
 
-/// Exact settings information architecture from the supplied reference.
-class ReferenceSettingsHomePage extends ConsumerWidget {
+/// Explicitly local sign-out: never revoke the member's other devices.
+final settingsSignOutProvider = Provider<Future<void> Function(String)>((ref) {
+  return (expectedOwnerId) async {
+    if (!AppEnvironment.supabaseRuntimeReady) {
+      throw StateError('Cloud session is not ready');
+    }
+    await signOutSettingsSession(
+      Supabase.instance.client.auth,
+      expectedOwnerId,
+    );
+  };
+});
+
+Future<void> signOutSettingsSession(
+  GoTrueClient auth,
+  String expectedOwnerId,
+) async {
+  if (auth.currentUser?.id != expectedOwnerId) {
+    throw StateError('The active account changed');
+  }
+  try {
+    await auth.signOut(scope: SignOutScope.local);
+  } catch (_) {
+    // GoTrue clears the local session before contacting the revocation API.
+    // A network error must not claim that a cleared device session is signed in.
+    if (auth.currentUser != null) rethrow;
+  }
+  if (auth.currentUser != null) throw StateError('The active account changed');
+}
+
+/// Grouped settings with a native-symbol pilot. iOS visual approval is separate.
+class ReferenceSettingsHomePage extends ConsumerStatefulWidget {
   const ReferenceSettingsHomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ReferenceSettingsHomePage> createState() =>
+      _ReferenceSettingsHomePageState();
+}
+
+class _ReferenceSettingsHomePageState
+    extends ConsumerState<ReferenceSettingsHomePage> {
+  bool _signingOut = false;
+
+  @override
+  Widget build(BuildContext context) {
     final copy = ReferenceSettingsCopy.of(context);
+    final identity = ref.watch(profileAuthIdentityProvider);
+    final ownerId = identity.asData?.value.ownerId;
+    final sessionReady = identity.hasValue && !identity.hasError;
     final showPremiumUpsell = ref
         .watch(verifiedSubscriptionStateProvider)
         .when(
@@ -94,25 +138,44 @@ class ReferenceSettingsHomePage extends ConsumerWidget {
               backgroundColor: Colors.transparent,
               children: [
                 CupertinoListTile(
+                  key: Key(
+                    ownerId == null ? 'settings-sign-in' : 'settings-sign-out',
+                  ),
                   padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 14, 8),
                   leadingSize: 24,
                   leadingToTitle: 12,
-                  leading: const Icon(
-                    CupertinoIcons.square_arrow_right,
-                    color: CupertinoColors.systemRed,
-                    size: 22,
-                  ),
+                  leading: _signingOut || !sessionReady
+                      ? const CupertinoActivityIndicator()
+                      : Icon(
+                          ownerId == null
+                              ? CupertinoIcons.person_crop_circle
+                              : CupertinoIcons.square_arrow_right,
+                          color: ownerId == null
+                              ? CupertinoColors.activeBlue
+                              : CupertinoColors.systemRed,
+                          size: 22,
+                        ),
                   title: Padding(
                     padding: const EdgeInsetsDirectional.only(start: 12),
                     child: Text(
-                      copy('Logout'),
-                      style: const TextStyle(
-                        color: CupertinoColors.systemRed,
+                      ownerId == null
+                          ? context.strings.text('Sign in')
+                          : copy('Logout'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: ownerId == null
+                            ? CupertinoColors.activeBlue
+                            : CupertinoColors.systemRed,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  onTap: () => _logout(context),
+                  onTap: !sessionReady || _signingOut
+                      ? null
+                      : ownerId == null
+                      ? () => context.push('/login')
+                      : () => _logout(ownerId),
                 ),
               ],
             ),
@@ -153,30 +216,28 @@ class ReferenceSettingsHomePage extends ConsumerWidget {
     );
   }
 
-  Future<void> _logout(BuildContext context) async {
-    if (AppEnvironment.cloudConfigured) {
-      try {
-        final supabase = Supabase.instance;
-        if (!supabase.isInitialized) {
-          throw StateError('Cloud session is not ready');
-        }
-        await supabase.client.auth.signOut();
-      } catch (_) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                context.strings.text(
-                  'Could not sign out. Check your connection and retry.',
-                ),
+  Future<void> _logout(String ownerId) async {
+    if (_signingOut) return;
+    setState(() => _signingOut = true);
+    FocusManager.instance.primaryFocus?.unfocus();
+    try {
+      await ref.read(settingsSignOutProvider)(ownerId);
+      if (mounted) context.go('/login');
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              ReferenceSettingsCopy.of(context)(
+                'Could not sign out. Check your connection and retry.',
               ),
             ),
-          );
-        }
-        return;
+          ),
+        );
       }
+    } finally {
+      if (mounted) setState(() => _signingOut = false);
     }
-    if (context.mounted) context.go('/login');
   }
 }
 
@@ -198,13 +259,6 @@ class _SettingsGroup extends StatelessWidget {
       backgroundColor: Colors.transparent,
       header: Row(
         children: [
-          BilSemanticIconBadge(
-            kind: kind,
-            size: 26,
-            iconSize: 15,
-            shape: BoxShape.rectangle,
-          ),
-          const SizedBox(width: 8),
           Expanded(
             child: Text(
               title,
@@ -234,7 +288,7 @@ class _SettingsRow extends StatelessWidget {
     final kind = BilSemanticIcons.kindForRoute(route);
     return CupertinoListTile(
       padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 14, 8),
-      leadingSize: 34,
+      leadingSize: 29,
       leadingToTitle: 12,
       leading: kind == null
           ? Icon(
@@ -242,15 +296,15 @@ class _SettingsRow extends StatelessWidget {
               size: 19,
               color: CupertinoColors.secondaryLabel.resolveFrom(context),
             )
-          : BilSemanticIconBadge(
-              kind: kind,
-              size: 34,
-              iconSize: 19,
-              shape: BoxShape.rectangle,
-            ),
-      title: Padding(
-        padding: const EdgeInsetsDirectional.only(start: 12),
-        child: Text(label),
+          : BilNativeSettingsIcon(kind: kind),
+      title: Tooltip(
+        message: label,
+        child: Text(
+          label,
+          maxLines: 1,
+          softWrap: false,
+          overflow: TextOverflow.ellipsis,
+        ),
       ),
       trailing: Icon(
         Directionality.of(context) == TextDirection.rtl

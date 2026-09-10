@@ -52,6 +52,32 @@ const failureCases: Array<{
 
 const protectedOperations = [
   {
+    action: "admin.subscriptions.grant",
+    body: {
+      operation: "subscription_grant",
+      email: "person@example.com",
+      plan_id: "premium",
+      duration_days: 30,
+      idempotency_key: "integrity-subscription-grant",
+    },
+  },
+  {
+    action: "admin.subscriptions.revoke",
+    body: {
+      operation: "subscription_revoke",
+      grant_id: grantId,
+      idempotency_key: "integrity-subscription-revoke",
+    },
+  },
+  {
+    action: "admin.subscriptions.list",
+    body: {
+      operation: "subscription_list",
+      offset: 0,
+      idempotency_key: "integrity-subscription-list",
+    },
+  },
+  {
     action: "admin.ai_coach.global_reset",
     body: {
       operation: "global",

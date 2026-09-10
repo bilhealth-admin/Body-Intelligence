@@ -197,11 +197,6 @@ void main() {
       _snapshot(
         status: ConnectedHealthStatus.synchronized,
         verified: true,
-        signals: [_signal('steps', 100, 'steps', source: 'Health app')],
-      ),
-      _snapshot(
-        status: ConnectedHealthStatus.synchronized,
-        verified: true,
         signals: [
           _signal('steps', double.nan, 'steps'),
           _signal('heartRate', 70, 'bpm', source: ''),

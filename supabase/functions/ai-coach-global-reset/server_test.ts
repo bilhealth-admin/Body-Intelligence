@@ -12,7 +12,7 @@ const handler = (
     // Unit tests exercise authorization, validation, rate limits, and RPC
     // boundaries with deterministic fakes. Production keeps the real mobile
     // integrity verifier unless a test explicitly replaces this dependency.
-    requireIntegrity: async ({ body }) => body,
+    requireIntegrity: ({ body }) => Promise.resolve(body),
     ...dependencies,
   });
 
@@ -61,32 +61,32 @@ function fakeClients({
     ({
       auth: {
         auth: {
-          // deno-lint-ignore require-await
-          getUser: async () => ({
-            data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
-            error: null,
-          }),
+          getUser: () =>
+            Promise.resolve({
+              data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
+              error: null,
+            }),
         },
-        // deno-lint-ignore require-await
-        rpc: async (
+        rpc: (
           name: string,
           args?: Record<string, unknown>,
         ): Promise<RpcResult> => {
           calls.push({ name, args });
           if (name === "bil_can_manage_ai_coach") {
-            return { data: allowed, error: null };
+            return Promise.resolve({ data: allowed, error: null });
           }
           if (name === "bil_consume_rate_limit") {
-            return rateLimited
-              ? { data: null, error: { message: "rate limit exceeded" } }
-              : { data: null, error: null };
+            return Promise.resolve(
+              rateLimited
+                ? { data: null, error: { message: "rate limit exceeded" } }
+                : { data: null, error: null },
+            );
           }
-          throw new Error(`unexpected auth rpc: ${name}`);
+          return Promise.reject(new Error(`unexpected auth rpc: ${name}`));
         },
       },
       admin: {
-        // deno-lint-ignore require-await
-        rpc: async (
+        rpc: (
           name: string,
           args?: Record<string, unknown>,
         ): Promise<RpcResult> => {
@@ -95,10 +95,10 @@ function fakeClients({
             name === "bil_resolve_ai_coach_reset_target" ||
             name === "bil_resolve_admin_notification_target"
           ) {
-            return { data: resolvedTarget, error: null };
+            return Promise.resolve({ data: resolvedTarget, error: null });
           }
           if (name === "bil_list_community_moderators_for_admin") {
-            return {
+            return Promise.resolve({
               data: [{
                 user_id: "00000000-0000-4000-8000-000000000002",
                 email: "moderator@example.com",
@@ -107,19 +107,25 @@ function fakeClients({
                 ignored_private_field: "must-not-cross-edge-boundary",
               }],
               error: null,
-            };
+            });
           }
           if (name === "bil_add_community_moderator_by_email") {
             if (moderatorAddError != null) {
-              return { data: null, error: { message: moderatorAddError } };
+              return Promise.resolve({
+                data: null,
+                error: { message: moderatorAddError },
+              });
             }
-            return { data: { matched: true, added: true }, error: null };
+            return Promise.resolve({
+              data: { matched: true, added: true },
+              error: null,
+            });
           }
           if (name === "bil_remove_community_moderator") {
-            return { data: true, error: null };
+            return Promise.resolve({ data: true, error: null });
           }
           if (name === "bil_list_suspended_community_members_for_admin") {
-            return {
+            return Promise.resolve({
               data: [{
                 user_id: "00000000-0000-4000-8000-000000000003",
                 email: "suspended@example.com",
@@ -128,10 +134,10 @@ function fakeClients({
                 ignored_private_field: "must-not-cross-edge-boundary",
               }],
               error: null,
-            };
+            });
           }
           if (name === "bil_suspend_community_member_by_email") {
-            return {
+            return Promise.resolve({
               data: {
                 matched: true,
                 active: true,
@@ -139,36 +145,38 @@ function fakeClients({
                 moderator_removed: false,
               },
               error: null,
-            };
+            });
           }
           if (name === "bil_reinstate_community_member") {
-            return { data: { reinstated: true }, error: null };
+            return Promise.resolve({ data: { reinstated: true }, error: null });
           }
           if (pendingErrors.length > 0) {
             const code = pendingErrors.shift()!;
-            return {
+            return Promise.resolve({
               data: null,
               error: { message: "retryable concurrency conflict", code },
-            };
+            });
           }
-          return name === "bil_enqueue_admin_notification" ||
+          return Promise.resolve(
+            name === "bil_enqueue_admin_notification" ||
               name === "bil_enqueue_admin_notification_with_message"
-            ? {
-              data: { duplicate: false, recipients_enqueued: 2 },
-              error: null,
-            }
-            : {
-              data: {
-                duplicate: false,
-                reset_id: "00000000-0000-4000-8000-000000000010",
-                usage_rows_reset: 1,
-                monthly_rows_reset: 1,
-                users_notified: 2,
-                boost_tokens_per_recipient: 2500,
-                custom_message_applied: true,
+              ? {
+                data: { duplicate: false, recipients_enqueued: 2 },
+                error: null,
+              }
+              : {
+                data: {
+                  duplicate: false,
+                  reset_id: "00000000-0000-4000-8000-000000000010",
+                  usage_rows_reset: 1,
+                  monthly_rows_reset: 1,
+                  users_notified: 2,
+                  boost_tokens_per_recipient: 2500,
+                  custom_message_applied: true,
+                },
+                error: null,
               },
-              error: null,
-            };
+          );
         },
       },
     }) as never;
@@ -268,9 +276,9 @@ Deno.test("moderator list is permission, integrity, rate, and shape guarded", as
     }),
     {
       clients: fakeClients({ allowed: true, calls }),
-      requireIntegrity: async ({ action, body }) => {
+      requireIntegrity: ({ action, body }) => {
         integrityAction = action;
-        return body;
+        return Promise.resolve(body);
       },
     },
   );
@@ -381,9 +389,9 @@ Deno.test("suspended member list is admin, integrity, rate, and shape guarded", 
     }),
     {
       clients: fakeClients({ allowed: true, calls }),
-      requireIntegrity: async ({ action, body }) => {
+      requireIntegrity: ({ action, body }) => {
         integrityAction = action;
-        return body;
+        return Promise.resolve(body);
       },
     },
   );
@@ -504,23 +512,26 @@ Deno.test("reset success fails closed without the atomic gift receipt", async ()
     clients: (() => ({
       auth: {
         auth: {
-          getUser: async () => ({
-            data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
-            error: null,
-          }),
+          getUser: () =>
+            Promise.resolve({
+              data: { user: { id: "00000000-0000-4000-8000-000000000001" } },
+              error: null,
+            }),
         },
-        rpc: async (name: string) =>
-          name === "bil_can_manage_ai_coach"
-            ? { data: true, error: null }
-            : { data: null, error: null },
+        rpc: (name: string) =>
+          Promise.resolve(
+            name === "bil_can_manage_ai_coach"
+              ? { data: true, error: null }
+              : { data: null, error: null },
+          ),
       },
       admin: {
-        rpc: async (name: string, args?: Record<string, unknown>) => {
+        rpc: (name: string, args?: Record<string, unknown>) => {
           calls.push({ name, args });
-          return {
+          return Promise.resolve({
             data: { duplicate: false, users_notified: 2 },
             error: null,
-          };
+          });
         },
       },
     })) as never,

@@ -31,17 +31,30 @@ void main() {
     expect(sql, contains('bil_has_premium_barcode_access'));
     expect(sql, contains("'pro','premium','premium_ai_coach'"));
     expect(sql, contains('bil_barcode_shared_cache'));
-    expect(edge, contains("return json({error:'premium_required'},403)"));
+    expect(
+      edge,
+      matches(
+        RegExp(
+          r'''return\s+json\(\{\s*error\s*:\s*['"]premium_required['"]\s*\},\s*403\)''',
+        ),
+      ),
+    );
     expect(edge, contains('bil_get_cached_barcode'));
     expect(edge, contains('api.nal.usda.gov'));
     expect(edge, contains('food.gtinUpc'));
     expect(edge, contains('BIL_USDA_API_KEY'));
-    expect(edge, contains("product_type', 'all"));
+    expect(
+      edge,
+      matches(RegExp(r'''['"]product_type['"]\s*,\s*['"]all['"]''')),
+    );
     expect(edge, contains('world.openfoodfacts.org/api/v3/product/'));
     expect(edge, contains('productNameFields'));
-    expect(edge, contains("p_source: 'open_facts'"));
+    expect(edge, matches(RegExp(r'''p_source\s*:\s*['"]open_facts['"]''')));
     expect(universalCache, contains("'bil','usda','open_facts'"));
-    expect(edge, contains("next_step:'capture_product_label'"));
+    expect(
+      edge,
+      matches(RegExp(r'''next_step\s*:\s*['"]capture_product_label['"]''')),
+    );
     expect(client, contains("functions.invoke(\n        'barcode-lookup'"));
     expect(
       client,

@@ -1,5 +1,61 @@
 part of 'connected_health_provider.dart';
 
+/// This projection replaces (never adds to) raw activity samples. An empty
+/// native result is unknown/no permitted data, not a fabricated zero.
+@visibleForTesting
+List<GlobalHealthSignal> nativeDailyActivitySignals(
+  Iterable<NativeHealthRecord> records,
+  DateTime asOf,
+) {
+  final byDayAndType = <String, GlobalHealthSignal>{};
+  final local = asOf.toLocal();
+  final first = DateTime(local.year, local.month, local.day - 29);
+  for (final row in records) {
+    final expected = switch (row.type) {
+      HealthDataType.steps => 'count',
+      HealthDataType.distance => 'm',
+      HealthDataType.activeEnergy => 'kcal',
+      _ => null,
+    };
+    if (expected == null ||
+        row.unit != expected ||
+        row.deleted ||
+        !row.value.isFinite ||
+        row.value < 0 ||
+        row.confidence <= 0 ||
+        row.sourceId.trim().isEmpty ||
+        row.attributes['aggregation'] != 'native_daily' ||
+        row.observedAt.isBefore(first) ||
+        row.observedAt.isAfter(asOf)) {
+      continue;
+    }
+    final day = row.observedAt.toLocal();
+    final key = '${row.type.name}:${day.year}-${day.month}-${day.day}';
+    final current = byDayAndType[key];
+    if (current != null &&
+        !row.observedAt.isAfter(current.provenance.observedAt)) {
+      continue;
+    }
+    byDayAndType[key] = GlobalHealthSignal(
+      key: row.type.name,
+      canonicalValue: row.value,
+      canonicalUnit: row.unit,
+      provenance: GlobalProvenance(
+        providerId: row.providerId,
+        sourceId: row.sourceId,
+        recordId: row.id,
+        observedAt: row.observedAt,
+        confidence: row.confidence.clamp(0, 1),
+        timeZoneId: row.timeZoneId,
+      ),
+      attributes: row.attributes,
+    );
+  }
+  return byDayAndType.values.toList()..sort(
+    (a, b) => a.provenance.observedAt.compareTo(b.provenance.observedAt),
+  );
+}
+
 @visibleForTesting
 Set<HealthDataType> connectedHealthReadTypesForPlatform(
   TargetPlatform platform,

@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('completion monitor is read-only and validates the full gym batch', () {
     final source = File(
-      'artifacts/release/monitor_workout_video_gym_completion.ps1',
+      'tool/release/monitor_workout_video_gym_completion.ps1',
     ).readAsStringSync();
 
     expect(source, contains("'bulk_1000.run.lock'"));

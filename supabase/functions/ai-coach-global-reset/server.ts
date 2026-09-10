@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2.112.3";
+import { handleSubscriptionOperation } from "./subscription_operations.ts";
 import {
   MobileIntegrityFailure,
   requireMobileIntegrityGrant,
@@ -186,6 +187,12 @@ export async function handler(
       ? "admin.community.members.suspend"
       : operation === "community_member_reinstate"
       ? "admin.community.members.reinstate"
+      : operation === "subscription_list"
+      ? "admin.subscriptions.list"
+      : operation === "subscription_grant"
+      ? "admin.subscriptions.grant"
+      : operation === "subscription_revoke"
+      ? "admin.subscriptions.revoke"
       : "";
     if (!integrityAction) return json({ error: "invalid_operation" }, 400);
     // Replacing the client boundary must never implicitly disable integrity.
@@ -201,6 +208,24 @@ export async function handler(
     const idempotencyKey = String(body.idempotency_key ?? "").trim();
     if (!validIdempotencyKey(idempotencyKey)) {
       return json({ error: "invalid_idempotency_key" }, 400);
+    }
+
+    if (
+      ["subscription_list", "subscription_grant", "subscription_revoke"]
+        .includes(operation)
+    ) {
+      const rateResponse = await consumeRateLimit(
+        c.auth,
+        `admin_${operation}`,
+        operation === "subscription_list" ? 120 : 60,
+      );
+      if (rateResponse != null) return rateResponse;
+      return handleSubscriptionOperation(
+        body,
+        authResult.data.user.id,
+        c.admin,
+        json,
+      );
     }
 
     if (operation === "moderator_list") {

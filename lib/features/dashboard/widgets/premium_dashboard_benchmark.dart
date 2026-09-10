@@ -12,6 +12,7 @@ import '../../commerce/presentation/premium_label_badge.dart';
 import '../providers/dashboard_preferences_provider.dart';
 import '../dashboard_five_locale_copy.dart';
 import '../domain/dashboard_heart_health_policy.dart';
+import '../domain/dashboard_step_trend.dart';
 import 'premium_dashboard_card_lock.dart';
 
 part 'premium_dashboard_command_center.dart';
@@ -81,6 +82,8 @@ class PremiumDashboardBenchmark extends StatelessWidget {
     this.nutrientDashboardPreset = 'Calories and macros',
     this.weightTrendValues = const [],
     this.stepTrendValues = const [],
+    this.stepSourceName,
+    this.todaySteps,
     this.weightUnit = 'kg',
     this.visibleSections = const {
       DashboardSectionIds.aiCoach,
@@ -149,6 +152,8 @@ class PremiumDashboardBenchmark extends StatelessWidget {
   final String nutrientDashboardPreset;
   final List<double> weightTrendValues;
   final List<double> stepTrendValues;
+  final String? stepSourceName;
+  final double? todaySteps;
   final String weightUnit;
   final Set<String> visibleSections;
   final bool premiumUnlocked;
@@ -188,6 +193,8 @@ class PremiumDashboardBenchmark extends StatelessWidget {
       nutrientDashboardPreset: nutrientDashboardPreset,
       weightTrendValues: weightTrendValues,
       stepTrendValues: stepTrendValues,
+      stepSourceName: stepSourceName,
+      todaySteps: todaySteps,
       weightUnit: weightUnit,
       loggingItems: loggingItems,
       hero: hero,

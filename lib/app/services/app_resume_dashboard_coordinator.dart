@@ -56,6 +56,7 @@ class _AppResumeDashboardCoordinatorState
     extends State<AppResumeDashboardCoordinator>
     with WidgetsBindingObserver {
   late MeaningfulResumePolicy _policy;
+  int _resumeGeneration = 0;
 
   @override
   void initState() {
@@ -84,11 +85,17 @@ class _AppResumeDashboardCoordinatorState
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    final generation = ++_resumeGeneration;
     if (!_policy.handle(state)) return;
-    // Route before Flutter paints the first resumed frame, otherwise the stale
-    // internal surface can become visible for one frame after the privacy
-    // shield drops.
-    if (mounted) widget.onMeaningfulResume();
+    // Let MediaQuery and the native viewport settle before refreshing data.
+    // Never replace the route synchronously inside a lifecycle callback.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted &&
+          generation == _resumeGeneration &&
+          WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+        widget.onMeaningfulResume();
+      }
+    });
   }
 
   @override

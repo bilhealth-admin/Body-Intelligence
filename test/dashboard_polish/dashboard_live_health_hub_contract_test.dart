@@ -2,11 +2,13 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/dart_library_source.dart';
+
 void main() {
   test('P9-R9 live Health Hub and paired deck contracts are present', () {
-    final watch = File(
+    final watch = readDartLibrarySource(
       'lib/features/connected_health/widgets/live_health_watch.dart',
-    ).readAsStringSync();
+    );
     final emptyState = File(
       'lib/features/connected_health/widgets/health_hub_empty_state.dart',
     ).readAsStringSync();

@@ -76,7 +76,7 @@ extension _DailyLogNavigationActions on _DailyLogPageState {
         case 'exercise':
           await _reveal(exerciseSectionKey);
         case 'quick-macros':
-          await _quickAddMacrosV2();
+          await _quickAddMacros();
       }
     } finally {
       if (initialActionInFlight == action) initialActionInFlight = null;

@@ -3,6 +3,11 @@
 This is the source of truth for App Store Connect, Google Play Data Safety and
 the public privacy policy. Update it whenever a connector changes.
 
+Deployment facts below were reconciled on 10 September 2026 against the
+[read-only store/domain/backend audit](qa/STORE_READINESS_AUDIT_2026-09-10.md).
+Source capability, deployed metadata and end-to-end proof are separate: this
+inventory does not certify that every current source change is in build 8/12.
+
 ## Product position
 
 - BIL is a health and nutrition logger, not a medical diagnosis product.
@@ -83,12 +88,15 @@ the public privacy policy. Update it whenever a connector changes.
 - Continue locally without an account and request permissions per feature.
 - Export data, remove packs, clear local data and sign out independently.
 - Delete account and associated cloud data through a verified backend flow.
-  The prepared Storage-first worker removes the user's object prefixes from every BIL-owned
+  The Storage-first worker removes the user's object prefixes from every BIL-owned
   Storage bucket through the Storage API and verifies them empty before it may
   delete the Supabase Auth user. Storage or Auth failure returns the tracked
   request to `pending`; direct database-only Auth deletion fails closed. The
-  production SQL-only worker is disabled, but this replacement Edge worker is
-  not production-active until its required secrets and migration are deployed.
+  production SQL-only worker is disabled. The 10 September read-only check found
+  `account-data-deletion` ACTIVE at version 18 and its secret-protected
+  `bil-account-data-deletion-storage-first-15m` dispatcher cron active. Required
+  secret names were configured; secret values were not read. This confirms
+  deployment/scheduling, not the completion of a real user's deletion.
 - Warn before deletion that App Store/Google Play billing continues until the
   user cancels it with the store, and provide the platform subscription link.
 - Report/block/moderation controls before public community is enabled.
@@ -139,25 +147,41 @@ optionally included in the encrypted selective profile sync.
   the separate-store-billing warning before submission, provides the Apple
   subscription-management link on iOS, and returns a tracked request
   reference/status.
-- In the prepared source, the authenticated Edge Function attempts
+- In the current source, the authenticated Edge Function attempts
   Storage-first deletion immediately. If that call is unavailable, the durable
-  request is retried by the secret-protected scheduled dispatcher within 15
-  minutes. Production currently fails closed with requests left `pending`;
-  deploy and validate the replacement worker before App Store submission.
-- The OAuth client does not retain the Apple access/refresh token or
-  authorization code needed for automatic revocation, so BIL does not claim
-  that Apple authorization was revoked automatically.
-- Apple TN3194 permits a manual fallback in this condition. After BIL deletion
+  request is retried by the secret-protected dispatcher scheduled every 15
+  minutes. The live audit found 96 successful cron invocations in its 24-hour
+  window, last checked at 9 September 2026 22:15 UTC. A successful dispatcher
+  invocation does not prove a successful HTTP response or completed Storage,
+  Auth or associated Community-data deletion. A dedicated authorized end-to-end
+  deletion test remains required before treating that outcome as verified.
+- The current Apple sign-in path forwards the short-lived authorization code
+  through authenticated HTTPS for server-side exchange and encrypted token
+  custody; it does not store the code or refresh token on the device. The
+  `apple-sign-in-token` function was ACTIVE at version 7 in the live audit.
+- When a custody record exists, the deletion worker revokes the Apple grant
+  before deleting Storage and then Auth. A revocation failure leaves the request
+  pending for retry rather than claiming completion. Legacy/non-Apple accounts
+  without a custody record return `not_available` from that step and continue
+  through Storage-before-Auth deletion; automatic Apple revocation is not
+  established for those accounts. Source references:
+  `lib/features/auth/supabase_auth_service.dart`,
+  `supabase/functions/_shared/apple_sign_in_token_lifecycle.ts`, and
+  `supabase/functions/_shared/account_deletion_worker.ts`.
+- The manual Apple-account step remains available. After BIL deletion
   completes for a detected Apple-linked user, the app directs the user to
   `Settings > [your name] > Sign in with Apple > BIL > Delete or Stop Using`,
   links to `https://support.apple.com/102571`, and clears the local session.
   Skipping this optional Apple step does not block or undo BIL data deletion.
 
-- The reconciled `public_site/app.js` wording was deployed on 30 August 2026
-  as Cloudflare version `2aa8c5d3-d2b9-4193-a647-25d045fcde9e`. The privacy,
-  terms, subscription terms, support, health disclaimer, community guidelines
-  and account-deletion routes all returned HTTP 200 after deployment. App
-  Store Connect now reads back `https://www.bilhealth.com/privacy` as the
+- The earlier 30 August deployment record (Cloudflare version
+  `2aa8c5d3-d2b9-4193-a647-25d045fcde9e`) is historical, not a current-version
+  assertion. The 10 September audit verified rendered public policy content
+  and exact byte parity between live `www.bilhealth.com/app.js` and the local
+  `public_site/app.js`; the audit records its SHA-256. The privacy, terms,
+  subscription terms, support, health disclaimer, community guidelines,
+  account-deletion and data-deletion routes were available. App Store Connect
+  still reads back `https://www.bilhealth.com/privacy` as the
   Privacy Policy URL and `https://www.bilhealth.com/account-deletion` as the
   User Privacy Choices URL.
 - App Store Connect privacy answers must be reconciled manually against the

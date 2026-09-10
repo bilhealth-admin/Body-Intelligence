@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/read_push_dispatcher.dart';
 
 void main() {
   const dispatchPaths = <String>[
@@ -8,23 +9,25 @@ void main() {
     'supabase/functions/community_push_dispatch.ts',
   ];
 
-  test('push dispatcher copies remain identical and fail closed', () {
+  test('push entry points share one implementation and fail closed', () {
     final sources = dispatchPaths
-        .map((path) => File(path).readAsStringSync())
+        .map(readPushDispatcherImplementation)
         .toList(growable: false);
     expect(sources[0], sources[1]);
 
     final source = sources.first;
     final secretRead = source.indexOf(
-      'const dispatchSecret = Deno.env.get("BIL_INTERNAL_DISPATCH_SECRET")',
+      'const dispatchSecret = readEnv("BIL_INTERNAL_DISPATCH_SECRET")',
     );
     final missingSecretGuard = source.indexOf('if (!dispatchSecret)');
     final headerComparison = source.indexOf(
-      'request.headers.get("x-bil-dispatch-secret") !== dispatchSecret',
+      'request.headers.get("x-bil-dispatch-secret")',
     );
     expect(secretRead, greaterThanOrEqualTo(0));
     expect(missingSecretGuard, greaterThan(secretRead));
     expect(headerComparison, greaterThan(missingSecretGuard));
+    expect(source, contains('!await secretMatches('));
+    expect(source, contains('timingSafeEqual('));
     expect(source, contains('request.method !== "POST"'));
     expect(source, contains('parsed.protocol === "https:"'));
     expect(source, contains('redirect: "error"'));
@@ -38,7 +41,7 @@ void main() {
   });
 
   test('push delivery is leased per token and gateway calls are bounded', () {
-    final source = File(dispatchPaths.first).readAsStringSync();
+    final source = readPushDispatcherImplementation(dispatchPaths.first);
 
     expect(source, contains('bil_claim_push_deliveries'));
     expect(source, contains('bil_record_push_delivery_result'));

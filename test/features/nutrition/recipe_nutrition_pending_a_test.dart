@@ -1,52 +1,78 @@
 import 'dart:convert';
-import 'dart:io';
-
+import 'package:body_intelligence_log/features/recipe_import/domain/recipe_ingredient_evidence.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/released_recipe_contract.dart';
 
 void main() {
-  test(
-    'pending A calculations are exact and blocked values are never zero-filled',
-    () {
-      final artifact =
-          jsonDecode(
-                File(
-                  'artifacts/meal_catalog/recipe_nutrition_pending_a.json',
-                ).readAsStringSync(),
-              )
-              as Map<String, dynamic>;
-      final records = (artifact['records'] as List<dynamic>)
-          .cast<Map<String, dynamic>>();
-      expect(records, hasLength(17));
+  TestWidgetsFlutterBinding.ensureInitialized();
+  late List<Map<String, dynamic>> records;
+  setUpAll(() async => records = await releasedRecipeRecords());
 
+  test(
+    'all shipped calculations replace the pending stage with source evidence',
+    () {
+      expect(records, hasLength(1500));
       for (final record in records) {
-        final blocked =
-            (record['blockedIngredientIds'] as List<dynamic>).isNotEmpty;
-        expect(record['status'], blocked ? 'blocked' : 'verified-calculation');
-        final nutrition = record['nutritionPerServing'] as Map<String, dynamic>;
-        if (blocked) {
-          expect(nutrition.values, everyElement(isNull));
-          continue;
-        }
-        final servings = (record['servings'] as num).toDouble();
-        final expected = <String, double>{};
-        for (final ingredient
-            in (record['formulation'] as List<dynamic>)
-                .cast<Map<String, dynamic>>()) {
-          final grams = (ingredient['grams'] as num).toDouble();
-          final nutrients =
-              ingredient['nutrientsPer100g'] as Map<String, dynamic>;
-          for (final entry in nutrients.entries) {
-            expected[entry.key] =
-                (expected[entry.key] ?? 0) +
-                (entry.value as num).toDouble() * grams / 100 / servings;
-          }
-        }
-        for (final entry in expected.entries) {
-          expect(
-            (nutrition[entry.key] as num).toDouble(),
-            closeTo(entry.value, .011),
-          );
-        }
+        expectRecipeCalculation(record);
+        expect(
+          RecipeIngredientEvidence.recordNeedsReview(record),
+          isFalse,
+          reason: record['canonicalId'] as String,
+        );
+      }
+    },
+  );
+  test(
+    'missing macro evidence remains blocked even when a zero total is supplied',
+    () {
+      for (final nutrient in const [
+        'kcal',
+        'proteinG',
+        'carbohydrateG',
+        'fatG',
+      ]) {
+        final record =
+            jsonDecode(jsonEncode(records.first)) as Map<String, dynamic>;
+        ((record['ingredients'] as List).first['nutrientsPer100g']
+                as Map)[nutrient] =
+            null;
+        ((record['nutrition'] as Map)['perServing'] as Map)[nutrient] = 0;
+        expect(
+          RecipeIngredientEvidence.recordNeedsReview(record),
+          isTrue,
+          reason: nutrient,
+        );
+      }
+    },
+  );
+  test(
+    'unknown optional nutrients stay null and may not become partial totals',
+    () {
+      for (final nutrient in const [
+        'fiberG',
+        'sugarG',
+        'sodiumMg',
+        'potassiumMg',
+      ]) {
+        final record =
+            jsonDecode(jsonEncode(records.first)) as Map<String, dynamic>;
+        ((record['ingredients'] as List).first['nutrientsPer100g']
+                as Map)[nutrient] =
+            null;
+        final nutrition = record['nutrition'] as Map;
+        (nutrition['perServing'] as Map)[nutrient] = null;
+        nutrition['missingNutrients'] = [nutrient];
+        expect(
+          RecipeIngredientEvidence.recordNeedsReview(record),
+          isFalse,
+          reason: nutrient,
+        );
+        (nutrition['perServing'] as Map)[nutrient] = 0;
+        expect(
+          RecipeIngredientEvidence.recordNeedsReview(record),
+          isTrue,
+          reason: nutrient,
+        );
       }
     },
   );

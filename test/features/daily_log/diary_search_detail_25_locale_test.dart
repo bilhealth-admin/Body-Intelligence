@@ -162,6 +162,18 @@ void main() {
       );
       expect(tester.takeException(), isNull, reason: '$tag search');
 
+      final searchEntry = find.byKey(const Key('daily-meal-food-search-bar'));
+      final searchController =
+          tester.widget<SearchBar>(searchEntry).controller! as SearchController;
+      expect(
+        searchController.isOpen,
+        isFalse,
+        reason: '$tag user opens search',
+      );
+      await tester.tap(searchEntry);
+      await tester.pumpAndSettle();
+      expect(searchController.isOpen, isTrue);
+
       const query = 'chicken';
       final resultLocale = FoodPresentationLocalizer.resultLocaleForQuery(
         query: query,
@@ -185,13 +197,12 @@ void main() {
       );
       if (tag == 'ar') {
         await tester.enterText(find.byType(SearchBar).last, 'تيف مطبوخ');
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 1500));
         final trustedTeffName = FoodPresentationLocalizer.foodName(
           name: 'Teff, cooked',
           localeTag: 'ar',
           source: 'USDA FoodData Central',
         );
+        await _settleSearch(tester, find.text(trustedTeffName));
         expect(
           find.text(trustedTeffName),
           findsOneWidget,
@@ -200,8 +211,7 @@ void main() {
         );
       }
       await tester.enterText(find.byType(SearchBar).last, query);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 1500));
+      await _settleSearch(tester, find.text(expectedName));
       expect(find.text(expectedName), findsOneWidget, reason: '$tag food name');
       final verifiedBadge = find.byKey(
         const Key('daily-search-verified-food-badge'),
@@ -310,6 +320,14 @@ void main() {
       await tester.pump(Duration.zero);
       await tester.idle();
     });
+  }
+}
+
+// The database search and debounce schedule successive asynchronous stages.
+// Retain the exact result assertions after advancing them in bounded steps.
+Future<void> _settleSearch(WidgetTester tester, Finder result) async {
+  for (var tick = 0; tick < 60 && result.evaluate().isEmpty; tick++) {
+    await tester.pump(const Duration(milliseconds: 50));
   }
 }
 

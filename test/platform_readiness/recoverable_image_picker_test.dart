@@ -12,6 +12,70 @@ void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   test(
+    'Coach photo recovery cannot leak into meals or another journey',
+    () async {
+      final now = DateTime.utc(2026, 9, 9, 12);
+      const ownerScope = 'account:coach-member';
+      final directory = await Directory.systemTemp.createTemp(
+        'bil-coach-picker-test-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final file = File('${directory.path}/coach.jpg');
+      await file.writeAsBytes(const [0xff, 0xd8, 0xff, 0xd9]);
+      final xFile = XFile(file.path);
+      SharedPreferences.setMockInitialValues({
+        BilRecoverableImagePicker.pendingPurposePreferenceKey:
+            BilRecoverableImagePicker.pendingMarkerForTesting(
+              purpose: BilImagePickerPurpose.coachFoodPhoto,
+              ownerScope: ownerScope,
+              launchedAt: now,
+            ),
+      });
+      final plugin = _FakeImagePicker(
+        lost: LostDataResponse(
+          file: xFile,
+          files: [xFile],
+          type: RetrieveType.image,
+        ),
+      );
+      final picker = BilRecoverableImagePicker(
+        picker: plugin,
+        isAndroid: true,
+        ownerScope: () => ownerScope,
+        clock: () => now,
+      );
+      await picker.recoverAtStartup();
+      expect(
+        await picker.takeRecoveredImage(BilImagePickerPurpose.mealPhoto),
+        isNull,
+      );
+      expect(
+        await picker.takeRecoveredImage(BilImagePickerPurpose.profilePhoto),
+        isNull,
+      );
+      expect(
+        BilImagePickerResumePolicy.locationFor(
+          BilImagePickerPurpose.coachFoodPhoto,
+          hasMealPhotoEntitlement: true,
+        ),
+        isNull,
+      );
+      expect(
+        (await picker.pickImage(
+          purpose: BilImagePickerPurpose.coachFoodPhoto,
+          source: ImageSource.gallery,
+        ))?.path,
+        file.path,
+      );
+      expect(plugin.pickCalls, 0);
+      expect(
+        await picker.takeRecoveredImage(BilImagePickerPurpose.coachFoodPhoto),
+        isNull,
+      );
+    },
+  );
+
+  test(
     'startup recovery is returned only to the originating image journey',
     () async {
       final now = DateTime.utc(2026, 9, 4, 12);
@@ -313,10 +377,11 @@ void main() {
     expect(profileActions, contains('recoveredOnly: recoveredOnly'));
     expect(dailyNavigation, contains("case 'recovered-photo':"));
     expect(dailyLog, contains('takeRecoveredImage('));
-    // AI Coach camera capture stays in-app, so it cannot trigger the Android
-    // external-picker process-death path or expose a cross-purpose result.
+    // Camera stays in-app; the gallery uses a separate, owner-scoped recovery
+    // purpose so it cannot deliver a Coach photo to an unrelated journey.
     expect(coachVision, contains('BilCameraCapturePage('));
-    expect(coachVision, isNot(contains('BilRecoverableImagePicker')));
+    expect(coachVision, contains('BilRecoverableImagePicker.instance'));
+    expect(coachVision, contains('BilImagePickerPurpose.coachFoodPhoto'));
   });
 }
 

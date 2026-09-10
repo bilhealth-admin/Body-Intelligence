@@ -26,8 +26,9 @@ final class _RaceFoodSearchAuthority extends FoodRuntimeSearchAuthority {
   final pending = <String, Completer<List<Food>>>{};
 
   @override
-  Future<List<Food>> search(String query, {int limit = 50}) =>
-      pending.putIfAbsent(query, Completer<List<Food>>.new).future;
+  Future<List<Food>> search(String query, {int limit = 50}) => query.isEmpty
+      ? Future<List<Food>>.value(const [])
+      : pending.putIfAbsent(query, Completer<List<Food>>.new).future;
 }
 
 void main() {
@@ -128,6 +129,15 @@ void main() {
     await tester.ensureVisible(logFood);
     await tester.tap(logFood);
     await tester.pump(const Duration(milliseconds: 600));
+
+    final searchEntry = find.byKey(const Key('daily-meal-food-search-bar'));
+    final controller =
+        tester.widget<SearchBar>(searchEntry).controller! as SearchController;
+    expect(controller.isOpen, isFalse);
+    expect(authority.pending, isEmpty);
+    await tester.tap(searchEntry);
+    await tester.pumpAndSettle();
+    expect(controller.isOpen, isTrue);
 
     final searchBar = find.byType(SearchBar).last;
     await tester.enterText(searchBar, 'a');

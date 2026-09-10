@@ -66,20 +66,15 @@ void main() {
     expect(edge, contains('operation === "moderator_list"'));
     expect(edge, contains('operation === "moderator_add"'));
     expect(edge, contains('operation === "moderator_remove"'));
-    expect(
-      router,
-      contains(
-        "path: '/community/moderation',\n        // Moderation is a server-verified role",
-      ),
-    );
-    expect(
-      router,
-      isNot(
-        contains(
-          "path: '/community/moderation',\n        builder: (_, _) => const PremiumRouteGlassGate",
-        ),
-      ),
-    );
+    // Assert the actual route boundary, not the position of its explanation.
+    // A presentation-only wrapper must not turn a moderator role into a purchase.
+    final moderationRoute = RegExp(
+      r"GoRoute\(\s*path: '/community/moderation',([\s\S]*?)\n      \),",
+    ).firstMatch(router)?.group(1);
+    expect(moderationRoute, isNotNull);
+    expect(moderationRoute, contains('CommunityPostModerationPage()'));
+    expect(moderationRoute, contains('CommunitySurface('));
+    expect(moderationRoute, isNot(contains('PremiumRouteGlassGate')));
   });
 
   test('owner-approved second administrator is enrolled by auth identity', () {

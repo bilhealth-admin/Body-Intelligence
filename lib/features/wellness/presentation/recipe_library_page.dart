@@ -12,7 +12,9 @@ import '../../commerce/presentation/premium_label_badge.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../profile/providers/user_profile_provider.dart';
 import '../../nutrition/domain/dietary_preferences.dart';
-import '../../recipe_import/domain/trusted_recipe.dart';
+import '../../nutrition/services/food_presentation_localizer.dart';
+import '../../recipe_import/domain/recipe_ingredient_evidence.dart';
+import '../../recipe_import/services/catalog_recipe_draft.dart';
 import '../../recipe_import/presentation/trusted_recipe_import_page.dart';
 import '../repositories/recipe_favorites_repository.dart';
 import '../repositories/recipe_release_repository.dart';
@@ -20,6 +22,8 @@ import '../services/recipe_image_delivery_client.dart';
 import '../services/wellness_media_cache.dart';
 import 'recipe_artwork_registry.dart';
 import 'recipe_cuisine.dart';
+import 'recipe_source_disclosure.dart';
+import '../domain/recipe_source_copy.dart';
 import 'wellness_copy.dart';
 
 part 'recipe_library_helpers.dart';
@@ -650,20 +654,16 @@ class _RecipeDetails extends StatelessWidget {
     final localization = resolved.value;
     final record = detail.record;
     final ingredients = (localization['ingredients'] as List).cast<String>();
+    final sourceIngredients = (detail.record['ingredients'] as List)
+        .cast<Map<String, dynamic>>();
     final steps = (localization['steps'] as List).cast<String>();
     final contentLanguageMismatch = [...ingredients, ...steps].any(
       (value) =>
           _directionForText(value) != _directionForLocale(resolved.locale),
     );
     final nutrition = record['nutrition'] as Map<String, dynamic>;
-    final ingredientsEvidenceComplete = (record['ingredients'] as List).every((
-      value,
-    ) {
-      final ingredient = value as Map<String, dynamic>;
-      final recordId = ingredient['recordId'];
-      final refs = ingredient['sourceRefs'];
-      return recordId is String && refs is List && refs.contains(recordId);
-    });
+    final ingredientsEvidenceComplete =
+        !RecipeIngredientEvidence.recordNeedsReview(record);
     final perServing = nutrition['perServing'] as Map<String, dynamic>;
     final cardFacts = RecipeCatalogCardFacts.fromDetail(detail);
     return DraggableScrollableSheet(
@@ -723,19 +723,40 @@ class _RecipeDetails extends StatelessWidget {
             wellnessCopy(context, 'Ingredients', 'المكوّنات'),
             style: const TextStyle(fontWeight: FontWeight.w800),
           ),
-          for (final ingredient in ingredients)
+          for (
+            var ingredientIndex = 0;
+            ingredientIndex < ingredients.length;
+            ingredientIndex++
+          )
             Padding(
               padding: const EdgeInsets.only(top: 6),
               child: Directionality(
-                textDirection: _directionForText(ingredient),
-                child: Text(
-                  '• $ingredient',
-                  locale: BilLocalePolicy.localeFromTag(
-                    _localeForText(ingredient, resolved.locale),
-                  ),
+                textDirection: _directionForText(ingredients[ingredientIndex]),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '• ${ingredients[ingredientIndex]}',
+                      locale: BilLocalePolicy.localeFromTag(
+                        _localeForText(
+                          ingredients[ingredientIndex],
+                          resolved.locale,
+                        ),
+                      ),
+                    ),
+                    if (ingredientIndex < sourceIngredients.length)
+                      Text(
+                        '${context.strings.number(sourceIngredients[ingredientIndex]['grams'] as num)} '
+                        '${FoodPresentationLocalizer.servingUnit('g', locale)} · '
+                        '${RecipeSourceCopy.state(sourceIngredients[ingredientIndex]['sourcePreparation'] as String? ?? 'as-sold', locale)}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                        textDirection: _directionForLocale(locale),
+                      ),
+                  ],
                 ),
               ),
             ),
+          RecipeSourceDisclosure(ingredients: sourceIngredients),
           const SizedBox(height: 18),
           Text(
             wellnessCopy(context, 'Method', 'الطريقة'),
@@ -760,17 +781,23 @@ class _RecipeDetails extends StatelessWidget {
               context,
               ingredientsEvidenceComplete
                   ? 'Calculated values with complete ingredient record links'
-                  : 'Calculated values; some ingredient record links need review',
+                  : 'Nutrition values need review.',
               ingredientsEvidenceComplete
                   ? 'قيم محسوبة مع اكتمال روابط سجلات المكوّنات'
-                  : 'قيم محسوبة؛ بعض روابط سجلات المكوّنات تحتاج مراجعة',
+                  : 'القيم الغذائية تحتاج إلى مراجعة.',
             ),
             style: const TextStyle(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 6),
           Directionality(
-            textDirection: TextDirection.ltr,
-            child: Text(_nutritionLine(perServing), textAlign: TextAlign.start),
+            textDirection: _directionForLocale(locale),
+            child: Text(
+              _nutritionLine(
+                context,
+                ingredientsEvidenceComplete ? perServing : const {},
+              ),
+              textAlign: TextAlign.start,
+            ),
           ),
           const SizedBox(height: 6),
           Text(
@@ -784,39 +811,10 @@ class _RecipeDetails extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: () {
-              final timing = record['timing'] as Map<String, dynamic>;
-              final serving = record['serving'] as Map<String, dynamic>;
-              final canonicalIngredients = (record['ingredients'] as List)
-                  .cast<Map<String, dynamic>>();
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => TrustedRecipeImportPage(
-                    initialDraft: TrustedRecipeDraft(
-                      name: localization['title'] as String,
-                      servings: serving['count'] as int,
-                      prepMinutes: timing['prepMinutes'] as int,
-                      cookMinutes: timing['cookMinutes'] as int,
-                      ingredients: [
-                        for (
-                          var index = 0;
-                          index < canonicalIngredients.length;
-                          index++
-                        )
-                          TrustedRecipeIngredient(
-                            name:
-                                canonicalIngredients[index]['itemId'] as String,
-                            quantity:
-                                (canonicalIngredients[index]['quantity'] as num)
-                                    .toDouble(),
-                            unit: canonicalIngredients[index]['unit'] as String,
-                            sourceRecordId:
-                                canonicalIngredients[index]['recordId']
-                                    as String?,
-                          ),
-                      ],
-                      steps: steps,
-                      sourceUrl: null,
-                    ),
+                    initialDraft: CatalogRecipeDraft.fromDetail(detail, locale),
                   ),
                 ),
               );

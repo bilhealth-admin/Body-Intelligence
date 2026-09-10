@@ -2,8 +2,12 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/dart_library_source.dart';
+
 void main() {
-  String source(String path) => File(path).readAsStringSync();
+  String source(String path) => path.endsWith('.dart')
+      ? readDartLibrarySource(path)
+      : File(path).readAsStringSync();
 
   test(
     'community repository exposes the complete authenticated social loop',

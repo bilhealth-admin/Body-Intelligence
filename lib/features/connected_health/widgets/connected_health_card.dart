@@ -115,6 +115,28 @@ class ConnectedHealthCard extends ConsumerStatefulWidget {
 }
 
 class _ConnectedHealthCardState extends ConsumerState<ConnectedHealthCard> {
+  bool _refreshing = false;
+
+  Future<void> _synchronizeSnapshot() async {
+    if (_refreshing) return;
+    setState(() => _refreshing = true);
+    final health = ref.read(connectedHealthProvider).value;
+    final devices = ref.read(fitnessDeviceProvider);
+    final hasBle = devices.status == FitnessDeviceConnectionStatus.connected;
+    // The refresh control follows the source actually represented on the
+    // face. A BLE-only user must not silently get an unrelated HealthKit call.
+    try {
+      if (hasBle) {
+        await ref.read(fitnessDeviceProvider.notifier).refreshMeasurements();
+      }
+      if (!hasBle || health?.deviceVerified == true) {
+        await ref.read(connectedHealthProvider.notifier).synchronize();
+      }
+    } finally {
+      if (mounted) setState(() => _refreshing = false);
+    }
+  }
+
   String tr(String en, String ar) =>
       connectedHealthTextForLanguage(widget.languageCode, en, ar);
 
@@ -134,21 +156,23 @@ class _ConnectedHealthCardState extends ConsumerState<ConnectedHealthCard> {
         child: state.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (_, _) => ConnectedHealthErrorContent(
-            languageCode: widget.languageCode,
+            languageCode: Localizations.localeOf(context).toLanguageTag(),
             onRetry: () => ref.read(connectedHealthProvider.notifier).refresh(),
           ),
           data: (snapshot) => _ConnectedHealthContent(
-            snapshot: snapshot,
+            snapshot: snapshot.copyWith(isBusy: snapshot.isBusy || _refreshing),
             fitnessDevices: fitnessDevices,
-            languageCode: widget.languageCode,
+            languageCode: Localizations.localeOf(context).toLanguageTag(),
             compact: widget.compact,
             dashboardCompact: widget.dashboardCompact,
             hiddenSignalKeys: widget.hiddenSignalKeys,
             onManage: () => context.push('/connected-health'),
-            onSync: snapshot.status == ConnectedHealthStatus.syncing
+            onSync:
+                _refreshing ||
+                    snapshot.isBusy ||
+                    snapshot.status == ConnectedHealthStatus.syncing
                 ? null
-                : () =>
-                      ref.read(connectedHealthProvider.notifier).synchronize(),
+                : _synchronizeSnapshot,
           ),
         ),
       ),
@@ -166,7 +190,7 @@ class _DashboardDevicePreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final inherited = MediaQuery.of(context);
     final scale = inherited.textScaler.scale(1).clamp(1.0, 2.0).toDouble();
-    final previewSide = 212 + ((scale - 1) * 68);
+    final previewSide = 248 + ((scale - 1) * 68);
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(
@@ -225,6 +249,7 @@ class _ConnectedHealthContent extends StatelessWidget {
             snapshot: snapshot,
             fitnessDevices: fitnessDevices,
             languageCode: languageCode,
+            onSync: onSync,
           ),
         ),
       );
@@ -481,11 +506,13 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
     required this.snapshot,
     required this.fitnessDevices,
     required this.languageCode,
+    required this.onSync,
   });
 
   final ConnectedHealthSnapshot snapshot;
   final FitnessDeviceSnapshot fitnessDevices;
   final String languageCode;
+  final VoidCallback? onSync;
 
   String tr(String en, String ar) =>
       connectedHealthTextForLanguage(languageCode, en, ar);
@@ -517,8 +544,6 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
               ),
             ),
             ConnectedHealthStatusDot(status: watchSnapshot.status),
-            const SizedBox(width: 8),
-            const Icon(Icons.arrow_forward_rounded, size: 21),
           ],
         ),
         const SizedBox(height: 10),
@@ -549,6 +574,8 @@ class _DashboardHealthDeviceSection extends StatelessWidget {
                   _DashboardSyncReading(
                     syncedAt: syncedAt,
                     languageCode: languageCode,
+                    onSync: onSync,
+                    syncing: snapshot.isBusy,
                   ),
             ],
           ),
@@ -562,19 +589,36 @@ class _DashboardSyncReading extends StatelessWidget {
   const _DashboardSyncReading({
     required this.syncedAt,
     required this.languageCode,
+    required this.onSync,
+    required this.syncing,
   });
 
   final DateTime syncedAt;
   final String languageCode;
+  final VoidCallback? onSync;
+  final bool syncing;
 
   @override
-  Widget build(BuildContext context) => Chip(
+  Widget build(BuildContext context) => OutlinedButton.icon(
     key: const Key('dashboard-fitness-last-sync'),
-    avatar: const Icon(Icons.sync_rounded, size: 17),
+    // Consume taps while busy too: they must not reach the parent card's
+    // navigation gesture. The controller also coalesces repeated requests.
+    onPressed: onSync ?? () {},
+    icon: syncing
+        ? const SizedBox.square(
+            dimension: 17,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          )
+        : const Icon(Icons.sync_rounded, size: 17),
     label: Text(
-      '${connectedHealthTextForLanguage(languageCode, 'Last sync', 'آخر مزامنة')}  ${TimeOfDay.fromDateTime(syncedAt).format(context)}',
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
+      syncing
+          ? connectedHealthTextForLanguage(
+              languageCode,
+              'Synchronizing…',
+              'تتم المزامنة…',
+            )
+          : '${connectedHealthTextForLanguage(languageCode, 'Last sync', 'آخر مزامنة')}  ${TimeOfDay.fromDateTime(syncedAt.toLocal()).format(context)}',
+      textAlign: TextAlign.center,
     ),
   );
 }

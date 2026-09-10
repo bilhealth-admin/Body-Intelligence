@@ -79,7 +79,9 @@ final class CommunityPostCloudStore
     final boundedLimit = limit.clamp(1, 100);
     final selection = _client
         .from('bil_community_posts')
-        .select(_postSelection);
+        .select(_postSelection)
+        .eq('moderation_status', 'approved')
+        .isFilter('deleted_at', null);
     final filtered = before == null
         ? selection
         : selection.or(

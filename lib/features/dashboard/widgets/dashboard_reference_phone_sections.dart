@@ -49,15 +49,19 @@ class _ReferenceDiscoverGrid extends StatelessWidget {
         '/wellness/recipes',
         true,
       ),
-      if (AppEnvironment.communityConfigured) ...[
-        (
-          'assets/images/flagship/bil_body_intelligence_journey_v1.png',
-          Icons.group_outlined,
-          _referenceText(context, 'Friends', 'الأصدقاء'),
-          _referenceText(context, 'Your support squad', 'دائرة دعمك'),
-          '/community/connections',
-          true,
+      (
+        'assets/images/flagship/bil_movement_v1.png',
+        Icons.play_circle_outline_rounded,
+        _referenceText(context, 'Workout videos', 'فيديوهات التمارين'),
+        _referenceText(
+          context,
+          'Videos & training routines',
+          'فيديوهات وروتينات تدريبية',
         ),
+        '/wellness/workouts/routines',
+        true,
+      ),
+      if (AppEnvironment.communityConfigured) ...[
         (
           'assets/images/dashboard/bio_intelligence_v1.png',
           Icons.forum_outlined,

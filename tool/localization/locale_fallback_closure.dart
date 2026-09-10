@@ -14,6 +14,10 @@ import 'package:body_intelligence_log/app/localization/runtime_copy_community_mo
 import 'package:body_intelligence_log/app/localization/runtime_copy_community_social.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_admin_notifications.dart';
 import 'package:body_intelligence_log/app/localization/runtime_copy_sleep_schedule.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_coach_review.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_health_device_status.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_health_devices_review.dart';
+import 'package:body_intelligence_log/app/localization/runtime_copy_community_review.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_form_copy.dart';
 import 'package:body_intelligence_log/features/community/presentation/community_safety_locale_copy.dart';
 
@@ -48,7 +52,7 @@ const _androidQualifiers = <String, String>{
   'ur': 'values-ur',
   'fa': 'values-fa',
   'hi': 'values-hi',
-  'id': 'values-id',
+  'id': 'values-in',
   'ms': 'values-ms',
   'ja': 'values-ja',
   'ko': 'values-ko',
@@ -129,6 +133,14 @@ Future<LocaleFallbackClosureResult> auditLocaleFallbackClosure() async {
     ...CommunitySocialRuntimeCopy.sources,
     ...AdminNotificationRuntimeCopy.values.keys,
     ...SleepScheduleRuntimeCopy.sources,
+    ...CoachReviewRuntimeCopy.keys,
+    CoachReviewRuntimeCopy.deleteSelection,
+    CoachReviewRuntimeCopy.cameraRationale,
+    CoachReviewRuntimeCopy.settingsRecovery,
+    ...HealthDeviceStatusCopy.sources,
+    ...HealthDevicesReviewCopy.sources,
+    ...CommunityReviewCopy.keys,
+    ...CommunityReviewCopy.statusKeys,
     ...CommunityFormCopy.catalogSources,
     ...communitySafetyEnglishKeys,
     ...communityPolicyEnglishKeys,

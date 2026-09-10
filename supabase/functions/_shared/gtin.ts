@@ -1,6 +1,8 @@
 /** Validates exact GTIN-8, UPC-A, EAN-13, or GTIN-14 digits and check digit. */
 export function isValidGtin(value: unknown): value is string {
-  if (typeof value !== 'string' || !/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(value)) {
+  if (
+    typeof value !== "string" || !/^(?:\d{8}|\d{12}|\d{13}|\d{14})$/.test(value)
+  ) {
     return false;
   }
   const digits = [...value].map(Number);

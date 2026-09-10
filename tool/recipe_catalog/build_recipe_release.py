@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -133,7 +134,13 @@ def validate_record(record: dict) -> None:
     values = nutrition.get("perServing", {})
     if nutrition.get("status") != "calculated" or not nutrition.get("sourceRefs"):
         raise ValueError(f"nutrition is not source-backed calculated data: {recipe_id}")
-    if not values or any(isinstance(value, bool) or not isinstance(value, (int, float)) or value < 0 for value in values.values()):
+    missing = nutrition.get("missingNutrients", [])
+    optional = {"fiberG", "sugarG", "sodiumMg", "potassiumMg"}
+    if (not values or not set(missing) <= optional or
+        any((key not in missing or key not in optional) if value is None else
+            isinstance(value, bool) or not isinstance(value, (int, float)) or
+            not math.isfinite(value) or value < 0 for key, value in values.items()) or
+        any(values.get(key) is not None for key in missing)):
         raise ValueError(f"invalid nutrition values: {recipe_id}")
     if any(marker in text for text in localized_strings(record) for marker in MOJIBAKE):
         raise ValueError(f"residual mojibake: {recipe_id}")

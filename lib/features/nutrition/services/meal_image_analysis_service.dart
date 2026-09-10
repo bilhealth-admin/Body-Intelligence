@@ -100,7 +100,8 @@ class MealImageAnalysisService {
         }
       }
       if (response != null &&
-          !_transientStatusCodes.contains(response.statusCode)) {
+          (_isLanguageMismatch(response) ||
+              !_transientStatusCodes.contains(response.statusCode))) {
         break;
       }
     }
@@ -130,6 +131,11 @@ class MealImageAnalysisService {
       );
     }
     if (response.statusCode != HttpStatus.ok) {
+      if (_isLanguageMismatch(response)) {
+        throw const MealImageAnalysisException(
+          MealImageAnalysisFailure.languageMismatch,
+        );
+      }
       throw const MealImageAnalysisException(
         MealImageAnalysisFailure.serviceUnavailable,
       );
@@ -146,6 +152,21 @@ class MealImageAnalysisService {
   }
 
   static const _allowedMimeTypes = {'image/jpeg', 'image/png', 'image/webp'};
+
+  // A language-contract failure is not transient: do not run the same paid
+  // analysis twice. Interpret only a bounded machine code, never remote copy.
+  static bool _isLanguageMismatch(MealImageGatewayResponse response) {
+    if (response.statusCode == HttpStatus.ok || response.body.length >= 2048) {
+      return false;
+    }
+    try {
+      final failure = jsonDecode(response.body);
+      return failure is Map && failure['error'] == 'vision_language_mismatch';
+    } on FormatException {
+      return false;
+    }
+  }
+
   static const _transientStatusCodes = {
     HttpStatus.badGateway,
     HttpStatus.serviceUnavailable,

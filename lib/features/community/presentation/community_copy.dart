@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../../../app/localization/bil_locale_policy.dart';
 import '../../../app/localization/runtime_copy_community_moderation.dart';
 import '../../../app/localization/runtime_copy_community_social.dart';
+import '../../../app/localization/runtime_copy_community_review.dart';
 import '../../../app/localization/runtime_copy_extended.dart';
 import 'community_form_copy.dart';
 import 'community_media_locale_copy.dart';
@@ -26,7 +27,8 @@ String communityTextForLanguage(String languageCode, String en, String ar) {
     'Check again' => 'Retry',
     _ => en,
   };
-  return CommunitySocialRuntimeCopy.resolve(catalogEnglish, canonical) ??
+  return CommunityReviewCopy.resolve(catalogEnglish, canonical) ??
+      CommunitySocialRuntimeCopy.resolve(catalogEnglish, canonical) ??
       (code == 'ar' ? ar : null) ??
       CommunityFormCopy.resolve(catalogEnglish, canonical) ??
       CommunityModerationRuntimeCopy.resolve(catalogEnglish, canonical) ??

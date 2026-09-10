@@ -1,170 +1,5 @@
 part of 'intelligence_center_page.dart';
 
-class _CoachMenuSheet extends StatelessWidget {
-  const _CoachMenuSheet();
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(18, 2, 18, 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              intelligenceText(context, 'Your BIL Coach', 'مدرب BIL الخاص بك'),
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              intelligenceText(
-                context,
-                'Memory and preferences stay one tap away.',
-                'ذاكرتك وتفضيلاتك على بُعد لمسة.',
-              ),
-              style: TextStyle(color: scheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: 16),
-            _CoachMenuTile(
-              icon: Icons.forum_outlined,
-              title: intelligenceText(
-                context,
-                'Conversation history',
-                'سجل المحادثات',
-              ),
-              subtitle: intelligenceText(
-                context,
-                'Open an earlier chat or start a new one',
-                'افتح محادثة سابقة أو ابدأ محادثة جديدة',
-              ),
-              onTap: () => Navigator.of(context).pop('history'),
-            ),
-            const SizedBox(height: 9),
-            _CoachMenuTile(
-              icon: Icons.psychology_alt_rounded,
-              title: intelligenceText(
-                context,
-                'What BIL remembers',
-                'ماذا يتذكر BIL عني',
-              ),
-              subtitle: intelligenceText(
-                context,
-                'Review the context behind your decisions',
-                'راجع السياق الذي يبني عليه قراراتك',
-              ),
-              onTap: () => Navigator.of(context).pop('memory'),
-            ),
-            const SizedBox(height: 9),
-            _CoachMenuTile(
-              icon: Icons.tune_rounded,
-              title: intelligenceText(
-                context,
-                'Coach preferences',
-                'تفضيلات المدرب',
-              ),
-              subtitle: intelligenceText(
-                context,
-                'Personal AI, voice, and response style',
-                'الذكاء الشخصي والصوت وأسلوب الرد',
-              ),
-              onTap: () => Navigator.of(context).pop('settings'),
-            ),
-            const SizedBox(height: 9),
-            _CoachMenuTile(
-              icon: Icons.delete_sweep_outlined,
-              title: intelligenceText(
-                context,
-                'Clear conversation',
-                'مسح المحادثة',
-              ),
-              subtitle: intelligenceText(
-                context,
-                'Start a clean coaching session',
-                'ابدأ جلسة تدريب جديدة',
-              ),
-              onTap: () => Navigator.of(context).pop('clear'),
-              destructive: true,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CoachMenuTile extends StatelessWidget {
-  const _CoachMenuTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-    this.destructive = false,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-  final bool destructive;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final accent = destructive ? scheme.error : const Color(0xFF12394E);
-    return Material(
-      color: destructive
-          ? scheme.errorContainer.withValues(alpha: .22)
-          : const Color(0xFFF2F7FA),
-      borderRadius: BorderRadius.circular(20),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: .1),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(icon, color: accent, size: 21),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(fontWeight: FontWeight.w800),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right_rounded, color: scheme.outline),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _InlineCoachDecision extends StatelessWidget {
   const _InlineCoachDecision({required this.brief, required this.onAction});
 
@@ -315,100 +150,119 @@ class _CoachHero extends StatelessWidget {
         label: status.isEmpty
             ? '$coachName. $voiceDescription'
             : '$coachName. $voiceDescription. $status',
-        child: Row(
-          children: [
-            _CoachHeroControl(
-              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-              icon: const BackButtonIcon(),
-              onPressed: onBack,
-              size: 32,
-            ),
-            const SizedBox(width: 7),
-            _CoachHeroPortrait(
-              size: 48,
-              onTap: interactionEnabled ? onHistory : null,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact =
+                constraints.maxWidth < 480 ||
+                MediaQuery.textScalerOf(context).scale(14) > 19;
+            final identity = Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     coachName,
-                    maxLines: 1,
+                    maxLines: compact ? 2 : 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w900,
-                      letterSpacing: -.2,
                     ),
                   ),
-                  const SizedBox(height: 1),
                   Text(
                     voiceTagline,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: light.withValues(alpha: .86),
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelSmall?.copyWith(color: light),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(width: 3),
-            Flexible(
-              child: _CoachStatusBadge(
-                active: active,
-                status: status,
-                light: light,
-              ),
-            ),
-            const SizedBox(width: 3),
-            IconButton(
-              key: const Key('ai-coach-hero-start'),
-              tooltip: callLabel,
-              onPressed: interactionEnabled ? onStart : null,
-              style: IconButton.styleFrom(
-                foregroundColor: light,
-                backgroundColor: Colors.white.withValues(alpha: .08),
-                minimumSize: const Size.square(36),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              icon: Icon(
-                liveCallActive && !liveCallPaused
-                    ? Icons.pause_rounded
-                    : Icons.mic_none_rounded,
-                size: 19,
-              ),
-            ),
-            if (liveCallActive) ...[
-              const SizedBox(width: 3),
+            );
+            final controls = <Widget>[
               IconButton(
-                key: const Key('ai-coach-live-call-stop'),
-                tooltip: stopLabel,
-                onPressed: interactionEnabled ? onStop : null,
+                key: const Key('ai-coach-hero-start'),
+                tooltip: callLabel,
+                onPressed: interactionEnabled ? onStart : null,
                 style: IconButton.styleFrom(
-                  foregroundColor: Colors.white70,
-                  backgroundColor: Colors.white.withValues(alpha: .06),
-                  minimumSize: const Size.square(36),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  foregroundColor: light,
+                  backgroundColor: Colors.white.withValues(alpha: .08),
+                  minimumSize: const Size.square(48),
+                  tapTargetSize: MaterialTapTargetSize.padded,
                 ),
-                icon: const Icon(Icons.call_end_rounded, size: 18),
+                icon: Icon(
+                  liveCallActive && !liveCallPaused
+                      ? Icons.pause_rounded
+                      : Icons.mic_none_rounded,
+                ),
               ),
-            ],
-            const SizedBox(width: 3),
-            _CoachHeroControl(
-              tooltip: intelligenceText(
-                context,
-                'Coach controls',
-                'أدوات المدرب',
+              if (liveCallActive)
+                IconButton(
+                  key: const Key('ai-coach-live-call-stop'),
+                  tooltip: stopLabel,
+                  onPressed: interactionEnabled ? onStop : null,
+                  style: IconButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.square(48),
+                    tapTargetSize: MaterialTapTargetSize.padded,
+                  ),
+                  icon: const Icon(Icons.call_end_rounded),
+                ),
+            ];
+            final statusBadge = Flexible(
+              child: Semantics(
+                liveRegion: true,
+                child: _CoachStatusBadge(
+                  active: active,
+                  status: status,
+                  light: light,
+                ),
               ),
-              icon: const Icon(Icons.tune_rounded, size: 19),
-              onPressed: interactionEnabled ? onMenu : null,
-            ),
-          ],
+            );
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    _CoachHeroControl(
+                      tooltip: MaterialLocalizations.of(
+                        context,
+                      ).backButtonTooltip,
+                      icon: const BackButtonIcon(),
+                      onPressed: onBack,
+                    ),
+                    const SizedBox(width: 6),
+                    _CoachHeroPortrait(
+                      size: 48,
+                      onTap: interactionEnabled ? onHistory : null,
+                    ),
+                    const SizedBox(width: 8),
+                    identity,
+                    if (!compact) ...[statusBadge, ...controls],
+                    _CoachHeroControl(
+                      tooltip: intelligenceText(
+                        context,
+                        'Coach controls',
+                        'أدوات المدرب',
+                      ),
+                      icon: const Icon(Icons.tune_rounded),
+                      onPressed: interactionEnabled ? onMenu : null,
+                    ),
+                  ],
+                ),
+                if (compact)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      statusBadge,
+                      const SizedBox(width: 8),
+                      ...controls,
+                    ],
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -473,13 +327,11 @@ class _CoachHeroControl extends StatelessWidget {
     required this.tooltip,
     required this.icon,
     required this.onPressed,
-    this.size = 36,
   });
 
   final String tooltip;
   final Widget icon;
   final VoidCallback? onPressed;
-  final double size;
 
   @override
   Widget build(BuildContext context) => IconButton(
@@ -488,8 +340,8 @@ class _CoachHeroControl extends StatelessWidget {
     style: IconButton.styleFrom(
       foregroundColor: Colors.white,
       backgroundColor: Colors.white.withValues(alpha: .08),
-      minimumSize: Size.square(size),
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      minimumSize: const Size.square(48),
+      tapTargetSize: MaterialTapTargetSize.padded,
     ),
     icon: icon,
   );

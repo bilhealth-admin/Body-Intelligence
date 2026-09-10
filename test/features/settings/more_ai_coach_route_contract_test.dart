@@ -155,7 +155,8 @@ void main() {
         find.byKey(const ValueKey('premium-route-protected-content')),
         findsOneWidget,
       );
-      expect(find.text('BIL PREMIUM AI COACH'), findsWidgets);
+      expect(find.text('BIL AI BOOST'), findsWidgets);
+      expect(find.text('BIL PREMIUM AI COACH'), findsNothing);
       expect(find.byType(SettingsPage), findsNothing);
     }
 

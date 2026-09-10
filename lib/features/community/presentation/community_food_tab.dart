@@ -96,7 +96,15 @@ class _CommunityFoodTabState extends State<_CommunityFoodTab> {
           Card(
             child: ListTile(
               title: Text(row['canonical_name'] as String),
-              subtitle: Text(row['status'] as String),
+              subtitle: Text(switch (row['status']) {
+                'approved' => communityText(context, 'Approved', 'معتمد'),
+                'rejected' => communityText(context, 'Rejected', 'مرفوض'),
+                _ => communityText(
+                  context,
+                  'Pending review',
+                  'بانتظار المراجعة',
+                ),
+              }),
               trailing: Icon(
                 row['status'] == 'approved'
                     ? Icons.verified_outlined

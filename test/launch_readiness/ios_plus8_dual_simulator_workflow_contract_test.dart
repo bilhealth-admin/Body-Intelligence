@@ -226,10 +226,16 @@ void main() {
       backendOracle,
       isNot(contains("insertReturning('bil_content_policy_acceptances'")),
     );
-    expect(backendOracle, contains('DISPOSABLE_POLICY_ACCEPTANCE_SEEDED=false'));
+    expect(
+      backendOracle,
+      contains('DISPOSABLE_POLICY_ACCEPTANCE_SEEDED=false'),
+    );
     expect(uiDriver, contains("'bil://community/safety'"));
     expect(uiDriver, contains('verify-disposable-policy-and-post'));
-    expect(backendOracle, contains('disposable_policy_was_not_accepted_in_app'));
+    expect(
+      backendOracle,
+      contains('disposable_policy_was_not_accepted_in_app'),
+    );
   });
 
   test(

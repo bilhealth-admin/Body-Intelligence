@@ -85,7 +85,7 @@ void main() {
     expect(migration, contains('enable row level security'));
     expect(migration, contains('auth.uid()'));
     expect(migration, contains('bil_claim_sensitive_request'));
-    expect(function, contains("request.headers.get('x-idempotency-key')"));
+    expect(function, contains('request.headers.get("x-idempotency-key")'));
     expect(function, contains("auth.auth.getUser()"));
   });
 }

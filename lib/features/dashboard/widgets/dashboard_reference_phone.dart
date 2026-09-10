@@ -25,6 +25,8 @@ class _ReferenceDashboardPhone extends StatelessWidget {
     required this.nutrientDashboardPreset,
     required this.weightTrendValues,
     required this.stepTrendValues,
+    required this.stepSourceName,
+    this.todaySteps,
     required this.weightUnit,
     required this.loggingItems,
     required this.hero,
@@ -64,6 +66,8 @@ class _ReferenceDashboardPhone extends StatelessWidget {
   final String nutrientDashboardPreset;
   final List<double> weightTrendValues;
   final List<double> stepTrendValues;
+  final String? stepSourceName;
+  final double? todaySteps;
   final String weightUnit;
   final List<DashboardLoggingItem> loggingItems;
   final Widget? hero;
@@ -269,6 +273,8 @@ class _ReferenceDashboardPhone extends StatelessWidget {
           _ReferenceTrendRail(
             weightValues: weightTrendValues,
             stepValues: stepTrendValues,
+            todaySteps: todaySteps,
+            stepSourceName: stepSourceName,
             weightUnit: weightUnit,
           ),
         ],

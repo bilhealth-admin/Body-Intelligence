@@ -75,6 +75,7 @@ Future<List<MealImageReviewSelection>?> showMealImageReviewDialog(
   BuildContext context, {
   required MealImageAnalysis analysis,
 }) {
+  final locale = BilLocalePolicy.canonicalTag(Localizations.localeOf(context));
   final copy = _VisionReviewCopy.ofLocale(Localizations.localeOf(context));
   final selected = <int>{};
   final amounts = <TextEditingController>[
@@ -83,7 +84,7 @@ Future<List<MealImageReviewSelection>?> showMealImageReviewDialog(
   ];
   final units = <TextEditingController>[
     for (final item in analysis.candidates)
-      TextEditingController(text: item.unit ?? ''),
+      TextEditingController(text: mealImageUnitLabel(item.unit ?? '', locale)),
   ];
   return showDialog<List<MealImageReviewSelection>>(
     context: context,
@@ -126,7 +127,10 @@ Future<List<MealImageReviewSelection>?> showMealImageReviewDialog(
                       final amount = double.tryParse(
                         amounts[index].text.trim(),
                       );
-                      final unit = units[index].text.trim();
+                      final unit = mealImageCanonicalUnit(
+                        units[index].text,
+                        locale,
+                      );
                       if (amount == null ||
                           !amount.isFinite ||
                           amount <= 0 ||

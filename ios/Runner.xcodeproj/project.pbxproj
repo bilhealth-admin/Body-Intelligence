@@ -12,6 +12,7 @@
 		A1B2C3D41F00000100000006 /* BILSpeechBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D41F00000100000005 /* BILSpeechBridge.swift */; };
 		A1B2C3D41F00000100000008 /* BILTextToSpeechBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D41F00000100000007 /* BILTextToSpeechBridge.swift */; };
 		A1B2C3D41F0000010000000A /* BILSystemCryptoBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D41F00000100000009 /* BILSystemCryptoBridge.swift */; };
+		D40909000000000000000002 /* BILSettingsSymbolsBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40909000000000000000001 /* BILSettingsSymbolsBridge.swift */; };
 		A1B2C3D41F0000010000000C /* BILObjCExceptionCatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D41F0000010000000B /* BILObjCExceptionCatcher.m */; };
 		C1D2E3F41F00000100000002 /* BILMicSoundBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D2E3F41F00000100000001 /* BILMicSoundBridge.swift */; };
 		C1D2E3F41F00000100000004 /* bil_mic_open_vibration.wav in Resources */ = {isa = PBXBuildFile; fileRef = C1D2E3F41F00000100000003 /* bil_mic_open_vibration.wav */; };
@@ -60,6 +61,7 @@
 		A1B2C3D41F00000100000005 /* BILSpeechBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BILSpeechBridge.swift; sourceTree = "<group>"; };
 		A1B2C3D41F00000100000007 /* BILTextToSpeechBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BILTextToSpeechBridge.swift; sourceTree = "<group>"; };
 		A1B2C3D41F00000100000009 /* BILSystemCryptoBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BILSystemCryptoBridge.swift; sourceTree = "<group>"; };
+		D40909000000000000000001 /* BILSettingsSymbolsBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BILSettingsSymbolsBridge.swift; sourceTree = "<group>"; };
 		A1B2C3D41F0000010000000B /* BILObjCExceptionCatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BILObjCExceptionCatcher.m; sourceTree = "<group>"; };
 		C1D2E3F41F00000100000001 /* BILMicSoundBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BILMicSoundBridge.swift; sourceTree = "<group>"; };
 		C1D2E3F41F00000100000003 /* bil_mic_open_vibration.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = bil_mic_open_vibration.wav; sourceTree = "<group>"; };
@@ -179,6 +181,7 @@
 				A1B2C3D41F00000100000005 /* BILSpeechBridge.swift */,
 				A1B2C3D41F00000100000007 /* BILTextToSpeechBridge.swift */,
 				A1B2C3D41F00000100000009 /* BILSystemCryptoBridge.swift */,
+				D40909000000000000000001 /* BILSettingsSymbolsBridge.swift */,
 				A1B2C3D41F0000010000000B /* BILObjCExceptionCatcher.m */,
 				C1D2E3F41F00000100000001 /* BILMicSoundBridge.swift */,
 				C1D2E3F41F00000100000003 /* bil_mic_open_vibration.wav */,
@@ -428,6 +431,7 @@
 				A1B2C3D41F00000100000006 /* BILSpeechBridge.swift in Sources */,
 				A1B2C3D41F00000100000008 /* BILTextToSpeechBridge.swift in Sources */,
 				A1B2C3D41F0000010000000A /* BILSystemCryptoBridge.swift in Sources */,
+				D40909000000000000000002 /* BILSettingsSymbolsBridge.swift in Sources */,
 				A1B2C3D41F0000010000000C /* BILObjCExceptionCatcher.m in Sources */,
 				C1D2E3F41F00000100000002 /* BILMicSoundBridge.swift in Sources */,
 				D2E3F4A51F00000100000002 /* BILAppleSignInLifecycleBridge.swift in Sources */,

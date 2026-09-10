@@ -73958,15 +73958,23 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Замінити код BIL?",
     },
     "Your old code will stop working. Friends will need the new one.": {
-      "de": "Ihr alter Code wird nicht mehr funktionieren. Freunde werden das Neue brauchen.",
-      "it": "Il tuo vecchio codice smetterà di funzionare. Gli amici avranno bisogno di quello nuovo.",
-      "pt-BR": "Seu código antigo irá parar de funcionar. Os amigos precisarão do novo.",
-      "pt-PT": "O seu código antigo irá parar de funcionar. Os amigos precisarão do novo.",
-      "ur": "آپ کا پرانا کوڈ کام کرنا بند کر دے گا۔ دوستوں کو نئے کی ضرورت ہوگی۔",
+      "de":
+          "Ihr alter Code wird nicht mehr funktionieren. Freunde werden das Neue brauchen.",
+      "it":
+          "Il tuo vecchio codice smetterà di funzionare. Gli amici avranno bisogno di quello nuovo.",
+      "pt-BR":
+          "Seu código antigo irá parar de funcionar. Os amigos precisarão do novo.",
+      "pt-PT":
+          "O seu código antigo irá parar de funcionar. Os amigos precisarão do novo.",
+      "ur":
+          "آپ کا پرانا کوڈ کام کرنا بند کر دے گا۔ دوستوں کو نئے کی ضرورت ہوگی۔",
       "fa": "کد قدیمی شما کار نخواهد کرد. دوستان به جدید نیاز دارند.",
-      "hi": "आपका पुराना कोड काम करना बंद कर देगा. मित्रों को नये की आवश्यकता होगी।",
-      "id": "Kode lama Anda akan berhenti berfungsi. Teman akan membutuhkan yang baru.",
-      "ms": "Kod lama anda akan berhenti berfungsi. Kawan akan memerlukan yang baru.",
+      "hi":
+          "आपका पुराना कोड काम करना बंद कर देगा. मित्रों को नये की आवश्यकता होगी।",
+      "id":
+          "Kode lama Anda akan berhenti berfungsi. Teman akan membutuhkan yang baru.",
+      "ms":
+          "Kod lama anda akan berhenti berfungsi. Kawan akan memerlukan yang baru.",
       "ja": "古いコードは動作しなくなります。友達には新しいものが必要になるでしょう。",
       "ko": "이전 코드는 작동이 중지됩니다. 친구에게는 새로운 것이 필요합니다.",
       "zh-Hans": "您的旧代码将停止工作。朋友们将需要新的。",
@@ -73975,7 +73983,8 @@ abstract final class ExtendedRuntimeCopy {
       "bn": "আপনার পুরানো কোড কাজ করা বন্ধ হবে. বন্ধুদের নতুনের প্রয়োজন হবে।",
       "vi": "Mã cũ của bạn sẽ ngừng hoạt động. Bạn bè sẽ cần cái mới.",
       "th": "รหัสเก่าของคุณจะหยุดทำงาน เพื่อนจะต้องการอันใหม่",
-      "pl": "Twój stary kod przestanie działać. Przyjaciele będą potrzebować nowego.",
+      "pl":
+          "Twój stary kod przestanie działać. Przyjaciele będą potrzebować nowego.",
       "nl": "Uw oude code werkt niet meer. Vrienden hebben de nieuwe nodig.",
       "uk": "Ваш старий код перестане працювати. Новий знадобиться друзям.",
     },
@@ -74002,10 +74011,13 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Замінити код",
     },
     "Your BIL Code is unavailable right now. Try again.": {
-      "de": "Ihr BIL-Code ist derzeit nicht verfügbar. Versuchen Sie es erneut.",
+      "de":
+          "Ihr BIL-Code ist derzeit nicht verfügbar. Versuchen Sie es erneut.",
       "it": "Il tuo codice BIL non è al momento disponibile. Riprova.",
-      "pt-BR": "Seu código BIL não está disponível no momento. Tente novamente.",
-      "pt-PT": "O seu código BIL não se encontra disponível de momento. Tente novamente.",
+      "pt-BR":
+          "Seu código BIL não está disponível no momento. Tente novamente.",
+      "pt-PT":
+          "O seu código BIL não se encontra disponível de momento. Tente novamente.",
       "ur": "آپ کا BIL کوڈ ابھی دستیاب نہیں ہے۔ دوبارہ کوشش کریں۔",
       "fa": "کد BIL شما در حال حاضر در دسترس نیست. دوباره امتحان کنید.",
       "hi": "आपका BIL कोड अभी उपलब्ध नहीं है। पुनः प्रयास करें।",
@@ -74046,26 +74058,42 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Мій код BIL",
     },
     "Let a friend scan this code. It only identifies your public Community profile; it cannot sign anyone in.": {
-      "de": "Lassen Sie einen Freund diesen Code scannen. Es identifiziert lediglich Ihr öffentliches Community-Profil. Es kann niemanden angemeldet werden.",
-      "it": "Lascia che un amico scansioni questo codice. Identifica solo il tuo profilo comunitario pubblico; non può far accedere nessuno.",
-      "pt-BR": "Deixe um amigo digitalizar este código. Ele identifica apenas o perfil público da sua comunidade; não é possível conectar ninguém.",
-      "pt-PT": "Deixe um amigo digitalizar este código. Apenas identifica o perfil público da sua comunidade; não é possível ligar ninguém.",
-      "ur": "کسی دوست کو یہ کوڈ اسکین کرنے دیں۔ یہ صرف آپ کے عوامی کمیونٹی پروفائل کی شناخت کرتا ہے۔ یہ کسی کو سائن ان نہیں کر سکتا۔",
-      "fa": "اجازه دهید یکی از دوستان این کد را اسکن کند. این فقط نمایه عمومی جامعه شما را شناسایی می کند. نمی تواند کسی وارد شود.",
-      "hi": "किसी मित्र को यह कोड स्कैन करने दें. यह केवल आपकी सार्वजनिक सामुदायिक प्रोफ़ाइल की पहचान करता है; यह किसी को साइन इन नहीं कर सकता.",
-      "id": "Biarkan teman memindai kode ini. Ini hanya mengidentifikasi profil Komunitas publik Anda; itu tidak dapat membuat siapa pun masuk.",
-      "ms": "Biarkan rakan mengimbas kod ini. Ia hanya mengenal pasti profil Komuniti awam anda; ia tidak boleh melog masuk sesiapa.",
+      "de":
+          "Lassen Sie einen Freund diesen Code scannen. Es identifiziert lediglich Ihr öffentliches Community-Profil. Es kann niemanden angemeldet werden.",
+      "it":
+          "Lascia che un amico scansioni questo codice. Identifica solo il tuo profilo comunitario pubblico; non può far accedere nessuno.",
+      "pt-BR":
+          "Deixe um amigo digitalizar este código. Ele identifica apenas o perfil público da sua comunidade; não é possível conectar ninguém.",
+      "pt-PT":
+          "Deixe um amigo digitalizar este código. Apenas identifica o perfil público da sua comunidade; não é possível ligar ninguém.",
+      "ur":
+          "کسی دوست کو یہ کوڈ اسکین کرنے دیں۔ یہ صرف آپ کے عوامی کمیونٹی پروفائل کی شناخت کرتا ہے۔ یہ کسی کو سائن ان نہیں کر سکتا۔",
+      "fa":
+          "اجازه دهید یکی از دوستان این کد را اسکن کند. این فقط نمایه عمومی جامعه شما را شناسایی می کند. نمی تواند کسی وارد شود.",
+      "hi":
+          "किसी मित्र को यह कोड स्कैन करने दें. यह केवल आपकी सार्वजनिक सामुदायिक प्रोफ़ाइल की पहचान करता है; यह किसी को साइन इन नहीं कर सकता.",
+      "id":
+          "Biarkan teman memindai kode ini. Ini hanya mengidentifikasi profil Komunitas publik Anda; itu tidak dapat membuat siapa pun masuk.",
+      "ms":
+          "Biarkan rakan mengimbas kod ini. Ia hanya mengenal pasti profil Komuniti awam anda; ia tidak boleh melog masuk sesiapa.",
       "ja": "友人にこのコードをスキャンしてもらいましょう。公開コミュニティ プロフィールのみを識別します。誰もサインインすることはできません。",
       "ko": "친구에게 이 코드를 스캔하게 하세요. 이는 귀하의 공개 커뮤니티 프로필만 식별합니다. 누구도 로그인할 수 없습니다.",
       "zh-Hans": "让朋友扫描此代码。它仅识别您的公共社区个人资料；它无法让任何人登录。",
       "zh-Hant": "請朋友掃描此代碼。它僅識別您的公共社區個人資料；它無法讓任何人登入。",
-      "ru": "Позвольте другу отсканировать этот код. Он идентифицирует только ваш общедоступный профиль сообщества; он не может никого авторизовать.",
-      "bn": "একজন বন্ধুকে এই কোডটি স্ক্যান করতে দিন। এটি শুধুমাত্র আপনার সর্বজনীন সম্প্রদায় প্রোফাইল সনাক্ত করে; এটি কাউকে সাইন ইন করতে পারে না।",
-      "vi": "Hãy để một người bạn quét mã này. Nó chỉ xác định hồ sơ Cộng đồng công khai của bạn; nó không thể đăng nhập bất cứ ai.",
-      "th": "ให้เพื่อนสแกนโค้ดนี้ ระบุเฉพาะโปรไฟล์ชุมชนสาธารณะของคุณเท่านั้น มันไม่สามารถลงชื่อเข้าใช้ใครได้",
-      "pl": "Pozwól znajomemu zeskanować ten kod. Identyfikuje jedynie Twój publiczny profil społecznościowy; nie może nikogo zalogować.",
-      "nl": "Laat een vriend deze code scannen. Het identificeert alleen uw openbare communityprofiel; het kan niemand aanmelden.",
-      "uk": "Нехай друг просканує цей код. Він ідентифікує лише ваш публічний профіль спільноти; він не може нікого ввійти.",
+      "ru":
+          "Позвольте другу отсканировать этот код. Он идентифицирует только ваш общедоступный профиль сообщества; он не может никого авторизовать.",
+      "bn":
+          "একজন বন্ধুকে এই কোডটি স্ক্যান করতে দিন। এটি শুধুমাত্র আপনার সর্বজনীন সম্প্রদায় প্রোফাইল সনাক্ত করে; এটি কাউকে সাইন ইন করতে পারে না।",
+      "vi":
+          "Hãy để một người bạn quét mã này. Nó chỉ xác định hồ sơ Cộng đồng công khai của bạn; nó không thể đăng nhập bất cứ ai.",
+      "th":
+          "ให้เพื่อนสแกนโค้ดนี้ ระบุเฉพาะโปรไฟล์ชุมชนสาธารณะของคุณเท่านั้น มันไม่สามารถลงชื่อเข้าใช้ใครได้",
+      "pl":
+          "Pozwól znajomemu zeskanować ten kod. Identyfikuje jedynie Twój publiczny profil społecznościowy; nie może nikogo zalogować.",
+      "nl":
+          "Laat een vriend deze code scannen. Het identificeert alleen uw openbare communityprofiel; het kan niemand aanmelden.",
+      "uk":
+          "Нехай друг просканує цей код. Він ідентифікує лише ваш публічний профіль спільноти; він не може нікого ввійти.",
     },
     "Share code": {
       "de": "Code teilen",
@@ -74156,10 +74184,13 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Сканувати код друга",
     },
     "Code scanning needs an iOS or Android camera.": {
-      "de": "Für das Code-Scannen ist eine iOS- oder Android-Kamera erforderlich.",
+      "de":
+          "Für das Code-Scannen ist eine iOS- oder Android-Kamera erforderlich.",
       "it": "La scansione del codice richiede una fotocamera iOS o Android.",
-      "pt-BR": "A digitalização de código precisa de uma câmera iOS ou Android.",
-      "pt-PT": "A digitalização de código precisa de uma câmara iOS ou Android.",
+      "pt-BR":
+          "A digitalização de código precisa de uma câmera iOS ou Android.",
+      "pt-PT":
+          "A digitalização de código precisa de uma câmara iOS ou Android.",
       "ur": "کوڈ اسکیننگ کے لیے ایک iOS یا Android کیمرے کی ضرورت ہے۔",
       "fa": "اسکن کد به دوربین iOS یا Android نیاز دارد.",
       "hi": "कोड स्कैनिंग के लिए iOS या Android कैमरा की आवश्यकता होती है।",
@@ -74178,21 +74209,26 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Для сканування коду потрібна камера iOS або Android.",
     },
     "Point the camera at a BIL friend code. Nothing is uploaded.": {
-      "de": "Richten Sie die Kamera auf einen BIL-Freundescode. Es wird nichts hochgeladen.",
-      "it": "Punta la fotocamera su un codice amico BIL. Non viene caricato nulla.",
+      "de":
+          "Richten Sie die Kamera auf einen BIL-Freundescode. Es wird nichts hochgeladen.",
+      "it":
+          "Punta la fotocamera su un codice amico BIL. Non viene caricato nulla.",
       "pt-BR": "Aponte a câmera para um código de amigo BIL. Nada é carregado.",
       "pt-PT": "Aponte a câmara para um código de amigo BIL. Nada é carregado.",
       "ur": "کیمرے کو BIL فرینڈ کوڈ پر پوائنٹ کریں۔ کچھ بھی اپ لوڈ نہیں ہے۔",
       "fa": "دوربین را به سمت کد دوست BIL بگیرید. چیزی آپلود نمیشه",
-      "hi": "कैमरे को BIL मित्र कोड पर इंगित करें। कुछ भी अपलोड नहीं किया गया है.",
+      "hi":
+          "कैमरे को BIL मित्र कोड पर इंगित करें। कुछ भी अपलोड नहीं किया गया है.",
       "id": "Arahkan kamera ke kode teman BIL. Tidak ada yang diunggah.",
-      "ms": "Halakan kamera pada kod rakan BIL. Tiada apa-apa yang dimuat naik.",
+      "ms":
+          "Halakan kamera pada kod rakan BIL. Tiada apa-apa yang dimuat naik.",
       "ja": "BIL フレンド コードにカメラを向けます。何もアップロードされていません。",
       "ko": "카메라를 BIL 친구 코드로 향하세요. 아무것도 업로드되지 않았습니다.",
       "zh-Hans": "将相机对准 BIL 好友代码。没有上传任何内容。",
       "zh-Hant": "將相機對準 BIL 好友代碼。沒有上傳任何內容。",
       "ru": "Наведите камеру на код друга BIL. Ничего не загружается.",
-      "bn": "ক্যামেরাটিকে একটি BIL বন্ধু কোডে নির্দেশ করুন৷ কিছুই আপলোড করা হয় না.",
+      "bn":
+          "ক্যামেরাটিকে একটি BIL বন্ধু কোডে নির্দেশ করুন৷ কিছুই আপলোড করা হয় না.",
       "vi": "Hướng camera vào mã bạn bè BIL. Không có gì được tải lên.",
       "th": "เล็งกล้องไปที่รหัสเพื่อน BIL ไม่มีอะไรถูกอัปโหลด",
       "pl": "Skieruj aparat na kod znajomego BIL. Nic nie zostało przesłane.",
@@ -74200,9 +74236,11 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Наведіть камеру на код друга BIL. Нічого не завантажується.",
     },
     "Friend request could not be sent. Try again.": {
-      "de": "Freundschaftsanfrage konnte nicht gesendet werden. Versuchen Sie es erneut.",
+      "de":
+          "Freundschaftsanfrage konnte nicht gesendet werden. Versuchen Sie es erneut.",
       "it": "Impossibile inviare la richiesta di amicizia. Riprova.",
-      "pt-BR": "Não foi possível enviar a solicitação de amizade. Tente novamente.",
+      "pt-BR":
+          "Não foi possível enviar a solicitação de amizade. Tente novamente.",
       "pt-PT": "Não foi possível enviar o pedido de amizade. Tente novamente.",
       "ur": "دوستی کی درخواست نہیں بھیجی جا سکی۔ دوبارہ کوشش کریں۔",
       "fa": "درخواست دوستی ارسال نشد. دوباره امتحان کنید.",
@@ -74213,12 +74251,14 @@ abstract final class ExtendedRuntimeCopy {
       "ko": "친구 요청을 보낼 수 없습니다. 다시 시도해 보세요.",
       "zh-Hans": "无法发送好友请求。再试一次。",
       "zh-Hant": "無法發送好友請求。再試一次。",
-      "ru": "Не удалось отправить запрос на добавление в друзья. Попробуйте еще раз.",
+      "ru":
+          "Не удалось отправить запрос на добавление в друзья. Попробуйте еще раз.",
       "bn": "বন্ধুত্বের অনুরোধ পাঠানো যায়নি। আবার চেষ্টা করুন",
       "vi": "Không thể gửi yêu cầu kết bạn. Hãy thử lại.",
       "th": "ไม่สามารถส่งคำขอเป็นเพื่อนได้ ลองอีกครั้ง",
       "pl": "Nie można wysłać zaproszenia do znajomych. Spróbuj ponownie.",
-      "nl": "Vriendschapsverzoek kon niet worden verzonden. Probeer het opnieuw.",
+      "nl":
+          "Vriendschapsverzoek kon niet worden verzonden. Probeer het opnieuw.",
       "uk": "Не вдалося надіслати запит про дружбу. Спробуйте знову.",
     },
     "Add Friend": {
@@ -74266,10 +74306,13 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Запит на перегляд",
     },
     "This BIL Code is unavailable right now. Try again.": {
-      "de": "Dieser BIL-Code ist derzeit nicht verfügbar. Versuchen Sie es erneut.",
+      "de":
+          "Dieser BIL-Code ist derzeit nicht verfügbar. Versuchen Sie es erneut.",
       "it": "Questo codice BIL non è al momento disponibile. Riprova.",
-      "pt-BR": "Este código BIL não está disponível no momento. Tente novamente.",
-      "pt-PT": "Este código BIL não se encontra disponível de momento. Tente novamente.",
+      "pt-BR":
+          "Este código BIL não está disponível no momento. Tente novamente.",
+      "pt-PT":
+          "Este código BIL não se encontra disponível de momento. Tente novamente.",
       "ur": "یہ BIL کوڈ ابھی دستیاب نہیں ہے۔ دوبارہ کوشش کریں۔",
       "fa": "این کد BIL در حال حاضر در دسترس نیست. دوباره امتحان کنید.",
       "hi": "यह BIL कोड अभी उपलब्ध नहीं है। पुनः प्रयास करें।",
@@ -74310,54 +74353,89 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Увійдіть, щоб створити та поділитися своїм кодом BIL.",
     },
     "Save your Community profile first. Your BIL Code is then created automatically; you do not need to add a friend first.": {
-      "de": "Speichern Sie zunächst Ihr Community-Profil. Ihr BIL-Code wird dann automatisch erstellt; Sie müssen nicht zuerst einen Freund hinzufügen.",
-      "it": "Salva prima il profilo della tua community. Il tuo codice BIL viene quindi creato automaticamente; non è necessario aggiungere prima un amico.",
-      "pt-BR": "Salve seu perfil da comunidade primeiro. Seu código BIL é então criado automaticamente; você não precisa adicionar um amigo primeiro.",
-      "pt-PT": "Guarde primeiro o seu perfil da comunidade. O seu código BIL é então criado automaticamente; não precisa de adicionar um amigo primeiro.",
-      "ur": "پہلے اپنا کمیونٹی پروفائل محفوظ کریں۔ آپ کا BIL کوڈ خود بخود بن جاتا ہے۔ آپ کو پہلے کسی دوست کو شامل کرنے کی ضرورت نہیں ہے۔",
-      "fa": "ابتدا نمایه انجمن خود را ذخیره کنید. کد BIL شما به طور خودکار ایجاد می شود. لازم نیست ابتدا یک دوست اضافه کنید.",
-      "hi": "सबसे पहले अपना सामुदायिक प्रोफ़ाइल सहेजें. फिर आपका BIL कोड स्वचालित रूप से बन जाता है; आपको पहले किसी मित्र को जोड़ने की आवश्यकता नहीं है.",
-      "id": "Simpan profil Komunitas Anda terlebih dahulu. Kode BIL Anda kemudian dibuat secara otomatis; Anda tidak perlu menambahkan teman terlebih dahulu.",
-      "ms": "Simpan profil Komuniti anda dahulu. Kod BIL anda kemudiannya dicipta secara automatik; anda tidak perlu menambah rakan terlebih dahulu.",
+      "de":
+          "Speichern Sie zunächst Ihr Community-Profil. Ihr BIL-Code wird dann automatisch erstellt; Sie müssen nicht zuerst einen Freund hinzufügen.",
+      "it":
+          "Salva prima il profilo della tua community. Il tuo codice BIL viene quindi creato automaticamente; non è necessario aggiungere prima un amico.",
+      "pt-BR":
+          "Salve seu perfil da comunidade primeiro. Seu código BIL é então criado automaticamente; você não precisa adicionar um amigo primeiro.",
+      "pt-PT":
+          "Guarde primeiro o seu perfil da comunidade. O seu código BIL é então criado automaticamente; não precisa de adicionar um amigo primeiro.",
+      "ur":
+          "پہلے اپنا کمیونٹی پروفائل محفوظ کریں۔ آپ کا BIL کوڈ خود بخود بن جاتا ہے۔ آپ کو پہلے کسی دوست کو شامل کرنے کی ضرورت نہیں ہے۔",
+      "fa":
+          "ابتدا نمایه انجمن خود را ذخیره کنید. کد BIL شما به طور خودکار ایجاد می شود. لازم نیست ابتدا یک دوست اضافه کنید.",
+      "hi":
+          "सबसे पहले अपना सामुदायिक प्रोफ़ाइल सहेजें. फिर आपका BIL कोड स्वचालित रूप से बन जाता है; आपको पहले किसी मित्र को जोड़ने की आवश्यकता नहीं है.",
+      "id":
+          "Simpan profil Komunitas Anda terlebih dahulu. Kode BIL Anda kemudian dibuat secara otomatis; Anda tidak perlu menambahkan teman terlebih dahulu.",
+      "ms":
+          "Simpan profil Komuniti anda dahulu. Kod BIL anda kemudiannya dicipta secara automatik; anda tidak perlu menambah rakan terlebih dahulu.",
       "ja": "まずコミュニティプロフィールを保存してください。 BIL コードが自動的に作成されます。最初に友達を追加する必要はありません。",
       "ko": "먼저 커뮤니티 프로필을 저장하세요. 그러면 BIL 코드가 자동으로 생성됩니다. 먼저 친구를 추가할 필요는 없습니다.",
       "zh-Hans": "首先保存您的社区个人资料。然后将自动创建您的 BIL 代码；您无需先添加好友。",
       "zh-Hant": "首先儲存您的社區個人資料。然後將自動建立您的 BIL 代碼；您無需先新增好友。",
-      "ru": "Сначала сохраните свой профиль сообщества. Ваш код BIL будет создан автоматически; вам не нужно сначала добавлять друга.",
-      "bn": "প্রথমে আপনার কমিউনিটি প্রোফাইল সেভ করুন। আপনার BIL কোড তারপর স্বয়ংক্রিয়ভাবে তৈরি হয়; আপনাকে প্রথমে বন্ধু যোগ করার দরকার নেই।",
-      "vi": "Lưu hồ sơ Cộng đồng của bạn trước. Sau đó, Mã BIL của bạn sẽ được tạo tự động; bạn không cần phải thêm một người bạn trước.",
-      "th": "บันทึกโปรไฟล์ชุมชนของคุณก่อน รหัส BIL ของคุณจะถูกสร้างขึ้นโดยอัตโนมัติ คุณไม่จำเป็นต้องเพิ่มเพื่อนก่อน",
-      "pl": "Najpierw zapisz swój profil społeczności. Twój kod BIL zostanie wówczas utworzony automatycznie; nie musisz najpierw dodawać znajomego.",
-      "nl": "Sla eerst uw communityprofiel op. Uw BIL-code wordt vervolgens automatisch aangemaakt; je hoeft niet eerst een vriend toe te voegen.",
-      "uk": "Спочатку збережіть профіль спільноти. Потім ваш код BIL створюється автоматично; вам не потрібно спочатку додавати друга.",
+      "ru":
+          "Сначала сохраните свой профиль сообщества. Ваш код BIL будет создан автоматически; вам не нужно сначала добавлять друга.",
+      "bn":
+          "প্রথমে আপনার কমিউনিটি প্রোফাইল সেভ করুন। আপনার BIL কোড তারপর স্বয়ংক্রিয়ভাবে তৈরি হয়; আপনাকে প্রথমে বন্ধু যোগ করার দরকার নেই।",
+      "vi":
+          "Lưu hồ sơ Cộng đồng của bạn trước. Sau đó, Mã BIL của bạn sẽ được tạo tự động; bạn không cần phải thêm một người bạn trước.",
+      "th":
+          "บันทึกโปรไฟล์ชุมชนของคุณก่อน รหัส BIL ของคุณจะถูกสร้างขึ้นโดยอัตโนมัติ คุณไม่จำเป็นต้องเพิ่มเพื่อนก่อน",
+      "pl":
+          "Najpierw zapisz swój profil społeczności. Twój kod BIL zostanie wówczas utworzony automatycznie; nie musisz najpierw dodawać znajomego.",
+      "nl":
+          "Sla eerst uw communityprofiel op. Uw BIL-code wordt vervolgens automatisch aangemaakt; je hoeft niet eerst een vriend toe te voegen.",
+      "uk":
+          "Спочатку збережіть профіль спільноти. Потім ваш код BIL створюється автоматично; вам не потрібно спочатку додавати друга.",
     },
     "Community access is unavailable for this account, so a BIL Code cannot be created yet.": {
-      "de": "Für dieses Konto ist kein Community-Zugriff verfügbar, daher kann noch kein BIL-Code erstellt werden.",
-      "it": "L'accesso alla community non è disponibile per questo account, quindi non è ancora possibile creare un codice BIL.",
-      "pt-BR": "O acesso à comunidade não está disponível para esta conta, portanto, um código BIL ainda não pode ser criado.",
-      "pt-PT": "O acesso à comunidade não está disponível para esta conta, pelo que ainda não pode ser criado um código BIL.",
-      "ur": "اس اکاؤنٹ کے لیے کمیونٹی تک رسائی دستیاب نہیں ہے، اس لیے ابھی تک BIL کوڈ نہیں بنایا جا سکتا۔",
-      "fa": "دسترسی انجمن برای این حساب در دسترس نیست، بنابراین کد BIL هنوز نمی تواند ایجاد شود.",
-      "hi": "इस खाते के लिए सामुदायिक पहुंच अनुपलब्ध है, इसलिए BIL कोड अभी तक नहीं बनाया जा सकता है।",
-      "id": "Akses komunitas tidak tersedia untuk akun ini, sehingga Kode BIL belum dapat dibuat.",
-      "ms": "Akses komuniti tidak tersedia untuk akaun ini, jadi Kod BIL tidak boleh dibuat lagi.",
+      "de":
+          "Für dieses Konto ist kein Community-Zugriff verfügbar, daher kann noch kein BIL-Code erstellt werden.",
+      "it":
+          "L'accesso alla community non è disponibile per questo account, quindi non è ancora possibile creare un codice BIL.",
+      "pt-BR":
+          "O acesso à comunidade não está disponível para esta conta, portanto, um código BIL ainda não pode ser criado.",
+      "pt-PT":
+          "O acesso à comunidade não está disponível para esta conta, pelo que ainda não pode ser criado um código BIL.",
+      "ur":
+          "اس اکاؤنٹ کے لیے کمیونٹی تک رسائی دستیاب نہیں ہے، اس لیے ابھی تک BIL کوڈ نہیں بنایا جا سکتا۔",
+      "fa":
+          "دسترسی انجمن برای این حساب در دسترس نیست، بنابراین کد BIL هنوز نمی تواند ایجاد شود.",
+      "hi":
+          "इस खाते के लिए सामुदायिक पहुंच अनुपलब्ध है, इसलिए BIL कोड अभी तक नहीं बनाया जा सकता है।",
+      "id":
+          "Akses komunitas tidak tersedia untuk akun ini, sehingga Kode BIL belum dapat dibuat.",
+      "ms":
+          "Akses komuniti tidak tersedia untuk akaun ini, jadi Kod BIL tidak boleh dibuat lagi.",
       "ja": "このアカウントではコミュニティ アクセスが利用できないため、BIL コードはまだ作成できません。",
       "ko": "이 계정에서는 커뮤니티에 액세스할 수 없으므로 아직 BIL 코드를 생성할 수 없습니다.",
       "zh-Hans": "此帐户无法访问社区，因此尚无法创建 BIL 代码。",
       "zh-Hant": "此帳戶無法存取社區，因此尚無法建立 BIL 代碼。",
-      "ru": "Доступ к сообществу для этой учетной записи недоступен, поэтому код BIL пока создать невозможно.",
-      "bn": "এই অ্যাকাউন্টের জন্য কমিউনিটি অ্যাক্সেস অনুপলব্ধ, তাই একটি BIL কোড এখনও তৈরি করা যাবে না।",
-      "vi": "Tài khoản này không có quyền truy cập cộng đồng nên chưa thể tạo Mã BIL.",
-      "th": "การเข้าถึงชุมชนไม่พร้อมใช้งานสำหรับบัญชีนี้ ดังนั้นจึงยังไม่สามารถสร้างรหัส BIL ได้",
-      "pl": "Dostęp społeczności jest niedostępny dla tego konta, więc nie można jeszcze utworzyć kodu BIL.",
-      "nl": "Er is geen communitytoegang beschikbaar voor dit account, dus er kan nog geen BIL-code worden aangemaakt.",
-      "uk": "Доступ спільноти недоступний для цього облікового запису, тому код BIL ще не можна створити.",
+      "ru":
+          "Доступ к сообществу для этой учетной записи недоступен, поэтому код BIL пока создать невозможно.",
+      "bn":
+          "এই অ্যাকাউন্টের জন্য কমিউনিটি অ্যাক্সেস অনুপলব্ধ, তাই একটি BIL কোড এখনও তৈরি করা যাবে না।",
+      "vi":
+          "Tài khoản này không có quyền truy cập cộng đồng nên chưa thể tạo Mã BIL.",
+      "th":
+          "การเข้าถึงชุมชนไม่พร้อมใช้งานสำหรับบัญชีนี้ ดังนั้นจึงยังไม่สามารถสร้างรหัส BIL ได้",
+      "pl":
+          "Dostęp społeczności jest niedostępny dla tego konta, więc nie można jeszcze utworzyć kodu BIL.",
+      "nl":
+          "Er is geen communitytoegang beschikbaar voor dit account, dus er kan nog geen BIL-code worden aangemaakt.",
+      "uk":
+          "Доступ спільноти недоступний для цього облікового запису, тому код BIL ще не можна створити.",
     },
     "Your BIL Code could not be created right now. Try again.": {
-      "de": "Ihr BIL-Code konnte derzeit nicht erstellt werden. Versuchen Sie es erneut.",
+      "de":
+          "Ihr BIL-Code konnte derzeit nicht erstellt werden. Versuchen Sie es erneut.",
       "it": "Impossibile creare il tuo codice BIL in questo momento. Riprova.",
-      "pt-BR": "Seu código BIL não pôde ser criado no momento. Tente novamente.",
-      "pt-PT": "O seu código BIL não pôde ser criado de momento. Tente novamente.",
+      "pt-BR":
+          "Seu código BIL não pôde ser criado no momento. Tente novamente.",
+      "pt-PT":
+          "O seu código BIL não pôde ser criado de momento. Tente novamente.",
       "ur": "آپ کا BIL کوڈ ابھی نہیں بنایا جا سکتا۔ دوبارہ کوشش کریں۔",
       "fa": "کد BIL شما در حال حاضر ایجاد نشد. دوباره امتحان کنید.",
       "hi": "आपका BIL कोड अभी नहीं बनाया जा सका। पुनः प्रयास करें।",
@@ -74367,12 +74445,14 @@ abstract final class ExtendedRuntimeCopy {
       "ko": "지금은 BIL 코드를 생성할 수 없습니다. 다시 시도해 보세요.",
       "zh-Hans": "目前无法创建您的 BIL 代码。再试一次。",
       "zh-Hant": "目前無法建立您的 BIL 程式碼。再試一次。",
-      "ru": "Ваш код BIL не может быть создан прямо сейчас. Попробуйте еще раз.",
+      "ru":
+          "Ваш код BIL не может быть создан прямо сейчас. Попробуйте еще раз.",
       "bn": "আপনার BIL কোড এই মুহূর্তে তৈরি করা যায়নি। আবার চেষ্টা করুন",
       "vi": "Không thể tạo mã BIL của bạn ngay bây giờ. Hãy thử lại.",
       "th": "ไม่สามารถสร้างรหัส BIL ของคุณได้ในขณะนี้ ลองอีกครั้ง",
       "pl": "Nie można teraz utworzyć Twojego kodu BIL. Spróbuj ponownie.",
-      "nl": "Uw BIL-code kan momenteel niet worden aangemaakt. Probeer het opnieuw.",
+      "nl":
+          "Uw BIL-code kan momenteel niet worden aangemaakt. Probeer het opnieuw.",
       "uk": "Зараз неможливо створити ваш BIL код. Спробуйте знову.",
     },
     "Open Community profile": {
@@ -74398,20 +74478,23 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Відкрийте профіль спільноти",
     },
     "This code is invalid, expired, private, or unavailable.": {
-      "de": "Dieser Code ist ungültig, abgelaufen, privat oder nicht verfügbar.",
+      "de":
+          "Dieser Code ist ungültig, abgelaufen, privat oder nicht verfügbar.",
       "it": "Questo codice non è valido, è scaduto, privato o non disponibile.",
       "pt-BR": "Este código é inválido, expirou, privado ou indisponível.",
       "pt-PT": "Este código é inválido, expirou, privado ou indisponível.",
       "ur": "یہ کوڈ غلط، میعاد ختم، نجی یا غیر دستیاب ہے۔",
       "fa": "این کد نامعتبر، منقضی شده، خصوصی یا در دسترس نیست.",
       "hi": "यह कोड अमान्य, समाप्त, निजी या अनुपलब्ध है।",
-      "id": "Kode ini tidak valid, kedaluwarsa, bersifat pribadi, atau tidak tersedia.",
+      "id":
+          "Kode ini tidak valid, kedaluwarsa, bersifat pribadi, atau tidak tersedia.",
       "ms": "Kod ini tidak sah, tamat tempoh, peribadi atau tidak tersedia.",
       "ja": "このコードは無効であるか、期限切れであるか、非公開であるか、使用できません。",
       "ko": "이 코드는 유효하지 않거나 만료되었거나 비공개이거나 사용할 수 없습니다.",
       "zh-Hans": "此代码无效、已过期、私有或不可用。",
       "zh-Hant": "此代碼無效、已過期、私有或不可用。",
-      "ru": "Этот код недействителен, просрочен, является частным или недоступен.",
+      "ru":
+          "Этот код недействителен, просрочен, является частным или недоступен.",
       "bn": "এই কোডটি অবৈধ, মেয়াদোত্তীর্ণ, ব্যক্তিগত বা অনুপলব্ধ৷",
       "vi": "Mã này không hợp lệ, hết hạn, riêng tư hoặc không có sẵn.",
       "th": "รหัสนี้ไม่ถูกต้อง หมดอายุ เป็นส่วนตัว หรือไม่สามารถใช้ได้",
@@ -74420,26 +74503,42 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Цей код недійсний, прострочений, приватний або недоступний.",
     },
     "Camera access is denied or restricted. Enable it in system settings and retry.": {
-      "de": "Der Kamerazugriff ist verweigert oder eingeschränkt. Aktivieren Sie es in den Systemeinstellungen und versuchen Sie es erneut.",
-      "it": "L'accesso alla telecamera è negato o limitato. Abilitalo nelle impostazioni di sistema e riprova.",
-      "pt-BR": "O acesso à câmera é negado ou restrito. Ative-o nas configurações do sistema e tente novamente.",
-      "pt-PT": "O acesso à câmara é negado ou restrito. Ative-o nas definições do sistema e tente novamente.",
-      "ur": "کیمرے تک رسائی سے انکار یا پابندی ہے۔ اسے سسٹم کی ترتیبات میں فعال کریں اور دوبارہ کوشش کریں۔",
-      "fa": "دسترسی به دوربین ممنوع یا محدود شده است. آن را در تنظیمات سیستم فعال کنید و دوباره امتحان کنید.",
-      "hi": "कैमरा पहुंच अस्वीकृत या प्रतिबंधित है. इसे सिस्टम सेटिंग्स में सक्षम करें और पुनः प्रयास करें।",
-      "id": "Akses kamera ditolak atau dibatasi. Aktifkan di pengaturan sistem dan coba lagi.",
-      "ms": "Akses kamera dinafikan atau dihadkan. Dayakannya dalam tetapan sistem dan cuba semula.",
+      "de":
+          "Der Kamerazugriff ist verweigert oder eingeschränkt. Aktivieren Sie es in den Systemeinstellungen und versuchen Sie es erneut.",
+      "it":
+          "L'accesso alla telecamera è negato o limitato. Abilitalo nelle impostazioni di sistema e riprova.",
+      "pt-BR":
+          "O acesso à câmera é negado ou restrito. Ative-o nas configurações do sistema e tente novamente.",
+      "pt-PT":
+          "O acesso à câmara é negado ou restrito. Ative-o nas definições do sistema e tente novamente.",
+      "ur":
+          "کیمرے تک رسائی سے انکار یا پابندی ہے۔ اسے سسٹم کی ترتیبات میں فعال کریں اور دوبارہ کوشش کریں۔",
+      "fa":
+          "دسترسی به دوربین ممنوع یا محدود شده است. آن را در تنظیمات سیستم فعال کنید و دوباره امتحان کنید.",
+      "hi":
+          "कैमरा पहुंच अस्वीकृत या प्रतिबंधित है. इसे सिस्टम सेटिंग्स में सक्षम करें और पुनः प्रयास करें।",
+      "id":
+          "Akses kamera ditolak atau dibatasi. Aktifkan di pengaturan sistem dan coba lagi.",
+      "ms":
+          "Akses kamera dinafikan atau dihadkan. Dayakannya dalam tetapan sistem dan cuba semula.",
       "ja": "カメラへのアクセスが拒否または制限されています。システム設定で有効にして、再試行してください。",
       "ko": "카메라 액세스가 거부되거나 제한되었습니다. 시스템 설정에서 활성화하고 다시 시도하세요.",
       "zh-Hans": "相机访问被拒绝或限制。在系统设置中启用它并重试。",
       "zh-Hant": "相機存取被拒絕或限制。在系統設定中啟用它並重試。",
-      "ru": "Доступ к камере запрещен или ограничен. Включите его в настройках системы и повторите попытку.",
-      "bn": "ক্যামেরা অ্যাক্সেস অস্বীকৃত বা সীমাবদ্ধ। সিস্টেম সেটিংসে এটি সক্ষম করুন এবং পুনরায় চেষ্টা করুন।",
-      "vi": "Quyền truy cập vào máy ảnh bị từ chối hoặc hạn chế. Kích hoạt nó trong cài đặt hệ thống và thử lại.",
-      "th": "การเข้าถึงกล้องถูกปฏิเสธหรือจำกัด เปิดใช้งานในการตั้งค่าระบบแล้วลองอีกครั้ง",
-      "pl": "Dostęp do kamery jest zabroniony lub ograniczony. Włącz tę opcję w ustawieniach systemu i spróbuj ponownie.",
-      "nl": "Cameratoegang wordt geweigerd of beperkt. Schakel het in de systeeminstellingen in en probeer het opnieuw.",
-      "uk": "Доступ до камери заборонено або обмежено. Увімкніть його в налаштуваннях системи та повторіть спробу.",
+      "ru":
+          "Доступ к камере запрещен или ограничен. Включите его в настройках системы и повторите попытку.",
+      "bn":
+          "ক্যামেরা অ্যাক্সেস অস্বীকৃত বা সীমাবদ্ধ। সিস্টেম সেটিংসে এটি সক্ষম করুন এবং পুনরায় চেষ্টা করুন।",
+      "vi":
+          "Quyền truy cập vào máy ảnh bị từ chối hoặc hạn chế. Kích hoạt nó trong cài đặt hệ thống và thử lại.",
+      "th":
+          "การเข้าถึงกล้องถูกปฏิเสธหรือจำกัด เปิดใช้งานในการตั้งค่าระบบแล้วลองอีกครั้ง",
+      "pl":
+          "Dostęp do kamery jest zabroniony lub ograniczony. Włącz tę opcję w ustawieniach systemu i spróbuj ponownie.",
+      "nl":
+          "Cameratoegang wordt geweigerd of beperkt. Schakel het in de systeeminstellingen in en probeer het opnieuw.",
+      "uk":
+          "Доступ до камери заборонено або обмежено. Увімкніть його в налаштуваннях системи та повторіть спробу.",
     },
     "Retry camera": {
       "de": "Kamera erneut versuchen",
@@ -74486,10 +74585,13 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Політика перегляду",
     },
     "Could not load older posts. Try again.": {
-      "de": "Ältere Beiträge konnten nicht geladen werden. Versuchen Sie es erneut.",
+      "de":
+          "Ältere Beiträge konnten nicht geladen werden. Versuchen Sie es erneut.",
       "it": "Impossibile caricare i post più vecchi. Riprova.",
-      "pt-BR": "Não foi possível carregar postagens mais antigas. Tente novamente.",
-      "pt-PT": "Não foi possível carregar publicações mais antigas. Tente novamente.",
+      "pt-BR":
+          "Não foi possível carregar postagens mais antigas. Tente novamente.",
+      "pt-PT":
+          "Não foi possível carregar publicações mais antigas. Tente novamente.",
       "ur": "پرانی پوسٹس لوڈ نہیں ہو سکیں۔ دوبارہ کوشش کریں۔",
       "fa": "پست‌های قدیمی‌تر بارگیری نشد. دوباره امتحان کنید.",
       "hi": "पुराने पोस्ट लोड नहीं किये जा सके. पुनः प्रयास करें।",
@@ -74552,7 +74654,8 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Заблокувати цього учасника?",
     },
     "You will no longer see each other in Community or messages.": {
-      "de": "Sie werden sich nicht mehr in der Community oder in Nachrichten sehen.",
+      "de":
+          "Sie werden sich nicht mehr in der Community oder in Nachrichten sehen.",
       "it": "Non vi vedrete più nella Community o nei messaggi.",
       "pt-BR": "Vocês não se verão mais na Comunidade ou nas mensagens.",
       "pt-PT": "Não se verão mais na Comunidade nem nas mensagens.",
@@ -74560,12 +74663,14 @@ abstract final class ExtendedRuntimeCopy {
       "fa": "دیگر یکدیگر را در انجمن یا پیام‌ها نخواهید دید.",
       "hi": "अब आप एक-दूसरे को समुदाय या संदेशों में नहीं देख पाएंगे।",
       "id": "Anda tidak akan bertemu lagi di Komunitas atau pesan.",
-      "ms": "Anda tidak akan melihat satu sama lain dalam Komuniti atau mesej lagi.",
+      "ms":
+          "Anda tidak akan melihat satu sama lain dalam Komuniti atau mesej lagi.",
       "ja": "コミュニティやメッセージでお互いに会えなくなります。",
       "ko": "더 이상 커뮤니티나 메시지에서 서로를 볼 수 없습니다.",
       "zh-Hans": "您将不再在社区或消息中看到对方。",
       "zh-Hant": "您將不再在社區或訊息中看到對方。",
-      "ru": "Вы больше не будете видеть друг друга в Сообществе или сообщениях.",
+      "ru":
+          "Вы больше не будете видеть друг друга в Сообществе или сообщениях.",
       "bn": "আপনি সম্প্রদায় বা বার্তাগুলিতে একে অপরকে আর দেখতে পাবেন না৷",
       "vi": "Các bạn sẽ không còn gặp nhau trong Cộng đồng hoặc tin nhắn nữa.",
       "th": "คุณจะไม่เห็นกันในชุมชนหรือข้อความอีกต่อไป",
@@ -74640,7 +74745,8 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Завантажити старіші публікації",
     },
     "Could not update this reaction. Try again.": {
-      "de": "Diese Reaktion konnte nicht aktualisiert werden. Versuchen Sie es erneut.",
+      "de":
+          "Diese Reaktion konnte nicht aktualisiert werden. Versuchen Sie es erneut.",
       "it": "Impossibile aggiornare questa reazione. Riprova.",
       "pt-BR": "Não foi possível atualizar esta reação. Tente novamente.",
       "pt-PT": "Não foi possível atualizar esta reação. Tente novamente.",
@@ -74662,10 +74768,13 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Не вдалося оновити цю реакцію. Спробуйте знову.",
     },
     "Could not update saved posts. Try again.": {
-      "de": "Gespeicherte Beiträge konnten nicht aktualisiert werden. Versuchen Sie es erneut.",
+      "de":
+          "Gespeicherte Beiträge konnten nicht aktualisiert werden. Versuchen Sie es erneut.",
       "it": "Impossibile aggiornare i post salvati. Riprova.",
-      "pt-BR": "Não foi possível atualizar as postagens salvas. Tente novamente.",
-      "pt-PT": "Não foi possível atualizar as publicações guardadas. Tente novamente.",
+      "pt-BR":
+          "Não foi possível atualizar as postagens salvas. Tente novamente.",
+      "pt-PT":
+          "Não foi possível atualizar as publicações guardadas. Tente novamente.",
       "ur": "محفوظ کردہ پوسٹس کو اپ ڈیٹ نہیں کیا جا سکا۔ دوبارہ کوشش کریں۔",
       "fa": "پست های ذخیره شده به روز رسانی نشد. دوباره امتحان کنید.",
       "hi": "सहेजे गए पोस्ट अपडेट नहीं किए जा सके. पुनः प्रयास करें।",
@@ -74794,26 +74903,42 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Збережені дописи",
     },
     "Posts you publish appear here. Pending and rejected posts are visible only to you.": {
-      "de": "Von Ihnen veröffentlichte Beiträge erscheinen hier. Ausstehende und abgelehnte Beiträge sind nur für Sie sichtbar.",
-      "it": "I post che pubblichi vengono visualizzati qui. I post in sospeso e rifiutati sono visibili solo a te.",
-      "pt-BR": "As postagens que você publica aparecem aqui. Postagens pendentes e rejeitadas ficam visíveis apenas para você.",
-      "pt-PT": "As publicações que publica aparecem aqui. As publicações pendentes e rejeitadas ficam visíveis apenas para si.",
-      "ur": "آپ کی شائع کردہ پوسٹس یہاں ظاہر ہوتی ہیں۔ زیر التواء اور مسترد شدہ پوسٹس صرف آپ کو دکھائی دیتی ہیں۔",
-      "fa": "پست هایی که منتشر می کنید در اینجا ظاهر می شوند. پست های معلق و رد شده فقط برای شما قابل مشاهده است.",
-      "hi": "आपके द्वारा प्रकाशित पोस्ट यहां दिखाई देती हैं. लंबित और अस्वीकृत पोस्ट केवल आपको दिखाई देती हैं।",
-      "id": "Postingan yang Anda publikasikan muncul di sini. Postingan yang tertunda dan ditolak hanya dapat dilihat oleh Anda.",
-      "ms": "Siaran yang anda terbitkan dipaparkan di sini. Siaran yang belum selesai dan ditolak hanya kelihatan kepada anda.",
+      "de":
+          "Von Ihnen veröffentlichte Beiträge erscheinen hier. Ausstehende und abgelehnte Beiträge sind nur für Sie sichtbar.",
+      "it":
+          "I post che pubblichi vengono visualizzati qui. I post in sospeso e rifiutati sono visibili solo a te.",
+      "pt-BR":
+          "As postagens que você publica aparecem aqui. Postagens pendentes e rejeitadas ficam visíveis apenas para você.",
+      "pt-PT":
+          "As publicações que publica aparecem aqui. As publicações pendentes e rejeitadas ficam visíveis apenas para si.",
+      "ur":
+          "آپ کی شائع کردہ پوسٹس یہاں ظاہر ہوتی ہیں۔ زیر التواء اور مسترد شدہ پوسٹس صرف آپ کو دکھائی دیتی ہیں۔",
+      "fa":
+          "پست هایی که منتشر می کنید در اینجا ظاهر می شوند. پست های معلق و رد شده فقط برای شما قابل مشاهده است.",
+      "hi":
+          "आपके द्वारा प्रकाशित पोस्ट यहां दिखाई देती हैं. लंबित और अस्वीकृत पोस्ट केवल आपको दिखाई देती हैं।",
+      "id":
+          "Postingan yang Anda publikasikan muncul di sini. Postingan yang tertunda dan ditolak hanya dapat dilihat oleh Anda.",
+      "ms":
+          "Siaran yang anda terbitkan dipaparkan di sini. Siaran yang belum selesai dan ditolak hanya kelihatan kepada anda.",
       "ja": "公開した投稿がここに表示されます。保留中の投稿と拒否された投稿は自分だけに表示されます。",
       "ko": "게시한 게시물이 여기에 표시됩니다. 보류 중인 게시물과 거부된 게시물은 본인에게만 표시됩니다.",
       "zh-Hans": "您发布的帖子将显示在此处。待处理和拒绝的帖子只有您自己可见。",
       "zh-Hant": "您發布的帖子將顯示在此。待處理和拒絕的貼文只有您自己可見。",
-      "ru": "Публикуемые вами сообщения появляются здесь. Ожидающие и отклоненные публикации видны только вам.",
-      "bn": "আপনার প্রকাশিত পোস্ট এখানে প্রদর্শিত হবে. মুলতুবি এবং প্রত্যাখ্যাত পোস্ট শুধুমাত্র আপনার কাছে দৃশ্যমান।",
-      "vi": "Bài viết bạn xuất bản xuất hiện ở đây. Các bài viết đang chờ xử lý và bị từ chối chỉ hiển thị với bạn.",
-      "th": "โพสต์ที่คุณเผยแพร่จะปรากฏที่นี่ โพสต์ที่รอดำเนินการและถูกปฏิเสธจะปรากฏให้คุณเห็นเท่านั้น",
-      "pl": "Publikowane przez Ciebie posty pojawiają się tutaj. Oczekujące i odrzucone posty są widoczne tylko dla Ciebie.",
-      "nl": "Berichten die u publiceert, worden hier weergegeven. Openstaande en afgewezen berichten zijn alleen voor jou zichtbaar.",
-      "uk": "Публікувані вами публікації відображаються тут. Нерозглянуті та відхилені дописи бачите лише ви.",
+      "ru":
+          "Публикуемые вами сообщения появляются здесь. Ожидающие и отклоненные публикации видны только вам.",
+      "bn":
+          "আপনার প্রকাশিত পোস্ট এখানে প্রদর্শিত হবে. মুলতুবি এবং প্রত্যাখ্যাত পোস্ট শুধুমাত্র আপনার কাছে দৃশ্যমান।",
+      "vi":
+          "Bài viết bạn xuất bản xuất hiện ở đây. Các bài viết đang chờ xử lý và bị từ chối chỉ hiển thị với bạn.",
+      "th":
+          "โพสต์ที่คุณเผยแพร่จะปรากฏที่นี่ โพสต์ที่รอดำเนินการและถูกปฏิเสธจะปรากฏให้คุณเห็นเท่านั้น",
+      "pl":
+          "Publikowane przez Ciebie posty pojawiają się tutaj. Oczekujące i odrzucone posty są widoczne tylko dla Ciebie.",
+      "nl":
+          "Berichten die u publiceert, worden hier weergegeven. Openstaande en afgewezen berichten zijn alleen voor jou zichtbaar.",
+      "uk":
+          "Публікувані вами публікації відображаються тут. Нерозглянуті та відхилені дописи бачите лише ви.",
     },
     "Load more": {
       "de": "Mehr laden",
@@ -74860,10 +74985,14 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Перевірка політики спільноти…",
     },
     "Posting and messages stay locked until verification finishes.": {
-      "de": "Beiträge und Nachrichten bleiben gesperrt, bis die Überprüfung abgeschlossen ist.",
-      "it": "La pubblicazione e i messaggi rimangono bloccati fino al termine della verifica.",
-      "pt-BR": "Postagens e mensagens permanecem bloqueadas até a conclusão da verificação.",
-      "pt-PT": "As publicações e mensagens permanecem bloqueadas até à conclusão da verificação.",
+      "de":
+          "Beiträge und Nachrichten bleiben gesperrt, bis die Überprüfung abgeschlossen ist.",
+      "it":
+          "La pubblicazione e i messaggi rimangono bloccati fino al termine della verifica.",
+      "pt-BR":
+          "Postagens e mensagens permanecem bloqueadas até a conclusão da verificação.",
+      "pt-PT":
+          "As publicações e mensagens permanecem bloqueadas até à conclusão da verificação.",
       "ur": "تصدیق مکمل ہونے تک پوسٹنگ اور پیغامات مقفل رہتے ہیں۔",
       "fa": "ارسال و پیام‌ها تا پایان تأیید قفل می‌مانند.",
       "hi": "सत्यापन समाप्त होने तक पोस्टिंग और संदेश लॉक रहेंगे।",
@@ -74873,13 +75002,18 @@ abstract final class ExtendedRuntimeCopy {
       "ko": "확인이 완료될 때까지 게시 및 메시지가 잠긴 상태로 유지됩니다.",
       "zh-Hans": "在验证完成之前，发帖和消息将保持锁定状态。",
       "zh-Hant": "在驗證完成之前，發布和訊息將保持鎖定狀態。",
-      "ru": "Публикации и сообщения остаются заблокированными до завершения проверки.",
+      "ru":
+          "Публикации и сообщения остаются заблокированными до завершения проверки.",
       "bn": "যাচাইকরণ শেষ না হওয়া পর্যন্ত পোস্টিং এবং বার্তা লক থাকবে।",
-      "vi": "Bài đăng và tin nhắn vẫn bị khóa cho đến khi quá trình xác minh kết thúc.",
+      "vi":
+          "Bài đăng và tin nhắn vẫn bị khóa cho đến khi quá trình xác minh kết thúc.",
       "th": "การโพสต์และข้อความจะถูกล็อคจนกว่าการยืนยันจะเสร็จสิ้น",
-      "pl": "Publikowanie i wiadomości pozostają zablokowane do czasu zakończenia weryfikacji.",
-      "nl": "Berichten en berichten blijven vergrendeld totdat de verificatie is voltooid.",
-      "uk": "Публікації та повідомлення залишаються заблокованими до завершення перевірки.",
+      "pl":
+          "Publikowanie i wiadomości pozostają zablokowane do czasu zakończenia weryfikacji.",
+      "nl":
+          "Berichten en berichten blijven vergrendeld totdat de verificatie is voltooid.",
+      "uk":
+          "Публікації та повідомлення залишаються заблокованими до завершення перевірки.",
     },
     "Community policy could not be verified": {
       "de": "Die Gemeinschaftspolitik konnte nicht überprüft werden",
@@ -74904,26 +75038,42 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Не вдалося перевірити політику спільноти",
     },
     "Posting and messages remain locked. Check your connection and retry.": {
-      "de": "Beiträge und Nachrichten bleiben gesperrt. Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
-      "it": "La pubblicazione e i messaggi rimangono bloccati. Controlla la connessione e riprova.",
-      "pt-BR": "Postagens e mensagens permanecem bloqueadas. Verifique sua conexão e tente novamente.",
-      "pt-PT": "As publicações e mensagens permanecem bloqueadas. Verifique a sua ligação e tente novamente.",
-      "ur": "پوسٹنگ اور پیغامات مقفل رہتے ہیں۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔",
-      "fa": "ارسال و پیام ها قفل باقی می مانند. اتصال خود را بررسی کنید و دوباره امتحان کنید.",
-      "hi": "पोस्टिंग और संदेश लॉक रहते हैं. अपना कनेक्शन जांचें और पुनः प्रयास करें.",
-      "id": "Posting dan pesan tetap terkunci. Periksa koneksi Anda dan coba lagi.",
-      "ms": "Penyiaran dan mesej kekal dikunci. Semak sambungan anda dan cuba semula.",
+      "de":
+          "Beiträge und Nachrichten bleiben gesperrt. Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+      "it":
+          "La pubblicazione e i messaggi rimangono bloccati. Controlla la connessione e riprova.",
+      "pt-BR":
+          "Postagens e mensagens permanecem bloqueadas. Verifique sua conexão e tente novamente.",
+      "pt-PT":
+          "As publicações e mensagens permanecem bloqueadas. Verifique a sua ligação e tente novamente.",
+      "ur":
+          "پوسٹنگ اور پیغامات مقفل رہتے ہیں۔ اپنا کنکشن چیک کریں اور دوبارہ کوشش کریں۔",
+      "fa":
+          "ارسال و پیام ها قفل باقی می مانند. اتصال خود را بررسی کنید و دوباره امتحان کنید.",
+      "hi":
+          "पोस्टिंग और संदेश लॉक रहते हैं. अपना कनेक्शन जांचें और पुनः प्रयास करें.",
+      "id":
+          "Posting dan pesan tetap terkunci. Periksa koneksi Anda dan coba lagi.",
+      "ms":
+          "Penyiaran dan mesej kekal dikunci. Semak sambungan anda dan cuba semula.",
       "ja": "投稿とメッセージはロックされたままになります。接続を確認して再試行してください。",
       "ko": "게시 및 메시지는 잠긴 상태로 유지됩니다. 연결을 확인하고 다시 시도하세요.",
       "zh-Hans": "发帖和消息保持锁定状态。检查您的连接并重试。",
       "zh-Hant": "發文和訊息保持鎖定狀態。檢查您的連線並重試。",
-      "ru": "Публикация и сообщения остаются заблокированными. Проверьте соединение и повторите попытку.",
-      "bn": "পোস্টিং এবং বার্তা লক রাখা. আপনার সংযোগ পরীক্ষা করুন এবং পুনরায় চেষ্টা করুন.",
-      "vi": "Đăng bài và tin nhắn vẫn bị khóa. Kiểm tra kết nối của bạn và thử lại.",
-      "th": "การโพสต์และข้อความยังคงล็อคอยู่ ตรวจสอบการเชื่อมต่อของคุณแล้วลองอีกครั้ง",
-      "pl": "Publikowanie i wiadomości pozostają zablokowane. Sprawdź połączenie i spróbuj ponownie.",
-      "nl": "Berichten en berichten blijven vergrendeld. Controleer uw verbinding en probeer het opnieuw.",
-      "uk": "Публікації та повідомлення залишаються заблокованими. Перевірте підключення та повторіть спробу.",
+      "ru":
+          "Публикация и сообщения остаются заблокированными. Проверьте соединение и повторите попытку.",
+      "bn":
+          "পোস্টিং এবং বার্তা লক রাখা. আপনার সংযোগ পরীক্ষা করুন এবং পুনরায় চেষ্টা করুন.",
+      "vi":
+          "Đăng bài và tin nhắn vẫn bị khóa. Kiểm tra kết nối của bạn và thử lại.",
+      "th":
+          "การโพสต์และข้อความยังคงล็อคอยู่ ตรวจสอบการเชื่อมต่อของคุณแล้วลองอีกครั้ง",
+      "pl":
+          "Publikowanie i wiadomości pozostają zablokowane. Sprawdź połączenie i spróbuj ponownie.",
+      "nl":
+          "Berichten en berichten blijven vergrendeld. Controleer uw verbinding en probeer het opnieuw.",
+      "uk":
+          "Публікації та повідомлення залишаються заблокованими. Перевірте підключення та повторіть спробу.",
     },
     "Community publishing is unavailable": {
       "de": "Community-Veröffentlichung ist nicht verfügbar",
@@ -74948,26 +75098,42 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Публікація спільноти недоступна",
     },
     "No active production policy could be verified. No acceptance has been recorded.": {
-      "de": "Es konnte keine aktive Produktionspolitik nachgewiesen werden. Es wurde keine Abnahme verzeichnet.",
-      "it": "Non è stato possibile verificare alcuna politica di produzione attiva. Nessuna accettazione è stata registrata.",
-      "pt-BR": "Nenhuma política de produção ativa pôde ser verificada. Nenhuma aceitação foi registrada.",
-      "pt-PT": "Nenhuma política de produção ativa pôde ser verificada. Nenhuma aceitação foi registada.",
-      "ur": "کسی فعال پیداواری پالیسی کی تصدیق نہیں ہو سکی۔ کوئی قبولیت ریکارڈ نہیں کی گئی ہے۔",
-      "fa": "هیچ سیاست تولید فعالی را نمی توان تأیید کرد. هیچ پذیرشی ثبت نشده است.",
-      "hi": "कोई सक्रिय उत्पादन नीति सत्यापित नहीं की जा सकी. कोई स्वीकृति दर्ज नहीं की गई है.",
-      "id": "Tidak ada kebijakan produksi aktif yang dapat diverifikasi. Tidak ada penerimaan yang dicatat.",
-      "ms": "Tiada dasar pengeluaran aktif dapat disahkan. Tiada penerimaan direkodkan.",
+      "de":
+          "Es konnte keine aktive Produktionspolitik nachgewiesen werden. Es wurde keine Abnahme verzeichnet.",
+      "it":
+          "Non è stato possibile verificare alcuna politica di produzione attiva. Nessuna accettazione è stata registrata.",
+      "pt-BR":
+          "Nenhuma política de produção ativa pôde ser verificada. Nenhuma aceitação foi registrada.",
+      "pt-PT":
+          "Nenhuma política de produção ativa pôde ser verificada. Nenhuma aceitação foi registada.",
+      "ur":
+          "کسی فعال پیداواری پالیسی کی تصدیق نہیں ہو سکی۔ کوئی قبولیت ریکارڈ نہیں کی گئی ہے۔",
+      "fa":
+          "هیچ سیاست تولید فعالی را نمی توان تأیید کرد. هیچ پذیرشی ثبت نشده است.",
+      "hi":
+          "कोई सक्रिय उत्पादन नीति सत्यापित नहीं की जा सकी. कोई स्वीकृति दर्ज नहीं की गई है.",
+      "id":
+          "Tidak ada kebijakan produksi aktif yang dapat diverifikasi. Tidak ada penerimaan yang dicatat.",
+      "ms":
+          "Tiada dasar pengeluaran aktif dapat disahkan. Tiada penerimaan direkodkan.",
       "ja": "アクティブな運用ポリシーを検証できませんでした。受諾は記録されていません。",
       "ko": "활성 생산 정책을 확인할 수 없습니다. 접수된 내역이 없습니다.",
       "zh-Hans": "无法核实积极的生产政策。没有接受记录。",
       "zh-Hant": "無法核實積極的生產政策。沒有接受記錄。",
-      "ru": "Никакую активную производственную политику проверить не удалось. Приема не зафиксировано.",
-      "bn": "কোন সক্রিয় উৎপাদন নীতি যাচাই করা যায়নি. কোন গ্রহণযোগ্যতা রেকর্ড করা হয়নি.",
-      "vi": "Không có chính sách sản xuất đang hoạt động nào có thể được xác minh. Không có sự chấp nhận đã được ghi lại.",
-      "th": "ไม่สามารถตรวจสอบนโยบายการผลิตที่ใช้งานอยู่ได้ ไม่มีการบันทึกการยอมรับ",
-      "pl": "Nie udało się zweryfikować żadnej aktywnej polityki produkcyjnej. Nie odnotowano żadnego przyjęcia.",
-      "nl": "Er kon geen actief productiebeleid worden geverifieerd. Er is geen aanvaarding geregistreerd.",
-      "uk": "Не вдалося перевірити активну виробничу політику. Прийняття не зафіксовано.",
+      "ru":
+          "Никакую активную производственную политику проверить не удалось. Приема не зафиксировано.",
+      "bn":
+          "কোন সক্রিয় উৎপাদন নীতি যাচাই করা যায়নি. কোন গ্রহণযোগ্যতা রেকর্ড করা হয়নি.",
+      "vi":
+          "Không có chính sách sản xuất đang hoạt động nào có thể được xác minh. Không có sự chấp nhận đã được ghi lại.",
+      "th":
+          "ไม่สามารถตรวจสอบนโยบายการผลิตที่ใช้งานอยู่ได้ ไม่มีการบันทึกการยอมรับ",
+      "pl":
+          "Nie udało się zweryfikować żadnej aktywnej polityki produkcyjnej. Nie odnotowano żadnego przyjęcia.",
+      "nl":
+          "Er kon geen actief productiebeleid worden geverifieerd. Er is geen aanvaarding geregistreerd.",
+      "uk":
+          "Не вдалося перевірити активну виробничу політику. Прийняття не зафіксовано.",
     },
     "Review safety": {
       "de": "Überprüfen Sie die Sicherheit",
@@ -74992,48 +75158,77 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Перегляньте безпеку",
     },
     "Posting and messages stay locked until you accept the active version.": {
-      "de": "Beiträge und Nachrichten bleiben gesperrt, bis Sie die aktive Version akzeptieren.",
-      "it": "Pubblicazioni e messaggi rimangono bloccati finché non accetti la versione attiva.",
-      "pt-BR": "Postagens e mensagens permanecem bloqueadas até você aceitar a versão ativa.",
-      "pt-PT": "As publicações e mensagens permanecem bloqueadas até aceitar a versão ativa.",
-      "ur": "پوسٹنگ اور پیغامات اس وقت تک مقفل رہتے ہیں جب تک آپ فعال ورژن کو قبول نہیں کرتے۔",
-      "fa": "پست ها و پیام ها تا زمانی که نسخه فعال را قبول نکنید قفل می مانند.",
-      "hi": "जब तक आप सक्रिय संस्करण स्वीकार नहीं करते तब तक पोस्टिंग और संदेश लॉक रहते हैं।",
-      "id": "Postingan dan pesan tetap terkunci sampai Anda menerima versi aktif.",
-      "ms": "Penyiaran dan mesej kekal dikunci sehingga anda menerima versi aktif.",
+      "de":
+          "Beiträge und Nachrichten bleiben gesperrt, bis Sie die aktive Version akzeptieren.",
+      "it":
+          "Pubblicazioni e messaggi rimangono bloccati finché non accetti la versione attiva.",
+      "pt-BR":
+          "Postagens e mensagens permanecem bloqueadas até você aceitar a versão ativa.",
+      "pt-PT":
+          "As publicações e mensagens permanecem bloqueadas até aceitar a versão ativa.",
+      "ur":
+          "پوسٹنگ اور پیغامات اس وقت تک مقفل رہتے ہیں جب تک آپ فعال ورژن کو قبول نہیں کرتے۔",
+      "fa":
+          "پست ها و پیام ها تا زمانی که نسخه فعال را قبول نکنید قفل می مانند.",
+      "hi":
+          "जब तक आप सक्रिय संस्करण स्वीकार नहीं करते तब तक पोस्टिंग और संदेश लॉक रहते हैं।",
+      "id":
+          "Postingan dan pesan tetap terkunci sampai Anda menerima versi aktif.",
+      "ms":
+          "Penyiaran dan mesej kekal dikunci sehingga anda menerima versi aktif.",
       "ja": "アクティブなバージョンを受け入れるまで、投稿とメッセージはロックされたままになります。",
       "ko": "활성 버전을 수락할 때까지 게시 및 메시지가 잠긴 상태로 유지됩니다.",
       "zh-Hans": "在您接受活动版本之前，发帖和消息将保持锁定状态。",
       "zh-Hant": "在您接受活動版本之前，發文和訊息將保持鎖定狀態。",
-      "ru": "Публикации и сообщения остаются заблокированными, пока вы не примете активную версию.",
-      "bn": "আপনি সক্রিয় সংস্করণ গ্রহণ না করা পর্যন্ত পোস্টিং এবং বার্তা লক থাকবে।",
-      "vi": "Việc đăng bài và tin nhắn vẫn bị khóa cho đến khi bạn chấp nhận phiên bản đang hoạt động.",
+      "ru":
+          "Публикации и сообщения остаются заблокированными, пока вы не примете активную версию.",
+      "bn":
+          "আপনি সক্রিয় সংস্করণ গ্রহণ না করা পর্যন্ত পোস্টিং এবং বার্তা লক থাকবে।",
+      "vi":
+          "Việc đăng bài và tin nhắn vẫn bị khóa cho đến khi bạn chấp nhận phiên bản đang hoạt động.",
       "th": "การโพสต์และข้อความจะถูกล็อคจนกว่าคุณจะยอมรับเวอร์ชันที่ใช้งานอยู่",
-      "pl": "Publikowanie i wiadomości pozostają zablokowane, dopóki nie zaakceptujesz aktywnej wersji.",
-      "nl": "Berichten en berichten blijven vergrendeld totdat u de actieve versie accepteert.",
-      "uk": "Публікації та повідомлення залишаються заблокованими, доки ви не приймете активну версію.",
+      "pl":
+          "Publikowanie i wiadomości pozostają zablokowane, dopóki nie zaakceptujesz aktywnej wersji.",
+      "nl":
+          "Berichten en berichten blijven vergrendeld totdat u de actieve versie accepteert.",
+      "uk":
+          "Публікації та повідомлення залишаються заблокованими, доки ви не приймете активну версію.",
     },
     "Posting and messages stay locked until you accept {version}.": {
-      "de": "Beiträge und Nachrichten bleiben gesperrt, bis Sie {version} akzeptieren.",
-      "it": "La pubblicazione e i messaggi rimangono bloccati finché non accetti {version}.",
-      "pt-BR": "Postagens e mensagens permanecem bloqueadas até você aceitar {version}.",
-      "pt-PT": "As publicações e mensagens permanecem bloqueadas até aceitar {version}.",
-      "ur": "پوسٹنگ اور پیغامات اس وقت تک بند رہتے ہیں جب تک آپ {version} قبول نہیں کرتے ہیں۔",
-      "fa": "پست ها و پیام ها تا زمانی که {version} را قبول نکنید قفل می مانند.",
-      "hi": "जब तक आप {version} स्वीकार नहीं करते तब तक पोस्टिंग और संदेश लॉक रहेंगे।",
-      "id": "Postingan dan pesan tetap terkunci sampai Anda menerima {version}.",
-      "ms": "Penyiaran dan mesej kekal dikunci sehingga anda menerima {version}.",
+      "de":
+          "Beiträge und Nachrichten bleiben gesperrt, bis Sie {version} akzeptieren.",
+      "it":
+          "La pubblicazione e i messaggi rimangono bloccati finché non accetti {version}.",
+      "pt-BR":
+          "Postagens e mensagens permanecem bloqueadas até você aceitar {version}.",
+      "pt-PT":
+          "As publicações e mensagens permanecem bloqueadas até aceitar {version}.",
+      "ur":
+          "پوسٹنگ اور پیغامات اس وقت تک بند رہتے ہیں جب تک آپ {version} قبول نہیں کرتے ہیں۔",
+      "fa":
+          "پست ها و پیام ها تا زمانی که {version} را قبول نکنید قفل می مانند.",
+      "hi":
+          "जब तक आप {version} स्वीकार नहीं करते तब तक पोस्टिंग और संदेश लॉक रहेंगे।",
+      "id":
+          "Postingan dan pesan tetap terkunci sampai Anda menerima {version}.",
+      "ms":
+          "Penyiaran dan mesej kekal dikunci sehingga anda menerima {version}.",
       "ja": "{version} を受け入れるまで、投稿とメッセージはロックされたままになります。",
       "ko": "{version}를 수락할 때까지 게시 및 메시지가 잠긴 상태로 유지됩니다.",
       "zh-Hans": "在您接受 {version} 之前，发帖和消息将保持锁定状态。",
       "zh-Hant": "在您接受 {version} 之前，發文和訊息將保持鎖定狀態。",
-      "ru": "Публикации и сообщения остаются заблокированными до тех пор, пока вы не примете {version}.",
+      "ru":
+          "Публикации и сообщения остаются заблокированными до тех пор, пока вы не примете {version}.",
       "bn": "আপনি {version} গ্রহণ না করা পর্যন্ত পোস্টিং এবং বার্তা লক থাকবে।",
-      "vi": "Bài đăng và tin nhắn vẫn bị khóa cho đến khi bạn chấp nhận {version}.",
+      "vi":
+          "Bài đăng và tin nhắn vẫn bị khóa cho đến khi bạn chấp nhận {version}.",
       "th": "การโพสต์และข้อความจะถูกล็อคจนกว่าคุณจะยอมรับ {version}",
-      "pl": "Publikowanie i wiadomości pozostają zablokowane, dopóki nie zaakceptujesz {version}.",
-      "nl": "Berichten en berichten blijven vergrendeld totdat u {version} accepteert.",
-      "uk": "Публікації та повідомлення залишаються заблокованими, доки ви не приймете {version}.",
+      "pl":
+          "Publikowanie i wiadomości pozostają zablokowane, dopóki nie zaakceptujesz {version}.",
+      "nl":
+          "Berichten en berichten blijven vergrendeld totdat u {version} accepteert.",
+      "uk":
+          "Публікації та повідомлення залишаються заблокованими, доки ви не приймете {version}.",
     },
     "Review the active Community policy": {
       "de": "Überprüfen Sie die aktive Community-Richtlinie",
@@ -75080,7 +75275,8 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Напишіть свій пост перед публікацією.",
     },
     "Write a caption before publishing your photo.": {
-      "de": "Schreiben Sie eine Bildunterschrift, bevor Sie Ihr Foto veröffentlichen.",
+      "de":
+          "Schreiben Sie eine Bildunterschrift, bevor Sie Ihr Foto veröffentlichen.",
       "it": "Scrivi una didascalia prima di pubblicare la tua foto.",
       "pt-BR": "Escreva uma legenda antes de publicar sua foto.",
       "pt-PT": "Escreva uma legenda antes de publicar a sua fotografia.",
@@ -75146,26 +75342,41 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Спочатку напишіть коментар.",
     },
     "Comment was not sent. Your text is kept; retry safely.": {
-      "de": "Der Kommentar wurde nicht gesendet. Ihr Text bleibt erhalten; Versuchen Sie es sicher noch einmal.",
-      "it": "Il commento non è stato inviato. Il tuo testo viene mantenuto; riprovare in tutta sicurezza.",
-      "pt-BR": "O comentário não foi enviado. Seu texto é mantido; tente novamente com segurança.",
-      "pt-PT": "O comentário não foi enviado. O seu texto é mantido; tente novamente em segurança.",
-      "ur": "تبصرہ نہیں بھیجا گیا۔ آپ کا متن محفوظ ہے؛ محفوظ طریقے سے دوبارہ کوشش کریں.",
+      "de":
+          "Der Kommentar wurde nicht gesendet. Ihr Text bleibt erhalten; Versuchen Sie es sicher noch einmal.",
+      "it":
+          "Il commento non è stato inviato. Il tuo testo viene mantenuto; riprovare in tutta sicurezza.",
+      "pt-BR":
+          "O comentário não foi enviado. Seu texto é mantido; tente novamente com segurança.",
+      "pt-PT":
+          "O comentário não foi enviado. O seu texto é mantido; tente novamente em segurança.",
+      "ur":
+          "تبصرہ نہیں بھیجا گیا۔ آپ کا متن محفوظ ہے؛ محفوظ طریقے سے دوبارہ کوشش کریں.",
       "fa": "نظر ارسال نشد متن شما حفظ می شود. با خیال راحت دوباره امتحان کنید",
-      "hi": "टिप्पणी नहीं भेजी गई. आपका पाठ रखा गया है; सुरक्षित रूप से पुनः प्रयास करें.",
-      "id": "Komentar tidak dikirim. Teks Anda disimpan; coba lagi dengan aman.",
-      "ms": "Ulasan tidak dihantar. Teks anda disimpan; cuba semula dengan selamat.",
+      "hi":
+          "टिप्पणी नहीं भेजी गई. आपका पाठ रखा गया है; सुरक्षित रूप से पुनः प्रयास करें.",
+      "id":
+          "Komentar tidak dikirim. Teks Anda disimpan; coba lagi dengan aman.",
+      "ms":
+          "Ulasan tidak dihantar. Teks anda disimpan; cuba semula dengan selamat.",
       "ja": "コメントは送信されませんでした。あなたのテキストは保存されます。安全に再試行してください。",
       "ko": "댓글이 전송되지 않았습니다. 귀하의 텍스트는 보관됩니다. 안전하게 다시 시도하세요.",
       "zh-Hans": "评论未发送。您的文本将被保留；安全地重试。",
       "zh-Hant": "評論未發送。您的文字將被保留；安全地重試。",
-      "ru": "Комментарий не был отправлен. Ваш текст сохраняется; повторите попытку безопасно.",
-      "bn": "মন্তব্য পাঠানো হয়নি. আপনার লেখা রাখা হয়; নিরাপদে পুনরায় চেষ্টা করুন।",
-      "vi": "Bình luận đã không được gửi. Văn bản của bạn được giữ lại; thử lại một cách an toàn.",
-      "th": "ความคิดเห็นไม่ได้ถูกส่ง ข้อความของคุณถูกเก็บไว้ ลองอีกครั้งอย่างปลอดภัย",
-      "pl": "Komentarz nie został wysłany. Twój tekst zostanie zachowany; spróbuj ponownie bezpiecznie.",
-      "nl": "Reactie is niet verzonden. Uw tekst wordt bewaard; veilig opnieuw proberen.",
-      "uk": "Коментар не надіслано. Ваш текст зберігається; повторіть безпечну спробу.",
+      "ru":
+          "Комментарий не был отправлен. Ваш текст сохраняется; повторите попытку безопасно.",
+      "bn":
+          "মন্তব্য পাঠানো হয়নি. আপনার লেখা রাখা হয়; নিরাপদে পুনরায় চেষ্টা করুন।",
+      "vi":
+          "Bình luận đã không được gửi. Văn bản của bạn được giữ lại; thử lại một cách an toàn.",
+      "th":
+          "ความคิดเห็นไม่ได้ถูกส่ง ข้อความของคุณถูกเก็บไว้ ลองอีกครั้งอย่างปลอดภัย",
+      "pl":
+          "Komentarz nie został wysłany. Twój tekst zostanie zachowany; spróbuj ponownie bezpiecznie.",
+      "nl":
+          "Reactie is niet verzonden. Uw tekst wordt bewaard; veilig opnieuw proberen.",
+      "uk":
+          "Коментар не надіслано. Ваш текст зберігається; повторіть безпечну спробу.",
     },
     "Report sent for human review.": {
       "de": "Bericht zur menschlichen Überprüfung gesendet.",
@@ -75251,7 +75462,8 @@ abstract final class ExtendedRuntimeCopy {
       "bn": "এখনো কোন মন্তব্য নেই. একটি সম্মানজনক কথোপকথন শুরু করুন।",
       "vi": "Chưa có bình luận nào Bắt đầu một cuộc trò chuyện tôn trọng.",
       "th": "ยังไม่มีความคิดเห็น เริ่มการสนทนาด้วยความเคารพ.",
-      "pl": "Nie ma jeszcze żadnych komentarzy. Rozpocznij pełną szacunku rozmowę.",
+      "pl":
+          "Nie ma jeszcze żadnych komentarzy. Rozpocznij pełną szacunku rozmowę.",
       "nl": "Nog geen opmerkingen. Begin een respectvol gesprek.",
       "uk": "Поки немає коментарів. Почніть шанобливу розмову.",
     },
@@ -75423,7 +75635,8 @@ abstract final class ExtendedRuntimeCopy {
       "ko": "저장한 게시물은 비공개이며 여기에 표시됩니다.",
       "zh-Hans": "您保存的帖子是私密的，并显示在此处。",
       "zh-Hant": "您保存的帖子是私密的，並顯示在此處。",
-      "ru": "Сообщения, которые вы сохраняете, являются личными и появляются здесь.",
+      "ru":
+          "Сообщения, которые вы сохраняете, являются личными и появляются здесь.",
       "bn": "আপনার সেভ করা পোস্টগুলি ব্যক্তিগত এবং এখানে প্রদর্শিত হবে৷",
       "vi": "Các bài viết bạn lưu sẽ ở chế độ riêng tư và xuất hiện ở đây.",
       "th": "โพสต์ที่คุณบันทึกเป็นแบบส่วนตัวและปรากฏที่นี่",
@@ -75454,26 +75667,41 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Відхилити",
     },
     "These macros exceed the fixed calorie target. Lower the edited value.": {
-      "de": "Diese Makros überschreiten das festgelegte Kalorienziel. Verringern Sie den bearbeiteten Wert.",
-      "it": "Questi macronutrienti superano il target calorico fisso. Abbassare il valore modificato.",
-      "pt-BR": "Essas macros excedem a meta fixa de calorias. Diminua o valor editado.",
-      "pt-PT": "Estas macros excedem a meta fixa de calorias. Diminua o valor editado.",
-      "ur": "یہ میکرو مقررہ کیلوری کے ہدف سے زیادہ ہیں۔ ترمیم شدہ قدر کو کم کریں۔",
-      "fa": "این ماکروها از کالری هدف ثابت فراتر می روند. مقدار ویرایش شده را کاهش دهید.",
-      "hi": "ये मैक्रोज़ निर्धारित कैलोरी लक्ष्य से अधिक हैं। संपादित मान कम करें.",
-      "id": "Makro ini melebihi target kalori tetap. Turunkan nilai yang diedit.",
-      "ms": "Makro ini melebihi sasaran kalori tetap. Kurangkan nilai yang diedit.",
+      "de":
+          "Diese Makros überschreiten das festgelegte Kalorienziel. Verringern Sie den bearbeiteten Wert.",
+      "it":
+          "Questi macronutrienti superano il target calorico fisso. Abbassare il valore modificato.",
+      "pt-BR":
+          "Essas macros excedem a meta fixa de calorias. Diminua o valor editado.",
+      "pt-PT":
+          "Estas macros excedem a meta fixa de calorias. Diminua o valor editado.",
+      "ur":
+          "یہ میکرو مقررہ کیلوری کے ہدف سے زیادہ ہیں۔ ترمیم شدہ قدر کو کم کریں۔",
+      "fa":
+          "این ماکروها از کالری هدف ثابت فراتر می روند. مقدار ویرایش شده را کاهش دهید.",
+      "hi":
+          "ये मैक्रोज़ निर्धारित कैलोरी लक्ष्य से अधिक हैं। संपादित मान कम करें.",
+      "id":
+          "Makro ini melebihi target kalori tetap. Turunkan nilai yang diedit.",
+      "ms":
+          "Makro ini melebihi sasaran kalori tetap. Kurangkan nilai yang diedit.",
       "ja": "これらのマクロは、固定カロリー目標を超えています。編集した値を下げます。",
       "ko": "이러한 매크로는 고정 칼로리 목표를 초과합니다. 편집된 값을 낮추세요.",
       "zh-Hans": "这些宏指令超出了固定的卡路里目标。降低编辑值。",
       "zh-Hant": "這些宏指令超出了固定的卡路里目標。降低編輯值。",
-      "ru": "Эти макросы превышают фиксированную цель по калориям. Уменьшите отредактированное значение.",
-      "bn": "এই ম্যাক্রোগুলি নির্দিষ্ট ক্যালোরি লক্ষ্যমাত্রা অতিক্রম করে। সম্পাদিত মান কম করুন।",
-      "vi": "Các macro này vượt quá mục tiêu calo cố định. Giảm giá trị đã chỉnh sửa.",
+      "ru":
+          "Эти макросы превышают фиксированную цель по калориям. Уменьшите отредактированное значение.",
+      "bn":
+          "এই ম্যাক্রোগুলি নির্দিষ্ট ক্যালোরি লক্ষ্যমাত্রা অতিক্রম করে। সম্পাদিত মান কম করুন।",
+      "vi":
+          "Các macro này vượt quá mục tiêu calo cố định. Giảm giá trị đã chỉnh sửa.",
       "th": "มาโครเหล่านี้เกินเป้าหมายแคลอรี่คงที่ ลดค่าที่แก้ไขลง",
-      "pl": "Te makra przekraczają ustalony docelowy poziom kalorii. Obniż edytowaną wartość.",
-      "nl": "Deze macro's overschrijden het vaste caloriedoel. Verlaag de bewerkte waarde.",
-      "uk": "Ці макроси перевищують фіксовану цільову кількість калорій. Знизьте редаговане значення.",
+      "pl":
+          "Te makra przekraczają ustalony docelowy poziom kalorii. Obniż edytowaną wartość.",
+      "nl":
+          "Deze macro's overschrijden het vaste caloriedoel. Verlaag de bewerkte waarde.",
+      "uk":
+          "Ці макроси перевищують фіксовану цільову кількість калорій. Знизьте редаговане значення.",
     },
     "Back to pathways": {
       "de": "Zurück zu den Wegen",
@@ -75630,10 +75858,12 @@ abstract final class ExtendedRuntimeCopy {
       "uk": "Дієтичний підхід",
     },
     "Food selection does not change nutrient requirements": {
-      "de": "Durch die Auswahl der Nahrungsmittel ändert sich der Nährstoffbedarf nicht",
+      "de":
+          "Durch die Auswahl der Nahrungsmittel ändert sich der Nährstoffbedarf nicht",
       "it": "La selezione del cibo non modifica i requisiti nutrizionali",
       "pt-BR": "A seleção de alimentos não altera as necessidades nutricionais",
-      "pt-PT": "A seleção dos alimentos não altera as necessidades nutricionais",
+      "pt-PT":
+          "A seleção dos alimentos não altera as necessidades nutricionais",
       "ur": "خوراک کا انتخاب غذائیت کی ضروریات کو تبدیل نہیں کرتا ہے۔",
       "fa": "انتخاب غذا نیاز به مواد مغذی را تغییر نمی دهد",
       "hi": "भोजन का चयन पोषक तत्वों की आवश्यकताओं को नहीं बदलता है",
@@ -75643,11 +75873,13 @@ abstract final class ExtendedRuntimeCopy {
       "ko": "식품 선택은 영양 요구 사항을 변경하지 않습니다",
       "zh-Hans": "食物选择不会改变营养需求",
       "zh-Hant": "食物選擇不會改變營養需求",
-      "ru": "Выбор продуктов питания не меняет потребности в питательных веществах",
+      "ru":
+          "Выбор продуктов питания не меняет потребности в питательных веществах",
       "bn": "খাদ্য নির্বাচন পুষ্টির প্রয়োজনীয়তা পরিবর্তন করে না",
       "vi": "Lựa chọn thực phẩm không làm thay đổi nhu cầu dinh dưỡng",
       "th": "การเลือกอาหารไม่ได้เปลี่ยนความต้องการสารอาหาร",
-      "pl": "Wybór pożywienia nie zmienia zapotrzebowania na składniki odżywcze",
+      "pl":
+          "Wybór pożywienia nie zmienia zapotrzebowania na składniki odżywcze",
       "nl": "De voedselkeuze verandert niets aan de voedingsbehoeften",
       "uk": "Food selection does not change nutrient requirements",
     },

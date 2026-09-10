@@ -116,7 +116,10 @@ void main() {
       expect(source, contains('--literal-pathspecs add -f -A'));
       expect(source, contains('--pathspec-from-file='));
       expect(source, contains('commit-tree \$classifiedTree -p \$sourceHead'));
-      expect(source, contains('merge-tree --write-tree --name-only --no-messages'));
+      expect(
+        source,
+        contains('merge-tree --write-tree --name-only --no-messages'),
+      );
       expect(source, contains('read-tree --reset -u \$mergedTree'));
       expect(source, contains('merge-tree conflicts='));
       expect(source, contains('merged tree changed outside INCLUDE'));

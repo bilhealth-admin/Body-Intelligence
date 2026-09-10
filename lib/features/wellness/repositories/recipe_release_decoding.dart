@@ -1,5 +1,60 @@
 part of 'recipe_release_repository.dart';
 
+void _validateSourceReconciliation(Object? raw) {
+  if (raw is! Map<String, dynamic>) {
+    throw const FormatException('Recipe source revision is invalid.');
+  }
+  _exactKeys(raw, const {
+    'revision',
+    'recovered_formulation_count',
+    'formulation_evidence_sha256',
+    'food_database_sha256',
+    'food_snapshot_sha256',
+    'formula',
+    'weighing_basis',
+    'missing_optional_policy',
+    'core_nutrients_calculated_record_count',
+    'optional_unknowns',
+  });
+  for (final key in const [
+    'formulation_evidence_sha256',
+    'food_database_sha256',
+    'food_snapshot_sha256',
+  ]) {
+    _digest(raw[key]);
+  }
+  if (raw['revision'] != 'bil-source-reconciled-20260910-v1' ||
+      raw['recovered_formulation_count'] != 34 ||
+      raw['core_nutrients_calculated_record_count'] != 1500 ||
+      raw['formula'] != 'sum(per100g * grams / 100) / servings' ||
+      raw['optional_unknowns'] is! List) {
+    throw const FormatException('Recipe source revision is unsupported.');
+  }
+  _text(raw['weighing_basis'], 'weighing_basis');
+  _text(raw['missing_optional_policy'], 'missing_optional_policy');
+  final ids = <String>{};
+  for (final entry in raw['optional_unknowns'] as List) {
+    if (entry is! Map<String, dynamic>) {
+      throw const FormatException('Unknown nutrient evidence is invalid.');
+    }
+    _exactKeys(entry, const {'recipe', 'nutrients'});
+    final id = _text(entry['recipe'], 'recipe');
+    final nutrients = _strings(entry['nutrients'], 'nutrients');
+    if (!ids.add(id) ||
+        nutrients.isEmpty ||
+        nutrients.any(
+          (value) => !const {
+            'fiberG',
+            'sugarG',
+            'sodiumMg',
+            'potassiumMg',
+          }.contains(value),
+        )) {
+      throw const FormatException('Unknown nutrient declaration is invalid.');
+    }
+  }
+}
+
 Map<String, dynamic> _decodeObject(Uint8List bytes) {
   final decoded = jsonDecode(utf8.decode(bytes, allowMalformed: false));
   if (decoded is! Map<String, dynamic>) {

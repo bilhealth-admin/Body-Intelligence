@@ -143,7 +143,9 @@ class _MessageBubble extends StatelessWidget {
                             'اقرأ الإجابة بصوت عالٍ',
                           ),
                           onPressed: onSpeak,
-                          visualDensity: VisualDensity.compact,
+                          style: IconButton.styleFrom(
+                            minimumSize: const Size.square(48),
+                          ),
                           icon: const Icon(Icons.volume_up_rounded, size: 19),
                         ),
                       if (onFeedback != null)
@@ -163,8 +165,8 @@ class _MessageBubble extends StatelessWidget {
                           onPressed: () =>
                               _showAiAnswerReportSheet(context, onReport!),
                           style: IconButton.styleFrom(
-                            minimumSize: const Size.square(32),
-                            visualDensity: VisualDensity.compact,
+                            minimumSize: const Size.square(48),
+                            visualDensity: VisualDensity.standard,
                             foregroundColor: reported
                                 ? scheme.error
                                 : scheme.onSurfaceVariant,
@@ -412,8 +414,8 @@ class _FeedbackReaction extends StatelessWidget {
           customBorder: const CircleBorder(),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
-            width: compact ? 32 : 36,
-            height: compact ? 32 : 36,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: selected

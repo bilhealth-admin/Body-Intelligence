@@ -304,6 +304,7 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
       body: Column(
         children: [
           OnboardingStatusCard(
+            key: const Key('onboarding-health-permission'),
             icon: Icons.favorite_outline_rounded,
             title: healthName,
             body: supported
@@ -311,7 +312,13 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
                     'Import supported activity, steps, sleep and weight evidence you approve. Only compatible fitness watches and scales can feed this system source.',
                   )
                 : t('This connection is unavailable on this device.'),
-            status: _permissionStatus(_draft.healthPermission),
+            status: _permissionStatus(
+              isIos &&
+                      _draft.healthPermission ==
+                          OnboardingPermissionStatus.granted
+                  ? OnboardingPermissionStatus.requested
+                  : _draft.healthPermission,
+            ),
             action: !supported || _permissionBusy
                 ? null
                 : () => unawaited(_requestHealth()),
@@ -357,6 +364,14 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
     if (!mounted) return;
     _updateState(() => _permissionBusy = false);
     _setDraft(_draft.copyWith(healthPermission: status), persist: true);
+    if (state.value?.failureCode == 'health_permissions_review_required') {
+      await showAppleHealthPermissionReview(
+        context,
+        onOpenSettings: ref
+            .read(connectedHealthProvider.notifier)
+            .openSystemSettings,
+      );
+    }
   }
 
   OnboardingPermissionStatus _healthPermissionStatus(
@@ -364,7 +379,10 @@ extension _OnboardingDetailSteps on _OnboardingPageState {
   ) => switch (value.status) {
     ConnectedHealthStatus.ready ||
     ConnectedHealthStatus.synchronized ||
-    ConnectedHealthStatus.syncing => OnboardingPermissionStatus.granted,
+    ConnectedHealthStatus.syncing =>
+      defaultTargetPlatform == TargetPlatform.iOS
+          ? OnboardingPermissionStatus.requested
+          : OnboardingPermissionStatus.granted,
     ConnectedHealthStatus.authorizationRequested =>
       OnboardingPermissionStatus.requested,
     ConnectedHealthStatus.permissionDenied => OnboardingPermissionStatus.denied,

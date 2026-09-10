@@ -28,7 +28,7 @@ assets, Windows prerequisites, Android output, and the iOS signing checklist.
 
 ## Local data
 
-Drift/SQLite schema v13 is the source of truth. Profile, goals, plan overrides,
+Drift/SQLite schema v21 is the local health-log source of truth. Profile, goals, plan overrides,
 weights, daily notes, foods, favorites, recents, meals, meal items, water,
 context, decision memory, experiments, challenges, and preferences persist in
 the application-support directory. Nutrition is derived from meal items; old
@@ -42,6 +42,15 @@ Other external capabilities—including AI, commerce, community, coach access,
 remote updates, and shared challenges—remain visibly unavailable until their
 authenticated server-side adapters, consent rules, and verification paths are
 configured. No unavailable action reports success.
+
+Authentication, verified purchases, administrative grants, AI balances and
+Community state have separate server authorities; local cache values do not
+create server entitlements. See the [current authority map](docs/ARCHITECTURE.md).
+
+For a code-only pre-build check, use `python tool/prebuild/run_code_tests.py final`
+after package setup. It explicitly excludes device, capture and golden tests;
+the ordinary `flutter test` command above includes visual tests. PostgreSQL
+contracts have [separate reproducible setup](supabase/tests/README.md).
 
 ## Release documentation
 

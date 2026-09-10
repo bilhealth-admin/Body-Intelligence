@@ -42,7 +42,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
   };
   final _resolvedTargets = <int, DietMacroTarget>{};
   final _invalidMacroDays = <int>{};
-  final _lastEditedMacroComponent = <int, DietMacroComponent>{};
+  final _macroEditHistory = <int, DietMacroEditHistory>{};
   DietFatLevel _fatLevel = DietFatLevel.medium;
   int _trimester = 1;
   bool _clinicianAcknowledged = false;
@@ -92,7 +92,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     final week = draft.resolveWeek();
     _resolvedTargets.clear();
     _invalidMacroDays.clear();
-    _lastEditedMacroComponent.clear();
+    _macroEditHistory.clear();
     for (var day = 1; day <= 7; day += 1) {
       final target = week?[day];
       if (target == null) continue;
@@ -183,7 +183,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
       setState(() {});
       return;
     }
-    _lastEditedMacroComponent.clear();
+    _macroEditHistory.clear();
     for (var day = 1; day <= 7; day += 1) {
       final current = _resolvedTargets[day];
       if (current == null) continue;
@@ -206,8 +206,11 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
       setState(() {});
       return;
     }
-    final previous = _lastEditedMacroComponent[day];
-    final locked = <DietMacroComponent>{?previous, component};
+    final history = _macroEditHistory.putIfAbsent(
+      day,
+      DietMacroEditHistory.new,
+    );
+    final locked = history.lockedFor(component);
     final target = DietMacroAllocator.rebalancePreserving(
       current: current,
       edited: component,
@@ -222,7 +225,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
     }
     _invalidMacroDays.remove(day);
     _resolvedTargets[day] = target;
-    _lastEditedMacroComponent[day] = component;
+    history.accept(component);
     _writeTarget(day, target, preserve: component);
     setState(() {});
   }
@@ -398,7 +401,7 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
         : 0.0;
     final editableCalories = math.max(.01, target.calories - extra);
     _calories.text = editableCalories.round().toString();
-    _lastEditedMacroComponent.clear();
+    _macroEditHistory.clear();
     final macroTarget = DietMacroTarget(
       calories: target.calories,
       carbsGrams: target.calories * target.carbsPercent / 100 / 4,
@@ -549,10 +552,11 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
               padding: const EdgeInsets.only(bottom: 28),
               children: [
                 _DietHero(pathway: pathway, localeTag: localeTag),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-                  child: _EvidenceNotice(pathwayId: pathway.id),
-                ),
+                if (restricted)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
+                    child: _EvidenceNotice(pathwayId: pathway.id),
+                  ),
                 if (_isPregnancy)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(18, 14, 18, 0),
@@ -574,10 +578,6 @@ class _DietPlanEditorPageState extends ConsumerState<DietPlanEditorPage> {
                       onChanged: _onCaloriesChanged,
                     ),
                   ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(18, 14, 18, 0),
-                  child: _MacroEditingNotice(),
-                ),
                 if (_isPregnancy)
                   const Padding(
                     padding: EdgeInsets.fromLTRB(18, 14, 18, 0),

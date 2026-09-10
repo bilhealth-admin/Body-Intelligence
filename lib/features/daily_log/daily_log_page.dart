@@ -117,7 +117,6 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       mealSearchActive = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _focusMealEntry();
-        _openFoodSearchAfterBuild();
       });
     }
     if (widget.initialAction != null) {
@@ -136,7 +135,6 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
       mealSearchActive = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _focusMealEntry();
-        _openFoodSearchAfterBuild();
       });
     }
     if (widget.initialAction != null && actionChanged) {
@@ -544,7 +542,8 @@ class _DailyLogPageState extends ConsumerState<DailyLogPage> {
                             selectedFood = null;
                             mealSearchActive = true;
                           });
-                          _openFoodSearchAfterBuild();
+                          // Open this meal's own summary and actions first.
+                          // The user chooses when to open food search.
                         },
                       ),
                       const SizedBox(height: PremiumDesignTokens.spaceSm),

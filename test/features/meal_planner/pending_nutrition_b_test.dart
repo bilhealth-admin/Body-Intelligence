@@ -1,41 +1,52 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart';
+import '../../support/released_recipe_contract.dart';
 
 void main() {
-  final artifact =
-      jsonDecode(
-            File(
-              'artifacts/meal_catalog/recipe_nutrition_pending_b.json',
-            ).readAsStringSync(),
-          )
-          as Map;
-  final records = (artifact['records'] as List).cast<Map>();
-  test('pending B has exactly 17 traceable records', () {
-    expect(records, hasLength(17));
-    for (final r in records) {
-      expect(r['servings'], isPositive);
-      expect(r['timing'], isNotNull);
-      expect(r['method'], isNotEmpty);
-    }
-  });
-  test('every USDA reference exists locally', () {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  late List<Map<String, dynamic>> records;
+  setUpAll(() async => records = await releasedRecipeRecords());
+  test(
+    'all 1500 released records have explicit portions, timing and ordered methods',
+    () {
+      expect(records, hasLength(1500));
+      for (final record in records) {
+        expect((record['serving'] as Map)['count'], isPositive);
+        final timing = record['timing'] as Map;
+        expect(
+          timing['totalMinutes'],
+          (timing['prepMinutes'] as int) + (timing['cookMinutes'] as int),
+        );
+        expect(timing['totalMinutes'], greaterThan(0));
+        final method = (record['method'] as List).cast<Map>();
+        expect(method, isNotEmpty);
+        expect(
+          method.map((step) => step['order']),
+          orderedEquals(List.generate(method.length, (i) => i + 1)),
+        );
+      }
+    },
+  );
+  test('every shipped ingredient has a resolvable local USDA reference', () {
     final db = sqlite3.open(
       'assets/catalogs/bil_food_core.sqlite',
       mode: OpenMode.readOnly,
     );
     addTearDown(db.close);
-    for (final r in records) {
-      for (final i in r['formulation'] as List) {
-        final m = i as Map;
+    final checked = <String>{};
+    for (final record in records) {
+      for (final ingredient in (record['ingredients'] as List).cast<Map>()) {
+        final id = ingredient['recordId'] as String;
+        expect(ingredient['sourceRefs'], [id]);
+        if (!checked.add(id)) continue;
         expect(
           db.select('SELECT 1 FROM foods WHERE fdc_id=?', [
-            int.parse((m['recordId'] as String).split(':').last),
+            int.parse(id.split(':').last),
           ]),
           hasLength(1),
         );
       }
     }
+    expect(checked, hasLength(120));
   });
 }

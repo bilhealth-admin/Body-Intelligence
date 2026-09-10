@@ -1,32 +1,32 @@
 export type AppleSubscriptionLifecycle =
-  | 'trial'
-  | 'active'
-  | 'grace_period'
-  | 'billing_retry'
-  | 'expired'
-  | 'refunded'
-  | 'revoked';
+  | "trial"
+  | "active"
+  | "grace_period"
+  | "billing_retry"
+  | "expired"
+  | "refunded"
+  | "revoked";
 
 const appleEligibleSubscriptionProductIds = new Set([
-  'bil_premium',
-  'bil_premium_annual',
-  'bil_premium_ai_coach',
-  'bil_premium_ai_coach_annual',
+  "bil_premium",
+  "bil_premium_annual",
+  "bil_premium_ai_coach",
+  "bil_premium_ai_coach_annual",
 ]);
 
 const appleAiTrialProductIds = new Set([
-  'bil_premium_ai_coach',
-  'bil_premium_ai_coach_annual',
+  "bil_premium_ai_coach",
+  "bil_premium_ai_coach_annual",
 ]);
 
 const appleSubscriptionLifecycles = new Set<AppleSubscriptionLifecycle>([
-  'trial',
-  'active',
-  'grace_period',
-  'billing_retry',
-  'expired',
-  'refunded',
-  'revoked',
+  "trial",
+  "active",
+  "grace_period",
+  "billing_retry",
+  "expired",
+  "refunded",
+  "revoked",
 ]);
 
 function normalizedAppleLifecycle(
@@ -36,11 +36,11 @@ function normalizedAppleLifecycle(
       lifecycle as AppleSubscriptionLifecycle,
     )
     ? lifecycle as AppleSubscriptionLifecycle
-    : 'revoked';
+    : "revoked";
 }
 
 function isAppleIntroductoryFreeTrial(payload: Record<string, unknown>) {
-  if (!appleAiTrialProductIds.has(String(payload.productId ?? ''))) {
+  if (!appleAiTrialProductIds.has(String(payload.productId ?? ""))) {
     return false;
   }
   if (Number(payload.offerType) !== 1) return false;
@@ -53,32 +53,32 @@ function isAppleIntroductoryFreeTrial(payload: Record<string, unknown>) {
     purchaseDate <= 0 ||
     expiresDate - purchaseDate !== sevenDaysMs
   ) return false;
-  if (String(payload.offerDiscountType ?? '').toUpperCase() === 'FREE_TRIAL') {
+  if (String(payload.offerDiscountType ?? "").toUpperCase() === "FREE_TRIAL") {
     return true;
   }
-  return typeof payload.price === 'number' && payload.price === 0;
+  return typeof payload.price === "number" && payload.price === 0;
 }
 
 export function appleTransactionLifecycle(
   payload: Record<string, unknown>,
   nowMs = Date.now(),
 ): AppleSubscriptionLifecycle {
-  if (payload.revocationDate) return 'revoked';
-  const productId = String(payload.productId ?? '');
+  if (payload.revocationDate) return "revoked";
+  const productId = String(payload.productId ?? "");
   // The verified Apple transaction helper is also used for the exact Boost
   // consumable. Unknown, legacy, aliased, or malformed product identities are
   // terminal here even though persistence repeats the registry check.
-  if (productId === 'bil_ai_boost') return 'active';
-  if (!appleEligibleSubscriptionProductIds.has(productId)) return 'revoked';
+  if (productId === "bil_ai_boost") return "active";
+  if (!appleEligibleSubscriptionProductIds.has(productId)) return "revoked";
   const expires = Number(payload.expiresDate ?? 0);
   if (
     !Number.isFinite(expires) || expires <= 0
   ) {
-    return 'expired';
+    return "expired";
   }
-  if (expires > 0 && expires <= nowMs) return 'expired';
-  if (isAppleIntroductoryFreeTrial(payload)) return 'trial';
-  return 'active';
+  if (expires > 0 && expires <= nowMs) return "expired";
+  if (isAppleIntroductoryFreeTrial(payload)) return "trial";
+  return "active";
 }
 
 export function appleServerStatusLifecycle(
@@ -88,20 +88,20 @@ export function appleServerStatusLifecycle(
   const fallback = normalizedAppleLifecycle(verifiedLifecycle);
   // A server-status code cannot rehabilitate an unknown/aliased transaction
   // lifecycle. Keep the terminal fail-closed result across every status.
-  if (fallback === 'revoked') return 'revoked';
+  if (fallback === "revoked") return "revoked";
   switch (status) {
     case 1:
-      return fallback === 'trial' || fallback === 'active'
+      return fallback === "trial" || fallback === "active"
         ? fallback
-        : 'revoked';
+        : "revoked";
     case 2:
-      return 'expired';
+      return "expired";
     case 3:
-      return 'billing_retry';
+      return "billing_retry";
     case 4:
-      return 'grace_period';
+      return "grace_period";
     case 5:
-      return 'revoked';
+      return "revoked";
     default:
       return fallback;
   }

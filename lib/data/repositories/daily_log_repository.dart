@@ -328,6 +328,17 @@ class DailyLogRepository {
     return _database.select(_database.dailyLogs).get();
   }
 
+  /// Matches getAll's revision scope without loading every daily log.
+  Future<({int count, DateTime? updatedAt})> revisionSummary() async {
+    final table = _database.dailyLogs;
+    final count = table.id.count();
+    final updatedAt = table.updatedAt.max();
+    final row = await (_database.selectOnly(
+      table,
+    )..addColumns([count, updatedAt])).getSingle();
+    return (count: row.read(count) ?? 0, updatedAt: row.read(updatedAt));
+  }
+
   Future<DailyLog?> getForDay(DateTime date) {
     return (_database.select(_database.dailyLogs)
           ..where((row) => row.dayKey.equals(dayKeyFor(date)))

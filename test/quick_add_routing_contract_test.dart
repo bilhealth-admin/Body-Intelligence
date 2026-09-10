@@ -19,7 +19,7 @@ void main() {
 
       expect(
         shell,
-        contains('final action = await showModalBottomSheet<String>('),
+        contains('final action = await showBilModalBottomSheet<String>('),
       );
       expect(
         shell,

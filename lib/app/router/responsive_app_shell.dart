@@ -9,6 +9,7 @@ import '../localization/app_localizations.dart';
 import '../theme/premium_motion_tokens.dart';
 import '../theme/bil_navigation_icons.dart';
 import '../../shared/widgets/bil_wordmark.dart';
+import '../../shared/widgets/bil_modal_bottom_sheet.dart';
 import 'bil_quick_add_sheet.dart';
 
 part 'responsive_app_shell_top_navigation.dart';
@@ -53,7 +54,12 @@ class ResponsiveAppShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: GoRouter.of(context).routerDelegate,
+    builder: (context, _) => _buildShell(context),
+  );
+
+  Widget _buildShell(BuildContext context) {
     // A ShellRoute widget can inherit the shell page's GoRouterState instead
     // of the active child route. Read the delegate's complete configuration so
     // root-back and selected-navigation behavior follow the route the user is
@@ -77,40 +83,56 @@ class ResponsiveAppShell extends StatelessWidget {
       systemNavigationBarColor: Theme.of(context).scaffoldBackgroundColor,
       systemNavigationBarIconBrightness: Brightness.dark,
     );
-    ({IconData icon, IconData selected, String label}) navigationItem(
-      BilNavigationDestination destination,
+    ({
+      IconData icon,
+      IconData selected,
       String label,
-    ) {
+      BilNavigationDestination destination,
+    })
+    navigationItem(BilNavigationDestination destination, String label) {
       final icons = BilNavigationIcons.forDestination(destination, platform);
-      return (icon: icons.icon, selected: icons.selected, label: label);
+      return (
+        icon: icons.icon,
+        selected: icons.selected,
+        label: label,
+        destination: destination,
+      );
     }
 
-    final items = <({IconData icon, IconData selected, String label})>[
-      navigationItem(
-        BilNavigationDestination.today,
-        context.strings.text('Today'),
-      ),
-      navigationItem(
-        BilNavigationDestination.diary,
-        context.strings.text('Diary'),
-      ),
-      navigationItem(
-        BilNavigationDestination.discover,
-        context.strings.text('Discover'),
-      ),
-      navigationItem(
-        BilNavigationDestination.progress,
-        context.strings.text('Progress'),
-      ),
-      navigationItem(
-        BilNavigationDestination.insights,
-        context.strings.text('Insights'),
-      ),
-      navigationItem(
-        BilNavigationDestination.more,
-        context.strings.text('More'),
-      ),
-    ];
+    final items =
+        <
+          ({
+            IconData icon,
+            IconData selected,
+            String label,
+            BilNavigationDestination destination,
+          })
+        >[
+          navigationItem(
+            BilNavigationDestination.today,
+            context.strings.text('Today'),
+          ),
+          navigationItem(
+            BilNavigationDestination.diary,
+            context.strings.text('Diary'),
+          ),
+          navigationItem(
+            BilNavigationDestination.discover,
+            context.strings.text('Discover'),
+          ),
+          navigationItem(
+            BilNavigationDestination.progress,
+            context.strings.text('Progress'),
+          ),
+          navigationItem(
+            BilNavigationDestination.insights,
+            context.strings.text('Insights'),
+          ),
+          navigationItem(
+            BilNavigationDestination.more,
+            context.strings.text('More'),
+          ),
+        ];
 
     void navigate(int next) {
       if (next == 1 && index != 1) {
@@ -122,14 +144,12 @@ class ResponsiveAppShell extends StatelessWidget {
     }
 
     Future<void> quickAdd() async {
-      final action = await showModalBottomSheet<String>(
+      final action = await showBilModalBottomSheet<String>(
         context: context,
         // Keep the sheet dismissible from the dimmed area and draggable from
         // the handle/content on both iOS and Android. The custom sheet owns
         // its visual handle, so the framework handle is intentionally
         // disabled.
-        isDismissible: true,
-        enableDrag: true,
         showDragHandle: false,
         isScrollControlled: true,
         useSafeArea: true,
@@ -261,13 +281,15 @@ class ResponsiveAppShell extends StatelessWidget {
                       quickAdd: quickButton,
                       onSelected: (next) {
                         final target = next == 0 ? paths[0] : paths[5];
-                        // Re-selecting the mounted tab used to rebuild a heavy
-                        // Dashboard route and produced a visible blink. A real
-                        // tab change uses a replacement push so both Dashboard
-                        // and More share the native forward slide without
-                        // growing a bottom-navigation history stack.
-                        if (currentPath == target) return;
-                        context.pushReplacement(target);
+                        final activePath = GoRouter.of(
+                          context,
+                        ).routerDelegate.currentConfiguration.uri.path;
+                        // Tabs select the canonical shell root. Replacing the
+                        // top imperative route can retain an external/detail
+                        // stack and a stale tab closure after a modal return.
+                        if (activePath == target) return;
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        context.go(target);
                       },
                     ),
                   ),
@@ -329,7 +351,15 @@ class _GlassBottomNavigation extends StatelessWidget {
   }) : assert(items.length == 2);
 
   final int? selectedIndex;
-  final List<({IconData icon, IconData selected, String label})> items;
+  final List<
+    ({
+      IconData icon,
+      IconData selected,
+      String label,
+      BilNavigationDestination destination,
+    })
+  >
+  items;
   final Widget quickAdd;
   final ValueChanged<int> onSelected;
 
@@ -421,7 +451,13 @@ class _GlassBottomDestination extends StatelessWidget {
     required this.onTap,
   });
 
-  final ({IconData icon, IconData selected, String label}) item;
+  final ({
+    IconData icon,
+    IconData selected,
+    String label,
+    BilNavigationDestination destination,
+  })
+  item;
   final bool selected;
   final VoidCallback onTap;
 
@@ -455,8 +491,9 @@ class _GlassBottomDestination extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    selected ? item.selected : item.icon,
+                  BilNativeNavigationGlyph(
+                    destination: item.destination,
+                    selected: selected,
                     color: foreground,
                     size: 25,
                   ),

@@ -25,6 +25,11 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   final List<CommunityComment> _comments = [];
   CommunityComment? _replyingTo;
   String? _clientId;
+  String? _clientBody;
+  DateTime? _after;
+  String? _afterId;
+  int _loadGeneration = 0;
+  bool _refreshing = false;
   TextDirection? _composerDirection;
   String? _composerError;
   bool _hasMore = false;
@@ -34,26 +39,41 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   final Set<String> _busyComments = <String>{};
 
   Future<void> _loadInitial() async {
-    final values = await Future.wait<Object>([
-      widget.repository.loadPostStats([widget.post.id]),
-      widget.repository.loadPostComments(widget.post.id, limit: _pageSize),
-    ]);
-    final stats = values[0] as List<CommunityPostStats>;
-    final comments = values[1] as List<CommunityComment>;
-    if (stats.length == 1) _stats = stats.single;
-    _comments
-      ..clear()
-      ..addAll(comments);
-    _hasMore = comments.length == _pageSize;
+    final generation = ++_loadGeneration;
+    _refreshing = true;
+    _loadingMore = false;
+    try {
+      final values = await Future.wait<Object>([
+        widget.repository.loadPostStats([widget.post.id]),
+        widget.repository.loadPostComments(widget.post.id, limit: _pageSize),
+      ]);
+      final stats = values[0] as List<CommunityPostStats>;
+      final comments = values[1] as List<CommunityComment>;
+      if (!mounted || generation != _loadGeneration) return;
+      if (stats.length == 1) _stats = stats.single;
+      _comments
+        ..clear()
+        ..addAll(comments);
+      _hasMore = comments.length == _pageSize;
+      _after = comments.lastOrNull?.createdAt;
+      _afterId = comments.lastOrNull?.id;
+    } finally {
+      if (generation == _loadGeneration) _refreshing = false;
+    }
   }
 
   void _retry() {
-    setState(() => _loading = _loadInitial());
+    setState(() {
+      _loading = _loadInitial();
+    });
   }
 
   Future<void> _refresh() async {
+    if (_submitting || _busyComments.isNotEmpty || _likingPost) return;
     final future = _loadInitial();
-    setState(() => _loading = future);
+    setState(() {
+      _loading = future;
+    });
     try {
       await future;
     } on Object {
@@ -62,26 +82,38 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   }
 
   Future<void> _loadMore() async {
-    if (_loadingMore || !_hasMore || _comments.isEmpty) return;
+    if (_loadingMore ||
+        _refreshing ||
+        !_hasMore ||
+        _after == null ||
+        _afterId == null) {
+      return;
+    }
+    final generation = _loadGeneration;
     setState(() => _loadingMore = true);
     try {
-      final cursor = _comments.last;
       final page = await widget.repository.loadPostComments(
         widget.post.id,
-        after: cursor.createdAt,
-        afterId: cursor.id,
+        after: _after,
+        afterId: _afterId,
         limit: _pageSize,
       );
-      if (!mounted) return;
+      if (!mounted || generation != _loadGeneration) return;
       final known = _comments.map((comment) => comment.id).toSet();
       setState(() {
         _comments.addAll(page.where((comment) => known.add(comment.id)));
         _hasMore = page.length == _pageSize;
+        if (page.isNotEmpty) {
+          _after = page.last.createdAt;
+          _afterId = page.last.id;
+        }
       });
     } catch (_) {
-      if (mounted) _showActionError();
+      if (mounted && generation == _loadGeneration) _showActionError();
     } finally {
-      if (mounted) setState(() => _loadingMore = false);
+      if (mounted && generation == _loadGeneration) {
+        setState(() => _loadingMore = false);
+      }
     }
   }
 
@@ -103,7 +135,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
 
   Future<void> _submitComment() async {
     final text = _composer.text.trim();
-    if (_submitting) return;
+    if (_submitting || _refreshing) return;
     if (text.isEmpty) {
       setState(() {
         _composerError = communityText(
@@ -113,6 +145,13 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
         );
       });
       return;
+    }
+    // An unchanged retry reuses its id. Editing after an uncertain failure is
+    // a different payload and must not collide with the server's idempotency
+    // guard (which correctly rejects one id used for two different bodies).
+    if (_clientBody != text) {
+      _clientBody = text;
+      _clientId = null;
     }
     final clientId = _clientId ??= const Uuid().v4();
     setState(() {
@@ -141,8 +180,10 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
           _comments[existing] = comment;
         }
         _composer.clear();
+        _composerDirection = null;
         _replyingTo = null;
         _clientId = null;
+        _clientBody = null;
       });
     } on CommunityPolicyAccessException catch (error) {
       if (!mounted) return;
@@ -208,12 +249,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
   Future<void> _commentAction(CommunityComment comment, String action) async {
     if (action == 'reply') {
       setState(() {
-        _replyingTo = comment.parentId == null
-            ? comment
-            : _comments.firstWhere(
-                (item) => item.id == comment.parentId,
-                orElse: () => comment,
-              );
+        _replyingTo = comment;
         _clientId = null;
         _composerError = null;
       });
@@ -235,6 +271,11 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
           _comments.removeWhere(
             (item) => item.id == comment.id || item.parentId == comment.id,
           );
+          if (_replyingTo?.id == comment.id ||
+              _replyingTo?.parentId == comment.id) {
+            _replyingTo = null;
+            _clientId = null;
+          }
           final removedCount = before - _comments.length;
           _stats = CommunityPostStats(
             postId: _stats.postId,
@@ -253,6 +294,9 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
       } else if (action == 'block') {
         await widget.repository.blockMember(comment.authorId);
         if (!mounted) return;
+        // The server filters blocked members and their reply threads. Refresh
+        // only after releasing this mutation's busy guard.
+        _busyComments.remove(comment.id);
         await _refresh();
       }
       if (mounted && action != 'delete' && action != 'block') {
@@ -355,14 +399,26 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
                         ),
                       )
                     else
-                      for (final comment in _comments)
+                      for (final comment in communityCommentsInThreadOrder(
+                        _comments,
+                      ))
                         _CommunityCommentTile(
                           key: ValueKey(comment.id),
                           comment: comment,
                           mine:
                               comment.authorId ==
                               widget.repository.currentUserId,
-                          busy: _busyComments.contains(comment.id),
+                          busy:
+                              _refreshing ||
+                              _submitting ||
+                              _busyComments.contains(comment.id),
+                          parent: comment.parentId == null
+                              ? null
+                              : _comments
+                                    .where(
+                                      (item) => item.id == comment.parentId,
+                                    )
+                                    .firstOrNull,
                           onLike: () => _toggleCommentLike(comment),
                           onAction: (action) => _commentAction(comment, action),
                         ),
@@ -451,7 +507,7 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
                               minLines: 1,
                               maxLines: 4,
                               maxLength: 1200,
-                              enabled: !_submitting,
+                              enabled: !_submitting && !_refreshing,
                               textDirection:
                                   _composerDirection ??
                                   Directionality.of(context),
@@ -489,7 +545,9 @@ class _CommunityPostDetailPageState extends State<_CommunityPostDetailPage> {
                               'Send comment',
                               'إرسال التعليق',
                             ),
-                            onPressed: _submitting ? null : _submitComment,
+                            onPressed: _submitting || _refreshing
+                                ? null
+                                : _submitComment,
                             icon: _submitting
                                 ? const SizedBox.square(
                                     dimension: 18,

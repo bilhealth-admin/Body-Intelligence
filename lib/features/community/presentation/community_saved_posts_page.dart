@@ -32,7 +32,9 @@ class _CommunitySavedPostsPageState extends State<CommunitySavedPostsPage> {
 
   Future<void> _refresh() async {
     final future = _loadInitial();
-    setState(() => _loading = future);
+    setState(() {
+      _loading = future;
+    });
     try {
       await future;
     } on Object {
@@ -171,6 +173,7 @@ class _CommunitySavedPostsPageState extends State<CommunitySavedPostsPage> {
                     }
                     final post = _posts[index];
                     return Padding(
+                      key: ValueKey(post.id),
                       padding: const EdgeInsets.only(bottom: 16),
                       child: _CommunityPostCard(
                         post: post,

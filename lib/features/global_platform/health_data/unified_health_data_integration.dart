@@ -7,6 +7,16 @@ abstract interface class NativeHealthCapabilityBridge {
   Future<void> openSettings();
 }
 
+/// Whether iOS still has unanswered permission questions, not whether any
+/// read access was granted. Apple deliberately keeps read access private.
+enum HealthAuthorizationRequestStatus { shouldRequest, unnecessary, unknown }
+
+abstract interface class NativeHealthAuthorizationReviewBridge {
+  Future<HealthAuthorizationRequestStatus> authorizationRequestStatus(
+    Set<String> types,
+  );
+}
+
 /// Health signals BIL can read after the user explicitly authorizes them.
 /// Missing types remain missing evidence; BIL never synthesizes them.
 abstract final class BilHealthScope {
@@ -252,6 +262,12 @@ final class NativeHealthPage {
   /// The caller must discard that token and perform a bounded bootstrap read
   /// with a newly issued token. HealthKit and other bridges leave this false.
   final bool changesTokenExpired;
+}
+
+/// Calendar-day activity totals calculated by the OS across its selected
+/// sources. Never derive these by adding overlapping phone/watch samples.
+abstract interface class NativeHealthDailyTotalsBridge {
+  Future<List<NativeHealthRecord>> readDailyTotals({required DateTime asOf});
 }
 
 abstract interface class NativeHealthBridge {

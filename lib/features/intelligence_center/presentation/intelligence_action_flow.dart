@@ -500,6 +500,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
     final accepted = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        scrollable: true,
         icon: Icon(
           action.destructive
               ? BilSemanticIcons.deleteAccount
@@ -534,6 +535,7 @@ extension _IntelligenceActionFlow on _IntelligenceCenterPageState {
             context: context,
             barrierDismissible: false,
             builder: (dialogContext) => AlertDialog(
+              scrollable: true,
               icon: Icon(
                 BilSemanticIcons.deleteAccount,
                 color: Theme.of(context).colorScheme.error,

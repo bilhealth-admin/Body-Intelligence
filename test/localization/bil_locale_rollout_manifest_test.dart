@@ -44,9 +44,14 @@ void main() {
     final server = File(
       'supabase/functions/_shared/bcp47.ts',
     ).readAsStringSync();
-    for (final tag in BilLocaleRolloutManifest.releaseTargets25) {
-      expect(server, contains("'$tag'"), reason: 'server missing $tag');
-    }
+    final array = RegExp(
+      r'BIL_PRODUCTION_LOCALE_TAGS\s*=\s*\[([\s\S]*?)\]',
+    ).firstMatch(server)!.group(1)!;
+    final tags = RegExp(
+      """['"]([^'"]+)['"]""",
+    ).allMatches(array).map((m) => m.group(1)!).toList();
+    expect(tags, hasLength(25));
+    expect(tags.toSet(), BilLocaleRolloutManifest.releaseTargets25);
   });
 
   test('authenticated and settings surfaces expose the language selector', () {

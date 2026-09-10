@@ -15,12 +15,13 @@ class ZipDecoder {
     bool verify = false,
     String? password,
     ArchiveCallback? callback,
-  }) => decodeStream(
-    InputMemoryStream(bytes),
-    verify: verify,
-    password: password,
-    callback: callback,
-  );
+  }) =>
+      decodeStream(
+        InputMemoryStream(bytes),
+        verify: verify,
+        password: password,
+        callback: callback,
+      );
 
   Archive decodeStream(
     InputStream input, {

@@ -1,72 +1,59 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart';
+import '../../support/released_recipe_contract.dart';
 
 void main() {
-  final artifact =
-      jsonDecode(
-            File(
-              'artifacts/meal_catalog/existing_recipe_nutrition_batch_b.json',
-            ).readAsStringSync(),
-          )
-          as Map<String, Object?>;
-  final records = (artifact['records'] as List).cast<Map<String, Object?>>();
+  TestWidgetsFlutterBinding.ensureInitialized();
+  late List<Map<String, dynamic>> records;
+  setUpAll(() async {
+    records = (await releasedRecipeRecords())
+        .where((r) => originalRecipeBatchB.contains(r['canonicalId']))
+        .toList();
+  });
   test(
-    'batch B is nine recipes with truthful calculated or blocked status',
+    'all nine batch B recipes retain calculated evidence in the release',
     () {
-      final summary = artifact['summary'] as Map;
-      expect(records, hasLength(9));
-      expect(summary['calculated'], 9);
-      expect(summary['blocked'], 0);
       expect(
-        records
-            .where((r) => r['formulationStatus'] == 'blocked')
-            .map((r) => r['canonicalId']),
-        isEmpty,
+        records.map((r) => r['canonicalId']).toSet(),
+        originalRecipeBatchB,
       );
+      for (final record in records) {
+        expectRecipeCalculation(record);
+      }
     },
   );
   test(
-    'calculated nutrients exactly aggregate local USDA per-100g evidence',
+    'per-serving nutrients aggregate the actual local USDA rows and divisor',
     () {
       final db = sqlite3.open(
         'assets/catalogs/bil_food_core.sqlite',
         mode: OpenMode.readOnly,
       );
       addTearDown(db.close);
-      const columns = {
-        'kcal': 'energy_kcal',
-        'proteinG': 'protein_g',
-        'carbohydrateG': 'carbs_g',
-        'fatG': 'fat_g',
-        'fiberG': 'fiber_g',
-        'sugarG': 'sugars_g',
-        'sodiumMg': 'sodium_mg',
-        'potassiumMg': 'potassium_mg',
-      };
-      for (final recipe in records.where(
-        (r) => r['formulationStatus'] == 'calculated',
-      )) {
-        final nutrition = recipe['nutrition'] as Map<String, Object?>;
-        final actual = nutrition['perServing'] as Map<String, Object?>;
-        for (final nutrient in columns.entries) {
+      for (final recipe in records) {
+        final nutrition = recipe['nutrition'] as Map;
+        final actual = nutrition['perServing'] as Map;
+        final servings = (recipe['serving'] as Map)['count'] as num;
+        expect(servings, greaterThan(0));
+        for (final nutrient in recipeNutrientColumns.entries) {
           var expected = 0.0;
-          for (final raw in recipe['ingredients'] as List) {
-            final ingredient = (raw as Map).cast<String, Object?>();
+          var unknown = false;
+          for (final ingredient
+              in (recipe['ingredients'] as List).cast<Map>()) {
             final row = db.select(
               'SELECT ${nutrient.value} FROM foods WHERE fdc_id=?',
-              [ingredient['fdcId']],
+              [int.parse((ingredient['recordId'] as String).split(':').last)],
             ).single;
-            expected +=
-                (row[nutrient.value] as num).toDouble() *
-                (ingredient['grams'] as num).toDouble() /
-                100;
+            final value = row[nutrient.value] as num?;
+            if (value == null) {
+              unknown = true;
+            } else {
+              expected += value * (ingredient['grams'] as num) / 100 / servings;
+            }
           }
           expect(
-            (actual[nutrient.key] as num).toDouble(),
-            double.parse(expected.toStringAsFixed(2)),
+            actual[nutrient.key],
+            unknown ? isNull : closeTo(expected, .00001),
             reason: '${recipe['canonicalId']}:${nutrient.key}',
           );
         }

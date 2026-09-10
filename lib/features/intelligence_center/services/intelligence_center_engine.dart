@@ -341,6 +341,10 @@ class IntelligenceCenterEngine {
     String locale,
     CoachContextSnapshot? context,
   ) {
+    // Only a direct target lookup is a local shortcut. Mentioning protein in
+    // a meal-choice, remaining-intake or comparison question is not a request
+    // to repeat the full daily target (including the daily brief's CTA).
+    if (!_isDailyTargetLookup(question)) return null;
     final raw = context?.computedHealth['dailyTargets'];
     if (raw is! Map) return null;
     final targets = Map<String, Object?>.from(raw);
@@ -405,6 +409,36 @@ class IntelligenceCenterEngine {
       );
     }
     return null;
+  }
+
+  bool _isDailyTargetLookup(String question) {
+    final text = question
+        .replaceAll(RegExp(r'[أإآ]'), 'ا')
+        .replaceAll(RegExp(r'[?؟.!،]'), '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    return const {
+          'protein',
+          'calories',
+          'calorie',
+          'kcal',
+          'بروتين',
+          'البروتين',
+          'سعرات',
+          'السعرات',
+          'how much protein do i need',
+          'how many calories do i need',
+          'كم احتاج بروتين',
+          'كم احتاج من البروتين',
+          'كم احتاج سعرات',
+          'كم احتاج من السعرات',
+        }.contains(text) ||
+        RegExp(
+          r"^(?:(?:what is|what's|show me) )?(?:(?:my|the) )?(?:(?:current|saved|daily) )*(?:protein|calorie|calories|kcal) (?:target|goal)(?: today| per day)?$",
+        ).hasMatch(text) ||
+        RegExp(
+          r'^(?:(?:ما هو|ما|كم|اعرض) )?(?:هدف|هدفي|احتياجي)(?: اليومي)?(?: من)? (?:البروتين|بروتين|السعرات|السعرات الحرارية)(?: اليومي| اليوم)?$',
+        ).hasMatch(text);
   }
 
   IntelligenceCenterReply? _answerRecordedWeight(
@@ -517,8 +551,8 @@ class IntelligenceCenterEngine {
         'استهلكت حصة المدرب الذكي لهذه الفترة. لم تُحتسب هذه الرسالة، ولن أدّعي أن الرد صادر من Gemini.',
       ),
       CoachServiceStatus.creditsRequired => tr(
-        'Your available AI tokens are exhausted. No message was charged. Reactivate the smart coach with Premium AI Coach or add AI Boost tokens.',
-        'نفدت توكنات AI المتاحة. لم تُحتسب الرسالة. أعد تفعيل المدرب الذكي عبر Premium AI Coach أو أضف توكنات AI Boost.',
+        'Your available AI tokens are exhausted. No message was charged. Add AI Boost tokens to continue.',
+        'نفدت توكنات AI المتاحة. لم تُحتسب الرسالة. أضف توكنات AI Boost للمتابعة.',
       ),
       CoachServiceStatus.safetyBlocked => AiCoachSafetyCopy.resolve(locale),
       CoachServiceStatus.temporarilyUnavailable => tr(
@@ -534,15 +568,6 @@ class IntelligenceCenterEngine {
       evidence: const ['AI Coach service status'],
       actions: status == CoachServiceStatus.creditsRequired
           ? [
-              IntelligenceAction(
-                id: 'open-ai-coach-subscription',
-                type: IntelligenceActionType.openAiCoachSubscription,
-                // The exhausted-credit message above already names the tier.
-                // Keep the route-wide Premium label budget at one while the
-                // action remains explicit about its destination.
-                label: tr('View membership plans', 'عرض خطط العضوية'),
-                requiresConfirmation: false,
-              ),
               IntelligenceAction(
                 id: 'buy-ai-boost',
                 type: IntelligenceActionType.buyAiBoost,

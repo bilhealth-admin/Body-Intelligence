@@ -1,35 +1,99 @@
 part of 'intelligence_center_page.dart';
 
+// Native I/O boundaries stay injectable so cancellation, permissions and late
+// results can be exercised without opening hardware or making a paid request.
+final intelligenceCoachImagePickerProvider =
+    Provider<BilRecoverableImagePicker>(
+      (ref) => BilRecoverableImagePicker.instance,
+    );
+final intelligenceCoachImageAnalysisProvider =
+    Provider<MealImageAnalysisService Function(String)>(
+      (ref) =>
+          (locale) => MealImageAnalysisService(requestedLocale: locale),
+    );
+
 extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
   Future<void> _analyzeFoodImageInChat() async {
-    if (analyzingFoodImage || sending) return;
-    if (!await _ensureCoachRuntimePermission(BilRuntimeCapability.camera) ||
-        !mounted) {
+    if (!mounted || !conversationReady || foodImageFlowOpening || sending) {
       return;
     }
-    _updateState(() {
-      analyzingFoodImage = true;
-      introVisible = false;
-    });
+    _updateState(() => foodImageFlowOpening = true);
+    if (listening || voiceCaptureStarting) {
+      unawaited(_stopVoiceCapture(resetMode: true));
+    }
     try {
-      // Keep the camera in the app. Launching ImagePicker.camera hands the
-      // user to the system camera and backgrounds BIL, which is shown as the
-      // privacy shield in the iOS task switcher.
-      final image = await Navigator.of(context).push<XFile>(
-        MaterialPageRoute<XFile>(
-          builder: (_) => BilCameraCapturePage(
-            title: tr('Food photo', 'صورة الطعام'),
-            captureLabel: tr('Capture', 'التقاط'),
+      final copy = MealVisionUiCopy.ofLocale(Localizations.localeOf(context));
+      final source = await showModalBottomSheet<ImageSource>(
+        context: context,
+        useSafeArea: true,
+        showDragHandle: true,
+        builder: (sheetContext) => SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              ListTile(
+                key: const Key('ai-coach-image-source-camera'),
+                leading: const Icon(Icons.camera_alt_outlined),
+                title: Text(copy.text('take')),
+                onTap: () => Navigator.pop(sheetContext, ImageSource.camera),
+              ),
+              ListTile(
+                key: const Key('ai-coach-image-source-gallery'),
+                leading: const Icon(Icons.photo_library_outlined),
+                title: Text(copy.text('choose')),
+                onTap: () => Navigator.pop(sheetContext, ImageSource.gallery),
+              ),
+              ListTile(
+                key: const Key('ai-coach-image-source-cancel'),
+                leading: const Icon(Icons.close),
+                title: Text(copy.text('cancel')),
+                onTap: () => Navigator.pop(sheetContext),
+              ),
+            ],
           ),
         ),
       );
+      if (source == null || !mounted) return;
+      final XFile? image;
+      if (source == ImageSource.gallery) {
+        // The system picker grants access only to the chosen image. Do not
+        // request camera access or the entire photo library for this action.
+        image = await ref
+            .read(intelligenceCoachImagePickerProvider)
+            .pickImage(
+              purpose: BilImagePickerPurpose.coachFoodPhoto,
+              source: ImageSource.gallery,
+              maxWidth: 2048,
+              maxHeight: 2048,
+              imageQuality: 88,
+              requestFullMetadata: false,
+            );
+      } else {
+        if (!await _ensureCoachRuntimePermission(BilRuntimeCapability.camera) ||
+            !mounted) {
+          return;
+        }
+        // Keep the camera in the app. Launching ImagePicker.camera hands the
+        // user to the system camera and backgrounds BIL, which is shown as the
+        // privacy shield in the iOS task switcher.
+        image = await Navigator.of(context).push<XFile>(
+          MaterialPageRoute<XFile>(
+            builder: (_) => BilCameraCapturePage(
+              title: tr('Food photo', 'صورة الطعام'),
+              captureLabel: tr('Capture', 'التقاط'),
+            ),
+          ),
+        );
+      }
       if (image == null || !mounted) return;
-      final analysis = await MealImageAnalysisService(
-        requestedLocale: BilLocalePolicy.canonicalTag(
-          Localizations.localeOf(context),
-        ),
-      ).analyze(image);
+      _updateState(() => analyzingFoodImage = true);
+      final analysis = await ref
+          .read(intelligenceCoachImageAnalysisProvider)(
+            BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
+          )
+          .analyze(image);
       if (!mounted) return;
+      _updateState(() => analyzingFoodImage = false);
       final reviewed = await showMealImageReviewDialog(
         context,
         analysis: analysis,
@@ -43,7 +107,13 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
           : reviewed
                 .map((item) {
                   final confidence = (item.candidate.confidence * 100).round();
-                  return '${item.candidate.name}: ${item.amount} ${item.unit} ($confidence%)';
+                  final unit = mealImageUnitLabel(
+                    item.unit,
+                    BilLocalePolicy.canonicalTag(
+                      Localizations.localeOf(context),
+                    ),
+                  );
+                  return '${item.candidate.name}: ${item.amount} $unit ($confidence%)';
                 })
                 .join('\n');
       _beginConversationForUserAction();
@@ -90,7 +160,12 @@ extension _IntelligenceVisionFlow on _IntelligenceCenterPageState {
         ),
       );
     } finally {
-      if (mounted) _updateState(() => analyzingFoodImage = false);
+      if (mounted) {
+        _updateState(() {
+          analyzingFoodImage = false;
+          foodImageFlowOpening = false;
+        });
+      }
     }
   }
 }

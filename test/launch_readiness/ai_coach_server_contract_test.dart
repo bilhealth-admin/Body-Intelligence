@@ -61,6 +61,8 @@ void main() {
         [
               'intelligence_center_page.dart',
               'intelligence_conversation_voice.dart',
+              'intelligence_conversation_viewport.dart',
+              'intelligence_center_voice_widgets.dart',
               'intelligence_query_flow.dart',
             ]
             .map(
@@ -75,13 +77,18 @@ void main() {
     expect(page, contains('autoDetectLanguage: true'));
     expect(page, contains('localeId: null'));
     expect(page, isNot(contains('previousUserMessage')));
-    expect(page, contains('if (await _startNativeVoiceCapture()) return;'));
+    expect(
+      page,
+      contains('if (await _startNativeVoiceCapture(generation)) return;'),
+    );
     expect(page, isNot(contains('_startCloudVoiceCapture')));
     expect(page, isNot(contains('CoachVoicePayload')));
     expect(page, contains('pendingVoiceTranscript = transcript'));
     expect(page, contains('question.value = TextEditingValue('));
     expect(page, contains('Duration(milliseconds: 3500)'));
     expect(page, contains('_LiveVoiceTranscript'));
+    expect(page, contains("part 'intelligence_conversation_viewport.dart';"));
+    expect(page, contains("part 'intelligence_center_voice_widgets.dart';"));
     expect(page, contains('await speech.stop();'));
     expect(page, contains('_speakCoachText(spokenReply, spokenLocale)'));
     expect(page, contains('speechPlan != CoachSpeechPlan.directAnswer'));

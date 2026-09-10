@@ -70,6 +70,10 @@ function mockAuthenticated(premium = true): void {
       `${env.SUPABASE_URL}/rest/v1/bil_ai_closed_test_grants`,
       ({ request }) => requiredHeaders(request.headers) ?? HttpResponse.json([]),
     ),
+    http.get(
+      `${env.SUPABASE_URL}/rest/v1/rpc/bil_get_my_admin_subscription`,
+      ({ request }) => requiredHeaders(request.headers) ?? HttpResponse.json(null),
+    ),
   );
 }
 

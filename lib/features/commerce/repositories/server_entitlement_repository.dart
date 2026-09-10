@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../app/environment/app_environment.dart';
 import '../domain/commerce_plan.dart';
+import '../domain/admin_subscription_access.dart';
 import '../domain/entitlement_resolver.dart';
 import '../domain/free_plan.dart';
 import '../domain/subscription_lifecycle.dart';
@@ -23,6 +24,33 @@ final class ServerEntitlementRepository {
       VerifiedEntitlementSessionCache();
 
   Future<SubscriptionState> current() async {
+    if (!AppEnvironment.supabaseRuntimeReady) return FreePlan.createState();
+    final client = Supabase.instance.client;
+    final ownerId = client.auth.currentUser?.id;
+    if (ownerId == null) return FreePlan.createState();
+    final store = await _storeCurrent();
+    if (client.auth.currentUser?.id != ownerId) return FreePlan.createState();
+    try {
+      final grant = await client
+          .rpc('bil_get_my_admin_subscription')
+          .timeout(const Duration(seconds: 10));
+      if (client.auth.currentUser?.id != ownerId) return FreePlan.createState();
+      return composeAdminSubscriptionAccess(
+        store: store,
+        grant: grant,
+        ownerId: ownerId,
+        now: DateTime.now().toUtc(),
+      );
+    } on Object {
+      // A missing/new admin endpoint or a revoked grant must never erase a
+      // verified store purchase. Admin grants are not put in the store cache.
+      return client.auth.currentUser?.id == ownerId
+          ? store
+          : FreePlan.createState();
+    }
+  }
+
+  Future<SubscriptionState> _storeCurrent() async {
     if (!AppEnvironment.supabaseRuntimeReady) {
       return FreePlan.createState();
     }
@@ -35,7 +63,8 @@ final class ServerEntitlementRepository {
           .from('bil_ai_closed_test_grants')
           .select('active, expires_at')
           .eq('owner_id', user.id)
-          .limit(1);
+          .limit(1)
+          .timeout(const Duration(seconds: 10));
       final closedTestExpiresAt = closedTestRows.isEmpty
           ? null
           : DateTime.tryParse('${closedTestRows.first['expires_at']}')?.toUtc();
@@ -48,7 +77,8 @@ final class ServerEntitlementRepository {
           .from('bil_subscriptions')
           .select()
           .eq('owner_id', user.id)
-          .limit(1);
+          .limit(1)
+          .timeout(const Duration(seconds: 10));
       if (rows.isEmpty) {
         if (!closedTestActive) {
           return _remember(user.id, _verifiedFree(), now);

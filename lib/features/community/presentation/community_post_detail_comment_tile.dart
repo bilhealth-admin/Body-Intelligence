@@ -7,10 +7,12 @@ class _CommunityCommentTile extends StatelessWidget {
     required this.busy,
     required this.onLike,
     required this.onAction,
+    this.parent,
     super.key,
   });
 
   final CommunityComment comment;
+  final CommunityComment? parent;
   final bool mine;
   final bool busy;
   final VoidCallback onLike;
@@ -19,11 +21,16 @@ class _CommunityCommentTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: EdgeInsetsDirectional.only(
-      start: comment.parentId == null ? 0 : 34,
+      start: comment.parentId == null ? 0 : 24,
       bottom: 10,
     ),
-    child: Card(
-      margin: EdgeInsets.zero,
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        color: comment.parentId == null
+            ? null
+            : Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -61,10 +68,6 @@ class _CommunityCommentTile extends StatelessWidget {
                   onSelected: onAction,
                   itemBuilder: (_) => [
                     PopupMenuItem(
-                      value: 'reply',
-                      child: Text(communityText(context, 'Reply', 'رد')),
-                    ),
-                    PopupMenuItem(
                       value: 'copy',
                       child: Text(communityText(context, 'Copy', 'نسخ')),
                     ),
@@ -90,6 +93,23 @@ class _CommunityCommentTile extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
+            if (parent != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text(
+                  parent!.body,
+                  key: Key('community-comment-parent-${comment.id}'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textDirection: BilWrittenLanguageResolver.directionFor(
+                    parent!.body,
+                    fallback: Directionality.of(context),
+                  ),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
             SelectableText(
               comment.body,
               key: Key('community-comment-body-${comment.id}'),
@@ -99,13 +119,20 @@ class _CommunityCommentTile extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 6),
-            Row(
+            Wrap(
+              spacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 Text(
                   '${MaterialLocalizations.of(context).formatShortDate(comment.createdAt.toLocal())} · ${TimeOfDay.fromDateTime(comment.createdAt.toLocal()).format(context)}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
-                const Spacer(),
+                TextButton.icon(
+                  key: Key('community-comment-reply-${comment.id}'),
+                  onPressed: busy ? null : () => onAction('reply'),
+                  icon: const Icon(Icons.reply_rounded, size: 18),
+                  label: Text(communityText(context, 'Reply', 'رد')),
+                ),
                 TextButton.icon(
                   key: Key('community-comment-like-${comment.id}'),
                   onPressed: busy ? null : onLike,

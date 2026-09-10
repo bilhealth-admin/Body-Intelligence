@@ -17,7 +17,7 @@ class GoalRepository {
     if (!const {'lose', 'maintain', 'gain'}.contains(type)) {
       throw ArgumentError.value(type, 'type', 'Unsupported goal type');
     }
-    if (targetWeight < 20 || targetWeight > 500) {
+    if (!targetWeight.isFinite || targetWeight < 20 || targetWeight > 500) {
       throw ArgumentError.value(
         targetWeight,
         'targetWeight',

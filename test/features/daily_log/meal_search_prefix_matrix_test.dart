@@ -65,6 +65,12 @@ void main() {
       final foods = await repository.getFoods();
       final authority = _RecordingFoodSearchAuthority(repository);
       final selectedDate = DateTime(2026, 8, 24);
+      // Exercise both a newly focused route and a reused page receiving the
+      // Quick Add focus parameter. Neither may open search without a tap.
+      final focusEntry = ValueNotifier(
+        mealType == 'breakfast' || mealType == 'dinner',
+      );
+      addTearDown(focusEntry.dispose);
 
       await tester.pumpWidget(
         ProviderScope(
@@ -122,11 +128,31 @@ void main() {
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            home: DailyLogPage(initialMealType: mealType, focusMealEntry: true),
+            home: ValueListenableBuilder<bool>(
+              valueListenable: focusEntry,
+              builder: (_, focused, _) => DailyLogPage(
+                initialMealType: mealType,
+                focusMealEntry: focused,
+              ),
+            ),
           ),
         ),
       );
       await tester.pumpAndSettle();
+      if (!focusEntry.value) {
+        focusEntry.value = true;
+        await tester.pumpAndSettle();
+      }
+
+      final searchEntry = find.byKey(const Key('daily-meal-food-search-bar'));
+      final searchController =
+          tester.widget<SearchBar>(searchEntry).controller! as SearchController;
+      expect(
+        searchController.isOpen,
+        isFalse,
+        reason: '$mealType waits for the user on initial and updated routes',
+      );
+      expect(authority.queries, isEmpty);
 
       final title = tester.widget<Text>(
         find.byKey(const Key('daily-meal-detail-title')),
@@ -136,6 +162,10 @@ void main() {
         '${mealType[0].toUpperCase()}${mealType.substring(1)}',
       );
       expect(find.byKey(const Key('daily-meal-food-search-bar')), findsOne);
+
+      await tester.tap(searchEntry);
+      await tester.pumpAndSettle();
+      expect(searchController.isOpen, isTrue);
 
       final searchBar = find.byType(SearchBar).last;
       const sequence = <String>['a', 'ap', 'app', 'appl', 'apple'];

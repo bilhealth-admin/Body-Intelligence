@@ -25,14 +25,19 @@ class CoachMessageText extends StatelessWidget {
     final date = MaterialLocalizations.of(context).formatFullDate(localTime);
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: alignEnd
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       children: [
         SelectableText(text, textDirection: textDirection, style: style),
         const SizedBox(height: 4),
-        Text(time, semanticsLabel: '$date, $time',
+        Text(
+          time,
+          semanticsLabel: '$date, $time',
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
-          )),
+          ),
+        ),
       ],
     );
   }

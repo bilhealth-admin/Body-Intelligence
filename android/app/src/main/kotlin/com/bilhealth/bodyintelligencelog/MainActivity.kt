@@ -84,6 +84,7 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        BILSettingsSymbolsBridge.register(this, flutterEngine.dartExecutor.binaryMessenger)
         io.flutter.plugin.common.MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             "bil/launch",

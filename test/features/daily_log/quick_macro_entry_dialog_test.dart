@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:body_intelligence_log/features/daily_log/presentation/quick_macro_entry_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -61,6 +63,49 @@ void main() {
     expect(find.text('Quick Add macros'), findsOneWidget);
     expect(find.text('Could not save this entry. Try again.'), findsOneWidget);
     expect(find.text('455'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('two callbacks in the same frame commit the draft only once', (
+    tester,
+  ) async {
+    final pending = Completer<void>();
+    var writes = 0;
+    await open(tester, (_) {
+      writes++;
+      return pending.future;
+    });
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Calories'),
+      '455',
+    );
+    final submit = tester
+        .widget<FilledButton>(find.widgetWithText(FilledButton, 'Add'))
+        .onPressed!;
+    submit();
+    submit();
+    final actualWrites = writes;
+    pending.complete();
+    await tester.pumpAndSettle();
+    expect(actualWrites, 1);
+    expect(find.text('Quick Add macros'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('closing the route releases every field controller', (
+    tester,
+  ) async {
+    await open(tester, (_) async {});
+    final controllers = tester
+        .widgetList<TextFormField>(find.byType(TextFormField))
+        .map((field) => field.controller!)
+        .toList();
+    expect(controllers, hasLength(4));
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    for (final controller in controllers) {
+      expect(() => controller.addListener(() {}), throwsFlutterError);
+    }
     expect(tester.takeException(), isNull);
   });
 

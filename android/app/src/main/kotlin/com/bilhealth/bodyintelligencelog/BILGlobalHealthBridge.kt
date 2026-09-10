@@ -14,6 +14,8 @@ import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.*
 import androidx.health.connect.client.request.ChangesTokenRequest
 import androidx.health.connect.client.request.ReadRecordsRequest
+import androidx.health.connect.client.request.AggregateGroupByPeriodRequest
+import androidx.health.connect.client.aggregate.AggregateMetric
 import androidx.health.connect.client.time.TimeRangeFilter
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
@@ -26,6 +28,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.ZoneOffset
+import java.time.ZoneId
+import java.time.Period
 import kotlin.reflect.KClass
 
 /** Production Health Connect bridge. Device/OEM certification is tracked separately. */
@@ -64,12 +68,57 @@ class BILGlobalHealthBridge(
                     .onFailure { result.error("health_settings_unavailable", null, null) }
             }
             "readChanges" -> run(result) { readChanges(call) }
+            "readDailyTotals" -> run(result) { readDailyTotals(call) }
             "write" -> run(result) { write(call) }
             "delete" -> run(result) { delete(call) }
             // The first public release refreshes connected fitness data only
             // while BIL is in use. Do not claim a continuous background job.
             "enableBackgroundDelivery" -> result.success(mapOf("enabled" to false, "contract" to "foreground-refresh-only"))
             else -> result.notImplemented()
+        }
+    }
+
+    /** No DataOrigin filter: include phone steps and honor the user's app priorities. */
+    private suspend fun readDailyTotals(call: MethodCall): List<Map<String, Any>> {
+        val healthClient = requireClient()
+        val permissions = healthClient.permissionController.getGrantedPermissions()
+        val metrics = mutableSetOf<AggregateMetric<*>>()
+        if (HealthPermission.getReadPermission(StepsRecord::class) in permissions) metrics += StepsRecord.COUNT_TOTAL
+        if (HealthPermission.getReadPermission(DistanceRecord::class) in permissions) metrics += DistanceRecord.DISTANCE_TOTAL
+        if (HealthPermission.getReadPermission(ActiveCaloriesBurnedRecord::class) in permissions) metrics += ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL
+        if (metrics.isEmpty()) return emptyList()
+        val asOf = call.argument<String>("asOf")?.let(Instant::parse) ?: Instant.now()
+        val zone = ZoneId.systemDefault()
+        val end = asOf.atZone(zone).toLocalDateTime()
+        val start = end.toLocalDate().minusDays(29).atStartOfDay()
+        val buckets = healthClient.aggregateGroupByPeriod(
+            AggregateGroupByPeriodRequest(
+                metrics = metrics,
+                timeRangeFilter = TimeRangeFilter.between(start, end),
+                timeRangeSlicer = Period.ofDays(1),
+            ),
+        )
+        return buckets.flatMap { bucket ->
+            val observedAt = minOf(bucket.endTime.atZone(zone).toInstant().minusMillis(1), asOf)
+            fun row(type: String, value: Double?, unit: String): Map<String, Any>? {
+                if (value == null || !value.isFinite() || value < 0) return null
+                return mapOf(
+                    "id" to "daily:$type:${bucket.startTime.toLocalDate()}",
+                    "type" to type, "value" to value, "unit" to unit,
+                    "observedAt" to observedAt.toString(),
+                    "sourceId" to "health_connect.aggregate", "confidence" to 1.0,
+                    "timeZoneId" to zone.id,
+                    "attributes" to mapOf(
+                        "aggregation" to "native_daily",
+                        "sources" to bucket.result.dataOrigins.map { it.packageName }.sorted(),
+                    ),
+                )
+            }
+            listOfNotNull(
+                row("steps", bucket.result[StepsRecord.COUNT_TOTAL]?.toDouble(), "count"),
+                row("distance", bucket.result[DistanceRecord.DISTANCE_TOTAL]?.inMeters, "m"),
+                row("activeEnergy", bucket.result[ActiveCaloriesBurnedRecord.ACTIVE_CALORIES_TOTAL]?.inKilocalories, "kcal"),
+            )
         }
     }
 

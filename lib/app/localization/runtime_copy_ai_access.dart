@@ -34,6 +34,55 @@ abstract final class AiAccessRuntimeCopy {
   };
 
   static const values = <String, Map<String, String>>{
+    'Your available AI tokens are exhausted. No message was charged. Add AI Boost tokens to continue.': {
+      'ar':
+          'نفدت توكنات AI المتاحة. لم تُحتسب الرسالة. أضف توكنات AI Boost للمتابعة.',
+      'en':
+          'Your available AI tokens are exhausted. No message was charged. Add AI Boost tokens to continue.',
+      'fr':
+          'Vos jetons AI disponibles sont épuisés. Aucun message n’a été facturé. Ajoutez des jetons AI Boost pour continuer.',
+      'es':
+          'Tus tokens de AI disponibles se han agotado. No se cobró ningún mensaje. Añade tokens de AI Boost para continuar.',
+      'tr':
+          'Kullanılabilir AI tokenlarınız tükendi. Mesaj için ücret alınmadı. Devam etmek için AI Boost tokenları ekleyin.',
+      'de':
+          'Deine verfügbaren AI-Token sind aufgebraucht. Es wurde keine Nachricht berechnet. Füge AI-Boost-Token hinzu, um fortzufahren.',
+      'it':
+          'I token AI disponibili sono esauriti. Non è stato addebitato alcun messaggio. Aggiungi token AI Boost per continuare.',
+      'pt-BR':
+          'Seus tokens de IA disponíveis acabaram. Nenhuma mensagem foi cobrada. Adicione tokens do AI Boost para continuar.',
+      'pt-PT':
+          'Os seus tokens de IA disponíveis esgotaram-se. Nenhuma mensagem foi cobrada. Adicione tokens do AI Boost para continuar.',
+      'ur':
+          'آپ کے دستیاب AI ٹوکن ختم ہو گئے ہیں۔ کسی پیغام کا معاوضہ نہیں لیا گیا۔ جاری رکھنے کے لیے AI Boost ٹوکن شامل کریں۔',
+      'fa':
+          'توکن‌های AI موجود تمام شده‌اند. هزینه‌ای برای پیام کسر نشد. برای ادامه، توکن AI Boost بیفزایید.',
+      'hi':
+          'आपके उपलब्ध AI टोकन समाप्त हो गए हैं। संदेश के लिए कोई शुल्क नहीं लिया गया। जारी रखने के लिए AI Boost टोकन जोड़ें।',
+      'id':
+          'Token AI yang tersedia telah habis. Tidak ada pesan yang ditagihkan. Tambahkan token AI Boost untuk melanjutkan.',
+      'ms':
+          'Token AI anda yang tersedia telah habis. Tiada mesej dikenakan caj. Tambah token AI Boost untuk meneruskan.',
+      'ja': '利用可能なAIトークンを使い切りました。メッセージの料金は発生していません。続けるにはAI Boostトークンを追加してください。',
+      'ko':
+          '사용 가능한 AI 토큰을 모두 사용했습니다. 메시지 비용은 청구되지 않았습니다. 계속하려면 AI Boost 토큰을 추가하세요.',
+      'zh-Hans': '可用的 AI 令牌已用尽。本条消息未扣费。请添加 AI Boost 令牌以继续。',
+      'zh-Hant': '可用的 AI 權杖已用盡。本則訊息未扣費。請新增 AI Boost 權杖以繼續。',
+      'ru':
+          'Доступные AI-токены закончились. Сообщение не было списано. Добавьте токены AI Boost, чтобы продолжить.',
+      'bn':
+          'আপনার উপলভ্য AI টোকেন শেষ হয়ে গেছে। বার্তাটির জন্য কোনো চার্জ নেওয়া হয়নি। চালিয়ে যেতে AI Boost টোকেন যোগ করুন।',
+      'vi':
+          'Bạn đã hết token AI khả dụng. Tin nhắn này không bị tính phí. Hãy thêm token AI Boost để tiếp tục.',
+      'th':
+          'โทเคน AI ที่ใช้ได้หมดแล้ว ไม่มีการคิดค่าข้อความนี้ เพิ่มโทเคน AI Boost เพื่อใช้งานต่อ',
+      'pl':
+          'Dostępne tokeny AI zostały wyczerpane. Wiadomość nie została naliczona. Dodaj tokeny AI Boost, aby kontynuować.',
+      'nl':
+          'Je beschikbare AI-tokens zijn op. Er is geen bericht in rekening gebracht. Voeg AI Boost-tokens toe om door te gaan.',
+      'uk':
+          'Доступні AI-токени вичерпано. Повідомлення не було списано. Додайте токени AI Boost, щоб продовжити.',
+    },
     'Your available AI tokens are exhausted. No message was charged. Reactivate the smart coach with Premium AI Coach or add AI Boost tokens.': {
       'ar':
           'نفدت توكنات AI المتاحة. لم تُحتسب الرسالة. أعد تفعيل المدرب الذكي عبر Premium AI Coach أو أضف توكنات AI Boost.',

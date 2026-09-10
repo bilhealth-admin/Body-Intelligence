@@ -9,6 +9,8 @@ import '../../app/services/app_observability.dart';
 import '../../app/services/runtime_permission_policy.dart';
 import '../../app/theme/bil_semantic_icons.dart';
 import '../cloud_platform/presentation/cloud_sync_consent_notice.dart';
+import '../connected_health/providers/connected_health_provider.dart';
+import '../connected_health/widgets/dashboard_health_activity_refresh.dart';
 import '../life_context/providers/life_context_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
 import '../profile/services/profile_photo_service.dart';
@@ -244,6 +246,11 @@ class DashboardPage extends ConsumerWidget {
     WidgetRef ref,
   ) async {
     final refreshed = await Future.wait<bool>([
+      _settleDashboardRefresh(
+        () => ref
+            .read(connectedHealthProvider.notifier)
+            .refreshDailyActivity(force: true),
+      ),
       _settleDashboardRefresh(() => ref.refresh(latestWeightProvider.future)),
       _settleDashboardRefresh(() => ref.refresh(weightHistoryProvider.future)),
       _settleDashboardRefresh(() => ref.refresh(userProfileProvider.future)),
@@ -343,9 +350,11 @@ class DashboardPage extends ConsumerWidget {
       data: dashboardTheme,
       child: DashboardShell(
         onRefresh: () => refresh(context, ref),
-        child: DashboardComposition(
-          hero: hero,
-          content: const DashboardGrid(hero: DashboardHeader()),
+        child: DashboardHealthActivityRefresh(
+          child: DashboardComposition(
+            hero: hero,
+            content: const DashboardGrid(hero: DashboardHeader()),
+          ),
         ),
       ),
     );

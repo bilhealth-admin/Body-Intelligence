@@ -221,7 +221,7 @@ void main() {
     );
   });
 
-  test('watch presentation requires wearable provenance', () {
+  test('phone and wearable provenance remain distinct in storage', () {
     final observedAt = DateTime.utc(2026, 9, 4);
     final manual = ConnectedHealthSignalView(
       key: 'weight',
@@ -347,6 +347,7 @@ void main() {
   test('connected health uses existing global platform runtimes', () {
     final provider = <String>[
       'lib/features/connected_health/providers/connected_health_provider.dart',
+      'lib/features/connected_health/providers/connected_health_native_gateway.dart',
       'lib/features/connected_health/providers/connected_health_gateway_helpers.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
 
@@ -361,6 +362,7 @@ void main() {
   test('device verification requires persisted native evidence', () {
     final provider = <String>[
       'lib/features/connected_health/providers/connected_health_provider.dart',
+      'lib/features/connected_health/providers/connected_health_native_gateway.dart',
       'lib/features/connected_health/providers/connected_health_gateway_helpers.dart',
     ].map((path) => File(path).readAsStringSync()).join('\n');
 
@@ -427,9 +429,14 @@ void main() {
       );
       expect(page, contains("Key('fitness-devices-premium-gate')"));
       expect(page, contains("'connected-health-live-watch-card'"));
-      expect(page, contains("'connected-health-source-card'"));
+      expect(
+        File(
+          'lib/features/connected_health/connected_health_source_card.dart',
+        ).readAsStringSync(),
+        contains("'connected-health-source-card'"),
+      );
       expect(page, contains("'connected-health-signals-card'"));
-      expect(page, contains('connectedHealthSnapshotHasWearableEvidence('));
+      expect(page, contains('liveHealthWatchCanShowMetrics(snapshot)'));
       expect(page, contains('defaultTargetPlatform == TargetPlatform.android'));
       expect(page, contains('child: const _FitnessDeviceSection()'));
       expect(card, contains('LiveHealthWatch('));

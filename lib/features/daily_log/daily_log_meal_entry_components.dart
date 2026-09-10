@@ -22,22 +22,24 @@ class _DiaryActionButton extends StatelessWidget {
         onTap: onPressed,
         borderRadius: BorderRadius.circular(20),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 58),
+          constraints: const BoxConstraints(minHeight: 48),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-            child: Column(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                BilSemanticIconBadge(kind: kind, size: 34, iconSize: 19),
-                const SizedBox(height: 2),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontSize: 16,
-                    color: scheme.primary,
-                    fontWeight: FontWeight.w800,
+                BilSemanticIconBadge(kind: kind, size: 28, iconSize: 17),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontSize: 14,
+                      color: scheme.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ],

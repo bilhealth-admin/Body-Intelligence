@@ -622,48 +622,53 @@ void main() {
     expect(find.text('No community updates'), findsOneWidget);
   });
 
-  testWidgets('community action menu navigates to the selected route', (
-    tester,
-  ) async {
-    final repository = _CommunityInteractionRepository();
-    final router = GoRouter(
-      initialLocation: '/community',
-      routes: [
-        GoRoute(
-          path: '/community',
-          builder: (_, _) => CommunityHubPage(repository: repository),
-        ),
-        GoRoute(
-          path: '/community/profile',
-          builder: (_, _) => const Scaffold(body: Text('Profile destination')),
-        ),
-      ],
-    );
-    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Community actions'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Community profile'));
-    await tester.pumpAndSettle();
-    expect(find.text('Profile destination'), findsOneWidget);
-  });
+  testWidgets(
+    'community settings opens the member page and its profile edit route',
+    (tester) async {
+      final repository = _CommunityInteractionRepository();
+      final router = GoRouter(
+        initialLocation: '/community',
+        routes: [
+          GoRoute(
+            path: '/community',
+            builder: (_, _) => CommunityHubPage(repository: repository),
+          ),
+          GoRoute(
+            path: '/community/profile',
+            builder: (_, _) =>
+                const Scaffold(body: Text('Profile destination')),
+          ),
+        ],
+      );
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('community-settings')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('community-nav-account')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('community-edit-profile')));
+      await tester.pumpAndSettle();
+      expect(find.text('Profile destination'), findsOneWidget);
+    },
+  );
 
-  testWidgets('empty community composer blocks publish with inline validation', (
-    tester,
-  ) async {
-    final repository = _CommunityInteractionRepository();
-    await tester.pumpWidget(_app(CommunityHubPage(repository: repository)));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('community-create-post')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('community-post-publish')));
-    await tester.pumpAndSettle();
+  testWidgets(
+    'empty community composer blocks publish with inline validation',
+    (tester) async {
+      final repository = _CommunityInteractionRepository();
+      await tester.pumpWidget(_app(CommunityHubPage(repository: repository)));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('community-create-post')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('community-post-publish')));
+      await tester.pumpAndSettle();
 
-    expect(repository.publishCalls, 0);
-    expect(find.text('Write your post before publishing.'), findsOneWidget);
-    expect(find.text('Complete all required values.'), findsNothing);
-    expect(find.text('أكمل القيم المطلوبة.'), findsNothing);
-  });
+      expect(repository.publishCalls, 0);
+      expect(find.text('Write your post before publishing.'), findsOneWidget);
+      expect(find.text('Complete all required values.'), findsNothing);
+      expect(find.text('أكمل القيم المطلوبة.'), findsNothing);
+    },
+  );
 
   testWidgets('community food submission accepts Arabic digits and succeeds', (
     tester,
@@ -671,7 +676,9 @@ void main() {
     final repository = _CommunityInteractionRepository();
     await tester.pumpWidget(_app(CommunityHubPage(repository: repository)));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Verified food'));
+    await tester.tap(find.byKey(const Key('community-settings')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('community-nav-foods')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Submit food'));
     await tester.pumpAndSettle();
@@ -700,6 +707,8 @@ void main() {
       find.byKey(const Key('community-food-input-fat')),
       '٥',
     );
+    await tester.ensureVisible(find.byKey(const Key('community-food-submit')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community-food-submit')));
     await tester.pumpAndSettle();
 
@@ -716,7 +725,9 @@ void main() {
       ..failFoodSubmission = true;
     await tester.pumpWidget(_app(CommunityHubPage(repository: repository)));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Verified food'));
+    await tester.tap(find.byKey(const Key('community-settings')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('community-nav-foods')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Submit food'));
     await tester.pumpAndSettle();
@@ -734,6 +745,8 @@ void main() {
     }.entries) {
       await tester.enterText(find.byKey(Key(entry.key)), entry.value);
     }
+    await tester.ensureVisible(find.byKey(const Key('community-food-submit')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community-food-submit')));
     await tester.pumpAndSettle();
 

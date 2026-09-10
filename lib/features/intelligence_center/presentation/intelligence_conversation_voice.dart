@@ -37,17 +37,17 @@ coachRuntimePermissionPresentation(
     englishName: 'microphone',
     arabicName: 'الميكروفون',
     englishRationale:
-        'BIL starts listening only after you press the voice button. On iPhone, speech recognition may ask separately.',
+        'BIL uses speech recognition only after you start voice input. Recognized text is sent after you pause.',
     arabicRationale:
-        'يبدأ BIL الاستماع فقط بعد الضغط على زر الصوت. قد يطلب iPhone إذن التعرف على الكلام بشكل منفصل.',
+        'يستخدم BIL التعرف على الكلام فقط بعد بدء الإدخال الصوتي. يُرسل النص المتعرف عليه بعد أن تتوقف عن الكلام.',
   ),
   BilRuntimeCapability.speechRecognition => (
     englishName: 'speech recognition',
     arabicName: 'التعرف على الكلام',
     englishRationale:
-        'BIL uses speech recognition only after you start voice input, and you can review the text before sending.',
+        'BIL uses speech recognition only after you start voice input. Recognized text is sent after you pause.',
     arabicRationale:
-        'يستخدم BIL التعرف على الكلام فقط بعد بدء الإدخال الصوتي، ويمكنك مراجعة النص قبل الإرسال.',
+        'يستخدم BIL التعرف على الكلام فقط بعد بدء الإدخال الصوتي. يُرسل النص المتعرف عليه بعد أن تتوقف عن الكلام.',
   ),
   BilRuntimeCapability.notifications => (
     englishName: 'notifications',
@@ -64,6 +64,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     BilRuntimeCapability capability, {
     bool includeSpeechRecognition = false,
   }) async {
+    if (!mounted || coachInBackground) return false;
     const policy = BilRuntimePermissionPolicy();
     final permissionSequence = coachRuntimePermissionSequence(
       capability: capability,
@@ -83,20 +84,31 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     final presentation = coachRuntimePermissionPresentation(
       effectiveCapability,
     );
-    final capabilityName = tr(
-      presentation.englishName,
-      presentation.arabicName,
-    );
+    final permissionTitle = switch (effectiveCapability) {
+      BilRuntimeCapability.microphone => MealVoiceRuntimeCopy.resolve(
+        MealVoiceCopyKey.microphonePermissionTitle,
+        BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
+      ),
+      BilRuntimeCapability.speechRecognition => MealVoiceRuntimeCopy.resolve(
+        MealVoiceCopyKey.speechPermissionTitle,
+        BilLocalePolicy.canonicalTag(Localizations.localeOf(context)),
+      ),
+      BilRuntimeCapability.camera => tr(
+        'Allow camera for this action?',
+        'السماح بالكاميرا لهذا الإجراء؟',
+      ),
+      BilRuntimeCapability.notifications => tr('Notifications', 'الإشعارات'),
+    };
     if (current == BilRuntimePermissionState.permanentlyDenied ||
         current == BilRuntimePermissionState.restricted) {
       final open = await showDialog<bool>(
         context: context,
         builder: (dialogContext) => AlertDialog.adaptive(
-          title: Text(tr('Access is off', 'الوصول متوقف')),
+          title: Text(permissionTitle),
           content: Text(
             tr(
-              'BIL only uses the $capabilityName after you start this feature. Enable it in system settings to continue.',
-              'يستخدم BIL $capabilityName فقط بعد بدء هذه الميزة. فعّل الإذن في إعدادات النظام للمتابعة.',
+              'This permission is off. Enable it in system settings to use this feature; typing remains available.',
+              'هذا الإذن متوقف. فعّله في إعدادات النظام لاستخدام هذه الميزة؛ وتبقى الكتابة متاحة.',
             ),
           ),
           actions: [
@@ -117,12 +129,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     final continueRequest = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog.adaptive(
-        title: Text(
-          tr(
-            'Allow $capabilityName for this action?',
-            'السماح بـ $capabilityName لهذا الإجراء؟',
-          ),
-        ),
+        title: Text(permissionTitle),
         content: Text(
           tr(presentation.englishRationale, presentation.arabicRationale),
         ),
@@ -138,7 +145,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
         ],
       ),
     );
-    if (continueRequest != true) return false;
+    if (continueRequest != true || !mounted || coachInBackground) return false;
     final granted =
         await policy.request(effectiveCapability) ==
         BilRuntimePermissionState.granted;
@@ -165,11 +172,18 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     String locale, {
     bool showFailure = false,
   }) async {
+    if (!mounted || coachInBackground || (!showFailure && liveCallPaused)) {
+      return;
+    }
     try {
+      final voiceGender = await _preferredCoachVoice();
+      if (!mounted || coachInBackground || (!showFailure && liveCallPaused)) {
+        return;
+      }
       await const BilTextToSpeech().speak(
         text,
         locale,
-        voiceGender: await _preferredCoachVoice(),
+        voiceGender: voiceGender,
       );
     } on Object {
       if (!showFailure || !mounted) return;
@@ -183,7 +197,14 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
   }
 
   Future<void> _toggleDictation() async {
-    if (sending || voiceMode == _CoachVoiceMode.liveCall) return;
+    if (!mounted ||
+        !conversationReady ||
+        coachInBackground ||
+        voiceCaptureStarting ||
+        sending ||
+        voiceMode == _CoachVoiceMode.liveCall) {
+      return;
+    }
     if (listening) {
       await _submitVoiceTranscript();
       return;
@@ -195,6 +216,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
   }
 
   Future<void> _toggleLiveCall() async {
+    if (!mounted || !conversationReady || coachInBackground) return;
     if (voiceMode == _CoachVoiceMode.liveCall) {
       if (liveCallPaused) {
         liveCallPaused = false;
@@ -250,11 +272,36 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
   }
 
   Future<void> _startVoiceCapture({bool playCue = true}) async {
+    if (!_canCaptureVoice || voiceCaptureStarting) return;
+    voiceCaptureStarting = true;
+    final generation = ++voiceCaptureGeneration;
+    try {
+      await _prepareVoiceCapture(generation, playCue: playCue);
+    } on Object {
+      if (_canCaptureVoice && generation == voiceCaptureGeneration) {
+        _showVoiceUnavailable();
+      }
+    } finally {
+      voiceCaptureStarting = false;
+    }
+  }
+
+  bool get _canCaptureVoice =>
+      mounted &&
+      !coachInBackground &&
+      voiceMode != _CoachVoiceMode.idle &&
+      !(voiceMode == _CoachVoiceMode.liveCall && liveCallPaused);
+
+  Future<void> _prepareVoiceCapture(
+    int generation, {
+    required bool playCue,
+  }) async {
     final permissionGranted = await _ensureCoachRuntimePermission(
       BilRuntimeCapability.microphone,
       includeSpeechRecognition: true,
     );
-    if (!permissionGranted || !mounted) {
+    if (generation != voiceCaptureGeneration || !_canCaptureVoice) return;
+    if (!permissionGranted) {
       if (mounted) {
         _updateState(() {
           if (voiceMode == _CoachVoiceMode.liveCall) {
@@ -268,10 +315,13 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     }
     _updateState(() => introVisible = false);
     if (playCue) await _playVoiceActivationCue();
+    if (generation != voiceCaptureGeneration || !_canCaptureVoice) return;
     // Both microphones use the OS recognizer. Only its resulting text can
     // cross the AI boundary; raw microphone bytes never enter a model request.
-    if (await _startNativeVoiceCapture()) return;
-    if (mounted) _showVoiceUnavailable();
+    if (await _startNativeVoiceCapture(generation)) return;
+    if (_canCaptureVoice && generation == voiceCaptureGeneration) {
+      _showVoiceUnavailable();
+    }
   }
 
   Future<void> _playVoiceActivationCue() async {
@@ -300,17 +350,23 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
     }
   }
 
-  Future<bool> _startNativeVoiceCapture() async {
+  Future<bool> _startNativeVoiceCapture(int generation) async {
     voiceSilenceTimer?.cancel();
     voiceLanguageHint = null;
     voiceSubmitPending = false;
     pendingVoiceTranscript = '';
-    question.clear();
+    final initialDraft = question.value;
     try {
       final available = await speech.initialize(
-        onError: (error) => unawaited(_handleVoiceFailure(error)),
+        onError: (error) {
+          if (_canCaptureVoice && generation == voiceCaptureGeneration) {
+            unawaited(_handleVoiceFailure(error));
+          }
+        },
       );
-      if (!available || !mounted) {
+      if (!available ||
+          !_canCaptureVoice ||
+          generation != voiceCaptureGeneration) {
         return false;
       }
       // Speech language is deliberately independent from the BIL interface.
@@ -318,13 +374,19 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
       // language before its language-switch model gets a chance to run.
       if (!mounted) return false;
       final speechLocaleAllowList = await _coachSpeechLocaleAllowList();
-      if (!mounted) return false;
+      if (!_canCaptureVoice || generation != voiceCaptureGeneration) {
+        return false;
+      }
       _updateState(() {
         listening = true;
       });
       await speech.listen(
         onResult: (result) {
-          if (!mounted || voiceSubmitPending) return;
+          if (!_canCaptureVoice ||
+              generation != voiceCaptureGeneration ||
+              voiceSubmitPending) {
+            return;
+          }
           final transcript = result.recognizedWords.trim();
           if (transcript.isEmpty) return;
           if (result.localeId?.trim().isNotEmpty == true) {
@@ -373,6 +435,10 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
           allowedLocaleIds: speechLocaleAllowList,
         ),
       );
+      if (!_canCaptureVoice || generation != voiceCaptureGeneration) {
+        await speech.cancel();
+        return false;
+      }
       return true;
     } on Object {
       try {
@@ -383,6 +449,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
       if (mounted) {
         _updateState(() {
           listening = false;
+          if (question.text.isEmpty) question.value = initialDraft;
         });
       }
       return false;
@@ -404,7 +471,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
   }
 
   Future<void> _submitVoiceTranscript() async {
-    if (voiceSubmitPending) return;
+    if (!mounted || coachInBackground || voiceSubmitPending) return;
     final transcript = pendingVoiceTranscript.trim();
     if (transcript.isEmpty) {
       await _stopVoiceCapture();
@@ -421,6 +488,10 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
       await speech.stop();
     } on Object {
       // The recognized text is already in the composer and remains usable.
+    }
+    if (!mounted || coachInBackground) {
+      voiceSubmitPending = false;
+      return;
     }
     if (voiceMode == _CoachVoiceMode.dictation) {
       await _playVoiceDeactivationCue();
@@ -439,9 +510,11 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
       textOverride: transcript,
       autoSpeakReply: autoSpeakReply,
     );
+    if (!mounted) return;
     voiceLanguageHint = null;
     pendingVoiceTranscript = '';
-    question.clear();
+    // A user may already be typing the next turn while the answer arrives.
+    // Do not erase that new draft when this voice request finishes.
     voiceSubmitPending = false;
     if (!autoSpeakReply && voiceMode == _CoachVoiceMode.dictation) {
       voiceMode = _CoachVoiceMode.idle;
@@ -451,6 +524,7 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
 
   Future<void> _resumeLiveCallIfNeeded(int generation) async {
     if (!mounted ||
+        coachInBackground ||
         generation != requestGeneration ||
         voiceMode != _CoachVoiceMode.liveCall ||
         liveCallPaused ||
@@ -458,21 +532,26 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
         sending) {
       return;
     }
+    if (question.text.trim().isNotEmpty) {
+      _updateState(() => liveCallPaused = true);
+      return;
+    }
     await _startVoiceCapture(playCue: false);
   }
 
   Future<void> _stopVoiceCapture({bool resetMode = false}) async {
+    voiceCaptureGeneration++;
     voiceSilenceTimer?.cancel();
-    try {
-      await speech.cancel();
-    } on Object {
-      // The inline composer remains available even if native cancellation fails.
-    }
     if (mounted) {
       _updateState(() {
         listening = false;
         if (resetMode) voiceMode = _CoachVoiceMode.idle;
       });
+    }
+    try {
+      await speech.cancel();
+    } on Object {
+      // The inline composer remains available even if native cancellation fails.
     }
   }
 
@@ -547,6 +626,11 @@ extension _IntelligenceConversationVoice on _IntelligenceCenterPageState {
   }
 
   void _showVoiceUnavailable() {
+    if (!mounted) return;
+    _updateState(() {
+      listening = false;
+      if (voiceMode == _CoachVoiceMode.liveCall) liveCallPaused = true;
+    });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(

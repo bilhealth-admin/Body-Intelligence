@@ -161,7 +161,10 @@ final class OnboardingPlanCalculator {
   static double maxSafePaceKg(OnboardingDraft draft) {
     final current = draft.currentWeightKg ?? 0;
     if (draft.primaryWeightGoal == 'lose') {
-      return (current * .01).clamp(.1, 1.0).toDouble();
+      // Match the existing Goals screen's supported loss choices. This is an
+      // explicit planning choice, not a recommendation based on body weight.
+      // calculate() still rejects unsupported energy and macro targets.
+      return 1.0;
     }
     if (draft.primaryWeightGoal == 'gain') {
       return (current * .005).clamp(.1, .5).toDouble();

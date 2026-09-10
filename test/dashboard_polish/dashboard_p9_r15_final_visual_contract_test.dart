@@ -15,7 +15,7 @@ void main() {
       'lib/features/connected_health/widgets/health_hub_empty_state.dart',
       'lib/features/connected_health/widgets/live_health_watch.dart',
     ].map(read).join('\n');
-    final watch = read(
+    final watch = readDartLibrarySource(
       'lib/features/connected_health/widgets/live_health_watch.dart',
     );
     final dashboard = readDartLibrarySource(

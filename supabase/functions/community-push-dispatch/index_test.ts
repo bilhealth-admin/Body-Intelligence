@@ -3,18 +3,27 @@ import {
   assertStringIncludes,
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 
-const dispatcherUrl = new URL("./index.ts", import.meta.url);
+const dispatcherUrl = new URL("./server.ts", import.meta.url);
 const duplicateUrl = new URL("../community_push_dispatch.ts", import.meta.url);
 const migrationUrl = new URL(
   "../../migrations/20260904040000_push_delivery_idempotency.sql",
   import.meta.url,
 );
 
-Deno.test("push dispatcher copies preserve the invalid-token contract", async () => {
+Deno.test("push entry points share the canonical invalid-token contract", async () => {
   const source = await Deno.readTextFile(dispatcherUrl);
+  const entry = await Deno.readTextFile(new URL("./index.ts", import.meta.url));
   const duplicate = await Deno.readTextFile(duplicateUrl);
 
-  assertEquals(source, duplicate);
+  assertStringIncludes(entry, 'import { handler } from "./server.ts"');
+  assertStringIncludes(
+    duplicate,
+    'import { handler } from "./community-push-dispatch/server.ts"',
+  );
+  for (const shim of [entry, duplicate]) {
+    assertStringIncludes(shim, "Deno.serve((request) => handler(request))");
+    assertEquals(shim.includes("bil_push_outbox"), false);
+  }
   assertStringIncludes(source, 'response.headers.get("x-bil-token-status")');
   assertStringIncludes(source, "[400, 404, 410].includes(response.status)");
   assertStringIncludes(source, '===\n    "invalid"');

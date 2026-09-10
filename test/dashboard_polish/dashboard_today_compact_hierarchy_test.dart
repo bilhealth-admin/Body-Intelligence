@@ -37,7 +37,8 @@ void main() {
     expect(cards, contains('padEnds: false'));
     expect(health, contains("Key('dashboard-live-fitness-watch-slot')"));
     expect(health, isNot(contains("Key('dashboard-health-device-pager')")));
-    expect(health, contains('final previewSide = 212 + ((scale - 1) * 68)'));
+    // Preserve the owner's larger watch slot; text scaling remains bounded.
+    expect(health, contains('final previewSide = 248 + ((scale - 1) * 68)'));
     expect(health, contains('maxWidth: previewSide'));
     expect(health, contains('maxHeight: previewSide'));
     expect(health, contains('compact: true'));

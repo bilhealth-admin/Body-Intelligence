@@ -188,6 +188,9 @@ final class FitnessDeviceController
       devices: state.devices,
     );
     try {
+      // Reconnecting a saved device after relaunch/revocation must also use
+      // the native permission flow; a previous scan is not a lasting grant.
+      await _bridge.requestPermissions();
       await _bridge.pair(peripheral.id);
       final bridge = _bridge;
       final managedBridge = bridge is ManagedBleFitnessBridge ? bridge : null;

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../shared/widgets/bil_native_symbols.dart';
 
 /// Stable functional meanings used by entry points throughout BIL.
 ///
@@ -97,6 +98,62 @@ class BilSemanticIconSpec {
 
 /// One modern, rounded icon vocabulary shared by BIL entry points.
 abstract final class BilSemanticIcons {
+  static BilSettingsSymbol nativeSymbol(BilSemanticIconKind kind) =>
+      switch (kind) {
+        BilSemanticIconKind.foodLog => BilSettingsSymbol.nutrition,
+        BilSemanticIconKind.foodSearch => BilSettingsSymbol.foodSearch,
+        BilSemanticIconKind.meal => BilSettingsSymbol.nutrition,
+        BilSemanticIconKind.barcode => BilSettingsSymbol.barcode,
+        BilSemanticIconKind.voice => BilSettingsSymbol.voice,
+        BilSemanticIconKind.mealPhoto => BilSettingsSymbol.camera,
+        BilSemanticIconKind.notes => BilSettingsSymbol.notes,
+        BilSemanticIconKind.water => BilSettingsSymbol.water,
+        BilSemanticIconKind.weight => BilSettingsSymbol.weight,
+        BilSemanticIconKind.exercise => BilSettingsSymbol.exercise,
+        BilSemanticIconKind.breakfast => BilSettingsSymbol.breakfast,
+        BilSemanticIconKind.lunch => BilSettingsSymbol.lunch,
+        BilSemanticIconKind.dinner => BilSettingsSymbol.dinner,
+        BilSemanticIconKind.snack => BilSettingsSymbol.snack,
+        BilSemanticIconKind.profile => BilSettingsSymbol.profile,
+        BilSemanticIconKind.appearance => BilSettingsSymbol.appearance,
+        BilSemanticIconKind.language => BilSettingsSymbol.language,
+        BilSemanticIconKind.location => BilSettingsSymbol.location,
+        BilSemanticIconKind.goals => BilSettingsSymbol.goals,
+        BilSemanticIconKind.progress => BilSettingsSymbol.progress,
+        BilSemanticIconKind.report => BilSettingsSymbol.report,
+        BilSemanticIconKind.challenges => BilSettingsSymbol.challenges,
+        BilSemanticIconKind.nutrition => BilSettingsSymbol.nutrition,
+        BilSemanticIconKind.recipes => BilSettingsSymbol.recipes,
+        BilSemanticIconKind.fasting => BilSettingsSymbol.fasting,
+        BilSemanticIconKind.sleep => BilSettingsSymbol.sleep,
+        BilSemanticIconKind.devices => BilSettingsSymbol.devices,
+        BilSemanticIconKind.steps => BilSettingsSymbol.exercise,
+        BilSemanticIconKind.learn => BilSettingsSymbol.learn,
+        BilSemanticIconKind.community => BilSettingsSymbol.people,
+        BilSemanticIconKind.friends => BilSettingsSymbol.people,
+        BilSemanticIconKind.messages => BilSettingsSymbol.messages,
+        BilSemanticIconKind.privacy => BilSettingsSymbol.privacy,
+        BilSemanticIconKind.notifications => BilSettingsSymbol.notifications,
+        BilSemanticIconKind.preferences => BilSettingsSymbol.preferences,
+        BilSemanticIconKind.support => BilSettingsSymbol.support,
+        BilSemanticIconKind.aiCoach => BilSettingsSymbol.aiCoach,
+        BilSemanticIconKind.cloudSync => BilSettingsSymbol.cloud,
+        BilSemanticIconKind.moderation => BilSettingsSymbol.moderation,
+        BilSemanticIconKind.verifiedFood => BilSettingsSymbol.verifiedFood,
+        BilSemanticIconKind.measurements => BilSettingsSymbol.measure,
+        BilSemanticIconKind.calendar => BilSettingsSymbol.calendar,
+        BilSemanticIconKind.time => BilSettingsSymbol.time,
+        BilSemanticIconKind.export => BilSettingsSymbol.export,
+        BilSemanticIconKind.accountDeletion =>
+          BilSettingsSymbol.accountDeletion,
+        BilSemanticIconKind.legal => BilSettingsSymbol.legal,
+        BilSemanticIconKind.health => BilSettingsSymbol.health,
+        BilSemanticIconKind.heartRate => BilSettingsSymbol.heartRate,
+        BilSemanticIconKind.distance => BilSettingsSymbol.distance,
+        BilSemanticIconKind.bodyFat => BilSettingsSymbol.bodyFat,
+        BilSemanticIconKind.oxygen => BilSettingsSymbol.oxygen,
+        BilSemanticIconKind.synchronization => BilSettingsSymbol.cloud,
+      };
   static const today = Icons.dashboard_outlined;
   static const todaySelected = Icons.dashboard_rounded;
   static const diary = Icons.menu_book_outlined;
@@ -526,7 +583,7 @@ class BilSemanticIconBadge extends StatelessWidget {
     this.semanticLabel,
     this.size = 40,
     this.iconSize = 22,
-    this.shape = BoxShape.circle,
+    this.shape = BoxShape.rectangle,
     this.iconOverride,
     this.appleIconOverride,
     this.platformOverride,
@@ -557,17 +614,26 @@ class BilSemanticIconBadge extends StatelessWidget {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: spec.container(brightness),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color.lerp(spec.accent(brightness), Colors.white, .18)!,
+              spec.accent(brightness),
+            ],
+          ),
           shape: shape,
           borderRadius: shape == BoxShape.rectangle
               ? BorderRadius.circular(size * .3)
               : null,
         ),
         alignment: Alignment.center,
-        child: Icon(
-          resolvedIcon,
-          color: spec.accent(brightness),
+        child: BilNativeSymbolGlyph(
+          symbol: BilSemanticIcons.nativeSymbol(kind),
+          fallback: resolvedIcon,
           size: iconSize,
+          color: spec.onAccent(brightness),
+          platformOverride: platformOverride,
         ),
       ),
     );

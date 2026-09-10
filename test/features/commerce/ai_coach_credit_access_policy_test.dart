@@ -11,6 +11,38 @@ Map<String, Object?> usage(String plan, Object? totalRemaining) => {
 };
 
 void main() {
+  test(
+    'a server reload signal updates a mounted gate after a Boost grant',
+    () async {
+      Object? serverStatus = usage('free', 0);
+      final container = ProviderContainer(
+        overrides: [
+          verifiedEntitlementOwnerProvider.overrideWith(
+            (_) => Stream.value('qa-owner'),
+          ),
+          aiCoachUsageStatusLoaderProvider.overrideWithValue(
+            () async => serverStatus,
+          ),
+        ],
+      );
+      final listener = container.listen(aiCoachCreditAccessProvider, (_, _) {});
+      addTearDown(() {
+        listener.close();
+        container.dispose();
+      });
+      expect(await container.read(aiCoachCreditAccessProvider.future), isFalse);
+      serverStatus = usage('free', 2500);
+      container
+          .read(aiCoachUsageRefreshProvider.notifier)
+          .requestAuthoritativeReload();
+      expect(await container.read(aiCoachCreditAccessProvider.future), isTrue);
+      serverStatus = usage('premium', 0);
+      container
+          .read(aiCoachUsageRefreshProvider.notifier)
+          .requestAuthoritativeReload();
+      expect(await container.read(aiCoachCreditAccessProvider.future), isFalse);
+    },
+  );
   test('zero -> Boost -> consumed zero is reflected exactly', () {
     expect(aiCoachAccessFromUsageStatus(usage('free', 0)), isFalse);
     expect(aiCoachAccessFromUsageStatus(usage('free', 15)), isTrue);

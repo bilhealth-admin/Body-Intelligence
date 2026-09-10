@@ -36,7 +36,10 @@ void main() {
     // cache/USDA miss explicitly asks for product-label evidence.
     expect(backend, contains('bil_get_cached_barcode'));
     expect(backend, contains('api.nal.usda.gov'));
-    expect(backend, contains("next_step:'capture_product_label'"));
+    expect(
+      backend,
+      matches(RegExp(r'''next_step\s*:\s*['"]capture_product_label['"]''')),
+    );
     expect(backend, isNot(contains('image_base64')));
 
     // The miss UI hands off only after the user accepts the label-photo guide.

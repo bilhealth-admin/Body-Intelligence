@@ -431,6 +431,10 @@ class _ProfileSummary extends StatelessWidget {
                     children: [
                       Text(
                         name,
+                        maxLines: 1,
+                        softWrap: false,
+                        overflow: TextOverflow.ellipsis,
+                        semanticsLabel: name,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),

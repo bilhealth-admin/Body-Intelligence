@@ -1,18 +1,47 @@
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 import '../../app/localization/app_localizations.dart';
 import '../../app/localization/runtime_copy.dart';
+import '../../app/localization/bil_locale_policy.dart';
+import '../../app/localization/runtime_copy_health_devices_review.dart';
+import '../../app/localization/runtime_copy_health_device_status.dart';
+import 'connected_health_model.dart';
 
 String connectedHealthText(
   BuildContext context,
   String english,
   String arabic,
 ) {
-  final language = Localizations.localeOf(context).languageCode.toLowerCase();
+  final language = BilLocalePolicy.canonicalTag(
+    Localizations.localeOf(context),
+  );
   if (!const {'ar', 'en', 'fr', 'es', 'tr'}.contains(language)) {
     return context.strings.text(english);
   }
   return connectedHealthTextForLanguage(language, english, arabic);
+}
+
+String connectedHealthSignalValueText(
+  BuildContext context,
+  ConnectedHealthSignalView signal,
+) {
+  final tag = BilLocalePolicy.canonicalTag(Localizations.localeOf(context));
+  final format = NumberFormat.decimalPattern(tag.replaceAll('-', '_'))
+    ..maximumFractionDigits = signal.value == signal.value.roundToDouble()
+        ? 0
+        : 1;
+  final unit = switch (signal.unit) {
+    'count' => connectedHealthText(context, 'steps', 'خطوات'),
+    'count/min' || 'bpm' => connectedHealthText(context, 'bpm', 'نبضة/د'),
+    'kcal' => connectedHealthText(context, 'kcal', 'سعرة'),
+    'kg' => connectedHealthText(context, 'kg', 'كغ'),
+    'm' => connectedHealthText(context, 'm', 'م'),
+    'ms' => connectedHealthText(context, 'ms', 'مللي ثانية'),
+    'h' => connectedHealthText(context, 'h', 'س'),
+    _ => signal.unit,
+  };
+  return '${format.format(signal.value)} $unit';
 }
 
 String connectedHealthTextForLanguage(
@@ -20,6 +49,10 @@ String connectedHealthTextForLanguage(
   String english,
   String arabic,
 ) {
+  final reviewed =
+      HealthDeviceStatusCopy.resolve(english, languageCode) ??
+      HealthDevicesReviewCopy.resolve(english, languageCode);
+  if (reviewed != null) return reviewed;
   final language = languageCode.toLowerCase();
   if (language == 'ar') return arabic;
   if (language == 'en') return english;

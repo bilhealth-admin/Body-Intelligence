@@ -9,6 +9,7 @@ void main() {
               'intelligence_center_page.dart',
               'intelligence_center_page_message.dart',
               'intelligence_center_widgets.dart',
+              'intelligence_coach_menu.dart',
               'intelligence_center_message_widgets.dart',
               'intelligence_center_voice_widgets.dart',
               'intelligence_conversation_persistence.dart',

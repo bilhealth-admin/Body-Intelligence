@@ -136,6 +136,27 @@ class WeightRepository {
         .get();
   }
 
+  /// Lightweight change summary; does not load every health record into memory.
+  Future<({int count, DateTime? updatedAt, String? firstDay, String? lastDay})>
+  revisionSummary() async {
+    final table = _database.weightEntries;
+    final count = table.id.count();
+    final updatedAt = table.updatedAt.max();
+    final firstDay = table.dayKey.min();
+    final lastDay = table.dayKey.max();
+    final row =
+        await (_database.selectOnly(table)
+              ..addColumns([count, updatedAt, firstDay, lastDay])
+              ..where(table.deletedAt.isNull()))
+            .getSingle();
+    return (
+      count: row.read(count) ?? 0,
+      updatedAt: row.read(updatedAt),
+      firstDay: row.read(firstDay),
+      lastDay: row.read(lastDay),
+    );
+  }
+
   Future<void> deleteAll() async {
     await _database.delete(_database.weightEntries).go();
   }

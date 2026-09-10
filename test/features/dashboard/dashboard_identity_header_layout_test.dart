@@ -97,7 +97,8 @@ void main() {
             tester.getSize(notifications).height,
             greaterThanOrEqualTo(48),
           );
-          expect(tester.getSize(edit), const Size(96, 48));
+          // Preserve the approved compact control and its full 48dp target.
+          expect(tester.getSize(edit), const Size(84, 48));
 
           // The canonical mark itself and its Dashboard header path stay
           // transparent: no legacy white card, border or rounded container.

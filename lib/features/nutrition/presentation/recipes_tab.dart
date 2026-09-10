@@ -14,7 +14,6 @@ class _RecipesTab extends ConsumerWidget {
             for (final action in [
               (BilSemanticIconKind.recipes, 'Create recipe'),
               (BilSemanticIconKind.learn, 'Discover'),
-              (BilSemanticIconKind.export, 'Import'),
             ]) ...[
               Expanded(
                 child: _ActionCard(
@@ -25,7 +24,7 @@ class _RecipesTab extends ConsumerWidget {
                       : _showAddRecipeSheet(context),
                 ),
               ),
-              if (action.$2 != 'Import') const SizedBox(width: 8),
+              if (action.$2 != 'Discover') const SizedBox(width: 8),
             ],
           ],
         ),
@@ -138,51 +137,44 @@ class _RecipesTab extends ConsumerWidget {
     );
   }
 
-  static Future<void> _showAddRecipeSheet(BuildContext context) =>
-      showModalBottomSheet<void>(
-        context: context,
-        showDragHandle: true,
-        isScrollControlled: true,
-        builder: (sheetContext) => SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
-            child: Column(
-              key: const Key('add-recipe-choice-sheet'),
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  _recipeChoiceCopy(sheetContext, 'title'),
-                  style: Theme.of(sheetContext).textTheme.headlineSmall
-                      ?.copyWith(fontWeight: FontWeight.w800),
+  static Future<void> _showAddRecipeSheet(BuildContext context) async {
+    final create = await showBilModalBottomSheet<bool>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+          child: Column(
+            key: const Key('add-recipe-choice-sheet'),
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                _recipeChoiceCopy(sheetContext, 'title'),
+                style: Theme.of(sheetContext).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
                 ),
-                const SizedBox(height: 18),
-                _RecipeChoiceTile(
-                  key: const Key('import-recipe-from-web'),
-                  kind: BilSemanticIconKind.export,
-                  title: _recipeChoiceCopy(sheetContext, 'webTitle'),
-                  subtitle: _recipeChoiceCopy(sheetContext, 'webBody'),
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    context.push('/nutrition/recipes/import');
-                  },
-                ),
-                const SizedBox(height: 12),
-                _RecipeChoiceTile(
-                  key: const Key('enter-recipe-manually'),
-                  kind: BilSemanticIconKind.recipes,
-                  title: _recipeChoiceCopy(sheetContext, 'manualTitle'),
-                  subtitle: _recipeChoiceCopy(sheetContext, 'manualBody'),
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    context.push('/wellness/recipes');
-                  },
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 18),
+              _RecipeChoiceTile(
+                key: const Key('enter-recipe-manually'),
+                kind: BilSemanticIconKind.recipes,
+                title: _recipeChoiceCopy(sheetContext, 'manualTitle'),
+                subtitle: _recipeChoiceCopy(sheetContext, 'manualBody'),
+                onTap: () {
+                  Navigator.pop(sheetContext, true);
+                },
+              ),
+            ],
           ),
         ),
-      );
+      ),
+    );
+    if (create == true && context.mounted) {
+      context.push('/nutrition/recipes/import');
+    }
+  }
 }
 
 String _recipeListCopy(BuildContext context, String key) {

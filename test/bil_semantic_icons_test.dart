@@ -286,7 +286,14 @@ void main() {
     for (final path in paths) {
       expect(File(path).existsSync(), isTrue, reason: path);
       final source = File(path).readAsStringSync();
-      expect(source, contains('BilSemanticIconBadge'), reason: path);
+      expect(
+        source,
+        anyOf(
+          contains('BilSemanticIconBadge'),
+          contains('BilNativeSettingsIcon'),
+        ),
+        reason: path,
+      );
     }
 
     final health = File(

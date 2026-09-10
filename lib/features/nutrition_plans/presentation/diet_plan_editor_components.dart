@@ -132,38 +132,6 @@ class _CaloriesField extends StatelessWidget {
   );
 }
 
-class _MacroEditingNotice extends StatelessWidget {
-  const _MacroEditingNotice();
-
-  @override
-  Widget build(BuildContext context) => Container(
-    key: const Key('diet-macro-editing-notice'),
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: const Color(0xFFF0F9FF),
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: const Color(0xFFB9E6FE)),
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Icon(Icons.calculate_outlined, color: Color(0xFF026AA2)),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            nutritionText(
-              context,
-              'Calories and macros balanced for you',
-              'تبقى السعرات ثابتة. القيم التي تدخلها تبقى محفوظة، ويعدّل BIL قيمة واحدة غير مقفلة ليبقى 4ك + 4ب + 9د مساويًا لهدفك.',
-            ),
-            style: const TextStyle(height: 1.4, color: Color(0xFF344054)),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
 class _DietDayCard extends StatelessWidget {
   const _DietDayCard({
     required this.weekday,

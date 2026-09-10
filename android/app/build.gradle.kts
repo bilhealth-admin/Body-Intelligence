@@ -100,6 +100,13 @@ flutter {
 }
 
 dependencies {
+    constraints {
+        // Flutter's integration-test plugin brings JUnit 4.12 into debug.
+        // A constraint upgrades it only when present; it adds no release API.
+        implementation("junit:junit:4.13.2") {
+            because("GHSA-269g-pwp5-87pp: protect temporary test directories")
+        }
+    }
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     implementation("androidx.browser:browser:1.9.0")
     implementation("androidx.health.connect:connect-client:1.1.0")

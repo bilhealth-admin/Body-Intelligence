@@ -231,7 +231,15 @@ class _CommunityMemberAccessAdminPanelState
                             leading: const CircleAvatar(
                               child: Icon(Icons.block_outlined),
                             ),
-                            title: Text(entry.email),
+                            title: Tooltip(
+                              message: entry.email,
+                              child: Text(
+                                entry.email,
+                                maxLines: 1,
+                                softWrap: false,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                             subtitle: Text(entry.reason),
                             trailing: IconButton(
                               key: ValueKey(

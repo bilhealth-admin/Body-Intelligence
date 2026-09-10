@@ -201,7 +201,9 @@ void main() {
     );
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Verified food'));
+    await tester.tap(find.byKey(const Key('community-settings')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('community-nav-foods')));
     await tester.pumpAndSettle();
     final baseline = repository.foodLoads;
     expect(baseline, greaterThan(0));

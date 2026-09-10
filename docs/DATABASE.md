@@ -1,7 +1,7 @@
 # Database and migration policy
 
 BIL uses one Drift database as its local source of truth. The current schema
-version is 13. Every version increase has an explicit additive migration in
+version is 21. Every version increase has an explicit additive migration in
 `AppDatabase.migration`; no migration drops user tables or rewrites historical
 nutrition. Foreign keys are enabled on every connection.
 
@@ -14,6 +14,7 @@ nutrition. Foreign keys are enabled on every connection.
 - `life_context_entries`, `decision_memories`
 - `personal_experiments`, `challenges`
 - `preferences`
+- `decision_outcome_transitions`, `body_measurement_entries`, `community_food_outbox`
 
 User-originated sync candidates use durable UUIDs and appropriate created,
 updated, deleted, revision, and sync-status fields. Foreign keys prevent orphan
@@ -32,6 +33,16 @@ uses the canonical `day_key` rather than a timestamp-range scan.
 Schema v13 adds monotonic revision and sync-status metadata to existing meal
 items without changing their UUIDs, quantities, nutrient snapshots, or
 tombstones.
+
+Versions 14–21 add stable meal-item positions, nutrient evidence masks, daily
+closure state and phosphorus, decision-outcome transitions, immutable food and
+serving snapshots, progress-photo references, body measurements and the durable
+Community food outbox. The executable authority is `AppDatabase.migration`.
+
+Profile saves update/upsert the existing primary key in a transaction; SQLite
+`REPLACE` must not delete and recreate a profile because goals reference it with
+`ON DELETE CASCADE`. Local profile/goal data is separate from server commerce,
+AI-credit and Community authorities described in [Architecture](ARCHITECTURE.md).
 
 ## Migration verification
 

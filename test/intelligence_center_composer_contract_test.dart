@@ -8,6 +8,7 @@ void main() {
             'intelligence_center_page.dart',
             'intelligence_center_page_message.dart',
             'intelligence_center_widgets.dart',
+            'intelligence_coach_menu.dart',
             'intelligence_center_message_widgets.dart',
             'intelligence_center_voice_widgets.dart',
             'intelligence_conversation_persistence.dart',
@@ -46,7 +47,10 @@ void main() {
     expect(page, contains("String pendingVoiceTranscript = ''"));
     expect(page, contains('pendingVoiceTranscript = transcript'));
     expect(page, contains('question.value = TextEditingValue('));
-    expect(page, contains('if (await _startNativeVoiceCapture()) return;'));
+    expect(
+      page,
+      contains('if (await _startNativeVoiceCapture(generation)) return;'),
+    );
     expect(page, contains('_LiveVoiceTranscript'));
     expect(page, contains('Writing your words'));
     expect(page, contains('Live call transcript'));
@@ -78,7 +82,7 @@ void main() {
     expect(page, contains("'Speak your language'"));
     expect(page, contains('final coachName = intelligenceText'));
     expect(page, contains('final voiceTagline = intelligenceText'));
-    expect(page, contains('size: 32'));
+    expect(page, contains('size: 48'));
     expect(page, contains("Key('ai-coach-hero-start')"));
     expect(page, contains('Icons.mic_none_rounded'));
     expect(page, contains('minLines: 1'));

@@ -109,16 +109,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // The restored action is above the newest session greeting. Use a real
-    // drag so the reversed chat stops following the newest message exactly as
-    // it does for a person reading earlier messages.
-    await tester.drag(find.byType(ListView), const Offset(0, 420));
-    await tester.pumpAndSettle();
-
+    // Restoring a chat no longer appends another welcome. Locate each actual
+    // action independently of the transcript's sliver implementation.
     for (final action in actions) {
       final finder = find.byKey(
         Key('ai-coach-action-${action.type.name}-${action.id}'),
       );
+      await tester.ensureVisible(finder);
+      await tester.pumpAndSettle();
       await tester.tap(finder);
       await tester.pump();
     }
@@ -289,6 +287,8 @@ void main() {
     }
 
     expect(openedPaths, <String>['/weight-history']);
+    // Navigation is invoked before the next transcript layout and pin frame.
+    await tester.pumpAndSettle();
     expect(
       find.text(AiCoachChatCopy.resolve('ar', AiCoachChatCopy.navigationReady)),
       findsOneWidget,

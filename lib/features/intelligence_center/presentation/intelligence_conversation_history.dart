@@ -97,6 +97,40 @@ String encodeCoachConversationHistory({
   'conversations': conversations,
 });
 
+/// Delete only the selected conversation. Unlike the tolerant display decoder,
+/// this mutation preserves unrecognized rows and metadata and refuses a broken
+/// index instead of silently replacing other user-owned chats with an empty list.
+@visibleForTesting
+String deleteCoachConversationFromArchive(String? raw, String? id) {
+  final Object? decoded = raw == null || raw.trim().isEmpty
+      ? <Object?>[]
+      : jsonDecode(raw);
+  final Map<String, Object?> archive;
+  final List<Object?> entries;
+  if (decoded is List) {
+    archive = <String, Object?>{'version': _conversationHistoryStorageVersion};
+    entries = List<Object?>.from(decoded);
+  } else if (decoded is Map && decoded['conversations'] is List) {
+    archive = Map<String, Object?>.from(decoded);
+    entries = List<Object?>.from(decoded['conversations'] as List);
+  } else {
+    throw const FormatException('unreadable_conversation_archive');
+  }
+  if (id != null) {
+    entries.removeWhere(
+      (entry) => entry is Map && _nonEmptyConversationId(entry['id']) == id,
+    );
+  }
+  return jsonEncode(<String, Object?>{
+    ...archive,
+    'activeConversationId':
+        _nonEmptyConversationId(archive['activeConversationId']) == id
+        ? null
+        : archive['activeConversationId'],
+    'conversations': entries,
+  });
+}
+
 bool _sameConversationMessages(Object? left, Object? right) {
   if (left is! List || right is! List) return false;
   try {
@@ -174,17 +208,66 @@ List<Map<String, Object?>> upsertCoachConversationHistory({
 }
 
 extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
-  Future<void> _openConversationHistory() async {
-    final repository = ref.read(preferencesRepositoryProvider);
+  Future<void> _openConversationHistory({bool deleteMode = false}) async {
+    if (!mounted ||
+        !conversationReady ||
+        conversationHistoryOpening ||
+        foodImageFlowOpening) {
+      return;
+    }
+    conversationHistoryOpening = true;
+    try {
+      await _showConversationHistory(deleteMode: deleteMode);
+    } on Object {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(tr('Try again', 'أعد المحاولة'))),
+        );
+      }
+    } finally {
+      conversationHistoryOpening = false;
+    }
+  }
+
+  Future<void> _showConversationHistory({required bool deleteMode}) async {
+    final repository = conversationPreferences;
     final archive = decodeCoachConversationHistory(
       await repository.get(_conversationHistoryKey),
     );
+    if (!mounted) return;
     final history = archive.conversations.toList(growable: true);
     activeConversationId ??= archive.activeConversationId;
     // Snapshot the current chat before presenting the picker. This keeps its
     // title and turns current, and prevents selecting a stale copy of the
     // conversation that is already open.
-    await _archiveCurrentConversation(history);
+    if (deleteMode) {
+      // Selection/cancellation must not mutate the archive. Include the live
+      // transcript even when it has not yet been archived by New conversation.
+      final currentId = activeConversationId;
+      final current = messages
+          .where((item) => !item.id.startsWith('welcome'))
+          .toList();
+      if (currentId != null && current.isNotEmpty) {
+        final userTurns = current.where(
+          (item) => item.role == IntelligenceMessageRole.user,
+        );
+        final title = userTurns.isEmpty
+            ? tr('Conversation', 'محادثة')
+            : userTurns.first.text;
+        final updated = upsertCoachConversationHistory(
+          history: history,
+          id: currentId,
+          title: title,
+          createdAt: current.first.createdAt.toIso8601String(),
+          messages: current.map((item) => item.toJson()).toList(),
+        );
+        history
+          ..clear()
+          ..addAll(updated);
+      }
+    } else {
+      await _archiveCurrentConversation(history);
+    }
     if (!mounted) return;
     final selection = await showModalBottomSheet<String>(
       context: context,
@@ -196,17 +279,24 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
           padding: const EdgeInsets.fromLTRB(18, 2, 18, 18),
           children: [
             Text(
-              tr('Conversations', 'المحادثات'),
+              deleteMode
+                  ? tr('Clear conversation', 'مسح المحادثة')
+                  : tr('Conversations', 'المحادثات'),
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
             Text(
-              tr(
-                'Conversation history is stored locally on this device.',
-                'يُحفظ سجل المحادثات محليًا على هذا الجهاز.',
-              ),
+              deleteMode
+                  ? tr(
+                      'Choose the conversation to delete',
+                      'اختر المحادثة التي تريد حذفها',
+                    )
+                  : tr(
+                      'Conversation history is stored locally on this device.',
+                      'يُحفظ سجل المحادثات محليًا على هذا الجهاز.',
+                    ),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
@@ -220,10 +310,17 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
                 ),
                 title: Text(
                   '${entry['title'] ?? tr('Conversation', 'محادثة')}',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 subtitle: Text('${entry['createdAt'] ?? ''}'),
                 selected: entry['id'] == activeConversationId,
-                trailing: entry['id'] == activeConversationId
+                trailing: deleteMode
+                    ? Icon(
+                        Icons.delete_outline,
+                        semanticLabel: tr('Delete', 'حذف'),
+                      )
+                    : entry['id'] == activeConversationId
                     ? Icon(
                         Icons.check_circle_rounded,
                         semanticLabel: tr(
@@ -244,32 +341,39 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
                   ),
                 ),
               ),
-            const Divider(height: 20),
-            ListTile(
-              leading: const BilSemanticIconBadge(
-                kind: BilSemanticIconKind.messages,
-                iconOverride: Icons.add_comment_outlined,
-                appleIconOverride: Icons.add_comment_outlined,
-              ),
-              title: Text(tr('New conversation', 'محادثة جديدة')),
-              subtitle: Text(
-                tr(
-                  'Keep this chat in history and start an empty one.',
-                  'احفظ هذه المحادثة في السجل وابدأ محادثة فارغة.',
+            if (!deleteMode) const Divider(height: 20),
+            if (!deleteMode)
+              ListTile(
+                leading: const BilSemanticIconBadge(
+                  kind: BilSemanticIconKind.messages,
+                  iconOverride: Icons.add_comment_outlined,
+                  appleIconOverride: Icons.add_comment_outlined,
                 ),
+                title: Text(tr('New conversation', 'محادثة جديدة')),
+                subtitle: Text(
+                  tr(
+                    'Keep this chat in history and start an empty one.',
+                    'احفظ هذه المحادثة في السجل وابدأ محادثة فارغة.',
+                  ),
+                ),
+                onTap: () => Navigator.pop(sheetContext, '__new__'),
               ),
-              onTap: () => Navigator.pop(sheetContext, '__new__'),
-            ),
           ],
         ),
       ),
     );
     if (!mounted || selection == null) return;
+    if (deleteMode) {
+      final selected = history.firstWhere((entry) => entry['id'] == selection);
+      await _deleteConversation(selection, title: '${selected['title'] ?? ''}');
+      return;
+    }
     // A reply can finish while the history picker is open. Stop that request,
     // archive the latest visible turns, and invalidate all older queued saves
     // before replacing the active transcript.
     _cancelCurrentCoachRequest();
     await _archiveCurrentConversation(history);
+    if (!mounted) return;
     await _invalidatePendingConversationSaves();
     if (!mounted) return;
     if (selection == '__new__') {
@@ -297,12 +401,13 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
         break;
       }
     }
-    final messages = selected?['messages'];
-    if (messages is! List) return;
+    final selectedMessages = selected?['messages'];
+    if (selectedMessages is! List) return;
     final revision = await _coachContextRevision();
+    if (!mounted) return;
     activeConversationId = selection;
     await repository.setMany({
-      'intelligenceConversationV1': jsonEncode(messages),
+      'intelligenceConversationV1': jsonEncode(selectedMessages),
       'intelligenceConversationContextV1': revision.fingerprint,
       _activeConversationIdKey: selection,
       _conversationHistoryKey: encodeCoachConversationHistory(
@@ -316,10 +421,14 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
   Future<void> _archiveCurrentConversation(
     List<Map<String, Object?>> history,
   ) async {
+    if (!mounted) return;
+    final repository = conversationPreferences;
+    final fallbackTitle = tr('Conversation', 'محادثة');
     final idBeforeSave = activeConversationId;
     await _saveConversation();
-    final repository = ref.read(preferencesRepositoryProvider);
+    if (!mounted) return;
     final raw = await repository.get('intelligenceConversationV1');
+    if (!mounted) return;
     if (raw == null || raw.trim().isEmpty) return;
     List<Object?> messages;
     try {
@@ -346,7 +455,7 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
       (entry) => entry['role'] == 'user',
       orElse: () => const <String, Object?>{},
     );
-    final rawTitle = '${firstUser['text'] ?? tr('Conversation', 'محادثة')}'
+    final rawTitle = '${firstUser['text'] ?? fallbackTitle}'
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
     final title = rawTitle.length > 52
@@ -355,7 +464,7 @@ extension _IntelligenceConversationHistory on _IntelligenceCenterPageState {
     final updated = upsertCoachConversationHistory(
       history: history,
       id: conversationId,
-      title: title.isEmpty ? tr('Conversation', 'محادثة') : title,
+      title: title.isEmpty ? fallbackTitle : title,
       createdAt: DateTime.now().toIso8601String(),
       messages: messages,
     );

@@ -21,7 +21,7 @@ void main() {
           return const MealImageGatewayResponse(
             statusCode: 200,
             body:
-                '{"schema_version":1,"request_id":"req-1","candidates":[{"name":"دجاج","confidence":0.91,"evidence":"visible grilled pieces","provenance":{"identification_provider":"vision-provider","model_revision":"2026-08","nutrition_resolution":"requires_verified_food_match"}}],"notice":"Confirm visible foods."}',
+                '{"schema_version":1,"response_locale":"ar","request_id":"req-1","candidates":[{"name":"دجاج","confidence":0.91,"evidence":"قطع مشوية ظاهرة","provenance":{"identification_provider":"vision-provider","model_revision":"2026-08","nutrition_resolution":"requires_verified_food_match"}}],"notice":"Confirm visible foods."}',
           );
         },
       );
@@ -171,6 +171,9 @@ void main() {
     expect(gateway, contains('nutrition_resolution'));
     expect(gateway, contains('request_id: idempotencyKey'));
     expect(gateway, contains('AbortController'));
-    expect(gateway, contains("error: 'ai_boost_required'"));
+    expect(
+      gateway,
+      contains(RegExp(r'''error:\s*['"]ai_boost_required['"]''')),
+    );
   });
 }

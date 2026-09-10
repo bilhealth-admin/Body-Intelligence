@@ -22,37 +22,40 @@ class UserProfileRepository {
     double? arm,
     double? thigh,
   }) async {
-    final existing = await getProfile();
-    await _database
-        .into(_database.userProfile)
-        .insert(
-          UserProfileCompanion(
-            id: existing == null ? const Value.absent() : Value(existing.id),
-            uuid: existing == null
-                ? const Value.absent()
-                : Value(existing.uuid),
-            gender: Value(gender),
-            age: Value(age),
-            height: Value(height),
-            currentWeight: Value(currentWeight),
-            targetWeight: Value(targetWeight),
-            activityLevel: Value(activityLevel),
-            exercises: Value(exercises),
-            medicalConditions: Value(medicalConditions),
-            waist: Value(waist),
-            neck: Value(neck),
-            chest: Value(chest),
-            arm: Value(arm),
-            thigh: Value(thigh),
-            createdAt: existing == null
-                ? const Value.absent()
-                : Value(existing.createdAt),
-            updatedAt: Value(DateTime.now()),
-            revision: Value((existing?.revision ?? 0) + 1),
-            syncStatus: const Value('pending'),
-          ),
-          mode: InsertMode.insertOrReplace,
-        );
+    // Keep identity/revision selection and the write atomic. REPLACE deletes
+    // the old row and cascades into goals/plans, even when its UUID is reused.
+    await _database.transaction(() async {
+      final existing = await getProfile();
+      await _database
+          .into(_database.userProfile)
+          .insertOnConflictUpdate(
+            UserProfileCompanion(
+              id: existing == null ? const Value.absent() : Value(existing.id),
+              uuid: existing == null
+                  ? const Value.absent()
+                  : Value(existing.uuid),
+              gender: Value(gender),
+              age: Value(age),
+              height: Value(height),
+              currentWeight: Value(currentWeight),
+              targetWeight: Value(targetWeight),
+              activityLevel: Value(activityLevel),
+              exercises: Value(exercises),
+              medicalConditions: Value(medicalConditions),
+              waist: Value(waist),
+              neck: Value(neck),
+              chest: Value(chest),
+              arm: Value(arm),
+              thigh: Value(thigh),
+              createdAt: existing == null
+                  ? const Value.absent()
+                  : Value(existing.createdAt),
+              updatedAt: Value(DateTime.now()),
+              revision: Value((existing?.revision ?? 0) + 1),
+              syncStatus: const Value('pending'),
+            ),
+          );
+    });
   }
 
   Stream<UserProfileData?> watchProfile() {

@@ -8,11 +8,14 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
     bool addUserMessage = true,
     bool autoSpeakReply = false,
   }) async {
+    if (!mounted) return;
     final rawText = (textOverride ?? question.text).trim();
     final text = inputChannel == CoachInputChannel.voice
         ? normalizeCoachVoiceTranscript(rawText)
         : rawText;
-    if (!conversationReady || text.isEmpty || sending) return;
+    if (!conversationReady || text.isEmpty || sending || foodImageFlowOpening) {
+      return;
+    }
     if (addUserMessage) _beginConversationForUserAction();
     final localeCode = BilLocalePolicy.canonicalTag(
       Localizations.localeOf(context),
@@ -239,7 +242,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       if (!mounted || generation != requestGeneration) return;
       if (reply.serviceStatus == CoachServiceStatus.consentRequired) {
         final enabled = await _offerPersonalIntelligence();
-        if (!mounted) return;
+        if (!mounted || generation != requestGeneration) return;
         if (enabled) {
           _updateState(() => sending = false);
           await ask(
@@ -271,20 +274,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         }
         return;
       }
-      final activeAiSubscription =
-          reply.serviceStatus == CoachServiceStatus.creditsRequired &&
-          hasVerifiedAiSubscription(
-            ref.read(verifiedSubscriptionStateProvider).value,
-          );
-      final availableActions = activeAiSubscription
-          ? reply.actions
-                .where(
-                  (action) =>
-                      action.type !=
-                      IntelligenceActionType.openAiCoachSubscription,
-                )
-                .toList(growable: false)
-          : reply.actions;
+      final availableActions = reply.actions;
       final safeMessage = _presentationSafeMessage(reply.message);
       IntelligenceAction? directNavigationAction;
       if (reply.serviceStatus == CoachServiceStatus.ready) {
@@ -318,12 +308,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
           autoSpeakReply &&
           coachServiceStatusAllowsAutomaticSpeech(reply.serviceStatus);
       final presented = safeMessage.copyWith(
-        text: activeAiSubscription
-            ? tr(
-                'Your Premium AI Coach subscription is active, but its available AI tokens are exhausted. No message was charged. Add AI Boost tokens to continue now.',
-                'اشتراك Premium AI Coach لديك فعّال، لكن توكينات AI المتاحة نفدت. لم تُحتسب الرسالة. أضف توكينات AI Boost للمتابعة الآن.',
-              )
-            : directNavigationAction == null
+        text: directNavigationAction == null
             ? safeMessage.text
             : AiCoachChatCopy.resolve(
                 questionLocale,
@@ -422,14 +407,16 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
       _scrollToLatest();
       unawaited(_saveConversation());
     } finally {
-      replyDelayTimer?.cancel();
       if (mounted) {
         // Refresh even when the local request generation was cancelled: the
         // server may still have settled a reservation before its reply was
         // discarded. autoDispose clears the snapshot when this page is gone.
         ref.invalidate(aiCoachCreditAccessProvider);
+        ref.invalidate(aiBoostVisionAccessProvider);
       }
       if (mounted && generation == requestGeneration) {
+        // A cancelled, older response must not cancel the next turn's timer.
+        replyDelayTimer?.cancel();
         // A successful settlement or a quota rejection may have changed the
         // reserved-aware total. Refresh once after the request completes so
         // zero returns the AI Coach glass immediately without polling/loops.
@@ -476,6 +463,11 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
   }
 
   void _cancelCurrentCoachRequest() {
+    if (listening || voiceCaptureStarting) {
+      unawaited(
+        _stopVoiceCapture(resetMode: voiceMode != _CoachVoiceMode.liveCall),
+      );
+    }
     requestGeneration += 1;
     replyDelayTimer?.cancel();
     _updateState(() {
@@ -516,7 +508,7 @@ extension _IntelligenceQueryFlow on _IntelligenceCenterPageState {
         builder: (sheetContext) {
           final scheme = Theme.of(sheetContext).colorScheme;
           return SafeArea(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
               child: Column(
                 mainAxisSize: MainAxisSize.min,

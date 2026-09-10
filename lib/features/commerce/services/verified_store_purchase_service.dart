@@ -22,29 +22,52 @@ part 'verified_store_purchase_support.dart';
 
 class VerifiedStorePurchaseService extends ChangeNotifier {
   VerifiedStorePurchaseService({InAppPurchase? purchase})
-    : _purchase = purchase ?? InAppPurchase.instance;
+    : _purchaseInstance = purchase;
 
-  final InAppPurchase _purchase;
+  InAppPurchase? _purchaseInstance;
+  InAppPurchase get _purchase => _purchaseInstance ??= InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
   VerifiedStoreState state = VerifiedStoreState.loading;
   Map<String, ProductDetails> products = const {};
   VerifiedStoreEntitlement? entitlement;
   String? messageCode;
   GooglePlayPurchaseDetails? _activeGooglePurchase;
+  Future<void>? _initialization;
+  Future<void> _purchaseUpdates = Future<void>.value();
+  int _queuedPurchaseUpdates = 0;
+  int _purchaseEventGeneration = 0;
+  bool _restoring = false;
+  bool _disposed = false;
+  int _entitlementRefreshGeneration = 0;
 
   bool get configured => AppEnvironment.commerceConfigured;
-  bool get busy => state == VerifiedStoreState.purchasePending;
-  bool get canStartPurchase => canStartStorePurchase(
-    state: state,
-    productAvailable: products.isNotEmpty,
-    messageCode: messageCode,
-  );
+  bool get busy =>
+      _restoring ||
+      _queuedPurchaseUpdates > 0 ||
+      state == VerifiedStoreState.purchasePending;
+  bool get canStartPurchase =>
+      !busy &&
+      canStartStorePurchase(
+        state: state,
+        productAvailable: products.isNotEmpty,
+        messageCode: messageCode,
+      );
 
-  Future<void> initialize() async {
+  Future<void> initialize() {
+    if (_disposed || busy) return Future<void>.value();
+    // The page timeout/resume path can call again while native StoreKit/Play
+    // is still answering. Reuse that work rather than launching another query.
+    return _initialization ??= _initialize().whenComplete(() {
+      _initialization = null;
+    });
+  }
+
+  Future<void> _initialize() async {
+    final purchaseGeneration = _purchaseEventGeneration;
     state = VerifiedStoreState.loading;
     messageCode = null;
     notifyListeners();
-    final user = AppEnvironment.cloudConfigured
+    final user = AppEnvironment.supabaseRuntimeReady
         ? Supabase.instance.client.auth.currentUser
         : null;
     if (!configured || user == null) {
@@ -54,24 +77,37 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       return;
     }
     _subscription ??= _purchase.purchaseStream.listen(
-      (purchases) => unawaited(_consumePurchaseUpdates(purchases)),
+      (purchases) => unawaited(_enqueuePurchaseUpdates(purchases)),
       onError: (_) {
+        // A receipt already being verified owns its outcome. A stream error
+        // while merely waiting for a native transaction must still leave a
+        // recoverable, non-retryable failure instead of a permanent spinner.
+        if (_disposed || _queuedPurchaseUpdates > 0) return;
+        _purchaseEventGeneration++;
         state = VerifiedStoreState.failed;
         messageCode = 'store_stream_failed';
         notifyListeners();
       },
     );
-    await refreshEntitlement();
+    // Independent read-only work: a slow entitlement lookup must not delay
+    // asking the native store for prices. Both still settle before initialize.
+    final entitlementRefresh = refreshEntitlement();
     try {
-      if (!await _purchase.isAvailable()) {
+      if (!await _purchase.isAvailable().timeout(const Duration(seconds: 8))) {
+        if (_disposed ||
+            busy ||
+            purchaseGeneration != _purchaseEventGeneration) {
+          return;
+        }
         state = VerifiedStoreState.unavailable;
         messageCode = 'store_unavailable';
         notifyListeners();
         return;
       }
-      final response = await _purchase.queryProductDetails(
-        StoreCatalogConfiguration.storefrontProductIds,
-      );
+      final response = await _purchase
+          .queryProductDetails(StoreCatalogConfiguration.storefrontProductIds)
+          .timeout(const Duration(seconds: 10));
+      if (_disposed) return;
       final loaded = <String, ProductDetails>{};
       for (final product in response.productDetails) {
         final existing = loaded[product.id];
@@ -87,6 +123,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       // exposes Premium. Treating the other tier as "missing" would make the
       // whole paywall unusable in every correctly configured country.
       if (response.error != null || loaded.isEmpty) {
+        if (busy || purchaseGeneration != _purchaseEventGeneration) return;
         products = const {};
         state = VerifiedStoreState.unavailable;
         messageCode = 'prices_unavailable';
@@ -94,13 +131,18 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         return;
       }
       products = Map.unmodifiable(loaded);
-      state = VerifiedStoreState.ready;
+      if (state == VerifiedStoreState.loading) state = VerifiedStoreState.ready;
       notifyListeners();
       await _queryCompletedAndroidPurchases();
     } on Object {
+      if (_disposed || busy || purchaseGeneration != _purchaseEventGeneration) {
+        return;
+      }
       state = VerifiedStoreState.offline;
       messageCode = 'store_network_failed';
       notifyListeners();
+    } finally {
+      await entitlementRefresh;
     }
   }
 
@@ -124,7 +166,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     // The button and service both guard this boundary. Keeping the service
     // idempotent prevents a second UI event from overwriting the truthful
     // pending state while the native sheet is opening.
-    if (busy) return;
+    if (_disposed || busy) return;
     final user = Supabase.instance.client.auth.currentUser;
     final product = productFor(plan, term: term);
     if (user == null ||
@@ -174,15 +216,21 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         applicationUserName: accountHash,
       );
     }
+    final purchaseGeneration = _purchaseEventGeneration;
     try {
       final started = await _purchase.buyNonConsumable(
         purchaseParam: purchaseParam,
       );
-      if (started) return;
+      if (_disposed ||
+          started ||
+          purchaseGeneration != _purchaseEventGeneration) {
+        return;
+      }
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_not_started';
       notifyListeners();
     } on Object {
+      if (_disposed || purchaseGeneration != _purchaseEventGeneration) return;
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_failed';
       notifyListeners();
@@ -190,7 +238,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   }
 
   Future<void> purchaseBoost({String? offerToken}) async {
-    if (busy) return;
+    if (_disposed || busy) return;
     final user = Supabase.instance.client.auth.currentUser;
     final product = products[StoreCatalogConfiguration.aiBoost];
     if (user == null ||
@@ -217,16 +265,22 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       platform: defaultTargetPlatform,
       offerToken: offerToken,
     );
+    final purchaseGeneration = _purchaseEventGeneration;
     try {
       final started = await _purchase.buyConsumable(
         purchaseParam: purchaseParam,
         autoConsume: false,
       );
-      if (started) return;
+      if (_disposed ||
+          started ||
+          purchaseGeneration != _purchaseEventGeneration) {
+        return;
+      }
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_not_started';
       notifyListeners();
     } on Object {
+      if (_disposed || purchaseGeneration != _purchaseEventGeneration) return;
       state = VerifiedStoreState.failed;
       messageCode = 'purchase_failed';
       notifyListeners();
@@ -234,20 +288,28 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
   }
 
   Future<void> restore() async {
-    if (!configured || busy) return;
+    if (_disposed || !configured || busy) return;
     if (Supabase.instance.client.auth.currentUser == null) {
       state = VerifiedStoreState.unavailable;
       messageCode = 'authentication_required';
       notifyListeners();
       return;
     }
+    _restoring = true;
     state = VerifiedStoreState.purchasePending;
     messageCode = null;
     notifyListeners();
     try {
       // On Apple this is the explicit user action that invokes AppStore.sync.
       await _purchase.restorePurchases();
+      // A restored callback may be verifying while the native restore Future
+      // completes. Do not announce "nothing to restore" before it settles.
+      while (_queuedPurchaseUpdates > 0) {
+        await _purchaseUpdates;
+      }
+      if (_disposed) return;
       await refreshEntitlement();
+      if (_disposed) return;
       if (state == VerifiedStoreState.purchasePending) {
         state = entitlement?.grantsPaidAccess == true
             ? VerifiedStoreState.verified
@@ -260,15 +322,23 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         notifyListeners();
       }
     } on Object {
+      if (_disposed) return;
       state = VerifiedStoreState.failed;
       messageCode = 'restore_failed';
+      notifyListeners();
+    } finally {
+      _restoring = false;
       notifyListeners();
     }
   }
 
   Future<void> refreshEntitlement() async {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (!AppEnvironment.cloudConfigured || user == null) {
+    if (_disposed) return;
+    final generation = ++_entitlementRefreshGeneration;
+    final user = AppEnvironment.supabaseRuntimeReady
+        ? Supabase.instance.client.auth.currentUser
+        : null;
+    if (user == null) {
       entitlement = null;
       return;
     }
@@ -277,7 +347,13 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
           .from('bil_subscriptions')
           .select()
           .eq('owner_id', user.id)
-          .limit(1);
+          .limit(1)
+          .timeout(const Duration(seconds: 10));
+      if (_disposed || generation != _entitlementRefreshGeneration) return;
+      if (Supabase.instance.client.auth.currentUser?.id != user.id) {
+        entitlement = null;
+        return;
+      }
       if (rows.isEmpty) {
         entitlement = null;
         return;
@@ -300,7 +376,9 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
       );
     } on Object {
       // Never turn an unverifiable local label into paid access.
-      entitlement = null;
+      if (!_disposed && generation == _entitlementRefreshGeneration) {
+        entitlement = null;
+      }
     }
   }
 
@@ -336,7 +414,9 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     try {
       final addition = _purchase
           .getPlatformAddition<InAppPurchaseAndroidPlatformAddition>();
-      final response = await addition.queryPastPurchases();
+      final response = await addition.queryPastPurchases().timeout(
+        const Duration(seconds: 8),
+      );
       if (response.error == null) {
         for (final purchase in response.pastPurchases) {
           if (StoreCatalogConfiguration.bindingForProduct(purchase.productID) !=
@@ -345,7 +425,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
             break;
           }
         }
-        await _handlePurchases(response.pastPurchases);
+        await _enqueuePurchaseUpdates(response.pastPurchases);
       }
     } on Object {
       // Server refresh remains authoritative while Play is offline.
@@ -354,6 +434,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
 
   Future<void> _handlePurchases(List<PurchaseDetails> purchases) async {
     for (final purchase in purchases) {
+      if (_disposed) return;
       switch (purchase.status) {
         case PurchaseStatus.pending:
           state = VerifiedStoreState.purchasePending;
@@ -379,6 +460,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
           final verified = boost
               ? await _verifyBoostOnServer(purchase)
               : await _verifyOnServer(purchase);
+          if (_disposed) return;
           if (!boost && verified && purchase is GooglePlayPurchaseDetails) {
             _activeGooglePurchase = purchase;
           }
@@ -390,6 +472,7 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
               await _purchase.completePurchase(purchase);
             }
           }
+          if (_disposed) return;
           state = verified
               ? VerifiedStoreState.verified
               : VerifiedStoreState.failed;
@@ -407,10 +490,32 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
     try {
       await _handlePurchases(purchases);
     } on Object {
+      if (_disposed) return;
       state = VerifiedStoreState.failed;
-      messageCode = 'purchase_failed';
+      // Receipt delivery/acknowledgement may already follow a charge. This is
+      // not a safe pre-launch retry and must never enable a second purchase.
+      messageCode = 'verification_failed';
       notifyListeners();
     }
+  }
+
+  Future<void> _enqueuePurchaseUpdates(List<PurchaseDetails> purchases) {
+    if (_disposed || purchases.isEmpty) return Future<void>.value();
+    // Store callbacks own transaction outcomes. An older price/launch Future
+    // must not publish a stale failure after any newer native transaction event.
+    _purchaseEventGeneration++;
+    _queuedPurchaseUpdates++;
+    notifyListeners();
+    // Native callbacks may overlap server verification. Preserve arrival order
+    // and never acknowledge a pending or unverified transaction.
+    return _purchaseUpdates = _purchaseUpdates.then((_) async {
+      try {
+        if (!_disposed) await _consumePurchaseUpdates(purchases);
+      } finally {
+        _queuedPurchaseUpdates--;
+        notifyListeners();
+      }
+    });
   }
 
   Future<bool> _verifyOnServer(PurchaseDetails purchase) async {
@@ -426,14 +531,12 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         'source': purchase.verificationData.source,
         'verification_data': purchase.verificationData.serverVerificationData,
       };
-      final protectedBody = await BilMobileIntegrityService.instance.protect(
-        action: 'store.verify_purchase',
-        payload: body,
-      );
-      final response = await Supabase.instance.client.functions.invoke(
-        'verify-store-purchase',
-        body: protectedBody,
-      );
+      final protectedBody = await BilMobileIntegrityService.instance
+          .protect(action: 'store.verify_purchase', payload: body)
+          .timeout(const Duration(seconds: 12));
+      final response = await Supabase.instance.client.functions
+          .invoke('verify-store-purchase', body: protectedBody)
+          .timeout(const Duration(seconds: 30));
       final data = response.data;
       final verified =
           response.status == 200 &&
@@ -456,14 +559,12 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
         'source': purchase.verificationData.source,
         'verification_data': purchase.verificationData.serverVerificationData,
       };
-      final protectedBody = await BilMobileIntegrityService.instance.protect(
-        action: 'store.verify_ai_boost',
-        payload: body,
-      );
-      final response = await Supabase.instance.client.functions.invoke(
-        'verify-store-purchase',
-        body: protectedBody,
-      );
+      final protectedBody = await BilMobileIntegrityService.instance
+          .protect(action: 'store.verify_ai_boost', payload: body)
+          .timeout(const Duration(seconds: 12));
+      final response = await Supabase.instance.client.functions
+          .invoke('verify-store-purchase', body: protectedBody)
+          .timeout(const Duration(seconds: 30));
       final data = response.data;
       return response.status == 200 && data is Map && data['verified'] == true;
     } on Object {
@@ -480,7 +581,14 @@ class VerifiedStorePurchaseService extends ChangeNotifier {
 
   @override
   void dispose() {
-    _subscription?.cancel();
+    _disposed = true;
+    _entitlementRefreshGeneration++;
+    unawaited(_subscription?.cancel());
     super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) super.notifyListeners();
   }
 }

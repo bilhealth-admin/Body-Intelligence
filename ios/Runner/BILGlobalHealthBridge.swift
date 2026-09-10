@@ -49,6 +49,8 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       result(permissionSnapshot(arguments: call.arguments))
     case "requestPermissions":
       requestAuthorization(arguments: call.arguments, result: result)
+    case "authorizationRequestStatus":
+      authorizationRequestStatus(arguments: call.arguments, result: result)
     case "enableBackgroundDelivery":
       // BIL v1 deliberately ships without the HealthKit background-delivery
       // entitlement. A foreground refresh remains available after explicit
@@ -67,6 +69,8 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
       }
     case "readChanges":
       readChanges(arguments: call.arguments, result: result)
+    case "readDailyTotals":
+      readDailyTotals(arguments: call.arguments, result: result)
     case "write":
       write(arguments: call.arguments, result: result)
     case "delete":
@@ -81,10 +85,37 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
     let requested = (args?["types"] as? [String]) ?? Self.supportedTypeNames
     var output: [String: Bool] = [:]
     for name in requested {
-      guard let type = sampleType(name) else { output[name] = false; continue }
-      output[name] = store.authorizationStatus(for: type) != .sharingDenied
+      guard sampleType(name) != nil else { output[name] = false; continue }
+      // HealthKit hides read authorization. sharingDenied describes WRITE
+      // access and cannot be used to suppress a permitted read. This flag
+      // means queryable type, not that the user granted read permission;
+      // HealthKit still filters results and Dart requires explicit consent.
+      output[name] = true
     }
     return output
+  }
+
+  private func authorizationRequestStatus(arguments: Any?, result: @escaping FlutterResult) {
+    guard HKHealthStore.isHealthDataAvailable() else {
+      result(error("unavailable", "HealthKit is unavailable on this device.")); return
+    }
+    let args = arguments as? [String: Any]
+    let names = Set((args?["types"] as? [String]) ?? Self.supportedTypeNames)
+    let readTypes = Set(names.compactMap(sampleType))
+    // This API reports whether a sheet is needed, never the user's read grants.
+    store.getRequestStatusForAuthorization(toShare: [], read: readTypes) { status, failure in
+      DispatchQueue.main.async {
+        if let failure {
+          result(self.error("authorization_status_failed", failure.localizedDescription)); return
+        }
+        switch status {
+        case .shouldRequest: result("shouldRequest")
+        case .unnecessary: result("unnecessary")
+        case .unknown: result("unknown")
+        @unknown default: result("unknown")
+        }
+      }
+    }
   }
 
   private func requestAuthorization(arguments: Any?, result: @escaping FlutterResult) {
@@ -164,6 +195,66 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
         "nextAnchor": self.encodeAnchors(nextAnchors),
         "hasMore": pageHasMore,
       ])
+    }
+  }
+
+  /// One-shot statistics, not an observer/background query. HealthKit merges
+  /// overlapping sources; adding raw iPhone/Watch samples would count twice.
+  private func readDailyTotals(arguments: Any?, result: @escaping FlutterResult) {
+    guard HKHealthStore.isHealthDataAvailable() else {
+      result(error("unavailable", "HealthKit is unavailable on this device.")); return
+    }
+    let args = arguments as? [String: Any]
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    let asOf = formatter.date(from: args?["asOf"] as? String ?? "") ?? Date()
+    let calendar = Calendar.current
+    let today = calendar.startOfDay(for: asOf)
+    guard let start = calendar.date(byAdding: .day, value: -29, to: today) else {
+      result(error("invalid_date", "Could not resolve calendar days.")); return
+    }
+    let group = DispatchGroup()
+    let lock = NSLock()
+    var records = [[String: Any]]()
+    var firstError: Error?
+    for (name, unitName) in [("steps", "count"), ("distance", "m"), ("activeEnergy", "kcal")] {
+      guard let type = sampleType(name) as? HKQuantityType,
+            let unit = preferredUnit(name) else { continue }
+      group.enter()
+      let query = HKStatisticsCollectionQuery(
+        quantityType: type,
+        quantitySamplePredicate: HKQuery.predicateForSamples(withStart: start, end: asOf, options: []),
+        options: .cumulativeSum,
+        anchorDate: today,
+        intervalComponents: DateComponents(day: 1)
+      )
+      query.initialResultsHandler = { _, collection, failure in
+        defer { group.leave() }
+        lock.lock(); defer { lock.unlock() }
+        if let failure { firstError = firstError ?? failure; return }
+        collection?.enumerateStatistics(from: start, to: asOf) { statistics, _ in
+          guard let quantity = statistics.sumQuantity() else { return }
+          let value = quantity.doubleValue(for: unit)
+          guard value.isFinite, value >= 0 else { return }
+          let observedAt = min(statistics.endDate.addingTimeInterval(-0.001), asOf)
+          records.append([
+            "id": "daily:\(name):\(formatter.string(from: statistics.startDate))",
+            "type": name, "value": value, "unit": unitName,
+            "observedAt": formatter.string(from: observedAt),
+            "sourceId": "healthkit.statistics", "confidence": 1.0,
+            "timeZoneId": calendar.timeZone.identifier,
+            "attributes": [
+              "aggregation": "native_daily",
+              "sources": (statistics.sources ?? []).map { $0.bundleIdentifier }.sorted(),
+            ],
+          ])
+        }
+      }
+      store.execute(query)
+    }
+    group.notify(queue: .main) {
+      if let firstError { result(self.error("daily_totals_failed", firstError.localizedDescription)); return }
+      result(records)
     }
   }
 

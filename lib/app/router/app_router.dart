@@ -39,6 +39,7 @@ import '../../features/commerce/presentation/bil_store_plans_page.dart';
 import '../../features/commerce/presentation/premium_route_glass_gate.dart';
 import '../../features/commerce/presentation/premium_logging_intro_page.dart';
 import '../../features/community/presentation/community_hub_page.dart';
+import '../../features/community/presentation/community_surface.dart';
 import '../../features/community/presentation/community_bil_code_page.dart';
 import '../../features/community/presentation/community_people_page.dart';
 import '../../features/community/presentation/community_connections_page.dart';
@@ -93,6 +94,8 @@ import '../../features/startup/startup_page.dart';
 import 'invalid_route_page.dart';
 import 'responsive_app_shell.dart';
 
+part 'app_route_redirect.dart';
+
 class AppRouter {
   static Future<bool> Function()? nativeAuthCallbackRetry;
 
@@ -112,23 +115,7 @@ class AppRouter {
       }
       return const Allow();
     },
-    redirect: (_, state) {
-      if (BilAuthCallbackController.isSupportedCallbackLocation(state.uri)) {
-        if (!AppEnvironment.cloudConfigured) return '/login';
-        final isPasswordRecovery =
-            BilAuthCallbackController.isPasswordRecoveryLocation(state.uri);
-        return isPasswordRecovery ? '/reset-password' : '/auth-callback';
-      }
-      final launchLink = BilLaunchDeepLink.parse(state.uri);
-      if (launchLink != null) return launchLink.route;
-      final deepLinkRoute = CommunityDeepLink.routeFor(state.uri);
-      if (deepLinkRoute == null) return null;
-      if (deepLinkRoute.startsWith('/community') &&
-          !AppEnvironment.communityConfigured) {
-        return '/settings';
-      }
-      return deepLinkRoute;
-    },
+    redirect: (_, state) => _redirectAppRoute(state.uri),
     routes: [
       GoRoute(
         path: '/startup',
@@ -298,81 +285,85 @@ class AppRouter {
         path: '/community/people',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunityPeoplePage(),
+          child: CommunitySurface(child: CommunityPeoplePage()),
         ),
       ),
       GoRoute(
         path: '/community/code',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunityBilCodePage(),
+          child: CommunitySurface(child: CommunityBilCodePage()),
         ),
       ),
       GoRoute(
         path: '/community/code/scan',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunityCodeScannerPage(),
+          child: CommunitySurface(child: CommunityCodeScannerPage()),
         ),
       ),
       GoRoute(
         path: '/community/member/:code',
         builder: (_, state) => PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunityMemberCodePage(code: state.pathParameters['code']!),
+          child: CommunitySurface(
+            child: CommunityMemberCodePage(code: state.pathParameters['code']!),
+          ),
         ),
       ),
       GoRoute(
         path: '/community/notifications',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunityNotificationsPage(),
+          child: CommunitySurface(child: CommunityNotificationsPage()),
         ),
       ),
+      // Moderation uses a server-verified role, not a customer purchase.
+      // Its RPCs fail closed; a moderator need not own Premium.
       GoRoute(
         path: '/community/moderation',
-        // Moderation is a server-verified role, not a customer purchase.
-        // Its RPCs fail closed for non-moderators, so a legitimate moderator
-        // must not be blocked merely because they do not own Premium.
-        builder: (_, _) => const CommunityPostModerationPage(),
+        builder: (_, _) =>
+            const CommunitySurface(child: CommunityPostModerationPage()),
       ),
       GoRoute(
         path: '/community/connections',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunityConnectionsPage(),
+          child: CommunitySurface(child: CommunityConnectionsPage()),
         ),
       ),
       GoRoute(
         path: '/community/food-review',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunityFoodReviewPage(),
+          child: CommunitySurface(child: CommunityFoodReviewPage()),
         ),
       ),
       GoRoute(
         path: '/community/profile',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunityProfilePage(),
+          child: CommunitySurface(child: CommunityProfilePage()),
         ),
       ),
       GoRoute(
         path: '/community/safety',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunitySafetyPage(),
+          child: CommunitySurface(child: CommunitySafetyPage()),
         ),
       ),
       GoRoute(
         path: '/community/chat/:userId',
         builder: (_, state) => PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunityChatPage(
-            userId: state.pathParameters['userId']!,
-            displayName: state.extra is String
-                ? state.extra! as String
-                : state.uri.queryParameters['name'] ?? 'BIL',
+          child: CommunitySurface(
+            child: CommunityChatPage(
+              userId: state.pathParameters['userId']!,
+              displayName: state.extra is String
+                  ? state.extra! as String
+                  : state.uri.queryParameters['name'] ?? 'BIL',
+            ),
           ),
         ),
       ),
@@ -380,14 +371,14 @@ class AppRouter {
         path: '/community/messages',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: CommunityMessagesPage(),
+          child: CommunitySurface(child: CommunityMessagesPage()),
         ),
       ),
       GoRoute(
         path: '/community/messages/new',
         builder: (_, _) => const PremiumRouteGlassGate(
           feature: PremiumGateFeature.community,
-          child: NewCommunityMessagePage(),
+          child: CommunitySurface(child: NewCommunityMessagePage()),
         ),
       ),
       GoRoute(

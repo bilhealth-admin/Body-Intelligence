@@ -59,10 +59,13 @@ void main() {
         RegExp(r'active\.start\(\)\s+result\.success').hasMatch(androidSound),
         isFalse,
       );
-      expect(
-        startCapture.indexOf('await _playVoiceActivationCue()'),
-        lessThan(startCapture.indexOf('await _startNativeVoiceCapture()')),
+      final cue = startCapture.indexOf('await _playVoiceActivationCue()');
+      final capture = startCapture.indexOf(
+        'await _startNativeVoiceCapture(generation)',
       );
+      expect(cue, greaterThanOrEqualTo(0));
+      expect(capture, greaterThanOrEqualTo(0));
+      expect(cue, lessThan(capture));
     },
   );
 }

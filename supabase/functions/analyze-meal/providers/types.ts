@@ -1,4 +1,4 @@
-export type VisionProviderName = 'openai' | 'gemini' | 'mistral';
+export type VisionProviderName = "openai" | "gemini" | "mistral";
 
 export type ProviderConfig = {
   provider: VisionProviderName;
@@ -9,7 +9,7 @@ export type ProviderConfig = {
 
 export type MealVisionInput = {
   imageBase64: string;
-  mimeType: 'image/jpeg' | 'image/png' | 'image/webp';
+  mimeType: "image/jpeg" | "image/png" | "image/webp";
   requestedLocale: string;
 };
 
@@ -41,12 +41,13 @@ export type BilVisionCandidate = {
   provenance: {
     identification_provider: VisionProviderName;
     model_revision: string;
-    nutrition_resolution: 'requires_verified_food_match';
+    nutrition_resolution: "requires_verified_food_match";
   };
 };
 
 export type NormalizedProviderResult = {
   schema_version: 1;
+  response_locale: string | null;
   candidates: BilVisionCandidate[];
   usage: {
     input_tokens: number | null;
@@ -57,11 +58,15 @@ export type NormalizedProviderResult = {
 
 export class VisionProviderError extends Error {
   constructor(
-    readonly code: 'not_configured' | 'malformed_response' | 'provider_error',
+    readonly code:
+      | "not_configured"
+      | "malformed_response"
+      | "provider_error"
+      | "language_mismatch",
     message: string,
     readonly provider?: VisionProviderName,
   ) {
     super(message);
-    this.name = 'VisionProviderError';
+    this.name = "VisionProviderError";
   }
 }

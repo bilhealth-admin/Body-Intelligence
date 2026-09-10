@@ -83,6 +83,8 @@ class ReferenceSettingsCopy {
       'Weekly Nutrition Settings': 'إعدادات التغذية الأسبوعية',
       'Push Notifications': 'الإشعارات الفورية',
       'Logout': 'تسجيل الخروج',
+      'Could not sign out. Check your connection and retry.':
+          'تعذر تسجيل الخروج. تحقق من اتصالك وحاول مجددًا.',
       'Go Premium': 'الانتقال إلى Premium',
       'Explore Premium': 'استكشف Premium',
       'Premium adds advanced insights and customization. Your results still depend on your own data and actions.':
@@ -147,6 +149,8 @@ class ReferenceSettingsCopy {
       'Weekly Nutrition Settings': 'Nutrition hebdomadaire',
       'Push Notifications': 'Notifications push',
       'Logout': 'Déconnexion',
+      'Could not sign out. Check your connection and retry.':
+          'Impossible de vous déconnecter. Vérifiez votre connexion et réessayez.',
       'Go Premium': 'Passer à Premium',
       'Explore Premium': 'Découvrir Premium',
       'Premium adds advanced insights and customization. Your results still depend on your own data and actions.':
@@ -211,6 +215,8 @@ class ReferenceSettingsCopy {
       'Weekly Nutrition Settings': 'Nutrición semanal',
       'Push Notifications': 'Notificaciones push',
       'Logout': 'Cerrar sesión',
+      'Could not sign out. Check your connection and retry.':
+          'No se pudo cerrar la sesión. Comprueba tu conexión e inténtalo de nuevo.',
       'Go Premium': 'Hazte Premium',
       'Explore Premium': 'Explorar Premium',
       'Premium adds advanced insights and customization. Your results still depend on your own data and actions.':
@@ -275,6 +281,8 @@ class ReferenceSettingsCopy {
       'Weekly Nutrition Settings': 'Haftalık beslenme ayarları',
       'Push Notifications': 'Anlık bildirimler',
       'Logout': 'Çıkış yap',
+      'Could not sign out. Check your connection and retry.':
+          'Çıkış yapılamadı. Bağlantınızı kontrol edip tekrar deneyin.',
       'Go Premium': 'Premium’a geç',
       'Explore Premium': 'Premium’u keşfet',
       'Premium adds advanced insights and customization. Your results still depend on your own data and actions.':

@@ -48,4 +48,5 @@ void main() {
   );
   ledger.writeAsStringSync('${lines.join('\n')}\n');
 }
+
 // ignore_for_file: curly_braces_in_flow_control_structures

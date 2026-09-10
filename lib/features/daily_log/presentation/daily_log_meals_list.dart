@@ -52,7 +52,11 @@ class DailyMealsList extends ConsumerWidget {
           for (final entry in indexes.entries)
             if (() {
               final meal = byType[entry.key];
-              final configuredName = configuredNames?[entry.value];
+              final configuredName =
+                  configuredNames != null &&
+                      entry.value < configuredNames.length
+                  ? configuredNames[entry.value]
+                  : null;
               final enabled =
                   configuredNames == null ||
                   configuredName == null ||
@@ -97,8 +101,15 @@ class DailyMealsList extends ConsumerWidget {
     final resolved = names.value;
     if (resolvedIndex != null &&
         resolved != null &&
+        resolvedIndex < resolved.length &&
         resolved[resolvedIndex]?.isNotEmpty == true) {
-      return resolved[resolvedIndex]!;
+      final stored = resolved[resolvedIndex]!;
+      final defaultName = '${type[0].toUpperCase()}${type.substring(1)}';
+      // Older installs persisted English defaults as if they were custom names.
+      // Localize those exact defaults; preserve genuinely user-authored names.
+      return stored.trim().toLowerCase() == type
+          ? context.strings.text(defaultName)
+          : stored;
     }
     return context.strings.text('${type[0].toUpperCase()}${type.substring(1)}');
   }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +13,7 @@ import '../../../app/theme/bil_semantic_icons.dart';
 import '../../../shared/widgets/bil_account_avatar.dart';
 import '../data/community_repository.dart';
 import '../domain/community_content_policy.dart';
+import '../domain/community_comment_threads.dart';
 import '../domain/community_models.dart';
 import '../domain/community_text_policy.dart';
 import '../services/community_post_image_picker.dart';
@@ -19,8 +22,11 @@ import 'community_food_submission_sheet.dart';
 import 'community_policy_notice.dart';
 import 'community_safety_page.dart';
 import 'community_taxonomy_sheet.dart';
+import 'community_surface.dart';
 
 part 'community_feed_tab.dart';
+
+part 'community_post_card.dart';
 part 'community_feed_pagination.dart';
 part 'community_post_composer_page.dart';
 part 'community_post_detail_page.dart';
@@ -28,13 +34,21 @@ part 'community_post_detail_comment_tile.dart';
 part 'community_post_widgets.dart';
 part 'community_saved_posts_page.dart';
 part 'community_my_posts_page.dart';
+part 'community_account_widgets.dart';
+part 'community_navigation_sheet.dart';
 part 'community_friends_tab.dart';
 part 'community_food_tab.dart';
 
 class CommunityHubPage extends StatefulWidget {
-  const CommunityHubPage({this.repository, this.postImagePicker, super.key});
+  const CommunityHubPage({
+    this.repository,
+    this.client,
+    this.postImagePicker,
+    super.key,
+  });
 
   final CommunityRepository? repository;
+  final SupabaseClient? client;
   final CommunityPostImagePickerContract? postImagePicker;
 
   @override
@@ -43,32 +57,35 @@ class CommunityHubPage extends StatefulWidget {
 
 class _CommunityHubPageState extends State<CommunityHubPage> {
   CommunityRepository? _repository;
-  Future<bool>? _moderatorAccess;
+  GlobalKey<_FeedTabState> _feedKey = GlobalKey<_FeedTabState>();
+  bool _openingNavigation = false;
+  StreamSubscription<AuthState>? _authSubscription;
+  String? _ownerId;
 
   @override
   void initState() {
     super.initState();
     _repository = widget.repository ?? _productionRepository();
-    _moderatorAccess = _repository?.isCommunityModerator();
+    _watchProductionSession();
   }
 
   @override
   void didUpdateWidget(covariant CommunityHubPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!identical(oldWidget.repository, widget.repository)) {
+    if (!identical(oldWidget.repository, widget.repository) ||
+        !identical(oldWidget.client, widget.client)) {
       _repository = widget.repository ?? _productionRepository();
-      _moderatorAccess = _repository?.isCommunityModerator();
+      _feedKey = GlobalKey<_FeedTabState>();
+      _watchProductionSession();
     }
   }
 
-  CommunityRepository? _productionRepository() {
+  SupabaseClient? _productionClient() {
+    if (widget.client != null) return widget.client;
     if (!AppEnvironment.communityConfigured) return null;
     try {
       final supabase = Supabase.instance;
-      if (!supabase.isInitialized || supabase.client.auth.currentUser == null) {
-        return null;
-      }
-      return CommunityRepository(supabase.client);
+      return supabase.isInitialized ? supabase.client : null;
     } on AssertionError {
       return null;
     } on StateError {
@@ -76,171 +93,154 @@ class _CommunityHubPageState extends State<CommunityHubPage> {
     }
   }
 
+  CommunityRepository? _productionRepository() {
+    final client = _productionClient();
+    return client?.auth.currentUser == null
+        ? null
+        : CommunityRepository(client!);
+  }
+
+  void _watchProductionSession() {
+    unawaited(_authSubscription?.cancel());
+    _authSubscription = null;
+    if (widget.repository != null) return;
+    final client = _productionClient();
+    if (client == null) return;
+    _ownerId = client.auth.currentUser?.id;
+    _authSubscription = client.auth.onAuthStateChange.listen(
+      (state) {
+        final nextOwner = state.session?.user.id;
+        if (!mounted || nextOwner == _ownerId) return;
+        setState(() {
+          _ownerId = nextOwner;
+          _repository = nextOwner == null ? null : CommunityRepository(client);
+          // Discard cached member posts, not just the visible sign-in label.
+          _feedKey = GlobalKey<_FeedTabState>();
+        });
+      },
+      onError: (Object _, StackTrace _) {
+        // Auth owns refresh/recovery. Do not invent a new session on failure.
+      },
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  void dispose() {
+    unawaited(_authSubscription?.cancel());
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      CommunitySurface(child: Builder(builder: _buildHub));
+
+  Widget _buildHub(BuildContext context) {
     final repository = _repository;
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          actions: [
-            IconButton(
-              key: const Key('community-my-bil-code'),
-              onPressed: repository == null
-                  ? null
-                  : () => context.push('/community/code'),
-              tooltip: communityText(
-                context,
-                'My BIL Code',
-                'رمز BIL الخاص بي',
-              ),
-              icon: const Icon(Icons.qr_code_2_rounded),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          communityText(context, 'BIL Community', 'مجتمع BIL'),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        actions: [
+          IconButton(
+            key: const Key('community-settings'),
+            tooltip: communityText(
+              context,
+              'Community actions',
+              'إجراءات المجتمع',
             ),
-            IconButton(
-              key: const Key('community-find-people'),
-              onPressed: repository == null
-                  ? null
-                  : () => context.push('/community/people'),
-              tooltip: communityText(context, 'Find people', 'البحث عن أصدقاء'),
-              icon: const Icon(Icons.person_search_outlined),
+            icon: const Icon(Icons.settings_outlined, size: 21),
+            onPressed: repository == null
+                ? null
+                : () => _openNavigation(context, repository),
+          ),
+        ],
+      ),
+      body: repository == null
+          ? const _SignInRequired()
+          : _FeedTab(
+              key: _feedKey,
+              repository: repository,
+              imagePicker: widget.postImagePicker ?? CommunityPostImagePicker(),
             ),
-            IconButton(
-              key: const Key('community-saved-posts'),
-              onPressed: repository == null
-                  ? null
-                  : () => Navigator.of(context).push<void>(
-                      MaterialPageRoute<void>(
-                        builder: (_) =>
-                            CommunitySavedPostsPage(repository: repository),
-                      ),
-                    ),
-              tooltip: communityText(
-                context,
-                'Saved posts',
-                'المنشورات المحفوظة',
-              ),
-              icon: const Icon(Icons.bookmarks_outlined),
+    );
+  }
+
+  Future<void> _openNavigation(
+    BuildContext context,
+    CommunityRepository repository,
+  ) async {
+    if (_openingNavigation) return;
+    _openingNavigation = true;
+    FocusManager.instance.primaryFocus?.unfocus();
+    try {
+      final destination = await showModalBottomSheet<String>(
+        context: context,
+        isScrollControlled: true,
+        useSafeArea: true,
+        showDragHandle: true,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        constraints: const BoxConstraints(maxWidth: 560),
+        builder: (_) => _CommunityNavigationSheet(repository: repository),
+      );
+      if (!context.mounted || destination == null) return;
+      switch (destination) {
+        case 'account':
+          await pushCommunityPage<void>(
+            context,
+            CommunityMyPostsPage(
+              repository: repository,
+              showProfileHeader: true,
             ),
-            IconButton(
-              onPressed: repository == null
-                  ? null
-                  : () => context.push('/community/notifications'),
-              tooltip: communityText(
-                context,
-                'Community updates',
-                'تحديثات المجتمع',
-              ),
-              icon: const Icon(Icons.notifications_none_rounded),
-            ),
-            FutureBuilder<bool>(
-              future: _moderatorAccess,
-              builder: (context, moderatorSnapshot) => PopupMenuButton<String>(
-                enabled: repository != null,
-                position: PopupMenuPosition.under,
-                tooltip: communityText(
-                  context,
-                  'Community actions',
-                  'إجراءات المجتمع',
-                ),
-                icon: const Icon(Icons.more_vert_rounded),
-                onSelected: (route) {
-                  if (route == 'my-posts') {
-                    final activeRepository = repository;
-                    if (activeRepository == null) return;
-                    Navigator.of(context).push<void>(
-                      MaterialPageRoute<void>(
-                        builder: (_) =>
-                            CommunityMyPostsPage(repository: activeRepository),
-                      ),
-                    );
-                    return;
-                  }
-                  context.push(route);
-                },
-                itemBuilder: (context) => [
-                  if (moderatorSnapshot.data == true)
-                    _communityAction(
-                      context,
-                      '/community/moderation',
-                      'Community moderation',
-                      'مراجعة المجتمع',
-                    ),
-                  _communityAction(
+          );
+        case 'saved':
+          await pushCommunityPage<void>(
+            context,
+            CommunitySavedPostsPage(repository: repository),
+          );
+        case 'friends':
+          await pushCommunityPage<void>(
+            context,
+            Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  communityText(
                     context,
-                    '/community/safety',
-                    'Safety and policy',
-                    'الأمان والسياسة',
-                  ),
-                  _communityAction(
-                    context,
-                    '/community/profile',
-                    'Community profile',
-                    'ملف المجتمع',
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'my-posts',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.article_outlined),
-                        const SizedBox(width: 12),
-                        Text(communityText(context, 'My posts', 'منشوراتي')),
-                      ],
-                    ),
-                  ),
-                  _communityAction(
-                    context,
-                    '/community/connections',
                     'Friends and requests',
                     'الأصدقاء والطلبات',
                   ),
-                  _communityAction(
-                    context,
-                    '/community/food-review',
-                    'Review foods',
-                    'مراجعة الأغذية',
-                  ),
-                  _communityAction(
-                    context,
-                    '/community/people',
-                    'Find people',
-                    'البحث عن أصدقاء',
-                  ),
-                ],
+                ),
               ),
+              body: _FriendsTab(repository: repository),
             ),
-          ],
-          title: Text(communityText(context, 'BIL Community', 'مجتمع BIL')),
-          bottom: TabBar(
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-            tabs: [
-              Tab(
-                key: const Key('community-public-feed-tab'),
-                icon: const Icon(Icons.public_outlined, size: 18),
-                iconMargin: EdgeInsets.zero,
-                text: communityText(context, 'Community', 'المجتمع'),
+          );
+        case 'foods':
+          await pushCommunityPage<void>(
+            context,
+            Scaffold(
+              appBar: AppBar(
+                title: Text(
+                  communityText(context, 'Verified food', 'غذاء موثّق'),
+                ),
               ),
-              Tab(text: communityText(context, 'Friends', 'الأصدقاء')),
-              Tab(text: communityText(context, 'Verified food', 'غذاء موثّق')),
-            ],
-          ),
-        ),
-        body: repository == null
-            ? const _SignInRequired()
-            : TabBarView(
-                children: [
-                  _FeedTab(
-                    key: ObjectKey(repository),
-                    repository: repository,
-                    imagePicker:
-                        widget.postImagePicker ?? CommunityPostImagePicker(),
-                  ),
-                  _FriendsTab(repository: repository),
-                  _CommunityFoodTab(repository: repository),
-                ],
-              ),
-      ),
-    );
+              body: _CommunityFoodTab(repository: repository),
+            ),
+          );
+        case 'topics':
+          await CommunityTaxonomySheet.show(
+            context,
+            onSelectTag: (tag) {
+              _feedKey.currentState?._openComposer(tag: tag);
+            },
+          );
+        default:
+          await context.push(destination);
+      }
+    } finally {
+      _openingNavigation = false;
+    }
   }
 }
 

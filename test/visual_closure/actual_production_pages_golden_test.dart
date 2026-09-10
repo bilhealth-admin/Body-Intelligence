@@ -693,9 +693,9 @@ void main() {
       name: 'community_navigation_menu_authenticated_phone',
       captureOverlay: true,
       interact: (tester) async {
-        await tester.tap(find.byTooltip('Community actions'));
+        await tester.tap(find.byKey(const Key('community-settings')));
         await tester.pumpAndSettle();
-        expect(find.text('Community profile'), findsOneWidget);
+        expect(find.byKey(const Key('community-nav-account')), findsOneWidget);
         expect(find.text('Friends and requests'), findsOneWidget);
         expect(find.text('Find people'), findsOneWidget);
       },

@@ -32,7 +32,12 @@ void main() {
       'android/app/src/main/kotlin/com/bilhealth/bodyintelligencelog/BILSpeechBridge.kt',
     ).readAsStringSync();
 
-    expect(page, contains('if (await _startNativeVoiceCapture()) return;'));
+    expect(
+      page,
+      contains('if (await _startNativeVoiceCapture(generation)) return;'),
+    );
+    expect(page, contains('generation != voiceCaptureGeneration'));
+    expect(page, contains('coachInBackground'));
     expect(page, contains('partialResults: true'));
     expect(page, contains('pendingVoiceTranscript = transcript'));
     expect(page, contains('textOverride: transcript'));

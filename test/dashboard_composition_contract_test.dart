@@ -38,7 +38,11 @@ void main() {
     expect(source, contains('((index * 3) ~/ values.length).clamp(0, 2)'));
     expect(source, isNot(contains('canvas.drawPath(')));
     expect(grid, contains('weightTrendValues: weights'));
-    expect(grid, contains('final localStepTrendValues = dailyLogs'));
-    expect(grid, contains('stepTrendValues: stepTrendValues'));
+    expect(grid, contains('DashboardStepTrend.fromEvidence('));
+    expect(grid, contains('connected: connectedHealthSnapshot'));
+    expect(grid, contains('localReadings: dailyLogs.map('));
+    expect(grid, contains('stepTrendValues: stepTrend.values'));
+    expect(grid, contains('todaySteps: stepTrend.today'));
+    expect(grid, contains('stepSourceName: stepTrend.source'));
   });
 }

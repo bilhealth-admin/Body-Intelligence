@@ -16,13 +16,14 @@ function runtime({
   translate?: FoodSearchRuntime["translate"];
 } = {}): FoodSearchRuntime {
   return {
-    authorize: async () => ({
-      ok: true,
-      consumeQuota: async () => quota,
-    }),
+    authorize: () =>
+      Promise.resolve({
+        ok: true,
+        consumeQuota: () => Promise.resolve(quota),
+      }),
     apiKey: () => "test-key",
-    fetch: fetchImpl ?? (async () => {
-      throw new Error("Unexpected USDA request");
+    fetch: fetchImpl ?? (() => {
+      return Promise.reject(new Error("Unexpected USDA request"));
     }) as typeof fetch,
     translate,
   };
@@ -43,9 +44,9 @@ Deno.test("rejects a chunked request over the byte cap without USDA access", asy
       body: oversized,
     }),
     runtime({
-      fetchImpl: (async () => {
+      fetchImpl: (() => {
         fetches += 1;
-        return new Response("{}");
+        return Promise.resolve(new Response("{}"));
       }) as typeof fetch,
     }),
   );
@@ -63,9 +64,9 @@ Deno.test("rate-limited member cannot reach USDA", async () => {
     }),
     runtime({
       quota: "rate_limited",
-      fetchImpl: (async () => {
+      fetchImpl: (() => {
         fetches += 1;
-        return new Response("{}");
+        return Promise.resolve(new Response("{}"));
       }) as typeof fetch,
     }),
   );
@@ -83,9 +84,9 @@ Deno.test("quota backend failure fails closed before USDA", async () => {
     }),
     runtime({
       quota: "unavailable",
-      fetchImpl: (async () => {
+      fetchImpl: (() => {
         fetches += 1;
-        return new Response("{}");
+        return Promise.resolve(new Response("{}"));
       }) as typeof fetch,
     }),
   );
@@ -97,21 +98,24 @@ Deno.test("quota backend failure fails closed before USDA", async () => {
 Deno.test("quota is consumed before one bounded USDA search", async () => {
   const events: string[] = [];
   const testRuntime: FoodSearchRuntime = {
-    authorize: async () => ({
-      ok: true,
-      consumeQuota: async () => {
-        events.push("quota");
-        return "allowed";
-      },
-    }),
+    authorize: () =>
+      Promise.resolve({
+        ok: true,
+        consumeQuota: () => {
+          events.push("quota");
+          return Promise.resolve("allowed" as const);
+        },
+      }),
     apiKey: () => "test-key",
-    fetch: (async () => {
+    fetch: (() => {
       events.push("fetch");
-      return new Response(
-        JSON.stringify({
-          foods: [{ fdcId: 1, description: "Apple" }],
-        }),
-        { status: 200 },
+      return Promise.resolve(
+        new Response(
+          JSON.stringify({
+            foods: [{ fdcId: 1, description: "Apple" }],
+          }),
+          { status: 200 },
+        ),
       );
     }) as typeof fetch,
   };
@@ -140,18 +144,20 @@ Deno.test("translated query reaches USDA while canonical identity is preserved",
       }),
     }),
     runtime({
-      translate: async (value, source, target) => {
+      translate: (value, source, target) => {
         translationCall = `${value}|${source}|${target}`;
-        return "teff cooked";
+        return Promise.resolve("teff cooked");
       },
-      fetchImpl: (async (_input, init) => {
+      fetchImpl: ((_input, init) => {
         const body = JSON.parse(String(init?.body)) as { query?: string };
         usdaQuery = String(body.query ?? "");
-        return new Response(
-          JSON.stringify({
-            foods: [{ fdcId: 172672, description: "Teff, cooked" }],
-          }),
-          { status: 200 },
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              foods: [{ fdcId: 172672, description: "Teff, cooked" }],
+            }),
+            { status: 200 },
+          ),
         );
       }) as typeof fetch,
     }),
@@ -178,14 +184,16 @@ Deno.test("unsafe client search hint cannot replace the typed query", async () =
       }),
     }),
     runtime({
-      fetchImpl: (async (_input, init) => {
+      fetchImpl: ((_input, init) => {
         const body = JSON.parse(String(init?.body)) as { query?: string };
         usdaQuery = String(body.query ?? "");
-        return new Response(
-          JSON.stringify({
-            foods: [{ fdcId: 1, description: "RISE protein bar" }],
-          }),
-          { status: 200 },
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              foods: [{ fdcId: 1, description: "RISE protein bar" }],
+            }),
+            { status: 200 },
+          ),
         );
       }) as typeof fetch,
     }),

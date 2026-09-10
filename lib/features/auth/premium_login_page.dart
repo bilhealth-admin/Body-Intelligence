@@ -28,6 +28,21 @@ class _LoginPageState extends State<LoginPage> {
   OAuthProvider? oauthLoading;
   String? status;
 
+  bool get _usesNativeAppleButton =>
+      !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+
+  // Apple derives its title size from the button height (43%). Keep the
+  // provider group on the same 44pt / 18.92pt scale on iOS instead of pairing
+  // a 24pt Apple title with 15.5pt Google/Facebook titles in 56pt buttons.
+  double get _oauthFontSize => _usesNativeAppleButton ? 44 * .43 : 15.5;
+
+  double _oauthHeight(BuildContext context) {
+    final baseHeight = _usesNativeAppleButton ? 44.0 : 56.0;
+    final scale =
+        MediaQuery.textScalerOf(context).scale(_oauthFontSize) / _oauthFontSize;
+    return baseHeight * (scale < 1 ? 1 : scale);
+  }
+
   Future<void> submitEmail() async {
     if (loading || oauthLoading != null || !AppEnvironment.cloudConfigured) {
       return;
@@ -259,25 +274,31 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                 ),
                                 const SizedBox(height: 11),
-                                if (!kIsWeb &&
-                                    defaultTargetPlatform == TargetPlatform.iOS)
-                                  SignInWithAppleButton(
-                                    key: const Key('oauth-apple'),
-                                    onPressed:
-                                        configured &&
-                                            !loading &&
-                                            oauthLoading == null
-                                        ? () => submitOAuth(OAuthProvider.apple)
-                                        : null,
-                                    text: authEntryText(
-                                      context,
-                                      AuthEntryCopyKey.continueApple,
+                                if (_usesNativeAppleButton)
+                                  // Height already incorporates text enlargement.
+                                  // Avoid applying it twice inside the package;
+                                  // smaller accessibility text remains respected.
+                                  MediaQuery.withClampedTextScaling(
+                                    maxScaleFactor: 1,
+                                    child: SignInWithAppleButton(
+                                      key: const Key('oauth-apple'),
+                                      onPressed:
+                                          configured &&
+                                              !loading &&
+                                              oauthLoading == null
+                                          ? () =>
+                                                submitOAuth(OAuthProvider.apple)
+                                          : null,
+                                      text: authEntryText(
+                                        context,
+                                        AuthEntryCopyKey.continueApple,
+                                      ),
+                                      height: _oauthHeight(context),
+                                      borderRadius: BorderRadius.circular(12),
+                                      style: dark
+                                          ? SignInWithAppleButtonStyle.white
+                                          : SignInWithAppleButtonStyle.black,
                                     ),
-                                    height: 56,
-                                    borderRadius: BorderRadius.circular(12),
-                                    style: dark
-                                        ? SignInWithAppleButtonStyle.white
-                                        : SignInWithAppleButtonStyle.black,
                                   )
                                 else
                                   _oauthButton(
@@ -427,7 +448,7 @@ class _LoginPageState extends State<LoginPage> {
         borderRadius: BorderRadius.circular(12),
         onTap: enabled ? () => submitOAuth(provider) : null,
         child: SizedBox(
-          height: 56,
+          height: _oauthHeight(context),
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -454,7 +475,7 @@ class _LoginPageState extends State<LoginPage> {
                     color: enabled
                         ? scheme.onSurface
                         : scheme.onSurfaceVariant.withValues(alpha: .7),
-                    fontSize: 15.5,
+                    fontSize: _oauthFontSize,
                     fontWeight: FontWeight.w700,
                     height: 1.15,
                   ),

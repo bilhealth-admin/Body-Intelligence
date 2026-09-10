@@ -103,6 +103,10 @@ describe("premium entitlement", () => {
       expect(headers.get("authorization")).toBe(`Bearer ${token}`);
       expect(headers.get("apikey")).toBe(env.SUPABASE_PUBLISHABLE_KEY);
       expect(init?.redirect).toBe("manual");
+      if (url.pathname.endsWith("/rpc/bil_get_my_admin_subscription")) {
+        expect(url.search).toBe("");
+        return Response.json(null);
+      }
       expect(url.searchParams.get("owner_id")).toBe(`eq.${userId}`);
       if (url.pathname.endsWith("/bil_ai_closed_test_grants")) {
         return Response.json([]);
@@ -129,7 +133,7 @@ describe("premium entitlement", () => {
         new Date("2026-08-24T12:00:00Z"),
       ),
     ).resolves.toBe(true);
-    expect(seen).toHaveLength(2);
+    expect(seen).toHaveLength(3);
   });
 
   it("accepts only a current owner-scoped closed-test grant", async () => {
@@ -156,9 +160,9 @@ describe("premium entitlement", () => {
     ).resolves.toBe(true);
   });
 
-  it("fails closed for stale verification or an untrusted provider", async () => {
+  it("fails closed for future verification or an untrusted provider", async () => {
     for (const mutation of [
-      { provider: "google", verified_at: "2026-08-20T00:00:00Z" },
+      { provider: "google", verified_at: "2026-08-25T00:00:00Z" },
       { provider: "untrusted", verified_at: "2026-08-24T00:00:00Z" },
       {
         plan_id: "legacy_plus",

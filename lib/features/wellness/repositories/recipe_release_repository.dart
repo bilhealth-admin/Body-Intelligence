@@ -5,8 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../domain/recipe_release_manifest.dart';
+import '../domain/recipe_content_localizer.dart';
 import '../domain/wellness_content_pack.dart';
 import '../../nutrition/domain/dietary_preferences.dart';
+import '../../recipe_import/domain/recipe_ingredient_evidence.dart';
 
 part 'recipe_release_decoding.dart';
 
@@ -77,7 +79,11 @@ final class RecipeCatalogDetail {
     final localizations = record['localizations'] as Map<String, dynamic>;
     final primary = record['primaryLocale'] as String;
     if (localizations[requested] case final Map<String, dynamic> value) {
-      return (value: value, locale: requested, isFallback: false);
+      return (
+        value: RecipeContentLocalizer.resolve(value, requested),
+        locale: requested,
+        isFallback: false,
+      );
     }
     if (localizations['en'] case final Map<String, dynamic> value) {
       return (value: value, locale: 'en', isFallback: true);
@@ -147,11 +153,13 @@ final class RecipeCatalogCardFacts {
     required this.kcalPerServing,
     required this.proteinGramsPerServing,
     required this.servings,
+    this.nutritionNeedsReview = false,
   });
 
   final double kcalPerServing;
   final double proteinGramsPerServing;
   final int servings;
+  final bool nutritionNeedsReview;
 
   factory RecipeCatalogCardFacts.fromDetail(RecipeCatalogDetail detail) {
     final record = detail.record;
@@ -180,6 +188,7 @@ final class RecipeCatalogCardFacts {
       kcalPerServing: kcal.toDouble(),
       proteinGramsPerServing: protein.toDouble(),
       servings: count,
+      nutritionNeedsReview: RecipeIngredientEvidence.recordNeedsReview(record),
     );
   }
 }
@@ -454,14 +463,18 @@ final class RecipeReleaseRepository implements RecipeImageCatalog {
 }
 
 int _validateProvenance(Map<String, dynamic> value) {
-  _exactKeys(value, const {
+  _exactKeys(value, {
     'schema_version',
     'source_inputs',
     'localization_repairs',
     'localization_ingredient_count_mismatches',
     'nutrition_claim',
     'image_claim',
+    if (value.containsKey('source_reconciliation')) 'source_reconciliation',
   });
+  if (value.containsKey('source_reconciliation')) {
+    _validateSourceReconciliation(value['source_reconciliation']);
+  }
   if (value['schema_version'] != 1 ||
       value['source_inputs'] is! List ||
       value['localization_repairs'] is! List ||

@@ -21,6 +21,7 @@ import 'app/services/app_observability.dart';
 import 'app/services/app_settings_provider.dart';
 import 'app/services/recoverable_image_picker.dart';
 import 'features/ads/presentation/ad_runtime_bootstrap.dart';
+import 'features/commerce/providers/commerce_providers.dart';
 import 'features/auth/apple_credential_lifecycle.dart';
 import 'features/auth/bil_auth_callback_controller.dart';
 import 'features/auth/oauth_browser_return.dart';
@@ -384,19 +385,13 @@ class BILApp extends ConsumerWidget {
                 child: BilAppleCredentialLifecycleCoordinator(
                   child: AppResumeDashboardCoordinator(
                     onMeaningfulResume: () {
-                      final current = AppRouter
-                          .router
-                          .routerDelegate
-                          .currentConfiguration
-                          .uri;
-                      // A long locked/backgrounded session can retain stale
-                      // iOS window metrics (narrow layout / enlarged text) on
-                      // the previously mounted route. Re-enter through the
-                      // startup boundary instead of repainting that stale
-                      // page, while short app switches preserve user input.
-                      if (current.path != '/startup') {
-                        AppRouter.router.go('/startup');
-                      }
+                      // Resume is not a cold launch. Retain the active route,
+                      // theme, locale and draft while refreshing server truth.
+                      // Re-entering startup here raced restored iOS metrics.
+                      ref.invalidate(verifiedSubscriptionStateProvider);
+                      ref
+                          .read(aiCoachUsageRefreshProvider.notifier)
+                          .requestAuthoritativeReload();
                     },
                     child: AppSwitcherPrivacyShield(
                       child: Semantics(

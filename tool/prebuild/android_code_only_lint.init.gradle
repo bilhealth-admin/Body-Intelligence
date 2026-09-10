@@ -1,0 +1,21 @@
+// Opt-in audit harness only; never applied by normal release builds.
+// The owner prohibits image analysis. Do not run IconDetector's bitmap reads,
+// dimension comparisons, pixel/color checks or duplicate-image hashing.
+// Their status is NOT RUN, not PASS. All code/security lint remains enabled;
+// no baseline or severity overrides are introduced.
+def imageOnlyChecks = [
+    'IconExpectedSize', 'IconDipSize', 'IconLocation', 'IconDensities',
+    'IconMissingDensityFolder', 'GifUsage', 'IconDuplicates',
+    'IconDuplicatesConfig', 'IconNoDpi', 'IconMixedNinePatch',
+    'IconXmlAndPng', 'IconExtension', 'IconColors', 'IconLauncherShape',
+    'WebpUnsupported'
+]
+allprojects { project ->
+    ['com.android.application', 'com.android.library'].each { pluginId ->
+        project.plugins.withId(pluginId) {
+            project.extensions.getByName('androidComponents').finalizeDsl { dsl ->
+                dsl.lint.disable.addAll(imageOnlyChecks)
+            }
+        }
+    }
+}

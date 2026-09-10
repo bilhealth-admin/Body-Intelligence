@@ -223,23 +223,64 @@ class _CommunityFeedImage extends StatelessWidget {
       image: true,
       label: communityText(context, 'Post photo', 'صورة المنشور'),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: AspectRatio(
-          key: Key('community-post-image-${post.id}'),
-          aspectRatio: ratio,
-          child: url == null
-              ? const _CommunityImageFallback()
-              : Image.network(
-                  url,
-                  fit: BoxFit.cover,
-                  filterQuality: FilterQuality.medium,
-                  gaplessPlayback: true,
-                  errorBuilder: (_, _, _) => const _CommunityImageFallback(),
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          onTap: url == null
+              ? null
+              : () => pushCommunityPage<void>(
+                  context,
+                  _CommunityPhotoPage(url: url),
                 ),
+          child: AspectRatio(
+            key: Key('community-post-image-${post.id}'),
+            aspectRatio: ratio,
+            child: url == null
+                ? const _CommunityImageFallback()
+                : Image.network(
+                    url,
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.medium,
+                    gaplessPlayback: true,
+                    errorBuilder: (_, _, _) => const _CommunityImageFallback(),
+                  ),
+          ),
         ),
       ),
     );
   }
+}
+
+class _CommunityPhotoPage extends StatelessWidget {
+  const _CommunityPhotoPage({required this.url});
+  final String url;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: Colors.black,
+    appBar: AppBar(
+      backgroundColor: Colors.black,
+      foregroundColor: Colors.white,
+      titleTextStyle: Theme.of(
+        context,
+      ).textTheme.titleMedium?.copyWith(color: Colors.white),
+      title: Text(communityText(context, 'Post photo', 'صورة المنشور')),
+    ),
+    body: SafeArea(
+      child: InteractiveViewer(
+        key: const Key('community-photo-viewer'),
+        minScale: 1,
+        maxScale: 4,
+        child: Center(
+          child: Image.network(
+            url,
+            fit: BoxFit.contain,
+            semanticLabel: communityText(context, 'Post photo', 'صورة المنشور'),
+            errorBuilder: (_, _, _) => const _CommunityImageFallback(),
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 class _CommunityImageFallback extends StatelessWidget {

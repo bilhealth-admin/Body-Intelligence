@@ -12,6 +12,7 @@ import '../../data/database/database_provider.dart';
 import '../../shared/widgets/bil_coach_identity.dart';
 import '../connected_health/connected_health_model.dart';
 import '../connected_health/providers/connected_health_provider.dart';
+import '../connected_health/widgets/apple_health_permission_review.dart';
 import '../intelligence_center/domain/coach_context_preferences.dart';
 import '../intelligence_center/services/coach_context_provider.dart';
 import '../profile/providers/user_profile_provider.dart';
@@ -396,6 +397,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       case 'plan':
         final validation = OnboardingPlanCalculator.validate(_draft);
         if (!validation.isValid) return _validationMessage(validation.code!);
+        try {
+          OnboardingPlanCalculator.calculate(_draft);
+        } on StateError {
+          return t('BIL could not calculate a safe plan.');
+        }
       case 'waist':
         if (_draft.waistCm != null &&
             (_draft.waistCm! < 20 || _draft.waistCm! > 300)) {

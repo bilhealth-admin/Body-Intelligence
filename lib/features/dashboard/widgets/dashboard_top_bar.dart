@@ -160,14 +160,14 @@ class _DashboardEditButton extends StatelessWidget {
           ],
         ),
         child: SizedBox(
-          width: 96,
+          width: 84,
           height: 48,
           child: TextButton(
             key: const Key('dashboard-edit-today'),
             onPressed: () => context.push('/dashboard/preferences'),
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
-              minimumSize: const Size(96, 48),
+              minimumSize: const Size(84, 48),
               padding: const EdgeInsets.symmetric(horizontal: 12),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: const StadiumBorder(),
@@ -178,7 +178,10 @@ class _DashboardEditButton extends StatelessWidget {
                 label,
                 maxLines: 1,
                 softWrap: false,
-                style: const TextStyle(fontWeight: FontWeight.w800),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ),

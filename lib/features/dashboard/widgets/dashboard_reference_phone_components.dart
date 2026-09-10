@@ -97,11 +97,15 @@ class _ReferenceTrendRail extends StatelessWidget {
   const _ReferenceTrendRail({
     required this.weightValues,
     required this.stepValues,
+    required this.todaySteps,
+    required this.stepSourceName,
     required this.weightUnit,
   });
 
   final List<double> weightValues;
   final List<double> stepValues;
+  final double? todaySteps;
+  final String? stepSourceName;
   final String weightUnit;
 
   @override
@@ -115,6 +119,7 @@ class _ReferenceTrendRail extends StatelessWidget {
         padEnds: true,
         children: [
           _ReferenceTrendCard(
+            key: const Key('dashboard-weight-trend-card'),
             title: tr('Weight', 'الوزن'),
             period: tr('Last 90 days', 'آخر 90 يومًا'),
             values: weightValues,
@@ -127,16 +132,22 @@ class _ReferenceTrendRail extends StatelessWidget {
             onTap: () => context.push('/weight-history'),
           ),
           _ReferenceTrendCard(
+            key: const Key('dashboard-step-trend-card'),
             title: tr('Today steps', 'خطوات اليوم'),
-            period: tr('Last 30 days', 'آخر 30 يومًا'),
+            period: [
+              tr('Last 30 days', 'آخر 30 يومًا'),
+              ?stepSourceName,
+            ].join(' · '),
             values: stepValues,
+            explicitValue: todaySteps,
+            useExplicitValue: true,
             unit: tr('steps', 'خطوة'),
             colors: const [AppColors.protein, AppColors.carbs, AppColors.fats],
             emptyLabel: tr(
               'Connect or log steps to see your trend',
               'اربط مصدرًا أو سجل خطواتك لعرض الاتجاه',
             ),
-            onTap: () => context.push('/history'),
+            onTap: () => context.push('/connected-health'),
           ),
         ],
       ),
@@ -146,6 +157,7 @@ class _ReferenceTrendRail extends StatelessWidget {
 
 class _ReferenceTrendCard extends StatelessWidget {
   const _ReferenceTrendCard({
+    super.key,
     required this.title,
     required this.period,
     required this.values,
@@ -153,6 +165,8 @@ class _ReferenceTrendCard extends StatelessWidget {
     required this.colors,
     required this.emptyLabel,
     required this.onTap,
+    this.explicitValue,
+    this.useExplicitValue = false,
   });
 
   final String title;
@@ -162,6 +176,8 @@ class _ReferenceTrendCard extends StatelessWidget {
   final List<Color> colors;
   final String emptyLabel;
   final VoidCallback onTap;
+  final double? explicitValue;
+  final bool useExplicitValue;
 
   @override
   Widget build(BuildContext context) {
@@ -221,17 +237,23 @@ class _ReferenceTrendCard extends StatelessWidget {
                           ),
                         )
                       : CustomPaint(
+                          key: Key(
+                            useExplicitValue
+                                ? 'dashboard-step-bars'
+                                : 'dashboard-weight-bars',
+                          ),
                           painter: _ReferenceTrendPainter(
                             values: values,
                             colors: colors,
                             gridColor: theme.colorScheme.outlineVariant,
+                            zeroBased: useExplicitValue,
                           ),
                         ),
                 ),
                 if (values.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text(
-                    '${values.last.toStringAsFixed(unit == 'kg' || unit == 'lb' ? 1 : 0)} $unit',
+                    '${(useExplicitValue ? explicitValue : values.last)?.toStringAsFixed(unit == 'kg' || unit == 'lb' ? 1 : 0) ?? '—'} $unit',
                     textDirection: TextDirection.ltr,
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: colors.last,
@@ -253,11 +275,13 @@ class _ReferenceTrendPainter extends CustomPainter {
     required this.values,
     required this.colors,
     required this.gridColor,
+    this.zeroBased = false,
   });
 
   final List<double> values;
   final List<Color> colors;
   final Color gridColor;
+  final bool zeroBased;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -280,7 +304,7 @@ class _ReferenceTrendPainter extends CustomPainter {
     canvas.drawLine(const Offset(0, 0), Offset(0, chartBottom), axis);
 
     final populatedValues = values
-        .where((value) => value > 0)
+        .where((value) => value.isFinite && value > 0)
         .toList(growable: false);
     if (populatedValues.isEmpty) return;
     final minValue = populatedValues.reduce((a, b) => a < b ? a : b);
@@ -288,14 +312,17 @@ class _ReferenceTrendPainter extends CustomPainter {
     final spread = (maxValue - minValue).abs();
     final slotWidth = size.width / values.length;
     final barWidth = (slotWidth * .62).clamp(3.0, 14.0);
+    final stepFractions = zeroBased ? dashboardStepBarFractions(values) : null;
     for (var index = 0; index < values.length; index++) {
       // An absent day remains visually absent; the card reports the actual
       // latest-day value rather than an invented baseline.
-      if (values[index] <= 0) continue;
+      if (!values[index].isFinite || values[index] <= 0) continue;
       final normalized = spread == 0
           ? .52
           : (values[index] - minValue) / spread;
-      final height = size.height * (.16 + normalized * .76);
+      final height =
+          size.height *
+          (zeroBased ? stepFractions![index] * .92 : .16 + normalized * .76);
       final left = index * slotWidth + (slotWidth - barWidth) / 2;
       final rect = Rect.fromLTWH(left, chartBottom - height, barWidth, height);
       final third = ((index * 3) ~/ values.length).clamp(0, 2);
@@ -332,6 +359,7 @@ class _ReferenceTrendPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _ReferenceTrendPainter oldDelegate) =>
       oldDelegate.values != values ||
+      oldDelegate.zeroBased != zeroBased ||
       oldDelegate.colors != colors ||
       oldDelegate.gridColor != gridColor;
 }

@@ -7,4 +7,5 @@ import 'package:body_intelligence_log/app/localization/runtime_copy.dart';
 void main() {
   print(jsonEncode(RuntimeCopy.values.keys.toList(growable: false)));
 }
+
 // ignore_for_file: avoid_print

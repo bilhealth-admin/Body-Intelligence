@@ -82,6 +82,9 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
         _lastStoreState != VerifiedStoreState.verified) {
       ref.invalidate(verifiedSubscriptionStateProvider);
       ref.invalidate(aiCoachCreditAccessProvider);
+      ref
+          .read(aiCoachUsageRefreshProvider.notifier)
+          .requestAuthoritativeReload();
     }
     _lastStoreState = store.state;
     final feedback = _purchaseFeedbackFor(store);
@@ -94,13 +97,13 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
   (String?, bool) _purchaseFeedbackFor(VerifiedStorePurchaseService store) {
     final code = store.messageCode;
     final key = switch (code) {
-      'purchase_pending' => 'purchase_in_progress',
+      'purchase_pending' => 'purchase_awaiting_approval',
       // Cancelling the native sheet is an intentional choice, not an error.
       // Keep the catalog actionable so another term can be selected at once.
       'purchase_cancelled' => null,
       'purchase_not_started' => 'purchase_error',
       'purchase_unavailable' || 'authentication_required' => 'purchase_error',
-      'verification_failed' => 'purchase_error',
+      'verification_failed' => 'purchase_verification_unavailable',
       'purchase_failed' || 'store_stream_failed' => 'purchase_error',
       'subscription_verified' || 'ai_boost_verified' => 'purchase_verified',
       _ => switch (store.state) {
@@ -203,7 +206,7 @@ class _BilStorePlansPageState extends ConsumerState<BilStorePlansPage>
     } on Object {
       if (mounted) {
         setState(() {
-          _purchaseFeedbackKey = 'purchase_failed';
+          _purchaseFeedbackKey = 'purchase_error';
           _purchaseFeedbackIsError = true;
         });
       }

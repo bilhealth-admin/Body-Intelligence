@@ -33,7 +33,10 @@ void main() {
     expect(androidWorkflow, contains('(( BUILD_NUMBER == 11 ))'));
     expect(iosWorkflow, contains('(( BUILD_NUMBER == 12 ))'));
     expect(iosWorkflow, isNot(contains('(( BUILD_NUMBER == 11 ))')));
-    expect(androidWorkflow, contains('build 10 and earlier must never be promoted'));
+    expect(
+      androidWorkflow,
+      contains('build 10 and earlier must never be promoted'),
+    );
     expect(
       iosWorkflow,
       contains(r'--build-number "$BUILD_NUMBER"'),

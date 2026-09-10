@@ -12,10 +12,7 @@ void main() {
   ).readAsStringSync();
 
   test('friendship write migration narrows direct client columns', () {
-    expect(
-      migration,
-      contains('grant insert (requester_id, addressee_id)'),
-    );
+    expect(migration, contains('grant insert (requester_id, addressee_id)'));
     expect(migration, contains('grant update (status, responded_at)'));
     expect(migration, contains("and status = 'pending'"));
     expect(migration, contains("and status in ('accepted', 'declined')"));
@@ -24,10 +21,7 @@ void main() {
   });
 
   test('friendship identity and transition checks are server enforced', () {
-    expect(
-      migration,
-      contains('bil_enforce_friendship_write_contract'),
-    );
+    expect(migration, contains('bil_enforce_friendship_write_contract'));
     expect(migration, contains('new.id is distinct from old.id'));
     expect(
       migration,
@@ -72,10 +66,7 @@ void main() {
     expect(rollbackTest, contains(r'$test_non_party_cannot_delete$'));
     expect(rollbackTest, contains(r'$test_addressee_can_delete$'));
     expect(rollbackTest, contains(r'$test_requester_can_delete$'));
-    expect(
-      rollbackTest,
-      contains(r'$test_declined_cannot_become_accepted$'),
-    );
+    expect(rollbackTest, contains(r'$test_declined_cannot_become_accepted$'));
     expect(rollbackTest, contains('set local role authenticated'));
   });
 }

@@ -1,6 +1,7 @@
 import '../../nutrition/services/food_runtime_search_authority.dart';
 import '../../nutrition/services/food_search_normalizer.dart';
 import '../domain/trusted_recipe.dart';
+import '../domain/recipe_ingredient_evidence.dart';
 
 enum IngredientMatchStatus { exact, ambiguous, missing }
 
@@ -29,7 +30,11 @@ final class TrustedRecipeIngredientReconciler {
       final sourceRecordId = ingredient.sourceRecordId;
       if (sourceRecordId != null) {
         final exactFood = await _search.findExact(sourceRecordId);
-        if (exactFood != null) {
+        if (exactFood != null &&
+            !RecipeIngredientEvidence.hasKnownMismatch(
+              ingredient.name,
+              exactFood.name,
+            )) {
           output.add(
             TrustedIngredientMatch(
               ingredient: ingredient,

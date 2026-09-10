@@ -58,7 +58,8 @@ void main() {
     );
     expect(speech.englishName, 'speech recognition');
     expect(speech.arabicName, 'التعرف على الكلام');
-    expect(speech.englishRationale, contains('review the text'));
+    expect(speech.englishRationale, contains('text is sent after you pause'));
+    expect(speech.englishRationale, isNot(contains('review the text')));
     expect(speech.englishRationale, isNot(contains('camera')));
   });
 
@@ -320,7 +321,7 @@ void main() {
   );
 
   test(
-    'exhausted AI tokens expose only the two direct reactivation routes',
+    'exhausted AI tokens expose Boost without requiring a membership',
     () async {
       final reply =
           await const IntelligenceCenterEngine(
@@ -334,7 +335,6 @@ void main() {
 
       expect(reply.serviceStatus, CoachServiceStatus.creditsRequired);
       expect(reply.actions.map((action) => action.type), [
-        IntelligenceActionType.openAiCoachSubscription,
         IntelligenceActionType.buyAiBoost,
       ]);
       expect(reply.message.text, contains('No message was charged'));

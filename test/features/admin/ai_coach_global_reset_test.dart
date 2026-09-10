@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../../support/read_push_dispatcher.dart';
 
 const _gift =
     'A gift from BIL 🎁 Your current-period AI Coach usage was reset, and 2,500 non-expiring AI Boost tokens were added.';
@@ -93,6 +94,8 @@ void main() {
   ) async {
     final gateway = _FakeAdminGateway(allowed: true);
     await _pumpAdmin(tester, gateway: gateway, allowed: true);
+    await tester.tap(find.byKey(const Key('admin-action-global')));
+    await tester.pumpAndSettle();
     await tester.enterText(
       find.byKey(const Key('admin-ai-coach-global-message')),
       'Enjoy 2,500 AI Boost tokens from BIL.',
@@ -126,6 +129,8 @@ void main() {
     final gateway = _FakeAdminGateway(allowed: true);
     await _pumpAdmin(tester, gateway: gateway, allowed: true);
     final button = find.byKey(const Key('admin-ai-coach-individual-reset'));
+    await tester.tap(find.byKey(const Key('admin-action-individual')));
+    await tester.pumpAndSettle();
     await tester.ensureVisible(button);
     await tester.enterText(
       find.byKey(const Key('admin-ai-coach-individual-email')),
@@ -174,6 +179,8 @@ void main() {
   ) async {
     final gateway = _FakeAdminGateway(allowed: true, individualMatched: false);
     await _pumpAdmin(tester, gateway: gateway, allowed: true);
+    await tester.tap(find.byKey(const Key('admin-action-individual')));
+    await tester.pumpAndSettle();
     await tester.enterText(
       find.byKey(const Key('admin-ai-coach-individual-email')),
       'missing@example.com',
@@ -197,6 +204,56 @@ void main() {
     );
     expect(find.text('missing@example.com'), findsWidgets);
   });
+
+  for (final global in [true, false]) {
+    testWidgets('reset completes safely after leaving admin (global=$global)', (
+      tester,
+    ) async {
+      final completion = Completer<void>();
+      final gateway = _FakeAdminGateway(allowed: true, completion: completion);
+      await _pumpAdmin(tester, gateway: gateway, allowed: true);
+      await tester.tap(
+        find.byKey(Key('admin-action-${global ? 'global' : 'individual'}')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Full or higher balances'), findsOneWidget);
+      if (!global) {
+        await tester.enterText(
+          find.byKey(const Key('admin-ai-coach-individual-email')),
+          'member@example.com',
+        );
+      }
+      await tester.enterText(
+        find.byKey(
+          Key('admin-ai-coach-${global ? 'global' : 'individual'}-message'),
+        ),
+        'Your Boost balance has been reset.',
+      );
+      final action = find.byKey(
+        Key('admin-ai-coach-${global ? 'global' : 'individual'}-reset'),
+      );
+      await tester.ensureVisible(action);
+      await tester.pumpAndSettle();
+      await tester.tap(action);
+      await tester.pumpAndSettle();
+      expect(find.textContaining('without'), findsOneWidget);
+      await tester.tap(
+        find.byKey(
+          Key(
+            global
+                ? 'admin-ai-coach-reset-confirm'
+                : 'admin-ai-coach-individual-reset-confirm',
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(gateway.globalResetCalls + gateway.individualResetCalls, 1);
+      await tester.pumpWidget(const SizedBox.shrink());
+      completion.complete();
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('root notice loads after sign-in and dismisses exactly once', (
     tester,
@@ -526,7 +583,7 @@ void main() {
       'supabase/functions/community-push-dispatch/index.ts',
       'supabase/functions/community_push_dispatch.ts',
     ]) {
-      final source = File(path).readAsStringSync();
+      final source = readPushDispatcherImplementation(path);
       expect(source, contains('"admin_notification_compensation_v1"'));
       expect(source, contains('"admin_notification_gift_v1"'));
       expect(
@@ -574,7 +631,7 @@ void main() {
     expect(() => consumed.consumeIncluded(1), throwsStateError);
   });
 
-  test('reset gift opens true Free until its 2,500 tokens are consumed', () {
+  test('reset top-up opens true Free until its 2,500 tokens are consumed', () {
     const free = _QuotaState(
       plan: 'free',
       weekStart: '2026-08-31',
@@ -586,7 +643,7 @@ void main() {
       reserved: 0,
       boostGranted: 0,
     );
-    final reset = free.resetWithGift();
+    final reset = free.resetWithTopUp();
     expect(reset.plan, 'free');
     expect(reset.weeklyLimit, 0);
     expect(reset.monthlyLimit, 0);
@@ -597,7 +654,7 @@ void main() {
   });
 
   test(
-    'reset preserves reservations and adds exactly one 2,500-token gift',
+    'reset preserves reservations and adds nothing to a full Boost balance',
     () {
       const state = _QuotaState(
         plan: 'ai_coach',
@@ -610,11 +667,11 @@ void main() {
         reserved: 120,
         boostGranted: 2500,
       );
-      final reset = state.resetWithGift();
+      final reset = state.resetWithTopUp();
       expect(reset.weeklyUsed, 0);
       expect(reset.monthlyUsed, 0);
       expect(reset.reserved, 120);
-      expect(reset.boostGranted, 5000);
+      expect(reset.boostGranted, 2500);
       expect(reset.weekStart, state.weekStart);
       expect(reset.monthStart, state.monthStart);
       expect(reset.plan, state.plan);
@@ -692,10 +749,15 @@ String _function(String sql, String startName, String endName) {
 }
 
 final class _FakeAdminGateway implements AiCoachAdminGateway {
-  _FakeAdminGateway({required this.allowed, this.individualMatched = true});
+  _FakeAdminGateway({
+    required this.allowed,
+    this.individualMatched = true,
+    this.completion,
+  });
 
   final bool allowed;
   final bool individualMatched;
+  final Completer<void>? completion;
   int globalResetCalls = 0;
   int individualResetCalls = 0;
   String? lastGlobalIdempotencyKey;
@@ -720,6 +782,7 @@ final class _FakeAdminGateway implements AiCoachAdminGateway {
     globalResetCalls += 1;
     lastGlobalIdempotencyKey = idempotencyKey;
     lastGlobalMessage = message;
+    if (completion != null) await completion!.future;
     return const AiCoachGlobalResetResult(
       resetId: '00000000-0000-4000-8000-000000000010',
       usageRowsReset: 2,
@@ -741,6 +804,7 @@ final class _FakeAdminGateway implements AiCoachAdminGateway {
     lastReason = reason;
     lastIndividualMessage = message;
     lastIndividualIdempotencyKey = idempotencyKey;
+    if (completion != null) await completion!.future;
     return individualMatched;
   }
 
@@ -918,8 +982,12 @@ final class _QuotaState {
 
   _QuotaState resetConsumed() => _copy(weeklyUsed: 0, monthlyUsed: 0);
 
-  _QuotaState resetWithGift() =>
-      _copy(weeklyUsed: 0, monthlyUsed: 0, boostGranted: boostGranted + 2500);
+  // Supplemented by the actual migration/RPC PostgreSQL tests, not a substitute.
+  _QuotaState resetWithTopUp() => _copy(
+    weeklyUsed: 0,
+    monthlyUsed: 0,
+    boostGranted: boostGranted < 2500 ? 2500 : boostGranted,
+  );
 
   _QuotaState consumeIncluded(int units) {
     if (!canConsumeIncluded(units)) throw StateError('ai_usage_exhausted');

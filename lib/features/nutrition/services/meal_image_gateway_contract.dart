@@ -1,5 +1,10 @@
 import 'dart:convert';
 
+import '../../../app/localization/runtime_copy_coach_review.dart';
+import 'meal_image_language.dart';
+
+export 'meal_image_language.dart';
+
 const maximumMealImageBytes = 12 * 1024 * 1024;
 const maximumMealImageResponseBytes = 256 * 1024;
 const maximumMealImageCandidates = 8;
@@ -47,6 +52,7 @@ enum MealImageAnalysisFailure {
   rateLimited,
   nonFoodOrUnrecognized,
   invalidResponse,
+  languageMismatch,
 }
 
 class MealImageAnalysisException implements Exception {
@@ -56,8 +62,10 @@ class MealImageAnalysisException implements Exception {
     var code = languageCode?.toLowerCase();
     code ??= 'en';
     if (arabic && languageCode == null) code = 'ar';
-    final values = _utf8Messages[failure]!;
-    return values[code] ?? values['en']!;
+    final english = failure == MealImageAnalysisFailure.languageMismatch
+        ? CoachReviewRuntimeCopy.languageFailure
+        : _utf8Messages[failure]!['en']!;
+    return CoachReviewRuntimeCopy.resolve(english, code)!;
   }
 
   @override
@@ -297,6 +305,20 @@ MealImageAnalysis parseMealImageResponse(
   }
   final requestId = (decoded['request_id'] as String).trim();
   final raw = decoded['candidates'] as List;
+  final locale = CoachReviewRuntimeCopy.localeTag(languageCode);
+  final responseLocale = decoded['response_locale'];
+  // Legacy English results remain readable. A non-English request must carry
+  // an explicit matching language receipt; never silently display old English
+  // cached results under a translated dialog title.
+  if (raw.isNotEmpty &&
+      ((responseLocale == null && locale != 'en') ||
+          (responseLocale != null &&
+              (responseLocale is! String ||
+                  responseLocale.toLowerCase() != locale.toLowerCase())))) {
+    throw const MealImageAnalysisException(
+      MealImageAnalysisFailure.languageMismatch,
+    );
+  }
   if (requestId.isEmpty ||
       requestId.length > 128 ||
       raw.length > maximumMealImageCandidates) {
@@ -372,6 +394,18 @@ MealImageAnalysis parseMealImageResponse(
       }
       warnings.add(warning.trim());
     }
+    if (responseLocale != null &&
+        [
+          name,
+          evidence,
+          ...alternatives.map((item) => item.name),
+          ?uncertainty,
+          ...warnings,
+        ].any((text) => !mealImageTextHasExpectedScript(text, locale))) {
+      throw const MealImageAnalysisException(
+        MealImageAnalysisFailure.languageMismatch,
+      );
+    }
     candidates.add(
       MealImageCandidate(
         name: name,
@@ -389,14 +423,13 @@ MealImageAnalysis parseMealImageResponse(
       ),
     );
   }
-  final notice = (decoded['notice'] as String?)?.trim() ?? '';
-  if (notice.length > 1000) _invalid();
+  // This is BIL-owned review/safety copy, not model output. The server's legacy
+  // English notice must never override the application's selected language.
+  final notice = CoachReviewRuntimeCopy.resolve(_utf8Notices['en']!, locale)!;
   return MealImageAnalysis(
     candidates: List.unmodifiable(candidates),
     requestId: requestId,
-    notice: notice.isEmpty
-        ? (_utf8Notices[languageCode.toLowerCase()] ?? _utf8Notices['en']!)
-        : notice,
+    notice: notice,
   );
 }
 

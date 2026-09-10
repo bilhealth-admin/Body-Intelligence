@@ -278,7 +278,7 @@ String _localeForText(String value, String declaredLocale) {
   return _directionForText(value) == declaredDirection ? declaredLocale : 'en';
 }
 
-String _nutritionLine(Map<String, Object?> nutrients) {
+String _nutritionLine(BuildContext context, Map<String, Object?> nutrients) {
   String value(String key, {String? fallbackKey}) {
     final raw =
         nutrients[key] ?? (fallbackKey == null ? null : nutrients[fallbackKey]);
@@ -288,10 +288,14 @@ String _nutritionLine(Map<String, Object?> nutrients) {
         : raw.toStringAsFixed(1);
   }
 
-  return '${value('kcal')} kcal · '
-      '${value('proteinG')} g protein · '
-      '${value('carbsG', fallbackKey: 'carbohydrateG')} g carbs · '
-      '${value('fatG')} g fat';
+  final locale = BilLocalePolicy.canonicalTag(Localizations.localeOf(context));
+  final gram = FoodPresentationLocalizer.servingUnit('g', locale);
+  final kcal = FoodPresentationLocalizer.servingUnit('kcal', locale);
+  String t(String text) => context.strings.text(text);
+  return '${value('kcal')} $kcal · '
+      '${value('proteinG')} $gram ${t('Protein')} · '
+      '${value('carbsG', fallbackKey: 'carbohydrateG')} $gram ${t('Carbs')} · '
+      '${value('fatG')} $gram ${t('Fat')}';
 }
 
 class _CatalogUnavailable extends StatelessWidget {

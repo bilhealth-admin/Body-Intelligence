@@ -274,7 +274,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('compact hero and one-line composer remain above the keyboard', (
+  testWidgets('compact hero and bounded composer remain above the keyboard', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
@@ -289,8 +289,14 @@ void main() {
     final fieldFinder = find.byKey(const Key('ai-coach-question-field'));
     final field = tester.widget<TextField>(fieldFinder);
     expect(field.minLines, 1);
-    expect(field.maxLines, 1);
+    expect(field.maxLines, 2);
+    // The second title belongs to the explicit menu sheet, not this closed-menu
+    // conversation. Preserve the owner's single hero instead of restoring a duplicate.
     expect(find.text('Your BIL Coach'), findsOneWidget);
+    expect(
+      find.text('Memory and preferences stay one tap away.'),
+      findsNothing,
+    );
     expect(find.text('Speak your language'), findsOneWidget);
     expect(find.byKey(const Key('ai-coach-hero-start')), findsOneWidget);
     expect(tester.getBottomLeft(fieldFinder).dy, lessThanOrEqualTo(544));
@@ -301,54 +307,60 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('restored technical failure is sanitized behind latest welcome', (
-    tester,
-  ) async {
-    final db = await database(tester);
-    final stored = <Map<String, Object?>>[
-      for (var index = 0; index < 18; index++)
+  testWidgets(
+    'restored technical failure is sanitized without adding a welcome',
+    (tester) async {
+      final db = await database(tester);
+      final stored = <Map<String, Object?>>[
+        for (var index = 0; index < 18; index++)
+          {
+            'id': 'old-$index',
+            'role': 'user',
+            'kind': 'freeQuestion',
+            'text': 'رسالة $index',
+            'createdAt': DateTime(2026, 8, 9, 12, index).toIso8601String(),
+            'evidence': <String>[],
+            'missingData': <String>[],
+          },
         {
-          'id': 'old-$index',
-          'role': 'user',
-          'kind': 'freeQuestion',
-          'text': 'رسالة $index',
-          'createdAt': DateTime(2026, 8, 9, 12, index).toIso8601String(),
-          'evidence': <String>[],
+          'id': 'technical-error',
+          'role': 'bil',
+          'kind': 'safety',
+          'text':
+              'BIL did not expose an action because the safety boundary did not approve one. AI Context is not accepted.',
+          'createdAt': DateTime(2026, 8, 9, 13).toIso8601String(),
+          'evidence': <String>['local-coach-runtime'],
           'missingData': <String>[],
         },
-      {
-        'id': 'technical-error',
-        'role': 'bil',
-        'kind': 'safety',
-        'text':
-            'BIL did not expose an action because the safety boundary did not approve one. AI Context is not accepted.',
-        'createdAt': DateTime(2026, 8, 9, 13).toIso8601String(),
-        'evidence': <String>['local-coach-runtime'],
-        'missingData': <String>[],
-      },
-    ];
-    await PreferencesRepository(
-      db,
-    ).set('intelligenceConversationV1', jsonEncode(stored));
+      ];
+      await PreferencesRepository(
+        db,
+      ).set('intelligenceConversationV1', jsonEncode(stored));
 
-    await tester.pumpWidget(_app(db, locale: const Locale('ar')));
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(_app(db, locale: const Locale('ar')));
+      await tester.pumpAndSettle();
 
-    expect(find.textContaining('BIL did not expose'), findsNothing);
-    expect(find.textContaining('AI Context is not accepted'), findsNothing);
-    expect(
-      find.textContaining('جاهز لقرارك المفيد التالي').hitTestable(),
-      findsOneWidget,
-    );
-    await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pumpAndSettle();
-  });
+      expect(find.textContaining('BIL did not expose'), findsNothing);
+      expect(find.textContaining('AI Context is not accepted'), findsNothing);
+      expect(find.textContaining('جاهز لقرارك المفيد التالي'), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+    },
+  );
 
-  testWidgets('every opened chat gets one non-persistent session welcome', (
+  testWidgets('only an empty chat gets one non-persistent session welcome', (
     tester,
   ) async {
     final db = await database(tester);
     final repository = PreferencesRepository(db);
+    await tester.pumpWidget(_app(db));
+    await tester.pumpAndSettle();
+    expect(
+      find.textContaining('ready for your next useful decision'),
+      findsOneWidget,
+    );
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
     await repository.set(
       'intelligenceConversationV1',
       jsonEncode([
@@ -365,16 +377,11 @@ void main() {
     );
 
     await tester.pumpWidget(_app(db));
-    await tester.pump();
-    expect(
-      find.textContaining('ready for your next useful decision'),
-      findsOneWidget,
-    );
     await tester.pumpAndSettle();
 
     expect(
       find.textContaining('ready for your next useful decision'),
-      findsOneWidget,
+      findsNothing,
     );
     expect(
       await repository.get('intelligenceConversationV1'),
@@ -388,7 +395,7 @@ void main() {
 
     expect(
       find.textContaining('ready for your next useful decision'),
-      findsOneWidget,
+      findsNothing,
     );
     expect(
       await repository.get('intelligenceConversationV1'),
@@ -448,7 +455,7 @@ void main() {
     },
   );
 
-  testWidgets('session welcome stays visible after a tall restored history', (
+  testWidgets('latest real turn stays visible after a tall restored history', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(430, 932));
@@ -475,8 +482,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.textContaining('ready for your next useful decision').hitTestable(),
+      find.textContaining('Historic conversation turn 23').hitTestable(),
       findsOneWidget,
+    );
+    expect(
+      find.textContaining('ready for your next useful decision'),
+      findsNothing,
     );
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
@@ -711,14 +722,15 @@ final class _DelayedWeightRepository extends WeightRepository {
   }
 
   @override
-  Future<List<WeightEntry>> getAll() async {
+  Future<({int count, DateTime? updatedAt, String? firstDay, String? lastDay})>
+  revisionSummary() async {
     final gate = _nextRead;
     _nextRead = null;
     if (gate != null) {
       _activeRead = gate;
       await gate.future;
     }
-    return super.getAll();
+    return super.revisionSummary();
   }
 }
 

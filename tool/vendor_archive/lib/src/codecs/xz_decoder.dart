@@ -73,8 +73,7 @@ class _XZStreamDecoder {
   // Reads an XZ steam header from [input].
   bool _readStreamHeader(InputStream input, OutputStream output) {
     final magic = input.readBytes(6).toUint8List();
-    final magicIsValid =
-        magic[0] == 253 &&
+    final magicIsValid = magic[0] == 253 &&
         magic[1] == 55 /* '7' */ &&
         magic[2] == 122 /* 'z' */ &&
         magic[3] == 88 /* 'X' */ &&
@@ -309,8 +308,7 @@ class _XZStreamDecoder {
         // 2 - reset state, properties
         // 3 - reset state, properties and dictionary
         final reset = (control >> 5) & 0x3;
-        final uncompressedLength =
-            ((control & 0x1f) << 16 |
+        final uncompressedLength = ((control & 0x1f) << 16 |
                 input.readByte() << 8 |
                 input.readByte()) +
             1;
@@ -412,7 +410,7 @@ class _XZStreamDecoder {
     }
 
     final magic = input.readBytes(2).toUint8List();
-    if (magic[0] != 89 /* 'Y' */ && magic[1] != 90 /* 'Z' */ ) {
+    if (magic[0] != 89 /* 'Y' */ && magic[1] != 90 /* 'Z' */) {
       return false;
       //throw ArchiveException('Invalid XZ stream footer signature');
     }

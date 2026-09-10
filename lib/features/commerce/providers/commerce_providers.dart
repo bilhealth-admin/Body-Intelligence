@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -44,11 +46,51 @@ final verifiedEntitlementOwnerProvider = StreamProvider<String?>((ref) async* {
   }
 });
 
+final verifiedEntitlementLoaderProvider =
+    Provider<Future<SubscriptionState> Function()>(
+      (_) => const ServerEntitlementRepository().current,
+    );
+
+/// Starts a non-overlapping refresh after a load finishes and only while its
+/// provider is observed. Credit access must refresh independently of Premium.
+void Function() _observedAuthorityReload(Ref ref, void Function() reload) {
+  Timer? refresh;
+  var disposed = false;
+  var observed = true;
+  var loaded = false;
+  void schedule() {
+    refresh?.cancel();
+    refresh = Timer(const Duration(seconds: 30), reload);
+  }
+
+  ref.onCancel(() {
+    observed = false;
+    refresh?.cancel();
+  });
+  ref.onResume(() {
+    observed = true;
+    if (loaded) schedule();
+  });
+  ref.onDispose(() {
+    disposed = true;
+    refresh?.cancel();
+  });
+  return () {
+    loaded = true;
+    if (!disposed && observed) schedule();
+  };
+}
+
 final verifiedSubscriptionStateProvider = FutureProvider<SubscriptionState>((
   ref,
 ) async {
   ref.watch(verifiedEntitlementOwnerProvider);
-  return const ServerEntitlementRepository().current();
+  final loaded = _observedAuthorityReload(ref, ref.invalidateSelf);
+  try {
+    return await ref.watch(verifiedEntitlementLoaderProvider)();
+  } finally {
+    loaded();
+  }
 });
 
 double _positiveFiniteNumber(Object? value) {
@@ -137,11 +179,21 @@ final aiCoachCreditAccessProvider = FutureProvider.autoDispose<bool>((
   ref,
 ) async {
   ref.watch(verifiedEntitlementOwnerProvider);
-  final value = await ref.read(aiCoachUsageStatusLoaderProvider)();
+  ref.watch(aiCoachUsageRefreshProvider);
+  final loaded = _observedAuthorityReload(ref, () {
+    ref.read(aiCoachUsageRefreshProvider.notifier).requestAuthoritativeReload();
+  });
   // A signed-out or malformed response is a verified no-access result. An
   // RPC exception is deliberately allowed through so Riverpod exposes
   // AsyncError and the route shows retry instead of a purchase offer.
-  return aiCoachAccessFromUsageStatus(value);
+  try {
+    final value = await ref
+        .read(aiCoachUsageStatusLoaderProvider)()
+        .timeout(const Duration(seconds: 10));
+    return aiCoachAccessFromUsageStatus(value);
+  } finally {
+    loaded();
+  }
 }, retry: (_, _) => null);
 
 /// Meal-photo analysis is purchased through AI Boost in every storefront.
@@ -149,6 +201,7 @@ final aiCoachCreditAccessProvider = FutureProvider.autoDispose<bool>((
 /// when Supabase confirms enough paid credit for one Vision reservation.
 final aiBoostVisionAccessProvider = FutureProvider<bool>((ref) async {
   ref.watch(verifiedEntitlementOwnerProvider);
+  ref.watch(aiCoachUsageRefreshProvider);
   final client = Supabase.instance.client;
   if (client.auth.currentSession == null) return false;
   try {
@@ -158,7 +211,9 @@ final aiBoostVisionAccessProvider = FutureProvider<bool>((ref) async {
     if (rawCredits is! Map) return false;
     final credits = Map<String, Object?>.from(rawCredits);
     final paidRemaining = credits['paid_remaining'];
-    return paidRemaining is num && paidRemaining >= 100;
+    return paidRemaining is num &&
+        paidRemaining.isFinite &&
+        paidRemaining >= 100;
   } on Object {
     // Cloud-paid access fails closed when current credit cannot be verified.
     return false;

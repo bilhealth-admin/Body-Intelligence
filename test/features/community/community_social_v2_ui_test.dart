@@ -108,6 +108,14 @@ final class _SocialV2Repository extends CommunityRepository {
   Future<bool> isCommunityModerator() async => false;
 
   @override
+  Future<CommunityProfile?> loadMyProfile() async => const CommunityProfile(
+    userId: currentId,
+    displayName: 'BIL Tester',
+    localeCode: 'en',
+    discoverable: true,
+  );
+
+  @override
   Future<CommunityPolicyState> loadCommunityPolicyState({
     required String localeCode,
   }) async =>
@@ -244,17 +252,24 @@ Widget _app(CommunityRepository repository) => MaterialApp(
 
 void main() {
   testWidgets(
-    'Community exposes the public feed and member BIL Code from its first screen',
+    'Community opens on posts with one settings entry and preserves BIL Code inside it',
     (tester) async {
       await tester.pumpWidget(_app(_SocialV2Repository()));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('community-my-bil-code')), findsOneWidget);
+      expect(find.byType(TabBar), findsNothing);
+      expect(tester.widget<AppBar>(find.byType(AppBar)).actions, hasLength(1));
+      expect(find.byKey(const Key('community-my-bil-code')), findsNothing);
       expect(
-        find.byKey(const Key('community-public-feed-tab')),
-        findsOneWidget,
+        tester
+            .widget<Semantics>(find.byKey(const Key('community-public-feed')))
+            .properties
+            .label,
+        'Shared with BIL members',
       );
-      expect(find.byIcon(Icons.public_outlined), findsOneWidget);
+      await tester.tap(find.byKey(const Key('community-settings')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('community-my-bil-code')), findsOneWidget);
     },
   );
 
@@ -285,6 +300,8 @@ void main() {
     expect(repository.savedMutations, 1);
     expect(find.byTooltip('Remove from saved'), findsOneWidget);
 
+    await tester.tap(find.byKey(const Key('community-settings')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community-saved-posts')));
     await tester.pumpAndSettle();
     expect(find.text('Saved posts'), findsOneWidget);
@@ -349,7 +366,12 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Root comment can be selected'), findsOneWidget);
+      expect(
+        find.byKey(
+          const Key('community-comment-body-${_SocialV2Repository.rootId}'),
+        ),
+        findsOneWidget,
+      );
       expect(find.text('One-level reply'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('community-post-detail-like')));
@@ -382,11 +404,9 @@ void main() {
 
       await tester.tap(
         find.byKey(
-          const Key('community-comment-actions-${_SocialV2Repository.rootId}'),
+          const Key('community-comment-reply-${_SocialV2Repository.rootId}'),
         ),
       );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Reply'));
       await tester.pumpAndSettle();
       await tester.enterText(
         find.byKey(const Key('community-comment-composer')),

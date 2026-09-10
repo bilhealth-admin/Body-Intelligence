@@ -1,4 +1,5 @@
 import '../../../app/localization/runtime_copy.dart';
+import 'bil_store_recovery_copy.dart';
 
 abstract final class BilStoreCopy {
   static const _runtimeFallbackSource = <String, String>{
@@ -163,7 +164,7 @@ abstract final class BilStoreCopy {
       'store_loading': 'Loading price from the store…',
       'store_unavailable': 'Price unavailable on this device',
       'purchase_error':
-          'The purchase was not completed. No access was granted.',
+          'The store could not complete this request. Try again later.',
       'purchase_in_progress': 'Opening secure purchase…',
       'purchase_verified': 'Purchase verified. Your access is updating.',
       'ads_consent': 'Choose whether BIL may show contextual ads.',
@@ -248,7 +249,7 @@ abstract final class BilStoreCopy {
       'show_fewer_features': 'عرض مزايا أقل',
       'store_loading': 'جارٍ تحميل السعر من المتجر…',
       'store_unavailable': 'السعر غير متاح على هذا الجهاز',
-      'purchase_error': 'لم تكتمل عملية الشراء ولم يتم منح أي صلاحية.',
+      'purchase_error': 'تعذر إكمال الطلب من المتجر. يمكنك المحاولة لاحقًا.',
       'purchase_in_progress': 'جارٍ فتح عملية الشراء الآمنة…',
       'purchase_verified': 'تم التحقق من الشراء. يجري تحديث صلاحياتك.',
       'ads_consent': 'اختر ما إذا كان بإمكان BIL عرض إعلانات سياقية.',
@@ -342,7 +343,8 @@ abstract final class BilStoreCopy {
       'show_fewer_features': 'Afficher moins de fonctionnalités',
       'store_loading': 'Chargement du prix depuis la boutique…',
       'store_unavailable': 'Prix indisponible sur cet appareil',
-      'purchase_error': 'L’achat n’a pas abouti. Aucun accès n’a été accordé.',
+      'purchase_error':
+          'La boutique n’a pas pu traiter cette demande. Réessayez plus tard.',
       'purchase_in_progress': 'Ouverture de l’achat sécurisé…',
       'purchase_verified':
           'Achat vérifié. Votre accès est en cours de mise à jour.',
@@ -438,7 +440,8 @@ abstract final class BilStoreCopy {
       'show_fewer_features': 'Mostrar menos funciones',
       'store_loading': 'Cargando el precio desde la tienda…',
       'store_unavailable': 'Precio no disponible en este dispositivo',
-      'purchase_error': 'La compra no se completó. No se concedió acceso.',
+      'purchase_error':
+          'La tienda no pudo completar la solicitud. Inténtalo más tarde.',
       'purchase_in_progress': 'Abriendo la compra segura…',
       'purchase_verified': 'Compra verificada. Se está actualizando tu acceso.',
       'ads_consent': 'Elige si BIL puede mostrar anuncios contextuales.',
@@ -526,7 +529,8 @@ abstract final class BilStoreCopy {
       'show_fewer_features': 'Daha az özellik göster',
       'store_loading': 'Fiyat mağazadan yükleniyor…',
       'store_unavailable': 'Fiyat bu cihazda kullanılamıyor',
-      'purchase_error': 'Satın alma tamamlanmadı. Erişim verilmedi.',
+      'purchase_error':
+          'Mağaza bu isteği tamamlayamadı. Daha sonra tekrar deneyin.',
       'purchase_in_progress': 'Güvenli satın alma açılıyor…',
       'purchase_verified': 'Satın alma doğrulandı. Erişiminiz güncelleniyor.',
       'ads_consent':
@@ -538,7 +542,8 @@ abstract final class BilStoreCopy {
     final normalized = locale.replaceAll('_', '-').toLowerCase();
     final language = normalized.split('-').first;
     final english = catalogs['en']![key] ?? key;
-    return catalogs[language]?[key] ??
+    return BilStoreRecoveryCopy.text(normalized, key) ??
+        catalogs[language]?[key] ??
         _extendedTrialRenewalCopy[key]?[normalized] ??
         _extendedTrialRenewalCopy[key]?[language] ??
         RuntimeCopy.resolve(_runtimeFallbackSource[key] ?? english, locale) ??

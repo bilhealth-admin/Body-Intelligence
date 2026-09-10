@@ -171,12 +171,25 @@ class BILFitnessBleBridge(private val context: Context, messenger: BinaryMesseng
     }, timeoutMs.coerceIn(500, 30000).toLong())
   }
 
+  private fun knownDevice(id: String?): BluetoothDevice? {
+    if (id == null) return null
+    devices[id]?.let { return it }
+    // Explicit reconnect of a locally saved fitness device. A known address
+    // is not evidence of proximity/connection; the GATT callback verifies it.
+    if (!BluetoothAdapter.checkBluetoothAddress(id)) return null
+    return try {
+      manager.adapter?.getRemoteDevice(id)?.also { devices[id] = it }
+    } catch (_: SecurityException) {
+      null
+    }
+  }
+
   private fun pair(id: String?, result: MethodChannel.Result) {
     // Standard fitness GATT sensors commonly do not create an Android system
     // bond. Treat "pair" as a verified GATT connection, not as a successful
     // no-op: the UI must never claim a connection merely because discovery
     // found an address.
-    val device = id?.let(devices::get) ?: return result.error("device_not_found", null, null)
+    val device = knownDevice(id) ?: return result.error("device_not_found", null, null)
     val address = try {
       device.address
     } catch (error: SecurityException) {
@@ -261,7 +274,7 @@ class BILFitnessBleBridge(private val context: Context, messenger: BinaryMesseng
   }
 
   private fun read(id: String?, result: MethodChannel.Result) {
-    val device = id?.let(devices::get) ?: return result.error("device_not_found", null, null)
+    val device = knownDevice(id) ?: return result.error("device_not_found", null, null)
     val address = try {
       device.address
     } catch (error: SecurityException) {

@@ -38,16 +38,27 @@ export async function verifyPremiumEntitlement(
     owner_id: `eq.${user.id}`,
     select: "owner_id,active,expires_at",
   });
-  const [subscriptionValue, closedTestValue] = await Promise.all([
-    fetchRows(subscriptionUrl, user.token, env, runtimeFetch),
-    fetchRows(closedTestUrl, user.token, env, runtimeFetch),
+  const adminGrantUrl = restUrl(env, "rpc/bil_get_my_admin_subscription", {});
+  // Independent server authorities must not cancel each other. An unavailable
+  // gift endpoint cannot revoke a verified store subscription (or vice versa).
+  const checks = await Promise.allSettled([
+    fetchRows(subscriptionUrl, user.token, env, runtimeFetch).then((value) =>
+      rows(value).some((row) => activeSubscription(row, user.id, now))
+    ),
+    fetchRows(closedTestUrl, user.token, env, runtimeFetch).then((value) =>
+      rows(value).some((row) => activeClosedTest(row, user.id, now))
+    ),
+    fetchRows(adminGrantUrl, user.token, env, runtimeFetch).then((value) =>
+      activeAdminGrant(value, user.id, now)
+    ),
   ]);
-  const subscriptions = rows(subscriptionValue);
-  const closedTests = rows(closedTestValue);
-  if (closedTests.some((row) => activeClosedTest(row, user.id, now))) {
+  if (checks.some((check) => check.status === "fulfilled" && check.value)) {
     return true;
   }
-  return subscriptions.some((row) => activeSubscription(row, user.id, now));
+  if (checks.some((check) => check.status === "rejected")) {
+    throw new EntitlementError();
+  }
+  return false;
 }
 
 function restUrl(
@@ -142,12 +153,8 @@ function activeSubscription(
   if (verifiedAt === null || verifiedAt.getTime() > now.getTime() + 5 * 60_000) {
     return false;
   }
-  if (
-    row.provider !== "closed_test" &&
-    now.getTime() - verifiedAt.getTime() > 72 * 60 * 60_000
-  ) {
-    return false;
-  }
+  // verified_at records receipt verification, not a 72-hour subscription TTL.
+  // Expiry/revocation is authoritative in the fresh RLS-protected server row.
   const boundary =
     row.lifecycle === "grace_period"
       ? row.grace_period_ends_at
@@ -155,9 +162,27 @@ function activeSubscription(
   return isCurrentBoundary(boundary, now);
 }
 
+function activeAdminGrant(value: unknown, ownerId: string, now: Date): boolean {
+  if (
+    !isRecord(value) || value.owner_id !== ownerId ||
+    (value.plan_id !== "premium" && value.plan_id !== "premium_ai_coach")
+  ) return false;
+  const created = parsedDate(value.created_at);
+  const until = parsedDate(value.access_until);
+  const expires = value.expires_at === null ? null : parsedDate(value.expires_at);
+  // Match the app's short server lease. The RPC omits revoked grants entirely.
+  return created !== null && until !== null &&
+    created.getTime() <= now.getTime() + 60_000 &&
+    until.getTime() > now.getTime() &&
+    until.getTime() <= now.getTime() + 6 * 60_000 &&
+    (value.expires_at === null ||
+      (expires !== null && expires.getTime() > now.getTime() &&
+        until.getTime() <= expires.getTime()));
+}
+
 function isCurrentBoundary(value: unknown, now: Date): boolean {
   const boundary = parsedDate(value);
-  return boundary !== null && now.getTime() <= boundary.getTime();
+  return boundary !== null && now.getTime() < boundary.getTime();
 }
 
 function parsedDate(value: unknown): Date | null {

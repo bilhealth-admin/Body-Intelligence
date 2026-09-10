@@ -6,17 +6,33 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
   bool get _hasMore;
   set _hasMore(bool value);
   set _feed(Future<List<CommunityPost>> value);
+  int get _feedGeneration;
+  set _feedGeneration(int value);
+  bool get _feedRefreshing;
+  set _feedRefreshing(bool value);
 
   Future<List<CommunityPost>> _loadFirst() async {
-    final posts = await widget.repository.loadFeed(
-      limit: _FeedTabState._pageSize,
-    );
-    _hasMore = posts.length == _FeedTabState._pageSize;
-    return posts;
+    final generation = ++_feedGeneration;
+    _feedRefreshing = true;
+    _loadingMore = false;
+    try {
+      final posts = await widget.repository.loadFeed(
+        limit: _FeedTabState._pageSize,
+      );
+      if (mounted && generation == _feedGeneration) {
+        _hasMore = posts.length == _FeedTabState._pageSize;
+      }
+      return posts;
+    } finally {
+      if (generation == _feedGeneration) _feedRefreshing = false;
+    }
   }
 
   Future<void> _loadMore(List<CommunityPost> visiblePosts) async {
-    if (_loadingMore || !_hasMore || visiblePosts.isEmpty) return;
+    if (_loadingMore || _feedRefreshing || !_hasMore || visiblePosts.isEmpty) {
+      return;
+    }
+    final generation = _feedGeneration;
     setState(() => _loadingMore = true);
     try {
       final cursor = visiblePosts.last;
@@ -25,7 +41,7 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
         beforeId: cursor.id,
         limit: _FeedTabState._pageSize,
       );
-      if (!mounted) return;
+      if (!mounted || generation != _feedGeneration) return;
       final known = visiblePosts.map((post) => post.id).toSet();
       final combined = [
         ...visiblePosts,
@@ -36,7 +52,7 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
         _hasMore = page.hasMore;
       });
     } catch (_) {
-      if (!mounted) return;
+      if (!mounted || generation != _feedGeneration) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -49,7 +65,9 @@ mixin _CommunityFeedPaginationMixin on State<_FeedTab> {
         ),
       );
     } finally {
-      if (mounted) setState(() => _loadingMore = false);
+      if (mounted && generation == _feedGeneration) {
+        setState(() => _loadingMore = false);
+      }
     }
   }
 }

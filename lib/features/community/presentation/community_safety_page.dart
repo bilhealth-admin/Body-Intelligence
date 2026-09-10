@@ -164,7 +164,9 @@ class _CommunitySafetyPageState extends State<CommunitySafetyPage> {
           _loadedLanguageCode != languageCode) {
         return;
       }
-      setState(() => _policyState = Future.value(verifiedState));
+      setState(() {
+        _policyState = Future.value(verifiedState);
+      });
     } on Object {
       if (!mounted ||
           !identical(_repository, repository) ||

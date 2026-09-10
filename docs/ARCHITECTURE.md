@@ -9,14 +9,31 @@ BIL uses a practical feature-first Flutter structure:
 - `lib/features`: Riverpod providers and screens grouped by user capability.
 - `lib/shared`: reusable presentation components.
 
-Drift/SQLite is the only active source of truth. Meal-item nutrient snapshots
+Drift/SQLite schema v21 is the local health-log source of truth. Meal-item nutrient snapshots
 produce daily nutrition totals, and individual water entries produce hydration
 totals. Legacy daily total columns are retained only so schema-v4 databases can
 upgrade without losing data; current repositories do not write them.
 
 User-originated records carry UUIDs, timestamps, revisions, tombstones where
-useful, and a sync-status marker. These fields prepare a later synchronization
-boundary without pretending that cloud sync exists today.
+useful, and a sync-status marker. These fields support versioned persistence
+and recovery boundaries; their presence alone does not prove that a cloud
+synchronization adapter is enabled.
+
+## Authority boundaries
+
+| State | Authority | Client consumers |
+| --- | --- | --- |
+| Signed-in owner | Supabase Auth session, verified server-side for privileged requests | Auth coordinators and owner-scoped providers |
+| Health logs, profile, goals | Drift repositories and transactions | Riverpod queries; AI changes require the same reviewed write path |
+| Paid subscriptions | Server-verified Apple/Google receipts and lifecycle rows | Entitlement repository and fail-closed cached access |
+| Complimentary Premium | Separate administrator grant and short server lease | Commerce access merges it with valid store access; revocation removes only the grant |
+| AI allowance and Boost | Server usage/reservation/settlement and credit ledger | Coach/Vision/Voice credit policies; Premium alone does not invent tokens |
+| Community profiles, friends and posts | Authenticated Supabase RPCs, RLS, policy and moderation | Owner-scoped repositories; request results cannot be reused for another owner |
+| Connected-health evidence | Native permission-bounded readings and local aggregation | Dashboard charts consume dated evidence, not decorative histories |
+
+The reset trigger tops up remaining Boost to 2,500, not by 2,500. Higher balances,
+paid purchases and reservations are preserved. Administrative subscription
+grants, token top-ups and paid subscriptions are deliberately different ledgers.
 
 The engine imports no Flutter, Riverpod, Drift, or Supabase packages. Insights
 are deterministic objects containing explanation, evidence, suggested action,

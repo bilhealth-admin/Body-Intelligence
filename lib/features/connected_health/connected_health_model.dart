@@ -158,13 +158,37 @@ List<double> connectedHealthStepTrendValues(
   ConnectedHealthSnapshot? snapshot,
   DateTime now,
 ) {
-  final source = snapshot == null
-      ? const <ConnectedHealthSignalView>[]
-      : snapshot.stepHistory.isNotEmpty
+  final totals = connectedHealthDailyStepTotals(snapshot, now);
+  final local = now.toLocal();
+  return List<double>.generate(
+    30,
+    (index) =>
+        totals[DateTime(local.year, local.month, local.day - 29 + index)] ?? 0,
+    growable: false,
+  );
+}
+
+/// Missing data is absent, not zero. Only chart bars may fill a missing day
+/// with zero; the Today value must come from an actual record for today.
+Map<DateTime, double> connectedHealthDailyStepTotals(
+  ConnectedHealthSnapshot? snapshot,
+  DateTime now,
+) {
+  if (snapshot == null ||
+      const {
+        ConnectedHealthStatus.unavailable,
+        ConnectedHealthStatus.permissionRequired,
+        ConnectedHealthStatus.permissionDenied,
+        ConnectedHealthStatus.authorizationRequested,
+      }.contains(snapshot.status)) {
+    return const {};
+  }
+  final source = snapshot.stepHistory.isNotEmpty
       ? snapshot.stepHistory
       : snapshot.signals;
-  final today = DateTime(now.year, now.month, now.day);
-  final first = today.subtract(const Duration(days: 29));
+  final local = now.toLocal();
+  final today = DateTime(local.year, local.month, local.day);
+  final first = DateTime(local.year, local.month, local.day - 29);
   final totals = <DateTime, double>{};
   for (final signal in source) {
     if (signal.key != 'steps' || signal.unit != 'count') continue;
@@ -178,9 +202,22 @@ List<double> connectedHealthStepTrendValues(
       ifAbsent: () => signal.value,
     );
   }
-  return List<double>.generate(
-    30,
-    (index) => totals[first.add(Duration(days: index))] ?? 0,
-    growable: false,
-  );
+  // Older snapshots may have history ending yesterday but a current daily
+  // total in signals. Fill only missing days; never count the same native
+  // total twice when it appears in both projections.
+  if (snapshot.stepHistory.isNotEmpty) {
+    for (final signal in snapshot.signals) {
+      if (signal.key != 'steps' ||
+          signal.unit != 'count' ||
+          !signal.value.isFinite ||
+          signal.value < 0) {
+        continue;
+      }
+      final observed = signal.observedAt.toLocal();
+      final day = DateTime(observed.year, observed.month, observed.day);
+      if (day.isBefore(first) || day.isAfter(today)) continue;
+      totals.putIfAbsent(day, () => signal.value);
+    }
+  }
+  return Map.unmodifiable(totals);
 }

@@ -175,7 +175,15 @@ class _CommunityModeratorAdminPanelState
                             leading: const CircleAvatar(
                               child: Icon(Icons.shield_outlined),
                             ),
-                            title: Text(entry.email),
+                            title: Tooltip(
+                              message: entry.email,
+                              child: Text(
+                                entry.email,
+                                maxLines: 1,
+                                softWrap: false,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                             subtitle: entry.protectedAdministrator
                                 ? Text(
                                     _copy(

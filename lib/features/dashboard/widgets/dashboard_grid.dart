@@ -12,7 +12,6 @@ import '../../../engine/data_honesty_engine.dart';
 import '../../../engine/one_best_action_engine.dart';
 import '../../connected_health/widgets/connected_health_card.dart';
 import '../../connected_health/providers/connected_health_provider.dart';
-import '../../connected_health/connected_health_model.dart';
 import '../../commerce/domain/commerce_plan.dart';
 import '../../commerce/providers/commerce_providers.dart';
 import '../../exercise_calorie_controls/domain/exercise_calorie_policy.dart';
@@ -31,6 +30,7 @@ import '../domain/dashboard_intelligence_composer.dart';
 import '../domain/dashboard_decision_explanation.dart';
 import '../domain/dashboard_trusted_body_twin_adapter.dart';
 import '../domain/dashboard_runtime_state.dart';
+import '../domain/dashboard_step_trend.dart';
 import '../domain/nutrient_dashboard.dart';
 import '../presentation/dashboard_intelligence_localizer.dart';
 import '../presentation/dashboard_body_twin_copy.dart';
@@ -222,20 +222,13 @@ class DashboardGrid extends ConsumerWidget {
     final allContexts = allContextsAsync.value ?? const [];
     final now = clock();
     final connectedHealthSnapshot = ref.watch(connectedHealthProvider).value;
-    final localStepTrendValues = dailyLogs
-        .where((entry) => entry.steps != null)
-        .take(30)
-        .map((entry) => entry.steps!.toDouble())
-        .toList(growable: false)
-        .reversed
-        .toList(growable: false);
-    final connectedStepTrendValues = connectedHealthStepTrendValues(
-      connectedHealthSnapshot,
-      now,
+    final stepTrend = DashboardStepTrend.fromEvidence(
+      now: now,
+      connected: connectedHealthSnapshot,
+      localReadings: dailyLogs.map(
+        (entry) => (day: entry.date, steps: entry.steps?.toDouble()),
+      ),
     );
-    final stepTrendValues = connectedStepTrendValues.any((value) => value > 0)
-        ? connectedStepTrendValues
-        : localStepTrendValues;
     final canonicalIntelligence = ref.watch(productIntelligenceOutputProvider);
     final goalSchedule =
         ref.watch(nutritionGoalScheduleProvider).value ??
@@ -595,7 +588,9 @@ class DashboardGrid extends ConsumerWidget {
                 .toList(growable: false)
                 .reversed
                 .toList(growable: false),
-            stepTrendValues: stepTrendValues,
+            stepTrendValues: stepTrend.values,
+            todaySteps: stepTrend.today,
+            stepSourceName: stepTrend.source,
             weightUnit: UnitConverter.weightUnit(system),
             visibleSections: visibleSections,
             premiumUnlocked: premiumUnlocked,
