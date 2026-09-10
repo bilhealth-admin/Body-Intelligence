@@ -14,6 +14,7 @@ and any failure stops the release suite without retries.
 from __future__ import annotations
 
 import argparse
+import importlib
 import shutil
 import subprocess
 import sys
@@ -129,6 +130,16 @@ def partition_tests(portable: list[str]) -> tuple[list[str], list[str]]:
     ]
 
 
+def load_code_only_policy():
+    """Reuse the audited exclusions and shell-free regex runner, not a second list."""
+    policy_path = str(REPOSITORY_ROOT / "tool/prebuild")
+    sys.path.insert(0, policy_path)
+    try:
+        return importlib.import_module("run_code_tests")
+    finally:
+        sys.path.remove(policy_path)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -136,12 +147,33 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="validate and print suite counts without invoking Flutter",
     )
+    parser.add_argument(
+        "--code-only", action="store_true",
+        help="apply the reviewed no-image/no-device audit policy; report exclusions as NOT RUN",
+    )
     args = parser.parse_args(argv)
 
     all_tests, portable = discover_tests()
+    policy = load_code_only_policy() if args.code_only else None
+    mixed_names = {}
+    if policy is not None:
+        # Fail before execution if a new visual operation lacks a reviewed rule.
+        policy.discover()
+        for path in portable:
+            if path in policy.NOT_RUN:
+                print(f"PORTABLE_RELEASE_NOT_RUN={path}: {policy.NOT_RUN[path]}", flush=True)
+        portable = [path for path in portable if path not in policy.NOT_RUN]
+        mixed_names = {path: pattern for path, pattern in policy.MIXED_NAMES.items()
+                       if path in portable}
+        for path, pattern in mixed_names.items():
+            print(f"PORTABLE_RELEASE_NAME_FILTER={path}: {pattern}; other cases NOT RUN", flush=True)
     performance_tests, remaining_tests = partition_tests(portable)
+    remaining_tests = [path for path in remaining_tests if path not in mixed_names]
     print(f"PORTABLE_RELEASE_ALL_TEST_FILES={len(all_tests)}", flush=True)
-    print(f"PORTABLE_RELEASE_EXCLUDED_TEST_FILES={len(EXCLUDED_TESTS)}", flush=True)
+    excluded_count = len(all_tests) - len(portable) if policy is not None else len(EXCLUDED_TESTS)
+    print(f"PORTABLE_RELEASE_EXCLUDED_TEST_FILES={excluded_count}", flush=True)
+    if policy is not None:
+        print(f"PORTABLE_RELEASE_MIXED_NAME_FILTERED_FILES={len(mixed_names)}", flush=True)
     print(f"PORTABLE_RELEASE_SCHEDULED_TEST_FILES={len(portable)}", flush=True)
     print(
         f"PORTABLE_RELEASE_PERFORMANCE_SCHEDULED_TEST_FILES={len(performance_tests)}",
@@ -162,14 +194,17 @@ def main(argv: list[str] | None = None) -> int:
         "--no-pub",
         "--timeout",
         "30s",
+    ] if policy is None else [
+        *policy.flutter_test_command(resolve_flutter_executable()),
+        "--timeout", "30s",
     ]
     print("PORTABLE_RELEASE_PHASE=performance_serial", flush=True)
     performance = subprocess.run(
-        [*command, "--concurrency", "1", *performance_tests],
+        [*command, *(["--concurrency", "1"] if policy is None else []), *performance_tests],
         cwd=REPOSITORY_ROOT,
         check=False,
     )
-    if performance.returncode != 0 or not remaining_tests:
+    if performance.returncode != 0 or (not remaining_tests and not mixed_names):
         print(
             f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={len(performance_tests)}",
             flush=True,
@@ -192,6 +227,15 @@ def main(argv: list[str] | None = None) -> int:
                 f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={executed_test_files}",
                 flush=True,
             )
+            return completed.returncode
+    for path, pattern in mixed_names.items():
+        completed = subprocess.run(
+            [*command, path, "--name", pattern],
+            cwd=REPOSITORY_ROOT, check=False,
+        )
+        executed_test_files += 1
+        if completed.returncode != 0:
+            print(f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={executed_test_files}", flush=True)
             return completed.returncode
     print(f"PORTABLE_RELEASE_EXECUTED_TEST_FILES={executed_test_files}", flush=True)
     return 0

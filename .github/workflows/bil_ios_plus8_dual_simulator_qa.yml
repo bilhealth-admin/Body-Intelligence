@@ -24,9 +24,12 @@ jobs:
     env:
       BIL_APP_ID: com.bilhealth.bodyintelligencelog
       BIL_EVIDENCE_DIR: artifacts/release/ios_plus8_dual_simulator
-      BIL_QA_STATE_PATH: ${{ runner.temp }}/bil-ios-plus8-private-state.json
       BIL_QA_SUSPEND_REASON: ios-plus8-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
+      - name: Initialize runner-local QA state path
+        shell: bash
+        run: printf 'BIL_QA_STATE_PATH=%s/bil-ios-plus8-private-state.json\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+
       - name: Checkout the selected accepted source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
@@ -536,10 +539,14 @@ jobs:
     permissions:
       contents: read
     env:
-      BIL_EVIDENCE_DIR: ${{ runner.temp }}/bil-ios-plus8-watchdog-evidence
-      BIL_QA_STATE_PATH: ${{ runner.temp }}/bil-ios-plus8-watchdog-state.json
       BIL_QA_SUSPEND_REASON: ios-plus8-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
+      - name: Initialize runner-local watchdog paths
+        shell: bash
+        run: |
+          printf 'BIL_EVIDENCE_DIR=%s/bil-ios-plus8-watchdog-evidence\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+          printf 'BIL_QA_STATE_PATH=%s/bil-ios-plus8-watchdog-state.json\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+
       - name: Checkout the exact workflow revision
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
 
