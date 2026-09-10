@@ -83,8 +83,8 @@ void main() {
     final ios = _read(workflows.last);
     expect(android, contains('BIL_ANDROID_V13_AUDITED_SOURCE_SHA'));
     expect(android, contains('BIL_ANDROID_V13_STAGING_MANIFEST_SHA256'));
-    expect(ios, contains('BIL_IOS_V14_AUDITED_SOURCE_SHA'));
-    expect(ios, contains('BIL_IOS_V14_STAGING_MANIFEST_SHA256'));
+    expect(ios, contains('BIL_IOS_V15_AUDITED_SOURCE_SHA'));
+    expect(ios, contains('BIL_IOS_V15_STAGING_MANIFEST_SHA256'));
     expect(ios, isNot(contains('BIL_PLUS8_AUDITED_SOURCE_SHA')));
     expect(ios, isNot(contains('BIL_PLUS8_STAGING_MANIFEST_SHA256')));
   });
@@ -109,13 +109,13 @@ void main() {
     );
   });
 
-  test('iOS validator consumes only the build 14 release manifest', () {
+  test('iOS validator consumes only the build 15 release manifest', () {
     final source = _read(workflows.last);
     expect(
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_IOS_V14_FROZEN_SOURCE_MANIFEST_2026-09-10.md',
+        'docs/release/BIL_IOS_V15_FROZEN_SOURCE_MANIFEST_2026-09-10.md',
       ),
     );
     expect(
@@ -127,8 +127,8 @@ void main() {
         ),
       ),
     );
-    expect(source, contains('(( BUILD_NUMBER == 14 ))'));
-    expect(source, isNot(contains('(( BUILD_NUMBER == 13 ))')));
+    expect(source, contains('(( BUILD_NUMBER == 15 ))'));
+    expect(source, isNot(contains('(( BUILD_NUMBER == 14 ))')));
   });
 
   test('signed workflows pin actions and stable runner families', () {
