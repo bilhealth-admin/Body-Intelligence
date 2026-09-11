@@ -201,7 +201,10 @@ class ResponsiveAppShell extends StatelessWidget {
       final origin = Uri.encodeComponent(paths[index]);
       switch (action) {
         case 'food':
-          context.go('/daily-log?focus=meal&from=$origin');
+          // Quick Add's Log food action owns a separate entry surface. The
+          // legacy Daily Log and its breakfast/lunch/dinner pages stay on
+          // their original route and are not rebuilt or altered here.
+          context.go('/daily-log?foodLog=1&from=$origin');
           break;
         case 'barcode':
           context.go('/daily-log?action=barcode&from=$origin');

@@ -56,7 +56,11 @@ void main() {
       }
 
       expect(manifest, contains('android:resizeableActivity="true"'));
-      expect(manifest, isNot(contains('android:screenOrientation=')));
+      expect(
+        RegExp(r'android:screenOrientation="portrait"').allMatches(manifest),
+        hasLength(2),
+        reason: 'Both the rationale and main activities must stay portrait.',
+      );
       expect(manifest, isNot(contains('android:required="true"')));
     },
   );
@@ -101,13 +105,14 @@ void main() {
     expect(project, contains('com.apple.HealthKit'));
     expect(project, contains('com.apple.SignInWithApple'));
     expect(info, contains('UISupportedInterfaceOrientations~ipad'));
-    for (final orientation in <String>[
-      'UIInterfaceOrientationPortrait',
-      'UIInterfaceOrientationLandscapeLeft',
-      'UIInterfaceOrientationLandscapeRight',
-    ]) {
-      expect(info, contains('<string>$orientation</string>'));
-    }
+    expect(
+      RegExp(
+        r'<string>UIInterfaceOrientationPortrait</string>',
+      ).allMatches(info),
+      hasLength(2),
+    );
+    expect(info, isNot(contains('UIInterfaceOrientationLandscapeLeft')));
+    expect(info, isNot(contains('UIInterfaceOrientationLandscapeRight')));
     expect(info, isNot(contains('<key>UIRequiredDeviceCapabilities</key>')));
 
     for (final key in <String>[

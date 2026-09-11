@@ -17,6 +17,7 @@ import '../../features/auth/auth_callback_page.dart';
 import '../../features/auth/bil_auth_callback_controller.dart';
 import '../../features/auth/reset_password_page.dart';
 import '../../features/daily_log/daily_log_page.dart';
+import '../../features/daily_log/food_log_page.dart';
 import '../../features/daily_log/daily_body_context_page.dart';
 import '../../features/daily_log/daily_water_page.dart';
 import '../../features/daily_check_in/daily_check_in_page.dart';
@@ -624,14 +625,24 @@ class AppRouter {
           ),
           GoRoute(
             path: '/daily-log',
-            builder: (_, state) => DailyLogPage(
-              initialMealType: state.uri.queryParameters['meal'],
-              focusMealEntry: state.uri.queryParameters['focus'] == 'meal',
-              initialAction: state.uri.queryParameters['action'],
-              returnPath: ResponsiveAppShell.safeQuickAddReturnPath(
+            builder: (_, state) {
+              final foodLogMode = state.uri.queryParameters['foodLog'] == '1';
+              final returnPath = ResponsiveAppShell.safeQuickAddReturnPath(
                 state.uri.queryParameters['from'],
-              ),
-            ),
+              );
+              if (foodLogMode) {
+                return FoodLogPage(
+                  initialMealType: state.uri.queryParameters['meal'],
+                  returnPath: returnPath,
+                );
+              }
+              return DailyLogPage(
+                initialMealType: state.uri.queryParameters['meal'],
+                focusMealEntry: state.uri.queryParameters['focus'] == 'meal',
+                initialAction: state.uri.queryParameters['action'],
+                returnPath: returnPath,
+              );
+            },
           ),
           GoRoute(
             path: '/daily-log/body-context',

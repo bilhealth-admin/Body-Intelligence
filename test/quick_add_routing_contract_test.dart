@@ -37,11 +37,18 @@ void main() {
       expect(shell, contains('vision=capture&from=\$origin'));
       expect(diary, contains("case 'photo':"));
 
-      expect(shell, contains("context.go('/daily-log?focus=meal&from="));
-      // Quick Add's general food flow must not smuggle a Dinner context into
-      // the route. The focused page exposes the meal selector after a food is
-      // chosen, so the user can deliberately keep or change the context.
+      expect(shell, contains("context.go('/daily-log?foodLog=1&from="));
+      // Quick Add's Log food action is a standalone surface. It exposes the
+      // meal selector there while leaving the legacy Daily Log pages intact.
       expect(shell, isNot(contains("focus=meal&meal=dinner")));
+      final router = File('lib/app/router/app_router.dart').readAsStringSync();
+      expect(
+        router,
+        contains(
+          "final foodLogMode = state.uri.queryParameters['foodLog'] == '1';",
+        ),
+      );
+      expect(router, contains('return FoodLogPage('));
       expect(
         File('lib/features/daily_log/daily_log_page.dart').readAsStringSync(),
         contains("String mealType = 'breakfast';"),

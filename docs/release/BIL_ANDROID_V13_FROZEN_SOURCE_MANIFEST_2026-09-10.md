@@ -15,6 +15,9 @@
 This tester-feedback candidate follows `a05140609ee145e5002eaa9c960bb3ff4f75ede0`.
 It contains the reviewed display-name persistence, Dashboard refresh, AI Coach
 scrolling, More heading, Free Community/friendship, and sleep-reminder fixes.
+It also locks the app to portrait on phone and adds a standalone Food Log entry
+surface reached from Quick Add. The existing breakfast, lunch, dinner, and snack
+Daily Log pages and their routes remain unchanged.
 The owner's food-search/navigation decisions, real health-data behavior,
 purchase entitlements, and non-accumulating token resets remain preserved.
 AdMob and pricing changes remain deferred. The shared version stays `1.0.0+8`;
@@ -28,8 +31,10 @@ Older source bindings, manifests, and release artifacts remain unchanged.
 
 ## Verification boundaries
 
-The complete selected host-only suite passed: 26 groups, 950 of 950 test files
-covered, zero failed or stale files. The full analyzer reported no issues.
+The complete selected host-only suite passed: 968 discovered files, 936
+scheduled/executed files, zero failures, with the documented native/mixed-filter
+exclusions. The full analyzer reported no issues. The portable run ended with
+`PORTABLE_RELEASE_EXECUTED_TEST_FILES=936` and `All tests passed!`.
 See `../qa/TESTER_FIXES_RELEASE_GATE_2026-09-10.md` for final verification.
 Signed CI retains configuration, analyzer, code-only portable tests, signing,
 manifest, and 16 KB/ELF packaging gates. Native runtime checks are explicitly

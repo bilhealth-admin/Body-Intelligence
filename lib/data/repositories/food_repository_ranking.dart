@@ -1,6 +1,44 @@
 part of 'food_repository.dart';
 
-extension _FoodRepositoryRanking on FoodRepository {
+extension FoodRepositoryRanking on FoodRepository {
+  /// Returns foods selected at least four times, ordered by actual usage.
+  ///
+  /// This is intentionally a separate browse contract for the standalone
+  /// Food Log surface. The existing [search] method keeps its personalized
+  /// empty-query behavior for the legacy Daily Log pages.
+  Future<List<Food>> popularFoods({
+    int minimumUseCount = 4,
+    int limit = 30,
+  }) async {
+    if (limit <= 0) return const <Food>[];
+    final foods = await getFoods();
+    if (foods.isEmpty) return const <Food>[];
+
+    final threshold = minimumUseCount < 1 ? 1 : minimumUseCount;
+    final recentRows = await _database.select(_database.recentFoods).get();
+    final recentsByFoodId = {for (final row in recentRows) row.foodId: row};
+    final popular = foods
+        .where((food) => (recentsByFoodId[food.id]?.useCount ?? 0) >= threshold)
+        .toList();
+    popular.sort((left, right) {
+      final rightRecent = recentsByFoodId[right.id];
+      final leftRecent = recentsByFoodId[left.id];
+      final useCountOrder = (rightRecent?.useCount ?? 0).compareTo(
+        leftRecent?.useCount ?? 0,
+      );
+      if (useCountOrder != 0) return useCountOrder;
+      final lastUsedOrder =
+          (rightRecent?.lastUsedAt ?? DateTime.fromMillisecondsSinceEpoch(0))
+              .compareTo(
+                leftRecent?.lastUsedAt ??
+                    DateTime.fromMillisecondsSinceEpoch(0),
+              );
+      if (lastUsedOrder != 0) return lastUsedOrder;
+      return left.name.toLowerCase().compareTo(right.name.toLowerCase());
+    });
+    return List<Food>.unmodifiable(popular.take(limit));
+  }
+
   /// Uses SQLite to cheaply narrow ordinary ASCII searches before adapting
   /// and ranking rows in Dart. The full in-memory path remains the fallback
   /// for non-ASCII normalization and for queries without a literal candidate,
