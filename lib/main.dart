@@ -32,12 +32,6 @@ import 'app/theme/bil_flagship_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // BIL is a portrait-only mobile experience. Keep Flutter aligned with the
-  // native Android/iOS declarations so device rotation cannot rebuild the
-  // responsive route tree while a form, scanner, or conversation is active.
-  await SystemChrome.setPreferredOrientations(const <DeviceOrientation>[
-    DeviceOrientation.portraitUp,
-  ]);
   FlutterError.onError = (details) {
     FlutterError.presentError(details);
     AppObservability.crashes.record(

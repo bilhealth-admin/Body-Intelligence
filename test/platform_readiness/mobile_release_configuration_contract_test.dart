@@ -104,15 +104,41 @@ void main() {
     expect(project, contains('com.apple.InAppPurchase'));
     expect(project, contains('com.apple.HealthKit'));
     expect(project, contains('com.apple.SignInWithApple'));
-    expect(info, contains('UISupportedInterfaceOrientations~ipad'));
+    expect(
+      info,
+      contains(
+        '<key>UISupportedInterfaceOrientations</key>\n'
+        '\t<array>\n'
+        '\t\t<string>UIInterfaceOrientationPortrait</string>\n'
+        '\t</array>',
+      ),
+      reason: 'iPhone must stay locked to portrait.',
+    );
     expect(
       RegExp(
         r'<string>UIInterfaceOrientationPortrait</string>',
       ).allMatches(info),
       hasLength(2),
     );
-    expect(info, isNot(contains('UIInterfaceOrientationLandscapeLeft')));
-    expect(info, isNot(contains('UIInterfaceOrientationLandscapeRight')));
+    expect(
+      info,
+      contains(
+        '<key>UISupportedInterfaceOrientations~ipad</key>\n'
+        '\t<array>\n'
+        '\t\t<string>UIInterfaceOrientationPortrait</string>\n'
+        '\t\t<string>UIInterfaceOrientationPortraitUpsideDown</string>\n'
+        '\t\t<string>UIInterfaceOrientationLandscapeLeft</string>\n'
+        '\t\t<string>UIInterfaceOrientationLandscapeRight</string>\n'
+        '\t</array>',
+      ),
+      reason: 'iPad must retain all orientations required for multitasking.',
+    );
+    final main = File('lib/main.dart').readAsStringSync();
+    expect(
+      main,
+      isNot(contains('SystemChrome.setPreferredOrientations')),
+      reason: 'A global Flutter orientation lock would override iPad support.',
+    );
     expect(info, isNot(contains('<key>UIRequiredDeviceCapabilities</key>')));
 
     for (final key in <String>[
