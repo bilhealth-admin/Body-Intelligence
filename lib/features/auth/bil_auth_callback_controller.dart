@@ -99,9 +99,8 @@ final class BilAuthCallbackController {
     }
   }
 
-  /// Returns true only for BIL's exact verified HTTPS callback origin.
-  /// Credential-bearing custom-scheme callbacks are deliberately rejected
-  /// because another installed app can register the same scheme.
+  /// Returns true only for BIL's exact HTTPS callback origin or the exact
+  /// Android Google callback scheme owned by the manifest.
   static bool isSupportedCallbackLocation(Uri uri) {
     if (!_hasSupportedCallbackOrigin(uri)) return false;
 
@@ -142,6 +141,9 @@ final class BilAuthCallbackController {
       return path.length == 2 &&
           path.first == 'auth' &&
           (path.last == 'callback' || path.last == 'reset-password');
+    }
+    if (scheme == 'bil' && host == 'auth-callback') {
+      return uri.pathSegments.isEmpty && !uri.hasPort;
     }
     return false;
   }

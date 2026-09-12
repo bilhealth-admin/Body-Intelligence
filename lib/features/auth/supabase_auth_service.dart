@@ -64,6 +64,7 @@ class SupabaseAuthService {
   final BilFacebookOAuthLauncher facebookOAuthLauncher;
 
   static const oauthRedirectUri = 'https://www.bilhealth.com/auth/callback';
+  static const androidGoogleOAuthRedirectUri = 'bil://auth-callback';
   static const emailRedirectUri = oauthRedirectUri;
   static const passwordResetRedirectUri =
       'https://www.bilhealth.com/auth/reset-password';
@@ -91,6 +92,19 @@ class SupabaseAuthService {
       !isWeb &&
       platform == TargetPlatform.android;
 
+  static String oauthRedirectUriFor(
+    OAuthProvider provider, {
+    required bool isWeb,
+    required TargetPlatform platform,
+  }) {
+    if (!isWeb &&
+        platform == TargetPlatform.android &&
+        provider == OAuthProvider.google) {
+      return androidGoogleOAuthRedirectUri;
+    }
+    return oauthRedirectUri;
+  }
+
   Future<bool> signInWithOAuth(OAuthProvider provider) async {
     if (usesNativeAndroidFacebookLauncher(
       provider,
@@ -105,7 +119,11 @@ class SupabaseAuthService {
     }
     return client.auth.signInWithOAuth(
       provider,
-      redirectTo: oauthRedirectUri,
+      redirectTo: oauthRedirectUriFor(
+        provider,
+        isWeb: kIsWeb,
+        platform: defaultTargetPlatform,
+      ),
       authScreenLaunchMode: oauthLaunchModeFor(provider),
     );
   }

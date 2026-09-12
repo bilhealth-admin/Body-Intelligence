@@ -38,7 +38,9 @@ void main() {
         'android/app/src/main/AndroidManifest.xml',
       ).readAsStringSync();
 
-      expect(manifest, contains('android:enableOnBackInvokedCallback="true"'));
+    expect(manifest, contains('android:enableOnBackInvokedCallback="true"'));
+    expect(manifest, contains('android:scheme="bil"'));
+    expect(manifest, contains('android:host="auth-callback"'));
     },
   );
 }

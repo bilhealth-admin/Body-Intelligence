@@ -114,7 +114,7 @@ void main() {
     'validator targets the current non-self-referential Android 13 manifest',
     () {
       const currentManifestPath =
-          'docs/release/BIL_ANDROID_V13_FROZEN_SOURCE_MANIFEST_2026-09-10.md';
+          'docs/release/BIL_ANDROID_V14_FROZEN_SOURCE_MANIFEST_2026-09-12.md';
       final validator = File(
         'tool/release/validate_release_configuration.dart',
       ).readAsStringSync();
@@ -134,10 +134,10 @@ void main() {
         metadata.candidateFrozenOrAccepted,
         reason: 'The current manifest must transition from NO/NO to YES/YES.',
       );
-      expect(manifestSource, contains('BIL_ANDROID_V13_AUDITED_SOURCE_SHA'));
+      expect(manifestSource, contains('BIL_ANDROID_V14_AUDITED_SOURCE_SHA'));
       expect(
         manifestSource,
-        contains('BIL_ANDROID_V13_STAGING_MANIFEST_SHA256'),
+        contains('BIL_ANDROID_V14_STAGING_MANIFEST_SHA256'),
       );
       expect(manifestSource, contains('not self-referential'));
     },

@@ -35,6 +35,7 @@ void main() {
     expect(page, contains('SignInWithAppleButtonStyle.black'));
     expect(page, contains('SignInWithAppleButtonStyle.white'));
     expect(service, contains("'https://www.bilhealth.com/auth/callback'"));
+    expect(service, contains("'bil://auth-callback'"));
     expect(service, contains('redirectTo: oauthRedirectUri'));
 
     for (final removed in [

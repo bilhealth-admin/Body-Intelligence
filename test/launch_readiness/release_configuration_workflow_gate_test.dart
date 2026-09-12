@@ -81,8 +81,8 @@ void main() {
 
     final android = _read(workflows.first);
     final ios = _read(workflows.last);
-    expect(android, contains('BIL_ANDROID_V13_AUDITED_SOURCE_SHA'));
-    expect(android, contains('BIL_ANDROID_V13_STAGING_MANIFEST_SHA256'));
+    expect(android, contains('BIL_ANDROID_V14_AUDITED_SOURCE_SHA'));
+    expect(android, contains('BIL_ANDROID_V14_STAGING_MANIFEST_SHA256'));
     expect(ios, contains('BIL_IOS_V16_AUDITED_SOURCE_SHA'));
     expect(ios, contains('BIL_IOS_V16_STAGING_MANIFEST_SHA256'));
     expect(ios, isNot(contains('BIL_PLUS8_AUDITED_SOURCE_SHA')));
@@ -95,7 +95,7 @@ void main() {
       source,
       contains(
         'BIL_RELEASE_MANIFEST_PATH: '
-        'docs/release/BIL_ANDROID_V13_FROZEN_SOURCE_MANIFEST_2026-09-10.md',
+        'docs/release/BIL_ANDROID_V14_FROZEN_SOURCE_MANIFEST_2026-09-12.md',
       ),
     );
     expect(

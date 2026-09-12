@@ -23,37 +23,34 @@ void main() {
     expect(routes, <String>['/auth-callback']);
   });
 
-  test(
-    'accepts HTTPS fragment tokens but rejects custom-scheme auth',
-    () async {
-      final resolved = <Uri>[];
-      final controller = BilAuthCallbackController(
-        resolve: (uri) async => resolved.add(uri),
-        navigate: (_) {},
-        onError: (_, _) {},
-      );
+  test('accepts HTTPS and the exact Android Google callback scheme', () async {
+    final resolved = <Uri>[];
+    final controller = BilAuthCallbackController(
+      resolve: (uri) async => resolved.add(uri),
+      navigate: (_) {},
+      onError: (_, _) {},
+    );
 
-      expect(
-        await controller.handle(
-          Uri.parse(
-            'https://www.bilhealth.com/auth/callback#access_token=test-token',
-          ),
+    expect(
+      await controller.handle(
+        Uri.parse(
+          'https://www.bilhealth.com/auth/callback#access_token=test-token',
         ),
-        isTrue,
-      );
-      expect(
-        await controller.handle(
-          Uri.parse('bil://auth-callback?code=untrusted-code'),
-        ),
-        isFalse,
-      );
-      expect(
-        await controller.handle(Uri.parse('bil://plans?code=not-auth')),
-        isFalse,
-      );
-      expect(resolved, hasLength(1));
-    },
-  );
+      ),
+      isTrue,
+    );
+    expect(
+      await controller.handle(
+        Uri.parse('bil://auth-callback?code=android-google-code'),
+      ),
+      isTrue,
+    );
+    expect(
+      await controller.handle(Uri.parse('bil://plans?code=not-auth')),
+      isFalse,
+    );
+    expect(resolved, hasLength(2));
+  });
 
   test('rejects unverified OAuth callback lookalikes', () async {
     final controller = BilAuthCallbackController(

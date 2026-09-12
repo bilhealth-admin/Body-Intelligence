@@ -262,7 +262,6 @@ class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
 
   void _bind() {
     final appLinks = AppLinks();
-    // app_links replays the cold-start URI when the event listener attaches.
     // Subscribe synchronously so a return from native consent/browser UI
     // cannot arrive in the gap created by awaiting getInitialLink first.
     _linkSubscription = appLinks.uriLinkStream.listen(
@@ -275,6 +274,24 @@ class _BILLinkBootstrapState extends State<_BILLinkBootstrap> {
         );
       },
     );
+    // On Android, a cold-start OAuth return can be delivered before the
+    // stream has been attached. The stream is still the primary path for
+    // resumed links; this one-shot read closes the cold-start gap and is
+    // deduplicated by BilAuthCallbackController.
+    unawaited(_consumeInitialLink(appLinks));
+  }
+
+  Future<void> _consumeInitialLink(AppLinks appLinks) async {
+    try {
+      final initial = await appLinks.getInitialLink();
+      if (initial != null) _uriDispatcher.add(initial);
+    } catch (error, stackTrace) {
+      AppObservability.logger.record(
+        AppLogLevel.warning,
+        'initial_link_read_failed',
+        attributes: {'errorType': error.runtimeType.toString()},
+      );
+    }
   }
 
   Future<void> _handleIncomingUri(Uri uri) async {

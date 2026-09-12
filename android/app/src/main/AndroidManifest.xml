@@ -151,10 +151,13 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <!-- Dart applies the audited route allow-list. Registering the
-                     custom scheme here lets future allow-listed routes work
-                     without broad HTTPS domain verification claims. -->
-                <data android:scheme="bil"/>
+                <!-- Dart applies the audited route allow-list. This explicit
+                     host is the Android Google OAuth return target; keeping
+                     it narrow prevents the browser from treating the target
+                     as a web page or claiming arbitrary bil:// routes. -->
+                <data
+                    android:scheme="bil"
+                    android:host="auth-callback"/>
             </intent-filter>
             <!-- Credential-bearing authentication callbacks use verified
                  HTTPS App Links; bil:// remains for non-secret app routes. -->

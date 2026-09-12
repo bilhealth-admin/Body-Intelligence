@@ -15,7 +15,7 @@ void main() {
     );
     final iosWorkflow = read('.github/workflows/bil_ios_signed_release.yml');
 
-    expect(pubspec, contains('version: 1.0.0+8'));
+    expect(pubspec, contains('version: 1.0.0+14'));
     expect(
       android,
       contains('applicationId = "com.bilhealth.bodyintelligencelog"'),
@@ -30,13 +30,13 @@ void main() {
     );
     expect(gate, contains('CURRENT_PLUS8_CANDIDATE_ACCEPTED: FALSE'));
     expect(gate, isNot(contains('## Accepted parent')));
-    expect(androidWorkflow, contains('(( BUILD_NUMBER == 13 ))'));
-    expect(androidWorkflow, isNot(contains('(( BUILD_NUMBER == 12 ))')));
+    expect(androidWorkflow, contains('(( BUILD_NUMBER == 14 ))'));
+    expect(androidWorkflow, isNot(contains('(( BUILD_NUMBER == 13 ))')));
     expect(iosWorkflow, contains('(( BUILD_NUMBER == 16 ))'));
     expect(iosWorkflow, isNot(contains('(( BUILD_NUMBER == 15 ))')));
     expect(
       androidWorkflow,
-      contains('build 12 and earlier must never be promoted'),
+      contains('build 13 and earlier must never be promoted'),
     );
     expect(
       iosWorkflow,

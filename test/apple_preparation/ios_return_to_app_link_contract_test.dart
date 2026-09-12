@@ -65,8 +65,11 @@ void main() {
     final bindBody = mainSource.substring(bindStart, bindEnd);
 
     expect(bindBody, contains('appLinks.uriLinkStream.listen('));
-    expect(bindBody, isNot(contains('getInitialLink()')));
-    expect(bindBody, isNot(contains('await ')));
+    expect(bindBody, contains('getInitialLink()'));
+    final synchronousBindBody = bindBody
+        .split('Future<void> _consumeInitialLink')
+        .first;
+    expect(synchronousBindBody, isNot(contains('await ')));
     expect(bindBody, contains("'incoming_link_stream_failed'"));
 
     final onListenStart = iosPlugin.indexOf('public func onListen(');
