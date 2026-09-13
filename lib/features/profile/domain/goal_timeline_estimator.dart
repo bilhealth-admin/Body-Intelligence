@@ -100,7 +100,16 @@ abstract final class GoalTimelineEstimator {
       minimumWeeks,
       (distance / effectiveLow).ceil(),
     );
-    final start = DateTime(asOf.year, asOf.month, asOf.day);
+    // Goal dates are calendar dates, not elapsed 24-hour intervals. Adding a
+    // Duration from local midnight can cross a daylight-saving transition and
+    // display the previous/next date. Construct the target calendar day
+    // directly and preserve whether the caller supplied UTC or local time.
+    final start = asOf.isUtc
+        ? DateTime.utc(asOf.year, asOf.month, asOf.day)
+        : DateTime(asOf.year, asOf.month, asOf.day);
+    DateTime calendarDateAfterWeeks(int weeks) => start.isUtc
+        ? DateTime.utc(start.year, start.month, start.day + (weeks * 7))
+        : DateTime(start.year, start.month, start.day + (weeks * 7));
     return GoalTimelineEstimate(
       state: losing ? GoalTimelineState.losing : GoalTimelineState.gaining,
       currentWeightKg: currentWeightKg,
@@ -110,8 +119,8 @@ abstract final class GoalTimelineEstimator {
       plannedWeeklyHighKg: effectiveHigh,
       minimumWeeks: minimumWeeks,
       maximumWeeks: maximumWeeks,
-      earliestDate: start.add(Duration(days: minimumWeeks * 7)),
-      latestDate: start.add(Duration(days: maximumWeeks * 7)),
+      earliestDate: calendarDateAfterWeeks(minimumWeeks),
+      latestDate: calendarDateAfterWeeks(maximumWeeks),
     );
   }
 }
