@@ -92,47 +92,74 @@ final class SqliteGlobalPlatformStore implements GlobalDurableStore {
     );
   }
 
+  static const int _readPageSize = 64;
+
   @override
-  Future<List<Map<String, Object?>>> list(String bucket) async {
-    final rows = _db.select(
-      'SELECT value FROM global_records WHERE bucket=? ORDER BY updated_at,key',
-      <Object?>[bucket],
-    );
-    final output = <Map<String, Object?>>[];
-    var decodedSinceYield = 0;
-    for (final row in rows) {
-      output.add(
-        Map<String, Object?>.from(jsonDecode(row['value'] as String) as Map),
-      );
-      decodedSinceYield++;
-      if (decodedSinceYield >= 64) {
-        decodedSinceYield = 0;
-        await Future<void>.delayed(Duration.zero);
-      }
-    }
-    return output;
-  }
+  Future<List<Map<String, Object?>>> list(String bucket) =>
+      _readValuesInPages(bucket);
 
   Future<List<Map<String, Object?>>> queryUpdatedAfter(
     String bucket,
     DateTime instant,
-  ) async {
-    final rows = _db.select(
-      'SELECT value FROM global_records '
-      'WHERE bucket=? AND updated_at>? ORDER BY updated_at,key',
-      <Object?>[bucket, instant.toUtc().toIso8601String()],
-    );
+  ) => _readValuesInPages(
+    bucket,
+    updatedAfter: instant.toUtc().toIso8601String(),
+  );
+
+  Future<List<Map<String, Object?>>> _readValuesInPages(
+    String bucket, {
+    String? updatedAfter,
+  }) async {
     final output = <Map<String, Object?>>[];
-    var decodedSinceYield = 0;
-    for (final row in rows) {
-      output.add(
-        Map<String, Object?>.from(jsonDecode(row['value'] as String) as Map),
-      );
-      decodedSinceYield++;
-      if (decodedSinceYield >= 64) {
-        decodedSinceYield = 0;
-        await Future<void>.delayed(Duration.zero);
+    String? cursorUpdatedAt;
+    String? cursorKey;
+
+    while (true) {
+      final ResultSet rows;
+      if (cursorUpdatedAt == null) {
+        rows = _db.select(
+          updatedAfter == null
+              ? 'SELECT key,value,updated_at FROM global_records '
+                    'WHERE bucket=? ORDER BY updated_at,key LIMIT ?'
+              : 'SELECT key,value,updated_at FROM global_records '
+                    'WHERE bucket=? AND updated_at>? '
+                    'ORDER BY updated_at,key LIMIT ?',
+          <Object?>[
+            bucket,
+            if (updatedAfter != null) updatedAfter,
+            _readPageSize,
+          ],
+        );
+      } else {
+        rows = _db.select(
+          'SELECT key,value,updated_at FROM global_records '
+          'WHERE bucket=? AND '
+          '(updated_at>? OR (updated_at=? AND key>?)) '
+          'ORDER BY updated_at,key LIMIT ?',
+          <Object?>[
+            bucket,
+            cursorUpdatedAt,
+            cursorUpdatedAt,
+            cursorKey,
+            _readPageSize,
+          ],
+        );
       }
+
+      if (rows.isEmpty) break;
+      for (final row in rows) {
+        output.add(
+          Map<String, Object?>.from(jsonDecode(row['value'] as String) as Map),
+        );
+      }
+      if (rows.length < _readPageSize) break;
+
+      cursorUpdatedAt = rows.last['updated_at'] as String;
+      cursorKey = rows.last['key'] as String;
+      // sqlite3.select is synchronous. Bounding each native query prevents a
+      // large Health history from materializing every row before Flutter gets
+      // another event turn.
+      await Future<void>.delayed(Duration.zero);
     }
     return output;
   }
