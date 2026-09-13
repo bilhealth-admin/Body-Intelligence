@@ -241,7 +241,7 @@ void main() {
         findsNothing,
       );
 
-      pendingReload!.complete(_aiUsage(1000));
+      pendingReload.complete(_aiUsage(1000));
       await tester.pump();
       await tester.pumpAndSettle();
       expect(find.text('Coach surface'), findsOneWidget);
@@ -255,7 +255,7 @@ void main() {
 
       // Once the authoritative server response says the balance is exhausted,
       // the gate must close instead of trusting the retained presentation.
-      pendingReload!.complete(_aiUsage(0));
+      pendingReload.complete(_aiUsage(0));
       await tester.pump();
       await tester.pumpAndSettle();
       expect(find.text('BIL AI BOOST'), findsWidgets);
