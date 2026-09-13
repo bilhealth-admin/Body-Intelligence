@@ -105,12 +105,12 @@ void main() {
     expect(project, contains('com.apple.HealthKit'));
     expect(project, contains('com.apple.SignInWithApple'));
     final phoneOrientations = RegExp(
-      r'<key>UISupportedInterfaceOrientations</key>\\s*'
-      r'<array>([\\s\\S]*?)</array>',
+      r'<key>UISupportedInterfaceOrientations</key>\s*'
+      r'<array>([\s\S]*?)</array>',
     ).firstMatch(info)?.group(1);
     final ipadOrientations = RegExp(
-      r'<key>UISupportedInterfaceOrientations~ipad</key>\\s*'
-      r'<array>([\\s\\S]*?)</array>',
+      r'<key>UISupportedInterfaceOrientations~ipad</key>\s*'
+      r'<array>([\s\S]*?)</array>',
     ).firstMatch(info)?.group(1);
 
     expect(phoneOrientations, isNotNull);
