@@ -47,10 +47,11 @@ void main() {
     addTearDown(s.close);
     final updatedAt = DateTime.utc(2026, 9, 13, 20).toIso8601String();
     for (var index = 0; index < 130; index++) {
-      await s.put('health_signals', 'signal-${index.toString().padLeft(3, '0')}', {
-        'id': index,
-        'updatedAt': updatedAt,
-      });
+      await s.put(
+        'health_signals',
+        'signal-${index.toString().padLeft(3, '0')}',
+        {'id': index, 'updatedAt': updatedAt},
+      );
     }
 
     var completed = false;
@@ -59,9 +60,9 @@ void main() {
       uiTurnObservedBeforeCompletion = !completed;
     });
 
-    final rows = await s
-        .list('health_signals')
-        .whenComplete(() => completed = true);
+    final rows = await s.list('health_signals').whenComplete(
+      () => completed = true,
+    );
 
     expect(rows, hasLength(130));
     expect(
@@ -77,17 +78,23 @@ void main() {
     final boundary = DateTime.utc(2026, 9, 13, 20);
     await s.put('health_signals', 'before', {
       'id': -1,
-      'updatedAt': boundary.subtract(const Duration(seconds: 1)).toIso8601String(),
+      'updatedAt': boundary
+          .subtract(const Duration(seconds: 1))
+          .toIso8601String(),
     });
     await s.put('health_signals', 'boundary', {
       'id': 0,
       'updatedAt': boundary.toIso8601String(),
     });
     for (var index = 1; index <= 130; index++) {
-      await s.put('health_signals', 'after-${index.toString().padLeft(3, '0')}', {
-        'id': index,
-        'updatedAt': boundary.add(Duration(seconds: index)).toIso8601String(),
-      });
+      await s.put(
+        'health_signals',
+        'after-${index.toString().padLeft(3, '0')}',
+        {
+          'id': index,
+          'updatedAt': boundary.add(Duration(seconds: index)).toIso8601String(),
+        },
+      );
     }
 
     final rows = await s.queryUpdatedAfter('health_signals', boundary);
