@@ -317,7 +317,7 @@ final class NativeConnectedHealthGateway
             'weightWriteRequested': true,
             'updatedAt': DateTime.now().toUtc().toIso8601String(),
           });
-      return load();
+      return await load();
     } catch (_) {
       final cached = await load();
       return cached.copyWith(failureCode: 'health_write_permission_failed');
