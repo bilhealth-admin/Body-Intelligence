@@ -1,3 +1,0 @@
-* text=auto eol=lf
-# The v4 manifest is content-addressed and pinned byte-for-byte by both clients.
-assets/catalogs/recipes/v1/recipe-thumbnails-v4.json -text

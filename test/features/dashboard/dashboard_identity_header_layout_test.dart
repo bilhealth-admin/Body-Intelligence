@@ -141,32 +141,31 @@ void main() {
     expect(placeholder.color, Colors.white);
   });
 
-  testWidgets(
-    'a member photo remains an unmodified foreground image provider',
-    (tester) async {
-      final onePixelPng = base64Decode(
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4'
-        '//8/AwAI/AL+KDvKAAAAAElFTkSuQmCC',
-      );
-      await pumpHeader(
-        tester,
-        size: const Size(390, 844),
-        locale: const Locale('en'),
-        photo: onePixelPng,
-      );
+  testWidgets('a member photo remains an unmodified foreground image provider', (
+    tester,
+  ) async {
+    final onePixelPng = base64Decode(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4'
+      '//8/AwAI/AL+KDvKAAAAAElFTkSuQmCC',
+    );
+    await pumpHeader(
+      tester,
+      size: const Size(390, 844),
+      locale: const Locale('en'),
+      photo: onePixelPng,
+    );
 
-      final avatar = tester.widget<CircleAvatar>(
-        find.descendant(
-          of: find.byKey(const Key('dashboard-user-profile-avatar')),
-          matching: find.byType(CircleAvatar),
-        ),
-      );
-      // The freshly selected local photo must stay on the foreground layer so a
-      // delayed cached NetworkImage cannot replace it during an unrelated
-      // Dashboard rebuild. This is still the original MemoryImage provider.
-      expect(avatar.foregroundImage, isA<MemoryImage>());
-      expect(avatar.backgroundImage, isNull);
-      expect(avatar.child, isNull);
-    },
-  );
+    final avatar = tester.widget<CircleAvatar>(
+      find.descendant(
+        of: find.byKey(const Key('dashboard-user-profile-avatar')),
+        matching: find.byType(CircleAvatar),
+      ),
+    );
+    // The freshly selected local photo must stay on the foreground layer so a
+    // delayed cached NetworkImage cannot replace it during an unrelated
+    // Dashboard rebuild. This is still the original MemoryImage provider.
+    expect(avatar.foregroundImage, isA<MemoryImage>());
+    expect(avatar.backgroundImage, isNull);
+    expect(avatar.child, isNull);
+  });
 }

@@ -200,15 +200,15 @@ class LlamaCppLocalGateway implements LocalModelGateway {
       final response = await request.close().timeout(
         const Duration(seconds: 18),
       );
-      if (response.statusCode != HttpStatus.ok) return await cloudFallback();
+      if (response.statusCode != HttpStatus.ok) return cloudFallback();
       final payload = jsonDecode(await utf8.decoder.bind(response).join());
       final choices = payload is Map ? payload['choices'] : null;
-      if (choices is! List || choices.isEmpty) return await cloudFallback();
+      if (choices is! List || choices.isEmpty) return cloudFallback();
       final firstChoice = choices.first;
       final message = firstChoice is Map ? firstChoice['message'] : null;
       final content = message is Map ? message['content'] : null;
       if (content is! String || content.trim().isEmpty) {
-        return await cloudFallback();
+        return cloudFallback();
       }
       final decoded = jsonDecode(content) as Map<String, dynamic>;
       final answer = decoded['answer']?.toString().trim() ?? '';

@@ -40,7 +40,7 @@ Future<bool> _settleDashboardRefresh<T>(Future<T> Function() refresh) async {
   try {
     await refresh().timeout(dashboardSourceRefreshMaximum);
     return true;
-  } on Object catch (error) {
+  } on Object catch (error, _) {
     AppObservability.logger.record(
       AppLogLevel.warning,
       'dashboard_refresh_source_failed',

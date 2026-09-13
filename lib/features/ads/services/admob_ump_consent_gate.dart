@@ -202,7 +202,7 @@ final class AdMobUmpConsentGate extends ChangeNotifier
         timeout: machineReadTimeout,
       );
       if (generation != _operationGeneration) {
-        return await _supersedingOperationOrSnapshot();
+        return _supersedingOperationOrSnapshot();
       }
       if (verificationGeneration != _verificationGeneration) {
         return _staleVerificationSnapshot();

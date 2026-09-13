@@ -14,9 +14,6 @@ final class BILGlobalHealthBridge: NSObject, FlutterPlugin {
   // HKQueryAnchor continues each page and later incremental refreshes without
   // restarting the backfill.
   private static let initialHistoryDays = 365
-  // Keep each per-type native query bounded. Dart persists each returned
-  // page cooperatively and yields to Flutter's event loop between small batches,
-  // so the full 100-sample page can be retained without freezing navigation.
   private static let readPageLimit = 100
   private let store: HKHealthStore
   private let channelName: String

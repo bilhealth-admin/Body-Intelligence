@@ -51,7 +51,9 @@ void main() {
     );
 
     await pump(bytes);
-    final memberAvatar = tester.widget<CircleAvatar>(find.byType(CircleAvatar));
+    final memberAvatar = tester.widget<CircleAvatar>(
+      find.byType(CircleAvatar),
+    );
     expect(memberAvatar.foregroundImage, isA<MemoryImage>());
     expect(memberAvatar.backgroundImage, isNull);
     coach = tester.widget<Image>(
