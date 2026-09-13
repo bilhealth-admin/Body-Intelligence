@@ -475,7 +475,7 @@ final class NativeConnectedHealthGateway
       if (dailyBridge is NativeHealthDailyTotalsBridge) {
         try {
           nativeTotals = nativeDailyActivitySignals(
-            await dailyBridge
+            await (dailyBridge as NativeHealthDailyTotalsBridge)
                 .readDailyTotals(asOf: now)
                 .timeout(const Duration(seconds: 6)),
             now,
