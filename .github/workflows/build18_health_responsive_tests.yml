@@ -35,6 +35,7 @@ jobs:
           flutter analyze --no-pub
           lib/features/global_platform/health_data/unified_health_data_integration.dart
           lib/features/global_platform/intelligence/global_health_evidence_graph.dart
+          lib/features/global_platform/persistence/global_platform_sqlite_store.dart
           lib/features/connected_health/providers/connected_health_provider.dart
           lib/features/connected_health/providers/connected_health_native_gateway.dart
           test/features/global_platform/apple_health_runtime_test.dart
@@ -45,6 +46,7 @@ jobs:
           flutter test --no-pub
           test/features/global_platform/apple_health_runtime_test.dart
           test/features/global_platform/global_health_evidence_graph_test.dart
+          test/features/global_platform/atomic_cas_migration_integrity_test.dart
           test/connected_health/connected_health_contract_test.dart
           test/connected_health/health_devices_review_regression_test.dart
           test/features/connected_health/health_controller_disposal_test.dart
