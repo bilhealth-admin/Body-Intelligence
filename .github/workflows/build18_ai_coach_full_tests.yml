@@ -41,3 +41,14 @@ jobs:
 
       - name: Run complete test suite including goldens
         run: flutter test --no-pub
+
+      - name: Upload golden failure evidence
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: build18-golden-failure-evidence-${{ github.sha }}
+          if-no-files-found: warn
+          retention-days: 7
+          path: |
+            test/failures/
+            test/visual_closure/failures/
