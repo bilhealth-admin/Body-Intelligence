@@ -277,10 +277,7 @@ void main() {
         matching: find.byType(AbsorbPointer),
       );
       expect(retainedAbsorber, findsOneWidget);
-      expect(
-        tester.widget<AbsorbPointer>(retainedAbsorber).absorbing,
-        isTrue,
-      );
+      expect(tester.widget<AbsorbPointer>(retainedAbsorber).absorbing, isTrue);
     },
   );
 
