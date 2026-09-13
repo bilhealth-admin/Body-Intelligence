@@ -52,6 +52,7 @@ void main() {
           verifiedEntitlementOwnerProvider.overrideWith(
             (_) => Stream.value('qa-owner'),
           ),
+          verifiedEntitlementOwnerSeedProvider.overrideWithValue('qa-owner'),
           aiCoachUsageStatusLoaderProvider.overrideWithValue(() async {
             loads++;
             return usage('ai_coach', 1000);
