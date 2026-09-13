@@ -18,6 +18,12 @@ synchronization resilience and Apple Watch data-source handling, AI Coach
 refresh/typing stability, profile-photo recovery, and Food Log search and
 visual-evidence updates. Existing Daily Log meal routes remain intact.
 
+The iPad orientation declaration now explicitly includes Apple's required
+portrait and landscape orientations. Its release-contract test reads the
+plist arrays correctly, so it verifies that iPhone remains portrait-only
+while iPad carries the required orientations. This is the corrective change
+for the prior signed-iOS source-validation failure.
+
 AdMob remains deferred. The shared Flutter source version remains `1.0.0+8`;
 the signed iOS workflow explicitly supplies `--build-number 17`, which becomes
 `CFBundleVersion 17` while the public version remains `1.0.0`.
